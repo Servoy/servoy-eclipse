@@ -83,7 +83,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() rowStyleClass: string;
     @Input() rowStyleClassDataprovider: string;
     @Input() responsivePageSize: number;
-    @Input() responsiveRowHeight: number;
+    @Input() responsiveHeight: number;
     @Input() pageLayout: string;
     @Input() onSelectionChanged: (event: any) => void;
 
@@ -221,7 +221,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 			return;
 		}
 
-        this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-scroll') !== -1
+        this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-paging') === -1
             && !this.servoyApi.isInDesigner();
         if (this.useScrolling) {
             this.agGridOptions = {
@@ -236,7 +236,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     flex: 1
                 },
                 columnDefs: [
-                  { cellRenderer: 'row-renderer' }
+                  { cellRenderer: 'row-renderer', autoHeight: true }
                 ],
                 rowModelType: 'serverSide',
                 serverSideStoreType: 'partial',
@@ -421,7 +421,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getRowHeight(): number {
-        return this.containedForm.formHeight ? this.containedForm.formHeight : this.responsiveRowHeight;
+        return this.containedForm.formHeight ? this.containedForm.formHeight : null;
     }
 
     getRowWidth(): string {
@@ -626,7 +626,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             }
 
         } else {
-            this.numberOfColumns = this.responsivePageSize;
+            this.numberOfColumns = this.pageLayout === 'listview' ? 1 : this.responsivePageSize;
         }
 
         if(!this.useScrolling) {
@@ -713,7 +713,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if(this.servoyApi.isInAbsoluteLayout()) {
             return { height: '100%' };
         } else {
-            return {'height.px': this.getRowHeight() * this.responsivePageSize };
+            return {'height.px': this.responsiveHeight };
         }
     }
 }
