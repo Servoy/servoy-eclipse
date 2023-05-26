@@ -86,6 +86,7 @@ describe('JSONObjectConverter', () => {
                     deepSubprop: { s: 3 } as IPropertyDescriptionFromServerWithMultipleEntries
                 } as IPropertiesFromServer,
                 DumbSubpropsThatInheritPTSFromParent: {
+                    sa007: { s: 1 } as IPropertyDescriptionFromServerWithMultipleEntries
                 } as IPropertiesFromServer
             } as ICustomTypesFromServer;
 
@@ -284,6 +285,37 @@ describe('JSONObjectConverter', () => {
         expect( changes2.u[0].v ).toBe( 'test4', 'checking that it is the correct value');
     } );
 
+    it( 'send obj from model (with push to server reject) as arg to handler', () => {
+        const val = converterService.convertFromServerToClient({ v: { sa007: 'test' }, vEr: 1},
+               untypedObjectWithREJECTOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithREJECTOnSubpropPushToServer));
+
+        const valAsSeenInternally = val as IChangeAwareValue;
+        let valCoT = val as ICustomObjectValue;
+
+        let changeListenerWasCalled = false;
+        valAsSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+
+        // simulate a send to server as argument to a handler, which should work even though it is a model value with push to server reject
+        const changesAndVal: [ICOTFullObjectToServer, ICustomObjectValue] = converterService.convertFromClientToServer(val, untypedObjectWithREJECTOnSubpropType, undefined,
+            PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES);
+        const changes = changesAndVal[0];
+        
+        valCoT = changesAndVal[1];
+        
+        expect(changes.vEr).toBe(0, 'full value being sent to server');
+        expect(changes.v).toBeDefined('change object should have a value');
+        expect(changes.v.sa007).toBe('test');
+
+        valCoT.sa007 = 'test4';
+
+        expect(changeListenerWasCalled).toBe(false);
+        
+        // inside the model it is push to server reject
+        const changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(valCoT, untypedObjectWithREJECTOnSubpropType, valCoT,
+            getParentPropertyContext(untypedObjectWithREJECTOnSubpropPushToServer))[0];
+        expect( changes2.n ).toBeTrue();
+    } );
+
     it( 'change subprop. by ref but do not send to server (so it still has changes to send for the model property), then send obj as arg to handler, change another tab by ref; both tabs changed by ref in the model should be then sent to server', () => {
         let tabHolder = new TabHolder();
         tabHolder.id = 'test';
@@ -311,7 +343,7 @@ describe('JSONObjectConverter', () => {
         tabHolder.tabs[0]= tabElement;
         expect(changeListenerWasCalled).toBe(true);
 
-        // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
+        // simulate a send to server as argument to a handler for this obj (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
         const changesAndVal: [ICOTFullObjectToServer, TabHolder] = converterService.convertFromClientToServer(tabHolder, tabHolderType, undefined,
             PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES);
         const changes = changesAndVal[0];
@@ -370,7 +402,7 @@ describe('JSONObjectConverter', () => {
         let changeListenerWasCalled = false;
         tabHolderSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
 
-        // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
+        // simulate a send to server as argument to a handler for this obj (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
         const changesAndVal: [ICOTFullObjectToServer, TabHolder] = converterService.convertFromClientToServer(tabHolder, tabHolderType, undefined,
             PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES);
         const changes = changesAndVal[0];
