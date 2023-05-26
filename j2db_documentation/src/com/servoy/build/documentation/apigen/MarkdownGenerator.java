@@ -94,27 +94,27 @@ public class MarkdownGenerator
 	private static Map<String, String> defaultTypePath = new HashMap<>();
 	static
 	{
-		defaultTypePath.put("Boolean", "/JSLib");
-		defaultTypePath.put("String", "/JSLib");
-		defaultTypePath.put("Date", "/JSLib");
-		defaultTypePath.put("Number", "/JSLib");
-		defaultTypePath.put("Array", "/JSLib");
-		defaultTypePath.put("Object", "/JSLib");
-		defaultTypePath.put("Function", "/JSLib");
-		defaultTypePath.put("IterableValue", "/JSLib");
-		defaultTypePath.put("Iterator", "/JSLib");
-		defaultTypePath.put("JSON", "/JSLib");
-		defaultTypePath.put("JS Lib", "/JSLib");
-		defaultTypePath.put("Map", "/JSLib");
-		defaultTypePath.put("Math", "/JSLib");
-		defaultTypePath.put("Namespace", "/JSLib");
-		defaultTypePath.put("QName", "/JSLib");
-		defaultTypePath.put("RegExp", "/JSLib");
-		defaultTypePath.put("Set", "/JSLib");
-		defaultTypePath.put("Special Operators", "/JSLib");
-		defaultTypePath.put("Statements", "/JSLib");
-		defaultTypePath.put("XML", "/JSLib");
-		defaultTypePath.put("XMLList", "/JSLib");
+		defaultTypePath.put("Boolean", "/js-lib");
+		defaultTypePath.put("String", "/js-lib");
+		defaultTypePath.put("Date", "/js-lib");
+		defaultTypePath.put("Number", "/js-lib");
+		defaultTypePath.put("Array", "/js-lib");
+		defaultTypePath.put("Object", "/js-lib");
+		defaultTypePath.put("Function", "/js-lib");
+		defaultTypePath.put("IterableValue", "/js-lib");
+		defaultTypePath.put("Iterator", "/js-lib");
+		defaultTypePath.put("JSON", "/js-lib");
+		defaultTypePath.put("JS Lib", "/js-lib");
+		defaultTypePath.put("Map", "/js-lib");
+		defaultTypePath.put("Math", "/js-lib");
+		defaultTypePath.put("Namespace", "/js-lib");
+		defaultTypePath.put("QName", "/js-lib");
+		defaultTypePath.put("RegExp", "/js-lib");
+		defaultTypePath.put("Set", "/js-lib");
+		defaultTypePath.put("Special Operators", "/js-lib");
+		defaultTypePath.put("Statements", "/js-lib");
+		defaultTypePath.put("XML", "/js-lib");
+		defaultTypePath.put("XMLList", "/js-lib");
 		defaultTypePath.put("Exception", "/");
 		// special types
 		defaultTypePath.put("JSServer", "/plugins/maintenance/");
@@ -142,7 +142,7 @@ public class MarkdownGenerator
 		this.parentPath = parentPath;
 		root = new HashMap<>();
 		root.put("classname", publicName);
-		root.put("classname_nospacde", publicName.replace(" ", "%20"));
+		root.put("classname_nospacde", publicName.replace(" ", "%20").toLowerCase());
 		root.put("instance", this);
 
 		if ("/design-api".equals(parentPath))
@@ -332,7 +332,7 @@ public class MarkdownGenerator
 
 			String output = cg.generate();
 			String parent = cg.getPath().toString();
-			File file = new File(userDir, (ngOnly ? "ng_generated/" : "generated/") + parent + '/' + value.getPublicName() + ".md");
+			File file = new File(userDir, (ngOnly ? "ng_generated/" : "generated/") + (parent + '/' + value.getPublicName() + ".md").toLowerCase());
 			file.getParentFile().mkdirs();
 			try (FileWriter writer = new FileWriter(file))
 			{
@@ -449,7 +449,7 @@ public class MarkdownGenerator
 		Path p1 = Paths.get(generatePath(publicName));
 		Path relativize = path.relativize(p1);
 		String relativePath = relativize.toString().replace('\\', '/').replace(" ", "%20");
-		return relativePath.isBlank() ? "." : relativePath;
+		return ((relativePath.isBlank() ? "." : relativePath) + "/" + publicName + ".md").toLowerCase();
 	}
 
 	/**

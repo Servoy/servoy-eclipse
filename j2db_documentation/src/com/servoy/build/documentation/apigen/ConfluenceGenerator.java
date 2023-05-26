@@ -461,6 +461,7 @@ public class ConfluenceGenerator
 		returnTypesToParentName.put("RuntimeSpinner", "elements");
 		returnTypesToParentName.put("RuntimeTextArea", "elements");
 		returnTypesToParentName.put("RuntimeTextField", "elements");
+		returnTypesToParentName.put("RuntimeWebComponent", "elements");
 
 
 		returnTypesToParentName.put("Calendar", "Form");
