@@ -18,6 +18,7 @@ import { ServerDataService } from './serverdata.service';
 export class ApplicationService {
     private userProperties: { [property: string]: any };
     private log: LoggerService;
+    private minElectronVersion = '24.4.0';
 
     constructor(private servoyService: ServoyService,
         private localStorageService: LocalStorageService,
@@ -125,9 +126,49 @@ export class ApplicationService {
                     this.doc.body.appendChild(ifrm);
                 }
             } else {
-                this.windowRefService.nativeWindow.open(url, target, targetOptions);
+				 if (this.isNgdesktopWithTargetSupport(this.windowRefService.nativeWindow.navigator.userAgent)) {
+                    const r = this.windowRefService.nativeWindow['require'];
+                    const ipcRenderer = r('electron').ipcRenderer;
+                    ipcRenderer.send('open-url-with-target', url, target, targetOptions);
+                } else {
+                    this.windowRefService.nativeWindow.open(url, target, targetOptions);
+
+                }
             }
         }, timeout * 1000);
+    }
+
+	private isNgdesktopWithTargetSupport(userAgent: string) {
+        const electronVersion = userAgent.match(/Electron\/([0-9\.]+)/);
+
+        if (!electronVersion) {
+            return false;
+        }
+        
+        const compare = this.compareVersions(electronVersion[1], this.minElectronVersion);
+        return compare >= 0; // true if electronVersion >= this.minElectronVersion (24.4.0)
+    }
+
+    private compareVersions(v1: string, v2: string): number {
+        let v1tokens = v1.split('.').map(Number);
+        let v2tokens = v2.split('.').map(Number);
+    
+        for (let i = 0; i < v1tokens.length; ++i) {
+            if (v1tokens[i] > v2tokens[i]) {
+                return 1;
+            }
+            if (v1tokens[i] === v2tokens[i]) {
+                continue;
+            }
+            if (v2tokens.length === i) {
+                return 1;
+            }
+            return -1; //get here only if previous tokens (if any) were ==
+        }
+        if (v1tokens.length !== v2tokens.length) {
+            return -1; //get here only if all tokens are equal but first version has less tokens
+        }
+        return 0;
     }
 
     public setStatusText(text: string) {
