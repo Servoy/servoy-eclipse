@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.part.FileEditorInput;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.less.LessPropertyEntry.LessPropertyType;
@@ -50,6 +51,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class PropertiesLessEditorInput extends FileEditorInput
 {
+	private static final String JSON_DESC_KEY = "desc";
+	private static final String JSON_NAME_KEY = "name";
 	public static final String CUSTOM_PROPERTIES_LESS = "custom_servoy_theme_properties";
 
 	public static PropertiesLessEditorInput createFromFileEditorInput(FileEditorInput input)
@@ -84,7 +87,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	private LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> properties;
 	private final Set<LessPropertyEntry> modified = new HashSet<>();
 	private final static Map<LessPropertyType, TreeSet<String>> typesToProperties = new HashMap<>();
-	private final static Pattern lessVariablePattern = Pattern.compile("@([\\w-_]+)\\s*:\\s*(.*);\\s?(?:// default?:(.*))?");
+	private final static Pattern lessVariablePattern = Pattern.compile("@([\\w-_]+)\\s*:\\s*(.*);\\s?(?:// default?:(.*))?\\s*+(/\\*(.+)\\*/)?");
 	private String version;
 
 	private PropertiesLessEditorInput(IFile file, String content)
@@ -146,10 +149,15 @@ public class PropertiesLessEditorInput extends FileEditorInput
 			}
 			try
 			{
-				String content = category.replaceAll("/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/", "").trim();
+				String content = category.replaceAll("(?m)^/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/", "").trim();
 				Matcher m = lessVariablePattern.matcher(content);
 				while (m.find())
 				{
+					JSONObject json = new JSONObject();
+					if (m.groupCount() == 5 && m.group(5) != null)
+					{
+						json = new JSONObject(m.group(5));
+					}
 					String name = m.group(1);
 					String value = m.group(2);
 					String storedDefaultValue = m.group(3);
@@ -163,11 +171,21 @@ public class PropertiesLessEditorInput extends FileEditorInput
 						LessPropertyEntry lessProp = previousValues.get(name);
 						lessProp.setValue(value);
 						lessProp.resetLastTxtValue();
+						if (json.has(JSON_NAME_KEY))
+						{
+							lessProp.setDisplayName(json.optString(JSON_NAME_KEY, null));
+						}
+						if (json.has(JSON_DESC_KEY))
+						{
+							lessProp.setDescription(json.optString(JSON_DESC_KEY, null));
+						}
 						props.put(name, lessProp);
 					}
 					else
 					{
 						LessPropertyEntry lessProp = new LessPropertyEntry(name, value, type, storedDefaultValue);
+						lessProp.setDisplayName(json.optString(JSON_NAME_KEY, null));
+						lessProp.setDescription(json.optString(JSON_DESC_KEY, null));
 						LessPropertyEntry overwrittenValue = props.put(name, lessProp);
 						if (overwrittenValue != null) lessProp.setDefaultValue(overwrittenValue.getValue());
 					}

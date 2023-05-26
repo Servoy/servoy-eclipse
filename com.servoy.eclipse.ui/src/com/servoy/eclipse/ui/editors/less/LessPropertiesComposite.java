@@ -456,22 +456,27 @@ public class LessPropertiesComposite extends Composite
 	 */
 	private void setChanged(LessPropertyEntry property, Label label, Color normalBg)
 	{
+		String tooltip = null;
 		if (property.getStoredDefault() != null && !property.getStoredDefault().equals(property.getDefaultValue()))
 		{
 			label.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
-			label.setToolTipText("Default value changed from: " + property.getStoredDefault() + " to " + property.getDefaultValue() +
-				", right click to to update the default value or change the value itself");
+			tooltip = "Default value changed from: " + property.getStoredDefault() + " to " + property.getDefaultValue() +
+				", right click to to update the default value or change the value itself";
 		}
 		else if (property.getDefaultValue() != null && !property.getDefaultValue().equals(property.getValue()))
 		{
 			label.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
-			label.setToolTipText("Value overwrites default value: " + property.getDefaultValue() + ", right click to reset");
+			tooltip = "Value overwrites default value: " + property.getDefaultValue() + ", right click to reset";
 		}
 		else
 		{
 			label.setForeground(normalBg);
-			label.setToolTipText(null);
 		}
+		if (property.getDescription() != null)
+		{
+			tooltip = property.getDescription() + (tooltip != null ? "\n" + tooltip : "");
+		}
+		label.setToolTipText(tooltip);
 	}
 
 

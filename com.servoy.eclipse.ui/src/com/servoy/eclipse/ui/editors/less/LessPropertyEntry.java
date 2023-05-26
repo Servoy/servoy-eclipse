@@ -29,6 +29,8 @@ public class LessPropertyEntry
 	private final LessPropertyType type;
 	private String defaultValue;
 	private String storedDefault;
+	private String description;
+	private String displayName;
 
 	static enum LessPropertyType
 	{
@@ -62,6 +64,7 @@ public class LessPropertyEntry
 
 	public String getLabel()
 	{
+		if (displayName != null) return displayName;
 		String label = name.length() > 1 ? name.substring(0, 1).toUpperCase() + name.substring(1) : name;
 		return label.replaceAll("-", " ");
 	}
@@ -117,5 +120,20 @@ public class LessPropertyEntry
 	public void setStoredDefault(String storedDefault)
 	{
 		this.storedDefault = storedDefault;
+	}
+
+	public void setDescription(String desc)
+	{
+		this.description = desc;
+	}
+
+	public String getDescription()
+	{
+		return description;
+	}
+
+	public void setDisplayName(String displayName)
+	{
+		this.displayName = displayName;
 	}
 }
