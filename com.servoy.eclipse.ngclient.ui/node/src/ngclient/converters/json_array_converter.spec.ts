@@ -26,6 +26,8 @@ describe( 'JSONArrayConverter', () => {
     let stringArrayWithShallowOnElementsPushToServer: PushToServerEnum;
     let tabHolderElementsType: CustomObjectType;
     let tabHolderElementsPushToServer: PushToServerEnum;
+    let untypedObjectArrayWithREJECTOnElementsType: CustomArrayType<any>;
+    let untypedObjectArrayWithREJECTOnElementsPushToServer: PushToServerEnum;
     let untypedObjectArrayWithALLOWOnElementsType: CustomArrayType<any>;
     let untypedObjectArrayWithALLOWOnElementsPushToServer: PushToServerEnum;
     let untypedObjectArrayWithSHALLOWOnElementsType: CustomArrayType<any>;
@@ -89,6 +91,7 @@ describe( 'JSONArrayConverter', () => {
                     tabArray: { t: [CustomArrayTypeFactory.TYPE_FACTORY_NAME, [CustomObjectTypeFactory.TYPE_FACTORY_NAME, 'Tab']] as ITypeFromServer, s: 1 } as
                         IPropertyDescriptionFromServerWithMultipleEntries,
                     tabHolder: { t: [CustomObjectTypeFactory.TYPE_FACTORY_NAME, 'TabHolder'], s: 1 } as IPropertyDescriptionFromServerWithMultipleEntries,
+                    untypedObjectArrayREJECT: { t: [CustomArrayTypeFactory.TYPE_FACTORY_NAME, null] as ITypeFromServer, s: 0 } as IPropertyDescriptionFromServerWithMultipleEntries,
                     untypedObjectArrayALLOW: { t: [CustomArrayTypeFactory.TYPE_FACTORY_NAME, null] as ITypeFromServer, s: 1 } as IPropertyDescriptionFromServerWithMultipleEntries,
                     untypedObjectArraySHALLOW: { t: [CustomArrayTypeFactory.TYPE_FACTORY_NAME, { t: null, s: 2}] as ITypeFromServer, s: 1 } as IPropertyDescriptionFromServerWithMultipleEntries,
                     untypedObjectArrayDEEP: { t: [CustomArrayTypeFactory.TYPE_FACTORY_NAME, { t: null, s: 3 }] as ITypeFromServer, s: 1 } as IPropertyDescriptionFromServerWithMultipleEntries,
@@ -108,6 +111,8 @@ describe( 'JSONArrayConverter', () => {
         tabJustForTypeType = spec.getPropertyType('tabJustForType') as CustomObjectType;
         tabHolderElementsType = spec.getPropertyType('tabHolder') as CustomObjectType;
         tabHolderElementsPushToServer = spec.getPropertyPushToServer('tabHolder'); // so computed not declared (undefined -> REJECT)
+        untypedObjectArrayWithREJECTOnElementsType = spec.getPropertyType('untypedObjectArrayREJECT') as CustomArrayType<any>;
+        untypedObjectArrayWithREJECTOnElementsPushToServer = spec.getPropertyPushToServer('untypedObjectArrayREJECT'); // so computed not declared (undefined -> REJECT)
         untypedObjectArrayWithALLOWOnElementsType = spec.getPropertyType('untypedObjectArrayALLOW') as CustomArrayType<any>;
         untypedObjectArrayWithALLOWOnElementsPushToServer = spec.getPropertyPushToServer('untypedObjectArrayALLOW'); // so computed not declared (undefined -> REJECT)
         untypedObjectArrayWithSHALLOWOnElementsType = spec.getPropertyType('untypedObjectArraySHALLOW') as CustomArrayType<any>;
@@ -516,6 +521,37 @@ describe( 'JSONArrayConverter', () => {
         expect( fullTabChange.vEr ).toBe( 0 );
         expect( fullTabChange.v.name ).toBe( 'test4', 'item[0].name should be test4 now' );
         expect( fullTabChange.v.myvalue ).toBe( 'test4', 'item[0].myvalue should be test4 now' );
+    } );
+
+    it( 'send obj from model (with push to server reject) as arg to handler', () => {
+        const val = converterService.convertFromServerToClient({ v: [ 'test1' ], vEr: 1 },
+               untypedObjectArrayWithREJECTOnElementsType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectArrayWithREJECTOnElementsPushToServer));
+
+        const valAsSeenInternally = val as IChangeAwareValue;
+        let valCaT = val as ICustomArrayValue<any>;
+
+        let changeListenerWasCalled = false;
+        valAsSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+
+        // simulate a send to server as argument to a handler, which should work even though it is a model value with push to server reject
+        const changesAndVal: [ICOTFullObjectToServer, ICustomArrayValue<any>] = converterService.convertFromClientToServer(val, untypedObjectArrayWithREJECTOnElementsType, undefined,
+            PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES);
+        const changes = changesAndVal[0];
+        
+        valCaT = changesAndVal[1];
+        
+        expect(changes.vEr).toBe(0, 'full value being sent to server');
+        expect(changes.v).toBeDefined('change object should have a value');
+        expect(changes.v[0]).toBe('test1');
+
+        valCaT[0] = 'test4';
+
+        expect(changeListenerWasCalled).toBe(false);
+        
+        // inside the model it is push to server reject
+        const changes2: ICATNoOpToServer = converterService.convertFromClientToServer(valCaT, untypedObjectArrayWithREJECTOnElementsType, valCaT,
+            getParentPropertyContext(untypedObjectArrayWithREJECTOnElementsPushToServer))[0];
+        expect( changes2.n ).toBeTrue();
     } );
 
     it( 'change array el. by ref but do not send to server (so it still has changes to send for the model property), then send array as arg to handler, change another tab by ref; both tabs changed by ref in the model should be then sent to server', () => {
