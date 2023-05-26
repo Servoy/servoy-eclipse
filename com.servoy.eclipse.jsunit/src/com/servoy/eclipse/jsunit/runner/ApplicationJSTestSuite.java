@@ -81,10 +81,18 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 
 	protected void initWithError(String errorMessage)
 	{
-		SolutionJSUnitSuiteCodeBuilder suiteBuilder = new SolutionJSUnitSuiteCodeBuilder();
-		suiteBuilder.initializeWithError(errorMessage);
-		jsTestCode = suiteBuilder.getCode();
-		super.init(new StringReader(suiteBuilder.getCode()), suiteBuilder.getRootTestClassName(), SOLUTION_TEST_JS_NAME, null, false, isDebugModeOn());
+		Context.enter();
+		try
+		{
+			SolutionJSUnitSuiteCodeBuilder suiteBuilder = new SolutionJSUnitSuiteCodeBuilder();
+			suiteBuilder.initializeWithError(errorMessage);
+			jsTestCode = suiteBuilder.getCode();
+			super.init(new StringReader(suiteBuilder.getCode()), suiteBuilder.getRootTestClassName(), SOLUTION_TEST_JS_NAME, null, false, isDebugModeOn());
+		}
+		finally
+		{
+			Context.exit();
+		}
 	}
 
 	protected void init(IApplication application, TestTarget target, boolean spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy)
