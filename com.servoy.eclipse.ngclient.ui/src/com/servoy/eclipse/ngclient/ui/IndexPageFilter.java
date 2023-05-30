@@ -82,6 +82,14 @@ public class IndexPageFilter implements Filter
 			indexFile = new File(distFolder, "index.html");
 		}
 		String solutionName = getSolutionNameFromURI(requestURI);
+
+		if (solutionName != null && AngularIndexPageWriter.mustAuthenticate(request, response, solutionName))
+		{
+			String loginHtml = Utils.getURLContent(Activator.getInstance().getBundle().getEntry("/resources/login.html"));
+			AngularIndexPageWriter.writeLoginPage(loginHtml, request, response, solutionName);
+			return;
+		}
+
 		if (indexFile != null && indexFile.exists())
 		{
 			if (solutionName != null &&
