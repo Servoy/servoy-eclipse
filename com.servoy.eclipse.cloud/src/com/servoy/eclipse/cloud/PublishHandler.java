@@ -25,15 +25,17 @@ import com.servoy.eclipse.model.util.ServoyLog;
 
 public class PublishHandler extends AbstractHandler implements IResourceChangeListener{
 
+    private Git git = null;
     private IWorkspace workspace = null;
-    private Repository repository = null;
     
     public PublishHandler() {
     	try {
     		workspace = ResourcesPlugin.getWorkspace();
     		workspace.addResourceChangeListener(this);
     		IPath workspaceRoot = workspace.getRoot().getLocation();
-    		repository = new  RepositoryBuilder().setWorkTree(workspaceRoot.toFile()).build();
+    		Repository repository = new  RepositoryBuilder().setWorkTree(workspaceRoot.toFile()).build();
+    		if (repository.getDirectory().exists())
+    			git = new Git(repository);
     		fireHandlerChanged(new HandlerEvent(this, true, false));//force eclipse to call isEnabled() method
     	} catch (IOException | NoWorkTreeException e) {
     		ServoyLog.logError(e);
@@ -45,10 +47,10 @@ public class PublishHandler extends AbstractHandler implements IResourceChangeLi
     	String commitMessage = askForCommitMessage();
     	if (commitMessage != null) {
     		Job.create("Publish to ServoyCloud", (monitor) -> {
-        		 try (Git git = new Git(repository)) {
+        		try {
         			monitor.beginTask("Pull from repository", 100);
                     git.pull().call(); //pull from remote
-       		        commitChanges(git, commitMessage);
+       		        commitChanges(commitMessage);
        		        monitor.subTask(commitMessage);
        		        git.push().call(); //push to remote    
         			monitor.done(); 
@@ -74,15 +76,15 @@ public class PublishHandler extends AbstractHandler implements IResourceChangeLi
         }
     }
 
-    private void commitChanges(Git git, String commitMessage) throws GitAPIException {
+    private void commitChanges(String commitMessage) throws GitAPIException {
         git.add().addFilepattern(".").call();
         CommitCommand commitCmd = git.commit();
         commitCmd.setMessage(commitMessage).call();
     }
     
     @Override
-    public boolean isEnabled() {    	
-    	return !isCleanGitRepo();
+    public boolean isEnabled() {
+    	return (git != null) && !isCleanGitRepo(git);
     }
     
     @Override
@@ -92,12 +94,14 @@ public class PublishHandler extends AbstractHandler implements IResourceChangeLi
         }
     }
     
-    private boolean isCleanGitRepo() {
-        try (Git git = new Git(repository)) {
-            return git.status().call().isClean();
-        } catch (NoWorkTreeException | GitAPIException e) {
-            ServoyLog.logError(e);
-        }
+    private boolean isCleanGitRepo(Git gitRepo) {
+    	if (gitRepo != null) {
+    		try {
+				return gitRepo.status().call().isClean();
+			} catch (NoWorkTreeException | GitAPIException e) {
+				ServoyLog.logError(e);
+			}
+    	} 
     	return true;
     }
 }
