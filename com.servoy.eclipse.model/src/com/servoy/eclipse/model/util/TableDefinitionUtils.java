@@ -74,6 +74,24 @@ public class TableDefinitionUtils
 		return getTableDefinitionsFromDBI(neededServersTables, true, true);
 	}
 
+	public static TableDef loadTableDef(IFile file) throws IOException, CoreException
+	{
+		if (file.exists())
+		{
+			String dbiFileContent = null;
+			try (InputStream is = file.getContents(true))
+			{
+				dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF-8"));
+			}
+
+			if (dbiFileContent != null)
+			{
+				return DatabaseUtils.deserializeTableInfo(dbiFileContent);
+			}
+		}
+		return null;
+	}
+
 	private static Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> getTableDefinitionsFromDBI(
 		Map<String, List<String>> neededServersTables, boolean exportAllTablesFromReferencedServers, boolean exportMetaData)
 		throws CoreException, JSONException, IOException
@@ -120,31 +138,22 @@ public class TableDefinitionUtils
 			List<TableDef> tableDefs = new ArrayList<>();
 			for (IFile file : server_tableDbiFile.getValue())
 			{
-				if (file.exists())
+				TableDef tableInfo = loadTableDef(file);
+				if (tableInfo != null)
 				{
-					String dbiFileContent = null;
-					try (InputStream is = file.getContents(true))
+					tableDefs.add(tableInfo);
+					if (exportMetaData && tableInfo.isMetaData != null && tableInfo.isMetaData.booleanValue())
 					{
-						dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF-8"));
-					}
-
-					if (dbiFileContent != null)
-					{
-						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
-						tableDefs.add(tableInfo);
-						if (exportMetaData && tableInfo.isMetaData != null && tableInfo.isMetaData.booleanValue())
+						String ds = DataSourceUtils.createDBTableDataSource(serverName, tableInfo.name);
+						IFile mdf = dmm.getMetaDataFile(ds);
+						if (mdf != null && mdf.exists())
 						{
-							String ds = DataSourceUtils.createDBTableDataSource(serverName, tableInfo.name);
-							IFile mdf = dmm.getMetaDataFile(ds);
-							if (mdf != null && mdf.exists())
+							String wscontents = null;
+							wscontents = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(mdf.getFullPath().toString());
+							if (wscontents != null)
 							{
-								String wscontents = null;
-								wscontents = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(mdf.getFullPath().toString());
-								if (wscontents != null)
-								{
-									MetadataDef mdd = new MetadataDef(ds, wscontents);
-									if (!metadataDefs.contains(mdd)) metadataDefs.add(mdd);
-								}
+								MetadataDef mdd = new MetadataDef(ds, wscontents);
+								if (!metadataDefs.contains(mdd)) metadataDefs.add(mdd);
 							}
 						}
 					}

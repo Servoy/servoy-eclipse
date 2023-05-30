@@ -126,6 +126,7 @@ import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerSettings;
@@ -145,7 +146,9 @@ import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedProperties;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
+import com.servoy.j2db.util.xmlxport.TableDef;
 
 
 /**
@@ -1373,9 +1376,21 @@ public class WarExporter
 				copyFileIfExists(serverDBIFile, new File(dbDir, serverDBIFile.getName()), () -> DatabaseUtils.serializeServerSettings(ServerSettings.DEFAULT));
 				File serverDbDir = new File(dbDir, serverName);
 				serverDbDir.mkdirs();
-				for (IFile tableDBIfile : TableDefinitionUtils.getServerTableinfo(serverName, DataModelManager.COLUMN_INFO_FILE_EXTENSION, tablesNeeded,
+				outer : for (IFile tableDBIfile : TableDefinitionUtils.getServerTableinfo(serverName, DataModelManager.COLUMN_INFO_FILE_EXTENSION, tablesNeeded,
 					exportModel.isExportAllTablesFromReferencedServers()))
 				{
+					// test first if this is not a legacy table with a pk that has a servoy sequence.
+					TableDef tableDef = TableDefinitionUtils.loadTableDef(tableDBIfile);
+					if (tableDef != null)
+					{
+						for (ColumnInfoDef columnDef : tableDef.columnInfoDefSet)
+						{
+							if (columnDef.autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER && columnDef.autoEnterSubType == ColumnInfo.SERVOY_SEQUENCE)
+							{
+								continue outer;
+							}
+						}
+					}
 					copyFileIfExists(tableDBIfile, new File(serverDbDir, tableDBIfile.getName()));
 				}
 			}
