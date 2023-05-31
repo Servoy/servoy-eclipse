@@ -658,7 +658,7 @@ public class CreateComponentHandler implements IServerService
 						}
 						List<IPersist> changes = new ArrayList<>();
 						boolean addSiblingsToChanges = true;
-						if (editorPart.getForm().isResponsiveLayout())
+						if (editorPart.getForm().isResponsiveLayout() || webComponent.getParent() instanceof AbstractContainer)
 						{
 							if (initialDropTarget != null &&
 								!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
@@ -883,7 +883,7 @@ public class CreateComponentHandler implements IServerService
 
 	private Point getLocationAndShiftSiblings(ISupportChilds parent, JSONObject args, List<IPersist> extraChangedPersists) throws RepositoryException
 	{
-		if (editorPart.getForm().isResponsiveLayout() && !CSSPositionUtils.isCSSPositionContainer(
+		if ((editorPart.getForm().isResponsiveLayout() || parent instanceof AbstractContainer) && !CSSPositionUtils.isCSSPositionContainer(
 			parent instanceof LayoutContainer ? (LayoutContainer)parent : null))
 		{
 			List<IPersist> children = new ArrayList<IPersist>();
@@ -932,6 +932,7 @@ public class CreateComponentHandler implements IServerService
 							{
 								x = counter;
 								y = counter;
+								// i don't think we need this, because we are doing the increment at line 940
 								counter++;
 							}
 							((ISupportBounds)element).setLocation(new Point(counter, counter));

@@ -204,6 +204,9 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
                     component.dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
                 }
+                if (this.canDrop.beforeChild) {
+                    component.rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
+                }
             }
             else {
                 if (this.canDrop.dropAllowed) {
