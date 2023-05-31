@@ -81,10 +81,14 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() selectionClass: string;
     @Input() styleClass: string;
     @Input() rowStyleClass: string;
-    @Input() rowStyleClassDataprovider: string;
+    @Input() rowStyleClassDataprovider: string[];
+    @Input() rowEditableDataprovider: boolean[];
+    @Input() rowEnableDataprovider: boolean[];
     @Input() responsivePageSize: number;
     @Input() responsiveHeight: number;
     @Input() pageLayout: string;
+    @Input() readOnly: boolean;
+    @Input() editable: boolean;
     @Input() onSelectionChanged: (event: any) => void;
 
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
@@ -537,6 +541,26 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             });
         }
 
+        const thisLFC = this;;
+        const idx = rowIndex;
+        Object.defineProperty(rowItem.model, 'readOnly', {
+            configurable: true,
+            get() {
+                let rowReadOnly = false;
+                if (thisLFC.rowEditableDataprovider && thisLFC.rowEditableDataprovider.length > idx) {
+                    rowReadOnly = !thisLFC.rowEditableDataprovider[idx];    
+                }
+                return rowReadOnly || thisLFC.readOnly || !thisLFC.editable;
+            },
+        });
+        if (this.rowEnableDataprovider && this.rowEnableDataprovider.length > idx) {
+            Object.defineProperty(rowItem.model, 'enabled', {
+                configurable: true,
+                get() {
+                    return thisLFC.rowEnableDataprovider[idx];
+                },
+            });
+        }
         if (!row._cache) row._cache = new Map();
         row._cache.set(cm.name, rowItem);
         return rowItem;

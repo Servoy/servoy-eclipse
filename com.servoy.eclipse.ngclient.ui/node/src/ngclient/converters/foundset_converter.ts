@@ -402,7 +402,9 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         this.__internalState.requests.push(req);
         this.__internalState.notifyChangeListener();
 
-        return this.__internalState.selectionUpdateDefer.promise;
+        return this.__internalState.selectionUpdateDefer.promise.finally(() => {
+            delete this.__internalState.selectionUpdateDefer;
+        })
     }
     
     /**
