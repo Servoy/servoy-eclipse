@@ -85,8 +85,7 @@ public class IndexPageFilter implements Filter
 
 		if (solutionName != null && AngularIndexPageWriter.mustAuthenticate(request, response, solutionName))
 		{
-			String loginHtml = Utils.getURLContent(Activator.getInstance().getBundle().getEntry("/resources/login.html"));
-			AngularIndexPageWriter.writeLoginPage(loginHtml, request, response, solutionName);
+			AngularIndexPageWriter.writeLoginPage(request, response, solutionName);
 			return;
 		}
 
