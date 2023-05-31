@@ -878,7 +878,7 @@ class AGGridDatasource implements IServerSideDatasource {
             size = 0;
         }
 
-        return this.lfc.foundset.loadRecordsAsync(startIndex, size);
+        return this.lfc.foundset.loadExtraRecordsAsync(size);
     }
 
     getViewPortData(startIndex: number, endIndex: number) {
