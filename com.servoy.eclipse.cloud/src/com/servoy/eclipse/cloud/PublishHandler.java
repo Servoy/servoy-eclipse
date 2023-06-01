@@ -1,5 +1,6 @@
 package com.servoy.eclipse.cloud;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,8 +38,8 @@ public class PublishHandler extends AbstractHandler implements IResourceChangeLi
     		workspace = ResourcesPlugin.getWorkspace();
     		workspace.addResourceChangeListener(this);
     		IPath workspaceRoot = workspace.getRoot().getLocation();
-    		repository = new  RepositoryBuilder().setWorkTree(workspaceRoot.toFile()).build(); //this will trigger an exception if workspace root is not a valid git repository;
-    		isGitWs = true;
+    		repository = new  RepositoryBuilder().setWorkTree(workspaceRoot.toFile()).build(); 
+    		isGitWs = isGitWorkspace();
     		isCleanGit.set(isCleanGitRepo()); //detect changes from eventually outside apps
     		fireHandlerChanged(new HandlerEvent(this, true, false));//force eclipse to call isEnabled() method
     	} catch (IOException | NoWorkTreeException e) {
@@ -96,9 +97,19 @@ public class PublishHandler extends AbstractHandler implements IResourceChangeLi
     @Override
     public void resourceChanged(IResourceChangeEvent event) {
         if (event.getType() == IResourceChangeEvent.POST_CHANGE) {//save or save all buttons were pressed
+        	isGitWs = isGitWorkspace();
         	if (isGitWs) isCleanGit.set(isCleanGitRepo()); //update git status
     		fireHandlerChanged(new HandlerEvent(this, true, false));
         }
+    }
+    
+    private boolean isGitWorkspace() {
+    	IPath workspaceRoot = workspace.getRoot().getLocation();
+        File gitDir = new File(workspaceRoot.toFile(), ".git");
+        if (!gitDir.exists() || !gitDir.isDirectory()) {
+            return false;
+        }
+        return true;
     }
     
     
