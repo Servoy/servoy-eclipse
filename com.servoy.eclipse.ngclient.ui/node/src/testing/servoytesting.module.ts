@@ -16,10 +16,14 @@ import { SabloService } from '../sablo/sablo.service';
 import { PopupFormService } from '../ngclient/services/popupform.service';
 
 class TestDeferred implements IDeferred<any> {
-  promise: Promise<any>;
-  reject(reason: any) {
+  promise: Promise<any> = {
+      then: (_value) => null, catch: (_err) => null,
+      finally:() => null,
+      [Symbol.toStringTag]: ''
+  };
+  reject(_reason: any) {
   }
-  resolve(value: any) {
+  resolve(_value: any) {
   }
 }
 
