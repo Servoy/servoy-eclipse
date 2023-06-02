@@ -37,7 +37,9 @@ import org.apache.commons.io.FileUtils;
 import org.sablo.security.ContentSecurityPolicyConfig;
 
 import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
+import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
 import com.servoy.j2db.util.MimeTypes;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -61,7 +63,6 @@ public class IndexPageFilter implements Filter
 		HttpServletResponse response = (HttpServletResponse)servletResponse;
 		request.getSession();
 		String requestURI = request.getRequestURI();
-
 		if (requestURI.toLowerCase().endsWith("/index.html") &&
 			(requestURI.toLowerCase().contains("rfb/angular2") || requestURI.toLowerCase().contains("/solution/")) && WebPackagesListener.isBuildRunning())
 		{
@@ -83,10 +84,23 @@ public class IndexPageFilter implements Filter
 		}
 		String solutionName = getSolutionNameFromURI(requestURI);
 
-		if (solutionName != null && AngularIndexPageWriter.mustAuthenticate(request, response, solutionName))
+		if (solutionName != null)
 		{
-			AngularIndexPageWriter.writeLoginPage(request, response, solutionName);
-			return;
+			Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
+			if (showLogin.getLeft().booleanValue())
+			{
+				StatelessLoginHandler.writeLoginPage(request, response, solutionName);
+				return;
+			}
+			if (showLogin.getRight() != null && request.getParameter("id_token") == null)
+			{
+				StringBuilder url = new StringBuilder(requestURI.subSequence(0, requestURI.indexOf(SOLUTIONS_PATH)) + SOLUTIONS_PATH);
+				url.append(solutionName);
+				url.append("/index.html?id_token=");
+				url.append(showLogin.getRight());
+				((HttpServletResponse)servletResponse).sendRedirect(url.toString());
+				return;
+			}
 		}
 
 		if (indexFile != null && indexFile.exists())
@@ -131,7 +145,6 @@ public class IndexPageFilter implements Filter
 			response.setContentType("text/html");
 			response.setContentLengthLong(indexHtml.length());
 			response.getWriter().write(indexHtml);
-
 			return;
 		}
 		chain.doFilter(servletRequest, servletResponse);
