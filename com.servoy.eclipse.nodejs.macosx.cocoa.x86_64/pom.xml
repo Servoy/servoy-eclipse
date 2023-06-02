@@ -9,7 +9,7 @@
 		<version>2023.6.0.3880_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</artifactId>
-	<version>18.14.0</version>
+	<version>18.16.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
