@@ -89,6 +89,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	private final static Map<LessPropertyType, TreeSet<String>> typesToProperties = new HashMap<>();
 	private final static Pattern lessVariablePattern = Pattern.compile("@([\\w-_]+)\\s*:\\s*(.*);\\s?(?:// default?:(.*))?\\s*+(/\\*(.+)\\*/)?");
 	private String version;
+	private String currentTheme;
 
 	private PropertiesLessEditorInput(IFile file, String content)
 	{
@@ -114,6 +115,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 			defaultThemeProperties = ThemeResourceLoader.getThemeProperties(version);
 		}
 
+		currentTheme = ThemeResourceLoader.getTheme(version);
 		LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> props = new LinkedHashMap<>();
 		parseContent(defaultThemeProperties, previousValues, props);
 		parseContent(text, previousValues, props);
@@ -345,6 +347,11 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	public void clearChanges()
 	{
 		modified.clear();
+	}
+
+	public String getCurrentTheme()
+	{
+		return currentTheme;
 	}
 
 

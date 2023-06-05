@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 2023.6.0.3880_rc
+Bundle-Version: 2023.9.0.3900_rc
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -86,7 +86,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.nebula.widgets.nattable.extension.nebula,
  org.eclipse.e4.ui.css.swt,
  org.eclipse.nebula.widgets.nattable.extension.e4,
- com.servoy.eclipse.cloud
+ com.servoy.eclipse.cloud,
+ org.eclipse.tm4e.ui;bundle-version="0.6.1",
+ org.eclipse.tm4e.core;bundle-version="0.5.1",
+ org.eclipse.tm4e.languageconfiguration;bundle-version="0.5.2",
+ org.eclipse.ui.genericeditor;bundle-version="1.2.300"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,

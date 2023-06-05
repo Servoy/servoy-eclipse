@@ -17,12 +17,15 @@
 
 package com.servoy.eclipse.ui.editors.less;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 
@@ -36,7 +39,8 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 {
 	private PropertiesLessEditorInput editorInput;
 	private LessPropertiesComposite propertiesComposite;
-	private TextEditor textEditor;
+	private ExtensionBasedTextEditor servoyThemeSource;;
+	private ExtensionBasedTextEditor textEditor;
 	private boolean isPageModified = false;
 
 	@Override
@@ -140,9 +144,69 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 
 		try
 		{
-			textEditor = new TextEditor();
+			textEditor = new ExtensionBasedTextEditor();
 			index = addPage(textEditor, getEditorInput());
 			setPageText(index, "Source");
+
+			servoyThemeSource = new ExtensionBasedTextEditor();
+			index = addPage(servoyThemeSource, new IEditorInput()
+			{
+
+				@Override
+				public <T> T getAdapter(Class<T> adapter)
+				{
+					if (adapter == IFile.class)
+					{
+//						return new Fil
+					}
+					return null;
+				}
+
+				@Override
+				public boolean exists()
+				{
+					// TODO Auto-generated method stub
+					return false;
+				}
+
+				@Override
+				public ImageDescriptor getImageDescriptor()
+				{
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+				@Override
+				public String getName()
+				{
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+				@Override
+				public IPersistableElement getPersistable()
+				{
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+				@Override
+				public String getToolTipText()
+				{
+					// TODO Auto-generated method stub
+					return null;
+				}
+
+			});
+			setPageText(index, "Servoy Theme Source");
+
+
+			IEditorInput input = getEditorInput();
+//			if (input instanceof PropertiesLessEditorInput ple)
+//			{
+//				servoyThemeSource.setText(ple.getCurrentTheme());
+//			}
+
 		}
 		catch (PartInitException e)
 		{
