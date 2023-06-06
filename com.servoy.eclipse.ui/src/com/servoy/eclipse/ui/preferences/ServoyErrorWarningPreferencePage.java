@@ -584,8 +584,6 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_solutionPropertyFormCannotBeInstantiated, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.SOLUTION_PROPERTY_TARGET_NOT_FOUND,
 				Messages.ErrorWarningPreferencePage_solutionPropertyTargetNotFound, false));
-			associatedProblemMarkers.add(
-				new ErrorWarningPreferenceItem(ServoyBuilder.CONSTANTS_USED, Messages.ErrorWarningPreferencePage_constantsUsed, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM,
 				Messages.ErrorWarningPreferencePage_solutionUsedAsWebServiceMustAuthenticateProblem, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.ERROR_MISSING_PROJECT_REFERENCE,

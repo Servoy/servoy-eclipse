@@ -36,18 +36,13 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.ast.ASTNode;
@@ -59,7 +54,6 @@ import org.eclipse.dltk.javascript.ast.BinaryOperation;
 import org.eclipse.dltk.javascript.ast.BooleanLiteral;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
-import org.eclipse.dltk.javascript.ast.ConstStatement;
 import org.eclipse.dltk.javascript.ast.DecimalLiteral;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
@@ -84,7 +78,6 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
-import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.ICalculationTypeInferencer;
 import com.servoy.eclipse.model.extensions.ICalculationTypeInferencerProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -1067,7 +1060,6 @@ public class SolutionDeserializer
 
 			List<VariableDeclaration> variables = new ArrayList<VariableDeclaration>();
 			List<FunctionStatement> functions = new ArrayList<FunctionStatement>();
-			final List<ConstStatement> constants = new ArrayList<ConstStatement>();
 			List<Statement> statements = script.getStatements();
 			List<Comment> comments = script.getComments();
 			Set<Comment> sortedComments = new TreeSet<Comment>(new Comparator<Comment>()
@@ -1115,51 +1107,9 @@ public class SolutionDeserializer
 						functions.add((FunctionStatement)exp);
 					}
 				}
-				else if (node instanceof ConstStatement)
-				{
-					constants.add((ConstStatement)node);
-				}
 			}
 
 			final IFile resource = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(Path.fromOSString(file.getAbsolutePath()));
-			if (resource != null) // resource can be null when the file is not in the workspace, like deserializing from STP temp dir
-			{
-				boolean runJob = constants.size() > 0;
-				if (!runJob && resource.exists() && resource.getProject().isOpen())
-				{
-					try
-					{
-						IMarker[] currentMarkers = resource.findMarkers(ServoyBuilder.CONSTANTS_USED_MARKER_TYPE, false, IResource.DEPTH_INFINITE);
-						runJob = currentMarkers != null ? currentMarkers.length > 0 : false;
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-				if (runJob)
-				{
-					WorkspaceJob job = new WorkspaceJob("constant variable marker checks")
-					{
-
-						@Override
-						public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-						{
-							ServoyBuilder.deleteMarkers(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE);
-
-							for (Statement consts : constants)
-							{
-								ServoyBuilder.addMarker(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE, "Constants are not supported", consts.sourceEnd(),
-									ServoyBuilder.CONSTANTS_USED, IMarker.PRIORITY_NORMAL, resource.getProjectRelativePath().toString());
-							}
-							return org.eclipse.core.runtime.Status.OK_STATUS;
-						}
-					};
-					job.setRule(resource);
-					job.setSystem(true);
-					job.schedule();
-				}
-			}
 
 			List<Line> lines = new ArrayList<Line>();
 			int counter = 0;

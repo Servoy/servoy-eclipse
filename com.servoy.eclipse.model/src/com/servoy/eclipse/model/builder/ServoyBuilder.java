@@ -271,7 +271,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = _PREFIX + ".formWithDatasourceInLoginSolution";
 	public static final String MULTIPLE_METHODS_ON_SAME_ELEMENT = _PREFIX + ".multipleMethodsInfo";
 	public static final String UNRESOLVED_RELATION_UUID = _PREFIX + ".unresolvedRelationUuid";
-	public static final String CONSTANTS_USED_MARKER_TYPE = _PREFIX + ".constantsUsed";
+	public static final String CONSTANTS_USED_MARKER_TYPE = _PREFIX + ".constantsUsed"; // removed marker type, kept only for removal
 	public static final String MISSING_DRIVER = _PREFIX + ".missingDriver";
 	public static final String OBSOLETE_ELEMENT = _PREFIX + ".obsoleteElement";
 	public static final String HIDDEN_TABLE_STILL_IN_USE = _PREFIX + ".hiddenTableInUse";
@@ -580,7 +580,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> SERVER_NOT_ACCESSIBLE_FIRST_OCCURENCE = new Pair<String, ProblemSeverity>(
 		"serverNotAccessibleFirstOccurence", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> CONSTANTS_USED = new Pair<String, ProblemSeverity>("constantsUsed", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM = new Pair<String, ProblemSeverity>(
 		"solutionUsedAsWebServiceMustAuthenticateProblem", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> SOLUTION_WITH_HIGHER_FILE_VERSION = new Pair<String, ProblemSeverity>("solutionWithHigherFileVersion",
@@ -1858,6 +1857,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_PROPERTY_FROM_SPEC);
 		deleteMarkers(project, PARAMETERS_MISMATCH);
 		deleteMarkers(project, NAMED_FOUNDSET_DATASOURCE);
+		deleteMarkers(project, CONSTANTS_USED_MARKER_TYPE);
 		try
 		{
 			if (project.getReferencedProjects() != null)

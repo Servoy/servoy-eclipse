@@ -276,7 +276,6 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_solutionElementNameInvalidIdentifier;
 	public static String ErrorWarningPreferencePage_solutionPropertyFormCannotBeInstantiated;
 	public static String ErrorWarningPreferencePage_solutionPropertyTargetNotFound;
-	public static String ErrorWarningPreferencePage_constantsUsed;
 	public static String ErrorWarningPreferencePage_solutionUsedAsWebServiceMustAuthenticateProblem;
 	public static String ErrorWarningPreferencePage_errorMissingProjectReference;
 	public static String ErrorWarningPreferencePage_styleNotFound;
