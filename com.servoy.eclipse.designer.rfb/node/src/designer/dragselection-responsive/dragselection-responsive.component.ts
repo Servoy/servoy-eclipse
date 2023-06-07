@@ -137,7 +137,8 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
         if (this.editorContentService.getGlassPane().style.cursor === "pointer") {
             if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
-               this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop);
+               // we should check for siblings on mouseUp
+               //this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop);
                return; //preview position not changed, return here
             }
             if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentElement.closest("[svy-id]") && this.canDrop.beforeChild === this.designerUtilsService.getNextElementSibling(this.dragNode)) {

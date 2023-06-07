@@ -687,7 +687,8 @@ public class CreateComponentHandler implements IServerService
 								changes.add(webComponent);
 							}
 							webComponent.setLocation(getLocationAndShiftSiblings(webComponent.getParent(), args, extraChangedPersists));
-							if (addSiblingsToChanges) changes.addAll(extraChangedPersists);
+							// we don't need to add the changed components
+							//if (addSiblingsToChanges) changes.addAll(extraChangedPersists);
 						}
 						else
 						{
@@ -721,7 +722,8 @@ public class CreateComponentHandler implements IServerService
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
 								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 									initialDropTarget.getParent() instanceof Form;
-								Point p = getLocationAndShiftSiblings(parentSupportingElements, args, extraChangedPersists);
+								// this is a fix for dropping the responsive container on csspos
+								Point p = new Point(x, y);
 								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, p,
 									specifications, args.optString("packageName"));
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
