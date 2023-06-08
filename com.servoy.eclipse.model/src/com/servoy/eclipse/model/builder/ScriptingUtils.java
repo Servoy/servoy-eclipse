@@ -41,7 +41,7 @@ import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.EnumDataProvider;
@@ -52,7 +52,6 @@ import com.servoy.j2db.util.Debug;
 
 public class ScriptingUtils
 {
-	private static final JavaScriptParser javascriptParser = new JavaScriptParser();
 	private static final IProblemReporter dummyReporter = new IProblemReporter()
 	{
 		public void reportProblem(IProblem problem)
@@ -69,7 +68,7 @@ public class ScriptingUtils
 
 	public static int getArgumentsUsage(final String declaration)
 	{
-		final Script script = javascriptParser.parse(declaration, dummyReporter);
+		final Script script = JavaScriptParserUtil.parse(declaration, dummyReporter);
 		List<Statement> statements = script.getStatements();
 		if (statements != null && statements.size() == 1 && (statements.get(0) instanceof VoidExpression))
 		{
@@ -118,10 +117,9 @@ public class ScriptingUtils
 	{
 		final List<EnumDataProvider> retval = new ArrayList<EnumDataProvider>();
 		String defaultValue = global.getDefaultValue();
-		JavaScriptParser parser = new JavaScriptParser();
 		try
 		{
-			Script script = parser.parse(global.getName() + '=' + defaultValue, dummyReporter);
+			Script script = JavaScriptParserUtil.parse(global.getName() + '=' + defaultValue, dummyReporter);
 			script.visitAll(new AbstractNavigationVisitor<Object>()
 			{
 				@Override
@@ -204,7 +202,7 @@ public class ScriptingUtils
 	{
 		String declaration = method.getDeclaration();
 		if (Strings.isEmpty(declaration)) return false;
-		final Script script = javascriptParser.parse(declaration, dummyReporter);
+		final Script script = JavaScriptParserUtil.parse(declaration, dummyReporter);
 		List<Statement> statements = script.getStatements();
 		if (statements != null && statements.size() == 1 && (statements.get(0) instanceof VoidExpression))
 		{
