@@ -34,86 +34,54 @@ export class SabloService {
 
         sessionStorage.set('svy_session_lock', '1');
 
-        const oldError = this.windowRefService.nativeWindow.window.console.error;
         const oldLog = this.windowRefService.nativeWindow.window.console.log;
-        this.windowRefService.nativeWindow.window.console.log = (...msg: any[]) => {
-            try {
-                oldLog.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
-                if (!this.inLogCall) {
-                    this.inLogCall = true;
-                    this.callService('consoleLogger', 'info', { message: (msg ? msg.join(' ') : '') }, true);
-                }
-            } catch (e) {
-                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
-            } finally {
-                this.inLogCall = false;
-            }
-        };
-
-        this.windowRefService.nativeWindow.window.console.error = (...msg: any[]) => {
-            try {
-                oldError.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
-                if (!this.inLogCall) {
-                    this.inLogCall = true;
-                    this.callService('consoleLogger', 'error', { message: (msg ? msg.join(' ') : '') }, true);
-                }
-            } catch (e) {
-                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
-            } finally {
-                this.inLogCall = false;
-            }
-        };
-
-        const oldWarn = this.windowRefService.nativeWindow.window.console.warn;
-        this.windowRefService.nativeWindow.window.console.warn = (...msg: any[]) => {
-            try {
-                oldWarn.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
-                if (!this.inLogCall) {
-                    this.inLogCall = true;
-                    this.callService('consoleLogger', 'warn', { message: (msg ? msg.join(' ') : '') }, true);
-                }
-            } catch (e) {
-                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
-            } finally {
-                this.inLogCall = false;
-            }
-        };
-
         const oldInfo = this.windowRefService.nativeWindow.window.console.info;
-        this.windowRefService.nativeWindow.window.console.info = (...msg: any[]) => {
-            try {
-                oldInfo.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
-                if (!this.inLogCall) {
-                    this.inLogCall = true;
-                    this.callService('consoleLogger', 'info', { message: (msg ? msg.join(' ') : '') }, true);
-                }
-            } catch (e) {
-                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
-            } finally {
-                this.inLogCall = false;
-            }
-        };
-
+        const oldWarn = this.windowRefService.nativeWindow.window.console.warn
         const oldDebug = this.windowRefService.nativeWindow.window.console.debug;
-        this.windowRefService.nativeWindow.window.console.debug = (...msg: any[]) => {
-            try {
-                oldDebug.apply(this.windowRefService.nativeWindow.window.console, this.buildStackMessage(msg));
-                if (!this.inLogCall) {
-                    this.inLogCall = true;
-                    this.callService('consoleLogger', 'debug', { message: (msg ? msg.join(' ') : '') }, true);
-                }
-            } catch (e) {
-                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
-            } finally {
-                this.inLogCall = false;
-            }
-        };
+        const oldError = this.windowRefService.nativeWindow.window.console.error;
+        // always use warn for all levels except error so that the stacktrace is shown in the browser.
+        this.windowRefService.nativeWindow.window.console.log = new Proxy(oldWarn, this.getProxyHandler("info", oldError));
+        this.windowRefService.nativeWindow.window.console.warn = new Proxy(oldWarn, this.getProxyHandler("warn", oldError));
+        this.windowRefService.nativeWindow.window.console.info = new Proxy(oldWarn, this.getProxyHandler("info", oldError));
+        this.windowRefService.nativeWindow.window.console.debug = new Proxy(oldWarn, this.getProxyHandler("debug", oldError));
+        this.windowRefService.nativeWindow.window.console.error = new Proxy(oldError, this.getProxyHandler("error", oldError));
 
         this.windowRefService.nativeWindow.window.onerror = function(message, source, lineno, colno, error) {
             const msg = message + '\n' + source + ':' + lineno + ':' + colno + '\n' + error;
             this.callService('consoleLogger', 'error', { message: msg }, true);
         };
+        
+        this.windowRefService.nativeWindow['toggleSabloLogWrapping'] = () => {
+            this.windowRefService.nativeWindow.window.console.log = oldLog;
+            this.windowRefService.nativeWindow.window.console.info = oldInfo;
+            this.windowRefService.nativeWindow.window.console.warn = oldWarn;
+            this.windowRefService.nativeWindow.window.console.error = oldError;
+            this.windowRefService.nativeWindow.window.console.debug = oldDebug;;
+        }
+        oldInfo("turn off the logger overrides by executing: toggleSabloLogWrapping() in the console of your browser");
     }
+    
+    private getProxyHandler(name: string, oldError: any): ProxyHandler<any> {
+        return {
+            apply: (target: Function, _thisArg: any, argumentsList: Array<any>) => {
+                target(...argumentsList);
+                try {
+                if (!this.inLogCall) {
+                    this.inLogCall = true;
+                    if ('error' === name) {
+                        argumentsList = this.buildStackMessage(argumentsList);
+                    }
+                    this.callService('consoleLogger', name, { message:  (argumentsList ? argumentsList.join(' ') : '')  }, true);
+                }
+            } catch (e) {
+                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
+            } finally {
+                this.inLogCall = false;
+            }
+            }   
+        }
+    }
+    
 
     public connect(context, queryArgs, websocketUri): WebsocketSession {
         const wsSessionArgs = {
@@ -302,8 +270,12 @@ export class SabloService {
 
     private buildStackMessage(msg: any[]): Array<any> {
         const arr = new Array();
-        arr.push(...msg);
-        let message = new Error().stack;
+        let error = msg[0] instanceof Error? msg[0]: msg[1] instanceof Error?msg[1]:null;
+        if (error === null) { 
+            error = new Error();
+            arr.push(...msg);
+        }
+        let message = error.stack;
         if (message.startsWith('Error')) {
             message = message.substring(5);
         }

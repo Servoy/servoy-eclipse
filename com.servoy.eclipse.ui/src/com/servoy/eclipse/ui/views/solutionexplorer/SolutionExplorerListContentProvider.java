@@ -64,7 +64,7 @@ import org.eclipse.dltk.javascript.ast.PropertyInitializer;
 import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.VariableStatement;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
@@ -1801,8 +1801,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				is.close();
 				if (source != null)
 				{
-					JavaScriptParser parser = new JavaScriptParser();
-					Script script = parser.parse(source, null);
+					Script script = JavaScriptParserUtil.parse(source, null);
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
 					{
 						@Override

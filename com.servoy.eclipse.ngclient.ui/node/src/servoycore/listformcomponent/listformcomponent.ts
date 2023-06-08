@@ -243,7 +243,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                   { cellRenderer: 'row-renderer', autoHeight: true }
                 ],
                 rowModelType: 'serverSide',
-                serverSideStoreType: 'partial',
                 cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
                 infiniteInitialRowCount: AGGRID_CACHE_BLOCK_SIZE,
                 //maxBlocksInCache: AGGRID_MAX_BLOCKS_IN_CACHE,
