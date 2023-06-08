@@ -270,8 +270,12 @@ export class SabloService {
 
     private buildStackMessage(msg: any[]): Array<any> {
         const arr = new Array();
-        arr.push(...msg);
-        let message = new Error().stack;
+        let error = msg[0] instanceof Error? msg[0]: msg[1] instanceof Error?msg[1]:null;
+        if (error === null) { 
+            error = new Error();
+            arr.push(...msg);
+        }
+        let message = error.stack;
         if (message.startsWith('Error')) {
             message = message.substring(5);
         }
