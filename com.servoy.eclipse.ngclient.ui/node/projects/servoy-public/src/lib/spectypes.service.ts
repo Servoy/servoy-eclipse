@@ -652,7 +652,7 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * Adds a change listener that will get triggered when server sends changes for this foundset.
      *
      * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset
-                 get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
+     *           get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
      * @param changeListener the listener to register.
      * @return a function to unregister the listener
      */
