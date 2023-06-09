@@ -81,7 +81,7 @@ describe('ComboboxComponent', () => {
 
     component = fixture.componentInstance;
     component.valuelistID = dummyValuelist;
-    component.servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
+    component.servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent','getClientProperty']);
     component.dataProviderID = 3;
     component.format = new Format();
     component.format.type = 'TEXT';
