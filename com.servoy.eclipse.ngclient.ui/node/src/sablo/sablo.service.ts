@@ -46,7 +46,7 @@ export class SabloService {
         this.windowRefService.nativeWindow.window.console.debug = new Proxy(oldWarn, this.getProxyHandler("debug", oldError));
         this.windowRefService.nativeWindow.window.console.error = new Proxy(oldError, this.getProxyHandler("error", oldError));
 
-        this.windowRefService.nativeWindow.window.onerror = function(message, source, lineno, colno, error) {
+        this.windowRefService.nativeWindow.window.onerror = (message, source, lineno, colno, error) => {
             const msg = message + '\n' + source + ':' + lineno + ':' + colno + '\n' + error;
             this.callService('consoleLogger', 'error', { message: msg }, true);
         };
