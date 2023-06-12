@@ -48,7 +48,7 @@ export class SabloService {
 
         this.windowRefService.nativeWindow.window.onerror = (message, source, lineno, colno, error) => {
             const msg = message + '\n' + source + ':' + lineno + ':' + colno + '\n' + error;
-            this.callService('consoleLogger', 'error', { message: msg }, true);
+            if (this.wsSession) this.callService('consoleLogger', 'error', { message: msg }, true);
         };
         
         this.windowRefService.nativeWindow['toggleSabloLogWrapping'] = () => {
@@ -71,7 +71,7 @@ export class SabloService {
                     if ('error' === name) {
                         argumentsList = this.buildStackMessage(argumentsList);
                     }
-                    this.callService('consoleLogger', name, { message:  (argumentsList ? argumentsList.join(' ') : '')  }, true);
+                    if (this.wsSession) this.callService('consoleLogger', name, { message:  (argumentsList ? argumentsList.join(' ') : '')  }, true);
                 }
             } catch (e) {
                 oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
