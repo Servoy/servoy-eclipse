@@ -121,7 +121,7 @@ export class WindowPluginService {
                     if (this._popupMenuShowCommand?.elementId) {
                         const element = this.doc.querySelector("[id^="+this._popupMenuShowCommand.elementId+"]") as HTMLElement;
                         if (element && this._popupMenuShowCommand.x && this._popupMenuShowCommand.y) {
-							const x = element.getBoundingClientRect().x + this._popupMenuShowCommand.x + (element.getBoundingClientRect().width / 2);
+							const x = element.getBoundingClientRect().x + this._popupMenuShowCommand.x;
 							const y = element.getBoundingClientRect().y + this._popupMenuShowCommand.y;
 							this.popupMenuService.showMenu(x, y, this._popupMenuShowCommand?.positionTop || false);
 						}
@@ -131,7 +131,7 @@ export class WindowPluginService {
                             this.log.error('Cannot display popup, element with id:' + this._popupMenuShowCommand.elementId + ' , not found');
                         }
                     } else {
-                        this.popupMenuService.showMenu((this._popupMenuShowCommand.x + 70), this._popupMenuShowCommand.y, this._popupMenuShowCommand?.positionTop || false);
+                        this.popupMenuService.showMenu(this._popupMenuShowCommand.x, this._popupMenuShowCommand.y, this._popupMenuShowCommand?.positionTop || false);
                     }
                     break;
                 }

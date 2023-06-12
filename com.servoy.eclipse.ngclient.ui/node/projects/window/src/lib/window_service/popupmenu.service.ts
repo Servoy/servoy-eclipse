@@ -91,6 +91,18 @@ export class PopupMenuService {
                     rootBoundary: 'document'
                   },
                 },
+                {
+                  name: 'offset',
+                  options: {
+                    offset: ({ placement, reference, popper }) => {
+                        if( reference.x + popper.width / 2 < this.doc.documentElement.clientWidth) {
+                            return [popper.width / 2, 0];
+                        } else {
+                            return [];
+                        }
+                    },
+                  },
+                },
               ],
           });
     }
