@@ -71,7 +71,7 @@ export class SabloService {
                     if ('error' === name) {
                         argumentsList = this.buildStackMessage(argumentsList);
                     }
-                    this.callService('consoleLogger', name, { message:  (argumentsList ? argumentsList.join(' ') : '')  }, true);
+                    if (this.wsSession) this.callService('consoleLogger', name, { message:  (argumentsList ? argumentsList.join(' ') : '')  }, true);
                 }
             } catch (e) {
                 oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
