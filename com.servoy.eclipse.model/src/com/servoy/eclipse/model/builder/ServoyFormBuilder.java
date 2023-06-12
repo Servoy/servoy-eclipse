@@ -1672,7 +1672,7 @@ public class ServoyFormBuilder
 	private static void addWebComponentMissingReferences(WebComponent wc, PropertyDescription spec, JSONObject json, FlattenedSolution flattenedSolution,
 		Form form, IResource markerResource)
 	{
-		if (spec != null)
+		if (spec != null && json != null)
 		{
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			if (properties != null)
