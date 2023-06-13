@@ -13,6 +13,7 @@ import { DefaultLoginWindowComponent } from './default-login-window/default-logi
 import { FileUploadWindowComponent } from './file-upload-window/file-upload-window.component';
 import { LocaleService } from '../locale.service';
 import { ServerDataService } from './serverdata.service';
+import {AlertWindowComponent} from "./alert-window/alert-window.component";
 
 @Injectable()
 export class ApplicationService {
@@ -99,8 +100,37 @@ export class ApplicationService {
     }
 
     public showMessage(message: string) {
-        this.windowRefService.nativeWindow.alert(message);
+        const alertWindowComponent= this.mainViewRefService.mainContainer.createComponent(AlertWindowComponent);
+        alertWindowComponent.instance.message = message;
+        const origin: string = this.windowRefService.nativeWindow.location.origin;
+        alertWindowComponent.instance.title = origin.substring(origin.indexOf('://') + 3);;
+
+        const opt: BSWindowOptions = {
+          id: 'svyalert',
+          fromElement: alertWindowComponent.location.nativeElement.childNodes[0],
+          title: '',
+          resizable: false,
+          isModal: true
+        };
+
+        const bsWindowInstance = this.bsWindowManager.createWindow(opt);
+        alertWindowComponent.instance.setOnCloseCallback(() => {
+          bsWindowInstance.close();
+          alertWindowComponent.destroy();
+        });
+        bsWindowInstance.setActive(true);
+
+        this.adjustDialogPosition();
     }
+
+  private adjustDialogPosition() {
+      //maintain alert-dialog in the center of the browser
+      const dialog: HTMLElement = document.querySelector('.svy-alert') as HTMLElement;
+      const windowHeight = window.innerHeight;
+      const dialogHeight = dialog.offsetHeight;
+      const topOffset = Math.max((windowHeight - dialogHeight) / 2, 0);
+      dialog.style.top = topOffset + 'px';
+  }
 
     public showUrl(pUrl: string, target: string, targetOptions: string, timeout: number) {
         let url = pUrl;
