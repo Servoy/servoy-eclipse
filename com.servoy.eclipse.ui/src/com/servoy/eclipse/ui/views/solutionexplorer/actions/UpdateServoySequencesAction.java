@@ -42,6 +42,8 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 
@@ -126,7 +128,46 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 				}
 			}
 		}
-		setEnabled(selectedServers != null);
+		boolean showLegacyAction = false;
+		if (selectedServers != null)
+		{
+			for (IServerInternal server : selectedServers)
+			{
+				try
+				{
+					List<String> tables = server.getTableAndViewNames(true);
+					if (tables != null)
+					{
+						outer : for (String tableName : tables)
+						{
+							ITable table = server.getTable(tableName);
+							if (table != null)
+							{
+								List<Column> pkColumns = table.getRowIdentColumns();
+								if (pkColumns != null && pkColumns.size() > 0)
+								{
+									for (Column column : pkColumns)
+									{
+										if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.SEQUENCE_AUTO_ENTER &&
+											column.getColumnInfo().getAutoEnterSubType() == ColumnInfo.SERVOY_SEQUENCE)
+										{
+											// only show if already set
+											showLegacyAction = true;
+											break outer;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+		setEnabled(selectedServers != null && showLegacyAction);
 	}
 
 	@Override
@@ -157,10 +198,8 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 						}
 						if (tables != null)
 						{
-							Iterator<String> iterator = tables.iterator();
-							while (iterator.hasNext())
+							for (String tableName : tables)
 							{
-								String tableName = iterator.next();
 								try
 								{
 									ITable table = server.getTable(tableName);
