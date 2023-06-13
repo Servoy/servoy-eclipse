@@ -1,8 +1,8 @@
 import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
-import {  FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
+import { FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
 import { DOCUMENT } from '@angular/common';
-import tinymce, { RawEditorOptions } from 'tinymce';
+import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 
 @Component({
     selector: 'servoydefault-htmlarea',
@@ -21,6 +21,8 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         promotion: false,
         toolbar: 'fontselect fontsizeselect | bold italic underline | superscript subscript | undo redo |alignleft aligncenter alignright alignjustify | styleselect | outdent indent bullist numlist'
     };
+    lastServerValueAsSeenByTinyMCEContent: string;
+    editor: Editor;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected servoyService: ServoyPublicService) {
         super(renderer, cdRef, formattingService, doc);
@@ -36,8 +38,10 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     blur() {
-        this.dataProviderID = '<html><body>' + this.tinyValue + '</body></html>'
-        this.pushUpdate();
+        if (this.lastServerValueAsSeenByTinyMCEContent != this.tinyValue) {
+            this.dataProviderID = '<html><body>' + this.tinyValue + '</body></html>'
+            this.pushUpdate();
+        }
         if (this.onFocusLostMethodID) this.onFocusLostMethodID(new CustomEvent('blur'));
     }
 
@@ -45,9 +49,9 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         if (this.onActionMethodID) this.onActionMethodID(new CustomEvent('click'));
     }
 
-    ngOnInit(){
-        super.ngOnInit(); 
-        
+    ngOnInit() {
+        super.ngOnInit();
+
         this.tinyConfig['language'] = this.servoyService.getLocale();
 
         this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0].href + 'tinymce';
@@ -64,7 +68,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
             }
             for (const key in defaultConfiguration) {
                 if (defaultConfiguration.hasOwnProperty(key)) {
-                    this.tinyConfig[key] =  defaultConfiguration[key];
+                    this.tinyConfig[key] = defaultConfiguration[key];
                 }
             }
         }
@@ -87,7 +91,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         }
 
     }
-    
+
     svyOnInit() {
         super.svyOnInit();
         this.tinyValue = this.dataProviderID;
@@ -117,21 +121,19 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
                     case 'editable':
                     case 'readOnly':
                     case 'enabled':
-                        let editable = this.editable && !this.readOnly && this.enabled;
-                        if (tinymce.activeEditor) {
+                        const editable = this.editable && !this.readOnly && this.enabled;
+                        if (this.getEditor()) {
                             if (editable) {
-                                if (!change.firstChange) {
-                                    tinymce.activeEditor.mode.set("design");
-                                }
-                            }
-                            else {
-                                tinymce.activeEditor.mode.set("readonly");
+                                this.getEditor().mode.set("design");
+                            } else {
+                                this.getEditor().mode.set("readonly");
                             }
 
                         }
                         break;
                     case 'dataProviderID':
                         this.tinyValue = this.dataProviderID;
+                        this.lastServerValueAsSeenByTinyMCEContent = this.tinyValue;
                         break;
                 }
             }
@@ -140,7 +142,14 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     getEditor() {
-        return tinymce.get(this.servoyApi.getMarkupId() + '_editor');
+        return this.editor;
+    }
+
+    public onInit({ event, editor }: any) {
+        this.editor = editor;
+        this.lastServerValueAsSeenByTinyMCEContent = editor.getContent();
+        const editable = this.editable && !this.readOnly && this.enabled;
+        if (!editable) editor.mode.set('readonly')
     }
 
     requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
@@ -171,9 +180,11 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
 
     public replaceSelectedText(text: string) {
         this.getEditor().selection.setContent(text);
-        var edContent = this.getEditor().getContent();
-        this.dataProviderID = '<html><body>' + edContent + '</body></html>'
-        this.pushUpdate();
+        const edContent = this.getEditor().getContent();
+        if (this.lastServerValueAsSeenByTinyMCEContent != edContent) {
+            this.dataProviderID = '<html><body>' + edContent + '</body></html>';
+            this.pushUpdate();
+        }
     }
 
     public setScroll(x: number, y: number) {
