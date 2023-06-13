@@ -46,17 +46,19 @@ export class SabloService {
         this.windowRefService.nativeWindow.window.console.debug = new Proxy(oldWarn, this.getProxyHandler("debug", oldError));
         this.windowRefService.nativeWindow.window.console.error = new Proxy(oldError, this.getProxyHandler("error", oldError));
 
-        this.windowRefService.nativeWindow.window.onerror = (message, source, lineno, colno, error) => {
-            const msg = message + '\n' + source + ':' + lineno + ':' + colno + '\n' + error;
+        this.windowRefService.nativeWindow.window.addEventListener("error", (err: ErrorEvent) => {
+            const msg = err.message + '\n' + err.filename + ':' + err.lineno + ':' + err.colno + '\n' + err.error;
+            oldError.apply(this.windowRefService.nativeWindow.window.console, [msg]);
             if (this.wsSession) this.callService('consoleLogger', 'error', { message: msg }, true);
-        };
+            return false; // false allows it to keep default behavior as well theoretically - log to browser console (but it seems to have no effect, probably angular/zone also mess with this handler)
+        });
         
         this.windowRefService.nativeWindow['toggleSabloLogWrapping'] = () => {
             this.windowRefService.nativeWindow.window.console.log = oldLog;
             this.windowRefService.nativeWindow.window.console.info = oldInfo;
             this.windowRefService.nativeWindow.window.console.warn = oldWarn;
             this.windowRefService.nativeWindow.window.console.error = oldError;
-            this.windowRefService.nativeWindow.window.console.debug = oldDebug;;
+            this.windowRefService.nativeWindow.window.console.debug = oldDebug;
         }
         oldInfo("turn off the logger overrides by executing: toggleSabloLogWrapping() in the console of your browser");
     }
