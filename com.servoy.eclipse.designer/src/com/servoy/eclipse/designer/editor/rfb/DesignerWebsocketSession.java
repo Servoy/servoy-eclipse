@@ -245,7 +245,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.key("solutionProperties");
 					writer.object();
 					writer.key("styleSheets");
-					writer.value(getSolutionStyleSheets(fs));
+					writer.value(getSolutionStyleSheets(ServoyModelFinder.getServoyModel().getFlattenedSolution()));
 					writer.endObject();
 					generateParts(flattenedForm, context, writer, wrapper.getParts());
 					writer.endObject();
@@ -341,7 +341,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			case "getStyleSheets" :
 			{
-				return getDesignerStyleSheets(fs);
+				return getDesignerStyleSheets(ServoyModelFinder.getServoyModel().getFlattenedSolution());
 			}
 		}
 		return null;
