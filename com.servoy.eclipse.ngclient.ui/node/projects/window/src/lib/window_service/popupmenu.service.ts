@@ -122,7 +122,7 @@ export class PopupMenuService {
             li.appendChild(link);
             if (item) {
                 if (item.enabled === false) link.classList.add('disabled');
-                if (item.callback) {
+                if (item.callback && item.enabled !== false) {
                     li.addEventListener('mouseup', (event) => {
                         if (event.button == 0) this.servoyService.callServiceServerSideApi("window","executeMenuItem",[item.id, index, -1, item.selected, null, item.text]);
                     });
