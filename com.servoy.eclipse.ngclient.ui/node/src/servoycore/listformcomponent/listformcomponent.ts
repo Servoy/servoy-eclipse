@@ -381,10 +381,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     changes.forEach(change => {
                         insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
                     });
-                    if (insertOrDeletes) this.agGrid.api.refreshServerSideStore({purge: true});
+                    if (insertOrDeletes) this.agGrid.api.refreshServerSide({purge: true});
                     else this.agGrid.api.refreshCells();
                 } else if (event.viewportRowsUpdated || event.viewportRowsCompletelyChanged || event.fullValueChanged) {
-                    this.agGrid.api.refreshServerSideStore({purge: true});
+                    this.agGrid.api.refreshServerSide({purge: true});
                 }
             });
         }
@@ -641,7 +641,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 this.numberOfCells = numberOfRows * this.numberOfColumns;
                 // always just render 1
                 if (this.numberOfCells < 1) this.numberOfCells = 1;
-            } else {
+            } else if(!this.useScrolling) {
                 if(!this.servoyApi.isInAbsoluteLayout()) {
                     this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
                 } else if(this.containedForm && !this.containedForm.absoluteLayout) {
@@ -734,10 +734,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getAGGridStyle(): any {
-        if(this.servoyApi.isInAbsoluteLayout()) {
+        if(this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight < 1) {
             return { height: '100%' };
         } else {
-            return {'height.px': this.responsiveHeight };
+            return {height: '100%', 'max-height.px': this.responsiveHeight };
         }
     }
 }
