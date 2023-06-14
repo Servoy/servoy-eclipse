@@ -108,12 +108,12 @@ public abstract class SecurityQuickFix implements IMarkerResolution
 			InputDialog dialog;
 
 			// request user name
-			dialog = new InputDialog(UIUtils.getActiveShell(), title, "Please specify new group name", initialValue, new IInputValidator()
+			dialog = new InputDialog(UIUtils.getActiveShell(), title, "Please specify new permission name", initialValue, new IInputValidator()
 			{
 				public String isValid(String newUserName)
 				{
-					if (newUserName == null || newUserName.trim().length() == 0) return "Please specify group name";
-					return groupNameExists(newUserName) ? "Another group with this name exists" : null;
+					if (newUserName == null || newUserName.trim().length() == 0) return "Please specify permission name";
+					return groupNameExists(newUserName) ? "Another permission with this name exists" : null;
 				}
 			});
 			int result = dialog.open();

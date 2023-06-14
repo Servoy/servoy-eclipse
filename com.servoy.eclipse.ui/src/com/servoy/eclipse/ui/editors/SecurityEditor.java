@@ -122,7 +122,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 		Button newGroupButton;
 		newGroupButton = new Button(container, SWT.NONE);
-		newGroupButton.setText("New Group");
+		newGroupButton.setText("New Permission");
 
 		Button newUserButton;
 		newUserButton = new Button(container, SWT.NONE);
@@ -147,9 +147,9 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 		final Button removeGroupButton;
 		removeGroupButton = new Button(container, SWT.NONE);
-		removeGroupButton.setText("Remove Group(s)");
+		removeGroupButton.setText("Remove Permission(s)");
 		removeGroupButton.setEnabled(false);
-		removeGroupButton.setToolTipText("Delete checked group(s)");
+		removeGroupButton.setToolTipText("Delete checked permission(s)");
 
 		newGroupButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -165,7 +165,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 				}
 				else
 				{
-					MessageDialog.openError(getSite().getShell(), "Cannot create group", "Please enter a valid name in textbox");
+					MessageDialog.openError(getSite().getShell(), "Cannot create permission", "Please enter a valid name in textbox");
 				}
 			}
 		});
@@ -227,7 +227,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			}
 		});
 
-		groupTable.setToolTipText("Group name(s)");
+		groupTable.setToolTipText("Permission name(s)");
 		groupTable.setHeaderVisible(true);
 		groupTable.setLinesVisible(true);
 
@@ -252,8 +252,8 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 				if (groups != null && groups.size() > 0)
 				{
 					String groupsToDelete = groups.toString();
-					if (MessageDialog.openConfirm(getSite().getShell(), "Delete group(s)",
-						"Are you sure you want to delete the group(s): " + groupsToDelete + " ?"))
+					if (MessageDialog.openConfirm(getSite().getShell(), "Delete permission(s)",
+						"Are you sure you want to delete the permission(s): " + groupsToDelete + " ?"))
 					{
 						model.removeGroups(groups);
 						for (TableItem item : groupTable.getItems())
@@ -325,7 +325,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 		layout.setColumnData(uidColumn, new ColumnWeightData(40, 50, true));
 
 		TableColumn groupColumn = new TableColumn(groupTable, SWT.NONE, 0);
-		groupColumn.setText("Group name");
+		groupColumn.setText("Permission name");
 		groupColumn.setToolTipText("Select a group to assign users to it (users checkbox)");
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableLayout.setColumnData(groupColumn, new ColumnWeightData(20, 50, true));

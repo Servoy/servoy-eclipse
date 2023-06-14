@@ -1627,7 +1627,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						}
 						monitor.worked(1);
 
-						monitor.subTask("Loading user/group/permission information");
+						monitor.subTask("Loading user/permission information");
 						if (activeResourcesProject != null)
 						{
 							getUserManager().setResourcesProject(activeResourcesProject.getProject());

@@ -76,8 +76,8 @@ public class DeclareGroupReferencedInPermissions extends AlterPermissionSecFileQ
 				String newGroupName = groupName;
 				if (groupName == null || groupName.trim().length() == 0)
 				{
-					// group name is not only not declared, but also invalid - ask for new group name
-					ReturnValueRunnable r = new GetNewGroupNameRunnable(groups, "Declare new group (needs valid group name)", groupName);
+					// permission name is not only not declared, but also invalid - ask for new permission name
+					ReturnValueRunnable r = new GetNewGroupNameRunnable(groups, "Declare new permission (needs valid permission name)", groupName);
 					UIUtils.runInUI(r, true);
 					newGroupName = (String)r.getReturnValue();
 					if (newGroupName != null)

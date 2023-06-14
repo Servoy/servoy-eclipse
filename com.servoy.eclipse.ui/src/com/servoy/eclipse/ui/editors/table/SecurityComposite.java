@@ -70,7 +70,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 		Button btnNORights = new Button(this, SWT.CHECK);
 		btnNORights.setText("No rights unless explicitly specified");
 		btnNORights.setToolTipText(
-			"When this is checked, all groups will have by default no right for this table, unless it is specified by editor. If unchecked, by default read/insert/update/delete are available.");
+			"When this is checked, all permissions will have by default no right for this table, unless it is specified by editor. If unchecked, by default read/insert/update/delete are available.");
 		btnNORights.setSelection(solution.getImplicitSecurityNoRights(te.getTable().getDataSource()));
 		btnNORights.addSelectionListener(new SelectionListener()
 		{
@@ -145,7 +145,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 	protected void initDataBindings()
 	{
 		TableColumn nameColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_NAME);
-		nameColumn.setText("Group");
+		nameColumn.setText("Permission");
 		// nameColumn.setWidth(400);
 
 		TableColumnLayout layout = new TableColumnLayout();

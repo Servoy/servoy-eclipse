@@ -338,10 +338,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		if (isOperational())
 		{
 			boolean changed = false;
-			Iterator<GroupSecurityInfo> it = groupInfos.iterator();
-			while (it.hasNext())
+			for (GroupSecurityInfo groupSecurityInfo : groupInfos)
 			{
-				GroupSecurityInfo groupSecurityInfo = it.next();
 				List<SecurityInfo> infos = groupSecurityInfo.tableSecurity.get(Utils.getDotQualitfied(table.getServerName(), table.getName()));
 				if (infos != null && infos.size() > 0)
 				{
@@ -378,10 +376,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		for (String columnName : table.getColumnNames())
 		{
 			boolean columnFound = false;
-			Iterator<SecurityInfo> it = infos.iterator();
-			while (it.hasNext())
+			for (SecurityInfo element : infos)
 			{
-				if (it.next().element_uid.equals(columnName))
+				if (element.element_uid.equals(columnName))
 				{
 					columnFound = true;
 					break;
@@ -678,10 +675,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		if (serverName == null || tableName == null) return null;
 
 		Map<String, List<SecurityInfo>> tableAccess = new HashMap<String, List<SecurityInfo>>();
-		Iterator<GroupSecurityInfo> it = groupInfos.iterator();
-		while (it.hasNext())
+		for (GroupSecurityInfo groupSecurityInfo : groupInfos)
 		{
-			GroupSecurityInfo groupSecurityInfo = it.next();
 			List<SecurityInfo> infos = groupSecurityInfo.tableSecurity.get(Utils.getDotQualitfied(serverName, tableName));
 			if (infos != null && infos.size() > 0)
 			{
@@ -694,7 +689,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	}
 
 	/**
-	 * Writes the "formName.sec" file in the form's directory. This file contains the user/group security access rights for that form.<BR>
+	 * Writes the "formName.sec" file in the form's directory. This file contains the user/permissions security access rights for that form.<BR>
 	 * This method should be used when the write mode is {@link #WRITE_MODE_MANUAL}. When the write mode is {@link #WRITE_MODE_AUTOMATIC}, it will get called
 	 * automatically when security information is changed.
 	 *
@@ -786,18 +781,14 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public static String serializeSecurityPermissionInfo(Map<String, List<SecurityInfo>> access) throws JSONException
 	{
 		ServoyJSONObject obj = new ServoyJSONObject();
-		Iterator<String> it = access.keySet().iterator();
-		while (it.hasNext())
+		for (String groupName : access.keySet())
 		{
-			String groupName = it.next();
 			List<SecurityInfo> infos = access.get(groupName);
 			if (infos != null && infos.size() > 0)
 			{
 				ServoyJSONObject jinfos = new ServoyJSONObject();
-				Iterator<SecurityInfo> it2 = infos.iterator();
-				while (it2.hasNext())
+				for (SecurityInfo securityInfo : infos)
 				{
-					SecurityInfo securityInfo = it2.next();
 					jinfos.put(securityInfo.element_uid, securityInfo.access);
 				}
 				obj.put(groupName, jinfos);
@@ -811,10 +802,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		if (f == null) return null;
 
 		Map<String, List<SecurityInfo>> formAccess = new HashMap<String, List<SecurityInfo>>();
-		Iterator<GroupSecurityInfo> it = groupInfos.iterator();
-		while (it.hasNext())
+		for (GroupSecurityInfo groupSecurityInfo : groupInfos)
 		{
-			GroupSecurityInfo groupSecurityInfo = it.next();
 			List<SecurityInfo> infos = groupSecurityInfo.formSecurity.get(f.getUUID());
 			if (infos != null && infos.size() > 0)
 			{
@@ -977,10 +966,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 					u.toJSON().toString(true));
 			}
 		}
-		Iterator<String> keys /* group names */ = usersForGroups.keySet().iterator();
-		while (keys.hasNext())
+		for (String groupName : usersForGroups.keySet())
 		{
-			String groupName = keys.next();
 			List<String> userListForGroup = usersForGroups.get(groupName);
 			if (!userGroups.containsKey(groupName))
 			{
@@ -1075,10 +1062,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		boolean mustWriteBackTableInfo = false;
 
-		Iterator<String> keys = tableAccess.keySet().iterator();
-		while (keys.hasNext())
+		for (String groupName : tableAccess.keySet())
 		{
-			String groupName = keys.next();
 			List<SecurityInfo> groupPermissions = tableAccess.get(groupName);
 
 			if (userGroups.containsKey(groupName))
@@ -1203,10 +1188,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	{
 		Map<String, List<SecurityInfo>> formAccess = deserializeSecurityPermissionInfo(info);
 
-		Iterator<String> keys = formAccess.keySet().iterator();
-		while (keys.hasNext())
+		for (String groupName : formAccess.keySet())
 		{
-			String groupName = keys.next();
 			List<SecurityInfo> groupPermissions = formAccess.get(groupName);
 
 			if (userGroups.containsKey(groupName))
@@ -1295,10 +1278,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	protected GroupSecurityInfo getGroupSecurityInfo(String group)
 	{
 		GroupSecurityInfo groupSecurityInfo = null;
-		Iterator<GroupSecurityInfo> it = groupInfos.iterator();
-		while (it.hasNext())
+		for (GroupSecurityInfo element : groupInfos)
 		{
-			groupSecurityInfo = it.next();
+			groupSecurityInfo = element;
 			if (groupSecurityInfo.getName().equals(group)) break;
 		}
 		return groupSecurityInfo;
@@ -1379,18 +1361,14 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 					GroupSecurityInfo gsi = getGroupSecurityInfo(group);
 					if (solution != null)
 					{
-						Iterator<Entry<UUID, List<SecurityInfo>>> it = gsi.formSecurity.entrySet().iterator();
-						while (it.hasNext())
+						for (Entry<UUID, List<SecurityInfo>> formSecurityEntry : gsi.formSecurity.entrySet())
 						{
-							Entry<UUID, List<SecurityInfo>> formSecurityEntry = it.next();
 							UUID formUUID = formSecurityEntry.getKey();
 							if (formIsChildOfPersist(solution, formUUID))
 							{
 								List<SecurityInfo> lsi = formSecurityEntry.getValue();
-								Iterator<SecurityInfo> it2 = lsi.iterator();
-								while (it2.hasNext())
+								for (SecurityInfo si : lsi)
 								{
-									SecurityInfo si = it2.next();
 									UUID uuid = UUID.fromString(si.element_uid);
 									Object value = retval.get(uuid);
 									if (value instanceof Integer)
@@ -1421,16 +1399,12 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		for (String group : groups)
 		{
 			GroupSecurityInfo gsi = getGroupSecurityInfo(group);
-			Iterator<Entry<String, List<SecurityInfo>>> it3 = gsi.tableSecurity.entrySet().iterator();
-			while (it3.hasNext())
+			for (Entry<String, List<SecurityInfo>> entry : gsi.tableSecurity.entrySet())
 			{
-				Entry<String, List<SecurityInfo>> entry = it3.next();
 				String s_t = entry.getKey();
 				List<SecurityInfo> lsi = entry.getValue();
-				Iterator<SecurityInfo> it2 = lsi.iterator();
-				while (it2.hasNext())
+				for (SecurityInfo si : lsi)
 				{
-					SecurityInfo si = it2.next();
 					String cid = Utils.getDotQualitfied(s_t, si.element_uid);
 					Object value = retval.get(cid);
 					if (value instanceof Integer)
@@ -1680,10 +1654,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		List<String> user_uids = userGroups.get(group_name);
 		if (user_uids != null)
 		{
-			Iterator<String> it = user_uids.iterator();
-			while (it.hasNext())
+			for (String uid : user_uids)
 			{
-				String uid = it.next();
 				for (User u : allDefinedUsers)
 				{
 					if (uid.equals(u.userUid))
@@ -2414,10 +2386,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	private void removeAllFormSecurityInfoFromMemory()
 	{
-		Iterator<GroupSecurityInfo> it = groupInfos.iterator();
-		while (it.hasNext())
+		for (GroupSecurityInfo gsi : groupInfos)
 		{
-			GroupSecurityInfo gsi = it.next();
 			gsi.formSecurity.clear();
 		}
 	}
@@ -2429,10 +2399,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 */
 	protected void removeSecurityInfoFromMemory(String serverName, String tableName)
 	{
-		Iterator<GroupSecurityInfo> it = groupInfos.iterator();
-		while (it.hasNext())
+		for (GroupSecurityInfo gsi : groupInfos)
 		{
-			GroupSecurityInfo gsi = it.next();
 			gsi.tableSecurity.remove(Utils.getDotQualitfied(serverName, tableName));
 		}
 	}
@@ -2444,10 +2412,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 */
 	private void removeSecurityInfoFromMemory(Form f)
 	{
-		Iterator<GroupSecurityInfo> it = groupInfos.iterator();
-		while (it.hasNext())
+		for (GroupSecurityInfo gsi : groupInfos)
 		{
-			GroupSecurityInfo gsi = it.next();
 			gsi.formSecurity.remove(f.getUUID());
 		}
 	}
@@ -2501,10 +2467,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			{
 				try
 				{
-					Iterator<String> tables = s.getTableAndViewNames(false).iterator();
-					while (tables.hasNext())
+					for (String tableName : s.getTableAndViewNames(false))
 					{
-						String tableName = tables.next();
 						try
 						{
 							writeSecurityInfo(s.getName(), tableName, false);
@@ -2571,10 +2535,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				{
 					try
 					{
-						Iterator<String> tables = s.getTableAndViewNames(false).iterator();
-						while (tables.hasNext())
+						for (String tableName : s.getTableAndViewNames(false))
 						{
-							String tableName = tables.next();
 							try
 							{
 								readSecurityInfo(s.getName(), tableName);

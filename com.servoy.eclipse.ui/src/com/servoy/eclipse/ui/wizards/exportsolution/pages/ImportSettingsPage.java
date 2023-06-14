@@ -159,7 +159,7 @@ public class ImportSettingsPage extends WizardPage implements Listener
 		createCheckbox("Activate new release of imported solution and modules", ACTIVATE_NEW_RELEASE, composite);
 		createCheckbox("Compact all the solutions/modules first before import", COMPACT_BEFORE_INPUT, composite);
 		createCheckbox("Overwrite repository styles with import version", OVERWRITE_STYLE, composite);
-		createCheckbox("Overwrite repository group security settings with import version", OVERWRITE_GROUP_SECURITY, composite);
+		createCheckbox("Overwrite repository permission security settings with import version", OVERWRITE_GROUP_SECURITY, composite);
 
 
 		GridData gd = new GridData();
@@ -279,10 +279,10 @@ public class ImportSettingsPage extends WizardPage implements Listener
 		createHeader("User import options...", composite);
 
 		createRadio("Do not import users contained in import", USER_IMPORT, composite, 0);
-		createRadio("Create nonexisting users and add existing users to groups specified in import", USER_IMPORT, composite, 1);
+		createRadio("Create nonexisting users and give existing users the permissions specified in import", USER_IMPORT, composite, 1);
 		createRadio("Overwrite existing users completely (USE WITH CARE)", USER_IMPORT, composite, 2);
 
-		createCheckbox("Allow users to be added to the Administrators group", ALLOW_ADMIN_USER, composite);
+		createCheckbox("Allow users to be give the Administrators permission", ALLOW_ADMIN_USER, composite);
 
 		createNewLine(composite);
 
