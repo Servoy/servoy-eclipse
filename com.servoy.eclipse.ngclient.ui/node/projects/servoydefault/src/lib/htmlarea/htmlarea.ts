@@ -2,7 +2,7 @@ import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetection
 import { ServoyDefaultBaseField } from '../basefield';
 import {  FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
 import { DOCUMENT } from '@angular/common';
-import tinymce, { RawEditorSettings, Editor } from 'tinymce';
+import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 
 @Component({
     selector: 'servoydefault-htmlarea',
