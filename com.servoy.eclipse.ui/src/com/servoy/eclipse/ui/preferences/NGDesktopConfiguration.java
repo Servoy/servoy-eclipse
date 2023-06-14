@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.preference.PreferencePage;
@@ -51,7 +50,7 @@ import com.servoy.j2db.ClientVersion;
 public class NGDesktopConfiguration extends PreferencePage implements IWorkbenchPreferencePage
 {
 
-	private static final String versionsUrl = "https://download.servoy.com/ngdesktop/2023.06.0/ngdesktop-versions-2023.06.txt";
+	private static final String versionsUrl = "https://download.servoy.com/ngdesktop/ngdesktop-versions.txt";
 	private static List<String> remoteVersions = new ArrayList<String>();
 
 	private Combo srcVersionCombo;
@@ -145,38 +144,42 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 		{
 			final URL url = new URL(versionsUrl);
 			final StringBuffer sb = new StringBuffer();
+			String middleVersion = Integer.toString(ClientVersion.getMiddleVersion());
+			if (middleVersion.length() == 1)
+			{
+				middleVersion += "0";
+			}
+			final String devVersion = ClientVersion.getMajorVersion() + "." + middleVersion;
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream())))
 			{
 				String line = null;
 				while ((line = br.readLine()) != null)
 					sb.append(line);
 				final JSONObject jsonObj = new JSONObject(sb.toString());
-				final JSONArray value = (JSONArray)jsonObj.get("versions");
-				if (value != null && value.length() > 0)
+				JSONArray releases = jsonObj.getJSONArray("releases");
+				remoteVersions.clear();
+				for (int i = 0; i < releases.length(); i++)
 				{
-					final List<String> result = new ArrayList<String>();
-					value.forEach((item) -> {
-						final String servoyVersion = ((JSONObject)item).getString("servoyVersion");
-						//servoyVersion is a string like 2023.03 or 2023.03.x (where x is a digit.
-						String middleVersion = Integer.toString(ClientVersion.getMiddleVersion());
-						if (middleVersion.length() == 1)
-						{
-							middleVersion += "0";
-						}
-						final String devVersion = ClientVersion.getMajorVersion() + "." + middleVersion;
-						//devVersion is a string like 2023.03 (so no minors)
-						//we need to compare only the base
-						if (SemVerComparator.compare(devVersion, getBaseVersion(servoyVersion)) < 0)
-							return;
-						final String status = ((JSONObject)item).getString("status");
-						String version = ((JSONObject)item).getString("ngDesktopVersion");
-						if ("deprecated".equals(status)) version = "* " + version;
-						result.add(version);
-					});
-					if (result.size() > 0)
+					JSONObject release = releases.getJSONObject(i);
+					String servoyVersion = release.getString("servoy-version");
+
+					// check if devVersion fits into the interval defined by servoyVersion
+					String[] interval = servoyVersion.split("-"); // split the servoyVersion into start and end
+
+					if (interval.length == 2)
 					{
-						result.sort(Comparator.naturalOrder());
-						return result;
+						if (SemVerComparator.compare(devVersion, interval[0]) >= 0 &&
+							SemVerComparator.compare(devVersion, interval[1]) <= 0)
+						{
+							remoteVersions.add(release.getString("version"));
+						}
+					}
+					else
+					{
+						if (SemVerComparator.compare(devVersion, servoyVersion) >= 0)
+						{
+							remoteVersions.add(release.getString("version"));
+						}
 					}
 				}
 			}
