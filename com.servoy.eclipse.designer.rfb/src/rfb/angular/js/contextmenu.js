@@ -165,7 +165,16 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 						var submenu = $(".dropdown-submenu:hover");
 					    if (submenu[0]) {
 					    	var menu = $(submenu[0]).find(".dropdown-menu");
-						    var ctxmenu = $("#contextMenu");		
+						    var ctxmenu = $("#contextMenu");
+						    if (menu.height() > 200 && (win.height() - ctxmenu.offset().top - menu.height()) <= 100) {
+								if (ctxmenu.offset().top > menu.height()) {
+									menu.css({ top: -ctxmenu.offset().top + menu.height() });
+								} else {
+									menu.css({ top: -ctxmenu.offset().top });
+								}
+							} else {
+								menu.css({ top: "" });
+							}
 						    //the submenu can only be displayed on the right or left side of the contextmenu
 						    if (ctxmenu.outerWidth() + ctxmenu.offset().left + menu.outerWidth() > viewport.right) {
 						    	//+5 to make it overlap the menu a bit

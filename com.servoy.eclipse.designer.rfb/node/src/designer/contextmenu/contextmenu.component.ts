@@ -220,6 +220,16 @@ export class ContextMenuComponent implements OnInit {
             const submenu = this.editorContentService.querySelector('.dropdown-submenu:hover');
             if (submenu) {
                 const menu: HTMLElement = submenu.querySelector('.dropdown-menu');
+                const ctxmenu: HTMLElement = submenu.closest('#contextMenu');
+                if (menu.clientHeight > 200 && (window.innerHeight - ctxmenu.getBoundingClientRect().top - menu.clientHeight) <= 100) {
+					if (ctxmenu.getBoundingClientRect().top > menu.clientHeight) {
+						menu.style.top = (-ctxmenu.getBoundingClientRect().top + menu.clientHeight - submenu.clientHeight) + 'px';
+					} else {
+						menu.style.top = -ctxmenu.getBoundingClientRect().top + 'px';
+					}
+				} else {
+					menu.style.top = '';
+				}	
                 //the submenu can only be displayed on the right or left side of the contextmenu
                 if (this.element.nativeElement.offsetWidth + this.getElementOffset(this.element.nativeElement).left + menu.offsetWidth > viewport.right) {
                     //+5 to make it overlap the menu a bit
