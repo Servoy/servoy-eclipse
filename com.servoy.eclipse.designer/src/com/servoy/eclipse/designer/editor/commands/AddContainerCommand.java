@@ -198,9 +198,10 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									if (persistContext.getPersist() instanceof IBasicWebComponent)
 									{
 										IBasicWebComponent parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(persistContext);
-										addCustomType(parentBean, event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null,
+										finalPersist[0] = addCustomType(parentBean,
+											event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null,
 											-1, null);
-										finalPersist[0] = parentBean;
+										;
 									}
 								}
 								else if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec") != null)
