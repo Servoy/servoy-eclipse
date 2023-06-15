@@ -132,7 +132,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 				return Integer.MAX_VALUE;
 			}
-			else if (value == null && !webObject.hasProperty(getName()) && propertyDescription.hasDefault()) // default values for persist mapped properties are already handled by WebObjectImpl, so value will not be null here for those
+			else if (value == null && !webObject.hasProperty(getName()) &&
+				(propertyDescription.hasDefault() || propertyDescription.getType().defaultValue(propertyDescription) != null)) // default values for persist mapped properties are already handled by WebObjectImpl, so value will not be null here for those
 			{
 				// if null is coming from parent and is a value that is was set, it is not a default, return it
 				if (webObject.getParentComponent().getExtendsID() > 0)
@@ -164,7 +165,15 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 						if (propertyIsSetInHierarchy) return value;
 					}
 				}
-				Object defaultValue = propertyDescription.getDefaultValue();
+				Object defaultValue = null;
+				if (propertyDescription.hasDefault())
+				{
+					propertyDescription.getDefaultValue();
+				}
+				else
+				{
+					defaultValue = propertyDescription.getType().defaultValue(propertyDescription);
+				}
 				if (propertyDescription.getType() instanceof IDesignValueConverter)
 				{
 					return ((IDesignValueConverter< ? >)propertyDescription.getType()).fromDesignValue(defaultValue, propertyDescription, webObject);
