@@ -225,8 +225,15 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 			return;
 		}
 
-        this.useScrolling = this.styleClass && this.styleClass.indexOf('svy-listformcomponent-paging') === -1
-            && !this.servoyApi.isInDesigner();
+        this.useScrolling = true;
+        let pagingMode = this.servoyApi.getClientProperty('ListFormComponent.pagingMode');
+        if (pagingMode === null || pagingMode === undefined) {
+            pagingMode = this.servoyService.getUIProperties().getUIProperty('ListFormComponent.pagingMode');
+        }
+        if (pagingMode !== null && pagingMode !== undefined) {
+            this.useScrolling = false;
+        }
+
         if (this.useScrolling) {
             this.agGridOptions = {
                 suppressBrowserResizeObserver: true,
