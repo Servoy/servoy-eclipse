@@ -237,6 +237,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.useScrolling) {
             this.agGridOptions = {
                 suppressBrowserResizeObserver: true,
+                suppressContextMenu: true,
                 context: {
                     componentParent: this
                 },
