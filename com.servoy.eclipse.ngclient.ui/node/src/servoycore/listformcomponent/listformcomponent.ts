@@ -745,7 +745,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if(this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight < 1) {
             return { height: '100%' };
         } else {
-            return {height: '100%', 'max-height.px': this.responsiveHeight };
+            return { 'height.px': this.responsiveHeight };
         }
     }
 }
