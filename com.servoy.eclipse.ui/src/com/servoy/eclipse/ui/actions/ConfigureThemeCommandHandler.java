@@ -1,4 +1,5 @@
 package com.servoy.eclipse.ui.actions;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -9,6 +10,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Solution;
@@ -33,7 +35,7 @@ public class ConfigureThemeCommandHandler extends AbstractHandler implements IHa
 		}
 		if (solution != null)
 		{
-			EditorUtil.openThemeEditor(solution);
+			EditorUtil.openThemeEditor(ModelUtils.getEditingFlattenedSolution(solution));
 		}
 		return null;
 	}

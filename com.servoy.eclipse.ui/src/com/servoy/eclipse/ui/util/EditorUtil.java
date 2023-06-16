@@ -104,6 +104,7 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -694,9 +695,13 @@ public class EditorUtil
 		}
 	}
 
-	public static void openThemeEditor(final Solution project)
+	public static void openThemeEditor(final IMediaProvider project)
 	{
 		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
+		if (media == null)
+		{
+			media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
+		}
 		Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
 		Path path = new Path(pathPair.getLeft() + pathPair.getRight());
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
