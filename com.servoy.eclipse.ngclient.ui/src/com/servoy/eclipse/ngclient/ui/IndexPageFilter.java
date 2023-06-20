@@ -83,27 +83,23 @@ public class IndexPageFilter implements Filter
 			indexFile = new File(distFolder, "index.html");
 		}
 		String solutionName = getSolutionNameFromURI(requestURI);
-
-		if (solutionName != null)
-		{
-			Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
-			if (showLogin.getLeft().booleanValue())
-			{
-				StatelessLoginHandler.writeLoginPage(request, response, solutionName);
-				return;
-			}
-			if (showLogin.getRight() != null)
-			{
-				((HttpServletRequest)servletRequest).getSession().setAttribute("id_token", showLogin.getRight());
-			}
-		}
-
 		if (indexFile != null && indexFile.exists())
 		{
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
 					requestURI.toLowerCase().endsWith("/index.html")))
 			{
+				Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
+				if (showLogin.getLeft().booleanValue())
+				{
+					StatelessLoginHandler.writeLoginPage(request, response, solutionName);
+					return;
+				}
+				if (showLogin.getRight() != null)
+				{
+					((HttpServletRequest)servletRequest).getSession().setAttribute("id_token", showLogin.getRight());
+				}
+
 				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
 
 				ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(request, response, false); // for NG2 remove the unsafe-eval
