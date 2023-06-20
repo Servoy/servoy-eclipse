@@ -97,7 +97,7 @@ public class IndexPageFilter implements Filter
 				}
 				if (showLogin.getRight() != null)
 				{
-					((HttpServletRequest)servletRequest).getSession().setAttribute("id_token", showLogin.getRight());
+					((HttpServletRequest)servletRequest).getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
 				}
 
 				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
