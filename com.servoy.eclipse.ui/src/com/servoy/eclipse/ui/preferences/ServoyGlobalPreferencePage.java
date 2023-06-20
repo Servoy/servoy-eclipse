@@ -287,6 +287,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		ng2Prefs.setShowNG2Designer(showNGDesignerButton.getSelection());
 		prefs.setShowForumNotifications(showForumNotificationsButton.getSelection());
 		prefs.save();
+		ng2Prefs.save();
 
 		IconPreferences iconPreferences = IconPreferences.getInstance();
 		if (useDarkIconsButton.getSelection() != iconPreferences.getUseDarkThemeIcons() && !iconPreferences.isChanged()) //we set it once more if it was not already set by the theme change

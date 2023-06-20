@@ -53,16 +53,6 @@ public class Ng2DesignerPreferences
 		setProperty(LAUNCH_NG2, launchNG2);
 	}
 
-	public boolean getLaunchNg2()
-	{
-		return getProperty(DESIGNER_SETTINGS_PREFIX + LAUNCH_NG2, LAUNCH_NG2_DEFAULT);
-	}
-
-	public void setLaunchNg2(boolean value)
-	{
-		setProperty(DESIGNER_SETTINGS_PREFIX + LAUNCH_NG2, value);
-	}
-
 	public boolean showNG2Designer()
 	{
 		return getProperty(NG2_DESIGNER, NG2_DESIGNER_DEFAULT);
