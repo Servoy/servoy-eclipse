@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.zip.GZIPOutputStream;
 
@@ -1675,7 +1676,7 @@ public class SolutionSerializer
 
 		//load all styles permanently in the solution
 		Iterator solutionFormsIte = solution.getForms(null, false);
-		HashMap<String, Style> all_styles = new HashMap<String, Style>();
+		ConcurrentHashMap<String, Style> all_styles = new ConcurrentHashMap<String, Style>();
 		while (solutionFormsIte.hasNext())
 		{
 			Form solutionForm = (Form)solutionFormsIte.next();
@@ -1716,7 +1717,7 @@ public class SolutionSerializer
 				Solution element = mods[i];
 				//load all styles permanently in the solution
 				solutionFormsIte = element.getForms(null, false);
-				all_styles = new HashMap<String, Style>();
+				all_styles = new ConcurrentHashMap<String, Style>();
 				while (solutionFormsIte.hasNext())
 				{
 					Form solutionForm = (Form)solutionFormsIte.next();
