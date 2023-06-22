@@ -1716,10 +1716,16 @@ public class ServoyFormBuilder
 						}
 						else if (pd.getType() instanceof RelationPropertyType)
 						{
-							Relation rel = flattenedSolution.getRelation(value.toString());
-							if (rel != null)
+							Relation[] relations = flattenedSolution.getRelationSequence(value.toString());
+							if (relations != null)
 							{
-								BuilderDependencies.getInstance().addDependency(form, rel);
+								for (Relation relationObj : relations)
+								{
+									if (relationObj != null)
+									{
+										BuilderDependencies.getInstance().addDependency(form, relationObj);
+									}
+								}
 							}
 							else
 							{
