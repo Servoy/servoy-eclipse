@@ -4809,7 +4809,6 @@ public class TypeCreator extends TypeCache
 			String name = typeNames.get(cls.getSimpleName());
 			if (name == null)
 			{
-				Debug.log("no element name found for " + cls.getSimpleName()); // TODO make trace, this will always be hit by beans.
 				name = cls.getSimpleName();
 				addAnonymousClassType(name, cls);
 			}
