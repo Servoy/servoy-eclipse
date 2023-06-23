@@ -972,7 +972,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else
 			{
-				checkMissingProperties(((WebComponent)o).getJson(), spec, o, project, "");
+				checkMissingProperties((JSONObject)((WebComponent)o).getOwnProperty(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName()), spec, o, project,
+					"");
 			}
 		}
 		if (o instanceof LayoutContainer && ((LayoutContainer)o).getPackageName() != null && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
