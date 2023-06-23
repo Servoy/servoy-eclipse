@@ -680,6 +680,10 @@
         </markerResolutionGenerator>
         <markerResolutionGenerator
               class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+              markerType="com.servoy.eclipse.core.missingPropetyFromSpec">
+        </markerResolutionGenerator>
+        <markerResolutionGenerator
+              class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
               markerType="com.servoy.eclipse.core.deprecatedPropertyUsage">
         </markerResolutionGenerator>
         <markerResolutionGenerator

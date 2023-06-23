@@ -85,7 +85,14 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				return new IMarkerResolution[] { new ResolveUuidRelationNameQuickFix(solName, uuid, propertyName,
 					displayName), new ClearPropertyQuickFix(solName, uuid, propertyName, displayName) };
 			}
+			if (type.equals(ServoyBuilder.MISSING_PROPERTY_FROM_SPEC))
+			{
+				String propertyName = (String)marker.getAttribute("PropertyName");
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
 
+				return new IMarkerResolution[] { new RemoveJSONPropertyQuickFix(solName, uuid, propertyName) };
+			}
 			if (type.equals(ServoyBuilder.MISSING_SPEC))
 			{
 				final String packageName = (String)marker.getAttribute("packageName");

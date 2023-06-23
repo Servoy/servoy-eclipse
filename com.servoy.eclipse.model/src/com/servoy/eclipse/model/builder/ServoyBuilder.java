@@ -971,7 +971,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else
 			{
-				checkMissingProperties(((WebComponent)o).getJson(), spec, o, project);
+				checkMissingProperties(((WebComponent)o).getJson(), spec, o, project, "");
 			}
 		}
 		if (o instanceof LayoutContainer && ((LayoutContainer)o).getPackageName() != null && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
@@ -1635,7 +1635,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private static void checkMissingProperties(JSONObject json, PropertyDescription description, IPersist o, IProject project)
+	private static void checkMissingProperties(JSONObject json, PropertyDescription description, IPersist o, IProject project, String currentPath)
 	{
 		if (json != null)
 		{
@@ -1660,14 +1660,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					if ((description instanceof WebObjectSpecification) && ((WebObjectSpecification)description).getHandler(key) != null)
 						continue;
-					addMissingPropertyFromSpecMarker(o, project, key);
+					addMissingPropertyFromSpecMarker(o, project, key, currentPath != null && currentPath.length() == 0 ? key : currentPath + "." + key);
 				}
 				else if (pd.getType() instanceof CustomJSONPropertyType< ? >)
 				{
 					Object value = json.opt(key);
 					if (value instanceof JSONObject)
 					{
-						checkMissingProperties((JSONObject)value, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), o, project);
+						checkMissingProperties((JSONObject)value, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), o, project,
+							currentPath != null && currentPath.length() == 0 ? key : currentPath + "." + key);
 					}
 					else if (value instanceof JSONArray)
 					{
@@ -1677,7 +1678,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							if (arr.get(i) instanceof JSONObject)
 							{
 								checkMissingProperties((JSONObject)arr.get(i), ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), o,
-									project);
+									project,
+									currentPath != null && currentPath.length() == 0 ? key + "_arrindex" + i : currentPath + "." + key + "_arrindex" + i);
 							}
 						}
 					}
@@ -1687,7 +1689,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	}
 
 	private static void addMissingPropertyFromSpecMarker(IPersist persist, IProject project,
-		String propertyName)
+		String propertyName, String propertyPath)
 	{
 		Form form = (Form)persist.getAncestor(IRepository.FORMS);
 		ServoyMarker mk = MarkerMessages.MissingPropertyFromSpecification.fill(((WebComponent)persist).getName(), form.getName(),
@@ -1701,8 +1703,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("SolutionName", project.getName());
-				marker.setAttribute("PropertyName", propertyName);
-				marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(propertyName, persist.getClass()));
+				marker.setAttribute("PropertyName", propertyPath);
 			}
 			catch (CoreException e)
 			{
