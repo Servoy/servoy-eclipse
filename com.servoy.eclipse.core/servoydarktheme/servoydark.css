@@ -12,7 +12,7 @@ ExpandBar {
 
 * {
 	background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
-	color:  '#org-eclipse-ui-workbench-DARK_FOREGROUND';
+	color:  #FFF;
 }
 
 Table, Tree {
