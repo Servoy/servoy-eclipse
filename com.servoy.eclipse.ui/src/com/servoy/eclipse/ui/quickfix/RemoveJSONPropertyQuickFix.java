@@ -17,12 +17,17 @@
 
 package com.servoy.eclipse.ui.quickfix;
 
+import java.util.Arrays;
+
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
@@ -36,27 +41,46 @@ import com.servoy.j2db.util.Utils;
  * @author lvostinar
  *
  */
-public class RemoveJSONPropertyQuickFix implements IMarkerResolution
+public class RemoveJSONPropertyQuickFix extends WorkbenchMarkerResolution
 {
-	private final String uuid;
-	private final String solutionName;
-	private final String propertyName;
+	private final IMarker marker;
 
-	public RemoveJSONPropertyQuickFix(String solutionName, String uuid, String propertyName)
+	public RemoveJSONPropertyQuickFix(IMarker marker)
 	{
-		this.solutionName = solutionName;
-		this.uuid = uuid;
-		this.propertyName = propertyName;
+		this.marker = marker;
 	}
 
 	public String getLabel()
 	{
-		String[] parts = propertyName.split("\\.");
-		return "Clear property " + parts[parts.length - 1];
+		String propertyName;
+		try
+		{
+			propertyName = (String)marker.getAttribute("PropertyName");
+			String[] parts = propertyName.split("\\.");
+			return "Clear property " + parts[parts.length - 1];
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return "Clear property";
 	}
 
 	public void run(IMarker marker)
 	{
+		String propertyName = null;
+		String solutionName = null;
+		String uuid = null;
+		try
+		{
+			propertyName = (String)marker.getAttribute("PropertyName");
+			solutionName = (String)marker.getAttribute("SolutionName");
+			uuid = (String)marker.getAttribute("Uuid");
+		}
+		catch (CoreException e1)
+		{
+			ServoyLog.logError(e1);
+		}
 		if (solutionName != null && uuid != null && propertyName != null)
 		{
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
@@ -65,7 +89,7 @@ public class RemoveJSONPropertyQuickFix implements IMarkerResolution
 				IPersist persist = servoyProject.getEditingPersist(UUID.fromString(uuid));
 				if (persist instanceof IWebComponent)
 				{
-					removeProperty((IWebComponent)persist);
+					removeProperty((IWebComponent)persist, propertyName);
 					try
 					{
 						servoyProject.saveEditingSolutionNodes(new IPersist[] { persist }, true);
@@ -79,7 +103,7 @@ public class RemoveJSONPropertyQuickFix implements IMarkerResolution
 		}
 	}
 
-	private void removeProperty(IWebComponent webComponent)
+	private void removeProperty(IWebComponent webComponent, String propertyName)
 	{
 		JSONObject json = (JSONObject)webComponent.getProperty(
 			StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
@@ -143,5 +167,39 @@ public class RemoveJSONPropertyQuickFix implements IMarkerResolution
 				((WebComponent)webComponent).setJson(json);
 			}
 		}
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return null;
+	}
+
+	@Override
+	public Image getImage()
+	{
+		return null;
+	}
+
+	@Override
+	public IMarker[] findOtherMarkers(IMarker[] markers)
+	{
+		if (markers != null)
+		{
+			return Arrays.stream(markers).filter(
+				mk -> {
+					try
+					{
+						return mk.getId() != marker.getId() && mk.exists() && mk.getType().equals(ServoyBuilder.MISSING_PROPERTY_FROM_SPEC);
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError("Could not find all missing property from spec markers.", e);
+					}
+					return false;
+				})
+				.toArray(IMarker[]::new);
+		}
+		return markers;
 	}
 }
