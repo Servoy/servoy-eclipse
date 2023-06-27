@@ -74,7 +74,7 @@ public class Activator extends Plugin
 		}
 		if (value != null)
 		{
-			Boolean useEs6 = Boolean.valueOf(value);
+			Boolean useEs6 = "".equals(value) ? Boolean.TRUE : Boolean.valueOf(value);
 			JavascriptParserPreferences preferences = new JavascriptParserPreferences();
 			preferences.useES6Parser(useEs6.booleanValue());
 			preferences.save();
