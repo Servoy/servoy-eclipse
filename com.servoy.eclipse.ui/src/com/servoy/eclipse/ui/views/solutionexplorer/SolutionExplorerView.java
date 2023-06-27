@@ -3207,6 +3207,9 @@ public class SolutionExplorerView extends ViewPart
 		createActionInTree.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newServicesPackageProjectAction);
 		createActionInTree.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newServicesPackageProjectAction);
 		createActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newFolderInWebFolderAction);
+		createActionInTree.registerAction(UserNodeType.COMPONENT, newComponentResource);
+		createActionInTree.registerAction(UserNodeType.SERVICE, newComponentResource);
+		createActionInTree.registerAction(UserNodeType.LAYOUT, newComponentResource);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -3241,6 +3244,8 @@ public class SolutionExplorerView extends ViewPart
 		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTableAction);
 		newActionInListPrimary.registerAction(UserNodeType.LAYOUT, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newComponentResource);
+		newActionInListPrimary.registerAction(UserNodeType.COMPONENT, newComponentResource);
+		newActionInListPrimary.registerAction(UserNodeType.SERVICE, newComponentResource);
 
 		newActionInListPrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInListPrimary.registerAction(UserNodeType.ALL_RELATIONS, newRelation);

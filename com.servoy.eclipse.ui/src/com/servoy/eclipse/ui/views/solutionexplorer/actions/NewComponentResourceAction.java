@@ -18,12 +18,16 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -33,6 +37,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.json.JSONObject;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -142,6 +147,24 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 					{
 						file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
 						EditorUtil.openFileEditor(file);
+						if (newFileName.indexOf("_server.js") > -1)
+						{
+							String specFileName = folder.getName() + ".spec";
+							IFile specFile = folder.getFile(new Path(specFileName));
+							try (InputStream is = specFile.getContents())
+							{
+								String text = IOUtils.toString(is, "UTF-8");
+								JSONObject obj = new JSONObject(text);
+								obj.put("serverscript", file.getFullPath().toString());
+								specFile.setContents(new ByteArrayInputStream(obj.toString().getBytes()), IResource.NONE, new NullProgressMonitor());
+							}
+							catch (IOException e)
+							{
+								MessageDialog.openError(shell, getText(), "Could not update the .spec file.");
+							}
+
+
+						}
 					}
 					catch (CoreException e)
 					{
