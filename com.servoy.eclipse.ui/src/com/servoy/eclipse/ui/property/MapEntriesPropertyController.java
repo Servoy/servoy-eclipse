@@ -455,7 +455,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 					{
 						Shell shell = new Shell(parent.getDisplay());
 						InputDialog dialog = new InputDialog(shell, "Edit JSON",
-							"JSON Editor", new JSONObject(value).toString(), new IInputValidator()
+							"JSON Editor", new JSONObject(value).toString(3), new IInputValidator()
 							{
 
 								@Override
