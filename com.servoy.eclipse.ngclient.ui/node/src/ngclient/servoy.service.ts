@@ -25,7 +25,6 @@ import { ClientFunctionType } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { UIBlockerService } from './services/ui_blocker.service';
 import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
-import { MapType } from './converters/map_converter';
 
 class UIProperties {
     private uiProperties: { [property: string]: any};
@@ -112,7 +111,6 @@ export class ServoyService {
         typesRegistry.registerGlobalType(FormcomponentType.TYPE_NAME, new FormcomponentType(converterService, typesRegistry));
         typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, this.uiBlockerService));
 
-        typesRegistry.registerGlobalType(MapType.TYPE_NAME, new MapType(converterService));
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
     }
 
