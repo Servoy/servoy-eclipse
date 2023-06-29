@@ -11,9 +11,12 @@ import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
 import { BSWindowOptions } from './bootstrap-window/bswindow';
 import { DefaultLoginWindowComponent } from './default-login-window/default-login-window.component';
 import { FileUploadWindowComponent } from './file-upload-window/file-upload-window.component';
+import { MessageDialogWindowComponent } from './message-dialog-window/message-dialog-window.component';
 import { LocaleService } from '../locale.service';
 import { ServerDataService } from './serverdata.service';
 import {AlertWindowComponent} from "./alert-window/alert-window.component";
+import { resolve } from 'path';
+import { reject } from 'lodash-es';
 
 @Injectable()
 export class ApplicationService {
@@ -301,6 +304,33 @@ export class ApplicationService {
             fileUploadWindowComponent.destroy();
         });
         bsWindowInstance.setActive(true);
+    }
+
+    public showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const messageDialogWindowComponent = this.mainViewRefService.mainContainer.createComponent(MessageDialogWindowComponent);
+
+            messageDialogWindowComponent.instance.message = dialogMessage;
+            messageDialogWindowComponent.instance.styleClass = styleClass;
+            messageDialogWindowComponent.instance.values = values;
+            messageDialogWindowComponent.instance.buttonsText = buttonsText;
+
+            const opt: BSWindowOptions = {
+                id: 'svymessagedialog',
+                fromElement: messageDialogWindowComponent.location.nativeElement.childNodes[0],
+                title: dialogTitle,
+                resizable: false,
+                isModal: true
+            };
+
+            const bsWindowInstance = this.bsWindowManager.createWindow(opt);
+            messageDialogWindowComponent.instance.onCloseCallback = (r: string) => {
+                bsWindowInstance.close();
+                messageDialogWindowComponent.destroy();
+                resolve(r);
+            };
+            bsWindowInstance.setActive(true);
+        });
     }
 
     public getSolutionName() {
