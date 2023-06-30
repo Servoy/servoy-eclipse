@@ -196,7 +196,7 @@ public class DataproviderPropertiesSelector
 					WebComponent component = (WebComponent)persist;
 					String fsProperty = ((FoundsetLinkedConfig)dataproviderProperties.get(0).getConfig()).getForFoundsetName();
 
-					JSONObject value = converter.convertFromChooserValueToJSONValue(tw, null);
+					JSONObject value = converter.convertFromChooserValueToJSONValue(selection.getFirstElement(), null);
 					component.setProperty(fsProperty, value);
 				}
 				dataSourceViewer.setValid(true);
