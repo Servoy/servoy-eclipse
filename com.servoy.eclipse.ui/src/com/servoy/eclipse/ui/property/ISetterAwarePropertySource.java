@@ -20,12 +20,11 @@ package com.servoy.eclipse.ui.property;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
- * Property source tha allows {@link IPropertySetter} instances to use default actions as well.
+ * Property source that allows {@link IPropertySetter} instances to use default actions as well.
  * @author acostescu
  */
 public interface ISetterAwarePropertySource extends IPropertySource
 {
-
 	void defaultSetProperty(Object id, Object value);
 
 	Object defaultGetProperty(Object id);
@@ -33,5 +32,16 @@ public interface ISetterAwarePropertySource extends IPropertySource
 	boolean defaultIsPropertySet(Object id);
 
 	void defaultResetProperty(Object id);
+
+	/**
+	 * Handle undo of property
+	 * @param id property id
+	 *
+	 * @return false if nothing has been done, caller should fall back to default undo behavior
+	 */
+	default boolean undoSetProperty(Object id)
+	{
+		return false;
+	}
 
 }

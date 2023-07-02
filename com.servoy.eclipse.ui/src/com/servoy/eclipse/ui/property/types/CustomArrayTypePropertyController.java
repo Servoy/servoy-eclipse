@@ -40,7 +40,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Utils;
@@ -67,7 +66,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return ((ICustomType< ? >)propertyDescription.getType()).getCustomJSONTypeDefinition();
 	}
 
-	private WebCustomType getNewElementValue(int index, boolean insert)
+	private WebCustomType getNewElementValue(int index)
 	{
 		// when user adds/inserts a new item in the array normally a null is inserted
 		// but for custom object properties most of the time the uses will want to have an object so that it can be directly expanded (without clicking one more time to make it {} from null)
@@ -76,17 +75,10 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		{
 			String typeName = propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
 				: propertyDescription.getType().getName();
-			ISupportsIndexedChildren parent = (ISupportsIndexedChildren)persistContext.getPersist();
-			WebCustomType customType = WebCustomType.createNewInstance((IBasicWebObject)parent, arrayElementPD, propertyDescription.getName(), index, true);
+			IBasicWebObject parent = (IBasicWebObject)persistContext.getPersist();
+			WebCustomType customType = WebCustomType.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true);
 			customType.setTypeName(typeName);
-			if (insert)
-			{
-				parent.insertChild(customType);
-			}
-			else
-			{
-				parent.setChild(customType);
-			}
+			// Do not add customType to parent here, this method should be without side-effect for undo/redo to work properly
 			return customType;
 		}
 		return null;
@@ -95,7 +87,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected WebCustomType getNewElementInitialValue()
 	{
-		return getNewElementValue(0, true);
+		return getNewElementValue(0);
 	}
 
 	@Override
@@ -178,7 +170,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected Object insertNewElementAfterIndex(int idx)
 		{
-			return insertElementAtIndex(idx + 1, getNewElementValue(idx + 1, true), getEditableValue());
+			return insertElementAtIndex(idx + 1, getNewElementValue(idx + 1), getEditableValue());
 		}
 
 		@Override
@@ -198,7 +190,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			if (idx < 0 || idx >= ((Object[])getEditableValue()).length) return;
 			if (value == null && getEditableValue() instanceof IChildWebObject[])
 			{
-				((Object[])getEditableValue())[idx] = getNewElementValue(idx, false);
+				((Object[])getEditableValue())[idx] = getNewElementValue(idx);
 			}
 			else
 			{
@@ -248,41 +240,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
-//		if (propertyDescription.hasDefault())
-//		{
-//			Object defValue = propertyDescription.getDefaultValue();
-//			JSONArray toSet = null;
-//			if (defValue instanceof String)
-//			{
-//				try
-//				{
-//					toSet = new ServoyJSONArray((String)defValue);
-//				}
-//				catch (JSONException e)
-//				{
-//					ServoyLog.logError(e);
-//				}
-//			}
-//			else if (defValue instanceof JSONArray)
-//			{
-//				int length = ((JSONArray)defValue).length();
-//				toSet = new JSONArray();
-//				for (int i = 0; i < length; i++)
-//				{
-//					Object val = ((JSONArray)defValue).opt(i);
-//					if (val instanceof JSONObject)
-//					{
-//						toSet.put(i, ServoyJSONObject.mergeAndDeepCloneJSON((JSONObject)val, new JSONObject()));
-//					}
-//					else
-//					{
-//						toSet.put(i, val);
-//					}
-//				}
-//			}
-//			propertySource.setPropertyValue(getId(), toSet);
-//		}
-//		else propertySource.defaultResetProperty(getId());
 		propertySource.defaultResetProperty(getId());
 	}
 

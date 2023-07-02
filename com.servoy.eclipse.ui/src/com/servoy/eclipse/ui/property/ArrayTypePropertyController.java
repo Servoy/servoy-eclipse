@@ -17,6 +17,11 @@
 
 package com.servoy.eclipse.ui.property;
 
+import static com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions.DELETE_CURRENT_COMMAND_VALUE;
+import static com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions.INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+import static com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions.UNDO_DELETE_CURRENT_COMMAND_VALUE;
+import static com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions.UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -36,6 +41,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.eclipse.core.util.ReturnValueSnippet;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
@@ -276,6 +282,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	{
 
 		protected IPropertyDescriptor[] elementPropertyDescriptors;
+		private ArrayActions undoValue;
 
 		public ArrayPropertySource(ComplexProperty<Object> complexProperty)
 		{
@@ -347,24 +354,54 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			return null;
 		}
 
+		/**
+		 * Handle undo, revert handling of the special values
+		 */
 		@Override
-		public Object setComplexPropertyValue(final Object id, Object v)
+		public boolean undoSetProperty(Object id)
+		{
+			if (undoValue != null)
+			{
+				setPropertyValue(id, undoValue);
+				return true;
+			}
+
+			return ISetterAwarePropertySource.super.undoSetProperty(id);
+		}
+
+
+		@Override
+		public Object setComplexPropertyValue(Object id, Object v)
 		{
 			try
 			{
-				final int idx = getIndexFromId((ArrayPropertyChildId)id);
-				if (v == ArrayItemPropertyDescriptorWrapper.DELETE_CURRENT_COMMAND_VALUE)
+				undoValue = null;
+				int idx = getIndexFromId((ArrayPropertyChildId)id);
+				if (v == DELETE_CURRENT_COMMAND_VALUE)
 				{
+					undoValue = UNDO_DELETE_CURRENT_COMMAND_VALUE;
 					return deleteElementAtIndex(idx);
 				}
-				else if (v == ArrayItemPropertyDescriptorWrapper.INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE)
+				if (v == INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE)
 				{
+					undoValue = UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
 					return insertNewElementAfterIndex(idx);
 				}
-				else
+
+				// undo
+				if (v == UNDO_DELETE_CURRENT_COMMAND_VALUE)
 				{
-					return setComplexElementValueImpl(idx, v);
+					undoValue = DELETE_CURRENT_COMMAND_VALUE;
+					return insertNewElementAfterIndex(idx - 1);
 				}
+
+				if (v == UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE)
+				{
+					undoValue = INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+					return deleteElementAtIndex(idx + 1);
+				}
+
+				return setComplexElementValueImpl(idx, v);
 			}
 			catch (NumberFormatException e)
 			{
@@ -430,9 +467,13 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	protected static class ArrayItemPropertyDescriptorWrapper
 		implements IPropertyController<Object, Object>, IPropertySetter<Object, ISetterAwarePropertySource>, IProvidesTooltip, IAdaptable
 	{
-
-		protected final static Object DELETE_CURRENT_COMMAND_VALUE = new Object();
-		protected final static Object INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE = new Object();
+		enum ArrayActions
+		{
+			DELETE_CURRENT_COMMAND_VALUE,
+			UNDO_DELETE_CURRENT_COMMAND_VALUE,
+			INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE,
+			UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE
+		}
 
 		protected final IPropertyDescriptor basePD;
 		protected final String index;

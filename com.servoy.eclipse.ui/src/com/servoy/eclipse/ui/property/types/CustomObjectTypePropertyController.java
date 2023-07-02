@@ -157,24 +157,6 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	@Override
 	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
-//		if (propertyDescription.hasDefault())
-//		{
-//			Object defValue = propertyDescription.getDefaultValue();
-//			JSONObject toSet = null;
-//			if (defValue instanceof String)
-//			{
-//				try
-//				{
-//					toSet = new ServoyJSONObject((String)defValue, false);
-//				}
-//				catch (JSONException e)
-//				{
-//					ServoyLog.logError(e);
-//				}
-//			}
-//			propertySource.setPropertyValue(getId(), toSet);
-//		}
-//		else propertySource.defaultResetProperty(getId());
 		propertySource.defaultResetProperty(getId());
 	}
 
