@@ -117,6 +117,16 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		getParentComponent().flagChanged();
 	}
 
+	public void removeProperty()
+	{
+		JSONObject valuesJSON = getJson(true, false);
+		for (String keyToRemove : valuesJSON.keySet())
+		{
+			valuesJSON.remove(keyToRemove);
+		}
+		getParentComponent().flagChanged();
+	}
+
 	@Override
 	protected void setPropertyInternal(String propertyName, Object val)
 	{

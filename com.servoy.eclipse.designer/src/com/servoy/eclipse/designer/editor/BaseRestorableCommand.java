@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
 import com.servoy.eclipse.ui.property.IRestorer;
 
@@ -37,6 +38,7 @@ import com.servoy.eclipse.ui.property.IRestorer;
 public abstract class BaseRestorableCommand extends Command
 {
 	private Map<Object, Object> states;
+	private static String REMOVE_PROPERTY = "{}";
 
 	public BaseRestorableCommand(String label)
 	{
@@ -142,7 +144,14 @@ public abstract class BaseRestorableCommand extends Command
 			{
 				Object object = entry.getKey();
 				IRestorer restorable = Platform.getAdapterManager().getAdapter(object, IRestorer.class);
-				restorable.restoreState(object, entry.getValue());
+				if (entry.getValue().toString().equals(REMOVE_PROPERTY))
+				{
+					((WebFormComponentChildType)object).removeProperty();
+				}
+				else
+				{
+					restorable.restoreState(object, entry.getValue());
+				}
 
 				// fire persist change recursively
 				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, object, true);

@@ -112,6 +112,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
           let i = 0;
           for (const nodeId of elementInfos.keys()) {
               const elementInfo = elementInfos.get(nodeId);
+              const parentFC = elementInfo.element.closest('.svy-formcomponent');
+              if (parentFC && !elementInfo.element.classList.contains('svy-formcomponent')) {
+				const parentRect = parentFC.getBoundingClientRect();
+				elementInfo.x = elementInfo.x - parentRect.x;
+				elementInfo.y = elementInfo.y - parentRect.y;
+              }
               const id = (event.ctrlKey || event.metaKey) ? i++ : nodeId;
               changes[id] = {
                   x: elementInfo.x,
