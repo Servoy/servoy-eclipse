@@ -14,7 +14,7 @@ export class TooltipDirective implements OnDestroy {
         });
     }
 
-    @HostListener('mouseenter')
+    @HostListener('pointerenter')
     onMouseEnter(event): void {
         if (this.tooltipText) {
             let initialDelay = this.servoyService.getUIProperty("tooltipInitialDelay");
@@ -25,7 +25,7 @@ export class TooltipDirective implements OnDestroy {
         }
     }
 
-    @HostListener('mouseleave')
+    @HostListener('pointerleave')
     onMouseLeave(): void {
         this.tooltipService.hideTooltip();
     }
