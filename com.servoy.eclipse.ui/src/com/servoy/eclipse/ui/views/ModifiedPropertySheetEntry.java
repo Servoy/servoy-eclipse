@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.ui.views;
 
+import static com.servoy.j2db.util.ComponentFactoryHelper.createBorderString;
+import static java.util.Arrays.stream;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +34,6 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
-import com.servoy.j2db.util.ComponentFactoryHelper;
 
 /**
  * PropertySheetEntry with additional Servoy features.
@@ -243,7 +245,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 		// See if the value changed and if so update
 		Object newValue = editor.getValue();
-		if (!valueEquals(newValue, editValues))
+		if (stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
 		{
 			// Set the editor value
 			setValue(newValue);
@@ -275,39 +277,31 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 		}
 	}
 
-	protected boolean valueEquals(Object val1, Object val2)
+	private static boolean valueEquals(Object val1, Object val2)
 	{
-		if (val1 == null)
+		if (val1 == val2)
 		{
-			if (val2 instanceof Object[])
-			{
-				for (Object obj : (Object[])val2)
-				{
-					if (obj != null) return false;
-				}
-				return true;
-			}
-			return val2 == null;
+			return true;
+		}
+
+		if (val1 == null || val2 == null)
+		{
+			return false;
 		}
 
 		// special cases, borders (like LineBorder) do not implement equals based on fields.
 		if (val1 instanceof Border && val2 instanceof Border)
 		{
-			return ComponentFactoryHelper.createBorderString(val1).equals(ComponentFactoryHelper.createBorderString(val2));
+			return createBorderString(val1).equals(createBorderString(val2));
 		}
 
-		if (val2 instanceof Object[])
+		if (val1 instanceof Object[] && val2 instanceof Object[] && ((Object[])val1).length == ((Object[])val2).length)
 		{
-			if (((Object[])val2).length > 0)
+			Object[] arr1 = (Object[])val1;
+			Object[] arr2 = (Object[])val2;
+			for (int i = 0; i < arr1.length; i++)
 			{
-				for (Object obj : (Object[])val2)
-				{
-					if (!valueEquals(val1, obj)) return false;
-				}
-			}
-			else
-			{
-				return val1 instanceof Object[] && ((Object[])val1).length == 0;
+				if (!valueEquals(arr1[i], arr2[i])) return false;
 			}
 			return true;
 		}
