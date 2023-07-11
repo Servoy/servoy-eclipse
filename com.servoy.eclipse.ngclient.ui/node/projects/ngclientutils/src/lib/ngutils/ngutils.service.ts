@@ -319,11 +319,11 @@ export class NGUtilsService {
     * @param component the component to retrieve location for.
     * @return the location of the component.
     */
-    public getAbsoluteLocation(component: string): {x: number;y: number} {
+    public getAbsoluteLocation(component: string): { x: number; y: number } {
         const el = this.document.getElementById(component);
-        if (el){
-           const rect = el.getBoundingClientRect();
-           return { x: rect.left + this.windowRef.nativeWindow.scrollX, y: rect.top + this.windowRef.nativeWindow.scrollY };
+        if (el) {
+            const rect = el.getBoundingClientRect();
+            return { x: rect.left + this.windowRef.nativeWindow.scrollX, y: rect.top + this.windowRef.nativeWindow.scrollY };
         }
         return null;
     }
@@ -412,6 +412,13 @@ export class NGUtilsService {
         for (let i = 0; i < nodeList.length; i++) {
             nodeList[i].classList.remove(className);
         }
+    }
+
+    /**
+    * This method removes the arguments from the client url. This is used for bookmark url to be correct or for back button behavior.
+    */
+    public removeArguments() {
+        this.windowRef.nativeWindow.history.replaceState({}, '', this.windowRef.nativeWindow.location.pathname + this.windowRef.nativeWindow.location.hash);
     }
 
     private beforeUnload(e: any) {
