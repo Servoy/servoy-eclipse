@@ -1506,7 +1506,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				else if (propertyType == MapPropertyType.INSTANCE || propertyType == JSONPropertyType.INSTANCE)
 				{
-					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null, propertyType == JSONPropertyType.INSTANCE);
+					Object valueTypes = propertyDescription.getTag(PropertyDescription.VALUE_TYPES_TAG_FOR_PROP);
+					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null, propertyType == JSONPropertyType.INSTANCE,
+						valueTypes instanceof JSONObject ? (JSONObject)valueTypes : null);
 					resultingPropertyDescriptor = new PropertyController<JSONObject, Object>(id, displayName,
 						new ChainedPropertyConverter<JSONObject, Map<String, Object>, Object>(new IPropertyConverter<JSONObject, Map<String, Object>>()
 						{
