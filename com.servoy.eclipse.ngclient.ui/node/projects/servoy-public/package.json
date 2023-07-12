@@ -1,9 +1,9 @@
 {
   "name": "@servoy/public",
-  "version": "2023.3.1",
+  "version": "2023.9.0",
   "peerDependencies": {
-    "@angular/common": "^15",
-    "@angular/core": "^15"
+    "@angular/common": "^16",
+    "@angular/core": "^16"
   },
   "dependencies": {
     "luxon": "^3",

@@ -43,7 +43,7 @@ export class ReconnectingWebSocket {
      * Can be one of: WebSocket.CONNECTING, WebSocket.OPEN, WebSocket.CLOSING, WebSocket.CLOSED
      * Read only.
      */
-    private readyState = WebSocket.CONNECTING;
+    private readyState: number = WebSocket.CONNECTING;
     private log: LoggerService;
 
     constructor(url: string | UrlFunction, logFactory: LoggerFactory, options?: { [property: string]: string | number | boolean }) {

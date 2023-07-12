@@ -1,9 +1,9 @@
 {
   "name": "@servoy/ngclientutils",
-  "version": "2023.3.0",
+  "version": "2023.9.0",
   "peerDependencies": {
-    "@angular/common": "^15",
-    "@angular/core": "^15",
+    "@angular/common": "^16",
+    "@angular/core": "^16",
     "@servoy/public": "*"
   },
   "dependencies": {

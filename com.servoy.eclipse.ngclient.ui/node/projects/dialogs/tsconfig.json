@@ -1,3 +1,11 @@
 {
-  "extends": "./tsconfig.lib.json"
+  "extends": "./tsconfig.lib.json",
+    "exclude": [],
+   "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "../../out-tsc/spec",
+    "types": [
+      "jasmine"
+    ]
+  }
 }

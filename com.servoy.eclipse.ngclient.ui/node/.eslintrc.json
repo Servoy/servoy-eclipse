@@ -22,14 +22,14 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
-          "prefer-arrow/prefer-arrow-functions": [
-            "warn",
-            {
-              "disallowPrototype": true,
-              "singleReturnOnly": false,
-              "classPropertiesAllowed": false
-            }
-          ],
+        "prefer-arrow/prefer-arrow-functions": [
+          "warn",
+          {
+            "disallowPrototype": true,
+            "singleReturnOnly": false,
+            "classPropertiesAllowed": false
+          }
+        ],
         "@typescript-eslint/naming-convention": [
           "error",
           {
