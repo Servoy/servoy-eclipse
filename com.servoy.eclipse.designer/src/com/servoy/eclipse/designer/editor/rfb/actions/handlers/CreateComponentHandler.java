@@ -658,7 +658,7 @@ public class CreateComponentHandler implements IServerService
 						}
 						List<IPersist> changes = new ArrayList<>();
 						boolean addSiblingsToChanges = true;
-						if (editorPart.getForm().isResponsiveLayout() || webComponent.getParent() instanceof AbstractContainer)
+						if (editorPart.getForm().isResponsiveLayout() || webComponent.getParent() instanceof CSSPositionLayoutContainer)
 						{
 							if (initialDropTarget != null &&
 								!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
@@ -885,7 +885,7 @@ public class CreateComponentHandler implements IServerService
 
 	private Point getLocationAndShiftSiblings(ISupportChilds parent, JSONObject args, List<IPersist> extraChangedPersists) throws RepositoryException
 	{
-		if ((editorPart.getForm().isResponsiveLayout() || parent instanceof AbstractContainer) && !CSSPositionUtils.isCSSPositionContainer(
+		if ((editorPart.getForm().isResponsiveLayout() || parent instanceof CSSPositionLayoutContainer) && !CSSPositionUtils.isCSSPositionContainer(
 			parent instanceof LayoutContainer ? (LayoutContainer)parent : null))
 		{
 			List<IPersist> children = new ArrayList<IPersist>();
