@@ -2138,7 +2138,15 @@ public class TypeCreator extends TypeCache
 		}
 		else if (type.getMetaType() == null || type.getMetaType() == DefaultMetaType.DEFAULT)
 		{
-			type.setMetaType(staticMetaType);
+			if (Record.JS_RECORD.equals(type.getName()) || FoundSet.JS_FOUNDSET.equals(type.getName()))
+			{
+				// there should be no difference between typed record/foundset and plain one; so always use the dynamic type
+				type.setMetaType(ServoyDynamicMetaType.META_TYPE);
+			}
+			else
+			{
+				type.setMetaType(staticMetaType);
+			}
 //			staticTypes.add(type.getName());
 		}
 //		else
