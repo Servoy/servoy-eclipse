@@ -187,7 +187,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.dltk.javascript.rhino"
          download-size="0"
          install-size="0"
-         version="1.7.14.s4"
+         version="1.7.14.s5"
          unpack="false"/>
 
    <plugin
@@ -362,14 +362,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.jsoup"
          download-size="0"
          install-size="0"
-         version="1.15.3"
+         version="1.16.1"
          unpack="false"/>
 
    <plugin
          id="org.freemarker.freemarker"
          download-size="0"
          install-size="0"
-         version="2.3.31.stable"
+         version="2.3.32.stable"
          unpack="false"/>
 
    <plugin
@@ -446,21 +446,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.logging.log4j.api"
          download-size="0"
          install-size="0"
-         version="2.19.0"
+         version="2.20.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
          download-size="0"
          install-size="0"
-         version="2.19.0"
+         version="2.20.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.jcl"
          download-size="0"
          install-size="0"
-         version="2.19.0"
+         version="2.20.0"
          unpack="false"/>
 
    <plugin
@@ -509,14 +509,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.google.guava"
          download-size="0"
          install-size="0"
-         version="31.1.0.jre"
+         version="30.1.0.v20221112-0806"
          unpack="false"/>
 
    <plugin
          id="org.hibernate.orm.core"
          download-size="0"
          install-size="0"
-         version="5.6.15.Servoy2"
+         version="5.6.15.Servoy3"
          unpack="false"/>
 
    <plugin
@@ -534,24 +534,10 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="org.jboss.jandex"
-         download-size="0"
-         install-size="0"
-         version="2.4.3.Final"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
          download-size="0"
          install-size="0"
          version="1.3.6"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.aries.util"
-         download-size="0"
-         install-size="0"
-         version="1.1.3"
          unpack="false"/>
 
    <plugin
@@ -672,24 +658,17 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="org.slf4j.api"
-         download-size="0"
-         install-size="0"
-         version="2.0.6"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.logging.log4j.slf4j2-impl"
          download-size="0"
          install-size="0"
-         version="2.19.0"
+         version="2.20.0"
          unpack="false"/>
 
    <plugin
          id="slf4j.api"
          download-size="0"
          install-size="0"
-         version="1.7.36"
+         version="2.0.7"
          unpack="false"/>
 
    <plugin
@@ -704,6 +683,13 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="5.1.2.Final"
+         unpack="false"/>
+
+   <plugin
+         id="io.smallrye.jandex"
+         download-size="0"
+         install-size="0"
+         version="3.1.2"
          unpack="false"/>
 
 </feature>

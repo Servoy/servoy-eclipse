@@ -44,10 +44,6 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IPageLayout;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ISetSelectionTarget;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -227,11 +223,11 @@ public class LinkWithEditorAction extends Action
 
 		if (files.size() > 0)
 		{
-			IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(IPageLayout.ID_RES_NAV);
-			if (part instanceof ISetSelectionTarget)
-			{
-				((ISetSelectionTarget)part).selectReveal(new StructuredSelection(files.values().toArray()));
-			}
+//			IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(IPageLayout.ID_RES_NAV);
+//			if (part instanceof ISetSelectionTarget)
+//			{
+//				((ISetSelectionTarget)part).selectReveal(new StructuredSelection(files.values().toArray()));
+//			}
 		}
 
 		if (serverName != null)
