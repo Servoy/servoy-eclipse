@@ -19,6 +19,7 @@
 -Xmx2G
 --add-modules=ALL-SYSTEM
 --add-exports java.desktop/sun.java2d=ALL-UNNAMED
+-Dp2.trustedAuthorities=https://download.servoy.com,https://download.eclipse.org
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED
       </vmArgsMac>
@@ -127,6 +128,10 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="slf4j.api" autoStart="true" startLevel="0" />
       <property name="osgi.instance.area.default" value="@user.home/servoy_workspace" />
    </configurations>
+
+   <repositories>
+      <repository location="http://download.servoy.com/developer/latest/" enabled="true" />
+   </repositories>
 
    <preferencesInfo>
       <targetfile overwrite="false"/>
