@@ -120,8 +120,8 @@ class FSLinkedInternalState extends FoundsetViewportState {
     private singleValueState: SingleValueState = undefined;
 
     constructor(private foundsetLinkedValue: FoundsetLinkedValue, propertyContext: IPropertyContext, forFoundset: () => IFoundset, log: LoggerService,
-                    public viewportService: ViewportService, private sabloService: SabloService) {
-        super(forFoundset, log);
+                    public viewportService: ViewportService, protected sabloService: SabloService) {
+        super(forFoundset, log, sabloService);
 
         this.propertyContextCreatorForRow = {
                // currently foundset prop columns always have foundset prop's pushToServer so only one property context needed;

@@ -159,7 +159,7 @@ export class FoundsetType implements IType<FoundsetValue> {
                 let oldValueShallowCopy: FoundsetFieldsOnly;
 
                 if (!newValue /* newValue is now already currentValue, see code above, so we are checking current value here */) {
-                    newValue = new FoundsetValue(propertyContext, this.sabloDeferHelper, this.viewportService, this.log);
+                    newValue = new FoundsetValue(propertyContext, this.sabloDeferHelper, this.viewportService, this.log, this.sabloService);
                     internalState = newValue.getInternalState();
                 } else {
                     // reuse old value; but make a shallow copy of the old value to give as oldValue to the listener
@@ -315,8 +315,8 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
     private __internalState: FoundsetTypeInternalState;
 
     constructor(propertyContext: IPropertyContext, sabloDeferHelper: SabloDeferHelper,
-            viewportService: ViewportService, private log: LoggerService) {
-        this.__internalState = new FoundsetTypeInternalState(propertyContext, log, sabloDeferHelper, viewportService);
+            viewportService: ViewportService, private log: LoggerService, protected sabloService: SabloService) {
+        this.__internalState = new FoundsetTypeInternalState(propertyContext, log, sabloDeferHelper, viewportService, sabloService);
     }
 
     // PUBLIC API to components follows; make it 'smart'
@@ -476,8 +476,9 @@ class FoundsetTypeInternalState extends FoundsetViewportState implements IDefere
 
     unwatchSelection: () => void;
 
-    constructor(propertyContext: IPropertyContext, log: LoggerService, public readonly sabloDeferHelper: SabloDeferHelper, public readonly viewportService: ViewportService) {
-        super(undefined, log);
+    constructor(propertyContext: IPropertyContext, log: LoggerService, public readonly sabloDeferHelper: SabloDeferHelper, public readonly viewportService: ViewportService,
+        protected sabloService: SabloService) {
+        super(undefined, log, sabloService);
 
         this.propertyContextCreator = {
             // currently foundset prop columns always have foundset prop's pushToServer so only one property context needed

@@ -192,7 +192,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                     private readonly typesRegistry: TypesRegistry,
                     forFoundset?: () => IFoundset) {
 
-        super(forFoundset, log);
+        super(forFoundset, log, sabloService);
 
         this.propertyContextCreatorForRow = {
             withRowValueAndPushToServerFor: (rowValue: any, propertyName: string) => ({
