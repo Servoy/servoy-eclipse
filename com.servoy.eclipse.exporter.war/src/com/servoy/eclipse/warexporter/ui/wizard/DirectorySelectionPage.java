@@ -131,6 +131,12 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		return checkboxTableViewer.getTable().getItemCount();
 	}
 
+	public boolean hasElements()
+	{
+		Object[] elements = new DirectoryContentProvider().getElements(this.directory);
+		return elements != null && elements.length > 0;
+	}
+
 	@Override
 	public void dispose()
 	{

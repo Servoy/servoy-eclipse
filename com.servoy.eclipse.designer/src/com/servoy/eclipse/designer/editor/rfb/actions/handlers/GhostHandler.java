@@ -130,11 +130,11 @@ public class GhostHandler implements IServerService
 				if (FormTemplateGenerator.isWebcomponentBean(basicWebComponent))
 				{
 					SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-					WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(basicWebComponent.getTypeName());
+					WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(basicWebComponent.getTypeName());
 					if (spec == null)
 					{
 						//error bean
-						spec = componentsSpecProviderState.getWebComponentSpecification(FormElement.ERROR_BEAN);
+						spec = componentsSpecProviderState.getWebObjectSpecification(FormElement.ERROR_BEAN);
 					}
 					Map<String, PropertyDescription> properties = spec.getProperties();
 					if (basicWebComponent instanceof WebComponent && !FormElement.ERROR_BEAN.equals(spec.getName())) // could be legacy Bean (was used in alphas/betas) - that is unlikely though
@@ -200,12 +200,10 @@ public class GhostHandler implements IServerService
 					{
 						SortedMap<String, Object> sortedDroppableProperties = filterAndSortDroppableProperties((WebComponent)basicWebComponent);
 
-						Iterator<Entry<String, Object>> droppablePropIt = sortedDroppableProperties.entrySet().iterator();
 						int droppablePropCount = sortedDroppableProperties.size(), i = 0;
 
-						while (droppablePropIt.hasNext())
+						for (Entry<String, Object> dropPropEntry : sortedDroppableProperties.entrySet())
 						{
-							Entry<String, Object> dropPropEntry = droppablePropIt.next();
 							PropertyDescription propertyPD = spec.getProperty(dropPropEntry.getKey());
 
 							startNewGhostContainer(writer, basicWebComponent, i++, droppablePropCount, dropPropEntry.getKey(),
@@ -277,14 +275,15 @@ public class GhostHandler implements IServerService
 
 				if (spec != null) // can be null if the developer introduced a syntax error for example in the spec file while editing it
 				{
-					Iterator<Entry<String, PropertyDescription>> propIt = spec.getProperties().entrySet().iterator();
-					while (propIt.hasNext())
+					for (Entry<String, PropertyDescription> propEntry : spec.getProperties().entrySet())
 					{
-						Entry<String, PropertyDescription> propEntry = propIt.next();
-
 						if (isDroppable(propEntry.getValue(), propEntry.getValue().getConfig()))
 						{
-							sortedAndDroppableProps.put(propEntry.getKey(), webComponent.getProperty(propEntry.getKey()));
+							Object value = webComponent.getProperty(propEntry.getKey());
+							if (propEntry.getValue().getDeprecated() == null || value != null)
+							{
+								sortedAndDroppableProps.put(propEntry.getKey(), value);
+							}
 						}
 					}
 				}
@@ -390,7 +389,7 @@ public class GhostHandler implements IServerService
 				{
 					do
 					{
-						parent = parent.getParent();
+						parent = PersistHelper.getRealParent(parent);
 					}
 					while (parent != null && parent != container);
 				}
@@ -541,7 +540,7 @@ public class GhostHandler implements IServerService
 					writeGhostsForWebcomponentBeans((IBasicWebComponent)o, parentID, parentFormComponentPath);
 
 					String componentType = FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)o);
-					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentType);
+					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentType);
 					if (specification != null)
 					{
 						Collection<PropertyDescription> properties = specification.getProperties(FormComponentPropertyType.INSTANCE);

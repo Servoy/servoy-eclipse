@@ -31,11 +31,11 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportCSSPosition;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
@@ -79,7 +79,7 @@ public class SetPropertiesHandler implements IServerService
 					{
 						PersistContext context = PersistContext.create(persist, editorPart.getForm());
 						if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType ||
-							persist instanceof WebFormComponentChildType)
+							persist instanceof WebFormComponentChildType || persist instanceof ISupportCSSPosition)
 						{
 							JSONObject properties = args.optJSONObject(uuid);
 							Iterator it = properties.keys();
@@ -92,14 +92,16 @@ public class SetPropertiesHandler implements IServerService
 										propertyName, properties.opt(propertyName)));
 								}
 							}
-							if (persist instanceof BaseComponent && CSSPositionUtils.useCSSPosition(persist) && (properties.has("x") || properties.has("y") ||
-								properties.has("width") || properties.has("height")))
+							if (persist instanceof ISupportCSSPosition && CSSPositionUtils.useCSSPosition(persist) &&
+								(properties.has("x") || properties.has("y") ||
+									properties.has("width") || properties.has("height")))
 							{
-								Point oldLocation = CSSPositionUtils.getLocation((BaseComponent)persist);
-								Dimension oldSize = CSSPositionUtils.getSize((BaseComponent)persist);
+								Point oldLocation = CSSPositionUtils.getLocation((ISupportCSSPosition)persist);
+								Dimension oldSize = CSSPositionUtils.getSize((ISupportCSSPosition)persist);
 								// we need to calculate the new cssposition
 								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
-									StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName(), CSSPositionUtils.adjustCSSPosition((BaseComponent)persist,
+									StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName(),
+									CSSPositionUtils.adjustCSSPosition((ISupportCSSPosition)persist,
 										properties.optInt("x", oldLocation.x), properties.optInt("y", oldLocation.y), properties.optInt("width", oldSize.width),
 										properties.optInt("height", oldSize.height))));
 							}
@@ -136,6 +138,11 @@ public class SetPropertiesHandler implements IServerService
 							{
 								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
 									StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(properties.optInt("y"))));
+							}
+							if (properties.has("x"))
+							{
+								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
+									StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName(), new Integer(properties.optInt("x"))));
 							}
 						}
 						else if (persist instanceof Form)

@@ -18,10 +18,10 @@
 package com.servoy.eclipse.warexporter.ui.wizard;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebObjectSpecification;
@@ -33,7 +33,7 @@ import com.servoy.j2db.server.ngclient.utils.NGUtils;
  * Shows the user the list of needed services and allows him to select more to export.
  * @author emera
  */
-public class ServicesSelectionPage extends AbstractComponentsSelectionPage
+public class ServicesSelectionPage extends AbstractWebObjectSelectionPage
 {
 	private final SpecProviderState servicesSpecProviderState;
 
@@ -41,39 +41,42 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	{
 		super(exportModel, pageName, title, description, "service");
 		this.servicesSpecProviderState = servicesSpecProviderState;
-		componentsUsed = exportModel.getUsedServices();
-		selectedComponents = new TreeSet<String>(componentsUsed);
-		joinWithLastUsed();
+	}
+
+	@Override
+	protected Set<String> getWebObjectsExplicitlyUsedBySolution()
+	{
+		return exportModel.getServicesUsedExplicitlyBySolution();
 	}
 
 	@Override
 	protected void joinWithLastUsed()
 	{
-		if (exportModel.getExportedServices() == null ||
-			exportModel.getExportedServices().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedServices())) return;
-		for (String service : exportModel.getExportedServices())
+		Set<String> servicesToExportWithoutUnderTheHoodOnes = exportModel.getServicesToExportWithoutUnderTheHoodOnes();
+		if (servicesToExportWithoutUnderTheHoodOnes == null ||
+			webObjectsUsedExplicitlyBySolution.containsAll(servicesToExportWithoutUnderTheHoodOnes)) return;
+		for (String service : servicesToExportWithoutUnderTheHoodOnes)
 		{
-			if (servicesSpecProviderState.getWebComponentSpecification(service) != null) selectedComponents.add(service);
+			if (servicesSpecProviderState.getWebObjectSpecification(service) != null) selectedWebObjectsForListCreation.add(service);
 		}
 	}
 
 	@Override
-	protected Set<String> getAvailableItems()
+	protected Set<String> getAvailableItems(boolean alreadyPickedAtListCreationShouldBeInThere)
 	{
-		Set<String> availableComponents = new TreeSet<String>();
+		Set<String> availableServices = new TreeSet<String>();
+		List<String> preferencesExcludedDefaultServicePackages = exportModel.getPreferencesExcludedDefaultServicePackages();
+		Set<String> servicesNeededUnderTheHood = exportModel.getServicesNeededUnderTheHoodWithoutSabloServices();
 		for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState))
 		{
-			if (exportModel.getExcludedServicePackages().contains(spec.getPackageName())) continue;
-			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
+			if (!preferencesExcludedDefaultServicePackages.contains(spec.getPackageName()) &&
+				!servicesNeededUnderTheHood.contains(spec.getName()) && // normally under the hood services would not be returned anyway by NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport
+				(alreadyPickedAtListCreationShouldBeInThere || !selectedWebObjectsForListCreation.contains(spec.getName())))
+			{
+				availableServices.add(spec.getName());
+			}
 		}
-		return availableComponents;
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		exportModel.setExportedServices(new TreeSet<String>(Arrays.asList(selectedComponentsList.getItems())));
-		return super.getNextPage();
+		return availableServices;
 	}
 
 	@Override
@@ -83,8 +86,9 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	}
 
 	@Override
-	protected void restoreUsedFromModel()
+	public void storeInput()
 	{
-		componentsUsed = exportModel.getExportedServices();
+		exportModel.setServicesToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(selectedWebObjectsList.getItems())));
 	}
+
 }

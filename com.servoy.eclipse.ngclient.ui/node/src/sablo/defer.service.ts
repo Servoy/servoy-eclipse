@@ -10,7 +10,8 @@ import { SabloService } from './sablo.service';
 export class SabloDeferHelper {
 
     private log: LoggerService;
-    constructor(private logFactory: LoggerFactory, private sabloService: SabloService) {
+
+    constructor(logFactory: LoggerFactory, private sabloService: SabloService) {
         this.log = logFactory.getLogger('SabloDeferHelper');
     }
 
@@ -50,7 +51,7 @@ export class SabloDeferHelper {
     public getNewDeferId(state: IDeferedState): number {
         const deferred = this.sabloService.createDeferredWSEvent();
         const newMsgID = deferred.cmsgid;
-        const d = deferred.deferred;;
+        const d = deferred.deferred;
         state.deferred[newMsgID + ''] = {
             defer: d, timeoutId: setTimeout(() => {
                 // if nothing comes back for a while do cancel the promise to avoid memory leaks/infinite waiting

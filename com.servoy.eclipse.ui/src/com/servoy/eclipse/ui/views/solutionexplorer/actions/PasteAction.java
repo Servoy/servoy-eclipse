@@ -232,7 +232,7 @@ public class PasteAction extends Action implements ISelectionChangedListener
 									{
 										if (o instanceof WebComponent)
 										{
-											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 												((WebComponent)o).getTypeName());
 											if (spec == null)
 											{

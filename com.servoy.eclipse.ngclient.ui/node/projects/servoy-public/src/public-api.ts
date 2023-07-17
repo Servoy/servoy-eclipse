@@ -16,6 +16,7 @@ export * from './lib/services/servoy_public.service';
 export * from './lib/webstorage/localstorage.service';
 export * from './lib/webstorage/sessionstorage.service';
 export * from './lib/services/windowref.service';
+export * from './lib/services/mainviewref.service';
 export * from './lib/directives/autosave.directive';
 export * from './lib/directives/decimalkeyconverter.directive';
 export * from './lib/directives/imagemediaid.directive';
@@ -28,4 +29,5 @@ export * from './lib/utils/popupform';
 export * from './lib/spectypes.service';
 export * from './lib/testing/publictesting.module';
 export * from './lib/testing/utils';
+export * from './lib/directives/tabfix.directive';
 

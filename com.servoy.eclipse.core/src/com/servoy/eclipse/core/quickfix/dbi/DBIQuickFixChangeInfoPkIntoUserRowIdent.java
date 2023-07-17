@@ -25,11 +25,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.json.JSONException;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
@@ -37,7 +38,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
 /**
  * Quick fix for differences between column info in the dbi file and columns in the DB. It will change the column information so that is is marked as user row
  * ident column rather then pk.
- * 
+ *
  * @author acostescu
  */
 public class DBIQuickFixChangeInfoPkIntoUserRowIdent extends TableDifferenceQuickFix
@@ -68,7 +69,8 @@ public class DBIQuickFixChangeInfoPkIntoUserRowIdent extends TableDifferenceQuic
 	{
 		return difference != null &&
 			difference.getType() == TableDifference.COLUMN_CONFLICT &&
-			((difference.getDbiFileDefinition().flags & Column.IDENT_COLUMNS) == Column.PK_COLUMN && (difference.getTableDefinition().flags & Column.PK_COLUMN) == 0);
+			((difference.getDbiFileDefinition().flags & IBaseColumn.IDENT_COLUMNS) == IBaseColumn.PK_COLUMN &&
+				(difference.getTableDefinition().flags & IBaseColumn.PK_COLUMN) == 0);
 	}
 
 	@Override
@@ -94,17 +96,17 @@ public class DBIQuickFixChangeInfoPkIntoUserRowIdent extends TableDifferenceQuic
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 
 						for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
 						{
 							ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(i);
 							if (cid.name.equals(difference.getColumnName()))
 							{
-								if ((cid.flags & Column.IDENT_COLUMNS) == Column.PK_COLUMN)
+								if ((cid.flags & IBaseColumn.IDENT_COLUMNS) == IBaseColumn.PK_COLUMN)
 								{
 									// change pk into user row ident
-									cid.flags = (cid.flags & (~Column.IDENT_COLUMNS)) | Column.USER_ROWID_COLUMN;
+									cid.flags = (cid.flags & (~IBaseColumn.IDENT_COLUMNS)) | IBaseColumn.USER_ROWID_COLUMN;
 								}
 								else
 								{

@@ -1,6 +1,6 @@
-import { DOCUMENT } from "@angular/common";
-import { Directive, HostListener, Inject, OnInit } from "@angular/core";
+import { Directive, HostListener } from "@angular/core";
 import { EditorSessionService } from "../services/editorsession.service";
+import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from "../services/urlparser.service";
 import { ElementInfo } from "./resizeknob.directive";
 
@@ -12,8 +12,7 @@ export class KeyboardLayoutDirective {
     isSendChanges = true;
     boundsUpdating = false;
 
-    constructor(private editorSession: EditorSessionService, private urlParser: URLParserService, 
-                 @Inject(DOCUMENT) private doc: Document) {}
+    constructor(private editorSession: EditorSessionService, private urlParser: URLParserService, private editorContentService : EditorContentService) {}
 
     @HostListener('document:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
@@ -80,8 +79,7 @@ export class KeyboardLayoutDirective {
 
                 for (let i = 0; i < selection.length; i++) {
 					const node = selection[i];
-                    const frameElem = this.doc.querySelector('iframe');
-                    let element: HTMLElement = frameElem.contentWindow.document.querySelector("[svy-id='" + node + "']");
+                    let element = this.editorContentService.getContentElement(node);
                     while(element && !element.classList.contains('svy-wrapper')) {
                         element = element.parentElement;
                     }
@@ -131,8 +129,7 @@ export class KeyboardLayoutDirective {
 
             for (var i = 0; i < selection.length; i++) {
                 const node = selection[i];
-                const frameElem = this.doc.querySelector('iframe');
-                let element: HTMLElement = frameElem.contentWindow.document.querySelector("[svy-id='" + node + "']");
+                let element = this.editorContentService.getContentElement(node);
                 while(element && !element.classList.contains('svy-wrapper')) {
                     element = element.parentElement;
                 }

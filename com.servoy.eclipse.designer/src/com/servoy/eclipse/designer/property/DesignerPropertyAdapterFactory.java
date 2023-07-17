@@ -292,7 +292,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					PropertyDescription propertyDescription = null;
 					if (persist.getParent() != null)
 					{
-						propertyDescription = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+						propertyDescription = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 							FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)persist));
 					}
 

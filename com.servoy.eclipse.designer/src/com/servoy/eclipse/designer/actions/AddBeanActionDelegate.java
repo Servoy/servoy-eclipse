@@ -33,9 +33,9 @@ import com.servoy.eclipse.ui.property.BeanInfoLabelProvider;
  * Present the user available beans via a dialog.
  * <p>
  * The actual command is performed via the selected edit parts' edit policy.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class AddBeanActionDelegate extends AbstractEditpartActionDelegate
 {
@@ -49,7 +49,7 @@ public class AddBeanActionDelegate extends AbstractEditpartActionDelegate
 	{
 		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, BeanClassContentProvider.DEFAULT,
 			BeanInfoLabelProvider.INSTANCE_NAME, null, null, SWT.NONE, "Select bean", BeanClassContentProvider.BEANS_DUMMY_INPUT, null, false,
-			TreeSelectDialog.BEAN_DIALOG, null);
+			TreeSelectDialog.BEAN_DIALOG, null, false);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)

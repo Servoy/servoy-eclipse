@@ -6,27 +6,13 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2022.3.5.3747_LTS</version>
+		<version>2023.3.2.3844</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</artifactId>
-	<version>16.15.0</version>
+	<version>18.14.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>target-platform-configuration</artifactId>
-				<version>${tycho.version}</version>
-				<configuration>
-					<environments>
-						<environment>
-							<os>macosx</os>
-							<ws>cocoa</ws>
-							<arch>x86_64</arch>
-						</environment>
-					</environments>
-				</configuration>
-			</plugin>
 			 <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
@@ -38,7 +24,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <url>https://nodejs.org/dist/v16.15.0/node-v16.15.0-darwin-x64.tar.gz</url>
+                            <url>https://nodejs.org/dist/v${project.version}/node-v${project.version}-darwin-x64.tar.gz</url>
                             <outputFileName>node.tar.gz</outputFileName>
                             <unpack>false</unpack>
                             <overwrite>true</overwrite>

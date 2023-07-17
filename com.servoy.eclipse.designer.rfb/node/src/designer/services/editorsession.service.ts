@@ -1,8 +1,8 @@
-import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable } from '@angular/core';
-import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider } from '@servoy/sablo';
+import { Injectable, EventEmitter } from '@angular/core';
+import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider, TypesRegistry } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
+import { EditorContentService } from './editorcontent.service';
 
 interface CallbackFunction {
     event: string,
@@ -21,53 +21,60 @@ export class EditorSessionService implements ServiceProvider {
     public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
-    private allowedChildren: unknown;
+    private allowedChildren: { [key: string]: string[] }  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
+    private wizardProperties: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
+    private lockAutoscrollId = '';
+    
+    variantsTrigger = new EventEmitter<{show: boolean, top?: number, left?: number, component?: PaletteComp}>();
+    variantsScroll = new EventEmitter<{scrollPos: number}>();
+    variantsPopup = new EventEmitter<{status: string}>();
+    paletteRefresher : ISupportRefreshPalette;
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
-        @Inject(DOCUMENT) private doc: Document, private urlParser: URLParserService) {
+        private urlParser: URLParserService, private editorContentService: EditorContentService, private typesRegistry: TypesRegistry) {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
-        this.autoscrollBehavior = new BehaviorSubject(null);
+        this.autoscrollBehavior = new BehaviorSubject<ISupportAutoscroll>(null);
+        this.editorContentService.executeOnlyAfterInit(() => {
+            this.initialized();
+        });
     }
 
-   public getService(name: string) {
-            if (name == '$editorService') {
-                return this;
-            }
-            return null;
+    public getService(name: string) {
+        if (name === '$editorService') {
+            return this;
+        } else if (name === '$typesRegistry') {
+            return this.typesRegistry;
+        }
+        return null;
     }
     connect() {
-        //if (deferred) return deferred.promise;
-        //deferred = $q.defer();
-        // var promise = deferred.promise;
-        // if (!connected) testWebsocket();
-        // else {
-        //    deferred.resolve();
-        //     deferred = null;
-        // }
-        // return promise;
-
         // do we need the promise
         this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')]);
         if (!this.urlParser.isAbsoluteFormLayout()) {
             this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: string) => {
-                this.allowedChildren = JSON.parse(result);
-				this.sendState('allowedChildren', this.allowedChildren);
+                this.allowedChildren = JSON.parse(result) as { [key: string]: string[] } ;
+                this.editorContentService.executeOnlyAfterInit(() => {
+                    this.editorContentService.sendMessageToIframe({ id: 'allowedChildren', value: this.allowedChildren });
+                });
             }).catch(e => console.log(e));
         }
+        this.wsSession.callService('formeditor', 'getWizardProperties').then((result: { [key: string]: string[] }) => {
+            this.wizardProperties = result;
+        }).catch(e => console.log(e));
     }
 
     activated() {
         return this.wsSession.callService('formeditor', 'activated')
     }
-
-    keyPressed(event: {ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean; keyCode?: number}) {
-        // remove selection if backspace or delete key was pressed
-        if (event.keyCode == 8 || event.keyCode == 46) {
-            this.updateSelection([], true, true);
-        }
+    
+    initialized() {
+        void this.wsSession.callService('formeditor', 'initialized');
+    }
+    
+    keyPressed(event: { ctrlKey?: boolean; shiftKey?: boolean; altKey?: boolean; metaKey?: boolean; keyCode?: number }) {
         void this.wsSession.callService('formeditor', 'keyPressed', {
             ctrl: event.ctrlKey,
             shift: event.shiftKey,
@@ -89,6 +96,18 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', 'createComponent', component, true)
     }
 
+    addStyleVariantFor(variantCategory: string) {
+        void this.wsSession.callService('formeditor', 'addStyleVariantFor', { p: variantCategory }, true);
+    }
+
+    editStyleVariantsFor(variantCategory: string) {
+        void this.wsSession.callService('formeditor', 'editStyleVariantsFor', { p: variantCategory }, true);
+    }
+
+    getVariantsForCategory<T>(variantCategory: string) {
+        return this.wsSession.callService<T>('formeditor', 'getVariantsForCategory', { variantCategory: variantCategory }, false);
+    }
+
     getGhostComponents<T>() {
         return this.wsSession.callService<T>('formeditor', 'getGhostComponents', null, false)
     }
@@ -103,6 +122,10 @@ export class EditorSessionService implements ServiceProvider {
 
     requestSelection() {
         return this.wsSession.callService('formeditor', 'requestSelection', null, true)
+    }
+
+    openConfigurator(property: string) {
+        return this.wsSession.callService('formeditor', 'openConfigurator', { name: property }, false);
     }
 
     setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
@@ -128,6 +151,18 @@ export class EditorSessionService implements ServiceProvider {
     isShowWireframe() {
         return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
             'showWireframe': true
+        }, false)
+    }
+
+    showSameSizeIndicator() {
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'sameSizeIndicator': true
+        }, false)
+    }
+
+    showAnchoringIndicator() {
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'anchoringIndicator': true
         }, false)
     }
 
@@ -165,6 +200,18 @@ export class EditorSessionService implements ServiceProvider {
         }, false);
     }
 
+    isShowI18NValues() {
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'showI18NValuesInDesigner': true
+        }, false)
+    }
+
+    toggleShowI18NValues() {
+        return this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
+            'show': 'showI18NValuesInDesigner'
+        }, false);
+    }
+
     createComponents(components) {
         void this.wsSession.callService('formeditor', 'createComponents', components, true)
     }
@@ -175,7 +222,7 @@ export class EditorSessionService implements ServiceProvider {
         }, true)
     }
 
-    updateFieldPositioner(location: {x: number;y: number}) {
+    updateFieldPositioner(location: { x: number; y: number }) {
         void this.wsSession.callService('formeditor', 'updateFieldPositioner', {
             location: location
         }, true)
@@ -185,7 +232,7 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', action, params, true);
     }
 
-    updateSelection(ids: Array<string>, redrawDecorators?: boolean, designerChange?:boolean) {
+    updateSelection(ids: Array<string>, redrawDecorators?: boolean, designerChange?: boolean) {
         this.selection = ids;
         this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids, redrawDecorators, designerChange));
     }
@@ -218,6 +265,14 @@ export class EditorSessionService implements ServiceProvider {
             'uuid': uuid
         }, true)
     }
+    
+    buildTiNG() {
+        void this.wsSession.callService('formeditor', 'buildTiNG', {}, true);
+    }
+
+    consoleLog(message: string) {//log message to eclipse console
+        void this.wsSession.callService('formeditor', 'consoleLog', {message: message}, true);
+    }
 
     setInlineEditMode(edit: boolean) {
         this.inlineEdit = edit
@@ -238,7 +293,7 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     getShortcuts() {
-        return this.wsSession.callService< { [key: string]: string; }>('formeditor', 'getShortcuts');
+        return this.wsSession.callService<{ [key: string]: string; }>('formeditor', 'getShortcuts');
     }
 
     toggleHighlight() {
@@ -271,9 +326,16 @@ export class EditorSessionService implements ServiceProvider {
         return this.wsSession.callService('formeditor', 'openPackageManager', null, true);
     }
 
-    getAllowedChildrenForContainer(container:string): string[] {
+    getAllowedChildrenForContainer(container: string): string[] {
         if (this.allowedChildren) {
             return this.allowedChildren[container ? container : 'topContainer'];
+        }
+        return null;
+    }
+
+    getWizardProperties(spec: string): string[] {
+        if (this.wizardProperties) {
+            return this.wizardProperties[spec];
         }
         return null;
     }
@@ -282,20 +344,20 @@ export class EditorSessionService implements ServiceProvider {
         return this.wsSession.callService<Array<string>>('formeditor', 'getSuperForms');
     }
 
-    setCssAnchoring(selection: Array<string>, anchors: {top:string;left:string;bottom:string;right:string}) {
+    setCssAnchoring(selection: Array<string>, anchors: { top: string; left: string; bottom: string; right: string }) {
         void this.wsSession.callService('formeditor', 'setCssAnchoring', { 'selection': selection, 'anchors': anchors }, true);
     }
 
     getFormFixedSize() {
-        return this.wsSession.callService<{width:string;height:string}>('formeditor', 'getFormFixedSize');
+        return this.wsSession.callService<{ width: string; height: string }>('formeditor', 'getFormFixedSize');
     }
 
-    setFormFixedSize(args: {width:string;height?:string}) {
+    setFormFixedSize(args: { width: string; height?: string }) {
         return this.wsSession.callService('formeditor', 'setFormFixedSize', args);
     }
 
     getZoomLevel() {
-       return this.wsSession.callService<number>('formeditor', 'getZoomLevel', {}, false);
+        return this.wsSession.callService<number>('formeditor', 'getZoomLevel', {}, false);
     }
 
     setZoomLevel(value: number) {
@@ -304,11 +366,26 @@ export class EditorSessionService implements ServiceProvider {
         }, false)
     }
 
-    setStatusBarText(text:string) {
+    setStatusBarText(text: string) {
         this.state.statusText = text;
         this.stateListener.next('statusText');
     }
 
+    setSameSizeIndicator(flag: boolean) {
+        this.state.sameSizeIndicator = flag;
+        this.stateListener.next('sameSizeIndicator');
+    }
+
+    setAnchoringIndicator(flag: boolean) {
+        this.state.anchoringIndicator = flag;
+        this.stateListener.next('anchoringIndicator');
+    }
+
+    setDragging(dragging : boolean){
+        this.state.dragging = dragging;
+        this.stateListener.next('dragging');
+    }
+    
     getState(): State {
         return this.state;
     }
@@ -320,18 +397,17 @@ export class EditorSessionService implements ServiceProvider {
     sameSize(width: boolean) {
         const selection = this.getSelection();
         if (selection && selection.length > 1) {
-            const obj: { [key: string]: {width:number; height:number} ; } = {};
-            let firstSize: {width:number; height:number} = null;
-            const frameElem = this.doc.querySelector('iframe');
+            const obj: { [key: string]: { width: number; height: number }; } = {};
+            let firstSize: { width: number; height: number } = null;
             for (let i = 0; i < selection.length; i++) {
                 const nodeid = selection[i];
-                const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                const element = this.editorContentService.getContentElement(nodeid);
                 if (element) {
                     const elementRect = element.getBoundingClientRect();
                     if (firstSize == null) {
                         firstSize = { width: elementRect.width, height: elementRect.height };
                     } else {
-                        let newSize:  {width:number; height:number};
+                        let newSize: { width: number; height: number };
                         if (width) {
                             newSize = {
                                 width: firstSize.width,
@@ -355,48 +431,60 @@ export class EditorSessionService implements ServiceProvider {
         return this.bIsDirty;
     }
 
-    sendState(key: string, result: unknown): void {
-        const iframe = this.doc.querySelector('iframe');
-        const elements = iframe.contentWindow.document.querySelectorAll('[svy-id]');
-        if (elements.length == 0) {
-            setTimeout(() => this.sendState(key, result), 400);
-            return;
-        }
-        else {
-            iframe.contentWindow.postMessage({ id: key, value: result }, '*');
-        }
+    setDirty(dirty: boolean) {
+        this.bIsDirty = dirty;
     }
-
-    startAutoscroll(scrollComponent: ISupportAutoscroll){
-        if ( this.autoscrollBehavior == null) {
+    
+    refreshPalette(){
+       this.paletteRefresher.refreshPalette();
+    }
+    
+    setPaletteRefresher( refresher : ISupportRefreshPalette){
+        this.paletteRefresher = refresher;
+    }
+    
+    registerAutoscroll(scrollComponent: ISupportAutoscroll) {
+        if (this.lockAutoscrollId && scrollComponent.getAutoscrollLockId() !== this.lockAutoscrollId) return;
+        this.lockAutoscrollId = scrollComponent.getAutoscrollLockId();
+        if (this.autoscrollBehavior == null) {
             this.autoscrollBehavior = new BehaviorSubject(scrollComponent);
-        }  else {
+        } else {
             this.autoscrollBehavior.next(scrollComponent);
         }
     }
 
-    stopAutoscroll(){
-        this.autoscrollBehavior.next(null);
+    unregisterAutoscroll(scrollComponent: ISupportAutoscroll) {
+        if (this.lockAutoscrollId && this.lockAutoscrollId === scrollComponent.getAutoscrollLockId()) {
+            this.lockAutoscrollId = '';
+            this.autoscrollBehavior.next(null);
+        }
     }
 
     getFixedKeyEvent(event: KeyboardEvent) {
+        let keyCode = event.keyCode;
+        if ((event.metaKey && event.key == 'Meta') || (event.ctrlKey && event.key == 'Control') || (event.altKey && event.key == 'Alt')) { 
+            //standalone special keys have a javascript keyCode (91 = Meta, 17 = Ctrl, 18 = Alt) which may be wrongly interpreted in the KeyPressHandler (server side)
+            //they must produce no action by themselves
+            keyCode = 0
+        } 
+ 
         return {
-            keyCode: event.keyCode,
+            keyCode: keyCode,
             ctrlKey: event.ctrlKey,
             shiftKey: event.shiftKey,
             altKey: event.altKey,
             metaKey: event.metaKey
         }
     }
-    
-    isAbsoluteFormLayout() : boolean{
+
+    isAbsoluteFormLayout(): boolean {
         return this.urlParser.isAbsoluteFormLayout();
     }
 }
 
 export interface ISelectionChangedListener {
 
-    selectionChanged(selection: Array<string>, redrawDecorators?:boolean, designerChange?:boolean): void;
+    selectionChanged(selection: Array<string>, redrawDecorators?: boolean, designerChange?: boolean): void;
 
 }
 
@@ -410,51 +498,72 @@ class State {
     showWireframe: boolean;
     showSolutionSpecificLayoutContainerClasses: boolean;
     showSolutionCss: boolean;
+    sameSizeIndicator: boolean;
+    anchoringIndicator: boolean;
     statusText: string;
     maxLevel: number;
     dragging = false;
     pointerEvents = 'none';
-    packages : Array<Package>;
-	drop_highlight: string;
+    packages: Array<Package>;
+    drop_highlight: string;
 }
 
 export class PaletteComp {
     name: string;
-    displayName : string;
+    displayName: string;
     packageName: string;
     x: number;
     y: number;
+    w: number;
+    h: number;
+    text: string;
     type: string;
     ghostPropertyName: string;
-    dropTargetUUID?: string; 
+    styleVariantCategory: string;
+    lastChosenVariant: string;
+    dropTargetUUID?: string;
     isOpen: boolean;
     propertyName: string; // ghost
     components: Array<PaletteComp>;
     properties: Array<string>;
-    isAbsoluteCSSPositionMix ?:boolean; // formcomponent property
-    icon? : string;
-    model? : {property : any};
-    types? : Array<PaletteComp>; // the ghosts
-    multiple? : boolean; //ghost property
-    propertyValue?: {property : string}; // formcomponents
+    isAbsoluteCSSPositionMix?: boolean; // formcomponent property
+    icon?: string;
+    model?: { property: any };
+    types?: Array<PaletteComp>; // the ghosts
+    multiple?: boolean; //ghost property
+    propertyValue?: { property: string }; // formcomponents
     componentType?: string;
     topContainer: boolean;
     layoutName?: string;
     attributes?: { [property: string]: string };
     children?: [{ [property: string]: string }];
     rightSibling?: string;
+    variant?: string;
 }
 
 export class Package {
     id: string;
     packageName: string;
-    packageDisplayname : string;
+    packageDisplayname: string;
     components: Array<PaletteComp>;
     propertyValues?: Array<PaletteComp>;
-    categories?: {property :  Array<PaletteComp>};
+    categories?: { property: Array<PaletteComp> };
 }
 
 export interface ISupportAutoscroll {
-    getUpdateLocationCallback(): (changeX: number, changeY: number, minX?: number, minY?: number) => void;
+    updateLocationCallback(changeX: number, changeY: number): void;
     onMouseUp(event: MouseEvent): void;
+    onMouseMove(event: MouseEvent): void;
+    getAutoscrollLockId(): string;
+}
+
+export interface ISupportRefreshPalette{
+    refreshPalette() : void;
+}
+
+export class Variant {
+    name: string;
+    category: string;
+    displayName: string;
+    classes: Array<string>;
 }

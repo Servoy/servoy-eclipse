@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Core Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.core;singleton:=true
-Bundle-Version: 2022.3.5.3747_LTS
+Bundle-Version: 2023.3.2.3844
 Bundle-Activator: com.servoy.eclipse.core.Activator
 Bundle-Vendor: Servoy
 Bundle-Localization: plugin
@@ -44,9 +44,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.servoy.eclipse.model.exporter.mobile,
  net.sourceforge.sqlexplorer;resolution:=optional,
  sablo,
- org.apache.commons.io,
  sj.jsonschemavalidation,
- slf4j.api,
  com.servoy.eclipse.ngclient,
  org.apache.tomcat
 Bundle-ActivationPolicy: lazy
@@ -62,8 +60,9 @@ Export-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.util,
  com.servoy.eclipse.dnd
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.core
 Import-Package: javax.servlet;version="4.0.0",
  javax.servlet.annotation;version="4.0.0",
- javax.servlet.http;version="4.0.0"
+ javax.servlet.http;version="4.0.0",
+ org.apache.commons.io;version="2.8.0"

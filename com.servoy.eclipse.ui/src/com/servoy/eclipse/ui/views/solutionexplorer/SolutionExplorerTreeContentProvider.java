@@ -280,6 +280,11 @@ public class SolutionExplorerTreeContentProvider
 			createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib), //
 			createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib), //
 			createTypeNode(Messages.TreeStrings_Object, UserNodeType.OBJECT, com.servoy.j2db.documentation.scripting.docs.Object.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Map, UserNodeType.MAP, com.servoy.j2db.documentation.scripting.docs.Map.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Set, UserNodeType.SET, com.servoy.j2db.documentation.scripting.docs.Set.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Iterator, UserNodeType.ITERATOR, com.servoy.j2db.documentation.scripting.docs.Iterator.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Iterablevalue, UserNodeType.ITERABELVALUE, com.servoy.j2db.documentation.scripting.docs.IterableValue.class,
+				jslib), //
 			createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib), //
 			createTypeNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, com.servoy.j2db.documentation.scripting.docs.RegExp.class, jslib), //
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
@@ -960,7 +965,7 @@ public class SolutionExplorerTreeContentProvider
 					else if (type == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || type == UserNodeType.LAYOUT_NONPROJECT_PACKAGE)
 					{
 						String packageName = getPackageName(un);
-						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getComponentsInPackage(packageName));
+						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getWebObjectsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
 						{
@@ -968,7 +973,7 @@ public class SolutionExplorerTreeContentProvider
 							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
 							for (String component : components)
 							{
-								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
+								WebObjectSpecification spec = getComponentsSpecProviderState().getWebObjectSpecification(component);
 								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
@@ -998,7 +1003,7 @@ public class SolutionExplorerTreeContentProvider
 					{
 						String packageName = getPackageName(un);
 						Set<String> folderNames = new HashSet<String>();
-						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getComponentsInPackage(packageName));
+						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getWebObjectsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
 						{
@@ -1077,7 +1082,7 @@ public class SolutionExplorerTreeContentProvider
 								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
 								for (String component : services)
 								{
-									WebObjectSpecification spec = provider.getWebComponentSpecification(component);
+									WebObjectSpecification spec = provider.getWebObjectSpecification(component);
 									Image img = getIconFromSpec(spec, true);
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
 										img != null ? img : serviceDefaultIcon);
@@ -1182,7 +1187,7 @@ public class SolutionExplorerTreeContentProvider
 	{
 		for (String component : services)
 		{
-			WebObjectSpecification spec = provider.getWebComponentSpecification(component);
+			WebObjectSpecification spec = provider.getWebObjectSpecification(component);
 			String folderName = getFolderNameFromSpec(spec);
 			try
 			{
@@ -1653,7 +1658,10 @@ public class SolutionExplorerTreeContentProvider
 				{
 					try
 					{
-						return ((IServerInternal)un.getRealObject()).getTableNames(true).size() > 0;
+						IServerInternal server = ((IServerInternal)un.getRealObject());
+						// if tables are not loaded yet, do not load them here
+						if (!server.isTableListLoadedAsync()) return true;
+						return server.getTableNames(true).size() > 0;
 					}
 					catch (RepositoryException e)
 					{
@@ -1776,7 +1784,7 @@ public class SolutionExplorerTreeContentProvider
 				else if (un.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || un.getType() == UserNodeType.LAYOUT_NONPROJECT_PACKAGE)
 				{
 					return getComponentsSpecProviderState() != null &&
-						(!getComponentsSpecProviderState().getComponentsInPackage(getPackageName(un)).isEmpty() ||
+						(!getComponentsSpecProviderState().getWebObjectsInPackage(getPackageName(un)).isEmpty() ||
 							!getComponentsSpecProviderState().getLayoutsInPackage(getPackageName(un)).isEmpty());
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || un.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE)
@@ -2000,11 +2008,15 @@ public class SolutionExplorerTreeContentProvider
 			IServerInternal server = (IServerInternal)serverNode.getRealObject();
 			handleServerNode(server, serverNode);
 		}
-		for (Object node : serverNode.children)
+		if (serverNode.children != null)
 		{
-			if (node instanceof SimpleUserNode)
+			// can be null is server is disabled/invalid
+			for (Object node : serverNode.children)
 			{
-				((SimpleUserNode)node).parent = serverNode;
+				if (node instanceof SimpleUserNode)
+				{
+					((SimpleUserNode)node).parent = serverNode;
+				}
 			}
 		}
 	}
@@ -2131,7 +2143,7 @@ public class SolutionExplorerTreeContentProvider
 		if (pluginNode.isHidden()) pluginNode.hide();
 		else pluginNode.unhide();
 
-		view.refreshTreeNodeFromModel(pluginNode);
+		view.refreshTreeNodeFromModel(pluginNode, false, false);
 	}
 
 	private ArrayList<PlatformSimpleUserNode> getJavaPluginsNodeChildren(PlatformSimpleUserNode pluginNode)
@@ -2142,10 +2154,8 @@ public class SolutionExplorerTreeContentProvider
 			if (loadedJavaPluginNodes == null)
 			{
 				loadedJavaPluginNodes = new ArrayList<PlatformSimpleUserNode>();
-				Iterator<IClientPlugin> it = Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class).iterator();
-				while (it.hasNext())
+				for (IClientPlugin plugin : Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class))
 				{
-					IClientPlugin plugin = it.next();
 					try
 					{
 						IScriptable scriptObject = null;
@@ -3034,10 +3044,8 @@ public class SolutionExplorerTreeContentProvider
 
 			List<PlatformSimpleUserNode> relationNodes = new ArrayList<PlatformSimpleUserNode>();
 			TreeSet<Relation> relations = new TreeSet<Relation>(NameComparator.INSTANCE);
-			Iterator<Solution> solutions = allSolutions.values().iterator();
-			while (solutions.hasNext())
+			for (Solution sol : allSolutions.values())
 			{
-				Solution sol = solutions.next();
 				Iterator<Relation> it = sol.getRelations(table, true, false);
 
 				while (it.hasNext())
@@ -3071,12 +3079,9 @@ public class SolutionExplorerTreeContentProvider
 
 	public void refreshContent(Map<IPersist, Set<Class< ? extends IPersist>>> persists)
 	{
-		// optimize a bit so we don't refresh the same thing multiple times
-		Iterator<Entry<IPersist, Set<Class< ? extends IPersist>>>> it = persists.entrySet().iterator();
 		List<String> solutionsRefreshedForRelations = new ArrayList<String>();
-		while (it.hasNext())
+		for (Entry<IPersist, Set<Class< ? extends IPersist>>> entry : persists.entrySet())
 		{
-			Entry<IPersist, Set<Class< ? extends IPersist>>> entry = it.next();
 			IPersist persist = entry.getKey();
 			IRootObject root = persist.getRootObject();
 			boolean refreshedFormsNode = false;

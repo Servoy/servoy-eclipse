@@ -152,7 +152,7 @@ public class ElementUtil
 			if (persist instanceof IWebComponent)
 			{
 				IWebComponent iw = (IWebComponent)persist;
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(iw.getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(iw.getTypeName());
 				name = spec != null && spec.getCategoryName() != null ? spec.getCategoryName() : "components";
 			}
 			else if (name.startsWith("combobox"))

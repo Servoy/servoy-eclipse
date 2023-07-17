@@ -25,7 +25,6 @@ import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -41,7 +40,6 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
@@ -53,7 +51,6 @@ import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
-import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -89,190 +86,189 @@ public class FormatCellEditor extends TextDialogCellEditor
 		int type = IColumnTypes.TEXT;
 		if (formatForPropertyNames != null && formatForPropertyNames.length > 0)
 		{
-			String webComponentClassName = null;
-			if (persist instanceof IFormElement)
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			FlattenedSolution flattenedSolution = servoyModel.getFlattenedSolution();
+			for (String propertyName : formatForPropertyNames)
 			{
-				webComponentClassName = FormTemplateGenerator.getComponentTypeName((IFormElement)persist);
-			}
-			else if (persist instanceof WebCustomType)
-			{
-				webComponentClassName = FormTemplateGenerator.getComponentTypeName((IFormElement)persist.getAncestor(IRepository.WEBCOMPONENTS));
-			}
-			else if (persist instanceof IBasicWebObject)
-			{
-				webComponentClassName = ((IBasicWebObject)persist).getTypeName();
-			}
-			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(webComponentClassName);
-			if (spec != null)
-			{
-				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-				FlattenedSolution flattenedSolution = servoyModel.getFlattenedSolution();
-				for (String propertyName : formatForPropertyNames)
+				PropertyDescription pd = null;
+				if (persist instanceof WebCustomType wct)
 				{
-					PropertyDescription pd = null;
-					if (persist instanceof WebCustomType)
+					PropertyDescription customTypePD = wct.getPropertyDescription();
+					pd = customTypePD.getProperty(propertyName);
+					IBasicWebObject parent = wct.getParent();
+					while (pd == null)
 					{
-						pd = spec.getProperty(((WebCustomType)persist).getJsonKey());
-						if (pd.getType() instanceof CustomJSONArrayType)
+						if (parent instanceof WebCustomType p)
 						{
-							pd = ((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition();
+							customTypePD = p.getPropertyDescription();
+							pd = customTypePD.getProperty(propertyName);
+							parent = p.getParent();
 						}
-						pd = pd.getProperty(propertyName);
+						else
+						{
+							String webComponentClassName = parent.getTypeName();
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponentClassName);
+							pd = spec.getProperty(propertyName);
+							break;
+						}
 					}
-					if (pd == null)
+				}
+				else if (persist instanceof IBasicWebObject p)
+				{
+					String webComponentClassName = p.getTypeName();
+					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponentClassName);
+					pd = spec.getProperty(propertyName);
+
+				}
+				if (pd != null)
+				{
+					IPropertyType propertyType = pd.getType();
+					if (propertyType instanceof IYieldingType)
 					{
-						pd = spec.getProperty(propertyName);
+						propertyType = ((IYieldingType)propertyType).getPossibleYieldType();
 					}
-					if (pd != null)
+					if (propertyType instanceof DataproviderPropertyType)
 					{
-						IPropertyType propertyType = pd.getType();
-						if (propertyType instanceof IYieldingType)
+						String dataProviderID = (String)((AbstractBase)persist).getProperty(propertyName);
+						if (dataProviderID == null && persist instanceof IBasicWebObject)
 						{
-							propertyType = ((IYieldingType)propertyType).getPossibleYieldType();
+							dataProviderID = ((IBasicWebObject)persist).getProperty(propertyName) != null
+								? (String)((IBasicWebObject)persist).getProperty(propertyName) : null;
 						}
-						if (propertyType instanceof DataproviderPropertyType)
+						if (dataProviderID != null)
 						{
-							String dataProviderID = (String)((AbstractBase)persist).getProperty(propertyName);
-							if (dataProviderID == null && persist instanceof IBasicWebObject)
+							Object config = pd.getConfig();
+							// if it is a dataprovider type. look if it is foundset linked
+							if (config instanceof FoundsetLinkedConfig && ((FoundsetLinkedConfig)config).getForFoundsetName() != null)
 							{
-								dataProviderID = ((IBasicWebObject)persist).getProperty(propertyName) != null
-									? (String)((IBasicWebObject)persist).getProperty(propertyName) : null;
-							}
-							if (dataProviderID != null)
-							{
-								Object config = pd.getConfig();
-								// if it is a dataprovider type. look if it is foundset linked
-								if (config instanceof FoundsetLinkedConfig && ((FoundsetLinkedConfig)config).getForFoundsetName() != null)
+								Object json = ((AbstractBase)persist.getParent()).getProperty(((FoundsetLinkedConfig)config).getForFoundsetName());
+								if (json instanceof JSONObject)
 								{
-									Object json = ((AbstractBase)persist.getParent()).getProperty(((FoundsetLinkedConfig)config).getForFoundsetName());
-									if (json instanceof JSONObject)
+									// get the foundset selector and try to resolve the table
+									String fs = ((JSONObject)json).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+									ITable table = servoyModel.getDataSourceManager().getDataSource(fs);
+									if (table == null)
 									{
-										// get the foundset selector and try to resolve the table
-										String fs = ((JSONObject)json).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
-										ITable table = servoyModel.getDataSourceManager().getDataSource(fs);
-										if (table == null)
+										// table not found is the foundset selector a relation.
+										Relation[] relations = flattenedSolution.getRelationSequence(fs);
+										if (relations != null && relations.length > 0)
 										{
-											// table not found is the foundset selector a relation.
-											Relation[] relations = flattenedSolution.getRelationSequence(fs);
-											if (relations != null && relations.length > 0)
-											{
-												table = servoyModel.getDataSourceManager().getDataSource(
-													relations[relations.length - 1].getForeignDataSource());
-											}
-										}
-										try
-										{
-											IDataProvider dataProvider = flattenedSolution.getDataProviderForTable(table, dataProviderID);
-											// the dataprovider is found through the table, returns for this the ComponentFormat, if not fall through through the forms
-											// dataprovider lookup below
-											if (dataProvider != null)
-											{
-												type = dataProvider.getDataProviderType();
-												break;
-											}
-										}
-										catch (RepositoryException e)
-										{
-											Debug.error(e);
+											table = servoyModel.getDataSourceManager().getDataSource(
+												relations[relations.length - 1].getForeignDataSource());
 										}
 									}
-								}
-								Form form = (Form)persist.getAncestor(IRepository.FORMS);
-								if (form != null)
-								{
-									form = flattenedSolution.getFlattenedForm(form);
-									IDataProviderLookup dataproviderLookup = flattenedSolution.getDataproviderLookup(
-										Activator.getDefault().getDesignClient().getFoundSetManager(), form);
-									ComponentFormat componentFormat = ComponentFormat.getComponentFormat(formatString, dataProviderID, dataproviderLookup,
-										Activator.getDefault().getDesignClient());
-									type = componentFormat.dpType;
-								}
-								break;
-							}
-						}
-						else if (propertyType instanceof ValueListPropertyType)
-						{
-							ValueList vl = null;
-							if (persist instanceof WebCustomType)
-							{
-								Object property = ((WebCustomType)persist).getProperty(propertyName);
-								if (property != null)
-								{
-									vl = (ValueList)flattenedSolution.searchPersist(property.toString());
-								}
-							}
-							else
-							{
-								int valuelistID = Utils.getAsInteger(((AbstractBase)persist).getProperty(propertyName));
-								if (valuelistID > 0)
-								{
-									vl = flattenedSolution.getValueList(valuelistID);
-								}
-							}
-
-							if (vl != null)
-							{
-								if ((vl.getValueListType() == IValueListConstants.CUSTOM_VALUES ||
-									vl.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES))
-								{
-									int displayValueType = vl.getDisplayValueType();
-									if (displayValueType != 0)
+									try
 									{
-										type = displayValueType;
-										break;
-									}
-								}
-
-								IDataProvider dataProvider = null;
-								ITable table = null;
-								try
-								{
-									if (vl.getRelationName() != null)
-									{
-										Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
-										table = servoyModel.getDataSourceManager().getDataSource(relations[relations.length - 1].getForeignDataSource());
-									}
-									else
-									{
-										table = servoyModel.getDataSourceManager().getDataSource(vl.getDataSource());
-									}
-								}
-								catch (Exception ex)
-								{
-									ServoyLog.logError(ex);
-								}
-								if (table != null)
-								{
-									String dp = null;
-									int showDataProviders = vl.getShowDataProviders();
-									if (showDataProviders == 1)
-									{
-										dp = vl.getDataProviderID1();
-									}
-									else if (showDataProviders == 2)
-									{
-										dp = vl.getDataProviderID2();
-									}
-									else if (showDataProviders == 4)
-									{
-										dp = vl.getDataProviderID3();
-									}
-
-									if (dp != null)
-									{
-										try
-										{
-											dataProvider = flattenedSolution.getDataProviderForTable(table, dp);
-										}
-										catch (Exception ex)
-										{
-											ServoyLog.logError(ex);
-										}
+										IDataProvider dataProvider = flattenedSolution.getDataProviderForTable(table, dataProviderID);
+										// the dataprovider is found through the table, returns for this the ComponentFormat, if not fall through through the forms
+										// dataprovider lookup below
 										if (dataProvider != null)
 										{
 											type = dataProvider.getDataProviderType();
 											break;
 										}
+									}
+									catch (RepositoryException e)
+									{
+										Debug.error(e);
+									}
+								}
+							}
+							Form form = (Form)persist.getAncestor(IRepository.FORMS);
+							if (form != null)
+							{
+								form = flattenedSolution.getFlattenedForm(form);
+								IDataProviderLookup dataproviderLookup = flattenedSolution.getDataproviderLookup(
+									Activator.getDefault().getDesignClient().getFoundSetManager(), form);
+								ComponentFormat componentFormat = ComponentFormat.getComponentFormat(formatString, dataProviderID, dataproviderLookup,
+									Activator.getDefault().getDesignClient());
+								type = componentFormat.dpType;
+							}
+							break;
+						}
+					}
+					else if (propertyType instanceof ValueListPropertyType)
+					{
+						ValueList vl = null;
+						if (persist instanceof WebCustomType)
+						{
+							Object property = ((WebCustomType)persist).getProperty(propertyName);
+							if (property != null)
+							{
+								vl = (ValueList)flattenedSolution.searchPersist(property.toString());
+							}
+						}
+						else
+						{
+							int valuelistID = Utils.getAsInteger(((AbstractBase)persist).getProperty(propertyName));
+							if (valuelistID > 0)
+							{
+								vl = flattenedSolution.getValueList(valuelistID);
+							}
+						}
+
+						if (vl != null)
+						{
+							if ((vl.getValueListType() == IValueListConstants.CUSTOM_VALUES ||
+								vl.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES))
+							{
+								int displayValueType = vl.getDisplayValueType();
+								if (displayValueType != 0)
+								{
+									type = displayValueType;
+									break;
+								}
+							}
+
+							IDataProvider dataProvider = null;
+							ITable table = null;
+							try
+							{
+								if (vl.getRelationName() != null)
+								{
+									Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
+									table = servoyModel.getDataSourceManager().getDataSource(relations[relations.length - 1].getForeignDataSource());
+								}
+								else
+								{
+									table = servoyModel.getDataSourceManager().getDataSource(vl.getDataSource());
+								}
+							}
+							catch (Exception ex)
+							{
+								ServoyLog.logError(ex);
+							}
+							if (table != null)
+							{
+								String dp = null;
+								int showDataProviders = vl.getShowDataProviders();
+								if (showDataProviders == 1)
+								{
+									dp = vl.getDataProviderID1();
+								}
+								else if (showDataProviders == 2)
+								{
+									dp = vl.getDataProviderID2();
+								}
+								else if (showDataProviders == 4)
+								{
+									dp = vl.getDataProviderID3();
+								}
+
+								if (dp != null)
+								{
+									try
+									{
+										dataProvider = flattenedSolution.getDataProviderForTable(table, dp);
+									}
+									catch (Exception ex)
+									{
+										ServoyLog.logError(ex);
+									}
+									if (dataProvider != null)
+									{
+										type = dataProvider.getDataProviderType();
+										break;
 									}
 								}
 							}

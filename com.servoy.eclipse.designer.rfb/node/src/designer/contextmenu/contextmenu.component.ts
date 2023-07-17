@@ -1,7 +1,7 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
 import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
+import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from '../services/urlparser.service';
 
 export enum SHORTCUT_IDS {
@@ -18,8 +18,6 @@ export enum SHORTCUT_IDS {
     SEND_TO_BACK_ID = 'com.servoy.eclipse.designer.rfb.sendtoback',
     OPEN_SCRIPT_ID = 'com.servoy.eclipse.ui.OpenFormJsAction',
     OPEN_SUPER_SCRIPT_ID = 'com.servoy.eclipse.designer.rfb.openscripteditor',
-    GROUP_ID = 'com.servoy.eclipse.designer.rfb.group',
-    UNGROUP_ID = 'com.servoy.eclipse.designer.rfb.ungroup',
     OPEN_FORM_HIERARCHY_ID = 'com.servoy.eclipse.ui.OpenFormHierarchyAction'
 }
 @Component({
@@ -36,8 +34,8 @@ export class ContextMenuComponent implements OnInit {
     selection: string[];
     selectionAnchor = 0;
 
-    constructor(protected readonly editorSession: EditorSessionService,
-        protected urlParser: URLParserService, @Inject(DOCUMENT) private doc: Document) {
+    constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService,
+        protected urlParser: URLParserService) {
     }
 
     ngOnInit(): void {
@@ -50,10 +48,10 @@ export class ContextMenuComponent implements OnInit {
 
     private setup(shortcuts: { [key: string]: string; }, superForms: Array<string>): void {
         this.createItems(shortcuts, superForms);
-        const contentArea = this.doc.querySelector('.content-area');
+        const contentArea = this.editorContentService.getContentArea();
         contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
             let node: HTMLElement;
-            const frameElem = this.doc.querySelector('iframe');
+            const selectionChanged = this.selection !== this.editorSession.getSelection();
             this.selection = this.editorSession.getSelection();
             if (this.selection && this.selection.length == 1) {
                 node = contentArea.querySelector("[svy-id='" + this.selection[0] + "']")
@@ -62,13 +60,13 @@ export class ContextMenuComponent implements OnInit {
                     event.stopPropagation();
                     return;
                 }
-                node = frameElem.contentWindow.document.querySelector("[svy-id='" + this.selection[0] + "']");
+                node = this.editorContentService.getContentElement(this.selection[0]);
                 if (node && node.hasAttribute('svy-anchors')) {
                     this.selectionAnchor = parseInt(node.getAttribute('svy-anchors'));
                 }
             }
             if (!node) {
-                node = frameElem.contentWindow.document.querySelector('.svy-form');
+                node = this.editorContentService.getContentForm();
             }
             if (node) {
                 for (let i = 0; i < this.menuItems.length; i++) {
@@ -105,6 +103,7 @@ export class ContextMenuComponent implements OnInit {
                                             }
                                             component = this.convertToContentPoint(component) as PaletteComp;
                                             this.editorSession.createComponent(component);
+                                            return false;
                                         });
                                     this.menuItems[i].subMenu.push(submenuItem);
                                 }
@@ -130,6 +129,35 @@ export class ContextMenuComponent implements OnInit {
                         }
                     }
                 }
+                if (selectionChanged) {
+                    const existingItem = this.menuItems.findIndex(item => item.text.startsWith("Configure"));
+                    if (existingItem >= 0) this.menuItems.splice(existingItem, 1);
+                    const wizardProperties = this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'));
+                    if (wizardProperties) {
+                        const insertIndex = this.menuItems.findIndex(item => item.text.startsWith("Delete"));//insert above delete
+                        if (wizardProperties.length == 1) {
+                            this.menuItems.splice(insertIndex, 0, new ContextmenuItem(
+                                "Configure " + wizardProperties[0],
+                                () => {
+                                    this.hide();
+                                    this.editorSession.openConfigurator(wizardProperties[0]);
+                                }
+                            ));
+                        }
+                        else if (wizardProperties.length > 1) {
+                            let menuItem = new ContextmenuItem("Configure", null);
+                            menuItem.subMenu = [];
+                            wizardProperties.forEach((value) => {
+                                menuItem.subMenu.push(new ContextmenuItem("Configure " + value,
+                                    () => {
+                                        this.hide();
+                                        this.editorSession.openConfigurator(value);
+                                    }));
+                            });
+                            this.menuItems.splice(insertIndex, 0, menuItem);
+                        }
+                    }
+                }
             }
 
             this.show(event);
@@ -138,12 +166,12 @@ export class ContextMenuComponent implements OnInit {
             event.stopPropagation();
         });
         // for some reason click event is not always triggered
-        this.doc.body.addEventListener('mouseup', (event: MouseEvent) => {
+        this.editorContentService.getBodyElement().addEventListener('mouseup', (event: MouseEvent) => {
             if (event.button == 0) {
                 setTimeout(() => this.hide(), 200);
             }
         });
-        this.doc.body.addEventListener('keyup', (event: KeyboardEvent) => {
+        this.editorContentService.getBodyElement().addEventListener('keyup', (event: KeyboardEvent) => {
             if (event.keyCode == 27) {
                 // esc key, close menu
                 this.hide();
@@ -189,7 +217,7 @@ export class ContextMenuComponent implements OnInit {
             this.element.nativeElement.style.top = top + 'px';
         }
         else {
-            const submenu = this.doc.querySelector('.dropdown-submenu:hover');
+            const submenu = this.editorContentService.querySelector('.dropdown-submenu:hover');
             if (submenu) {
                 const menu: HTMLElement = submenu.querySelector('.dropdown-menu');
                 //the submenu can only be displayed on the right or left side of the contextmenu
@@ -438,6 +466,7 @@ export class ContextMenuComponent implements OnInit {
                 null
             );
             entry.getItemClass = () => {
+                if (this.isInResponsiveContainer()) return 'disabled';
                 return 'dropdown-submenu';
             };
             entry.subMenu = anchoringActions;
@@ -515,62 +544,12 @@ export class ContextMenuComponent implements OnInit {
                 null
             );
             entry.getItemClass = () => {
+                if (this.isInResponsiveContainer()) return 'disabled';
                 return 'dropdown-submenu';
             };
             entry.subMenu = arrangeActions;
             this.menuItems.push(entry);
 
-
-            const groupingActions = new Array<ContextmenuItem>();
-
-            entry = new ContextmenuItem(
-                'Group',
-                () => {
-                    this.hide();
-                    this.editorSession.executeAction('createGroup');
-                }
-            );
-            entry.getIconStyle = () => {
-                return { 'background-image': 'url(designer/assets/images/group.png)' };
-            };
-            entry.shortcut = shortcuts[SHORTCUT_IDS.GROUP_ID];
-            entry.getItemClass = () => {
-                if (!this.selection || this.selection.length < 2) return 'disabled';
-            };
-            groupingActions.push(entry);
-
-            entry = new ContextmenuItem(
-                'Ungroup',
-                () => {
-                    this.hide();
-                    this.editorSession.executeAction('clearGroup');
-                }
-            );
-            entry.getIconStyle = () => {
-                return { 'background-image': 'url(designer/assets/images/ungroup.png)' };
-            };
-            entry.shortcut = shortcuts[SHORTCUT_IDS.UNGROUP_ID];
-            entry.getItemClass = () => {
-                if (!this.hasSelection()) return 'disabled';
-                for (let i = 0; i < this.selection.length; i++) {
-                    const node = this.doc.querySelector("[svy-id='" + this.selection[i] + "']")
-                    if (node && node.hasAttribute('svy-ghosttype') && node.getAttribute('svy-ghosttype') === GHOST_TYPES.GHOST_TYPE_GROUP) {
-                        return '';
-                    }
-                }
-                return 'disabled';
-            };
-            groupingActions.push(entry);
-
-            entry = new ContextmenuItem(
-                'Grouping',
-                null
-            );
-            entry.getItemClass = () => {
-                return 'dropdown-submenu'
-            };
-            entry.subMenu = groupingActions;
-            this.menuItems.push(entry);
         } else { //this is an Responsive Layout
             entry = new ContextmenuItem(
                 'Zoom in',
@@ -614,7 +593,8 @@ export class ContextMenuComponent implements OnInit {
         };
         this.menuItems.push(entry);
 
-        entry = new ContextmenuItem(
+		// deprecated
+        /*entry = new ContextmenuItem(
             'Save as template ...',
             () => {
                 this.hide();
@@ -624,7 +604,7 @@ export class ContextMenuComponent implements OnInit {
         // entry.getIconStyle = () => {
         // 	return {'background-image':"url(designer/assets/images/template.png)"};
         // };
-        this.menuItems.push(entry);
+        this.menuItems.push(entry);*/
 
         entry = new ContextmenuItem(
             'Open in Script Editor',
@@ -670,7 +650,6 @@ export class ContextMenuComponent implements OnInit {
             () => {
                 this.hide();
                 this.selection = [];
-                this.editorSession.updateSelection(this.selection, true, true)
                 //46 == delete key
                 this.editorSession.keyPressed({ 'keyCode': 46 });
             }
@@ -678,6 +657,9 @@ export class ContextMenuComponent implements OnInit {
         // entry.getIconStyle = () => {
         // 	return {'background-image':"url(designer/assets/images/delete.gif)"};
         // };
+        entry.getItemClass = () => {
+            if (!this.canDeleteSelection()) return 'disabled';
+        };
         this.menuItems.push(entry);
 
         entry = new ContextmenuItem(
@@ -703,6 +685,33 @@ export class ContextMenuComponent implements OnInit {
         return false;
     }
 
+    private isInResponsiveContainer(): boolean {
+        if (this.selection && this.selection.length > 0) {
+            for (const selection of this.selection) {
+                const node = this.editorContentService.getContentElement(selection );
+                if (node && node.parentElement.closest('.svy-responsivecontainer')) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    private canDeleteSelection() : boolean{
+         if (this.selection && this.selection.length > 0) {
+            for (const selection of this.selection) {
+                const node = this.editorContentService.getContentElement(selection );
+                if (node) {
+                    if (node.parentElement.closest('.svy-listformcomponent')) return false;
+                    if (node.parentElement.closest('.svy-formcomponent')) return false;
+                    if (node.parentElement.closest('.inherited_element')) return false;
+                }
+            }
+        }
+        else return false;
+        return true;
+    }
+    
     private isAnchored(anchor: number): boolean {
         if (this.selection && this.selection.length == 1) {
             if (this.selectionAnchor == 0)
@@ -718,8 +727,7 @@ export class ContextMenuComponent implements OnInit {
         if (this.selection && this.selection.length == 1) {
             const obj = {};
             const nodeid = this.selection[0];
-            const frameElem = this.doc.querySelector('iframe');
-            const node = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+            const node = this.editorContentService.getContentElement(this.selection[0] );
             if (node && node.hasAttribute('svy-anchors')) {
                 let beanAnchor = parseInt(node.getAttribute('svy-anchors'));
                 if (beanAnchor == 0)
@@ -779,7 +787,7 @@ export class ContextMenuComponent implements OnInit {
     }
 
     private convertToContentPoint(point: { x?: number; y?: number; left?: number; top?: number }) {
-        const glasspane = this.doc.querySelector('.contentframe-overlay');
+        const glasspane = this.editorContentService.getGlassPane();
         const frameRect = glasspane.getBoundingClientRect();
 
         if (point.x && point.y) {
@@ -802,6 +810,11 @@ export class ContextmenuItem {
 
     constructor(
         public text: string,
-        public execute: () => void) {
+        private functionToExecute: () => void) {
+    }
+    
+    public execute() {
+        this.functionToExecute();
+        return false;
     }
 }

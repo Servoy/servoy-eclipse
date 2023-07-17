@@ -53,6 +53,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.MoveInResponsiveL
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenContainedFormHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenFormHierarchyHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenPropertiesWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RevertFormCommand;
@@ -60,14 +61,19 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetPropertiesHand
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetSelectionHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SpacingCentersPack;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.StyleVariantsHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositioner;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -114,6 +120,10 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("z_order_bring_to_front", new ZOrderCommand(editorPart, selectionProvider, "z_order_bring_to_front"));
 		configuredHandlers.put("z_order_send_to_back", new ZOrderCommand(editorPart, selectionProvider, "z_order_send_to_back"));
 
+		configuredHandlers.put("addStyleVariantFor", new StyleVariantsHandler());
+		configuredHandlers.put("editStyleVariantsFor", new StyleVariantsHandler());
+		configuredHandlers.put("getStyleVariantsFor", new StyleVariantsHandler());
+
 		configuredHandlers.put("horizontal_spacing", new SpacingCentersPack(editorPart, selectionProvider));
 		configuredHandlers.put("vertical_spacing", new SpacingCentersPack(editorPart, selectionProvider));
 		configuredHandlers.put("horizontal_centers", new SpacingCentersPack(editorPart, selectionProvider));
@@ -148,6 +158,17 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("openFormHierarchy", new OpenFormHierarchyHandler(selectionProvider));
 		configuredHandlers.put("updatePaletteOrder", new UpdatePaletteOrder());
 		configuredHandlers.put("openContainedForm", new OpenContainedFormHandler(editorPart));
+		configuredHandlers.put("buildTiNG", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				CopySourceFolderAction copySourceFolderAction = new CopySourceFolderAction();
+				copySourceFolderAction.run();
+				return null;
+			}
+		});
 		configuredHandlers.put("setInlineEditMode", new IServerService()
 		{
 
@@ -192,6 +213,17 @@ public class EditorServiceHandler implements IServerService
 				{
 					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomIn((LayoutContainer)currentPersist);
 				}
+				return null;
+			}
+		});
+
+		configuredHandlers.put("consoleLog", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				System.out.println(args.optString("message", ""));
 				return null;
 			}
 		});
@@ -252,6 +284,10 @@ public class EditorServiceHandler implements IServerService
 				{
 					String showValue = args.getString("show");
 					Activator.getDefault().toggleShow(showValue);
+					if (Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER.equals(showValue))
+					{
+						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+					}
 					return Activator.getDefault().getPreferenceStore().contains(showValue)
 						? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(showValue)) : Boolean.FALSE;
 				}
@@ -298,11 +334,25 @@ public class EditorServiceHandler implements IServerService
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER))
 							: Boolean.TRUE;
 					}
+					if (args.has("sameSizeIndicator"))
+					{
+						return Boolean.valueOf(new DesignerPreferences().getShowSameSizeFeedback());
+					}
+					if (args.has("anchoringIndicator"))
+					{
+						return Boolean.valueOf(new DesignerPreferences().getShowAnchorFeedback());
+					}
 					if (args.has("isHideInherited"))
 					{
 						RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
 						return Boolean.valueOf(rfbVisualFormEditorDesignPage != null
 							? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED) : null);
+					}
+					if (args.has("showI18NValues"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER))
+							: Boolean.TRUE;
 					}
 				}
 				return Boolean.FALSE;
@@ -320,6 +370,19 @@ public class EditorServiceHandler implements IServerService
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
 				}
 
+				return null;
+			}
+		});
+		configuredHandlers.put("initialized", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				// first set focus is too early, make sure focus is properly set
+				if (editorPart == PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
+				{
+					editorPart.setFocus();
+				}
 				return null;
 			}
 		});
@@ -487,6 +550,21 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 
+		});
+
+		configuredHandlers.put("openConfigurator", new OpenPropertiesWizardHandler(selectionProvider));
+		configuredHandlers.put("getWizardProperties", new GetWizardProperties());
+
+		configuredHandlers.put("getVariantsForCategory", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+				String category = args.getString("variantCategory");
+				JSONArray variants = fl.getVariantsHandler().getVariantsForCategory(category);
+				return variants;
+			}
 		});
 	}
 

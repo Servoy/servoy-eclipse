@@ -1,70 +1,72 @@
-import { IConverter, PropertyContext, ConverterService } from '../../sablo/converter.service';
-import { ChangeAwareState, IChangeAwareValue, instanceOfChangeAwareValue,  } from '@servoy/public';
-import { ComponentModel } from './component_converter';
+import { ChangeAwareState, ConverterService, IChangeAwareValue, instanceOfChangeAwareValue } from '../../sablo/converter.service';
+import { ChildComponentPropertyValue, ComponentType } from './component_converter';
+import { IType, IPropertyContext, TypesRegistry,  } from '../../sablo/types_registry';
 
-export class FormcomponentConverter implements IConverter {
+export class FormcomponentType implements IType<FormComponentValue> {
 
-    constructor( private converterService: ConverterService) {
+    public static readonly TYPE_NAME = 'formcomponent';
+
+    constructor(private converterService: ConverterService, private typesRegistry: TypesRegistry) {
     }
-    fromServerToClient(serverSentData: any, currentClientData: FormComponentState, propertyContext: PropertyContext): FormComponentState {
-        let conversionInfo = null;
-        let state = currentClientData;
-        if ( state == null ) {
-            state = new FormComponentState(serverSentData.absoluteLayout,
-            serverSentData.childElements,
-            serverSentData.formHeight,
-            serverSentData.formWidth,
-            serverSentData.startName,
-            serverSentData.useCssPosition,
-            serverSentData.uuid);
-        }
-        if ( serverSentData[ConverterService.TYPES_KEY] ) {
-            conversionInfo = serverSentData[ConverterService.TYPES_KEY];
-            delete serverSentData[ConverterService.TYPES_KEY];
-        }
 
-        for ( const key of Object.keys(serverSentData) ) {
-            let elem = serverSentData[key];
-            if (conversionInfo?.[key]) state.conversionInfo[key] = conversionInfo[key];
-            state[key] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo?.[key], currentClientData ? currentClientData[key] : undefined, propertyContext );
+    fromServerToClient(serverSentData: any, currentClientData: FormComponentValue, propertyContext: IPropertyContext): FormComponentValue {
+        if (!serverSentData) return null;
 
-            if (instanceOfChangeAwareValue(elem)) {
-                // child is able to handle it's own change mechanism
-                elem.getStateHolder().setChangeListener(() => {
-                  state.notifyChangeListener();
-                });
-            }
-            if ( key === 'childElements' && elem ) {
-                for ( const i of Object.keys(elem)) {
-                    const comp = elem[i];
-                    if (instanceOfChangeAwareValue(comp)) {
-                        comp.getStateHolder().setChangeListener(() => {
-                          state.notifyChangeListener();
-                        });
-                    }
+        let formComponentPropertyValue = currentClientData;
+        if (!formComponentPropertyValue) formComponentPropertyValue = new FormComponentValue(serverSentData.absoluteLayout,
+                                            serverSentData.childElements,
+                                            serverSentData.formHeight,
+                                            serverSentData.formWidth,
+                                            serverSentData.startName,
+                                            serverSentData.useCssPosition,
+                                            serverSentData.uuid);
+
+        if (serverSentData.childElements) {
+            if (!formComponentPropertyValue.childElements) formComponentPropertyValue.childElements = [];
+            else formComponentPropertyValue.childElements.length = formComponentPropertyValue.childElements.length;
+
+            for (let idx = 0; idx < serverSentData.childElements.length; idx++) {
+                let childCompElem: ChildComponentPropertyValue;
+
+                formComponentPropertyValue.childElements[idx] = childCompElem = this.converterService.convertFromServerToClient(serverSentData.childElements[idx],
+                        this.typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
+                        currentClientData && currentClientData.childElements ? currentClientData.childElements[idx] : undefined,
+                        undefined, undefined, propertyContext);
+
+                if (instanceOfChangeAwareValue(childCompElem)) {
+                    childCompElem.getInternalState().setChangeListener((doNotPush?: boolean) => {
+                        formComponentPropertyValue.markAllChanged(true);
+                    });
                 }
             }
         }
 
-        return state;
+        return formComponentPropertyValue;
     }
 
-    fromClientToServer(newClientData: FormComponentState, oldClientData: FormComponentState): any {
-        if ( !newClientData ) return null;
+    fromClientToServer(newClientData: FormComponentValue, oldClientData: FormComponentValue, propertyContext: IPropertyContext): [any, FormComponentValue] | null {
+        if (!newClientData) return null;
         // only childElements are pushed.
-        const formState = newClientData.getStateHolder();
-        const changes = this.converterService.convertFromClientToServer( newClientData['childElements'], formState.conversionInfo['childElements'],
-                                                                            oldClientData ? oldClientData['childElements'] : null );
-        return changes;
+        let changes = null;
+        if (newClientData.childElements) {
+            changes = [];
+            for (let idx = 0; idx < newClientData.childElements.length; idx++) {
+                changes[idx] = this.converterService.convertFromClientToServer(newClientData.childElements[idx],
+                        this.typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
+                        oldClientData && oldClientData.childElements ? oldClientData.childElements[idx] : null, propertyContext)[0];
+            }
+        }
+        newClientData.clearChanges();
+        return [changes, newClientData];
     }
+
 }
 
-export class FormComponentState extends ChangeAwareState implements IChangeAwareValue {
+export class FormComponentValue extends ChangeAwareState implements IChangeAwareValue {
 
-    conversionInfo: any = {};
     constructor(
         public absoluteLayout: boolean,
-        public childElements: ComponentModel[],
+        public childElements: ChildComponentPropertyValue[],
         public formHeight: number,
         public formWidth: number,
         public startName: string,
@@ -73,8 +75,9 @@ export class FormComponentState extends ChangeAwareState implements IChangeAware
         super();
     }
 
-    getStateHolder(): FormComponentState {
+    getInternalState(): FormComponentValue {
         return this;
     }
+
 }
 

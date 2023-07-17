@@ -18,12 +18,7 @@ package com.servoy.eclipse.ui.editors.table;
 
 import java.util.Iterator;
 
-import org.eclipse.core.databinding.observable.AbstractObservable;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -43,48 +38,16 @@ public class AggregationColumnEditingSupport extends EditingSupport
 	private final ITable table;
 	private final CellEditor editor;
 	private String[] columns;
-	private final IObservable observable;
+	private final ChangeSupportObservable observable;
 
 	public AggregationColumnEditingSupport(ITable table, TreeViewer tv)
 	{
 		super(tv);
 		this.table = table;
 		updateColumns();
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-		observable = new AbstractObservable(Realm.getDefault())
-		{
-			@Override
-			public void addChangeListener(IChangeListener listener)
-			{
-				changeSupport.addChangeListener(listener);
-			}
-
-			@Override
-			public void removeChangeListener(IChangeListener listener)
-			{
-				changeSupport.removeChangeListener(listener);
-			}
-
-			public boolean isStale()
-			{
-				return false;
-			}
-		};
+		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 		editor = new ComboBoxCellEditor(tv.getTree(), columns, SWT.READ_ONLY);
 	}
-
-	private final ChangeSupport changeSupport;
 
 	public void addChangeListener(IChangeListener listener)
 	{
@@ -107,7 +70,7 @@ public class AggregationColumnEditingSupport extends EditingSupport
 			if (!column.getDataProviderID().equals(aggregateVariable.getDataProviderIDToAggregate()))
 			{
 				aggregateVariable.setDataProviderIDToAggregate(column.getDataProviderID());
-				changeSupport.fireEvent(new ChangeEvent(observable));
+				observable.fireChangeEvent();
 				getViewer().update(element, null);
 			}
 		}

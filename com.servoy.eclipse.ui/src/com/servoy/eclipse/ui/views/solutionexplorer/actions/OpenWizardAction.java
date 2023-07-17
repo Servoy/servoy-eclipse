@@ -90,7 +90,7 @@ public class OpenWizardAction extends Action
 			wizard.init(PlatformUI.getWorkbench(), selection);
 			initWizard(wizard);
 			// Instantiates the wizard container with the wizard and opens it
-			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
+			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard)
 			{
 				private Button restoreDefault = null;
 				private Button copyWarToCmd = null;
@@ -110,7 +110,7 @@ public class OpenWizardAction extends Action
 					}
 					else
 					{
-						super.setShellStyle(SWT.CLOSE | SWT.APPLICATION_MODAL | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
+						super.setShellStyle(SWT.CLOSE | SWT.PRIMARY_MODAL | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
 					}
 				}
 
@@ -186,10 +186,11 @@ public class OpenWizardAction extends Action
 							@Override
 							public void widgetSelected(SelectionEvent e)
 							{
-								((ICopyWarToCommandLineWizard)wizard).copyWarToCommandLine();
+								String extraInfoForClient = ((ICopyWarToCommandLineWizard)wizard).copyWarToCommandLine();
 								MessageBox box = new MessageBox(parent.getShell(), SWT.OK);
 								box.setText("War Export - cmd. line args");
-								box.setMessage("Command line war export equivalent (to this wizard war export) was copied to clipboard.");
+								box.setMessage("Command for command line war exporter (equivalent to this wizard war export) was copied to clipboard." +
+									(extraInfoForClient != null ? "\n\n" + extraInfoForClient : ""));
 								box.open();
 							}
 

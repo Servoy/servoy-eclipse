@@ -290,6 +290,8 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 	public boolean isEnabled()
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
-		return node.getType() == UserNodeType.ALL_WEB_PACKAGE_PROJECTS || node.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES;
+		if (node != null)
+			return node.getType() == UserNodeType.ALL_WEB_PACKAGE_PROJECTS || node.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES;
+		return false;
 	}
 }

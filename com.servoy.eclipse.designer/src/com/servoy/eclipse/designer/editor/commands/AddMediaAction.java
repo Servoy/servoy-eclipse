@@ -40,7 +40,7 @@ import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Action to add an image in form designer, show media selection dialog.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -62,7 +62,7 @@ public class AddMediaAction extends DesignerToolbarAction
 		final FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution((IPersist)editPart.getModel());
 		final TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, new MediaContentProvider(
 			flattenedSolution, null, null), new SolutionContextDelegateLabelProvider(new MediaLabelProvider(), flattenedSolution.getSolution()), null, null,
-			SWT.NONE, "Please select image", new MediaContentProvider.MediaListOptions(false), null, false, TreeSelectDialog.MEDIA_DIALOG, null);
+			SWT.NONE, "Please select image", new MediaContentProvider.MediaListOptions(false), null, false, TreeSelectDialog.MEDIA_DIALOG, null, false);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)

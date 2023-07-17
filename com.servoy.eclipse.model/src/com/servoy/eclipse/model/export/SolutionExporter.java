@@ -76,19 +76,15 @@ public class SolutionExporter
 		AbstractRepository rep = (AbstractRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 		IXMLExporter exporter = as.createXMLExporter(rep, sm, userChannel, Settings.getInstance(), as.getDataServer(), as.getClientId(), eeI18NHelper);
 
-		ITableDefinitionsAndSecurityBasedOnWorkspaceFiles tableDefManager = null;
+		ITableDefinitionsAndSecurityBasedOnWorkspaceFiles tableDefAndSecFromFiles = null;
 		IMetadataDefManager metadataDefManager = null;
-		if (dbDown || exportModel.isExportUsingDbiFileInfoOnly())
+		Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(
+			activeSolution, exportModel.isExportReferencedModules(), exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(),
+			exportModel.isExportMetaData());
+		if (defManagers != null)
 		{
-			Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(
-				activeSolution,
-				exportModel.isExportReferencedModules(), exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(),
-				exportModel.isExportMetaData());
-			if (defManagers != null)
-			{
-				tableDefManager = defManagers.getLeft();
-				metadataDefManager = defManagers.getRight();
-			}
+			tableDefAndSecFromFiles = defManagers.getLeft();
+			metadataDefManager = defManagers.getRight();
 		}
 		final String[] warningMessage = new String[] { "" };
 		if (exportModel.isExportSampleData() && dbDown)
@@ -101,13 +97,14 @@ public class SolutionExporter
 		}
 		if (!"".equals(warningMessage[0]))
 		{
-			userChannel.displayWarningMessage("Export solution from database files (database server not accesible)", warningMessage[0]);
+			userChannel.displayWarningMessage("Export solution from database files (database server not accesible)", warningMessage[0], false);
 		}
 
 		exporter.exportSolutionToFile(activeSolution, exportFile, ClientVersion.getVersion(), ClientVersion.getReleaseNumber(),
 			exportModel.isExportMetaData() && !dbDown, exportModel.isExportSampleData() && !dbDown, exportModel.getNumberOfSampleDataExported(),
 			exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
-			tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null,
+			tableDefAndSecFromFiles, exportModel.isExportUsingDbiFileInfoOnly(), metadataDefManager, exportSolution,
+			exportModel.useImportSettings() ? exportModel.getImportSettings() : null,
 			modulesWebPackages, exportVersions);
 	}
 }

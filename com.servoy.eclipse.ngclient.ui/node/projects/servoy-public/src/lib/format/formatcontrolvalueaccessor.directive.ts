@@ -5,6 +5,7 @@ import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
 import { DOCUMENT } from '@angular/common';
 import { LoggerFactory, LoggerService } from '../logger.service';
+import { DateTime } from 'luxon';
 
 
 class NumberParser {
@@ -27,6 +28,13 @@ class NumberParser {
   }
 }
 
+/**
+  * This is the format directive [svyFormat]="format" that can format the dataprovider value in a input field and parse the value back when the user changes the value.
+  * this is an Angular  ControlValueAccessor  that sits between the angular component ( {@link ServoyBaseComponent } and the dom element, it writes the formatted value to the dom 
+  * and parses and pushes the parsed value back into the component.
+  *
+  * it uses the {@link FormattingService} for this. 
+  */
 @Directive({
 
     // eslint-disable-next-line @angular-eslint/directive-selector
@@ -38,7 +46,7 @@ class NumberParser {
     }]
 })
 export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnChanges {
-    private static DATETIMEFORMAT: Format = {display:'yyyy-MM-ddTHH:mm:ss', type:'DATETIME'} as Format;
+    private static DATETIMEFORMAT: Format = {display:'yyyy-MM-dd\'T\'HH:mm:ss', type:'DATETIME'} as Format;
     private static DATEFORMAT: Format = {display:'yyyy-MM-dd', type:'DATETIME'} as Format;
     private static MONTHFORMAT: Format = {display:'yyyy-MM', type:'DATETIME'} as Format;
     private static WEEKFORMAT: Format = {display:'YYYY-[W]WW', type:'DATETIME'} as Format;
@@ -65,7 +73,8 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     @HostListener('blur', []) touched() {
         this.onTouchedCallback();
         this.hasFocus = false;
-        if (this.format.display && !this.format.isMask) {
+        const inputType = this.getType();
+        if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
             this.writeValue(this.realValue);
         }
     }
@@ -80,16 +89,11 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     @HostListener('change', ['$event.target.value']) input(value: any) {
         let data = value;
         const inputType = this.getType();
-        if (inputType === 'datetime-local') {
-             data = this.formatService.unformat(value, FormatDirective.DATETIMEFORMAT.display, FormatDirective.DATETIMEFORMAT.type, this.realValue);
-        } else if (inputType === 'date') {
-             data = this.formatService.unformat(value, FormatDirective.DATEFORMAT.display, FormatDirective.DATEFORMAT.type, this.realValue);
-        } else if (inputType === 'time') {
-             data = this.formatService.unformat(value, FormatDirective.TIMEFORMAT.display, FormatDirective.TIMEFORMAT.type, this.realValue);
-        } else if (inputType === 'month') {
-             data = this.formatService.unformat(value, FormatDirective.MONTHFORMAT.display, FormatDirective.MONTHFORMAT.type, this.realValue);
-        } else if (inputType === 'week') {
-             data = this.formatService.unformat(value, FormatDirective.WEEKFORMAT.display, FormatDirective.WEEKFORMAT.type, this.realValue);
+        if (inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week') {
+             const luxonDate = DateTime.fromISO(data);
+             if (luxonDate.isValid)
+                data = luxonDate.toJSDate();
+            else data = null;
         } else if (inputType === 'number') {
              data = FormatDirective.BROWSERNUMBERFORMAT.parse(value);
         } else if (inputType === 'email') {

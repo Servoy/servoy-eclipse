@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 2022.3.5.3747_LTS
+Bundle-Version: 2023.3.2.3844
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -34,6 +34,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
  org.eclipse.core.databinding,
  org.eclipse.core.databinding.beans,
+ org.eclipse.core.databinding.property,
  org.eclipse.jface.databinding,
  org.eclipse.team.core,
  net.sourceforge.sqlexplorer;resolution:=optional,
@@ -67,13 +68,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  servoy_ngclient,
- org.apache.commons.io,
  org.maven.ide.eclipse.grouplayout,
  org.apache.commons.commons-dbcp2,
  org.eclipse.jface,
  sj.jsonschemavalidation,
- org.apache.httpcomponents.httpclient,
- org.apache.httpcomponents.httpcore,
+ org.apache.httpcomponents.client5.httpclient5,
+ org.apache.httpcomponents.core5.httpcore5,
  com.servoy.eclipse.ui.tweaks,
  org.apache.commons.codec,
  org.eclipse.help,
@@ -81,7 +81,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.equinox.security,
  com.servoy.eclipse.ngclient.ui,
  org.eclipse.e4.ui.css.swt.theme,
- com.equo.chromium;resolution:=optional
+ com.equo.chromium;resolution:=optional,
+ org.eclipse.nebula.widgets.nattable.core,
+ org.eclipse.nebula.widgets.nattable.extension.nebula,
+ org.eclipse.e4.ui.css.swt,
+ org.eclipse.nebula.widgets.nattable.extension.e4
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,
@@ -89,6 +93,7 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.actions,
  com.servoy.eclipse.ui.browser,
  com.servoy.eclipse.ui.dialogs,
+ com.servoy.eclipse.ui.dialogs.autowizard,
  com.servoy.eclipse.ui.editors,
  com.servoy.eclipse.ui.editors.table,
  com.servoy.eclipse.ui.export,
@@ -107,6 +112,7 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
  com.servoy.eclipse.ui.wizards,
  com.servoy.eclipse.ui.wizards.exportsolution.pages
+Import-Package: org.apache.commons.io;version="2.8.0"
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.ui

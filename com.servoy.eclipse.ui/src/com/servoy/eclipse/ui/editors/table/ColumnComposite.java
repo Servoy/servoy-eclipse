@@ -20,11 +20,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.core.databinding.observable.value.IValueChangeListener;
-import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -33,9 +29,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -63,6 +57,7 @@ import org.eclipse.swt.widgets.Scrollable;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -140,70 +135,66 @@ public class ColumnComposite extends Composite
 		final GroupLayout groupLayout = new GroupLayout(container);
 		final GroupLayout tableLayout = new GroupLayout(container);
 
-		tableViewer.addSelectionChangedListener(new ISelectionChangedListener()
-		{
-			public void selectionChanged(SelectionChangedEvent event)
+		tableViewer.addSelectionChangedListener(event -> {
+			ISelection sel = tableViewer.getSelection();
+			if (sel instanceof IStructuredSelection)
 			{
-				ISelection sel = tableViewer.getSelection();
-				if (sel instanceof IStructuredSelection)
+				final Object first = ((IStructuredSelection)sel).getFirstElement();
+				if (first instanceof Column)
 				{
-					final Object first = ((IStructuredSelection)sel).getFirstElement();
-					if (first instanceof Column)
+					Column c = (Column)first;
+					boolean b = (c.getColumnInfo() != null);
+					if (!b)
 					{
-						Column c = (Column)first;
-						boolean b = (c.getColumnInfo() != null);
-						if (!b)
+						// if we are only using the eclipse column info manager we can create empty column
+						// info, because it will not be saved to disk unless the column exists in the DB;
+						// if we are using old table based column info provider, creating new column info would
+						// result in it being written into the database even if the column is not...
+						DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
+						if (dmm != null)
 						{
-							// if we are only using the eclipse column info manager we can create empty column
-							// info, because it will not be saved to disk unless the column exists in the DB;
-							// if we are using old table based column info provider, creating new column info would
-							// result in it being written into the database even if the column is not...
-							DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
-							if (dmm != null)
+							try
 							{
-								try
-								{
-									dmm.createNewColumnInfo(c, false);
-									b = true;
-								}
-								catch (RepositoryException e)
-								{
-									ServoyLog.logWarning("Cannot create new column info in table editor", e);
-								}
+								dmm.createNewColumnInfo(c, false);
+								b = true;
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logWarning("Cannot create new column info in table editor", e);
 							}
 						}
-						if (b && !tabFolder.isVisible())
-						{
-							container.setLayout(groupLayout);
-							myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-							container.layout(true);
-						}
-						if (!b && tabFolder.isVisible())
-						{
-							container.setLayout(tableLayout);
-							myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-							container.layout(true);
-						}
-						tabFolder.setVisible(b);
-						if (b) propagateSelection(c);
-						tableViewer.getTable().setToolTipText(c.getNote());
-						ColumnComposite.this.layout(true, true);
-
-						Display.getDefault().asyncExec(new Runnable()
-						{
-							public void run()
-							{
-								tableViewer.reveal(first);
-							}
-						});
 					}
-					else
+					if (b && !tabFolder.isVisible())
 					{
-						tabFolder.setVisible(false);
+						container.setLayout(groupLayout);
+						myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+						container.layout(true);
+					}
+					if (!b && tabFolder.isVisible())
+					{
 						container.setLayout(tableLayout);
 						myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 						container.layout(true);
 					}
+					tabFolder.setVisible(b);
+					if (b) propagateSelection(c);
+					tableViewer.getTable().setToolTipText(c.getNote());
+					ColumnComposite.this.layout(true, true);
+
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							tableViewer.reveal(first);
+						}
+					});
+				}
+				else
+				{
+					tabFolder.setVisible(false);
+					container.setLayout(tableLayout);
+					myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+					container.layout(true);
 				}
 			}
 		});
@@ -251,25 +242,13 @@ public class ColumnComposite extends Composite
 			autoEnterTabItem.setText("Auto Enter");
 			columnAutoEnterComposite = new ColumnAutoEnterComposite(tabFolder, flattenedSolution, SWT.NONE);
 			autoEnterTabItem.setControl(columnAutoEnterComposite);
-			columnAutoEnterComposite.addChangeListener(new IChangeListener()
-			{
-				public void handleChange(ChangeEvent event)
-				{
-					tableViewer.refresh();
-				}
-			});
+			columnAutoEnterComposite.addChangeListener(event -> tableViewer.refresh());
 		}
 
 		columnDetailsComposite = new ColumnDetailsComposite(tabFolder, SWT.NONE, isViewFoundsetTable);
 		detailsTabItem.setControl(columnDetailsComposite);
 
-		columnDetailsComposite.addValueChangeListener(new IValueChangeListener()
-		{
-			public void handleValueChange(ValueChangeEvent event)
-			{
-				tableViewer.refresh();
-			}
-		});
+		columnDetailsComposite.addValueChangeListener(event -> tableViewer.refresh());
 
 		//TODO conversion and validation support will be added later for view foundset tables SVY-13547
 		if (!isViewFoundsetTable)
@@ -400,7 +379,8 @@ public class ColumnComposite extends Composite
 	{
 		//JFaceResources.getColorRegistry().get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_END"); is the
 		//closest match, but the label background is slightly visible
-		Color backgroundColor = JFaceResources.getColorRegistry().get("servoy_gray_background");
+		Color backgroundColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+			.get("org.eclipse.ui.workbench.HOVER_BACKGROUND");
 		if (backgroundColor == null)
 		{
 			JFaceResources.getColorRegistry().put("servoy_gray_background", new RGB(38, 38, 38));
@@ -547,17 +527,12 @@ public class ColumnComposite extends Composite
 		delColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
 		delColumn.setToolTipText("Delete column");
 
-		editingSupport.addChangeListener(new IChangeListener()
-		{
-			public void handleChange(ChangeEvent event)
+		editingSupport.addChangeListener(event -> {
+			if (event.getSource() instanceof ColumnSeqTypeEditingObservable)
 			{
-				if (event.getSource() instanceof ColumnSeqTypeEditingObservable)
-				{
-					columnDetailsComposite.refresh();
-				}
+				columnDetailsComposite.refresh();
 			}
 		});
-
 
 		tableContainer.setLayout(getTableLayout());
 

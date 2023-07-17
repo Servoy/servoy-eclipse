@@ -48,6 +48,7 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
@@ -604,9 +605,9 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						{
 							public Object visit(IPersist o)
 							{
-								if (o instanceof ISupportExtendsID && changed.getID() == ((ISupportExtendsID)o).getExtendsID() ||
+								if (o instanceof ISupportExtendsID && (changed.getID() == ((ISupportExtendsID)o).getExtendsID() ||
 									(((ISupportExtendsID)changed).getExtendsID() > 0 &&
-										((ISupportExtendsID)changed).getExtendsID() == ((ISupportExtendsID)o).getExtendsID()))
+										((ISupportExtendsID)changed).getExtendsID() == ((ISupportExtendsID)o).getExtendsID())))
 								{
 									return o;
 								}
@@ -748,6 +749,13 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						propertySheet.partClosed(this);
 						propertySheet.partActivated(this);
 					}
+
+					ContentOutline contentOutline = (ContentOutline)getEditorSite().getPage().findView("org.eclipse.ui.views.ContentOutline");
+					if (contentOutline != null)
+					{
+						contentOutline.partClosed(this);
+						contentOutline.partActivated(this);
+					}
 					// set up the editor actions, this is normally done in part activation listener
 					getEditorSite().getActionBarContributor().setActiveEditor(this);
 				}
@@ -865,6 +873,11 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		IViewPart contentOutline = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView("org.eclipse.ui.views.ContentOutline");
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().hideView(contentOutline);
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("org.eclipse.ui.views.ContentOutline");
+
+		if (this != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
+		{
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(this);
+		}
 	}
 
 	protected void createDesignPage(DesignPagetype designPagetype) throws PartInitException

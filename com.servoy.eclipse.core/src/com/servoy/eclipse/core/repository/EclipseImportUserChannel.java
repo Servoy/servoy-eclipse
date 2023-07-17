@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
@@ -37,7 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -112,7 +113,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				{
 					final MessageDialog dialog = new MessageDialog(shell, "User groups used by imported solution already exist", null,
 						"Do you want to configure security rights on existing groups?\nIf you choose no then no security rights will be imported for existing groups.",
-						MessageDialog.WARNING, new String[] { "Yes to all", "No to all" }, 0);
+						MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
 					retval = dialog.open();
 				}
 			});
@@ -188,6 +189,14 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		return UIUtils.askQuestion(shell, "Sample Data", "Do you want to import the sample data contained in the import?") ? OK_ACTION : CANCEL_ACTION;
 	}
+
+	@Override
+	public int askImportDatasources()
+	{
+		return UIUtils.askQuestion(shell, "Datasources", "Do you want to overwrite the DBI files in the workspace with those contained in the import?")
+			? OK_ACTION : CANCEL_ACTION;
+	}
+
 
 	public int askMediaChangedAction(String name)
 	{
@@ -380,8 +389,9 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			else
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel();
-				String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(false, true, true, false);
-				ServerConfig serverConfig = ApplicationServerRegistry.get().getServerManager().getServerConfig(name);
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+				String[] serverNames = serverManager.getServerNames(false, true, true, false);
+				ServerConfig serverConfig = serverManager.getServerConfig(name);
 				if (serverConfig != null)
 				{
 					if (!serverConfig.isEnabled())
@@ -398,7 +408,6 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						try
 						{
 							serverConfig = serverConfig.getEnabledCopy(true);
-							IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 							serverManager.testServerConfigConnection(serverConfig, 0);
 							serverManager.saveServerConfig(name, serverConfig);
 							// return retry so importer picks up the enabled server
@@ -415,20 +424,20 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				else
 				{
 					IServerInternal serverPrototype = null;
-					ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
+					ServerConfig[] serverConfigs = serverManager.getServerConfigs();
 					for (ServerConfig sc : serverConfigs)
 					{
 						if (sc.isEnabled() && sc.isPostgresDriver())
 						{
-							serverPrototype = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(sc.getServerName());
+							serverPrototype = (IServerInternal)serverManager.getServer(sc.getServerName());
 							if (serverPrototype != null && serverPrototype.isValid())
 							{
-								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), DatabaseUtils.getPostgresServerUrl(sc, name),
+								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), EclipseDatabaseUtils.getPostgresServerUrl(sc, name),
 									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
 									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
 									sc.getQuoteList(), sc.isClientOnlyConnections());
-								if (ApplicationServerRegistry.get().getServerManager().validateServerConfig(null, serverConfig) != null)
+								if (serverManager.validateServerConfig(null, serverConfig) != null)
 								{
 									// something is wrong
 									serverConfig = null;
@@ -476,8 +485,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						}
 						try
 						{
-							ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
-							ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
+							serverManager.testServerConfigConnection(serverConfig, 0);
+							serverManager.saveServerConfig(null, serverConfig);
 						}
 						catch (Exception ex)
 						{
@@ -794,5 +803,26 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	public boolean allowImportEmptySolution()
 	{
 		return true;
+	}
+
+	@Override
+	public void displayWarningMessage(String title, String message, boolean scrollableDialog)
+	{
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				if (scrollableDialog)
+				{
+					UIUtils.showScrollableDialog(Display.getDefault().getActiveShell(), IMessageProvider.WARNING, "War export", title,
+						message);
+				}
+				else
+				{
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), title,
+						message);
+				}
+			}
+		});
 	}
 }

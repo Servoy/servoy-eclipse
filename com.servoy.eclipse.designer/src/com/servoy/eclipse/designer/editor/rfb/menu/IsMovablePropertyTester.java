@@ -52,7 +52,7 @@ public class IsMovablePropertyTester extends PropertyTester
 		if (persist != null)
 		{
 			Form form = (Form)persist.getAncestor(IRepository.FORMS);
-			if (form != null && form.isResponsiveLayout())
+			if (form != null && (form.isResponsiveLayout() || persist.getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) != null))
 			{
 				ISupportChilds persistParent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist), form,
 					persist instanceof ISupportExtendsID ? ((ISupportExtendsID)persist).getRealParent() : persist.getParent());

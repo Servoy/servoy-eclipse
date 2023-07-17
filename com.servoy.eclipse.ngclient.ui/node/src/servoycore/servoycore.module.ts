@@ -10,8 +10,11 @@ import { ServoyCoreFormContainer } from './formcontainer/formcontainer';
 import {AddAttributeDirective} from './addattribute.directive';
 import { ListFormComponent } from './listformcomponent/listformcomponent';
 import { ServoyPublicModule } from '@servoy/public';
-import { LicenseManager, ModuleRegistry, ServerSideRowModelModule, ClientSideRowModelModule } from '@ag-grid-enterprise/all-modules';
 import { AgGridModule } from '@ag-grid-community/angular';
+import { ModuleRegistry } from '@ag-grid-community/core';
+import { LicenseManager } from '@ag-grid-enterprise/core';
+import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
+import {  ServerSideRowModelModule } from '@ag-grid-enterprise/server-side-row-model';
 import { RowRenderer } from './listformcomponent/row-renderer.component';
 import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-responsive-container/formcomponent-responsive-container';
 
@@ -30,7 +33,7 @@ import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-respo
     imports: [CommonModule,
         FormsModule,
         ServoyPublicModule,
-        AgGridModule.withComponents([])
+        AgGridModule
     ],
     providers: [],
     bootstrap: [],
@@ -48,7 +51,7 @@ import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-respo
 export class ServoyCoreComponentsModule {
     constructor() {
         // eslint-disable-next-line max-len
-        LicenseManager.setLicenseKey('CompanyName=Servoy B.V.,LicensedApplication=Servoy,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=7,LicensedProductionInstancesCount=10000,AssetReference=AG-018380,ExpiryDate=11_October_2022_[v2]_MTY2NTQ0MjgwMDAwMA==a725c314c19f2c87b1f6a2f4836eec3e');
+        LicenseManager.setLicenseKey('CompanyName=Servoy B.V.,LicensedApplication=Servoy,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=7,LicensedProductionInstancesCount=-1,AssetReference=AG-031784,SupportServicesEnd=11_November_2023_[v2]_MTY5OTY2MDgwMDAwMA==ef0717137a9846a6aa3a3c8426e308b4');
         ModuleRegistry.registerModules([ServerSideRowModelModule, ClientSideRowModelModule]);
     }
 }

@@ -1,8 +1,8 @@
-import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import {  FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
 import { DOCUMENT } from '@angular/common';
-import tinymce, { RawEditorSettings, Editor } from 'tinymce';
+import tinymce, { RawEditorOptions } from 'tinymce';
 
 @Component({
     selector: 'servoydefault-htmlarea',
@@ -12,17 +12,15 @@ import tinymce, { RawEditorSettings, Editor } from 'tinymce';
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 
     tinyValue: any;
-    tinyConfig: RawEditorSettings = {
+    tinyConfig: RawEditorOptions = {
         suffix: '.min',
         height: '100%',
         menubar: false,
         statusbar: false,
         readonly: false,
-        plugins: 'tabfocus',
-        tabfocus_elements: ':prev,:next',
+        promotion: false,
         toolbar: 'fontselect fontsizeselect | bold italic underline | superscript subscript | undo redo |alignleft aligncenter alignright alignjustify | styleselect | outdent indent bullist numlist'
     };
-    editor: Editor;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected servoyService: ServoyPublicService) {
         super(renderer, cdRef, formattingService, doc);
@@ -47,29 +45,26 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         if (this.onActionMethodID) this.onActionMethodID(new CustomEvent('click'));
     }
 
-    ngOnInit() {
-        super.ngOnInit();
-
+    ngOnInit(){
+        super.ngOnInit(); 
+        
         this.tinyConfig['language'] = this.servoyService.getLocale();
 
         this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0].href + 'tinymce';
 
         // app level configuration
-        let defaultConfiguration = this.servoyService.getUIProperty("config");
+        let defaultConfiguration = this.servoyService.getUIProperty('config');
         if (defaultConfiguration) {
-            try {
-                defaultConfiguration = JSON.parse(defaultConfiguration);
+            if (typeof defaultConfiguration === 'string') {
+                try {
+                    defaultConfiguration = JSON.parse(defaultConfiguration);
+                } catch (e) {
+                    console.error(e);
+                }
             }
-            catch (e) {
-                console.error(e)
-            }
-            for (var key in defaultConfiguration) {
+            for (const key in defaultConfiguration) {
                 if (defaultConfiguration.hasOwnProperty(key)) {
-                    var value = defaultConfiguration[key]
-                    if (key === "plugins") {
-                        value += " tabindex";
-                    }
-                    this.tinyConfig[key] = value;
+                    this.tinyConfig[key] =  defaultConfiguration[key];
                 }
             }
         }
@@ -77,24 +72,22 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         // element level configuration
         let configuration = this.servoyApi.getClientProperty('config');
         if (configuration) {
-            try {
-                configuration = JSON.parse(configuration);
-            }
-            catch (e) {
-                console.error(e)
-            }
-            for (var key in configuration) {
-                if (configuration.hasOwnProperty(key)) {
-                    var value = configuration[key];
-                    if (key === "plugins") {
-                        value += " tabindex";
-                    }
-                    this.tinyConfig[key] = value;
+            if (typeof configuration === 'string') {
+                try {
+                    configuration = JSON.parse(configuration);
+                } catch (e) {
+                    console.error(e);
                 }
             }
-        }   
-    }
+            for (const key in configuration) {
+                if (configuration.hasOwnProperty(key)) {
+                    this.tinyConfig[key] = configuration[key];
+                }
+            }
+        }
 
+    }
+    
     svyOnInit() {
         super.svyOnInit();
         this.tinyValue = this.dataProviderID;
@@ -120,12 +113,15 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
                     case 'editable':
                     case 'readOnly':
                     case 'enabled':
-                        const editable = this.editable && !this.readOnly && this.enabled;
-                        if (this.getEditor()) {
+                        let editable = this.editable && !this.readOnly && this.enabled;
+                        if (tinymce.activeEditor) {
                             if (editable) {
-                                this.getEditor().mode.set("design");
-                            } else {
-                                this.getEditor().mode.set("readonly");
+                                if (!change.firstChange) {
+                                    tinymce.activeEditor.mode.set("design");
+                                }
+                            }
+                            else {
+                                tinymce.activeEditor.mode.set("readonly");
                             }
 
                         }
@@ -140,13 +136,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     getEditor() {
-        return this.editor;
-    }
-
-    public onInit({ event, editor }: any) {
-        this.editor = editor;
-        const editable = this.editable && !this.readOnly && this.enabled;
-        if (!editable) editor.mode.set('readonly')
+        return tinymce.get(this.servoyApi.getMarkupId() + '_editor');
     }
 
     requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
@@ -177,8 +167,8 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
 
     public replaceSelectedText(text: string) {
         this.getEditor().selection.setContent(text);
-        const edContent = this.getEditor().getContent();
-        this.dataProviderID = '<html><body>' + edContent + '</body></html>';
+        var edContent = this.getEditor().getContent();
+        this.dataProviderID = '<html><body>' + edContent + '</body></html>'
         this.pushUpdate();
     }
 

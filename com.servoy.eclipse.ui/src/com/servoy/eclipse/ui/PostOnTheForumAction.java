@@ -22,16 +22,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.wicket.util.string.Strings;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -43,6 +44,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -110,9 +112,9 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 
 				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, StandardCharsets.UTF_8);
 				httpPost.setEntity(entity);
-				HttpResponse response = client.execute(httpPost, context);
+				CloseableHttpResponse response = client.execute(httpPost, context);
 				String content = EntityUtils.toString(response.getEntity());
-				if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK && content.contains("viewtopic.php"))
+				if (response.getCode() == HttpStatus.SC_OK && content.contains("viewtopic.php"))
 				{
 					MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Thank you for posting", null,
 						"You can view your post on the Servoy forum.", MessageDialog.CONFIRM,
@@ -131,7 +133,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 						}
 					}
 				}
-				else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)
+				else if (response.getCode() == HttpStatus.SC_UNAUTHORIZED)
 				{
 					setErrorMessage("Could not login on the forum.");
 				}
@@ -140,9 +142,9 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 					ServoyLog.logInfo("Cannot post to the forum " + EntityUtils.toString(response.getEntity()));
 					setErrorMessage("Cannot post to the forum. Please try again later.");
 				}
-				return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+				return response.getCode() == HttpStatus.SC_OK;
 			}
-			catch (IOException | StorageException e)
+			catch (IOException | StorageException | ParseException e)
 			{
 				ServoyLog.logError(e);
 			}
@@ -185,9 +187,10 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			Label topicLabel = new Label(topLevel, SWT.NONE);
 			topicLabel.setText("Topic");
 			topicLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			FontDescriptor descriptor = FontDescriptor.createFrom(topicLabel.getFont());
-			descriptor = descriptor.setStyle(SWT.BOLD);
-			topicLabel.setFont(descriptor.createFont(getShell().getDisplay()));
+			FontDescriptor descriptor = FontDescriptor.createFrom(topicLabel.getFont()).setStyle(SWT.BOLD);
+			Font font = descriptor.createFont(getShell().getDisplay());
+			topicLabel.setFont(font);
+			topicLabel.addDisposeListener((e) -> descriptor.destroyFont(font));
 
 			topicsCombo = new Combo(topLevel, SWT.READ_ONLY);
 			topicsCombo.setItems(topics);
@@ -201,7 +204,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			Label subjectLabel = new Label(topLevel, SWT.NONE);
 			subjectLabel.setText("Subject");
 			subjectLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			subjectLabel.setFont(descriptor.createFont(getShell().getDisplay()));
+			subjectLabel.setFont(font);
 			subjectText = new Text(topLevel, SWT.BORDER);
 			subjectText.setLayoutData(gridData);
 

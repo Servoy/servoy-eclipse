@@ -429,7 +429,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 				{
 					IBasicWebComponent webComponent = (IBasicWebComponent)persist;
 					String componentType = FormTemplateGenerator.getComponentTypeName(webComponent);
-					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentType);
+					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentType);
 					if (specification != null)
 					{
 						Collection<PropertyDescription> properties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
@@ -476,7 +476,6 @@ public class VisualFormEditorTabSequencePage extends Composite
 				configureButtons();
 			});
 		}).schedule();
-
 	}
 
 	private void addFormComponentProperties(IFormElement persist, Collection<PropertyDescription> properties, List<TabSeqProperty> available,
@@ -523,7 +522,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 							{
 								IBasicWebComponent innerWebComponent = (IBasicWebComponent)p;
 								String innerComponentType = FormTemplateGenerator.getComponentTypeName(innerWebComponent);
-								WebObjectSpecification innerSpecification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+								WebObjectSpecification innerSpecification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 									innerComponentType);
 								if (innerSpecification != null)
 								{

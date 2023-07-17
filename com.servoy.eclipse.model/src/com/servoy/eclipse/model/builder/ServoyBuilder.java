@@ -238,6 +238,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DIFFERENT_RESOURCES_PROJECTS_MARKER_TYPE = _PREFIX + ".differentResourcesProblem";
 	public static final String PROJECT_RELATION_MARKER_TYPE = _PREFIX + ".relationProblem";
 	public static final String MEDIA_MARKER_TYPE = _PREFIX + ".mediaProblem";
+	public static final String VARIANT_MARKER_TYPE = _PREFIX + ".variantProblem";
 	public static final String CALCULATION_MARKER_TYPE = _PREFIX + ".calculationProblem";
 	public static final String SCRIPT_MARKER_TYPE = _PREFIX + ".scriptProblem";
 	public static final String EVENT_METHOD_MARKER_TYPE = _PREFIX + ".eventProblem";
@@ -310,6 +311,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> METHOD_NO_RETURN = new Pair<String, ProblemSeverity>("methodNoReturn",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MEDIA_TIFF = new Pair<String, ProblemSeverity>("mediaTiff", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> VARIANT_ID_UNRESOLVED = new Pair<String, ProblemSeverity>("variantIdUnresolved", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> CALCULATION_FORM_ACCESS = new Pair<String, ProblemSeverity>("calculationFormAccess",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> IMAGE_MEDIA_NOT_SET = new Pair<String, ProblemSeverity>("imageMediaNotSet", ProblemSeverity.WARNING);
@@ -913,7 +915,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		if (o instanceof WebComponent)
 		{
 			String typeName = ((WebComponent)o).getTypeName();
-			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(typeName);
+			WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(typeName);
 			if (spec == null)
 			{
 				if (typeName != null)
@@ -1540,37 +1542,37 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	public static void checkDeprecatedPropertyUsage(IPersist persist, IResource markerResource, IProject project)
 	{
-		if (persist instanceof Solution)
-		{
-			Solution solution = (Solution)persist;
-
-			// loginForm is deprecated, use loginSolution (not needed for WebClient)
-			if (solution.getLoginFormID() > 0)
-			{
-				try
-				{
-					if (solution.getLoginSolutionName() != null)
-					{
-						// login form will be ignored
-						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
-							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
-							"Solution '" + solution.getName() + "' has a loginForm property set which is overridden by the loginSolutionName property.");
-					}
-					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY && solution.getSolutionType() != SolutionMetaData.MOBILE &&
-						solution.getSolutionType() != SolutionMetaData.NG_CLIENT_ONLY)
-					{
-						// loginForm is deprecated
-						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
-							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
-							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead.");
-					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-		}
+//		if (persist instanceof Solution)
+//		{
+//			Solution solution = (Solution)persist;
+//
+//			// loginForm is deprecated, use loginSolution (not needed for WebClient)
+//			if (solution.getLoginFormID() > 0)
+//			{
+//				try
+//				{
+//					if (solution.getLoginSolutionName() != null)
+//					{
+//						// login form will be ignored
+//						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+//							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
+//							"Solution '" + solution.getName() + "' has a loginForm property set which is overridden by the loginSolutionName property.");
+//					}
+//					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY && solution.getSolutionType() != SolutionMetaData.MOBILE &&
+//						solution.getSolutionType() != SolutionMetaData.NG_CLIENT_ONLY)
+//					{
+//						// loginForm is deprecated
+//						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+//							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
+//							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead.");
+//					}
+//				}
+//				catch (Exception e)
+//				{
+//					ServoyLog.logError(e);
+//				}
+//			}
+//		}
 
 		if (persist instanceof Form || persist instanceof Portal)
 		{
@@ -2537,11 +2539,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (server != null) // server may have become invalid in the mean time
 				{
 					List<String> tableNames = server.getTableAndViewNames(true);
-					Iterator<String> tables = tableNames.iterator();
-					while (tables.hasNext())
+					for (String tableName : tableNames)
 					{
-						final String tableName = tables.next();
-
 						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
 							final ITable table = server.getTable(tableName);

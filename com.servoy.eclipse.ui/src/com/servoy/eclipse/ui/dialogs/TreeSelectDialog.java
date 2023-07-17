@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -99,9 +100,12 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	private final IValueEditor valueEditor;
 
+	private final boolean useToggleAll;
+	private String toggleAllCheckBox;
+
 	/**
 	 * Constructs a new TreeSelectDialog.
-	 * 
+	 *
 	 * @param shell
 	 * @param contentProvider
 	 * @param labelProvider
@@ -112,7 +116,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 */
 	public TreeSelectDialog(Shell shell, boolean showFilter, boolean showFilterMenu, int defaultFilterMode, ITreeContentProvider contentProvider,
 		IBaseLabelProvider labelProvider, ViewerComparator comparator, IFilter selectionFilter, int treeStyle, String title, Object input,
-		ISelection selection, boolean allowEmptySelection, String name, IValueEditor valueEditor)
+		ISelection selection, boolean allowEmptySelection, String name, IValueEditor valueEditor, boolean useToggleAll)
 	{
 		super(shell);
 		this.showFilter = showFilter;
@@ -130,6 +134,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		this.allowEmptySelection = allowEmptySelection;
 		this.selection = selection;
 		this.optionalMessage = "";
+		this.useToggleAll = useToggleAll;
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
@@ -145,7 +150,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
 	@Override
@@ -161,7 +166,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	 * The default implementation of this framework method adds standard ok and cancel buttons using the <code>createButton</code> framework method. Subclasses
 	 * may override.
 	 * </p>
-	 * 
+	 *
 	 * @param parent the button bar composite
 	 */
 	@Override
@@ -175,7 +180,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	/**
 	 * Creates and returns the contents of the upper part of this dialog (above the button bar).
-	 * 
+	 *
 	 * @param parent the parent composite to contain the dialog area
 	 * @return the dialog area control
 	 */
@@ -198,12 +203,23 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 		createDialogMessage(composite);
 
+		if (useToggleAll)
+		{
+			setOptionsAreaFactory(createToggleAllOptionsAreaFactory());
+		}
+
 		// options area
 		Control optionsArea = null;
 		if (optionsAreaFactory != null)
 		{
 			optionsArea = optionsAreaFactory.createControl(composite);
 			optionsArea.pack();
+			if (useToggleAll)
+			{
+				Control[] children = ((Composite)optionsArea).getChildren();
+				((Button)children[0]).addListener(SWT.Selection, e -> selectAllPressed());
+				((Button)children[1]).addListener(SWT.Selection, e -> deselectAllPressed());
+			}
 		}
 
 		if (optionsArea == null)
@@ -220,7 +236,10 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 				groupLayout.createSequentialGroup().addContainerGap().add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, treeViewer, GroupLayout.PREFERRED_SIZE,
 						GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(GroupLayout.TRAILING, optionsArea, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addContainerGap()));
+							GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+					.addContainerGap()));
+
+
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
 				GroupLayout.LEADING,
 				groupLayout.createSequentialGroup().add(15, 15, 15).add(treeViewer, GroupLayout.PREFERRED_SIZE, 216, Short.MAX_VALUE).addPreferredGap(
@@ -230,8 +249,28 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 		updateButtons();
 
+		composite.pack();
+
 		// Return results.
 		return composite;
+	}
+
+	private IControlFactory createToggleAllOptionsAreaFactory()
+	{
+		return new IControlFactory()
+		{
+			@Override
+			public Control createControl(Composite composite)
+			{
+				Composite toggleButtonBar = new Composite(composite, SWT.LEFT_TO_RIGHT);
+				toggleButtonBar.setLayout(new RowLayout());
+				Button selectAllButton = new Button(toggleButtonBar, SWT.PUSH);
+				selectAllButton.setText("Select All");
+				Button deselectAllButton = new Button(toggleButtonBar, SWT.PUSH);
+				deselectAllButton.setText("Deselect All");
+				return toggleButtonBar;
+			}
+		};
 	}
 
 	/**
@@ -251,7 +290,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	/**
 	 * Create a new filtered tree viewer in the parent.
-	 * 
+	 *
 	 * @param parent the parent <code>Composite</code>.
 	 */
 	protected FilteredTreeViewer createFilteredTreeViewer(Composite parent)
@@ -286,7 +325,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	/**
 	 * Returns the descriptors for the selected views.
-	 * 
+	 *
 	 * @return the descriptors for the selected views
 	 */
 	public ISelection getSelection()
@@ -296,7 +335,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	/**
 	 * Layout the top control.
-	 * 
+	 *
 	 * @param control the control.
 	 */
 	protected void layoutTopControl(Control control)
@@ -309,7 +348,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 
 	/**
 	 * Notifies that the selection has changed.
-	 * 
+	 *
 	 * @param event event object describing the change
 	 */
 	public void selectionChanged(SelectionChangedEvent event)
@@ -318,7 +357,7 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 	}
 
 	/**
-	 * Update the button enablement state.
+	 * Update the buttons' enabled state.
 	 */
 	protected void updateButtons()
 	{
@@ -413,9 +452,21 @@ public class TreeSelectDialog extends Dialog implements ISelectionChangedListene
 		okPressed();
 	}
 
+	protected void selectAllPressed()
+	{
+		treeViewer.setSelection(new StructuredSelection((Object[])input));
+		updateButtons();
+	}
+
+	protected void deselectAllPressed()
+	{
+		treeViewer.setSelection(StructuredSelection.EMPTY);
+		updateButtons();
+	}
+
 	/**
 	 * Returns whether an empty selection is allowed for this dialog.
-	 * 
+	 *
 	 * @return the allowEmptySelection
 	 */
 	public boolean isAllowEmptySelection()

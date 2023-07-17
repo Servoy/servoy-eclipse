@@ -18,27 +18,28 @@ package com.servoy.eclipse.ui;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.e4.ui.css.swt.theme.ITheme;
-import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
-import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -68,6 +69,7 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -76,6 +78,7 @@ import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsWebPackageAction;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.IPersist;
@@ -91,10 +94,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends AbstractUIPlugin
 {
-
-	private static final String ECLIPSE_DARK_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_dark";
-	private static final String ECLIPSE_CSS_SWT_THEME = "org.eclipse.e4.ui.css.swt.theme";
-
 	/**
 	 *
 	 */
@@ -127,8 +126,6 @@ public class Activator extends AbstractUIPlugin
 
 	private final Map<String, Image> grayCacheBundle = new HashMap<String, Image>();
 
-	private IPreferenceChangeListener themeChangedListener;
-
 	private static BundleContext context;
 
 	private static final String SERVOY_VERSION = "servoy_version";
@@ -148,7 +145,6 @@ public class Activator extends AbstractUIPlugin
 		// make sure that core is fully initialized; this should also make sure app. server is initialised
 		com.servoy.eclipse.core.Activator.getDefault();
 		com.servoy.eclipse.ngclient.ui.Activator.getInstance().extractNode();
-		com.servoy.eclipse.ngclient.ui.Activator.getInstance().copyNodeFolder(true, false);
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(new IActiveProjectListener()
 		{
@@ -183,7 +179,7 @@ public class Activator extends AbstractUIPlugin
 										String missingPackage = null;
 										if (o instanceof WebComponent && ((WebComponent)o).getTypeName() != null)
 										{
-											WebObjectSpecification spec = componentSpecProvider.getWebComponentSpecification(((WebComponent)o).getTypeName());
+											WebObjectSpecification spec = componentSpecProvider.getWebObjectSpecification(((WebComponent)o).getTypeName());
 											if (spec == null)
 											{
 												// see if package is there or not; the component is not present
@@ -234,25 +230,88 @@ public class Activator extends AbstractUIPlugin
 									@Override
 									public void run()
 									{
-										Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-										List<String> input = processedPackages.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
-										final ListSelectionDialog lsd = new ListSelectionDialog(active, input, new ArrayContentProvider(), new LabelProvider(),
-											"The packages listed below are missing from the active solution and it's modules.\nPlease select the ones you want to download using Servoy Package Manager:");
-										lsd.setInitialElementSelections(input);
-										lsd.setBlockOnOpen(true);
-										int pressedButton = lsd.open();
-										if (pressedButton == 0)
+										try
 										{
-											List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
-												IAutomaticImportWPMPackages.EXTENSION_ID);
-											if (defaultImports != null && defaultImports.size() > 0)
+											Shell active = new Shell(PlatformUI.getWorkbench().getDisplay().getActiveShell(), SWT.PRIMARY_MODAL);
+											ArrayList<IProject> packagesSource = new ArrayList<IProject>();
+											List<String> packagesHelp = new ArrayList<String>();
+											List<String> packagesFinal = new ArrayList<String>();
+											List<String> packagesNeeded = processedPackages.entrySet().stream().map(Map.Entry::getKey)
+												.collect(Collectors.toList());
+											IProject[] allProjects = ServoyModel.getWorkspace().getRoot().getProjects();
+											if (allProjects.length > 0)
 											{
-												Object[] result = lsd.getResult();
-												for (Object o : result)
+												for (IProject project : allProjects)
 												{
-													defaultImports.get(0).importPackage((String)o);
+													if (project.isAccessible() && project.hasNature(ServoyNGPackageProject.NATURE_ID))
+													{
+														String packageName = project.getName();
+														if (packagesNeeded.contains(packageName) ||
+															(packageName.equals("servoy-extra-components") && packagesNeeded.contains("servoyextra")))
+														{
+															packagesSource.add(project);
+															packagesHelp.add(packageName.equals("servoy-extra-components") ? "servoyextra" : packageName);
+														}
+													}
+												}
+												for (String packageName : packagesNeeded)
+												{
+													packagesFinal.add(packagesHelp.contains(packageName)
+														? (packageName + " (existing source package project will be used; checking this will download the wpm package)")
+														: packageName);
 												}
 											}
+											if (packagesFinal.size() == 0)
+											{
+												packagesFinal = packagesNeeded;
+											}
+											final ListSelectionDialog lsd = new ListSelectionDialog(active, packagesFinal, new ArrayContentProvider(),
+												new LabelProvider(),
+												"The packages listed below are missing from the active solution and it's modules.\nPlease select the ones you want to download using Servoy Package Manager:");
+											lsd.setInitialElementSelections(packagesNeeded);
+											lsd.setBlockOnOpen(true);
+											lsd.setTitle("Solution needs packages, install them from wpm/source");
+											int pressedButton = lsd.open();
+											if (pressedButton == 0)
+											{
+												List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
+													IAutomaticImportWPMPackages.EXTENSION_ID);
+												List<String> result = Arrays.asList(lsd.getResult()).stream().map(object -> Objects.toString(object, null))
+													.toList();
+												for (String packageName : packagesFinal)
+												{
+													String realPackageName = packageName.substring(0,
+														packageName.indexOf(" (") != -1 ? packageName.indexOf(" (") : packageName.length());
+													if (result.contains(packageName))
+													{
+														if (defaultImports != null && defaultImports.size() > 0)
+														{
+															defaultImports.get(0).importPackage(realPackageName);
+														}
+													}
+													else if (packagesSource.size() > 0)
+													{
+														String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution()
+															.getName();
+														IProject solutionProject = ServoyModel.getWorkspace().getRoot().getProject(solutionName);
+														IProjectDescription solutionProjectDescription = solutionProject.getDescription();
+														for (IProject project : packagesSource)
+														{
+															String packName = project.getName();
+															if (packName.equals(realPackageName) ||
+																(packName.equals("servoy-extra-components") && realPackageName.equals("servoyextra")))
+															{
+																AddAsWebPackageAction.addReferencedProjectToDescription(project, solutionProjectDescription);
+															}
+														}
+														solutionProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
+													}
+												}
+											}
+										}
+										catch (CoreException e)
+										{
+											ServoyLog.logError(e);
 										}
 									}
 								});
@@ -276,72 +335,9 @@ public class Activator extends AbstractUIPlugin
 		ServoyModelManager.getServoyModelManager().getServoyModel()
 			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
 
-		final BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
-		final ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
-		if (serviceReference != null)
-		{
-			final IThemeManager manager = ctx.getService(serviceReference);
-			if (manager != null)
-			{
-				final Display d = Display.getDefault();
-				final IThemeEngine engine = manager.getEngineForDisplay(d);
-				if (engine != null)
-				{
-					final ITheme it = engine.getActiveTheme();
-					if (it != null)
-					{
-						String label = it.getLabel();
-						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
-							!ECLIPSE_DARK_THEME_ID.equals(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
-						{
-							IconPreferences.getInstance().setUseDarkThemeIcons(ECLIPSE_DARK_THEME_ID.equals(it.getId()));
-							IconPreferences.getInstance().save(true);
-							ServoyModelManager.getServoyModelManager().getServoyModel()
-								.addDoneListener(() -> {
-									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-										label + " theme was detected",
-										"It is strongly recommended to restart the developer for the " + label +
-											" theme preferences to be applied. Would you like to restart now?"))
-									{
-										PlatformUI.getWorkbench().restart();
-									}
-								});
-						}
-					}
-					else if (IconPreferences.getInstance().getUseDarkThemeIcons())
-					{
-						IconPreferences.getInstance().setUseDarkThemeIcons(false);
-						IconPreferences.getInstance().save(true);
-						ServoyModelManager.getServoyModelManager().getServoyModel()
-							.addDoneListener(() -> {
-								if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-									"Theming is disabled",
-									"It is strongly recommended to restart the developer for the theming preferences to be applied. Would you like to restart now?"))
-								{
-									PlatformUI.getWorkbench().restart();
-								}
-							});
-					}
-				}
-			}
-		}
-
-		listenForThemeChanges();
+		EclipseCSSThemeListener.getInstance().initThemeListener();
 	}
 
-	private void listenForThemeChanges()
-	{
-		themeChangedListener = (PreferenceChangeEvent event) -> {
-			if (event.getKey().equals("themeid"))
-			{
-				String themeid = (String)event.getNewValue();
-				IconPreferences iconPreferences = IconPreferences.getInstance();
-				iconPreferences.setUseDarkThemeIcons(themeid.equals(ECLIPSE_DARK_THEME_ID));
-				iconPreferences.save();
-			}
-		};
-		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).addPreferenceChangeListener(themeChangedListener);
-	}
 
 	/**
 	 *
@@ -453,8 +449,7 @@ public class Activator extends AbstractUIPlugin
 			provisioningAgent.stop();
 		}
 
-		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).removePreferenceChangeListener(themeChangedListener);
-
+		EclipseCSSThemeListener.getInstance().removeListener();
 		plugin = null;
 		super.stop(context);
 	}

@@ -32,7 +32,7 @@ import {ServoyDefaultSpinner} from './spinner/spinner';
 
 import {ChoiceElementDirective} from './basechoice';
 
-import { ServoyPublicModule, SpecTypesService } from '@servoy/public';
+import { ServoyPublicModule } from '@servoy/public';
 
 import { Tab } from './tabpanel/basetabpanel';
 import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
@@ -105,8 +105,4 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
   ]
 })
 export class ServoyDefaultComponentsModule {
-    constructor( specTypesService: SpecTypesService ) {
-        specTypesService.registerType('servoydefault-tabpanel.tab', Tab);
-        specTypesService.registerType('servoydefault-splitpane.tab', Tab);
-    }
 }

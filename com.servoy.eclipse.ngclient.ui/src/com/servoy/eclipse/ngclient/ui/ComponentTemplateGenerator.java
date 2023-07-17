@@ -30,6 +30,7 @@ import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecification.PushToServerEnum;
 import org.sablo.specification.property.CustomJSONPropertyType;
+import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.impl.ClientService;
 
@@ -60,7 +61,7 @@ public class ComponentTemplateGenerator
 
 		template.append("<!-- component template generate start -->\n");
 		viewChild.append("// component viewchild template generate start\n");
-		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 		Arrays.sort(specs, new Comparator<WebObjectSpecification>()
 		{
 			@Override
@@ -71,7 +72,7 @@ public class ComponentTemplateGenerator
 		});
 		for (WebObjectSpecification spec : specs)
 		{
-			if (model == null || model.getExportedComponents().contains(spec.getName()))
+			if (model == null || model.getAllExportedComponents().contains(spec.getName()))
 			{
 				genereateSpec(template, viewChild, spec, spec.getName());
 				if (spec.getName().equals("servoydefault-tabpanel"))
@@ -136,6 +137,7 @@ public class ComponentTemplateGenerator
 
 			// all properties that handle there own stuff, (that have converters on the server side)
 			// should not have the need for an emitter/datachange call. this should be handled in the type itself.
+			// TODO can we make this check more generic?
 			if (pd.getPushToServer() != null && pd.getPushToServer() != PushToServerEnum.reject &&
 				!(pd.getType() instanceof FoundsetPropertyType ||
 					pd.getType() instanceof FoundsetLinkedPropertyType ||
@@ -171,16 +173,7 @@ public class ComponentTemplateGenerator
 			template.append(handler.getName());
 			template.append("]=\"callback.getHandler(state,'");
 			template.append(handler.getName());
-			if (handler.shouldIgnoreNGBlockDuplicateEvents())
-			{
-				template.append("',");
-				template.append(handler.shouldIgnoreNGBlockDuplicateEvents());
-			}
-			else
-			{
-				template.append('\'');
-			}
-			template.append(")\"");
+			template.append("')\"");
 		}
 		template.append(" [servoyApi]=\"callback.getServoyApi(state)\"");
 		template.append(" [name]=\"state.name\" #cmp");
@@ -188,7 +181,7 @@ public class ComponentTemplateGenerator
 		Collection<PropertyDescription> properties = spec.getProperties(FormPropertyType.INSTANCE);
 		if (properties.size() == 0)
 		{
-			Map<String, IPropertyType< ? >> declaredCustomObjectTypes = spec.getDeclaredCustomObjectTypes();
+			Map<String, ICustomType< ? >> declaredCustomObjectTypes = spec.getDeclaredCustomObjectTypes();
 			for (IPropertyType< ? > pt : declaredCustomObjectTypes.values())
 			{
 				if (pt instanceof CustomJSONPropertyType< ? >)

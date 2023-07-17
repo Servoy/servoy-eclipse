@@ -53,7 +53,8 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 	@Override
 	public boolean calculateEnabled()
 	{
-		return super.calculateEnabled() && !DesignerUtil.containsInheritedElement(getSelectedObjects());
+		return super.calculateEnabled() && !DesignerUtil.containsInheritedElement(getSelectedObjects()) &&
+			!DesignerUtil.containsFormComponentElement(getSelectedObjects());
 	}
 
 	/**

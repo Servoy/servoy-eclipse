@@ -37,13 +37,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
-import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
@@ -77,7 +74,8 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String startRMIPort = "1099";
 	private boolean startRMI = false;
 	private boolean exportActiveSolution;
-	private String exportNG2;
+	private String exportNG2 = "true";
+	private boolean exportNG1 = false;
 	private boolean overwriteSocketFactoryProperties;
 	private final List<String> pluginLocations;
 	private boolean exportAllTablesFromReferencedServers;
@@ -98,8 +96,8 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean overwriteGroups;
 	private boolean addUsersToAdminGroup;
 	private int importUserPolicy;
-	private Set<String> exportedComponents;
-	private Set<String> exportedServices;
+	private Set<String> componentsToExportWithoutUnderTheHoodOnes;
+	private Set<String> servicesToExportWithoutUnderTheHoodOnes;
 	private boolean upgradeRepository;
 	private boolean createTomcatContextXML;
 	private boolean antiResourceLocking;
@@ -109,7 +107,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String defaultAdminUser;
 	private String defaultAdminPassword;
 
-	private final List<String> excludedPackages = new ArrayList<>();
+	private final List<String> preferencesExcludedDefaultComponentPackages = new ArrayList<>();
 
 	private boolean ready = false;
 	private boolean useAsRealAdminUser;
@@ -117,17 +115,16 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String webXMLFileName;
 	private String log4jConfigurationFile;
 	private boolean exportNoneActiveSolutions;
-	private Set<String> exportedComponentPackages = new HashSet<>();
-	private Set<String> exportedServicePackages = new HashSet<>();
 	private String contextFileName;
-	private EclipseExportUserChannel userChannel;
+	private WorkspaceJob searchForUsedAndUnderTheHoodWebObjectsJob;
+	private String generateExportCommandLinePropertiesFileSavePath;
 
 	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
 	{
 		super(isNGExport);
 		if (isNGExport)
 		{
-			WorkspaceJob job = new WorkspaceJob("Searching used components and services data")
+			searchForUsedAndUnderTheHoodWebObjectsJob = new WorkspaceJob("Searching used components and services data")
 			{
 
 				@Override
@@ -135,7 +132,19 @@ public class ExportWarModel extends AbstractWarExportModel
 				{
 					try
 					{
-						search();
+						searchForComponentsAndServicesBothDefaultAndInSolution();
+
+						// at one point we were showing under-the-hood components that are always needed to the user in the pick services/components dialog;
+						// that is no longer the case, but old exports might have saved those in settings; update the model to not include setComponentsToExportWithoutUnderTheHoodOnes
+						// they were initially set in code below, outside of this runInWorkspace
+						if (componentsToExportWithoutUnderTheHoodOnes != null)
+						{
+							componentsToExportWithoutUnderTheHoodOnes.removeAll(ExportWarModel.super.getComponentsNeededUnderTheHood());
+						}
+						if (servicesToExportWithoutUnderTheHoodOnes != null)
+						{
+							servicesToExportWithoutUnderTheHoodOnes.removeAll(ExportWarModel.super.getServicesNeededUnderTheHoodWithoutSabloServices());
+						}
 					}
 					catch (final Exception e)
 					{
@@ -149,9 +158,13 @@ public class ExportWarModel extends AbstractWarExportModel
 					return Status.OK_STATUS;
 				}
 			};
-			job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-			job.setUser(false);
-			job.schedule();
+			searchForUsedAndUnderTheHoodWebObjectsJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+			searchForUsedAndUnderTheHoodWebObjectsJob.setUser(false);
+			searchForUsedAndUnderTheHoodWebObjectsJob.schedule();
+		}
+		else
+		{
+			ready = true;
 		}
 
 		Cipher desCipher = null;
@@ -173,6 +186,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
 		exportNG2 = settings.get("export.ng2");
+		exportNG1 = Utils.getAsBoolean(settings.get("export.legacyng"));
 		exportNoneActiveSolutions = Utils.getAsBoolean(settings.get("export.exportNoneActiveSolutions"));
 		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
 		if (settings.get("export.startRMI") != null) startRMI = Utils.getAsBoolean(settings.get("export.startRMI"));
@@ -202,6 +216,8 @@ public class ExportWarModel extends AbstractWarExportModel
 		clearReferencesStopThreads = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStopThreads"));
 		clearReferencesStopTimerThreads = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStopTimerThreads"));
 
+		generateExportCommandLinePropertiesFileSavePath = settings.get("ui.cmdgenerator.propertiesSavePath");
+
 		if (settings.get("export.overwriteDBServerProperties") != null)
 		{
 			setOverwriteDeployedDBServerProperties(Utils.getAsBoolean(settings.get("export.overwriteDBServerProperties")));
@@ -224,11 +240,11 @@ public class ExportWarModel extends AbstractWarExportModel
 		{
 			if (settings.getArray("export.components") != null)
 			{
-				setExportedComponents(new TreeSet<String>(Arrays.asList(settings.getArray("export.components"))));
+				setComponentsToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(settings.getArray("export.components"))));
 			}
 			if (settings.getArray("export.services") != null)
 			{
-				setExportedServices(new TreeSet<String>(Arrays.asList(settings.getArray("export.services"))));
+				setServicesToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(settings.getArray("export.services"))));
 			}
 		}
 		pluginLocations = new ArrayList<String>();
@@ -314,6 +330,8 @@ public class ExportWarModel extends AbstractWarExportModel
 					sc.setMaxPreparedStatementsIdle(Utils.getAsInteger(settings.get("export.servers." + name + ".maxstatements")));
 					sc.setSkipSysTables(Utils.getAsBoolean(settings.get("export.servers." + name + ".skipsystables")));
 					sc.setPrefixTables(Utils.getAsBoolean(settings.get("export.servers." + name + ".prefixTables")));
+					sc.setQueryProcedures(Utils.getAsBoolean(settings.get("export.servers." + name + ".queryProcedures")));
+					sc.setClientOnlyConnections(Utils.getAsBoolean(settings.get("export.servers." + name + ".clientOnlyConnections")));
 				}
 			}
 		}
@@ -331,7 +349,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		{
 			if (!PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName))
 			{
-				excludedPackages.add(packageName);
+				preferencesExcludedDefaultComponentPackages.add(packageName);
 			}
 		}
 
@@ -346,6 +364,22 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 	}
 
+	/**
+	 * ExportWarModel constructor starts a workspace job the searches in the active solution for used services/components.<br/>
+	 * Call this method to make sure that job finished before trying to use services/components used by solution & under the hood components/services.
+	 */
+	public void waitForSearchJobToFinish()
+	{
+		try
+		{
+			if (searchForUsedAndUnderTheHoodWebObjectsJob != null) searchForUsedAndUnderTheHoodWebObjectsJob.join();
+		}
+		catch (InterruptedException e)
+		{
+			ServoyLog.logError("Error waiting for job that searches solution for used components/services & under the hood webobjects...", e);
+		}
+	}
+
 	private String decryptPassword(IDialogSettings settings, Cipher desCipher, String propertyName)
 	{
 		return decryptPassword(desCipher, settings.get(propertyName));
@@ -353,7 +387,6 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	public void saveSettings(IDialogSettings settings)
 	{
-
 		Cipher desCipher = null;
 		try
 		{
@@ -368,6 +401,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		settings.put("export.warfilename", warFileName);
 		settings.put("export.ng2", exportNG2Mode());
+		settings.put("export.legacyng", exportNG1());
 		settings.put("export.userHome", getUserHome());
 		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
@@ -402,6 +436,9 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.tomcat.clearReferencesStopThreads", clearReferencesStopThreads);
 		settings.put("export.tomcat.clearReferencesStopTimerThreads", clearReferencesStopTimerThreads);
 		settings.put("export.defaultAdminUser", defaultAdminUser);
+
+		settings.put("ui.cmdgenerator.propertiesSavePath", generateExportCommandLinePropertiesFileSavePath);
+
 		if (defaultAdminPassword != null)
 			settings.put("export.defaultAdminPassword", encryptPassword(desCipher, "export.defaultAdminPassword", defaultAdminPassword));
 		settings.put("export.useAsRealAdminUser", useAsRealAdminUser);
@@ -409,9 +446,11 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.overwriteDBServerProperties", isOverwriteDeployedDBServerProperties());
 		settings.put("export.overwriteAllProperties", isOverwriteDeployedServoyProperties());
 
-
-		if (exportedComponents != null) settings.put("export.components", exportedComponents.toArray(new String[exportedComponents.size()]));
-		if (exportedServices != null) settings.put("export.services", exportedServices.toArray(new String[exportedServices.size()]));
+		waitForSearchJobToFinish();
+		if (componentsToExportWithoutUnderTheHoodOnes != null)
+			settings.put("export.components", componentsToExportWithoutUnderTheHoodOnes.toArray(new String[componentsToExportWithoutUnderTheHoodOnes.size()]));
+		if (servicesToExportWithoutUnderTheHoodOnes != null)
+			settings.put("export.services", servicesToExportWithoutUnderTheHoodOnes.toArray(new String[servicesToExportWithoutUnderTheHoodOnes.size()]));
 
 		if (pluginLocations.size() > 1)
 		{
@@ -500,6 +539,8 @@ public class ExportWarModel extends AbstractWarExportModel
 				settings.put("export.servers." + name + ".maxstatements", sc.getMaxPreparedStatementsIdle());
 				settings.put("export.servers." + name + ".skipsystables", sc.isSkipSysTables());
 				settings.put("export.servers." + name + ".prefixTables", sc.isPrefixTables());
+				settings.put("export.servers." + name + ".queryProcedures", sc.isQueryProcedures());
+				settings.put("export.servers." + name + ".clientOnlyConnections", sc.isClientOnlyConnections());
 			}
 			settings.put("export.servers", sb.toString());
 		}
@@ -598,6 +639,17 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.exportNG2 = exportNG2;
 	}
 
+	@Override
+	public boolean exportNG1()
+	{
+		return exportNG1;
+	}
+
+	public void setExportNG1(boolean exportNG1)
+	{
+		this.exportNG1 = exportNG1;
+	}
+
 	public List<String> getPlugins()
 	{
 		return plugins;
@@ -631,13 +683,14 @@ public class ExportWarModel extends AbstractWarExportModel
 			IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 			if (server != null)
 			{
-				serverConfiguration = new ServerConfiguration(serverName, server.getConfig());
+				serverConfiguration = new ServerConfiguration(serverName, server.getConfig(), server.getSettings());
 				servers.put(serverName, serverConfiguration);
 			}
 			else if (serverName.equals(IServer.REPOSITORY_SERVER))
 			{
 				server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, false, true);
-				serverConfiguration = server != null ? new ServerConfiguration(serverName, server.getConfig()) : new ServerConfiguration(serverName);
+				serverConfiguration = server != null ? new ServerConfiguration(serverName, server.getConfig(), server.getSettings())
+					: new ServerConfiguration(serverName);
 				servers.put(serverName, serverConfiguration);
 			}
 		}
@@ -858,34 +911,40 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.importUserPolicy = importUserPolicy;
 	}
 
-	public void setExportedComponents(Set<String> selectedComponents)
+	public void setComponentsToExportWithoutUnderTheHoodOnes(Set<String> selectedComponents)
 	{
-		this.exportedComponents = selectedComponents;
-		exportedComponentPackages = exportedComponents.stream() //
-			.filter(component -> componentsSpecProviderState.getWebComponentSpecification(component) != null) //
-			.map(component -> componentsSpecProviderState.getWebComponentSpecification(component).getPackageName()) //
-			.collect(Collectors.toSet());
+		this.componentsToExportWithoutUnderTheHoodOnes = selectedComponents;
 	}
 
-	public void setExportedServices(Set<String> selectedServices)
+	public void setServicesToExportWithoutUnderTheHoodOnes(Set<String> selectedServices)
 	{
-		this.exportedServices = selectedServices;
-		exportedServicePackages = exportedServices.stream() //
-			.filter(service -> servicesSpecProviderState.getWebComponentSpecification(service) != null) //
-			.map(service -> servicesSpecProviderState.getWebComponentSpecification(service).getPackageName()) //
-			.collect(Collectors.toSet());
+		this.servicesToExportWithoutUnderTheHoodOnes = selectedServices;
 	}
 
 	@Override
-	public Set<String> getExportedComponents()
+	public Set<String> getComponentsNeededUnderTheHood()
 	{
-		return exportedComponents != null ? exportedComponents : new TreeSet<String>();
+		waitForSearchJobToFinish();
+		return super.getComponentsNeededUnderTheHood();
 	}
 
 	@Override
-	public Set<String> getExportedServices()
+	public Set<String> getServicesNeededUnderTheHoodWithoutSabloServices()
 	{
-		return exportedServices != null ? exportedServices : new TreeSet<String>();
+		waitForSearchJobToFinish();
+		return super.getServicesNeededUnderTheHoodWithoutSabloServices();
+	}
+
+	public Set<String> getComponentsToExportWithoutUnderTheHoodOnes()
+	{
+		waitForSearchJobToFinish();
+		return componentsToExportWithoutUnderTheHoodOnes != null ? componentsToExportWithoutUnderTheHoodOnes : new TreeSet<String>();
+	}
+
+	public Set<String> getServicesToExportWithoutUnderTheHoodOnes()
+	{
+		waitForSearchJobToFinish();
+		return servicesToExportWithoutUnderTheHoodOnes != null ? servicesToExportWithoutUnderTheHoodOnes : new TreeSet<String>();
 	}
 
 	public void setAutomaticallyUpgradeRepository(boolean upgrade)
@@ -964,14 +1023,14 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.antiResourceLocking = antiResourceLocking;
 	}
 
-	public List<String> getExcludedComponentPackages()
+	public List<String> getPreferencesExcludedDefaultComponentPackages()
 	{
-		return excludedPackages;
+		return preferencesExcludedDefaultComponentPackages;
 	}
 
-	public List<String> getExcludedServicePackages()
+	public List<String> getPreferencesExcludedDefaultServicePackages()
 	{
-		return excludedPackages;
+		return preferencesExcludedDefaultComponentPackages;
 	}
 
 	public String getDefaultAdminUser()
@@ -1059,27 +1118,48 @@ public class ExportWarModel extends AbstractWarExportModel
 	}
 
 	@Override
-	public Set<String> getExportedPackages()
+	public Set<String> getExportedPackagesExceptSablo()
 	{
-		return Stream.of(exportedComponentPackages, exportedServicePackages, exportedLayoutPackages) //
-			.flatMap(Set::stream) //
+		Set<String> allExportedServicePackages = getAllExportedServicesWithoutSabloServices().stream()
+			.filter(service -> servicesSpecProviderState.getWebObjectSpecification(service) != null)
+			.map(service -> servicesSpecProviderState.getWebObjectSpecification(service).getPackageName())
+			.collect(Collectors.toSet());
+
+		Set<String> allExportedComponentPackages = getAllExportedComponents().stream()
+			.filter(component -> componentsSpecProviderState.getWebObjectSpecification(component) != null)
+			.map(component -> componentsSpecProviderState.getWebObjectSpecification(component).getPackageName())
+			.collect(Collectors.toSet());
+
+		return Stream
+			.of(allExportedComponentPackages, allExportedServicePackages, exportedLayoutPackages)
+			.flatMap(Set::stream)
 			.collect(Collectors.toSet());
 	}
 
-	public void setUserChannel(EclipseExportUserChannel eclipseExportUserChannel)
+	@Override
+	public Set<String> getAllExportedComponents()
 	{
-		this.userChannel = eclipseExportUserChannel;
+		Set<String> allComponentsThatShouldBeExported = new HashSet<>(getComponentsNeededUnderTheHood());
+		allComponentsThatShouldBeExported.addAll(getComponentsToExportWithoutUnderTheHoodOnes());
+		return allComponentsThatShouldBeExported;
 	}
 
 	@Override
-	public void displayWarningMessage(String title, String message)
+	public Set<String> getAllExportedServicesWithoutSabloServices()
 	{
-		Display.getDefault().syncExec(new Runnable()
-		{
-			public void run()
-			{
-				UIUtils.showScrollableDialog(Display.getDefault().getActiveShell(), IMessageProvider.WARNING, "War export", title, message);
-			}
-		});
+		Set<String> allServicesThatShouldBeExportedExceptSabloServices = new HashSet<>(getServicesNeededUnderTheHoodWithoutSabloServices());
+		allServicesThatShouldBeExportedExceptSabloServices.addAll(getServicesToExportWithoutUnderTheHoodOnes());
+		return allServicesThatShouldBeExportedExceptSabloServices;
 	}
+
+	public String getGenerateExportCommandLinePropertiesFileSavePath()
+	{
+		return generateExportCommandLinePropertiesFileSavePath;
+	}
+
+	public void setGenerateExportCommandLinePropertiesFileSavePath(String path)
+	{
+		generateExportCommandLinePropertiesFileSavePath = path;
+	}
+
 }

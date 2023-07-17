@@ -53,7 +53,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		transclude: true,
 		scope: {},
 		link: function($scope, $element) {
-			var timeout;
+            var markDirtyTimeoutRef;
+            var markDirtyTimeoutMs = 1;
 			var delta = {
 				addedNodes: [],
 				removedNodes: []
@@ -63,11 +64,27 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			var selectedConfigGhosts = [];
 
 			function markDirty() {
-				if (timeout) {
-					clearTimeout(timeout)
+				if (markDirtyTimeoutRef) {
+					clearTimeout(markDirtyTimeoutRef);
 				}
-				timeout = $timeout(fireSelectionChanged, 1)
+                markDirtyTimeoutMs = 1;
+                markDirtyTimeoutRef = $timeout(executeMarkDirtyLater, markDirtyTimeoutMs);
 			}
+			
+			function executeMarkDirtyLater() {
+                if (markDirtyTimeoutMs < 250 && !editorContentRootScope.getDesignFormControllerScope) {
+                    // postpone until editorContentRootScope gets initialized
+                    markDirtyTimeoutRef = $timeout(executeMarkDirtyLater, markDirtyTimeoutMs);
+                    markDirtyTimeoutMs += 50;
+                } else {
+                    //Reference to editor should be gotten from Editor instance somehow
+                    //instance.fire(Editor.EVENT_TYPES.SELECTION_CHANGED, delta)
+                    $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection)
+                    delta.addedNodes.length = delta.removedNodes.length = 0
+                    
+                    markDirtyTimeoutRef = null;
+                }
+            }
 
 			 $document.bind('selectstart', function(event) {
 				 if (!$editorService.isInlineEditMode())
@@ -87,14 +104,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			var editorContentRootScope = null;
 			var servoyInternal = null;
 			var fieldLocation = null;
-
-			function fireSelectionChanged() {
-				//Reference to editor should be gotten from Editor instance somehow
-				//instance.fire(Editor.EVENT_TYPES.SELECTION_CHANGED, delta)
-				$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection)
-				delta.addedNodes.length = delta.removedNodes.length = 0
-				timeout = null
-			}
 
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.glasspane = $element.find('.contentframe-overlay')[0];
@@ -341,7 +350,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							});
 						} else {
 							showAndPositionGhostContainer(ghostContainer, p.getBoundingClientRect());
-							ghostContainer.style.display = "block";
+							if (p?.parentElement.classList.contains('maxLevelDesign')) {
+								ghostContainer.style.display = "none";
+							} else {
+								ghostContainer.style.display = "block";
+							}	
 						}
 					}
 				} else {
@@ -457,7 +470,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$scope.getBeanModel = function(node) {
 				if (node && editorContentRootScope.getDesignFormControllerScope) {
 					var name = node.getAttribute("svy-id");
-					if (name) return editorContentRootScope.getDesignFormControllerScope().model(name, true);
+					if (name && editorContentRootScope.getDesignFormControllerScope) return editorContentRootScope.getDesignFormControllerScope().model(name, true);
 				}
 				return null;
 			}
@@ -1431,12 +1444,18 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		},
 
 		keyPressed: function(event) {
+			var keyCode = event.keyCode;
+			if ((event.metaKey && event.key == 'Meta') || (event.ctrlKey && event.key == 'Control') || (event.altKey && event.key == 'Alt')) { 
+				//standalone special keys have a javascript keyCode (91 = Meta, 17 = Ctrl, 18 = Alt) which may be wrongly interpreted in the KeyPressHandler (server side)
+				//they must produce no action by themselves
+				keyCode = 0
+			} 
 			wsSession.callService('formeditor', 'keyPressed', {
 				ctrl: event.ctrlKey,
 				shift: event.shiftKey,
 				alt: event.altKey,
 				meta: event.metaKey,
-				keyCode: event.keyCode
+				keyCode: keyCode
 			}, true)
 		},
 
@@ -1575,12 +1594,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 		},
 
-		updateSelection: function(ids,timeout) {
+		updateSelection: function(ids, timeout) {
 			if (editorScope.updateSel)
 			{
 				$timeout.cancel(editorScope.updateSel);
 			}
-			function tryUpdateSelection (){
+			function tryUpdateSelection () {
 				var prevSelection = editorScope.getSelection();
 				var changed = false;
 				var selection = [];
@@ -1613,7 +1632,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 				if (changed) editorScope.setSelection(selection);
 			}
-			editorScope.updateSel = $timeout(tryUpdateSelection, 400);
+			editorScope.updateSel = $timeout(tryUpdateSelection, typeof timeout == 'number' ? timeout : 400);
 		},
 		
 		setDirty: function(isDirty){

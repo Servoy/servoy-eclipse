@@ -60,7 +60,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
@@ -103,6 +102,7 @@ import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RadioButtonsDialog;
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
@@ -189,6 +189,7 @@ public class Activator extends Plugin
 
 	private final List<Runnable> postgressCheckedNotify = new ArrayList<Runnable>(3);
 
+	private boolean designerCallbackNotSetTodch = true;
 
 	@Override
 	public void start(BundleContext context) throws Exception
@@ -233,6 +234,10 @@ public class Activator extends Plugin
 
 		IPreferenceStore prefs = PlatformUI.getPreferenceStore();
 		prefs.setValue(IWorkbenchPreferenceConstants.SHOW_PROGRESS_ON_STARTUP, true);
+
+		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
+		// unfortunately there isn't currently a possibility to limit the scope of a filter to a workingSet via extension point - only the user can do it
+		prefs.setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
 
 		Dictionary<String, String[]> properties = new Hashtable<String, String[]>(1);
 		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] { MediaURLStreamHandlerService.PROTOCOL });
@@ -402,7 +407,7 @@ public class Activator extends Plugin
 				}
 			});
 		}
-
+		com.servoy.eclipse.ngclient.startup.Activator.setDesignerCallback(getDesignerCallback());
 	}
 
 	private void turnOffExternalToolsActionSet(IWorkbenchWindow workbenchWindow, IPerspectiveDescriptor perspectiveDescriptor, Preferences node)
@@ -563,6 +568,16 @@ public class Activator extends Plugin
 	public IDebugClientHandler getDebugClientHandler()
 	{
 		IDebugClientHandler dch = ApplicationServerRegistry.get().getDebugClientHandler();
+		if (designerCallbackNotSetTodch)
+		{
+			designerCallbackNotSetTodch = false;
+			dch.setDesignerCallback(getDesignerCallback());
+		}
+		return dch;
+	}
+
+	private IDesignerCallback getDesignerCallback()
+	{
 		if (designerCallback == null)
 		{
 			designerCallback = new IDesignerCallback()
@@ -650,9 +665,8 @@ public class Activator extends Plugin
 					}
 				}
 			};
-			dch.setDesignerCallback(designerCallback);
 		}
-		return dch;
+		return designerCallback;
 	}
 
 	/**
@@ -1150,7 +1164,7 @@ public class Activator extends Plugin
 					return new DebugWebClientSession(request);
 				}
 			});
-			ss.start(false);
+			ss.start(false, true);
 			ss.startWebServer();
 
 			checkApplicationServerVersion(ss.getApplicationServer());
@@ -1302,7 +1316,7 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!",
+					ServoyMessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!",
 						"No application server found at: " + appServerDir + "\nPlease make sure that you installed Servoy Developer correctly");
 				}
 			});
@@ -1324,7 +1338,7 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Servoy ApplicationServer version check",
+								ServoyMessageDialog.openError(Display.getDefault().getActiveShell(), "Servoy ApplicationServer version check",
 									"Application Server version (" + version + ") is higher than the developers (" + ClientVersion.getReleaseNumber() +
 										") \nPlease upgrade the developer Help->Check for updates");
 							}
@@ -1336,7 +1350,7 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								boolean upgrade = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+								boolean upgrade = ServoyMessageDialog.openQuestion(Display.getDefault().getActiveShell(),
 									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version +
 										") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?");
 
@@ -1382,7 +1396,7 @@ public class Activator extends Plugin
 													{
 														public void run()
 														{
-															MessageDialog.openError(new Shell(), "Servoy update problem",
+															ServoyMessageDialog.openError(new Shell(), "Servoy update problem",
 																"Servoy ApplicationServer update failed; please shutdown developer and try to run the command line updater.");
 														}
 													});
@@ -1393,7 +1407,8 @@ public class Activator extends Plugin
 													{
 														public void run()
 														{
-															if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "ApplicationServer updated",
+															if (ServoyMessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+																"ApplicationServer updated",
 																"It is recommended you restart the workbench for the changes to take effect. Would you like to restart now?"))
 															{
 																PlatformUI.getWorkbench().restart();

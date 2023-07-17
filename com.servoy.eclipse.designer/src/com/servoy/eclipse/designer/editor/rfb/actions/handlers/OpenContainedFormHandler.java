@@ -107,7 +107,7 @@ public class OpenContainedFormHandler implements IServerService
 							else if (persist instanceof Bean)
 							{
 								Bean bean = (Bean)persist;
-								WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(((Bean)persist).getBeanClassName());
+								WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((Bean)persist).getBeanClassName());
 								if (spec != null)
 								{
 									Collection<PropertyDescription> forms = spec.getProperties(FormPropertyType.INSTANCE);

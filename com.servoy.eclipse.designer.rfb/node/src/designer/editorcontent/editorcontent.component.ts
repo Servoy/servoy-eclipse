@@ -1,17 +1,17 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, Inject, AfterViewInit, HostListener } from '@angular/core';
+import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService } from '../services/editorsession.service';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 
 @Component({
     selector: 'designer-editorcontent',
     templateUrl: './editorcontent.component.html',
     styleUrls: ['./editorcontent.component.css']
 })
-export class EditorContentComponent implements OnInit, AfterViewInit {
+export class EditorContentComponent implements OnInit, AfterViewInit, IContentMessageListener, OnDestroy {
 
     initialWidth: string;
     contentStyle: CSSStyleDeclaration = {
@@ -24,11 +24,16 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
 
     clientURL: SafeResourceUrl;
     @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
-
+    
+    @Input() styleVariantPreview: boolean
+    @Output() previewReady = new EventEmitter<{previewReady: boolean}>();
+    
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
-        protected designSize: DesignSizeService, @Inject(DOCUMENT) private doc: Document, private windowRef: WindowRefService,
+        protected designSize: DesignSizeService, private editorContentService: EditorContentService, private windowRef: WindowRefService,
         private editorSession: EditorSessionService) {
+
         designSize.setEditor(this);
+        this.editorContentService.addContentMessageListener(this);
     }
 
     ngOnInit() {
@@ -36,35 +41,41 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         if (this.urlParser.isAbsoluteFormLayout()) {
             this.contentStyle['width'] = this.urlParser.getFormWidth() + 'px';
             this.contentStyle['height'] = this.urlParser.getFormHeight() + 'px';
-            this.windowRef.nativeWindow.addEventListener('message', (event) => {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                if (event.data.id === 'updateFormSize') {
-                    this.contentStyle['width'] = event.data.width + 'px';
-                    this.contentStyle['height'] = event.data.height + 'px';
-                }
-            });
         }
         else {
             this.contentStyle['bottom'] = '20px';
             this.contentStyle['right'] = '20px';
             this.contentStyle['minWidth'] = '992px';
-            this.windowRef.nativeWindow.addEventListener('message', (event: MessageEvent) => {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                if (event.data.id === 'contentSizeChanged') {
-                    this.adjustFromContentSize();
-                }
-            });
         }
     }
 
     ngAfterViewInit() {
         if (this.urlParser.isAbsoluteFormLayout()) {
-            const glassPane = this.doc.querySelector('.contentframe-overlay');
+            const glassPane = this.editorContentService.getGlassPane();
             const formHeight = this.urlParser.getFormHeight() + 50;//should we calculate this number?
             if (glassPane.clientHeight < formHeight) {
                 this.renderer.setStyle(glassPane, 'height', formHeight + 'px');
             }
         }
+    }
+    
+    ngOnDestroy(): void {
+        this.editorContentService.removeContentMessageListener(this);
+    }
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    contentMessageReceived(id: string, data: { property: string, width? : number, height? : number, eventData?: any }) {
+        if (id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
+            this.contentStyle['width'] = data.width + 'px';
+            this.contentStyle['height'] = data.height + 'px';
+        }
+        if (id === 'contentSizeChanged' && !this.urlParser.isAbsoluteFormLayout()) {
+            this.adjustFromContentSize();
+        }
+        if (id === 'buildTitaniumClient') {
+            this.editorSession.buildTiNG();
+            window.parent.postMessage({ id: 'hideGhostContainer' }, '*');
+		}
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -79,26 +90,44 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
     @HostListener('document:keyup', ['$event'])
     onKeyUp(event: KeyboardEvent) {
         // delete , f4 (open form hierarchy) and f5
-        if (event.keyCode == 46 || event.keyCode == 115 ||  event.keyCode == 116 ){
-             this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));
-             return false;
+        if (event.keyCode == 46 || event.keyCode == 115 || event.keyCode == 116 ) {
+            this.editorSession.keyPressed(this.editorSession.getFixedKeyEvent(event));         
+            return false;
         }
         return true;
     }
     
+    @HostListener('document:click', ['$event'])
+    onClick(event: MouseEvent) {
+		if (event.offsetX > 50 && event.offsetY > 50) {
+			window.parent.postMessage({ id: 'positionClick', x: event.offsetX, y: event.offsetY, isAbsoluteFormLayout: this.urlParser.isAbsoluteFormLayout() }, '*');
+		}
+    }
+
     adjustFromContentSize() {
-        let paletteHeight = '100%';
-        if (!this.lastHeight || this.lastHeight == 'auto' || this.contentSizeFull) {
-            const iframe = this.doc.querySelector('iframe');
-            const newHeight = iframe.contentWindow.document.body.clientHeight + 30;
-            if (newHeight > this.elementRef.nativeElement.clientHeight) {
-                this.renderer.setStyle(this.elementRef.nativeElement, 'height', newHeight + 'px');
-                paletteHeight = newHeight + 'px';
+        this.editorContentService.executeOnlyAfterInit(() => {
+            const overlay = this.editorContentService.getGlassPane();
+            this.renderer.setStyle(overlay, 'height', '100%');
+            this.renderer.setStyle(overlay, 'width', '100%');
+
+            let paletteHeight = '100%';
+            if (!this.lastHeight || this.lastHeight == 'auto' || this.contentSizeFull) {
+                const newHeight = this.editorContentService.getContentBodyElement().clientHeight + 30;
+                if (newHeight > this.elementRef.nativeElement.clientHeight) {
+                    this.renderer.setStyle(this.elementRef.nativeElement, 'height', newHeight + 'px');
+                    paletteHeight = newHeight + 'px';
+                }
             }
-        }
-        const palette = this.doc.querySelector('.palette');
-        this.renderer.setStyle(palette, 'height', paletteHeight + 'px');
-        this.renderer.setStyle(palette, 'max-height', paletteHeight + 'px');
+            const palette = this.editorContentService.getPallete();
+            this.renderer.setStyle(palette, 'height', paletteHeight);
+            this.renderer.setStyle(palette, 'max-height', paletteHeight);
+
+            // make the overlay the same size as content area to cover it; unfortunately didn't find a way to do this through css'
+            const contentArea = this.editorContentService.getContentArea();
+            //add a small scroll space in order to make margins visible
+            this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 20 + 'px');
+            this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 20 + 'px');
+        });
     }
 
     setContentSizeFull() {
@@ -112,10 +141,12 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         this.contentSizeFull = true;
         delete this.contentStyle['width'];
         delete this.contentStyle['height'];
-        if (this.getContentDocument()) {
-            const svyForm = this.getContentDocument().getElementsByClassName('svy-form')[0] as HTMLElement;
-            svyForm.style['width'] = '';
-        }
+        
+        this.editorContentService.executeOnlyAfterInit(()=>{
+            const svyForm = this.editorContentService.getContentForm();
+             svyForm.style['width'] = '';
+        });
+       
         // TODO
         // $scope.adjustGlassPaneSize();
         // if (redraw) {
@@ -170,22 +201,9 @@ export class EditorContentComponent implements OnInit, AfterViewInit {
         }
     }*/
     private setFormWidth(width: string) {
-        const contentDoc: Document = this.getContentDocument();
-        if (contentDoc) {
-            const svyForm: HTMLElement = this.getContentDocument().querySelector('.svy-form');
-            if (svyForm) {
-                svyForm.style['width'] = width;
-            } else {
-                setTimeout(() => this.setFormWidth(width), 300);
-            }
-        }
-        else {
-            setTimeout(() => this.setFormWidth(width), 300);
-        }
-    }
-
-    getContentDocument(): Document {
-        const iframe = this.doc.querySelector('iframe');
-        return iframe.contentWindow.document;
+        this.editorContentService.executeOnlyAfterInit(()=>{
+            const svyForm = this.editorContentService.getContentForm();
+             svyForm.style['width'] = width;
+        });
     }
 }

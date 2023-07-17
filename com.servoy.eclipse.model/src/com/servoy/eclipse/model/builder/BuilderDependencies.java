@@ -45,6 +45,7 @@ public class BuilderDependencies
 	private Map<Form, List<Form>> formToFormsDependencies;
 	private Map<String, List<IPersist>> scopeToPersists;
 	private Map<String, List<IPersist>> datasourceToPersists;
+	private List<Form> variantlistToForms;
 
 	private BuilderDependencies()
 	{
@@ -75,6 +76,7 @@ public class BuilderDependencies
 		scopeToPersists = null;
 		formToFormsDependencies = null;
 		datasourceToPersists = null;
+		variantlistToForms = null;
 	}
 
 	public boolean isInitialized()
@@ -153,6 +155,22 @@ public class BuilderDependencies
 					it.remove();
 				}
 			}
+		}
+		if (variantlistToForms != null)
+		{
+			variantlistToForms.remove(form);
+		}
+	}
+
+	public void addVariantDependency(Form form)
+	{
+		if (variantlistToForms == null)
+		{
+			variantlistToForms = new ArrayList<>();
+		}
+		if (!variantlistToForms.contains(form))
+		{
+			variantlistToForms.add(form);
 		}
 	}
 
@@ -356,5 +374,10 @@ public class BuilderDependencies
 	{
 		if (relationToPersists != null) return relationToPersists.get(relation);
 		return null;
+	}
+
+	public List<Form> getVariantDependencies()
+	{
+		return variantlistToForms;
 	}
 }

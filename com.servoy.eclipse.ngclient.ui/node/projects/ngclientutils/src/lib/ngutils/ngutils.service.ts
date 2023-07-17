@@ -7,7 +7,7 @@ import { WindowRefService, ServoyPublicService } from '@servoy/public';
 export class NGUtilsService {
     private _tags: Tag[];
     private _tagscopy: Tag[];
-    private _styleclasses: {property : string};
+    private _styleclasses: { property: string };
     private _backActionCB: any;
     private confirmMessage: string;
     private renderer: Renderer2;
@@ -314,6 +314,21 @@ export class NGUtilsService {
     }
 
     /**
+    * Retrieves the screen location of a specific element. Returns the location as point (object with x and y properties).
+    *
+    * @param component the component to retrieve location for.
+    * @return the location of the component.
+    */
+    public getAbsoluteLocation(component: string): {x: number;y: number} {
+        const el = this.document.getElementById(component);
+        if (el){
+           const rect = el.getBoundingClientRect();
+           return { x: rect.left + this.windowRef.nativeWindow.scrollX, y: rect.top + this.windowRef.nativeWindow.scrollY };
+        }
+        return null;
+    }
+
+    /**
      *
      *
      * This will register a callback that will be triggered on all history/window popstate events (back,forward but also next main form).
@@ -340,11 +355,6 @@ export class NGUtilsService {
         });
     }
 
-    private beforeUnload(e: any) {
-        (e || window.event).returnValue = this.confirmMessage; //Gecko + IE
-        return this.confirmMessage; //Gecko + Webkit, Safari, Chrome etc.
-    };
-
     /**
      * Move the scrollbar to the position of the given anchorSelector.
      * The target anchorSelector can be a Servoy Form, Layout Container or element in a responsive form or any element in a form.
@@ -357,16 +367,58 @@ export class NGUtilsService {
      * @param anchorSelector {string} the selector to which the scrollbar should be moved to.
      * @param scrollIntoViewOptions option argument used for scrolling animation (example:  { behavior: "smooth", block: "start", inline: "nearest" }).
      */
-    public scrollIntoView( anchorSelector: string, scrollIntoViewOptions?: any ) {
-        const anchor = this.document.querySelector( anchorSelector );
-        if ( anchor ) {
-            if ( !scrollIntoViewOptions ) scrollIntoViewOptions = { behavior: 'smooth', block: 'start', inline: 'nearest' };
+    public scrollIntoView(anchorSelector: string, scrollIntoViewOptions?: any) {
+        const anchor = this.document.querySelector(anchorSelector);
+        if (anchor) {
+            if (!scrollIntoViewOptions) scrollIntoViewOptions = { behavior: 'smooth', block: 'start', inline: 'nearest' };
             // move scrolling to position
-            anchor.scrollIntoView( scrollIntoViewOptions );
+            anchor.scrollIntoView(scrollIntoViewOptions);
         } else {
-            console.log( 'cannot find anchor element ' + anchorSelector );
+            console.log('cannot find anchor element ' + anchorSelector);
         }
     }
+
+    /**
+     * Utility method for manipulating any DOM element's style classes.
+     * It will add the given class to the DOM element identified via the jQuery selector param.
+     * 
+     * NOTE: This operation is not persistent; it executes client-side only; so for example when the browser is reloaded (F5/Ctrl+F5) by the user classes added by this method are lost.
+     * If you need this to be persistent - you can do that directly via server side scripting elements.myelement.addStyleClass(...) if the DOM element is a Servoy component. If the DOM element is
+     * not a component then you probably lack something in terms of UI and you could build what you need as a new custom component or use another approach/set of components when building the UI.
+     * 
+     * @param cssSelector {string} the css selector string that is used to find the DOM element.
+     * @param className {string} the class to be added to the element.
+     */
+    public addClassToDOMElement(cssSelector: string, className: string) {
+        const nodeList = this.document.querySelectorAll(cssSelector);
+        for (let i = 0; i < nodeList.length; i++) {
+            nodeList[i].classList.add(className);
+        }
+    }
+
+    /**
+     * Utility method for manipulating any DOM element's style classes.
+     * It will remove the given class from the DOM element identified via the jQuery selector param.
+     * 
+     * NOTE: This operation is not persistent; it executes client-side only; so for example when the browser is reloaded (F5/Ctrl+F5) by the user classes removed by this method are lost;
+     * If you need this to be persistent - you can do that directly via server side scripting elements.myelement.removeStyleClass(...) if the DOM element is a Servoy component. If the DOM element it is
+     * not a component then you probably lack something in terms of UI and you could build what you need as a new custom component or use another approach/set of components when building the UI.
+     * 
+     * @param cssSelector {string} the css selector string that is used to find the DOM element.
+     * @param className {string} the class to be added to the element.
+     */
+    public removeClassFromDOMElement(cssSelector: string, className: string) {
+        const nodeList = this.document.querySelectorAll(cssSelector);
+        for (let i = 0; i < nodeList.length; i++) {
+            nodeList[i].classList.remove(className);
+        }
+    }
+
+    private beforeUnload(e: any) {
+        (e || window.event).returnValue = this.confirmMessage; //Gecko + IE
+        return this.confirmMessage; //Gecko + Webkit, Safari, Chrome etc.
+    };
+
 }
 
 class Tag {

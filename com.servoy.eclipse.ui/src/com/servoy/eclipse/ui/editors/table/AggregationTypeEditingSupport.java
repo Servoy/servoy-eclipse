@@ -16,12 +16,9 @@
 */
 package com.servoy.eclipse.ui.editors.table;
 
-import org.eclipse.core.databinding.observable.AbstractObservable;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.ChangeSupport;
+import static java.util.Arrays.stream;
+
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -35,51 +32,43 @@ import com.servoy.j2db.query.QueryAggregate;
 public class AggregationTypeEditingSupport extends EditingSupport
 {
 	private final CellEditor editor;
-	private final IObservable observable;
+	private final ChangeSupportObservable observable;
+
+	private enum AggregateTypes
+	{
+		count(QueryAggregate.COUNT),
+		countDistinct(QueryAggregate.COUNT, QueryAggregate.DISTINCT, "count(distinct)"),
+		maximum(QueryAggregate.MAX),
+		minimum(QueryAggregate.MIN),
+		average(QueryAggregate.AVG),
+		sum(QueryAggregate.SUM);
+
+		final int type;
+		final int aggregateQuantifier;
+		final String display;
+
+		AggregateTypes(int type)
+		{
+			this.type = type;
+			this.aggregateQuantifier = QueryAggregate.ALL;
+			this.display = name();
+		}
+
+		AggregateTypes(int type, int aggregateQuantifier, String display)
+		{
+			this.type = type;
+			this.aggregateQuantifier = aggregateQuantifier;
+			this.display = display;
+		}
+	}
 
 	public AggregationTypeEditingSupport(TreeViewer tv)
 	{
 		super(tv);
-		String[] types = new String[QueryAggregate.ALL_DEFINED_AGGREGATES.length];
-		for (int i = 0; i < types.length; i++)
-		{
-			types[i] = AggregateVariable.getTypeAsString(QueryAggregate.ALL_DEFINED_AGGREGATES[i]);
-		}
+		String[] types = stream(AggregateTypes.values()).map(at -> at.display).toArray(String[]::new);
 		editor = new FixedComboBoxCellEditor(tv.getTree(), types, SWT.READ_ONLY);
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-		observable = new AbstractObservable(Realm.getDefault())
-		{
-			@Override
-			public void addChangeListener(IChangeListener listener)
-			{
-				changeSupport.addChangeListener(listener);
-			}
-
-			@Override
-			public void removeChangeListener(IChangeListener listener)
-			{
-				changeSupport.removeChangeListener(listener);
-			}
-
-			public boolean isStale()
-			{
-				return false;
-			}
-		};
+		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 	}
-
-	private final ChangeSupport changeSupport;
 
 	public void addChangeListener(IChangeListener listener)
 	{
@@ -97,13 +86,13 @@ public class AggregationTypeEditingSupport extends EditingSupport
 		if (element instanceof AggregateVariable)
 		{
 			AggregateVariable aggregateVariable = (AggregateVariable)element;
-			int index = Integer.parseInt(value.toString());
-			int type = QueryAggregate.ALL_DEFINED_AGGREGATES[index];
-			if (type != aggregateVariable.getType())
+			AggregateTypes agType = AggregateTypes.values()[Integer.parseInt(value.toString())];
+			if (agType.type != aggregateVariable.getType() || agType.aggregateQuantifier != aggregateVariable.getAggregateQuantifier())
 			{
-				aggregateVariable.setType(type);
+				aggregateVariable.setType(agType.type);
+				aggregateVariable.setAggregateQuantifier(agType.aggregateQuantifier);
 				getViewer().update(element, null);
-				changeSupport.fireEvent(new ChangeEvent(observable));
+				observable.fireChangeEvent();
 			}
 		}
 	}
@@ -113,20 +102,13 @@ public class AggregationTypeEditingSupport extends EditingSupport
 	{
 		if (element instanceof AggregateVariable)
 		{
-			AggregateVariable aggregateVariable = (AggregateVariable)element;
-			int type = aggregateVariable.getType();
-			int index = 0;
-			for (int i = 0; i < QueryAggregate.ALL_DEFINED_AGGREGATES.length; i++)
+			AggregateTypes agType = getAggregateType((AggregateVariable)element);
+			if (agType != null)
 			{
-				if (QueryAggregate.ALL_DEFINED_AGGREGATES[i] == type)
-				{
-					index = i;
-					break;
-				}
+				return Integer.valueOf(agType.ordinal());
 			}
-			return new Integer(index);
 		}
-		return null;
+		return Integer.valueOf(0);
 	}
 
 	@Override
@@ -138,7 +120,30 @@ public class AggregationTypeEditingSupport extends EditingSupport
 	@Override
 	protected boolean canEdit(Object element)
 	{
-		if (element instanceof AggregateVariable) return true;
-		else return false;
+		return element instanceof AggregateVariable;
 	}
+
+	public static String getDisplay(AggregateVariable aggregateVariable)
+	{
+		AggregateTypes agType = getAggregateType(aggregateVariable);
+		if (agType != null)
+		{
+			return agType.display;
+		}
+		return null;
+	}
+
+	private static AggregateTypes getAggregateType(AggregateVariable aggregateVariable)
+	{
+		for (int i = 0; i < AggregateTypes.values().length; i++)
+		{
+			AggregateTypes agType = AggregateTypes.values()[i];
+			if (agType.type == aggregateVariable.getType() && agType.aggregateQuantifier == aggregateVariable.getAggregateQuantifier())
+			{
+				return agType;
+			}
+		}
+		return null;
+	}
+
 }

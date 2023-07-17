@@ -93,7 +93,7 @@ public class BrowserDialog extends Dialog
 	 */
 	public BrowserDialog(Shell parentShell, String url, boolean modal, boolean showSkipNextTime)
 	{
-		super(parentShell, modal ? SWT.APPLICATION_MODAL : SWT.MODELESS);
+		super(parentShell, modal ? SWT.PRIMARY_MODAL : SWT.MODELESS);
 		this.url = url;
 		this.showSkipNextTime = showSkipNextTime;
 	}
@@ -106,7 +106,14 @@ public class BrowserDialog extends Dialog
 
 	public Object open(boolean useChromiumHint)
 	{
-		Rectangle size = getParent().getBounds();
+		Shell parent = getParent();
+
+		while (parent.getParent() instanceof Shell)
+		{
+			parent = (Shell)parent.getParent();
+		}
+
+		Rectangle size = parent.getBounds();
 		int newWidth = (int)(size.width / 1.5) < MIN_WIDTH ? MIN_WIDTH : (int)(size.width / 1.5);
 		int newHeight = (int)(size.height / 1.4) < MIN_HEIGHT ? MIN_HEIGHT : (int)(size.height / 1.4);
 		Dimension newSize = new Dimension(newWidth, newHeight);

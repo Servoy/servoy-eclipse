@@ -43,7 +43,8 @@ export class LocaleService {
         this.loadedLocale = new Deferred<any>();
         this.setAngularLocale(language, country).then(localeId => {
             this.i18nProvider.flush();
-            this.sabloService.setLocale({ language, country, full: localeId });
+            const full = language + (country ? '-' + country.toUpperCase() : '');
+            this.sabloService.setLocale({ language, country, full });
             if (!initializing) {
                 // in the session storage we always have the value set via applicationService.setLocale
                 this.sessionStorageService.set('locale', language + '-' + country);
@@ -51,7 +52,6 @@ export class LocaleService {
             // luxon default locale
             Settings.defaultLocale =  localeId;
             this.locale = localeId;
-            const full = language + (country ? '-' + country.toUpperCase() : '');
             // numbro wants with upper case counter but moment is all lower case
             this.setNumbroLocale(full, true).then(() =>
                 this.loadedLocale.resolve(localeId)
@@ -90,13 +90,13 @@ export class LocaleService {
             language.toLowerCase() + '-' + country.toUpperCase() : language.toLowerCase();
         return new Promise<string>((resolve, reject) => {
             import(
-                `../../node_modules/@angular/common/locales/${localeId}.mjs`).then(
+                `@/../../node_modules/@angular/common/locales/${localeId}.mjs`).then(
                 module => {
                     registerLocaleData(module.default, localeId);
                     resolve(localeId);
                 },
                 () => {
-                    import(`../../node_modules/@angular/common/locales/${language.toLowerCase()}.mjs`).then(module => {
+                    import(`@/../../node_modules/@angular/common/locales/${language.toLowerCase()}.mjs`).then(module => {
                         registerLocaleData(module.default, localeId.split('-')[0]);
                         resolve(language.toLowerCase());
                     }, reject);

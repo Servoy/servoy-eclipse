@@ -91,6 +91,7 @@ import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.editors.less.PropertiesLessEditorInput;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
@@ -118,11 +119,13 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -611,17 +614,17 @@ public class EditorUtil
 	}
 
 
-	public static IEditorPart openServerEditor(ServerConfig serverConfig)
+	public static IEditorPart openServerEditor(ServerConfig serverConfig, ServerSettings serverSettings)
 	{
-		return openServerEditor(serverConfig, false);
+		return openServerEditor(serverConfig, serverSettings, false);
 	}
 
-	public static IEditorPart openServerEditor(ServerConfig serverConfig, boolean isNew)
+	public static IEditorPart openServerEditor(ServerConfig serverConfig, ServerSettings serverSettings, boolean isNew)
 	{
-		if (serverConfig == null) return null;
+		if (serverConfig == null || serverSettings == null) return null;
 		try
 		{
-			ServerEditorInput sei = new ServerEditorInput(serverConfig);
+			ServerEditorInput sei = new ServerEditorInput(serverConfig, serverSettings);
 			sei.setIsNew(isNew);
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
@@ -671,6 +674,45 @@ public class EditorUtil
 		catch (PartInitException e)
 		{
 			Debug.log(e);
+		}
+	}
+
+	public static void openComponentVariantsEditor(String deepLinkArgs)
+	{
+		try
+		{
+			//PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(deepLinkArgs),
+			//	"com.servoy.eclipse..designer.editor.componentvariantseditor");
+			IFile variants = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
+				.getFile(new Path("medias/variants.less"));
+			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("variants.less");
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(variants), desc.getId(), true);
+		}
+		catch (PartInitException e)
+		{
+			Debug.log(e);
+		}
+	}
+
+	public static void openThemeEditor(final Solution project)
+	{
+		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
+		Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
+		Path path = new Path(pathPair.getLeft() + pathPair.getRight());
+		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+		try
+		{
+			IWorkbenchPage activePage = getActivePage();
+			if (activePage != null)
+			{
+				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
+				activePage.openEditor(PropertiesLessEditorInput.createFromFileEditorInput(new FileEditorInput(file)), desc.getId(),
+					true);
+			}
+		}
+		catch (PartInitException ex)
+		{
+			ServoyLog.logError(ex);
 		}
 	}
 
@@ -794,7 +836,7 @@ public class EditorUtil
 										return super.getText(element);
 									}
 								}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyParts, new StructuredSelection(dirtyParts), true, null,
-								null);
+								null, false);
 
 							dialog.open();
 							if (dialog.getReturnCode() == Window.OK)

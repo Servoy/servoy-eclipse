@@ -39,6 +39,8 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
@@ -46,6 +48,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
@@ -125,6 +128,9 @@ public class LessPropertiesComposite extends Composite
 
 	private static final Pattern pattern = Pattern.compile("[@\\w]([\\w-]*)");
 	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
+	private static final String SWT_CSS_ID_KEY = "org.eclipse.e4.ui.css.id";
+	private static final String SVY_BACKGROUND = "svybackground";
+
 
 	private String getWordAt(String txt, int pos)
 	{
@@ -173,11 +179,12 @@ public class LessPropertiesComposite extends Composite
 	private CachingChildrenComposite area;
 	private final ScrolledComposite sc;
 	private final PropertiesLessEditor editor;
-	private final Color backgroundColor;
 	private final char[] autoActivationCharacters = new char[] { '@' };
 	private KeyStroke keyStroke;
 	private ArrayList<ExpandableLessPropertiesComposite> categoryComposites;
 	private Text firstText;
+	private Button tiCheck;
+	private CCombo combo;
 
 	public LessPropertiesComposite(Composite parent, int style, final PropertiesLessEditor editor)
 	{
@@ -196,8 +203,7 @@ public class LessPropertiesComposite extends Composite
 		sc = new ScrolledComposite(parent, SWT.TRANSPARENT | SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
-		backgroundColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-		sc.setBackground(backgroundColor);
+		sc.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		createArea();
 	}
 
@@ -209,74 +215,65 @@ public class LessPropertiesComposite extends Composite
 	{
 		area = new CachingChildrenComposite(sc, SWT.TRANSPARENT);
 		sc.setContent(area);
-		GridLayout layout = new GridLayout(2, false);
+		GridLayout layout = new GridLayout(1, false);
 		layout.marginRight = 5;
 		area.setLayout(layout);
-		area.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		area.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		FontDescriptor descriptor = FontDescriptor.createFrom(sc.getFont());
-		descriptor = descriptor.setStyle(SWT.BOLD);
-		Font font = descriptor.createFont(getShell().getDisplay());
+		FontDescriptor boldFontDescriptor = FontDescriptor.createFrom(sc.getFont()).setStyle(SWT.BOLD);
+		Font boldFont = boldFontDescriptor.createFont(getShell().getDisplay());
 
 		try
 		{
+			Composite comp = new Composite(area, SWT.NONE);
+			RowLayout rowLayout = new RowLayout();
+			rowLayout.spacing = 8;
+			comp.setLayout(rowLayout);
+			comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
 			PropertiesLessEditorInput propertiesLessEditorInput = (PropertiesLessEditorInput)editor.getEditorInput();
 
-			Label l = new Label(area, SWT.NONE);
+			Label l = new Label(comp, SWT.NONE);
 			l.setText("Servoy Theme Version");
-			l.setBackground(backgroundColor);
-			l.setFont(font);
-			CCombo combo = new CCombo(area, SWT.READ_ONLY | SWT.BORDER);
-			combo.setBackground(backgroundColor);
+			l.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
+			l.setFont(boldFont);
+			l.addDisposeListener((e) -> boldFontDescriptor.destroyFont(boldFont));
+			combo = new CCombo(comp, SWT.READ_ONLY | SWT.BORDER);
+			combo.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			combo.setItems(ThemeResourceLoader.VERSIONS);
-			combo.select(Arrays.asList(ThemeResourceLoader.VERSIONS).indexOf(propertiesLessEditorInput.getVersion()));
+			String version = propertiesLessEditorInput.getVersion();
+			boolean tiVersion = false;
+			if (version.endsWith("_ng2"))
+			{
+				tiVersion = true;
+				version = version.substring(0, version.length() - 4);
+			}
+			combo.select(Arrays.asList(ThemeResourceLoader.VERSIONS).indexOf(version));
 			combo.addListener(SWT.Selection, e -> {
-				int selectionIndex = combo.getSelectionIndex();
-				if (selectionIndex > -1)
+				setThemeVersion();
+			});
+			tiCheck = new Button(comp, SWT.CHECK);
+			tiCheck.setText("Titanium NG Theme");
+			tiCheck.setSelection(tiVersion);
+			tiCheck.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
 				{
-					String selectedVersion = ThemeResourceLoader.VERSIONS[selectionIndex];
-					String text = PropertiesLessEditorInput.getFileContent(propertiesLessEditorInput);
-					int versionIndex = text.indexOf(ThemeResourceLoader.THEME_LESS);
-					if (versionIndex != -1)
-					{
-						int endIndex = text.indexOf("';", versionIndex);
-						if (selectedVersion == "latest") // special case
-						{
-							text = text.substring(0, versionIndex + ThemeResourceLoader.THEME_LESS.length()) + text.substring(endIndex);
-						}
-						else
-						{
-							text = text.substring(0, versionIndex + ThemeResourceLoader.THEME_LESS.length()) + "?version=" + selectedVersion +
-								text.substring(endIndex);
-						}
-						try
-						{
-							propertiesLessEditorInput.getFile().setContents(new ByteArrayInputStream(text.getBytes(Charset.forName("UTF-8"))), IResource.FORCE,
-								null);
-						}
-						catch (CoreException e1)
-						{
-							ServoyLog.logError(e1);
-						}
-						propertiesLessEditorInput.reloadProperties(text, true);
-						area.dispose();
-						createArea();
-						sc.layout(true, true);
-					}
+					setThemeVersion();
 				}
 			});
-
 			categoryComposites = new ArrayList<ExpandableLessPropertiesComposite>();
 			for (String categoryName : propertiesLessEditorInput.getCategories())
 			{
 				ExpandBar expandBar = new ExpandBar(area, SWT.NONE);
-				expandBar.setBackground(backgroundColor);
-				expandBar.setFont(font);
+				expandBar.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
+				expandBar.setFont(boldFont);
 				expandBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-				ExpandableLessPropertiesComposite expandComposite = new ExpandableLessPropertiesComposite(expandBar, propertiesLessEditorInput, font,
+				ExpandableLessPropertiesComposite expandComposite = new ExpandableLessPropertiesComposite(expandBar, propertiesLessEditorInput, boldFont,
 					categoryName);
 				categoryComposites.add(expandComposite);
-				expandComposite.setBackground(backgroundColor);
+				expandComposite.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 				ExpandItem collapsableItem = new ExpandItem(expandBar, SWT.NONE, 0);
 				collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 				collapsableItem.setControl(expandComposite);
@@ -315,14 +312,57 @@ public class LessPropertiesComposite extends Composite
 		area.cacheChildren(true);
 		sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		Display.getCurrent().asyncExec(() -> {
-			if (firstText != null) firstText.setFocus();
+			if (firstText != null && !firstText.isDisposed()) firstText.setFocus();
 		});
+	}
+
+	/**
+	 * @param propertiesLessEditorInput
+	 * @param combo
+	 */
+	protected void setThemeVersion()
+	{
+		PropertiesLessEditorInput propertiesLessEditorInput = (PropertiesLessEditorInput)editor.getEditorInput();
+		int selectionIndex = combo.getSelectionIndex();
+		if (selectionIndex > -1)
+		{
+			String selectedVersion = ThemeResourceLoader.VERSIONS[selectionIndex];
+			if (tiCheck.getSelection()) selectedVersion = selectedVersion + "_ng2";
+			String text = PropertiesLessEditorInput.getFileContent(propertiesLessEditorInput);
+			int versionIndex = text.indexOf(ThemeResourceLoader.THEME_LESS);
+			if (versionIndex != -1)
+			{
+				int endIndex = text.indexOf("';", versionIndex);
+				if (selectedVersion == "latest") // special case
+				{
+					text = text.substring(0, versionIndex + ThemeResourceLoader.THEME_LESS.length()) + text.substring(endIndex);
+				}
+				else
+				{
+					text = text.substring(0, versionIndex + ThemeResourceLoader.THEME_LESS.length()) + "?version=" + selectedVersion +
+						text.substring(endIndex);
+				}
+				try
+				{
+					propertiesLessEditorInput.getFile().setContents(new ByteArrayInputStream(text.getBytes(Charset.forName("UTF-8"))), IResource.FORCE,
+						null);
+				}
+				catch (CoreException e1)
+				{
+					ServoyLog.logError(e1);
+				}
+				propertiesLessEditorInput.reloadProperties(text, true);
+				area.dispose();
+				createArea();
+				sc.layout(true, true);
+			}
+		}
 	}
 
 	protected void addPropertyEntry(Composite container, Font font, PropertiesLessEditorInput propertiesLessEditorInput, LessPropertyEntry property)
 	{
 		Label label = new Label(container, SWT.NONE);
-		label.setBackground(backgroundColor);
+		label.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 		label.setFont(font);
 		label.setText(property.getLabel());
 		final Text txtName = new Text(container, SWT.BORDER);
@@ -383,7 +423,7 @@ public class LessPropertiesComposite extends Composite
 		if (property.getType() == LessPropertyType.COLOR)
 		{
 			Button editButton = new Button(container, SWT.FLAT);
-			editButton.setBackground(backgroundColor);
+			editButton.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
 			editButton.setText("Select Color");
 			editButton.addListener(SWT.Selection, e -> {
 				final Display display = editButton.getDisplay();

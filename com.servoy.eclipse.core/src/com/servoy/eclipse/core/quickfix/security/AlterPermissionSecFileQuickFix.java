@@ -36,16 +36,15 @@ public abstract class AlterPermissionSecFileQuickFix extends SecurityQuickFix
 	@Override
 	protected String parseAndAlterSecurityFile(String fileContent) throws JSONException
 	{
-		Map<String, List<SecurityInfo>> access = new HashMap<String, List<SecurityInfo>>();
-
 		// read the file into memory
-		WorkspaceUserManager.deserializeSecurityPermissionInfo(fileContent, access);
+		Map<String, List<SecurityInfo>> access = new HashMap<>(WorkspaceUserManager.deserializeSecurityPermissionInfo(fileContent));
 
 		// alter contents
-		boolean altered = alterPermissionInfo(access);
-
-		// write new contents
-		if (altered) return WorkspaceUserManager.serializeSecurityPermissionInfo(access);
+		if (alterPermissionInfo(access))
+		{
+			// write new contents
+			return WorkspaceUserManager.serializeSecurityPermissionInfo(access);
+		}
 		return null;
 	}
 

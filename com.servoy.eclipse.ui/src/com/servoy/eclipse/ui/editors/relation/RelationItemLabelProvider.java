@@ -24,8 +24,6 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.LiteralDataprovider;
-import com.servoy.j2db.persistence.RelationItem;
-import com.servoy.j2db.util.Utils;
 
 /**
  * Label provider for relation items in relation editor.
@@ -58,7 +56,6 @@ public class RelationItemLabelProvider extends LabelProvider implements ITableLa
 	public String getColumnText(Object element, int columnIndex)
 	{
 		RelationRow info = (RelationRow)element;
-		Integer dp = null;
 		switch (columnIndex)
 		{
 			case RelationEditor.CI_FROM :
@@ -68,7 +65,9 @@ public class RelationItemLabelProvider extends LabelProvider implements ITableLa
 				if (ci_from != null) return info.getCIFrom();
 				return UnresolvedValue.getUnresolvedMessage(info.getCIFrom());
 			case RelationEditor.CI_OP :
-				return (info.getOperator() != null ? RelationItem.getOperatorAsString(Utils.getAsInteger(info.getOperator())) : RelationEditor.EMPTY);
+				return OperatorEditingSupport.getColumnText(info.getMaskedOperator());
+			case RelationEditor.CI_MASK :
+				return OperatorMaskEditingSupport.getColumnText(info.getMask());
 			case RelationEditor.CI_TO :
 				if (info.getCITo() == null) return RelationEditor.EMPTY;
 				String ci_to = relationEditor.getDataProvidersIndex(RelationEditor.CI_TO, info.getCITo());

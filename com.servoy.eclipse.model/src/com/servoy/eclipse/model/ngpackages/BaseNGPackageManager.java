@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -165,11 +166,24 @@ public abstract class BaseNGPackageManager
 		}
 	}
 
+	/**
+	 * this call gives all the package readers, but filters out the duplicates if there are source and zip packages for the same package.
+	 *
+	 * @return
+	 */
 	public List<IPackageReader> getAllPackageReaders()
 	{
 		List<IPackageReader> all = new ArrayList<>();
 		all.addAll(Arrays.asList(WebComponentSpecProvider.getSpecProviderState().getAllPackageReaders()));
 		all.addAll(Arrays.asList(WebServiceSpecProvider.getSpecProviderState().getAllPackageReaders()));
+		List<String> sourcePackageNames = all.stream().filter(reader -> reader instanceof ContainerPackageReader).map(reader -> reader.getPackageName())
+			.collect(Collectors.toList());
+		if (sourcePackageNames.size() > 0)
+		{
+			all = all.stream().filter(
+				reader -> (!sourcePackageNames.contains(reader.getPackageName()) || reader instanceof ContainerPackageReader))
+				.collect(Collectors.toList());
+		}
 		return all;
 	}
 

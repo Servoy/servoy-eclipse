@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale } from '@servoy/public';
+import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale, I18NListener, RequestInfoPromise } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { WebsocketService } from '../../sablo/websocket.service';
+import { ServicesService } from '../../sablo/services.service';
 import { FormService } from '../form.service';
 import { LocaleService } from '../locale.service';
 import { ServoyService } from '../servoy.service';
@@ -19,6 +20,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         private applicationService: ApplicationService,
         private servoyService: ServoyService,
         private formService: FormService,
+        private servicesService: ServicesService,
         private popupFormService: PopupFormService,
         private websocketService: WebsocketService) {
         super();
@@ -27,48 +29,72 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
         return this.servoyService.executeInlineScript(formname, script, params);
     }
+
     callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T> {
-        return this.formService.callServiceServerSideApi(servicename, methodName, args);
+        return this.servicesService.callServiceServerSideApi(servicename, methodName, args);
     }
 
     getI18NMessages(...keys: string[]): Promise<any> {
         return this.i18nProvider.getI18NMessages(...keys);
     }
+
+    public listenForI18NMessages(...keys: string[]): I18NListener {
+        return this.i18nProvider.listenForI18NMessages(...keys);
+    }
+
     getClientnr(): string {
         return this.sabloService.getClientnr();
     }
-    callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T> {
+
+    callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): RequestInfoPromise<T> {
         return this.sabloService.callService(serviceName, methodName, argsObject, async);
     }
+
     getLocale(): string {
         return this.localeService.getLocale();
     }
+
     getLocaleObject(): Locale {
         return this.sabloService.getLocale();
     }
+
     createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
         return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement);
     }
+
     showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void {
         this.applicationService.showFileOpenDialog(title, multiselect, acceptFilter, url);
     }
+
     generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
         return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName, tus);
     }
+
     generateUploadUrl(formname: string, componentName: string, propertyName: string, tus?: boolean): string {
         return this.applicationService.generateUploadUrl(formname, componentName, propertyName, tus);
     }
+
     generateMediaDownloadUrl(media: string): string {
         return this.applicationService.generateMediaDownloadUrl(media);
     }
+
     getUIProperty(key: string): any {
         return this.applicationService.getUIProperty(key);
     }
+
     getFormCacheByName(containedForm: string): IFormCache {
         return this.formService.getFormCacheByName(containedForm);
     }
+
+    /** 
+     * @deprecated see interface jsDoc 
+     */
     sendServiceChanges(serviceName: string, propertyName: string, propertyValue: any) {
-        this.sabloService.sendServiceChanges(serviceName, propertyName, propertyValue);
+        this.servicesService.sendServiceChangesWithValue(serviceName, propertyName, propertyValue, propertyValue);
+    }
+
+    sendServiceChangeToServer(serviceName: string, propertyName: string, propertyValue: any, oldPropertyValue: any): void {
+        this.servicesService.sendServiceChangesWithValue(serviceName, propertyName, propertyValue, oldPropertyValue);
     }
 
     showForm(popup: PopupForm): void {
@@ -83,8 +109,4 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         this.formService.setFormStyleClasses(styleclasses);
     }
 
-    getCurrentRequestInfo(): any {
-        return this.websocketService.getCurrentRequestInfo();
-    }
 }
-

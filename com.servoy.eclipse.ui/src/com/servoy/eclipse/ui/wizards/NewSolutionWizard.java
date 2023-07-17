@@ -67,7 +67,7 @@ import org.w3c.dom.NodeList;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -87,6 +87,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
@@ -252,6 +253,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					addMediaFile(solution, ThemeResourceLoader.getCustomProperties(), ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
 					addMediaFile(solution, ThemeResourceLoader.getDefaultNG2SolutionLess(), solution.getName() + "_ng2.less");
 					addMediaFile(solution, ThemeResourceLoader.getNG2CustomProperties(), ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
+					addMediaFile(solution, ThemeResourceLoader.getVariantsFile(), ThemeResourceLoader.VARIANTS_JSON);
 
 					solution.setStyleSheetID(defaultTheme.getID());
 					repository.updateRootObject(solution);
@@ -561,7 +563,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	protected static void createMissingDbServers(Set<String> missingServerNames, IProgressMonitor monitor)
 	{
-		ServerConfig origConfig = Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+
+		ServerConfig origConfig = Arrays.stream(serverManager.getServerConfigs())
 			.filter(
 				s -> s.isPostgresDriver() && s.isEnabled())
 			.findAny()
@@ -572,7 +576,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			return;
 		}
 
-		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(origConfig.getServerName());
+		IServerInternal server = (IServerInternal)serverManager.getServer(origConfig.getServerName());
 		if (server == null || !server.isValid())
 		{
 			ServoyLog.logError(new Exception("Cannot create missing servers. Did not find a valid Postgres server."));
@@ -584,15 +588,17 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		{
 			action.createDatabase(server, server_name, monitor);
 			final ServerConfig serverConfig = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
-				DatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
+				EclipseDatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
 				origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
 				origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getPrefixTables(),
 				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
 				origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
 			try
 			{
-				ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
-				ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
+				serverManager.testServerConfigConnection(serverConfig, 0);
+				serverManager.saveServerConfig(null, serverConfig);
+				serverManager.saveServerSettings(serverConfig.getServerName(),
+					serverManager.getServerSettings(origConfig.getServerName()).withDefaults(serverConfig));
 			}
 			catch (Exception ex)
 			{
@@ -805,7 +811,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
 						origConfig.getDialectClass(), origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
 
-					EditorUtil.openServerEditor(config, true);
+					EditorUtil.openServerEditor(config, ServerSettings.DEFAULT, true);
 				}
 			}
 		}

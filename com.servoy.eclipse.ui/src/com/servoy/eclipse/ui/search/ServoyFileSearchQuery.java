@@ -23,7 +23,7 @@ import org.eclipse.search.ui.text.FileTextSearchScope;
 
 /**
  * Class that extends FileSearchQuery in order to user Servoy's SearchResultUpdater class.
- * 
+ *
  * @author acostache
  *
  */
@@ -36,9 +36,10 @@ public class ServoyFileSearchQuery extends FileSearchQuery
 	 * @param isCaseSensitive
 	 * @param scope
 	 */
-	public ServoyFileSearchQuery(String searchText, boolean isRegEx, boolean isCaseSensitive, FileTextSearchScope scope)
+	public ServoyFileSearchQuery(String searchText, boolean isRegEx, boolean isCaseSensitive, boolean isWholeWord, boolean searchInBinaries,
+		FileTextSearchScope scope)
 	{
-		super(searchText, isRegEx, isCaseSensitive, scope);
+		super(searchText, isRegEx, isCaseSensitive, isWholeWord, searchInBinaries, scope);
 	}
 
 	private org.eclipse.search.internal.ui.text.FileSearchResult my_fResult;

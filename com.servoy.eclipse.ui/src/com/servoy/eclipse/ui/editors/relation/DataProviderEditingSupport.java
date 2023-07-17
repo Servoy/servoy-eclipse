@@ -16,8 +16,9 @@
  */
 package com.servoy.eclipse.ui.editors.relation;
 
+import static java.util.Arrays.asList;
+
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.action.IStatusLineManager;
@@ -183,7 +184,7 @@ public class DataProviderEditingSupport extends EditingSupport
 		try
 		{
 			IDataSourceManager dsm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager();
-			List<TableItem> items = Arrays.asList(tv.getTable().getItems());
+			List<TableItem> items = asList(tv.getTable().getItems());
 			int idx = items.indexOf(item);
 			if (re.canEditIndex(idx))
 			{
@@ -241,7 +242,6 @@ public class DataProviderEditingSupport extends EditingSupport
 
 				}
 			}
-
 		}
 		catch (Exception ex)
 		{
@@ -328,11 +328,6 @@ public class DataProviderEditingSupport extends EditingSupport
 					// get it back so that we get the display value.
 					currentValue = pi.getCIFrom();
 					break;
-				case RelationEditor.CI_OP :
-					currentValue = Integer.valueOf(intValue);
-					previousValue = pi.getOperator();
-					pi.setOperator((Integer)currentValue);
-					break;
 				case RelationEditor.CI_TO :
 					currentValue = intValue != -1 ? dataProviders[intValue] : null;
 					previousValue = pi.getCITo();
@@ -352,23 +347,22 @@ public class DataProviderEditingSupport extends EditingSupport
 		if (element instanceof RelationRow)
 		{
 			RelationRow pi = (RelationRow)element;
-			Integer value = null;
+			int value = 0;
+			List<String> dataProviders = asList(relationEditor.getDataProviders(index));
 			switch (index)
 			{
 				case RelationEditor.CI_FROM :
-					value = Integer.valueOf(Arrays.asList(relationEditor.getDataProviders(RelationEditor.CI_FROM)).indexOf(pi.getCIFrom()));
-					if (value.intValue() == -1 && pi.getCIFrom() != null)
+					value = dataProviders.indexOf(pi.getCIFrom());
+					if (value == -1 && pi.getCIFrom() != null)
 					{
 						return pi.getCIFrom();
 					}
 					break;
-				case RelationEditor.CI_OP :
-					value = pi.getOperator();
-					break;
 				case RelationEditor.CI_TO :
-					value = Integer.valueOf(Arrays.asList(relationEditor.getDataProviders(RelationEditor.CI_TO)).indexOf(pi.getCITo()));
+					value = dataProviders.indexOf(pi.getCITo());
+					break;
 			}
-			return value != null ? value : Integer.valueOf(0);
+			return Integer.valueOf(value);
 		}
 		return null;
 	}

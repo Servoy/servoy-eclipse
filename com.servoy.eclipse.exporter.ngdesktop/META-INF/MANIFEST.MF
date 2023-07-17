@@ -2,7 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Electron Exporter Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.exporter.ngdesktop;singleton:=true
-Bundle-Version: 2022.3.5.3747_LTS
+Bundle-Version: 2023.3.2.3844
+Import-Package: org.apache.commons.io;version="2.8.0"
 Bundle-Activator: com.servoy.eclipse.exporter.ngdesktop.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -12,13 +13,12 @@ Require-Bundle: org.eclipse.ui,
  com.servoy.eclipse.ui,
  com.servoy.eclipse.model,
  servoy_shared,
- org.apache.httpcomponents.httpclient,
- org.apache.httpcomponents.httpcore,
+ org.apache.httpcomponents.client5.httpclient5,
+ org.apache.httpcomponents.core5.httpcore5,
  com.servoy.eclipse.core,
  com.servoy.eclipse.debug,
  org.apache.commons.compress,
- org.apache.commons.io,
  org.eclipse.equinox.security;bundle-version="1.3.600"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.exporter.electron
 Bundle-ActivationPolicy: lazy

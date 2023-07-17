@@ -119,15 +119,12 @@ public class DeveloperUtils
 
 				if (useAsCaption instanceof Boolean && ((Boolean)useAsCaption).booleanValue())
 				{
-					if (webCustomType.hasProperty(captionPD.getName()))
+					Object propertyValue = webCustomType.getProperty(captionPD.getName());
+					if (propertyValue != null)
 					{
-						Object propertyValue = webCustomType.getProperty(captionPD.getName());
-						if (propertyValue != null)
-						{
-							caption = String.valueOf(propertyValue).trim();
-						}
+						caption = String.valueOf(propertyValue).trim();
 					}
-					else if (captionPD.hasDefault())
+					else if (!webCustomType.hasProperty(captionPD.getName()) && captionPD.hasDefault())
 					{
 						caption = String.valueOf(captionPD.getDefaultValue()).trim();
 					}

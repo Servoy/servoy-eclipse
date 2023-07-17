@@ -1,7 +1,7 @@
-import { DOCUMENT } from '@angular/common';
-import { Directive, HostListener, Inject, Input, OnInit } from '@angular/core';
+import { Directive, HostListener, Input, OnInit } from '@angular/core';
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
+import { EditorContentService } from '../services/editorcontent.service';
 
 @Directive({
     selector: '[resizeKnob]'
@@ -9,9 +9,6 @@ import { EditorSessionService } from '../services/editorsession.service';
 export class ResizeKnobDirective implements OnInit {
 
     @Input('resizeKnob') resizeInfo: ResizeInfo;
-
-    contentArea: HTMLElement;
-    glassPane: HTMLElement;
 
     lastresizeStartPosition: {x: number; y: number};
     initialElementInfo: Map<string, ElementInfo>;
@@ -25,16 +22,13 @@ export class ResizeKnobDirective implements OnInit {
     topContentAreaAdjust: number;
     leftContentAreaAdjust: number;
 
-    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document) {
+    constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService) {
     }
 
     ngOnInit(): void {
-        this.contentArea = this.doc.querySelector('.content-area') ;
-        const computedStyle = window.getComputedStyle(this.contentArea, null)
+        const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
         this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
         this.leftContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
-
-        this.glassPane = this.doc.querySelector('.contentframe-overlay') ;
     }
 
     @HostListener('mousedown', ['$event'])
@@ -53,10 +47,9 @@ export class ResizeKnobDirective implements OnInit {
 
             const selection = this.editorSession.getSelection();
             if (selection && selection.length > 0) {
-                const frameElem = this.doc.querySelector('iframe');
                 for (let i = 0; i < selection.length; i++) {
                     const nodeid = selection[i];
-                    let element: HTMLElement = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                    let element = this.editorContentService.getContentElement(nodeid);
                     while(element && !element.classList.contains('svy-wrapper')) {
                         element = element.parentElement;
                     }
@@ -72,19 +65,19 @@ export class ResizeKnobDirective implements OnInit {
                 }
             }
 
-            this.contentArea.addEventListener('mousemove', this.contentAreaMouseMove = (event: MouseEvent) => {
+            this.editorContentService.getContentArea().addEventListener('mousemove', this.contentAreaMouseMove = (event: MouseEvent) => {
                 this.resizeSelection(event);
             });
-            this.contentArea.addEventListener('mouseup', this.contentAreaMouseUp = (event: MouseEvent) => {
+            this.editorContentService.getContentArea().addEventListener('mouseup', this.contentAreaMouseUp = (event: MouseEvent) => {
                 this.resizeSelection(event);
                 this.sendChanges(this.currentElementInfo);
                 this.setCursorStyle('');
                 this.cleanResizeState();
             });
-            this.contentArea.addEventListener('mouseleave', this.contentAreaMouseLeave = (event: MouseEvent) => {
+            this.editorContentService.getContentArea().addEventListener('mouseleave', this.contentAreaMouseLeave = (event: MouseEvent) => {
                 this.contentAreaMouseUp(event);
             });
-            this.contentArea.addEventListener('keydown', this.contentAreaKeyDown = (event: KeyboardEvent) => {
+            this.editorContentService.getContentArea().addEventListener('keydown', this.contentAreaKeyDown = (event: KeyboardEvent) => {
                 if (event.keyCode == 27)
                 {
                     for(const elementInfo of this.initialElementInfo.values()) {
@@ -115,14 +108,14 @@ export class ResizeKnobDirective implements OnInit {
     private cleanResizeState() {
         this.initialElementInfo = null;
         this.currentElementInfo = null;
-        this.contentArea.removeEventListener('mousemove', this.contentAreaMouseMove);
-        this.contentArea.removeEventListener('mouseup', this.contentAreaMouseUp);
-        this.contentArea.removeEventListener('mouseleave', this.contentAreaMouseLeave);
-        this.contentArea.removeEventListener('keydown', this.contentAreaKeyDown);
+        this.editorContentService.getContentArea().removeEventListener('mousemove', this.contentAreaMouseMove);
+        this.editorContentService.getContentArea().removeEventListener('mouseup', this.contentAreaMouseUp);
+        this.editorContentService.getContentArea().removeEventListener('mouseleave', this.contentAreaMouseLeave);
+        this.editorContentService.getContentArea().removeEventListener('keydown', this.contentAreaKeyDown);
     }
 
     private setCursorStyle(style: string) {
-        this.glassPane.style.cursor = style;
+        this.editorContentService.getGlassPane().style.cursor = style;
     }
 
     private resizeSelection(event: MouseEvent) {

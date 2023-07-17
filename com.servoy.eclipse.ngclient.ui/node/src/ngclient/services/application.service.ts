@@ -1,9 +1,9 @@
-import { Injectable, Inject, ComponentFactoryResolver, Injector, ApplicationRef, EmbeddedViewRef } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 import { ServoyService } from '../servoy.service';
 
-import { LoggerFactory, LoggerService, WindowRefService, LocalStorageService } from '@servoy/public';
+import { LoggerFactory, LoggerService, WindowRefService, LocalStorageService, MainViewRefService } from '@servoy/public';
 
 import { SabloService } from '../../sablo/sablo.service';
 
@@ -18,19 +18,18 @@ import { ServerDataService } from './serverdata.service';
 export class ApplicationService {
     private userProperties: { [property: string]: any };
     private log: LoggerService;
+    private minElectronVersion = '24.4.0';
 
     constructor(private servoyService: ServoyService,
         private localStorageService: LocalStorageService,
         private localeService: LocaleService,
         private windowRefService: WindowRefService,
+        private mainViewRefService: MainViewRefService,
         private sabloService: SabloService,
         @Inject(DOCUMENT) private doc: Document,
         private bsWindowManager: BSWindowManager,
         private serverData: ServerDataService,
-        logFactory: LoggerFactory,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private _applicationRef: ApplicationRef,
-        private _injector: Injector) {
+        logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('ApplicationService');
     }
 
@@ -64,6 +63,16 @@ export class ApplicationService {
         if (value == null) delete userProps[key];
         else userProps[key] = value;
         this.localStorageService.set('userProperties', JSON.stringify(userProps));
+    }
+
+    public removeUserProperty(key: string) {
+        const userProps = this.getUserProperties();
+        delete userProps[key];
+        this.localStorageService.set('userProperties', JSON.stringify(userProps));
+    }
+
+    public removeAllUserProperties() {
+        this.localStorageService.set('userProperties', JSON.stringify({}));
     }
 
     public getUIProperty(key: string) {
@@ -117,9 +126,49 @@ export class ApplicationService {
                     this.doc.body.appendChild(ifrm);
                 }
             } else {
-                this.windowRefService.nativeWindow.open(url, target, targetOptions);
+				 if (this.isNgdesktopWithTargetSupport(this.windowRefService.nativeWindow.navigator.userAgent)) {
+                    const r = this.windowRefService.nativeWindow['require'];
+                    const ipcRenderer = r('electron').ipcRenderer;
+                    ipcRenderer.send('open-url-with-target', url, target, targetOptions);
+                } else {
+                    this.windowRefService.nativeWindow.open(url, target, targetOptions);
+
+                }
             }
         }, timeout * 1000);
+    }
+
+	private isNgdesktopWithTargetSupport(userAgent: string) {
+        const electronVersion = userAgent.match(/Electron\/([0-9\.]+)/);
+
+        if (!electronVersion) {
+            return false;
+        }
+        
+        const compare = this.compareVersions(electronVersion[1], this.minElectronVersion);
+        return compare >= 0; // true if electronVersion >= this.minElectronVersion (24.4.0)
+    }
+
+    private compareVersions(v1: string, v2: string): number {
+        let v1tokens = v1.split('.').map(Number);
+        let v2tokens = v2.split('.').map(Number);
+    
+        for (let i = 0; i < v1tokens.length; ++i) {
+            if (v1tokens[i] > v2tokens[i]) {
+                return 1;
+            }
+            if (v1tokens[i] === v2tokens[i]) {
+                continue;
+            }
+            if (v2tokens.length === i) {
+                return 1;
+            }
+            return -1; //get here only if previous tokens (if any) were ==
+        }
+        if (v1tokens.length !== v2tokens.length) {
+            return -1; //get here only if all tokens are equal but first version has less tokens
+        }
+        return 0;
     }
 
     public setStatusText(text: string) {
@@ -201,25 +250,26 @@ export class ApplicationService {
         if (!url) {
             url = this.generateUploadUrl(null, null, null);
         }
-        const componentFactory = this.componentFactoryResolver.resolveComponentFactory(FileUploadWindowComponent);
-        const defaultLoginWindowComponent = componentFactory.create(this._injector);
-        this._applicationRef.attachView(defaultLoginWindowComponent.hostView);
+        const fileUploadWindowComponent = this.mainViewRefService.mainContainer.createComponent(FileUploadWindowComponent);
 
-        defaultLoginWindowComponent.instance.url = url;
-        defaultLoginWindowComponent.instance.title = title;
-        defaultLoginWindowComponent.instance.multiselect = multiselect;
-        defaultLoginWindowComponent.instance.filter = acceptFilter;
+        fileUploadWindowComponent.instance.url = url;
+        fileUploadWindowComponent.instance.title = title;
+        fileUploadWindowComponent.instance.multiselect = multiselect;
+        fileUploadWindowComponent.instance.filter = acceptFilter;
 
         const opt: BSWindowOptions = {
             id: 'svyfileupload',
-            fromElement: defaultLoginWindowComponent.location.nativeElement.childNodes[0],
-            title: "",
+            fromElement: fileUploadWindowComponent.location.nativeElement.childNodes[0],
+            title: '',
             resizable: false,
             isModal: true
         };
 
         const bsWindowInstance = this.bsWindowManager.createWindow(opt);
-        defaultLoginWindowComponent.instance.setOnCloseCallback(() => bsWindowInstance.close());
+        fileUploadWindowComponent.instance.setOnCloseCallback(() => {
+            bsWindowInstance.close();
+            fileUploadWindowComponent.destroy();
+        });
         bsWindowInstance.setActive(true);
     }
 
@@ -263,17 +313,14 @@ export class ApplicationService {
     public getClipboardContent(): Promise<string> {
         return this.windowRefService.nativeWindow.navigator.clipboard.readText();
     }
-    
+
     public replaceUrlState() {
         history.replaceState({}, '', this.windowRefService.nativeWindow.location.href.split('?')[0]);
     }
 
     private showDefaultLoginWindow() {
-        const componentFactory = this.componentFactoryResolver.resolveComponentFactory(DefaultLoginWindowComponent);
-        const defaultLoginWindowComponent = componentFactory.create(this._injector);
-        this._applicationRef.attachView(defaultLoginWindowComponent.hostView);
+        const defaultLoginWindowComponent = this.mainViewRefService.mainContainer.createComponent(DefaultLoginWindowComponent);
         defaultLoginWindowComponent.instance.setOnLoginCallback(() => defaultLoginWindowComponent.destroy());
-        this.doc.body.appendChild((defaultLoginWindowComponent.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement);
     }
 
     private getUserProperties() {

@@ -22,10 +22,12 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.views.contentoutline.ContentOutline;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
@@ -45,11 +47,13 @@ public class RfbSelectionListener implements ISelectionListener
 	private List<String> lastSelection = new ArrayList<String>();
 	private final Form form;
 	private ISelection currentSelection;
+	private final ISelectionProvider selectionProvider;
 
-	public RfbSelectionListener(Form form, EditorWebsocketSession editorWebsocketSession)
+	public RfbSelectionListener(Form form, EditorWebsocketSession editorWebsocketSession, ISelectionProvider selectionProvider)
 	{
 		this.form = form;
 		this.editorWebsocketSession = editorWebsocketSession;
+		this.selectionProvider = selectionProvider;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -61,6 +65,11 @@ public class RfbSelectionListener implements ISelectionListener
 			currentSelection = selection;
 
 			updateSelection(false);
+			// update selection immediately if it comes from outline view, do not wait for client call setSelection
+			if (part instanceof ContentOutline)
+			{
+				selectionProvider.setSelection(selection);
+			}
 		}
 	}
 

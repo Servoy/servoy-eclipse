@@ -131,8 +131,15 @@
       }
     }
   },
-  "defaultProject": "wpm2",
   "cli": {
     "analytics": "bdd6071a-93e5-445c-af9b-e068bd29f8dc"
+  },
+  "schematics": {
+    "@angular-eslint/schematics:application": {
+      "setParserOptionsProject": true
+    },
+    "@angular-eslint/schematics:library": {
+      "setParserOptionsProject": true
+    }
   }
 }

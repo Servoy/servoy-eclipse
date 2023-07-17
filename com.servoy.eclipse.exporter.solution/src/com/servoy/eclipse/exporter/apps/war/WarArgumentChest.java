@@ -44,6 +44,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String drivers;
 	private boolean isExportActiveSolution;
 	private String exportNG2Mode;
+	private boolean exportNG1;
 	private String pluginLocations;
 	private String selectedComponents;
 	private String selectedServices;
@@ -189,14 +190,16 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             components separated by spaces; exports the  components  used  by  the solution\n"
 			+ "             (current if -s has more) and the components in this additional components list.\n"
 			+ "             Default: only the used components exported.\n"
-			+ "        -excludeComponentPkgs ... space separated list of excluded component packages\n"
+			+ "        -excludeComponentPkgs ... space separated list of  excluded component packages (from\n"
+			+ "             all available component packages).\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -srefs ... exports  only the services used by  the (current if -s has more) solution\n"
 			+ "        -srefs <additional_service_names> ... can  be  'all' (no ')  or  a list  of services\n"
 			+ "             separated by spaces; exports the services used by the  (current if -s has more)\n"
 			+ "             solution  and the services in this additional services list.\n"
 			+ "             Default: only the used services are exported.\n"
-			+ "        -excludeServicePkgs ... space separated list of excluded service packages.\n"
+			+ "        -excludeServicePkgs ... space separated list of  excluded service packages (from all\n"
+			+ "             available service packages).\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -md ... export metadata tables (tables marked as metadata); uses the metadata stored\n"
 			+ "             in workspace files for each metadata table.\n"
@@ -235,7 +238,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + addUsersToAdminGroup + " ... adds Users To Admin Group\n"
 			+ "        -" + updateSequences + " ... updates Sequences\n"
 			+ "        -" + upgradeRepository + " ... automatically upgrade repository if needed\n"
-			+ "        -" + contextFileName + " ...  a path to a tomcat context.xml  that should be included into the WAR/META-INF/context.xml\n"
+			+ "        -" + contextFileName + " ... a path to a tomcat context.xml  that should be included\n"
+			+ "             into the WAR/META-INF/context.xml\n"
 //			+ "        -" + createTomcatContextXML + " ... create   a   META-INF/context.xml   file;   please   see\n"
 //			+ "             https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Standard_Implement\n"
 //			+ "             ation for more information.\n"
@@ -275,7 +279,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             included nstead of the default one.\n"
 			+ "        -" + webXmlFileName + " ... a path to a web.xml  that should be included instead  of default\n"
 			+ "             one; it should be a web.xml file previously generated via a Servoy WAR export.\n"
-			+  "        -ng2 <optional:sourcemaps> export ng2 binaries you can give 'sourcemaps' as value to generate sourcemaps\n"
+			+ "        -ng2 true / false / sourcemaps ... export Titanium NG2 binaries.  If 'sourcemaps' is\n"
+			+ "             given, sourcemaps will be generated for .ts files - useful for debugging.\n"
+			+ "             Default: true\n"
+			+ "        -ng1 ... export NG1 client resources; not exported by default.\n"
 			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}
@@ -295,8 +302,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 		excludedDrivers = parseArg(excludeDrivers, null, argsMap, false);
 		isExportActiveSolution = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolution = false;
-		exportNG2Mode = null;
-		if (argsMap.containsKey("ng2") && !Utils.getAsBoolean(argsMap.get("active"))) exportNG2Mode = argsMap.get("ng2");
+		exportNG2Mode = "true";
+		if (argsMap.containsKey("ng2")) exportNG2Mode = argsMap.get("ng2");
+		exportNG1 = false;
+		if (argsMap.containsKey("ng1")) exportNG1 = true;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
 		if (pluginLocations == null) pluginLocations = "../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
@@ -507,6 +516,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return exportNG2Mode;
 	}
 
+	public boolean exportNG1()
+	{
+		return exportNG1;
+	}
 
 	public String getPluginLocations()
 	{

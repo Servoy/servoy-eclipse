@@ -117,12 +117,14 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 			int res = nameDialog.open();
 			if (res == Window.OK)
 			{
-
-				FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getFlattenedSolution();
-				// avoid NPE by closing all editors before deactivating the solution
-				if (flattenedSolution.getName() == editingSolution.getName())
+				if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 				{
-					EditorUtil.getActivePage().closeAllEditors(false);
+					FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getFlattenedSolution();
+					// avoid NPE by closing all editors before deactivating the solution
+					if (flattenedSolution.getName() == editingSolution.getName())
+					{
+						EditorUtil.getActivePage().closeAllEditors(false);
+					}
 				}
 				final String name = nameDialog.getValue();
 				ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
@@ -159,18 +161,21 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 								for (ServoyProject solution : ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProjects())
 								{
 									Solution editingSol = solution.getEditingSolution();
-									String[] modulesNames = Utils.getTokenElements(editingSol.getModulesNames(), ",", true);
-									if (modulesNames != null && modulesNames.length > 0)
+									if (editingSol != null)
 									{
-										for (int i = 0; i < modulesNames.length; i++)
+										String[] modulesNames = Utils.getTokenElements(editingSol.getModulesNames(), ",", true);
+										if (modulesNames != null && modulesNames.length > 0)
 										{
-											if (oldName.equals(modulesNames[i]))
+											for (int i = 0; i < modulesNames.length; i++)
 											{
-												modulesNames[i] = name;
-												String modulesTokenized = ModelUtils.getTokenValue(modulesNames, ",");
-												editingSol.setModulesNames(modulesTokenized);
-												toUpdate.add(editingSol);
-												break;
+												if (oldName.equals(modulesNames[i]))
+												{
+													modulesNames[i] = name;
+													String modulesTokenized = ModelUtils.getTokenValue(modulesNames, ",");
+													editingSol.setModulesNames(modulesTokenized);
+													toUpdate.add(editingSol);
+													break;
+												}
 											}
 										}
 									}

@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * A simple resource mapping for converting IResource to ResourceMapping. It uses the resource as the model object and traverses deeply.
- * 
+ *
  * @since 3.1
  */
 public class SimpleResourceMapping extends ResourceMapping
@@ -40,11 +40,6 @@ public class SimpleResourceMapping extends ResourceMapping
 		this.resource = resource;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.resources.mapping.ResourceMapping#contains(org.eclipse.core.resources.mapping.ResourceMapping)
-	 */
 	@Override
 	public boolean contains(ResourceMapping mapping)
 	{
@@ -66,9 +61,6 @@ public class SimpleResourceMapping extends ResourceMapping
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on ResourceMapping.
-	 */
 	@Override
 	public Object getModelObject()
 	{
@@ -81,9 +73,6 @@ public class SimpleResourceMapping extends ResourceMapping
 		return ModelProvider.RESOURCE_MODEL_PROVIDER_ID;
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on ResourceMapping.
-	 */
 	@Override
 	public IProject[] getProjects()
 	{
@@ -91,9 +80,6 @@ public class SimpleResourceMapping extends ResourceMapping
 		return new IProject[] { resource.getProject() };
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on ResourceMapping.
-	 */
 	@Override
 	public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor)
 	{

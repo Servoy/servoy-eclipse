@@ -584,7 +584,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 						return new WorkspaceUserManager();
 					}
 				});
-				ss.start(false);
+				ss.start(false, true);
 			}
 			catch (Exception e)
 			{
@@ -618,14 +618,14 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		if (outputExtra && !verbose) return;
 		String message = "    -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message.");
 		Object location = marker.getAttribute(IMarker.LOCATION, null);
-		Object lineNumber = marker.getAttribute(IMarker.LINE_NUMBER, null);
-		if (location != null)
+		String path = marker.getResource().getLocation().toOSString();
+		if (path != null)
 		{
-			if (lineNumber != null)
+			if (location != null)
 			{
-				location = location + ":" + lineNumber;
+				path = path + " : " + location;
 			}
-			message += " (" + location + ")";
+			message += " (" + path + ")";
 		}
 		output(message);
 	}

@@ -94,10 +94,10 @@ export class BSWindow {
         options.elements.title = this.element.querySelector(options.selectors.title);
         options.elements.body = this.element.querySelector(options.selectors.body);
         options.elements.footer = this.element.querySelector(options.selectors.footer);
-        options.elements.title.innerHTML = options.title; // How ... ?
-        if (options.fromElement && _this.element.querySelectorAll('[data-dismiss=window]').length <= 0) {
-            options.elements.title.innerHTML += '<button class="close" data-dismiss="window">x</button>';
-        }
+        if (options.title) options.elements.title.innerHTML = options.title;
+//        if (options.fromElement && _this.element.querySelectorAll('[data-dismiss=window]').length <= 0) {
+//            options.elements.title.innerHTML += '<button class="close" data-dismiss="window">x</button>';
+//        }
         if (options.bodyContent) options.elements.body.innerHTML = options.bodyContent;
         if (options.footerContent) options.elements.footer.innerHTML = options.footerContent;
         this.undock();
@@ -146,8 +146,9 @@ export class BSWindow {
 
     setSize(size: { width: number; height: number }) {
         const winBody = this.element.querySelector(this.options.selectors.body);
-        this.renderer.setStyle(winBody, 'width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
-        this.renderer.setStyle(winBody, 'height', size.height + 'px');
+        this.renderer.setStyle(winBody, 'min-width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
+        this.renderer.setStyle(winBody, 'min-height', size.height + 'px');
+        this.renderer.setStyle(winBody, 'height', '1px');
     }
 
     centerWindow() {
@@ -243,13 +244,13 @@ export class BSWindow {
     }
 
     initHandlers() {
-        this.renderer.listen(this.element.querySelector('[data-dismiss=window]'), 'click', (e) => {
-            if (this.options.blocker) {
-                return;
-            }
-            this.close();
-        });
-
+//        this.renderer.listen(this.element.querySelector('[data-dismiss=window]'), 'click', (e) => {
+//            if (this.options.blocker) {
+//                return;
+//            }
+//            this.close();
+//        });
+//
 
         if (this.mouseDownListenerElement) {
             this.mouseDownListenerElement();

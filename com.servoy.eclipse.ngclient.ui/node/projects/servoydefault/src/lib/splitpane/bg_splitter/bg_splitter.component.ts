@@ -84,29 +84,37 @@ export class BGSplitter implements AfterContentInit , OnChanges {
         if ( this.orientation === 'vertical' ) {
             const height = bounds.bottom - bounds.top;
 
-            if ( pos < this.panes.first.minSize ) return;
-            if ( height - pos < this.panes.last.minSize ) return;
+            // only check for minSize if it is adjusting because of mousemove
+            if(event) {
+                if ( pos < this.panes.first.minSize ) return;
+                if ( height - pos < this.panes.last.minSize ) return;
+            }
+
             this.renderer.setStyle( this.handler, 'top', pos + 'px' );
             this.renderer.setStyle( this.panes.first.element.nativeElement, 'height', pos + 'px' );
-            this.renderer.setStyle( this.panes.last.element.nativeElement, 'top', pos + 'px' );
+            this.renderer.setStyle( this.panes.last.element.nativeElement, 'top', (pos + this.handler.offsetHeight) + 'px' );
 
         } else {
             const width = bounds.right - bounds.left;
 
-            if ( pos < this.panes.first.minSize ) return;
-            if ( width - pos < this.panes.last.minSize ) return;
+            // only check for minSize if it is adjusting because of mousemove
+            if(event) {
+                if ( pos < this.panes.first.minSize ) return;
+                if ( width - pos < this.panes.last.minSize ) return;
+            }
+
             this.renderer.setStyle( this.handler, 'left', pos + 'px' );
             this.renderer.setStyle( this.panes.first.element.nativeElement, 'width', pos + 'px' );
-            this.renderer.setStyle( this.panes.last.element.nativeElement, 'left',  pos + 'px' );
+            this.renderer.setStyle( this.panes.last.element.nativeElement, 'left',  (pos + this.handler.offsetWidth) + 'px' );
         }
     }
 
     private getPosition(bounds: any, event?: any, wantedPosition?: number) {
         if ( this.orientation === 'vertical' ) {
             const height = bounds.bottom - bounds.top;
-            if ((wantedPosition < 0 || wantedPosition === undefined) && (event === undefined)) {
+            if ((wantedPosition < 0 || wantedPosition === undefined) && !event) {
                 return height / 2;
-            } else if (event != undefined) {
+            } else if (event) {
                 return event.clientY - bounds.top;
             }
             if (wantedPosition >= 0 && wantedPosition <= 1) {
@@ -114,9 +122,9 @@ export class BGSplitter implements AfterContentInit , OnChanges {
             }
         } else {//horizontal
             const width = bounds.right - bounds.left;
-            if ((wantedPosition < 0 || wantedPosition === undefined) && (event === undefined)) {
+            if ((wantedPosition < 0 || wantedPosition === undefined) && !event) {
                 return width / 2;
-            } else if (event != undefined) {
+            } else if (event) {
                 return event.clientX - bounds.left;
             }
             if (wantedPosition >= 0 && wantedPosition <= 1) {

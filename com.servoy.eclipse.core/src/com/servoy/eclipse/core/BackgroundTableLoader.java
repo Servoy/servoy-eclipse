@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.core;
 
+import static java.lang.Boolean.TRUE;
+
 import java.util.Iterator;
 import java.util.Set;
 
@@ -114,7 +116,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 				for (String serverName : serverNames)
 				{
 					IServer s = serverManager.getServer(serverName, true, false);
-					if (s != null && !((IServerInternal)s).getConfig().isClientOnlyConnections())
+					if (s != null && !TRUE.equals(s.getSettings().getClientOnlyConnections()))
 					{
 						try
 						{

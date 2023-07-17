@@ -28,7 +28,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
-import com.servoy.j2db.server.ngclient.endpoint.BaseNGClientEndpoint;
+import org.sablo.websocket.WebsocketEndpoint;
 
 /**
  * WebsocketEndpoint for editor content (running design ngclient)
@@ -38,7 +38,7 @@ import com.servoy.j2db.server.ngclient.endpoint.BaseNGClientEndpoint;
  */
 
 @ServerEndpoint(value = "/rfb/angular/content/websocket/{clientnr}/{windowName}/{windownr}")
-public class EditorContentEndpoint extends BaseNGClientEndpoint
+public class EditorContentEndpoint extends WebsocketEndpoint
 {
 	public EditorContentEndpoint()
 	{

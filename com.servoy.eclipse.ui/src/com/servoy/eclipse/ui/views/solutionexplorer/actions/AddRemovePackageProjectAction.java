@@ -143,10 +143,10 @@ public class AddRemovePackageProjectAction extends Action implements ISelectionC
 
 				int treeStyle = SWT.MULTI | SWT.CHECK;
 
+
 				dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, labelProvider, null,
-					selectionFilter, treeStyle, "Add/Remove Servoy Project Packages", selectablePackages.toArray(), theSelection, true,
-					"Add/Remove Servoy Project Packages",
-					null);
+					selectionFilter, treeStyle, "Add/Remove Servoy Packages", selectablePackages.toArray(), theSelection, true, "Add/Remove Servoy Packages",
+					null, true);
 
 				dialog.open();
 

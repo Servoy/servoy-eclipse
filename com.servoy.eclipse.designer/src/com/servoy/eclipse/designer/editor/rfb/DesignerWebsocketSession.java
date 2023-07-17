@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
+import org.sablo.eventthread.WebsocketSessionWindows;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
@@ -47,11 +48,15 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecificationBuilder;
 import org.sablo.websocket.BaseWebsocketSession;
+import org.sablo.websocket.CurrentWindow;
 import org.sablo.websocket.IClientService;
 import org.sablo.websocket.IServerService;
+import org.sablo.websocket.IWindow;
 import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.impl.ClientService;
+import org.sablo.websocket.utils.JSONUtils.EmbeddableJSONWriter;
 
+import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -110,9 +115,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 	private final BaseVisualFormEditor editor;
 
-	/**
-	 * @param uuid
-	 */
+	private final Set<String> clientSideSpecs = new HashSet<>();
+
 	public DesignerWebsocketSession(WebsocketSessionKey sessionKey, BaseVisualFormEditor editor)
 	{
 		super(sessionKey);
@@ -199,6 +203,23 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			case "getData" :
 			{
 				boolean isNG2 = args.optBoolean("ng2", false);
+				Collection<IFormElement> baseComponents = new ArrayList<IFormElement>(wrapper.getBaseComponents());
+
+				// send any client-side-types that the form designer will neeed for this form's components
+				EmbeddableJSONWriter compSpecsToSend = null;
+				for (IFormElement baseComponent : baseComponents)
+				{
+					FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+					String specName = fe.getWebComponentSpec().getName();
+					compSpecsToSend = sendComponentSpecToClientIfNeeded(compSpecsToSend, fe, specName);
+				}
+				if (compSpecsToSend != null)
+				{
+					compSpecsToSend.endObject();
+					getTypesRegistryService().addComponentClientSideSpecs(compSpecsToSend);
+				}
+
+				// send the rest of the form data
 				if (isNG2)
 				{
 					LayoutContainer zoomedInContainer = null;
@@ -207,7 +228,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					{
 						zoomedInContainer = (LayoutContainer)((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
 					}
-					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true, zoomedInContainer).generateJS();
+					return new AngularFormGenerator(fs, flattenedForm, form.getName(), true, zoomedInContainer).generateJS(new ServoyDataConverterContext(fs,
+						Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER)
+							? ServoyModelFinder.getServoyModel().getMessagesManager() : null));
 				}
 				else
 				{
@@ -217,7 +240,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.value(new JSONObject(wrapper.getPropertiesString()));
 					writer.key("parentUuid");
 					writer.value(form.extendsForm != null ? form.extendsForm.getUUID() : null);
-					Collection<IFormElement> baseComponents = new ArrayList<IFormElement>(wrapper.getBaseComponents());
 					Collection<IFormElement> deleted = Collections.emptyList();
 					sendComponents(fs, writer, baseComponents, deleted, false);
 					writer.key("solutionProperties");
@@ -332,10 +354,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
 		for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
 		{
-			List<String> libs = entry.getNg2CssDesignLibrary();
-			if (libs != null)
+			Object responsiveLib = entry.getManifest().getMainAttributes().getValue("Responsive-Layout");
+			if (form.isResponsiveLayout() && "True".equals(responsiveLib))
 			{
-				designCssLibs.addAll(libs);
+				List<String> libs = entry.getNg2CssDesignLibrary();
+				if (libs != null)
+				{
+					designCssLibs.addAll(libs);
+				}
 			}
 		}
 		// also add the solution css
@@ -366,19 +392,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	 * Function that check recursively childrens of a LayoutContainer .
 	 * If LayoutContainer childrens contains BaseComponent element, will call parseFormElements and will return it's value.
 	 *
-	 * @param persist
-	 * @param containers
-	 * @param components
-	 * @param compAttributes
-	 * @param deletedComponents
-	 * @param formComponentChild
-	 * @param refreshTemplate
-	 * @param updatedFormComponentsDesignId
-	 * @param formComponentsComponents
-	 * @param renderGhosts
-	 * @param fs
-	 * @param childParentMap
-	 * @param skipComponents
 	 * @return ghost
 	 */
 	private boolean checkLayoutHierarchyRecursively(IPersist persist, List<LayoutContainer> containers, Set<IFormElement> components,
@@ -413,17 +426,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 	/**
 	 * Function that parse an IPersist when instance is IFormElement
-	 * @param persist
-	 * @param baseComponents
-	 * @param compAttributes
-	 * @param deletedComponents
-	 * @param formComponentChild
-	 * @param refreshTemplate
-	 * @param updatedFormComponentsDesignId
-	 * @param formComponentsComponents
-	 * @param renderGhosts
-	 * @param fs
-	 * @param childParentMap
 	 * @return ghost
 	 */
 	private boolean parseIFormElement(IFormElement persist, Set<IFormElement> baseComponents, Set<IFormElement> compAttributes,
@@ -445,7 +447,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			if (persist instanceof WebComponent)
 			{
 				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-					.getWebComponentSpecification(((WebComponent)persist).getTypeName());
+					.getWebObjectSpecification(((WebComponent)persist).getTypeName());
 				ghost = !spec.getProperties(FormComponentPropertyType.INSTANCE).isEmpty();
 			}
 		}
@@ -491,8 +493,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				ghost = true;
 			}
-			checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
+			boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
 				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>(), containers, childParentMap);
+			if (fcGhosts) ghost = fcGhosts;
 		}
 		else
 		{
@@ -610,6 +613,27 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			baseComponents.addAll(formComponentsComponents);
 		}
 
+		EmbeddableJSONWriter compSpecsToSend = null;
+		for (IFormElement baseComponent : baseComponents)
+		{
+			FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+			String specName = fe.getWebComponentSpec().getName();
+			compSpecsToSend = sendComponentSpecToClientIfNeeded(compSpecsToSend, fe, specName);
+		}
+		if (compSpecsToSend != null)
+		{
+			compSpecsToSend.endObject();
+			final EmbeddableJSONWriter clientSideSpecsToSend = compSpecsToSend;
+			CurrentWindow.runForWindow(new WebsocketSessionWindows(this), new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					getTypesRegistryService().addComponentClientSideSpecs(clientSideSpecsToSend);
+				}
+			});
+		}
+
 		JSONWriter writer = new JSONStringer();
 		writer.object();
 		sendComponents(fs, writer, baseComponents, deletedComponents, true);
@@ -724,7 +748,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (LayoutContainer container : containersList)
 			{
 				writer.object();
-				ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, true);
+				ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, form, true);
 				writer.endObject();
 			}
 			writer.endArray();
@@ -821,9 +845,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		return writer.toString();
 	}
 
-	private void checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
+	private boolean checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
 		FlattenedSolution fs, HashSet<String> forms, List<LayoutContainer> containers, Map<String, String> childParentMap)
 	{
+		boolean ghost = false;
 		WebObjectSpecification spec = formElement.getWebComponentSpec();
 		if (spec != null)
 		{
@@ -846,24 +871,38 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					for (FormElement element : cache.getFormComponentElements())
 					{
 						formComponentsComponents.add((IFormElement)element.getPersistIfAvailable());
-						checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms, containers, childParentMap);
+						if (element.getPersistIfAvailable() instanceof ISupportsIndexedChildren &&
+							((ISupportsIndexedChildren)element.getPersistIfAvailable()).getAllObjects().hasNext())
+						{
+							ghost = true;
+						}
+						boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms, containers,
+							childParentMap);
+						if (fcGhosts) ghost = fcGhosts;
 					}
-					if (frm.isResponsiveLayout())
+					if (frm.isResponsiveLayout() || frm.containsResponsiveLayout())
 					{
 						Iterator<LayoutContainer> it = frm.getLayoutContainers();
+						if (!it.hasNext() || frm.containsResponsiveLayout())
+						{
+							it = frm.getFormLayoutContainers();
+						}
 						while (it.hasNext())
 						{
 							LayoutContainer container = it.next();
 							childParentMap.put(container.getUUID().toString(), formElement.getPersistIfAvailable().getUUID().toString());
-							checkLayoutHierarchyRecursively(container, containers, formComponentsComponents, formComponentsComponents, formComponentsComponents,
+							boolean fcGhosts = checkLayoutHierarchyRecursively(container, containers, formComponentsComponents, formComponentsComponents,
+								formComponentsComponents,
 								isValid(), formComponentsComponents, updatedFormComponentsDesignId, formComponentsComponents, isValid(), fs, childParentMap,
 								true);
+							if (fcGhosts) ghost = fcGhosts;
 						}
 					}
 					forms.remove(frm.getName());
 				}
 			}
 		}
+		return ghost;
 	}
 
 	private IFormElement getFormComponentElement(FlattenedSolution fs, IFormElement formComponent, String elementName)
@@ -923,8 +962,11 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			List<IFormElement> components = new ArrayList<IFormElement>(baseComponents);
 			Collections.sort(components, PositionComparator.XY_PERSIST_COMPARATOR);
 			Collections.reverse(components);
+			EmbeddableJSONWriter compSpecNames = new EmbeddableJSONWriter();
 			writer.key("components");
 			writer.object();
+			compSpecNames.object();
+
 			// TODO is this really all the data? or are there properties that would normally go through the webcomponents..
 			for (IFormElement baseComponent : components)
 			{
@@ -932,11 +974,16 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				if (fe.getDesignId() != null)
 				{
 					writer.key(fe.getDesignId());
+					compSpecNames.key(fe.getDesignId());
 				}
 				else
 				{
 					writer.key(fe.getName());
+					compSpecNames.key(fe.getName());
 				}
+				String specName = fe.getWebComponentSpec().getName();
+				compSpecNames.value(specName);
+
 				fe.propertiesAsTemplateJSON(writer,
 					new FormElementContext(fe, new ServoyDataConverterContext(ServoyModelFinder.getServoyModel().getFlattenedSolution(),
 						ServoyModelFinder.getServoyModel().getMessagesManager()), null),
@@ -956,6 +1003,11 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 			}
 			writer.endObject();
+			compSpecNames.endObject();
+
+			writer.key("componentSpecNames");
+			writer.value(compSpecNames);
+
 			if (writeNG2)
 			{
 				writer.key("ng2components");
@@ -994,4 +1046,37 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		}
 
 	}
+
+	private EmbeddableJSONWriter sendComponentSpecToClientIfNeeded(EmbeddableJSONWriter compSpecsToSend, FormElement fe, String specName)
+	{
+		if (!clientSideSpecs.contains(specName))
+		{
+			clientSideSpecs.add(specName);
+
+			EmbeddableJSONWriter clSideTypesForThisComponent = WebComponentSpecProvider.getInstance().getClientSideTypeCache().getClientSideSpecFor(
+				fe.getWebComponentSpec());
+			if (clSideTypesForThisComponent != null)
+			{
+				if (compSpecsToSend == null)
+				{
+					compSpecsToSend = new EmbeddableJSONWriter();
+					compSpecsToSend.object();
+				}
+				compSpecsToSend.key(specName).value(clSideTypesForThisComponent);
+			}
+		}
+		return compSpecsToSend;
+	}
+
+	public void handleBrowserWindowRefresh()
+	{
+		clientSideSpecs.clear();
+	}
+
+	@Override
+	protected IWindow createWindow(int windowNr, String windowName)
+	{
+		return new DesignerBaseWindow(this, windowNr, windowName);
+	}
+
 }

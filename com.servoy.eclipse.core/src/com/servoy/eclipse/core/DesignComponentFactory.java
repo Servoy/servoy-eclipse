@@ -124,7 +124,7 @@ public class DesignComponentFactory extends ComponentFactory
 		{
 			if (meta instanceof WebComponent)
 			{
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 					FormTemplateGenerator.getComponentTypeName((WebComponent)meta));
 				String label;
 				if (spec == null)

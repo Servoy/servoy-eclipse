@@ -18,10 +18,10 @@
 package com.servoy.eclipse.warexporter.ui.wizard;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebObjectSpecification;
@@ -32,7 +32,7 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
  * Shows the user the list of needed components for export and allows him to add more components to export.
  * @author emera
  */
-public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
+public class ComponentsSelectionPage extends AbstractWebObjectSelectionPage
 {
 
 	private final SpecProviderState componentsSpecProviderState;
@@ -42,40 +42,44 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 	{
 		super(exportModel, pageName, title, description, "component");
 		this.componentsSpecProviderState = componentsSpecProviderState;
-		componentsUsed = exportModel.getUsedComponents();
-		selectedComponents = new TreeSet<String>(componentsUsed);
-		joinWithLastUsed();
+	}
+
+	@Override
+	protected Set<String> getWebObjectsExplicitlyUsedBySolution()
+	{
+		return exportModel.getComponentsUsedExplicitlyBySolution();
 	}
 
 	@Override
 	protected void joinWithLastUsed()
 	{
-		if (exportModel.getExportedComponents() == null ||
-			exportModel.getExportedComponents().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedComponents())) return;
-		for (String component : exportModel.getExportedComponents())
+		Set<String> componentsToExportWithoutUnderTheHoodOnes = exportModel.getComponentsToExportWithoutUnderTheHoodOnes();
+		if (componentsToExportWithoutUnderTheHoodOnes == null ||
+			webObjectsUsedExplicitlyBySolution.containsAll(componentsToExportWithoutUnderTheHoodOnes)) return;
+
+		for (String component : componentsToExportWithoutUnderTheHoodOnes)
 		{
-			//make sure that the component exported the last time was not removed
-			if (componentsSpecProviderState.getWebComponentSpecification(component) != null) selectedComponents.add(component);
+			// make sure that the component exported the last time was not removed
+			if (componentsSpecProviderState.getWebObjectSpecification(component) != null) selectedWebObjectsForListCreation.add(component);
 		}
 	}
 
 	@Override
-	protected Set<String> getAvailableItems()
+	protected Set<String> getAvailableItems(boolean alreadyPickedAtListCreationShouldBeInThere)
 	{
 		Set<String> availableComponents = new TreeSet<String>();
-		for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebComponentSpecifications())
+		List<String> preferencesExcludedDefaultComponentPackages = exportModel.getPreferencesExcludedDefaultComponentPackages();
+		Set<String> componentsNeededUnderTheHood = exportModel.getComponentsNeededUnderTheHood();
+		for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebObjectSpecifications())
 		{
-			if (exportModel.getExcludedComponentPackages().contains(spec.getPackageName())) continue;
-			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
+			if (!preferencesExcludedDefaultComponentPackages.contains(spec.getPackageName()) &&
+				!componentsNeededUnderTheHood.contains(spec.getName()) &&
+				(alreadyPickedAtListCreationShouldBeInThere || !selectedWebObjectsForListCreation.contains(spec.getName())))
+			{
+				availableComponents.add(spec.getName());
+			}
 		}
 		return availableComponents;
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		exportModel.setExportedComponents(new TreeSet<String>(Arrays.asList(selectedComponentsList.getItems())));
-		return super.getNextPage();
 	}
 
 	@Override
@@ -85,8 +89,9 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 	}
 
 	@Override
-	protected void restoreUsedFromModel()
+	public void storeInput()
 	{
-		componentsUsed = exportModel.getUsedComponents();
+		exportModel.setComponentsToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(selectedWebObjectsList.getItems())));
 	}
+
 }

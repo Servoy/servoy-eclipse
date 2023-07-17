@@ -1,21 +1,28 @@
-<div id="palette" class="palette">
+<div id="palette" class="palette" (scroll)="onPaletteScroll()">	
     <input type="text" class="form-control input-xs" placeholder="Search"  [(ngModel)]="searchText"/>
-    <button type="button" class="btn btn-default btn-link" (click)="openPackageManager()"><img src='/rfb/angular/templates/images/add_components.png'/>Get more components</button>
+    <button type="button" class="btn btn-default btn-link" (click)="openPackageManager()"><img draggable="false" src='/rfb/angular/templates/images/add_components.png'/>Get more components</button>
     <ngb-accordion [activeIds]="activeIds" [type]="'light'">
         <ngb-panel *ngFor="let package of getPackages()| searchTextFilterDeep : searchText;let i = index" [id]="package.id">
          <ng-template ngbPanelTitle>
            {{package.packageDisplayname}}
         </ng-template>
-         <ng-template ngbPanelContent>
+         <ng-template ngbPanelContent>         
             <ul>
-                <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
-                    <img *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
-                    <img [src]="'/'+component.icon" alt=""/>{{component.displayName}}
+                <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
+                    <span>
+                    <img draggable="false" *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
+                    <img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{component.displayName}}
+                    </span>
+                    <designer-variantscontent [component]="component" (click)="onVariantClick($event, component, component.packageName ? component.packageName : package.packageName)" *ngIf="component.styleVariantCategory"></designer-variantscontent>
                     <ul>
-                    <li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)"><img [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}</li>
+                    	<li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)">
+                    	   <span>
+                    	       <img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}
+                    	   </span>
+                    	</li>
                     </ul>
                     <ul *ngFor="let propertyName of component.properties" [ngbCollapse]="!component.isOpen">
-                        <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, propertyName, comp.propertyValue)" *ngFor="let comp of component.components"><img [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</li>
+                        <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, propertyName, comp.propertyValue, component.componentType)" *ngFor="let comp of component.components"><span><img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</span></li>
                     </ul>
                 </li>
             </ul>
@@ -23,8 +30,8 @@
                 <li *ngFor="let categoryObject of package.categories | keyvalue" >
                     <div>{{categoryObject.key}}</div>
                     <ul>
-                         <li (mousedown)="onMouseDown($event, component.name, package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of categoryObject.value | searchTextFilter : searchText" (click)="onClick(component)">
-                             <img [src]="'/'+component.icon" alt=""/>{{component.displayName}}
+                         <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of categoryObject.value | searchTextFilter : searchText" (click)="onClick(component)">
+                             <span><img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{component.displayName}}</span>
                          </li>
                     </ul>
                 </li>

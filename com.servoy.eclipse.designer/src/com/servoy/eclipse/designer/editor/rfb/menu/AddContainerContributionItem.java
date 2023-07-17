@@ -24,6 +24,7 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Debug;
@@ -50,7 +51,16 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		PersistContext persistContext = DesignerUtil.getContentOutlineSelection();
 		IPersist persist = null;
 		if (persistContext != null) persist = persistContext.getPersist();
-		if (persist instanceof LayoutContainer)
+		if (persist.getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) != null)
+		{
+			addMenuItem(list, null, null, null);
+			PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
+				"servoycore");
+			WebLayoutSpecification layoutSpec = specifications.getSpecification(((LayoutContainer)persist).getSpecName());
+			String config = layoutSpec.getConfig() instanceof String ? layoutSpec.getConfig().toString() : "{}";
+			addMenuItem(list, layoutSpec, config, null);
+		}
+		else if (persist instanceof LayoutContainer)
 		{
 			String packageName = ((LayoutContainer)persist).getPackageName();
 			PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
@@ -111,7 +121,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof WebComponent)
 		{
-			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(((WebComponent)persist).getTypeName());
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((WebComponent)persist).getTypeName());
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			for (PropertyDescription propertyDescription : properties.values())
 			{

@@ -66,9 +66,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.property.IPropertyType;
-import org.sablo.specification.property.types.TypesRegistry;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
@@ -320,15 +319,16 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					{
 						if (persist instanceof IBasicWebObject)
 						{
-							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 								((IBasicWebObject)persist).getTypeName());
-							if (spec != null && spec.getHandler(methodKey) != null)
+							WebObjectFunctionDefinition handler;
+							if (spec != null && (handler = spec.getHandler(methodKey)) != null)
 							{
 								template = MethodTemplate.DEFAULT_TEMPLATE;
-								PropertyDescription def = spec.getHandler(methodKey).getAsPropertyDescription();
-								if (def != null && def.getConfig() instanceof JSONObject)
+								PropertyDescription handlerLowLevelDef = handler.getAsPropertyDescription();
+								if (handlerLowLevelDef != null && handlerLowLevelDef.getConfig() instanceof JSONObject)
 								{
-									JSONObject config = (JSONObject)def.getConfig();
+									JSONObject config = (JSONObject)handlerLowLevelDef.getConfig();
 									ArgumentType returnType = null;
 									String defaultMethodCode = config.optString("code", "");
 									String returnTypeDescription = "";
@@ -336,6 +336,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 									Object defaultValue = null;
 									if (config.has("returns"))
 									{
+										PropertyDescription returnTypeUnprocessed = handler.getReturnType();
 										if (config.get("returns") instanceof JSONObject)
 										{
 											JSONObject returns = config.getJSONObject("returns");
@@ -352,14 +353,13 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 										{
 											returnType = ArgumentType.valueOf(config.getString("returns"));
 										}
+
 										if (!hasDefaultValue)
 										{
-											IPropertyType< ? > pt = null;
-											if (!returnType.getName().equals("") && defaultMethodCode.equals("") &&
-												(pt = TypesRegistry.getType(returnType.getName())) != null)
+											if (returnTypeUnprocessed != null && returnTypeUnprocessed.getType() != null && defaultMethodCode.equals(""))
 											{
 												hasDefaultValue = true;
-												defaultValue = pt.defaultValue(def);
+												defaultValue = returnTypeUnprocessed.getType().defaultValue(returnTypeUnprocessed);
 											}
 										}
 										if (hasDefaultValue)

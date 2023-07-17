@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -52,6 +54,8 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
@@ -244,34 +248,58 @@ public class MovePersistAction extends AbstractMovePersistAction
 			{
 				public Object visit(IPersist o)
 				{
-					try
+					if (o instanceof WebComponent)
 					{
-						for (ContentSpec.Element element : Utils.iterate(
-							((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
-								o.getTypeID())))
+						WebComponent wc = (WebComponent)o;
+						PropertyDescription pd = ((WebObjectImpl)wc.getImplementation()).getPropertyDescription();
+						if (pd instanceof WebObjectSpecification)
 						{
-							// Don't set meta data properties.
-							if (element.isMetaData() || element.isDeprecated()) continue;
-							// Get default property value as an object.
-							if (element.getTypeID() == IRepository.ELEMENTS)
+							for (String handler : ((WebObjectSpecification)pd).getHandlers().keySet())
 							{
-								Object property_value = ((AbstractBase)o).getProperty(element.getName());
-								int id = Utils.getAsInteger(property_value);
-								if (id > 0)
+								UUID uuid = Utils.getAsUUID(wc.getProperty(handler), false);
+								if (uuid != null)
 								{
-									Object newId = idMap.get(new Integer(id));
-									if (newId != null)
+									Object newUUID = idMap.get(uuid.toString());
+									if (newUUID != null)
 									{
-										((AbstractBase)o).setProperty(element.getName(), newId);
+										wc.setProperty(handler, newUUID);
 										changed[0] = true;
 									}
 								}
 							}
 						}
 					}
-					catch (Exception e)
+					else
 					{
-						ServoyLog.logError(e);
+						try
+						{
+							for (ContentSpec.Element element : Utils.iterate(
+								((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
+									o.getTypeID())))
+							{
+								// Don't set meta data properties.
+								if (element.isMetaData() || element.isDeprecated()) continue;
+								// Get default property value as an object.
+								if (element.getTypeID() == IRepository.ELEMENTS)
+								{
+									Object property_value = ((AbstractBase)o).getProperty(element.getName());
+									int id = Utils.getAsInteger(property_value);
+									if (id > 0)
+									{
+										Object newId = idMap.get(new Integer(id));
+										if (newId != null)
+										{
+											((AbstractBase)o).setProperty(element.getName(), newId);
+											changed[0] = true;
+										}
+									}
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
 					}
 					return IPersistVisitor.CONTINUE_TRAVERSAL;
 				}

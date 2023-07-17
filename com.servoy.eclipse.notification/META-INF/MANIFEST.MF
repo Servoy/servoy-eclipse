@@ -2,22 +2,22 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy notification
 Bundle-SymbolicName: com.servoy.eclipse.notification;singleton:=true
-Bundle-Version: 2022.3.5.3747_LTS
+Bundle-Version: 2023.3.2.3844
 Bundle-Activator: com.servoy.eclipse.notification.Activator
 Bundle-Vendor: Servoy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui,
  org.eclipse.jface,
  org.eclipse.core.runtime,
  com.servoy.eclipse.model,
  org.eclipse.ui.forms,
- slf4j.api,
  org.apache.commons.lang3,
  com.servoy.eclipse.ui
 Export-Package: com.servoy.eclipse.notification,
  com.servoy.eclipse.notification.mylyn,
  com.servoy.eclipse.notification.rss
+Import-Package: org.slf4j;version="2.0.6"
 Bundle-ClassPath: .,
  lib/rome-1.7.5-SNAPSHOT.jar,
  lib/jdom2-2.0.6.jar,

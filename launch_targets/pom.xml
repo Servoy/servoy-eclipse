@@ -2,12 +2,28 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.servoy</groupId>
-		<artifactId>servoy-eclipse</artifactId>
-		<version>2022.3.5.3747_LTS</version>
-	</parent>
+  <groupId>com.servoy</groupId>
+  <version>2023.3.2.3844</version>
   <artifactId>com.servoy.eclipse.target</artifactId>
   <packaging>eclipse-target-definition</packaging>
+    <properties>
+        <tycho.version>2.7.5</tycho.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+                <version>${tycho.version}</version>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-versions-plugin</artifactId>
+                <version>${tycho.version}</version>
+            </plugin>            
+        </plugins>
+    </build>
 </project>

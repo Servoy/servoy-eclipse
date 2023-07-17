@@ -371,6 +371,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 			associatedProblemMarkers.add(
 				new ErrorWarningPreferenceItem(ServoyBuilder.METHOD_NO_RETURN, Messages.ErrorWarningPreferencePage_methodNoReturn, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.MEDIA_TIFF, Messages.ErrorWarningPreferencePage_mediaTiff, true));
+			associatedProblemMarkers
+				.add(new ErrorWarningPreferenceItem(ServoyBuilder.VARIANT_ID_UNRESOLVED, Messages.ErrorWarningPreferencePage_variantId, true));
 			associatedProblemMarkers.add(
 				new ErrorWarningPreferenceItem(ServoyBuilder.CALCULATION_FORM_ACCESS, Messages.ErrorWarningPreferencePage_calculationFormAccess, true));
 			associatedProblemMarkers.add(

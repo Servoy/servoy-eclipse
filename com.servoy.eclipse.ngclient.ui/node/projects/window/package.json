@@ -1,12 +1,13 @@
 {
   "name": "@servoy/window",
-  "version": "2021.12.0",
+  "version": "2023.3.0",
   "peerDependencies": {
-    "@angular/common": "^13",
-    "@angular/core": "^13",
+    "@angular/common": "^15",
+    "@angular/core": "^15",
     "@servoy/public": "*"
   },
   "dependencies": {
+    "@popperjs/core": "<3",
     "tslib": "*"
   },
   "license": "MIT",

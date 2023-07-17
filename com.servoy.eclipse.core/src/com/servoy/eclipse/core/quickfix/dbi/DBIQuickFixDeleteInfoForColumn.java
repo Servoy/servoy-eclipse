@@ -30,13 +30,14 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
  * Quick fix for missing columns in DB (although they are present in the dbi files). It will delete the info from the dbi file.
- * 
+ *
  * @author acostescu
  */
 public class DBIQuickFixDeleteInfoForColumn extends TableDifferenceQuickFix
@@ -100,7 +101,7 @@ public class DBIQuickFixDeleteInfoForColumn extends TableDifferenceQuickFix
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = dmm.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
 
 						// delete the column information
 						boolean removed = false;

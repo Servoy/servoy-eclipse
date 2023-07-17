@@ -10,16 +10,17 @@
     "emitDecoratorMetadata": false,
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "target": "es2017",
+    "target": "ES2022",
     "typeRoots": [
       "node_modules/@types",
       "typings"
     ],
     "lib": [
-      "es2017",
+      "es2020",
+      "es2021.Promise",
+      "es2022.Error",
       "dom",
-      "ES2020.Promise",
-       "dom.Iterable"
+      "dom.Iterable"
     ],
     "paths": {
       "@servoy/public": [
@@ -28,7 +29,8 @@
         "../servoy-public/src/public-api"
       ]
     },
-	"outDir": "./out-tsc/app"
+    "outDir": "./out-tsc/app",
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

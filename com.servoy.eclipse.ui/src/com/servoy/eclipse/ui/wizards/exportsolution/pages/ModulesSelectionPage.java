@@ -257,13 +257,13 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 
 
-		FontDescriptor descriptor = FontDescriptor.createFrom(parent.getFont());
-		descriptor = descriptor.setStyle(SWT.BOLD);
+		FontDescriptor descriptor = FontDescriptor.createFrom(parent.getFont()).setStyle(SWT.BOLD);
 		Font font = descriptor.createFont(getShell().getDisplay());
 
 		checkAll = new Button(composite, SWT.CHECK);
 		checkAll.setText("Select/Deselect All");
 		checkAll.setFont(font);
+		checkAll.addDisposeListener((e) -> descriptor.destroyFont(font));
 		checkAll.addListener(SWT.Selection, e -> {
 			checks.stream().forEach(check -> check.setSelection(checkAll.getSelection()));
 			handleEvent(null);

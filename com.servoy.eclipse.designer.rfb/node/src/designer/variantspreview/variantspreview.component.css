@@ -1,0 +1,36 @@
+.variant-content-frame {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.variant-content-overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index:2;
+    background-color: transparent;
+    outline:none;
+    user-select:none;
+}
+
+.variant-content-area {
+    position: relative;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    vertical-align: top;
+}
+
+.variantBtn {
+	background-color: transparent;
+    border: 0px;
+    border-radius: 3px;
+    padding: 0px;
+}
+.variantBtn:hover {
+  background-color: lightgray;
+}
+

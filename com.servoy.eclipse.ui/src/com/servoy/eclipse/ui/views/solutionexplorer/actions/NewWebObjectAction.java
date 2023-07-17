@@ -330,8 +330,8 @@ public class NewWebObjectAction extends Action
 				modifyBuildFile(packageRoot, componentOrServiceName, charset);
 
 				IFile moduleFile = null;
-				if (packageRoot instanceof IFolder) moduleFile = ((IFolder)packageRoot).getFile("projects/ng2package/src/ng2package.module.ts");
-				if (packageRoot instanceof IProject) moduleFile = ((IProject)packageRoot).getFile("projects/ng2package/src/ng2package.module.ts");
+				if (packageRoot instanceof IFolder) moduleFile = ((IFolder)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
+				if (packageRoot instanceof IProject) moduleFile = ((IProject)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
 				InputStream is = moduleFile.getContents(true);
 				String moduleFileContent = null;
 				try

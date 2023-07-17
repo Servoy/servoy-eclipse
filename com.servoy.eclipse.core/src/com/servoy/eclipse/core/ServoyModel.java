@@ -81,10 +81,12 @@ import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -92,7 +94,6 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
@@ -117,7 +118,7 @@ import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.TableEditorInput;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.IFormComponentListener;
@@ -137,7 +138,6 @@ import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
 import com.servoy.eclipse.model.util.AvoidMultipleExecutionsWorkspaceJob;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -209,7 +209,6 @@ import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
  */
 public class ServoyModel extends AbstractServoyModel implements IDeveloperServoyModel
 {
-
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
 
 	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT";
@@ -285,10 +284,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	private void init()
 	{
-		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
-		// unfortunately there isn't currently a possibility to limit the scope of a filter to a workingSet via extension point - only the user can do it
-		PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
-
 		realOutstandingChanges = new ArrayList<IPersist>();
 
 		// the in-process repository is only meant to work by itself - so all servoy related projects in the workspace should
@@ -412,7 +407,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 									}
 									catch (IOException e)
 									{
-										ServoyLog.logError("error saving chagnes from debugger", e);
+										ServoyLog.logError("error saving changes from debugger", e);
 									}
 									return null;
 								}
@@ -441,7 +436,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 									}
 									catch (Exception e)
 									{
-										e.printStackTrace();
+										ServoyLog.logError("error parsing script method " + method.getName(), e);
 									}
 									return null;
 								}
@@ -1356,7 +1351,14 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		{
 			try
 			{
-				PlatformUI.getWorkbench().getProgressService().run(true, false, op);
+				new ProgressMonitorDialog(UIUtils.getActiveShell())
+				{
+					@Override
+					protected void setShellStyle(int newShellStyle)
+					{
+						super.setShellStyle((newShellStyle & ~SWT.APPLICATION_MODAL) | SWT.PRIMARY_MODAL);
+					}
+				}.run(true, false, op);
 			}
 			catch (InvocationTargetException e)
 			{
@@ -1547,7 +1549,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
 								if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()))
 								{
-									IFolder serverInformationFolder = dataModelManager.getDBIFileContainer(server.getName());
+									IFolder serverInformationFolder = dataModelManager.getServerInformationFolder(server.getName());
 									if (serverInformationFolder.exists())
 									{
 										try
@@ -1566,7 +1568,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 															InputStream is = file.getContents(true);
 															String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 															Utils.closeInputStream(is);
-															DatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent, false);
+															EclipseDatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent,
+																EclipseDatabaseUtils.NO_UPDATE);
 														}
 														catch (CoreException e)
 														{
@@ -2589,21 +2592,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 										}
 										if (file.exists() && (element.getKind() == IResourceDelta.ADDED || element.getKind() == IResourceDelta.CHANGED))
 										{
-											InputStream is = file.getContents();
-											try
+											try (InputStream is = file.getContents())
 											{
-												if (cloneFile.exists())
-												{
-													cloneFile.setContents(is, true, false, null);
-												}
-												else
-												{
-													ResourcesUtils.createFileAndParentContainers(cloneFile, is, true);
-												}
-											}
-											finally
-											{
-												Utils.closeInputStream(is);
+												ResourcesUtils.createOrWriteFile(cloneFile, is, true);
 											}
 										}
 									}
@@ -2715,7 +2706,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			final IContainer workspace = project.getParent();
 
 			SolutionDeserializer sd = new SolutionDeserializer(ApplicationServerRegistry.get().getDeveloperRepository(), servoyProject);
-			final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, sd);
+			final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, sd, false);
 			// Regenerate script files for parents that have changed script elements.
 			if (changedScriptElements.size() > 0)
 			{
@@ -2838,12 +2829,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	 * @throws RepositoryException
 	 */
 	public Set<IPersist> handleChangedFiles(IProject project, Solution solution, List<File> changedFiles, final ServoyProject servoyProject,
-		SolutionDeserializer sd) throws RepositoryException
+		SolutionDeserializer sd, boolean doCleanup) throws RepositoryException
 	{
 		// TODO refresh modules when solution type was changed
 		List<IPersist> strayCats = new ArrayList<IPersist>();
 		String oldModules = solution.getModulesNames();
-		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false, true, true);
+		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false, true, true, doCleanup);
 
 		// see if modules were changed
 		String newModules = solution.getModulesNames();
@@ -2922,7 +2913,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				// file outside of visited tree, ignore
 				continue;
 			}
-			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION) && isSolutionActive(project.getName()))
+			else if (file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT) && isSolutionActive(project.getName()))
 			{
 				// must be a form ".sec" file; find the form for it...
 				File projectFolder = project.getLocation().toFile();
@@ -2930,7 +2921,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				if (formsContainer != null && formsContainer.getName().equals(SolutionSerializer.FORMS_DIR) &&
 					projectFolder.equals(formsContainer.getParentFile()))
 				{
-					String formName = file.getName().substring(0, file.getName().length() - WorkspaceUserManager.SECURITY_FILE_EXTENSION.length());
+					String formName = file.getName().substring(0, file.getName().length() - DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT.length());
 					Form f = solution.getForm(formName);
 					if (f != null)
 					{
@@ -3136,8 +3127,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			{
 				columnInfoFiles.add(fileRd);
 			}
-			else if (file.equals(activeResourcesProject.getProject().getFile(new Path(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT))) ||
-				file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION))
+			else if (file.equals(dataModelManager.getSecurityFile()) || file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT))
 			{
 				securityFiles.add(fileRd);
 			}
@@ -3207,8 +3197,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		}
 		else for (IResourceDelta fileRd : securityFiles)
 		{
-			final IFile file = (IFile)fileRd.getResource();
-			if (file.equals(activeResourcesProject.getProject().getFile(new Path(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT))))
+			IResource file = fileRd.getResource();
+
+			if (file.equals(dataModelManager.getSecurityFile()))
 			{
 				// users/groups have changed - will reload all security information
 				securityInfoChanged = true;
@@ -3217,7 +3208,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					getUserManager().reloadAllSecurityInformation();
 				}
 			}
-			else if (file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION))
+			else if (file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT))
 			{
 				IContainer serverContainer = file.getParent();
 				if (serverContainer != null && serverContainer.getParent() != null &&
@@ -3233,7 +3224,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						{
 							try
 							{
-								String tableName = file.getName().substring(0, file.getName().length() - WorkspaceUserManager.SECURITY_FILE_EXTENSION.length());
+								String tableName = file.getName().substring(0,
+									file.getName().length() - DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT.length());
 								ITable t = s.getTable(tableName);
 								if (t != null)
 								{
@@ -4140,5 +4132,4 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	{
 		solutionImportListeners.remove(l);
 	}
-
 }

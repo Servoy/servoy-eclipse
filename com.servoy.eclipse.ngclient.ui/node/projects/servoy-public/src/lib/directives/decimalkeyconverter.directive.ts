@@ -22,8 +22,9 @@ export class DecimalkeyconverterDirective {
           const endString = this.element.value.slice(this.element.selectionEnd, this.element.value.length);
           this.element.value = (startString + this.servoyService.getLocaleNumberSymbol(NumberSymbol.Decimal) + endString);
           this.element.focus();
-          if(this.element.type === "text") this.element.setSelectionRange(caretPos + 1, caretPos + 1);
+          if(this.element.type === 'text') this.element.setSelectionRange(caretPos + 1, caretPos + 1);
           if (e.preventDefault) e.preventDefault();
       }
   }
+
 }

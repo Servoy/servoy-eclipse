@@ -8,12 +8,12 @@ export class UIBlockerService {
 
 	public shouldBlockDuplicateEvents(componentId: string, model: any, eventType: string, rowId?: any): boolean {
 		let blockDuplicates = null;
-		if(model && model.clientProperty &&  model.clientProperty.ngBlockDuplicateEvents !== undefined) {
+		if(model && model.clientProperty && model.clientProperty.ngBlockDuplicateEvents !== undefined) {
 			blockDuplicates = model.clientProperty.ngBlockDuplicateEvents;
 		} else {
 			blockDuplicates = this.servoyService.getUIProperties().getUIProperty('ngBlockDuplicateEvents');
 		}
-		if(blockDuplicates && componentId && eventType) {
+		if (blockDuplicates && componentId && eventType) {
 			for (const executeEvent of this.executingEvents) {
 				if (executeEvent.componentId === componentId && executeEvent.eventType === eventType && executeEvent.rowId === rowId) {
 					return true;

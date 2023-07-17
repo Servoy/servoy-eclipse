@@ -22,6 +22,7 @@ import java.io.File;
 import javax.swing.filechooser.FileSystemView;
 
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -33,6 +34,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -62,7 +64,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
 	private Button browseButton;
-	private Button exportNG2;
+	private Button exportNG1LegacyMode;
 	private Button exportActiveSolution;
 	private Button exportSomeNonActiveSolutions;
 	private Button allRowsRadioButton;
@@ -118,21 +120,21 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		browseButton.setText("Browse...");
 		browseButton.addListener(SWT.Selection, this);
 
-		exportNG2 = new Button(composite, SWT.CHECK);
-		exportNG2.setText("Export NG2 resources");
-		exportNG2.setEnabled(exportModel.isNGExport());
-		exportNG2.setSelection(exportModel.exportNG2Mode() != null);
-		exportNG2.addSelectionListener(new SelectionAdapter()
+		exportNG1LegacyMode = new Button(composite, SWT.CHECK);
+		exportNG1LegacyMode.setText("Export NG1 Client resources (by default only Titanium Client will be exported)");
+		exportNG1LegacyMode.setEnabled(exportModel.isNGExport());
+		exportNG1LegacyMode.setSelection(exportModel.exportNG1());
+		exportNG1LegacyMode.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				exportModel.setExportNG2Mode(exportNG2.getSelection() ? "true" : null);
+				exportModel.setExportNG1(exportNG1LegacyMode.getSelection());
 			}
 		});
 
 		exportActiveSolution = new Button(composite, SWT.CHECK);
-		exportActiveSolution.setText("Include active solution and modules");
+		exportActiveSolution.setText("Include active solution and modules (a war export without solution does not support newest features)");
 		exportActiveSolution.setSelection(exportModel.isExportActiveSolution());
 		exportActiveSolution.addSelectionListener(new SelectionAdapter()
 		{
@@ -614,25 +616,33 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	{
 		if (exportModel.getWarFileName() == null) return null;
 
-		File f = new File(exportModel.getWarFileName());
-		if (f.exists())
+		if (!exportActiveSolution.getSelection())
 		{
 			MessageBox msg = new MessageBox(this.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-			msg.setText("File already exists");
-			msg.setMessage("The file you selected already exists on disk. Do you want to overwrite it?");
-			if (msg.open() == SWT.YES)
-			{
-				return super.getNextPage();
-			}
-			else
+			msg.setText("Export without active solution");
+			msg.setMessage(
+				"When a war is deployed without active solution, not all features are supported in the uploaded solution,\nDo you want to continue?");
+			if (msg.open() != SWT.YES)
 			{
 				return null;
 			}
 		}
-		else
+
+		File f = new File(exportModel.getWarFileName());
+		if (f.exists())
 		{
-			return super.getNextPage();
+			final boolean[] overwrite = new boolean[] { true };
+			Display.getDefault().syncExec(() -> {
+				overwrite[0] = MessageDialog.openQuestion(getShell(), "File already exists",
+					"The file you selected already exists on disk. Do you want to overwrite it?");
+			});
+			if (!overwrite[0])
+			{
+				return null;
+			}
 		}
+
+		return super.getNextPage();
 	}
 
 	@Override
@@ -641,9 +651,9 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		fileNameText.setText("");
 		exportSomeNonActiveSolutions.setSelection(false);
 		exportModel.setFileName(null);
-		exportActiveSolution.setSelection(false);
-		exportNG2.setSelection(false);
-		exportModel.setExportActiveSolution(false);
+		exportActiveSolution.setSelection(true);
+		exportNG1LegacyMode.setSelection(false);
+		exportModel.setExportActiveSolution(true);
 		exportSampleDataButton.setSelection(false);
 		exportModel.setExportSampleData(false);
 		exportModel.setOverrideDefaultValues(false);

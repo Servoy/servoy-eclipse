@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.property;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.Point;
 import java.beans.IntrospectionException;
 import java.beans.PropertyEditor;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.PropertySheetPage;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
@@ -73,6 +75,7 @@ import org.sablo.specification.property.types.FunctionPropertyType;
 import org.sablo.specification.property.types.InsetsPropertyType;
 import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
+import org.sablo.specification.property.types.ObjectPropertyType;
 import org.sablo.specification.property.types.PointPropertyType;
 import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
@@ -144,6 +147,7 @@ import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.FormController;
 import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataui.PropertyEditorClass;
@@ -174,6 +178,7 @@ import com.servoy.j2db.persistence.IDesignValueConverter;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -186,6 +191,7 @@ import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
@@ -217,14 +223,17 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.JSONPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MapPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGStyleClassPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.VariantPropertyType;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -1455,13 +1464,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							}
 						}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
 				}
-				else if (propertyType == StyleClassPropertyType.INSTANCE)
+				else if (propertyType == StyleClassPropertyType.INSTANCE || propertyType == NGStyleClassPropertyType.NG_INSTANCE)
 				{
 					resultingPropertyDescriptor = createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
 				}
-				else if (propertyType == MapPropertyType.INSTANCE)
+				else if (propertyType == VariantPropertyType.INSTANCE)
 				{
-					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null);
+					resultingPropertyDescriptor = createVariantPropertyController(persistContext.getPersist(), id, displayName, flattenedEditingSolution);
+				}
+				else if (propertyType == LabelForPropertyType.INSTANCE)
+				{
+					resultingPropertyDescriptor = createLabelForPropertyController(id, displayName, form, flattenedEditingSolution);
+				}
+				else if (propertyType == MapPropertyType.INSTANCE || propertyType == JSONPropertyType.INSTANCE)
+				{
+					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null, propertyType == JSONPropertyType.INSTANCE);
 					resultingPropertyDescriptor = new PropertyController<JSONObject, Object>(id, displayName,
 						new ChainedPropertyConverter<JSONObject, Map<String, Object>, Object>(new IPropertyConverter<JSONObject, Map<String, Object>>()
 						{
@@ -1507,9 +1524,31 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						resultingPropertyDescriptor = retVal;
 					}
 					else if (propertyType == StringPropertyType.INSTANCE || propertyType == ServoyStringPropertyType.INSTANCE ||
-						propertyType == LabelForPropertyType.INSTANCE)
+						propertyType == VariantPropertyType.INSTANCE)
 					{
 						resultingPropertyDescriptor = new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null,
+							new ICellEditorFactory()
+							{
+								public CellEditor createPropertyEditor(Composite parent)
+								{
+									return new TextCellEditor(parent);
+								}
+							});
+					}
+					else if (propertyType instanceof ObjectPropertyType)
+					{
+						resultingPropertyDescriptor = new PropertyController<Object, Object>(id, displayName, new IPropertyConverter<Object, Object>()
+						{
+							public Object convertProperty(Object id, Object value)
+							{
+								return value == null ? "" : value;
+							}
+
+							public Object convertValue(Object id, Object value)
+							{
+								return "".equals(value) ? null : value;
+							}
+						}, null,
 							new ICellEditorFactory()
 							{
 								public CellEditor createPropertyEditor(Composite parent)
@@ -1693,21 +1732,26 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					return new ChainedPropertyConverter<Integer, MethodWithArguments, Object>(id2MethodsWithArgumentConverter, mwa2complexConverter);
 				}
 			};
+			String tooltipText = null;
 			Object config = propertyDescription.getConfig();
 			if (config instanceof JSONObject)
 			{
 				// this is for when WebObjectFunctionDefinition.getAsPropertyDescription is given here as PD (for custom web components)
 				// then the config is the actual json definition of that in the spec file it seems
-				String tooltipText = ((JSONObject)config).optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS, null);
-				if (tooltipText != null) methodPropertyController.setTooltipText(tooltipText);
+				tooltipText = ((JSONObject)config).optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS, null);
 			}
 			else
 			{
 				// config is probably a boolean - created in case of legacy component event handlers
 				// but then the tooltip should be in tags as for normal properties see PersistPropertyHandler.getPropertyDescription() for events
-				String tooltipText = propertyDescription.getDocumentation();
-				if (tooltipText != null) methodPropertyController.setTooltipText(tooltipText);
+				tooltipText = propertyDescription.getDocumentation();
 			}
+			if (tooltipText == null && !(persistContext.getPersist() instanceof IBasicWebObject))
+			{
+				MethodTemplate legacyMethodTemplate = MethodTemplate.getTemplate(ScriptMethod.class, propertyDescription.getName());
+				if (legacyMethodTemplate != null) tooltipText = legacyMethodTemplate.getDescription();
+			}
+			if (tooltipText != null) methodPropertyController.setTooltipText(tooltipText);
 		}
 		return methodPropertyController;
 	}
@@ -1754,6 +1798,120 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				values != null ? (String)values.getRealDefault() : null, tooltip, null);
 		}
 		return propertyController;
+	}
+
+	/**
+	 * Create a property controller for selecting a style class in Properties view.
+	 *
+	 * @param id
+	 * @param displayName
+	 * @param form
+	 * @param flattenedSolution
+	 * @return
+	 */
+	public static PropertyController<String, ? > createLabelForPropertyController(Object id, String displayName, Form frm, FlattenedSolution fs)
+	{
+
+		final FlattenedSolution flattenedEditingSolution = fs;
+		Form flattenedForm = flattenedEditingSolution.getFlattenedForm(frm);
+		int bodyStart = -1, bodyEnd = -1;
+		if (flattenedForm.getView() == FormController.TABLE_VIEW || flattenedForm.getView() == FormController.LOCKED_TABLE_VIEW)
+		{
+			bodyStart = 0;
+			Iterator<Part> parts = flattenedForm.getParts();
+			while (parts.hasNext())
+			{
+				Part part = parts.next();
+				if (part.getPartType() == Part.BODY)
+				{
+					bodyEnd = part.getHeight();
+					break;
+				}
+				bodyStart = part.getHeight();
+			}
+		}
+
+		List<String> names = new ArrayList<String>();
+		for (IPersist object : flattenedForm.getAllObjectsAsList())
+		{
+			if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
+			{
+				boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
+					!((WebComponent)object).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
+				if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
+				{
+					// TableView, add elements in the body
+					Point location = ((IFormElement)object).getLocation();
+					add = (location != null && location.y >= bodyStart && location.y < bodyEnd);
+				}
+				if (add)
+				{
+					names.add(((IFormElement)object).getName());
+				}
+			}
+			else if (object instanceof LayoutContainer)
+			{
+				((LayoutContainer)object).acceptVisitor(new IPersistVisitor()
+				{
+					public Object visit(IPersist o)
+					{
+						boolean add = (o instanceof WebComponent &&
+							!((WebComponent)o).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
+						if (add)
+						{
+							names.add(((WebComponent)o).getName());
+						}
+						return IPersistVisitor.CONTINUE_TRAVERSAL;
+					}
+				});
+			}
+		}
+		String[] array = names.toArray(new String[names.size()]);
+		Arrays.sort(array, String.CASE_INSENSITIVE_ORDER);
+
+		return new EditableComboboxPropertyController(id, displayName, array, null);
+	}
+
+	/**
+	 * Create a property controller for selecting a style class in Properties view.
+	 *
+	 * @param id
+	 * @param displayName
+	 * @param styleLookupname
+	 * @return
+	 */
+	public static PropertyController<String, ? > createVariantPropertyController(IPersist persist, Object id, String displayName, FlattenedSolution fs)
+	{
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
+			((IBasicWebObject)persist).getTypeName());
+		String category = spec.getStyleVariantCategory();
+		JSONArray variantsForCategory = fs.getVariantsHandler().getVariantsForCategory(category);
+
+		String[] variantIds = new String[variantsForCategory.length() + 1];
+		String[] variantNames = new String[variantsForCategory.length() + 1];
+		variantNames[variantsForCategory.length()] = "";
+
+		for (var i = 0; i < variantsForCategory.length(); i++)
+		{
+			JSONObject variant = variantsForCategory.getJSONObject(i);
+			variantIds[i] = variant.getString("name");
+			variantNames[i] = variant.getString("displayName");
+		}
+
+		ComboboxPropertyModel<String> model = new ComboboxPropertyModel<String>(variantIds, variantNames);
+		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved);
+//		{
+//			@Override
+//			protected String getWarningMessage()
+//			{
+//				if (getModel().getRealValues().length == 1)
+//				{
+//					// only 1 value (DEFAULT)
+//					return "No style classes available for lookup '" + styleLookupname + "'";
+//				}
+//				return null;
+//			}
+//		};
 	}
 
 	/**
@@ -1998,7 +2156,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						Object defaultValue = desc.getDefaultValue();
 						if (desc.getType() instanceof IDesignValueConverter)
 						{
-							return ((IDesignValueConverter< ? >)desc.getType()).fromDesignValue(defaultValue, desc);
+							return ((IDesignValueConverter< ? >)desc.getType()).fromDesignValue(defaultValue, desc, persistContext.getPersist());
 						}
 						return defaultValue;
 					}
@@ -2159,7 +2317,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 																					 * not a bean property
 																					 */)
 			{
-				((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
+				clearAbstractBaseProperty(beanPropertyDescriptor, id, (AbstractBase)persistContext.getPersist());
 				if (persistContext.getPersist() instanceof ISupportExtendsID &&
 					PersistHelper.isOverrideElement((ISupportExtendsID)persistContext.getPersist()) &&
 					!((AbstractBase)persistContext.getPersist()).hasOverrideProperties() && !PersistHelper.hasOverrideChildren(persistContext.getPersist()))
@@ -2216,6 +2374,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), false);
 		}
+	}
+
+	protected void clearAbstractBaseProperty(PropertyDescriptorWrapper propertyDescriptor, Object id, AbstractBase persist)
+	{
+		((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 	}
 
 	public static void adjustPropertyValueAndReset(Object id, IPropertyDescriptor pd, ISetterAwarePropertySource propertySource)
@@ -3355,7 +3518,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			WebComponent parentComponent = (WebComponent)persistContext.getPersist().getAncestor(IRepository.WEBCOMPONENTS);
 			if (parentComponent != null)
 			{
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(parentComponent.getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentComponent.getTypeName());
 				Collection<PropertyDescription> formComponentProperties = spec.getProperties(FormComponentPropertyType.INSTANCE);
 				if (!formComponentProperties.isEmpty())
 				{

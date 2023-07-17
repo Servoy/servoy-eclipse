@@ -148,7 +148,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 
 				if (copyColumnInfo)
 				{
-					DataModelManager dmm = DataModelManager.getColumnInfoManager(ApplicationServerRegistry.get().getServerManager(), targetServer.getName());
+					DataModelManager dmm = DataModelManager.getColumnInfoManager(ApplicationServerRegistry.get().getServerManager());
 					if (dmm != null)
 					{
 						for (Column c : newTable.getColumns())

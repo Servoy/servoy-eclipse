@@ -3,28 +3,28 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
-import { SpecTypesService, WindowRefService, LoggerFactory, SessionStorageService } from '@servoy/public';
+import { PushToServerUtils, TypesRegistry } from '../sablo/types_registry';
+import { WindowRefService, LoggerFactory, SessionStorageService, RequestInfoPromise, SpecTypesService } from '@servoy/public';
 import { SabloDeferHelper } from '../sablo/defer.service';
 
-import { DateConverter } from './converters/date_converter';
-import { JSONObjectConverter } from './converters/json_object_converter';
-import { JSONArrayConverter } from './converters/json_array_converter';
-import { ValuelistConverter } from './converters/valuelist_converter';
-import { FoundsetConverter } from './converters/foundset_converter';
-import { FoundsetLinkedConverter } from './converters/foundsetLinked_converter';
+import { CustomObjectTypeFactory } from './converters/json_object_converter';
+import { CustomArrayTypeFactory } from './converters/json_array_converter';
+import { ValuelistType } from './converters/valuelist_converter';
+import { FoundsetTreeType } from './converters/foundsettree_converter';
+import { FoundsetType } from './converters/foundset_converter';
+import { FoundsetRefType } from './converters/foundset_ref_converter';
+import { RecordRefType } from './converters/record_ref_converter';
+import { DatasetType } from './converters/dataset_converter';
+import { FoundsetLinkedType } from './converters/foundsetLinked_converter';
 import { ViewportService } from './services/viewport.service';
-
-import { IterableDiffers } from '@angular/core';
-
-
-import { FormcomponentConverter } from './converters/formcomponent_converter';
-import { ComponentConverter } from './converters/component_converter';
+import { FormcomponentType } from './converters/formcomponent_converter';
+import { ComponentType } from './converters/component_converter';
 import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
-import { ClientFunctionConverter } from './converters/clientfunction_converter';
+import { ClientFunctionType } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
-import { DeveloperService } from './developer.service';
 import { UIBlockerService } from './services/ui_blocker.service';
+import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
 
 class UIProperties {
     private uiProperties: { [property: string]: any};
@@ -78,6 +78,8 @@ export class ServoyService {
     private uiBlockerService: UIBlockerService;
 
     private findModeShortCutCallback: any = null;
+    private resizeObservable$: Observable<Event>;
+    private resizeSubscription$: Subscription;
 
     constructor(private websocketService: WebsocketService,
         private sabloService: SabloService,
@@ -85,28 +87,31 @@ export class ServoyService {
         private sessionStorageService: SessionStorageService,
         private localeService: LocaleService,
         private clientFunctionService: ClientFunctionService,
-        converterService: ConverterService,
-        specTypesService: SpecTypesService,
+        private converterService: ConverterService,
+        typesRegistry: TypesRegistry,
         sabloDeferHelper: SabloDeferHelper,
-        iterableDiffers: IterableDiffers,
         logFactory: LoggerFactory,
-        viewportService: ViewportService) {
+        viewportService: ViewportService,
+        specTypesService: SpecTypesService) {
 
         this.uiProperties = new UIProperties(sessionStorageService);
-        const dateConverter = new DateConverter();
         this.uiBlockerService = new UIBlockerService(this);
-        converterService.registerCustomPropertyHandler('svy_date', dateConverter);
-        converterService.registerCustomPropertyHandler('Date', dateConverter);
-        converterService.registerCustomPropertyHandler('JSON_obj', new JSONObjectConverter(converterService, specTypesService));
-        converterService.registerCustomPropertyHandler('JSON_arr', new JSONArrayConverter(converterService, specTypesService, iterableDiffers));
-        converterService.registerCustomPropertyHandler('valuelist', new ValuelistConverter(sabloService, sabloDeferHelper));
-        converterService.registerCustomPropertyHandler('foundset',
-            new FoundsetConverter(converterService, sabloService, sabloDeferHelper, viewportService, logFactory));
-        converterService.registerCustomPropertyHandler('fsLinked',
-            new FoundsetLinkedConverter(converterService, sabloService, viewportService, logFactory));
-        converterService.registerCustomPropertyHandler('formcomponent', new FormcomponentConverter(converterService));
-        converterService.registerCustomPropertyHandler('component', new ComponentConverter(converterService, viewportService, this.sabloService, logFactory, this.uiBlockerService));
-        converterService.registerCustomPropertyHandler('clientfunction', new ClientFunctionConverter(this.windowRefService));
+
+        typesRegistry.registerGlobalType(DatasetType.TYPE_NAME, new DatasetType(typesRegistry, converterService));
+
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService, logFactory));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, logFactory));
+
+        typesRegistry.registerGlobalType(ValuelistType.TYPE_NAME, new ValuelistType(sabloDeferHelper));
+        typesRegistry.registerGlobalType(FoundsetTreeType.TYPE_NAME, new FoundsetTreeType(sabloDeferHelper));
+        typesRegistry.registerGlobalType(FoundsetType.TYPE_NAME, new FoundsetType(sabloService, sabloDeferHelper, viewportService, logFactory));
+        typesRegistry.registerGlobalType(RecordRefType.TYPE_NAME, new RecordRefType());
+        typesRegistry.registerGlobalType(FoundsetRefType.TYPE_NAME, new FoundsetRefType());
+        typesRegistry.registerGlobalType(FoundsetLinkedType.TYPE_NAME, new FoundsetLinkedType(sabloService, viewportService, logFactory));
+        typesRegistry.registerGlobalType(FormcomponentType.TYPE_NAME, new FormcomponentType(converterService, typesRegistry));
+        typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, this.uiBlockerService));
+
+        typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
     }
 
     public connect() {
@@ -146,6 +151,15 @@ export class ServoyService {
             // update the main app window with the right size
             wsSession.callService('$windowService', 'resize',
                 { size: { width: this.windowRefService.nativeWindow.innerWidth, height: this.windowRefService.nativeWindow.innerHeight } }, true);
+
+            this.resizeObservable$ = fromEvent(this.windowRefService.nativeWindow, 'resize')
+            this.resizeSubscription$ = this.resizeObservable$.pipe(debounceTime(500)).subscribe( evt => {
+                wsSession.callService('$windowService', 'resize',
+                    { size: { width: this.windowRefService.nativeWindow.innerWidth, height: this.windowRefService.nativeWindow.innerHeight } }, true);
+            });
+            wsSession.onclose(() => {
+                this.resizeSubscription$.unsubscribe();
+            });
             // set the correct locale, first test if it is set in the sessionstorage
             let locale = this.sessionStorageService.get('locale');
             if (locale) {
@@ -170,9 +184,12 @@ export class ServoyService {
         return this.uiBlockerService;
     }
 
-    public executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
-        return this.sabloService.callService('formService', 'executeInlineScript',
-            { formname, script, params }, false);
+    public executeInlineScript<T>(formname: string, script: string, params: any[]): RequestInfoPromise<T> {
+        const promise = this.sabloService.callService('formService', 'executeInlineScript', { formname, script, params }, false);
+            
+        return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise,
+                    promise.then((serviceCallResult) =>
+                        this.converterService.convertFromServerToClient(serviceCallResult, undefined, undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
     }
 
     public loaded(): Promise<any> {

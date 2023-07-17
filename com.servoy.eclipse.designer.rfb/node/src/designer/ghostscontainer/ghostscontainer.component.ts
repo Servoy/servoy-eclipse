@@ -1,16 +1,16 @@
-import { Component, OnInit, Inject, Renderer2, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
+import { StatusBarComponent } from './../statusbar/statusbar.component';
+import { Component, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { EditorSessionService, ISelectionChangedListener, ISupportAutoscroll } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
-import { WindowRefService } from '@servoy/public';
 import { Point } from '../mouseselection/mouseselection.component';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 
 @Component({
     selector: 'designer-ghostscontainer',
     templateUrl: './ghostscontainer.component.html',
     styleUrls: ['./ghostscontainer.component.css']
 })
-export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy {
+export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {
 
     @ViewChild('element', { static: false }) elementRef: ElementRef<Element>;
 
@@ -20,42 +20,30 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     leftOffsetRelativeToSelectedGhost: number;
     topOffsetRelativeToSelectedGhost: number;
 
-    ghosts: Array<GhostContainer>;
+    ghostContainers: Array<GhostContainer>;
     removeSelectionChangedListener: () => void;
     mousedownpoint: Point;
     draggingGhost: Ghost;
     draggingInGhostContainer: GhostContainer;
     draggingClone: Element;
+
     draggingGhostComponent: HTMLElement;
     formWidth: number;
     formHeight: number;
+    partTopPosition: number;
+    
+    private topLimit = 0;
+    private bottomLimit = 0;
+    private isLowestPart = false;
+    private editorContent: HTMLElement;
+    private contentArea: HTMLElement;
+    private glasspane: HTMLElement;
+    private ghostsBottom = 0;
+    private lastMouseY = 0;
 
-    constructor(protected readonly editorSession: EditorSessionService, @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2,
-        protected urlParser: URLParserService, private windowRefService: WindowRefService) {
-        this.windowRefService.nativeWindow.addEventListener('message', (event) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (event.data.id === 'renderGhosts') {
-                this.renderGhosts();
-            }
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (event.data.id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
-                this.formWidth = event.data.width as number;
-                this.formHeight = event.data.height as number;
-                this.renderGhosts();
-            }
-            if (event.data.id === 'redrawDecorators') {
-                if (this.ghosts) {
-                    for (const ghostContainer of this.ghosts) {
-                        for (const ghost of ghostContainer.ghosts) {
-                            if (this.editorSession.getSelection().indexOf(ghost.uuid) >= 0) {
-                                this.renderGhosts();
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+    constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
+        protected urlParser: URLParserService, private editorContentService: EditorContentService) {
+        this.editorContentService.addContentMessageListener(this);
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
     }
 
@@ -64,14 +52,61 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             // for responsive this is way too early we need the real content size to show the ghosts
             this.renderGhosts()
         }
-        const content = this.doc.querySelector('.content-area');
-        content.addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
-        content.addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
+        this.editorContentService.getDocument().addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
+        this.editorContentService.getDocument().addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
+        this.editorContent = this.editorContentService.querySelector('.content');
+        this.contentArea = this.editorContentService.getContentArea();
+        this.glasspane = this.editorContentService.getGlassPane();
     }
 
     ngOnDestroy(): void {
         this.removeSelectionChangedListener();
+        this.editorContentService.removeContentMessageListener(this);
     }
+
+    contentMessageReceived(id: string, data: { property: string, width? : number, height? : number }) {
+        if (id === 'renderGhosts') {
+            this.renderGhosts();
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
+            this.formWidth = data.width;
+            this.formHeight = data.height;
+            this.renderGhosts();
+        }
+        
+        if (id === 'redrawDecorators') {
+            if (this.ghostContainers) {
+                for (const ghostContainer of this.ghostContainers) {
+                    for (const ghost of ghostContainer.ghosts) {
+                        if (this.editorSession.getSelection().indexOf(ghost.uuid) >= 0) {
+                            this.renderGhosts();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (id !== 'hideGhostContainer' && id !== 'positionClick') {
+			this.hideShowGhosts('visible');
+		}
+        
+		if (id === 'hideGhostContainer') {
+			this.hideShowGhosts('hidden');
+		}
+
+    }
+    
+    hideShowGhosts(visibility: string) {
+		if (this.elementRef) {
+			const ghostsContainer = document.querySelectorAll(`.${this.elementRef.nativeElement.classList.value}`);
+			Array.from(ghostsContainer).slice(1).forEach((item: HTMLElement) => {
+				item.style.visibility = visibility; 
+				item.querySelectorAll('.ghost').forEach((ghost:HTMLElement) => ghost.style.visibility = visibility);
+			});
+		}
+	}
 
     renderGhosts() {
         void this.editorSession.getGhostComponents<{ ghostContainers: Array<GhostContainer> }>().then((result: { ghostContainers: Array<GhostContainer> }) => {
@@ -86,6 +121,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         if (!this.formHeight) {
             this.formHeight = this.urlParser.getFormHeight();
         }
+        this.ghostsBottom = 0;
         if (ghostContainers) {
             // set the ghosts
             for (const ghostContainer of ghostContainers) {
@@ -99,8 +135,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                     }
                 }
                 if (!this.urlParser.isAbsoluteFormLayout()) {
-                    const iframe = this.doc.querySelector('iframe');
-                    const node = iframe.contentWindow.document.querySelectorAll('[svy-id="' + ghostContainer.uuid + '"]')[0];
+                    const node = this.editorContentService.getContentElement(ghostContainer.uuid);
                     if (node !== undefined) {
                         ghostContainer.parentCompBounds = node.getBoundingClientRect();
                     }
@@ -121,8 +156,17 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                     ghostContainer.style.width = this.formWidth + 'px';
                     ghostContainer.style.height = this.formHeight + 'px';
                 }
+                
+                if (this.editorContentService.getContentElement(ghostContainer.uuid)?.parentElement?.parentElement?.classList.contains('maxLevelDesign')) {
+					ghostContainer.style.display = 'none';
+				}
 
                 for (const ghost of ghostContainer.ghosts) {
+                    if (ghost.type == GHOST_TYPES.GHOST_TYPE_GROUP) {
+                        ghostContainer.style.display = 'none';
+                        // groups are deprecated in new designer
+                        continue;
+                    }
                     let style = {};
                     ghost.hrstyle = { display: 'none' } as CSSStyleDeclaration;
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_PART) { // parts
@@ -132,7 +176,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                             right: '-90px',
                             width: '90px',
                             height: '20px',
-                            cursor: 's-resize',
                             overflow: 'visible'
                         };
                         ghost.hrstyle = {
@@ -140,10 +183,11 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                             borderTop: '1px dashed #000',
                             height: '0px',
                             width: (this.formWidth + 90) + 'px',
+                            cursor: 'ns-resize',
                             float: 'right'
                         } as CSSStyleDeclaration;
                     } else if (ghost.type == GHOST_TYPES.GHOST_TYPE_FORM) { // the form
-                        // why should we need this, it interferes a lot with the events
+                        // why should we need this?, it interferes a lot with the events
                         style = {
                             display: 'none'/*
                             left: 0,
@@ -179,6 +223,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                         else if (ghost.type != GHOST_TYPES.GHOST_TYPE_GROUP) {
                             style['background'] = '#e4844a';
                         }
+                        this.ghostsBottom = Math.max(this. ghostsBottom, ghost.location.y + yOffset + ghost.size.height);
                     }
                     if (this.editorSession.getSelection().indexOf(ghost.uuid) >= 0) {
                         style['background'] = '#07f';
@@ -188,7 +233,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
             }
         }
-        this.ghosts = ghostContainers;
+        this.ghostContainers = ghostContainers;
     }
 
     openContainedForm(ghost: Ghost) {
@@ -216,34 +261,68 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.draggingClone = (event.currentTarget as Element).cloneNode(true) as Element;
                 this.renderer.setStyle(this.draggingClone, 'background', '#ffbb37');
             }
+
+            if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
+                this.draggingGhostComponent = this.editorContentService.querySelector('[svy-id="' + this.draggingGhost.uuid + '"]');
+                const containerHeight = parseInt(ghostContainer.style.height.replace('px', ''));
+                const parentRect = (event.currentTarget as Element).parentElement.getBoundingClientRect();
+                this.containerTopOffset = parentRect.top;
+                this.topLimit = this.draggingGhostComponent.previousSibling ? (this.draggingGhostComponent.previousElementSibling as HTMLElement).offsetTop + 5 : 5;
+                this.bottomLimit = (this.draggingGhostComponent.nextElementSibling as HTMLElement).offsetTop - 5;
+                this.partTopPosition = this.draggingGhost.location.y;
+                this.lastMouseY = event.pageY;
+                this.isLowestPart = false;
+                if (this.partTopPosition == containerHeight) {
+                    this.isLowestPart = true;
+                }        
+                this.editorSession.registerAutoscroll(this);
+            }
         }
     }
 
-    private onMouseUp(event: MouseEvent) {
+    onMouseUp(event: MouseEvent) {
         if (this.draggingGhost) {
-            if (this.mousedownpoint.y != event.pageY && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
-                const obj = {};
-                obj[this.draggingGhost.uuid] = { 'y': event.pageY - this.elementRef.nativeElement.getBoundingClientRect().top };
-                this.editorSession.sendChanges(obj);
-            }
-            if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
-                const obj = {};
-                for (const ghost of this.draggingInGhostContainer.ghosts) {
-                    obj[ghost.uuid] = { 'x': ghost.location.x, 'y': ghost.location.y };
+            if (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) {
+                if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
+                    const obj = {};
+                    for (const ghost of this.draggingInGhostContainer.ghosts) {
+                        obj[ghost.uuid] = { 'x': ghost.location.x, 'y': ghost.location.y };
+                    }
+                    this.editorSession.sendChanges(obj);
                 }
-                this.editorSession.sendChanges(obj);
-            }
-            if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
-                const frameElem = this.doc.querySelector('iframe');
-                const frameRect = frameElem.getBoundingClientRect();
-                const obj = {};
-                obj[this.draggingGhost.uuid] = { 'x': event.pageX - frameRect.x - this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - frameRect.y - this.topOffsetRelativeToSelectedGhost };
-                this.editorSession.sendChanges(obj);
-                this.renderGhosts();
+                if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
+                    this.renderGhostsInternal(this.ghostContainers);
+                }
+                if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                    const obj = {};
+                    obj[this.draggingGhost.uuid] = { 'x': event.pageX - this.editorContentService.getLeftPositionIframe() - this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - this.editorContentService.getTopPositionIframe() - this.topOffsetRelativeToSelectedGhost };
+                    this.editorSession.sendChanges(obj);
+                    this.renderGhosts();
+                }
+                if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
+                    const changes = {};
+                    if (this.partTopPosition < this.topLimit) {
+                        this.partTopPosition = this.topLimit;
+                    }
+                    if (this.partTopPosition > this.bottomLimit && !this.isLowestPart) {
+                        this.partTopPosition = this.bottomLimit;
+                    }
+                    if (this.isLowestPart) {
+                        const id = document.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');
+                        changes[id] = { 'y': this.partTopPosition };
+                        this.editorSession.sendChanges(changes);
+
+                        //todo: correct glasspane size
+                        this.glasspane.style.height = Math.max(this.partTopPosition + this.ghostOffset, this.ghostsBottom) + 'px';
+                    } 
+                    changes[this.draggingGhost.uuid] = { 'y': this.partTopPosition };
+                    this.editorSession.sendChanges(changes);
+                }
             }
             // this is just to re-render the decorators
             this.editorSession.updateSelection(this.editorSession.getSelection(), true);
             this.editorSession.getState().dragging = false;
+            this.editorSession.unregisterAutoscroll(this);
         }
         if (this.draggingClone) {
             this.draggingClone.remove();
@@ -252,70 +331,124 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         this.draggingGhost = null;
         this.draggingInGhostContainer = null;
         this.draggingGhostComponent = null;
+        this.renderGhosts();
     }
 
-    private onMouseMove(event: MouseEvent) {
-        if (this.draggingGhost && (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
-            if (!this.draggingClone.parentNode) {
-                this.doc.body.appendChild(this.draggingClone);
-            }
-            this.renderer.setStyle(this.draggingClone, 'left', (event.pageX - this.leftOffsetRelativeToSelectedGhost) + 'px');
-            this.renderer.setStyle(this.draggingClone, 'top', (event.pageY - this.topOffsetRelativeToSelectedGhost) + 'px');
-            const initialIndex = this.draggingInGhostContainer.ghosts.indexOf(this.draggingGhost);
-            let newIndex = -1;
-            const ghostWidth = this.draggingGhost.size.width;
-            for (let index = 0; index < this.draggingInGhostContainer.ghosts.length; index++) {
-                const ghostStart = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset;
-                const ghostEnd = ghostStart + ghostWidth;
-                const currentPosition = event.pageX - this.containerLeftOffset;
-                if (currentPosition == ghostStart || currentPosition == ghostEnd) {
-                    // on the border, do nothing
-                    break;
+    onMouseMove(event: MouseEvent) {
+        if (this.draggingGhost && (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX)) {
+            if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
+                if (!this.draggingClone.parentNode) {
+                    this.editorContentService.getBodyElement().appendChild(this.draggingClone);
                 }
-                if (newIndex < 0 && (currentPosition > ghostStart || index == 0) && (currentPosition < ghostEnd || index == this.draggingInGhostContainer.ghosts.length - 1)) {
-                    // found its place, is it changed ?
-                    if (index == initialIndex) {
-                        // everything is fine, do not touch it
+                this.renderer.setStyle(this.draggingClone, 'left', (event.pageX - this.leftOffsetRelativeToSelectedGhost) + 'px');
+                this.renderer.setStyle(this.draggingClone, 'top', (event.pageY - this.topOffsetRelativeToSelectedGhost) + 'px');
+                const initialIndex = this.draggingInGhostContainer.ghosts.indexOf(this.draggingGhost);
+                let newIndex = -1;
+                const ghostWidth = this.draggingGhost.size.width;
+                for (let index = 0; index < this.draggingInGhostContainer.ghosts.length; index++) {
+                    const ghostStart = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset;
+                    const ghostEnd = ghostStart + ghostWidth;
+                    const currentPosition = event.pageX - this.containerLeftOffset;
+                    if (currentPosition == ghostStart || currentPosition == ghostEnd) {
+                        // on the border, do nothing
                         break;
                     }
-                    newIndex = index;
-                    this.draggingGhost.location.x = this.draggingInGhostContainer.ghosts[newIndex].location.x;
-                    this.draggingGhost.style.left = this.draggingGhost.location.x + this.ghostOffset + 'px';
-                }
-                if (index < initialIndex && newIndex >= 0) {
-                    // the newindex was already found, move current ghost to right
-                    this.draggingInGhostContainer.ghosts[index].location.x += ghostWidth;
-                    this.draggingInGhostContainer.ghosts[index].style.left = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset + 'px';
-                }
-                if (index > initialIndex) {
-                    if (newIndex < 0 || newIndex == index) {
-                        //move current ghost to left
-                        this.draggingInGhostContainer.ghosts[index].location.x -= ghostWidth;
+                    if (newIndex < 0 && (currentPosition > ghostStart || index == 0) && (currentPosition < ghostEnd || index == this.draggingInGhostContainer.ghosts.length - 1)) {
+                        // found its place, is it changed ?
+                        if (index == initialIndex) {
+                            // everything is fine, do not touch it
+                            break;
+                        }
+                        newIndex = index;
+                        this.draggingGhost.location.x = this.draggingInGhostContainer.ghosts[newIndex].location.x;
+                        this.draggingGhost.style.left = this.draggingGhost.location.x + this.ghostOffset + 'px';
+                    }
+                    if (index < initialIndex && newIndex >= 0) {
+                        // the newindex was already found, move current ghost to right
+                        this.draggingInGhostContainer.ghosts[index].location.x += ghostWidth;
                         this.draggingInGhostContainer.ghosts[index].style.left = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset + 'px';
-
+                    }
+                    if (index > initialIndex) {
+                        if (newIndex < 0 || newIndex == index) {
+                            //move current ghost to left
+                            this.draggingInGhostContainer.ghosts[index].location.x -= ghostWidth;
+                            this.draggingInGhostContainer.ghosts[index].style.left = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset + 'px';
+    
+                        }
                     }
                 }
+                if (newIndex >= 0) {
+                    // now all styling is fixed, add ghost in new position so that position is ordered
+                    this.draggingInGhostContainer.ghosts.splice(initialIndex, 1);
+                    this.draggingInGhostContainer.ghosts.splice(newIndex, 0, this.draggingGhost);
+                }
             }
-            if (newIndex >= 0) {
-                // now all styling is fixed, add ghost in new position so that position is ordered
-                this.draggingInGhostContainer.ghosts.splice(initialIndex, 1);
-                this.draggingInGhostContainer.ghosts.splice(newIndex, 0, this.draggingGhost);
+            if (this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                if (this.draggingGhostComponent === null) { 
+                    this.draggingGhostComponent = this.editorContentService.querySelector('[svy-id="' + this.draggingGhost.uuid + '"]'); 
+                }
+                this.renderer.setStyle(this.draggingGhostComponent, 'left', (event.pageX - this.containerLeftOffset - this.leftOffsetRelativeToSelectedGhost) + 'px');
+                this.renderer.setStyle(this.draggingGhostComponent, 'top', (event.pageY - this.containerTopOffset - this.topOffsetRelativeToSelectedGhost) + 'px');
             }
-        }
-        if (this.draggingGhost && (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) && this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
-            if (this.draggingGhostComponent === null) {
-                this.draggingGhostComponent = this.doc.querySelector('.contentframe-overlay').querySelectorAll('[svy-id="' + this.draggingGhost.uuid + '"]')[0] as HTMLElement;
+            if (this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_PART) {
+                let step = event.pageY - this.lastMouseY;
+                if (step != 0) {
+                    this.partTopPosition += step;
+                    if (this.partTopPosition > this.topLimit) {
+                        if (!this.isLowestPart && this.partTopPosition < this.bottomLimit) {
+                            this.renderer.setStyle(this.draggingGhostComponent, 'top', this.partTopPosition + 'px');
+                        } else if (this.isLowestPart) {
+                            this.formHeight = this.partTopPosition;
+                            for (let index = 0; index < this.ghostContainers.length; index++) {
+                                this.ghostContainers[0].style.height = this.partTopPosition + 'px';
+                            }
+                            this.renderer.setStyle(this.editorContent, 'height', this.partTopPosition + 'px');
+                            if (this.partTopPosition + this.ghostOffset > this.glasspane.offsetHeight) {
+                                this.glasspane.style.height = this.partTopPosition + this.ghostOffset + 'px' ;
+                            }
+                            this.renderer.setStyle(this.draggingGhostComponent, 'top', this.partTopPosition + 'px');
+                        }
+                    }
+                    this.lastMouseY = event.pageY;
+                }
             }
-            this.renderer.setStyle(this.draggingGhostComponent, 'left', (event.pageX - this.containerLeftOffset - this.leftOffsetRelativeToSelectedGhost) + 'px');
-            this.renderer.setStyle(this.draggingGhostComponent, 'top', (event.pageY - this.containerTopOffset - this.topOffsetRelativeToSelectedGhost) + 'px');
-        }
+        } 
     }
 
-    selectionChanged(ids: Array<string>, redrawDecorators?: boolean, designerChange?:boolean): void {
+    selectionChanged(ids: Array<string>, redrawDecorators?: boolean, designerChange?: boolean): void {
         // this is an overkill but sometimes we need the server side data for the ghosts (for example when element was dragged out of form bounds and is shown as ghost)
         // not sure how to detect when we really need to redraw
         if (designerChange) this.renderGhosts();
         //this.renderGhostsInternal(this.ghosts);
+    }
+
+    getAutoscrollLockId(): string {
+        return 'ghost-container';
+    }
+
+    updateLocationCallback(changeX: number, changeY: number) {
+        if (this.partTopPosition <= this.topLimit) {
+            return;
+        } else if (!this.isLowestPart && this.partTopPosition >= this.bottomLimit) {
+            return;
+        } //else partTopPosition > this.topLimit && (this.isLowestPart || partTopPosition <= bottomLimit)
+        if (this.isLowestPart) {
+            this.formHeight = this.partTopPosition;
+            for (let index = 0; index < this.ghostContainers.length; index++) {
+                this.ghostContainers[0].style.height = this.partTopPosition + 'px';
+            }
+            this.renderer.setStyle(this.editorContent, 'height', this.partTopPosition + 'px');
+            if (this.partTopPosition + this.ghostOffset > this.glasspane.offsetHeight) {
+                this.glasspane.style.height = this.partTopPosition + this.ghostOffset + 'px' ;
+            }
+            this.renderer.setStyle(this.draggingGhostComponent, 'top', this.partTopPosition + 'px');
+        } else {//!lowestpart && partTopPosition < bottomlimit
+            this.renderer.setStyle(this.draggingGhostComponent, 'top', this.partTopPosition + 'px');
+        }
+
+        this.partTopPosition += changeY;
+        this.contentArea.scrollTop += changeY;
+
     }
 }
 
@@ -326,7 +459,7 @@ class GhostContainer {
     style: CSSStyleDeclaration;
     parentCompBounds: { left?: number, top?: number; width?: number; height?: number };
     containerPositionInComp: number;
-    totalGhostContainersOfComp: number;;
+    totalGhostContainersOfComp: number;
     ghosts: Array<Ghost>;
 }
 

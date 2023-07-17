@@ -18,12 +18,12 @@ package com.servoy.eclipse.ui.editors.relation;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.PojoObservables;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -197,30 +197,44 @@ public class OptionsComposite extends Group
 		this.relationEditor = relationEditor;
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
 
-		IObservableValue allowCreationOfButtonObserveWidget = SWTObservables.observeSelection(allowCreationOfButton);
-		IObservableValue allowCreationRelatedRecordsObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "allowCreationRelatedRecords");
+		IObservableValue allowCreationOfButtonObserveWidget = WidgetProperties.widgetSelection().observe(allowCreationOfButton);
+		IObservableValue allowCreationRelatedRecordsObserveValue = PojoProperties.value(Relation.class, "allowCreationRelatedRecords")
+			.observe(relationEditor.getRelation());
 
-		IObservableValue allowParentDeleteButtonObserveWidget = SWTObservables.observeSelection(allowParentDeleteButton);
-		IObservableValue allowParentDeleteWhenHavingRelatedRecordsObserveValue = PojoObservables.observeValue(relationEditor.getRelation(),
-			"allowParentDeleteWhenHavingRelatedRecords");
+		IObservableValue allowParentDeleteButtonObserveWidget = WidgetProperties.widgetSelection().observe(allowParentDeleteButton);
+		IObservableValue allowParentDeleteWhenHavingRelatedRecordsObserveValue = PojoProperties
+			.value(Relation.class, "allowParentDeleteWhenHavingRelatedRecords")
+			.observe(relationEditor.getRelation());
 
-		IObservableValue deleteRelatedRecordsButtonObserveWidget = SWTObservables.observeSelection(deleteRelatedRecordsButton);
-		IObservableValue deleteRelatedRecordsObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "deleteRelatedRecords");
+		IObservableValue deleteRelatedRecordsButtonObserveWidget = WidgetProperties.widgetSelection().observe(deleteRelatedRecordsButton);
+		IObservableValue deleteRelatedRecordsObserveValue = PojoProperties
+			.value(Relation.class, "deleteRelatedRecords")
+			.observe(relationEditor.getRelation());
 
-		IObservableValue joinComboObserveWidget = SWTObservables.observeSelection(joinCombo);
-		IObservableValue joinTypeObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "joinType");
+		IObservableValue joinComboObserveWidget = WidgetProperties.widgetSelection().observe(joinCombo);
+		IObservableValue joinTypeObserveValue = PojoProperties
+			.value(Relation.class, "joinType")
+			.observe(relationEditor.getRelation());
 
-		IObservableValue initialSortObserveWidget = SWTObservables.observeText(initalSort, SWT.Modify);
-		IObservableValue initialSortObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "initialSort");
+		IObservableValue initialSortObserveWidget = WidgetProperties.text(SWT.Modify).observe(initalSort);
+		IObservableValue initialSortObserveValue = PojoProperties
+			.value(Relation.class, "initialSort")
+			.observe(relationEditor.getRelation());
 
-		IObservableValue deprecatedObserveWidget = SWTObservables.observeText(deprecated, SWT.Modify);
-		IObservableValue deprecatedObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "deprecated");
+		IObservableValue deprecatedObserveWidget = WidgetProperties.text(SWT.Modify).observe(deprecated);
+		IObservableValue deprecatedObserveValue = PojoProperties
+			.value(Relation.class, "deprecated")
+			.observe(relationEditor.getRelation());
 
-		IObservableValue commentObserveWidget = SWTObservables.observeText(commentText, SWT.Modify);
-		IObservableValue commentObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "comment");
+		IObservableValue commentObserveWidget = WidgetProperties.text(SWT.Modify).observe(commentText);
+		IObservableValue commentObserveValue = PojoProperties
+			.value(Relation.class, "comment")
+			.observe(relationEditor.getRelation());
 
-		IObservableValue encapsulationObserveWidget = SWTObservables.observeSelection(encapsulation);
-		IObservableValue encapsulationObserveValue = PojoObservables.observeValue(relationEditor.getRelation(), "encapsulation");
+		IObservableValue encapsulationObserveWidget = WidgetProperties.widgetSelection().observe(encapsulation);
+		IObservableValue encapsulationObserveValue = PojoProperties
+			.value(Relation.class, "encapsulation")
+			.observe(relationEditor.getRelation());
 
 		m_bindingContext = new DataBindingContext();
 

@@ -24,21 +24,17 @@ import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.PojoObservables;
+import org.eclipse.core.databinding.beans.typed.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
-import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.IDisposeListener;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -120,7 +116,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 	private final Text databaseDefaultValue;
 	private Column column;
 	private ColumnInfoBean columnInfoBean;
-	private final IObservable observable;
+	private final ChangeSupportObservable observable;
 
 	private final ColumnAutoEnterServoySeqComposite columnAutoEnterServoySeqComposite;
 	private final ColumnAutoEnterDBSeqComposite columnAutoEnterDBSeqComposite;
@@ -208,12 +204,9 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 							((DataProviderNodeWrapper)parentElement).node == DataProviderTreeViewer.SCOPE_METHODS)
 						{
 							Collection<Pair<String, IRootObject>> scopes = ColumnAutoEnterComposite.this.flattenedSolution.getScopes();
-							Iterator<Pair<String, IRootObject>> it = scopes.iterator();
-
 							SortedList<ScopeWithContext> scopesList = new SortedList<ScopeWithContext>(ScopeWithContext.SCOPE_COMPARATOR);
-							while (it.hasNext())
+							for (Pair<String, IRootObject> sc : scopes)
 							{
-								Pair<String, IRootObject> sc = it.next();
 								scopesList.add(new ScopeWithContext(sc.getLeft(), sc.getRight()));
 							}
 							List<Object> children = new ArrayList<Object>();
@@ -288,10 +281,8 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 							Pair<String, String> scopePair = ScopesUtils.getVariableScope(((EnumDataProvider)value).getDataProviderID());
 							Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
 							ScopeWithContext scope = null;
-							Iterator<Pair<String, IRootObject>> it = scopes.iterator();
-							while (it.hasNext())
+							for (Pair<String, IRootObject> sc : scopes)
 							{
-								Pair<String, IRootObject> sc = it.next();
 								if (sc.getLeft().equals(scopePair.getLeft()))
 								{
 									scope = new ScopeWithContext(sc.getLeft(), sc.getRight());
@@ -411,39 +402,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 				.addContainerGap()));
 		setLayout(groupLayout);
 
-		changeSupport = new ChangeSupport(Realm.getDefault())
-		{
-			@Override
-			protected void lastListenerRemoved()
-			{
-			}
-
-			@Override
-			protected void firstListenerAdded()
-			{
-			}
-		};
-
-		observable = new AbstractObservable(Realm.getDefault())
-		{
-			@Override
-			public void addChangeListener(IChangeListener listener)
-			{
-				changeSupport.addChangeListener(listener);
-			}
-
-			@Override
-			public void removeChangeListener(IChangeListener listener)
-			{
-				changeSupport.removeChangeListener(listener);
-			}
-
-			public boolean isStale()
-			{
-				return false;
-			}
-		};
-		//
+		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 	}
 
 	@Override
@@ -545,9 +504,9 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		{
 			columnInfoBean.setColumnInfo(c.getColumnInfo());
 		}
-		IObservableValue getCICustomValueObserveValue = PojoObservables.observeValue(columnInfoBean, "defaultValue");
-		IObservableValue customValueTextObserveWidget = SWTObservables.observeText(customValueText, SWT.Modify);
-		IObservableValue getCILookUpValueObserveValue = PojoObservables.observeValue(columnInfoBean, "lookupValue");
+		IObservableValue getCICustomValueObserveValue = PojoProperties.value("defaultValue").observe(columnInfoBean);
+		IObservableValue customValueTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(customValueText);
+		IObservableValue getCILookUpValueObserveValue = PojoProperties.value("lookupValue").observe(columnInfoBean);
 		IObservableValue lookUpValueSelectObserveWidget = new TreeSelectObservableValue(lookupValueSelect, IDataProvider.class);
 
 		bindingContext = new DataBindingContext();
@@ -665,7 +624,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 						{
 							column.setSequenceType(element);
 							columnInfo.setFlag(IBaseColumn.UUID_COLUMN, element == ColumnInfo.UUID_GENERATOR);
-							changeSupport.fireEvent(new ChangeEvent(observable));
+							observable.fireChangeEvent();
 							break;
 						}
 					}
@@ -795,7 +754,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					{
 						columnInfo.setAutoEnterSubType(element);
 						columnInfo.setFlag(IBaseColumn.UUID_COLUMN, element == ColumnInfo.UUID_GENERATOR);
-						changeSupport.fireEvent(new ChangeEvent(observable));
+						observable.fireChangeEvent();
 						if (element == ColumnInfo.SERVOY_SEQUENCE)
 						{
 							columnInfo.setPreSequenceChars("");
@@ -807,8 +766,6 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			}
 		}
 	}
-
-	private final ChangeSupport changeSupport;
 
 	public void addChangeListener(IChangeListener listener)
 	{

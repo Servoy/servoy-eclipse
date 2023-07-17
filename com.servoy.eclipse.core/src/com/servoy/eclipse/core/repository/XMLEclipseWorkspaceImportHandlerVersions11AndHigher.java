@@ -89,6 +89,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.DBIDefinition;
 import com.servoy.j2db.util.xmlxport.GroupInfo;
 import com.servoy.j2db.util.xmlxport.GroupInfo.GroupElementInfo;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
@@ -151,14 +152,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		try
 		{
 			m.beginTask("Importing...", 5);
-			final WorkspaceUserManager userManager = new WorkspaceUserManager()
-			{
-				@Override
-				public void setResourcesProject(IProject project)
-				{
-					this.resourcesProject = project;
-				}
-			};
+			WorkspaceUserManager userManager = new WorkspaceUserManager();
 			userManager.setWriteMode(WorkspaceUserManager.WRITE_MODE_MANUAL);
 			userManager.setOperational(true);
 			if (resourcesProject != null)
@@ -867,6 +861,63 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 		EclipseMessages.writeMessages(i18nServerName, i18nTableName, currentMessages, workspaceDir);
 
+	}
+
+	public void importDatasources(ImportInfo importInfo) throws RepositoryException
+	{
+		m.setTaskName("Importing data sources");
+
+		// save the datasources in the workspace
+		if (importInfo.datasourcesMap != null && !importInfo.datasourcesMap.isEmpty())
+		{
+			boolean importDatasources = x11handler.getUserChannel().askImportDatasources() == IXMLImportUserChannel.OK_ACTION;
+			if (!importDatasources)
+			{
+				x11handler.getUserChannel().info("Skipping data sources import", ILogLevel.INFO);
+			}
+
+			DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+			if (dmm == null)
+			{
+				throw new RepositoryException("Error importing data sources, Cannot find internal data model manager.");
+			}
+
+			WorkspaceFileAccess ws = new WorkspaceFileAccess(ServoyModel.getWorkspace());
+
+			for (Entry<String, DBIDefinition> entry : importInfo.datasourcesMap.entrySet())
+			{
+				String dataSource = entry.getKey();
+				DBIDefinition dbiDefinition = entry.getValue();
+
+				String[] server_table = DataSourceUtils.getDBServernameTablename(dataSource);
+				String serverName = server_table[0];
+				String tableName = server_table[1];
+
+				IFile dbiFile;
+				if (tableName == null)
+				{
+					// server.dbi file
+					dbiFile = dmm.getServerDBIFile(serverName);
+				}
+				else
+				{
+					// table.dbi file
+					dbiFile = dmm.getDBIFile(serverName, tableName);
+				}
+
+				if (dbiDefinition.getDbiFileContents() != null)
+				{
+					try
+					{
+						ws.setUTF8Contents(dbiFile.getFullPath().toString(), dbiDefinition.getDbiFileContents());
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logError("Cannot save datasource dbi file", e);
+					}
+				}
+			}
+		}
 	}
 
 	public void importMetaData(ImportInfo importInfo) throws RepositoryException

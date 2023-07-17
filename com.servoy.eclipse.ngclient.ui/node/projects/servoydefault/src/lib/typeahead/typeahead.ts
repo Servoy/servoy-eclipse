@@ -16,6 +16,8 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
     @ViewChild('instance', { static: true }) instance: NgbTypeahead;
     focus$ = new Subject<string>();
     click$ = new Subject<string>();
+    
+    currentValue: any;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
         formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
@@ -69,9 +71,19 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
         if (changes.readOnly || changes.enabled) {
             this.instance.setDisabledState(this.readOnly || !this.enabled);
         }
-        if ((changes.format || changes.findmode) && this.valuelistID) {
-            this.instance.writeValue(this.dataProviderID);
+        if (changes.format || changes.findmode) {
+             if (this.format && this.format.maxLength) {
+                if (!this.findmode) {
+                    this.renderer.setAttribute(this.elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
+                } else {
+                    this.renderer.removeAttribute(this.elementRef.nativeElement, 'maxlength');
+                }
+            }
+            if (this.valuelistID) this.instance.writeValue(this.dataProviderID);
         }
+        if (changes.dataProviderID) {
+            this.currentValue = changes.dataProviderID.currentValue;
+        }        
     }
 
     values = (text$: Observable<string>) => {
@@ -81,6 +93,23 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 
         return merge( debouncedText$, inputFocus$, clicksWithClosedPopup$ ).pipe( switchMap( term => ( this.valuelistID.filterList( term ) ) ) );
     };
+
+    pushUpdate() {
+        if (!this.dataProviderID && !this.isEditable()){
+           const allowEmptyValue = this.valuelistID[0]?.displayValue === '' && this.valuelistID[0]?.realValue === null;
+           if(!allowEmptyValue) {
+               if (this.valuelistID[0]?.displayValue && this.valuelistID[0]?.realValue && this.elementRef.nativeElement.value === this.valuelistID[0]?.displayValue) {
+                    this.dataProviderID = this.valuelistID[0]?.realValue;
+                    this.currentValue = this.dataProviderID;
+               } else {
+				  this.dataProviderID = this.currentValue;
+			   }
+               return;
+           }
+        }
+        this.currentValue = this.dataProviderID;
+        super.pushUpdate();
+    }
 
     isEditable() {
         return this.valuelistID && !this.valuelistID.hasRealValues();
@@ -133,5 +162,6 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
         else if (value) this.dataProviderID = value;
         else this.dataProviderID = null;
         this.dataProviderIDChange.emit(this.dataProviderID);
+        this.currentValue = this.dataProviderID;
     }
 }

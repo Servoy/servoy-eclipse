@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import java.awt.Dimension;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +54,7 @@ import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -81,6 +83,7 @@ import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -175,7 +178,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorKey));
 		WebsocketSessionManager.addSession(designerWebsocketSession = new DesignerWebsocketSession(clientKey, editorPart));
-		selectionListener = new RfbSelectionListener(editorPart.getForm(), editorWebsocketSession);
+		selectionListener = new RfbSelectionListener(editorPart.getForm(), editorWebsocketSession, selectionProvider);
 		getSite().setSelectionProvider(selectionProvider);
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
 
@@ -184,6 +187,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		editorWebsocketSession.registerServerService("formeditor", editorServiceHandler);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(partListener);
 		ServoyModelFinder.getServoyModel().addFormComponentListener(partListener);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(true, partListener);
 		designerPreferences.addPreferenceChangeListener(partListener);
 		createBrowser(parent);
 
@@ -192,7 +196,6 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 		dirtyListener = new RfbDirtyListener(editorPart, editorWebsocketSession);
 		editorPart.addPropertyListener(dirtyListener);
-
 	}
 
 	protected abstract void createBrowser(Composite parent);
@@ -220,6 +223,12 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		if (form.isResponsiveLayout()) return "flow";
 		if (form.getUseCssPosition()) return "csspos";
 		return "absolute";
+	}
+
+	@Override
+	public void refreshPersists(List<IPersist> persists, boolean fullRefresh)
+	{
+		this.partListener.refreshPersists(persists, fullRefresh);
 	}
 
 	public void refreshPalette()
@@ -374,61 +383,6 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 //				iFormController.recreateUI();
 //			}
 //		}
-	}
-
-	@Override
-	public void refreshPersists(final List<IPersist> persists, boolean fullRefresh)
-	{
-		if (persists != null)
-		{
-			if (persists.size() == 1 && persists.get(0) == showedContainer && showedContainer instanceof LayoutContainer &&
-				CSSPositionUtils.isCSSPositionContainer((LayoutContainer)showedContainer))
-			{
-				// probably size has changed we need a full refresh
-				refreshBrowserUrl(true);
-				return;
-			}
-			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editorPart.getForm());
-			final Form form = fs.getFlattenedForm(editorPart.getForm(), false);
-			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
-			List<String> styleSheets = PersistHelper.getOrderedStyleSheets(fs);
-			String[] newStylesheets = null;
-			for (IPersist persist : persists)
-			{
-				if (persist instanceof Media && styleSheets.contains(((Media)persist).getName()))
-				{
-					newStylesheets = designerWebsocketSession.getSolutionStyleSheets(fs);
-					break;
-				}
-			}
-			final String[] newStylesheetsFinal = newStylesheets;
-			CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData",
-						new Object[] { componentsJSON });
-					if (persists.contains(form instanceof FlattenedForm ? ((FlattenedForm)form).getWrappedPersist() : form))
-					{
-						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
-							new Object[] { form.getUUID(), form.extendsForm != null ? form.extendsForm.getUUID()
-								: null, form.getSize().width, form.getSize().height });
-					}
-					if (fullRefresh)
-					{
-						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh",
-							new Object[] { });
-					}
-					if (newStylesheetsFinal != null)
-					{
-						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateStyleSheets",
-							new Object[] { newStylesheetsFinal });
-					}
-					designerWebsocketSession.valueChanged();
-				}
-			});
-		}
 	}
 
 	/**
@@ -611,7 +565,8 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		NO_REFRESH, FULL_REFRESH, PALETTE_REFRESH;
 	}
 
-	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener, IPreferenceChangeListener
+	private final class PartListener
+		implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener, IPreferenceChangeListener, IPersistChangeListener
 	{
 		private boolean hidden = false;
 		private RefreshType refresh = RefreshType.NO_REFRESH;
@@ -724,6 +679,95 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				}
 				else refresh = RefreshType.FULL_REFRESH;
 			}
+		}
+
+
+		public void persistChanges(Collection<IPersist> changes)
+		{
+			Object media = changes.iterator().next();
+
+			if (media instanceof Media mediaFile)
+			{
+
+				if (mediaFile.getName().equals("variants.json") || mediaFile.getName().endsWith(".less") || mediaFile.getName().endsWith(".css"))
+				{
+					refresh(true);
+				}
+
+			}
+		}
+
+
+		public void refreshPersists(final List<IPersist> persists, boolean fullRefresh)
+		{
+			if (persists != null)
+			{
+				if (persists.size() == 1 && persists.get(0) == showedContainer && showedContainer instanceof LayoutContainer &&
+					CSSPositionUtils.isCSSPositionContainer((LayoutContainer)showedContainer))
+				{
+					// probably size has changed we need a full refresh
+					refreshBrowserUrl(true);
+					return;
+				}
+				FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editorPart.getForm());
+				final Form form = fs.getFlattenedForm(editorPart.getForm(), false);
+				final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
+				List<String> styleSheets = PersistHelper.getOrderedStyleSheets(fs);
+				String[] newStylesheets = null;
+				for (IPersist persist : persists)
+				{
+					if (persist instanceof Media && styleSheets.contains(((Media)persist).getName()))
+					{
+						newStylesheets = designerWebsocketSession.getSolutionStyleSheets(fs);
+						break;
+					}
+				}
+				if (persists.size() == 1 && persists.get(0) instanceof Form)
+				{
+					// datasource changed, refresh palette for form components
+					this.refreshPalette();
+				}
+				final String[] newStylesheetsFinal = newStylesheets;
+				CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData",
+							new Object[] { componentsJSON });
+						if (persists.contains(form instanceof FlattenedForm ? ((FlattenedForm)form).getWrappedPersist() : form))
+						{
+							designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
+								new Object[] { form.getUUID(), form.extendsForm != null ? form.extendsForm.getUUID()
+									: null, form.getSize().width, form.getSize().height });
+						}
+						if (fullRefresh)
+						{
+							designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh",
+								new Object[] { });
+						}
+						if (newStylesheetsFinal != null)
+						{
+							designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateStyleSheets",
+								new Object[] { newStylesheetsFinal });
+						}
+						designerWebsocketSession.valueChanged();
+					}
+				});
+			}
+		}
+
+		public void refreshPalette()
+		{
+			CurrentWindow.runForWindow(new WebsocketSessionWindows(editorWebsocketSession), new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("refreshPalette", new Object[] { });
+					editorWebsocketSession.valueChanged();
+				}
+			});
 		}
 	}
 

@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.ISupportDeprecated;
 
 /**
  * LabelProvider for forms.
- * 
+ *
  * @author rgansevles
  */
 
@@ -35,11 +35,18 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 {
 	protected final FlattenedSolution flattenedSolution;
 	private final boolean defaultIsNone;
+	private final boolean defaultAsText;
 
 	public FormLabelProvider(FlattenedSolution flattenedSolution, boolean defaultIsNone)
 	{
+		this(flattenedSolution, defaultIsNone, false);
+	}
+
+	public FormLabelProvider(FlattenedSolution flattenedSolution, boolean defaultIsNone, boolean defaultAsText)
+	{
 		this.flattenedSolution = flattenedSolution;
 		this.defaultIsNone = defaultIsNone;
+		this.defaultAsText = defaultAsText;
 	}
 
 	@Override
@@ -59,7 +66,7 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 		int formId = ((Integer)value).intValue();
 		if (formId == Form.NAVIGATOR_DEFAULT)
 		{
-			return defaultIsNone ? Messages.LabelNone : Messages.LabelDefault;
+			return defaultIsNone ? Messages.LabelNone : defaultAsText ? Messages.LabelDefaultAsText : Messages.LabelDefault;
 		}
 		if (formId == Form.NAVIGATOR_IGNORE)
 		{
@@ -93,7 +100,7 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.util.IDeprecationProvider#isDeprecated(java.lang.Object)
 	 */
 	@Override

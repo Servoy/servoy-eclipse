@@ -78,7 +78,7 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidato
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
 import com.servoy.eclipse.core.repository.EclipseImportUserChannel;
 import com.servoy.eclipse.core.repository.XMLEclipseWorkspaceImportHandlerVersions11AndHigher;
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -381,7 +381,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					protected ServerConfig createServer(String name, ServerConfig sc)
 					{
 						ServerConfig serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(),
-							DatabaseUtils.getPostgresServerUrl(sc, name),
+							EclipseDatabaseUtils.getPostgresServerUrl(sc, name),
 							sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 							sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
 							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
@@ -588,11 +588,10 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 				GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-				FontDescriptor descriptor = FontDescriptor.createFrom(parent.getFont());
-				descriptor = descriptor.setStyle(SWT.BOLD);
+				FontDescriptor descriptor = FontDescriptor.createFrom(parent.getFont()).setStyle(SWT.BOLD);
 				Font font = descriptor.createFont(getShell().getDisplay());
 
-				addLabel(composite, backgroundColor, gd, "Module", font);
+				addLabel(composite, backgroundColor, gd, "Module", font).addDisposeListener((e) -> descriptor.destroyFont(font));
 				addLabel(composite, backgroundColor, gd, "Workspace Version", font);
 				addLabel(composite, backgroundColor, gd, "Import Version", font);
 				addLabel(composite, backgroundColor, gd, "Action Taken", font);
@@ -610,13 +609,15 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				return super.createCustomArea(parent);
 			}
 
-			protected void addLabel(Composite composite, Color backgroundColor, GridData gd, String text, Font font)
+			protected Label addLabel(Composite composite, Color backgroundColor, GridData gd, String text, Font font)
 			{
 				Label l = new Label(composite, SWT.NONE);
 				l.setBackground(backgroundColor);
 				l.setLayoutData(gd);
 				if (font != null) l.setFont(font);
 				l.setText(text);
+
+				return l;
 			}
 		}
 

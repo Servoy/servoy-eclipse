@@ -86,7 +86,7 @@ public class ElementResolver implements IElementResolver
 	private final Set<String> noneCalcNames = new HashSet<String>();
 	private final Set<String> noneFoundsetNames = new HashSet<String>();
 	private final Set<String> deprecated = new HashSet<String>();
-	private final Set<String> serversideScriptingNames = new HashSet<>();
+	private final Map<String, String> serversideScriptingNamesAndDoc = new HashMap<>();
 
 	public ElementResolver()
 	{
@@ -124,8 +124,9 @@ public class ElementResolver implements IElementResolver
 		noneCalcNames.addAll(noneFoundsetNames); // all filtered out for foundset methods is also filtered out for calcs
 		noneCalcNames.add(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER);
 
-		serversideScriptingNames.add("servoyApi");
-		serversideScriptingNames.add("console");
+		serversideScriptingNamesAndDoc.put("servoyApi",
+			"Provides utility methods for web object server side scripting to interact with the Servoy environment.");
+		serversideScriptingNamesAndDoc.put("console", "Supports console logging in the serverside scripting code of web objects.");
 
 		deprecated.add("alldataproviders");
 		deprecated.add("currentcontroller");
@@ -140,6 +141,8 @@ public class ElementResolver implements IElementResolver
 		if (resource != null && fs != null)
 		{
 			typeNames = getTypeNames(prefix);
+
+			// we only want currently to show code completion for servoyDeveloper inside Interactive Scripting Console
 			if (ValueCollectionProvider.getGenerateFullGlobalCollection())
 			{
 				typeNames.add("servoyDeveloper");
@@ -275,7 +278,7 @@ public class ElementResolver implements IElementResolver
 				resource.getName().endsWith("_server.js"))
 			{
 				if (typeNames.isEmpty()) typeNames = new HashSet<>();
-				typeNames.addAll(serversideScriptingNames);
+				typeNames.addAll(serversideScriptingNamesAndDoc.keySet());
 			}
 		}
 		catch (Exception e)
@@ -411,12 +414,14 @@ public class ElementResolver implements IElementResolver
 		{
 			if (ctxResource != null && ctxResource.exists() && ctxResource.getProject() != null &&
 				ctxResource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID) && ctxResource.getName().endsWith("_server.js") &&
-				serversideScriptingNames.contains(name))
+				serversideScriptingNamesAndDoc.containsKey(name))
 			{
+				if (ServoyModelFinder.getServoyModel().getActiveProject() == null) return null; // in this case TypeCreator would not create the needed type; avoid generating a resolve stack overflow
 				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 				property.setName(name);
 				property.setReadOnly(true);
 				property.setType(context.getTypeRef(name));
+				property.setDescription(serversideScriptingNamesAndDoc.get(name));
 				members.add(property);
 			}
 		}
@@ -495,9 +500,12 @@ public class ElementResolver implements IElementResolver
 		}
 
 		String typeName;
+		String description = null;
 		if ("servoyDeveloper".equals(name))
 		{
-			typeName = "JSDeveloperSolutionModel";
+			if (ServoyModelFinder.getServoyModel().getActiveProject() == null) return null; // in this case TypeCreator would not create the needed type; avoid generating a resolve stack overflow
+			typeName = name;
+			description = "ONLY AVAILABLE when running a client from Servoy Developer. Do not try to use this when running clients from a normal server/war deployment.<br/>It is meant to be used primarily from developer's 'Interactive Console' view (so you will not get it suggested in code completion of a scope/form script editor).<br/><br/>It provides utility methods for interacting with the developer's environment from a debug Servoy client.";
 		}
 		else
 		{
@@ -528,7 +536,6 @@ public class ElementResolver implements IElementResolver
 		boolean readOnly = true;
 		ImageDescriptor image = null;
 		Object resource = null;
-		String description = null;
 		String deprecatedText = null;
 		boolean hideAllowed = false;
 		if (type == null && name.indexOf('.') == -1)

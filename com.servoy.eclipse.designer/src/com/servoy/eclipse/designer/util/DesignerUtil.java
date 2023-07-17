@@ -57,9 +57,11 @@ import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
@@ -161,6 +163,26 @@ public class DesignerUtil
 					}
 					if (Utils.isInheritedFormElement(formElement, context)) return true;
 				}
+			}
+		}
+		return false;
+	}
+
+	public static boolean containsFormComponentElement(List selectedEditParts)
+	{
+		if (selectedEditParts != null && !selectedEditParts.isEmpty())
+		{
+			for (Object selectedEditPart : selectedEditParts)
+			{
+				IPersist formElement = null;
+				if (selectedEditPart instanceof PersistContext)
+				{
+					PersistContext persistContext = (PersistContext)selectedEditPart;
+					formElement = persistContext.getPersist();
+
+				}
+				if (formElement != null && (formElement instanceof WebFormComponentChildType || formElement.getParent() instanceof WebFormComponentChildType))
+					return true;
 			}
 		}
 		return false;
@@ -456,7 +478,8 @@ public class DesignerUtil
 								if (layoutSpec.isDeprecated()) continue;
 								try
 								{
-									String layoutName = new JSONObject((String)layoutSpec.getConfig()).optString("layoutName", null);
+									String config = (String)layoutSpec.getConfig();
+									String layoutName = config == null ? null : new JSONObject(config).optString("layoutName", null);
 									if (layoutName == null)
 									{
 										layoutName = layoutSpec.getName();
@@ -485,7 +508,8 @@ public class DesignerUtil
 				if (layoutSpec.isDeprecated()) continue;
 				try
 				{
-					String layoutName = new JSONObject((String)layoutSpec.getConfig()).optString("layoutName", null);
+					String config = (String)layoutSpec.getConfig();
+					String layoutName = config == null ? null : new JSONObject(config).optString("layoutName", null);
 					if (layoutName == null)
 					{
 						layoutName = layoutSpec.getName();
@@ -530,6 +554,10 @@ public class DesignerUtil
 				tag.append(entry.getValue());
 				tag.append("\"");
 			}
+		}
+		if (layout instanceof CSSPositionLayoutContainer)
+		{
+			tag.append(" [ResponsiveContainer]");
 		}
 		tag.append(">");
 		if (layout.getName() != null)
@@ -612,7 +640,7 @@ public class DesignerUtil
 					if (spec != null)
 					{
 						if (allowedChildren.contains(spec) || allowedChildren.contains(packAndSpec) ||
-							allowedChildren.contains("component") && WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(spec) != null)
+							allowedChildren.contains("component") && WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(spec) != null)
 						{
 							return true;
 						}
@@ -628,8 +656,9 @@ public class DesignerUtil
 		return false;
 	}
 
-	public static boolean isDropAllowed(AbstractContainer parent, IPersist webObj)
+	public static boolean isDropAllowed(AbstractContainer parent, IPersist webObj, Form form)
 	{
+		if (parent instanceof LayoutContainer && !form.isResponsiveLayout()) return true;
 		if (parent instanceof LayoutContainer)
 		{
 			Set<String> allowed = getAllowedChildren().get(
@@ -647,4 +676,5 @@ public class DesignerUtil
 		}
 		return false;
 	}
+
 }

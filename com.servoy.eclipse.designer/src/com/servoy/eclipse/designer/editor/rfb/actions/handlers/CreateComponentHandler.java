@@ -39,6 +39,7 @@ import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.ui.IEditorPart;
@@ -55,6 +56,8 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
+import org.sablo.specification.property.CustomJSONObjectType;
+import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
@@ -68,9 +71,12 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -78,6 +84,8 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
@@ -96,6 +104,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Portal;
@@ -173,6 +182,7 @@ public class CreateComponentHandler implements IServerService
 		{
 			public void run()
 			{
+				final IStructuredSelection[] newSelection = new IStructuredSelection[1];
 				editorPart.getCommandStack().execute(new BaseRestorableCommand("createComponent")
 				{
 					private IPersist[] newPersist;
@@ -190,9 +200,8 @@ public class CreateComponentHandler implements IServerService
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
 								if (!args.optBoolean("keepOldSelection", false))
 								{
-									IStructuredSelection structuredSelection = new StructuredSelection(
+									newSelection[0] = new StructuredSelection(
 										newPersist.length > 0 ? PersistContext.create(newPersist[0], editorPart.getForm()) : newPersist);
-									selectionProvider.setSelection(structuredSelection);
 								}
 								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
 									CSSPositionUtils.isCSSPositionContainer((LayoutContainer)newPersist[0]))
@@ -239,6 +248,8 @@ public class CreateComponentHandler implements IServerService
 					}
 
 				});
+
+				if (newSelection[0] != null) selectionProvider.setSelection(newSelection[0]);
 			}
 		});
 		return null;
@@ -325,6 +336,10 @@ public class CreateComponentHandler implements IServerService
 			if (args.has("name"))
 			{
 				String name = args.getString("name");
+				if (args.has("packageName")) //ghost components has no packageName
+				{
+					PaletteCommonsHandler.getInstance().updateComponentCounter(name);
+				}
 				if (dropTarget instanceof WebComponent)
 				{
 					// see if target has a 'component' or 'component[]' typed property
@@ -364,7 +379,11 @@ public class CreateComponentHandler implements IServerService
 					gc.setOnActionMethodID(-1);
 					gc.setRolloverCursor(Cursor.HAND_CURSOR);
 					CSSPositionUtils.setLocation(gc, x, y);
-					CSSPositionUtils.setSize(gc, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(gc, w, h);
+					if (args.has("styleClass"))
+					{
+						gc.setStyleClass(args.getString("styleClass"));
+					}
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-label".equals(name))
@@ -372,7 +391,11 @@ public class CreateComponentHandler implements IServerService
 					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
 					gc.setText(args.has("text") ? args.getString("text") : "label");
 					CSSPositionUtils.setLocation(gc, x, y);
-					CSSPositionUtils.setSize(gc, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(gc, w, h);
+					if (args.has("styleClass"))
+					{
+						gc.setStyleClass(args.getString("styleClass"));
+					}
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-combobox".equals(name))
@@ -380,7 +403,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.COMBOBOX);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-textfield".equals(name))
@@ -388,7 +411,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.TEXT_FIELD);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-textarea".equals(name))
@@ -396,7 +419,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.TEXT_AREA);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-password".equals(name))
@@ -404,7 +427,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.PASSWORD);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-calendar".equals(name))
@@ -412,7 +435,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.CALENDAR);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-typeahead".equals(name))
@@ -420,7 +443,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.TYPE_AHEAD);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-spinner".equals(name))
@@ -428,7 +451,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.SPINNER);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
@@ -436,7 +459,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.CHECKS);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
@@ -444,7 +467,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.RADIOS);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-imagemedia".equals(name))
@@ -452,7 +475,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.IMAGE_MEDIA);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-listbox".equals(name))
@@ -460,7 +483,7 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.LIST_BOX);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-htmlarea".equals(name))
@@ -469,7 +492,7 @@ public class CreateComponentHandler implements IServerService
 					field.setDisplayType(Field.HTML_AREA);
 					field.setEditable(true);
 					CSSPositionUtils.setLocation(field, x, y);
-					CSSPositionUtils.setSize(field, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-tabpanel".equals(name))
@@ -489,7 +512,7 @@ public class CreateComponentHandler implements IServerService
 						tabPanel = editorPart.getForm().createNewTabPanel(compName);
 					}
 					CSSPositionUtils.setLocation(tabPanel, x, y);
-					CSSPositionUtils.setSize(tabPanel, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(tabPanel, w, h);
 					return new IPersist[] { tabPanel };
 				}
 				else if ("servoydefault-splitpane".equals(name))
@@ -510,7 +533,7 @@ public class CreateComponentHandler implements IServerService
 					}
 					tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
 					CSSPositionUtils.setLocation(tabPanel, x, y);
-					CSSPositionUtils.setSize(tabPanel, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(tabPanel, w, h);
 					return new IPersist[] { tabPanel };
 				}
 				else if ("servoycore-portal".equals(name))
@@ -530,7 +553,7 @@ public class CreateComponentHandler implements IServerService
 						portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
 					}
 					CSSPositionUtils.setLocation(portal, x, y);
-					CSSPositionUtils.setSize(portal, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(portal, w, h);
 					return new IPersist[] { portal };
 				}
 				else if ("servoydefault-rectangle".equals(name))
@@ -538,21 +561,16 @@ public class CreateComponentHandler implements IServerService
 					RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
 					shape.setLineSize(1);
 					CSSPositionUtils.setLocation(shape, x, y);
-					CSSPositionUtils.setSize(shape, w, h);
+					if (w != 0 || h != 0) CSSPositionUtils.setSize(shape, w, h);
 					return new IPersist[] { shape };
 				}
 				else
 				{
-					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(name);
+					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(name);
 					if (spec != null)
 					{
 						String compName = null;
-						String componentName = name;
-						int index = componentName.indexOf("-");
-						if (index != -1)
-						{
-							componentName = componentName.substring(index + 1);
-						}
+						String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
 						componentName = componentName.replaceAll("-", "_");
 						compName = componentName + "_" + id.incrementAndGet();
 						while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
@@ -566,7 +584,12 @@ public class CreateComponentHandler implements IServerService
 							Portal portal = (Portal)parentSupportingElements;
 							webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
 								IRepository.WEBCOMPONENTS);
-							webComponent.setProperty("text", compName);
+							webComponent.setProperty("text", compName); //default
+							if (args.has("text"))
+							{
+								webComponent.setProperty("text", args.getString("text"));
+							}
+
 							webComponent.setTypeName(name);
 							portal.addChild(webComponent);
 						}
@@ -578,7 +601,7 @@ public class CreateComponentHandler implements IServerService
 						CSSPositionUtils.setLocation(webComponent, x, y);
 						CSSPositionUtils.setSize(webComponent, w, h);
 						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
-						if (description != null && description.getDefaultValue() instanceof JSONObject)
+						if ((w == 0 && h == 0) && description != null && description.getDefaultValue() instanceof JSONObject)
 						{
 							CSSPositionUtils.setSize(webComponent, ((JSONObject)description.getDefaultValue()).optInt("width", 80),
 								((JSONObject)description.getDefaultValue()).optInt("height", 80));
@@ -588,21 +611,25 @@ public class CreateComponentHandler implements IServerService
 							CSSPositionUtils.setSize(webComponent, 200, 100);
 						}
 						Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
-						for (String string : allPropertiesNames)
+						for (String propertyName : allPropertiesNames)
 						{
-							PropertyDescription property = spec.getProperty(string);
+							PropertyDescription property = spec.getProperty(propertyName);
 							if (property != null)
 							{
-								if (args.has(string) && webComponent.getProperty(string) == null)
+								if (args.has(propertyName) && webComponent.getProperty(propertyName) == null)
 								{
-									webComponent.setProperty(string, args.opt(string));
+									webComponent.setProperty(propertyName, args.opt(propertyName));
 									if (property.getType() == FormComponentPropertyType.INSTANCE)
 									{
 										FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-										Form form = FormComponentPropertyType.INSTANCE.getForm(args.opt(string), flattenedSolution);
+										Form form = FormComponentPropertyType.INSTANCE.getForm(args.opt(propertyName), flattenedSolution);
 										if (form != null)
 										{
 											Dimension size = form.getSize();
+											if (size.height == 0)
+											{
+												size.height = CSSPositionUtils.getSize(webComponent).height;
+											}
 											CSSPositionUtils.setSize(webComponent, size.width, size.height);
 										}
 									}
@@ -610,7 +637,11 @@ public class CreateComponentHandler implements IServerService
 								else if (property.getInitialValue() != null)
 								{
 									Object initialValue = property.getInitialValue();
-									if (initialValue != null) webComponent.setProperty(string, initialValue);
+									if (initialValue != null) webComponent.setProperty(propertyName, initialValue);
+								}
+								if ("autoshow".equals(property.getTag("wizard")))
+								{
+									autoshowWizard(parentSupportingElements, spec, webComponent, property, editorPart, id);
 								}
 							}
 						}
@@ -635,7 +666,8 @@ public class CreateComponentHandler implements IServerService
 									if (!overridePersist.getUUID().equals(child.getUUID()))
 									{
 										parent.removeChild(child);
-										parent.addChild(overridePersist);
+										// do not add the override again, the getOverridePersist should already create it in the right place (probably directly on form)
+										//parent.addChild(overridePersist);
 									}
 								}
 							}
@@ -679,7 +711,7 @@ public class CreateComponentHandler implements IServerService
 								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 									initialDropTarget.getParent() instanceof Form;
 								Point p = getLocationAndShiftSiblings(parentSupportingElements, args, extraChangedPersists);
-								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, p.x,
+								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, p,
 									specifications, args.optString("packageName"));
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
@@ -780,6 +812,64 @@ public class CreateComponentHandler implements IServerService
 		return null;
 	}
 
+	public static void autoshowWizard(ISupportFormElements parentSupportingElements, WebObjectSpecification spec,
+		WebComponent webComponent, PropertyDescription property, BaseVisualFormEditor editorPart, AtomicInteger id)
+	{
+
+		// prop type should be an array of a custom type..
+		IPropertyType< ? > propType = property.getType();
+		if (propType instanceof CustomJSONArrayType< ? , ? >)
+		{
+
+			CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
+				.getCustomJSONTypeDefinition().getType();
+			PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
+			Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
+			if (wizardProperties.size() > 0)
+			{
+				// feed this wizardProperties into the wizard
+				System.err.println(wizardProperties);
+				Display current = Display.getCurrent();
+				if (current == null) current = Display.getDefault();
+
+				PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
+				FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+				ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
+					.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+
+				PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
+					context,
+					flattenedSolution, property).withTable(table).withProperties(wizardProperties);
+				if (dialogConfigurator.open() == Window.OK)
+				{
+					List<Map<String, Object>> result = dialogConfigurator.getResult();
+					String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(customObjectType.getName());
+					for (int i = 0; i < result.size(); i++)
+					{
+						Map<String, Object> row = result.get(i);
+						String customTypeName = typeName + "_" + id.incrementAndGet();
+						while (!PersistFinder.INSTANCE.checkName(editorPart, customTypeName))
+						{
+							customTypeName = typeName + "_" + id.incrementAndGet();
+						}
+						WebCustomType bean = AddContainerCommand.addCustomType(webComponent, property.getName(), customTypeName, i, null);
+						row.forEach((key, value) -> bean.setProperty(key, value));
+					}
+				}
+			}
+			else
+			{
+				ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
+					"\nhas no wizard properties\n" + propType, null);
+			}
+		}
+		else
+		{
+			ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
+				" that is not an custom array type " + propType, null);
+		}
+	}
+
 	private Point getLocationAndShiftSiblings(ISupportChilds parent, JSONObject args, List<IPersist> extraChangedPersists) throws RepositoryException
 	{
 		if (editorPart.getForm().isResponsiveLayout() && !CSSPositionUtils.isCSSPositionContainer(
@@ -862,16 +952,11 @@ public class CreateComponentHandler implements IServerService
 	protected ChildWebComponent createNestedWebComponent(WebComponent parentWebComponent, PropertyDescription pd, String componentSpecName, String propertyName,
 		int indexIfInArray, int x, int y, int width, int height)
 	{
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentSpecName);
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentSpecName);
 		if (spec != null)
 		{
 			String compName = null;
-			String componentName = componentSpecName;
-			int index = componentName.indexOf("-");
-			if (index != -1)
-			{
-				componentName = componentName.substring(index + 1);
-			}
+			String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
 			componentName = componentName.replaceAll("-", "_");
 			compName = componentName + "_" + id.incrementAndGet();
 			while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
@@ -901,17 +986,28 @@ public class CreateComponentHandler implements IServerService
 	}
 
 	protected List<IPersist> createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, LayoutContainer sameTypeChildContainer,
-		JSONObject config, int index, PackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
+		JSONObject config, Point location, PackageSpecification<WebLayoutSpecification> specifications, String packageName)
+		throws RepositoryException, JSONException
 	{
 		List<IPersist> newPersists = new ArrayList<IPersist>();
+		int type = parent.getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) == null && layoutSpec.getName().equals("servoycore-responsivecontainer")
+			? IRepository.CSSPOS_LAYOUTCONTAINERS : IRepository.LAYOUTCONTAINERS;
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
-			IRepository.LAYOUTCONTAINERS);
+			type);
 		container.setSpecName(layoutSpec.getName());
 		container.setPackageName(packageName);
 		parent.addChild(container);
-		container.setLocation(new Point(index, index));
+		if (container instanceof CSSPositionLayoutContainer)
+		{
+			((CSSPositionLayoutContainer)container)
+				.setCssPosition(new CSSPosition(Integer.toString(location.y), "-1", "-1", Integer.toString(location.x), "200", "200"));
+		}
+		else
+		{
+			container.setLocation(new Point(location.x, location.x));
+			if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
+		}
 		newPersists.add(container);
-		if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
 		if (config != null)
 		{
 			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)
@@ -933,14 +1029,15 @@ public class CreateComponentHandler implements IServerService
 						{
 							WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
 							newPersists.addAll(
-								createLayoutContainer(container, spec, null, jsonObject.optJSONObject("model"), i + 1, specifications, packageName));
+								createLayoutContainer(container, spec, null, jsonObject.optJSONObject("model"), new Point(i + 1, i + 1), specifications,
+									packageName));
 						}
 						else if (jsonObject.has("componentName"))
 						{
 							String compName = "component_" + id.incrementAndGet();
 							WebComponent component = container.createNewWebComponent(compName, jsonObject.getString("componentName"));
 							newPersists.add(component);
-							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 								jsonObject.getString("componentName"));
 							if (spec != null)
 							{

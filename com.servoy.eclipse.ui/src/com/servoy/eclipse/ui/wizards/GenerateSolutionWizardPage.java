@@ -66,6 +66,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -173,6 +174,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		expandBar.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		expandBar.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE));
 		expandComposite = new SolutionAdvancedSettingsComposite(expandBar, isModuleWizard);
+		expandComposite.setBackground(topLevel.getBackground());
 		collapsableItem = new ExpandItem(expandBar, SWT.NONE, 0);
 		collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		collapsableItem.setControl(expandComposite);
@@ -181,14 +183,14 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			public void itemExpanded(ExpandEvent e)
 			{
 				collapsableItem.setText("Hide advanced solution settings");
-				collapsableItem.setImage(uiActivator.loadImageFromBundle("collapse_tree.png"));
+				collapsableItem.setImage(uiActivator.loadImageFromBundle("collapse_tree_.png"));
 				resizeDialog();
 			}
 
 			public void itemCollapsed(ExpandEvent e)
 			{
 				collapsableItem.setText("Show advanced solution settings");
-				collapsableItem.setImage(uiActivator.loadImageFromBundle("expandall.png"));
+				collapsableItem.setImage(uiActivator.loadImageFromBundle("expandall_.png"));
 				resizeDialog();
 			}
 		});
@@ -474,11 +476,16 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			Label solutionTypeLabel = new Label(this, SWT.NONE);
 			solutionTypeLabel.setText("Solution type");
 			solutionTypeCombo = new Combo(this, SWT.DROP_DOWN | SWT.READ_ONLY);
-			String[] solutionTypeNames = new String[SolutionMetaData.solutionTypeNames.length - 1];
-			System.arraycopy(SolutionMetaData.solutionTypeNames, 1, solutionTypeNames, 0, solutionTypeNames.length);
+			boolean showLegacyTypes = new DesignerPreferences().getShowLegacySolutionTypes();
+
+			String[] solutionTypeNames = new String[showLegacyTypes ? SolutionMetaData.solutionTypeNames.length - 1
+				: SolutionMetaData.currentSolutionTypeNames.length - 1];
+			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypeNames : SolutionMetaData.currentSolutionTypeNames, 1, solutionTypeNames, 0,
+				solutionTypeNames.length);
+			solutionTypeComboValues = new int[showLegacyTypes ? SolutionMetaData.solutionTypes.length - 1 : SolutionMetaData.currentSolutionTypes.length - 1];
+			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypes : SolutionMetaData.currentSolutionTypes, 1, solutionTypeComboValues, 0,
+				solutionTypeComboValues.length);
 			solutionTypeCombo.setItems(solutionTypeNames);
-			solutionTypeComboValues = new int[SolutionMetaData.solutionTypes.length - 1];
-			System.arraycopy(SolutionMetaData.solutionTypes, 1, solutionTypeComboValues, 0, solutionTypeComboValues.length);
 			int defaultSolutionType = getDialogSettings().get(wizard.getSettingsPrefix() + SOLUTION_TYPE) != null
 				? getDialogSettings().getInt(wizard.getSettingsPrefix() + SOLUTION_TYPE) : SolutionMetaData.NG_CLIENT_ONLY;
 			solutionTypeCombo.select(

@@ -73,17 +73,22 @@ public class IndexPageFilter implements Filter
 
 			return;
 		}
-		File projectFolder = Activator.getInstance().getProjectFolder();
-		File distFolder = new File(projectFolder, "dist/app");
-		if (distFolder.exists())
+		File distFolder = null;
+		File indexFile = null;
+		File projectFolder = Activator.getInstance().getSolutionProjectFolder();
+		if (projectFolder != null)
 		{
-			String solutionName = getSolutionNameFromURI(requestURI);
+			distFolder = new File(projectFolder, "dist/app");
+			indexFile = new File(distFolder, "index.html");
+		}
+		String solutionName = getSolutionNameFromURI(requestURI);
+		if (indexFile != null && indexFile.exists())
+		{
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
 					requestURI.toLowerCase().endsWith("/index.html")))
 			{
-				File file = new File(distFolder, "index.html");
-				String indexHtml = FileUtils.readFileToString(file, "UTF-8");
+				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
 
 				ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(request, response, false); // for NG2 remove the unsafe-eval
 				AngularIndexPageWriter.writeIndexPage(indexHtml, request, response, solutionName,
@@ -110,6 +115,17 @@ public class IndexPageFilter implements Filter
 					return;
 				}
 			}
+		}
+		else if (solutionName != null)
+		{
+			// the system is not ready because the TiNG resources are not build/ not build properly
+			String indexHtml = Utils.getURLContent(Activator.getInstance().getBundle().getEntry("/resources/buildfailedclient.html"));
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("text/html");
+			response.setContentLengthLong(indexHtml.length());
+			response.getWriter().write(indexHtml);
+
+			return;
 		}
 		chain.doFilter(servletRequest, servletResponse);
 	}

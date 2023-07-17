@@ -16,44 +16,42 @@
  */
 package com.servoy.eclipse.ui.editors.relation;
 
-import java.util.ArrayList;
+import static com.servoy.base.query.IBaseSQLCondition.IN_OPERATOR;
+import static com.servoy.base.query.IBaseSQLCondition.OPERATOR_MASK;
+import static com.servoy.j2db.persistence.RelationItem.RELATION_OPERATORS;
+import static com.servoy.j2db.util.Utils.getAsInteger;
+import static com.servoy.j2db.util.Utils.indexOf;
+import static java.util.Arrays.stream;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 
 import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.RelationItem;
-import com.servoy.j2db.query.ISQLCondition;
-import com.servoy.j2db.util.Utils;
 
 public class OperatorEditingSupport extends EditingSupport
 {
 	private final ComboBoxCellEditor editor;
 	private final RelationEditor relationEditor;
-	private final ArrayList<String> items;
+	private final int[] values;
 
 	public OperatorEditingSupport(RelationEditor re, TableViewer tv)
 	{
 		super(tv);
 		relationEditor = re;
-		items = new ArrayList<String>();
-		for (int element : RelationItem.RELATION_OPERATORS)
-		{
-			if ((element & ISQLCondition.OPERATOR_MASK) != ISQLCondition.IN_OPERATOR)
-			{
-				items.add(RelationItem.getOperatorAsString(element));
-			}
-		}
-		editor = new FixedComboBoxCellEditor(tv.getTable(), items.toArray(new String[] { }), SWT.READ_ONLY);
-		if (editor.getControl() instanceof CCombo)
-		{
-			((CCombo)editor.getControl()).setToolTipText("Special modifiers:\n\n# - case insensitive condition\n^|| - is null condition\n\nExample:\n\n#= - case insensitive equals\n^||= - equals or null\n^||#!= - case insensitive not equals or null");
-		}
+
+		values = stream(RELATION_OPERATORS)
+			.filter(element -> element != IN_OPERATOR && (element & OPERATOR_MASK) == element)
+			.toArray();
+		String[] items = stream(values)
+			.mapToObj(OperatorEditingSupport::getColumnText)
+			.toArray(String[]::new);
+
+		editor = new FixedComboBoxCellEditor(tv.getTable(), items, SWT.READ_ONLY);
 	}
 
 	@Override
@@ -62,18 +60,22 @@ public class OperatorEditingSupport extends EditingSupport
 		if (element instanceof RelationRow)
 		{
 			RelationRow pi = (RelationRow)element;
-			int listIndex = Utils.getAsInteger(value);
-			String operatorString = items.get(listIndex);
-			int validOperator = RelationItem.getValidOperator(operatorString, RelationItem.RELATION_OPERATORS, null);
-			if (validOperator != -1)
+
+			int newValue = values[getAsInteger(value)];
+			int previousValue = pi.getMaskedOperator();
+			if (previousValue != newValue)
 			{
-				Integer previousValue = pi.getOperator();
-				Integer currentValue = Integer.valueOf(validOperator);
-				pi.setOperator(currentValue);
-				if (!Utils.equalObjects(previousValue, currentValue) && !(previousValue == null && currentValue.intValue() == 0)) relationEditor.flagModified(true);
+				if (indexOf(RELATION_OPERATORS, newValue | pi.getMask()) < 0)
+				{
+					// combination with mask is not valid, clear mask
+					pi.setMask(0);
+				}
+				relationEditor.flagModified(true);
+
+				pi.setMaskedOperator(newValue);
 			}
-			getViewer().update(element, null);
 		}
+		getViewer().update(element, null);
 	}
 
 	@Override
@@ -82,9 +84,11 @@ public class OperatorEditingSupport extends EditingSupport
 		if (element instanceof RelationRow)
 		{
 			RelationRow pi = (RelationRow)element;
-			Integer operatorCode = pi.getOperator() != null ? pi.getOperator() : new Integer(0);
-			String operatorString = RelationItem.getOperatorAsString(operatorCode.intValue());
-			return new Integer(items.indexOf(operatorString));
+			int index = indexOf(values, pi.getMaskedOperator());
+			if (index >= 0)
+			{
+				return Integer.valueOf(index);
+			}
 		}
 		return null;
 	}
@@ -103,5 +107,10 @@ public class OperatorEditingSupport extends EditingSupport
 			return relationEditor.canEdit(element);
 		}
 		return false;
+	}
+
+	public static String getColumnText(int maskedOperator)
+	{
+		return RelationItem.getOperatorAsString(maskedOperator);
 	}
 }

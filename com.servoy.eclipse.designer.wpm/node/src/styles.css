@@ -1,3 +1,7 @@
+:root {
+  --mdc-tab-indicator-active-indicator-color: #e4844a;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -20,23 +24,37 @@ body {
   height: auto;
 }
 
-
-mat-tab-header, .mat-tab-label-content {
+.mat-mdc-tab-header, .mat-mdc-tab-label-content {
   background-color: #000;
   color: #fff;
   font-size: medium;
   text-transform: none;
 }
 
-.mat-tab-label-active .mat-tab-label-content {
+.mat-mdc-tab:not(.mat-mdc-tab-disabled) .mdc-tab__text-label, .mat-mdc-tab-link:not(.mat-mdc-tab-disabled) .mdc-tab__text-label {
+    color: #fff;
+}
+
+.mat-mdc-tab:not(.mat-mdc-tab-disabled).mdc-tab--active .mdc-tab__text-label, .mat-mdc-tab-link:not(.mat-mdc-tab-disabled).mdc-tab--active .mdc-tab__text-label {
     color: #e4844a;
 }
 
-.mat-tab-labels .mat-tab-label {
+.mat-mdc-tab-labels .mat-mdc-tab-label {
     opacity: unset;
 }
 
-.mat-tab-group .mat-ink-bar {
+.mat-mdc-select-value,
+.mat-mdc-option.mdc-list-item  {
+    font-family: initiali;
+    font-size: initial;
+}
+
+.mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
+    padding-bottom: 0px;
+    min-height: unset;
+}
+
+.mat-mdc-tab-group .mat-mdc-ink-bar {
     background-color: #e4844a !important;
 }
 
@@ -45,16 +63,80 @@ mat-select.repository {
   padding-top: 10px;
 }
 
-mat-select.repository .mat-select-value {
+mat-select.repository .mat-mdc-select-value-text {
   color: #fff;
   max-width: none;
 }
 
-mat-select.repository .mat-select-arrow {
+mat-select.repository .mat-mdc-select-arrow {
   color: #fff;
 }
 
+.mdc-text-field--filled:not(.mdc-text-field--disabled)
+{
+    background-color: unset;;
+}
+
+.mat-mdc-select-value, .mat-mdc-select-disabled .mat-mdc-select-value {
+    color: unset;;
+}
 /* workaround for IE, see: https://github.com/angular/material2/issues/11609 */
 .cdk-overlay-pane {
   display: block;
+}
+
+
+/* DARK THEME*/
+html, body {
+    height: 100%;
+}
+
+.dark .content {
+    background: #262626;
+    color: #ffffff;
+    height: 100%;
+}
+
+.dark .mat-mdc-select-value, 
+.dark .mat-mdc-select-arrow, 
+.dark .mat-mdc-option,
+.dark .mdc-list-item__primary-text,
+.dark .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
+    color: #ffffff;
+}
+
+.dark .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before  {
+    border-bottom-color: unset;
+}
+
+.dark .mat-mdc-select-disabled .mat-mdc-select-value, 
+.dark .mat-mdc-select-disabled .mat-mdc-select-arrow, 
+.dark .mat-primary .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text {
+	color: #c1c1c161
+}
+
+.dark .mat-mdc-form-field-underline {
+	background: #ffffff
+}
+
+.dark .wpm-package-selected {
+	background: #1e1d1d !important;
+}
+
+.dark .wpm-package-description .mat-mdc-card-content{
+	background: #1a1a1a !important;
+}
+
+.dark .table-package tr th div, 
+.dark .mat-mdc-select-panel {
+    background: #3c3c3c;
+    color: #ffffff;
+}
+
+.dark .mat-mdc-form-field-label {
+	color: #ffffff;
+}
+
+.dark .column-fitwidth {
+    height: 80px;
 }

@@ -39,6 +39,7 @@ import com.servoy.eclipse.designer.editor.rfb.ChromiumVisualFormEditorDesignPage
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.SystemVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
@@ -61,7 +62,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEditor
+public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEditor, IEditorRefresh
 {
 	public static final RequestType REQ_PLACE_TAB = new RequestType(RequestType.TYPE_TAB);
 	public static final RequestType REQ_PLACE_PORTAL = new RequestType(RequestType.TYPE_PORTAL);
@@ -250,6 +251,16 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		{
 			((RfbVisualFormEditorDesignPage)graphicaleditor).refreshBrowserUrl(false);
 		}
+	}
+
+	@Override
+	public void refresh()
+	{
+		if (graphicaleditor instanceof RfbVisualFormEditorDesignPage)
+		{
+			((RfbVisualFormEditorDesignPage)graphicaleditor).refreshBrowserUrl(true);
+		}
+
 	}
 
 	@Override

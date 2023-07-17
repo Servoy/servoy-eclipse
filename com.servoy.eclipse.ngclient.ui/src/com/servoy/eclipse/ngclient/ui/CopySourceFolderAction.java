@@ -18,8 +18,14 @@
 package com.servoy.eclipse.ngclient.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.DeletingPathVisitor;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -28,12 +34,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.j2db.util.Debug;
+
 /**
  * @author jcompagner
  * @since 2021.03
  */
 public class CopySourceFolderAction extends Action
 {
+	public static final String JOB_FAMILY = "Copy_Build_Sources";
+
 	public CopySourceFolderAction()
 	{
 		setText("Copy the Titanium NGClient sources");
@@ -41,8 +51,28 @@ public class CopySourceFolderAction extends Action
 	}
 
 	@Override
+	public boolean isEnabled()
+	{
+		if (super.isEnabled())
+		{
+			Job[] jobs = Job.getJobManager().find(JOB_FAMILY);
+			return jobs.length == 0;
+		}
+		return false;
+	}
+
+	@Override
 	public void run()
 	{
+		if (!isEnabled())
+		{
+			MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Copy and Build TiNG",
+				"Build is already running, wait for that one to finish");
+			return;
+		}
+		File solutionProjectFolder = Activator.getInstance().getSolutionProjectFolder();
+		if (solutionProjectFolder == null) return;
+
 		final int choice = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getCurrent().getActiveShell(), "Copy the Titanium NGClient sources",
 			"This action will perform an npm install/ng build as well.\n" +
 				"Should we do a normal install or a clean install (npm ci)?\n\n" +
@@ -53,22 +83,75 @@ public class CopySourceFolderAction extends Action
 
 		if (choice < 0 || choice == 2) return; // cancel
 
+		Job deleteJob = null;
 		if (choice == 1)
 		{
-			Job.createSystem("delete .angular and packages cache", (monitor) -> {
-				FileUtils.deleteQuietly(new File(Activator.getInstance().getProjectFolder(), ".angular"));
-				FileUtils.deleteQuietly(new File(Activator.getInstance().getProjectFolder(), "packages"));
-			}).schedule();
+			deleteJob = new Job("delete .angular and packages cache")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
+				{
+					StringOutputStream console = Activator.getInstance().getConsole().outputStream();
+					try
+					{
+						long time = System.currentTimeMillis();
+						console.write("Starting to delete the main target folder: " + Activator.getInstance().getMainTargetFolder() + "\n");
+						WebPackagesListener.setIgnore(true);
+
+						Path path = Activator.getInstance().getMainTargetFolder().toPath();
+						Files.walkFileTree(path, DeletingPathVisitor.withLongCounters());
+
+						console.write("Done deleting the main target folder: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
+					}
+					catch (IOException e)
+					{
+						Debug.error(e);
+					}
+					finally
+					{
+						try
+						{
+							console.close();
+						}
+						catch (IOException e)
+						{
+						}
+					}
+					return Status.OK_STATUS;
+				}
+
+				@Override
+				public boolean belongsTo(Object family)
+				{
+					return CopySourceFolderAction.JOB_FAMILY.equals(family);
+				}
+			};
 		}
-		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(Activator.getInstance().getProjectFolder(), false, true);
+		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(solutionProjectFolder, false, true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override
 			public void done(IJobChangeEvent event)
 			{
+				if (choice == 1) WebPackagesListener.setIgnoreAndCheck(false, false);
 				WebPackagesListener.checkPackages(choice == 1);
 			}
 		});
-		copySources.schedule();
+		if (choice == 1)
+		{
+			deleteJob.addJobChangeListener(new JobChangeAdapter()
+			{
+				@Override
+				public void done(IJobChangeEvent event)
+				{
+					copySources.schedule();
+				}
+			});
+			deleteJob.schedule();
+		}
+		else
+		{
+			copySources.schedule();
+		}
 	}
 }

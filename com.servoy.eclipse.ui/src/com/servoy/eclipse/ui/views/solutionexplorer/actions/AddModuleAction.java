@@ -133,7 +133,7 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 		int treeStyle = SWT.MULTI | SWT.CHECK;
 
 		TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, labelProvider, null,
-			selectionFilter, treeStyle, "Select modules", allSolutions.toArray(), theSelection, true, "Select modules", null);
+			selectionFilter, treeStyle, "Select modules", allSolutions.toArray(), theSelection, true, "Select modules", null, false);
 
 		dialog.open();
 

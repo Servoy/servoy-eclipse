@@ -68,7 +68,6 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -245,13 +244,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public static final int WRITE_MODE_MANUAL = 0;
 	public static final int WRITE_MODE_AUTOMATIC = 1;
 
-	public static final String SECURITY_DIR = "security";
-	public static final String SECURITY_FILE_EXTENSION_WITHOUT_DOT = "sec";
-	public static final String SECURITY_FILE_EXTENSION = '.' + SECURITY_FILE_EXTENSION_WITHOUT_DOT;
-	public static final String SECURITY_FILENAME_WITHOUT_EXTENSION = "security";
-	public static final String SECURITY_FILENAME = SECURITY_FILENAME_WITHOUT_EXTENSION + SECURITY_FILE_EXTENSION;
-	public static final String SECURITY_FILE_RELATIVE_TO_PROJECT = SECURITY_DIR + IPath.SEPARATOR + SECURITY_FILENAME;
-
 	public static final String MARKER_ATTRIBUTE_TYPE = "SPM_type"; // security problem marker type
 	public static final String MARKER_ATTRIBUTE_WRONG_VALUE = "SPM_wrong_value"; // security problem marker wrong value (for example the name of an invalid group...) - if not an array
 	public static final String MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY_LENGTH = "SPM_wrong_value_array_length"; // security problem marker wrong value array length
@@ -274,6 +266,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	protected int writeMode = WRITE_MODE_AUTOMATIC;
 	protected IProject resourcesProject;
+	protected DataModelManager dataModelManager;
+
 	protected SecurityReadException readError;
 	protected IResource lastReadResource;
 	protected boolean isOperational = false;
@@ -398,20 +392,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		return false;
 	}
 
-	public static String getFileName(String name)
-	{
-		if (name == null) return null;
-
-		return name + SECURITY_FILE_EXTENSION;
-	}
-
-	public static String getFileName(ISupportName t)
-	{
-		if (t == null) return null;
-
-		return t.getName() + SECURITY_FILE_EXTENSION;
-	}
-
 	private int getNextId()
 	{
 		return idCounter++;
@@ -483,37 +463,32 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 */
 	protected void writeUserAndGroupInfo(boolean later) throws RepositoryException
 	{
-		//write groups/users/usergroups
-		IPath path = new Path(SECURITY_FILE_RELATIVE_TO_PROJECT);
-		final IFile file = resourcesProject.getFile(path);
+		// write groups/users/usergroups
+		IFile file = dataModelManager.getSecurityFile();
 
 		try
 		{
-			final String out = serializeUserAndGroupInfo();
+			String out = serializeUserAndGroupInfo();
 			if (out.length() == 0)
 			{
 				// no content to write
 				if (later)
 				{
-					runLaterInUserJob(file.getProject(), new Runnable()
-					{
-						public void run()
+					runLaterInUserJob(file.getProject(), () -> {
+						if (file.exists())
 						{
-							if (file.exists())
+							writingResources = true;
+							try
 							{
-								writingResources = true;
-								try
-								{
-									file.delete(true, null);
-								}
-								catch (CoreException e)
-								{
-									ServoyLog.logError(e);
-								}
-								finally
-								{
-									writingResources = false;
-								}
+								file.delete(true, null);
+							}
+							catch (CoreException e)
+							{
+								ServoyLog.logError(e);
+							}
+							finally
+							{
+								writingResources = false;
 							}
 						}
 					});
@@ -528,46 +503,26 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			{
 				if (later)
 				{
-					runLaterInUserJob(file.getProject(), new Runnable()
-					{
-						public void run()
+					runLaterInUserJob(file.getProject(), () -> {
+						writingResources = true;
+						try
 						{
-							writingResources = true;
-							try
-							{
-								InputStream source = Utils.getUTF8EncodedStream(out);
-								if (file.exists())
-								{
-									file.setContents(source, true, false, null);
-								}
-								else
-								{
-									ResourcesUtils.createFileAndParentContainers(file, source, true);
-								}
-							}
-							catch (CoreException e)
-							{
-								ServoyLog.logError(e);
-							}
-							finally
-							{
-								writingResources = false;
-							}
+							ResourcesUtils.createOrWriteFileUTF8(file, out, true);
+						}
+						catch (CoreException e)
+						{
+							ServoyLog.logError(e);
+						}
+						finally
+						{
+							writingResources = false;
 						}
 					});
 				}
 				else
 				{
 					writingResources = true;
-					InputStream source = Utils.getUTF8EncodedStream(out);
-					if (file.exists())
-					{
-						file.setContents(source, true, false, null);
-					}
-					else
-					{
-						ResourcesUtils.createFileAndParentContainers(file, source, true);
-					}
+					ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 				}
 			}
 
@@ -639,8 +594,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 */
 	public void writeSecurityInfo(String serverName, String tableName, boolean later) throws RepositoryException
 	{
-		IPath path = new Path(DataModelManager.getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(tableName));
-		final IFile file = resourcesProject.getFile(path);
+		IFile file = dataModelManager.getSecurityFile(serverName, tableName);
 		try
 		{
 			final String out = serializeSecurityInfo(serverName, tableName);
@@ -689,15 +643,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 							writingResources = true;
 							try
 							{
-								InputStream source = Utils.getUTF8EncodedStream(out);
-								if (file.exists())
-								{
-									file.setContents(source, true, false, null);
-								}
-								else
-								{
-									ResourcesUtils.createFileAndParentContainers(file, source, true);
-								}
+								ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 							}
 							catch (CoreException e)
 							{
@@ -713,15 +659,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				else
 				{
 					writingResources = true;
-					InputStream source = Utils.getUTF8EncodedStream(out);
-					if (file.exists())
-					{
-						file.setContents(source, true, false, null);
-					}
-					else
-					{
-						ResourcesUtils.createFileAndParentContainers(file, source, true);
-					}
+					ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 				}
 			}
 		}
@@ -767,7 +705,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	private synchronized void writeSecurityInfo(Form f, boolean later) throws RepositoryException
 	{
 		if (!isOperational()) return;
-		IPath path = new Path(SolutionSerializer.getRelativePath(f, false) + IPath.SEPARATOR + getFileName(f));
+
+		IPath path = new Path(SolutionSerializer.getRelativePath(f, false) + IPath.SEPARATOR + DataModelManager.getSecurityFileName(f.getName()));
 		final IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 		try
 		{
@@ -814,15 +753,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 							writingResources = true;
 							try
 							{
-								InputStream source = Utils.getUTF8EncodedStream(out);
-								if (file.exists())
-								{
-									file.setContents(source, true, false, null);
-								}
-								else
-								{
-									ResourcesUtils.createFileAndParentContainers(file, source, true);
-								}
+								ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 							}
 							catch (CoreException e)
 							{
@@ -838,15 +769,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				else
 				{
 					writingResources = true;
-					InputStream source = Utils.getUTF8EncodedStream(out);
-					if (file.exists())
-					{
-						file.setContents(source, true, false, null);
-					}
-					else
-					{
-						ResourcesUtils.createFileAndParentContainers(file, source, true);
-					}
+					ResourcesUtils.createOrWriteFileUTF8(file, out, true);
 				}
 			}
 		}
@@ -928,14 +851,13 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 */
 	private void readUserAndGroupInfo(String clientId) throws RepositoryException
 	{
-		//read groups/users/usergroups
-		IPath path = new Path(SECURITY_FILE_RELATIVE_TO_PROJECT);
-		IFile file = resourcesProject.getFile(path);
+		// read groups/users/usergroups
+		IFile file = dataModelManager.getSecurityFile();
 		lastReadResource = file;
 
 		try
 		{
-			// this results in deadlocks beween jobs/threads
+			// this results in deadlocks between jobs/threads
 //			file.refreshLocal(IResource.DEPTH_ONE, null);
 			if (file.exists())
 			{
@@ -1116,12 +1038,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 	}
 
-	public static IFile getTableSecFile(String serverName, String tableName, IProject resourcesProject)
-	{
-		IPath path = new Path(DataModelManager.getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(tableName));
-		return resourcesProject.getFile(path);
-	}
-
 	/**
 	 * Reads the security info for the given table from the resources project.<BR>
 	 * Missing groups that are in the table security info file will be added to the group list. Groups with invalid names will be removed from this table's
@@ -1132,7 +1048,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 */
 	protected void readSecurityInfo(String serverName, String tableName) throws RepositoryException
 	{
-		IFile file = getTableSecFile(serverName, tableName, resourcesProject);
+		IFile file = dataModelManager.getSecurityFile(serverName, tableName);
 		lastReadResource = file;
 
 		try
@@ -1155,8 +1071,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	private void deserializeSecurityInfo(String serverName, String tableName, String info) throws JSONException, RepositoryException
 	{
-		Map<String, List<SecurityInfo>> tableAccess = new HashMap<String, List<SecurityInfo>>();
-		deserializeSecurityPermissionInfo(info, tableAccess);
+		Map<String, List<SecurityInfo>> tableAccess = deserializeSecurityPermissionInfo(info);
 
 		boolean mustWriteBackTableInfo = false;
 
@@ -1233,7 +1148,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	private void readSecurityInfo(Form form) throws RepositoryException
 	{
 		if (!isOperational()) return;
-		IPath path = new Path(SolutionSerializer.getRelativePath(form, false) + IPath.SEPARATOR + getFileName(form));
+
+		IPath path = new Path(SolutionSerializer.getRelativePath(form, false) + IPath.SEPARATOR + DataModelManager.getSecurityFileName(form.getName()));
 		// the path is relative to the solution project; so get the solution's project
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 		lastReadResource = file;
@@ -1256,8 +1172,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 	}
 
-	public static void deserializeSecurityPermissionInfo(String jsonContent, Map<String, List<SecurityInfo>> access) throws JSONException
+	public static Map<String, List<SecurityInfo>> deserializeSecurityPermissionInfo(String jsonContent) throws JSONException
 	{
+		Map<String, List<SecurityInfo>> access = new HashMap<String, List<SecurityInfo>>();
 		ServoyJSONObject obj = new ServoyJSONObject(jsonContent, true);
 
 		Iterator<String> keys = obj.keys();
@@ -1279,12 +1196,12 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				groupAccessList.add(new SecurityInfo(elementUUID, groupPermissions.getInt(elementUUID)));
 			}
 		}
+		return access;
 	}
 
 	private void deserializeSecurityInfo(Form form, String info) throws RepositoryException, JSONException
 	{
-		Map<String, List<SecurityInfo>> formAccess = new HashMap<String, List<SecurityInfo>>();
-		deserializeSecurityPermissionInfo(info, formAccess);
+		Map<String, List<SecurityInfo>> formAccess = deserializeSecurityPermissionInfo(info);
 
 		Iterator<String> keys = formAccess.keySet().iterator();
 		while (keys.hasNext())
@@ -2262,11 +2179,10 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 							IRepository.SOLUTIONS);
 						if (solution != null)
 						{
-							Iterator<Form> iterator = solution.getForms(null, false);
-							while (iterator.hasNext())
+							for (Form form : Utils.iterate(solution.getForms(null, false)))
 							{
-								Form form = iterator.next();
-								IPath path = new Path(SolutionSerializer.getRelativePath(form, false) + IPath.SEPARATOR + getFileName(form));
+								IPath path = new Path(
+									SolutionSerializer.getRelativePath(form, false) + IPath.SEPARATOR + DataModelManager.getSecurityFileName(form.getName()));
 								// the path is relative to the solution project; so get the solution's project
 								IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 								if (file.exists())
@@ -2546,6 +2462,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		if (project != resourcesProject)
 		{
 			resourcesProject = project;
+			dataModelManager = new DataModelManager(resourcesProject, ApplicationServerRegistry.get().getServerManager());
+
 			reloadAllSecurityInformation();
 		}
 	}

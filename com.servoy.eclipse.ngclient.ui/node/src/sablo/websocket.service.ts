@@ -1,16 +1,11 @@
-import { Injectable, EventEmitter, NgZone, Inject } from '@angular/core';
-
+import { Injectable, NgZone } from '@angular/core';
 import { Subscription, interval, Subject } from 'rxjs';
-
-
 import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.websocket';
 import { WindowRefService } from '@servoy/public';
 import { Deferred } from '@servoy/public';
-import { ServicesService } from './services.service';
 import { ConverterService } from './converter.service';
-import { LoggerService, LogLevel, LoggerFactory } from '@servoy/public';
+import { LoggerService, LoggerFactory, RequestInfoPromise } from '@servoy/public';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
-import { TestabilityService } from './testability.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,16 +19,12 @@ export class WebsocketService {
     private wsSessionDeferred: Deferred<WebsocketSession>;
     private connectionArguments = {};
     private lastServerMessageNumber = null;
-    private log: LoggerService;
 
     constructor(private windowRef: WindowRefService,
-        private services: ServicesService,
         private converterService: ConverterService,
         private logFactory: LoggerFactory,
         private loadingIndicatorService: LoadingIndicatorService,
-        private ngZone: NgZone,
-        private testability: TestabilityService) {
-        this.log = logFactory.getLogger('WebsocketService');
+        private ngZone: NgZone) {
     }
 
     public connect(context, args, queryArgs?, websocketUri?): WebsocketSession {
@@ -50,9 +41,7 @@ export class WebsocketService {
             const websocket = new ReconnectingWebSocket(() => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri']), this.logFactory);
 
-            this.wsSession = new WebsocketSession(websocket, this, this.services, this.windowRef, this.converterService, this.loadingIndicatorService, this.ngZone, this.testability, this.logFactory );
-            // todo should we just merge $websocket and $services into $sablo that just has all
-            // the public api of sablo (like connect, conversions, services)
+            this.wsSession = new WebsocketSession(websocket, this, this.windowRef, this.converterService, this.loadingIndicatorService, this.ngZone, this.logFactory );
         });
         //$services.setSession(wsSession);
         if (this.wsSessionDeferred != null) {
@@ -69,6 +58,15 @@ export class WebsocketService {
         } else if (this.connectionArguments['queryArgs']) {
             this.connectionArguments['queryArgs'].delete(arg);
         }
+    }
+
+    public wrapPromiseToPropagateCustomRequestInfoInternal(originalPromise: RequestInfoPromise<any>,
+                                                               spawnedPromise: RequestInfoPromise<any>): RequestInfoPromise<any> {
+        return Object.defineProperty(spawnedPromise, "requestInfo", {
+            set(value) {
+                originalPromise.requestInfo = value;
+            }
+        });        
     }
 
     public setConnectionPathArguments(args) {
@@ -159,22 +157,20 @@ export class WebsocketService {
         }
 
         new_uri += '?connectNr=' + Math.floor((Math.random() * 10000000000000)) + '&';
-        
-        if (queryArgs)
-        {
-             for (const a of Object.keys(queryArgs)) {
-            if (queryArgs.hasOwnProperty(a)) {
-                new_uri += a + '=' + queryArgs[a] + '&';
+
+        if (queryArgs) {
+            for (const a of Object.keys(queryArgs)) {
+                if (queryArgs.hasOwnProperty(a)) {
+                    new_uri += a + '=' + queryArgs[a] + '&';
+                }
             }
         }
-        }
-       
 
         if (this.lastServerMessageNumber != null) {
             new_uri += 'lastServerMessageNumber=' + this.lastServerMessageNumber + '&';
         }
 
-        let queryString = this.getQueryString();
+        const queryString = this.getQueryString();
         if (queryString) {
             new_uri += queryString;
         } else {
@@ -184,6 +180,13 @@ export class WebsocketService {
     }
 }
 
+export type MessageObjectHandler = (msg: any) => Promise<any> | void;
+
+export interface ServicesHandler {
+    handleServiceApisWithApplyFirst(serviceApisJSON: any, previousResponseValue: any): any;
+    handlerServiceUpdatesFromServer(servicesUpdatesFromServerJSON: any): void;
+    handleNormalServiceApis(serviceApisJSON: any, previousResponseValue: any): any;
+}
 
 export class WebsocketSession {
     private connected = 'INITIAL';
@@ -192,9 +195,10 @@ export class WebsocketSession {
     private onOpenHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
     private onErrorHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
     private onCloseHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
-    private onMessageObjectHandlers: Array<(msg: any, conversionInfo: any) => any> = new Array();
+    private onMessageObjectHandlers: Array<MessageObjectHandler> = new Array();
+    private servicesHandler: ServicesHandler = undefined;
 
-    private functionsToExecuteAfterIncommingMessageWasHandled = undefined;
+    private functionsToExecuteAfterIncommingMessageWasHandled: Array<() => void> = undefined;
 
     private deferredEvents: Array<Deferred<any>> = new Array();
 
@@ -209,12 +213,10 @@ export class WebsocketSession {
 
     constructor(private websocket: ReconnectingWebSocket,
         private websocketService: WebsocketService,
-        private services: ServicesService,
         private windowRef: WindowRefService,
         private converterService: ConverterService,
         private loadingIndicatorService: LoadingIndicatorService,
         private ngZone: NgZone,
-        private testability: TestabilityService,
         logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('WebsocketSession');
         this.websocket.onopen = (evt) => {
@@ -256,10 +258,9 @@ export class WebsocketSession {
             }
         };
         this.websocket.onmessage = (message) => this.handleHeartbeat(message) || this.ngZone.run(() => this.handleMessage(message));
-        testability.setEventList(this.deferredEvents);
     }
 
-    public  createDeferredEvent<T>(): {deferred: Deferred<T>; cmsgid: number } {
+    public createDeferredEvent<T>(): {deferred: Deferred<T>; cmsgid: number } {
           const deferred = new Deferred<T>();
             const cmsgid = this.getNextMessageId();
             this.deferredEvents[cmsgid] = deferred;
@@ -272,12 +273,22 @@ export class WebsocketSession {
                 delete this.deferredEvents[cmsgid];
                 if (success) deferred.resolve(argument);
                 else deferred.reject(argument);
-                this.testability.testEvents();
             }
     }
 
     // api
-    public callService<T>(serviceName: string, methodName: string, argsObject?: unknown, async?: boolean): Promise<T> {
+    /**
+     * IMPORTANT!
+     * 
+     * If the returned value is a promise and if the caller is INTERNAL code that chains more .then() or other methods and returns the new promise
+     * to it's own callers, it MUST to wrap the new promise (returned by that then() for example) using $websocket.wrapPromiseToPropagateCustomRequestInfoInternal().
+     * 
+     * This is so that the promise that ends up in (3rd party or our own) components and service code - that can then set .requestInfo on it - ends up to be
+     * propagated into the promise that this callService(...) registered in "deferredEvents"; that is where any user set .requestInfo has to end up, because
+     * that is where getCurrentRequestInfo() gets it from. And that is where special code - like foundset listeners also get the current request info from to
+     * return it back to the user (component/service code).   
+     */
+    public callService<T>(serviceName: string, methodName: string, argsObject?: unknown, async?: boolean): RequestInfoPromise<T> {
         const cmd = {
             service: serviceName,
             methodname: methodName,
@@ -320,8 +331,12 @@ export class WebsocketSession {
     public onclose(handler) {
         this.onCloseHandlers.push(handler);
     }
-    public onMessageObject(handler: (message: any, conversionInfo: any) => void) {
+    public onMessageObject(handler: MessageObjectHandler) {
         this.onMessageObjectHandlers.push(handler);
+    }
+
+    public setServicesHandler(servicesHandler: ServicesHandler) {
+        this.servicesHandler = servicesHandler;
     }
 
     public isConnected() {
@@ -352,7 +367,7 @@ export class WebsocketSession {
     public addIncomingMessageHandlingDoneTask(func: () => any) {
         if (this.functionsToExecuteAfterIncommingMessageWasHandled) this.functionsToExecuteAfterIncommingMessageWasHandled.push(func);
         else func(); // will not addPostIncommingMessageHandlingTask while not handling an incoming message;
-                     // the task can execute right away then (maybe it was called due to a change detected in a watch instead of property listener)
+                     // the task can execute right away then (maybe it was called due to a change detected somewhere else instead of property listener)
     }
 
     public getCurrentRequestInfo(): any {
@@ -419,42 +434,37 @@ export class WebsocketSession {
     }
 
     private handleMessage(message) {
-        let obj;
-        let responseValue;
+        let obj: any; // TODO should we type everything that can come from server?
+        let responseValue: any;
+
+        // normally this will always be null here; but in some browsers (FF) an alert on window can make these calls nest unexpectedly;
+        // so oldFTEAIMWH avoids exceptions in those cases as well - as we do not restore to null but to old when nesting happens
+        const oldFTEAIMWH = this.functionsToExecuteAfterIncommingMessageWasHandled;
+
         this.functionsToExecuteAfterIncommingMessageWasHandled = [];
 
         let message_data = message.data;
         let hideIndicator = false;
         try {
-            this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server: ' + JSON.stringify(message))));
 
             const separator = message_data.indexOf('#');
             if (separator >= 0 && separator < 5) {
                 // the json is prefixed with a message number: 123#{bla: "hello"}
                 this.websocketService.setLastServerMessageNumber(message_data.substring(0, separator));
+                this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message number: ' + message_data.substring(0, separator))));
                 message_data = message_data.substr(separator + 1);
             }
             // else message has no seq-no
 
             obj = JSON.parse(message_data);
+            this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message data: ' + JSON.stringify(obj, null, 2))));
 
-			if(obj.cmsgid && this.deferredEvents[obj.cmsgid] && this.deferredEvents[obj.cmsgid].promise) {
-				this.currentRequestInfo = this.deferredEvents[obj.cmsgid].promise['requestInfo'];
-			}
+            if (obj.cmsgid && this.deferredEvents[obj.cmsgid] && this.deferredEvents[obj.cmsgid].promise) {
+                				this.currentRequestInfo = this.deferredEvents[obj.cmsgid].promise['requestInfo'];
+            			}
 
-            if (obj.services) {
-                // services call, first process the once with the flag 'apply_first'
-                if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].services) {
-                    obj.services = this.converterService.convertFromServerToClient(obj.services, obj[ConverterService.TYPES_KEY].services, undefined, undefined);
-                }
-                // eslint-disable-next-line guard-for-in
-                for (const index of Object.keys(obj.services)) {
-                    const srv = obj.services[index];
-                    if (srv['pre_data_service_call']) {
-                        // responseValue keeps last services call return value
-                        responseValue = this.services.callServiceApi(srv);
-                    }
-                }
+            if (obj.serviceApis) {
+                responseValue = this.servicesHandler.handleServiceApisWithApplyFirst(obj.serviceApis, responseValue);
             }
 
             // if the indicator is showing and this object wants a return message then hide the indicator until we send the response
@@ -466,68 +476,48 @@ export class WebsocketSession {
 
             // message
             if (obj.msg) {
-                // eslint-disable-next-line guard-for-in
                 for (const handler of Object.keys(this.onMessageObjectHandlers)) {
-                    const ret = this.onMessageObjectHandlers[handler](obj.msg, obj[ConverterService.TYPES_KEY] ? obj[ConverterService.TYPES_KEY].msg : undefined);
+                    const ret = this.onMessageObjectHandlers[handler](obj.msg);
                     if (ret) responseValue = ret;
-
-                    this.log.spam('sbl * Checking if any form scope changes need to be digested (obj.msg).');
                 }
             }
 
             if (obj.msg && obj.msg.services) {
-                this.services.updateServiceScopes(obj.msg.services,
-                    (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].msg) ? obj[ConverterService.TYPES_KEY].msg.services : undefined);
+                this.servicesHandler.handlerServiceUpdatesFromServer(obj.msg.services);
             }
 
-            if (obj.services) {
+            if (obj.serviceApis) {
                 // normal services call
-                // eslint-disable-next-line guard-for-in
-                for (const index of Object.keys(obj.services)) {
-                    const srv = obj.services[index];
-                    if (!srv['pre_data_service_call']) {
-                        // responseValue keeps last services call return value
-                        responseValue = this.services.callServiceApi(srv);
+                responseValue = this.servicesHandler.handleNormalServiceApis(obj.serviceApis, responseValue);
+            }
+
+            // component api calls
+            if (obj.componentApis) {
+                for (const componentApiCall of obj.componentApis) {
+                    for (const handler of this.onMessageObjectHandlers) {
+                        const ret = handler({ call: componentApiCall });
+                        // the handler call above handles both the arg type conversions and return value type conversion itself (wraps return value in a q.when);
+                        // so no need to store/set "responseValueType" here, just responseValue
+                        if (ret) responseValue = ret;
                     }
                 }
             }
 
-            // delayed calls
-            if (obj.calls) {
-                for (const i of Object.keys(obj.calls)) {
-                    // eslint-disable-next-line guard-for-in
-                    for (const handler of Object.keys(this.onMessageObjectHandlers)) {
-                        this.onMessageObjectHandlers[handler](obj.calls[i],
-                            (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].calls) ? obj[ConverterService.TYPES_KEY].calls[i] : undefined);
-                    }
-
-                    this.log.spam('sbl * Checking if any (obj.calls) form scopes changes need to be digested (obj.calls).');
-                }
-            }
             if (obj && obj.smsgid) {
-                if (responseValue instanceof Promise) {
-                    // the server wants a response, this could be a promise so a dialog could be shown
-                    // then just let protractor go through.
-                    this.testability.increaseEventLoop();
-                }
                 // server wants a response; responseValue may be a promise
                 Promise.resolve(responseValue).then((ret) => {
-                    if (responseValue instanceof Promise) {
-                        this.testability.decreaseEventLoop();
-                    }
                     // success
                     const response = {
                         smsgid: obj.smsgid
                     };
                     if (ret !== undefined) {
-                        response['ret'] = this.converterService.convertClientObject(ret);
+                        response['ret'] = ret; // any needed conversions were already applied here
                     }
                     if (hideIndicator) {
                         this.loadingIndicatorService.showLoading();
                     }
                     this.sendMessageObject(response);
                 }, (reason) => {
-                    if (responseValue instanceof Promise) this.testability.decreaseEventLoop();
                     // server wants a response; send failure so that browser side script doesn't hang
                     const response = {
                         smsgid: obj.smsgid,
@@ -540,25 +530,21 @@ export class WebsocketSession {
                 });
             }
 
-            // data got back from the server
+            // got the return value for a client-to-server call (that has a defer/waiting promise) back from the server
             if (obj.cmsgid) { // response to event
                 const deferredEvent = this.deferredEvents[obj.cmsgid];
-                if (deferredEvent !== null) {
+                if (deferredEvent != null) {
                     if (obj.exception) {
                         // something went wrong
-                        if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].exception) {
-                            obj.exception = this.converterService.convertFromServerToClient(obj.exception, obj[ConverterService.TYPES_KEY].exception, undefined, undefined);
-                        }
+                        // do a default conversion although I doubt it will do anything (don't think server will send client side type for exceptions)
+                        obj.exception = this.converterService.convertFromServerToClient(obj.exception, undefined, undefined, undefined, undefined, undefined);
                         deferredEvent.reject(obj.exception);
                     } else {
-                        if (obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].ret) {
-                            obj.ret = this.converterService.convertFromServerToClient(obj.ret, obj[ConverterService.TYPES_KEY].ret, undefined, undefined);
-                        }
+                        // if it's a handler/server side api call that expects a return value, any type conversions should be done in code triggered by this resolve (in calling code)
                         deferredEvent.resolve(obj.ret);
                     }
                 } else this.log.warn('Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.');
                 delete this.deferredEvents[obj.cmsgid];
-                this.testability.testEvents();
                 this.loadingIndicatorService.hideLoading();
             }
         } catch (e) {
@@ -577,39 +563,66 @@ export class WebsocketSession {
             }
         } finally {
             this.currentRequestInfo = undefined;
-            let err;
-            for (const i of Object.keys(this.functionsToExecuteAfterIncommingMessageWasHandled)) {
+            let err: any;
+            const toExecuteAfterIncommingMessageWasHandled = this.functionsToExecuteAfterIncommingMessageWasHandled;
+
+            // clear/restore this before calling just in the unlikely case that some handlers want to add more such tasks (and we don't want to loose those but rather execute them right away)
+            this.functionsToExecuteAfterIncommingMessageWasHandled = oldFTEAIMWH;
+
+            for (const i of Object.keys(toExecuteAfterIncommingMessageWasHandled)) {
                 try {
-                    this.functionsToExecuteAfterIncommingMessageWasHandled[i]();
+                    toExecuteAfterIncommingMessageWasHandled[i]();
                 } catch (e) {
-                    this.log.error(this.log.buildMessage(() => ('Error (follows below) in executing PostIncommingMessageHandlingTask: ' + this.functionsToExecuteAfterIncommingMessageWasHandled[i])));
+                    this.log.error(this.log.buildMessage(() => ('Error (follows below) in executing PostIncommingMessageHandlingTask: ' + toExecuteAfterIncommingMessageWasHandled[i])));
                     this.log.error(e);
                     err = e;
                 }
             }
-            this.functionsToExecuteAfterIncommingMessageWasHandled = undefined;
+            // eslint-disable-next-line no-unsafe-finally
             if (err) throw err;
         }
     }
 
-
 }
 
 class WsCloseCodes {
-    static readonly NORMAL_CLOSURE = 1000; // indicates a normal closure, meaning that the purpose for which the connection was established has been fulfilled.
-    static readonly GOING_AWAY: 1001; // indicates that an endpoint is "going away", such as a server going down or a browser having navigated away from a page.
-    static readonly PROTOCOL_ERROR: 1002; // indicates that an endpoint is terminating the connection due to a protocol error.
-    static readonly CANNOT_ACCEPT: 1003; // indicates that an endpoint is terminating the connection because it has received a type of data it cannot accept (e.g., an endpoint that understands only text data MAY send this if it receives a binary message).
-    static readonly NO_STATUS_CODE: 1005; // is a reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint.
-    static readonly CLOSED_ABNORMALLY: 1006; // is a reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint.
-    static readonly NOT_CONSISTENT: 1007; // indicates that an endpoint is terminating the connection because it has received data within a message that was not consistent with the type of the message (e.g., non-UTF-8 data within a text message).
-    static readonly VIOLATED_POLICY: 1008; // indicates that an endpoint is terminating the connection because it has received a message that violates its policy.
-    static readonly TOO_BIG: 1009; // indicates that an endpoint is terminating the connection because it has received a message that is too big for it to process.
-    static readonly NO_EXTENSION: 1010; // indicates that an endpoint (client) is terminating the connection because it has expected the server to negotiate one or more extension, but the server didn't return them in the response message of the WebSocket handshake.
-    static readonly UNEXPECTED_CONDITION: 1011; // indicates that a server is terminating the connection because it encountered an unexpected condition that prevented it from fulfilling the request.
-    static readonly SERVICE_RESTART: 1012; // indicates that the service will be restarted.
-    static readonly TLS_HANDSHAKE_FAILURE: 1015; // is a reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint.
-    static readonly TRY_AGAIN_LATER: 1013; // indicates that the service is experiencing overload
+    /** indicates a normal closure, meaning that the purpose for which the connection was established has been fulfilled. */
+    static readonly NORMAL_CLOSURE = 1000;
+    /** indicates that an endpoint is "going away", such as a server going down or a browser having navigated away from a page. */
+    static readonly GOING_AWAY: 1001;
+    /** indicates that an endpoint is terminating the connection due to a protocol error. */
+    static readonly PROTOCOL_ERROR: 1002;
+    /**
+     * indicates that an endpoint is terminating the connection because it has received a type of data it cannot accept.
+     *(e.g., an endpoint that understands only text data MAY send this if it receives a binary message).
+     */
+    static readonly CANNOT_ACCEPT: 1003;
+    /** is a reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint. */
+    static readonly NO_STATUS_CODE: 1005;
+    /** is a reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint. */
+    static readonly CLOSED_ABNORMALLY: 1006;
+    /**
+     * indicates that an endpoint is terminating the connection because it has received data within a message that
+     * was not consistent with the type of the message (e.g., non-UTF-8 data within a text message).
+     */
+    static readonly NOT_CONSISTENT: 1007;
+    /** indicates that an endpoint is terminating the connection because it has received a message that violates its policy. */
+    static readonly VIOLATED_POLICY: 1008;
+    /** indicates that an endpoint is terminating the connection because it has received a message that is too big for it to process. */
+    static readonly TOO_BIG: 1009;
+    /**
+     * indicates that an endpoint (client) is terminating the connection because it has expected the server to negotiate
+     * one or more extension, but the server didn't return them in the response message of the WebSocket handshake.
+     */
+    static readonly NO_EXTENSION: 1010;
+    /** indicates that a server is terminating the connection because it encountered an unexpected condition that prevented it from fulfilling the request. */
+    static readonly UNEXPECTED_CONDITION: 1011;
+    /** indicates that the service will be restarted. */
+    static readonly SERVICE_RESTART: 1012;
+    /** is a reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint. */
+    static readonly TLS_HANDSHAKE_FAILURE: 1015;
+    /** indicates that the service is experiencing overload. */
+    static readonly TRY_AGAIN_LATER: 1013;
 }
 
 export class SabloUtils {
@@ -631,5 +644,6 @@ export class SabloUtils {
 
         return clone;
     }
+
 }
 

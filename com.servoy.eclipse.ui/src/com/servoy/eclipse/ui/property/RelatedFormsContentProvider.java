@@ -79,6 +79,12 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 		this.flattenedSolution = ModelUtils.getEditingFlattenedSolution(rootForm);
 	}
 
+	public RelatedFormsContentProvider(Form rootForm, FlattenedSolution fs)
+	{
+		this.rootForm = rootForm;
+		this.flattenedSolution = fs;
+	}
+
 	@Override
 	public Object[] getElements(Object inputElement)
 	{

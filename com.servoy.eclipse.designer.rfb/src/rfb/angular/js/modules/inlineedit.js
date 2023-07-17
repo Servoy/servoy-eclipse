@@ -2,9 +2,11 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 	$pluginRegistry.registerPlugin(function(editorScope) {
 
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
+		var lastValue = {nodeId: '', directEditText: '', property: '', propertyValue: ''};
 
 		function handleDirectEdit(nodeId, absolutePoint, property, propertyValue) {
 			var obj = {};
+			var sameValue = false;
 			var applyValue = function() {
 				angular.element("#directEdit").hide();
 				var newValue = angular.element("#directEdit").text();
@@ -13,7 +15,17 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 					var value = {};
 					value[property] = newValue;
 					obj[nodeId] = value;
-					$editorService.sendChanges(obj);
+					if (nodeId === lastValue.nodeId && newValue === lastValue.directEditText && property === lastValue.property && propertyValue === lastValue.propertyValue) {
+						sameValue = true;
+					}
+					lastValue.nodeId = nodeId;
+					lastValue.directEditText =  newValue;
+					lastValue.property = property;
+					lastValue.propertyValue = propertyValue;
+
+					if (!sameValue) { //avoid sending the same value twice
+						$editorService.sendChanges(obj);
+					}
 				}
 				$editorService.setInlineEditMode(false);
 			}
@@ -49,6 +61,27 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 					}
 					if (event.keyCode == 65 && event.ctrlKey) {
 						document.execCommand('selectAll', false, null);
+					}
+					if (event.metaKey && event.target.id == 'directEdit' && (event.key === 'x' || event.key === 'X')) {//cut action for mac: see the case SVY-17017
+						//this code is executing only on mac (event.metaKey)
+						var selectedObj = null;
+						if (window.getSelection) {
+							selectedObj = window.getSelection();
+						} else if (document.getSelection) {
+							selectedObj = document.getSelection();
+						} 
+						if (selectedObj != null) {
+							var nodeText = selectedObj.anchorNode.nodeValue;
+							//in this context anchorNode and focusNode are the same
+							var startRange = Math.min(selectedObj.anchorOffset, selectedObj.focusOffset);
+							var endRange = Math.max(selectedObj.anchorOffset, selectedObj.focusOffset);
+							if (startRange != endRange) { //something is selected; 
+								document.execCommand('copy'); //deprecated but navigator.clipboard.writeText is not working
+								var selectedText = nodeText.substring(startRange, endRange);
+								document.activeElement.textContent = nodeText.replace(selectedText, '');
+							}
+						}
+						return false; //do not dispatch the event further
 					}
 				})
 				.bind('blur', function() {

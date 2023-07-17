@@ -29,11 +29,11 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.XMLScriptObjectAdapterLoader;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.documentation.IFunctionDocumentation;
 import com.servoy.j2db.documentation.IObjectDocumentation;
+import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 
 public class TreeBuilder
 {
@@ -56,10 +56,6 @@ public class TreeBuilder
 		return docManager;
 	}
 
-	/**
-	 * @param prefix
-	 * @return
-	 */
 	public static UserNode[] createLengthAndArray(IImageLookup imageLookup, String prefix)
 	{
 		Image propertiesIcon = imageLookup.loadImage("properties.png");
@@ -79,6 +75,26 @@ public class TreeBuilder
 	public static UserNode[] createJSObject(IImageLookup imageLookup)
 	{
 		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Object.class, UserNodeType.OBJECT, null);
+	}
+
+	public static UserNode[] createJSSet(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Set.class, UserNodeType.SET, null);
+	}
+
+	public static UserNode[] createJSMap(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Map.class, UserNodeType.MAP, null);
+	}
+
+	public static UserNode[] createJSIterator(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Iterator.class, UserNodeType.ITERATOR, null);
+	}
+
+	public static UserNode[] createJSIterableValue(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.IterableValue.class, UserNodeType.ITERABELVALUE, null);
 	}
 
 	public static UserNode[] createJSDate(IImageLookup imageLookup)
@@ -135,12 +151,13 @@ public class TreeBuilder
 			IObjectDocumentation objDoc = dm.getObjectByQualifiedName(clazz.getCanonicalName());
 			if (objDoc != null)
 			{
+				XMLScriptObjectAdapter docAdapter = new XMLScriptObjectAdapter(objDoc, null);
 				// We need constructors listed before anything else.
 				for (IFunctionDocumentation fdoc : objDoc.getFunctions())
 				{
 					if (fdoc.getType() == IFunctionDocumentation.TYPE_CONSTRUCTOR && !fdoc.isDeprecated())
 					{
-						dlm.add(fdoc2usernode(fdoc, type, constructorIcon));
+						dlm.add(fdoc2usernode(docAdapter, fdoc, type, constructorIcon));
 					}
 				}
 				// We need properties listed before functions.
@@ -148,14 +165,14 @@ public class TreeBuilder
 				{
 					if (fdoc.getType() == IFunctionDocumentation.TYPE_PROPERTY && !fdoc.isDeprecated())
 					{
-						dlm.add(fdoc2usernode(fdoc, type, propertiesIcon));
+						dlm.add(fdoc2usernode(docAdapter, fdoc, type, propertiesIcon));
 					}
 				}
 				for (IFunctionDocumentation fdoc : objDoc.getFunctions())
 				{
 					if (fdoc.getType() == IFunctionDocumentation.TYPE_FUNCTION && !fdoc.isDeprecated())
 					{
-						dlm.add(fdoc2usernode(fdoc, type, functionIcon));
+						dlm.add(fdoc2usernode(docAdapter, fdoc, type, functionIcon));
 					}
 				}
 			}
@@ -164,10 +181,12 @@ public class TreeBuilder
 		return dlm.toArray(new UserNode[dlm.size()]);
 	}
 
-	private static UserNode fdoc2usernode(IFunctionDocumentation fdoc, UserNodeType type, Image functionIcon)
+	private static UserNode fdoc2usernode(XMLScriptObjectAdapter docAdapter, IFunctionDocumentation fdoc, UserNodeType type, Image functionIcon)
 	{
 		ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
-		String tooltip = "<html><body><b>" + fdoc.getFullSignature(true, true) + "</b><br>" + fdoc.getDescription(clientType) + "</body></html>";
+		String extTT = docAdapter.getExtendedTooltip(fdoc.getMainName(), fdoc.getArgumentsTypes(), clientType, null);
+		if (extTT == null) extTT = "";
+		String tooltip = "<html><body><b>" + fdoc.getFullSignature(true, true) + "</b><pre>" + extTT + "</pre></body></html>";
 		UserNode un = new UserNode(fdoc.getFullSignature(false, true), type, fdoc.getSignature("."), fdoc.getSample(clientType), tooltip, null, functionIcon);
 		un.setClientSupport(fdoc.getClientSupport());
 		return un;
@@ -227,7 +246,7 @@ public class TreeBuilder
 				if (answeredName != null) realObject = onlyThese.get(answeredName);
 
 				String toolTip = fdoc.getDescription(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
-				String tmp = "<html><body><b>" + SolutionExplorerListContentProvider.getReturnTypeString(fdoc.getReturnedType()) + " " + fdoc.getMainName() +
+				String tmp = "<html><body><b>" + XMLScriptObjectAdapter.getReturnTypeString(fdoc.getReturnedType()) + " " + fdoc.getMainName() +
 					"</b>";
 				if ("".equals(toolTip))
 				{

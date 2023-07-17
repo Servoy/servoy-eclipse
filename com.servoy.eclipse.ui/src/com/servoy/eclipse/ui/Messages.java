@@ -27,6 +27,7 @@ public class Messages extends NLS
 {
 	private static final String BUNDLE_NAME = "com.servoy.eclipse.ui.messages";
 
+
 	public static String MoveTextAction_moveCode;
 	public static String MoveTextAction_moveSample;
 	public static String RefreshAction_refresh;
@@ -55,6 +56,7 @@ public class Messages extends NLS
 
 	public static String LabelDefault;
 	public static String LabelDefault_arg;
+	public static String LabelDefaultAsText;
 	public static String LabelIgnore;
 	public static String LabelSeparate;
 	public static String LabelEmpty;
@@ -120,6 +122,10 @@ public class Messages extends NLS
 	public static String TreeStrings_Application;
 	public static String TreeStrings_Array;
 	public static String TreeStrings_Object;
+	public static String TreeStrings_Map;
+	public static String TreeStrings_Set;
+	public static String TreeStrings_Iterator;
+	public static String TreeStrings_Iterablevalue;
 	public static String TreeStrings_controller;
 	public static String TreeStrings_currentcontroller;
 	public static String TreeStrings_DatabaseManager;
@@ -280,6 +286,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_invalidTableReference;
 	public static String ErrorWarningPreferencePage_methodEventParameters;
 	public static String ErrorWarningPreferencePage_mediaTiff;
+	public static String ErrorWarningPreferencePage_variantId;
 	public static String ErrorWarningPreferencePage_calculationFormAccess;
 	public static String ErrorWarningPreferencePage_imageMediaNotSet;
 	public static String ErrorWarningPreferencePage_methodNumberOfArgsMismatch;
@@ -287,6 +294,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_methodOverrideProblem;
 	public static String ErrorWarningPreferencePage_deprecatedSpecUsageProblem;
 	public static String ErrorWarningPreferencePage_methodNoReturn;
+	public static String EditComponentVariantsAction_editVariants;
 
 	static
 	{

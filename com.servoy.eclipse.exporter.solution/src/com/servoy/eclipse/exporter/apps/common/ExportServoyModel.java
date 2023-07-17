@@ -148,5 +148,4 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 	{
 		// changes are not relevant for command line exports as after a solution is activated everything is refreshed anyway and no-one changes the workspace
 	}
-
 }

@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Titanium NGClient plugin
 Bundle-SymbolicName: com.servoy.eclipse.ngclient.ui;singleton:=true
-Bundle-Version: 2022.3.5.3747_LTS
+Bundle-Version: 2023.3.2.3844
 Bundle-Vendor: Servoy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.apache.tomcat,
  servoy_ngclient,
@@ -12,7 +12,8 @@ Require-Bundle: org.apache.tomcat,
  sablo,
  com.servoy.eclipse.model,
  org.eclipse.swt,
- org.eclipse.ui.workbench
+ org.eclipse.ui.workbench,
+ org.tukaani.xz
 Bundle-Activator: com.servoy.eclipse.ngclient.ui.Activator
 Automatic-Module-Name: com.servoy.eclipse.ngclient.ui
 Export-Package: com.servoy.eclipse.ngclient.ui;
@@ -34,6 +35,8 @@ Import-Package: javax.servlet;version="[4.0.0,5.0.0)",
  javax.servlet.annotation;version="[4.0.0,5.0.0)",
  javax.servlet.http;version="[4.0.0,5.0.0)",
  org.apache.commons.io;version="2.8.0",
+ org.apache.commons.io.file;version="2.8.0",
+ org.apache.commons.io.filefilter;version="2.8.0",
  org.eclipse.core.commands.common,
  org.eclipse.core.resources,
  org.eclipse.core.runtime;version="3.7.0",
@@ -42,5 +45,4 @@ Import-Package: javax.servlet;version="[4.0.0,5.0.0)",
  org.eclipse.jface.dialogs,
  org.eclipse.jface.resource,
  org.eclipse.ui.console,
- org.osgi.framework;version="1.10.0",
- org.tukaani.xz;version="1.9.0"
+ org.osgi.framework;version="1.10.0"

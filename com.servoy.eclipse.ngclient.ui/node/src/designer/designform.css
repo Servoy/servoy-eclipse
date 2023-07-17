@@ -71,3 +71,11 @@
 .containerChildren10 {
 	background-image: url("/assets/designer/images/container-with-10-children.png");
 }
+
+.variant_item {
+	margin: 7px;
+}
+
+.variants_container {
+	margin: 2px;
+}

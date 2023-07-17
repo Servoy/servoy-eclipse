@@ -7,10 +7,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2022.3.5.3747_LTS</version>
+		<version>2023.3.2.3844</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
-	<version>2022.3.5.3747_LTS</version>
+	<version>2023.3.2.3844</version>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
 		<test.script>test_headless</test.script>
@@ -43,7 +43,7 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<nodeVersion>v16.14.0</nodeVersion>
+							<nodeVersion>v16.18.1</nodeVersion>
 						</configuration>
 					</execution>
 
@@ -55,7 +55,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/servoydefault</workingDirectory>
-                            <nodeVersion>v16.14.0</nodeVersion>
+                            <nodeVersion>v16.18.1</nodeVersion>
                         </configuration>
                     </execution>
 
@@ -67,10 +67,22 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/dialogs</workingDirectory>
-                            <nodeVersion>v16.14.0</nodeVersion>
+                            <nodeVersion>v16.18.1</nodeVersion>
                         </configuration>
                     </execution>
-                    
+
+                    <execution>
+                        <id>install node and npm (window)</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node/projects/window</workingDirectory>
+                            <nodeVersion>v16.18.1</nodeVersion>
+                        </configuration>
+                    </execution>
+
 					<!-- run npm install over the projects -->
 					<execution>
 						<id>npm install</id>
@@ -108,6 +120,17 @@
 						</configuration>
 					</execution>
 
+                    <execution>
+                        <id>npm install window</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node/projects/window</workingDirectory>
+                            <arguments>install --legacy-peer-deps</arguments>
+                        </configuration>
+                    </execution>
 					<!-- 3. npm run build_lib <execution> <id>npm run build_lib</id> <phase>compile</phase> 
 						<goals> <goal>npm</goal> </goals> <configuration> <workingDirectory>node</workingDirectory> 
 						<arguments>run build_lib</arguments> </configuration> </execution> -->

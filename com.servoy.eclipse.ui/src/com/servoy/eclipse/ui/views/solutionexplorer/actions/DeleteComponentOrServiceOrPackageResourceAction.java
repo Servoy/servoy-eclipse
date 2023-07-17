@@ -24,8 +24,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IContainer;
@@ -67,18 +69,29 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 
 	private IStructuredSelection selection;
 	private final Shell shell;
-	private final UserNodeType nodeType;
-	private boolean deleteFromDisk;
+	private boolean deletePackageProjectsFromDisk;
 	private final SolutionExplorerView viewer;
 
+	private static Map<UserNodeType, String> nodeTypesToUIText = new HashMap<>();
 
-	public DeleteComponentOrServiceOrPackageResourceAction(Shell shell, String text, UserNodeType nodeType, SolutionExplorerView viewer)
+	static
+	{
+		nodeTypesToUIText.put(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, "component package");
+		nodeTypesToUIText.put(UserNodeType.LAYOUT_NONPROJECT_PACKAGE, "layout package");
+		nodeTypesToUIText.put(UserNodeType.SERVICES_NONPROJECT_PACKAGE, "service package");
+		nodeTypesToUIText.put(UserNodeType.COMPONENTS_PROJECT_PACKAGE, "component package project");
+		nodeTypesToUIText.put(UserNodeType.LAYOUT_PROJECT_PACKAGE, "layout package project");
+		nodeTypesToUIText.put(UserNodeType.SERVICES_PROJECT_PACKAGE, "service package project");
+		nodeTypesToUIText.put(UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, "package project"); // not necessarily used by active solution
+		nodeTypesToUIText.put(UserNodeType.WEB_OBJECT_FOLDER, "folder");
+		nodeTypesToUIText.put(UserNodeType.COMPONENT_RESOURCE, "file");
+	}
+
+
+	public DeleteComponentOrServiceOrPackageResourceAction(Shell shell, SolutionExplorerView viewer)
 	{
 		this.shell = shell;
-		this.nodeType = nodeType;
 		this.viewer = viewer;
-		setText(text);
-		setToolTipText(text);
 	}
 
 	@Override
@@ -86,39 +99,46 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 	{
 		if (selection != null)
 		{
-			//first save the current selection so that he user can't change it while the job is running
+			// first save the current selection so that he user can't change it while the job is running
 			List<SimpleUserNode> savedSelection = new ArrayList<SimpleUserNode>();
 			Iterator<SimpleUserNode> it = selection.iterator();
-			boolean packageProjectSelected = false;
+			int packageProjectSelected = 0;
 			while (it.hasNext())
 			{
 				SimpleUserNode next = it.next();
 				savedSelection.add(next);
 				if (next.getRealObject() instanceof IPackageReader &&
-					SolutionExplorerTreeContentProvider.getResource((IPackageReader)next.getRealObject()) instanceof IProject) packageProjectSelected = true;
+					SolutionExplorerTreeContentProvider.getResource((IPackageReader)next.getRealObject()) instanceof IProject) packageProjectSelected++;
 			}
-
-			if (packageProjectSelected)
+			boolean proceed = true;
+			if (packageProjectSelected > 0)
 			{
-				MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(shell, "Delete Package", null, "Are you sure you want to delete?",
-					"Delete package contents on disk (cannot be undone)                                                   ", false, MessageDialog.QUESTION,
+				MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(shell, "Delete Package Project" + (packageProjectSelected > 1 ? "s" : ""), null,
+					"Remove the selected package project" + (packageProjectSelected > 1 ? "s" : "") +
+						" from the workspace?",
+					"delete " + (packageProjectSelected > 1 ? "them" : "it") + " from disk as well (cannot be undone)\n", false, MessageDialog.QUESTION,
 					new String[] { "Ok", "Cancel" }, 0);
 				if (dialog.open() == 0)
 				{
-					deleteFromDisk = dialog.isChecked();
-					startDeleteJob(savedSelection);
+					deletePackageProjectsFromDisk = dialog.isChecked();
 				}
+				else proceed = false;
 			}
-			else if (MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?"))
+
+			if (proceed && (packageProjectSelected == 0 || packageProjectSelected < selection.size()))
 			{
-				startDeleteJob(savedSelection);
+				proceed = MessageDialog.openConfirm(shell, getText(),
+					"Are you sure you want to continue" +
+						(packageProjectSelected == 0 ? " with the delete?" : "?\nAll other selected resources will be deleted as well."));
 			}
+
+			if (proceed) startDeleteJob(savedSelection);
 		}
 	}
 
 	private void startDeleteJob(List<SimpleUserNode> saveTheSelection)
 	{
-		//start the delete job
+		// start the delete job
 		RunInWorkspaceJob deleteJob = new RunInWorkspaceJob(new DeleteComponentOrServiceResourcesWorkspaceJob(saveTheSelection));
 		deleteJob.setName("Deleting component or service resources");
 		deleteJob.setRule(ServoyModel.getWorkspace().getRoot());
@@ -140,7 +160,9 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 		public void run(IProgressMonitor monitor) throws CoreException
 		{
 			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-			IProject resources = activeProject == null || activeProject.getResourcesProject() == null ? null : activeProject.getResourcesProject().getProject();
+			IProject resourcesProject = activeProject == null || activeProject.getResourcesProject() == null ? null
+				: activeProject.getResourcesProject().getProject();
+			List<IResource> resourcesToDelete = new ArrayList<>();
 			for (SimpleUserNode selected : savedSelection)
 			{
 				Object realObject = selected.getRealObject();
@@ -153,46 +175,51 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 				{
 					resource = SolutionExplorerTreeContentProvider.getResource((IPackageReader)realObject);
 				}
-				else if (resources != null &&
+				else if (resourcesProject != null &&
 					(selected.getType() == UserNodeType.COMPONENT || selected.getType() == UserNodeType.SERVICE || selected.getType() == UserNodeType.LAYOUT))
 				{
-					resource = getComponentFolderToDelete(resources, selected);
+					resource = getComponentFolderToDelete(resourcesProject, selected);
 				}
 
-				if (resource != null)
+				if (resource != null) resourcesToDelete.add(resource);
+			}
+
+			for (IResource resource : resourcesToDelete)
+			{
+				if (!resource.exists()) continue; // in case multiple nodes in Solex were selected for delete it might happen that parent and child resources were selected; and then a previous delete might have deleted this one
+
+				try
 				{
-					try
+					if (resource instanceof IFolder)
 					{
-						if (resource instanceof IFolder)
+						if (resourcesProject != null) resourcesProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+						deleteFolder((IFolder)resource);
+					}
+					else
+					{
+						if (resource instanceof IProject)
 						{
-							if (resources != null) resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-							deleteFolder((IFolder)resource);
+							IProject[] referencingProjects = ((IProject)resource).getReferencingProjects();
+							for (IProject iProject : referencingProjects)
+							{
+								RemovePackageProjectReferenceAction.removeProjectReference(iProject, (IProject)resource);
+							}
+							((IProject)resource).delete(deletePackageProjectsFromDisk, true, monitor);
 						}
 						else
 						{
-							if (resource instanceof IProject)
-							{
-								IProject[] referencingProjects = ((IProject)resource).getReferencingProjects();
-								for (IProject iProject : referencingProjects)
-								{
-									RemovePackageProjectReferenceAction.removeProjectReference(iProject, (IProject)resource);
-								}
-								((IProject)resource).delete(deleteFromDisk, true, monitor);
-							}
-							else
-							{
-								resource.delete(true, new NullProgressMonitor());
-							}
-							if (resources != null) resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+							resource.delete(true, new NullProgressMonitor());
 						}
-						viewer.refreshTreeCompletely();
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
+						if (resourcesProject != null) resourcesProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 					}
 				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
+
+			viewer.refreshTreeCompletely();
 		}
 
 		private void deleteFolder(IContainer folder) throws CoreException
@@ -295,10 +322,17 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		boolean state = true;
 		Iterator<SimpleUserNode> it = sel.iterator();
+		String textForStuffToDelete = null;
 		while (it.hasNext() && state)
 		{
 			SimpleUserNode node = it.next();
-			state = (node.getRealType() == nodeType);
+			String uiTextForNodeType = nodeTypesToUIText.get(node.getRealType());
+			state = (uiTextForNodeType != null); // this type of node can be processed if found in nodeTypesToUIText map
+
+			if (textForStuffToDelete == null) textForStuffToDelete = uiTextForNodeType; // 1 node to delete so far
+			else if (!uiTextForNodeType.equals(textForStuffToDelete)) textForStuffToDelete = "resource"; // more then 1 type of node to delete; so call them generic "resources"
+			// else same type of nodes to delete so far
+
 			if (node.getType() == UserNodeType.COMPONENT || node.getType() == UserNodeType.SERVICE || node.getType() == UserNodeType.LAYOUT)
 			{
 				if (node.getRealObject() instanceof WebObjectSpecification)
@@ -315,7 +349,12 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 		if (state)
 		{
 			selection = sel;
+			boolean multiple = (sel.size() > 1);
+			String text = "Delete " + (multiple ? "multiple " : "") + textForStuffToDelete + (multiple ? "s" : "");
+			setText(text);
+			setToolTipText(text);
 		}
+
 		setEnabled(state);
 	}
 

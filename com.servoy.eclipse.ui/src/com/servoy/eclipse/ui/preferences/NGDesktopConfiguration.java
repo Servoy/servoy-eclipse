@@ -51,7 +51,7 @@ import com.servoy.j2db.ClientVersion;
 public class NGDesktopConfiguration extends PreferencePage implements IWorkbenchPreferencePage
 {
 
-	private static final String versionsUrl = "https://download.servoy.com/ngdesktop/ngdesktop-versions-2022.03.txt";
+	private static final String versionsUrl = "https://download.servoy.com/ngdesktop/2023.03.2/ngdesktop-versions-2023.03.txt";
 	private static List<String> remoteVersions = new ArrayList<String>();
 
 	private Combo srcVersionCombo;
@@ -157,8 +157,16 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 					final List<String> result = new ArrayList<String>();
 					value.forEach((item) -> {
 						final String servoyVersion = ((JSONObject)item).getString("servoyVersion");
-						final String devVersion = ClientVersion.getMajorVersion() + "." + ClientVersion.getMiddleVersion();
-						if (SemVerComparator.compare(devVersion, servoyVersion) < 0)
+						//servoyVersion is a string like 2023.03 or 2023.03.x (where x is a digit.
+						String middleVersion = Integer.toString(ClientVersion.getMiddleVersion());
+						if (middleVersion.length() == 1)
+						{
+							middleVersion += "0";
+						}
+						final String devVersion = ClientVersion.getMajorVersion() + "." + middleVersion;
+						//devVersion is a string like 2023.03 (so no minors)
+						//we need to compare only the base
+						if (SemVerComparator.compare(devVersion, getBaseVersion(servoyVersion)) < 0)
 							return;
 						final String status = ((JSONObject)item).getString("status");
 						String version = ((JSONObject)item).getString("ngDesktopVersion");
@@ -179,6 +187,13 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 		}
 
 		return remoteVersions;
+	}
+
+	private static String getBaseVersion(String version)
+	{
+		String[] result = version.split("\\.");
+		if (result.length <= 2) return version;
+		return result[0] + "." + result[1];
 	}
 
 	@Override

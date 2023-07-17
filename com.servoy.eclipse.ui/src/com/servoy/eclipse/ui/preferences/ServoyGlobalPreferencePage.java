@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -42,6 +41,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.util.PrefUtil;
 
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.util.ObjectWrapper;
@@ -59,6 +59,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button closeEditorOnExitButton;
 	private Button openFirstFormDesignerButton;
 	private Button showColumnsInDbOrderButton;
+	private Button showLegacySolutionTypesButton;
 	private Button showColumnsInAlphabeticOrderButton;
 	private Button showNavigatorDefaultButton;
 	private ComboViewer encapsulationTypeCombo;
@@ -132,6 +133,9 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 
 		showColumnsInDbOrderButton = new Button(columnsOrderGroup, SWT.RADIO);
 		showColumnsInDbOrderButton.setText("in database defined order");
+
+		showLegacySolutionTypesButton = new Button(wizardOptionsContainer, SWT.CHECK);
+		showLegacySolutionTypesButton.setText("Show legacy solution types (smart client, web client..)");
 
 		//Form Properties
 		Group formProperties = new Group(rootContainer, SWT.NONE);
@@ -218,6 +222,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		closeEditorOnExitButton.setSelection(prefs.getCloseEditorOnExit());
 		openFirstFormDesignerButton.setSelection(prefs.getOpenFirstFormDesigner());
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
+		showLegacySolutionTypesButton.setSelection(prefs.getShowLegacySolutionTypes());
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		showNavigatorDefaultButton.setSelection(prefs.getShowNavigatorDefault());
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
@@ -237,6 +242,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, DesignerPreferences.CLOSE_EDITORS_ON_EXIT_DEFAULT);
 		openFirstFormDesignerButton.setSelection(DesignerPreferences.OPEN_FIRST_FORM_DESIGNER_DEFAULT);
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
+		showLegacySolutionTypesButton.setSelection(DesignerPreferences.SHOW_LEGACY_SOLUTION_TYPES_DEFAULT);
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		showNavigatorDefaultButton.setSelection(DesignerPreferences.SHOW_NAVIGATOR_DEFAULT);
 		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL);
@@ -269,6 +275,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, closeEditorOnExitButton.getSelection());
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
+		prefs.setShowLegacySolutionTypes(showLegacySolutionTypesButton.getSelection());
 		prefs.setShowNavigatorDefault(showNavigatorDefaultButton.getSelection());
 		prefs.setEncapsulationType(getFirstElementValue(encapsulationTypeCombo, Integer.valueOf(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)).intValue());
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
@@ -283,7 +290,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		{
 			iconPreferences.setUseDarkThemeIcons(useDarkIconsButton.getSelection());
 			iconPreferences.save(true);
-			if (MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Use dark icons preference changed",
+			if (ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Use dark icons preference changed",
 				"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
 			{
 				PlatformUI.getWorkbench().restart();

@@ -16,7 +16,7 @@
 */
 package com.servoy.eclipse.ui.property;
 
-import com.servoy.eclipse.core.util.DatabaseUtils;
+import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
@@ -56,7 +56,7 @@ public class RelationNameConverter implements IPropertyConverter<String, Object>
 	{
 		if (value instanceof RelationsWrapper)
 		{
-			return DatabaseUtils.getRelationsString(((RelationsWrapper)value).relations);
+			return EclipseDatabaseUtils.getRelationsString(((RelationsWrapper)value).relations);
 		}
 		if (value instanceof String)
 		{

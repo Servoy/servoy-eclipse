@@ -1,22 +1,26 @@
 <div class="editor">
 <designer-toolbar></designer-toolbar>
 <div class="fill-area">
+    <designer-variantspreview></designer-variantspreview>
     <designer-palette></designer-palette>
     <designer-resizer></designer-resizer> 
     <div #contentArea class="content-area" tabindex="0">
         <div #glasspane class="contentframe-overlay">
             <selection-decorators></selection-decorators>
             <designer-highlight></designer-highlight>
-            <designer-ghostscontainer></designer-ghostscontainer>
+            <designer-ghostscontainer #ghostContainer></designer-ghostscontainer>
             <dragselection *ngIf="urlParser.isAbsoluteFormLayout()"></dragselection>
-            <dragselection-responsive *ngIf="!urlParser.isAbsoluteFormLayout()"></dragselection-responsive>
+            <dragselection-responsive></dragselection-responsive>
+            <designer-samesize-indicator></designer-samesize-indicator>
+            <designer-anchoring-indicator></designer-anchoring-indicator>
         </div>
         <designer-editorcontent></designer-editorcontent> 
     </div>
-    <div #bottomAutoscroll class="bottomAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
-	<div #rightAutoscroll class="rightAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
-	<div #topAutoscroll class="topAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
-	<div #leftAutoscroll class="leftAutoscrollArea" [ngStyle]="{'pointer-events' : editorSession.getState().pointerEvents}"></div>
-</div> <designer-status-bar></designer-status-bar> </div>
+    <designer-autoscroll [placement]="'top'"></designer-autoscroll>
+    <designer-autoscroll [placement]="'bottom'"></designer-autoscroll>
+    <designer-autoscroll [placement]="'left'"></designer-autoscroll>
+    <designer-autoscroll [placement]="'right'"></designer-autoscroll>
+</div> 
+<designer-status-bar *ngIf="!urlParser.isAbsoluteFormLayout()"></designer-status-bar> </div>
 <designer-contextmenu></designer-contextmenu>
 <designer-inline-edit></designer-inline-edit>

@@ -22,13 +22,13 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -43,6 +43,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -59,6 +60,7 @@ import org.json.JSONObject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.IServoyLoginListener;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -154,7 +156,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	{
 		String loginToken = null;
 
-		HttpClient httpclient = HttpClients.createDefault();
+		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpGet httpget = new HttpGet(CROWD_URL);
 
 		String auth = username + ":" + password;
@@ -162,15 +164,17 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		String authHeader = "Basic " + new String(encodedAuth);
 		httpget.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
 		httpget.addHeader(HttpHeaders.ACCEPT, "application/json");
+		httpget.addHeader("servoyVersion", ClientVersion.getBundleVersion());
+		httpget.addHeader("os", Utils.getPlatformAsString());
 
 		// execute the request
-		HttpResponse response;
+		CloseableHttpResponse response;
 		try
 		{
 			response = httpclient.execute(httpget);
 			HttpEntity responseEntity = response.getEntity();
 			String responseString = EntityUtils.toString(responseEntity);
-			if (response.getStatusLine().getStatusCode() == 200)
+			if (response.getCode() == 200)
 			{
 
 				JSONObject loginTokenJSON = new JSONObject(responseString);
@@ -180,7 +184,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			else
 			{
 				StringBuilder sb = new StringBuilder();
-				sb.append("HTTP ERROR : ").append(response.getStatusLine().getStatusCode()).append(' ').append(responseString);
+				sb.append("HTTP ERROR : ").append(response.getCode()).append(' ').append(responseString);
 				return new LoginTokenResponse(LoginTokenResponse.Status.LOGIN_ERROR, sb.toString());
 			}
 		}
@@ -224,9 +228,11 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		Label lbl = new Label(composite, SWT.NONE);
 		lbl.setText("Email");
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		FontDescriptor descriptor = FontDescriptor.createFrom(lbl.getFont());
-		descriptor = descriptor.setStyle(SWT.BOLD);
-		lbl.setFont(descriptor.createFont(getShell().getDisplay()));
+		final FontDescriptor labelFontDescriptor = FontDescriptor.createFrom(lbl.getFont()).setStyle(SWT.BOLD);
+		final Font labelFont = labelFontDescriptor.createFont(getShell().getDisplay());
+		lbl.setFont(labelFont);
+		lbl.addDisposeListener((e) -> labelFontDescriptor.destroyFont(labelFont));
+
 		Text usernameTxt = new Text(composite, SWT.BORDER);
 		usernameTxt.setText(dlgUsername);
 		usernameTxt.selectAll();
@@ -244,7 +250,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		lbl = new Label(composite, SWT.NONE);
 		lbl.setText("Password");
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		lbl.setFont(descriptor.createFont(getShell().getDisplay()));
+		lbl.setFont(labelFont);
 		// On MacOS, SWT 3.5 does not send events to listeners on password fields.
 		// See: http://www.eclipse.org/forums/index.php?t=msg&goto=508058&
 		int style = SWT.BORDER;
@@ -306,7 +312,8 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, true);
 		gd.horizontalIndent = 10;
 		lbl.setLayoutData(gd);
-		lbl.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+		Cursor handCursor = parent.getDisplay().getSystemCursor(SWT.CURSOR_HAND);
+		lbl.setCursor(handCursor);
 		if (Util.isMac())
 		{
 			Label lbl2 = new Label(parent, SWT.NONE);
@@ -324,7 +331,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			GridData gd2 = new GridData(SWT.FILL, SWT.BEGINNING, true, true);
 			gd2.horizontalIndent = 10;
 			lbl2.setLayoutData(gd2);
-			lbl2.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+			lbl2.setCursor(handCursor);
 		}
 
 		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));

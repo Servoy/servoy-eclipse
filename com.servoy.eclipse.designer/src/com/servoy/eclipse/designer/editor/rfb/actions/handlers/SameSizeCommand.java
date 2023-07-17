@@ -26,6 +26,7 @@ import org.eclipse.gef.commands.CompoundCommand;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -58,6 +59,8 @@ public class SameSizeCommand extends AbstractEditorAndOutlineActionDelegateHandl
 					comp = (BaseComponent)((PersistContext)component).getPersist();
 				}
 				if (comp == null) continue;
+
+				if (comp.getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) != null) return null;
 
 				if (size == null)
 				{

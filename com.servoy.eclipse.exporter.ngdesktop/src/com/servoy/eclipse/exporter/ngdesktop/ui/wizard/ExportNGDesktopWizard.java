@@ -12,16 +12,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.HttpHostConnectException;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.wicket.validation.validator.UrlValidator;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -112,7 +111,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 			try (final CloseableHttpResponse httpResponse = sendRequest(exportSettings))
 			{
-				final int httpStatusCode = httpResponse.getStatusLine().getStatusCode();
+				final int httpStatusCode = httpResponse.getCode();
 
 				switch (httpStatusCode)
 				{
@@ -120,7 +119,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 						result[0] = true; //at least one platform has been delivered succesfully
 						break;
 					default :
-						String reasonPhrase = httpResponse.getStatusLine().getReasonPhrase();
+						String reasonPhrase = httpResponse.getReasonPhrase();
 						if (Utils.stringIsEmpty(reasonPhrase)) reasonPhrase = getReasonPhrase(httpResponse);
 						errorMsg
 							.append(String.format("Platform: %s\nError code: %d\n%s", platform, httpStatusCode, reasonPhrase));
@@ -139,14 +138,14 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		if (errorMsg.length() > 0) MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
 		else
 		{
-			final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be send to the provided address ...";
+			final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be sent to the provided address ...";
 			MessageDialog.open(MessageDialog.INFORMATION, UIUtils.getActiveShell(), "NG Desktop Export", message, SWT.None, "OK");
 		}
 		return result[0];
 	}
 
 	//fail to customize reason phrase into Spring - so extract from the
-	private String getReasonPhrase(HttpResponse response) throws IOException
+	private String getReasonPhrase(CloseableHttpResponse response) throws IOException
 	{
 		if (response != null) try (BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent())))
 		{
@@ -162,7 +161,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			catch (final JSONException e)
 			{
 				//Unexpected http response?
-				return "Internal server error: " + response.getStatusLine();
+				return "Internal server error: " + response.getReasonPhrase();
 
 			}
 		}

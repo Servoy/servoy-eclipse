@@ -5,6 +5,9 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 
 const MILLSIGN = '\u2030';
 
+/**
+  * Class reflecting a Format object coming from the server (format spec property)
+  */
 export class Format {
     display: string = null;
     uppercase = false;
@@ -20,17 +23,21 @@ export class Format {
     maxLength = 0;
 }
 
-
+/**
+ * This service is able to format/parse/unformat data of different types (dates,numbers) according to the format string of the format spec property.
+ *
+ * Components can use the {@link FormatDirective} that uses this service in the component template: [svyFormat]="format" 
+ */
 @Injectable()
 export class FormattingService {
 
     constructor(private servoyService: ServoyPublicService) {
     }
 
-    // formatting stufff
+    /**
+     * format the data give with the {@link Format} object give, optionally using the display or edit format.
+     */
     public format(data: any, format: Format, useEditFormat: boolean): string {
-        const formatString = useEditFormat ? format.edit : format.display;
-
         if ((!format) || (!format.type) || ((typeof data === 'number') && isNaN(data))) {
             if (!format && ((format.type === 'NUMBER') || (format.type === 'INTEGER')) && (typeof data === 'number') && !isNaN(data)) {
                 // make sure is always returned with correct type, otherwise compare will not work well
@@ -38,6 +45,7 @@ export class FormattingService {
             }
             return data;
         }
+        const formatString = useEditFormat ? format.edit : format.display;
         if (data === undefined || data === null) return '';
         if ((format.type === 'NUMBER') || (format.type === 'INTEGER')) {
             return this.formatNumbers(data, formatString);
@@ -52,6 +60,9 @@ export class FormattingService {
         return data;
     }
 
+    /**
+     * utility function to test if a certain key is pressed
+     */
     public testKeyPressed(event: KeyboardEvent, keyCode: number) {
         let code: number;
 
@@ -62,19 +73,20 @@ export class FormattingService {
         return code === keyCode;
     }
 
-    // test numbers only
+    /**
+     * utility function to test if only numbers ar pressed.
+     */
     public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
         if (!vFindMode && vCheckNumbers) {
             if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
-                //do not looses focus, just apply the format and push value
-                vElement.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => vElement.value } }));
+                // enter key is pressed
             } else if (vSvyFormat.type === 'INTEGER') {
                 const currentLanguageNumeralSymbols = numbro.languageData();
 
                 if (keyChar === undefined || keyChar === null) {
                     return this.numbersonly(e, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands, currentLanguageNumeralSymbols.currency
                         .symbol,
-                        vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
+                        vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength, null);
                 } else {
                     return this.numbersonlyForChar(keyChar, false, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
                         currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
@@ -84,7 +96,7 @@ export class FormattingService {
 
                 if (keyChar === undefined || keyChar === null) {
                     return this.numbersonly(e, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
-                        currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
+                        currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength, vSvyFormat);
                 } else {
                     return this.numbersonlyForChar(keyChar, true, currentLanguageNumeralSymbols.delimiters.decimal, currentLanguageNumeralSymbols.delimiters.thousands,
                         currentLanguageNumeralSymbols.currency.symbol, vSvyFormat.percent, vElement, skipMaxLength === true ? 0 : vSvyFormat.maxLength);
@@ -94,11 +106,16 @@ export class FormattingService {
         return true;
     }
 
-    // unformatting stuff
-    public parse(data: any, format: Format, useEditFormat: boolean,  currentValue?: any): any {
-        return this.unformat(data, (useEditFormat &&  format.edit && !format.isMask)? format.edit : format.display, format.type, currentValue);
+    /**
+     * calls the { @link #unformat} function for unformatting/parsing the data given
+     */
+    public parse(data: any, format: Format, useEditFormat: boolean, currentValue?: any): any {
+        return this.unformat(data, (useEditFormat && format.edit && !format.isMask) ? format.edit : format.display, format.type, currentValue);
     }
 
+    /**
+     * unformats/parse the give data according to the given format and type 
+     */
     public unformat(data: any, servoyFormat: string, type: string, currentValue?: any) {
         if ((!servoyFormat) || (!type) || (!data && data !== 0)) return data;
         if ((type === 'NUMBER') || (type === 'INTEGER')) {
@@ -150,12 +167,26 @@ export class FormattingService {
                 }
             }
         }
+        const formatDecimalSeparatorPos = format.indexOf('\.');
+        if (formatDecimalSeparatorPos > -1) {
+            const currentLanguageNumeralSymbols = numbro.languageData();
+            const dataDecimalSeparatorPos = data.indexOf(currentLanguageNumeralSymbols.delimiters.decimal);
+            if (dataDecimalSeparatorPos > -1) {
+                const decimalLen = format.length - formatDecimalSeparatorPos - 1;
+                let adjustedData = data.toString().substring(0, dataDecimalSeparatorPos + 1);
+                const decimal = data.toString().substring(dataDecimalSeparatorPos + 1);
+                if (decimal.length > decimalLen) {
+                    adjustedData += decimal.substring(0, decimalLen);
+                    data = adjustedData;
+                }
+            }
+        }
         let ret = numbro(data).value();
         ret *= multFactor;
         return ret;
     }
 
-    private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
+    private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength, vSvyFormat) {
         let key;
 
         if (window.event) {
@@ -172,8 +203,24 @@ export class FormattingService {
         }
 
         const keychar = String.fromCharCode(key);
-        return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
-
+        if (this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) && vSvyFormat !== null) {
+			const value = vElement.value;
+			if (value.includes(decimalChar) && window.getSelection().toString() !== value) {
+				const allowToConcat = value.indexOf(decimalChar);
+				if (e.target.selectionStart <= allowToConcat) {
+					return true;
+				}
+				if (vSvyFormat.edit) {
+					const maxDecimals = vSvyFormat.edit.split(decimalChar)[1].length;
+					if (value.split(decimalChar)[1].length >= maxDecimals) {
+						return false;
+					}
+				}
+			}
+			return true;
+		} else {
+			return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
+		}
     }
 
     private numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
@@ -195,7 +242,7 @@ export class FormattingService {
             if (counter > mlength) return false;
         }
 
-        if ((('-0123456789').indexOf(keychar) > -1)) {
+		if ((('-0123456789').indexOf(keychar) > -1)) {
             return true;
         } else if (decimal && (keychar === decimalChar)) {
             return true;
@@ -442,8 +489,9 @@ export class FormattingService {
 
     private formatDate(data, dateFormat: string): string {
         if (!(data instanceof Date)) return data;
-        dateFormat = this.convertFormat(dateFormat);
-        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat);
+        // single quote escape workaround until https://github.com/moment/luxon/issues/649 is fixed
+        dateFormat = this.convertFormat(dateFormat).replace("''","'svy_quote'");
+        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat).replace('svy_quote',"'");
         return formatted.trim ? formatted.trim() : formatted;
     }
 

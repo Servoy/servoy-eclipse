@@ -78,6 +78,18 @@ public class ServoyMediaBuilder
 			}
 		}
 
+		List<Form> variantForms = BuilderDependencies.getInstance().getVariantDependencies();
+		if (variantForms != null)
+		{
+			Set<UUID> methodsParsed = new HashSet<UUID>();
+			Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
+			for (Form form : variantForms)
+			{
+				ServoyFormBuilder.deleteMarkers(form);
+				ServoyFormBuilder.addFormMarkers(servoyProject, form, methodsParsed, formsAbstractChecked);
+			}
+		}
+
 		return true;
 	}
 

@@ -92,7 +92,7 @@ public class KeyPressedHandler implements IServerService
 			if (isShift) modifier = SWT.SHIFT | modifier;
 			if (isAlt) modifier = SWT.ALT | modifier;
 			if (isMeta) modifier = SWT.COMMAND | modifier;
-			if (keyCode == 46 || keyCode == 8) keyCode = SWT.DEL;
+			if (!args.has("ctrl") && (keyCode == 46 || keyCode == 8)) keyCode = SWT.DEL;
 			else if (keyCode == 115) keyCode = SWT.F4;
 			else if (keyCode == 37) keyCode = SWT.ARROW_LEFT;
 			else if (keyCode == 39) keyCode = SWT.ARROW_RIGHT;

@@ -28,3 +28,77 @@
 #svybackground {
 	background-color: #FFFFFF;
 }
+
+ *, Shell, Composite, Label, Button[style~='SWT.CHECK'], Button[style~='SWT.RADIO'], Combo, Group {
+	background-color: #FFFFFF;
+}
+
+ToolItem {
+	background-color: unset;
+}
+
+#svyeditor, #svyeditor > * , #svyeditor > * > Label , #svyeditor > * > Button[style~='SWT.CHECK'], #svyeditor > * > * > Button[style~='SWT.CHECK'], #svyeditor > * > *, 
+#svyeditor > * > * > Label, #svyeditor > * > * > XLControl, #svyeditor > * > * > FormText, 
+#svyeditor > * > * > * > ExpandBarWidthAware, #svyeditor > * > * > * > ExpandBarWidthAware > ExpandBar  {
+	background-color: #F0F0F0;
+}
+#svyeditor > Text, #svyeditor > * > Text, #svyeditor > * > CCombo, #svyeditor > Combo, #svyeditor > * > Combo, #svyeditor > * > Table {
+	background-color: #FFFFFF;
+}
+
+Button[style~='SWT.PUSH']  {
+    background-color: unset;
+    color: unset;
+}
+
+Table, Tree {
+	swt-lines-visible: false;
+}
+ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Tree,
+ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Composite> Tree {
+	swt-lines-visible: true;
+}
+
+#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Tree {
+	swt-lines-visible: true;
+}
+
+.svyNatTable {
+	min-height: 300px;
+	text-trim: false;
+	text-wrap: true;
+}
+
+.svyNatTable > .styleClass,  .svyNatTable > .headertext{
+	text-align: center;
+}
+
+.svyNatTable:select {
+    painter-resolution: true;
+	cell-background-color:  #e7f1ff;
+}
+
+.svyNatTable > .COLUMN_HEADER {
+	painter-resolution: true;
+	cell-background-color:  #e7f1ff;
+	padding: 2;
+	render-grid-lines: false;
+	row-height: 30px;
+	color: #4C4E52;
+	text-trim: false;
+	text-align: center;
+}
+
+.svyNatTable > .COLUMN_0 {
+	padding-left: 5px;
+	text-align: left;
+}
+
+.svyNatTable > .containedForm, .svyNatTable > .relationName {
+	text-trim: false;
+}
+
+Button  {
+    background-color: unset;
+    color: unset;
+}

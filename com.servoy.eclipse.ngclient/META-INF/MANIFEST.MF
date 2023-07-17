@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ngclient Developer Package
 Bundle-SymbolicName: com.servoy.eclipse.ngclient;singleton:=true
-Bundle-Version: 2022.3.5.3747_LTS
+Bundle-Version: 2023.3.2.3844
 Export-Package:  com.servoy.eclipse.ngclient.startup,
  com.servoy.eclipse.ngclient.startup.resourceprovider
 Require-Bundle: sablo,
@@ -11,15 +11,15 @@ Require-Bundle: sablo,
  servoy_ngclient,
  j2db_server,
  org.eclipse.osgi,
- slf4j.api,
  org.apache.tomcat,
- org.apache.commons.io,
  org.eclipse.core.runtime
 Import-Package: javax.servlet;version="[4.0.0,5.0.0)",
  javax.servlet.annotation;version="[4.0.0,5.0.0)",
- javax.servlet.http;version="[4.0.0,5.0.0)"
+ javax.servlet.http;version="[4.0.0,5.0.0)",
+ org.apache.commons.io;version="2.8.0",
+ org.slf4j;version="2.0.6"
 Bundle-Vendor: Servoy
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: com.servoy.eclipse.ngclient.startup.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.ngclient

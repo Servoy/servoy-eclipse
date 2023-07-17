@@ -22,18 +22,20 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.FileBody;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.entity.mime.StringBody;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -147,10 +149,10 @@ public class DeployProgressPage extends WizardPage implements IJobChangeListener
 					// execute the request
 					HttpResponse response = httpclient.execute(httppost);
 
-					HttpEntity responseEntity = response.getEntity();
+					HttpEntity responseEntity = ((ClassicHttpResponse)response).getEntity();
 					String responseString = EntityUtils.toString(responseEntity);
 
-					if (response.getStatusLine().getStatusCode() == 200)
+					if (response.getCode() == 200)
 					{
 						String[] responses = responseString.split("\n");
 
@@ -162,12 +164,17 @@ public class DeployProgressPage extends WizardPage implements IJobChangeListener
 					}
 					else
 					{
-						responseMessage.append("HTTP ERROR : ").append(response.getStatusLine().getStatusCode()).append(' ').append(responseString);
+						responseMessage.append("HTTP ERROR : ").append(response.getCode()).append(' ').append(responseString);
 					}
 				}
 				catch (ClientProtocolException e)
 				{
 					responseMessage.append("Unable to make connection").append('\n').append(e.getMessage());
+					ServoyLog.logError(e);
+				}
+				catch (ParseException e)
+				{
+					responseMessage.append("Unable to parse response").append('\n').append(e.getMessage());
 					ServoyLog.logError(e);
 				}
 				catch (IOException e)

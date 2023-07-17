@@ -78,6 +78,7 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -604,6 +605,22 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = TreeBuilder.createJSObject(this);
 			}
+			else if (type == UserNodeType.MAP)
+			{
+				lm = TreeBuilder.createJSMap(this);
+			}
+			else if (type == UserNodeType.SET)
+			{
+				lm = TreeBuilder.createJSSet(this);
+			}
+			else if (type == UserNodeType.ITERATOR)
+			{
+				lm = TreeBuilder.createJSIterator(this);
+			}
+			else if (type == UserNodeType.ITERABELVALUE)
+			{
+				lm = TreeBuilder.createJSIterableValue(this);
+			}
 			else if (type == UserNodeType.REGEXP)
 			{
 				lm = TreeBuilder.createJSRegexp(this);
@@ -1044,10 +1061,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<IRootObject> styles = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.STYLES);
 		Collections.sort(styles, NameComparator.INSTANCE);
 
-		Iterator<IRootObject> stylesIterator = styles.iterator();
-		while (stylesIterator.hasNext())
+		for (IRootObject style : styles)
 		{
-			IRootObject style = stylesIterator.next();
 			UserNode node = new UserNode(style.getName(), UserNodeType.STYLE_ITEM, style, uiActivator.loadImageFromBundle("style.png"));
 			dlm.add(node);
 		}
@@ -1072,10 +1087,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<String> messagesFiles = Arrays.asList(EclipseMessages.getDefaultMessageFileNames());
 		Collections.sort(messagesFiles);
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
-		Iterator<String> messagesFilesIte = messagesFiles.iterator();
-		while (messagesFilesIte.hasNext())
+		for (String i18nFileItemName : messagesFiles)
 		{
-			String i18nFileItemName = messagesFilesIte.next();
 			i18nFileItemName = i18nFileItemName.substring(0, i18nFileItemName.indexOf(EclipseMessages.MESSAGES_EXTENSION));
 			boolean isActive = activeI18NFileNames.indexOf(i18nFileItemName) != -1;
 			UserNode node = new UserNode(i18nFileItemName, UserNodeType.I18N_FILE_ITEM, null, isActive ? null : "Not referenced");
@@ -1093,10 +1106,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
 		Collections.sort(templates, NameComparator.INSTANCE);
 
-		Iterator<IRootObject> templatesIterator = templates.iterator();
-		while (templatesIterator.hasNext())
+		for (IRootObject template : templates)
 		{
-			IRootObject template = templatesIterator.next();
 			UserNode node = new UserNode(template.getName(), UserNodeType.TEMPLATE_ITEM, template, null);
 			dlm.add(node);
 		}
@@ -1114,10 +1125,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (viewNames != null && viewNames.size() > 0)
 				{
 					List<String> hiddenViews = null;
-					Iterator<String> it = viewNames.iterator();
-					while (it.hasNext())
+					for (String name : viewNames)
 					{
-						String name = it.next();
 						if (s.isTableMarkedAsHiddenInDeveloper(name))
 						{
 							if (hiddenViews == null) hiddenViews = new ArrayList<String>();
@@ -2303,7 +2312,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(webcomponent);
 
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(webComponentClassName);
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponentClassName);
 		if (spec != null)
 		{
 			extractApiDocs(spec);
@@ -2337,16 +2346,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				String name = api.getName();
 				String displayParams = "(";
-				List<PropertyDescription> parameters = api.getParameters();
+				IFunctionParameters parameters = api.getParameters();
 				final List<String> parNames = new ArrayList<String>();
 				List<String> parTypes = new ArrayList<String>();
 
-				for (int i = 0; i < parameters.size(); i++)
+				for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
 				{
-					displayParams += parameters.get(i).getName();
-					parNames.add(parameters.get(i).getName());
-					parTypes.add(parameters.get(i).getType().getName());
-					if (i < parameters.size() - 1) displayParams += ", ";
+					displayParams += parameters.getParameterDefinition(i).getName();
+					parNames.add(parameters.getParameterDefinition(i).getName());
+					parTypes.add(parameters.getParameterDefinition(i).getType().getName());
+					if (i < parameters.getDefinedArgsCount() - 1) displayParams += ", ";
 				}
 				displayParams += ")";
 
@@ -2743,46 +2752,21 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			String tooltip = null;
 			Class< ? > returnType = null;
-			String returnDescription = null;
 			String[] paramNames = null;
 			boolean namesOnly = false;
 			if (scriptObject != null)
 			{
-				String description = "";
 				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes instanceof Class[])
 				{
 					ClientSupport csp = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
-					description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
+					tooltip = ((XMLScriptObjectAdapter)scriptObject).getExtendedTooltip(name, (Class[])parameterTypes, csp, resolver);
 					returnType = ((XMLScriptObjectAdapter)scriptObject).getReturnedType(name, (Class[])parameterTypes);
-					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, (Class[])parameterTypes);
-					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
-					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
-					String sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes);
-					if (sample != null)
-					{
-						tooltip += "\n<i>" + Text.processTags(HtmlUtils.escapeMarkup(sample).toString(), resolver).toString() + "</i>";
-					}
-					if (parameters != null)
-					{
-						paramNames = new String[parameters.length];
-						tooltip += "\n";
-						for (int i = 0; i < parameters.length; i++)
-						{
-							paramNames[i] = parameters[i].getName();
-							tooltip = tooltip + "\n <b>@param</b> {" + parameters[i].getType() + "} " + parameters[i].getName() + " " +
-								parameters[i].getDescription();
-						}
-					}
-					if (returnType != null)
-					{
-						tooltip = tooltip + "\n <b>@return</b> {" + getReturnTypeString(returnType) + "} ";
-						if (returnDescription != null) tooltip += returnDescription;
-					}
+					paramNames = ((XMLScriptObjectAdapter)scriptObject).getParameterNames(name, (Class[])parameterTypes);
 				}
 				else
 				{
 					namesOnly = true;
-					description = scriptObject.getToolTip(name);
+					String description = scriptObject.getToolTip(name);
 					paramNames = scriptObject.getParameterNames(name);
 					returnType = getMethodReturnType();
 					tooltip = Text.processTags(description, resolver);
@@ -2795,8 +2779,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (tooltip == null) tooltip = "";
 
-			StringBuilder tmp = new StringBuilder("<b>" + (returnTypeString != null ? returnTypeString : getReturnTypeString(returnType)) + " " + name + "(" +
-				getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>");
+			StringBuilder tmp = new StringBuilder(
+				"<b>" + (returnTypeString != null ? returnTypeString : XMLScriptObjectAdapter.getReturnTypeString(returnType)) + " " + name + "(" +
+					getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>");
 			if ("".equals(tooltip))
 			{
 				tooltip = tmp.toString();
@@ -3110,7 +3095,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				Object bp = ijm.getField(name, false);
 				if (bp instanceof JavaMembers.BeanProperty)
 				{
-					tmp = "<b>" + getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
+					tmp = "<b>" + XMLScriptObjectAdapter.getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
 				}
 				else if (bp instanceof Field)
 				{
@@ -3211,19 +3196,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return "<pre><b>" + c.getTypeAsString() + " " + c.getDataProviderID() + "</b></pre>";
 		}
 
-	}
-
-	public static String getReturnTypeString(Class returnType)
-	{
-		if (returnType == null) return "*unknown*";
-		StringBuilder sb = new StringBuilder();
-		while (returnType.isArray())
-		{
-			sb.append("[]");
-			returnType = returnType.getComponentType();
-		}
-		sb.insert(0, DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType));
-		return sb.toString();
 	}
 
 }

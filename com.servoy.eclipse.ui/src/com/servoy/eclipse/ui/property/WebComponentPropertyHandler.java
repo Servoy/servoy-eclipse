@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.property;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
@@ -27,6 +28,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
+import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -46,12 +48,14 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Property handler for web components
@@ -130,19 +134,51 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			else if (value == null && !webObject.hasProperty(getName()) && propertyDescription.hasDefault()) // default values for persist mapped properties are already handled by WebObjectImpl, so value will not be null here for those
 			{
-				// if null is coming from parent, return it
-				if (webObject.getParentComponent().getExtendsID() > 0) return value;
+				// if null is coming from parent and is a value that is was set, it is not a default, return it
+				if (webObject.getParentComponent().getExtendsID() > 0)
+				{
+					List<AbstractBase> overrideHierarchy = PersistHelper.getOverrideHierarchy(webObject.getParentComponent());
+					if (overrideHierarchy != null && overrideHierarchy.size() > 1) // list should contain as first item the component itself, so start with the first parent
+					{
+						String propertyName = getName();
+						boolean propertyIsSetInHierarchy = false;
+						for (int i = 1; i < overrideHierarchy.size(); i++)
+						{
+							AbstractBase parentObject = overrideHierarchy.get(i);
+							if (parentObject.getPropertiesMap().containsKey(propertyName))
+							{
+								propertyIsSetInHierarchy = true;
+								break;
+							}
+							if (parentObject instanceof WebComponent)
+							{
+								WebComponent parentWebComponent = (WebComponent)parentObject;
+								JSONObject parentWebComponentJson = parentWebComponent.getJson();
+								if (parentWebComponentJson != null && parentWebComponentJson.has(propertyName))
+								{
+									propertyIsSetInHierarchy = true;
+									break;
+								}
+							}
+						}
+						if (propertyIsSetInHierarchy) return value;
+					}
+				}
 				Object defaultValue = propertyDescription.getDefaultValue();
 				if (propertyDescription.getType() instanceof IDesignValueConverter)
 				{
-					return ((IDesignValueConverter< ? >)propertyDescription.getType()).fromDesignValue(defaultValue, propertyDescription);
+					return ((IDesignValueConverter< ? >)propertyDescription.getType()).fromDesignValue(defaultValue, propertyDescription, webObject);
 				}
 				return defaultValue;
+			}
+			if (value != null && type instanceof StringPropertyType)
+			{
+				value = value.toString();
 			}
 		}
 		catch (Exception e)
 		{
-			Debug.log("illegal value in bean, ignoring it: " + value);
+			Debug.log("illegal value in web component, ignoring it: " + value);
 		}
 		return value;
 	}

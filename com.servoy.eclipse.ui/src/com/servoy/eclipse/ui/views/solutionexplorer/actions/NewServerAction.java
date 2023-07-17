@@ -26,11 +26,12 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.ServerSettings;
 
 
 /**
  * Action to create a new server depending on the selection of a solution view.
- * 
+ *
  * @author jblok
  */
 public class NewServerAction extends Action implements ISelectionChangedListener
@@ -54,7 +55,7 @@ public class NewServerAction extends Action implements ISelectionChangedListener
 	{
 		try
 		{
-			EditorUtil.openServerEditor(template, true);
+			EditorUtil.openServerEditor(template, ServerSettings.DEFAULT, true);
 		}
 		catch (Exception e)
 		{

@@ -1,13 +1,15 @@
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, SecurityContext } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ServoyPublicService, Callback, BaseCustomObject } from '@servoy/public';
+import { createPopper } from '@popperjs/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Injectable()
 export class PopupMenuService {
 
     menu: HTMLElement = null;
 
-    constructor(private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document) {
+    constructor(private domSanitizer: DomSanitizer, private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document) {
 
     }
 
@@ -20,9 +22,9 @@ export class PopupMenuService {
             if (handler) {
                 handler();
             }
-            this.doc.removeEventListener('click', listener);
+            this.doc.removeEventListener('mouseup', listener);
         };
-        this.doc.addEventListener('click', listener);
+        this.doc.addEventListener('mouseup', listener);
     }
 
     public getMenuRect(popup: Popup) {
@@ -49,6 +51,21 @@ export class PopupMenuService {
         this.doc.body.appendChild(this.menu);
     }
 
+    public showMenuAt(element: HTMLElement) {
+        this.menu.style.visibility = 'visible';
+        createPopper(element, this.menu, {
+            modifiers: [
+                {
+                  name: 'preventOverflow',
+                  options: {
+                    padding: 8,
+                    rootBoundary: 'document'
+                  },
+                },
+              ],
+          });
+    }
+
     public showMenu(x: number, y: number) {
         this.menu.style.left = x + 'px';
         this.menu.style.top = y + 'px';
@@ -72,8 +89,8 @@ export class PopupMenuService {
             if (item) {
                 if (item.enabled === false) link.classList.add('disabled');
                 if (item.callback) {
-                    li.addEventListener('click', () => {
-                        this.servoyService.callServiceServerSideApi("window","executeMenuItem",[item.id, index, -1, item.selected, null, item.text]);
+                    li.addEventListener('mouseup', (event) => {
+                        if (event.button == 0) this.servoyService.callServiceServerSideApi("window","executeMenuItem",[item.id, index, -1, item.selected, null, item.text]);
                     });
                 }
                 let faicon = item.fa_icon;
@@ -115,7 +132,7 @@ export class PopupMenuService {
                     link.style.color = item.foregroundColor;
                 }
                 const span = this.doc.createElement('span');
-                span.textContent = item.text ? item.text : 'no text';
+                span.innerHTML= item.text ? this.domSanitizer.sanitize(SecurityContext.HTML, item.text) : 'no text';
                 link.appendChild(span);
 
                 if (item.items) {

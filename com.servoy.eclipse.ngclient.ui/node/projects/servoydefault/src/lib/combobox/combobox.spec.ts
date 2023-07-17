@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultCombobox } from './combobox';
-import { ServoyPublicTestingModule, Format, ServoyApi, IValuelist } from '@servoy/public';
+import { ServoyPublicTestingModule, Format, ServoyApi, IValuelist, ServoyBaseComponent } from '@servoy/public';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of } from 'rxjs';
 import { By } from '@angular/platform-browser';
@@ -10,27 +10,62 @@ import { FormsModule } from '@angular/forms';
 describe('ComboboxComponent', () => {
   let component: ServoyDefaultCombobox;
   let fixture: ComponentFixture<ServoyDefaultCombobox>;
-  let servoyApi;
+  let servoyApi: ServoyApi;
   let combobox: DebugElement;
 
   beforeEach(waitForAsync(() => {
-    servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent','registerComponent','unRegisterComponent']);
+
+    // the following construct does nothing but make sure that an error is generated at compile-time if ServoyApi changes
+    // so that when that happens we can update the jasmine.createSpyObj below which is based on strings only
+    class _X extends ServoyApi {
+        formWillShow(_fn: string, _rn?: string, _fi?: number): Promise<boolean> { return undefined; }
+        hideForm(_fn: string, _rn?: string, _fi?: number, _fntws?: string, _rntwbs?: string, _fitwbs?: number): Promise<boolean> { return undefined; }
+        startEdit(_p: string) {}
+        apply(_propertyName: string, _value: any) {}
+        callServerSideApi(_methodName: string, _args: Array<any>) {}
+        getFormComponentElements(_propertyName: string, _formComponentValue: any) {}
+        isInDesigner(): boolean { return false; }
+        trustAsHtml(): boolean { return false; }
+        isInAbsoluteLayout(): boolean { return false; }
+        getMarkupId(): string  { return undefined; }
+        getFormName(): string  { return undefined; }
+        registerComponent(_component: ServoyBaseComponent<any>) {}
+        unRegisterComponent(_component: ServoyBaseComponent<any>) {}
+        getClientProperty(_key:string): any { return undefined; }
+    };
+    new _X(); // just to remove unused class warning
+
+    servoyApi = jasmine.createSpyObj( 'ServoyApi', [
+        'formWillShow',
+        'hideForm',
+        'startEdit',
+        'apply',
+        'callServerSideApi',
+        'getFormComponentElements',
+        'isInDesigner',
+        'trustAsHtml',
+        'isInAbsoluteLayout',
+        'getMarkupId',
+        'getFormName',
+        'registerComponent',
+        'unRegisterComponent',
+        'getClientProperty'
+    ]);
 
 
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultCombobox],
-      providers: [ ],
-      imports: [ServoyPublicTestingModule, NgbModule, FormsModule]
+        declarations: [ ServoyDefaultCombobox ],
+        providers: [ ],
+        imports: [ServoyPublicTestingModule, NgbModule, FormsModule]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-
     fixture = TestBed.createComponent(ServoyDefaultCombobox);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
 
-    let dummyValuelist = new DummyValuelist();
+    const dummyValuelist = new DummyValuelist();
     dummyValuelist.push({
         realValue: 1,
         displayValue: 'Bucuresti'
@@ -43,10 +78,10 @@ describe('ComboboxComponent', () => {
          realValue: 3,
          displayValue: 'Cluj'
     });
-    
+
     component = fixture.componentInstance;
     component.valuelistID = dummyValuelist;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
+    component.servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
     component.dataProviderID = 3;
     component.format = new Format();
     component.format.type = 'TEXT';
@@ -86,17 +121,16 @@ describe('ComboboxComponent', () => {
 
 });
 
- class DummyValuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist
-{
-    filterList(filterString: string): Observable<any>{
+class DummyValuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist {
+    filterList(_filterString: string): Observable<any>{
         return of('');
     }
-    
-    getDisplayValue(realValue: any): Observable<any>{
+
+    getDisplayValue(_realValue: any): Observable<any>{
         return of('');
     }
     hasRealValues(): boolean{
-        return true;   
+        return true;
     }
     isRealValueDate(): boolean{
         return false;

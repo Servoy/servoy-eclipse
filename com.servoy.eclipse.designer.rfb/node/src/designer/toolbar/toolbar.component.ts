@@ -1,16 +1,21 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnInit, Renderer2 } from '@angular/core';
 import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
+import { EditorContentService } from '../services/editorcontent.service';
 
 export enum TOOLBAR_CONSTANTS {
     LAYOUTS_COMPONENTS_CSS = 'Layouts & Components CSS',
     COMPONENTS_CSS = 'Components CSS',
     NO_CSS = 'No CSS',
+    SAME_SIZE = 'Selected Element Same Size Indicator',
+    ANCHOR_INDICATOR = 'Selected Element Anchoring Indicator',
     LAYOUTS_COMPONENTS_CSS_ICON = 'url(designer/assets/images/layouts_components_css.png)',
+    VISUAL_FEEDBACK_CSS_ICON = 'url(designer/assets/images/grid.png)',
     COMPONENTS_CSS_ICON = 'url(designer/assets/images/components_css.png)',
-    NO_CSS_ICON = 'url(designer/assets/images/no_css.png)'
+    PLACEMENT_GUIDE_CSS_ICON = 'url(designer/assets/images/snaptogrid.png)',
+    NO_CSS_ICON = 'url(designer/assets/images/no_css.png)',
+    CHECK_ICON = 'url(designer/assets/images/check.png)'
 }
 
 export enum TOOLBAR_CATEGORIES {
@@ -20,7 +25,6 @@ export enum TOOLBAR_CATEGORIES {
     ALIGNMENT,
     DISTRIBUTION,
     SIZING,
-    GROUPING,
     ZOOM,
     ZOOM_LEVEL,
     FORM,
@@ -61,6 +65,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     btnSaveAsTemplate: ToolbarItem;
 
     btnHideInheritedElements: ToolbarItem;
+    btnVisualFeedbackOptions: ToolbarItem;
+    btnPlacementGuideOptions: ToolbarItem;
 
     btnBringForward: ToolbarItem;
     btnSendBackward: ToolbarItem;
@@ -87,11 +93,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     btnDistributeVerticalCenters: ToolbarItem;
     btnDistributeUpward: ToolbarItem;
 
-    btnGroup: ToolbarItem;
-    btnUngroup: ToolbarItem;
-
     btnReload: ToolbarItem;
-
+    btnToggleI18NValues: ToolbarItem;
     btnClassicEditor: ToolbarItem;
 
     btnShowErrors: ToolbarItem;
@@ -103,7 +106,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     alignment: ToolbarItem[];
     distribution: ToolbarItem[];
     sizing: ToolbarItem[];
-    grouping: ToolbarItem[];
     zoom_level: ToolbarItem[];
     design_mode: ToolbarItem[];
     sticky: ToolbarItem[];
@@ -112,7 +114,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     show_data: ToolbarItem[];
 
     constructor(protected readonly editorSession: EditorSessionService, protected urlParser: URLParserService,
-        @Inject(DOCUMENT) private doc: Document, protected designSize: DesignSizeService, private readonly renderer: Renderer2) {
+        protected designSize: DesignSizeService, private readonly renderer: Renderer2, private editorContentService: EditorContentService) {
         this.createItems();
         this.designSize.createItems(this);
         this.editorSession.addSelectionChangedListener(this);
@@ -149,8 +151,28 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.alignment = this.getCategoryItems(TOOLBAR_CATEGORIES.ALIGNMENT);
             this.distribution = this.getCategoryItems(TOOLBAR_CATEGORIES.DISTRIBUTION);
             this.sizing = this.getCategoryItems(TOOLBAR_CATEGORIES.SIZING);
-            //TODO move this outside the if when SVY-9108 Should be possible to group elements in responsive form. is done
-            this.grouping = this.getCategoryItems(TOOLBAR_CATEGORIES.GROUPING);
+
+            const ShowSameSizeIndicatorPromise = this.editorSession.showSameSizeIndicator();
+            void ShowSameSizeIndicatorPromise.then((result: boolean) => {
+                if (!result) {
+                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': 'none' };
+                }
+                else {
+                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                }
+                this.editorSession.setSameSizeIndicator(result);
+            });
+
+            const ShowAnchoringIndicatorPromise = this.editorSession.showAnchoringIndicator();
+            void ShowAnchoringIndicatorPromise.then((result: boolean) => {
+                if (!result) {
+                    this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': 'none' };
+                }
+                else {
+                    this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                }
+                this.editorSession.setAnchoringIndicator(result);
+            });
 
         } else {
             this.btnPlaceField.hide = true;
@@ -179,11 +201,14 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnToggleShowData.state = result;
         });
         const wireframePromise = this.editorSession.isShowWireframe();
-       void  wireframePromise.then((result: boolean) => {
+        void wireframePromise.then((result: boolean) => {
             this.btnToggleDesignMode.state = result;
             this.editorSession.getState().showWireframe = result;
             this.editorSession.stateListener.next('showWireframe');
-            if (result) this.editorSession.sendState('showWireframe', result);
+            // always send showwireframe because this will also display the ghosts
+            this.editorContentService.executeOnlyAfterInit(() => {
+                this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
+            });
             // TODO:
             // this.editorSession.setContentSizes();
         });
@@ -216,21 +241,30 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.editorSession.getState().showSolutionCss = result;
         });
         const zoomLevelPromise = this.editorSession.getZoomLevel();
-       void  zoomLevelPromise.then((result: number) => {
+        void zoomLevelPromise.then((result: number) => {
             if (result) {
                 this.btnSetMaxLevelContainer.initialValue = result;
                 this.editorSession.getState().maxLevel = result;
-                this.editorSession.sendState('maxLevel', result);
+                this.editorContentService.executeOnlyAfterInit(() => {
+                    this.editorContentService.sendMessageToIframe({ id: 'maxLevel', value: result });
+                });
                 this.editorSession.setZoomLevel(result);
             }
         });
 
-        if (this.doc.getElementById('errorsDiv') !== null) {
+        const showI18NValuesPromise = this.editorSession.isShowI18NValues();
+        void showI18NValuesPromise.then((result: boolean) => {
+            if (!result) {
+                this.btnToggleI18NValues.text = 'Show I18N values';
+            }
+        });
+
+        if (this.editorContentService.getDesignerElementById('errorsDiv') !== null) {
             this.btnShowErrors.enabled = true;
-            if (this.doc.getElementById('closeErrors')) {
-                this.doc.getElementById('closeErrors').addEventListener('click', () => {
+            if (this.editorContentService.getDesignerElementById('closeErrors')) {
+                this.editorContentService.getDesignerElementById('closeErrors').addEventListener('click', () => {
                     this.btnShowErrors.state = !this.btnShowErrors.state;
-                    this.doc.getElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
+                    this.editorContentService.getDesignerElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
                 });
             }
         }
@@ -333,7 +367,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 void promise.then((result: boolean) => {
                     this.btnToggleDesignMode.state = result;
                     this.editorSession.getState().showWireframe = result;
-                    this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'showWireframe', value: result }, '*');
+                    this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
                     this.editorSession.stateListener.next('showWireframe');
                     // TODO:
                     // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
@@ -440,7 +474,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             (value) => {
                 const lvl = parseInt(value);
                 this.editorSession.getState().maxLevel = lvl;
-                this.doc.querySelector('iframe').contentWindow.postMessage({ id: 'maxLevel', value: value }, '*');
+                this.editorContentService.sendMessageToIframe({ id: 'maxLevel', value: value });
                 this.editorSession.setZoomLevel(lvl);
             }
         );
@@ -452,20 +486,21 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnSetMaxLevelContainer.incIcon = 'images/zoom_in_xs.png';
         this.btnSetMaxLevelContainer.state = false;
 
-        this.btnSaveAsTemplate = new ToolbarItem(
+		// deprecated
+        /*this.btnSaveAsTemplate = new ToolbarItem(
             'Save as template...',
             'toolbar/icons/template_save.png',
             true,
             () => {
                 this.editorSession.openElementWizard('saveastemplate');
             }
-        );
+        );*/
 
         this.add(this.btnZoomIn, TOOLBAR_CATEGORIES.ZOOM);
         this.add(this.btnZoomOut, TOOLBAR_CATEGORIES.ZOOM);
         this.add(this.btnSetMaxLevelContainer, TOOLBAR_CATEGORIES.ZOOM_LEVEL);
         this.add(this.btnTabSequence, TOOLBAR_CATEGORIES.FORM);
-        this.add(this.btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
+        //this.add(this.btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 
         this.btnHideInheritedElements = new ToolbarItem(
             'Hide inherited elements',
@@ -481,12 +516,73 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
                 this.applyHideInherited(this.btnHideInheritedElements.state);
                 this.editorSession.executeAction('toggleHideInherited');
+                this.editorSession.setSelection([]);
             }
         );
         this.btnHideInheritedElements.disabledIcon = 'images/hide_inherited-disabled.png';
         this.btnHideInheritedElements.state = false;
 
+        this.btnVisualFeedbackOptions = new ToolbarItem(
+            'Visual feedback options',
+            null,
+            true,
+            null
+        );
+
+        this.btnVisualFeedbackOptions.getIconStyle = (selection) => {
+            return { 'background-image': TOOLBAR_CONSTANTS.VISUAL_FEEDBACK_CSS_ICON };
+        };
+
+        this.btnVisualFeedbackOptions.list = [
+            { 'text': 'Selected Element Anchoring Indicator', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
+            { 'text': 'Selected Element Alignment Guide', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
+            { 'text': TOOLBAR_CONSTANTS.SAME_SIZE, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
+            { 'text': 'Grid', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
+            { 'text': 'Rulers', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } }
+        ];
+
+        this.btnVisualFeedbackOptions.onselection = (selection) => {
+            if (selection == TOOLBAR_CONSTANTS.SAME_SIZE) {
+                this.editorSession.setSameSizeIndicator(!this.editorSession.getState().sameSizeIndicator);
+                if (this.editorSession.getState().sameSizeIndicator) {
+                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                }
+                else {
+                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': 'none' };
+                }
+            }
+            if (selection == TOOLBAR_CONSTANTS.ANCHOR_INDICATOR) {
+                this.editorSession.setAnchoringIndicator(!this.editorSession.getState().anchoringIndicator);
+                if (this.editorSession.getState().anchoringIndicator) {
+                    this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                }
+                else {
+                    this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': 'none' };
+                }
+            }
+            return selection;
+        }
+
+        this.btnPlacementGuideOptions = new ToolbarItem(
+            'Element placement guide options',
+            null,
+            true,
+            null
+        );
+
+        this.btnPlacementGuideOptions.list = [
+            { 'text': 'None', 'iconStyle': { 'background-image': 'none' } },
+            { 'text': 'Grid guides', 'iconStyle': { 'background-image': 'none' } },
+            { 'text': 'Alignment guides', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } }
+        ];
+
+        this.btnPlacementGuideOptions.getIconStyle = (selection) => {
+            return { 'background-image': TOOLBAR_CONSTANTS.PLACEMENT_GUIDE_CSS_ICON };
+        };
+
         this.add(this.btnHideInheritedElements, TOOLBAR_CATEGORIES.DISPLAY);
+        this.add(this.btnVisualFeedbackOptions, TOOLBAR_CATEGORIES.DISPLAY);
+        this.add(this.btnPlacementGuideOptions, TOOLBAR_CATEGORIES.DISPLAY);
 
         this.btnBringForward = new ToolbarItem(
             'Bring forward',
@@ -589,10 +685,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let left: number = null;
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (left == null) {
@@ -604,7 +699,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     }
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (elementRect.x != left) {
@@ -616,6 +711,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection(); 
                 }
             }
         );
@@ -630,10 +726,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let right = null;
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (right == null) {
@@ -645,7 +740,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     }
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if ((elementRect.x + elementRect.width) != right) {
@@ -657,6 +752,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -671,10 +767,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let top: number = null;
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (top == null) {
@@ -686,7 +781,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     }
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (elementRect.y != top) {
@@ -698,6 +793,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -712,10 +808,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let bottom = null;
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (bottom == null) {
@@ -727,7 +822,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     }
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if ((elementRect.y + elementRect.height) != bottom) {
@@ -739,6 +834,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -754,10 +850,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     const obj = {};
                     let centerElementModel: DOMRect = null;
                     const sortedSelection: Array<DOMRect> = [];
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (sortedSelection.length == 0) {
@@ -777,7 +872,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
@@ -789,6 +884,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -804,10 +900,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     const obj = {};
                     let centerElementModel: DOMRect = null;
                     const sortedSelection: Array<DOMRect> = [];
-                    const frameElem = this.doc.querySelector('iframe');
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (sortedSelection.length == 0) {
@@ -827,7 +922,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
-                        const element = frameElem.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+                        const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
@@ -839,6 +934,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         }
                     }
                     this.editorSession.sendChanges(obj);
+                    this.updateSelection();   
                 }
             }
         );
@@ -857,6 +953,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('horizontal_spacing');
+                this.updateSelection();
             }
         );
         this.btnDistributeHorizontalSpacing.disabledIcon = 'images/distribute_hspace-disabled.png';
@@ -867,6 +964,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('horizontal_centers');
+                this.updateSelection();
             }
         );
         this.btnDistributeHorizontalCenters.disabledIcon = 'images/distribute_hcenters-disabled.png';
@@ -877,6 +975,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('horizontal_pack');
+                this.updateSelection();
             }
         );
         this.btnDistributeLeftward.disabledIcon = 'images/distribute_leftward-disabled.png';
@@ -887,6 +986,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('vertical_spacing');
+                this.updateSelection();
             }
         );
         this.btnDistributeVerticalSpacing.disabledIcon = 'images/distribute_vspace-disabled.png';
@@ -897,6 +997,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('vertical_centers');
+                this.updateSelection();
             }
         );
         this.btnDistributeVerticalCenters.disabledIcon = 'images/distribute_vcenters-disabled.png';
@@ -907,6 +1008,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.editorSession.executeAction('vertical_pack');
+                this.updateSelection();
             }
         );
         this.btnDistributeUpward.disabledIcon = 'images/distribute_upward-disabled.png';
@@ -918,29 +1020,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnDistributeVerticalCenters, TOOLBAR_CATEGORIES.DISTRIBUTION);
         this.add(this.btnDistributeUpward, TOOLBAR_CATEGORIES.DISTRIBUTION);
 
-        this.btnGroup = new ToolbarItem(
-            'Group',
-            'images/group.png',
-            false,
-            () => {
-                this.editorSession.executeAction('createGroup');
-            }
-        );
-        this.btnGroup.disabledIcon = 'images/group-disabled.png';
-
-        this.btnUngroup = new ToolbarItem(
-            'Ungroup',
-            'images/ungroup.png',
-            false,
-            () => {
-                this.editorSession.executeAction('clearGroup');
-            }
-        );
-        this.btnUngroup.disabledIcon = 'images/ungroup-disabled.png';
-
-        this.add(this.btnGroup, TOOLBAR_CATEGORIES.GROUPING);
-        this.add(this.btnUngroup, TOOLBAR_CATEGORIES.GROUPING);
-
         this.btnReload = new ToolbarItem(
             'Reload designer (use when component changes must be reflected)',
             'images/reload.png',
@@ -951,6 +1030,24 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
 
         this.add(this.btnReload, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
+
+        this.btnToggleI18NValues = new ToolbarItem(
+            'Show I18n Values',
+            'toolbar/icons/i18n.png',
+            true,
+            () => {
+                if (this.btnToggleI18NValues.state) {
+                    this.btnToggleI18NValues.state = false;
+                    this.btnToggleI18NValues.text = 'Show I18N values';
+                } else {
+                    this.btnToggleI18NValues.state = true;
+                    this.btnToggleI18NValues.text = 'Show I18N keys';
+                }
+                void this.editorSession.toggleShowI18NValues();
+            }
+        );
+        this.btnToggleI18NValues.state = false;
+        this.add(this.btnToggleI18NValues, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         this.btnClassicEditor = new ToolbarItem(
             'Switch to classic editor',
@@ -969,7 +1066,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.btnShowErrors.state = !this.btnShowErrors.state;
-                this.doc.getElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
+                this.editorContentService.getDesignerElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
             }
         );
         this.btnShowErrors.disabledIcon = 'toolbar/icons/disabled_error.png';
@@ -1009,9 +1106,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         });
     }
 
-    setSolutionLayoutsCss(state) {
-        const frameElem = this.doc.querySelector('iframe');
-        frameElem.contentWindow.document.querySelectorAll('[svy-solution-layout-class]').forEach(element => {
+    setSolutionLayoutsCss(state: boolean) {
+        this.editorContentService.querySelectorAllInContent('[svy-solution-layout-class]').forEach(element => {
             const classes = element.getAttribute('svy-solution-layout-class');
             if (classes) {
                 classes.split(' ').forEach(cssclass => {
@@ -1027,9 +1123,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     }
 
     setShowSolutionCss(state) {
-        const frameElem = this.doc.querySelector('iframe');
-        frameElem.contentWindow.document.head.querySelectorAll('link').forEach(link => {
-            if (link.getAttribute('svy-stylesheet')) {
+        this.editorContentService.querySelectorAllInContent('link').forEach(link  => {
+            if (link instanceof HTMLLinkElement && link.getAttribute('svy-stylesheet')) {
                 if (state) {
                     link.disabled = false;
                 }
@@ -1059,20 +1154,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnBottomAlign.enabled = selection.length > 1;
             this.btnCenterAlign.enabled = selection.length > 1;
             this.btnMiddleAlign.enabled = selection.length > 1;
-            //TODO move this outside the if when SVY-9108 Should be possible to group elements in responsive form. is done
-            this.btnGroup.enabled = selection.length >= 2;
-            // btnUngroup.enabled = function() {
-            //at least one selected element should be a group
-            //              for (var i = 0; i < selection.length; i++)
-            //              {
-            //                  var ghost = editorScope.getGhost(selection[i].getAttribute("svy-id"));
-            //                  if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
-            //                  {
-            //                      return true;
-            //                  }
-            //              }
-            //              return false;
-            //          }();
             this.btnBringForward.enabled = selection.length > 0;
             this.btnSendBackward.enabled = selection.length > 0;
             this.btnBringToFront.enabled = selection.length > 0;
@@ -1084,21 +1165,24 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnZoomIn.enabled = selection.length == 1;
         }
     }
-    
-    applyHideInherited(hideInherited : boolean){
-        const frameElem = this.doc.querySelector('iframe');
-        const initializedElements = frameElem.contentWindow.document.querySelectorAll('[svy-id]');
-        if (initializedElements.length == 0) setTimeout(() => this.applyHideInherited(hideInherited), 400);
-        const elements =  Array.from(frameElem.contentWindow.document.querySelectorAll('.inherited_element')).concat(Array.from(this.doc.querySelectorAll('.inherited_element')));
-        elements.forEach((node) => {
-            if (hideInherited) {
-                this.renderer.setStyle(node, 'visibility', 'hidden');
-            }
-            else {
-                this.renderer.setStyle(node, 'visibility', 'visible' );
-            }
+
+    applyHideInherited(hideInherited: boolean) {
+        this.editorContentService.executeOnlyAfterInit(() => {
+            const elements = this.editorContentService.querySelectorAllInContent('.inherited_element').concat(Array.from(this.editorContentService.querySelectorAll('.inherited_element')));
+            elements.forEach((node) => {
+                if (hideInherited) {
+                    this.renderer.setStyle(node, 'visibility', 'hidden');
+                }
+                else {
+                    this.renderer.setStyle(node, 'visibility', 'visible');
+                }
+            });
         });
     }
+    
+    updateSelection(){
+		setTimeout(()=>{this.editorSession.setSelection(this.editorSession.getSelection());}, 100);
+	}
 
 }
 
@@ -1108,7 +1192,7 @@ export class ToolbarItem {
     style: string;
     disabledIcon: string;
     faIcon: string;
-    list: Array<{text: string; iconStyle?:{ 'background-image': string}}>;
+    list: Array<{ text: string; iconStyle?: { 'background-image': string } }>;
     getIconStyle: (text: string) => object;
     onselection: (text: string) => string;
     initialValue: number;

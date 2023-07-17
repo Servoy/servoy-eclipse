@@ -773,7 +773,12 @@
                description="Other Servoy Commands"
                id="com.servoy.eclipse.ui"
                name="Servoy">
-        </category>  
+        </category>
+         <command
+               defaultHandler="com.servoy.eclipse.ui.actions.ConfigureThemeCommandHandler"
+               id="com.servoy.eclipse.ui.less_theme"
+               name="Configure the theme">
+         </command>  
      </extension>
      <extension
            point="org.eclipse.ui.bindings">
@@ -1304,6 +1309,19 @@
             </control>
         </toolbar>
      </menuContribution>
+     <menuContribution
+              allPopups="false"
+              locationURI="toolbar:org.eclipse.ui.main.toolbar?endof=additions">
+           <toolbar
+                 id="com.servoy.eclipse.ui.toolbar">
+              <command
+                    commandId="com.servoy.eclipse.ui.less_theme"
+               		icon="icons/theme_properties.png"
+               		label="Configure the theme"
+                    style="push">
+              </command>
+           </toolbar>
+        </menuContribution>
   </extension>
  <extension
        point="org.eclipse.ui.propertiesView">

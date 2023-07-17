@@ -35,7 +35,7 @@ export class TrustAsHtmlPipe implements PipeTransform {
     }
 
     transform( input: string, trustAsHtml: boolean ): any {
-        if ( trustAsHtml ) {
+        if ( trustAsHtml && input ) {
             return this.domSanitizer.bypassSecurityTrustHtml(input);
         }
         return input;

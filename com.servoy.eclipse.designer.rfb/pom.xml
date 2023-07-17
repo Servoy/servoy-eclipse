@@ -6,10 +6,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2022.3.5.3747_LTS</version>
+		<version>2023.3.2.3844</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.designer.rfb</artifactId>
-	<version>2022.3.5.3747_LTS</version>
+	<version>2023.3.2.3844</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
@@ -31,7 +31,7 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
-							<nodeVersion>v16.14.0</nodeVersion>
+							<nodeVersion>v16.18.1</nodeVersion>
 						</configuration>
 					</execution>
 

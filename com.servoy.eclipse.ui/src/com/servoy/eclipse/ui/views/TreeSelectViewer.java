@@ -64,8 +64,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.EclipseCSSThemeListener;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
@@ -182,7 +184,9 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		}
 		else
 		{
-			textForeground = text.getForeground();
+			textForeground = EclipseCSSThemeListener.isDarkThemeSelected()
+				? PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get("org.eclipse.ui.workbench.DARK_FOREGROUND")
+				: text.getForeground();
 
 			text.addFocusListener(new FocusAdapter()
 			{
@@ -393,7 +397,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	protected TreeSelectDialog createDialog(Control control)
 	{
 		return new TreeSelectDialog(control.getShell(), isShowFilter(), isShowFilterMode(), getDefaultFilterMode(), getContentProvider(), getLabelProvider(),
-			getViewerComparator(), getSelectionFilter(), SWT.SINGLE, title, getInput(), getSelection(), false, name, null);
+			getViewerComparator(), getSelectionFilter(), SWT.SINGLE, title, getInput(), getSelection(), false, name, null, false);
 	}
 
 	protected IStructuredSelection openDialogBox(Control control)

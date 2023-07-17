@@ -1,5 +1,5 @@
 import { Injectable, } from '@angular/core';
-import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory, Locale } from '@servoy/public';
+import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory, Locale, RequestInfoPromise } from '@servoy/public';
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service';
 
@@ -11,7 +11,7 @@ export class SabloService {
     private locale: Locale = null;
     private wsSession: WebsocketSession;
     private currentServiceCallCallbacks = [];
-    private currentServiceCallDone;
+    private currentServiceCallDone: boolean;
     private currentServiceCallWaiting = 0;
     private currentServiceCallTimeouts;
     private log: LoggerService;
@@ -22,7 +22,9 @@ export class SabloService {
         this.log = logFactory.getLogger('SabloService');
         this.windowRefService.nativeWindow.window.addEventListener('beforeunload', () => {
             sessionStorage.remove('svy_session_lock');
-            websocketService.disconnect();
+        });
+        this.windowRefService.nativeWindow.window.addEventListener('pagehide', () => {
+            sessionStorage.remove('svy_session_lock');
         });
 
         if (sessionStorage.has('svy_session_lock')) {
@@ -42,11 +44,8 @@ export class SabloService {
 
         this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr(), this.getWindowName(), this.getWindownr()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri);
 
-        this.wsSession.onMessageObject((msg, conversionInfo) => {
+        this.wsSession.onMessageObject((msg) => {
             // data got back from the server
-
-            if (conversionInfo && conversionInfo.call) msg.call = this.converterService.convertFromServerToClient(msg.call, conversionInfo.call, undefined, undefined);
-
             if (msg.clientnr) {
                 this.sessionStorage.set('clientnr', msg.clientnr);
             }
@@ -123,7 +122,18 @@ export class SabloService {
         this.locale = loc;
     }
 
-    public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): Promise<T> {
+    /**
+     * IMPORTANT!
+     * 
+     * If the returned value is a promise and if the caller is INTERNAL code that chains more .then() or other methods and returns the new promise
+     * to it's own callers, it MUST to wrap the new promise (returned by that then() for example) using $websocket.wrapPromiseToPropagateCustomRequestInfoInternal().
+     * 
+     * This is so that the promise that ends up in (3rd party or our own) components and service code - that can then set .requestInfo on it - ends up to be
+     * propagated into the promise that this callService(...) registered in "deferredEvents"; that is where any user set .requestInfo has to end up, because
+     * that is where getCurrentRequestInfo() gets it from. And that is where special code - like foundset listeners also get the current request info from to
+     * return it back to the user (component/service code).   
+     */
+    public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): RequestInfoPromise<T> {
         const promise = this.wsSession.callService<T>(serviceName, methodName, argsObject, async);
         return async ? promise : this.waitForServiceCallbacks<T>(promise, [100, 200, 500, 1000, 3000, 5000]);
     }
@@ -139,15 +149,16 @@ export class SabloService {
         }
     }
 
-
-    public sendServiceChanges(serviceName: string, propertyName: string, value: any) {
-        const changes = {};
-        changes[propertyName] = this.converterService.convertClientObject(value);
+    public sendServiceChangesJSON(serviceName: string, changes: any) {
         this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes });
     }
 
     public addIncomingMessageHandlingDoneTask(func: () => any) {
-        this.wsSession.addIncomingMessageHandlingDoneTask(func);
+        if (this.wsSession) this.wsSession.addIncomingMessageHandlingDoneTask(func);
+        else {
+            // it can be undefined in form designer, as updates from server come via a different route and this.websocketService.connect() is called from a different place 
+            this.websocketService.getSession().then((session) => session.addIncomingMessageHandlingDoneTask(func));
+        }
     }
 
     public getCurrentRequestInfo(): any {
@@ -166,7 +177,7 @@ export class SabloService {
         }
     }
 
-    private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): Promise<T>{
+    private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): RequestInfoPromise<T>{
         if (this.currentServiceCallWaiting > 0) {
             // Already waiting
             return promise;
@@ -175,40 +186,38 @@ export class SabloService {
         this.currentServiceCallDone = false;
         this.currentServiceCallWaiting = times.length;
         this.currentServiceCallTimeouts = times.map((t) => setTimeout(this.callServiceCallbacksWhenDone, t));
-        return Object.defineProperty(promise.then((arg) => {
-            this.currentServiceCallDone = true;
-            return arg;
-        }, (arg) => {
-            this.currentServiceCallDone = true;
-            return Promise.reject(arg);
-        }), 'requestInfo', {
-			set : (value: any) => {
-				promise['requestInfo'] = value;
-			}
-        });
+
+        return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((arg) => {
+                this.currentServiceCallDone = true;
+                return arg;
+            }, (arg) => {
+                this.currentServiceCallDone = true;
+                return Promise.reject(arg);
+            }));
     }
 
-    private getAPICallFunctions(call, formState) {
-        let funcThis;
-        if (call.viewIndex != undefined) {
-            // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if it want to allow calling API on non-selected rows, but it is not used
-            funcThis = formState.api[call.bean][call.viewIndex];
-        } else if (call.propertyPath != undefined) {
-            // handle nested components; the property path is an array of string or int keys going
-            // through the form's model starting with the root bean name, then it's properties (that could be nested)
-            // then maybe nested child properties and so on
-            let obj = formState.model;
-            let pn;
-            for (pn in call.propertyPath) obj = obj[call.propertyPath[pn]];
-            funcThis = obj.api;
-        } else {
-            funcThis = formState.api[call.bean];
-        }
-        return funcThis;
-    }
+//    private getAPICallFunctions(call, formState) {
+//        let funcThis: Record<string, () => any>;
+//        if (call.viewIndex !== undefined) {
+//            // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if
+//            // it wants to allow calling API on non-selected rows, but it is not used
+//            funcThis = formState.api[call.bean][call.viewIndex];
+//        } else if (call.propertyPath !== undefined) {
+//            // handle nested components; the property path is an array of string or int keys going
+//            // through the form's model starting with the root bean name, then it's properties (that could be nested)
+//            // then maybe nested child properties and so on
+//            let obj = formState.model;
+//            for (const pp of call.propertyPath) obj = obj[pp];
+//            funcThis = obj.api;
+//        } else {
+//            funcThis = formState.api[call.bean];
+//        }
+//        return funcThis;
+//    }
 
     private clearSabloInfo() {
         this.sessionStorage.remove('windownr');
         this.sessionStorage.remove('clientnr');
     }
+
 }

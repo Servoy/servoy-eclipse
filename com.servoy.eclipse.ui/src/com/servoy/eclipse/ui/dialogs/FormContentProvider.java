@@ -251,7 +251,7 @@ public class FormContentProvider implements ITreeContentProvider
 					Form ff = flattenedSolution.getFlattenedForm(form);
 					ff.getWebComponents().forEachRemaining(comp -> {
 						String typeName = comp.getTypeName();
-						WebObjectSpecification spec = specs.getWebComponentSpecification(typeName);
+						WebObjectSpecification spec = specs.getWebObjectSpecification(typeName);
 						if (spec != null)
 						{
 							Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);

@@ -4,15 +4,12 @@
     <artifactId>shiplibs</artifactId>
     <version>2022.3.0.3740_rc</version>
     <name>Servoy shiplibs</name>
-
     <packaging>eclipse-repository</packaging>
-
     <properties>
         <tycho.version>2.6.0</tycho.version>
-        <log4j-version>2.18.0</log4j-version>
-        <eclipse.url>https://download.eclipse.org/eclipse/updates/4.22/</eclipse.url>
+        <log4j-version>2.19.0</log4j-version>
+        <eclipse.url>https://download.eclipse.org/eclipse/updates/4.25/</eclipse.url>
     </properties>
-
     <repositories>
         <repository>
             <id>developer_repo</id>
@@ -25,7 +22,6 @@
             <layout>p2</layout>
         </repository>
     </repositories>
-
     <build>
         <plugins>
             <plugin>
@@ -58,7 +54,6 @@
                             <arch>x86_64</arch>
                         </environment>
                     </environments>
-
                 </configuration>
             </plugin>
             <plugin>
@@ -133,18 +128,18 @@
         <dependency>
             <groupId>com.servoy</groupId>
             <artifactId>jabsorb</artifactId>
-            <version>1.3.2.s6</version>
+            <version>1.3.2.s7</version>
         </dependency>
-        <dependency>
-            <groupId>com.servoy</groupId>
-            <artifactId>slf4j.api</artifactId>
-            <version>1.8.0.beta3-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j18-impl</artifactId>
-            <version>${log4j-version}</version>
-        </dependency>
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-api</artifactId>
+	    <version>2.0.6</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.logging.log4j</groupId>
+	    <artifactId>log4j-slf4j2-impl</artifactId>
+	    <version>${log4j-version}</version>
+	</dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -153,6 +148,11 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>${log4j-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jcl</artifactId>
             <version>${log4j-version}</version>
         </dependency>
         <dependency>
@@ -171,28 +171,24 @@
             <artifactId>jakarta.servlet.jsp-api</artifactId>
             <version>2.3.6</version>
         </dependency>
-
         <!-- Needed for Hibernate -->
         <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>javax.persistence-api</artifactId>
             <version>2.2</version>
         </dependency>
-
         <!-- Needed for Hibernate -->
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
-            <version>3.4.3.Final</version>
+            <version>3.5.0.Final</version>
         </dependency>
-
         <!-- Needed for Hibernate -->
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.12.18</version>
+            <version>1.12.20</version>
         </dependency>
-
         <dependency>
             <groupId>com.servoy</groupId>
             <artifactId>javax.websocket</artifactId>
@@ -214,6 +210,11 @@
             <version>1.1.0.201005260935</version>
         </dependency>
         <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.20</version>
+        </dependency>
+        <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.15.3</version>
@@ -226,7 +227,7 @@
         <dependency>
             <groupId>org.apache.aries.spifly</groupId>
             <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
-            <version>1.3.4</version>
+            <version>1.3.6</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -267,14 +268,14 @@
         <!-- https://mvnrepository.com/artifact/com.sun.activation/javax.activation -->
         <dependency>
             <groupId>com.sun.activation</groupId>
-            <artifactId>javax.activation</artifactId>
-            <version>1.2.0</version>
+            <artifactId>jakarta.activation</artifactId>
+            <version>1.2.2</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.sun.mail/javax.mail -->
         <dependency>
             <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.6.2</version>
+            <artifactId>jakarta.mail</artifactId>
+            <version>1.6.7</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.james/apache-mime4j -->
         <dependency>
@@ -301,7 +302,7 @@
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
         </dependency>
         <dependency>
             <groupId>com.servoy</groupId>
@@ -311,7 +312,7 @@
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-commons</artifactId>
-            <version>9.2</version>
+            <version>9.4</version>
         </dependency>
     </dependencies>
 </project>

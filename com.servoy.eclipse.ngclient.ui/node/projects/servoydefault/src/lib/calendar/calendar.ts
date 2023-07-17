@@ -8,9 +8,7 @@ import { DateTime as LuxonDateTime } from 'luxon';
 
 import { DOCUMENT } from '@angular/common';
 import { LoggerFactory, LoggerService } from '@servoy/public';
-import { TempusDominus, DateTime, Namespace, Options} from '@servoy/tempus-dominus';
-import { ChangeEvent } from '@servoy/tempus-dominus/types/utilities/event-types';
-import Dates from '@servoy/tempus-dominus/types/dates';
+import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dominus';
 
 @Component({
     selector: 'servoydefault-calendar',
@@ -32,7 +30,6 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         useCurrent: false,
         display: {
             components: {
-                useTwentyfourHour: true,
                 decades: true,
                 year: true,
                 month: true,
@@ -46,13 +43,15 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                 today: true,
                 close: true,
                 clear: true,
-            }
+            },
+            theme: 'light'
         },
         restrictions: {
         },
         localization: {
             startOfTheWeek: 1,
-            locale: 'nl'
+            locale: 'nl',
+            hourCycle: 'h23'
         }
     };
 
@@ -66,9 +65,11 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         this.config.localization.locale = servoyService.getLocale();
         this.loadCalendarLocale(this.config.localization.locale);
         this.log = logFactory.getLogger('default-calendar');
-        this.config.localization.startOfTheWeek = getFirstDayOfWeek(servoyService.getLocale());
+        this.config.localization.startOfTheWeek = getFirstDayOfWeek(servoyService.getLocaleObject() ? servoyService.getLocaleObject().full : servoyService.getLocale());
         const lts = LuxonDateTime.now().setLocale(servoyService.getLocale()).toLocaleString(LuxonDateTime.DATETIME_FULL).toUpperCase();
-        this.config.display.components.useTwentyfourHour = lts.indexOf('AM') >= 0 || lts.indexOf('PM') >= 0;
+        if (lts.indexOf('AM') >= 0 || lts.indexOf('PM') >= 0) {
+            this.config.localization.hourCycle = 'h12';
+        }
     }
 
     svyOnInit() {
@@ -118,7 +119,6 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                     const showCalendar = format.indexOf('y') >= 0 || format.indexOf('M') >= 0;
                     const showTime = format.indexOf('h') >= 0 || format.indexOf('H') >= 0 || format.indexOf('m') >= 0;
                     const showSecondsTimer = format.indexOf('s') >= 0;
-                    this.config.display.components.useTwentyfourHour = !(format.indexOf('h') >= 0 || format.indexOf('a') >= 0 || format.indexOf('A') >= 0);
                     this.config.display.components.decades = showCalendar;
                     this.config.display.components.year = showCalendar;
                     this.config.display.components.month = showCalendar;
@@ -127,6 +127,13 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                     this.config.display.components.minutes = showTime;
                     this.config.display.components.seconds = showTime;
                     this.config.display.components.seconds = showSecondsTimer;
+                    if (format.indexOf('a') >= 0 || format.indexOf('A') >= 0 || format.indexOf('am') >= 0 || format.indexOf('AM') >= 0) {
+						this.config.localization.hourCycle = 'h12';
+					} else if (format.indexOf('H') >= 0) {
+						this.config.localization.hourCycle = 'h23';
+					} else if (format.indexOf('h') >= 0) {
+						this.config.localization.hourCycle = 'h12';
+					}
                     if (this.picker !== null) this.picker.updateOptions(this.config);
                 } else {
                     this.log.warn('wrong format or type given into the calendar field ' + JSON.stringify(changes.format.currentValue));
@@ -136,7 +143,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             this.renderer.setStyle(this.inputElementRef.nativeElement, 'height', changes.size.currentValue['height'] + 'px');
     }
 
-    public dateChanged(event: ChangeEvent) {
+    public dateChanged(event: any) {
         if (event.type === 'change.td') {
             if ((event.date && this.dataProviderID && event.date.getTime() === this.dataProviderID.getTime()) ||
                 (!event.date && !this.dataProviderID)) return;
@@ -162,7 +169,10 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
 
     private initializePicker() {
         if (!this.picker) {
+            const currentValue = (this.inputElementRef.nativeElement as HTMLInputElement).value;
+            (this.inputElementRef.nativeElement as HTMLInputElement).value='';
             this.picker = new TempusDominus(this.getNativeElement(), this.config);
+            (this.inputElementRef.nativeElement as HTMLInputElement).value = currentValue;
             this.picker.dates.formatInput =  (date: DateTime) => date?this.formattingService.format(date, this.format, false):'';
             this.picker.dates.parseInput =  (value: string) => {
                 const parsed = this.formattingService.parse(value?value.trim():null, this.format, true, this.dataProviderID);
@@ -205,7 +215,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             language = locale.substring(0, index);
         }
         language = language.toLowerCase();
-        import(`@servoy/tempus-dominus/dist/locales/${language}.js`).then(
+        import(`@eonasdan/tempus-dominus/dist/locales/${language}.js`).then(
             (module: { localization: { [key: string]: string } }) => {
                 this.config.localization = module.localization;
                 if (this.picker !== null) this.picker.updateOptions(this.config);

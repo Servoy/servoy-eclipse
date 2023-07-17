@@ -23,7 +23,6 @@ import org.eclipse.ui.console.IOConsole;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
 public class Activator extends Plugin
@@ -32,7 +31,7 @@ public class Activator extends Plugin
 	private final String NODEJS_EXTENSION = "nodejs";
 	private final static String NG2_FOLDER = "target";
 
-	private final CountDownLatch nodeReady = new CountDownLatch(2);
+	private final CountDownLatch nodeReady = new CountDownLatch(1);
 
 	// The shared instance
 	private static Activator plugin;
@@ -40,7 +39,8 @@ public class Activator extends Plugin
 	private File nodePath;
 	private File npmPath;
 	private RunNPMCommand buildCommand;
-	private File projectFolder;
+	private File mainTargetFolder;
+	private File solutionProjectFolder;
 	private IConsole console;
 
 
@@ -59,12 +59,12 @@ public class Activator extends Plugin
 		String targetFolder = getSystemOrEvironmentProperty("servoy.ng2.target.folder");
 		if (targetFolder != null)
 		{
-			this.projectFolder = new File(targetFolder);
+			this.mainTargetFolder = new File(targetFolder);
 		}
 		else
 		{
 			File stateLocation = Activator.getInstance().getStateLocation().toFile();
-			this.projectFolder = new File(stateLocation, NG2_FOLDER);
+			this.mainTargetFolder = new File(stateLocation, NG2_FOLDER);
 		}
 //		new DistFolderCreatorJob(projectFolder, true).schedule();
 //		extractNode();
@@ -94,16 +94,16 @@ public class Activator extends Plugin
 		if (nodeReady.getCount() > 0)
 		{
 			nodeReady.countDown();
-			if (nodeReady.getCount() == -0 && ServoyModelFinder.getServoyModel() != null && ServoyModelFinder.getServoyModel().getNGPackageManager() != null)
+			if (nodeReady.getCount() == 0 && ServoyModelFinder.getServoyModel() != null && ServoyModelFinder.getServoyModel().getNGPackageManager() != null)
 			{
 				ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
 			}
 		}
 	}
 
-	public void copyNodeFolder(boolean createWatcher, boolean force)
+	public void setActiveSolution(String solutionName)
 	{
-		new NodeFolderCreatorJob(this.projectFolder, createWatcher, force).schedule();
+		this.solutionProjectFolder = new File(mainTargetFolder, solutionName);
 	}
 
 	private String getSystemOrEvironmentProperty(String propertyName)
@@ -157,9 +157,17 @@ public class Activator extends Plugin
 	/**
 	 * @return the projectFolder
 	 */
-	public File getProjectFolder()
+	public File getSolutionProjectFolder()
 	{
-		return projectFolder;
+		return solutionProjectFolder;
+	}
+
+	/**
+	 * @return the projectFolder
+	 */
+	public File getMainTargetFolder()
+	{
+		return mainTargetFolder;
 	}
 
 	private static File extractPath(IConfigurationElement element, String attribute, boolean deletePreviousPaths)
@@ -222,39 +230,24 @@ public class Activator extends Plugin
 		return file;
 	}
 
-	public RunNPMCommand createNPMCommand(List<String> commandArguments)
+	public RunNPMCommand createNPMCommand(File folder, List<String> commandArguments)
 	{
 		waitForNodeExtraction();
-		return new RunNPMCommand(nodePath, npmPath, projectFolder, commandArguments);
+		return new RunNPMCommand(nodePath, npmPath, folder, commandArguments);
 	}
 
-	public void executeNPMInstall()
-	{
-		RunNPMCommand installCommand = createNPMCommand(NGClientConstants.NPM_INSTALL);
-		installCommand.setUser(false);
-		createBuildCommand();
-		installCommand.setNextJob(buildCommand);
-		installCommand.schedule();
-
-	}
-
-	public void executeNPMBuild()
-	{
-		if (buildCommand != null) return; // already started?
-		waitForNodeExtraction();
-		createBuildCommand();
-		buildCommand.schedule();
-	}
-
-	/**
+	/*
+	 * public void executeNPMInstall() { RunNPMCommand installCommand = createNPMCommand(NGClientConstants.NPM_INSTALL); installCommand.setUser(false);
+	 * createBuildCommand(); installCommand.setNextJob(buildCommand); installCommand.schedule();
 	 *
+	 * }
+	 *
+	 * public void executeNPMBuild() { if (buildCommand != null) return; // already started? waitForNodeExtraction(); createBuildCommand();
+	 * buildCommand.schedule(); }
+	 *
+	 * private void createBuildCommand() { buildCommand = new RunNPMCommand(NGClientConstants.NPM_BUILD_JOB, nodePath, npmPath, projectFolder,
+	 * NGClientConstants.NG_BUILD_COMMAND); buildCommand.setUser(false); buildCommand.setSystem(true); }
 	 */
-	private void createBuildCommand()
-	{
-		buildCommand = new RunNPMCommand(NGClientConstants.NPM_BUILD_JOB, nodePath, npmPath, projectFolder, NGClientConstants.NG_BUILD_COMMAND);
-		buildCommand.setUser(false);
-		buildCommand.setSystem(true);
-	}
 
 	void waitForNodeExtraction()
 	{

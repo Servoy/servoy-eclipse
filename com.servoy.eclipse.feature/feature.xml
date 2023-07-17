@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="2022.3.5.3747_LTS"
+      version="2023.3.2.3844"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -68,61 +68,67 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="com.servoy.css.core"
-         version="2022.3.5.3747_LTS"/>
+         version="2023.3.2.3844"/>
 
    <includes
          id="org.eclipse.dltk.core.servoy"
-         version="0.0.0"/>
+         version="5.1.1.202302131538"/>
 
    <includes
          id="org.eclipse.dltk.javascript.servoy"
-         version="0.0.0"/>
+         version="5.1.1.202302231624"/>
 
    <includes
          id="org.eclipse.draw2d"
-         version="0.0.0"/>
+         version="3.10.100.201606061308"/>
 
    <includes
          id="org.eclipse.gef"
-         version="0.0.0"/>
+         version="3.11.0.201606061308"/>
 
    <includes
          id="org.eclipse.egit"
-         version="0.0.0"/>
+         version="6.4.0.202211300538-r"/>
 
    <includes
          id="org.eclipse.jgit"
-         version="0.0.0"/>
+         version="6.4.0.202211300538-r"/>
 
    <includes
          id="org.eclipse.jgit.http.apache"
-         version="0.0.0"/>
+         version="6.4.0.202211300538-r"/>
 
    <includes
          id="org.eclipse.jgit.lfs"
-         version="0.0.0"/>
+         version="6.4.0.202211300538-r"/>
 
    <includes
          id="org.eclipse.jgit.ssh.apache"
-         version="0.0.0"/>
+         version="6.4.0.202211300538-r"/>
 
    <includes
          id="com.equo.chromium.cef.feature"
-         version="0.0.0"
+         version="95.0.10"
          arch="x86_64"/>
 
    <includes
          id="com.equo.chromium.feature"
-         version="0.0.0"
+         version="95.0.10"
          arch="x86_64"/>
 
    <includes
          id="com.equo.chromium.cef.arm.feature"
-         version="0.0.0"/>
+         version="95.0.10"/>
+
+   <includes
+         id="org.eclipse.tm4e.feature"
+         version="0.5.2.202211261320"/>
+
+   <includes
+         id="org.eclipse.tm4e.language_pack.feature"
+         version="0.1.1.202210101209"/>
 
    <requires>
-      <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
-      <import feature="org.eclipse.emf.common" version="2.9.0.v20130528-0742"/>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.5.0.0" match="greaterOrEqual"/>
@@ -139,196 +145,196 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.core"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.debug"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.jsunit"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.profiler"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="1.7.14.s3"
          unpack="false"/>
 
    <plugin
          id="j2db_documentation"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="j2db_tunnel"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="j2db_runtime"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="j2db_log4j"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="j2db_server"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="servoy_debug"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="servoy_headless_client"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="servoy_shared"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="servoy_smart_client"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="servoy_base"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="org.apache.tomcat"
          download-size="0"
          install-size="0"
-         version="9.0.50"
+         version="9.0.69"
          unpack="false"/>
 
    <plugin
          id="sablo"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="servoy_ngclient"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
@@ -339,17 +345,17 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.io"
-         download-size="0"
-         install-size="0"
-         version="2.8.0.v20210415-0900"
-         unpack="false"/>
-
-   <plugin
          id="org.maven.ide.eclipse.grouplayout"
          download-size="0"
          install-size="0"
          version="1.1.0.201005260935"
+         unpack="false"/>
+
+   <plugin
+         id="xstream"
+         download-size="0"
+         install-size="0"
+         version="1.4.20"
          unpack="false"/>
 
    <plugin
@@ -377,35 +383,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.codec"
          download-size="0"
          install-size="0"
-         version="1.14.0.v20200818-1422"
+         version="1.14.0.v20221112-0806"
          unpack="false"/>
 
    <plugin
-         id="org.apache.httpcomponents.httpcore"
+         id="org.apache.httpcomponents.core5.httpcore5"
          download-size="0"
          install-size="0"
-         version="4.4.14.v20210128-2225"
+         version="5.1.4.v20221013-1742"
          unpack="false"/>
 
    <plugin
-         id="org.apache.httpcomponents.httpclient"
+         id="org.apache.httpcomponents.client5.httpclient5"
          download-size="0"
          install-size="0"
-         version="4.5.13.v20210128-2225"
-         unpack="false"/>
-
-   <plugin
-         id="com.sun.mail.javax.mail"
-         download-size="0"
-         install-size="0"
-         version="1.6.2"
-         unpack="false"/>
-
-   <plugin
-         id="com.sun.activation.javax.activation"
-         download-size="0"
-         install-size="0"
-         version="1.2.0"
+         version="5.1.3.v20221013-1742"
          unpack="false"/>
 
    <plugin
@@ -426,56 +418,49 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="jabsorb"
          download-size="0"
          install-size="0"
-         version="1.3.2.s6"
-         unpack="false"/>
-
-   <plugin
-         id="slf4j.api"
-         download-size="0"
-         install-size="0"
-         version="1.8.0.beta3-SNAPSHOT"
+         version="1.3.2.s7"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.wpm"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.notification"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.api"
          download-size="0"
          install-size="0"
-         version="2.18.0"
+         version="2.19.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
          download-size="0"
          install-size="0"
-         version="2.18.0"
+         version="2.19.0"
          unpack="false"/>
 
    <plugin
-         id="org.apache.logging.log4j.slf4j18-impl"
+         id="org.apache.logging.log4j.jcl"
          download-size="0"
          install-size="0"
-         version="2.18.0"
+         version="2.19.0"
          unpack="false"/>
 
    <plugin
@@ -524,14 +509,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.google.guava"
          download-size="0"
          install-size="0"
-         version="30.1.0.v20210127-2300"
+         version="31.1.0.jre"
          unpack="false"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
          download-size="0"
          install-size="0"
-         version="1.3.4"
+         version="1.3.6"
          unpack="false"/>
 
    <plugin
@@ -545,7 +530,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.ngclient.ui"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
@@ -555,7 +540,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.15.0"/>
+         version="16.18.1"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
@@ -564,7 +549,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.15.0"/>
+         version="18.14.0"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.win32.win32.x86_64"
@@ -573,20 +558,20 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="16.15.0"/>
+         version="18.14.0"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ngclient"
          download-size="0"
          install-size="0"
-         version="2022.3.5.3747_LTS"
+         version="2023.3.2.3844"
          unpack="false"/>
 
    <plugin
@@ -595,7 +580,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.4"/>
+         version="17.0.5"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
@@ -603,7 +588,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.4"/>
+         version="17.0.5"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
@@ -611,7 +596,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          download-size="0"
          install-size="0"
-         version="17.0.4"/>
+         version="17.0.5"/>
 
    <plugin
          id="jakarta.servlet-api"
@@ -633,7 +618,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="aarch64"
          download-size="0"
          install-size="0"
-         version="17.0.4"/>
+         version="17.0.5"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"
@@ -642,6 +627,41 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="aarch64"
          download-size="0"
          install-size="0"
-         version="16.15.0"/>
+         version="18.14.0"/>
+
+   <plugin
+         id="com.sun.activation.jakarta.activation"
+         download-size="0"
+         install-size="0"
+         version="1.2.2"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.mail.jakarta.mail"
+         download-size="0"
+         install-size="0"
+         version="1.6.7"
+         unpack="false"/>
+
+   <plugin
+         id="org.slf4j.api"
+         download-size="0"
+         install-size="0"
+         version="2.0.6"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.logging.log4j.slf4j2-impl"
+         download-size="0"
+         install-size="0"
+         version="2.19.0"
+         unpack="false"/>
+
+   <plugin
+         id="slf4j.api"
+         download-size="0"
+         install-size="0"
+         version="1.7.36"
+         unpack="false"/>
 
 </feature>

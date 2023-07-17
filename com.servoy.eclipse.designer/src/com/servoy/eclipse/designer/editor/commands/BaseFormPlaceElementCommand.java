@@ -436,7 +436,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				return null;
 			}
 		}
-		if (draggedPersist == parent)
+		if ((draggedPersist == parent) || (draggedPersist instanceof WebComponent && parent instanceof WebComponent))
 		{
 			parent = draggedPersist.getParent();
 		}
@@ -559,6 +559,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 	{
 		if (parent instanceof LayoutContainer)
 		{
+			if (((LayoutContainer)parent).getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) != null) return true;
 			Set<String> allowed = DesignerUtil.getAllowedChildren().get(
 				((LayoutContainer)parent).getPackageName() + "." + ((LayoutContainer)parent).getSpecName());
 			if (component instanceof LayoutContainer)

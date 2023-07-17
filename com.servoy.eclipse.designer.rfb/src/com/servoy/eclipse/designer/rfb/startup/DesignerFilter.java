@@ -61,6 +61,7 @@ import org.sablo.util.HTTPUtils;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -219,7 +220,9 @@ public class DesignerFilter implements Filter
 						if (specProvider.getLayoutSpecifications().containsKey(key))
 						{
 							// TODO check why getWebComponentSpecifications call below also returns the layout specifications.
-							if (!"Absolute-Layout".equals(layoutType))
+							// hard coded that in absolute layout we get the servoycore (responsive container) layout
+							if ((!"servoycore".equals(key) && !"Absolute-Layout".equals(layoutType)) ||
+								("servoycore".equals(key) && "Absolute-Layout".equals(layoutType)))
 							{
 								PackageSpecification<WebLayoutSpecification> pkg = specProvider.getLayoutSpecifications().get(key);
 								jsonWriter.object();
@@ -310,6 +313,9 @@ public class DesignerFilter implements Filter
 									else layoutJson.put("layoutName", spec.getName());
 								}
 								else layoutJson.put("layoutName", spec.getName());
+
+								layoutJson.put("packageName", spec.getPackageName());
+
 								layoutJson.put("componentType", "layout");
 								layoutJson.put("displayName", spec.getDisplayName());
 
@@ -331,16 +337,27 @@ public class DesignerFilter implements Filter
 								}
 
 								Map<String, Object> model = new HashMap<String, Object>();
-								PropertyDescription pd = spec.getProperty("size");
-								if (pd != null && pd.getDefaultValue() != null)
+								if ("servoycore-responsivecontainer".equals(spec.getName()))
 								{
-									model.put("size", pd.getDefaultValue());
+									HashMap<String, Number> size = new HashMap<String, Number>();
+									size.put("width", Integer.valueOf(200));
+									size.put("height", Integer.valueOf(200));
+									model.put("size", size);
+									model.put("classes", new String[] { "highlight_element", "svy-responsivecontainer" });
 								}
 								else
 								{
-									HashMap<String, Number> size = new HashMap<String, Number>();
-									size.put("width", Integer.valueOf(300));
-									model.put("size", size);
+									PropertyDescription pd = spec.getProperty("size");
+									if (pd != null && pd.getDefaultValue() != null)
+									{
+										model.put("size", pd.getDefaultValue());
+									}
+									else
+									{
+										HashMap<String, Number> size = new HashMap<String, Number>();
+										size.put("width", Integer.valueOf(300));
+										model.put("size", size);
+									}
 								}
 								layoutJson.put("model", new JSONObject(model));
 								if (spec.getIcon() != null)
@@ -369,9 +386,20 @@ public class DesignerFilter implements Filter
 								{
 									JSONObject componentJson = new JSONObject();
 									componentJson.put("name", spec.getName());
+									componentJson.put("packageName", spec.getPackageName());
 									componentJson.put("componentType", "component");
 									componentJson.put("displayName", spec.getDisplayName());
 									componentJson.put("keywords", spec.getKeywords());
+									if (spec.getStyleVariantCategory() != null)
+									{
+										FlattenedSolution efs = ServoyModelFinder.getServoyModel().getServoyProject(form.getSolution().getName())
+											.getEditingFlattenedSolution();
+										JSONArray variantsForCategory = efs.getVariantsHandler().getVariantsForCategory(spec.getStyleVariantCategory());
+										if (variantsForCategory.length() > 0)
+										{
+											componentJson.put("styleVariantCategory", spec.getStyleVariantCategory());
+										}
+									}
 
 									Map<String, Object> model = new HashMap<String, Object>();
 									if (form.isResponsiveLayout())
@@ -451,11 +479,15 @@ public class DesignerFilter implements Filter
 						jsonWriter.endObject();
 					}
 					jsonWriter.endArray();
-					servletResponse.getWriter().write(sw.toString());
+					JSONArray jsonArray = new JSONArray(sw.toString());
+					jsonArray = PaletteCommonsHandler.getInstance()
+						.insertcommonsCategory(jsonArray);
+					;
+					servletResponse.getWriter().write(jsonArray.toString());
 				}
 				catch (JSONException ex)
 				{
-					Debug.error("Exception during designe palette generation", ex);
+					Debug.error("Exception during designer palette generation", ex);
 				}
 				catch (BackingStoreException e)
 				{
@@ -610,7 +642,7 @@ public class DesignerFilter implements Filter
 	private JSONObject getLayoutAttributes(JSONObject config, WebLayoutSpecification spec, boolean isChild)
 	{
 		JSONObject result = new JSONObject();
-		String value = config.optString("class");
+		String value = config != null ? config.optString("class") : null;
 		if (value == null) result.put("svy-title", "<null>");
 		else result.put("svy-title", (value.startsWith("col-") && !isChild ? "md-*" : value));
 		result.put("designclass", spec.getDesignStyleClass());

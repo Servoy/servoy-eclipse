@@ -2,7 +2,7 @@ import { NumberSymbol } from '@angular/common';
 import { Injectable, NgModule } from '@angular/core';
 import { EventLike, JSEvent } from '../jsevent';
 import { PopupForm } from '../utils/popupform';
-import { IComponentCache, IFormCache, Locale, ServoyPublicService } from '../services/servoy_public.service';
+import { I18NListener, IComponentCache, IFormCache, Locale, ServoyPublicService } from '../services/servoy_public.service';
 import { ServoyPublicModule } from '../servoy_public.module';
 
 @Injectable()
@@ -69,6 +69,9 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         return Promise.resolve(resolvedMessages);
     }
 
+    public listenForI18NMessages(...keys: string[]): I18NListener {
+        throw new Error('Method not implemented.');
+    }
     public callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T> {
         throw new Error('Method not implemented.');
     }
@@ -103,25 +106,16 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         this.localeNumberSymbol = symbol;
     }
 
-    public sendServiceChanges(serviceName: string,propertyName: string, propertyValue: any) {
+    /** @deprecated */
+    public sendServiceChanges(_serviceName: string, _propertyName: string, _propertyValue: any) {}
 
-    }
+    public sendServiceChangeToServer(_serviceName: string, _propertyName: string, _propertyValue: any, _oldPropertyValue: any): void {}
 
-    public showForm(popup: PopupForm): void{
+    public showForm(_popup: PopupForm): void {}
 
-    }
+    public cancelFormPopup(_disableClearPopupFormCallToServer: boolean): void {}
 
-    public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void{
-
-    }
-    
-    public setFormStyleClasses(styleclasses: {property : string}): void{
-        
-    }
-
-    public getCurrentRequestInfo() {
-        throw new Error('Method not implemented.');
-    }
+    public setFormStyleClasses(_styleclasses: {property: string}): void {}
 }
 @NgModule({
     declarations: [
