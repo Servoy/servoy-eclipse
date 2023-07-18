@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.css.core"
       label="Servoy CSS feature"
-      version="2023.3.2.3844"
+      version="2023.3.3.3845_LTS"
       provider-name="Servoy">
 
    <description>
