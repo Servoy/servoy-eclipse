@@ -1,5 +1,5 @@
 <div class="header-content">
-    <div style="float:right; display: -ms-inline-flexbox;">
+    <div style="float:right; display: flex;">
       <mat-select [(value)]="activeRepository" class="repository" matTooltip="Select to change the repository" (selectionChange)="onActiveRepositoryChange()">
         <mat-option *ngFor="let repository of repositories" [value]="repository">{{ repository }}</mat-option>
       </mat-select>

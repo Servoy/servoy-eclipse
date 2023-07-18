@@ -59,9 +59,8 @@ body {
 }
 
 mat-select.repository {
-  width: unset;
+  min-width: 150px;
   padding-top: 10px;
-  position: absolute;
   right: 10px;
 }
 
