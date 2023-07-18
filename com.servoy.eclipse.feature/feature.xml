@@ -68,11 +68,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="com.servoy.css.core"
-<<<<<<< HEAD
          version="2023.6.0.3883"/>
-=======
-         version="2023.3.3.3845_LTS"/>
->>>>>>> refs/remotes/origin/lts_latest
 
    <includes
          id="org.eclipse.dltk.core.servoy"
@@ -149,275 +145,175 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.core"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.debug"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.jsunit"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.profiler"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
-         version="1.7.14.s4"
-=======
          version="1.7.14.s5"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="j2db_documentation"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="j2db_tunnel"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="j2db_runtime"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="j2db_log4j"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="j2db_server"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="servoy_debug"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="servoy_headless_client"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="servoy_shared"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="servoy_smart_client"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="servoy_base"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
@@ -431,22 +327,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="sablo"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="servoy_ngclient"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
@@ -537,33 +425,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.designer.wpm"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.notification"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
@@ -682,11 +558,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.ngclient.ui"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
@@ -720,22 +592,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.exporter.ngdesktop"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ngclient"
          download-size="0"
          install-size="0"
-<<<<<<< HEAD
          version="2023.6.0.3883"
-=======
-         version="2023.3.3.3845_LTS"
->>>>>>> refs/remotes/origin/lts_latest
          unpack="false"/>
 
    <plugin
