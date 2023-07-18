@@ -29,7 +29,7 @@ export class EditorContentService {
         let redrawDecorators = false;
         let refresh = false;
         let reorderPartComponents: boolean;
-        
+
         if (data.updatedFormComponentsDesignId) {
             for (const index of Object.keys(data.updatedFormComponentsDesignId)) {
                 const fcname = data.updatedFormComponentsDesignId[index].startsWith('_') ? data.updatedFormComponentsDesignId[index].substring(1) : data.updatedFormComponentsDesignId[index];
@@ -43,13 +43,20 @@ export class EditorContentService {
                             this.removeChildrenRecursively(item, formCache);
                         }
                     });
+                    const parentUUID = data.childParentMap[fc.name] ? data.childParentMap[fc.name].uuid : undefined;
+                    if (parentUUID) {
+                        const parent = formCache.getLayoutContainer(parentUUID);
+                        if (parent) {
+                            parent.removeChild(fc);
+                        }
+                    }
                 }
                 formCache.removeFormComponent(fcname.replace(/_/g, '-'));
                 renderGhosts = true;
                 redrawDecorators = true;
             }
         }
-                
+
         if (data.ng2containers) {
             data.ng2containers.forEach((elem) => {
                 let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
@@ -136,7 +143,7 @@ export class EditorContentService {
                     } else if (formCache.absolute) {
                         reorderPartComponents = true;
                     }
-                    if ( (elem.specName === 'servoycore-formcomponent' || elem.specName === 'servoycore-listformcomponent') &&  !elem.responsive) {
+                    if ((elem.specName === 'servoycore-formcomponent' || elem.specName === 'servoycore-listformcomponent') && !elem.responsive) {
                         const layout: { [property: string]: string } = {};
                         this.fillLayout(elem, formCache, layout);
                         (component as FormComponentCache).formComponentProperties.layout = layout;
@@ -224,11 +231,11 @@ export class EditorContentService {
                                     const formComponentComponent = formCache.getComponent(child);
                                     const container = formCache.getLayoutContainer(data.childParentMap[child].uuid);
                                     if ((formComponent.responsive && container) || container) {
-										formComponent.removeChild(formComponentComponent);
-										container.removeChild(formComponentComponent);
-										container.addChild(formComponentComponent);
+                                        formComponent.removeChild(formComponentComponent);
+                                        container.removeChild(formComponentComponent);
+                                        container.addChild(formComponentComponent);
                                     } else {
-										formComponent.removeChild(formComponentComponent);
+                                        formComponent.removeChild(formComponentComponent);
                                         formComponent.addChild(formComponentComponent);
                                     }
                                 }
@@ -414,9 +421,9 @@ export class EditorContentService {
             });
         }
     }
-    
-    private fillLayout(elem: any, formCache: FormCache, layout: { [property: string]: string } ) {
-          if (!elem.responsive) {
+
+    private fillLayout(elem: any, formCache: FormCache, layout: { [property: string]: string }) {
+        if (!elem.responsive) {
             // form component content is anchored layout
             const continingFormIsResponsive = !formCache.absolute;
             let minHeight = elem.model.minHeight !== undefined ? elem.model.minHeight : elem.model.height; // height is deprecated in favor of minHeight but they do the same thing;
