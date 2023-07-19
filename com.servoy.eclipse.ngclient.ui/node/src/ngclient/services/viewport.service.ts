@@ -486,30 +486,38 @@ export class ViewportService {
      */
     private reallyQueueChange(viewPort: any[], internalState: FoundsetViewportState, deferredState: IDeferedState, idx: number, columnName: string,
         propertyContext: IPropertyContext, newValue: any, oldValue?: any, doNotPush?: boolean): Promise<any> {
-        // if it doesn't have internalState.forFoundset then it's probably the foundset property's viewport directly which has those in the viewport
-        const r: CellChangeToServer = {
-            _svyRowId: (internalState.forFoundset !== undefined ? internalState.forFoundset().viewPort.rows[idx]._svyRowId : viewPort[idx]._svyRowId),
-            value: newValue
-        };
-        if (columnName !== undefined) r.dp = columnName;
-
-        // convert new data if necessary
-        const clientSideTypesForRow = internalState.viewportTypes?.[idx];
-
-        const convResult = this.converterService.convertFromClientToServer(r.value, columnName ? clientSideTypesForRow?.[columnName] : clientSideTypesForRow, oldValue, propertyContext);
-        r.value = convResult[0];
-        if (columnName !== undefined) viewPort[idx][columnName] = convResult[1];
-        else viewPort[idx] = convResult[1];
-
-        const req = { viewportDataChanged: r };
         let promise: Promise<any>;
-        if (deferredState) {
-            const requestID = this.sabloDeferHelper.getNewDeferId(deferredState);
-            req[ViewportService.ID_KEY] = requestID;
-            promise = deferredState.deferred[requestID].defer.promise;
-        }
 
-        internalState.requests.push(req);
+        const previousIgnoreChanges = internalState.ignoreChanges;
+        internalState.ignoreChanges = true; // we want to disable the viewport and viewport row proxies here, as below we do assign the new conversion result back into the viewport - and that should not result in a stack overflow
+        
+        try {
+            // if it doesn't have internalState.forFoundset then it's probably the foundset property's viewport directly which has those in the viewport
+            const r: CellChangeToServer = {
+                _svyRowId: (internalState.forFoundset !== undefined ? internalState.forFoundset().viewPort.rows[idx]._svyRowId : viewPort[idx]._svyRowId),
+                value: newValue
+            };
+            if (columnName !== undefined) r.dp = columnName;
+    
+            // convert new data if necessary
+            const clientSideTypesForRow = internalState.viewportTypes?.[idx];
+    
+            const convResult = this.converterService.convertFromClientToServer(r.value, columnName ? clientSideTypesForRow?.[columnName] : clientSideTypesForRow, oldValue, propertyContext);
+            r.value = convResult[0];
+            if (columnName !== undefined) viewPort[idx][columnName] = convResult[1];
+            else viewPort[idx] = convResult[1];
+    
+            const req = { viewportDataChanged: r };
+            if (deferredState) {
+                const requestID = this.sabloDeferHelper.getNewDeferId(deferredState);
+                req[ViewportService.ID_KEY] = requestID;
+                promise = deferredState.deferred[requestID].defer.promise;
+            }
+    
+            internalState.requests.push(req);
+        } finally {
+            internalState.ignoreChanges = previousIgnoreChanges;
+        }
         internalState.notifyChangeListener(doNotPush);
 
         return promise;
