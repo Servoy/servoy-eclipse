@@ -100,9 +100,9 @@ public class SplashHandler extends BasicSplashHandler
 		StringBuffer text = new StringBuffer();
 		text.append("Version ");
 		text.append(ClientVersion.getVersion());
-		text.append(" Build date: ");
+		text.append(" (");
 		text.append(ClientVersion.getBuildDate());
-		text.append("\n");
+		text.append(")\n");
 		text.append("This program is protected by international\ncopyright laws as described in Help About");
 		text.append("\nCopyright \u00A9 Servoy BV 1997 - " + Utils.formatTime(System.currentTimeMillis(), "yyyy"));
 
