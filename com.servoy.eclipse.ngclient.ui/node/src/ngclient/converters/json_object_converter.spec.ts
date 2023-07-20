@@ -1034,6 +1034,9 @@ describe('JSONObjectConverter', () => {
         const tabAsSeenInternally = val as IChangeAwareValue;
         const tab = val as TabDeprecated;
         
+        for (const k in tab)
+            if (k === "constructor" || k === "get2ConcattedProps") fail("'" + k + "' should not be an enumerable property!");
+        
         expect(tab).toBeDefined();
         expect(tab.name).toBe('test', 'name should be test');
         expect(tab.myvalue).toBe('test', 'myvalue should be test');
