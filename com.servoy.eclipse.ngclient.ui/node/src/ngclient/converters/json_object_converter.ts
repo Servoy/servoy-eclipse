@@ -417,22 +417,27 @@ export class CustomObjectType implements IType<CustomObjectValue> {
     }
 
     /**
-     * @return [clonedProto, lastClonedProto] clonedProto tha is returned it the clone of the given prototype; lastClonedProto is the inner most prototype
+     * @return [clonedProto, lastClonedProto] clonedProto that is returned it the clone of the given prototype; lastClonedProto is the inner most prototype
      *              that was cloned before Object.prototype (as the cloning is recursive).
      */
     private static clonePrototypeDeep(p: any): [any, any] {
         // used so that we can augment the property chain of server or client code created custom objects
         // so that CustomObjectValue.class is the first thing in their prototype but then the following prototypes on the value can remain unchanged
         // for each type of custom object value
-        const clonedP = {};
-        let lastClonedP = clonedP;
-        Object.getOwnPropertyNames(p).forEach((memberName) => clonedP[memberName] = p[memberName]);
-        const childProt = Object.getPrototypeOf(p);
-        if (childProt && childProt !== Object.prototype) {
-            let clonedChildProt: any;
-            [clonedChildProt, lastClonedP] = CustomObjectType.clonePrototypeDeep(childProt);
-            Object.setPrototypeOf(clonedP, clonedChildProt);
-        }
+        let protToUseAfterCloning = Object.getPrototypeOf(p);
+
+        let lastClonedP: any;
+        if (protToUseAfterCloning && protToUseAfterCloning !== Object.prototype)
+            [protToUseAfterCloning, lastClonedP] = CustomObjectType.clonePrototypeDeep(protToUseAfterCloning);
+        
+        // shallow copy of "p"
+        const clonedP = Object.create(
+          protToUseAfterCloning,
+          Object.getOwnPropertyDescriptors(p),
+        );
+
+        if (!lastClonedP) lastClonedP = clonedP;
+        
         return [clonedP, lastClonedP];
     }
 
