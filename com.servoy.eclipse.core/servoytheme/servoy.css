@@ -33,7 +33,7 @@
 	background-color: #FFFFFF;
 }
 
-ToolItem {
+ToolItem, FigureCanvas {
 	background-color: unset;
 }
 
