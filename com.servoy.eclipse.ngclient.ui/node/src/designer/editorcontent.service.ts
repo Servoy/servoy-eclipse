@@ -185,6 +185,20 @@ export class EditorContentService {
                                 }
                             }
                         }
+                        const containers = data?.formComponentContainers?.[elem.name];
+                        containers?.forEach((elem) => {
+                            const container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
+                            formCache.addLayoutContainer(container);
+                            const parentUUID = data.childParentMap[container.id] ? data.childParentMap[container.id].uuid : undefined;
+                            if (parentUUID) {
+                               const parent = this.findStructureCache(fcc.items, parentUUID);
+                               if (parent) parent.addChild(container);
+                            }
+                            else {
+                                // parent is null so it is the child of the fcc directly.
+                                fcc.addChild(container);
+                            }
+                        });
                     } else {
                         const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry).initForDesigner(elem.model);
                         formCache.add(comp);
@@ -229,7 +243,7 @@ export class EditorContentService {
                             data.formComponentsComponents?.forEach((child: string) => {
                                 if (child.lastIndexOf(fixedName + '$', 0) === 0) {
                                     const formComponentComponent = formCache.getComponent(child);
-                                    const container = formCache.getLayoutContainer(data.childParentMap[child].uuid);
+                                    const container = this.findStructureCache(formComponent.items,data.childParentMap[child].uuid); 
                                     if ((formComponent.responsive && container) || container) {
                                         formComponent.removeChild(formComponentComponent);
                                         container.removeChild(formComponentComponent);
@@ -378,6 +392,21 @@ export class EditorContentService {
 
     setDirty() {
 
+    }
+    
+    private findStructureCache(items: Array<StructureCache | ComponentCache | FormComponentCache>, id: string): StructureCache {
+        for(const item of items) {
+            if (item instanceof StructureCache) {
+                if ( item.id == id) {
+                    return item;
+                }
+                else {
+                    const child =  this.findStructureCache(item.items, id);
+                    if (child) return child;
+                }
+            }
+        }
+        return null;
     }
 
     private removeChildFromParentRecursively(child: ComponentCache | StructureCache | FormComponentCache, parent: StructureCache | FormComponentCache) {
