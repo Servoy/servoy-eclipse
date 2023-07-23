@@ -17,19 +17,17 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
-import java.util.Iterator;
+import static com.servoy.eclipse.model.util.ModelUtils.getEditingFlattenedSolution;
+
 import java.util.Map;
 
 import org.sablo.specification.PropertyDescription;
 
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
-import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.UUID;
-import com.servoy.j2db.util.Utils;
 
 /**
  * @author user
@@ -49,7 +47,7 @@ public class PersistFinder
 	{
 	}
 
-	public IPersist searchForPersist(BaseVisualFormEditor editorPart, String fullUUIDA)
+	public IPersist searchForPersist(Form form, String fullUUIDA)
 	{
 		if (fullUUIDA == null) return null;
 		String fullUUID = fullUUIDA;
@@ -69,11 +67,11 @@ public class PersistFinder
 			if (uuid.startsWith("_")) start = 1;
 			uuid = uuid.substring(start, index).replace('_', '-');
 		}
-		IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(uuid);
+		IPersist searchPersist = getEditingFlattenedSolution(form).searchPersist(uuid);
 		if (index > 1)
 		{
 			searchPersist = new WebFormComponentChildType((WebComponent)searchPersist, fullUUID.substring(index + 1).replace('$', '.'),
-				ModelUtils.getEditingFlattenedSolution(editorPart.getForm()));
+				getEditingFlattenedSolution(form));
 			if (childUUID != null)
 			{
 				UUID childId = UUID.fromString(childUUID);
@@ -107,20 +105,11 @@ public class PersistFinder
 
 	}
 
-
-	public boolean checkName(BaseVisualFormEditor editorPart, String compName)
+	public boolean checkName(Form form, String compName)
 	{
-		Iterator<IFormElement> fields = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getFlattenedObjects(
-			null).iterator();
-		for (IFormElement element : Utils.iterate(fields))
-		{
-			if (compName.equals(element.getName()))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
+		return getEditingFlattenedSolution(form).getFlattenedForm(form).getFlattenedObjects(
+			null).stream().noneMatch(element -> compName.equals(element.getName()));
 
+	}
 
 }

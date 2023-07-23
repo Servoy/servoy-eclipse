@@ -41,10 +41,14 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.eclipse.core.util.ReturnValueSnippet;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.RagtestRegistry;
+import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestActions;
+import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestHandler;
 import com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.IDelegate;
 
 /**
@@ -312,6 +316,9 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 		protected abstract ArrayPropertyChildId getIdFromIndex(int idx);
 
+		protected abstract String getTypeName();
+
+
 		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
@@ -456,6 +463,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			return false;
 		}
 
+
 	}
 
 	/**
@@ -557,7 +565,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 					return DELETE_CURRENT_COMMAND_VALUE;
 				}
 
-			}, new ButtonCellEditor()
+			}, new ButtonRagtestCellEditor()
 			{
 
 				@Override
@@ -568,10 +576,41 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 					buttonWidget.setToolTipText("Insert a new array item below.");
 				}
 
+//				@Override
+//				protected Object getValueToSetOnClick(Object oldPropertyValue)
+//				{
+//					return INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+//				}
+
+
 				@Override
-				protected Object getValueToSetOnClick(Object oldPropertyValue)
+				protected void buttonClicked()
 				{
-					return INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+					EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
+					if (handler == null)
+					{
+						ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
+					}
+					else
+					{
+						Object id = getId();
+						String parentKey;
+						if (id instanceof ArrayPropertyChildId)
+						{
+							parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+						}
+						else
+						{
+							parentKey = String.valueOf(id);
+						}
+
+						if (oldValue instanceof IPersist)
+						{
+							handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, arrayPropertySource.getTypeName());
+						}
+						System.err.println("RAGTEST ");
+
+					}
 				}
 
 			}, false, true, 0));

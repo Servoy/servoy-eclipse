@@ -66,6 +66,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return ((ICustomType< ? >)propertyDescription.getType()).getCustomJSONTypeDefinition();
 	}
 
+
 	private WebCustomType getNewElementValue(int index)
 	{
 		// when user adds/inserts a new item in the array normally a null is inserted
@@ -102,6 +103,18 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		public CustomArrayPropertySource(ComplexProperty<Object> complexProperty)
 		{
 			super(complexProperty);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#getTypeName()
+		 */
+		@Override
+		protected String getTypeName()
+		{
+			return propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
+				: propertyDescription.getType().getName();
 		}
 
 		@Override

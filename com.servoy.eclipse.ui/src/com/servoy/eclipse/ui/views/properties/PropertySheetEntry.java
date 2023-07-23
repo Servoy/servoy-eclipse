@@ -214,15 +214,15 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		{
 			// get the current ids
 			Object[] ids = intersection.keySet().toArray();
-			for (int j = 0; j < ids.length; j++)
+			for (Object id : ids)
 			{
-				Object object = propertyDescriptorMaps[i].get(ids[j]);
+				Object object = propertyDescriptorMaps[i].get(id);
 				if (object == null ||
 					// see if the descriptors (which have the same id) are
 					// compatible
-					!((IPropertyDescriptor)intersection.get(ids[j])).isCompatibleWith((IPropertyDescriptor)object))
+					!((IPropertyDescriptor)intersection.get(id)).isCompatibleWith((IPropertyDescriptor)object))
 				{
-					intersection.remove(ids[j]);
+					intersection.remove(id);
 				}
 			}
 		}
@@ -645,9 +645,9 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		}
 
 		// Dispose of entries which are no longer needed
-		for (int i = 0; i < entriesToDispose.size(); i++)
+		for (Object element : entriesToDispose)
 		{
-			((IPropertySheetEntry)entriesToDispose.get(i)).dispose();
+			((IPropertySheetEntry)element).dispose();
 		}
 	}
 

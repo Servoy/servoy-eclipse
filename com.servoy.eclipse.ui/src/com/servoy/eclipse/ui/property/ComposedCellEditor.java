@@ -41,8 +41,7 @@ import com.servoy.eclipse.core.util.ReturnValueSnippet;
  */
 public class ComposedCellEditor extends CellEditor
 {
-
-	protected CellEditor cellEditor1;
+	protected CellEditor cellEditor1; // RAGTEST final
 	protected CellEditor cellEditor2;
 	protected boolean cellEditor1IsMain;
 	protected Object oldValue;
@@ -116,22 +115,6 @@ public class ComposedCellEditor extends CellEditor
 		this.cellEditor2 = cellEditor2;
 	}
 
-	/**
-	 * @param cellEditorCreator1 the cellEditorCreator1 to set
-	 */
-	public void setCellEditorCreator1(ReturnValueSnippet<CellEditor, Composite> cellEditorCreator1)
-	{
-		this.cellEditorCreator1 = cellEditorCreator1;
-	}
-
-	/**
-	 * @param cellEditorCreator2 the cellEditorCreator2 to set
-	 */
-	public void setCellEditorCreator2(ReturnValueSnippet<CellEditor, Composite> cellEditorCreator2)
-	{
-		this.cellEditorCreator2 = cellEditorCreator2;
-	}
-
 	protected void init(boolean cellEditor1IsMain, boolean childNestedCellEditor, int freeSpaceInPixels)
 	{
 		this.cellEditor1IsMain = cellEditor1IsMain;
@@ -181,6 +164,24 @@ public class ComposedCellEditor extends CellEditor
 		cellEditor1.addPropertyChangeListener(enablementListener);
 		cellEditor2.addPropertyChangeListener(enablementListener);
 	}
+
+//	/*
+//	 * (non-Javadoc)
+//	 *
+//	 * @see com.servoy.eclipse.ui.property.RagtestCellEditor#setCommandStack(org.eclipse.emf.common.command.CommandStack)
+//	 */
+//	@Override
+//	public void setCommandStack(CommandStack commandStack)
+//	{
+//		if (cellEditor1 instanceof RagtestCellEditor)
+//		{
+//			((RagtestCellEditor)cellEditor1).setCommandStack(commandStack);
+//		}
+//		if (cellEditor2 instanceof RagtestCellEditor)
+//		{
+//			((RagtestCellEditor)cellEditor2).setCommandStack(commandStack);
+//		}
+//	}
 
 	@Override
 	protected Control createControl(final Composite parent)

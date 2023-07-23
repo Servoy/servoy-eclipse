@@ -74,7 +74,7 @@ public class SetPropertiesHandler implements IServerService
 				while (keys.hasNext())
 				{
 					String uuid = (String)keys.next();
-					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
+					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
 					if (persist != null)
 					{
 						PersistContext context = PersistContext.create(persist, editorPart.getForm());

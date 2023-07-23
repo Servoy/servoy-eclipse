@@ -69,7 +69,7 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 				while (keys.hasNext())
 				{
 					String uuid = (String)keys.next();
-					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
+					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
 					if (persist instanceof AbstractBase)
 					{
 						JSONObject properties = args.optJSONObject(uuid);
@@ -78,7 +78,7 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 						String rightSibling = properties.optString("rightSibling", null);
 
 						ISupportFormElements parent = editorPart.getForm();
-						IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, dropTarget);
+						IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), dropTarget);
 
 						if (searchForPersist != null)
 						{
@@ -110,7 +110,7 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 						{
 							Debug.error(e);
 						}
-						IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, rightSibling);
+						IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), rightSibling);
 						ISupportChilds initialParent = persist instanceof ISupportExtendsID ? ((ISupportExtendsID)persist).getRealParent()
 							: persist.getParent();
 						if (initialParent == parent)

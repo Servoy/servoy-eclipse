@@ -21,6 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.ImageIcon;
 
@@ -29,6 +31,9 @@ import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -39,8 +44,12 @@ import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RagtestCommand;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RagtestCommand.RagtestOptions;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.RagtestRegistry;
+import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestActions;
 import com.servoy.eclipse.ui.editors.I18NEditor;
 
 /**
@@ -114,6 +123,44 @@ public class Activator extends AbstractUIPlugin
 					}
 				});
 			}
+		});
+
+		AtomicReference<IWorkbenchPartReference> lastActivePart = new AtomicReference<>();
+
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().addPartListener(new IPartListener2()
+		{
+
+			@Override
+			public void partActivated(IWorkbenchPartReference partRef)
+			{
+				lastActivePart.set(partRef);
+			}
+		});
+
+		RagtestRegistry.registerRagtest(EditorRagtestActions.CREATE_COMPONENT_RAGTEST, (uuid, propertyName, type) -> {
+
+
+//			RagtestCommand command = new RagtestCommand(editorPart.getForm(), RagtestOptions.fromJson(args), id);
+//			editorPart.getCommandStack().execute(command);
+//
+//
+
+			IWorkbenchPage page = lastActivePart.get().getPage();
+			IEditorPart activeEditor = page.getActiveEditor();
+
+			if (activeEditor instanceof BaseVisualFormEditor)
+			{
+				BaseVisualFormEditor formEditor = (BaseVisualFormEditor)activeEditor;
+				RagtestOptions args = new RagtestOptions();
+				args.setDropTargetUUID(uuid.toString());
+				args.setGhostPropertyName(propertyName);
+				args.setType(type);
+				RagtestCommand command = new RagtestCommand(formEditor.getForm(), args, new AtomicInteger()/* RAGTESTtodo */);
+				formEditor.getCommandStack().execute(command);
+			}
+
+
+			System.err.println("RAGTEST called CREATE_COMPONENT_RAGTEST " + activeEditor.getTitle());
 		});
 	}
 

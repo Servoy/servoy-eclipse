@@ -252,7 +252,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									componentName = componentName.replaceAll("-", "_");
 									String baseName = componentName;
 									int i = 1;
-									while (!PersistFinder.INSTANCE.checkName(activeEditor, componentName))
+									while (!PersistFinder.INSTANCE.checkName(activeEditor.getForm(), componentName))
 									{
 										componentName = baseName + "_" + i;
 										i++;
@@ -291,7 +291,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 											if ("autoshow".equals(property.getTag("wizard")))
 											{
 												CreateComponentHandler.autoshowWizard(parentPersist, spec, ((WebComponent)finalPersist[0]), property,
-													activeEditor, id);
+													activeEditor.getForm(), id);
 											}
 										}
 									}

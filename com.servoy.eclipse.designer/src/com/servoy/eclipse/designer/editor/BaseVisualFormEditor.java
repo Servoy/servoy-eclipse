@@ -307,7 +307,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					{
 						try
 						{
-							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this, elementUuid));
+							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this.getForm(), elementUuid));
 						}
 						catch (IllegalArgumentException e)
 						{
