@@ -126,7 +126,7 @@ export class ApplicationService {
                     this.doc.body.appendChild(ifrm);
                 }
             } else {
-				 if (this.isNgdesktopWithTargetSupport(this.windowRefService.nativeWindow.navigator.userAgent)) {
+				 if (target == '_self' && this.isNgdesktopWithTargetSupport(this.windowRefService.nativeWindow.navigator.userAgent)) {
                     const r = this.windowRefService.nativeWindow['require'];
                     const ipcRenderer = r('electron').ipcRenderer;
                     ipcRenderer.send('open-url-with-target', url, target, targetOptions);
@@ -140,7 +140,6 @@ export class ApplicationService {
 
 	private isNgdesktopWithTargetSupport(userAgent: string) {
         const electronVersion = userAgent.match(/Electron\/([0-9\.]+)/);
-
         if (!electronVersion) {
             return false;
         }
