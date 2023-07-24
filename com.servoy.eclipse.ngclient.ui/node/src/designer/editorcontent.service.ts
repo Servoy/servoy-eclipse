@@ -47,7 +47,13 @@ export class EditorContentService {
                     if (parentUUID) {
                         const parent = formCache.getLayoutContainer(parentUUID);
                         if (parent) {
-                            parent.removeChild(fc);
+							if (!parent.removeChild(fc)) {
+								const parent = formCache.getLayoutContainerByFCName(fc.name);
+								if (parent) {
+									parent.removeChild(fc);
+								}
+							}
+                            
                         }
                     }
                 }

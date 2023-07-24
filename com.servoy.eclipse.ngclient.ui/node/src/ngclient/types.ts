@@ -85,6 +85,21 @@ export class FormCache implements IFormCache {
     public getLayoutContainer(id: string): StructureCache {
         return this.layoutContainersCache.get(id);
     }
+    
+    public getLayoutContainerByFCName(name: string): StructureCache {
+		const arrHelp = Array.from(this.layoutContainersCache).filter(cont => {
+			if (cont[1].items.length) {
+				return cont[1].items.map(item => {
+					if (item instanceof FormComponentCache) {
+						return item.name;
+					}
+					return "";
+				}).includes(name);
+			}
+			return false;
+		});
+        return arrHelp.length === 1 ? arrHelp[0][1] : undefined;
+    }
 
     public removeComponent(name: string) {
         const comp = this.componentCache.get(name);
