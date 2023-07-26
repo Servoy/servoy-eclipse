@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.jar.Manifest;
 
@@ -152,6 +153,7 @@ public class SpecMarkdownGenerator
 	private final JSONObject jsonObject;
 	private final Map<String, String> apiDoc = new HashMap<>();
 	private final File specFile;
+	private boolean service;
 
 	/**
 	 * @param specFile
@@ -221,7 +223,14 @@ public class SpecMarkdownGenerator
 		root.put("events", makeMap(jsonObject.optJSONObject("handlers"), this::createFunction));
 		root.put("api", makeMap(jsonObject.optJSONObject("api"), this::createFunction));
 		root.put("types", makeTypes(jsonObject.optJSONObject("types")));
-		if (componentGeneration)
+
+		service = false;
+		JSONObject ng2Config = jsonObject.optJSONObject("ng2Config");
+		if (ng2Config != null)
+		{
+			service = ng2Config.has("serviceName");
+		}
+		if (componentGeneration && !service)
 		{
 			root.put("designtimeExtends", new Property("JSWebComponent", "JSWebComponent", null, null));
 			root.put("runtimeExtends", new Property("RuntimeWebComponent", "RuntimeWebComponent", null, null));
@@ -296,7 +305,7 @@ public class SpecMarkdownGenerator
 	{
 		if (types != null)
 		{
-			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> map = new TreeMap<>();
 			Iterator<String> keys = types.keys();
 			while (keys.hasNext())
 			{
@@ -317,7 +326,7 @@ public class SpecMarkdownGenerator
 	{
 		if (properties != null)
 		{
-			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> map = new TreeMap<>();
 			Iterator<String> keys = properties.keys();
 			while (keys.hasNext())
 			{
@@ -449,14 +458,16 @@ public class SpecMarkdownGenerator
 			}
 		}
 
+
 		File file = new File(userDir,
-			"components/" + categoryName.trim().replace(' ', '-').replace("&", "and").toLowerCase() + "/" + displayName.trim().replace(' ', '-').toLowerCase() +
+			(service ? "service/" : "components/") + categoryName.trim().replace(' ', '-').replace("&", "and").toLowerCase() + "/" +
+				displayName.trim().replace(' ', '-').toLowerCase() +
 				".md");
 		// TODO Auto-generated method stub
 		try
 		{
 			file.getParentFile().mkdirs();
-			FileWriter out = new FileWriter(file);
+			FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
 			temp.process(root, out);
 		}
 		catch (TemplateException | IOException e)

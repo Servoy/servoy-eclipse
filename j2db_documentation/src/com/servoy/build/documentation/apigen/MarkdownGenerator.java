@@ -29,14 +29,17 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
@@ -120,11 +123,28 @@ public class MarkdownGenerator
 		defaultTypePath.put("JSServer", "/plugins/maintenance/");
 		defaultTypePath.put("JSTableObject", "/plugins/maintenance/");
 		defaultTypePath.put("JSColumnObject", "/plugins/maintenance/");
+		defaultTypePath.put("Component", "/forms/runtimeform/elements");
+
 
 	}
 	private static final HashMap<String, String> qualifiedToName = new HashMap<>();
 	private static final HashMap<String, String> publicToRootPath = new HashMap<>();
 	private static final HashMap<String, String> returnTypesToParentName = new HashMap<>();
+	private static final Set<String> storeAsReadMe = new HashSet<>();
+
+	static
+	{
+		storeAsReadMe.add("Application");
+		storeAsReadMe.add("Database Manager");
+		storeAsReadMe.add("SolutionModel");
+		storeAsReadMe.add("Datasources");
+		storeAsReadMe.add("Forms");
+		storeAsReadMe.add("RuntimeForm");
+		storeAsReadMe.add("JS Lib");
+		storeAsReadMe.add("ServoyException");
+		storeAsReadMe.add("Solution");
+
+	}
 
 	private final Map<String, Object> root;
 	private final Path path;
@@ -269,7 +289,7 @@ public class MarkdownGenerator
 		{
 			Class< ? > cls = Class.forName(doc.getQualifiedName());
 			IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
-			if (returnTypes != null && returnTypes.getAllReturnedTypes() != null)
+			if (returnTypes != null && returnTypes.getAllReturnedTypes() != null && returnTypes.getAllReturnedTypes().length > 0)
 			{
 				for (Class< ? > retCls : returnTypes.getAllReturnedTypes())
 				{
@@ -283,6 +303,7 @@ public class MarkdownGenerator
 						System.err.println(" qname not found for " + retCls);
 					}
 				}
+//				returnTypesToParentName.put(doc.getPublicName(), doc.getPublicName());
 			}
 		}
 		File userDir = new File(System.getProperty("user.dir"));
@@ -332,9 +353,18 @@ public class MarkdownGenerator
 
 			String output = cg.generate();
 			String parent = cg.getPath().toString();
-			File file = new File(userDir, (ngOnly ? "ng_generated/" : "generated/") + (parent + '/' + value.getPublicName() + ".md").toLowerCase());
+			String publicName = value.getPublicName();
+			if (storeAsReadMe.contains(value.getPublicName()))
+			{
+				publicName = "README";
+			}
+			else
+			{
+				publicName = publicName.toLowerCase();
+			}
+			File file = new File(userDir, (ngOnly ? "ng_generated/" : "generated/") + (parent.toLowerCase() + '/' + publicName + ".md").replace(' ', '-'));
 			file.getParentFile().mkdirs();
-			try (FileWriter writer = new FileWriter(file))
+			try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
 			{
 				writer.write(output);
 			}
@@ -470,7 +500,14 @@ public class MarkdownGenerator
 		if (p == null)
 		{
 			String parent = returnTypesToParentName.get(publicName);
-			if (parent == null) p = "/";
+			if (parent == null)
+			{
+				if (storeAsReadMe.contains(publicName))
+				{
+					p = "/" + publicName;
+				}
+				else p = "/";
+			}
 			else
 			{
 				String rootPath = publicToRootPath.get(parent);
