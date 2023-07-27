@@ -57,6 +57,7 @@ import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.DecimalLiteral;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.IVariableStatement;
 import org.eclipse.dltk.javascript.ast.Identifier;
 import org.eclipse.dltk.javascript.ast.NewExpression;
 import org.eclipse.dltk.javascript.ast.NullExpression;
@@ -66,7 +67,6 @@ import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
-import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTag;
@@ -1076,11 +1076,11 @@ public class SolutionDeserializer
 				if (node instanceof VoidExpression)
 				{
 					Expression exp = ((VoidExpression)node).getExpression();
-					if (exp instanceof VariableStatement)
+					if (exp instanceof IVariableStatement)
 					{
 						Comment doc = exp.getDocumentation();
 						if (doc != null) sortedComments.remove(doc);
-						List<VariableDeclaration> vars = ((VariableStatement)exp).getVariables();
+						List<VariableDeclaration> vars = ((IVariableStatement)exp).getVariables();
 						for (VariableDeclaration var : vars)
 						{
 							doc = var.getDocumentation();
@@ -1131,9 +1131,9 @@ public class SolutionDeserializer
 			for (VariableDeclaration field : variables)
 			{
 				Comment comment = field.getDocumentation();
-				if (comment == null && field.getParent() instanceof VariableStatement)
+				if (comment == null && field.getParent() instanceof IVariableStatement)
 				{
-					comment = ((VariableStatement)field.getParent()).getDocumentation();
+					comment = ((IVariableStatement)field.getParent()).getDocumentation();
 				}
 
 				boolean newField = true;
