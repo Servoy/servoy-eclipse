@@ -201,7 +201,10 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										finalPersist[0] = addCustomType(parentBean,
 											event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null,
 											-1, null);
-										;
+										CreateComponentHandler.autoShowDataProviderSelection((ISupportFormElements)persistContext.getContext(),
+											(WebComponent)parentBean,
+											event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), activeEditor,
+											((WebCustomType)finalPersist[0]));
 									}
 								}
 								else if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec") != null)
@@ -292,6 +295,11 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 											{
 												CreateComponentHandler.autoshowWizard(parentPersist, spec, ((WebComponent)finalPersist[0]), property,
 													activeEditor, id);
+											}
+											if ("dataprovider".equals(property.getType().getName()))
+											{
+												CreateComponentHandler.autoShowDataProviderSelection(parentPersist,
+													((WebComponent)finalPersist[0]), property.getName(), activeEditor, null);
 											}
 										}
 									}

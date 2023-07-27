@@ -76,8 +76,11 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.autowizard.FormComponentTreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
+import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
+import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -286,6 +289,7 @@ public class CreateComponentHandler implements IServerService
 					}
 					parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(PersistContext.create(parentBean, editorPart.getForm()));
 					WebCustomType bean = AddContainerCommand.addCustomType(parentBean, propertyName, compName, arrayIndex, null);
+					autoShowDataProviderSelection(editorPart.getForm(), (WebComponent)parentBean, propertyName, editorPart, bean);
 					return new IPersist[] { bean };
 				}
 				else if (args.getString("type").equals("tab"))
@@ -654,6 +658,10 @@ public class CreateComponentHandler implements IServerService
 										autoshowWizard(parentSupportingElements, spec, webComponent, property, editorPart, id);
 									}
 								}
+								if ("dataprovider".equals(property.getType().getName()))
+								{
+									autoShowDataProviderSelection(parentSupportingElements, webComponent, propertyName, editorPart, null);
+								}
 							}
 						}
 						List<IPersist> changes = new ArrayList<>();
@@ -823,6 +831,46 @@ public class CreateComponentHandler implements IServerService
 		}
 
 		return null;
+	}
+
+	public static void autoShowDataProviderSelection(ISupportFormElements parentSupportingElements, WebComponent webComponent, String propertyName,
+		BaseVisualFormEditor editorPart, WebCustomType bean)
+	{
+		Display current = Display.getCurrent();
+		if (current == null) current = Display.getDefault();
+		PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
+		IPersist persist = context.getContext();
+		while (!(persist instanceof Form))
+		{
+			persist = persist.getParent();
+		}
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+		ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
+			.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+		DataProviderOptions options = new DataProviderOptions(true, true, true, true, true, true, true, true, null, true, true, null);
+		DataProviderCellEditor dialog = new DataProviderCellEditor(current.getActiveShell(), new DataProviderLabelProvider(true), null,
+			(Form)persist,
+			flattenedSolution,
+			false, options, null, table, "Select Data Provider - " + propertyName);
+		if (!"aggrid-datasettable".equals(webComponent.getTypeName()))
+		{
+			Object result = dialog.openDialogBox(current.getActiveShell());
+			if (result != null)
+			{
+				if (!result.toString().contains("$NoDataProvider"))
+				{
+					if (bean != null)
+					{
+						bean.setProperty("dataprovider", result.toString());
+						bean.setProperty("id", result.toString());
+					}
+					else
+					{
+						webComponent.setProperty(propertyName, result.toString());
+					}
+				}
+			}
+		}
 	}
 
 	public static void autoshowWizard(ISupportFormElements parentSupportingElements, WebObjectSpecification spec,
