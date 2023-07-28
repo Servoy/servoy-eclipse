@@ -62,3 +62,5 @@ import 'zone.js';  // Included with Angular CLI.
 
 
 (window as any).ICAL = {};
+
+(window as any).global = window;
