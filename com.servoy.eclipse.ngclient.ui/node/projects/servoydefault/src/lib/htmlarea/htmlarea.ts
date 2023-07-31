@@ -39,7 +39,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
 
     blur() {
         if (this.lastServerValueAsSeenByTinyMCEContent != this.tinyValue) {
-            this.dataProviderID = '<html><body>' + this.tinyValue + '</body></html>'
+            this.dataProviderID = '<html><body>' + this.tinyValue ? this.tinyValue : '' + '</body></html>'
             this.pushUpdate();
         }
         if (this.onFocusLostMethodID) this.onFocusLostMethodID(new CustomEvent('blur'));
@@ -154,7 +154,12 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
 
     requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
         this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
-        this.getEditor().focus();
+        if (this.getEditor()) {
+			this.getEditor().focus();
+			delete this.mustExecuteOnFocus;
+		} else {
+			setTimeout(() => this.requestFocus(this.mustExecuteOnFocus), 10);
+		}
     }
 
     public selectAll() {
