@@ -917,7 +917,7 @@ public class SolutionSerializer
 						generateDefaultJSDoc(obj, sb, userTemplate, null);
 					}
 					generateJSDocScriptVariableType(sv, sb);
-					sb.append(VAR_KEYWORD);
+					sb.append(sv.getKeyword() != null ? sv.getKeyword() : VAR_KEYWORD);
 					sb.append(' ');
 					sb.append(sv.getName());
 //					if (jsType != null)

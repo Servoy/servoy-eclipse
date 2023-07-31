@@ -54,6 +54,7 @@ import org.eclipse.dltk.javascript.ast.BinaryOperation;
 import org.eclipse.dltk.javascript.ast.BooleanLiteral;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.ConstStatement;
 import org.eclipse.dltk.javascript.ast.DecimalLiteral;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
@@ -68,6 +69,8 @@ import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
+import org.eclipse.dltk.javascript.ast.v4.Keywords;
+import org.eclipse.dltk.javascript.ast.v4.LetStatement;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTag;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTags;
@@ -76,6 +79,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.extensions.ICalculationTypeInferencer;
@@ -1196,6 +1200,13 @@ public class SolutionDeserializer
 							}
 						}
 					}
+				}
+				if (field.getParent() instanceof ConstStatement || field.getParent() instanceof LetStatement)
+				{
+					Map<String, Object> props = new HashMap<>();
+					props.put("keyword", field.getParent() instanceof ConstStatement ? Keywords.CONST : Keywords.LET);
+					ServoyJSONObject custom = new ServoyJSONObject(props, false, false);
+					json.putOpt(IContentSpecConstantsBase.PROPERTY_CUSTOMPROPERTIES, custom);
 				}
 
 				if (code != null)
