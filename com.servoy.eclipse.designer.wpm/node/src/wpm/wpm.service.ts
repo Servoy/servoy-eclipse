@@ -244,13 +244,29 @@ export class WpmService {
   }
 
   versionCompare(v1: string, v2: string): number {
-    const av1 = v1.split('.');
-    const av2 = v2.split('.');
+    let av1: string[] = [];
+    let av2: string[] = [];
+    let sav1: string = null;
+    let sav2: string = null;
+    
+    if (v1.includes('-')) {
+        av1 = v1.split('-')[0].split('.');
+        sav1 = v1.split('-').slice(1).join('-');
+    } else {
+        av1 = v1.split('.');
+    }
+    
+    if (v2.includes('-')) {
+        av2 = v2.split('-')[0].split('.');
+        sav2 = v2.split('-').slice(1).join('-');
+    } else {
+        av2 = v2.split('.');
+    }
 
     const sizeDiff = av2.length - av1.length;
     if(sizeDiff) {
       for(let i = 0; i < Math.abs(sizeDiff); i++) {
-        if(sizeDiff > 0) av1.push('0')
+        if(sizeDiff > 0) av1.push('0');
         else av2.push('0');
       }
     }
@@ -263,6 +279,14 @@ export class WpmService {
       }
       else if(av1[i] < av2[i]) return -1;
       else if(av1[i] > av2[i]) return 1;
+    }
+    
+    if (sav1 === null && sav2 !== null) {
+        return -1;
+    } else if (sav1 !== null && sav2 === null) {
+        return 1;
+    } else if (sav1 !== null && sav2 !== null) {
+        return this.versionCompare(sav1, sav2);
     }
 
     return 0;
