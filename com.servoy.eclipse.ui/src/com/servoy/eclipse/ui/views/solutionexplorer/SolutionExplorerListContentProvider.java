@@ -57,13 +57,16 @@ import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.BinaryOperation;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.ConstStatement;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.IVariableStatement;
 import org.eclipse.dltk.javascript.ast.ObjectInitializer;
 import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.PropertyInitializer;
 import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.VariableStatement;
+import org.eclipse.dltk.javascript.ast.v4.LetStatement;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
@@ -1877,6 +1880,26 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						@Override
 						public ASTNode visitVariableStatement(VariableStatement node)
 						{
+							visitIVariableStatement(node);
+							return super.visitVariableStatement(node);
+						}
+
+						@Override
+						public ASTNode visitLetStatement(LetStatement node)
+						{
+							visitIVariableStatement(node);
+							return super.visitLetStatement(node);
+						}
+
+						@Override
+						public ASTNode visitConstDeclaration(ConstStatement node)
+						{
+							visitIVariableStatement(node);
+							return super.visitConstDeclaration(node);
+						}
+
+						private void visitIVariableStatement(IVariableStatement node)
+						{
 							if (node.getDocumentation() != null && node.getVariables().size() == 1)
 							{
 								PropertyDescription pd = properties.get(node.getVariables().get(0).getVariableName());
@@ -1885,7 +1908,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 									pd.setDocumentation(node.getDocumentation().getText());
 								}
 							}
-							return super.visitVariableStatement(node);
 						}
 					});
 				}
