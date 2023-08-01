@@ -74,10 +74,10 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.IVariableStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
-import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -3776,9 +3776,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			{
 				IPersist persist = null;
 				Expression expression = ((VoidExpression)statement).getExpression();
-				if (expression instanceof VariableStatement)
+				if (expression instanceof IVariableStatement)
 				{
-					VariableDeclaration decl = ((VariableStatement)expression).getVariables().get(0);
+					VariableDeclaration decl = ((IVariableStatement)expression).getVariables().get(0);
 
 					if (parent instanceof Form)
 					{
