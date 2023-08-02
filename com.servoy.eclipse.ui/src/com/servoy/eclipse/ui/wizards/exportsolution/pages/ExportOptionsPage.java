@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.ui.wizards.exportsolution.pages;
 
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -51,6 +50,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author gboros
@@ -103,7 +103,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 	{
 		setMessage(null);
 		setErrorMessage(null);
-		if (Strings.isEmpty(exportSolutionWizard.getActiveSolution().getVersion()))
+		if (Utils.stringIsEmpty(exportSolutionWizard.getActiveSolution().getVersion()))
 		{
 			setMessage("Please set a version number for the main solution to be able to complete the export.", IMessageProvider.WARNING);
 		}
@@ -172,7 +172,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 
 		warnLabel.setImage(Activator.getDefault().loadImageFromBundle("warning.png"));
 		warnLabel.setToolTipText("Please set a version for the main solution.");
-		warnLabel.setVisible(Strings.isEmpty(mainSolutionVersion.getText()));
+		warnLabel.setVisible(Utils.stringIsEmpty(mainSolutionVersion.getText()));
 
 		protectWithPasswordButton = new Button(composite, SWT.CHECK);
 		protectWithPasswordButton.setText("Protect solution with password");
@@ -306,7 +306,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		{
 			editingSolution.setVersion(mainSolutionVersion.getText());
 			repository.updateRootObject(editingSolution);
-			warnLabel.setVisible(Strings.isEmpty(mainSolutionVersion.getText()));
+			warnLabel.setVisible(Utils.stringIsEmpty(mainSolutionVersion.getText()));
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();
 			PersistPropertySource.refreshPropertiesView();
 		}

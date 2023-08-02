@@ -20,7 +20,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.compiler.problem.IProblem;
@@ -49,6 +48,7 @@ import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 public class ScriptingUtils
 {
@@ -203,7 +203,7 @@ public class ScriptingUtils
 	public static boolean isMissingReturnDocs(ScriptMethod method)
 	{
 		String declaration = method.getDeclaration();
-		if (Strings.isEmpty(declaration)) return false;
+		if (Utils.stringIsEmpty(declaration)) return false;
 		final Script script = javascriptParser.parse(declaration, dummyReporter);
 		List<Statement> statements = script.getStatements();
 		if (statements != null && statements.size() == 1 && (statements.get(0) instanceof VoidExpression))

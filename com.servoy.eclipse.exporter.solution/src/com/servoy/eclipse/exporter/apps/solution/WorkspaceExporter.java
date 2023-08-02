@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -168,7 +167,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 
 	protected boolean checkSolutionVersion(IServoyModel servoyModel, boolean exportVersions, String module)
 	{
-		if (Strings.isEmpty(servoyModel.getServoyProject(module).getSolution().getVersion()))
+		if (Utils.stringIsEmpty(servoyModel.getServoyProject(module).getSolution().getVersion()))
 		{
 			if (exportVersions)
 			{

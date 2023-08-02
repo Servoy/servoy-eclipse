@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.FontDescriptor;
@@ -58,6 +57,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author gboros
@@ -182,8 +182,8 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		String[] moduleNames = getSelectedModules();
 		exportSolutionWizard.getModel().setModulesToExport(moduleNames);
 		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		solutionVersionsPresent = !Strings.isEmpty(exportSolutionWizard.getActiveSolution().getVersion()) && (moduleNames.length == 0 ||
-			Arrays.stream(moduleNames).noneMatch(name -> Strings.isEmpty(servoyModel.getServoyProject(name).getSolution().getVersion())));
+		solutionVersionsPresent = !Utils.stringIsEmpty(exportSolutionWizard.getActiveSolution().getVersion()) && (moduleNames.length == 0 ||
+			Arrays.stream(moduleNames).noneMatch(name -> Utils.stringIsEmpty(servoyModel.getServoyProject(name).getSolution().getVersion())));
 	}
 
 	protected String[] getSelectedModules()
@@ -311,12 +311,12 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 			version.addModifyListener(event -> {
 				setSolutionVersion(servoyModel, module, version.getText(), true);
 				handleEvent(null);
-				label.setVisible(Strings.isEmpty(version.getText()));
+				label.setVisible(Utils.stringIsEmpty(version.getText()));
 			});
 			versionFields.put(module, version);
 
 			label.setImage(warn);
-			label.setVisible(Strings.isEmpty(v));
+			label.setVisible(Utils.stringIsEmpty(v));
 			label.setToolTipText("Please set a version for  module '" + module + "'.");
 			label.setLayoutData(gd);
 			warnLabels.add(label);
