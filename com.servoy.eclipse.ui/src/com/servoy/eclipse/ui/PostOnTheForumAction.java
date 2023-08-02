@@ -33,7 +33,6 @@ import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -63,6 +62,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.util.HtmlUtils;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Post on the forum directly from the IDE.
@@ -218,10 +218,10 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 			description.setLayoutData(gridData);
 
 			subjectText.addListener(SWT.Modify, event -> {
-				post.setEnabled(!Strings.isEmpty(subjectText.getText()) && !Strings.isEmpty(description.getText()));
+				post.setEnabled(!Utils.stringIsEmpty(subjectText.getText()) && !Utils.stringIsEmpty(description.getText()));
 			});
 			description.addListener(SWT.Modify, event -> {
-				post.setEnabled(!Strings.isEmpty(subjectText.getText()) && !Strings.isEmpty(description.getText()));
+				post.setEnabled(!Utils.stringIsEmpty(subjectText.getText()) && !Utils.stringIsEmpty(description.getText()));
 			});
 
 			return topLevel;
@@ -231,7 +231,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 		protected void createButtonsForButtonBar(Composite parent)
 		{
 			post = createButton(parent, IDialogConstants.OK_ID, "Post", false);
-			post.setEnabled(!Strings.isEmpty(subjectText.getText()) && !Strings.isEmpty(description.getText()));
+			post.setEnabled(!Utils.stringIsEmpty(subjectText.getText()) && !Utils.stringIsEmpty(description.getText()));
 			Button cancel = createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 			parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 			post.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));

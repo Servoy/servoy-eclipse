@@ -35,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -170,7 +169,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									Debug.log(ex);
 								}
 							}
-							else if (!Strings.isEmpty(solutionProject.getSolution().getVersion()))
+							else if (!Utils.stringIsEmpty(solutionProject.getSolution().getVersion()))
 							{
 								pack.put("installed", solutionProject.getSolution().getVersion());
 							}

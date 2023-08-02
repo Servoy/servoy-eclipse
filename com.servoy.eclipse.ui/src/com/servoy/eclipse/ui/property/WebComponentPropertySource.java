@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.wicket.util.string.Strings;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
@@ -40,6 +39,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Properties for ngclient components.
@@ -187,7 +187,7 @@ public class WebComponentPropertySource extends PDPropertySource
 		if (WebComponentSpecProvider.isLoaded())
 		{
 			String packageDisplayName = WebComponentSpecProvider.getSpecProviderState().getPackageDisplayName(packageName);
-			if (!Strings.isEmpty(packageDisplayName)) packageName = packageDisplayName;
+			if (!Utils.stringIsEmpty(packageDisplayName)) packageName = packageDisplayName;
 		}
 		return getPropertyDescription().getDisplayName() + " (" + packageName + ")";
 	}

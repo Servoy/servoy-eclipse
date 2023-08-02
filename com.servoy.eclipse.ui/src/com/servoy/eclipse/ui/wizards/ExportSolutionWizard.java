@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -70,6 +69,7 @@ import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.Utils;
 
 public class ExportSolutionWizard extends DirtySaveExportWizard implements IExportWizard
 {
@@ -450,7 +450,8 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		}
 		if (exportModel.useImportSettings() && (currentPage != importPage) && (currentPage != deployProgressPage)) return false;
 		if (currentPage == importPage && deployToApplicationServer) return false;
-		if (Strings.isEmpty(getActiveSolution().getVersion()) || exportModel.isExportReferencedModules() && !modulesSelectionPage.solutionVersionsPresent)
+		if (Utils.stringIsEmpty(getActiveSolution().getVersion()) ||
+			exportModel.isExportReferencedModules() && !modulesSelectionPage.solutionVersionsPresent)
 			return false;
 		return exportModel.canFinish();
 	}

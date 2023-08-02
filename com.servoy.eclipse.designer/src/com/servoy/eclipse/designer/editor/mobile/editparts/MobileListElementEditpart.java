@@ -28,7 +28,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
-import org.xhtmlrenderer.css.constants.CSSName;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -153,7 +152,7 @@ public class MobileListElementEditpart extends BaseGraphicalEditPart implements 
 		else
 		{
 			Pair<IStyleSheet, IStyleRule> elementStyle = ComponentFactory.getStyleForBasicComponent(application, gc, form);
-			if (elementStyle != null && elementStyle.getRight() != null && elementStyle.getRight().hasAttribute(CSSName.BACKGROUND_COLOR.toString()))
+			if (elementStyle != null && elementStyle.getRight() != null && elementStyle.getRight().hasAttribute("background-color"))
 			{
 				awtColor = elementStyle.getLeft().getBackground(elementStyle.getRight());
 			}
@@ -172,7 +171,7 @@ public class MobileListElementEditpart extends BaseGraphicalEditPart implements 
 		else
 		{
 			Pair<IStyleSheet, IStyleRule> elementStyle = ComponentFactory.getStyleForBasicComponent(application, gc, form);
-			if (elementStyle != null && elementStyle.getRight() != null && elementStyle.getRight().hasAttribute(CSSName.COLOR.toString()))
+			if (elementStyle != null && elementStyle.getRight() != null && elementStyle.getRight().hasAttribute("color"))
 			{
 				awtColor = elementStyle.getLeft().getForeground(elementStyle.getRight());
 			}
