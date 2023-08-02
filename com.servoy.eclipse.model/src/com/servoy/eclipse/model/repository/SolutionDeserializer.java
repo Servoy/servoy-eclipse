@@ -79,7 +79,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.extensions.ICalculationTypeInferencer;
@@ -137,6 +136,7 @@ public class SolutionDeserializer
 	static final String LINE_NUMBER_OFFSET_JSON_ATTRIBUTE = "lineNumberOffset";
 	static final String EXTRA_DOC_COMMENTS = "EXTRA_DOC_COMMENTS";
 	static final String COMMENT_JSON_ATTRIBUTE = "comment";
+	static final String DECL_KEYWORD = "keyword";
 	private static final String CHANGED_JSON_ATTRIBUTE = "changed";
 
 	public static final RuntimeProperty<Boolean> POSSIBLE_DUPLICATE_UUID = new RuntimeProperty<Boolean>()
@@ -1203,10 +1203,7 @@ public class SolutionDeserializer
 				}
 				if (field.getParent() instanceof ConstStatement || field.getParent() instanceof LetStatement)
 				{
-					Map<String, Object> props = new HashMap<>();
-					props.put("keyword", field.getParent() instanceof ConstStatement ? Keywords.CONST : Keywords.LET);
-					ServoyJSONObject custom = new ServoyJSONObject(props, false, false);
-					json.putOpt(IContentSpecConstantsBase.PROPERTY_CUSTOMPROPERTIES, custom);
+					json.put(DECL_KEYWORD, field.getParent() instanceof ConstStatement ? Keywords.CONST : Keywords.LET);
 				}
 
 				if (code != null)
@@ -1927,6 +1924,10 @@ public class SolutionDeserializer
 				else
 				{
 					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, null);
+				}
+				if (obj.has(DECL_KEYWORD))
+				{
+					((ScriptVariable)retval).setKeyword(obj.getString(DECL_KEYWORD));
 				}
 
 			}
