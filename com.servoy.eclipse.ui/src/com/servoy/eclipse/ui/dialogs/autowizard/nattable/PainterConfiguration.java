@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.dialogs.autowizard.nattable;
 
 import java.util.Map;
 
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.nebula.widgets.nattable.NatTable;
@@ -301,7 +300,7 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 				@Override
 				public Object displayToCanonicalValue(Object displayValue)
 				{
-					return Strings.isEmpty((String)displayValue) ? relationDisplayConverter.displayToCanonicalValue(displayValue) : null;
+					return Utils.stringIsEmpty((String)displayValue) ? relationDisplayConverter.displayToCanonicalValue(displayValue) : null;
 				}
 			}, DisplayMode.EDIT,
 			dp.getName());

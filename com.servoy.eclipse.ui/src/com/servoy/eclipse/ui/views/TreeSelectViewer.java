@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.jobs.IJobManager;
@@ -75,6 +74,7 @@ import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.IStatusChangedListener;
 import com.servoy.eclipse.ui.util.IStatusProvider;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Viewer to edit a value in a tree select dialog. The value is displayed in a textfield, a button is shown to edit the text.
@@ -574,7 +574,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 					{
 						textChanged();
 						String contents = text.getText();
-						if (!Strings.isEmpty(contents))
+						if (!Utils.stringIsEmpty(contents))
 						{
 							Object value = determineValue(contents);
 							setValid(value != null && getSelectionFilter().select(value));

@@ -30,7 +30,6 @@ import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -787,7 +786,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 							Solution sol = servoyModel.getServoyProject(name).getSolution();
 							if (sol != null)
 							{
-								workspaceVersions.put(name, !Strings.isEmpty(sol.getVersion()) ? sol.getVersion() : "-");
+								workspaceVersions.put(name, !Utils.stringIsEmpty(sol.getVersion()) ? sol.getVersion() : "-");
 								if (!versions.optString(name, "").equals(sol.getVersion()))
 								{
 									existingSolutionAction.put(name, IXMLImportUserChannel.OVERWRITE_ACTION);

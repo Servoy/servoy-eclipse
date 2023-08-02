@@ -9,7 +9,7 @@
 		<version>2023.9.0.3900_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.linux.gtk.x86_64</artifactId>
-	<version>16.20.0</version>
+	<version>18.17.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>

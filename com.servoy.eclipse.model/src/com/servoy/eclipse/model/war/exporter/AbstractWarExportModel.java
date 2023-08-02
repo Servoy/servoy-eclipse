@@ -37,7 +37,7 @@ import java.util.TreeSet;
 
 import javax.crypto.Cipher;
 
-import org.apache.wicket.util.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;

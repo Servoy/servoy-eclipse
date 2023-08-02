@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Base64;
 import java.util.regex.Matcher;
@@ -21,7 +24,6 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.wicket.validation.validator.UrlValidator;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -171,8 +173,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	private CloseableHttpResponse sendRequest(IDialogSettings settings) throws ClientProtocolException, IOException, HttpHostConnectException
 	{
 		final String srvAddress = System.getProperty("ngclient.service.address");
-		final UrlValidator urlValidator = new UrlValidator();
-		if (srvAddress != null && urlValidator.isValid(srvAddress))
+		if (srvAddress != null && isValidUrl(srvAddress))
 			service_url = srvAddress;
 
 		final HttpClientBuilder httpBuilder = HttpClientBuilder.create();
@@ -332,18 +333,14 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 
 		strValue = settings.get("update_url");
-		if (strValue != null && strValue.trim().length() > 0)
+		if (strValue != null && strValue.trim().length() > 0 && !isValidUrl(strValue))
 		{
-			final UrlValidator urlValidator = new UrlValidator();
-			if (!urlValidator.isValid(strValue))
+			final boolean result = MessageDialog.open(MessageDialog.QUESTION, UIUtils.getActiveShell(), "NG Desktop Export",
+				"URL can't be validated. Use it anyway? \n" + strValue, SWT.YES);
+			if (!result)
 			{
-				final boolean result = MessageDialog.open(MessageDialog.QUESTION, UIUtils.getActiveShell(), "NG Desktop Export",
-					"URL can't be validated. Use it anyway? \n" + strValue, SWT.YES);
-				if (!result)
-				{
-					errorMsg.append("Invalid URL: " + strValue + "\n");
-					return errorMsg;
-				}
+				errorMsg.append("Invalid URL: " + strValue + "\n");
+				return errorMsg;
 			}
 		}
 
@@ -389,4 +386,20 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	}
 
 
+	boolean isValidUrl(String url)
+	{
+		try
+		{
+			new URL(url).toURI();
+			return true;
+		}
+		catch (final MalformedURLException e)
+		{
+			return false;
+		}
+		catch (final URISyntaxException e)
+		{
+			return false;
+		}
+	}
 }
