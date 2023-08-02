@@ -154,7 +154,7 @@
   </extension>
    <extension
          point="org.eclipse.ui.actionSets">
-      <actionSet
+       <!--<actionSet
             id="com.servoy.eclipse.designer.PlaceElementsActionSet"
             label="Place Elements"
             visible="true">
@@ -283,7 +283,7 @@
                state="false"
                style="push"
                tooltip="Vertical Line"/>
-      </actionSet>
+      </actionSet>-->
       <actionSet
             id="com.servoy.eclipse.designer.PlaceShapesActionSet"
             label="Place Shapes"
