@@ -162,7 +162,12 @@ public class MarkdownGenerator
 		this.parentPath = parentPath;
 		root = new HashMap<>();
 		root.put("classname", publicName);
-		root.put("classname_nospacde", publicName.replace(" ", "%20").toLowerCase());
+		String classNoSpace = publicName.replace(" ", "%20").toLowerCase();
+		if (storeAsReadMe.contains(publicName))
+		{
+			classNoSpace = "README";
+		}
+		root.put("classname_nospace", classNoSpace);
 		root.put("instance", this);
 
 		if ("/design-api".equals(parentPath))
