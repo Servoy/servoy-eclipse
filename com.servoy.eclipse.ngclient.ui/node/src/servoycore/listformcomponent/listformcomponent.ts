@@ -20,7 +20,6 @@ import { RowRenderer } from './row-renderer.component';
 import { AgGridAngular } from '@ag-grid-community/angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
-import { SabloService } from '../../sablo/sablo.service';
 
 const AGGRID_CACHE_BLOCK_SIZE = 10;
 const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
@@ -139,8 +138,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         cdRef: ChangeDetectorRef,
         logFactory: LoggerFactory,
         private _injector: Injector,
-        @Inject(DOCUMENT) private doc: Document,
-        private sabloService: SabloService) {
+        @Inject(DOCUMENT) private doc: Document) {
         super(renderer, cdRef);
         try {
             this.parent = this._injector.get<FormComponent>(FormComponent);
@@ -528,9 +526,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
                             changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
                         });
-                        this.sabloService.addIncomingMessageHandlingDoneTask(() => {
-                            ui.ngOnChanges(changes);
-                        });
+                        ui.ngOnChanges(changes);
                         // no use to call detect changes here because it will be called in root parent form - because this is a result of a incomming server change for a child 'component' property
                     }
                 };
