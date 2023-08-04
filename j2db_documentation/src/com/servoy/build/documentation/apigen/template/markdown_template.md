@@ -28,7 +28,7 @@ ${extend}
 | Type                                                  | Name                                          | Summary                                                          |
 | ----------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 <#list constants as constant>
-| [${constant.getReturnType()}](${instance.getReturnTypePath(constant.getReturnType())}) | [${constant.getFullFunctionName()}](${classname_nospace}.md#${constant.getFullFunctionName()})                   | ${constant.getSummary()}.                                    |
+| [${constant.getReturnType()}](${instance.getReturnTypePath(constant.getReturnType())}) | [${constant.getFullFunctionName()}](${classname_nospace}.md#${constant.getAnchoredName()})                   | ${constant.getSummary()}.                                    |
 </#list>
 </#if>
 <#if properties??>
@@ -38,7 +38,7 @@ ${extend}
 | Type                                                  | Name                    | Summary                                                                                                           |
 | ----------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 <#list properties as prop>
-| [${prop.getReturnType()}](${instance.getReturnTypePath(prop.getReturnType())}) | [${prop.getFullFunctionName()}](${classname_nospace}.md#${prop.getFullFunctionName()})                   | ${prop.getSummary()}.                                    |
+| [${prop.getReturnType()}](${instance.getReturnTypePath(prop.getReturnType())}) | [${prop.getFullFunctionName()}](${classname_nospace}.md#${prop.getAnchoredName()})                   | ${prop.getSummary()}.                                    |
 </#list>
 </#if>
 <#if commands??>
@@ -48,7 +48,7 @@ ${extend}
 | Type                                                  | Name                    | Summary                                                                                                           |
 | ----------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 <#list commands as command>
-| [${command.getReturnType()}](${instance.getReturnTypePath(command.getReturnType())}) | [${command.getFullFunctionName()}](${classname_nospace}.md#${command.getFullFunctionName()})                   | ${command.getSummary()}.                                    |
+| [${command.getReturnType()}](${instance.getReturnTypePath(command.getReturnType())}) | [${command.getFullFunctionName()}](${classname_nospace}.md#${command.getAnchoredName()})                   | ${command.getSummary()}.                                    |
 </#list>
 </#if>
 <#if events??>
