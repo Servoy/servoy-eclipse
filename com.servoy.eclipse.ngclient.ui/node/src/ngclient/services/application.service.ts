@@ -280,6 +280,17 @@ export class ApplicationService {
             this.showDefaultLoginWindow();
         }
     }
+        
+    public clearDefaultLoginCredentials() {
+    	this.localStorageService.remove('servoy_username');
+        this.localStorageService.remove('servoy_password');
+        this.localStorageService.remove('servoy_token');
+    }
+    
+    public rememberUser(u: {user: string, token: string} ) {
+    	this.localStorageService.set('servoy_username', u.user);
+    	this.localStorageService.set('servoy_token', u.token);
+    }
 
     public showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string) {
         if (!url) {
