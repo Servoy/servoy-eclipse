@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 
 import { ServoyService } from '../servoy.service';
 
-import { LoggerFactory, LoggerService, WindowRefService, LocalStorageService, MainViewRefService } from '@servoy/public';
+import { LoggerFactory, LoggerService, WindowRefService, LocalStorageService, MainViewRefService, setFirstDayOfWeek } from '@servoy/public';
 
 import { SabloService } from '../../sablo/sablo.service';
 
@@ -89,7 +89,10 @@ export class ApplicationService {
             this.setIcon(value, '32x32');
         } else if (key === ClientPropertyConstants.WINDOW_BRANDING_ICON_192) {
             this.setIcon(value, '192x192');
+        } else if (key === ClientPropertyConstants.FIRST_DAY_OF_WEEK) {
+            setFirstDayOfWeek(value);
         }
+        
     }
 
     public setUIProperties(properties: { [property: string]: string }) {
@@ -412,4 +415,5 @@ export class ApplicationService {
 class ClientPropertyConstants {
     public static WINDOW_BRANDING_ICON_32 = 'window.branding.icon.32';
     public static WINDOW_BRANDING_ICON_192 = 'window.branding.icon.192';
+    public static FIRST_DAY_OF_WEEK = 'firstDayOfWeek';
 }
