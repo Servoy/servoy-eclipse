@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,13 +39,18 @@ import java.util.jar.Manifest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.Comment;
 import org.mozilla.javascript.ast.FunctionNode;
+import org.sablo.specification.Package;
+import org.sablo.specification.Package.IPackageReader;
+import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.core.ParseException;
@@ -56,7 +62,7 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateNotFoundException;
 
 /**
- * @author jcomp
+ * @author jcompagner
  *
  */
 public class SpecMarkdownGenerator
@@ -64,16 +70,9 @@ public class SpecMarkdownGenerator
 
 	private static Configuration cfg;
 	private static Template temp;
-	private static boolean componentGeneration;
 
-	/**
-	 * @param args
-	 * @throws IOException
-	 * @throws ParseException
-	 * @throws MalformedTemplateNameException
-	 * @throws TemplateNotFoundException
-	 */
-	public static void main(String[] args) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException
+	public static void main(String[] args)
+		throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, JSONException, TemplateException
 	{
 		if (args.length == 0)
 		{
@@ -93,20 +92,49 @@ public class SpecMarkdownGenerator
 
 		temp = cfg.getTemplate("component_template.md");
 
-		componentGeneration = true;
+		boolean componentGeneration = true;
+		String[] webPackageDirs = args;
 		if ("false".equals(args[args.length - 1]))
 		{
 			componentGeneration = false;
+			webPackageDirs = Arrays.copyOf(args, args.length - 1);
 		}
 
-		for (String dirname : args)
+		generateNGComponentOrServicePackageContentForDir(componentGeneration, webPackageDirs, new NGPackageMarkdownDocGenerator());
+	}
+
+	public static void generateNGComponentOrServicePackageContentForDir(boolean componentGeneration, String[] webPackageDirs,
+		INGPackageInfoGenerator docGenerator) throws JSONException, TemplateException, IOException
+	{
+		System.err.println("Generating NG package content");
+		for (String dirname : webPackageDirs)
 		{
 			File dir = new File(dirname);
 			if (!dir.exists())
 			{
-				System.err.println("skipping dir " + dirname + " because it doesn't exisits");
-				continue;
+				throw new RuntimeException("Given NG package dir " + dirname + " doesn't exist!");
 			}
+			else
+			{
+				System.err.println("  - NG package dir " + dirname);
+			}
+
+			// get package name / display name
+			String packageName;
+			String packageDisplayName;
+			String packageType;
+			try (InputStream is = FileUtils.openInputStream(new File(dir, "META-INF/MANIFEST.MF")))
+			{
+				Manifest mf = new Manifest(is);
+				packageName = Package.getPackageName(mf);
+				packageDisplayName = Package.getPackageDisplayname(mf);
+				packageType = Package.getPackageType(mf);
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException("Cannot access/read META-INF/MANIFEST.MF of NG package dir " + dirname + "!", e);
+			}
+
 			Collection<File> specFiles = FileUtils.listFiles(dir, new AbstractFileFilter()
 			{
 				@Override
@@ -138,31 +166,55 @@ public class SpecMarkdownGenerator
 			}).filter(Objects::nonNull).map(contents -> {
 				try
 				{
-					return new SpecMarkdownGenerator(new JSONObject(contents.getRight()), contents.getLeft());
+					return new SpecMarkdownGenerator(packageName, packageDisplayName, packageType, new JSONObject(contents.getRight()), contents.getLeft(),
+						componentGeneration,
+						docGenerator);
 				}
 				catch (RuntimeException e)
 				{
 					System.err.println(contents);
 					throw e;
 				}
-			}).forEach(generator -> generator.save());
+			}).forEach(generator -> {
+				try
+				{
+					generator.save();
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException(e);
+				}
+			});
+
+			File packageInfoFile = new File(dir, "webpackage.json");
+			while (!packageInfoFile.exists() && packageInfoFile.getParentFile().getParentFile() != null)
+				packageInfoFile = new File(packageInfoFile.getParentFile().getParentFile(), "webpackage.json");
+
+			if (packageInfoFile.exists())
+			{
+				docGenerator.generateNGPackageInfo(packageName, packageDisplayName,
+					new JSONObject(Utils.getTXTFileContent(packageInfoFile)).optString("description"),
+					packageType);
+			}
+			else System.err.println("    * cannot find the package's webpackage.json; skipping information about the package...");
+
+			docGenerator.currentPackageWasProcessed();
 		}
 	}
 
 	private final Map<String, Object> root;
 	private final JSONObject jsonObject;
 	private final Map<String, String> apiDoc = new HashMap<>();
-	private final File specFile;
 	private boolean service;
+	private final INGPackageInfoGenerator docGenerator;
 
-	/**
-	 * @param specFile
-	 *
-	 */
-	public SpecMarkdownGenerator(JSONObject jsonObject, File specFile)
+	public SpecMarkdownGenerator(String packageName, String packageDisplayName, String packageType,
+		JSONObject jsonObject, File specFile, boolean componentGeneration,
+		INGPackageInfoGenerator docGenerator)
 	{
 		this.jsonObject = jsonObject;
-		this.specFile = specFile;
+		this.docGenerator = docGenerator;
+
 		root = new HashMap<>();
 		String docFileName = jsonObject.optString("doc", null);
 		if (docFileName != null)
@@ -194,11 +246,8 @@ public class SpecMarkdownGenerator
 					{
 						if (comment.getNext() instanceof FunctionNode fn)
 						{
-							String doc = comment.toSource().replace("\r\n", "\n").replace("/**", "").replace("*/", "").replace(" *", "").replace("*", "")
-								.replace("%%prefix%%", "")
-								.trim();
 							String name = fn.getFunctionName().toSource();
-							apiDoc.put(name, "```\n" + doc + "\n```\n");
+							apiDoc.put(name, processFunctionJSDoc(comment.toSource()));
 						}
 					}
 
@@ -206,23 +255,29 @@ public class SpecMarkdownGenerator
 				}
 				catch (IOException e)
 				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					throw new RuntimeException("Cannot parse docfile: " + docFileName, e);
 				}
 			}
 			else
 			{
-				System.err.println("Docfile: " + docFileName + " doesn't exisit in the parent structure of the spec file " + specFile);
+				System.err.println("    * docfile: " + docFileName + " doesn't exist in the parent structure of the spec file " + specFile + " !");
 			}
 		}
 
+		root.put("package_name", packageName);
+		root.put("package_display_name", packageDisplayName);
+		root.put("package_type", packageType);
 		root.put("componentname", jsonObject.optString("displayName"));
-		root.put("componentname_nospacde", jsonObject.optString("displayName").replace(" ", "%20"));
+		root.put("componentinternalname", jsonObject.optString("name"));
+		root.put("componentname_nospace", jsonObject.optString("displayName").replace(" ", "%20"));
 		root.put("instance", this);
 		root.put("properties", makeMap(jsonObject.optJSONObject("model"), this::createProperty));
 		root.put("events", makeMap(jsonObject.optJSONObject("handlers"), this::createFunction));
-		root.put("api", makeMap(jsonObject.optJSONObject("api"), this::createFunction));
+		Map<String, Object> api = makeMap(jsonObject.optJSONObject("api"), this::createFunction);
+		root.put("api", api);
 		root.put("types", makeTypes(jsonObject.optJSONObject("types")));
+		if (IPackageReader.WEB_SERVICE.equals(packageType) && api != null && api.size() > 0)
+			root.put("service_scripting_name", ClientService.convertToJSName(jsonObject.optString("name")));
 
 		service = false;
 		JSONObject ng2Config = jsonObject.optJSONObject("ng2Config");
@@ -235,8 +290,19 @@ public class SpecMarkdownGenerator
 			root.put("designtimeExtends", new Property("JSWebComponent", "JSWebComponent", null, null));
 			root.put("runtimeExtends", new Property("RuntimeWebComponent", "RuntimeWebComponent", null, null));
 		}
+	}
 
+	private String processFunctionJSDoc(String jsDocComment)
+	{
+		if (jsDocComment == null) return null;
 
+		String doc = jsDocComment.replace("\r\n", "\n").replace("%%prefix%%", "");
+		if (docGenerator.shouldTurnAPIDocsIntoMarkdown())
+			doc = doc.replace("/**", "").replace("*/", "").replace(" *", "").replace("*", "");
+		doc = doc.trim();
+		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = "```\n" + doc + "\n```\n";
+
+		return doc;
 	}
 
 	private Record createProperty(String name, JSONObject specEntry)
@@ -260,22 +326,54 @@ public class SpecMarkdownGenerator
 
 	private Record createFunction(String name, JSONObject specEntry)
 	{
-		String doc = apiDoc.get(name);
-		if (doc == null) doc = specEntry.optString("doc", null);
 		String returns = specEntry.optString("returns", null);
+		JSONArray parameters = specEntry.optJSONArray("parameters");
+		List<Parameter> params = createParameters(parameters);
 		JSONObject fullType = specEntry.optJSONObject("returns");
 		if (fullType != null)
 		{
 			returns = fullType.optString("type", "");
 		}
-		JSONArray parameters = specEntry.optJSONArray("parameters");
-		return new Function(name, createParameters(parameters), returns, doc);
+
+		String jsDocEquivalent = apiDoc.get(name);
+		if (jsDocEquivalent == null)
+		{
+			jsDocEquivalent = processFunctionJSDoc(createFunctionDocFromSpec(specEntry, params, returns));
+		}
+		return new Function(name, params, returns, jsDocEquivalent);
 	}
 
-	/**
-	 * @param parameters
-	 * @return
-	 */
+	private String createFunctionDocFromSpec(JSONObject specEntry, List<Parameter> params, String returns)
+	{
+		boolean somethingWasWritten = false;
+		StringBuilder generatedJSDocCommentFromSpec = new StringBuilder("/**");
+
+		String functionDescription = specEntry.optString("doc", null);
+		if (functionDescription != null)
+		{
+			somethingWasWritten = true;
+			generatedJSDocCommentFromSpec.append("\n * ").append(functionDescription.replaceAll("\n", "\n * "));
+		}
+
+		for (Parameter param : params)
+		{
+			somethingWasWritten = true;
+			generatedJSDocCommentFromSpec.append("\n * @param ").append(param.name());
+			if (param.type() != null) generatedJSDocCommentFromSpec.append(" [").append(param.type()).append(']');
+			if (param.optional()) generatedJSDocCommentFromSpec.append(" (optional)");
+			if (param.doc() != null) generatedJSDocCommentFromSpec.append(' ').append(param.doc().replaceAll("\n", "\n *        "));
+		}
+
+		if (returns != null)
+		{
+			somethingWasWritten = true;
+			generatedJSDocCommentFromSpec.append("\n * @return {").append(returns).append('}');
+		}
+
+		generatedJSDocCommentFromSpec.append("\n */");
+		return somethingWasWritten ? generatedJSDocCommentFromSpec.toString() : null;
+	}
+
 	private List<Parameter> createParameters(JSONArray parameters)
 	{
 		if (parameters != null)
@@ -317,12 +415,7 @@ public class SpecMarkdownGenerator
 		return null;
 	}
 
-
-	/**
-	 * @param optJSONObject
-	 * @return
-	 */
-	private Object makeMap(JSONObject properties, BiFunction<String, JSONObject, Record> transformer)
+	private Map<String, Object> makeMap(JSONObject properties, BiFunction<String, JSONObject, Record> transformer)
 	{
 		if (properties != null)
 		{
@@ -419,7 +512,7 @@ public class SpecMarkdownGenerator
 
 				default ->
 				{
-					System.err.println(type);
+					System.err.println("    * cannot map type '" + type + "' to a path!");
 					yield "";
 				}
 			};
@@ -427,53 +520,18 @@ public class SpecMarkdownGenerator
 		return "";
 	}
 
-	private void save()
+	private void save() throws TemplateException, IOException
 	{
 		if (jsonObject.optString("deprecated", null) != null)
 		{
-			System.err.println("skipping " + jsonObject.optString("displayName", "component") + " because it is deprecated");
+			System.err.println("    * skipping " + jsonObject.optString("displayName", "component") + " because it is deprecated");
 			return;
 		}
 		File userDir = new File(System.getProperty("user.dir"));
 		String displayName = jsonObject.optString("displayName", "component");
 		String categoryName = jsonObject.optString("categoryName", null);
-		if (categoryName == null)
-		{
-			File parent = specFile.getParentFile();
-			while (parent != null)
-			{
-				if (new File(parent, "META-INF/MANIFEST.MF").exists())
-				{
-					try (InputStream is = FileUtils.openInputStream(new File(parent, "META-INF/MANIFEST.MF")))
-					{
-						Manifest mf = new Manifest(is);
-						categoryName = mf.getMainAttributes().getValue("Bundle-Name");
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}
-				}
-				parent = parent.getParentFile();
-			}
-		}
 
-
-		File file = new File(userDir,
-			(service ? "service/" : "components/") + categoryName.trim().replace(' ', '-').replace("&", "and").toLowerCase() + "/" +
-				displayName.trim().replace(' ', '-').toLowerCase() +
-				".md");
-		// TODO Auto-generated method stub
-		try
-		{
-			file.getParentFile().mkdirs();
-			FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
-			temp.process(root, out);
-		}
-		catch (TemplateException | IOException e)
-		{
-			e.printStackTrace();
-		}
+		docGenerator.generateComponentOrServiceInfo(root, userDir, displayName, categoryName, service);
 	}
 
 	public record Function(String name, List<Parameter> parameters, String returnValue, String doc)
@@ -483,7 +541,58 @@ public class SpecMarkdownGenerator
 	public record Parameter(String name, String type, String doc, boolean optional)
 	{
 	}
+
 	public record Property(String name, String type, String defaultValue, String doc)
 	{
 	}
+
+	public static class NGPackageMarkdownDocGenerator implements INGPackageInfoGenerator
+	{
+
+		@Override
+		public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryNameStrict, boolean service)
+		{
+			String categoryName = categoryNameStrict;
+			if (categoryName == null)
+			{
+				categoryName = (String)root.get("package_display_name");
+			}
+
+			File file = new File(userDir,
+				(service ? "service/" : "components/") + categoryName.trim().replace(' ', '-').replace("&", "and").toLowerCase() + "/" +
+					displayName.trim().replace(' ', '-').toLowerCase() +
+					".md");
+			// TODO Auto-generated method stub
+			try
+			{
+				file.getParentFile().mkdirs();
+				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
+				temp.process(root, out);
+			}
+			catch (TemplateException | IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void generateNGPackageInfo(String packageName, String packageDisplayName, String packageDescription, String packageType)
+		{
+			// we don't write the package description currently in markdown
+		}
+
+		@Override
+		public void currentPackageWasProcessed()
+		{
+			// nothing to do here currently
+		}
+
+		@Override
+		public boolean shouldTurnAPIDocsIntoMarkdown()
+		{
+			return true;
+		}
+
+	}
+
 }

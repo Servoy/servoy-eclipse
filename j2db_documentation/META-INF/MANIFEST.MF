@@ -12,7 +12,8 @@ Require-Bundle: servoy_shared,
  com.servoy.eclipse.debug,
  j2db_server,
  org.apache.httpcomponents.httpclient,
- org.apache.httpcomponents.httpcore
+ org.apache.httpcomponents.httpcore,
+ sablo
 Export-Package: com.servoy.build.documentation
 Import-Package: freemarker.cache;version="2.3.31.stable",
  freemarker.core;version="2.3.31.stable",
