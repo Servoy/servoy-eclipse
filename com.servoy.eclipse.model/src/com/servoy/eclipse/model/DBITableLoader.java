@@ -20,9 +20,9 @@ package com.servoy.eclipse.model;
 import static java.lang.Boolean.TRUE;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
@@ -51,7 +51,7 @@ public class DBITableLoader implements ITableLoader
 {
 
 	@Override
-	public boolean loadTables(LinkedHashMap<String, Table> loading_tables, IServerInternal server)
+	public boolean loadTables(ConcurrentMap<String, Table> loading_tables, IServerInternal server)
 	{
 		try
 		{
