@@ -554,7 +554,7 @@ export class ViewportService {
     private addRowProxyTo(viewPort: any[], rowIndex: number, propertyContextCreator: IPropertyContextCreatorForRow, internalState: FoundsetViewportState) {
         if (internalState.rowLevelProxyRevokers[rowIndex]) {
             internalState.rowLevelProxyRevokers[rowIndex].revoker();
-            viewPort[rowIndex] = internalState.rowLevelProxyRevokers[rowIndex].original;
+//            viewPort[rowIndex] = internalState.rowLevelProxyRevokers[rowIndex].original;
         }
 
         // add the actual row proxy for listening to cell change-by-ref
