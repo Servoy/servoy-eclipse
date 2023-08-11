@@ -46,6 +46,7 @@ import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
@@ -139,8 +140,6 @@ public class CreateComponentHandler implements IServerService
 	public static void autoShowDataProviderSelection(ISupportFormElements parentSupportingElements, WebComponent webComponent, String propertyName,
 		BaseVisualFormEditor editorPart, WebCustomType bean)
 	{
-		Display current = Display.getCurrent();
-		if (current == null) current = Display.getDefault();
 		PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
 		IPersist persist = context.getContext();
 		while (!(persist instanceof Form))
@@ -151,13 +150,13 @@ public class CreateComponentHandler implements IServerService
 		ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
 			.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
 		DataProviderOptions options = new DataProviderOptions(true, true, true, true, true, true, true, true, null, true, true, null);
-		DataProviderCellEditor dialog = new DataProviderCellEditor(current.getActiveShell(), new DataProviderLabelProvider(true), null,
+		DataProviderCellEditor dialog = new DataProviderCellEditor(UIUtils.getActiveShell(), new DataProviderLabelProvider(true), null,
 			(Form)persist,
 			flattenedSolution,
 			false, options, null, table, "Select Data Provider - " + propertyName);
 		if (!"aggrid-datasettable".equals(webComponent.getTypeName()))
 		{
-			Object result = dialog.openDialogBox(current.getActiveShell());
+			Object result = dialog.openDialogBox(UIUtils.getActiveShell());
 			if (result != null)
 			{
 				if (!result.toString().contains("$NoDataProvider"))
@@ -192,16 +191,12 @@ public class CreateComponentHandler implements IServerService
 			if (wizardProperties.size() > 0)
 			{
 				// feed this wizardProperties into the wizard
-				System.err.println(wizardProperties);
-				Display current = Display.getCurrent();
-				if (current == null) current = Display.getDefault();
-
 				PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
 				FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
 				ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
 					.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
 
-				PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
+				PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(UIUtils.getActiveShell(),
 					context,
 					flattenedSolution, property).withTable(table).withProperties(wizardProperties);
 				if (dialogConfigurator.open() == Window.OK)

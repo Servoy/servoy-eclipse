@@ -36,7 +36,7 @@ import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConve
  *
  * @author acostescu
  */
-public abstract class ObjectTypePropertyController extends PropertyController<Object, Object>implements IPropertySetter<Object, ISetterAwarePropertySource>
+public abstract class ObjectTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 
 	private static ILabelProvider labelProvider = null;
@@ -98,6 +98,7 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
+		// RAGTEST deze ook (als er nog geen columns zijn)
 		CellEditor cellEditor = new ButtonSetValueCellEditor()
 		{
 
@@ -130,7 +131,7 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 
 	protected abstract boolean isJSONNull(Object val);
 
-	protected abstract class ObjectPropertySource extends ComplexPropertySource<Object>implements ISetterAwarePropertySource
+	protected abstract class ObjectPropertySource extends ComplexPropertySource<Object> implements ISetterAwarePropertySource
 	{
 
 		public ObjectPropertySource(ComplexProperty<Object> complexProperty)

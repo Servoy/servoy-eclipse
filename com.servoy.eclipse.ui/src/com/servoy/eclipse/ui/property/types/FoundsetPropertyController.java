@@ -240,6 +240,18 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 				propertyDescriptors.add(new JSONArrayTypePropertyController(DATAPROVIDERS, DATAPROVIDERS)
 				{
 
+					/*
+					 * (non-Javadoc)
+					 *
+					 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController#createNewElement()
+					 */
+					@Override
+					protected void createNewElement()
+					{
+						// RAGTEST json werkend maken
+
+					}
+
 					@Override
 					protected Object getNewElementInitialValue()
 					{
@@ -262,18 +274,6 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 							protected Object getElementValue(int idx)
 							{
 								return defaultGetProperty(getIdFromIndex(idx));
-							}
-
-							/*
-							 * (non-Javadoc)
-							 *
-							 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#getTypeName()
-							 */
-							@Override
-							protected String getTypeName()
-							{
-								// RAGTEST Auto-generated method stub
-								return null;
 							}
 
 							@Override
