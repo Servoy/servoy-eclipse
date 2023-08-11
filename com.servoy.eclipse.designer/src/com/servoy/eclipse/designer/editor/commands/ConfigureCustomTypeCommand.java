@@ -42,6 +42,7 @@ import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.IPropertyType;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetCustomArrayPropertiesCommand;
@@ -120,10 +121,6 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 							if (wizardProperties.size() > 0)
 							{
 								// feed this wizardProperties into the wizard
-								System.err.println(wizardProperties);
-								Display current = Display.getCurrent();
-								if (current == null) current = Display.getDefault();
-
 								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
 								ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
 									.getDataSource(flattenedSolution.getFlattenedForm(activeEditor.getForm()).getDataSource());
@@ -147,7 +144,7 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 									}
 								}
 
-								PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
+								PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(UIUtils.getActiveShell(),
 									persistContext,
 									flattenedSolution, property).withTable(table).withProperties(wizardProperties).withInput(input);
 								if (dialogConfigurator.open() != Window.OK) return null;

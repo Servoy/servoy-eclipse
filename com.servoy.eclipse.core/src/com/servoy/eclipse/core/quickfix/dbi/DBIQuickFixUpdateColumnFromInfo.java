@@ -17,11 +17,11 @@
 package com.servoy.eclipse.core.quickfix.dbi;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -130,7 +130,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 								message.append("' sequence type which is not supported by the database; using '");
 								message.append(ColumnInfo.getSeqDisplayTypeString(ColumnInfo.SERVOY_SEQUENCE));
 								message.append("' sequence type instead.");
-								MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Unsupported sequence type", message.toString());
+								MessageDialog.openWarning(UIUtils.getActiveShell(), "Unsupported sequence type", message.toString());
 								sequenceType = ColumnInfo.SERVOY_SEQUENCE;
 							}
 							else if (sequenceType == ColumnInfo.DATABASE_IDENTITY)
@@ -139,7 +139,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 								message.append(difference.getColumnString());
 								message.append(
 									"' has type 'dbident'. As the table already exists, this column is only marked by Servoy as 'dbident' but it will not be created as such in the database.");
-								MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Creating 'dbident' column in existing table",
+								MessageDialog.openWarning(UIUtils.getActiveShell(), "Creating 'dbident' column in existing table",
 									message.toString());
 							}
 

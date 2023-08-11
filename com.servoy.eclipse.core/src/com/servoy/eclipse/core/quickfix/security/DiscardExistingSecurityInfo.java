@@ -19,11 +19,11 @@ package com.servoy.eclipse.core.quickfix.security;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * Quick fix for security read errors - discards existing security information.
- * 
+ *
  * @author acostescu
  */
 public class DiscardExistingSecurityInfo extends SecurityQuickFix
@@ -71,11 +71,12 @@ public class DiscardExistingSecurityInfo extends SecurityQuickFix
 		ok = ok && (activeResourceProject != null);
 		if (ok)
 		{
-			Shell shell = (Display.getCurrent() != null ? Display.getCurrent().getActiveShell() : null);
+			Shell shell = UIUtils.getActiveShell();
 			if (shell != null)
 			{
 				if (!MessageDialog.openQuestion(shell, "Confirm discard",
-					"Choosing yes will overwrite (most likely delete) existing security files in active solutions\nand resources project. Do you wish to continue?")) return;
+					"Choosing yes will overwrite (most likely delete) existing security files in active solutions\nand resources project. Do you wish to continue?"))
+					return;
 			} // else maybe we should not bother the user with one more dialog
 			try
 			{
@@ -83,7 +84,7 @@ public class DiscardExistingSecurityInfo extends SecurityQuickFix
 			}
 			catch (RepositoryException e)
 			{
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error writing security info", e.getMessage());
+				MessageDialog.openError(UIUtils.getActiveShell(), "Error writing security info", e.getMessage());
 				ServoyLog.logError("Cannot write empty security data (invalid security content quick fix)", e);
 			}
 		}

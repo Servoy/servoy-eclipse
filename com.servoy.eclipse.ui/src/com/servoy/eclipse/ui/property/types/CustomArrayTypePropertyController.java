@@ -27,6 +27,9 @@ import org.sablo.specification.property.ICustomType;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.RagtestRegistry;
+import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestActions;
+import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestHandler;
 import com.servoy.eclipse.ui.property.ArrayTypePropertyController;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
@@ -66,6 +69,41 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return ((ICustomType< ? >)propertyDescription.getType()).getCustomJSONTypeDefinition();
 	}
 
+	@Override
+	protected void createNewElement()
+	{
+		EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
+		if (handler == null)
+		{
+			ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
+		}
+		else
+		{
+			Object id = getId();
+			String parentKey;
+			if (id instanceof ArrayPropertyChildId)
+			{
+				parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+			}
+			else
+			{
+				parentKey = String.valueOf(id);
+			}
+
+
+			handler.createComponent(persistContext.getPersist().getUUID(), parentKey, getTypeName());
+
+			System.err.println("RAGTEST2 ");
+		}
+	}
+
+	protected String getTypeName()
+	{
+		return propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
+			: propertyDescription.getType().getName();
+	}
+
+	// RAGTEST weg
 	private WebCustomType getNewElementValue(int index)
 	{
 		// when user adds/inserts a new item in the array normally a null is inserted
@@ -84,11 +122,14 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return null;
 	}
 
+	// RAGTEST weg
 	@Override
 	protected WebCustomType getNewElementInitialValue()
 	{
 		return getNewElementValue(0);
 	}
+
+	// RAGTEST weg
 
 	@Override
 	protected CustomArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty)
@@ -104,17 +145,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			super(complexProperty);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#getTypeName()
-		 */
-		@Override
-		protected String getTypeName()
-		{
-			return propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
-				: propertyDescription.getType().getName();
-		}
 
 		@Override
 		protected ArrayPropertyChildId getIdFromIndex(int idx)

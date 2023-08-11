@@ -52,7 +52,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -64,6 +63,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -91,7 +91,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 				ServoyProject servoyProject = (ServoyProject)project.getNature(ServoyProject.NATURE_ID);
 
 				// show resource project choice dialog
-				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(Display.getCurrent().getActiveShell(),
+				final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(UIUtils.getActiveShell(),
 					"Resources project for solution '" + servoyProject.getProject().getName() + "'", servoyProject.getResourcesProject(), false);
 
 				if (dialog.open() == Window.OK)

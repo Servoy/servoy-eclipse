@@ -711,11 +711,11 @@ public class RagtestCommand extends BaseRestorableCommand
 		return null;
 	}
 
-	private static IPersist[] singlePersistWithLocationAndSize(ISupportBounds persist, RagtestOptions args)
+	private static IPersist[] singlePersistWithLocationAndSize(IFormElement persist, RagtestOptions args)
 	{
 		CSSPositionUtils.setLocation(persist, args.getLocation());
 		if (!EMPTY_SIZE.equals(args.getSize())) CSSPositionUtils.setSize(persist, args.getSize());
-		return new IPersist[] { (IPersist)persist };
+		return new IPersist[] { persist };
 	}
 
 	private static List<IPersist> createLayoutContainer(BaseVisualFormEditor editorPart, ISupportFormElements parent, WebLayoutSpecification layoutSpec,
@@ -960,6 +960,9 @@ public class RagtestCommand extends BaseRestorableCommand
 			this(null);
 		}
 
+		/**
+		 * Constructor with optional original json for dynamic webcomponent properties
+		 */
 		public RagtestOptions(JSONObject allProperties)
 		{
 			this.allProperties = allProperties;
@@ -1175,15 +1178,15 @@ public class RagtestCommand extends BaseRestorableCommand
 		{
 			RagtestOptions options = new RagtestOptions(args);
 
-			options.rightSibling = args.optString("rightSibling");
-			options.text = args.optString("text");
-			options.styleClass = args.optString("styleClass");
-			options.packageName = args.optString("packageName");
-			options.uuid = args.optString("uuid");
-			options.name = args.optString("name");
-			options.type = args.optString("type");
-			options.ghostPropertyName = args.optString("ghostPropertyName");
-			options.dropTargetUUID = args.optString("dropTargetUUID");
+			options.rightSibling = args.optString("rightSibling", null);
+			options.text = args.optString("text", null);
+			options.styleClass = args.optString("styleClass", null);
+			options.packageName = args.optString("packageName", null);
+			options.uuid = args.optString("uuid", null);
+			options.name = args.optString("name", null);
+			options.type = args.optString("type", null);
+			options.ghostPropertyName = args.optString("ghostPropertyName", null);
+			options.dropTargetUUID = args.optString("dropTargetUUID", null);
 			options.addAfterTarget = args.optBoolean("addAfterTarget", false);
 			options.keepOldSelection = args.optBoolean("keepOldSelection", false);
 

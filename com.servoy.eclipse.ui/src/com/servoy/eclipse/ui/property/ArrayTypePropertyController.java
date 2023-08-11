@@ -41,14 +41,10 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.eclipse.core.util.ReturnValueSnippet;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
-import com.servoy.eclipse.ui.RagtestRegistry;
-import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestActions;
-import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestHandler;
 import com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.IDelegate;
 
 /**
@@ -58,7 +54,6 @@ import com.servoy.j2db.util.IDelegate;
  */
 public abstract class ArrayTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
-
 	protected ILabelProvider labelProvider = null;
 
 	public ArrayTypePropertyController(Object id, String displayName)
@@ -80,9 +75,11 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	/**
 	 * @return new main value with the given element inserted.
 	 */
-	protected abstract Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue);
+	protected abstract Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue); // RAGTEST hier weg?
 
-	protected abstract Object getNewElementInitialValue();
+	protected abstract Object getNewElementInitialValue(); // RAGTEST hier weg?
+
+	protected abstract void createNewElement(); // RAGTEST hier weg?
 
 	protected abstract ArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty);
 
@@ -148,6 +145,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			}
 
 		};
+
 		ButtonCellEditor addButton = new ButtonCellEditor()
 		{
 
@@ -220,30 +218,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			@Override
 			protected void buttonClicked()
 			{
-				EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
-				if (handler == null)
-				{
-					ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
-				}
-				else
-				{
-					Object id = getId();
-					String parentKey;
-					if (id instanceof ArrayPropertyChildId)
-					{
-						parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
-					}
-					else
-					{
-						parentKey = String.valueOf(id);
-					}
-
-					if (oldValue instanceof IPersist)
-					{
-						handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, null);// RAGTEST arrayPropertySource.getTypeName());
-					}
-					System.err.println("RAGTEST2 ");
-				}
+				createNewElement();
 			}
 
 		};
@@ -339,7 +314,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 		protected abstract ArrayPropertyChildId getIdFromIndex(int idx);
 
-		protected abstract String getTypeName();
+		//	protected abstract String getTypeName();
 
 
 		@Override
@@ -601,31 +576,31 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				@Override
 				protected void buttonClicked()
 				{
-					// RAGTEST naar aparte klasse
-					EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
-					if (handler == null)
-					{
-						ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
-					}
-					else
-					{
-						Object id = getId();
-						String parentKey;
-						if (id instanceof ArrayPropertyChildId)
-						{
-							parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
-						}
-						else
-						{
-							parentKey = String.valueOf(id);
-						}
-
-						if (oldValue instanceof IPersist)
-						{
-							handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, arrayPropertySource.getTypeName());
-						}
-						System.err.println("RAGTEST1 ");
-					}
+//					// RAGTEST naar aparte klasse
+//					EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
+//					if (handler == null)
+//					{
+//						ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
+//					}
+//					else
+//					{
+//						Object id = getId();
+//						String parentKey;
+//						if (id instanceof ArrayPropertyChildId)
+//						{
+//							parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+//						}
+//						else
+//						{
+//							parentKey = String.valueOf(id);
+//						}
+//
+//						if (oldValue instanceof IPersist)
+//						{
+//							handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, arrayPropertySource.getTypeName());
+//						}
+//						System.err.println("RAGTEST1 ");
+//					}
 				}
 
 			}, false, true, 0));
