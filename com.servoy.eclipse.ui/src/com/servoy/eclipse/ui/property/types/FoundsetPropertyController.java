@@ -264,6 +264,18 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 								return defaultGetProperty(getIdFromIndex(idx));
 							}
 
+							/*
+							 * (non-Javadoc)
+							 *
+							 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#getTypeName()
+							 */
+							@Override
+							protected String getTypeName()
+							{
+								// RAGTEST Auto-generated method stub
+								return null;
+							}
+
 							@Override
 							protected void addChildPropertyDescriptors(Object arrayV)
 							{

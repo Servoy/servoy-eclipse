@@ -104,6 +104,18 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			super(complexProperty);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#getTypeName()
+		 */
+		@Override
+		protected String getTypeName()
+		{
+			return propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
+				: propertyDescription.getType().getName();
+		}
+
 		@Override
 		protected ArrayPropertyChildId getIdFromIndex(int idx)
 		{

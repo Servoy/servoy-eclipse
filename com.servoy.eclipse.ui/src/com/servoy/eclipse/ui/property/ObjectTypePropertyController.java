@@ -98,7 +98,7 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		CellEditor cellEditor = new ButtonCellEditor()
+		CellEditor cellEditor = new ButtonSetValueCellEditor()
 		{
 
 			@Override

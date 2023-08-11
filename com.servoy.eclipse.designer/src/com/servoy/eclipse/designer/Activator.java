@@ -29,6 +29,7 @@ import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -39,8 +40,12 @@ import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RagtestCommand;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RagtestCommand.RagtestOptions;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.RagtestRegistry;
+import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestActions;
 import com.servoy.eclipse.ui.editors.I18NEditor;
 
 /**
@@ -114,6 +119,32 @@ public class Activator extends AbstractUIPlugin
 					}
 				});
 			}
+		});
+
+		RagtestRegistry.registerRagtest(EditorRagtestActions.CREATE_COMPONENT_RAGTEST, (uuid, propertyName, type) -> {
+
+			if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null)
+			{
+				IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				if (activePage != null)
+				{
+					IEditorPart activeEditor = activePage.getActiveEditor();
+
+					if (activeEditor instanceof BaseVisualFormEditor)
+					{
+						BaseVisualFormEditor formEditor = (BaseVisualFormEditor)activeEditor;
+						RagtestOptions args = new RagtestOptions();
+						args.setDropTargetUUID(uuid.toString());
+						args.setGhostPropertyName(propertyName);
+						args.setAddAfterTarget(true);
+						args.setType(type);
+						RagtestCommand command = new RagtestCommand(formEditor, args, null);
+						formEditor.getCommandStack().execute(command);
+					}
+				}
+			}
+
+			System.err.println("RAGTEST called CREATE_COMPONENT_RAGTEST ");
 		});
 	}
 
