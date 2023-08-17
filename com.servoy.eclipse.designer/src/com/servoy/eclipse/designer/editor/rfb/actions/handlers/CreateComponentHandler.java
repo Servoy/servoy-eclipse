@@ -82,6 +82,7 @@ import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -126,6 +127,7 @@ import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 
@@ -289,7 +291,7 @@ public class CreateComponentHandler implements IServerService
 					}
 					parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(PersistContext.create(parentBean, editorPart.getForm()));
 					WebCustomType bean = AddContainerCommand.addCustomType(parentBean, propertyName, compName, arrayIndex, null);
-					autoShowDataProviderSelection(editorPart.getForm(), (WebComponent)parentBean, propertyName, editorPart, bean);
+					AddContainerCommand.showDataproviderDialog(bean.getPropertyDescription().getProperties(), bean, editorPart);
 					return new IPersist[] { bean };
 				}
 				else if (args.getString("type").equals("tab"))
@@ -658,12 +660,9 @@ public class CreateComponentHandler implements IServerService
 										autoshowWizard(parentSupportingElements, spec, webComponent, property, editorPart, id);
 									}
 								}
-								if ("dataprovider".equals(property.getType().getName()))
-								{
-									autoShowDataProviderSelection(parentSupportingElements, webComponent, propertyName, editorPart, null);
-								}
 							}
 						}
+						AddContainerCommand.showDataproviderDialog(spec.getProperties(), webComponent, editorPart);
 						List<IPersist> changes = new ArrayList<>();
 						boolean addSiblingsToChanges = true;
 						if (editorPart.getForm().isResponsiveLayout() || webComponent.getParent() instanceof CSSPositionLayoutContainer)
@@ -833,42 +832,24 @@ public class CreateComponentHandler implements IServerService
 		return null;
 	}
 
-	public static void autoShowDataProviderSelection(ISupportFormElements parentSupportingElements, WebComponent webComponent, String propertyName,
-		BaseVisualFormEditor editorPart, WebCustomType bean)
+	public static void autoShowDataProviderSelection(PropertyDescription pd, Form form, AbstractBase webComponent, String propertyName)
 	{
 		Display current = Display.getCurrent();
 		if (current == null) current = Display.getDefault();
-		PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
-		IPersist persist = context.getContext();
-		while (!(persist instanceof Form))
-		{
-			persist = persist.getParent();
-		}
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-		ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
-			.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+
+		Pair<String, ITable> forFoundset = PersistPropertySource.calculateFoundsetTable(pd, PersistContext.create(webComponent, form), flattenedSolution, form);
+		ITable table = forFoundset.getRight();
 		DataProviderOptions options = new DataProviderOptions(true, true, true, true, true, true, true, true, null, true, true, null);
 		DataProviderCellEditor dialog = new DataProviderCellEditor(current.getActiveShell(), new DataProviderLabelProvider(true), null,
-			(Form)persist,
-			flattenedSolution,
-			false, options, null, table, "Select Data Provider - " + propertyName);
-		if (!"aggrid-datasettable".equals(webComponent.getTypeName()))
+			form, flattenedSolution, false, options, null, table,
+			"Select Data Provider - " + (propertyName.endsWith("ID") ? propertyName.substring(0, propertyName.length() - 2) : propertyName));
+		Object result = dialog.openDialogBox(current.getActiveShell());
+		if (result != null)
 		{
-			Object result = dialog.openDialogBox(current.getActiveShell());
-			if (result != null)
+			if (!result.toString().contains("$NoDataProvider"))
 			{
-				if (!result.toString().contains("$NoDataProvider"))
-				{
-					if (bean != null)
-					{
-						bean.setProperty("dataprovider", result.toString());
-						bean.setProperty("id", result.toString());
-					}
-					else
-					{
-						webComponent.setProperty(propertyName, result.toString());
-					}
-				}
+				webComponent.setProperty(propertyName, result.toString());
 			}
 		}
 	}
