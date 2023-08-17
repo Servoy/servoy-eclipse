@@ -796,7 +796,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				template.append("  let-state=\"state\" >\n<");
 				template.append(pair.getRight());
 				pair.getLeft().getDirectives().forEach(directive -> template.append(' ').append(directive));
-				template.append(" [svyContainerStyle]=\"state\" class=\"svy-layoutcontainer\">\n");
+				template.append(
+					" [svyContainerStyle]=\"state\" [svyContainerClasses]=\"state.classes\" [svyContainerAttributes]=\"state.attributes\"  class=\"svy-layoutcontainer\">\n");
 				template.append(
 					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getTemplate(item)\" [ngTemplateOutletContext]=\"{ state:item, callback:this}\"></ng-template>\n</");
 				template.append(pair.getRight());
@@ -807,7 +808,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				templateLFC.append("  let-state=\"state\" let-row=\"row\" let-i=\"i\">\n<");
 				templateLFC.append(pair.getRight());
 				pair.getLeft().getDirectives().forEach(directive -> templateLFC.append(' ').append(directive));
-				templateLFC.append(" [svyContainerStyle]=\"state\" class=\"svy-layoutcontainer\">\n");
+				templateLFC.append(
+					" [svyContainerStyle]=\"state\" [svyContainerClasses]=\"state.classes\" [svyContainerAttributes]=\"state.attributes\"  class=\"svy-layoutcontainer\">\n");
 				templateLFC.append(
 					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getRowItemTemplate(item)\" [ngTemplateOutletContext]=\"{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}\"></ng-template>\n</");
 				templateLFC.append(pair.getRight());
