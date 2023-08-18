@@ -1,0 +1,23 @@
+.horizontalGuide {
+    position:absolute;
+    left: 0px;
+    top: 0px;
+    height:1px;
+    width:0px;
+    border-style:solid;
+    border-width: 1px;
+    border-color: red;
+    display: block;
+}
+
+.verticalGuide {
+    position:absolute;
+    left: 0px;
+    top: 0px;
+    height:0px;
+    width:1px;
+    border-style:solid;
+    border-width: 1px;
+    border-color: red;
+    display: block;
+}

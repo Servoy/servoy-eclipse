@@ -13,6 +13,7 @@
             <dragselection-responsive></dragselection-responsive>
             <designer-samesize-indicator></designer-samesize-indicator>
             <designer-anchoring-indicator></designer-anchoring-indicator>
+            <dynamic-guides *ngIf="urlParser.isAbsoluteFormLayout()"></dynamic-guides>
         </div>
         <designer-editorcontent></designer-editorcontent> 
     </div>
