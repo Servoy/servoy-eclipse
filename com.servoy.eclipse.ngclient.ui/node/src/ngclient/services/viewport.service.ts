@@ -106,7 +106,7 @@ export class ViewportService {
         oldViewPort.splice(0); // clear oldViewport
         for (const rowUpdate of convertedViewPortUpdate) oldViewPort.push(rowUpdate);
 
-        const newViewport = this.addViewportOrRowProxiesIfNeeded(oldViewPort, internalState, propertyContextCreator, defaultColumnTypes, simpleRowValue);
+        const newViewport = this.addViewportOrRowProxiesIfNeeded(oldViewPort, internalState, propertyContextCreator, simpleRowValue);
 
         // link new smart viewport values to parent change notifier so that things such as let's say child valuelist.filter(...) do get sent to server correctly
         for (let i = newViewport.length - 1; i >= 0; i--) {
@@ -123,7 +123,7 @@ export class ViewportService {
         rowCreator?: () => any, cellUpdatedFromServerListener?: CellUpdatedFromServerListener): void {
         // partial row updates (remove/insert/update)
 
-        const worksWithRowLevelProxies = !simpleRowValue && this.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(PushToServerEnum.SHALLOW, internalState, propertyContextCreator, defaultColumnTypes);
+        const worksWithRowLevelProxies = !simpleRowValue && this.needsRowProxies(internalState, propertyContextCreator);
 
         // {
         //   "rows": rowData, // array again
@@ -281,11 +281,9 @@ export class ViewportService {
      *                    it will return a promise otherwise - if the update was sent to server.
      */
     public sendCellChangeToServerBasedOnRowId(viewPort: any[], internalState: FoundsetViewportState, deferredState: IDeferedState, rowID: string, columnName: string,
-        propertyContextCreator: IPropertyContextCreatorForRow, defaultColumnTypes: IWebObjectSpecification, newValue: any, oldValue?: any): Promise<any> {
+        propertyContextCreator: IPropertyContextCreatorForRow, newValue: any, oldValue?: any): Promise<any> {
 
-        if (columnName !== undefined ?
-            !this.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(PushToServerEnum.ALLOW, internalState, propertyContextCreator, defaultColumnTypes) :
-            this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined).getPushToServerCalculatedValue() < PushToServerEnum.ALLOW) {
+        if (this.getCellPropertyContextFor(propertyContextCreator, undefined, columnName).getPushToServerCalculatedValue() < PushToServerEnum.ALLOW) {
             internalState.log.spam(internalState.log.buildMessage(() => ('svy viewport * sendCellChangeToServerBasedOnRowId denied because pushToServer < ALLOW in .spec ('
                 + rowID + ', ' + columnName + ', ' + newValue)));
             return;
@@ -545,7 +543,7 @@ export class ViewportService {
     }
 
     private addViewportOrRowProxiesIfNeeded<T extends any[]>(viewPort: T, internalState: FoundsetViewportState, propertyContextCreator: IPropertyContextCreatorForRow,
-        defaultColumnTypes: IWebObjectSpecification, simpleRowValue: boolean): T {
+                            simpleRowValue: boolean): T {
 
         let resultingViewport = viewPort;
 
@@ -567,7 +565,7 @@ export class ViewportService {
             internalState.rowLevelProxyStates = [];
 
             // see if we have any columns
-            if (this.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(PushToServerEnum.SHALLOW, internalState, propertyContextCreator, defaultColumnTypes)) {
+            if (this.needsRowProxies(internalState, propertyContextCreator)) {
                 for (let i = viewPort.length - 1; i >= 0; i--) {
                     viewPort[i] = this.addRowProxyTo(viewPort, i, propertyContextCreator, internalState);
                 }
@@ -582,36 +580,24 @@ export class ViewportService {
         return new Proxy(viewPort[rowIndex], this.getRowLevelProxyHandler(viewPort, rowIndex, propertyContextCreator, internalState));
     }
 
-    private hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(atLeastPushToServer: PushToServerEnum, internalState: FoundsetViewportState, propertyContextCreator: IPropertyContextCreatorForRow,
-        defaultColumnTypes: IWebObjectSpecification): boolean {
-        if (internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer] !== undefined)
-            return internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer];
+    private needsRowProxies(internalState: FoundsetViewportState, propertyContextCreator: IPropertyContextCreatorForRow): boolean {
 
-        // this hasPushToServerForNestedCellsInRowsGreaterOrEqualTo is defined only when we have defaultColumnTypes (component property type viewport)
+        if (internalState.needsRowProxies !== undefined)
+            return internalState.needsRowProxies;
 
-        if (defaultColumnTypes) {
-            // FIXME defaultColumnTypes != null so this is the viewport for a child "component" property type value;
-            // but do we really need to proxy it then? components in ng2 are responsible for "emiting" changes of root component properties
-            // and the one that is using the "component" property (for example a list form component) is responsible for linking that emit of the
-            // child component to the ChildComponentPropertyValue.sendChanges of the component property value; so is there a need to send changes automatically
-            // then via a proxy? (root properties of components will not be updated in the models by the component itself anyway - until an emit happens...)
-            
-            // component property type viewport probably; we search for push to server at least specified value on spec property names
-            internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer] = false;
-            const pds = defaultColumnTypes.getPropertyDescriptions();
-            if (pds) for (const propName of Object.keys(pds)) {
-                if (pds[propName].getPropertyPushToServer() >= atLeastPushToServer) { // this is for component root properties, so no need for parent prop. push-to-server
-                    internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer] = true;
-                    break;
-                }
-            }
-        } else {
-            // foundset type probably; it only has 1 property context for all columns currently - so just check it
-            internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer] = (this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined)
-                .getPushToServerCalculatedValue() >= atLeastPushToServer);
-        }
+        // it can be a foundset type viewport; it then only has 1 property context for all columns currently - so just check it
+        // or component type for which we should return false anyway (and .getCellPropertyContextFor() with undefined column name in component_converter.ts will give REJECT); see comment below
+        internalState.needsRowProxies = (this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined)
+            .getPushToServerCalculatedValue() >= PushToServerEnum.SHALLOW);
 
-        return internalState.hasPushToServerForNestedCellsInRowsGreaterOrEqualTo[atLeastPushToServer];
+        // if this is the viewport for a child "component" property type value, we don't really need to proxy it then; components in ng2 are responsible
+        // for "emiting" changes of root component properties and the one that is using the "component" property (for example a list form component) is responsible
+        // for linking that emit of the child component to the ChildComponentPropertyValue.sendChanges of the component property value; so there is no need to
+        // send changes automatically then via a proxy (root properties of components will not be updated in the models anyway by the component itself, child
+        // component only has access to the @Input and @Output - so it can't set root props. directly in the model itself (it does not have access to it)
+        // so those will not change anyway until an emit happens...)
+
+        return internalState.needsRowProxies;
         // undefined is turned into false if we cannot decide at this point if viewport rows need proxies or not
     }
 
@@ -730,8 +716,8 @@ export abstract class FoundsetViewportState extends ChangeAwareState {
 
     viewportLevelProxyRevokerFunc?: () => void; // this can be just a boolean I think; we never call it, we just check if it's there or not
     rowLevelProxyStates?: Array<RowProxyState>;
-    /** just a value that is cached here for component and foundset type viewports - so we don't need to search for it each time it's needed */
-    hasPushToServerForNestedCellsInRowsGreaterOrEqualTo: Map<PushToServerEnum, boolean> = new Map();
+    /** just a value that is cached here for foundset type viewports - so we don't need to search for it each time it's needed */
+    needsRowProxies: boolean;
 
     constructor(public readonly forFoundset: () => IFoundset, public readonly log: LoggerService, protected sabloService: SabloService) {
         super();

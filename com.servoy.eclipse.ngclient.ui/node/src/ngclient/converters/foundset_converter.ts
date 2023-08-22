@@ -422,7 +422,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
     public columnDataChangedByRowId(rowID: string, columnName: string, newValue: any, oldValue: any): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * columnDataChangedByRowId requested with ("' + rowID + '", ' + columnName + ', ' + newValue)));
         return this.__internalState.viewportService.sendCellChangeToServerBasedOnRowId(this.viewPort.rows, this.__internalState, this.__internalState, rowID, columnName,
-                                        this.__internalState.propertyContextCreator, undefined, newValue, oldValue);
+                                        this.__internalState.propertyContextCreator, newValue, oldValue);
     }
 
     public columnDataChanged(rowIndex: number, columnName: string, newValue: any, oldValue?: any): RequestInfoPromise<any> {
