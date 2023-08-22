@@ -3,7 +3,7 @@ import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISuppor
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
-import { EditorContentService } from '../services/editorcontent.service';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 import { WindowRefService } from '@servoy/public';
 
 @Component({
@@ -11,7 +11,7 @@ import { WindowRefService } from '@servoy/public';
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css']
 })
-export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette{
+export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, IContentMessageListener{
 
     public searchText: string;
     public activeIds: Array<string>;
@@ -20,6 +20,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
     draggedVariant: DraggedVariant = {};
     isDraggedVariant = false;
+    snapData: {top: number, left: number, snapX?: string, snapY?: string};
 
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, 
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
@@ -42,6 +43,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         });
         this.editorContentService.getBodyElement().addEventListener('mouseup', this.onMouseUp);
         this.editorContentService.getBodyElement().addEventListener('mousemove', this.onMouseMove);
+        this.editorContentService.addContentMessageListener(this);
     }
 
     openPackageManager() {
@@ -181,8 +183,19 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             component.name = this.dragItem.elementName;
             component.packageName = this.dragItem.packageName;
 
-            component.x = event.pageX;
-            component.y = event.pageY;
+            if (this.snapData) {
+                component.x = this.snapData.left;
+                component.y = this.snapData.top;
+                component.snapX = this.snapData.snapX;
+                component.snapY = this.snapData.snapY;
+            }
+            else {
+                component.x = event.pageX;
+                component.y = event.pageY;
+                // do we also need to set size here ?
+                component.x = component.x - this.editorContentService.getLeftPositionIframe();
+                component.y = component.y - this.editorContentService.getTopPositionIframe();
+            }
                     
             if (this.isDraggedVariant) {
                 component.w = this.draggedVariant.size.width;
@@ -192,13 +205,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     component.variant = this.draggedVariant.variant;
                 }
                 this.isDraggedVariant = false;
-            }
-
-            // do we also need to set size here ?
-            component.x = component.x - this.editorContentService.getLeftPositionIframe();
-            component.y = component.y - this.editorContentService.getTopPositionIframe();
-
-            
+            }            
 
             if (this.urlParser.isAbsoluteFormLayout()) {
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
@@ -410,6 +417,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             }
             this.editorSession.getState().packages = packages;
         });
+    }
+
+    contentMessageReceived(id: string, data: { property: string }) {
+        if (id === 'snap') {
+            this.snapData = data['properties'];
+        }
     }
 }
 

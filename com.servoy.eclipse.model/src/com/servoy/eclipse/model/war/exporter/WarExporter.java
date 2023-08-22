@@ -393,12 +393,13 @@ public class WarExporter
 	private void checkDuplicateJars(File tmpWarDir) throws ExportException
 	{
 		Map<String, TreeMap<String, List<File>>> dependenciesVersions = new HashMap<>();
+		TreeMap<String, List<File>> possibleDuplicates = new TreeMap<>();
 		Set<File> libs;
 		try
 		{
 			libs = Files.walk(tmpWarDir.toPath()).filter(path -> path.toString().endsWith(".jar"))//
 				.map(path -> path.toFile()).collect(Collectors.toSet());
-			libs.forEach(jar -> checkDuplicateJar(jar, dependenciesVersions));
+			libs.forEach(jar -> checkDuplicateJar(jar, dependenciesVersions, possibleDuplicates));
 		}
 		catch (IOException e)
 		{
@@ -436,6 +437,8 @@ public class WarExporter
 						//keep the one in the lib folder, doesn't matter if it's older
 						latestJarPath = getRelativePath(tmpWarDir, lib.get());
 						latestJar = lib.get();
+						String name = latestJar.getName().substring(0, latestJar.getName().indexOf(".jar")).replaceAll("-|_|\\d|\\.", "");
+						possibleDuplicates.get(name).add(latestJar);
 					}
 
 					for (String version : dependenciesVersions.get(jar).keySet())
@@ -478,6 +481,8 @@ public class WarExporter
 									latest +
 									") is already present in '" + latestJarPath + "'. \n");
 							}
+							String name = file.getName().substring(0, file.getName().indexOf(".jar")).replaceAll("-|_|\\d|\\.", "");
+							possibleDuplicates.get(name).remove(file);
 							File parent = file.getParentFile();
 							file.delete();
 							if (parent.list().length == 0)
@@ -511,6 +516,26 @@ public class WarExporter
 			messageBuilder.append(
 				"\n If you are not using the latest versions of the exported plugins, an upgrade might fix the warnings. Otherwise, no action is required.");
 			userChannel.displayWarningMessage("Plugin dependencies problem", messageBuilder.toString(), true);
+		}
+
+		if (!possibleDuplicates.isEmpty())
+		{
+			Optional<List<File>> moreJars = possibleDuplicates.values().stream().filter(jars -> jars.size() > 1).findAny();
+			if (!moreJars.isPresent()) return;
+			messageBuilder = new StringBuilder(
+				"The following jars have similar file names so they are possible duplicates, which means the war deployment could fail if the wrong jar is used. \n" +
+					"They cannot be checked automatically because some don't provide the bundle symbolic name in the manifest, or it is not exactly the same. \nPlease check and delete the duplicate jars manually.\n\n");
+			for (List<File> jars : possibleDuplicates.values())
+			{
+				if (jars.size() > 1)
+				{
+					String message = jars.stream().map(file -> getRelativePath(tmpWarDir, file))//
+						.collect(Collectors.joining(", "));
+					message = message.substring(0, message.lastIndexOf(",")) + message.substring(message.lastIndexOf(",")).replace(",", " and");
+					messageBuilder.append("- " + message + "\n");
+				}
+			}
+			userChannel.displayWarningMessage("Possible duplicate jars", messageBuilder.toString(), true);
 		}
 	}
 
@@ -2067,7 +2092,7 @@ public class WarExporter
 		}
 	}
 
-	private void checkDuplicateJar(File jarFile, Map<String, TreeMap<String, List<File>>> dependenciesVersions)
+	private void checkDuplicateJar(File jarFile, Map<String, TreeMap<String, List<File>>> dependenciesVersions, TreeMap<String, List<File>> allJars)
 	{
 		String jarName = null;
 		String version = null;
@@ -2106,6 +2131,13 @@ public class WarExporter
 		{
 			dependenciesVersions.put(jarName, new TreeMap<>(VersionComparator.INSTANCE));
 		}
+		String name = jarFile.getName().substring(0, jarFile.getName().indexOf(".jar")).replaceAll("-|_|\\d|\\.", "");
+		if (!allJars.containsKey(name))
+		{
+			allJars.put(name, new ArrayList<>());
+		}
+		if (jarFile.getPath().contains("plugins"))
+			allJars.get(name).add(jarFile);
 
 		TreeMap<String, List<File>> vFiles = dependenciesVersions.get(jarName);
 		if (!vFiles.containsKey(version))

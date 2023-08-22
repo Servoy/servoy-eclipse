@@ -250,10 +250,8 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		throws RepositoryException, SQLException
 	{
 		DataModelManager dataModelManager = ServoyModelFinder.getServoyModel().getDataModelManager();
-		Iterator<Column> it = table.getColumns().iterator();
-		while (it.hasNext())
+		for (Column c : table.getColumns())
 		{
-			Column c = it.next();
 			if (c.getColumnInfo() == null && dataModelManager != null) dataModelManager.createNewColumnInfo(c, createMissingServoySequences); // Use supplied sequence info, don't assume anything!!
 		}
 
@@ -841,10 +839,8 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		tables.put(tableName, table);
 
 		DataModelManager dmm = DataModelManager.getColumnInfoManager(ApplicationServerRegistry.get().getServerManager());
-		Iterator<Column> it = selectedTable.getColumns().iterator();
-		while (it.hasNext())
+		for (Column c : selectedTable.getColumns())
 		{
-			Column c = it.next();
 			ColumnInfo columnInfo = c.getColumnInfo();
 			Column newColumn = table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
 				(c.getFlags() & IBaseColumn.PK_COLUMN) != 0);
@@ -866,18 +862,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 */
 	@Override
 	public boolean isTableListLoaded()
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#isTableListLoaded()
-	 */
-	@Override
-	public boolean isTableListLoadedAsync()
 	{
 		// TODO Auto-generated method stub
 		return false;

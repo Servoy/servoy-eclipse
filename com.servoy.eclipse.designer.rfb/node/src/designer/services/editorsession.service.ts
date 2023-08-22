@@ -539,6 +539,8 @@ export class PaletteComp {
     children?: [{ [property: string]: string }];
     rightSibling?: string;
     variant?: string;
+    snapX?: string;
+    snapY?: string;
 }
 
 export class Package {

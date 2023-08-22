@@ -38,6 +38,7 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -56,7 +57,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.apache.wicket.util.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mozilla.javascript.Function;

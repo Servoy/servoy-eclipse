@@ -9,7 +9,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -22,6 +25,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +73,7 @@ import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
@@ -198,13 +203,11 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									if (persistContext.getPersist() instanceof IBasicWebComponent)
 									{
 										IBasicWebComponent parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(persistContext);
-										finalPersist[0] = addCustomType(parentBean,
+										WebCustomType customType = addCustomType(parentBean,
 											event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null,
 											-1, null);
-										CreateComponentHandler.autoShowDataProviderSelection((ISupportFormElements)persistContext.getContext(),
-											(WebComponent)parentBean,
-											event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), activeEditor,
-											((WebCustomType)finalPersist[0]));
+										finalPersist[0] = customType;
+										showDataproviderDialog(customType.getPropertyDescription().getProperties(), customType, activeEditor);
 									}
 								}
 								else if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec") != null)
@@ -260,25 +263,26 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										componentName = baseName + "_" + i;
 										i++;
 									}
-									finalPersist[0] = parentPersist.createNewWebComponent(componentName, spec.getName());
+									WebComponent webComponent = parentPersist.createNewWebComponent(componentName, spec.getName());
+									finalPersist[0] = webComponent;
 
 									if (parentPersist instanceof LayoutContainer || activeEditor.getForm().isResponsiveLayout())
 									{
 										int maxLocation = 0;
-										ISupportChilds parent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(finalPersist[0]),
+										ISupportChilds parent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(webComponent),
 											activeEditor.getForm(), parentPersist);
 										Iterator<IPersist> it = parent.getAllObjects();
 										while (it.hasNext())
 										{
 											IPersist currentPersist = it.next();
-											if (currentPersist != finalPersist[0] && currentPersist instanceof ISupportBounds)
+											if (currentPersist != webComponent && currentPersist instanceof ISupportBounds)
 											{
 												Point location = ((ISupportBounds)currentPersist).getLocation();
 												if (location.x > maxLocation) maxLocation = location.x;
 												if (location.y > maxLocation) maxLocation = location.y;
 											}
 										}
-										((WebComponent)finalPersist[0]).setLocation(new Point(maxLocation + 1, maxLocation + 1));
+										webComponent.setLocation(new Point(maxLocation + 1, maxLocation + 1));
 									}
 									Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
 									for (String string : allPropertiesNames)
@@ -289,20 +293,16 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 											if (property.getInitialValue() != null)
 											{
 												Object initialValue = property.getInitialValue();
-												if (initialValue != null) ((WebComponent)finalPersist[0]).setProperty(string, initialValue);
+												if (initialValue != null) webComponent.setProperty(string, initialValue);
 											}
 											if ("autoshow".equals(property.getTag("wizard")))
 											{
-												CreateComponentHandler.autoshowWizard(parentPersist, spec, ((WebComponent)finalPersist[0]), property,
+												CreateComponentHandler.autoshowWizard(parentPersist, spec, webComponent, property,
 													activeEditor, id);
-											}
-											if ("dataprovider".equals(property.getType().getName()))
-											{
-												CreateComponentHandler.autoShowDataProviderSelection(parentPersist,
-													((WebComponent)finalPersist[0]), property.getName(), activeEditor, null);
 											}
 										}
 									}
+									AddContainerCommand.showDataproviderDialog(spec.getProperties(), webComponent, activeEditor);
 								}
 								if (finalPersist[0] != null)
 								{
@@ -401,7 +401,9 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				}
 			}
 		}
-		catch (NullPointerException npe)
+		catch (
+
+		NullPointerException npe)
 		{
 			Debug.log(npe);
 		}
@@ -500,6 +502,56 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			return i;
 		}
 		return i;
+	}
+
+	/**
+	 * @param activeEditor
+	 * @param customType
+	 */
+	public static void showDataproviderDialog(Map<String, PropertyDescription> properties, AbstractBase webComponent, BaseVisualFormEditor activeEditor)
+	{
+		List<Entry<String, PropertyDescription>> dataproviderProperties = properties.entrySet().stream()
+			.filter(entry -> entry.getValue().getType().getName().equals(DataproviderPropertyType.TYPE_NAME))
+			.collect(Collectors.toList());
+		if (dataproviderProperties.size() == 1)
+		{
+			Entry<String, PropertyDescription> entry = dataproviderProperties.get(0);
+			CreateComponentHandler.autoShowDataProviderSelection(entry.getValue(), activeEditor.getForm(), webComponent,
+				entry.getKey());
+		}
+		else if (dataproviderProperties.size() > 1)
+		{
+			List<String> collect = dataproviderProperties.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
+			ElementListSelectionDialog dialog = new ElementListSelectionDialog(activeEditor.getEditorSite().getShell(),
+				new LabelProvider()
+				{
+					@Override
+					public String getText(Object element)
+					{
+						String txt = super.getText(element);
+						if (txt.endsWith("ID")) txt = txt.substring(0, txt.length() - 2);
+						return txt;
+					}
+				});
+			dialog.setMultipleSelection(true);
+			dialog.setMessage("Select the dataprovider properties that you want to configure");
+			dialog.setElements(collect.toArray());
+			List<String> dataproviderNames = collect.stream().filter(property -> property.toLowerCase().startsWith("dataprovider"))
+				.collect(Collectors.toList());
+			if (dataproviderNames.size() > 0)
+			{
+				// this is a bit hard coded to at least select the one that is called dataprovider as the main selection.
+				dialog.setInitialSelections(dataproviderNames.toArray());
+			}
+			dialog.setTitle("Dataprovider properties configuration");
+			if (dialog.open() == Window.OK)
+			{
+				Arrays.asList(dialog.getResult()).forEach(property -> {
+					PropertyDescription propertyDescription = properties.get(property);
+					CreateComponentHandler.autoShowDataProviderSelection(propertyDescription, activeEditor.getForm(), webComponent, (String)property);
+				});
+			}
+		}
 	}
 
 	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex, WebCustomType template)

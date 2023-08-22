@@ -165,13 +165,25 @@ export class ApplicationService {
 				 if (target == '_self' && this.isNgdesktopWithTargetSupport(this.windowRefService.nativeWindow.navigator.userAgent)) {
                     const r = this.windowRefService.nativeWindow['require'];
                     const ipcRenderer = r('electron').ipcRenderer;
-                    ipcRenderer.send('open-url-with-target', url, target, targetOptions);
+                    ipcRenderer.send('open-url-with-target', this.getAbsoluteUrl(url));
                 } else {
                     this.windowRefService.nativeWindow.open(url, target, targetOptions);
 
                 }
             }
         }, timeout * 1000);
+    }
+
+    private getAbsoluteUrl(url: string) {
+        if (this.isRelativeUrl(url)) {
+            return new URL(url, document.baseURI).href;
+        }
+        return url;
+    }
+
+    private isRelativeUrl(url: string) {
+        // Absolute URLs start with a protocol or are protocol-relative (start with //)
+        return !(/^(?:[a-z]+:)?\/\//i.test(url));
     }
 
 	private isNgdesktopWithTargetSupport(userAgent: string) {

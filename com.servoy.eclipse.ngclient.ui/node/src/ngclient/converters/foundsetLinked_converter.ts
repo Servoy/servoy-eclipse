@@ -108,7 +108,7 @@ export class FoundsetLinkedValue extends Array<any> implements IChangeAwareValue
 
         this.__internalState.viewportService.sendCellChangeToServerBasedOnRowId(this, this.__internalState, undefined,
                 this.__internalState.forFoundset().viewPort.rows[index]._svyRowId, undefined,
-                this.__internalState.getPropertyContextCreatorForRow(), undefined, newValue, oldValue);
+                this.__internalState.getPropertyContextCreatorForRow(), newValue, oldValue);
     }
 
 }

@@ -1,4 +1,4 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { LoggerFactory, SessionStorageService, WindowRefService } from '@servoy/public';
@@ -67,6 +67,7 @@ describe('FoundsetConverter', () => {
         };
     });
 
+    // as property types reuse parts of JSON that comes from server, return a new instance each time to avoid meddling between separate tests due to this
     const createDefaultFoundset = () => {
         const json = {};
         json['foundsetId'] = 1;
@@ -111,12 +112,12 @@ describe('FoundsetConverter', () => {
 
     it('should not send change of int value to server when no pushToServer is specified for property', () => {
         const serverValue = {
-            serverSize: 0,
+            serverSize: 1,
             selectedRowIndexes: [],
             multiSelect: false,
             viewPort: {
                 startIndex: 0,
-                size: 0,
+                size: 1,
                 rows: [{
                     d: someDateMs, i: 1234, _svyRowId: '5.10643;_0'
                 }]
@@ -230,7 +231,7 @@ describe('FoundsetConverter', () => {
     // eslint-disable-next-line max-len
     it('Should insert 2 before selection (server); this is a special case where foundset automatically expands viewport if viewport was showing whole foundset (an optimisation for scroll views)', () => {
         const serverValue = {
-            serverSize: 0,
+            serverSize: 6,
             selectedRowIndexes: [2],
             multiSelect: false,
             viewPort: {
@@ -311,7 +312,7 @@ describe('FoundsetConverter', () => {
     it('Should remove the inserted 2 (server) and one more (1-3)', () => {
 
         const serverValue = {
-            serverSize: 0,
+            serverSize: 8,
             selectedRowIndexes: [4],
             multiSelect: false,
             viewPort: {
@@ -840,6 +841,261 @@ describe('FoundsetConverter', () => {
         );
         expect(getAndClearNotified()).toEqual(false);
         expect(fs.getInternalState().hasChanges()).toEqual(false);
+    });
+
+    it('Should work when inserting one record above (it should not restore "original unproxied" value of record that slided down on top of the newly added record); proxies need to be up to date', () => {
+        const serverValue = {
+            serverSize: 5,
+            selectedRowIndexes: [],
+            multiSelect: false,
+            viewPort: {
+                startIndex: 0,
+                size: 2,
+                _T: { mT: null, cT: { d: {_T: 'Date'} } },
+                rows: [{ d: someDateMs, i: 1234, _svyRowId: '5.10643;_0' },
+                    { d: someDateMs, i: 4321, _svyRowId: '5.34601;_1' }]
+            }
+        };
+
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithShallow);
+        fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
+            changeNotified = true;
+        });
+        expect(getAndClearNotified()).toEqual(false);
+        
+        // see that row proxies are in-place for shallow values to be sent to server automatically
+        fs.viewPort.rows[1]['i'] = 4321234;
+        expect(getAndClearNotified()).toEqual(true);
+        expect(fs.getInternalState().hasChanges()).toEqual(true);
+        expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
+            [{ viewportDataChanged: { _svyRowId: '5.34601;_1', dp: 'i', value: 4321234 } }]
+        );
+
+        // insert one row at index 0 in foundset prop.
+        fs = converterService.convertFromServerToClient({
+            upd_serverSize: 6,
+            upd_selectedRowIndexes: [1],
+            upd_viewPort:
+            {
+                startIndex: 0,
+                size: 6,
+                upd_rows:
+                    [
+                        {
+                            _T: { mT: null, cT: { d: {_T: 'Date'} } },
+                            rows: [{ d: someDateMs, i: 9876, _svyRowId: '5.ATLKJ;_0' }],
+                            startIndex: 0,
+                            endIndex: 0,
+                            type: 1
+                        }
+                    ]
+            }
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithShallow);
+
+        // see that data is ok
+        expect(fs.viewPort.rows.length).toBe(3, 'model viewport size should be 6');
+        expect(fs.viewPort.rows[0].i).toBe(9876, 'new rec value should be ok');
+        expect(fs.viewPort.rows[1].i).toBe(1234, 'shifted to 1 rec value should be ok');
+        expect(fs.viewPort.rows[2].i).toBe(4321234, 'shifted to 2 rec value should be ok');
+        expect(getAndClearNotified()).toEqual(false);
+        
+        // see that proxies for rows that slided were updated
+        fs.viewPort.rows[1]['i'] = 8888;
+        expect(getAndClearNotified()).toEqual(true);
+        expect(fs.getInternalState().hasChanges()).toEqual(true);
+        expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
+            [{ viewportDataChanged: { _svyRowId: '5.10643;_0', dp: 'i', value: 8888 } }]
+        );
+
+        // see that new proxy was created
+        fs.viewPort.rows[0]['i'] = 7777;
+        expect(getAndClearNotified()).toEqual(true);
+        expect(fs.getInternalState().hasChanges()).toEqual(true);
+        expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
+            [{ viewportDataChanged: { _svyRowId: '5.ATLKJ;_0', dp: 'i', value: 7777 } }]
+        );
+    });
+
+    it('Should work when deleting 2 records in the middle; proxies should be up to date', () => {
+        const serverValue = {
+            serverSize: 5,
+            selectedRowIndexes: [],
+            multiSelect: false,
+            viewPort: {
+                startIndex: 0,
+                size: 4,
+                _T: { mT: null, cT: { d: {_T: 'Date'} } },
+                rows: [{ d: someDateMs, i: 1234, _svyRowId: '5.10643;_0' },
+                    { d: someDateMs, i: 4321, _svyRowId: '5.34601;_1' },
+                    { d: someDateMs, i: 5678, _svyRowId: '5.11143;_2' },
+                    { d: someDateMs, i: 3456, _svyRowId: '5.22201;_3' }]
+            }
+        };
+
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithShallow);
+        fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
+            changeNotified = true;
+        });
+        expect(getAndClearNotified()).toEqual(false);
+        
+        const recThatWillBeDeleted = fs.viewPort.rows[2];
+
+        // delete two rows at index 1 in foundset prop.
+        fs = converterService.convertFromServerToClient({
+            upd_serverSize: 3,
+            upd_selectedRowIndexes: [1],
+            upd_viewPort:
+            {
+                startIndex: 0,
+                size: 2,
+                upd_rows:
+                    [
+                        {
+                            startIndex: 1,
+                            endIndex: 2,
+                            type: 2
+                        }
+                    ]
+            }
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithShallow);
+
+        // see that data is ok
+        expect(fs.viewPort.rows.length).toBe(2, 'model viewport size should be 6');
+        expect(fs.viewPort.rows[0].i).toBe(1234, 'unaffected rec value should be ok');
+        expect(fs.viewPort.rows[1].i).toBe(3456, 'shifted to 1 rec value should be ok');
+        expect(getAndClearNotified()).toEqual(false);
+        
+        // see that proxies for rows that slided were updated
+        fs.viewPort.rows[1]['i'] = 5555;
+        expect(getAndClearNotified()).toEqual(true);
+        expect(fs.getInternalState().hasChanges()).toEqual(true);
+        expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
+            [{ viewportDataChanged: { _svyRowId: '5.22201;_3', dp: 'i', value: 5555 } }]
+        );
+        
+        // see that proxies for deleted rows (in case component keeps obsolete references to them) are disabled
+        recThatWillBeDeleted['i'] = 1357;
+        expect(getAndClearNotified()).toEqual(false);
+    });
+
+    it('Should work when updating 1 record fully and 1 record partially; proxies should still work', () => {
+        const serverValue = {
+            serverSize: 5,
+            selectedRowIndexes: [],
+            multiSelect: false,
+            viewPort: {
+                startIndex: 0,
+                size: 4,
+                _T: { mT: null, cT: { d: {_T: 'Date'} } },
+                rows: [{ d: someDateMs, i: 1234, _svyRowId: '5.10643;_0' },
+                    { d: someDateMs, i: 4321, _svyRowId: '5.34601;_1' },
+                    { d: someDateMs, i: 5678, _svyRowId: '5.11143;_2' },
+                    { d: someDateMs, i: 3456, _svyRowId: '5.22201;_3' }]
+            }
+        };
+
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithShallow);
+        fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
+            changeNotified = true;
+        });
+        expect(getAndClearNotified()).toEqual(false);
+        
+        const recThatWillBeFullyReplaced = fs.viewPort.rows[1];
+
+        // delete two rows at index 1 in foundset prop.
+        fs = converterService.convertFromServerToClient({
+            upd_serverSize: 5,
+            upd_selectedRowIndexes: [1],
+            upd_viewPort:
+            {
+                startIndex: 0,
+                size: 4,
+                upd_rows:
+                    [
+                        {
+                            _T: { mT: null, cT: { d: {_T: 'Date'} } },
+                            rows: [{ d: someDateMs, i: 6565, _svyRowId: '5.WERTY;_1' }],
+                            startIndex: 1,
+                            endIndex: 1,
+                            type: 0
+                        },
+                        {
+                            rows: [{ i: 3434 }],
+                            startIndex: 2,
+                            endIndex: 2,
+                            type: 0
+                        }
+                    ]
+            }
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithShallow);
+
+        // see that data is ok
+        expect(fs.viewPort.rows.length).toBe(4, 'model viewport size should be 6');
+        expect(fs.viewPort.rows[1].i).toBe(6565, 'fully changed rec value should be ok');
+        expect(fs.viewPort.rows[2].i).toBe(3434, 'partially changed rec value should be ok');
+        expect(getAndClearNotified()).toEqual(false);
+        
+        // see that proxies for rows that updated are ok
+        fs.viewPort.rows[1]['i'] = 1111;
+        expect(getAndClearNotified()).toEqual(true);
+        expect(fs.getInternalState().hasChanges()).toEqual(true);
+        expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
+            [{ viewportDataChanged: { _svyRowId: '5.WERTY;_1', dp: 'i', value: 1111 } }]
+        );
+
+        fs.viewPort.rows[2]['i'] = 2222;
+        expect(getAndClearNotified()).toEqual(true);
+        expect(fs.getInternalState().hasChanges()).toEqual(true);
+        expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
+            [{ viewportDataChanged: { _svyRowId: '5.11143;_2', dp: 'i', value: 2222 } }]
+        );
+        
+        // the old record that was replaced by reference should no trigger send to server anymore, in case component keeps an obsolete reference to it
+        recThatWillBeFullyReplaced['i'] = 7531;
+        expect(getAndClearNotified()).toEqual(false);
+    });
+
+    it('Should disable old row proxies when updating the whole viewport from server', () => {
+        const serverValue = {
+            serverSize: 5,
+            selectedRowIndexes: [],
+            multiSelect: false,
+            viewPort: {
+                startIndex: 0,
+                size: 4,
+                _T: { mT: null, cT: { d: {_T: 'Date'} } },
+                rows: [{ d: someDateMs, i: 1234, _svyRowId: '5.10643;_0' },
+                    { d: someDateMs, i: 4321, _svyRowId: '5.34601;_1' },
+                    { d: someDateMs, i: 5678, _svyRowId: '5.11143;_2' },
+                    { d: someDateMs, i: 3456, _svyRowId: '5.22201;_3' }]
+            }
+        };
+
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithShallow);
+        fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
+            changeNotified = true;
+        });
+        expect(getAndClearNotified()).toEqual(false);
+        
+        const recThatWillBeFullyReplaced = fs.viewPort.rows[1];
+
+        // delete two rows at index 1 in foundset prop.
+        fs = converterService.convertFromServerToClient({
+                upd_viewPort:
+                {
+                    startIndex: 0,
+                    size: 1,
+                    _T: { mT: null, cT: { d: {_T: 'Date'} } },
+                    rows:
+                        [
+                            { d: someDateMs, i: 6565, _svyRowId: '5.WERTY;_1' }
+                        ]
+                }
+            }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithShallow);
+
+        // the old record that was replaced by reference should no trigger send to server anymore, in case component keeps an obsolete reference to it
+        recThatWillBeFullyReplaced['i'] = 7531;
+        expect(getAndClearNotified()).toEqual(false);
     });
 
 });
