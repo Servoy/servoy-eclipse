@@ -851,6 +851,7 @@ describe('FoundsetConverter', () => {
             viewPort: {
                 startIndex: 0,
                 size: 2,
+                _T: { mT: null, cT: { d: {_T: 'Date'} } },
                 rows: [{ d: someDateMs, i: 1234, _svyRowId: '5.10643;_0' },
                     { d: someDateMs, i: 4321, _svyRowId: '5.34601;_1' }]
             }
@@ -881,6 +882,7 @@ describe('FoundsetConverter', () => {
                 upd_rows:
                     [
                         {
+                            _T: { mT: null, cT: { d: {_T: 'Date'} } },
                             rows: [{ d: someDateMs, i: 9876, _svyRowId: '5.ATLKJ;_0' }],
                             startIndex: 0,
                             endIndex: 0,
@@ -922,6 +924,7 @@ describe('FoundsetConverter', () => {
             viewPort: {
                 startIndex: 0,
                 size: 4,
+                _T: { mT: null, cT: { d: {_T: 'Date'} } },
                 rows: [{ d: someDateMs, i: 1234, _svyRowId: '5.10643;_0' },
                     { d: someDateMs, i: 4321, _svyRowId: '5.34601;_1' },
                     { d: someDateMs, i: 5678, _svyRowId: '5.11143;_2' },
@@ -935,6 +938,8 @@ describe('FoundsetConverter', () => {
         });
         expect(getAndClearNotified()).toEqual(false);
         
+        const recThatWillBeDeleted = fs.viewPort.rows[2];
+
         // delete two rows at index 1 in foundset prop.
         fs = converterService.convertFromServerToClient({
             upd_serverSize: 3,
@@ -967,6 +972,10 @@ describe('FoundsetConverter', () => {
         expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
             [{ viewportDataChanged: { _svyRowId: '5.22201;_3', dp: 'i', value: 5555 } }]
         );
+        
+        // see that proxies for deleted rows (in case component keeps obsolete references to them) are disabled
+        recThatWillBeDeleted['i'] = 1357;
+        expect(getAndClearNotified()).toEqual(false);
     });
 
     it('Should work when updating 1 record fully and 1 record partially; proxies should still work', () => {
@@ -977,6 +986,7 @@ describe('FoundsetConverter', () => {
             viewPort: {
                 startIndex: 0,
                 size: 4,
+                _T: { mT: null, cT: { d: {_T: 'Date'} } },
                 rows: [{ d: someDateMs, i: 1234, _svyRowId: '5.10643;_0' },
                     { d: someDateMs, i: 4321, _svyRowId: '5.34601;_1' },
                     { d: someDateMs, i: 5678, _svyRowId: '5.11143;_2' },
@@ -990,6 +1000,8 @@ describe('FoundsetConverter', () => {
         });
         expect(getAndClearNotified()).toEqual(false);
         
+        const recThatWillBeFullyReplaced = fs.viewPort.rows[1];
+
         // delete two rows at index 1 in foundset prop.
         fs = converterService.convertFromServerToClient({
             upd_serverSize: 5,
@@ -1001,6 +1013,7 @@ describe('FoundsetConverter', () => {
                 upd_rows:
                     [
                         {
+                            _T: { mT: null, cT: { d: {_T: 'Date'} } },
                             rows: [{ d: someDateMs, i: 6565, _svyRowId: '5.WERTY;_1' }],
                             startIndex: 1,
                             endIndex: 1,
@@ -1036,6 +1049,53 @@ describe('FoundsetConverter', () => {
         expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
             [{ viewportDataChanged: { _svyRowId: '5.11143;_2', dp: 'i', value: 2222 } }]
         );
+        
+        // the old record that was replaced by reference should no trigger send to server anymore, in case component keeps an obsolete reference to it
+        recThatWillBeFullyReplaced['i'] = 7531;
+        expect(getAndClearNotified()).toEqual(false);
+    });
+
+    it('Should disable old row proxies when updating the whole viewport from server', () => {
+        const serverValue = {
+            serverSize: 5,
+            selectedRowIndexes: [],
+            multiSelect: false,
+            viewPort: {
+                startIndex: 0,
+                size: 4,
+                _T: { mT: null, cT: { d: {_T: 'Date'} } },
+                rows: [{ d: someDateMs, i: 1234, _svyRowId: '5.10643;_0' },
+                    { d: someDateMs, i: 4321, _svyRowId: '5.34601;_1' },
+                    { d: someDateMs, i: 5678, _svyRowId: '5.11143;_2' },
+                    { d: someDateMs, i: 3456, _svyRowId: '5.22201;_3' }]
+            }
+        };
+
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithShallow);
+        fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
+            changeNotified = true;
+        });
+        expect(getAndClearNotified()).toEqual(false);
+        
+        const recThatWillBeFullyReplaced = fs.viewPort.rows[1];
+
+        // delete two rows at index 1 in foundset prop.
+        fs = converterService.convertFromServerToClient({
+                upd_viewPort:
+                {
+                    startIndex: 0,
+                    size: 1,
+                    _T: { mT: null, cT: { d: {_T: 'Date'} } },
+                    rows:
+                        [
+                            { d: someDateMs, i: 6565, _svyRowId: '5.WERTY;_1' }
+                        ]
+                }
+            }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithShallow);
+
+        // the old record that was replaced by reference should no trigger send to server anymore, in case component keeps an obsolete reference to it
+        recThatWillBeFullyReplaced['i'] = 7531;
+        expect(getAndClearNotified()).toEqual(false);
     });
 
 });
