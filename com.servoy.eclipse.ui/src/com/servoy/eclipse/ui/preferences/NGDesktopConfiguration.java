@@ -147,7 +147,7 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 			String middleVersion = Integer.toString(ClientVersion.getMiddleVersion());
 			if (middleVersion.length() == 1)
 			{
-				middleVersion += "0";
+				middleVersion = "0" + middleVersion;
 			}
 			final String devVersion = ClientVersion.getMajorVersion() + "." + middleVersion;
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream())))
