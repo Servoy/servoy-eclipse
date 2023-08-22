@@ -1461,7 +1461,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 			else if (propertyType == BooleanPropertyType.INSTANCE || propertyType.isProtecting())
 			{
-				resultingPropertyDescriptor = new CheckboxPropertyDescriptor(id, displayName);
+				boolean defaultValue = false;
+				if (propertyDescription.getDefaultValue() != null) defaultValue = Boolean.valueOf(propertyDescription.getDefaultValue().toString());
+				resultingPropertyDescriptor = new CheckboxPropertyDescriptor(id, displayName, defaultValue);
 			}
 			else
 			{
