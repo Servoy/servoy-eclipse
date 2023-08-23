@@ -245,7 +245,8 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 		// See if the value changed and if so update
 		Object newValue = editor.getValue();
-		if (stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
+		// if it is null then we also just need to set this because this could be the an actual null or the default value (undefined, AbstractBase.hasProperty() == false)
+		if (newValue == null || stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
 		{
 			// Set the editor value
 			setValue(newValue);
