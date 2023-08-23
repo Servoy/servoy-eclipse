@@ -1055,7 +1055,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				IDialogSettings settings = getDialogSettings();
 				String datasource = settings.get("datasource");
-				if (!Utils.stringIsEmpty(datasource) && dataSourceViewer.getSelection().isEmpty())
+				if (!Utils.stringIsEmpty(datasource) && dataSourceViewer.getSelection().isEmpty() && !(this.getWizard() instanceof NewFormComponentWizard))
 				{
 					dataSourceViewer.setSelection(new StructuredSelection(DataSourceWrapperFactory.getWrapper(datasource)));
 				}
