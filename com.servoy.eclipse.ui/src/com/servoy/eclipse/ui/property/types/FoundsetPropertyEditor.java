@@ -157,9 +157,9 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 			public String getText(Object element)
 			{
 				Object value = element;
-				if (value == null && persistContext != null && persistContext.getPersist() instanceof WebComponent)
+				if (value == null && persistContext != null && persistContext.getPersist() instanceof WebComponent wc && !wc.hasProperty(property))
 				{
-					value = ((WebObjectImpl)((WebComponent)persistContext.getPersist()).getImplementation()).getPropertyDefaultValue(property);
+					value = ((WebObjectImpl)wc.getImplementation()).getPropertyDefaultValue(property);
 				}
 				if (value instanceof JSONObject) return withSolutionContextForCell.getText(designToChooserConv.convertJSONValueToChooserValue(value)); // properties view cell label provider
 				else return withSolutionContextForChooser.getText(value);
