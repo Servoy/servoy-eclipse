@@ -18,17 +18,15 @@
 package com.servoy.build.documentation.ai;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +42,8 @@ import com.servoy.build.documentation.apigen.IDocFromXMLGenerator;
 import com.servoy.build.documentation.apigen.INGPackageInfoGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator.Function;
+import com.servoy.eclipse.core.ai.shared.PineconeItem;
+import com.servoy.eclipse.core.ai.shared.SharedStaticContent;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.core.ParseException;
@@ -60,14 +60,10 @@ import freemarker.template.TemplateNotFoundException;
 public class FullPineconeEmbeddingsGenerator implements IApplication
 {
 
-	private static final String STORED_PINECONE_STRING_TO_EMBEDDING_FILENAME = "stored_pinecone_str_to_embedding.sobj";
-	public static final String STORED_PINECONE_ID_TO_STRING_FILENAME = "stored_pinecone_id_to_str.sobj";
-
 	public static final String PINECONE_METADATA_CLIENT_TAG_NG_ONLY = "ng_only";
 
-	// 2 maps that are stored to disk/serialized
-	private static HashMap<String, List<Float>> stringForAIToVectorEmbedding; // used in order to not ask OpenAI for embedding vectors multiple times for the same string
-	private static List<PineconeItem> pineconeItemsToUpsert;
+	// 1 list that will be stored to disk/serialized; it can then be used for upsert/etc. via tools in build/com.servoy.ai.tools project
+	private static List<PineconeItem> pineconeItemsToUpsert = new ArrayList<>();
 
 	@Override
 	public Object start(IApplicationContext context) throws Exception
@@ -85,9 +81,6 @@ public class FullPineconeEmbeddingsGenerator implements IApplication
 	 *             2 - uri to "servoydoc_design.xml"
 	 *             3 - uri to the plugin dir of an installed application server (for java plugins)
 	 *             4 - path to the text file that contains on each line one location of one component/service/layout (ng) package dir - to generate the info for
-	 *             5 - boolean "reEmbedAllStrings" if this is set to true (defaults to false), it will ask the OpenAI (ada) model to re-embed all strings before
-	 *                 upsertion; it will not reuse any previously generated embeddings even if the string is identical to what we had previously. This is useful
-	 *                 for when the LLM model that we use to generate the embeddings changes.
 	 * @throws TemplateException
 	 * @throws JSONException
 	 */
@@ -99,22 +92,10 @@ public class FullPineconeEmbeddingsGenerator implements IApplication
 		String pluginDirURI = args[3];
 		String ngPackagesFileLocationsURI = args[4];
 
-		boolean reEmbedAllStrings = false; // normally Strings that were already embedded by openAI's ada model don't need to be re-encoded each run
-		if (args.length > 5) reEmbedAllStrings = Boolean.valueOf(args[5]).booleanValue();
-
-		System.out.println("Vectorized (to embeddings) file location is: " + new File(STORED_PINECONE_STRING_TO_EMBEDDING_FILENAME).getAbsolutePath());
-		System.out.println("IDs (from pinecone) to initial strings (that were turned into embeddings) file location is: " +
-			new File(STORED_PINECONE_ID_TO_STRING_FILENAME).getAbsolutePath());
-		System.out.println(reEmbedAllStrings
-			? "\nAs requested (last arg of java launch is 'true'): all strings will be re-embedded using OpenAI's 'ada' model before being upserted to Pinecone."
-			: "\nExisting embeddings (for identical source strings) will be reused.");
-
-		if (reEmbedAllStrings) stringForAIToVectorEmbedding = new HashMap<>(0);
-		else readAlreadyEmbeddedStrings();
-
-		List<String> newStringForAIToEmbed = new ArrayList<>(500);
+		int[] id = new int[] { 1 };
 		Consumer<String> registerNewEmbedding = (newStringToEmbed) -> {
-			newStringForAIToEmbed.add(newStringToEmbed);
+			// We could add other metadata as needed (versions of Servoy, versions of packages, don't know what exactly would be useful in the future to filter the similarity checks)
+			pineconeItemsToUpsert.add(new PineconeItem(id[0]++, newStringToEmbed, null));
 		};
 
 		Configuration cfg;
@@ -139,99 +120,19 @@ public class FullPineconeEmbeddingsGenerator implements IApplication
 		SpecMarkdownGenerator.generateNGComponentOrServicePackageContentForDir(true, ngPackageDirsToScan.toArray(new String[ngPackageDirsToScan.size()]),
 			new PineconeInfoFromNGPackagesGenerator(cfg, registerNewEmbedding));
 
-		// ask OpenAI ada model to create embeddings for all/unknown source texts and reuse the ones that can be reused if we are allowed to by args
-		makeTheNeededEmbeddingsAndUpsertAllEmbeddingsToPinecone(newStringForAIToEmbed);
-
-		// write back the two files that we will need later to identify source text based on IDs and to not re-create embeddings when it is not needed
-		writeAlreadyEmbeddedStrings();
+		// write the generated texts to disk so they can be used afterwards by a tool from build/com.servoy.ai.tools project - to upsert them to pinecone
+		writeDocsForAIToFile();
 
 		System.out.println("DONE.");
 	}
 
-	protected static void makeTheNeededEmbeddingsAndUpsertAllEmbeddingsToPinecone(List<String> newStringForAIToEmbed)
+	private static void writeDocsForAIToFile() throws FileNotFoundException, IOException
 	{
-		System.out.println("\n\n# of strings to be embedded if needed & upserted: " + newStringForAIToEmbed.size() + "\n\n");
-		newStringForAIToEmbed.stream().map(a -> a + "\n---------------------\n").forEach(System.out::println);
-
-		AIClient aiClient = new AIClient("test", "gpt-3.5-turbo-16k", "text-embedding-ada-002"); // OpenAI's text-embedding-ada-002 generates vectors with 1536 output dimensions; so existing pinecone index should use that!
-		int id = 1;
-		int reusedEmbeddings = 0;
-		pineconeItemsToUpsert = new ArrayList<>(newStringForAIToEmbed.size());
-
-		for (String stringToEmbed : newStringForAIToEmbed)
+		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(SharedStaticContent.STORED_ALL_UNEMBEDDED_PINECONE_ITEMS)))
 		{
-			PineconeItem itemToUpsert = new PineconeItem(id++, stringToEmbed, new HashMap<>() /*
-																								 * this map would contain the metadata columns if we used
-																								 * metadata
-																								 */);
-			// We could add metadata as needed (versions of Servoy, versions of packages, don't know what exactly would be useful in the future to filter the similarity checks)
-			pineconeItemsToUpsert.add(itemToUpsert);
-
-			List<Float> alreadyKnownEmbedding = stringForAIToVectorEmbedding.get(stringToEmbed);
-			if (alreadyKnownEmbedding != null)
-			{
-				reusedEmbeddings++;
-				itemToUpsert.setEmbeddings(alreadyKnownEmbedding); // tell it to not embed the string again using OpenAI's embedding model as it's not needed; we can reuse what we did in the past
-			}
+			out.writeObject(pineconeItemsToUpsert);
 		}
-
-		System.out.println("Reusing " + reusedEmbeddings + " previously stored embeddings (for identical strings)...");
-		System.out.println("Embeddings will be created (via OpenAI) for " + (pineconeItemsToUpsert.size() - reusedEmbeddings) +
-			" strings (these will be stored to disk for future reuse)...");
-
-		if (pineconeItemsToUpsert.size() > 0)
-		{
-			System.out.println("Creating embeddings for strings (that don't have/use previously known embeddedings), clearing pinecone index and upserting...");
-			aiClient.populateIndex(pineconeItemsToUpsert, Arrays.asList(/* we don't use metadata currently */), "default");
-		}
-		else throw new RuntimeException("Something went wrong... no string embeddings meant to be upserted to pinecone?!");
-	}
-
-	private static void writeAlreadyEmbeddedStrings() throws IOException
-	{
-		// store the strings that we have embeddings for in the STORED_PINECONE_STRING_TO_EMBEDDING_FILENAME file
-		// these are useful next time we want to upsert if most of the strings remain the same (we save lots of OpenAI embed queries)
-		stringForAIToVectorEmbedding.clear();
-		pineconeItemsToUpsert.forEach(item -> {
-			if (item.getEmbeddings() == null) throw new RuntimeException("At this point all items should have a proper embedding vector; check code!");
-			stringForAIToVectorEmbedding.put(item.getText(), item.getEmbeddings());
-		});
-		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(STORED_PINECONE_STRING_TO_EMBEDDING_FILENAME)))
-		{
-			out.writeObject(stringForAIToVectorEmbedding);
-		}
-
-		// store the id's that were upserted to pinecone to their string mapping in the STORED_PINECONE_ID_TO_STRING_FILENAME file
-		// this is used at developer runtime to translate ids returned by pinecone similarity searches into actual strings to feed into the chat
-		HashMap<Integer, String> pineconeIDToItemText = new HashMap<>(pineconeItemsToUpsert.size());
-		pineconeItemsToUpsert.forEach(item -> pineconeIDToItemText.put(Integer.valueOf(item.getId()), item.getText()));
-
-		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(STORED_PINECONE_ID_TO_STRING_FILENAME)))
-		{
-			out.writeObject(pineconeIDToItemText);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void readAlreadyEmbeddedStrings() throws IOException, ClassNotFoundException
-	{
-		// we stored the strings that we had embeddings for last time in the "STORED_PINECONE_STRING_TO_EMBEDDING_FILENAME" file; read that in
-		File f = new File(STORED_PINECONE_STRING_TO_EMBEDDING_FILENAME);
-		if (f.exists())
-		{
-			try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f)))
-			{
-				stringForAIToVectorEmbedding = (HashMap<String, List<Float>>)in.readObject();
-				System.out
-					.println("Read from disk a number of " + stringForAIToVectorEmbedding.size() + " strings for which we already have generated embeddings.");
-			}
-		}
-		else
-		{
-			throw new RuntimeException("No previously vectorized (to embeddings) strings found; file '" +
-				new File(STORED_PINECONE_STRING_TO_EMBEDDING_FILENAME).getAbsolutePath() +
-				"' does not exist. However last arg of java launch was 'false' which means that we should reuse old embeddings... Change that arg to true if you want to start fresh.");
-		}
+		System.out.println("Doc items were written to " + new File(SharedStaticContent.STORED_ALL_UNEMBEDDED_PINECONE_ITEMS).getAbsolutePath());
 	}
 
 	private static class PineconeInfoFromXMLGenerator implements IDocFromXMLGenerator

@@ -1,9 +1,10 @@
-package com.servoy.build.documentation.ai;
+package com.servoy.eclipse.core.ai.shared;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class PineconeItem
+public class PineconeItem implements Serializable
 {
 
 	private final String text;
@@ -52,5 +53,12 @@ public class PineconeItem
 	{
 		this.metadata = metadata;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "PineconeItem [ id=" + id + ", embeddings=" + (embeddings != null ? "SET" : "null") + ", metadata=" + metadata + ", text=" + text + " ]";
+	}
+
 
 }
