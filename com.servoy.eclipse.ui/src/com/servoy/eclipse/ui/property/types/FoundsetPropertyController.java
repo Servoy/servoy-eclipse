@@ -111,7 +111,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 	{
 		if (labelProvider == null)
 		{
-			labelProvider = FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext.getContext(), designToChooserConverter);
+			labelProvider = FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext, designToChooserConverter, getId().toString());
 		}
 
 		return labelProvider;
@@ -148,7 +148,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		return new FoundsetPropertyEditor(parent, persistContext, formTable, null /* foreignTable */, isReadOnly(), designToChooserConverter);
+		return new FoundsetPropertyEditor(parent, persistContext, formTable, null /* foreignTable */, isReadOnly(), designToChooserConverter,
+			getId().toString());
 	}
 
 	static class FoundsetPropertySource extends ComplexPropertySourceWithStandardReset<JSONObject>

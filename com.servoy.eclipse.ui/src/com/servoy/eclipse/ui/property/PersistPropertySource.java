@@ -1461,7 +1461,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 			else if (propertyType == BooleanPropertyType.INSTANCE || propertyType.isProtecting())
 			{
-				resultingPropertyDescriptor = new CheckboxPropertyDescriptor(id, displayName);
+				boolean defaultValue = false;
+				if (propertyDescription.getDefaultValue() != null) defaultValue = Boolean.valueOf(propertyDescription.getDefaultValue().toString());
+				resultingPropertyDescriptor = new CheckboxPropertyDescriptor(id, displayName, defaultValue);
 			}
 			else
 			{
@@ -2502,9 +2504,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					!hasInheritedValue)
 				{
 					// just clear the property because we do not need to store null in order to override a value
-					Object persistValue = ((AbstractBase)beanPropertyPersist).getProperty((String)id);
-					changed |= (defaultSpecValue == null ? persistValue != null
-						: !Utils.areJSONEqual(defaultSpecValue, ServoyJSONObject.nullToJsonNull(persistValue)));
+					changed |= ((AbstractBase)beanPropertyPersist).hasProperty((String)id);
 
 					((AbstractBase)beanPropertyPersist).clearProperty((String)id);
 				}
