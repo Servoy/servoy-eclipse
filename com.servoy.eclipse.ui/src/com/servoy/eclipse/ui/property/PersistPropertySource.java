@@ -1461,9 +1461,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 			else if (propertyType == BooleanPropertyType.INSTANCE || propertyType.isProtecting())
 			{
-				boolean defaultValue = false;
-				if (propertyDescription.getDefaultValue() != null) defaultValue = Boolean.valueOf(propertyDescription.getDefaultValue().toString());
-				resultingPropertyDescriptor = new CheckboxPropertyDescriptor(id, displayName, defaultValue);
+				resultingPropertyDescriptor = new CheckboxPropertyDescriptor(id, displayName);
 			}
 			else
 			{
@@ -2272,15 +2270,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return false;
 		}
 
-		if (((AbstractBase)persistContext.getPersist()).hasProperty((String)id))
-		{
-			return true;
-		}
-
-		Object defaultValue = getDefaultPersistValue(id);
-		Object propertyValue = getPersistPropertyValue(id);
-		return defaultValue != propertyValue &&
-			(defaultValue == null || !(defaultValue.equals(propertyValue) || Utils.areJSONEqual(defaultValue, propertyValue)));
+		// Even when the value is null it may even be set, some properties have a non-null default
+		return (((AbstractBase)persistContext.getPersist()).hasProperty((String)id));
 	}
 
 	public void resetPropertyValue(Object id)

@@ -39,23 +39,17 @@ import com.servoy.eclipse.ui.Activator;
 
 public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 {
-	private final CheckboxLabelProvider labelProvider;
+	static final CheckboxLabelProvider LABEL_PROVIDER = new CheckboxLabelProvider();
 
 	public CheckboxPropertyDescriptor(Object id, String displayName)
 	{
-		this(id, displayName, false);
-	}
-
-	public CheckboxPropertyDescriptor(Object id, String displayName, boolean defaultValue)
-	{
 		super(id, displayName);
-		this.labelProvider = new CheckboxLabelProvider(defaultValue);
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		return new CheckboxCellEditor(labelProvider, parent)
+		return new CheckboxCellEditor(parent)
 		{
 			@Override
 			public void activate()
@@ -69,7 +63,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 	@Override
 	public ILabelProvider getLabelProvider()
 	{
-		return labelProvider;
+		return LABEL_PROVIDER;
 	}
 
 
@@ -90,19 +84,15 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 		 */
 		private static final int defaultStyle = SWT.NONE;
 
-		private final CheckboxLabelProvider labelProvider;
-
-		private CLabel label;
-
 		/**
 		 * Creates a new checkbox cell editor parented under the given control. The cell editor value is a boolean value, which is initially <code>false</code>.
 		 * Initially, the cell editor has no cell validator.
 		 *
 		 * @param parent the parent control
 		 */
-		public CheckboxCellEditor(CheckboxLabelProvider labelProvider, Composite parent)
+		public CheckboxCellEditor(Composite parent)
 		{
-			this(labelProvider, parent, defaultStyle);
+			this(parent, defaultStyle);
 		}
 
 		/**
@@ -112,16 +102,15 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 		 * @param parent the parent control
 		 * @param style the style bits
 		 */
-		public CheckboxCellEditor(CheckboxLabelProvider labelProvider, Composite parent, int style)
+		public CheckboxCellEditor(Composite parent, int style)
 		{
 			super(parent, style);
-			this.labelProvider = labelProvider;
 		}
 
 		@Override
 		protected Control createControl(final Composite parent)
 		{
-			label = new CLabel(parent, SWT.NONE);
+			CLabel label = new CLabel(parent, SWT.NONE);
 			label.setMargins(5, 0, 0, 0);
 			label.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 			label.addMouseListener(new MouseAdapter()
@@ -132,12 +121,14 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 					toggle();
 				}
 			});
+			label.setText(LABEL_PROVIDER.getText(Boolean.valueOf(value)));
+
 			CheckboxCellEditor.this.addListener(new ICellEditorListener()
 			{
 				@Override
 				public void applyEditorValue()
 				{
-					label.setText(labelProvider.getText(Boolean.valueOf(value)));
+					label.setText(LABEL_PROVIDER.getText(Boolean.valueOf(value)));
 				}
 
 				@Override
@@ -204,7 +195,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 		@Override
 		protected void doSetValue(Object val)
 		{
-			this.value = Boolean.valueOf(labelProvider.getText(val).trim()).booleanValue();
+			this.value = Boolean.TRUE.equals(val);
 		}
 	}
 
@@ -220,23 +211,13 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 		public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("check_on.png");
 		public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("check_off.png");
 
-		private final boolean defaultValue;
-
-		public CheckboxLabelProvider(boolean defaultValue)
-		{
-			this.defaultValue = defaultValue;
-
-		}
-
 		public Image getImage(Object element)
 		{
-			if (element == null && defaultValue) return TRUE_IMAGE;
 			return Boolean.TRUE.equals(element) ? TRUE_IMAGE : FALSE_IMAGE;
 		}
 
 		public String getText(Object element)
 		{
-			if (element == null && defaultValue) return " true";
 			return Boolean.TRUE.equals(element) ? " true" : " false";
 		}
 	}

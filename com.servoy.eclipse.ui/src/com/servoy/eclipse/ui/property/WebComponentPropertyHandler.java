@@ -168,7 +168,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				Object defaultValue = null;
 				if (propertyDescription.hasDefault())
 				{
-					propertyDescription.getDefaultValue();
+					defaultValue = propertyDescription.getDefaultValue();
 				}
 				else
 				{
