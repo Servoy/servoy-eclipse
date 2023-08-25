@@ -33,8 +33,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import org.eclipse.equinox.app.IApplication;
-import org.eclipse.equinox.app.IApplicationContext;
 import org.json.JSONException;
 
 import com.servoy.build.documentation.DocumentationManager;
@@ -57,20 +55,13 @@ import freemarker.template.TemplateNotFoundException;
 /**
  * @author acostescu
  */
-public class FullPineconeEmbeddingsGenerator implements IApplication
+public class FullPineconeEmbeddingsGenerator
 {
 
 	public static final String PINECONE_METADATA_CLIENT_TAG_NG_ONLY = "ng_only";
 
 	// 1 list that will be stored to disk/serialized; it can then be used for upsert/etc. via tools in build/com.servoy.ai.tools project
 	private static List<PineconeItem> pineconeItemsToUpsert = new ArrayList<>();
-
-	@Override
-	public Object start(IApplicationContext context) throws Exception
-	{
-		main((String[])context.getArguments().get("application.args"));
-		return Integer.valueOf(0);
-	}
 
 	/**
 	 * It will generate and upsert all the needed pinecone embeddings related to Servoy (at least for APIs).
@@ -361,12 +352,6 @@ public class FullPineconeEmbeddingsGenerator implements IApplication
 			return false;
 		}
 
-	}
-
-	@Override
-	public void stop()
-	{
-		// ?
 	}
 
 }

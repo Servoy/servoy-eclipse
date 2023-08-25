@@ -13,19 +13,11 @@ Require-Bundle: servoy_shared,
  j2db_server,
  org.apache.httpcomponents.httpclient,
  org.apache.httpcomponents.httpcore,
- sablo,
- org.eclipse.core.runtime
+ sablo
 Export-Package: com.servoy.build.documentation
-Import-Package: com.google.protobuf,
- com.theokanning.openai.completion.chat,
- com.theokanning.openai.embedding,
- com.theokanning.openai.service,
- freemarker.cache;version="2.3.31.stable",
+Import-Package: freemarker.cache;version="2.3.31.stable",
  freemarker.core;version="2.3.31.stable",
  freemarker.template;version="2.3.31.stable",
- io.pinecone,
- io.pinecone.proto,
  org.apache.commons.io;version="2.11.0",
- org.apache.commons.io.filefilter;version="2.11.0",
- org.slf4j
+ org.apache.commons.io.filefilter;version="2.11.0"
 Automatic-Module-Name: j2db_documentation
