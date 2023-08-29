@@ -1502,7 +1502,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				else if (propertyType == LabelForPropertyType.INSTANCE)
 				{
-					resultingPropertyDescriptor = createLabelForPropertyController(id, displayName, form, flattenedEditingSolution);
+					resultingPropertyDescriptor = createLabelForPropertyController(persistContext.getPersist(), id, displayName, form,
+						flattenedEditingSolution);
 				}
 				else if (propertyType == MapPropertyType.INSTANCE || propertyType == JSONPropertyType.INSTANCE)
 				{
@@ -1830,18 +1831,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return propertyController;
 	}
 
-	/**
-	 * Create a property controller for selecting a style class in Properties view.
-	 *
-	 * @param id
-	 * @param displayName
-	 * @param form
-	 * @param flattenedSolution
-	 * @return
-	 */
-	public static PropertyController<String, ? > createLabelForPropertyController(Object id, String displayName, Form frm, FlattenedSolution fs)
+	private static void populateListForLabelFor(IPersist persist, Object id, String displayName, Form frm, FlattenedSolution fs, List<String> names)
 	{
-
 		final FlattenedSolution flattenedEditingSolution = fs;
 		Form flattenedForm = flattenedEditingSolution.getFlattenedForm(frm);
 		int bodyStart = -1, bodyEnd = -1;
@@ -1861,7 +1852,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 		}
 
-		List<String> names = new ArrayList<String>();
 		for (IPersist object : flattenedForm.getAllObjectsAsList())
 		{
 			if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
@@ -1876,7 +1866,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				if (add)
 				{
-					names.add(((IFormElement)object).getName());
+					if ("servoycore-formcomponent".equals(((WebComponent)object).getTypeName()))
+					{
+						Object containedForm = ((WebComponent)object).getProperty("containedForm");
+						if (containedForm instanceof JSONObject && persist instanceof WebFormComponentChildType)
+						{
+							String formName = ((JSONObject)containedForm).optString(FormComponentPropertyType.SVY_FORM, null);
+							Form abc = flattenedEditingSolution.getForm(formName);
+							populateListForLabelFor(persist, id, displayName, abc, fs, names);
+						}
+					}
+					else
+					{
+						names.add(((IFormElement)object).getName());
+					}
+
 				}
 			}
 			else if (object instanceof LayoutContainer)
@@ -1896,6 +1900,22 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				});
 			}
 		}
+	}
+
+	/**
+	 * Create a property controller for selecting a style class in Properties view.
+	 *
+	 * @param id
+	 * @param displayName
+	 * @param form
+	 * @param flattenedSolution
+	 * @return
+	 */
+	public static PropertyController<String, ? > createLabelForPropertyController(IPersist persist, Object id, String displayName, Form frm,
+		FlattenedSolution fs)
+	{
+		List<String> names = new ArrayList<String>();
+		populateListForLabelFor(persist, id, displayName, frm, fs, names);
 		String[] array = names.toArray(new String[names.size()]);
 		Arrays.sort(array, String.CASE_INSENSITIVE_ORDER);
 
