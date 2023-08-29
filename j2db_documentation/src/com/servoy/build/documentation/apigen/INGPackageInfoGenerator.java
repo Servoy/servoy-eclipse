@@ -44,4 +44,6 @@ public interface INGPackageInfoGenerator
 
 	public boolean shouldTurnAPIDocsIntoMarkdown();
 
+	public boolean shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt();
+
 }

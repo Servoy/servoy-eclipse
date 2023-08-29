@@ -352,6 +352,12 @@ public class FullPineconeEmbeddingsGenerator
 			return false;
 		}
 
+		@Override
+		public boolean shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt()
+		{
+			return true;
+		}
+
 	}
 
 }

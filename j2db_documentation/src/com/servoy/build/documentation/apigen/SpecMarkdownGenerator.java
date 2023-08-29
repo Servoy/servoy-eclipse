@@ -193,7 +193,7 @@ public class SpecMarkdownGenerator
 			if (packageInfoFile.exists())
 			{
 				docGenerator.generateNGPackageInfo(packageName, packageDisplayName,
-					new JSONObject(Utils.getTXTFileContent(packageInfoFile)).optString("description"),
+					new JSONObject(Utils.getTXTFileContent(packageInfoFile)).optString("description", null),
 					packageType);
 			}
 			else System.err.println("    * cannot find the package's webpackage.json; skipping information about the package...");
@@ -326,52 +326,75 @@ public class SpecMarkdownGenerator
 
 	private Record createFunction(String name, JSONObject specEntry)
 	{
-		String returns = specEntry.optString("returns", null);
+		String returnType = specEntry.optString("returns", null);
 		JSONArray parameters = specEntry.optJSONArray("parameters");
 		List<Parameter> params = createParameters(parameters);
-		JSONObject fullType = specEntry.optJSONObject("returns");
-		if (fullType != null)
+		JSONObject fullReturnType = specEntry.optJSONObject("returns");
+		if (fullReturnType != null)
 		{
-			returns = fullType.optString("type", "");
+			returnType = fullReturnType.optString("type", "");
 		}
 
 		String jsDocEquivalent = apiDoc.get(name);
 		if (jsDocEquivalent == null)
 		{
-			jsDocEquivalent = processFunctionJSDoc(createFunctionDocFromSpec(specEntry, params, returns));
+			jsDocEquivalent = processFunctionJSDoc(createFunctionDocFromSpec(specEntry, params, returnType, fullReturnType,
+				docGenerator.shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt()));
 		}
-		return new Function(name, params, returns, jsDocEquivalent);
+		return new Function(name, params, returnType, jsDocEquivalent);
 	}
 
-	private String createFunctionDocFromSpec(JSONObject specEntry, List<Parameter> params, String returns)
+	/**
+	 * @return a Pair who's left value is "someDocEntryFromSpecWasWritten" and right value is the generated JSDoc string.
+	 */
+	private String createFunctionDocFromSpec(JSONObject specEntry, List<Parameter> params, String returnType, JSONObject fullReturnType,
+		boolean shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt)
 	{
+		boolean someDocEntryFromSpecWasWritten = false;
 		boolean somethingWasWritten = false;
 		StringBuilder generatedJSDocCommentFromSpec = new StringBuilder("/**");
 
 		String functionDescription = specEntry.optString("doc", null);
 		if (functionDescription != null)
 		{
+			someDocEntryFromSpecWasWritten = true;
 			somethingWasWritten = true;
 			generatedJSDocCommentFromSpec.append("\n * ").append(functionDescription.replaceAll("\n", "\n * "));
 		}
 
 		for (Parameter param : params)
 		{
+			if (!shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt && (param.doc() == null || param.doc().length() == 0)) continue; // in markdown generator/docs.servoy.com, parameters are written separately anyway so if we don't have more info, don't write more info
+
 			somethingWasWritten = true;
 			generatedJSDocCommentFromSpec.append("\n * @param ").append(param.name());
 			if (param.type() != null) generatedJSDocCommentFromSpec.append(" [").append(param.type()).append(']');
 			if (param.optional()) generatedJSDocCommentFromSpec.append(" (optional)");
-			if (param.doc() != null) generatedJSDocCommentFromSpec.append(' ').append(param.doc().replaceAll("\n", "\n *        "));
+			if (param.doc() != null && param.doc().length() > 0)
+			{
+				someDocEntryFromSpecWasWritten = true;
+				generatedJSDocCommentFromSpec.append(' ').append(param.doc().replaceAll("\n", "\n *        "));
+			}
 		}
 
-		if (returns != null)
+		if (returnType != null)
 		{
-			somethingWasWritten = true;
-			generatedJSDocCommentFromSpec.append("\n * @return {").append(returns).append('}');
+			if (shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt || (fullReturnType != null && fullReturnType.optString("doc", null) != null))
+			{
+
+				somethingWasWritten = true;
+				generatedJSDocCommentFromSpec.append("\n * @return {").append(returnType).append('}');
+				if (fullReturnType != null && fullReturnType.optString("doc", null) != null)
+				{
+					someDocEntryFromSpecWasWritten = true;
+					generatedJSDocCommentFromSpec.append(fullReturnType.optString("doc"));
+				}
+			} // else, in markdown generator/docs.servoy.com, parameters are written separately anyway so if we don't have more info, don't write more info
 		}
 
 		generatedJSDocCommentFromSpec.append("\n */");
-		return somethingWasWritten ? generatedJSDocCommentFromSpec.toString() : null;
+		return somethingWasWritten ? (someDocEntryFromSpecWasWritten || shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt
+			? generatedJSDocCommentFromSpec.toString() : null) : null;
 	}
 
 	private List<Parameter> createParameters(JSONArray parameters)
@@ -591,6 +614,12 @@ public class SpecMarkdownGenerator
 		public boolean shouldTurnAPIDocsIntoMarkdown()
 		{
 			return true;
+		}
+
+		@Override
+		public boolean shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt()
+		{
+			return false;
 		}
 
 	}
