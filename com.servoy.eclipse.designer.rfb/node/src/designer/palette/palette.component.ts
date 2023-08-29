@@ -140,7 +140,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         event.stopPropagation(); 
         this.editorSession.variantsTrigger.emit({show: false});
 
-        this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
+		let target = event.target as HTMLElement;
+		if (target.localName === 'designer-variantscontent') {
+			target = target.closest('li');
+		}
+        this.dragItem.paletteItemBeingDragged = target.cloneNode(true) as Element;
         Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
             if (child.tagName === 'DESIGNER-VARIANTSCONTENT') {
                 this.dragItem.paletteItemBeingDragged.removeChild(child);
