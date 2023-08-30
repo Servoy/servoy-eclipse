@@ -298,6 +298,12 @@ public class ComposedCellEditor extends CellEditor
 	}
 
 	@Override
+	public boolean isDirty()
+	{
+		return cellEditor1.isDirty() || cellEditor2.isDirty();
+	}
+
+	@Override
 	public void activate()
 	{
 		cellEditor1.activate();
