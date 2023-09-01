@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RemovePackageProjectReferenceAction;
 
@@ -70,7 +71,7 @@ public class SpecReadMarkerQuickFix implements IMarkerResolution
 			{
 				public void run()
 				{
-					org.eclipse.jface.dialogs.MessageDialog.openError(Display.getCurrent().getActiveShell(), "Cannot delete package " + resource.getName(),
+					org.eclipse.jface.dialogs.MessageDialog.openError(UIUtils.getActiveShell(), "Cannot delete package " + resource.getName(),
 						e.getMessage());
 				}
 			});

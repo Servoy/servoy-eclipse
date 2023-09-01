@@ -870,7 +870,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			if (typeMismatch)
 			{
 				String msg = "Type mismatch";
-				MessageDialog.openError(Display.getCurrent().getActiveShell(), "Wrong type", msg);
+				MessageDialog.openError(UIUtils.getActiveShell(), "Wrong type", msg);
 				return ValidationStatus.error(msg);
 			}
 
