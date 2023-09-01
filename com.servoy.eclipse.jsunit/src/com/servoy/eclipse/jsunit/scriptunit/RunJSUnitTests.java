@@ -144,7 +144,7 @@ public abstract class RunJSUnitTests implements Runnable
 				final int port = SocketUtil.findFreePort();
 				if (port == -1)
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot run solution JSUnit tests",
+					MessageDialog.openError(UIUtils.getActiveShell(), "Cannot run solution JSUnit tests",
 						"No free port for JUnit launch was found.");
 				}
 				else

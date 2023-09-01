@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -125,7 +126,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 							}
 							else
 							{
-								MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Load relations",
+								MessageDialog.openInformation(UIUtils.getActiveShell(), "Load relations",
 									"No relation was found in server '" + server.getName() + "'.");
 							}
 						}

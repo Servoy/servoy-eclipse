@@ -48,7 +48,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -89,6 +88,7 @@ import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.I18NMessagesUtil;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -2335,7 +2335,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		catch (Exception e)
 		{
 			ServoyLog.logError("Could not reset property value for id " + id + " on object " + persistContext.getPersist(), e);
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not reset property", e.getMessage());
+			MessageDialog.openError(UIUtils.getActiveShell(), "Could not reset property", e.getMessage());
 		}
 	}
 
@@ -2351,7 +2351,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			catch (RepositoryException e)
 			{
 				ServoyLog.logError("Could not reset property value for id " + id + " on object " + persistContext.getPersist(), e);
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not reset property", e.getMessage());
+				MessageDialog.openError(UIUtils.getActiveShell(), "Could not reset property", e.getMessage());
 				return;
 			}
 
@@ -2562,7 +2562,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			catch (Exception e)
 			{
 				ServoyLog.logError("Could not set property value for id " + id + " on object " + beanPropertyDescriptor.valueObject, e);
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not update property", e.getMessage());
+				MessageDialog.openError(UIUtils.getActiveShell(), "Could not update property", e.getMessage());
 			}
 
 			if (changed)
@@ -2710,7 +2710,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		catch (Exception e)
 		{
 			ServoyLog.logError("Could not set property value for id " + id + " on object " + persistContext.getPersist(), e);
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not update property", e.getMessage());
+			MessageDialog.openError(UIUtils.getActiveShell(), "Could not update property", e.getMessage());
 		}
 	}
 

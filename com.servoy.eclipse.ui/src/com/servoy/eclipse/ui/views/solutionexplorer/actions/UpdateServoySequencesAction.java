@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -223,7 +224,7 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 				{
 					public void run()
 					{
-						MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Update servoy sequences", null, null,
+						MessageDialog dialog = new MessageDialog(UIUtils.getActiveShell(), "Update servoy sequences", null, null,
 							MessageDialog.NONE, new String[] { "OK" }, 0)
 						{
 							@Override

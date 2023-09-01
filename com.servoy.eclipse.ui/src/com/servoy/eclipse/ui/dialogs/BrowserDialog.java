@@ -410,7 +410,7 @@ public class BrowserDialog extends Dialog
 				boolean[] overwrite = new boolean[] { false };
 				Display.getDefault().syncExec(() -> {
 
-					overwrite[0] = UIUtils.askConfirmation(Display.getDefault().getActiveShell(),
+					overwrite[0] = UIUtils.askConfirmation(UIUtils.getActiveShell(),
 						"Sample already exists in the workspace",
 						"Do you want to fully overwrite the installed sample again?");
 				});

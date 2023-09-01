@@ -40,6 +40,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.util.Pair;
@@ -219,7 +220,7 @@ public class NewSolutionWizardDefaultPackages
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+					MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage());
 				}
 			});
 		}

@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
@@ -138,20 +139,18 @@ public class CreateComponentHandler implements IServerService
 		return null;
 	}
 
-
 	public static void autoShowDataProviderSelection(PropertyDescription pd, Form form, AbstractBase webComponent, String propertyName)
 	{
-		Display current = Display.getCurrent();
-		if (current == null) current = Display.getDefault();
+		Shell activeShell = UIUtils.getActiveShell();
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
 
 		Pair<String, ITable> forFoundset = PersistPropertySource.calculateFoundsetTable(pd, PersistContext.create(webComponent, form), flattenedSolution, form);
 		ITable table = forFoundset.getRight();
 		DataProviderOptions options = new DataProviderOptions(true, true, true, true, true, true, true, true, null, true, true, null);
-		DataProviderCellEditor dialog = new DataProviderCellEditor(current.getActiveShell(), new DataProviderLabelProvider(true), null,
+		DataProviderCellEditor dialog = new DataProviderCellEditor(activeShell, new DataProviderLabelProvider(true), null,
 			form, flattenedSolution, false, options, null, table,
 			"Select Data Provider - " + (propertyName.endsWith("ID") ? propertyName.substring(0, propertyName.length() - 2) : propertyName));
-		Object result = dialog.openDialogBox(current.getActiveShell());
+		Object result = dialog.openDialogBox(activeShell);
 		if (result != null)
 		{
 			if (!result.toString().contains("$NoDataProvider"))
@@ -164,12 +163,10 @@ public class CreateComponentHandler implements IServerService
 	public static void autoshowWizard(ISupportFormElements parentSupportingElements, WebObjectSpecification spec,
 		WebComponent webComponent, PropertyDescription property, BaseVisualFormEditor editorPart, AtomicInteger id)
 	{
-
 		// prop type should be an array of a custom type..
 		IPropertyType< ? > propType = property.getType();
 		if (propType instanceof CustomJSONArrayType< ? , ? >)
 		{
-
 			CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
 				.getCustomJSONTypeDefinition().getType();
 			PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();

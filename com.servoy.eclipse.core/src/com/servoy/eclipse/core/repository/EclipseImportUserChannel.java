@@ -814,12 +814,12 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			{
 				if (scrollableDialog)
 				{
-					UIUtils.showScrollableDialog(Display.getDefault().getActiveShell(), IMessageProvider.WARNING, "War export", title,
+					UIUtils.showScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.WARNING, "War export", title,
 						message);
 				}
 				else
 				{
-					MessageDialog.openWarning(Display.getDefault().getActiveShell(), title,
+					MessageDialog.openWarning(UIUtils.getActiveShell(), title,
 						message);
 				}
 			}

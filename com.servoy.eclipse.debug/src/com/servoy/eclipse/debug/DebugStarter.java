@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.eclipse.core.IDebuggerStarter;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -81,7 +82,7 @@ public class DebugStarter implements IDebuggerStarter
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error starting debugger", "Please check your logs");
+					MessageDialog.openError(UIUtils.getActiveShell(), "Error starting debugger", "Please check your logs");
 				}
 			});
 			return false;

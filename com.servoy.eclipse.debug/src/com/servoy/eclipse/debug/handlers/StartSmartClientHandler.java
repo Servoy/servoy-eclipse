@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.Activator.ShortcutDefinition;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
@@ -130,7 +131,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+							MessageDialog.openError(UIUtils.getActiveShell(), "Solution type problem",
 								"Cant open this solution type in this client");
 						}
 					});

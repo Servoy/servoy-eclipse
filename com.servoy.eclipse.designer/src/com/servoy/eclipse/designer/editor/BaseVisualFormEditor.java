@@ -62,6 +62,7 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -827,7 +828,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		{
 			if (isDirty())
 			{
-				if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Save form", getTitle() + " has been modified. Save changes?"))
+				if (!MessageDialog.openQuestion(UIUtils.getActiveShell(), "Save form", getTitle() + " has been modified. Save changes?"))
 				{
 					return;
 				}

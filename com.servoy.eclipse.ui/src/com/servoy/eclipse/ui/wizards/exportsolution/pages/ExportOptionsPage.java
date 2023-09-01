@@ -39,6 +39,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -314,7 +315,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		{
 			Debug.error(ex);
 			Display.getDefault().syncExec(() -> {
-				MessageDialog.openError(Display.getDefault().getActiveShell(),
+				MessageDialog.openError(UIUtils.getActiveShell(),
 					"Cannot set the version for solution '" + exportSolutionWizard.getActiveSolution().getName() + "'.",
 					ex.getMessage());
 			});

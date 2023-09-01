@@ -38,6 +38,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -134,7 +135,7 @@ public class DeprecatedSpecQuickFix extends WorkbenchMarkerResolution
 			String message = "Could not replace deprecated component type with " + replacement;
 			ServoyLog.logError(message, e);
 			Display.getDefault().asyncExec(() -> {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), IMarker.MESSAGE, message);
+				MessageDialog.openError(UIUtils.getActiveShell(), IMarker.MESSAGE, message);
 			});
 		}
 	}
@@ -195,7 +196,7 @@ public class DeprecatedSpecQuickFix extends WorkbenchMarkerResolution
 				String mess = "Could not replace deprecated component type with '" + replacement + "'." + message;
 				ServoyLog.logError(new Exception(mess));
 				Display.getDefault().asyncExec(() -> {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot quickfix deprecated marker", mess);
+					MessageDialog.openError(UIUtils.getActiveShell(), "Cannot quickfix deprecated marker", mess);
 				});
 				return;
 			}

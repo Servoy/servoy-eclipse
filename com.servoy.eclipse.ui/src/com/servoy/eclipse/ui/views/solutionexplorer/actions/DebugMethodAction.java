@@ -22,17 +22,17 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.ScriptMethod;
 
 /**
  * An action that is able to edit variables.
- * 
+ *
  * @author acostescu
  */
 public class DebugMethodAction extends Action implements ISelectionChangedListener
@@ -42,7 +42,7 @@ public class DebugMethodAction extends Action implements ISelectionChangedListen
 
 	/**
 	 * Creates a new edit variable action that will use the given shell to show the edit variable dialog.
-	 * 
+	 *
 	 * @param shell used to show a dialog.
 	 */
 	public DebugMethodAction(IViewPart viewPart)
@@ -88,7 +88,7 @@ public class DebugMethodAction extends Action implements ISelectionChangedListen
 		{
 			if (Activator.getDefault().getDebugClientHandler().getDebugReadyClient() != null) Activator.getDefault().getDebugClientHandler().executeMethod(
 				method.getParent(), method.getScopeName(), method.getName());
-			else MessageDialog.openError(Display.getDefault().getActiveShell(),
+			else MessageDialog.openError(UIUtils.getActiveShell(),
 				"Debug Method Problem", "Cannot debug method; please start a debug client first.");
 		}
 	}
