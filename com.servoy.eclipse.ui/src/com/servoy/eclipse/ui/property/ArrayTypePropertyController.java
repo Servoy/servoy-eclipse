@@ -79,7 +79,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 	protected abstract Object getNewElementInitialValue(); // RAGTEST hier weg?
 
-	protected abstract void createNewElement(); // RAGTEST hier weg?
+	protected abstract void createNewElement();
 
 	protected abstract ArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty);
 
@@ -127,7 +127,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	{
 		ButtonCellEditor clearButton = new ButtonSetValueCellEditor()
 		{
-
 			@Override
 			protected void updateButtonState(Button buttonWidget, Object value)
 			{
@@ -143,12 +142,10 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				if (!isNotSet(oldPropertyValue)) return null;
 				else return createEmptyPropertyValue();
 			}
-
 		};
 
 		ButtonCellEditor addButton = new ButtonCellEditor()
 		{
-
 			private Control buttonEditorControl; // actually this is the button control
 			private boolean visible = true;
 
@@ -314,7 +311,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 		protected abstract ArrayPropertyChildId getIdFromIndex(int idx);
 
-		//	protected abstract String getTypeName();
+		//	protected abstract String getTypeName(); RAGTEST weg?
 
 
 		@Override
@@ -339,9 +336,10 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		 * @param createPropertyDescriptor the real property descriptor that is able to handle the value
 		 * @return a wrapper IPropertyDescriptor that forwards everything to the given one, but it alters the cell editor as needed.
 		 */
-		protected IPropertyDescriptor addButtonsToPD(IPropertyDescriptor realPropertyDescriptor, int index)
+		protected IPropertyDescriptor createArrayItemPropertyDescriptor(IPropertyDescriptor propertyDescriptor, int index)
 		{
-			return new ArrayItemPropertyDescriptorWrapper(realPropertyDescriptor, index, this);
+			// RAGTEST naar eigen impl voor json en hier abstract
+			return new ArrayItemPropertyDescriptorWrapper(propertyDescriptor, index, this);
 		}
 
 		@Override
@@ -492,6 +490,11 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			this.arrayPropertySource = arrayPropertySource;
 		}
 
+		protected void addNewItemAfter(Object oldValue)
+		{
+			// RAGTEST impl voor json
+		}
+
 		protected IPropertyDescriptor getRootBasePD()
 		{
 			IPropertyDescriptor base = basePD;
@@ -576,31 +579,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				@Override
 				protected void buttonClicked()
 				{
-//					// RAGTEST naar aparte klasse
-//					EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
-//					if (handler == null)
-//					{
-//						ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
-//					}
-//					else
-//					{
-//						Object id = getId();
-//						String parentKey;
-//						if (id instanceof ArrayPropertyChildId)
-//						{
-//							parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
-//						}
-//						else
-//						{
-//							parentKey = String.valueOf(id);
-//						}
-//
-//						if (oldValue instanceof IPersist)
-//						{
-//							handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, arrayPropertySource.getTypeName());
-//						}
-//						System.err.println("RAGTEST1 ");
-//					}
+					addNewItemAfter(oldValue);
 				}
 
 			}, false, true, 0));

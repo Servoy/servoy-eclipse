@@ -1,9 +1,10 @@
 package com.servoy.eclipse.designer.editor.commands;
 
+import static java.util.Arrays.asList;
+
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -346,7 +347,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								{
 									((IDeveloperRepository)finalPersist[0].getRootObject().getRepository()).deleteObject(finalPersist[0]);
 									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
-										Arrays.asList(new IPersist[] { finalPersist[0] }));
+										asList(new IPersist[] { finalPersist[0] }));
 								}
 							}
 							catch (RepositoryException e)
@@ -544,12 +545,20 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				dialog.setInitialSelections(dataproviderNames.toArray());
 			}
 			dialog.setTitle("Dataprovider properties configuration");
-			if (dialog.open() == Window.OK)
+			try
 			{
-				Arrays.asList(dialog.getResult()).forEach(property -> {
-					PropertyDescription propertyDescription = properties.get(property);
-					CreateComponentHandler.autoShowDataProviderSelection(propertyDescription, activeEditor.getForm(), webComponent, (String)property);
-				});
+				if (dialog.open() == Window.OK)
+				{
+					asList(dialog.getResult()).forEach(property -> {
+						PropertyDescription propertyDescription = properties.get(property);
+						CreateComponentHandler.autoShowDataProviderSelection(propertyDescription, activeEditor.getForm(), webComponent, (String)property);
+					});
+				}
+			}
+			catch (Exception e)
+			{
+				// RAGTEST doc, happens when active window is not found
+				ServoyLog.logError(e);
 			}
 		}
 	}

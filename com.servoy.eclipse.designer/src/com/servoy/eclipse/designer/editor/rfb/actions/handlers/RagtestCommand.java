@@ -17,7 +17,10 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import static com.servoy.eclipse.core.util.UIUtils.getActiveShell;
 import static com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler.autoshowWizard;
+import static java.util.Arrays.asList;
+import static org.eclipse.jface.dialogs.MessageDialog.openQuestion;
 
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -50,7 +53,6 @@ import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
@@ -139,7 +141,7 @@ public class RagtestCommand extends BaseRestorableCommand
 			newPersist = createComponent(editorPart, args, changedPersists);
 			if (newPersist != null)
 			{
-				changedPersists.addAll(Arrays.asList(newPersist));
+				changedPersists.addAll(asList(newPersist));
 				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
 				if (newSelection != null && !args.isKeepOldSelection())
 				{
@@ -149,7 +151,7 @@ public class RagtestCommand extends BaseRestorableCommand
 				if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
 					CSSPositionUtils.isCSSPositionContainer((LayoutContainer)newPersist[0]))
 				{
-					if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(), "Edit css position container",
+					if (openQuestion(getActiveShell(), "Edit css position container",
 						"Do you want to zoom into the layout container so you can edit it ?"))
 					{
 						BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
@@ -163,7 +165,7 @@ public class RagtestCommand extends BaseRestorableCommand
 				}
 			}
 		}
-		catch (Exception ex)
+		catch (JSONException | RepositoryException ex)
 		{
 			Debug.error(ex);
 		}
@@ -252,7 +254,7 @@ public class RagtestCommand extends BaseRestorableCommand
 			if (args.getName() != null)
 			{
 				String name = args.getName();
-				if (args.getPackageName() != null) //ghost components has no packageName
+				if (args.getPackageName() != null) // ghost components has no packageName
 				{
 					PaletteCommonsHandler.getInstance().updateComponentCounter(name);
 				}
@@ -314,27 +316,19 @@ public class RagtestCommand extends BaseRestorableCommand
 				}
 				else if ("servoydefault-combobox".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.COMBOBOX);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.COMBOBOX, args);
 				}
 				else if ("servoydefault-textfield".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.TEXT_FIELD);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.TEXT_FIELD, args);
 				}
 				else if ("servoydefault-textarea".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.TEXT_AREA);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.TEXT_AREA, args);
 				}
 				else if ("servoydefault-password".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.PASSWORD);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.PASSWORD, args);
 				}
 				else if ("servoydefault-calendar".equals(name))
 				{
@@ -346,39 +340,27 @@ public class RagtestCommand extends BaseRestorableCommand
 				}
 				else if ("servoydefault-typeahead".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.TYPE_AHEAD);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.TYPE_AHEAD, args);
 				}
 				else if ("servoydefault-spinner".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.SPINNER);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.SPINNER, args);
 				}
 				else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.CHECKS);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.CHECKS, args);
 				}
 				else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.RADIOS);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.RADIOS, args);
 				}
 				else if ("servoydefault-imagemedia".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.IMAGE_MEDIA);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.IMAGE_MEDIA, args);
 				}
 				else if ("servoydefault-listbox".equals(name))
 				{
-					Field field = parentSupportingElements.createNewField(args.getLocation());
-					field.setDisplayType(Field.LIST_BOX);
-					return singlePersistWithLocationAndSize(field, args);
+					return createField(parentSupportingElements, Field.LIST_BOX, args);
 				}
 				else if ("servoydefault-htmlarea".equals(name))
 				{
@@ -664,7 +646,7 @@ public class RagtestCommand extends BaseRestorableCommand
 										}
 										else
 										{ //Object[] to IPersist[]
-											return Arrays.asList(applyTemplate).toArray(new IPersist[applyTemplate.length]);
+											return asList(applyTemplate).toArray(new IPersist[applyTemplate.length]);
 										}
 									}
 								}
@@ -705,6 +687,13 @@ public class RagtestCommand extends BaseRestorableCommand
 		}
 
 		return null;
+	}
+
+	private static IPersist[] createField(ISupportFormElements parentSupportingElements, int displayType, RagtestOptions args) throws RepositoryException
+	{
+		Field field = parentSupportingElements.createNewField(args.getLocation());
+		field.setDisplayType(displayType);
+		return singlePersistWithLocationAndSize(field, args);
 	}
 
 	private static IPersist[] singlePersistWithLocationAndSize(IFormElement persist, RagtestOptions args)
@@ -925,7 +914,7 @@ public class RagtestCommand extends BaseRestorableCommand
 					((IDeveloperRepository)iPersist.getRootObject().getRepository()).deleteObject(iPersist);
 				}
 
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(newPersist));
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, asList(newPersist));
 			}
 		}
 		catch (RepositoryException e)

@@ -129,7 +129,6 @@ public class Activator extends AbstractUIPlugin
 				if (activePage != null)
 				{
 					IEditorPart activeEditor = activePage.getActiveEditor();
-
 					if (activeEditor instanceof BaseVisualFormEditor)
 					{
 						BaseVisualFormEditor formEditor = (BaseVisualFormEditor)activeEditor;

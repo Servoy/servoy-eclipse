@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Control;
  */
 public abstract class ButtonCellEditor extends CellEditor
 {
-
 	protected Object oldValue;
 	protected Button button;
 

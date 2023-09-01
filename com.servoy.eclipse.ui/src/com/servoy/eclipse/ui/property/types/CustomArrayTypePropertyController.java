@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.property.types;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.sablo.specification.PropertyDescription;
@@ -42,6 +43,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
@@ -54,19 +56,19 @@ import com.servoy.j2db.util.Utils;
  */
 public class CustomArrayTypePropertyController extends ArrayTypePropertyController
 {
-	protected final PropertyDescription propertyDescription;
+	protected final PropertyDescription webComponentPropertyDescription;
 	protected final PersistContext persistContext;
 
-	public CustomArrayTypePropertyController(Object id, String displayName, PersistContext persistContext, PropertyDescription propertyDescription)
+	public CustomArrayTypePropertyController(Object id, String displayName, PersistContext persistContext, PropertyDescription webComponentPropertyDescription)
 	{
 		super(id, displayName);
-		this.propertyDescription = propertyDescription;
+		this.webComponentPropertyDescription = webComponentPropertyDescription;
 		this.persistContext = persistContext;
 	}
 
 	public PropertyDescription getArrayElementPD()
 	{
-		return ((ICustomType< ? >)propertyDescription.getType()).getCustomJSONTypeDefinition();
+		return ((ICustomType< ? >)webComponentPropertyDescription.getType()).getCustomJSONTypeDefinition();
 	}
 
 	@Override
@@ -99,8 +101,8 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 
 	protected String getTypeName()
 	{
-		return propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
-			: propertyDescription.getType().getName();
+		return webComponentPropertyDescription.getType().getName().indexOf(".") > 0 ? webComponentPropertyDescription.getType().getName().split("\\.")[1]
+			: webComponentPropertyDescription.getType().getName();
 	}
 
 	// RAGTEST weg
@@ -111,10 +113,11 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		PropertyDescription arrayElementPD = getArrayElementPD();
 		if (arrayElementPD.getType() instanceof ICustomType< ? >)
 		{
-			String typeName = propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
-				: propertyDescription.getType().getName();
+			String typeName = webComponentPropertyDescription.getType().getName().indexOf(".") > 0
+				? webComponentPropertyDescription.getType().getName().split("\\.")[1]
+				: webComponentPropertyDescription.getType().getName();
 			IBasicWebObject parent = (IBasicWebObject)persistContext.getPersist();
-			WebCustomType customType = WebCustomType.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true);
+			WebCustomType customType = WebCustomType.createNewInstance(parent, arrayElementPD, webComponentPropertyDescription.getName(), index, true);
 			customType.setTypeName(typeName);
 			// Do not add customType to parent here, this method should be without side-effect for undo/redo to work properly
 			return customType;
@@ -139,12 +142,53 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 
 	public class CustomArrayPropertySource extends ArrayPropertySource
 	{
+		private final class CustomArrayItemPropertyDescriptorWrapper extends ArrayItemPropertyDescriptorWrapper
+		{
+			/**
+			 * @param basePD
+			 * @param index
+			 * @param arrayPropertySource
+			 */
+			private CustomArrayItemPropertyDescriptorWrapper(IPropertyDescriptor basePD, int index, ArrayPropertySource arrayPropertySource)
+			{
+				super(basePD, index, arrayPropertySource);
+			}
+
+			@Override
+			protected void addNewItemAfter(Object oldValue)
+			{
+//				// RAGTEST naar aparte klasse
+				EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
+				if (handler == null)
+				{
+					ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
+				}
+				else
+				{
+					Object id = getId();
+					String parentKey;
+					if (id instanceof ArrayPropertyChildId)
+					{
+						parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+					}
+					else
+					{
+						parentKey = String.valueOf(id);
+					}
+
+					if (oldValue instanceof IPersist)
+					{
+						handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, getTypeName());
+					}
+					System.err.println("RAGTEST1x ");
+				}
+			}
+		}
 
 		public CustomArrayPropertySource(ComplexProperty<Object> complexProperty)
 		{
 			super(complexProperty);
 		}
-
 
 		@Override
 		protected ArrayPropertyChildId getIdFromIndex(int idx)
@@ -155,14 +199,15 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected void addChildPropertyDescriptors(Object arrayV)
 		{
+			if (arrayV == null) return;
 			Object[] arrayValue = (Object[])arrayV;
+
 			FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 			Form form = (Form)(Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()) ? persistContext.getContext()
 				: persistContext.getPersist()).getAncestor(IRepository.FORMS);
-			ArrayList<IPropertyDescriptor> createdPDs = new ArrayList<IPropertyDescriptor>();
-			Object arrayElementInPersist = ((IBasicWebObject)persistContext.getPersist()).getProperty(propertyDescription.getName());
+			List<IPropertyDescriptor> createdPDs = new ArrayList<>();
+			Object arrayElementInPersist = ((IBasicWebObject)persistContext.getPersist()).getProperty(webComponentPropertyDescription.getName());
 
-			if (arrayValue == null) return;
 			for (int i = 0; i < arrayValue.length; i++)
 			{
 				try
@@ -177,8 +222,10 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					}
 					PropertyDescriptorWrapper propertyDescriptorWrapper = new PersistPropertySource.PropertyDescriptorWrapper(
 						PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD(), persistContext), arrayValue[i]);
-					createdPDs.add(addButtonsToPD(PersistPropertySource.createPropertyDescriptor(this, getIdFromIndex(i), persistContextForElement, readOnly,
-						propertyDescriptorWrapper, "[" + i + "]", flattenedEditingSolution, form), i));
+					createdPDs.add(createArrayItemPropertyDescriptor(
+						PersistPropertySource.createPropertyDescriptor(this, getIdFromIndex(i), persistContextForElement, readOnly,
+							propertyDescriptorWrapper, "[" + i + "]", flattenedEditingSolution, form),
+						i));
 				}
 				catch (RepositoryException e)
 				{
@@ -187,6 +234,12 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			}
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(), false);
 			elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
+		}
+
+		@Override
+		protected IPropertyDescriptor createArrayItemPropertyDescriptor(IPropertyDescriptor propertyDescriptor, int index)
+		{
+			return new CustomArrayItemPropertyDescriptorWrapper(propertyDescriptor, index, this);
 		}
 
 		@Override
@@ -206,7 +259,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		public void defaultResetProperty(Object id)
 		{
 			defaultSetProperty(id, getDefaultElementProperty(id));
-
 		}
 
 		@Override
@@ -257,8 +309,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		{
 			try
 			{
-				final int idx = getIndexFromId((ArrayPropertyChildId)id);
-
+				int idx = getIndexFromId((ArrayPropertyChildId)id);
 				PersistPropertySource.adjustPropertyValueAndReset(id, getPropertyDescriptors()[idx], this);
 			}
 			catch (NumberFormatException e)
@@ -269,7 +320,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 
 		protected void defaultElementWasSet(Object newMainValue)
 		{
-			((IBasicWebObject)persistContext.getPersist()).setProperty(propertyDescription.getName(), newMainValue);
+			((IBasicWebObject)persistContext.getPersist()).setProperty(webComponentPropertyDescription.getName(), newMainValue);
 		}
 
 		protected Object getDefaultElementProperty(Object id)
@@ -316,7 +367,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 
 	@Override
 	protected Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue)
-	{
+	{ // RAGTEST alleen voor json array
 		Object[] arrayValue = (Object[])oldMainValue;
 		Object[] newArrayValue = (Object[])Array.newInstance(arrayValue.getClass().getComponentType(), arrayValue.length + 1);
 		System.arraycopy(arrayValue, 0, newArrayValue, 0, i);
