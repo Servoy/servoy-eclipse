@@ -206,10 +206,9 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					}
 					PropertyDescriptorWrapper propertyDescriptorWrapper = new PersistPropertySource.PropertyDescriptorWrapper(
 						PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD(), persistContext), arrayValue[i]);
-					createdPDs.add(createArrayItemPropertyDescriptor(
-						PersistPropertySource.createPropertyDescriptor(this, getIdFromIndex(i), persistContextForElement, readOnly,
-							propertyDescriptorWrapper, "[" + i + "]", flattenedEditingSolution, form),
-						i));
+					IPropertyDescriptor basePD = PersistPropertySource.createPropertyDescriptor(this, getIdFromIndex(i), persistContextForElement,
+						readOnly, propertyDescriptorWrapper, "[" + i + "]", flattenedEditingSolution, form);
+					createdPDs.add(new CustomArrayItemPropertyDescriptorWrapper(basePD, i, this));
 				}
 				catch (RepositoryException e)
 				{
@@ -218,12 +217,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			}
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(), false);
 			elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
-		}
-
-		@Override
-		protected IPropertyDescriptor createArrayItemPropertyDescriptor(IPropertyDescriptor propertyDescriptor, int index)
-		{
-			return new CustomArrayItemPropertyDescriptorWrapper(propertyDescriptor, index, this);
 		}
 
 		@Override

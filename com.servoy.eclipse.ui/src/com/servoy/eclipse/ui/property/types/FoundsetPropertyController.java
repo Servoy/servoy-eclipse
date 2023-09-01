@@ -286,7 +286,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 								for (int i = 0; i < arrayValue.length(); i++)
 								{
 									// RAGTEST test
-									createdPDs.add(createArrayItemPropertyDescriptor(createDataproviderPropertyDescriptor(getIdFromIndex(i), DP_PREFIX + i), i));
+									IPropertyDescriptor propertyDescriptor = createDataproviderPropertyDescriptor(getIdFromIndex(i), DP_PREFIX + i);
+									createdPDs.add(new ArrayItemPropertyDescriptorWrapper(propertyDescriptor, i, this));
 								}
 								elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
 							}

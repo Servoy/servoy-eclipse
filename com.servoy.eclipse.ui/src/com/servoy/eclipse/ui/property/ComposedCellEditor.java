@@ -41,7 +41,6 @@ import com.servoy.eclipse.core.util.ReturnValueSnippet;
  */
 public class ComposedCellEditor extends CellEditor
 {
-
 	protected CellEditor cellEditor1;
 	protected CellEditor cellEditor2;
 	protected boolean cellEditor1IsMain;

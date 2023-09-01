@@ -311,9 +311,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 		protected abstract ArrayPropertyChildId getIdFromIndex(int idx);
 
-		//	protected abstract String getTypeName(); RAGTEST weg?
-
-
 		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
@@ -371,7 +368,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 			return ISetterAwarePropertySource.super.undoSetProperty(id);
 		}
-
 
 		@Override
 		public Object setComplexPropertyValue(Object id, Object v)
@@ -522,9 +518,9 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			cellEditor.setCellEditor1(new ConvertingCellEditor<Object, Object>(new ReturnValueSnippet<CellEditor, Composite>()
 			{
 				@Override
-				public CellEditor run(Composite... args)
+				public CellEditor run(Composite arg)
 				{
-					return basePD.createPropertyEditor(args[0]);
+					return basePD.createPropertyEditor(arg);
 				}
 			}, new ICellEditorConverter<Object, Object>()
 			{
