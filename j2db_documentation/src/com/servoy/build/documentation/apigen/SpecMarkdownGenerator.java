@@ -41,6 +41,7 @@ import org.apache.commons.io.filefilter.AbstractFileFilter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.Comment;
@@ -287,8 +288,8 @@ public class SpecMarkdownGenerator
 		}
 		if (componentGeneration && !service)
 		{
-			root.put("designtimeExtends", new Property("JSWebComponent", "JSWebComponent", null, null));
-			root.put("runtimeExtends", new Property("RuntimeWebComponent", "RuntimeWebComponent", null, null));
+			root.put("designtimeExtends", new Property("JSWebComponent", "JSWebComponent", null, null, null));
+			root.put("runtimeExtends", new Property("RuntimeWebComponent", "RuntimeWebComponent", null, null, null));
 		}
 	}
 
@@ -307,8 +308,10 @@ public class SpecMarkdownGenerator
 
 	private Record createProperty(String name, JSONObject specEntry)
 	{
-		String dflt = specEntry.optString("default", null);
+		Object d = specEntry.opt("default");
+		String dflt = (d != null ? JSONObject.valueToString(d) : null);
 		String type = specEntry.optString("type", "");
+		String deprecationString = specEntry.optString("deprecated", null);
 		JSONObject fullType = specEntry.optJSONObject("type");
 		if (fullType != null)
 		{
@@ -321,13 +324,14 @@ public class SpecMarkdownGenerator
 			doc = optJSONObject.optString("doc", null);
 		}
 
-		return new Property(name, type, dflt, doc);
+		return new Property(name, type, dflt, doc, deprecationString);
 	}
 
 	private Record createFunction(String name, JSONObject specEntry)
 	{
 		String returnType = specEntry.optString("returns", null);
 		JSONArray parameters = specEntry.optJSONArray("parameters");
+		String deprecationString = specEntry.optString("deprecated", null);
 		List<Parameter> params = createParameters(parameters);
 		JSONObject fullReturnType = specEntry.optJSONObject("returns");
 		if (fullReturnType != null)
@@ -341,7 +345,7 @@ public class SpecMarkdownGenerator
 			jsDocEquivalent = processFunctionJSDoc(createFunctionDocFromSpec(specEntry, params, returnType, fullReturnType,
 				docGenerator.shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt()));
 		}
-		return new Function(name, params, returnType, jsDocEquivalent);
+		return new Function(name, params, returnType, jsDocEquivalent, deprecationString);
 	}
 
 	/**
@@ -459,6 +463,7 @@ public class SpecMarkdownGenerator
 					}
 					map.put(key, transformer.apply(key, (JSONObject)value));
 				}
+				else map.put(key, transformer.apply(key, new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString())));
 			}
 			return map;
 		}
@@ -484,6 +489,7 @@ public class SpecMarkdownGenerator
 		{
 			if (type.endsWith("[]")) type = type.substring(0, type.length() - 2);
 
+			@SuppressWarnings("unchecked")
 			Map<String, Record> types = (Map<String, Record>)root.get("types");
 			if (types != null && types.get(type) != null) return "#" + type;
 			return switch (type.toLowerCase())
@@ -545,19 +551,18 @@ public class SpecMarkdownGenerator
 
 	private void save() throws TemplateException, IOException
 	{
-		if (jsonObject.optString("deprecated", null) != null)
-		{
-			System.err.println("    * skipping " + jsonObject.optString("displayName", "component") + " because it is deprecated");
-			return;
-		}
 		File userDir = new File(System.getProperty("user.dir"));
 		String displayName = jsonObject.optString("displayName", "component");
 		String categoryName = jsonObject.optString("categoryName", null);
 
-		docGenerator.generateComponentOrServiceInfo(root, userDir, displayName, categoryName, service);
+		docGenerator.generateComponentOrServiceInfo(root, userDir, displayName, categoryName, service, jsonObject.optString("deprecated", null),
+			jsonObject.optString("replacement", null));
 	}
 
-	public record Function(String name, List<Parameter> parameters, String returnValue, String doc)
+	/**
+	 * @param deprecationString null if not deprecated, "true" or a deprecation explanation if deprecated...
+	 */
+	public record Function(String name, List<Parameter> parameters, String returnValue, String doc, String deprecationString)
 	{
 	}
 
@@ -565,7 +570,10 @@ public class SpecMarkdownGenerator
 	{
 	}
 
-	public record Property(String name, String type, String defaultValue, String doc)
+	/**
+	 * @param deprecationString null if not deprecated, "true" or a deprecation explanation if deprecated...
+	 */
+	public record Property(String name, String type, String defaultValue, String doc, String deprecationString)
 	{
 	}
 
@@ -573,8 +581,15 @@ public class SpecMarkdownGenerator
 	{
 
 		@Override
-		public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryNameStrict, boolean service)
+		public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryNameStrict, boolean service,
+			String deprecationString, String replacementInCaseOfDeprecation)
 		{
+			if (deprecationString != null || replacementInCaseOfDeprecation != null)
+			{
+				System.err.println("    * skipping " + (service ? "service" : "component") + " " + displayName + " because it is deprecated.");
+				return;
+			}
+
 			String categoryName = categoryNameStrict;
 			if (categoryName == null)
 			{
@@ -585,7 +600,6 @@ public class SpecMarkdownGenerator
 				(service ? "service/" : "components/") + categoryName.trim().replace(' ', '-').replace("&", "and").toLowerCase() + "/" +
 					displayName.trim().replace(' ', '-').toLowerCase() +
 					".md");
-			// TODO Auto-generated method stub
 			try
 			{
 				file.getParentFile().mkdirs();
