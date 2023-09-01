@@ -384,7 +384,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
         } else {
             // component code 'manually' requested a send change for some value in the modelViewport; handle that just as viewport does
             this.viewportService.sendCellChangeToServerBasedOnRowId(this.componentValue.modelViewport, this, undefined, rowId, propertyName,
-                this.propertyContextCreatorForRow, this.componentSpecification, newValue, oldValue);
+                this.propertyContextCreatorForRow, newValue, oldValue);
         }
     }
 

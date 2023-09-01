@@ -689,11 +689,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
 							const elementRect = element.getBoundingClientRect();
-							const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.x = elementRect.x - parentRect.x;
-							}
+							this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (left == null) {
                                 left = elementRect.x;
                             } else if (left > elementRect.x) {
@@ -706,11 +702,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.y = elementRect.y - parentRect.y;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (elementRect.x != left) {
                                 obj[nodeid] = {
                                     x: left,
@@ -740,11 +732,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.x = elementRect.x - parentRect.x;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (right == null) {
                                 right = elementRect.x + elementRect.width;
                             } else if (right < (elementRect.x + elementRect.width)) {
@@ -757,11 +745,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.y = elementRect.y - parentRect.y;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if ((elementRect.x + elementRect.width) != right) {
                                 obj[nodeid] = {
                                     x: (right - elementRect.width),
@@ -791,11 +775,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.y = elementRect.y - parentRect.y;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (top == null) {
                                 top = elementRect.y;
                             } else if (top > elementRect.y) {
@@ -808,11 +788,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.x = elementRect.x - parentRect.x;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (elementRect.y != top) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
@@ -842,11 +818,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.y = elementRect.y - parentRect.y;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (bottom == null) {
                                 bottom = elementRect.y + elementRect.height;
                             } else if (bottom < (elementRect.y + elementRect.height)) {
@@ -859,11 +831,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.x = elementRect.x - parentRect.x;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if ((elementRect.y + elementRect.height) != bottom) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
@@ -894,11 +862,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.x = elementRect.x - parentRect.x;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (sortedSelection.length == 0) {
                                 sortedSelection[0] = elementRect;
                             } else {
@@ -919,11 +883,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.y = elementRect.y - parentRect.y;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
                                 obj[nodeid] = {
                                     x: (centerElementModel.x + centerElementModel.width / 2 - elementRect.width / 2),
@@ -954,11 +914,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.y = elementRect.y - parentRect.y;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (sortedSelection.length == 0) {
                                 sortedSelection[0] = elementRect;
                             } else {
@@ -979,11 +935,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
-                            const parentFC = element.closest('.svy-formcomponent');
-							if (parentFC && !element.classList.contains('svy-formcomponent')) {
-								const parentRect = parentFC.getBoundingClientRect();
-								elementRect.x = elementRect.x - parentRect.x;
-							}
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
@@ -1290,6 +1242,19 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             });
             this.editorSession.setSelection(filteredSelection);
           }
+	}
+	
+	updateElementPositionUsingParentPosition(element: HTMLElement, elementRect: DOMRect, posX: boolean, posY: boolean) {
+		const parentFC = element.closest('.svy-formcomponent');
+		if (parentFC && !element.classList.contains('svy-formcomponent')) {
+			const parentRect = parentFC.getBoundingClientRect();
+			if (posX) {
+				elementRect.x = elementRect.x - parentRect.x;
+			}
+			if (posY) {
+				elementRect.y = elementRect.y - parentRect.y;
+			}
+		}
 	}
 
 }

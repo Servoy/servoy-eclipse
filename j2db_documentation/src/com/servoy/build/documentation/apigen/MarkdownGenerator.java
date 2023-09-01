@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.json.JSONObject;
@@ -87,7 +88,6 @@ import freemarker.template.TemplateExceptionHandler;
 
 /**
  * @author jcompagner
- *
  */
 public class MarkdownGenerator
 {
@@ -148,18 +148,9 @@ public class MarkdownGenerator
 
 	private final Map<String, Object> root;
 	private final Path path;
-	private final String parentPath;
 
-	/**
-	 * @param parentName
-	 * @param publicName
-	 * @param parentPath
-	 * @param qualifiedToName
-	 * @param returnTypesToParentName
-	 */
 	public MarkdownGenerator(String publicName, String parentPath)
 	{
-		this.parentPath = parentPath;
 		root = new HashMap<>();
 		root.put("classname", publicName);
 		String classNoSpace = publicName.replace(" ", "%20").toLowerCase();
@@ -208,31 +199,38 @@ public class MarkdownGenerator
 		String designDoc = args[2];
 		String pluginDir = args[3];
 
+		generateCoreAndPluginDocs(jsLib, servoyDoc, designDoc, pluginDir, new MarkdownDocFromXMLGenerator());
+	}
+
+	public static void generateCoreAndPluginDocs(String jsLibURL, String servoyDocURL, String designDocURL, String pluginDir, IDocFromXMLGenerator docGenerator)
+		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException
+	{
 		boolean ngOnly = false;
 
 		do
 		{
 			ngOnly = !ngOnly;
-			boolean ng = ngOnly;
+			final boolean ng = ngOnly;
 
-			System.err.println("generate " + jsLib + ", " + ngOnly);
-			DocumentationManager manager = DocumentationManager.fromXML(new URL(jsLib), MarkdownGenerator.class.getClassLoader());
-			generateDocsFromXML(manager, null, ngOnly);
+			System.err.println("Generating core and java plugin content (ngOnly = " + ngOnly + ")");
 
-			System.err.println("generate " + servoyDoc + ", " + ngOnly);
-			manager = DocumentationManager.fromXML(new URL(servoyDoc), MarkdownGenerator.class.getClassLoader());
-			generateDocsFromXML(manager, null, ngOnly);
+			System.err.println("  - " + jsLibURL);
+			DocumentationManager manager = DocumentationManager.fromXML(new URL(jsLibURL), MarkdownGenerator.class.getClassLoader());
+			docGenerator.generateDocsFromXML(manager, null, ngOnly);
 
-			System.err.println("generate " + designDoc + ", " + ngOnly);
-			manager = DocumentationManager.fromXML(new URL(designDoc), MarkdownGenerator.class.getClassLoader());
-			generateDocsFromXML(manager, "/design-api", ngOnly);
+			System.err.println("  - " + servoyDocURL);
+			manager = DocumentationManager.fromXML(new URL(servoyDocURL), MarkdownGenerator.class.getClassLoader());
+			docGenerator.generateDocsFromXML(manager, null, ngOnly);
 
+			System.err.println("  - " + designDocURL);
+			manager = DocumentationManager.fromXML(new URL(designDocURL), MarkdownGenerator.class.getClassLoader());
+			docGenerator.generateDocsFromXML(manager, "/design-api", ngOnly);
 
-			System.err.println("generate " + designDoc + ", " + ngOnly);
-			manager = DocumentationManager.fromXML(new URL(designDoc), MarkdownGenerator.class.getClassLoader());
-			generateDocsFromXML(manager, "/design-api", ngOnly);
+			System.err.println("  - " + designDocURL);
+			manager = DocumentationManager.fromXML(new URL(designDocURL), MarkdownGenerator.class.getClassLoader());
+			docGenerator.generateDocsFromXML(manager, "/design-api", ngOnly);
 
-
+			System.err.println("  - plugins (from " + pluginDir + "):");
 			File file2 = new File(new URI(pluginDir));
 			if (file2.isDirectory())
 			{
@@ -258,7 +256,8 @@ public class MarkdownGenerator
 							.forEach(is -> {
 								try
 								{
-									generateDocsFromXML(DocumentationManager.fromXML(is, MarkdownGenerator.class.getClassLoader()),
+									System.err.println("    * " + jar.getName());
+									docGenerator.generateDocsFromXML(DocumentationManager.fromXML(is, MarkdownGenerator.class.getClassLoader()),
 										"/plugins/" + jar.getName().substring(0, jar.getName().length() - 4), ng);
 								}
 								catch (ClassNotFoundException | IOException e)
@@ -274,134 +273,6 @@ public class MarkdownGenerator
 		while (ngOnly);
 	}
 
-	/**
-	 * @param args
-	 * @param parentName
-	 * @throws MalformedURLException
-	 * @throws ClassNotFoundException
-	 * @throws IOException
-	 */
-	private static void generateDocsFromXML(DocumentationManager manager, String path, boolean ngOnly)
-		throws MalformedURLException, ClassNotFoundException, IOException
-	{
-		SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
-		for (IObjectDocumentation doc : objects.values())
-		{
-			qualifiedToName.put(doc.getQualifiedName(), doc.getPublicName());
-			if (path != null) publicToRootPath.put(doc.getPublicName(), path);
-		}
-		for (IObjectDocumentation doc : objects.values())
-		{
-			Class< ? > cls = Class.forName(doc.getQualifiedName());
-			IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
-			if (returnTypes != null && returnTypes.getAllReturnedTypes() != null && returnTypes.getAllReturnedTypes().length > 0)
-			{
-				for (Class< ? > retCls : returnTypes.getAllReturnedTypes())
-				{
-					String qname = qualifiedToName.get(retCls.getCanonicalName());
-					if (qname != null)
-					{
-						returnTypesToParentName.put(qname, doc.getPublicName());
-					}
-					else
-					{
-						System.err.println(" qname not found for " + retCls);
-					}
-				}
-//				returnTypesToParentName.put(doc.getPublicName(), doc.getPublicName());
-			}
-		}
-		File userDir = new File(System.getProperty("user.dir"));
-		for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
-		{
-			IObjectDocumentation value = entry.getValue();
-			if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") || value.getFunctions().size() == 0) continue;
-			MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), path);
-			Class< ? > cls = Class.forName(value.getQualifiedName());
-			IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
-			if (returnTypes != null && returnTypes.getAllReturnedTypes() != null)
-			{
-				Class< ? >[] allReturnedTypes = returnTypes.getAllReturnedTypes();
-				ArrayList<Class< ? >> filterReturnTypes = new ArrayList<>();
-				for (Class< ? > clsReturn : allReturnedTypes)
-				{
-					IObjectDocumentation retDoc = objects.get(clsReturn.getCanonicalName());
-					if (retDoc == null || !retDoc.isDeprecated())
-					{
-						filterReturnTypes.add(clsReturn);
-					}
-				}
-				cg.classList("returnTypes", filterReturnTypes.toArray(new Class< ? >[filterReturnTypes.size()]));
-			}
-
-			if (!ngOnly) cg.generateClientSupport(value);
-
-			if (value.getExtendsClass() != null)
-			{
-				cg.classList("extends", new Class[] { Class.forName(value.getExtendsClass()) });
-			}
-
-
-			SortedSet<IFunctionDocumentation> functions = value.getFunctions();
-			List<IFunctionDocumentation> constants = ConfluenceGenerator.getConstants(functions);
-			List<IFunctionDocumentation> properties = ConfluenceGenerator.getProperties(functions);
-			List<IFunctionDocumentation> commands = ConfluenceGenerator.getCommands(functions);
-			List<IFunctionDocumentation> events = ConfluenceGenerator.getEvents(functions);
-			List<IFunctionDocumentation> methods = ConfluenceGenerator.getMethods(functions);
-			cg.table("constants", constants, cls, ngOnly);
-			if (properties != null) properties = properties.stream().filter(node -> node.getReturnedType() != void.class).collect(Collectors.toList());
-			cg.table("properties", properties, cls, ngOnly);
-			cg.table("commands", commands, cls, ngOnly);
-			cg.table("events", events, cls, ngOnly);
-			cg.table("methods", methods, cls, ngOnly);
-//			if (events != null && events.size() > 0) System.err.println(events.size() + value.getPublicName());
-
-			String output = cg.generate();
-			String parent = cg.getPath().toString();
-			String publicName = value.getPublicName();
-			if (storeAsReadMe.contains(value.getPublicName()))
-			{
-				publicName = "README";
-			}
-			else
-			{
-				publicName = publicName.toLowerCase();
-			}
-			File file = new File(userDir, (ngOnly ? "ng_generated/" : "generated/") + (parent.toLowerCase() + '/' + publicName + ".md").replace(' ', '-'));
-			file.getParentFile().mkdirs();
-			try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
-			{
-				writer.write(output);
-			}
-
-//			file = new File(userDir, "generated_old/" + value.getPublicName() + ".html");
-//			if (file.exists())
-//			{
-//				if (file.length() == output.length())
-//				{
-//					// check if it is still the same if the number of bytes are equal.
-//					try (FileReader reader = new FileReader(file))
-//					{
-//						char[] buf = new char[(int)file.length()];
-//						reader.read(buf);
-//						String old = new String(buf);
-//						if (old.equals(output))
-//						{
-//							System.out.println("not updating remote content because the file is the same as the old value " + file);
-//							continue;
-//						}
-//					}
-//				}
-//			}
-		}
-	}
-
-	/**
-	 * @param string
-	 * @param constants
-	 * @param cls
-	 * @param ngOnly
-	 */
 	private void table(String name, List<IFunctionDocumentation> functions, Class< ? > cls, boolean ngOnly)
 	{
 		if (functions != null && functions.size() > 0)
@@ -411,7 +282,7 @@ public class MarkdownGenerator
 			{
 				if (fd.isDeprecated()) continue;
 				if (ngOnly && !fd.getClientSupport().hasSupport(ClientSupport.ng)) continue;
-				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, this::getPublicName, cls, ngOnly);
+				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly);
 				models.add(ftm);
 //			if ("void".equals(ftm.getReturnType()) || ftm.getReturnType() == null)
 //			{
@@ -430,9 +301,6 @@ public class MarkdownGenerator
 		}
 	}
 
-	/**
-	 * @param value
-	 */
 	private void generateClientSupport(IObjectDocumentation value)
 	{
 		ClientSupport clientSupport = value.getClientSupport();
@@ -440,10 +308,6 @@ public class MarkdownGenerator
 		root.put("supportedClients", support);
 	}
 
-	/**
-	 * @param section
-	 * @param array
-	 */
 	private void classList(String section, Class< ? >[] alltypes)
 	{
 		if (alltypes != null && alltypes.length > 0)
@@ -461,9 +325,6 @@ public class MarkdownGenerator
 		}
 	}
 
-	/**
-	 *
-	 */
 	private String generate()
 	{
 		// TODO Auto-generated method stub
@@ -487,18 +348,11 @@ public class MarkdownGenerator
 		return ((relativePath.isBlank() ? "." : relativePath) + "/" + publicName + ".md").toLowerCase();
 	}
 
-	/**
-	 * @return the path
-	 */
 	public Path getPath()
 	{
 		return path;
 	}
 
-	/**
-	 * @param publicName
-	 * @return
-	 */
 	private String generatePath(String publicName)
 	{
 		String p = defaultTypePath.get(publicName);
@@ -535,7 +389,7 @@ public class MarkdownGenerator
 		return p;
 	}
 
-	public String getPublicName(Class< ? > type)
+	public static String getPublicName(Class< ? > type)
 	{
 		if (type != null)
 		{
@@ -659,6 +513,125 @@ public class MarkdownGenerator
 		}
 		return "void";
 
+	}
+
+	private static class MarkdownDocFromXMLGenerator implements IDocFromXMLGenerator
+	{
+
+		public void generateDocsFromXML(DocumentationManager manager, String path, boolean ngOnly)
+			throws MalformedURLException, ClassNotFoundException, IOException
+		{
+			SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
+			for (IObjectDocumentation doc : objects.values())
+			{
+				qualifiedToName.put(doc.getQualifiedName(), doc.getPublicName());
+				if (path != null) publicToRootPath.put(doc.getPublicName(), path);
+			}
+			for (IObjectDocumentation doc : objects.values())
+			{
+				Class< ? > cls = Class.forName(doc.getQualifiedName());
+				IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
+				if (returnTypes != null && returnTypes.getAllReturnedTypes() != null && returnTypes.getAllReturnedTypes().length > 0)
+				{
+					for (Class< ? > retCls : returnTypes.getAllReturnedTypes())
+					{
+						String qname = qualifiedToName.get(retCls.getCanonicalName());
+						if (qname != null)
+						{
+							returnTypesToParentName.put(qname, doc.getPublicName());
+						}
+						else
+						{
+							System.err.println(" qname not found for " + retCls);
+						}
+					}
+//				returnTypesToParentName.put(doc.getPublicName(), doc.getPublicName());
+				}
+			}
+			File userDir = new File(System.getProperty("user.dir"));
+			for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
+			{
+				IObjectDocumentation value = entry.getValue();
+				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") || value.getFunctions().size() == 0) continue;
+				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), path);
+				Class< ? > cls = Class.forName(value.getQualifiedName());
+				IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
+				if (returnTypes != null && returnTypes.getAllReturnedTypes() != null)
+				{
+					Class< ? >[] allReturnedTypes = returnTypes.getAllReturnedTypes();
+					ArrayList<Class< ? >> filterReturnTypes = new ArrayList<>();
+					for (Class< ? > clsReturn : allReturnedTypes)
+					{
+						IObjectDocumentation retDoc = objects.get(clsReturn.getCanonicalName());
+						if (retDoc == null || !retDoc.isDeprecated())
+						{
+							filterReturnTypes.add(clsReturn);
+						}
+					}
+					cg.classList("returnTypes", filterReturnTypes.toArray(new Class< ? >[filterReturnTypes.size()]));
+				}
+
+				if (!ngOnly) cg.generateClientSupport(value);
+
+				if (value.getExtendsClass() != null)
+				{
+					cg.classList("extends", new Class[] { Class.forName(value.getExtendsClass()) });
+				}
+
+
+				SortedSet<IFunctionDocumentation> functions = value.getFunctions();
+				List<IFunctionDocumentation> constants = ConfluenceGenerator.getConstants(functions);
+				List<IFunctionDocumentation> properties = ConfluenceGenerator.getProperties(functions);
+				List<IFunctionDocumentation> commands = ConfluenceGenerator.getCommands(functions);
+				List<IFunctionDocumentation> events = ConfluenceGenerator.getEvents(functions);
+				List<IFunctionDocumentation> methods = ConfluenceGenerator.getMethods(functions);
+				cg.table("constants", constants, cls, ngOnly);
+				if (properties != null) properties = properties.stream().filter(node -> node.getReturnedType() != void.class).collect(Collectors.toList());
+				cg.table("properties", properties, cls, ngOnly);
+				cg.table("commands", commands, cls, ngOnly);
+				cg.table("events", events, cls, ngOnly);
+				cg.table("methods", methods, cls, ngOnly);
+//			if (events != null && events.size() > 0) System.err.println(events.size() + value.getPublicName());
+
+				String output = cg.generate();
+				String parent = cg.getPath().toString();
+				String publicName = value.getPublicName();
+				if (storeAsReadMe.contains(value.getPublicName()))
+				{
+					publicName = "README";
+				}
+				else
+				{
+					publicName = publicName.toLowerCase();
+				}
+				File file = new File(userDir, (ngOnly ? "ng_generated/" : "generated/") + (parent.toLowerCase() + '/' + publicName + ".md").replace(' ', '-'));
+				file.getParentFile().mkdirs();
+				try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
+				{
+					writer.write(output);
+				}
+
+//			file = new File(userDir, "generated_old/" + value.getPublicName() + ".html");
+//			if (file.exists())
+//			{
+//				if (file.length() == output.length())
+//				{
+//					// check if it is still the same if the number of bytes are equal.
+//					try (FileReader reader = new FileReader(file))
+//					{
+//						char[] buf = new char[(int)file.length()];
+//						reader.read(buf);
+//						String old = new String(buf);
+//						if (old.equals(output))
+//						{
+//							System.out.println("not updating remote content because the file is the same as the old value " + file);
+//							continue;
+//						}
+//					}
+//				}
+//			}
+			}
+		}
 	}
 
 }

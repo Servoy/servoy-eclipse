@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
-import static com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler.autoShowDataProviderSelection;
 import static com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler.autoshowWizard;
 
 import java.awt.Cursor;
@@ -200,7 +199,7 @@ public class RagtestCommand extends BaseRestorableCommand
 					}
 					parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(PersistContext.create(parentBean, editorPart.getForm()));
 					WebCustomType bean = AddContainerCommand.addCustomType(parentBean, propertyName, compName, arrayIndex, null);
-					autoShowDataProviderSelection(editorPart.getForm(), (WebComponent)parentBean, propertyName, editorPart, bean);
+					AddContainerCommand.showDataproviderDialog(bean.getPropertyDescription().getProperties(), bean, editorPart);
 					return new IPersist[] { bean };
 				}
 				else if (args.getType().equals("tab"))
@@ -537,12 +536,9 @@ public class RagtestCommand extends BaseRestorableCommand
 										autoshowWizard(parentSupportingElements, spec, webComponent, property, editorPart, id);
 									}
 								}
-								if ("dataprovider".equals(property.getType().getName()))
-								{
-									autoShowDataProviderSelection(parentSupportingElements, webComponent, propertyName, editorPart, null);
-								}
 							}
 						}
+						AddContainerCommand.showDataproviderDialog(spec.getProperties(), webComponent, editorPart);
 						List<IPersist> changes = new ArrayList<>();
 						boolean addSiblingsToChanges = true;
 						if (editorPart.getForm().isResponsiveLayout() || webComponent.getParent() instanceof CSSPositionLayoutContainer)

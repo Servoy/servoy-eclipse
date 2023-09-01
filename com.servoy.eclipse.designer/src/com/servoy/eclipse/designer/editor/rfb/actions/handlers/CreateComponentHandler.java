@@ -59,14 +59,16 @@ import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 
 /**
  * @author user
@@ -137,40 +139,24 @@ public class CreateComponentHandler implements IServerService
 	}
 
 
-	public static void autoShowDataProviderSelection(ISupportFormElements parentSupportingElements, WebComponent webComponent, String propertyName,
-		BaseVisualFormEditor editorPart, WebCustomType bean)
+	public static void autoShowDataProviderSelection(PropertyDescription pd, Form form, AbstractBase webComponent, String propertyName)
 	{
-		PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
-		IPersist persist = context.getContext();
-		while (!(persist instanceof Form))
-		{
-			persist = persist.getParent();
-		}
+		Display current = Display.getCurrent();
+		if (current == null) current = Display.getDefault();
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-		ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
-			.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+
+		Pair<String, ITable> forFoundset = PersistPropertySource.calculateFoundsetTable(pd, PersistContext.create(webComponent, form), flattenedSolution, form);
+		ITable table = forFoundset.getRight();
 		DataProviderOptions options = new DataProviderOptions(true, true, true, true, true, true, true, true, null, true, true, null);
-		DataProviderCellEditor dialog = new DataProviderCellEditor(UIUtils.getActiveShell(), new DataProviderLabelProvider(true), null,
-			(Form)persist,
-			flattenedSolution,
-			false, options, null, table, "Select Data Provider - " + propertyName);
-		if (!"aggrid-datasettable".equals(webComponent.getTypeName()))
+		DataProviderCellEditor dialog = new DataProviderCellEditor(current.getActiveShell(), new DataProviderLabelProvider(true), null,
+			form, flattenedSolution, false, options, null, table,
+			"Select Data Provider - " + (propertyName.endsWith("ID") ? propertyName.substring(0, propertyName.length() - 2) : propertyName));
+		Object result = dialog.openDialogBox(current.getActiveShell());
+		if (result != null)
 		{
-			Object result = dialog.openDialogBox(UIUtils.getActiveShell());
-			if (result != null)
+			if (!result.toString().contains("$NoDataProvider"))
 			{
-				if (!result.toString().contains("$NoDataProvider"))
-				{
-					if (bean != null)
-					{
-						bean.setProperty("dataprovider", result.toString());
-						bean.setProperty("id", result.toString());
-					}
-					else
-					{
-						webComponent.setProperty(propertyName, result.toString());
-					}
-				}
+				webComponent.setProperty(propertyName, result.toString());
 			}
 		}
 	}

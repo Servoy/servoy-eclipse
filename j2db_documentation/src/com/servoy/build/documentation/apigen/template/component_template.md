@@ -1,4 +1,5 @@
 # ${componentname}
+(part of package '${package_display_name}')
 <#if designtimeExtends??>
 
 Extends designtime/SolutionModel: [${designtimeExtends.name()}](${instance.getReturnTypePath(designtimeExtends)})\

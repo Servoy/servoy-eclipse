@@ -53,6 +53,6 @@ export class DialogService {
         if (!dialogButtonsText || dialogButtonsText.length === 0) {
             dialogButtonsText = ['OK'];
         }
-        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values !== null ? values.toString().split(',') : null, dialogButtonsText.toString().split(','));
+        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values !== null ? [...values[0]] : null, dialogButtonsText.toString().split(','));
     }
 }

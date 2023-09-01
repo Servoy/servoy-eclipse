@@ -65,7 +65,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	/**
 	 * The property sources for the values we are displaying/editing.
 	 */
-	private Map sources = new HashMap(0);
+	private Map<Object, IPropertySource> sources = new HashMap<>(0);
 
 	/**
 	 * The value of this entry is defined as the the first object in its value array or, if that object is an <code>IPropertySource</code>, the value it
@@ -214,15 +214,15 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		{
 			// get the current ids
 			Object[] ids = intersection.keySet().toArray();
-			for (int j = 0; j < ids.length; j++)
+			for (Object id : ids)
 			{
-				Object object = propertyDescriptorMaps[i].get(ids[j]);
+				Object object = propertyDescriptorMaps[i].get(id);
 				if (object == null ||
 					// see if the descriptors (which have the same id) are
 					// compatible
-					!((IPropertyDescriptor)intersection.get(ids[j])).isCompatibleWith((IPropertyDescriptor)object))
+					!((IPropertyDescriptor)intersection.get(id)).isCompatibleWith((IPropertyDescriptor)object))
 				{
-					intersection.remove(ids[j]);
+					intersection.remove(id);
 				}
 			}
 		}
@@ -509,7 +509,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 */
 	public IPropertySource getPropertySource(Object object)
 	{
-		if (sources.containsKey(object)) return (IPropertySource)sources.get(object);
+		if (sources.containsKey(object)) return sources.get(object);
 
 		IPropertySource result = null;
 		IPropertySourceProvider provider = propertySourceProvider;
@@ -645,9 +645,9 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		}
 
 		// Dispose of entries which are no longer needed
-		for (int i = 0; i < entriesToDispose.size(); i++)
+		for (Object element : entriesToDispose)
 		{
-			((IPropertySheetEntry)entriesToDispose.get(i)).dispose();
+			((IPropertySheetEntry)element).dispose();
 		}
 	}
 
@@ -678,14 +678,19 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 		// loop through the objects getting our property value from each
 		Object[] newValues = new Object[currentSources.length];
+		boolean hasDefaultVaue = false;
 		for (int i = 0; i < currentSources.length; i++)
 		{
 			IPropertySource source = parent.getPropertySource(currentSources[i]);
 			newValues[i] = source.getPropertyValue(descriptor.getId());
+			if (!source.isPropertySet(descriptor.getId()))
+			{
+				hasDefaultVaue = true;
+			}
 		}
 
 		// set our new values
-		setValues(newValues);
+		setValuesInternal(newValues, hasDefaultVaue);
 	}
 
 	/*
@@ -808,7 +813,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	}
 
 	/**
-	 * The <code>PropertySheetEntry</code> implmentation of this method declared on<code>IPropertySheetEntry</code> will obtain an editable value for the
+	 * The <code>PropertySheetEntry</code> implementation of this method declared on<code>IPropertySheetEntry</code> will obtain an editable value for the
 	 * given objects and update the child entries.
 	 * <p>
 	 * Updating the child entries will typically call this method on the child entries and thus the entire entry tree is updated
@@ -818,8 +823,16 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 */
 	public void setValues(Object[] objects)
 	{
+		setValuesInternal(objects, false);
+	}
+
+	/**
+	 * @param hasDefaultVaue used in overridden class
+	 */
+	protected void setValuesInternal(Object[] objects, boolean hasDefaultVaue)
+	{
 		values = objects;
-		sources = new HashMap(values.length * 2 + 1);
+		sources = new HashMap<>(values.length * 2 + 1);
 
 		if (values.length == 0)
 		{

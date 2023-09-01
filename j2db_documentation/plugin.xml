@@ -16,4 +16,17 @@
             id="j2db_documentation.docmanagerprovider">
       </docmanagerprovider>
    </extension>
+   <extension
+         id="com.servoy.build.documentation.ai.pinecone"
+         name="Pinecone embeddings upsert"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="com.servoy.build.documentation.ai.FullPineconeEmbeddingsGenerator">
+         </run>
+      </application>
+   </extension>
 </plugin>

@@ -44,6 +44,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 {
 
 	private Object[] editValues;
+	private boolean hasDefaultVaue;
 
 	public ModifiedPropertySheetEntry()
 	{
@@ -245,7 +246,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 		// See if the value changed and if so update
 		Object newValue = editor.getValue();
-		if (stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
+		if (hasDefaultVaue || stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
 		{
 			// Set the editor value
 			setValue(newValue);
@@ -253,12 +254,13 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 	}
 
 	@Override
-	public void setValues(Object[] objects)
+	public void setValuesInternal(Object[] objects, boolean hasDefaultVaue)
 	{
-		super.setValues(objects);
+		super.setValuesInternal(objects, hasDefaultVaue);
 		if (objects.length == 0)
 		{
 			editValues = null;
+			this.hasDefaultVaue = false;
 		}
 		else
 		{
@@ -274,6 +276,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 				}
 				editValues[i] = newValue;
 			}
+			this.hasDefaultVaue = hasDefaultVaue;
 		}
 	}
 

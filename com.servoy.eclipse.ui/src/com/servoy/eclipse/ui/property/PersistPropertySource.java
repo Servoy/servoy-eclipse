@@ -1502,7 +1502,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				else if (propertyType == LabelForPropertyType.INSTANCE)
 				{
-					resultingPropertyDescriptor = createLabelForPropertyController(id, displayName, form, flattenedEditingSolution);
+					resultingPropertyDescriptor = createLabelForPropertyController(persistContext.getPersist(), id, displayName, form,
+						flattenedEditingSolution);
 				}
 				else if (propertyType == MapPropertyType.INSTANCE || propertyType == JSONPropertyType.INSTANCE)
 				{
@@ -1830,18 +1831,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return propertyController;
 	}
 
-	/**
-	 * Create a property controller for selecting a style class in Properties view.
-	 *
-	 * @param id
-	 * @param displayName
-	 * @param form
-	 * @param flattenedSolution
-	 * @return
-	 */
-	public static PropertyController<String, ? > createLabelForPropertyController(Object id, String displayName, Form frm, FlattenedSolution fs)
+	private static void populateListForLabelFor(IPersist persist, Object id, String displayName, Form frm, FlattenedSolution fs, List<String> names)
 	{
-
 		final FlattenedSolution flattenedEditingSolution = fs;
 		Form flattenedForm = flattenedEditingSolution.getFlattenedForm(frm);
 		int bodyStart = -1, bodyEnd = -1;
@@ -1861,7 +1852,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 		}
 
-		List<String> names = new ArrayList<String>();
 		for (IPersist object : flattenedForm.getAllObjectsAsList())
 		{
 			if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
@@ -1876,7 +1866,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				if (add)
 				{
-					names.add(((IFormElement)object).getName());
+					if ("servoycore-formcomponent".equals(((WebComponent)object).getTypeName()))
+					{
+						Object containedForm = ((WebComponent)object).getProperty("containedForm");
+						if (containedForm instanceof JSONObject && persist instanceof WebFormComponentChildType)
+						{
+							String formName = ((JSONObject)containedForm).optString(FormComponentPropertyType.SVY_FORM, null);
+							Form abc = flattenedEditingSolution.getForm(formName);
+							populateListForLabelFor(persist, id, displayName, abc, fs, names);
+						}
+					}
+					else
+					{
+						names.add(((IFormElement)object).getName());
+					}
+
 				}
 			}
 			else if (object instanceof LayoutContainer)
@@ -1896,6 +1900,22 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				});
 			}
 		}
+	}
+
+	/**
+	 * Create a property controller for selecting a style class in Properties view.
+	 *
+	 * @param id
+	 * @param displayName
+	 * @param form
+	 * @param flattenedSolution
+	 * @return
+	 */
+	public static PropertyController<String, ? > createLabelForPropertyController(IPersist persist, Object id, String displayName, Form frm,
+		FlattenedSolution fs)
+	{
+		List<String> names = new ArrayList<String>();
+		populateListForLabelFor(persist, id, displayName, frm, fs, names);
 		String[] array = names.toArray(new String[names.size()]);
 		Arrays.sort(array, String.CASE_INSENSITIVE_ORDER);
 
@@ -2270,15 +2290,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return false;
 		}
 
-		if (((AbstractBase)persistContext.getPersist()).hasProperty((String)id))
-		{
-			return true;
-		}
-
-		Object defaultValue = getDefaultPersistValue(id);
-		Object propertyValue = getPersistPropertyValue(id);
-		return defaultValue != propertyValue &&
-			(defaultValue == null || !(defaultValue.equals(propertyValue) || Utils.areJSONEqual(defaultValue, propertyValue)));
+		// Even when the value is null it may even be set, some properties have a non-null default
+		return (((AbstractBase)persistContext.getPersist()).hasProperty((String)id));
 	}
 
 	public void resetPropertyValue(Object id)
@@ -2502,9 +2515,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					!hasInheritedValue)
 				{
 					// just clear the property because we do not need to store null in order to override a value
-					Object persistValue = ((AbstractBase)beanPropertyPersist).getProperty((String)id);
-					changed |= (defaultSpecValue == null ? persistValue != null
-						: !Utils.areJSONEqual(defaultSpecValue, ServoyJSONObject.nullToJsonNull(persistValue)));
+					changed |= ((AbstractBase)beanPropertyPersist).hasProperty((String)id);
 
 					((AbstractBase)beanPropertyPersist).clearProperty((String)id);
 				}
@@ -3167,80 +3178,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 
 		// see if the property (dataprovider/tagstring) needs to point to a different foundset (not the form's foundset)
-		IPersist persistContainingFoundsetProperty = persistContext.getPersist();
-		if (persistContainingFoundsetProperty instanceof WebCustomType)
-		{
-			persistContainingFoundsetProperty = ((WebCustomType)persistContainingFoundsetProperty).getParent();
-		}
-		else if (persistContainingFoundsetProperty instanceof WebFormComponentChildType)
-		{
-			persistContainingFoundsetProperty = persistContainingFoundsetProperty.getAncestor(IRepository.WEBCOMPONENTS);
-		}
-		String forFoundsetName = differentFoundsetDueToProperty(propertyDescription, persistContext);
-		if (forFoundsetName == null)
-		{
-			forFoundsetName = differentFoundsetDueToComponent(propertyDescription, persistContainingFoundsetProperty);
-			if (forFoundsetName != null)
-			{
-				// so it's a child component linked to the foundset property of (another) parent component; so we must be looking in the parent component for the foundset property
-				persistContainingFoundsetProperty = persistContainingFoundsetProperty.getParent().getAncestor(IRepository.WEBCOMPONENTS);
-			}
-		}
-		ITable forFoundsetTable = null;
+		Pair<String, ITable> forFoundset = calculateFoundsetTable(propertyDescription, persistContext, flattenedEditingSolution, form);
+		ITable forFoundsetTable = forFoundset.getRight();
+		String forFoundsetName = forFoundset.getLeft();
+
 		if (forFoundsetName != null)
 		{
-			try
-			{
-				Object object = null;
-				if (persistContainingFoundsetProperty instanceof IBasicWebObject)
-				{
-					IBasicWebObject webObjectContainingFoundsetProperty = (IBasicWebObject)persistContainingFoundsetProperty;
-					if (webObjectContainingFoundsetProperty.hasProperty(forFoundsetName))
-						object = webObjectContainingFoundsetProperty.getProperty(forFoundsetName);
-					else object = webObjectContainingFoundsetProperty.getPropertyDefaultValueClone(forFoundsetName);
-				}
-				String foundsetValue = null; // default no table
-				if (object instanceof JSONObject)
-				{
-					foundsetValue = (String)((JSONObject)object).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
-				}
-				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
-				if (foundsetValue != null)
-				{
-					if (foundsetValue.equals(""))
-					{
-						forFoundsetTable = dsm.getDataSource(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
-					}
-					else
-					{
-						if (DataSourceUtils.isDatasourceUri(foundsetValue))
-						{
-							forFoundsetTable = dsm.getDataSource(foundsetValue);
-						}
-						else
-						{
-							Relation[] relations = flattenedEditingSolution.getRelationSequence(foundsetValue);
-							if (relations != null && relations.length > 0)
-							{
-								forFoundsetTable = dsm.getDataSource(relations[relations.length - 1].getForeignDataSource());
-							}
-							else
-							{
-								List<Form> forms = flattenedEditingSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetValue);
-								if (forms.size() > 0)
-								{
-									forFoundsetTable = dsm.getDataSource(forms.get(0).getDataSource());
-								}
-							}
-						}
-					}
-				}
-			}
-			catch (JSONException e)
-			{
-				Debug.log(e);
-			}
-
 			if (propertyType instanceof TagStringPropertyType)
 			{
 				return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, forFoundsetTable);
@@ -3252,8 +3195,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 				return createDataproviderController(persistContext, readOnly, id, displayName, flattenedEditingSolution, form, forFoundsetTable, options);
 			}
-		}
 
+		}
 		if (propertyType instanceof DataproviderPropertyType)
 		{
 			ITable table = null;
@@ -3514,6 +3457,89 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 
 		return null;
+	}
+
+	/**
+	 *
+	 */
+	public static Pair<String, ITable> calculateFoundsetTable(PropertyDescription propertyDescription, PersistContext persistContext,
+		FlattenedSolution flattenedEditingSolution, Form form)
+	{
+		ITable forFoundsetTable = null;
+		String forFoundsetName = differentFoundsetDueToProperty(propertyDescription, persistContext);
+		IPersist persistContainingFoundsetProperty = persistContext.getPersist();
+		if (persistContainingFoundsetProperty instanceof WebCustomType)
+		{
+			persistContainingFoundsetProperty = ((WebCustomType)persistContainingFoundsetProperty).getParent();
+		}
+		else if (persistContainingFoundsetProperty instanceof WebFormComponentChildType)
+		{
+			persistContainingFoundsetProperty = persistContainingFoundsetProperty.getAncestor(IRepository.WEBCOMPONENTS);
+		}
+		if (forFoundsetName == null)
+		{
+			forFoundsetName = differentFoundsetDueToComponent(propertyDescription, persistContainingFoundsetProperty);
+			if (forFoundsetName != null)
+			{
+				// so it's a child component linked to the foundset property of (another) parent component; so we must be looking in the parent component for the foundset property
+				persistContainingFoundsetProperty = persistContainingFoundsetProperty.getParent().getAncestor(IRepository.WEBCOMPONENTS);
+			}
+		}
+		if (forFoundsetName != null)
+		{
+			try
+			{
+				Object object = null;
+				if (persistContainingFoundsetProperty instanceof IBasicWebObject)
+				{
+					IBasicWebObject webObjectContainingFoundsetProperty = (IBasicWebObject)persistContainingFoundsetProperty;
+					if (webObjectContainingFoundsetProperty.hasProperty(forFoundsetName))
+						object = webObjectContainingFoundsetProperty.getProperty(forFoundsetName);
+					else object = webObjectContainingFoundsetProperty.getPropertyDefaultValueClone(forFoundsetName);
+				}
+				String foundsetValue = null; // default no table
+				if (object instanceof JSONObject)
+				{
+					foundsetValue = (String)((JSONObject)object).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
+				}
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+				if (foundsetValue != null)
+				{
+					if (foundsetValue.equals(""))
+					{
+						forFoundsetTable = dsm.getDataSource(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
+					}
+					else
+					{
+						if (DataSourceUtils.isDatasourceUri(foundsetValue))
+						{
+							forFoundsetTable = dsm.getDataSource(foundsetValue);
+						}
+						else
+						{
+							Relation[] relations = flattenedEditingSolution.getRelationSequence(foundsetValue);
+							if (relations != null && relations.length > 0)
+							{
+								forFoundsetTable = dsm.getDataSource(relations[relations.length - 1].getForeignDataSource());
+							}
+							else
+							{
+								List<Form> forms = flattenedEditingSolution.getFormsForNamedFoundset(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + foundsetValue);
+								if (forms.size() > 0)
+								{
+									forFoundsetTable = dsm.getDataSource(forms.get(0).getDataSource());
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (JSONException e)
+			{
+				Debug.log(e);
+			}
+		}
+		return new Pair<String, ITable>(forFoundsetName, forFoundsetTable);
 	}
 
 	/**

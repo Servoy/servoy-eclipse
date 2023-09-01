@@ -235,7 +235,7 @@ public class ModelUtils
 							// we only use the css3 styling (getStyleNames() so that we can give a boolean to ignore/don't create the rest
 							IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName(), true);
 							styleNames = ss.getStyleNames();
-							cachedStyleNames.put(styleSheet, new Pair<Long, List<String>>(Long.valueOf(media.getLastModifiedTime()), styleNames));
+							cachedStyleNames.put(media.getName(), new Pair<Long, List<String>>(Long.valueOf(media.getLastModifiedTime()), styleNames));
 						}
 						for (String cssSelector : styleNames)
 						{

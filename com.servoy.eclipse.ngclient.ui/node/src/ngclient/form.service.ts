@@ -36,7 +36,9 @@ export class FormService {
                     for (const formname in msg.forms) {
                         // if form is loaded
                         if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)) {
-                            this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService);
+                            this.clientFunctionService.waitForLoading().finally(() => {
+                                this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService);
+                            });
                         } else {
                             if (!this.formComponentCache.has(formname)) {
                                 this.formComponentCache.set(formname, new Deferred<any>());

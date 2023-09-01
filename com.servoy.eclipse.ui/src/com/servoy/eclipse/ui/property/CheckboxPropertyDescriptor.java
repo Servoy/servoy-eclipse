@@ -16,18 +16,17 @@
  */
 package com.servoy.eclipse.ui.property;
 
-
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 import com.servoy.eclipse.ui.Activator;
 
@@ -86,14 +85,6 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 		private static final int defaultStyle = SWT.NONE;
 
 		/**
-		 * Creates a new checkbox cell editor with no control
-		 */
-		public CheckboxCellEditor()
-		{
-			setStyle(defaultStyle);
-		}
-
-		/**
 		 * Creates a new checkbox cell editor parented under the given control. The cell editor value is a boolean value, which is initially <code>false</code>.
 		 * Initially, the cell editor has no cell validator.
 		 *
@@ -119,7 +110,9 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 		@Override
 		protected Control createControl(final Composite parent)
 		{
-			final Label label = new Label(parent, SWT.NONE);
+			CLabel label = new CLabel(parent, SWT.NONE);
+			label.setMargins(5, 0, 0, 0);
+			label.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 			label.addMouseListener(new MouseAdapter()
 			{
 				@Override

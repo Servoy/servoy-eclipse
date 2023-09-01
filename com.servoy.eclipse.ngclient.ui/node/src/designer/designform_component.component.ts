@@ -128,6 +128,15 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private variantContainerMargin = 2;
     private variantItemMargin = 10;
     private variantsLoaded = false;
+    
+    private leftPos: Map<string, number> = new Map();
+    private rightPos: Map<string, number> = new Map();
+    private topPos: Map<string, number> = new Map();
+    private bottomPos : Map<string, number> = new Map();
+    private middleV: Map<string, number> = new Map();
+    private middleH : Map<string, number> = new Map();
+    
+    readonly SNAP_THRESHOLD = 20; //TODO get preference
 
     constructor(private formservice: FormService,
             private servoyService: ServoyService, logFactory: LoggerFactory,
@@ -314,8 +323,88 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'allowedChildren') {
                 this.allowedChildren = event.data.value;
             }
+            if (event.data.id === 'getSnapTarget') {
+            
+            	if (this.leftPos.size == 0) {
+            		for (let comp of this.formCache.componentCache.values()) {
+        				if (comp.name == '') continue;
+        				const id = comp.name;
+        				const bounds = this.document.querySelector("[svy-id='"+id+"']").getBoundingClientRect();
+        				this.leftPos.set(id, bounds.left);
+        				this.rightPos.set(id, bounds.right);
+        				this.topPos.set(id, bounds.top);
+        				this.bottomPos.set(id, bounds.bottom);
+        				this.middleV.set(id, (bounds.top + bounds.bottom)/2);
+        				this.middleH.set(id, (bounds.left + bounds.right)/2);
+       				}
+       				const sortfn = (a, b) => a[1] - b[1];
+        			this.leftPos = new Map([...this.leftPos].sort(sortfn));
+       				this.rightPos = new Map([...this.rightPos].sort(sortfn));
+        			this.topPos = new Map([...this.topPos].sort(sortfn));
+        			this.bottomPos = new Map([...this.bottomPos].sort(sortfn));
+            	}
+            
+            	let point = event.data.p1;
+            	let left, right, top, bottom;
+            	left = this.isSnapInterval(point.x, this.leftPos);
+            	if (!left) right = this.isSnapInterval(point.x, this.rightPos);
+            	//TODO middleH
+            	
+            	top = this.isSnapInterval(point.y, this.topPos);
+            	if (!top) bottom = this.isSnapInterval(point.y, this.bottomPos);
+            	//TODO middleV
+            	
+            	let props = this.getSnapProperties(point, left, right, top, bottom);				
+            	this.windowRefService.nativeWindow.parent.postMessage({ id: 'snap', properties: props }, '*');
+            }
             this.detectChanges();
         });
+    }
+    
+    private isSnapInterval(coordinate, posMap) {
+    	let res = null;
+    	for (let [key, value] of posMap) {
+        	if ((coordinate > value - this.SNAP_THRESHOLD) && (coordinate < value + this.SNAP_THRESHOLD)) {
+            	res = key;
+            }
+            else break;
+        }
+        return res;    	
+    }
+    
+    private getSnapProperties(point: {x: number, y: number}, left: string, right: string, top: string, bottom: string) {
+    		let properties = {top: point.y, left: point.x, snapX: null, snapY: null};
+    		if (left) { 
+    		    this.log.spam('snap to the left edge');
+    			properties.left = this.leftPos.get(left);
+    			properties.snapX = left;
+			}
+			if (right) {
+				//left - size of dragged...
+				let _left = this.rightPos.get(right);
+				if (this.draggedElementItem) {
+					//drag from palette
+					_left -= this.draggedElementItem.model.size.width;
+					properties['bottom'] = this.bottomPos.get(right) + this.draggedElementItem.model.size.height;
+				}
+				properties.left = _left;
+				properties['right'] = this.rightPos.get(right);
+    			properties.snapX = right;
+			}
+			if (top) { 
+    			properties.top = this.topPos.get(top);
+    			properties.snapY = top;
+			}
+			if (bottom ) {
+				let _top = this.bottomPos.get(bottom);
+				if (this.draggedElementItem) {
+					//drag from palette
+					_top -= this.draggedElementItem.model.size.height;
+				}
+				properties.top = _top;
+    			properties.snapY = bottom;
+			}
+			return properties.snapX == null && properties.snapY == null ? null : properties;
     }
 
     sendVariantSizes() {
@@ -539,6 +628,12 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this._cssstyles = this.formCache.getComponent('').model.cssstyles;
         this.servoyApiCache = {};
         this.componentCache = {};
+        this.leftPos = new Map();
+        this.rightPos = new Map();
+    	this.topPos = new Map();
+   		this.bottomPos = new Map();
+    	this.middleV = new Map();
+    	this.middleH = new Map();
     }
 
     private canContainDraggedElement(container: string, svyid: string): boolean {

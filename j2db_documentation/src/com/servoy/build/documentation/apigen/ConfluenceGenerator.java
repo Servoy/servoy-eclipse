@@ -528,7 +528,7 @@ public class ConfluenceGenerator
 	 * @param clientSupport
 	 * @return
 	 */
-	static List<String> getSupportedClientsList(ClientSupport clientSupport)
+	public static List<String> getSupportedClientsList(ClientSupport clientSupport)
 	{
 		List<String> support = new ArrayList<>();
 		if (clientSupport.hasSupport(ClientSupport.sc))

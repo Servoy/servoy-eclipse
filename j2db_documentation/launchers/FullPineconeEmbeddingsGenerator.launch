@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+    <stringAttribute key="bad_container_name" value="\j2db_documentation\launcher"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/j2db_documentation/src/com/servoy/build/documentation/ai/FullPineconeEmbeddingsGenerator.java"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="1"/>
+    </listAttribute>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_ATTR_USE_ARGFILE" value="false"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE" value="true"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.servoy.build.documentation.ai.FullPineconeEmbeddingsGenerator"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="j2db_documentation"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="file:///E:/GitHome_master/git/servoy-eclipse/com.servoy.eclipse.core/src/com/servoy/eclipse/core/doc/servoydoc_jslib.xml&#13;&#10;file:///E:/GitHome_master/git/servoy-eclipse/com.servoy.eclipse.core/src/com/servoy/eclipse/core/doc/servoydoc.xml&#13;&#10;file:///E:/GitHome_master/git/servoy-eclipse/com.servoy.eclipse.core/src/com/servoy/eclipse/core/doc/servoydoc_design.xml&#13;&#10;file:///e:/ServoyInstalls/2023.06/application_server/plugins&#13;&#10;E:/GitHome_master/git/servoy-eclipse/j2db_documentation/launchers/ng_package_git_repos_for_docs.txt&#13;&#10;true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="j2db_documentation"/>
+</launchConfiguration>

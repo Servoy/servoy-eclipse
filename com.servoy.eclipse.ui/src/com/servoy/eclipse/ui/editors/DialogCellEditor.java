@@ -227,6 +227,7 @@ public abstract class DialogCellEditor extends org.eclipse.jface.viewers.DialogC
 				setErrorMessage(MessageFormat.format(getErrorMessage(), new Object[] { newValue.toString() }));
 			}
 			fireApplyEditorValue();
+			updateContents(newValue);
 		}
 	}
 

@@ -114,8 +114,8 @@ public class DataproviderPropertiesSelector
 		};
 
 		dataSourceViewer.setContentProvider(FoundsetPropertyEditor.getFoundsetContentProvider(persistContext));
-		dataSourceViewer.setLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(null, converter));
-		dataSourceViewer.setTextLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext.getContext(), converter));
+		dataSourceViewer.setLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(null, converter, null));
+		dataSourceViewer.setTextLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext, converter, null));
 
 		Form frm = persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
 		ITable formTable = frm != null && frm.getDataSource() != null

@@ -1045,7 +1045,6 @@ describe( 'JSONArrayConverter', () => {
 
         expect(((childTab as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
 
-        debugger;
         // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
         const changesAndVal: [ICATGranularUpdatesToServer, any] = converterService.convertFromClientToServer(tabArray, tabArrayWithShallowOnElementsType, tabArray,
              getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
