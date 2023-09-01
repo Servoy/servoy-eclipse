@@ -189,6 +189,12 @@ public abstract class ProxyCellEditor<T, CT> extends CellEditor
 	}
 
 	@Override
+	public boolean isDirty()
+	{
+		return baseCellEditor.isDirty();
+	}
+
+	@Override
 	public void dispose()
 	{
 		super.dispose();
