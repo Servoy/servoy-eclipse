@@ -74,6 +74,11 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected void createNewElement()
 	{
+		callRagtestHandler(persistContext.getPersist());
+	}
+
+	private void callRagtestHandler(IPersist persist)
+	{
 		EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
 		if (handler == null)
 		{
@@ -93,7 +98,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			}
 
 
-			handler.createComponent(persistContext.getPersist().getUUID(), parentKey, getTypeName());
+			handler.createComponent(persist.getUUID(), parentKey, getTypeName());
 
 			System.err.println("RAGTEST2 ");
 		}
@@ -157,30 +162,9 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			@Override
 			protected void addNewItemAfter(Object oldValue)
 			{
-//				// RAGTEST naar aparte klasse
-				EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
-				if (handler == null)
+				if (oldValue instanceof IPersist)
 				{
-					ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
-				}
-				else
-				{
-					Object id = getId();
-					String parentKey;
-					if (id instanceof ArrayPropertyChildId)
-					{
-						parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
-					}
-					else
-					{
-						parentKey = String.valueOf(id);
-					}
-
-					if (oldValue instanceof IPersist)
-					{
-						handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, getTypeName());
-					}
-					System.err.println("RAGTEST1x ");
+					callRagtestHandler((IPersist)oldValue);
 				}
 			}
 		}
