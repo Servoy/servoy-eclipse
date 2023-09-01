@@ -74,8 +74,7 @@ public class PublishHandler extends AbstractHandler implements IResourceChangeLi
    
 
     private String askForCommitMessage() {
-    	Shell shell = UIUtils.getActiveShell();
-    	InputDialog dialog = new InputDialog(shell, "Commit Changes", "Enter a commit message:", "", null);
+    	InputDialog dialog = new InputDialog(UIUtils.getActiveShell(), "Commit Changes", "Enter a commit message:", "", null);
         int result = dialog.open();
         if (result == InputDialog.OK) {
             return dialog.getValue();
