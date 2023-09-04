@@ -67,7 +67,7 @@ export class DialogService {
             message: dialogMessage,
             btnsText: buttonsText.toString().split(','),
             class: styleClass,
-            initValues: values != null ? values.toString().split(',') : null
+            initValues: values != null ? [...values[0]] : null
         };
 
         const dialogRef = this.matDialog.open(DialogBodyComponent, this.dialogConfig);
