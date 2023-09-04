@@ -79,7 +79,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 	protected abstract Object getNewElementInitialValue(); // RAGTEST hier weg?
 
-	protected abstract void createNewElement();
+	protected abstract void createNewElement(Object oldValue);
 
 	protected abstract ArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty);
 
@@ -215,9 +215,8 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			@Override
 			protected void buttonClicked()
 			{
-				createNewElement();
+				createNewElement(oldValue);
 			}
-
 		};
 
 		ComposedCellEditor cellEditor = new ComposedCellEditor(addButton, clearButton, false, true, 0);

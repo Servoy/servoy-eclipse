@@ -52,8 +52,8 @@ public abstract class ButtonSetValueCellEditor extends ButtonCellEditor
 	@Override
 	protected void buttonClicked()
 	{
-		Object newValue = getValueToSetOnClick(oldValue);
-		if (newValue != oldValue)
+		Object newValue = getValueToSetOnClick(doGetValue());
+		if (newValue != doGetValue())
 		{
 			doSetValue(newValue);
 			markDirty();

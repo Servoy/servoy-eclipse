@@ -70,6 +70,13 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 	}
 
 	@Override
+	protected void createNewElement(Object oldValue)
+	{
+		// insert at position 0 an empty/null value
+		insertElementAtIndex(0, getNewElementInitialValue(), oldValue); // RAGTEST oldValue zelf???
+	}
+
+	@Override
 	protected Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue)
 	{
 		return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldMainValue, i, elementValue);

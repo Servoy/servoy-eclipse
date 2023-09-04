@@ -240,19 +240,6 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			{
 				propertyDescriptors.add(new JSONArrayTypePropertyController(DATAPROVIDERS, DATAPROVIDERS)
 				{
-
-					/*
-					 * (non-Javadoc)
-					 *
-					 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController#createNewElement()
-					 */
-					@Override
-					protected void createNewElement()
-					{
-						// RAGTEST json werkend maken
-
-					}
-
 					@Override
 					protected Object getNewElementInitialValue()
 					{

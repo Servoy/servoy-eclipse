@@ -72,7 +72,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	}
 
 	@Override
-	protected void createNewElement()
+	protected void createNewElement(Object oldValue)
 	{
 		callRagtestHandler(persistContext.getPersist());
 	}
