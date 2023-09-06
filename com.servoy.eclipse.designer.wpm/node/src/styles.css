@@ -117,6 +117,10 @@ html, body {
     color: #ffffff;
 }
 
+.dark .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+    background-color: unset;
+}
+
 .dark .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before  {
     border-bottom-color: unset;
 }
