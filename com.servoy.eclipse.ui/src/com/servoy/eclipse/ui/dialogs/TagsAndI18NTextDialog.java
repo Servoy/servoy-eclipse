@@ -83,6 +83,7 @@ public class TagsAndI18NTextDialog extends Dialog
 	private String value;
 	private Button addButton;
 	private final boolean hideTags;
+	private final boolean includeNone;
 
 	private static final String STANDARD_TAGS_LABEL = "Standard tags";
 
@@ -100,11 +101,17 @@ public class TagsAndI18NTextDialog extends Dialog
 	private final FlattenedSolution flattenedSolution;
 	private final PersistContext persistContext;
 
+	public TagsAndI18NTextDialog(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table, Object value, String title,
+		IApplication application, boolean hideTags)
+	{
+		this(shell, persistContext, flattenedSolution, table, value, title, application, hideTags, false);
+	}
+
 	/**
 	 * if the Dialog is independent of the solution/form/dataprovider context , then pass null as a value for persistContext (this is the case when it is used in table editor for the title of a column)
 	 */
 	public TagsAndI18NTextDialog(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table, Object value, String title,
-		IApplication application, boolean hideTags)
+		IApplication application, boolean hideTags, boolean includeNone)
 	{
 		super(shell);
 		this.persistContext = persistContext;
@@ -114,6 +121,7 @@ public class TagsAndI18NTextDialog extends Dialog
 		this.value = value == null ? "" : value.toString();
 		this.title = title;
 		this.hideTags = hideTags;
+		this.includeNone = includeNone;
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
 	}
 
@@ -149,12 +157,12 @@ public class TagsAndI18NTextDialog extends Dialog
 
 			if (persistContext != null)
 			{
-				dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(false, true, !mobile, !mobile, true, true, !mobile, !mobile,
+				dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(includeNone, true, !mobile, !mobile, true, true, !mobile, !mobile,
 					INCLUDE_RELATIONS.NESTED, true, true, null);
 			}
 			else
 			{ // i18n dialog is not dependent of solution (ex : table editor -> column detail -> title )
-				dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false,
+				dataProviderOptions = new DataProviderTreeViewer.DataProviderOptions(includeNone, true, false, false, false, false, false, false,
 					INCLUDE_RELATIONS.NO, false, false, null);
 			}
 
@@ -329,20 +337,27 @@ public class TagsAndI18NTextDialog extends Dialog
 		StringBuffer sb = new StringBuffer();
 		for (Object sel : selection.toArray())
 		{
-			String txt = null;
-			if (sel instanceof IDataProvider)
+			if (sel == DataProviderContentProvider.NONE)
 			{
-				txt = DataProviderLabelProvider.INSTANCE_SHOWPREFIX.getText(sel);
+				sb.append("<empty>"); // should it be -none- ? DataProviderLabelProvider.INSTANCE_SHOWPREFIX.getText(sel)
 			}
-			else if (sel instanceof StandardTagsLeafNode)
+			else
 			{
-				txt = StandardTagsLabelProvider.INSTANCE_SHOWPREFIX.getText(sel);
-			}
-			if (txt != null && txt.length() > 0)
-			{
-				sb.append("%%");
-				sb.append(txt);
-				sb.append("%%");
+				String txt = null;
+				if (sel instanceof IDataProvider)
+				{
+					txt = DataProviderLabelProvider.INSTANCE_SHOWPREFIX.getText(sel);
+				}
+				else if (sel instanceof StandardTagsLeafNode)
+				{
+					txt = StandardTagsLabelProvider.INSTANCE_SHOWPREFIX.getText(sel);
+				}
+				if (txt != null && txt.length() > 0)
+				{
+					sb.append("%%");
+					sb.append(txt);
+					sb.append("%%");
+				}
 			}
 		}
 		Point selPoint = text.getSelection();

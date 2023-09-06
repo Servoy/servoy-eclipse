@@ -59,10 +59,17 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 	private final FlattenedSolution flattenedSolution;
 	private final PersistContext persistContext;
 	private final boolean hideTags;
+	private final boolean includeNone;
 
 
 	public TagsAndI18NTextCellEditor(Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ILabelProvider labelProvider,
 		ITable table, String title, IApplication application, boolean hideTags)
+	{
+		this(parent, persistContext, flattenedSolution, labelProvider, table, title, application, hideTags, false);
+	}
+
+	public TagsAndI18NTextCellEditor(Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ILabelProvider labelProvider,
+		ITable table, String title, IApplication application, boolean hideTags, boolean includeNone)
 	{
 		super(parent, SWT.NONE, labelProvider);
 		this.persistContext = persistContext;
@@ -71,13 +78,14 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 		this.title = title;
 		this.application = application;
 		this.hideTags = hideTags;
+		this.includeNone = includeNone;
 	}
 
 	@Override
 	public Object openDialogBox(Control cellEditorWindow)
 	{
 		TagsAndI18NTextDialog dialog = new TagsAndI18NTextDialog(cellEditorWindow.getShell(), persistContext, flattenedSolution, table, getValue(), title,
-			application, hideTags);
+			application, hideTags, includeNone);
 		dialog.open();
 
 		if (dialog.getReturnCode() != Window.CANCEL)
