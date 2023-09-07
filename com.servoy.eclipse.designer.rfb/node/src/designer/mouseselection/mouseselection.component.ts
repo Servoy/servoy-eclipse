@@ -159,7 +159,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseDown(event: MouseEvent) {
         this.fieldLocation = { x: event.pageX, y: event.pageY };
-        if (this.editorSession.getState().dragging) return;
+        if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
         const found = this.designerUtilsService.getNode(event);
         if (found) {
             if (this.editorSession.getSelection().indexOf(found.getAttribute('svy-id')) !== -1) {
@@ -197,7 +197,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust });
         }
         this.fieldLocation = null;
-        if (this.editorSession.getState().dragging) return;
+        if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
         if (event.button == 2 && this.editorSession.getSelection().length > 1) {
             //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
             const node = this.designerUtilsService.getNode(event);
@@ -218,9 +218,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     this.designerUtilsService.adjustElementRect(node, position);
                     const iframeLeft = this.editorContentService.getLeftPositionIframe();
                     const iframeTop = this.editorContentService.getTopPositionIframe();
-                    const rect1 =  new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY , this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY  - this.mousedownpoint.y))
-                    const rect2 = new DOMRect(position.x + iframeLeft, position.y + iframeTop, position.width, position.height );
-                    if ( this.rectanglesIntersect(rect1, rect2)) {
+                    const rect1 = new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY, this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY - this.mousedownpoint.y))
+                    const rect2 = new DOMRect(position.x + iframeLeft, position.y + iframeTop, position.width, position.height);
+                    if (this.rectanglesIntersect(rect1, rect2)) {
                         const layoutName = node.getAttribute('svy-layoutname');
                         const newNode: SelectionNode = {
                             style: {
@@ -260,7 +260,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     let wrapper = node.parentElement;
                     while (wrapper && !wrapper.classList.contains('svy-wrapper')) wrapper = wrapper.parentElement;
                     addToSelection = wrapper && wrapper.style.visibility === 'hidden' ? false : true;
-                    
+
                 }
                 else if (node['offsetParent'] !== null && parseInt(window.getComputedStyle(node, ':before').height) > 0) {
                     const computedStyle = window.getComputedStyle(node, ':before');
@@ -332,7 +332,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         Array.from(elements).forEach((node) => {
                             const position = node.getBoundingClientRect();
                             this.designerUtilsService.adjustElementRect(node, position);
-                            if (this.rectanglesIntersect(rect1 ,position)) {
+                            if (this.rectanglesIntersect(rect1, position)) {
                                 const id = node.getAttribute('svy-id');
                                 const layoutName = node.getAttribute('svy-layoutname');
                                 const newNode = {
@@ -351,9 +351,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                     autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
                                 };
                                 if (!selection.includes(id)) {
-									this.nodes.push(newNode);
-									selection.push(id);
-								}
+                                    this.nodes.push(newNode);
+                                    selection.push(id);
+                                }
                             }
                         });
                         this.editorSession.setSelection(selection, this);
@@ -422,11 +422,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         }
     }
 
-    private rectanglesIntersect(r1: DOMRect,r2: DOMRect) : boolean {
-         return !(r2.left > r1.right || 
-           r2.right < r1.left || 
-           r2.top > r1.bottom ||
-           r2.bottom < r1.top);
+    private rectanglesIntersect(r1: DOMRect, r2: DOMRect): boolean {
+        return !(r2.left > r1.right ||
+            r2.right < r1.left ||
+            r2.top > r1.bottom ||
+            r2.bottom < r1.top);
     }
 
     deleteAction(event: MouseEvent) {
