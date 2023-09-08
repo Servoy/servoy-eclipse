@@ -111,20 +111,21 @@ import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 
 /**
- * @author rgansevles
+ * Command to create a component.
  *
+ * @author rgansevles
  */
-public class RagtestCommand extends BaseRestorableCommand
+public class CreateComponentCommand extends BaseRestorableCommand
 {
 	private static final AtomicInteger id = new AtomicInteger(); // RAGTEST new one per form?
 	private static final Dimension EMPTY_SIZE = new Dimension(0, 0);
 
-	private final RagtestOptions args;
+	private final CreateComponentOptions args;
 	private final IStructuredSelection[] newSelection;
 	private IPersist[] newPersist;
 	private final BaseVisualFormEditor editorPart;
 
-	public RagtestCommand(BaseVisualFormEditor editorPart, RagtestOptions args, IStructuredSelection[] newSelection)
+	public CreateComponentCommand(BaseVisualFormEditor editorPart, CreateComponentOptions args, IStructuredSelection[] newSelection)
 	{
 		super("createComponent");
 		this.editorPart = editorPart;
@@ -171,7 +172,7 @@ public class RagtestCommand extends BaseRestorableCommand
 		}
 	}
 
-	static IPersist[] createComponent(BaseVisualFormEditor editorPart, RagtestOptions args, List<IPersist> extraChangedPersists)
+	static IPersist[] createComponent(BaseVisualFormEditor editorPart, CreateComponentOptions args, List<IPersist> extraChangedPersists)
 		throws JSONException, RepositoryException
 	{
 		if (args.getType() != null)
@@ -689,14 +690,15 @@ public class RagtestCommand extends BaseRestorableCommand
 		return null;
 	}
 
-	private static IPersist[] createField(ISupportFormElements parentSupportingElements, int displayType, RagtestOptions args) throws RepositoryException
+	private static IPersist[] createField(ISupportFormElements parentSupportingElements, int displayType, CreateComponentOptions args)
+		throws RepositoryException
 	{
 		Field field = parentSupportingElements.createNewField(args.getLocation());
 		field.setDisplayType(displayType);
 		return singlePersistWithLocationAndSize(field, args);
 	}
 
-	private static IPersist[] singlePersistWithLocationAndSize(IFormElement persist, RagtestOptions args)
+	private static IPersist[] singlePersistWithLocationAndSize(IFormElement persist, CreateComponentOptions args)
 	{
 		CSSPositionUtils.setLocation(persist, args.getLocation());
 		if (!EMPTY_SIZE.equals(args.getSize())) CSSPositionUtils.setSize(persist, args.getSize());
@@ -821,7 +823,7 @@ public class RagtestCommand extends BaseRestorableCommand
 		return null;
 	}
 
-	private static Point getLocationAndShiftSiblings(BaseVisualFormEditor editorPart, ISupportChilds parent, RagtestOptions args,
+	private static Point getLocationAndShiftSiblings(BaseVisualFormEditor editorPart, ISupportChilds parent, CreateComponentOptions args,
 		List<IPersist> extraChangedPersists) throws RepositoryException
 	{
 		if ((editorPart.getForm().isResponsiveLayout() || parent instanceof CSSPositionLayoutContainer) && !CSSPositionUtils.isCSSPositionContainer(
@@ -923,7 +925,7 @@ public class RagtestCommand extends BaseRestorableCommand
 		}
 	}
 
-	public static class RagtestOptions
+	public static class CreateComponentOptions
 	{
 		private final JSONObject allProperties;
 		private Point location;
@@ -940,7 +942,7 @@ public class RagtestCommand extends BaseRestorableCommand
 		private boolean keepOldSelection;
 		private boolean addAfterTarget;
 
-		public RagtestOptions()
+		public CreateComponentOptions()
 		{
 			this(null);
 		}
@@ -948,7 +950,7 @@ public class RagtestCommand extends BaseRestorableCommand
 		/**
 		 * Constructor with optional original json for dynamic webcomponent properties
 		 */
-		public RagtestOptions(JSONObject allProperties)
+		public CreateComponentOptions(JSONObject allProperties)
 		{
 			this.allProperties = allProperties;
 		}
@@ -1067,26 +1069,6 @@ public class RagtestCommand extends BaseRestorableCommand
 			this.keepOldSelection = keepOldSelection;
 		}
 
-		/**
-		 * @param propertyName
-		 * @return
-		 */
-		public Object optRAGTESTTODO(String propertyName)
-		{
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		/**
-		 * @param propertyName
-		 * @return
-		 */
-		public boolean hasRAGTESTTODO(String propertyName)
-		{
-			// TODO Auto-generated method stub
-			return false;
-		}
-
 		public Point getLocation()
 		{
 			return location;
@@ -1159,9 +1141,9 @@ public class RagtestCommand extends BaseRestorableCommand
 		 * @param args
 		 * @return
 		 */
-		public static RagtestOptions fromJson(JSONObject args)
+		public static CreateComponentOptions fromJson(JSONObject args)
 		{
-			RagtestOptions options = new RagtestOptions(args);
+			CreateComponentOptions options = new CreateComponentOptions(args);
 
 			options.rightSibling = args.optString("rightSibling", null);
 			options.text = args.optString("text", null);

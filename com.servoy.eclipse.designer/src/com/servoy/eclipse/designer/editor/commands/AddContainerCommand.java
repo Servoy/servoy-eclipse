@@ -557,7 +557,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			}
 			catch (Exception e)
 			{
-				// RAGTEST doc, happens when active window is not found
+				// happens sometimes when active window is not found (only while debugging?)
 				ServoyLog.logError(e);
 			}
 		}

@@ -62,15 +62,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 	protected abstract boolean isNotSet(Object value);
 
-//	protected abstract Object createEmptyPropertyValue();
-
-	/**
-	 * @return new main value with the given element inserted.
-	 */
-//	protected abstract Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue); // RAGTEST hier weg?
-//
-//	protected abstract Object getNewElementInitialValue(); // RAGTEST hier weg?
-//
 	protected abstract void createNewElement(ButtonCellEditor cellEditor, Object oldValue);
 
 	protected abstract ArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty);
@@ -81,7 +72,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		return new ArrayPropertyConverter();
 	}
 
-	class ArrayPropertyConverter extends ComplexPropertyConverter<Object>
+	private class ArrayPropertyConverter extends ComplexPropertyConverter<Object>
 	{
 		@Override
 		public Object convertProperty(Object id, Object value)

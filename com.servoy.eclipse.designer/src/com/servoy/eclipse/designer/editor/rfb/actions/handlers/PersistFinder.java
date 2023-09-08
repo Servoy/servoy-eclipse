@@ -122,20 +122,4 @@ public class PersistFinder
 		return true;
 	}
 
-	// RAGTEST weg
-	public boolean checkName(IPersist persist, String compName)
-	{
-		Iterator<IFormElement> fields = ModelUtils.getEditingFlattenedSolution(persist).getFlattenedForm(persist).getFlattenedObjects(
-			null).iterator();
-		for (IFormElement element : Utils.iterate(fields))
-		{
-			if (compName.equals(element.getName()))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-
 }

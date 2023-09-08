@@ -24,39 +24,39 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.UUID;
 
 /**
- * RAGTEST doc
+ * Registry for editor actions that are handled by commands in the designer.
  *
  * @author rgansevles
  *
  */
-public class RagtestRegistry
+public class EditorActionsRegistry
 {
-	private static Map<EditorRagtestActions, EditorRagtestHandler> editorActionHandlers = new HashMap<>();
+	private static Map<EditorComponentActions, EditorComponentActionHandler> editorActionHandlers = new HashMap<>();
 
-	public enum EditorRagtestActions
+	public enum EditorComponentActions
 	{
-		CREATE_COMPONENT_RAGTEST
+		CREATE_CUSTOM_COMPONENT
 	}
 
-	public interface EditorRagtestHandler
+	public interface EditorComponentActionHandler
 	{
 		void createComponent(UUID uuid, String propertyName, String type);
 
 		void deleteComponent(IPersist persist);
 	}
 
-	public static void registerRagtest(EditorRagtestActions action, EditorRagtestHandler handler)
+	public static void registerHandler(EditorComponentActions action, EditorComponentActionHandler handler)
 	{
-		editorActionHandlers.put(action, handler); // RAGTEST todo lijst
+		editorActionHandlers.put(action, handler);
 	}
 
-	public static void unregisterRagtest(EditorRagtestActions action, EditorRagtestHandler handler)
+	public static void unregisterHandler(EditorComponentActions action, EditorComponentActionHandler handler)
 	{
-		editorActionHandlers.remove(action); // RAGTEST todo lijst
+		editorActionHandlers.remove(action);
 	}
 
-	public static EditorRagtestHandler getRagtestHandler(EditorRagtestActions action)
+	public static EditorComponentActionHandler getHandler(EditorComponentActions action)
 	{
-		return editorActionHandlers.get(action); // RAGTEST todo lijst
+		return editorActionHandlers.get(action);
 	}
 }

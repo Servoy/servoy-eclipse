@@ -51,7 +51,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RagtestCommand.RagtestOptions;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand.CreateComponentOptions;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -88,7 +88,7 @@ public class CreateComponentHandler implements IServerService
 
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
-		RagtestOptions options = RagtestOptions.fromJson(args);
+		CreateComponentOptions options = CreateComponentOptions.fromJson(args);
 
 		if (editorPart.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage &&
 			((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getShowedContainer() != null && options.getName() != null &&
@@ -131,7 +131,7 @@ public class CreateComponentHandler implements IServerService
 			public void run()
 			{
 				final IStructuredSelection[] newSelection = new IStructuredSelection[1];
-				editorPart.getCommandStack().execute(new RagtestCommand(editorPart, options, newSelection));
+				editorPart.getCommandStack().execute(new CreateComponentCommand(editorPart, options, newSelection));
 
 				if (newSelection[0] != null) selectionProvider.setSelection(newSelection[0]);
 			}
