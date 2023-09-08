@@ -18,7 +18,6 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +54,7 @@ import org.eclipse.ui.IWorkbench;
 
 import com.servoy.base.query.IQueryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
@@ -152,7 +152,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured while generating the relations.");
+							MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Error occured while generating the relations.");
 						}
 					});
 					return Status.CANCEL_STATUS;
@@ -488,11 +488,10 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 
 			solutions = allsolutions.values().toArray(new Solution[] { });
 			String[] solutionsNames = new String[allsolutions.values().size()];
-			Iterator<Solution> it = allsolutions.values().iterator();
 			int i = 0;
-			while (it.hasNext())
+			for (Solution element : allsolutions.values())
 			{
-				solutionsNames[i++] = it.next().getName();
+				solutionsNames[i++] = element.getName();
 			}
 			editor = new ComboBoxCellEditor(tv.getTable(), solutionsNames, SWT.READ_ONLY);
 		}

@@ -31,7 +31,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
@@ -42,6 +41,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.util.PrefUtil;
 
 import com.servoy.eclipse.core.util.ServoyMessageDialog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
@@ -294,7 +294,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		{
 			iconPreferences.setUseDarkThemeIcons(useDarkIconsButton.getSelection());
 			iconPreferences.save(true);
-			if (ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Use dark icons preference changed",
+			if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(), "Use dark icons preference changed",
 				"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
 			{
 				PlatformUI.getWorkbench().restart();

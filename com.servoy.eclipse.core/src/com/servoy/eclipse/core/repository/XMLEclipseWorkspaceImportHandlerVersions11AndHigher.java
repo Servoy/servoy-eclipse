@@ -23,7 +23,6 @@ import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,6 +50,7 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -705,10 +705,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		if (rootObjectImportInfo.securityInfoSet == null) return;
 		m.setTaskName("Importing security info");
 
-		Iterator<GroupInfo> iterator = rootObjectImportInfo.securityInfoSet.iterator();
-		while (iterator.hasNext())
+		for (GroupInfo groupInfo : rootObjectImportInfo.securityInfoSet)
 		{
-			GroupInfo groupInfo = iterator.next();
 			int groupId = userManager.getGroupId(ApplicationServerRegistry.get().getClientId(), groupInfo.name);
 			boolean update = false;
 			if (groupId > 0)
@@ -744,12 +742,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					userManager.createGroup(ApplicationServerRegistry.get().getClientId(), groupInfo.name);
 				}
 
-				// Iterate over the elements in the security element info and
-				// insert the corresponding values.
-				Iterator<GroupElementInfo> iterator2 = groupInfo.elementInfoSet.iterator();
-				while (iterator2.hasNext())
+				for (GroupElementInfo elementInfo : groupInfo.elementInfoSet)
 				{
-					GroupElementInfo elementInfo = iterator2.next();
 					int elementId = -1;
 					String target = elementInfo.elementUuid;
 					int i = target.indexOf('.');
@@ -1102,11 +1096,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			boolean addAdmins = x11handler.getUserChannel().getAddUsersToAdministratorGroup();
 			HashMap<String, Integer> groupIdCache = new HashMap<String, Integer>();
 
-			Iterator<UserInfo> iterator = userInfoSet.iterator();
-			while (iterator.hasNext())
+			for (UserInfo userInfo : userInfoSet)
 			{
-				UserInfo userInfo = iterator.next();
-
 				// Look up the user with the given name.
 				int userId = userManager.getUserIdByUserName(ApplicationServerRegistry.get().getClientId(), userInfo.name);
 
@@ -1128,11 +1119,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					}
 				}
 
-				// Add the user to all of the groups in the groups set.
-				Iterator<String> iterator2 = userInfo.groupSet.iterator();
-				while (iterator2.hasNext())
+				for (String groupName : userInfo.groupSet)
 				{
-					String groupName = iterator2.next();
 					Integer groupId = groupIdCache.get(groupName);
 					if (groupId == null)
 					{
@@ -1199,7 +1187,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Importing " + importInfo.main.name, e.getMessage());
+					MessageDialog.openError(UIUtils.getActiveShell(), "Importing " + importInfo.main.name, e.getMessage());
 				}
 			});
 		}

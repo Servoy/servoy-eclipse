@@ -29,6 +29,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.ITable;
@@ -50,7 +51,7 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 		{
 			public void run()
 			{
-				returnValue = new Boolean(MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Unexpected database information file write",
+				returnValue = new Boolean(MessageDialog.openQuestion(UIUtils.getActiveShell(), "Unexpected database information file write",
 					"The database information file (.dbi) contents for table '" + t.getName() + "' of server '" + t.getServerName() +
 						"' are about to be written. This table currently has associated error or warning markers for problems that might have prevented the loading of .dbi information in the first place. This means that you could be overwriting the current .dbi file contents with defaults.\nIf you are not sure why this happened, you should choose 'No', check the 'Problems' view for these error markers and try to solve them (see if context menu - Quick Fix is enabled).\n\nDo you wish to continue with the write?"));
 			}
@@ -68,7 +69,7 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 
 	public void cannotFindRepository()
 	{
-		MessageDialog.openError(Display.getCurrent().getActiveShell(), "Repository error", "Cannot find Servoy Eclipse repository.");
+		MessageDialog.openError(UIUtils.getActiveShell(), "Repository error", "Cannot find Servoy Eclipse repository.");
 	}
 
 	public void cannotWriteI18NFiles(final Exception ex)
@@ -77,7 +78,7 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 		{
 			public void run()
 			{
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot write project I18N files.\n" + ex.getMessage());
+				MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Cannot write project I18N files.\n" + ex.getMessage());
 			}
 		});
 	}
@@ -106,7 +107,7 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 									IEditorPart editor = reference.getEditor(false);
 									if (editor != null && editor.isDirty())
 									{
-										if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Saving script changes with dirty editor",
+										if (!MessageDialog.openQuestion(UIUtils.getActiveShell(), "Saving script changes with dirty editor",
 											"Overwrite editor changes? (if not then (property) changes could be ignored)"))
 										{
 											return;

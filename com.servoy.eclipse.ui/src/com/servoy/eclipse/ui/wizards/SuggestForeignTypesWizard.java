@@ -189,7 +189,7 @@ public class SuggestForeignTypesWizard extends Wizard
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Errors occured while saving the foreign type changes", answer);
+							MessageDialog.openError(UIUtils.getActiveShell(), "Errors occured while saving the foreign type changes", answer);
 						}
 					});
 					return Status.CANCEL_STATUS;

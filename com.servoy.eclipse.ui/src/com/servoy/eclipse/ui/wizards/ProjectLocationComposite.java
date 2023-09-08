@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.Activator;
 
 
@@ -127,7 +128,7 @@ public class ProjectLocationComposite extends Composite
 			@Override
 			public void handleEvent(Event event)
 			{
-				DirectoryDialog dlg = new DirectoryDialog(Display.getCurrent().getActiveShell(), SWT.SAVE);
+				DirectoryDialog dlg = new DirectoryDialog(UIUtils.getActiveShell(), SWT.SAVE);
 				dlg.setFilterPath("".equals(location) ? ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() : location);
 				String chosenFileName = dlg.open();
 				if (chosenFileName != null)

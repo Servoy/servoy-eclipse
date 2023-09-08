@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
@@ -75,7 +76,7 @@ public class AggregationNameEditingSupport extends EditingSupport
 				{
 					public void run()
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Save failed: " + e.getMessage());
+						MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Save failed: " + e.getMessage());
 					}
 				});
 			}

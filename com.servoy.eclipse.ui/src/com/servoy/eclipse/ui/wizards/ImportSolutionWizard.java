@@ -368,7 +368,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot create server '" + name + "'",
+								MessageDialog.openError(UIUtils.getActiveShell(), "Cannot create server '" + name + "'",
 									"An unexpected error occured while creating new server, please create the server manually.");
 							}
 						});

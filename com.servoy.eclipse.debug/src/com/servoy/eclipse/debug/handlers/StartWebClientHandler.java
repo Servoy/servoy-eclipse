@@ -17,7 +17,6 @@
 package com.servoy.eclipse.debug.handlers;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 
 import javax.swing.SwingUtilities;
 
@@ -47,6 +46,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -134,7 +134,7 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+							MessageDialog.openError(UIUtils.getActiveShell(), "Solution type problem",
 								"Cant open this solution type in this client");
 						}
 					});
@@ -170,7 +170,7 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 								{
 									public void run()
 									{
-										MessageDialog.openError(Display.getDefault().getActiveShell(), "Cant open external browser", e.getLocalizedMessage());
+										MessageDialog.openError(UIUtils.getActiveShell(), "Cant open external browser", e.getLocalizedMessage());
 									}
 								});
 							}
@@ -201,10 +201,8 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 		String ewbName = name == null ? lastUsedBrowser : name;
 		try
 		{
-			Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
-			while (iterator.hasNext())
+			for (IBrowserDescriptor ewb : BrowserManager.getInstance().getWebBrowsers())
 			{
-				final IBrowserDescriptor ewb = (IBrowserDescriptor)iterator.next();
 				if (ewb.getName().equals(ewbName))
 				{
 					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();

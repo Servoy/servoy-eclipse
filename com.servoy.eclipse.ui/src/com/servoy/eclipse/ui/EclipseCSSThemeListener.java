@@ -40,6 +40,7 @@ import org.osgi.service.prefs.Preferences;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.ServoyMessageDialog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.MessageAndCheckBoxDialog;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 
@@ -94,7 +95,7 @@ public class EclipseCSSThemeListener
 								.addDoneListener(() -> {
 									if (checkOverwriteThemePreferences(it.getId().equals(ECLIPSE_DARK_THEME_ID)))
 									{
-										MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(Display.getCurrent().getActiveShell(),
+										MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(UIUtils.getActiveShell(),
 											label + " theme was detected", null,
 											"It is strongly recommended to restart the developer for the " + label +
 												" theme preferences to be applied. Would you like to restart now?",
@@ -114,7 +115,7 @@ public class EclipseCSSThemeListener
 									else
 									{
 										setThemePreferences(it.getId()); //if nothing is overwritten, just import preferences
-										if (ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+										if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
 											label + " theme was detected",
 											"It is strongly recommended to restart the developer for the " + label +
 												" theme preferences to be applied. Would you like to restart now?"))
@@ -131,7 +132,7 @@ public class EclipseCSSThemeListener
 						IconPreferences.getInstance().save(true);
 						ServoyModelManager.getServoyModelManager().getServoyModel()
 							.addDoneListener(() -> {
-								if (ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+								if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
 									"Theming is disabled",
 									"It is strongly recommended to restart the developer for the theming preferences to be applied. Would you like to restart now?"))
 								{
@@ -158,7 +159,7 @@ public class EclipseCSSThemeListener
 				if (checkOverwriteThemePreferences(themeid.equals(ECLIPSE_DARK_THEME_ID)))
 				{
 					Display.getDefault().asyncExec(() -> {
-						if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+						if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(),
 							"Import theme preferences",
 							"Would you like to apply script editor preferences for the selected theme? It might overwrite exising values."))
 						{
@@ -187,7 +188,7 @@ public class EclipseCSSThemeListener
 				IStatus status = preferencesService.applyPreferences(prefs);
 				if (!status.isOK())
 				{
-					org.eclipse.jface.dialogs.MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Could not import theme preferences",
+					org.eclipse.jface.dialogs.MessageDialog.openWarning(UIUtils.getActiveShell(), "Could not import theme preferences",
 						"Please check the Servoy wiki and import the theme preferences manually.\n" +
 							status.getMessage());
 				}

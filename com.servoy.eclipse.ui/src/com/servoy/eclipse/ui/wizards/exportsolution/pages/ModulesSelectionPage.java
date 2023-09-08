@@ -48,6 +48,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
@@ -361,7 +362,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 			if (displayError)
 			{
 				Display.getDefault().syncExec(() -> {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot set the version for module '" + module + "'.",
+					MessageDialog.openError(UIUtils.getActiveShell(), "Cannot set the version for module '" + module + "'.",
 						ex.getMessage());
 				});
 			}

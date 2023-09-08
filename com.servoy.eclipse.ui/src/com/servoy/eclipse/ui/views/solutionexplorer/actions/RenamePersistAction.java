@@ -24,9 +24,9 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -74,7 +74,7 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 	public void run()
 	{
 		final Form form = (Form)persist;
-		InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), "Rename form", "Supply a new form name", form.getName(),
+		InputDialog nameDialog = new InputDialog(UIUtils.getActiveShell(), "Rename form", "Supply a new form name", form.getName(),
 			new IInputValidator()
 			{
 				public String isValid(String newText)
@@ -104,7 +104,7 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 			catch (RepositoryException e)
 			{
 				ServoyLog.logError(e);
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot rename", e.getMessage());
+				MessageDialog.openError(UIUtils.getActiveShell(), "Cannot rename", e.getMessage());
 			}
 
 		}

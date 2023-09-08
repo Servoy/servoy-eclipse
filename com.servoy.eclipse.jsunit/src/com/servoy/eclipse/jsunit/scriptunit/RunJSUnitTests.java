@@ -124,7 +124,7 @@ public abstract class RunJSUnitTests implements Runnable
 					{
 						public void run()
 						{
-							MessageDialog.openWarning(window == null ? Display.getCurrent().getActiveShell() : window.getShell(), "Unable to run unit tests",
+							MessageDialog.openWarning(window == null ? UIUtils.getActiveShell() : window.getShell(), "Unable to run unit tests",
 								"Running unit tests for solutions that require authentication through a login/authenticator form/solution is not currently supported.\n\nTo run unit tests for such a solution, create a new solution that does not require authentication and add the solution that requires authentication to it as a module.\nThis way you will be able to run tests without authenticating.");
 						}
 					}, false);
@@ -144,7 +144,7 @@ public abstract class RunJSUnitTests implements Runnable
 				final int port = SocketUtil.findFreePort();
 				if (port == -1)
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot run solution JSUnit tests",
+					MessageDialog.openError(UIUtils.getActiveShell(), "Cannot run solution JSUnit tests",
 						"No free port for JUnit launch was found.");
 				}
 				else

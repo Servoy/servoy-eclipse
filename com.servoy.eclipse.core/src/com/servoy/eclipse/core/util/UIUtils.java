@@ -948,7 +948,7 @@ public class UIUtils
 
 	/**
 	 * Tries to get the active shell. If this is a thread with an associated Display, then that display is used to get the active shell. If not,
-	 * Display.getDefault().getActiveShell() is used, but called from the UI thread so as not to cause an exception.
+	 * UIUtils.getActiveShell() is used, but called from the UI thread so as not to cause an exception.
 	 *
 	 * @return the found active shell (if any).
 	 */

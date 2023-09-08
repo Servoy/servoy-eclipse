@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
@@ -36,6 +35,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.inmemory.AbstractMemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -116,14 +116,11 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 	public void run()
 	{
 		names = new HashMap<String, String>();
-		Iterator<IDataSourceWrapper> it = selection.keySet().iterator();
-		while (it.hasNext())
+		for (IDataSourceWrapper selectedTable : selection.keySet())
 		{
-			final IDataSourceWrapper selectedTable = it.next();
-
 			if (!checkAndAskUnsaved(selectedTable)) continue;
 
-			InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), getText(), "Supply a new datasource name",
+			InputDialog nameDialog = new InputDialog(UIUtils.getActiveShell(), getText(), "Supply a new datasource name",
 				selectedTable.getTableName(), new IInputValidator()
 				{
 					public String isValid(String newText)

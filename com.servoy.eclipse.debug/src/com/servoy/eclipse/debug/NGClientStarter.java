@@ -24,6 +24,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ngclient.ui.RunNPMCommand;
 import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 
@@ -92,7 +93,7 @@ public interface NGClientStarter
 		if ( /* buildJobs.length == 0 || */ RunNPMCommand.isNGBuildRunning())
 		{
 			Display.getDefault().asyncExec(() -> {
-				ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+				ProgressMonitorDialog dialog = new ProgressMonitorDialog(UIUtils.getActiveShell());
 				try
 				{
 					dialog.run(true, false, new IRunnableWithProgress()

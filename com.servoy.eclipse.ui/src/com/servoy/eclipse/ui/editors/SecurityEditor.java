@@ -62,6 +62,7 @@ import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -498,7 +499,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 				IMarker[] markers = servoyProject.getProject().findMarkers(ServoyBuilder.USER_SECURITY_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 				if (markers != null && markers.length > 0)
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot save security settings",
+					MessageDialog.openError(UIUtils.getActiveShell(), "Cannot save security settings",
 						"There are security errors in the solution, you must solve those first.");
 					return;
 				}

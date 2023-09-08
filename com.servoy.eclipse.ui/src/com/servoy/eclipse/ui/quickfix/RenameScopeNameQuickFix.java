@@ -22,9 +22,9 @@ import java.io.IOException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMarkerResolution2;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -53,7 +53,7 @@ public class RenameScopeNameQuickFix implements IMarkerResolution2
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.IMarkerResolution#getLabel()
 	 */
 	public String getLabel()
@@ -63,7 +63,7 @@ public class RenameScopeNameQuickFix implements IMarkerResolution2
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.IMarkerResolution#run(org.eclipse.core.resources.IMarker)
 	 */
 	public void run(IMarker marker)
@@ -71,7 +71,7 @@ public class RenameScopeNameQuickFix implements IMarkerResolution2
 		ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(resource.getProject().getName());
 
 		String oldname = resource.getName().substring(0, resource.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length());
-		String scopeName = NewScopeAction.askScopeName(Display.getDefault().getActiveShell(), oldname, project);
+		String scopeName = NewScopeAction.askScopeName(UIUtils.getActiveShell(), oldname, project);
 		if (scopeName == null || scopeName.equals(oldname))
 		{
 			return;
@@ -99,7 +99,7 @@ public class RenameScopeNameQuickFix implements IMarkerResolution2
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.IMarkerResolution2#getDescription()
 	 */
 	public String getDescription()
@@ -109,7 +109,7 @@ public class RenameScopeNameQuickFix implements IMarkerResolution2
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.IMarkerResolution2#getImage()
 	 */
 	public Image getImage()

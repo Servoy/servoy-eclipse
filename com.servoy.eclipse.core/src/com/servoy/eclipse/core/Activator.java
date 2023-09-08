@@ -1316,7 +1316,7 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					ServoyMessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!",
+					ServoyMessageDialog.openError(UIUtils.getActiveShell(), "No Servoy ApplicationServer found!",
 						"No application server found at: " + appServerDir + "\nPlease make sure that you installed Servoy Developer correctly");
 				}
 			});
@@ -1338,7 +1338,7 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								ServoyMessageDialog.openError(Display.getDefault().getActiveShell(), "Servoy ApplicationServer version check",
+								ServoyMessageDialog.openError(UIUtils.getActiveShell(), "Servoy ApplicationServer version check",
 									"Application Server version (" + version + ") is higher than the developers (" + ClientVersion.getReleaseNumber() +
 										") \nPlease upgrade the developer Help->Check for updates");
 							}
@@ -1350,7 +1350,7 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								boolean upgrade = ServoyMessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+								boolean upgrade = ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
 									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version +
 										") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?");
 
@@ -1407,7 +1407,7 @@ public class Activator extends Plugin
 													{
 														public void run()
 														{
-															if (ServoyMessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+															if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
 																"ApplicationServer updated",
 																"It is recommended you restart the workbench for the changes to take effect. Would you like to restart now?"))
 															{

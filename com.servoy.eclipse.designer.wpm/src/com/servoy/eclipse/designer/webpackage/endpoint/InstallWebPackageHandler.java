@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +45,7 @@ import org.sablo.specification.Package.DirPackageReader;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SemVerComparator;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -105,12 +105,10 @@ public class InstallWebPackageHandler implements IDeveloperService
 			{
 				if (isMainSolutionInstall)
 				{
-					// last solution/module in list should not keep the import project's resources project open
-					Iterator<SolutionPackageInstallInfo> solutionsWithDependenciesIte = solutionsWithDependencies.values().iterator();
 					SolutionPackageInstallInfo lastSolutionPackageInstallInfo = null;
-					while (solutionsWithDependenciesIte.hasNext())
+					for (SolutionPackageInstallInfo element : solutionsWithDependencies.values())
 					{
-						lastSolutionPackageInstallInfo = solutionsWithDependenciesIte.next();
+						lastSolutionPackageInstallInfo = element;
 					}
 					lastSolutionPackageInstallInfo.keepResourcesProjectOpen = false;
 				}
@@ -236,7 +234,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 				{
 					public void run()
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", e.getMessage());
+						MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage());
 					}
 				});
 				throw e;
@@ -335,7 +333,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 													{
 														Display.getDefault().syncExec(() -> {
 
-															response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager",
+															response[0] = new MessageDialog(UIUtils.getActiveShell(), "Servoy Package Manager",
 																null,
 																"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
 																	", but you have version " + installedVersion +

@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -256,7 +257,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		{
 			public void run()
 			{
-				ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+				ProgressMonitorDialog dialog = new ProgressMonitorDialog(UIUtils.getActiveShell());
 				try
 				{
 					dialog.run(true, true, new DownloadNgDesktop(archiveUrl, savePath));
@@ -380,7 +381,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			{
 				public void run()
 				{
-					org.eclipse.jface.dialogs.MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+					org.eclipse.jface.dialogs.MessageDialog.openError(UIUtils.getActiveShell(), "Solution type problem",
 						"Cant open this solution type in this client");
 				}
 			});

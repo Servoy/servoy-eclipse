@@ -24,6 +24,7 @@ import org.eclipse.jgit.lib.RepositoryBuilder;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 public class PublishHandler extends AbstractHandler implements IResourceChangeListener{
@@ -73,8 +74,7 @@ public class PublishHandler extends AbstractHandler implements IResourceChangeLi
    
 
     private String askForCommitMessage() {
-    	Shell shell = Display.getCurrent().getActiveShell();
-    	InputDialog dialog = new InputDialog(shell, "Commit Changes", "Enter a commit message:", "", null);
+    	InputDialog dialog = new InputDialog(UIUtils.getActiveShell(), "Commit Changes", "Enter a commit message:", "", null);
         int result = dialog.open();
         if (result == InputDialog.OK) {
             return dialog.getValue();
