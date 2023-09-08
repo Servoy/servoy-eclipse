@@ -274,7 +274,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 								{
 									// RAGTEST test
 									IPropertyDescriptor propertyDescriptor = createDataproviderPropertyDescriptor(getIdFromIndex(i), DP_PREFIX + i);
-									createdPDs.add(new ArrayItemPropertyDescriptorWrapper(propertyDescriptor, i, this));
+									createdPDs.add(new JSONArrayItemPropertyDescriptorWrapper(propertyDescriptor, i, this));
 								}
 								elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
 							}

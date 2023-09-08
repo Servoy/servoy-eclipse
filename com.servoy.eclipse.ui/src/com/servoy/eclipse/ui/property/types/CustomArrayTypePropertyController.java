@@ -17,23 +17,32 @@
 
 package com.servoy.eclipse.ui.property.types;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.ReturnValueSnippet;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.RagtestRegistry;
 import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestActions;
 import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestHandler;
 import com.servoy.eclipse.ui.property.ArrayTypePropertyController;
+import com.servoy.eclipse.ui.property.ButtonCellEditor;
 import com.servoy.eclipse.ui.property.ComplexProperty;
+import com.servoy.eclipse.ui.property.ComposedCellEditor;
+import com.servoy.eclipse.ui.property.ConvertingCellEditor;
+import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
 import com.servoy.eclipse.ui.property.PDPropertySource;
@@ -90,11 +99,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		});
 	}
 
-	private void callRagtestHandlerDeleteComponent(IPersist persist)
-	{
-		callHandler(handler -> handler.deleteComponent(persist));
-	}
-
 	private static void callHandler(Consumer<EditorRagtestHandler> call)
 	{
 		EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
@@ -135,12 +139,12 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return null;
 	}
 
-	// RAGTEST weg
-	@Override
-	protected WebCustomType getNewElementInitialValue()
-	{
-		return getNewElementValue(0);
-	}
+//	// RAGTEST weg
+//	//RAGTEST@Override
+//	protected WebCustomType getNewElementInitialValue()
+//	{
+//		return getNewElementValue(0);
+//	}
 
 	// RAGTEST weg
 
@@ -165,40 +169,97 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			}
 
 			@Override
-			protected void deleteItem(Object oldValue)
+			public CellEditor createPropertyEditor(Composite parent)
 			{
-				if (oldValue instanceof IPersist)
-				{
-					callRagtestHandlerDeleteComponent((IPersist)oldValue);
-				}
-			}
+				ComposedCellEditor cellEditor = new ComposedCellEditor(false, false, 10);
 
-			@Override
-			protected void addNewItemAfter(Object oldValue)
-			{
-				if (oldValue instanceof IPersist)
+				// make sure our special values don't reach the real editor - as it could lead to exceptions (real editor doesn't expect such values)
+				cellEditor.setCellEditor1(new ConvertingCellEditor<Object, Object>(new ReturnValueSnippet<CellEditor, Composite>()
 				{
-					EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
-					if (handler == null)
+					@Override
+					public CellEditor run(Composite arg)
 					{
-						ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
+						return basePD.createPropertyEditor(arg);
 					}
-					else
+				}, new ICellEditorConverter<Object, Object>()
+				{
+
+					@Override
+					public Object convertValueToBaseEditor(Object outsideWorldValue)
 					{
-						Object id = getId();
-						String parentKey;
-						if (id instanceof ArrayPropertyChildId)
-						{
-							parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
-						}
-						else
-						{
-							parentKey = String.valueOf(id);
-						}
-						handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, getTypeName());
-						System.err.println("RAGTEST2 ");
+						return outsideWorldValue;
 					}
-				}
+
+					@Override
+					public Object convertValueFromBaseEditor(Object baseEditorValue)
+					{
+						return baseEditorValue;
+					}
+
+					@Override
+					public boolean allowSetToBaseEditor(Object outsideWorldValue)
+					{
+						return true;
+					}
+
+				}));
+
+				cellEditor.setCellEditor2(new ComposedCellEditor(new ButtonCellEditor()
+				{
+
+					@Override
+					protected void updateButtonState(Button buttonWidget, Object value)
+					{
+						buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ELCL_REMOVE));
+						buttonWidget.setEnabled(true);
+						buttonWidget.setToolTipText("Remove this array item.");
+					}
+
+					@Override
+					protected void buttonClicked()
+					{
+						if (oldValue instanceof IPersist)
+						{
+							callHandler(handler -> handler.deleteComponent((IPersist)oldValue));
+						}
+					}
+
+				}, new ButtonCellEditor()
+				{
+					@Override
+					protected void updateButtonState(Button buttonWidget, Object value)
+					{
+						buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
+						buttonWidget.setEnabled(true);
+						buttonWidget.setToolTipText("Insert a new array item below.");
+					}
+
+					@Override
+					protected void buttonClicked()
+					{
+						if (oldValue instanceof IPersist)
+						{
+							callHandler(handler -> {
+								Object id = getId();
+								String parentKey;
+								if (id instanceof ArrayPropertyChildId)
+								{
+									parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+								}
+								else
+								{
+									parentKey = String.valueOf(id);
+								}
+								handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, getTypeName());
+							});
+						}
+					}
+
+				}, false, true, 0));
+
+				cellEditor.create(parent);
+
+				return cellEditor;
 			}
 		}
 
@@ -271,22 +332,22 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			defaultSetProperty(id, getDefaultElementProperty(id));
 		}
 
-		@Override
-		protected Object insertNewElementAfterIndex(int idx)
-		{
-			return insertElementAtIndex(idx + 1, getNewElementValue(idx + 1), getEditableValue());
-		}
+//		@Override
+//		protected Object insertNewElementAfterIndex(int idx)
+//		{
+//			return insertElementAtIndex(idx + 1, getNewElementValue(idx + 1), getEditableValue());
+//		}
 
-		@Override
-		protected Object deleteElementAtIndex(int idx)
-		{
-			Object[] arrayValue = (Object[])getEditableValue();
-			Object[] newArrayValue = (Object[])Array.newInstance(arrayValue.getClass().getComponentType(), arrayValue.length - 1);
-			System.arraycopy(arrayValue, 0, newArrayValue, 0, idx);
-			System.arraycopy(arrayValue, idx + 1, newArrayValue, idx, arrayValue.length - idx - 1);
-			resetIndexes(newArrayValue);
-			return newArrayValue;
-		}
+//		@Override
+//		protected Object deleteElementAtIndex(int idx)
+//		{
+//			Object[] arrayValue = (Object[])getEditableValue();
+//			Object[] newArrayValue = (Object[])Array.newInstance(arrayValue.getClass().getComponentType(), arrayValue.length - 1);
+//			System.arraycopy(arrayValue, 0, newArrayValue, 0, idx);
+//			System.arraycopy(arrayValue, idx + 1, newArrayValue, idx, arrayValue.length - idx - 1);
+//			resetIndexes(newArrayValue);
+//			return newArrayValue;
+//		}
 
 		@Override
 		protected void defaultSetElement(Object value, int idx)
@@ -363,29 +424,29 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	{
 		return value == null;
 	}
+//
+//	@Override
+//	protected Object createEmptyPropertyValue()
+//	{
+//		PropertyDescription arrayElementPD = getArrayElementPD();
+//		if (arrayElementPD.getType() instanceof ICustomType< ? >)
+//		{
+//			return new WebCustomType[] { getNewElementInitialValue() };
+//		}
+//		return new Object[] { getNewElementInitialValue() };
+//	}
 
-	@Override
-	protected Object createEmptyPropertyValue()
-	{
-		PropertyDescription arrayElementPD = getArrayElementPD();
-		if (arrayElementPD.getType() instanceof ICustomType< ? >)
-		{
-			return new WebCustomType[] { getNewElementInitialValue() };
-		}
-		return new Object[] { getNewElementInitialValue() };
-	}
-
-	@Override
-	protected Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue)
-	{ // RAGTEST alleen voor json array
-		Object[] arrayValue = (Object[])oldMainValue;
-		Object[] newArrayValue = (Object[])Array.newInstance(arrayValue.getClass().getComponentType(), arrayValue.length + 1);
-		System.arraycopy(arrayValue, 0, newArrayValue, 0, i);
-		newArrayValue[i] = elementValue;
-		System.arraycopy(arrayValue, i, newArrayValue, i + 1, arrayValue.length - i);
-		resetIndexes(newArrayValue);
-		return newArrayValue;
-	}
+//	@Override
+//	protected Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue)
+//	{ // RAGTEST alleen voor json array
+//		Object[] arrayValue = (Object[])oldMainValue;
+//		Object[] newArrayValue = (Object[])Array.newInstance(arrayValue.getClass().getComponentType(), arrayValue.length + 1);
+//		System.arraycopy(arrayValue, 0, newArrayValue, 0, i);
+//		newArrayValue[i] = elementValue;
+//		System.arraycopy(arrayValue, i, newArrayValue, i + 1, arrayValue.length - i);
+//		resetIndexes(newArrayValue);
+//		return newArrayValue;
+//	}
 
 	private void resetIndexes(Object[] newArrayValue)
 	{
