@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.designer;
 
+import static com.servoy.eclipse.designer.EditorComponentActionHandlerImpl.EDITOR_COMPONENT_ACTION_HANDLER;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,6 +43,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.EditorActionsRegistry;
+import com.servoy.eclipse.ui.EditorActionsRegistry.EditorComponentActions;
 import com.servoy.eclipse.ui.editors.I18NEditor;
 
 /**
@@ -115,6 +119,8 @@ public class Activator extends AbstractUIPlugin
 				});
 			}
 		});
+
+		EditorActionsRegistry.registerHandler(EditorComponentActions.CREATE_CUSTOM_COMPONENT, EDITOR_COMPONENT_ACTION_HANDLER);
 	}
 
 	public void toggleShow(String toggleShowType)
@@ -151,6 +157,8 @@ public class Activator extends AbstractUIPlugin
 		{
 			ServoyModelManager.getServoyModelManager().getServoyModel().removeI18NChangeListener(i18nChangeListener);
 		}
+		EditorActionsRegistry.unregisterHandler(EditorComponentActions.CREATE_CUSTOM_COMPONENT, EDITOR_COMPONENT_ACTION_HANDLER);
+
 		imageIcons.clear();
 		super.stop(context);
 	}
@@ -219,5 +227,4 @@ public class Activator extends AbstractUIPlugin
 		}
 		return imageIcon;
 	}
-
 }

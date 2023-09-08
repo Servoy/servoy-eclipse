@@ -17,17 +17,11 @@
 
 package com.servoy.eclipse.ui.property;
 
-import static com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions.DELETE_CURRENT_COMMAND_VALUE;
-import static com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions.INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
-import static com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions.UNDO_DELETE_CURRENT_COMMAND_VALUE;
-import static com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions.UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -38,12 +32,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.core.util.ReturnValueSnippet;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
-import com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayItemPropertyDescriptorWrapper.ArrayActions;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
-import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.j2db.util.IDelegate;
 
@@ -54,7 +45,6 @@ import com.servoy.j2db.util.IDelegate;
  */
 public abstract class ArrayTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
-
 	protected ILabelProvider labelProvider = null;
 
 	public ArrayTypePropertyController(Object id, String displayName)
@@ -67,18 +57,17 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	 */
 	protected abstract String getLabelText(Object element);
 
-	protected abstract IObjectTextConverter getMainObjectTextConverter();
+	protected IObjectTextConverter getMainObjectTextConverter()
+	{
+		return null;
+	}
 
-	protected abstract boolean isNotSet(Object value);
+	protected boolean isNotSet(Object value)
+	{
+		return value == null;
+	}
 
-	protected abstract Object createEmptyPropertyValue();
-
-	/**
-	 * @return new main value with the given element inserted.
-	 */
-	protected abstract Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue);
-
-	protected abstract Object getNewElementInitialValue();
+	protected abstract void createNewElement(ButtonCellEditor cellEditor, Object oldValue);
 
 	protected abstract ArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty);
 
@@ -88,7 +77,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		return new ArrayPropertyConverter();
 	}
 
-	class ArrayPropertyConverter extends ComplexPropertyConverter<Object>
+	private class ArrayPropertyConverter extends ComplexPropertyConverter<Object>
 	{
 		@Override
 		public Object convertProperty(Object id, Object value)
@@ -124,31 +113,9 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ButtonCellEditor clearButton = new ButtonCellEditor()
-		{
-
-			@Override
-			protected void updateButtonState(Button buttonWidget, Object value)
-			{
-				buttonWidget.setImage(
-					PlatformUI.getWorkbench().getSharedImages().getImage(isNotSet(value) ? ISharedImages.IMG_OBJ_ADD : ISharedImages.IMG_ETOOL_CLEAR));
-				buttonWidget.setEnabled(true);
-				buttonWidget.setToolTipText(isNotSet(value) ? "Creates an empty property value '[]' to be able to expand node." : "Clears the property value.");
-			}
-
-			@Override
-			protected Object getValueToSetOnClick(Object oldPropertyValue)
-			{
-				if (!isNotSet(oldPropertyValue)) return null;
-				else return createEmptyPropertyValue();
-			}
-
-		};
 		ButtonCellEditor addButton = new ButtonCellEditor()
 		{
-
 			private Control buttonEditorControl; // actually this is the button control
-			private boolean visible = true;
 
 			@Override
 			protected Control createControl(Composite parentC)
@@ -184,26 +151,14 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 					"To add a new item after another item,\nclick the '+' button on a specific item.");
 				buttonWidget.setEnabled(true);
 
-				if (visible == isNotSet(value))
-				{
-					visible = !isNotSet(value); // visibility is not enough - we don't want the space ocuppied at all so we change layout data as well
-					updateButtonVisibility();
-				}
+				updateButtonVisibility();
 			}
 
 			private void updateButtonVisibility()
 			{
 				if (buttonEditorControl != null && buttonEditorControl.getLayoutData() != null)
 				{
-					if (visible)
-					{
-						((GridData)buttonEditorControl.getLayoutData()).exclude = false;
-					}
-					else
-					{
-						((GridData)buttonEditorControl.getLayoutData()).exclude = true; // layout no longer changes bounds of this control
-						buttonEditorControl.setSize(new Point(0, 0));
-					}
+					((GridData)buttonEditorControl.getLayoutData()).exclude = false;
 
 					// relayout as needed to not show blank area instead of button for no reason
 					Composite c = buttonEditorControl.getParent();
@@ -214,14 +169,13 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			}
 
 			@Override
-			protected Object getValueToSetOnClick(Object oldPropertyValue)
+			protected void buttonClicked()
 			{
-				// insert at position 0 an empty/null value
-				return insertElementAtIndex(0, getNewElementInitialValue(), oldPropertyValue);
+				createNewElement(this, oldValue);
 			}
 		};
 
-		ComposedCellEditor cellEditor = new ComposedCellEditor(addButton, clearButton, false, true, 0);
+		CellEditor cellEditor = addButton;
 		if (getMainObjectTextConverter() != null)
 		{
 			cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()), cellEditor, false, false, 0);
@@ -231,10 +185,8 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		return cellEditor;
 	}
 
-
 	public static class ArrayPropertyChildId
 	{
-
 		public final Object arrayPropId;
 		public final int idx;
 
@@ -282,7 +234,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	{
 
 		protected IPropertyDescriptor[] elementPropertyDescriptors;
-		private ArrayActions undoValue;
 
 		public ArrayPropertySource(ComplexProperty<Object> complexProperty)
 		{
@@ -292,10 +243,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		protected abstract void addChildPropertyDescriptors(Object arrayV);
 
 		protected abstract Object getElementValue(int idx);
-
-		protected abstract Object insertNewElementAfterIndex(int idx);
-
-		protected abstract Object deleteElementAtIndex(final int idx);
 
 		protected abstract Object setComplexElementValueImpl(int idx, Object v);
 
@@ -327,24 +274,12 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			return elementPropertyDescriptors;
 		}
 
-		/**
-		 * Adds the + and - buttons on the right side of the cell editor. Those buttons are needed for inserting/removing items in/from the array.
-		 * @param index the index of this child property inside the array.
-		 * @param customJSONArrayPropertySource
-		 * @param createPropertyDescriptor the real property descriptor that is able to handle the value
-		 * @return a wrapper IPropertyDescriptor that forwards everything to the given one, but it alters the cell editor as needed.
-		 */
-		protected IPropertyDescriptor addButtonsToPD(IPropertyDescriptor realPropertyDescriptor, int index)
-		{
-			return new ArrayItemPropertyDescriptorWrapper(realPropertyDescriptor, index, this);
-		}
-
 		@Override
 		public Object getPropertyValue(Object id)
 		{
 			try
 			{
-				final int idx = getIndexFromId((ArrayPropertyChildId)id);
+				int idx = getIndexFromId((ArrayPropertyChildId)id);
 				return getElementValue(idx);
 			}
 			catch (NumberFormatException e)
@@ -354,69 +289,12 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			return null;
 		}
 
-		/**
-		 * Handle undo, revert handling of the special values
-		 */
-		@Override
-		public boolean undoSetProperty(Object id)
-		{
-			if (undoValue != null)
-			{
-				setPropertyValue(id, undoValue);
-				return true;
-			}
-
-			return ISetterAwarePropertySource.super.undoSetProperty(id);
-		}
-
-
-		@Override
-		public Object setComplexPropertyValue(Object id, Object v)
-		{
-			try
-			{
-				undoValue = null;
-				int idx = getIndexFromId((ArrayPropertyChildId)id);
-				if (v == DELETE_CURRENT_COMMAND_VALUE)
-				{
-					undoValue = UNDO_DELETE_CURRENT_COMMAND_VALUE;
-					return deleteElementAtIndex(idx);
-				}
-				if (v == INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE)
-				{
-					undoValue = UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
-					return insertNewElementAfterIndex(idx);
-				}
-
-				// undo
-				if (v == UNDO_DELETE_CURRENT_COMMAND_VALUE)
-				{
-					undoValue = DELETE_CURRENT_COMMAND_VALUE;
-					return insertNewElementAfterIndex(idx - 1);
-				}
-
-				if (v == UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE)
-				{
-					undoValue = INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
-					return deleteElementAtIndex(idx + 1);
-				}
-
-				return setComplexElementValueImpl(idx, v);
-			}
-			catch (NumberFormatException e)
-			{
-				ServoyLog.logError(e);
-			}
-			return getEditableValue();
-		}
-
 		@Override
 		public void defaultSetProperty(Object id, Object value)
 		{
 			try
 			{
-				final int idx = getIndexFromId((ArrayPropertyChildId)id);
-
+				int idx = getIndexFromId((ArrayPropertyChildId)id);
 				defaultSetElement(value, idx);
 			}
 			catch (NumberFormatException e)
@@ -430,7 +308,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		{
 			try
 			{
-				final int idx = getIndexFromId((ArrayPropertyChildId)id);
+				int idx = getIndexFromId((ArrayPropertyChildId)id);
 				return defaultGetElement(idx);
 			}
 			catch (NumberFormatException e)
@@ -446,7 +324,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		{
 			try
 			{
-				final int idx = getIndexFromId((ArrayPropertyChildId)id);
+				int idx = getIndexFromId((ArrayPropertyChildId)id);
 				return defaultIsElementSet(idx);
 			}
 			catch (NumberFormatException e)
@@ -456,6 +334,20 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			return false;
 		}
 
+		@Override
+		public Object setComplexPropertyValue(Object id, Object v)
+		{
+			try
+			{
+				int idx = getIndexFromId((ArrayPropertyChildId)id);
+				return setComplexElementValueImpl(idx, v);
+			}
+			catch (NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+			}
+			return getEditableValue();
+		}
 	}
 
 	/**
@@ -464,17 +356,9 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	 *
 	 * @author acostescu
 	 */
-	protected static class ArrayItemPropertyDescriptorWrapper
+	protected abstract static class ArrayItemPropertyDescriptorWrapper
 		implements IPropertyController<Object, Object>, IPropertySetter<Object, ISetterAwarePropertySource>, IProvidesTooltip, IAdaptable
 	{
-		enum ArrayActions
-		{
-			DELETE_CURRENT_COMMAND_VALUE,
-			UNDO_DELETE_CURRENT_COMMAND_VALUE,
-			INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE,
-			UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE
-		}
-
 		protected final IPropertyDescriptor basePD;
 		protected final String index;
 		protected final ArrayPropertySource arrayPropertySource;
@@ -502,83 +386,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				}
 			}
 			return base;
-		}
-
-		@Override
-		public CellEditor createPropertyEditor(Composite parent)
-		{
-			ComposedCellEditor cellEditor = new ComposedCellEditor(false, false, 10);
-
-			// make sure our special values don't reach the real editor - as it could lead to exceptions (real editor doesn't expect such values)
-			cellEditor.setCellEditor1(new ConvertingCellEditor<Object, Object>(new ReturnValueSnippet<CellEditor, Composite>()
-			{
-				@Override
-				public CellEditor run(Composite... args)
-				{
-					return basePD.createPropertyEditor(args[0]);
-				}
-			}, new ICellEditorConverter<Object, Object>()
-			{
-
-				@Override
-				public Object convertValueToBaseEditor(Object outsideWorldValue)
-				{
-					return outsideWorldValue;
-				}
-
-				@Override
-				public Object convertValueFromBaseEditor(Object baseEditorValue)
-				{
-					return baseEditorValue;
-				}
-
-				@Override
-				public boolean allowSetToBaseEditor(Object outsideWorldValue)
-				{
-					return outsideWorldValue != DELETE_CURRENT_COMMAND_VALUE && outsideWorldValue != INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
-				}
-
-			}));
-
-			cellEditor.setCellEditor2(new ComposedCellEditor(new ButtonCellEditor()
-			{
-
-				@Override
-				protected void updateButtonState(Button buttonWidget, Object value)
-				{
-					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ELCL_REMOVE));
-					buttonWidget.setEnabled(true);
-					buttonWidget.setToolTipText("Remove this array item.");
-				}
-
-				@Override
-				protected Object getValueToSetOnClick(Object oldPropertyValue)
-				{
-					return DELETE_CURRENT_COMMAND_VALUE;
-				}
-
-			}, new ButtonCellEditor()
-			{
-
-				@Override
-				protected void updateButtonState(Button buttonWidget, Object value)
-				{
-					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
-					buttonWidget.setEnabled(true);
-					buttonWidget.setToolTipText("Insert a new array item below.");
-				}
-
-				@Override
-				protected Object getValueToSetOnClick(Object oldPropertyValue)
-				{
-					return INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
-				}
-
-			}, false, true, 0));
-
-			cellEditor.create(parent);
-
-			return cellEditor;
 		}
 
 		@Override
