@@ -82,7 +82,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	}
 
 	@Override
-	protected void createNewElement(Object oldValue)
+	protected void createNewElement(ButtonCellEditor cellEditor, Object oldValue)
 	{
 		callHandler(handler -> {
 			Object id = getId();

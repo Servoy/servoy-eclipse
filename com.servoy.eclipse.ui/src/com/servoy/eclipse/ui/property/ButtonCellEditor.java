@@ -74,7 +74,6 @@ public abstract class ButtonCellEditor extends CellEditor
 				buttonClicked();
 			}
 		});
-		initButtonWidget(button);
 		updateButtonState(button, oldValue);
 
 		setValueValid(true);
@@ -110,13 +109,13 @@ public abstract class ButtonCellEditor extends CellEditor
 	 */
 	protected abstract void buttonClicked();
 
-
-	/**
-	 * Can be overridden when needed.
-	 */
-	protected void initButtonWidget(Button buttonWidget)
+	public void applyValue(Object newValue)
 	{
-		// in case someone needs to override
+		if (newValue != doGetValue())
+		{
+			doSetValue(newValue);
+			markDirty();
+			fireApplyEditorValue();
+		}
 	}
-
 }
