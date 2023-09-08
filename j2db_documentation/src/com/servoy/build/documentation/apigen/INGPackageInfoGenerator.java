@@ -29,7 +29,12 @@ import freemarker.template.TemplateException;
 public interface INGPackageInfoGenerator
 {
 
-	public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryName, boolean service)
+	/**
+	 * @param deprecationString null if not deprecated, either string "true" or a deprecation message if it is deprecated
+	 * @param replacementInCaseOfDeprecation replacementInCaseOfDeprecation can be either null or the component with which it could be replaced in which case this component should be considered as being deprecated even if deprecationString is null
+	 */
+	public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryName, boolean service,
+		String deprecationString, String replacementInCaseOfDeprecation)
 		throws TemplateException, IOException;
 
 	/**

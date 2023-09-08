@@ -344,17 +344,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         			this.bottomPos = new Map([...this.bottomPos].sort(sortfn));
             	}
             
-            	let point = event.data.p1;
-            	let left, right, top, bottom;
-            	left = this.isSnapInterval(point.x, this.leftPos);
-            	if (!left) right = this.isSnapInterval(point.x, this.rightPos);
-            	//TODO middleH
-            	
-            	top = this.isSnapInterval(point.y, this.topPos);
-            	if (!top) bottom = this.isSnapInterval(point.y, this.bottomPos);
-            	//TODO middleV
-            	
-            	let props = this.getSnapProperties(point, left, right, top, bottom);				
+            	let props = this.getSnapProperties(event.data.p1);				
             	this.windowRefService.nativeWindow.parent.postMessage({ id: 'snap', properties: props }, '*');
             }
             this.detectChanges();
@@ -372,38 +362,72 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return res;    	
     }
     
-    private getSnapProperties(point: {x: number, y: number}, left: string, right: string, top: string, bottom: string) {
-    		let properties = {top: point.y, left: point.x, snapX: null, snapY: null};
-    		if (left) { 
-    		    this.log.spam('snap to the left edge');
-    			properties.left = this.leftPos.get(left);
-    			properties.snapX = left;
-			}
-			if (right) {
-				//left - size of dragged...
-				let _left = this.rightPos.get(right);
-				if (this.draggedElementItem) {
-					//drag from palette
-					_left -= this.draggedElementItem.model.size.width;
-					properties['bottom'] = this.bottomPos.get(right) + this.draggedElementItem.model.size.height;
-				}
-				properties.left = _left;
-				properties['right'] = this.rightPos.get(right);
-    			properties.snapX = right;
-			}
-			if (top) { 
-    			properties.top = this.topPos.get(top);
-    			properties.snapY = top;
-			}
-			if (bottom ) {
-				let _top = this.bottomPos.get(bottom);
-				if (this.draggedElementItem) {
-					//drag from palette
-					_top -= this.draggedElementItem.model.size.height;
-				}
-				properties.top = _top;
-    			properties.snapY = bottom;
-			}
+    private getDraggedElementRect(point: {x: number, y: number}): DOMRect {
+    	return this.document.elementFromPoint(point.x, point.y)?.getBoundingClientRect();
+    } 
+    
+    private getSnapProperties(point: {x: number, y: number}) {
+    		let properties = {top: point.y, left: point.x, snapX: null, snapY: null, cssPos: {}};
+    		
+    		const rect = this.getDraggedElementRect(point);
+    		if (!rect) return properties;
+
+           	properties.snapX = this.isSnapInterval(rect.left, this.leftPos);
+           	if (properties.snapX) {
+           		properties.left = this.leftPos.get(properties.snapX);
+           	}
+           	else {
+           		properties.snapX = this.isSnapInterval(rect.left, this.rightPos);
+           		properties.left = properties.snapX ? this.rightPos.get(properties.snapX) : properties.left;
+           	}
+           	
+           	if (properties.snapX) {
+           		properties.cssPos['left'] = this.formCache.componentCache.get(properties.snapX).model.cssPosition.left;
+           	}
+           	else {
+           		properties.snapX = this.isSnapInterval(rect.right, this.rightPos);
+           		properties['right'] = this.rightPos.get(properties.snapX);
+           		properties.left = properties.snapX ? this.rightPos.get(properties.snapX) : properties.left;
+           		if (!properties.snapX) { 
+           			properties.snapX = this.isSnapInterval(rect.right, this.leftPos);
+           			properties.left = properties.snapX ? this.leftPos.get(properties.snapX) : properties.left;
+           			properties['right'] = this.leftPos.get(properties.snapX);
+           		}
+           		if (properties.snapX){
+           			properties.left -= rect.width;
+           			properties.cssPos['right'] = this.formCache.componentCache.get(properties.snapX).model.cssPosition.right;
+           		}
+           	}
+           	//TODO middleV
+            	
+           	properties.snapY = this.isSnapInterval(rect.top, this.topPos);
+           	if (properties.snapY) {
+           		properties.top = this.topPos.get(properties.snapY);
+           	}
+           	else {
+           		properties.snapY = this.isSnapInterval(rect.top, this.bottomPos);
+           		properties.top = properties.snapY ? this.bottomPos.get(properties.snapY) : properties.top;
+           	}
+           	
+           	if (properties.snapY) {
+           		properties.cssPos['top'] = this.formCache.componentCache.get(properties.snapY).model.cssPosition.top;
+           	}
+           	else {
+           		properties.snapY = this.isSnapInterval(rect.bottom, this.bottomPos);
+           		properties['bottom'] = this.bottomPos.get(properties.snapY);
+           		properties.top = properties.snapY ? this.bottomPos.get(properties.snapY) : properties.top;
+           		if (!properties.snapY){
+           			properties.snapY = this.isSnapInterval(rect.bottom, this.topPos);
+           			properties.top = properties.snapY ? this.topPos.get(properties.snapY) : properties.top;
+           			properties['bottom'] = this.topPos.get(properties.snapY);
+           		}
+           		if (properties.snapY) {
+           			properties.top -= rect.height;
+           			properties.cssPos['bottom'] = this.formCache.componentCache.get(properties.snapY).model.cssPosition.bottom;
+           		}
+           	}
+           	//TODO middleH
+
 			return properties.snapX == null && properties.snapY == null ? null : properties;
     }
 

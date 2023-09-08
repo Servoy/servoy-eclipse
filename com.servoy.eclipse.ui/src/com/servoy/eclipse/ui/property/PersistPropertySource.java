@@ -3614,7 +3614,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			public CellEditor createPropertyEditor(Composite parent)
 			{
 				return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, titleLabelProvider, finalTable, "Edit text property",
-					Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()));
+					Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()), "titleText".equals(id));
 			}
 		});
 	}

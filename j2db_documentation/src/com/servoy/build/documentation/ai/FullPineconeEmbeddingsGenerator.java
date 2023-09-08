@@ -40,6 +40,7 @@ import com.servoy.build.documentation.apigen.IDocFromXMLGenerator;
 import com.servoy.build.documentation.apigen.INGPackageInfoGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator.Function;
+import com.servoy.build.documentation.apigen.SpecMarkdownGenerator.Property;
 import com.servoy.eclipse.core.ai.shared.PineconeItem;
 import com.servoy.eclipse.core.ai.shared.SharedStaticContent;
 
@@ -123,6 +124,13 @@ public class FullPineconeEmbeddingsGenerator
 		{
 			out.writeObject(pineconeItemsToUpsert);
 		}
+
+		for (PineconeItem item : pineconeItemsToUpsert)
+		{
+			System.out.println(item.getText());
+			System.out.println("-------------------");
+		}
+
 		System.out.println("Doc items were written to " + new File(SharedStaticContent.STORED_ALL_UNEMBEDDED_PINECONE_ITEMS).getAbsolutePath());
 	}
 
@@ -254,7 +262,6 @@ public class FullPineconeEmbeddingsGenerator
 		private final Template webObjectTemplate;
 		private final Template methodTemplate;
 		private final Template propertyTemplate;
-		private final Template deprecatedWebObjectTemplate;
 		private final Template typeTemplate;
 
 		private final List<Map<String, String>> allWebObjectsOfCurrentPackage = new ArrayList<>(10);
@@ -270,29 +277,82 @@ public class FullPineconeEmbeddingsGenerator
 			this.webObjectTemplate = cfg.getTemplate("pinecone_ng_webobject_template.md");
 			this.methodTemplate = cfg.getTemplate("pinecone_ng_webobject_method_template.md");
 			this.propertyTemplate = cfg.getTemplate("pinecone_ng_webobject_property_template.md");
-			this.deprecatedWebObjectTemplate = cfg.getTemplate("pinecone_ng_webobject_deprecated_template.md");
 			this.typeTemplate = cfg.getTemplate("pinecone_ng_webobject_type_template.md");
 		}
 
 		@Override
-		public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryName, boolean service)
+		public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryName, boolean service,
+			String deprecationString, String replacementInCaseOfDeprecation)
 			throws TemplateException, IOException
 		{
 			allWebObjectsOfCurrentPackage.add(Map.of("name", (String)root.get("componentname"), "internalName", (String)root.get("componentinternalname")));
 
-			root.put("category_name", categoryName);
+			if (deprecationString != null || replacementInCaseOfDeprecation != null)
+			{
+				StringBuilder deprecationMessage = new StringBuilder("@deprecated");
+				if (deprecationString != null && !deprecationString.equals("true"))
+				{
+					deprecationMessage.append(' ').append(deprecationString);
+					if (replacementInCaseOfDeprecation != null) deprecationMessage.append("\n          ");
+				}
+				if (replacementInCaseOfDeprecation != null) deprecationMessage.append(" should be replaced with 'replacementInCaseOfDeprecation'");
+				root.put("deprecationMessage", deprecationMessage);
+			}
 			StringWriter out = new StringWriter();
 			webObjectTemplate.process(root, out);
 
 			registerNewEmbedding.accept(out.toString());
 
+			generateMethods(root, "api", "API method");
+			generateMethods(root, "events", "event handler");
+
 			@SuppressWarnings("unchecked")
-			Map<String, Function> apis = (Map<String, Function>)root.get("api");
-			if (apis != null)
+			Map<String, Property> properties = (Map<String, Property>)root.get("properties");
+			if (properties != null)
 			{
-				for (Entry<String, Function> api : apis.entrySet())
+				for (Entry<String, Property> property : properties.entrySet())
 				{
-					root.put("apiName", api.getKey());
+					root.put("propertyName", property.getKey());
+
+					// String name, String type, String defaultValue, String doc
+					out = new StringWriter();
+					propertyTemplate.process(root, out);
+
+					registerNewEmbedding.accept(out.toString());
+				}
+				root.remove("propertyName");
+			}
+
+			@SuppressWarnings("unchecked")
+			Map<String, Map<String, Property>> types = (Map<String, Map<String, Property>>)root.get("types");
+			if (types != null)
+			{
+				for (Entry<String, Map<String, Property>> type : types.entrySet())
+				{
+					root.put("typeName", type.getKey());
+
+					// String name, String type, String defaultValue, String doc
+					out = new StringWriter();
+					typeTemplate.process(root, out);
+
+					registerNewEmbedding.accept(out.toString());
+				}
+				root.remove("typeName");
+			}
+		}
+
+		private void generateMethods(Map<String, Object> root, String rootMapKey, String methodTypeInOutput) throws TemplateException, IOException
+		{
+			StringWriter out;
+			@SuppressWarnings("unchecked")
+			Map<String, Function> methods = (Map<String, Function>)root.get(rootMapKey);
+			if (methods != null)
+			{
+				root.put("methodType", methodTypeInOutput);
+				root.put("methodMapName", rootMapKey);
+				for (Entry<String, Function> method : methods.entrySet())
+				{
+					root.put("methodName", method.getKey());
 
 					// String name, List<Parameter> parameters, String returnValue, String doc
 					out = new StringWriter();
@@ -300,25 +360,9 @@ public class FullPineconeEmbeddingsGenerator
 
 					registerNewEmbedding.accept(out.toString());
 				}
-				root.remove("apiName");
+				root.remove("methodName");
+				root.remove("methodType");
 			}
-			// FIXME fully implement it!
-//
-//			File file = new File(userDir,
-//				(service ? "service/" : "components/") + categoryName.trim().replace(' ', '-').replace("&", "and").toLowerCase() + "/" +
-//					displayName.trim().replace(' ', '-').toLowerCase() +
-//					".md");
-//			// TODO Auto-generated method stub
-//			try
-//			{
-//				file.getParentFile().mkdirs();
-//				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
-//				temp.process(root, out);
-//			}
-//			catch (TemplateException | IOException e)
-//			{
-//				e.printStackTrace();
-//			}
 		}
 
 		@Override

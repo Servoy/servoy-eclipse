@@ -503,6 +503,7 @@ class State {
     statusText: string;
     maxLevel: number;
     dragging = false;
+    ghosthandle = false;
     pointerEvents = 'none';
     packages: Array<Package>;
     drop_highlight: string;
