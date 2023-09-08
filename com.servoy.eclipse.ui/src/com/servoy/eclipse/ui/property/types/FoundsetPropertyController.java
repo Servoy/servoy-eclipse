@@ -240,7 +240,6 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			{
 				propertyDescriptors.add(new JSONArrayTypePropertyController(DATAPROVIDERS, DATAPROVIDERS)
 				{
-
 					@Override
 					protected Object getNewElementInitialValue()
 					{
@@ -273,7 +272,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 								for (int i = 0; i < arrayValue.length(); i++)
 								{
-									createdPDs.add(addButtonsToPD(createDataproviderPropertyDescriptor(getIdFromIndex(i), DP_PREFIX + i), i));
+									IPropertyDescriptor propertyDescriptor = createDataproviderPropertyDescriptor(getIdFromIndex(i), DP_PREFIX + i);
+									createdPDs.add(new JSONArrayItemPropertyDescriptorWrapper(propertyDescriptor, i, this));
 								}
 								elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
 							}
