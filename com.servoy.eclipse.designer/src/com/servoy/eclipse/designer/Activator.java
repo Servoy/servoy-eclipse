@@ -21,10 +21,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.swing.ImageIcon;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorPart;
@@ -40,13 +42,17 @@ import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RagtestCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RagtestCommand.RagtestOptions;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.RagtestRegistry;
 import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestActions;
+import com.servoy.eclipse.ui.RagtestRegistry.EditorRagtestHandler;
 import com.servoy.eclipse.ui.editors.I18NEditor;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.UUID;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -121,29 +127,46 @@ public class Activator extends AbstractUIPlugin
 			}
 		});
 
-		RagtestRegistry.registerRagtest(EditorRagtestActions.CREATE_COMPONENT_RAGTEST, (uuid, propertyName, type) -> {
-
-			if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null)
+		RagtestRegistry.registerRagtest(EditorRagtestActions.CREATE_COMPONENT_RAGTEST, new EditorRagtestHandler()
+		{
+			@Override
+			public void createComponent(UUID uuid, String propertyName, String type)
 			{
-				IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-				if (activePage != null)
-				{
-					IEditorPart activeEditor = activePage.getActiveEditor();
-					if (activeEditor instanceof BaseVisualFormEditor)
-					{
-						BaseVisualFormEditor formEditor = (BaseVisualFormEditor)activeEditor;
-						RagtestOptions args = new RagtestOptions();
-						args.setDropTargetUUID(uuid.toString());
-						args.setGhostPropertyName(propertyName);
-						args.setAddAfterTarget(true);
-						args.setType(type);
-						RagtestCommand command = new RagtestCommand(formEditor, args, null);
-						formEditor.getCommandStack().execute(command);
-					}
-				}
+				executeCommandOnForm(formEditor -> {
+					RagtestOptions args = new RagtestOptions();
+					args.setDropTargetUUID(uuid.toString());
+					args.setGhostPropertyName(propertyName);
+					args.setAddAfterTarget(true);
+					args.setType(type);
+					return new RagtestCommand(formEditor, args, null);
+				});
 			}
 
-			System.err.println("RAGTEST called CREATE_COMPONENT_RAGTEST ");
+			@Override
+			public void deleteComponent(IPersist persist)
+			{
+				executeCommandOnForm(formEditor -> new FormElementDeleteCommand(persist));
+			}
+
+			private static void executeCommandOnForm(Function<BaseVisualFormEditor, Command> buildCommand)
+			{
+				if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null)
+				{
+					IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+					if (activePage != null)
+					{
+						IEditorPart activeEditor = activePage.getActiveEditor();
+						if (activeEditor instanceof BaseVisualFormEditor)
+						{
+							BaseVisualFormEditor formEditor = (BaseVisualFormEditor)activeEditor;
+							Command command = buildCommand.apply(formEditor);
+							formEditor.getCommandStack().execute(command);
+						}
+					}
+				}
+
+				System.err.println("RAGTEST called CREATE_COMPONENT_RAGTEST ");
+			}
 		});
 	}
 

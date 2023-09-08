@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.property.types;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.sablo.specification.PropertyDescription;
@@ -74,18 +75,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected void createNewElement(Object oldValue)
 	{
-		callRagtestHandler(persistContext.getPersist());
-	}
-
-	private void callRagtestHandler(IPersist persist)
-	{
-		EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
-		if (handler == null)
-		{
-			ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
-		}
-		else
-		{
+		callHandler(handler -> {
 			Object id = getId();
 			String parentKey;
 			if (id instanceof ArrayPropertyChildId)
@@ -96,10 +86,25 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			{
 				parentKey = String.valueOf(id);
 			}
+			handler.createComponent(persistContext.getPersist().getUUID(), parentKey, getTypeName());
+		});
+	}
 
+	private void callRagtestHandlerDeleteComponent(IPersist persist)
+	{
+		callHandler(handler -> handler.deleteComponent(persist));
+	}
 
-			handler.createComponent(persist.getUUID(), parentKey, getTypeName());
-
+	private static void callHandler(Consumer<EditorRagtestHandler> call)
+	{
+		EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
+		if (handler == null)
+		{
+			ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
+		}
+		else
+		{
+			call.accept(handler);
 			System.err.println("RAGTEST2 ");
 		}
 	}
@@ -160,11 +165,39 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			}
 
 			@Override
+			protected void deleteItem(Object oldValue)
+			{
+				if (oldValue instanceof IPersist)
+				{
+					callRagtestHandlerDeleteComponent((IPersist)oldValue);
+				}
+			}
+
+			@Override
 			protected void addNewItemAfter(Object oldValue)
 			{
 				if (oldValue instanceof IPersist)
 				{
-					callRagtestHandler((IPersist)oldValue);
+					EditorRagtestHandler handler = RagtestRegistry.getRagtestHandler(EditorRagtestActions.CREATE_COMPONENT_RAGTEST);
+					if (handler == null)
+					{
+						ServoyLog.logWarning("No handler registered for adding component " + EditorRagtestActions.CREATE_COMPONENT_RAGTEST, null);
+					}
+					else
+					{
+						Object id = getId();
+						String parentKey;
+						if (id instanceof ArrayPropertyChildId)
+						{
+							parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+						}
+						else
+						{
+							parentKey = String.valueOf(id);
+						}
+						handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, getTypeName());
+						System.err.println("RAGTEST2 ");
+					}
 				}
 			}
 		}

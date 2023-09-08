@@ -325,18 +325,18 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			return elementPropertyDescriptors;
 		}
 
-		/**
-		 * Adds the + and - buttons on the right side of the cell editor. Those buttons are needed for inserting/removing items in/from the array.
-		 * @param index the index of this child property inside the array.
-		 * @param customJSONArrayPropertySource
-		 * @param createPropertyDescriptor the real property descriptor that is able to handle the value
-		 * @return a wrapper IPropertyDescriptor that forwards everything to the given one, but it alters the cell editor as needed.
-		 */
-		protected IPropertyDescriptor createArrayItemPropertyDescriptor(IPropertyDescriptor propertyDescriptor, int index)
-		{
-			// RAGTEST naar eigen impl voor json en hier abstract
-			return new ArrayItemPropertyDescriptorWrapper(propertyDescriptor, index, this);
-		}
+//		/**
+//		 * Adds the + and - buttons on the right side of the cell editor. Those buttons are needed for inserting/removing items in/from the array.
+//		 * @param index the index of this child property inside the array.
+//		 * @param customJSONArrayPropertySource
+//		 * @param createPropertyDescriptor the real property descriptor that is able to handle the value
+//		 * @return a wrapper IPropertyDescriptor that forwards everything to the given one, but it alters the cell editor as needed.
+//		 */
+//		protected IPropertyDescriptor createArrayItemPropertyDescriptor(IPropertyDescriptor propertyDescriptor, int index)
+//		{
+//			// RAGTEST naar eigen impl voor json en hier abstract
+//			return new ArrayItemPropertyDescriptorWrapper(propertyDescriptor, index, this);
+//		}
 
 		@Override
 		public Object getPropertyValue(Object id)
@@ -485,6 +485,11 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			this.arrayPropertySource = arrayPropertySource;
 		}
 
+		protected void deleteItem(Object oldValue)
+		{
+			// RAGTEST impl voor json
+		}
+
 		protected void addNewItemAfter(Object oldValue)
 		{
 			// RAGTEST impl voor json
@@ -544,7 +549,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 			}));
 
-			cellEditor.setCellEditor2(new ComposedCellEditor(new ButtonSetValueCellEditor()
+			cellEditor.setCellEditor2(new ComposedCellEditor(new ButtonCellEditor()
 			{
 
 				@Override
@@ -556,9 +561,9 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				}
 
 				@Override
-				protected Object getValueToSetOnClick(Object oldPropertyValue)
+				protected void buttonClicked()
 				{
-					return DELETE_CURRENT_COMMAND_VALUE; // RAGTEST via handler?
+					deleteItem(oldValue);
 				}
 
 			}, new ButtonCellEditor()
