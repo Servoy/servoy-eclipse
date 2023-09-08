@@ -117,7 +117,7 @@ import com.servoy.j2db.util.UUID;
  */
 public class CreateComponentCommand extends BaseRestorableCommand
 {
-	private static final AtomicInteger id = new AtomicInteger(); // RAGTEST new one per form?
+	private static final AtomicInteger id = new AtomicInteger();
 	private static final Dimension EMPTY_SIZE = new Dimension(0, 0);
 
 	private final CreateComponentOptions args;
