@@ -40,6 +40,7 @@ import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
+import org.eclipse.dltk.javascript.ast.v4.ArrowFunctionStatement;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -227,7 +228,7 @@ public class ScriptingUtils
 								{
 									hasReturnStatement[0] = true;
 								}
-								if (node instanceof FunctionStatement)
+								if (node instanceof FunctionStatement || node instanceof ArrowFunctionStatement)
 								{
 									return false;
 								}
