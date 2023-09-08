@@ -43,7 +43,6 @@ import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ComposedCellEditor;
 import com.servoy.eclipse.ui.property.ConvertingCellEditor;
 import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
-import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -56,7 +55,6 @@ import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -116,26 +114,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	{
 		return webComponentPropertyDescription.getType().getName().indexOf(".") > 0 ? webComponentPropertyDescription.getType().getName().split("\\.")[1]
 			: webComponentPropertyDescription.getType().getName();
-	}
-
-	// RAGTEST weg
-	private WebCustomType getNewElementValue(int index)
-	{
-		// when user adds/inserts a new item in the array normally a null is inserted
-		// but for custom object properties most of the time the uses will want to have an object so that it can be directly expanded (without clicking one more time to make it {} from null)
-		PropertyDescription arrayElementPD = getArrayElementPD();
-		if (arrayElementPD.getType() instanceof ICustomType< ? >)
-		{
-			String typeName = webComponentPropertyDescription.getType().getName().indexOf(".") > 0
-				? webComponentPropertyDescription.getType().getName().split("\\.")[1]
-				: webComponentPropertyDescription.getType().getName();
-			IBasicWebObject parent = (IBasicWebObject)persistContext.getPersist();
-			WebCustomType customType = WebCustomType.createNewInstance(parent, arrayElementPD, webComponentPropertyDescription.getName(), index, true);
-			customType.setTypeName(typeName);
-			// Do not add customType to parent here, this method should be without side-effect for undo/redo to work properly
-			return customType;
-		}
-		return null;
 	}
 
 	@Override
@@ -324,14 +302,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		protected void defaultSetElement(Object value, int idx)
 		{
 			if (idx < 0 || idx >= ((Object[])getEditableValue()).length) return;
-			if (value == null && getEditableValue() instanceof IChildWebObject[])
-			{
-				((Object[])getEditableValue())[idx] = getNewElementValue(idx);
-			}
-			else
-			{
-				((Object[])getEditableValue())[idx] = value;
-			}
+			((Object[])getEditableValue())[idx] = value;
 		}
 
 		@Override
@@ -381,17 +352,5 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	protected String getLabelText(Object element)
 	{
 		return ((element instanceof Object[]) ? (((Object[])element).length == 0 ? "[]" : "[...]") : "null");
-	}
-
-	@Override
-	protected IObjectTextConverter getMainObjectTextConverter()
-	{
-		return null;
-	}
-
-	@Override
-	protected boolean isNotSet(Object value)
-	{
-		return value == null;
 	}
 }

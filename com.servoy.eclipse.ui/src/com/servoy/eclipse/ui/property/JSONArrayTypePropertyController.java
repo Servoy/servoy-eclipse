@@ -78,14 +78,6 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 		return ServoyJSONObject.isJavascriptNullOrUndefined(value);
 	}
 
-	//RAGTEST@Override
-	protected Object createEmptyPropertyValue()
-	{
-		ServoyJSONArray v = new ServoyJSONArray();
-		v.put(getNewElementInitialValue()); // for convenience; usually when ppl want to use an array property they also want to add elements to it... not just have an empty array
-		return v;
-	}
-
 	@Override
 	protected void createNewElement(ButtonCellEditor cellEditor, Object oldValue)
 	{
@@ -351,14 +343,12 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 			return getEditableValue();
 		}
 
-		//RAGTEST@Override
-		protected ServoyJSONArray deleteElementAtIndex(final int idx)
+		private ServoyJSONArray deleteElementAtIndex(final int idx)
 		{
 			return ServoyJSONArray.removeIndexFromJSONArray((JSONArray)getEditableValue(), idx);
 		}
 
-		//RAGTEST@Override
-		protected Object insertNewElementAfterIndex(int idx)
+		private Object insertNewElementAfterIndex(int idx)
 		{
 			return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)getEditableValue(), idx + 1, getNewElementInitialValue());
 		}
@@ -469,14 +459,13 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 					undoValue = INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
 					return deleteElementAtIndex(idx + 1);
 				}
-
-				return setComplexElementValueImpl(idx, v);
 			}
 			catch (NumberFormatException e)
 			{
 				ServoyLog.logError(e);
 			}
-			return getEditableValue();
+
+			return super.setComplexPropertyValue(id, v);
 		}
 	}
 

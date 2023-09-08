@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -58,9 +57,15 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	 */
 	protected abstract String getLabelText(Object element);
 
-	protected abstract IObjectTextConverter getMainObjectTextConverter();
+	protected IObjectTextConverter getMainObjectTextConverter()
+	{
+		return null;
+	}
 
-	protected abstract boolean isNotSet(Object value);
+	protected boolean isNotSet(Object value)
+	{
+		return value == null;
+	}
 
 	protected abstract void createNewElement(ButtonCellEditor cellEditor, Object oldValue);
 
@@ -108,29 +113,9 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-//	RAGTEST	ButtonCellEditor clearButton = new ButtonSetValueCellEditor()
-//		{
-//			@Override
-//			protected void updateButtonState(Button buttonWidget, Object value)
-//			{
-//				buttonWidget.setImage(
-//					PlatformUI.getWorkbench().getSharedImages().getImage(isNotSet(value) ? ISharedImages.IMG_OBJ_ADD : ISharedImages.IMG_ETOOL_CLEAR));
-//				buttonWidget.setEnabled(true);
-//				buttonWidget.setToolTipText(isNotSet(value) ? "Creates an empty property value '[]' to be able to expand node." : "Clears the property value.");
-//			}
-//
-//			@Override
-//			protected Object getValueToSetOnClick(Object oldPropertyValue)
-//			{
-//				if (!isNotSet(oldPropertyValue)) return null;
-//				else return createEmptyPropertyValue();
-//			}
-//		};
-
 		ButtonCellEditor addButton = new ButtonCellEditor()
 		{
 			private Control buttonEditorControl; // actually this is the button control
-			private boolean visible = true;
 
 			@Override
 			protected Control createControl(Composite parentC)
@@ -166,26 +151,14 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 					"To add a new item after another item,\nclick the '+' button on a specific item.");
 				buttonWidget.setEnabled(true);
 
-				if (visible == isNotSet(value))
-				{
-					visible = !isNotSet(value); // visibility is not enough - we don't want the space ocuppied at all so we change layout data as well
-					updateButtonVisibility();
-				}
+				updateButtonVisibility();
 			}
 
 			private void updateButtonVisibility()
 			{
 				if (buttonEditorControl != null && buttonEditorControl.getLayoutData() != null)
 				{
-					if (visible)
-					{
-						((GridData)buttonEditorControl.getLayoutData()).exclude = false;
-					}
-					else
-					{
-						((GridData)buttonEditorControl.getLayoutData()).exclude = true; // layout no longer changes bounds of this control
-						buttonEditorControl.setSize(new Point(0, 0));
-					}
+					((GridData)buttonEditorControl.getLayoutData()).exclude = false;
 
 					// relayout as needed to not show blank area instead of button for no reason
 					Composite c = buttonEditorControl.getParent();
@@ -270,10 +243,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		protected abstract void addChildPropertyDescriptors(Object arrayV);
 
 		protected abstract Object getElementValue(int idx);
-
-//	RAGTEST	protected abstract Object insertNewElementAfterIndex(int idx);
-//
-//		protected abstract Object deleteElementAtIndex(final int idx);
 
 		protected abstract Object setComplexElementValueImpl(int idx, Object v);
 
@@ -363,6 +332,21 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				ServoyLog.logError(e);
 			}
 			return false;
+		}
+
+		@Override
+		public Object setComplexPropertyValue(Object id, Object v)
+		{
+			try
+			{
+				int idx = getIndexFromId((ArrayPropertyChildId)id);
+				return setComplexElementValueImpl(idx, v);
+			}
+			catch (NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+			}
+			return getEditableValue();
 		}
 	}
 

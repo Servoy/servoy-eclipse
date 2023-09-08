@@ -98,10 +98,8 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		// RAGTEST deze ook (als er nog geen columns zijn)
 		CellEditor cellEditor = new ButtonSetValueCellEditor()
 		{
-
 			@Override
 			protected void updateButtonState(Button buttonWidget, Object value)
 			{
