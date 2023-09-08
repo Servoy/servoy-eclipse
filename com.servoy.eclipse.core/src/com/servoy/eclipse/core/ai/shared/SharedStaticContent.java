@@ -23,4 +23,5 @@ package com.servoy.eclipse.core.ai.shared;
 public class SharedStaticContent
 {
 	public static final String STORED_ALL_UNEMBEDDED_PINECONE_ITEMS = "stored_all_unembedded_pinecone_items.sobj";
+	public static final String STORED_DOC_FINE_TUNING_ITEMS = "stored_doc_fine_tuning_items.jsonl";
 }

@@ -1,0 +1,1 @@
+,{"role": "user", "content": "${propertyName}"},{"role": "assistant", "content": "<#if properties[propertyName].doc()??>${utils.asJSONValue(properties[propertyName].doc())}\n</#if>Type: ${properties[propertyName].type()}<#if properties[propertyName].defaultValue()??>\nDefault value: ${utils.asJSONValue(properties[propertyName].defaultValue())}</#if>"}

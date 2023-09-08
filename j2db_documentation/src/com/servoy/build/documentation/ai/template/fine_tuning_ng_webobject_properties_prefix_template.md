@@ -1,0 +1,2 @@
+
+{"messages": [${utils.systemMessage}{"role": "user", "content": "I will give you one by one names of properties of NG ${package_type} '${componentname}' (internal name '${componentinternalname}') from NG ${package_type} Package '${package_display_name}'. Please reply with information about that property."},{"role": "assistant", "content": "OK. Waiting for the first property name."}
