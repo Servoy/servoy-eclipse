@@ -87,7 +87,7 @@ mat-select.repository .mat-mdc-select-arrow {
 }
 
 .mdc-tab:hover .mdc-tab__text-label{
-    color: var(--mdc-tab-indicator-active-indicator-color);
+    color: var(--mdc-tab-indicator-active-indicator-color) !important;
 }
 
 
@@ -162,7 +162,7 @@ html, body {
 }
 
 .dark .mdc-text-field--filled:not(.mdc-text-field--disabled):hover .mdc-line-ripple:before {
-    border-bottom-color: var(--mdc-tab-indicator-active-indicator-color);
+    border-bottom-color: var(--mdc-tab-indicator-active-indicator-color) !important;
 }
 
 .dark .mdc-icon-button:hover {
