@@ -86,6 +86,10 @@ mat-select.repository .mat-mdc-select-arrow {
   display: block;
 }
 
+.mdc-tab:hover .mdc-tab__text-label{
+    color: var(--mdc-tab-indicator-active-indicator-color);
+}
+
 
 /* DARK THEME*/
 html, body {
@@ -155,4 +159,12 @@ html, body {
 
 .dark .column-fitwidth {
     height: 80px;
+}
+
+.dark .mdc-text-field--filled:not(.mdc-text-field--disabled):hover .mdc-line-ripple:before {
+    border-bottom-color: var(--mdc-tab-indicator-active-indicator-color);
+}
+
+.dark .mdc-icon-button:hover {
+    background-color: var(--mdc-tab-indicator-active-indicator-color);
 }
