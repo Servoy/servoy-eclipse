@@ -189,6 +189,10 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				}
 				next = next.getParent();
 			}
+			else if (args.isPrepend())
+			{
+				arrayIndex = 0;
+			}
 			if (next instanceof BaseComponent)
 			{
 				if (next instanceof IBasicWebComponent)
@@ -941,6 +945,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		private String dropTargetUUID;
 		private boolean keepOldSelection;
 		private boolean addAfterTarget;
+		private boolean prepend;
 
 		public CreateComponentOptions()
 		{
@@ -1062,6 +1067,14 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 
 		/**
+		 * @param prepend the prepend to set
+		 */
+		public void setPrepend(boolean prepend)
+		{
+			this.prepend = prepend;
+		}
+
+		/**
 		 * @param keepOldSelection the keepOldSelection to set
 		 */
 		public void setKeepOldSelection(boolean keepOldSelection)
@@ -1129,9 +1142,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			return addAfterTarget;
 		}
 
-		/**
-		 * @return the keepOldSelection
-		 */
+		public boolean isPrepend()
+		{
+			return prepend;
+		}
+
 		public boolean isKeepOldSelection()
 		{
 			return keepOldSelection;
@@ -1155,6 +1170,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			options.ghostPropertyName = args.optString("ghostPropertyName", null);
 			options.dropTargetUUID = args.optString("dropTargetUUID", null);
 			options.addAfterTarget = args.optBoolean("addAfterTarget", false);
+			options.prepend = args.optBoolean("prepend", false);
 			options.keepOldSelection = args.optBoolean("keepOldSelection", false);
 
 			options.location = new Point(args.optInt("x"), args.optInt("y"));
