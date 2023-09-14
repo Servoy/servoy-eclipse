@@ -78,6 +78,7 @@ public enum UserNodeType
 	FORMS_GRAYED_OUT,
 	FORM,
 	JSLIB,
+	APIEXPLORER,
 	DATE,
 	ARRAY,
 	OBJECT,
