@@ -230,6 +230,10 @@ public class SolutionExplorerTreeContentProvider
 
 	private final PlatformSimpleUserNode i18n;
 
+	private final PlatformSimpleUserNode apiexplorer;
+
+	private final PlatformSimpleUserNode[] apiexplorerNodes;
+
 	private final PlatformSimpleUserNode[] scriptingNodes;
 
 	private final PlatformSimpleUserNode[] resourceNodes;
@@ -272,7 +276,11 @@ public class SolutionExplorerTreeContentProvider
 		view = v;
 		invisibleRootNode = new PlatformSimpleUserNode("root", UserNodeType.ARRAY);
 
-		PlatformSimpleUserNode jslib = createTypeNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, JSLib.class, invisibleRootNode);
+		apiexplorer = new PlatformSimpleUserNode(Messages.TreeStrings_APIExplorer, UserNodeType.APIEXPLORER, null,
+			uiActivator.loadImageFromBundle("api_explorer.png"));
+		apiexplorer.parent = invisibleRootNode;
+
+		PlatformSimpleUserNode jslib = createTypeNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, JSLib.class, apiexplorer);
 
 		jslib.children = new PlatformSimpleUserNode[] { //
 			createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib), //
@@ -295,7 +303,7 @@ public class SolutionExplorerTreeContentProvider
 			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
 				jslib) };
 
-		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
+		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, apiexplorer);
 
 		addReturnTypeNodesPlaceHolder(application, Utils.arrayJoin(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes(),
 			new ServoyException(0).getAllReturnedTypes()));
@@ -345,30 +353,30 @@ public class SolutionExplorerTreeContentProvider
 			uiActivator.loadImageFromBundle("all_packages.png"));
 		allWebPackagesNode.parent = invisibleRootNode;
 
-		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, invisibleRootNode);
+		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, apiexplorer);
 		addReturnTypeNodesPlaceHolder(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 
-		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, invisibleRootNode);
+		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, apiexplorer);
 
-		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, invisibleRootNode);
+		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, apiexplorer);
 
-		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, invisibleRootNode);
+		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, apiexplorer);
 
 		addReturnTypeNodesPlaceHolder(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
-		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, invisibleRootNode);
+		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, apiexplorer);
 
-		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, invisibleRootNode);
+		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, apiexplorer);
 		addReturnTypeNodesPlaceHolder(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
 
-		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, invisibleRootNode);
+		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, apiexplorer);
 		addReturnTypeNodesPlaceHolder(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.png"));
 		servers.parent = resources;
 
 		plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null, uiActivator.loadImageFromBundle("plugins.png"));
-		plugins.parent = invisibleRootNode;
+		plugins.parent = apiexplorer;
 
 
 		List<PlatformSimpleUserNode> resourcesChildren = new ArrayList<PlatformSimpleUserNode>();
@@ -396,22 +404,31 @@ public class SolutionExplorerTreeContentProvider
 
 		List<PlatformSimpleUserNode> rootChildren = new ArrayList<PlatformSimpleUserNode>();
 
+		List<PlatformSimpleUserNode> apiexplorerChildren = new ArrayList<PlatformSimpleUserNode>();
+
 		rootChildren.add(resources);
 		if (hasChildren(allWebPackagesNode)) rootChildren.add(allWebPackagesNode);
 		rootChildren.add(allSolutionsNode);
 		rootChildren.add(activeSolutionNode);
-		rootChildren.add(jslib);
-		rootChildren.add(application);
-		rootChildren.add(solutionModel);
-		rootChildren.add(databaseManager);
-		rootChildren.add(utils);
-		rootChildren.add(history);
-		rootChildren.add(security);
-		rootChildren.add(i18n);
-		rootChildren.add(jsunit);
-		rootChildren.add(plugins);
+
+		apiexplorerChildren.add(jslib);
+		apiexplorerChildren.add(application);
+		apiexplorerChildren.add(solutionModel);
+		apiexplorerChildren.add(databaseManager);
+		apiexplorerChildren.add(utils);
+		apiexplorerChildren.add(history);
+		apiexplorerChildren.add(security);
+		apiexplorerChildren.add(i18n);
+		apiexplorerChildren.add(jsunit);
+		apiexplorerChildren.add(plugins);
+
+		apiexplorer.children = apiexplorerChildren.toArray(new PlatformSimpleUserNode[0]);
+
+		rootChildren.add(apiexplorer);
 
 		invisibleRootNode.children = rootChildren.toArray(new PlatformSimpleUserNode[0]);// new PlatformSimpleUserNode[] { resources, allWebPackagesNode, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
+
+		apiexplorerNodes = new PlatformSimpleUserNode[] { apiexplorer };
 
 		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /*
 																																			 * exceptions ,
@@ -539,6 +556,11 @@ public class SolutionExplorerTreeContentProvider
 		activeSolutionNode.children = null;
 		allSolutionsNode.children = null;
 		servers.children = null;
+	}
+
+	public void setAPIExplorerNodesEnabled(boolean isEnabled)
+	{
+		setNodesEnabled(apiexplorerNodes, isEnabled);
 	}
 
 	public void setScriptingNodesEnabled(boolean isEnabled)

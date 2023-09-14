@@ -147,6 +147,7 @@ public class Messages extends NLS
 	public static String TreeStrings_SolutionModel;
 	public static String TreeStrings_i18n;
 	public static String TreeStrings_JSLib;
+	public static String TreeStrings_APIExplorer;
 	public static String TreeStrings_Math;
 	public static String TreeStrings_JSON;
 	public static String TreeStrings_Media;

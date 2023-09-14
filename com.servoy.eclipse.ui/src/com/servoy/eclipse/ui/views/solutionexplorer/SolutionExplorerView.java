@@ -946,6 +946,11 @@ public class SolutionExplorerView extends ViewPart
 						tree.setExpandedState(activeProjectNode, true);
 					}
 				}
+
+				// expand the API Explorer node after startup
+				tree.setExpandedState(rootNodes[rootNodes.length - 1], true);
+
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setAPIExplorerNodesEnabled(servoyProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(servoyProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(servoyProject != null);
 
@@ -2069,6 +2074,7 @@ public class SolutionExplorerView extends ViewPart
 						j.schedule();
 					}
 				}
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setAPIExplorerNodesEnabled(activeProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(activeProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(activeProject != null);
 			}
