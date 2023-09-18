@@ -27,11 +27,7 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
-import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.util.Utils;
 
 public class AiBridgeManager {
@@ -45,8 +41,6 @@ public class AiBridgeManager {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static String aiBridgePath = Platform.getLocation().toOSString() + File.separator + ".metadata" + File.separator + ".plugins" + File.separator + "com.servoy.eclipse.aibridge" + java.io.File.separator;
     private static final Object SAVE_LOCK = new Object();
-    
-    private static volatile boolean dataLoaded = false;//make sure we're loading data only once
     
     public static Map<UUID, Completion> getRequestMap() {
     	return requestMap;
@@ -104,11 +98,11 @@ public class AiBridgeManager {
     private static String logIn()
 	{
 
-//    	String loginToken = ServoyLoginDialog.getLoginToken();
-//    	if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-//    	System.out.println(loginToken);
-//		return loginToken;
-		return "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkaXNwbGF5LW5hbWUiOiJWaWQgTWFyaWFuIiwiY29tcGFueSI6IlMuQy4gU2Vydm95IFNybCIsInFhcGFhc19uYW1lc3BhY2UiOiJjcm0kJCIsImV4cCI6MTY5NTYzNDUxMSwiY29udGFjdC1pZCI6IjEwODY0MyIsImZpcnN0LW5hbWUiOiJWaWQiLCJlbWFpbCI6Im12aWRAc2Vydm95LmNvbSIsInVzZXJuYW1lIjoibXZpZEBzZXJ2b3kuY29tIiwibGFzdC1uYW1lIjoiTWFyaWFuIn0.9TiRvRJnnfPCuB59YfBK9N82mvHHSnyu2UdIgjlphlM";
+    	String loginToken = ServoyLoginDialog.getLoginToken();
+    	if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+    	System.out.println(loginToken);
+		return loginToken;
+//		return "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkaXNwbGF5LW5hbWUiOiJWaWQgTWFyaWFuIiwiY29tcGFueSI6IlMuQy4gU2Vydm95IFNybCIsInFhcGFhc19uYW1lc3BhY2UiOiJjcm0kJCIsImV4cCI6MTY5NTYzNDUxMSwiY29udGFjdC1pZCI6IjEwODY0MyIsImZpcnN0LW5hbWUiOiJWaWQiLCJlbWFpbCI6Im12aWRAc2Vydm95LmNvbSIsInVzZXJuYW1lIjoibXZpZEBzZXJ2b3kuY29tIiwibGFzdC1uYW1lIjoiTWFyaWFuIn0.9TiRvRJnnfPCuB59YfBK9N82mvHHSnyu2UdIgjlphlM";
 	}
     
     private static StringEntity createEntity(String loginToken, String queryData, String queryContext) throws UnsupportedEncodingException {
