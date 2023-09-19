@@ -41,16 +41,16 @@
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202309040820"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/95.0.24/repository"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="95.0.24"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/106.0.18/repository"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="106.0.18"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/95.0.19/repository"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="95.0.19"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/106.0.16/repository"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="106.0.16"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/95.0.19-arm/repository"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="95.0.19"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/106.0.16-arm/repository"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="106.0.16"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" missingManifest="generate" type="Maven">
             <dependencies>
