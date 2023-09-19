@@ -3589,6 +3589,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return forFoundsetName;
 	}
 
+	private static boolean isPropertyIdWithEmptyValueSupport(Object propertyId, PersistContext persistContext)
+	{
+		return "titleText".equals(propertyId) && persistContext != null &&
+			(persistContext.getPersist().getTypeID() == IRepository.SOLUTIONS || persistContext.getPersist().getTypeID() == IRepository.FORMS);
+	}
+
 	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, final Object id, final String displayName,
 		final PropertyDescription propertyDescription, final FlattenedSolution flattenedEditingSolution, final ITable finalTable)
 	{
@@ -3602,7 +3608,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			public String convertValue(Object propid, String value)
 			{
-				if ("titleText".equals(propid) && value != null && value.length() > 0 && value.trim().length() == 0)
+				if (isPropertyIdWithEmptyValueSupport(propid, persistContext) && value != null && value.length() > 0 && value.trim().length() == 0)
 				{
 					return IBasicFormManager.NO_TITLE_TEXT;
 				}
@@ -3614,7 +3620,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			public CellEditor createPropertyEditor(Composite parent)
 			{
 				return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, titleLabelProvider, finalTable, "Edit text property",
-					Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()), "titleText".equals(id));
+					Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()),
+					isPropertyIdWithEmptyValueSupport(id, persistContext));
 			}
 		});
 	}
