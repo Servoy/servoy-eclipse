@@ -305,8 +305,11 @@ public class SolutionExplorerTreeContentProvider
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, apiexplorer);
 
-		addReturnTypeNodesPlaceHolder(application, Utils.arrayJoin(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes(),
-			new ServoyException(0).getAllReturnedTypes()));
+		// get all JSApplication types
+		Class< ? >[] allJSApplicationTypes = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
+		// remove last 2 types APP_UI_PROPERTY.class and APP_NG_PROPERTY.class(deprecated/ replaced)
+		Class< ? >[] arr = Arrays.copyOf(allJSApplicationTypes, allJSApplicationTypes.length - 2);
+		addReturnTypeNodesPlaceHolder(application, Utils.arrayJoin(arr, new ServoyException(0).getAllReturnedTypes()));
 
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png"));
 		resources.parent = invisibleRootNode;
