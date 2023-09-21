@@ -112,9 +112,9 @@ export class FormService {
 
             if (propertyName === 'cssPosition') {
                 comp.layout = newPropertyValue;
-            } else {
-                comp.model[propertyName] = newPropertyValue;
             }
+            
+            comp.model[propertyName] = newPropertyValue;
 
             if (instanceOfChangeAwareValue(newPropertyValue)) {
                 newPropertyValue.getInternalState().setChangeListener(smartPropertyChangeListenerGenerator(propertyName, newPropertyValue));
