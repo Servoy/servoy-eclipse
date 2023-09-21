@@ -169,7 +169,7 @@ export class BSWindow {
     close() {
         const _this = this;
         if (this.options.window_manager && this.options.window_manager.modalStack.length === 1 && this.options.isModal) {
-            const backdropModals = this.doc.getElementsByClassName('.modal-backdrop');
+            const backdropModals = this.doc.getElementsByClassName('modal-backdrop');
             while (backdropModals[0]) {
                 backdropModals[0].parentNode.removeChild(backdropModals[0]);
             }
