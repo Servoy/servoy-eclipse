@@ -1866,7 +1866,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				if (add)
 				{
-					if ("servoycore-formcomponent".equals(((WebComponent)object).getTypeName()))
+					if (object instanceof WebComponent wc && "servoycore-formcomponent".equals(wc.getTypeName()))
 					{
 						Object containedForm = ((WebComponent)object).getProperty("containedForm");
 						if (containedForm instanceof JSONObject && persist instanceof WebFormComponentChildType)

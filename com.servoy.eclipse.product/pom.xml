@@ -157,7 +157,7 @@
 			<plugin>
 				<groupId>name.abuchen</groupId>
 				<artifactId>fix-info-plist-maven-plugin</artifactId>
-				<version>1.7</version>
+				<version>1.8</version>
 				<executions>
 					<execution>
 						<id>fix-info-plist</id>
