@@ -340,12 +340,25 @@ export class ApplicationService {
             messageDialogWindowComponent.instance.values = values;
             messageDialogWindowComponent.instance.buttonsText = buttonsText;
 
+            const dialogWindowComponentEl = messageDialogWindowComponent.location.nativeElement.childNodes[0];
+            const windowWidth = this.doc.documentElement.clientWidth;
+            //const windowHeight = this.doc.documentElement.clientHeight;
+            let top: number; let left: number;
+            left = (windowWidth / 2) - (dialogWindowComponentEl.clientWidth / 2);
+            top = 50; //(windowHeight / 2) - (dialogWindowComponentEl.clientHeight / 2);
+            if (left < 0) left = 0;
+            //if (top < 0) top = 0;
+
             const opt: BSWindowOptions = {
                 id: 'svymessagedialog',
-                fromElement: messageDialogWindowComponent.location.nativeElement.childNodes[0],
+                fromElement: dialogWindowComponentEl,
                 title: dialogTitle,
                 resizable: false,
-                isModal: true
+                isModal: true,
+                location: {
+                    left,
+                    top
+                }
             };
 
             const bsWindowInstance = this.bsWindowManager.createWindow(opt);
