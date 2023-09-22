@@ -390,7 +390,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						textAlign: "center",
 						whiteSpace: "nowrap",
 						cursor: "s-resize",
-						overflow: "visible"
+						overflow: "visible",
+						visibility: "hidden"
 					};
 				} else if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) { // the form
 					style = {

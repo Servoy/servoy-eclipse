@@ -175,7 +175,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                             right: '-90px',
                             width: '90px',
                             height: '20px',
-                            overflow: 'visible'
+                            overflow: 'visible',
+                            visibility: 'hidden'
                         };
                         ghost.hrstyle = {
                             marginTop: '-1px',
