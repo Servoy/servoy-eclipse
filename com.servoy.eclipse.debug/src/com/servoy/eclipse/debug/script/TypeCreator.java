@@ -175,6 +175,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
@@ -182,6 +183,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.LiteralDataprovider;
+import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
@@ -193,9 +195,11 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IIconProvider;
@@ -5256,6 +5260,49 @@ public class TypeCreator extends TypeCache
 			{
 				type.setDescription("<b>Based on a table that is marked as HIDDEN in developer</b>");
 				type.setDeprecated(true);
+			}
+			Iterator<TableNode> tableNodes = fs.getTableNodes(table);
+			while (tableNodes.hasNext())
+			{
+				TableNode tableNode = tableNodes.next();
+				if (tableNode != null)
+				{
+					Iterator<ScriptMethod> it2 = tableNode.getFoundsetMethods(true);
+					while (it2.hasNext())
+					{
+						ScriptMethod method = it2.next();
+						org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
+						m.setName(method.getName());
+						m.setAttribute(RESOURCE, method);
+						String comment = method.getRuntimeProperty(IScriptProvider.COMMENT);
+						if (comment != null)
+						{
+							m.setDescription(SolutionExplorerListContentProvider.getParsedComment(comment, STANDARD_ELEMENT_NAME, false));
+						}
+						MethodArgument returnTypeArgument = method.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
+						if (returnTypeArgument != null)
+						{
+							m.setType(getTypeRef(context, returnTypeArgument.getType().getName()));
+						}
+						EList<Parameter> parameters = m.getParameters();
+						MethodArgument[] methodParams = method.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+						if (methodParams != null && methodParams.length > 0)
+						{
+							for (MethodArgument methodParam : methodParams)
+							{
+								Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
+								parameter.setName(methodParam.getName());
+								parameter.setType(getTypeRef(context, methodParam.getType().getName()));
+								parameters.add(parameter);
+							}
+						}
+						if (method.isDeprecated())
+						{
+							m.setDeprecated(true);
+						}
+						type.getMembers().add(m);
+					}
+				}
 			}
 		}
 
