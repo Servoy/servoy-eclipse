@@ -729,7 +729,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			String password = sc.getPassword();
 			try
 			{
-				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), password != null ? password : "");
+				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(password != null ? password : "");
 			}
 			catch (Exception e)
 			{
@@ -815,7 +815,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			try
 			{
 				properties.setProperty("license." + i + ".code",
-					IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), license.getCode()));
+					IWarExportModel.enc_prefix + SecuritySupport.encrypt(license.getCode()));
 			}
 			catch (Exception e)
 			{

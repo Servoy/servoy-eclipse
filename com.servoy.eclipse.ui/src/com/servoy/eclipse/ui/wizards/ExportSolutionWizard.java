@@ -264,7 +264,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		dialogSettings.put(DEPLOY_USERNAME, deployUsername);
 		try
 		{
-			dialogSettings.put(DEPLOY_PASSWORD, SecuritySupport.encrypt(Settings.getInstance(), deployPassword));
+			dialogSettings.put(DEPLOY_PASSWORD, SecuritySupport.encrypt(deployPassword));
 		}
 		catch (Exception ex)
 		{
@@ -366,7 +366,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		}
 		try
 		{
-			deployPassword = SecuritySupport.decrypt(Settings.getInstance(), dialogSettings.get(DEPLOY_PASSWORD));
+			deployPassword = SecuritySupport.decrypt(dialogSettings.get(DEPLOY_PASSWORD));
 		}
 		catch (Exception ex)
 		{

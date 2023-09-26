@@ -1344,7 +1344,7 @@ public class WarExporter
 				File adminProperties = new File(tmpWarDir, "WEB-INF/admin.properties");
 				Properties prop = new Properties();
 				prop.setProperty("defaultAdminUser", exportModel.getDefaultAdminUser());
-				prop.setProperty("defaultAdminPassword", SecuritySupport.encrypt(Settings.getInstance(), exportModel.getDefaultAdminPassword()));
+				prop.setProperty("defaultAdminPassword", SecuritySupport.encrypt(exportModel.getDefaultAdminPassword()));
 				if (exportModel.isUseAsRealAdminUser())
 				{
 					prop.setProperty("useAsRealAdminUser", "true");
@@ -1887,7 +1887,7 @@ public class WarExporter
 					{
 						try
 						{
-							String password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), properties.getProperty(key, ""));
+							String password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(properties.getProperty(key, ""));
 							properties.put(k, password);
 						}
 						catch (Exception e)
@@ -1920,7 +1920,7 @@ public class WarExporter
 				try
 				{
 					Cipher cipher = Cipher.getInstance("DESede"); //$NON-NLS-1$
-					cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey(null));
+					cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey());
 					desCipher = cipher;
 				}
 				catch (Exception e)

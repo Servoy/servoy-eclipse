@@ -171,7 +171,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		try
 		{
 			Cipher cipher = Cipher.getInstance("DESede"); //$NON-NLS-1$
-			cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey(null));
+			cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey());
 			desCipher = cipher;
 		}
 		catch (Exception e)
@@ -391,7 +391,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		try
 		{
 			Cipher cipher = Cipher.getInstance("DESede"); //$NON-NLS-1$
-			cipher.init(Cipher.ENCRYPT_MODE, SecuritySupport.getCryptKey(null));
+			cipher.init(Cipher.ENCRYPT_MODE, SecuritySupport.getCryptKey());
 			desCipher = cipher;
 		}
 		catch (Exception e)
