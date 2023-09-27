@@ -54,6 +54,7 @@ public class IndexPageFilter implements Filter
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException
 	{
+		StatelessLoginHandler.init();
 	}
 
 	@Override
