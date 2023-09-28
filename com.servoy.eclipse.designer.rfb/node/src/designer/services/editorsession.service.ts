@@ -542,6 +542,7 @@ export class PaletteComp {
     variant?: string;
     snapX?: string;
     snapY?: string;
+    cssPosition?: { property: string };
 }
 
 export class Package {

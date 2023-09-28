@@ -20,7 +20,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
     draggedVariant: DraggedVariant = {};
     isDraggedVariant = false;
-    snapData: {top: number, left: number, snapX?: string, snapY?: string};
+    snapData: {top: number, left: number, snapX?: string, snapY?: string, cssPosition: { property: string } };
 
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, 
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
@@ -192,6 +192,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 component.y = this.snapData.top;
                 component.snapX = this.snapData.snapX;
                 component.snapY = this.snapData.snapY;
+                component.cssPosition = this.snapData.cssPosition
             }
             else {
                 component.x = event.pageX;

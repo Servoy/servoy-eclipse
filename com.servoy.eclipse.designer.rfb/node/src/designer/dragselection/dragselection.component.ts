@@ -1,17 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 
-import { Component, OnInit, Renderer2, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Renderer2, AfterViewInit, OnDestroy } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from 'src/designer/directives/resizeknob.directive';
 import { DesignerUtilsService } from '../services/designerutils.service';
-import { EditorContentService } from '../services/editorcontent.service';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 
 @Component({
   selector: 'dragselection',
   templateUrl: './dragselection.component.html'
 })
-export class DragselectionComponent implements OnInit, ISupportAutoscroll {
+export class DragselectionComponent implements OnInit, ISupportAutoscroll, IContentMessageListener, OnDestroy {
     frameRect: {x?:number; y?:number; top?:number; left?:number};
     leftContentAreaAdjust: number;
     topContentAreaAdjust: number;
@@ -32,6 +32,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
     selectionRect = {top: 0, left: 0, width: 0, height: 0};
     mousedownpoint = {x: 0, y: 0};
     mouseOffset = {top: 0, left: 0}; //autoscroll limits will refer to this parameter
+    snapData: {top: number, left: number, snapX?: string, snapY?: string, cssPosition: { property: string } };
 
   constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private readonly designerUtilsService: DesignerUtilsService, private editorContentService : EditorContentService) { }
 
@@ -50,6 +51,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
       this.selectionRect = {top: 0, left: 0, width: 0, height: 0};
       this.autoscrollOffset.x = 0;
       this.autoscrollOffset.y = 0;
+
+      this.editorContentService.addContentMessageListener(this);
+  }
+
+  ngOnDestroy(): void {
+    this.editorContentService.removeContentMessageListener(this);
   }
 
   private onKeyup(event: KeyboardEvent) {
@@ -64,7 +71,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
             this.selectionToDrag[i] = cloneInfo.element.getAttribute('cloneuuid');
             this.currentElementsInfo.set(this.selectionToDrag[i], new ElementInfo(node));
             this.renderer.removeChild(cloneInfo.element.parentElement, cloneInfo.element);
-               }
+        }
         this.dragCopy = false;
 	}
   }
@@ -121,7 +128,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
               const id = (event.ctrlKey || event.metaKey) ? i++ : nodeId;
               changes[id] = {
                   x: elementInfo.x,
-                  y: elementInfo.y
+                  y: elementInfo.y,
+                  cssPosition: this.snapData?.cssPosition
               };
 
               if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
@@ -252,6 +260,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
             elementInfo.element.style.position = 'absolute';
             elementInfo.element.style.top = (parseInt(elementInfo.element.style.top.replace('px', '')) || 0)  + changeY + 'px';
             elementInfo.element.style.left = (parseInt(elementInfo.element.style.left.replace('px', ''))|| 0)  + changeX + 'px';
+        }
+    }
+
+    contentMessageReceived(id: string, data: { property: string }) {
+        if (id === 'snap' && this.selectionToDrag) {
+            this.snapData = data['properties'];
         }
     }
 
