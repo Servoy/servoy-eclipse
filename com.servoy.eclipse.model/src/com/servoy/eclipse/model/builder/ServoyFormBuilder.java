@@ -2294,7 +2294,7 @@ public class ServoyFormBuilder
 					{
 						Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
 						if (relations != null && !relations[0].isGlobal() &&
-							!parentForm.getDataSource().equals(relations[0].getPrimaryDataSource()))
+							!Utils.equalObjects(datasource != null ? datasource : parentForm.getDataSource(), relations[0].getPrimaryDataSource()))
 						{
 							ServoyMarker mk;
 							if (elementName == null)
