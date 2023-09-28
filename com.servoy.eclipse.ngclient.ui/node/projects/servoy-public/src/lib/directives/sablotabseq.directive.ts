@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, HostBinding, ElementRef, HostListener, OnDestroy, ChangeDetectorRef, SimpleChanges, OnChanges } from '@angular/core';
+import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, ChangeDetectorRef, SimpleChanges, OnChanges } from '@angular/core';
 
 @Directive({
     selector: '[sabloTabseq]'
@@ -7,7 +7,6 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
     @Input('sabloTabseq') designTabSeq: number;
     @Input('sabloTabseqConfig') config: any;
-    @HostBinding('attr.tabindex') tabindex: number;
 
     designChildIndexToArrayPosition = {};
     designChildTabSeq = []; // contains ordered numbers that will be keys in 'runtimeChildIndexes'; can have duplicates
@@ -254,8 +253,7 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
             this.config.tabSeqSetter.setTabIndex(tabindex);
         }
         else {
-            this.tabindex = tabindex;
-            this.cdRef.detectChanges();
+            this._elemRef.nativeElement.setAttribute("tabindex", tabindex);
         }
     }
 
