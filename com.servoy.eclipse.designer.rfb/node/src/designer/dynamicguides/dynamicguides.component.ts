@@ -16,7 +16,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     previousPoint: {x: number, y: number};
     topAdjust: any;
     leftAdjust: number;
-    snapData: {top: number, left: number, right?: number, bottom?: number, snapX?: string, snapY?: string};
+    snapData: {top: number, left: number, guideX?: number, guideY?: number, snapX?: string, snapY?: string};
   
 
     constructor(protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2,
@@ -34,54 +34,54 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
         this.editorContentService.removeContentMessageListener(this);
     }
 
-    onMouseUp(event: MouseEvent): any {
+    onMouseUp(event: MouseEvent): void {
         this.snapData = null;
+        this.editorContentService.sendMessageToIframe({ id: 'clearSnapCache'});
+        this.renderer.setStyle(this.vertical.nativeElement, 'display', 'none');
         this.renderer.setStyle(this.vertical.nativeElement, 'height', '0px');
+        this.renderer.setStyle(this.horizontal.nativeElement, 'display', 'none');
         this.renderer.setStyle(this.horizontal.nativeElement, 'width', '0px');
     }    
 
     private onMouseMove(event: MouseEvent) {
-      /*if (!this.editorSession.getState().dragging) return;
+      if (!this.editorSession.getState().dragging) return;
       let point = { x: event.pageX, y: event.pageY };
       if (!this.topAdjust) {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
         this.topAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
         this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''))
-    }
+      }
       const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
       point.x = point.x + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust;
       point.y = point.y + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust;
-      if (this.previousPoint && (Math.abs(this.previousPoint.x - point.x) < 5 || Math.abs(this.previousPoint.y - point.y) < 5)) return;
+      if (this.previousPoint && this.previousPoint.x === point.x && this.previousPoint.y === point.y) return;
       this.editorContentService.sendMessageToIframe({ id: 'getSnapTarget', p1: point });
-      this.previousPoint = point;*/
+      this.previousPoint = point;
     }
 
     contentMessageReceived(id: string, data: { property: string }) {
         if (id === 'snap') {
             this.snapData = data['properties'];
             if (this.snapData?.snapX) {
-                const snapX = this.editorContentService.getContentElement(this.snapData.snapX);
-                const content = snapX.getBoundingClientRect();
-                this.renderer.setStyle(this.vertical.nativeElement, 'left', ( this.snapData.right ? this.snapData.right : this.snapData.left) + this.leftAdjust + 'px');
-                const t = Math.min(this.snapData.top, content.top);
-                this.renderer.setStyle(this.vertical.nativeElement, 'top', t + this.topAdjust + 'px');
-                const h = this.snapData.bottom? this.snapData.bottom : Math.max(content.bottom, this.previousPoint.y) ;
-                this.renderer.setStyle(this.vertical.nativeElement, 'height', h + 'px');
+                this.renderer.setStyle(this.vertical.nativeElement, 'left', this.snapData.guideX + this.leftAdjust + 'px');
+                this.renderer.setStyle(this.vertical.nativeElement, 'top', this.snapData['startX'] + this.topAdjust + 'px');
+                this.renderer.setStyle(this.vertical.nativeElement, 'height', this.snapData['lenX'] + 'px');
+                this.renderer.setStyle(this.vertical.nativeElement, 'display', 'block');
             }
             else {
                 this.renderer.setStyle(this.vertical.nativeElement, 'height', '0px');
+                this.renderer.setStyle(this.vertical.nativeElement, 'display', 'none');
             }
 
             if (this.snapData?.snapY) {
-                const snapY = this.editorContentService.getContentElement(this.snapData.snapY);
-                const content = snapY.getBoundingClientRect();
-                const l = Math.min(this.snapData.left, content.left);
-                this.renderer.setStyle(this.horizontal.nativeElement, 'left', l + this.leftAdjust + 'px');
-                this.renderer.setStyle(this.horizontal.nativeElement, 'top',  this.snapData.top + this.topAdjust + 'px'); //TODO fix for bottom edge
-                this.renderer.setStyle(this.horizontal.nativeElement, 'width', '100%'); //TODO get extra info for the width
+                this.renderer.setStyle(this.horizontal.nativeElement, 'left', this.snapData['startY'] + this.leftAdjust + 'px');
+                this.renderer.setStyle(this.horizontal.nativeElement, 'top',  this.snapData.guideY + this.topAdjust + 'px'); 
+                this.renderer.setStyle(this.horizontal.nativeElement, 'width', this.snapData['lenY'] + 'px');
+                this.renderer.setStyle(this.horizontal.nativeElement, 'display', 'block');
             }
             else {
                 this.renderer.setStyle(this.horizontal.nativeElement, 'width', '0px');
+                this.renderer.setStyle(this.horizontal.nativeElement, 'display', 'none');
             }
         }
     }

@@ -129,7 +129,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
               changes[id] = {
                   x: elementInfo.x,
                   y: elementInfo.y,
-                  cssPosition: this.snapData?.cssPosition
+                  cssPos: this.snapData?.cssPosition
               };
 
               if ((event.ctrlKey || event.metaKey) && this.dragCopy) {

@@ -192,7 +192,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 component.y = this.snapData.top;
                 component.snapX = this.snapData.snapX;
                 component.snapY = this.snapData.snapY;
-                component.cssPosition = this.snapData.cssPosition
+                component.cssPos = this.snapData.cssPosition
             }
             else {
                 component.x = event.pageX;

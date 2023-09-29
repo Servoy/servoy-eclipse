@@ -51,6 +51,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.outline.FormOutlineContentProvider;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
@@ -61,12 +62,15 @@ import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.ISupportCSSPosition;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
@@ -677,4 +681,138 @@ public class DesignerUtil
 		return false;
 	}
 
+	public static CSSPosition cssPositionFromJSON(BaseVisualFormEditor editorPart, IPersist persist, JSONObject properties)
+	{
+		return cssPositionFromJSON(editorPart, persist, properties, false);
+	}
+
+	public static CSSPosition cssPositionFromJSON(BaseVisualFormEditor editorPart, IPersist persist, JSONObject properties, boolean isResize)
+	{
+		CSSPosition newPosition;
+		JSONObject obj = properties.getJSONObject("cssPos");
+		CSSPosition position = ((ISupportCSSPosition)persist).getCssPosition();
+		newPosition = (position == null) ? new CSSPosition("0", "-1", "-1", "0", "0", "0")
+			: new CSSPosition(position.top, position.right, position.bottom, position.left, properties.optString("width", position.width),
+				properties.optString("height", position.height));
+		if (obj.has("left"))
+		{
+			ISupportCSSPosition left = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				obj.optString("left")));
+			if (left != null && CSSPositionUtils.isSet(left.getCssPosition().left))
+			{
+				newPosition.left = left.getCssPosition().left;
+			}
+		}
+		else if (obj.has("right"))
+		{
+			ISupportCSSPosition right = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				obj.optString("right")));
+			if (right != null && CSSPositionUtils.isSet(right.getCssPosition().right))
+			{
+				newPosition.right = right.getCssPosition().right;
+			}
+		}
+		else if (obj.has("middleH"))
+		{
+			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				obj.optString("middleH")));
+			if (middle != null)
+			{
+				CSSPosition midCssPosition = middle.getCssPosition();
+				int mid = -1;
+				if (CSSPositionUtils.isSet(midCssPosition.left) && CSSPositionUtils.isSet(midCssPosition.width))
+				{
+					mid = CSSPositionUtils.getPixelsValue(midCssPosition.left) + CSSPositionUtils.getPixelsValue(midCssPosition.width) / 2;
+				}
+				else if (CSSPositionUtils.isSet(midCssPosition.right) && CSSPositionUtils.isSet(midCssPosition.width))
+				{
+					mid = CSSPositionUtils.getPixelsValue(midCssPosition.right) - CSSPositionUtils.getPixelsValue(midCssPosition.width) / 2;
+				}
+				else
+				{
+					mid = (CSSPositionUtils.getPixelsValue(midCssPosition.left) + CSSPositionUtils.getPixelsValue(midCssPosition.right)) / 2;
+				}
+
+				if (CSSPositionUtils.isSet(newPosition.width))
+				{
+					if (CSSPositionUtils.isSet(newPosition.left))
+					{
+						newPosition.left = (mid - CSSPositionUtils.getPixelsValue(newPosition.width) / 2) + "";
+					}
+					if (CSSPositionUtils.isSet(newPosition.right))
+					{
+						newPosition.right = (mid + CSSPositionUtils.getPixelsValue(newPosition.width) / 2) + "";
+					}
+				}
+				else
+				{
+					//TODO set left and right?
+				}
+			}
+		}
+		//TODO middle v
+		if (obj.has("top"))
+		{
+			ISupportCSSPosition top = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				obj.optString("top")));
+			if (top != null && CSSPositionUtils.isSet(top.getCssPosition().top))
+			{
+				newPosition.top = top.getCssPosition().top;
+			}
+		}
+		else if (obj.has("bottom"))
+		{
+			ISupportCSSPosition bottom = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				obj.optString("bottom")));
+			if (bottom != null && CSSPositionUtils.isSet(bottom.getCssPosition().bottom))
+			{
+				newPosition.bottom = bottom.getCssPosition().bottom;
+			}
+		}
+		//TODO middle h
+
+		//make sure we have a valid css pos object
+		//in case both properties are set and it's a resize then we keep the width/height and the new property
+		//else we remove the width/height
+		if (CSSPositionUtils.isSet(newPosition.left) && CSSPositionUtils.isSet(newPosition.right) &&
+			CSSPositionUtils.isSet(newPosition.width))
+		{
+			if (isResize)
+			{
+				if (properties.getJSONObject("cssPosition").has("right"))
+				{
+					newPosition.left = "-1";
+				}
+				else
+				{
+					newPosition.right = "-1";
+				}
+			}
+			else
+			{
+				newPosition.width = "-1";
+			}
+		}
+
+		if (CSSPositionUtils.isSet(newPosition.top) && CSSPositionUtils.isSet(newPosition.bottom) &&
+			CSSPositionUtils.isSet(newPosition.height))
+		{
+			if (isResize)
+			{
+				if (properties.getJSONObject("cssPosition").has("bottom"))
+				{
+					newPosition.top = "-1";
+				}
+				else
+				{
+					newPosition.bottom = "-1";
+				}
+			}
+			else
+			{
+				newPosition.height = "-1";
+			}
+		}
+		return newPosition;
+	}
 }
