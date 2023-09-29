@@ -60,6 +60,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
@@ -511,54 +512,78 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 	 */
 	public static void showDataproviderDialog(Map<String, PropertyDescription> properties, AbstractBase webComponent, BaseVisualFormEditor activeEditor)
 	{
+		boolean showDialog = true;
 		List<Entry<String, PropertyDescription>> dataproviderProperties = properties.entrySet().stream()
 			.filter(entry -> entry.getValue().getType().getName().equals(DataproviderPropertyType.TYPE_NAME))
 			.collect(Collectors.toList());
-		if (dataproviderProperties.size() == 1)
+
+		ISupportChilds wc = webComponent.getParent();
+		while (!(wc instanceof Form))
 		{
-			Entry<String, PropertyDescription> entry = dataproviderProperties.get(0);
-			CreateComponentHandler.autoShowDataProviderSelection(entry.getValue(), activeEditor.getForm(), webComponent,
-				entry.getKey());
+			wc = wc.getParent();
 		}
-		else if (dataproviderProperties.size() > 1)
+		if (wc instanceof Form frm)
 		{
-			List<String> collect = dataproviderProperties.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
-			ElementListSelectionDialog dialog = new ElementListSelectionDialog(activeEditor.getEditorSite().getShell(),
-				new LabelProvider()
-				{
-					@Override
-					public String getText(Object element)
-					{
-						String txt = super.getText(element);
-						if (txt.endsWith("ID")) txt = txt.substring(0, txt.length() - 2);
-						return txt;
-					}
-				});
-			dialog.setMultipleSelection(true);
-			dialog.setMessage("Select the dataprovider properties that you want to configure");
-			dialog.setElements(collect.toArray());
-			List<String> dataproviderNames = collect.stream().filter(property -> property.toLowerCase().startsWith("dataprovider"))
-				.collect(Collectors.toList());
-			if (dataproviderNames.size() > 0)
+			boolean isFC = frm.getPropertiesMap().get("customProperties").toString().contains("formComponent:true");
+			boolean hasDB = frm.getPropertiesMap().get("dataSource") == null ? false : true;
+			if (isFC && !hasDB)
 			{
-				// this is a bit hard coded to at least select the one that is called dataprovider as the main selection.
-				dialog.setInitialSelections(dataproviderNames.toArray());
+				showDialog = false;
 			}
-			dialog.setTitle("Dataprovider properties configuration");
-			try
+		}
+
+		if (showDialog)
+		{
+			if (dataproviderProperties.size() == 1)
 			{
-				if (dialog.open() == Window.OK)
+				Entry<String, PropertyDescription> entry = dataproviderProperties.get(0);
+				Object showDialogForThisDP = dataproviderProperties.get(0).getValue().getTag("wizard");
+				if (showDialogForThisDP != null)
 				{
-					asList(dialog.getResult()).forEach(property -> {
-						PropertyDescription propertyDescription = properties.get(property);
-						CreateComponentHandler.autoShowDataProviderSelection(propertyDescription, activeEditor.getForm(), webComponent, (String)property);
-					});
+					CreateComponentHandler.autoShowDataProviderSelection(entry.getValue(), activeEditor.getForm(), webComponent,
+						entry.getKey());
 				}
 			}
-			catch (Exception e)
+			else if (dataproviderProperties.size() > 1)
 			{
-				// happens sometimes when active window is not found (only while debugging?)
-				ServoyLog.logError(e);
+				List<String> collect = dataproviderProperties.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
+				ElementListSelectionDialog dialog = new ElementListSelectionDialog(activeEditor.getEditorSite().getShell(),
+					new LabelProvider()
+					{
+						@Override
+						public String getText(Object element)
+						{
+							String txt = super.getText(element);
+							if (txt.endsWith("ID")) txt = txt.substring(0, txt.length() - 2);
+							return txt;
+						}
+					});
+				dialog.setMultipleSelection(true);
+				dialog.setMessage("Select the dataprovider properties that you want to configure");
+				dialog.setElements(collect.toArray());
+				List<String> dataproviderNames = collect.stream().filter(property -> property.toLowerCase().startsWith("dataprovider"))
+					.collect(Collectors.toList());
+				if (dataproviderNames.size() > 0)
+				{
+					// this is a bit hard coded to at least select the one that is called dataprovider as the main selection.
+					dialog.setInitialSelections(dataproviderNames.toArray());
+				}
+				dialog.setTitle("Dataprovider properties configuration");
+				try
+				{
+					if (dialog.open() == Window.OK)
+					{
+						asList(dialog.getResult()).forEach(property -> {
+							PropertyDescription propertyDescription = properties.get(property);
+							CreateComponentHandler.autoShowDataProviderSelection(propertyDescription, activeEditor.getForm(), webComponent, (String)property);
+						});
+					}
+				}
+				catch (Exception e)
+				{
+					// happens sometimes when active window is not found (only while debugging?)
+					ServoyLog.logError(e);
+				}
 			}
 		}
 	}
