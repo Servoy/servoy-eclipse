@@ -36,9 +36,9 @@
             <unit id="org.eclipse.platform.sdk" version="4.28.0.I20230605-0440"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2023.09/"/>
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2023.12"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202307140941"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202309200917"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202310020950"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/106.0.18/repository"/>
@@ -202,6 +202,12 @@
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
                     <version>1.14.5</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>antlr4-runtime</artifactId>
+                    <version>4.13.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
