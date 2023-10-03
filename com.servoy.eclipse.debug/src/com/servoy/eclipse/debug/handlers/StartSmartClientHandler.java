@@ -42,7 +42,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.Activator.ShortcutDefinition;
-import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -162,11 +161,6 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 								am.put(def.name, def.action);
 							}
 						}
-					}
-
-					if (debugJ2DBClient.getFlattenedSolution().getDebugListener() == null)
-					{
-						debugJ2DBClient.getFlattenedSolution().registerDebugListener(new FlattenedSolutionDebugListener());
 					}
 					debugJ2DBClient.show();
 				}

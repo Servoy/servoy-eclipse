@@ -47,7 +47,6 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -145,10 +144,6 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 				{
 					monitor.worked(3);
 					final IDebugWebClient debugWebClient = Activator.getDefault().getDebugWebClient();
-					if (debugWebClient != null && debugWebClient.getFlattenedSolution().getDebugListener() == null)
-					{
-						debugWebClient.getFlattenedSolution().registerDebugListener(new FlattenedSolutionDebugListener());
-					}
 					SwingUtilities.invokeLater(new Runnable()
 					{
 						public void run()

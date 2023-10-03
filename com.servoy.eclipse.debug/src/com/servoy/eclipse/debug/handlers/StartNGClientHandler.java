@@ -27,7 +27,6 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.debug.NGClientStarter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
@@ -100,10 +99,6 @@ public class StartNGClientHandler extends StartWebClientHandler implements NGCli
 					monitor.worked(3);
 					final String solution_path = (new Ng2DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/";
 					final IDebugClient debugNGClient = Activator.getDefault().getDebugNGClient();
-					if (debugNGClient != null && debugNGClient.getFlattenedSolution().getDebugListener() == null)
-					{
-						debugNGClient.getFlattenedSolution().registerDebugListener(new FlattenedSolutionDebugListener());
-					}
 					if (debugNGClient != null && debugNGClient.getSolution() != null)
 					{
 						debugNGClient.shutDown(true);
