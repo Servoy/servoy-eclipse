@@ -312,6 +312,30 @@ export class NGUtilsService {
     public removeFormStyleClass(_formname: string, _styleclass: string) {
         // implemented in ngutils_server.js
     }
+    
+    /**
+	* Print a document from specific URL. This will open browser specific print dialog. 
+	* 
+	* NOTE: url should be from same domain, otherwise a temp file on server should be created and served
+	* 
+	* @sample
+	* 	//if url is not from same domain we must create a temporary file
+	* 	var file = plugins.http.getMediaData(url);  
+	*	var remoteFileName = application.getUUID().toString() + '.pdf'; 
+	*	var remoteFile = plugins.file.convertToRemoteJSFile('/'+remoteFileName) 
+	*	remoteFile.setBytes(file,true);  //Convert the remote file to a url, and print it
+	*	var remoteUrl = plugins.file.getUrlForRemoteFile('/'+remoteFileName);  
+	*	plugins.ngclientutils.printDocument(remoteUrl)
+	* @param {string} url The URL of document to be printed.
+	*/
+    public printDocument(url: string) {
+		const objFra = document.createElement('iframe');   
+	    objFra.style.visibility = 'hidden';    
+	    objFra.src = url;                      
+	    document.body.appendChild(objFra);  
+	    objFra.contentWindow.focus();      
+	    objFra.contentWindow.print();
+	}
 
     /**
     * Retrieves the screen location of a specific element. Returns the location as point (object with x and y properties).
@@ -327,6 +351,16 @@ export class NGUtilsService {
         }
         return null;
     }
+    
+    /**
+	* Set lang attribute on html tag.
+	* 
+	* @param {string} lang of the html page
+	*/
+	public setLangAttribute(lang: string)
+	{
+		document.querySelector('html').setAttribute('lang', lang);
+	}
 
     /**
      *

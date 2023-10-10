@@ -37,7 +37,7 @@ export class DialogService {
         if (!dialogTitle) {
             dialogTitle = 'Enter value';
         }
-        return await this.showDialog(dialogTitle, dialogMessage, 'type-input', [initValue], [this.i18nCancel, this.i18nOK]);
+        return await this.showDialog(dialogTitle, dialogMessage, 'type-input', initValue !==null && initValue !== undefined ? [initValue] : null, [this.i18nCancel, this.i18nOK]);
     }
 
     public async showSelectDialog(dialogTitle: string, dialogMessage: string, ...options: string[]): Promise<any> {
