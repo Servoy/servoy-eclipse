@@ -44,7 +44,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     }    
 
     private onMouseMove(event: MouseEvent) {
-      if (!this.editorSession.getState().dragging) return;
+      /*if (!this.editorSession.getState().dragging) return;
       let point = { x: event.pageX, y: event.pageY };
       if (!this.topAdjust) {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
@@ -56,7 +56,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
       point.y = point.y + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust;
       if (this.previousPoint && this.previousPoint.x === point.x && this.previousPoint.y === point.y) return;
       this.editorContentService.sendMessageToIframe({ id: 'getSnapTarget', p1: point });
-      this.previousPoint = point;
+      this.previousPoint = point;*/
     }
 
     contentMessageReceived(id: string, data: { property: string }) {
