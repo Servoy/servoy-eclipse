@@ -54,7 +54,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         this.editorContentService.executeOnlyAfterInit(() => {
             this.contentInit = true;
             this.calculateAdjustToMainRelativeLocation();
-            this.createNodes(this.editorSession.getSelection())
+            setTimeout(()=>{
+				this.createNodes(this.editorSession.getSelection());
+			}, 50);
         });
 
         this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
@@ -478,6 +480,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     onLeave(event: MouseEvent) {
         (event.srcElement as HTMLElement).style.display = 'none'
     }
+    
+    checkIfNodeIsVisible(node: SelectionNode) {
+		const position = this.editorContentService.getContentElement(node.svyid).getBoundingClientRect();
+		if (position.height === 0 && position.width === 0) {
+			return false;
+		}
+		return true;
+	}
 
 }
 @Directive({
