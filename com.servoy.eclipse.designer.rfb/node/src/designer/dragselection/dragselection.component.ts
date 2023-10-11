@@ -260,6 +260,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
             elementInfo.element.style.position = 'absolute';
             elementInfo.element.style.top = (parseInt(elementInfo.element.style.top.replace('px', '')) || 0)  + changeY + 'px';
             elementInfo.element.style.left = (parseInt(elementInfo.element.style.left.replace('px', ''))|| 0)  + changeX + 'px';
+            if (elementInfo.element.style.right.length) {
+				elementInfo.element.style.right = (parseInt(elementInfo.element.style.right.replace('px', ''))|| 0)  - changeX + 'px';
+			}
+			if (elementInfo.element.style.bottom.length) {
+				elementInfo.element.style.bottom = (parseInt(elementInfo.element.style.bottom.replace('px', ''))|| 0)  - changeY + 'px';
+			}
         }
     }
 
