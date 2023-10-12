@@ -434,8 +434,8 @@ public class DesignerUtil
 	public static Set<String> findTopContainers(boolean skipTemplate)
 	{
 		Set<String> topContainers = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values().stream().flatMap(
-			pack -> pack.getSpecifications().values().stream().filter(WebLayoutSpecification::isTopContainer).map(
-				layoutSpec -> pack.getPackageName() + "." + layoutSpec.getName()))
+			pack -> pack.getSpecifications().values().stream().filter(WebLayoutSpecification::isTopContainer)
+				.filter(layoutSpec -> !layoutSpec.isDeprecated()).map(layoutSpec -> pack.getPackageName() + "." + layoutSpec.getName()))
 			.collect(
 				Collectors.toCollection(() -> !skipTemplate ? new TreeSet<>(comparator) : new HashSet<String>()));
 		if (!skipTemplate && hasResponsiveLayoutTemplates(null, null))
