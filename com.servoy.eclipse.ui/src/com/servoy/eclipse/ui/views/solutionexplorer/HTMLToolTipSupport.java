@@ -20,7 +20,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
+import org.eclipse.dltk.javascript.ui.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
