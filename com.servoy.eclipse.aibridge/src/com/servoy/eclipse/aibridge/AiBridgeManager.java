@@ -51,6 +51,7 @@ public class AiBridgeManager
 
 	public static void sendRequest(String cmdName, String endpoint, String inputData, String source, int offset, int length, String context)
 	{
+//		if (cmdName != null) return;
 		final String loginToken = logIn();
 		if (!Utils.stringIsEmpty(loginToken))
 		{
