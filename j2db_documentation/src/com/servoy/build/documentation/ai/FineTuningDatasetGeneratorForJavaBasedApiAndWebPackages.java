@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,19 +46,15 @@ import freemarker.template.TemplateNotFoundException;
 public class FineTuningDatasetGeneratorForJavaBasedApiAndWebPackages extends AbstractAIInfoGenerator
 {
 
-	private static final String SYSTEM_MESSAGE_WHEN_FINE_TUNNING = "{\"role\": \"system\", \"content\": \"You are a Servoy developer's assistant that likes to help only based on what it knows. All assumptions you make about things you do not know - when reasoning - you will present up-front in short sentences that start with 'Assuming '.\"},";
+	private static final String SYSTEM_MESSAGE_WHEN_FINE_TUNNING = "{\"role\": \"system\", \"content\": \"Let's talk about Servoy.\"}";
 
-	// 1 list that will be stored to disk/serialized; it can then be used for upsert/etc. via tools in build/com.servoy.ai.tools project
-	private final StringBuffer fineTuningJSONEntries = new StringBuffer(1900 * 100);
-	private final Consumer<String> registerNewInfo;
+	private final FineTuningInfoKeeper fineTuningInfoKeeper;
 
 	private FineTuningDatasetGeneratorForJavaBasedApiAndWebPackages()
 	{
 		super();
 
-		registerNewInfo = (newStringToEmbed) -> {
-			fineTuningJSONEntries.append(fineTuningJSONEntries.length() == 0 ? newStringToEmbed.substring(1) : newStringToEmbed); // gets rid of first \n so we don't have an empty new line at start of file
-		};
+		fineTuningInfoKeeper = new FineTuningInfoKeeper();
 	}
 
 	/**
@@ -81,7 +79,7 @@ public class FineTuningDatasetGeneratorForJavaBasedApiAndWebPackages extends Abs
 
 		FineTuningDatasetGeneratorForJavaBasedApiAndWebPackages fineTunningGenerator = new FineTuningDatasetGeneratorForJavaBasedApiAndWebPackages();
 		fineTunningGenerator.generate(jsLibURI, servoyDocURI, designDocURI, pluginDirURI, ngPackagesFileLocationsURI,
-			new FineTuningInfoFromNGPackagesGenerator(fineTunningGenerator.getFTLCfg(), fineTunningGenerator.registerNewInfo,
+			new FineTuningInfoFromNGPackagesGenerator(fineTunningGenerator.getFTLCfg(), fineTunningGenerator.fineTuningInfoKeeper,
 				"fine_tuning_ng_package_template.md",
 				"fine_tuning_ng_webobject_template.md",
 				"fine_tuning_ng_webobject_method_template.md",
@@ -108,25 +106,120 @@ public class FineTuningDatasetGeneratorForJavaBasedApiAndWebPackages extends Abs
 	private void writeFineTuningFile() throws FileNotFoundException, IOException
 	{
 		// write the generated texts to disk so they can be used afterwards by a tool from build/com.servoy.ai.tools project - to fine tune an OpenAI model
-		Files.writeString(new File(SharedStaticContent.STORED_DOC_FINE_TUNING_ITEMS).toPath(), fineTuningJSONEntries, StandardCharsets.UTF_8);
+		Files.writeString(new File(SharedStaticContent.STORED_DOC_FINE_TUNING_ITEMS).toPath(), fineTuningInfoKeeper.getFullContentFromAllPasses(),
+			StandardCharsets.UTF_8);
 		System.out.println("Fine tuning entries were written to " + new File(SharedStaticContent.STORED_DOC_FINE_TUNING_ITEMS).getAbsolutePath());
+	}
+
+	/** It keeps generated info, and, as the web objects of a package get generated before the packge itself, it will swap the two in the end result, so that the order makes sense. */
+	private static class InOrderInfoKeeper implements IInfoKeeper
+	{
+
+		private final StringBuilder webObjectsContent = new StringBuilder();
+		// content for one of the fine tuning generating passes, that will be stored to disk/serialized; it can then be used for fine-tuning via tools in build/com.servoy.ai.tools project
+		private final StringBuilder finalContent = new StringBuilder(1900 * 100);
+
+		public void addInfoAboutWebObjectsInAPackage(String someContentOfAWebObjectInThePackage)
+		{
+			webObjectsContent.append(someContentOfAWebObjectInThePackage); // happens first, a bunch of times
+		}
+
+		public void addInfoAboutProcessedPackage(String packageInfo)
+		{
+			// happens second; but we do want this content to appear first
+			registerNewInfo(packageInfo);
+			registerNewInfo(webObjectsContent);
+			webObjectsContent.setLength(0);
+		}
+
+		private void registerNewInfo(CharSequence newStringToEmbed)
+		{
+			if (newStringToEmbed.length() > 0)
+				finalContent.append(finalContent.length() == 0 ? newStringToEmbed.subSequence(1, newStringToEmbed.length()) : newStringToEmbed); // gets rid of first \n so we don't have an empty new line at start of file
+		}
+	}
+
+	private static class FineTuningInfoKeeper implements IInfoKeeper
+	{
+
+		private static final int CURRENT_NUMBER_OF_PASSES_IN_FINE_TUNING_TEMPLATE_MD_FILES = 3;
+
+		InOrderInfoKeeper[] infoKeepersForEachPass = new InOrderInfoKeeper[3];
+		private int pass;
+
+		FineTuningInfoKeeper()
+		{
+			// we try to feed the same information to the fine-tuning process in multiple ways;
+			// each of the .md templates has one section for each pass; however, the passes will be kept separately and
+			// will be given to the training process sequentially by pass - even if the content for a service or component for example
+			// is generated for all passes one after the other
+			infoKeepersForEachPass[0] = new InOrderInfoKeeper();
+			infoKeepersForEachPass[1] = new InOrderInfoKeeper();
+			infoKeepersForEachPass[2] = new InOrderInfoKeeper();
+		}
+
+		@Override
+		public void addInfoAboutWebObjectsInAPackage(String content)
+		{
+			infoKeepersForEachPass[pass].addInfoAboutWebObjectsInAPackage(content);
+		}
+
+		@Override
+		public void addInfoAboutProcessedPackage(String content)
+		{
+			infoKeepersForEachPass[pass].addInfoAboutProcessedPackage(content);
+		}
+
+		public String getFullContentFromAllPasses()
+		{
+			return Arrays.stream(infoKeepersForEachPass).map((ik) -> ik.finalContent).collect(Collectors.joining("\n"));
+		}
+
+		public void forAllPasses(Consumer<Integer> toExecute)
+		{
+			for (int passNo = 0; passNo < CURRENT_NUMBER_OF_PASSES_IN_FINE_TUNING_TEMPLATE_MD_FILES; passNo++)
+			{
+				this.pass = passNo;
+				toExecute.accept(Integer.valueOf(passNo + 1));
+			}
+		}
+
 	}
 
 	protected static class FineTuningInfoFromNGPackagesGenerator extends InfoFromNGPackagesGenerator
 	{
 
 		private final Template propertiesPrefixTemplate;
+		private final Template propertiesPostfixTemplate;
 
 
-		public FineTuningInfoFromNGPackagesGenerator(Configuration cfg, Consumer<String> registerNewInfo, String packageTemplateFilename,
+		public FineTuningInfoFromNGPackagesGenerator(Configuration cfg, FineTuningInfoKeeper registerNewInfo, String packageTemplateFilename,
 			String webObjectTemplateFilename, String methodTemplateFilename, String propertyTemplateFilename, String typeTemplateTemplateFilename)
 			throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException
 		{
 			super(cfg, registerNewInfo, packageTemplateFilename, webObjectTemplateFilename, methodTemplateFilename, propertyTemplateFilename,
 				typeTemplateTemplateFilename);
 			this.propertiesPrefixTemplate = cfg.getTemplate("fine_tuning_ng_webobject_properties_prefix_template.md");
+			this.propertiesPostfixTemplate = cfg.getTemplate("fine_tuning_ng_webobject_properties_postfix_template.md");
 		}
 
+		@Override
+		public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryName, boolean service,
+			String deprecationString, String replacementInCaseOfDeprecation) throws TemplateException, IOException
+		{
+			FineTuningInfoKeeper ftk = ((FineTuningInfoKeeper)this.registerNewInfo);
+			ftk.forAllPasses((pass) -> {
+				root.put("pass", pass);
+				try
+				{
+					super.generateComponentOrServiceInfo(root, userDir, displayName, categoryName, service, deprecationString, replacementInCaseOfDeprecation);
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException(e);
+				}
+			});
+		}
 
 		@Override
 		protected void generateProperties(Map<String, Object> root) throws TemplateException, IOException
@@ -134,12 +227,32 @@ public class FineTuningDatasetGeneratorForJavaBasedApiAndWebPackages extends Abs
 			// we insert all properties into one fine tuning chat training message
 			StringWriter out = new StringWriter();
 			propertiesPrefixTemplate.process(root, out);
-
-			registerNewInfo.accept(out.toString());
+			registerNewInfo.addInfoAboutWebObjectsInAPackage(out.toString());
 
 			super.generateProperties(root);
-			registerNewInfo.accept("]}");
+
+			out = new StringWriter();
+			propertiesPostfixTemplate.process(root, out);
+			registerNewInfo.addInfoAboutWebObjectsInAPackage(out.toString());
 		}
+
+		@Override
+		public void generateNGPackageInfo(String packageName, String packageDisplayName, String packageDescription, String packageType,
+			Map<String, Object> root) throws TemplateException, IOException
+		{
+			((FineTuningInfoKeeper)this.registerNewInfo).forAllPasses((pass) -> {
+				root.put("pass", pass);
+				try
+				{
+					super.generateNGPackageInfo(packageName, packageDisplayName, packageDescription, packageType, root);
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException(e);
+				}
+			});
+		}
+
 	}
 
 }

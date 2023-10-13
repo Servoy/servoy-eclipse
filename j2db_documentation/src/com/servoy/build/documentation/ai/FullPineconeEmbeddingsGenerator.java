@@ -22,9 +22,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.json.JSONException;
 
@@ -39,19 +40,40 @@ import freemarker.template.TemplateException;
 public class FullPineconeEmbeddingsGenerator extends AbstractAIInfoGenerator
 {
 
-	// 1 list that will be stored to disk/serialized; it can then be used for upsert/etc. via tools in build/com.servoy.ai.tools project
-	private final List<PineconeItem> pineconeItemsToUpsert = new ArrayList<>();
-	private final Consumer<String> registerNewEmbedding;
+	private final PineconeInfoKeeper pineconeInfoKeeper;
 
 	private FullPineconeEmbeddingsGenerator()
 	{
 		super();
 
+		pineconeInfoKeeper = new PineconeInfoKeeper();
+	}
+
+	private class PineconeInfoKeeper implements IInfoKeeper
+	{
+
 		int[] id = new int[] { 1 };
-		registerNewEmbedding = (newStringToEmbed) -> {
+		// 1 list that will be stored to disk/serialized; it can then be used for upsert/etc. via tools in build/com.servoy.ai.tools project
+		private final List<PineconeItem> pineconeItemsToUpsert = new ArrayList<>();
+
+		@Override
+		public void addInfoAboutWebObjectsInAPackage(String newStringToEmbed)
+		{
+			this.registerNewEmbedding(newStringToEmbed);
+		}
+
+		@Override
+		public void addInfoAboutProcessedPackage(String newStringToEmbed)
+		{
+			this.registerNewEmbedding(newStringToEmbed);
+		}
+
+		private void registerNewEmbedding(String newStringToEmbed)
+		{
 			// We could add other metadata as needed (versions of Servoy, versions of packages, don't know what exactly would be useful in the future to filter the similarity checks)
 			pineconeItemsToUpsert.add(new PineconeItem(id[0]++, newStringToEmbed, null));
-		};
+		}
+
 	}
 
 	/**
@@ -76,7 +98,7 @@ public class FullPineconeEmbeddingsGenerator extends AbstractAIInfoGenerator
 
 		FullPineconeEmbeddingsGenerator pineconeEmbeddingsGenerator = new FullPineconeEmbeddingsGenerator();
 		pineconeEmbeddingsGenerator.generate(jsLibURI, servoyDocURI, designDocURI, pluginDirURI, ngPackagesFileLocationsURI,
-			new InfoFromNGPackagesGenerator(pineconeEmbeddingsGenerator.getFTLCfg(), pineconeEmbeddingsGenerator.registerNewEmbedding,
+			new InfoFromNGPackagesGenerator(pineconeEmbeddingsGenerator.getFTLCfg(), pineconeEmbeddingsGenerator.pineconeInfoKeeper,
 				"pinecone_ng_package_template.md",
 				"pinecone_ng_webobject_template.md",
 				"pinecone_ng_webobject_method_template.md",
@@ -93,16 +115,20 @@ public class FullPineconeEmbeddingsGenerator extends AbstractAIInfoGenerator
 		// write the generated texts to disk so they can be used afterwards by a tool from build/com.servoy.ai.tools project - to upsert them to pinecone
 		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(SharedStaticContent.STORED_ALL_UNEMBEDDED_PINECONE_ITEMS)))
 		{
-			out.writeObject(pineconeItemsToUpsert);
+			out.writeObject(pineconeInfoKeeper.pineconeItemsToUpsert);
 		}
 
-		for (PineconeItem item : pineconeItemsToUpsert)
+		StringBuffer b = new StringBuffer(2000 * 200);
+		for (PineconeItem item : pineconeInfoKeeper.pineconeItemsToUpsert)
 		{
-			System.out.println(item.getText());
-			System.out.println("-------------------");
+			b.append(item.getText()).append("\n-------------------\n");
 		}
+
+		Files.writeString(new File(SharedStaticContent.STORED_ALL_UNEMBEDDED_PINECONE_ITEMS + ".txt").toPath(), b, StandardCharsets.UTF_8);
 
 		System.out.println("Doc items were written to " + new File(SharedStaticContent.STORED_ALL_UNEMBEDDED_PINECONE_ITEMS).getAbsolutePath());
+		System.out.println(
+			"Doc items (human friendly) were written to " + new File(SharedStaticContent.STORED_ALL_UNEMBEDDED_PINECONE_ITEMS).getAbsolutePath() + ".txt");
 	}
 
 }

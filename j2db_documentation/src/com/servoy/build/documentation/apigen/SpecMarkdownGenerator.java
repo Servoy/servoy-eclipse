@@ -154,6 +154,7 @@ public class SpecMarkdownGenerator
 				}
 
 			});
+
 			specFiles.stream().map(file -> {
 				try
 				{
@@ -187,6 +188,7 @@ public class SpecMarkdownGenerator
 				}
 			});
 
+			// generate package info last as the generators remembered all the services/components in the package by now
 			File packageInfoFile = new File(dir, "webpackage.json");
 			while (!packageInfoFile.exists() && packageInfoFile.getParentFile().getParentFile() != null)
 				packageInfoFile = new File(packageInfoFile.getParentFile().getParentFile(), "webpackage.json");
@@ -195,7 +197,7 @@ public class SpecMarkdownGenerator
 			{
 				docGenerator.generateNGPackageInfo(packageName, packageDisplayName,
 					new JSONObject(Utils.getTXTFileContent(packageInfoFile)).optString("description", null),
-					packageType, utilityObjectForTemplates);
+					packageType, new HashMap<String, Object>(Map.of("utils", utilityObjectForTemplates)));
 			}
 			else System.err.println("    * cannot find the package's webpackage.json; skipping information about the package...");
 
@@ -271,6 +273,7 @@ public class SpecMarkdownGenerator
 		root.put("componentname", jsonObject.optString("displayName"));
 		root.put("componentinternalname", jsonObject.optString("name"));
 		root.put("componentname_nospace", jsonObject.optString("displayName").replace(" ", "%20"));
+		root.put("category_name", jsonObject.optString("categoryName", null));
 		root.put("instance", this);
 		root.put("utils", utilityObjectForTemplates);
 		root.put("properties", makeMap(jsonObject.optJSONObject("model"), this::createProperty));
@@ -615,7 +618,7 @@ public class SpecMarkdownGenerator
 
 		@Override
 		public void generateNGPackageInfo(String packageName, String packageDisplayName, String packageDescription, String packageType,
-			Object utilityObjectForTemplates)
+			Map<String, Object> root)
 		{
 			// FIXME we don't write the package description currently in markdown
 		}

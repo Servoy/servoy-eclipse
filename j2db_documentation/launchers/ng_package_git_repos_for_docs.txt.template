@@ -9,6 +9,7 @@
 <<replace-with-your-git-repo-location>>/svyGMaps/googlemaps
 <<replace-with-your-git-repo-location>>/svyPDFViewer/pdfviewer
 <<replace-with-your-git-repo-location>>/servoy-client/servoy_ngclient/war/servoycore
+<<replace-with-your-git-repo-location>>/servoy-client/servoy_ngclient/war/servoy_ng_only_services
 <<replace-with-your-git-repo-location>>/svyBlockUI/svyblockui/blockui
 <<replace-with-your-git-repo-location>>/ngdesktoputils/ngdesktoputils/ngdesktoputils
 <<replace-with-your-git-repo-location>>/ngdesktopfile/ngdesktopfile/ngdesktopfile
@@ -16,3 +17,4 @@
 <<replace-with-your-git-repo-location>>/svyKeyListener/keylistener/keylistener
 <<replace-with-your-git-repo-location>>/webnotifications/webnotifications
 <<replace-with-your-git-repo-location>>/svycanvas/svycanvas
+<<replace-with-your-git-repo-location>>/svykanban/svykanban

@@ -40,10 +40,10 @@ public interface INGPackageInfoGenerator
 	/**
 	 * This method will be called after {@link #generateComponentOrServiceInfo(Map, File, String, String, boolean)} calls happened for all components/services of this package.
 	 * If the webpackage.json file was not found, this will not be called.
-	 * @param utilityObjectForTemplates just an utility objects that has content/methods that are needed in the template; it will be available inside the data model as "utils"
+	 * @param root can contain extra objects needed by the templates already; for example "utils" could be given as just an utility objects that has content/methods that are needed in the template
 	 */
 	public void generateNGPackageInfo(String packageName, String packageDisplayName, String packageDescription, String packageType,
-		Object utilityObjectForTemplates)
+		Map<String, Object> root)
 		throws TemplateException, IOException;
 
 

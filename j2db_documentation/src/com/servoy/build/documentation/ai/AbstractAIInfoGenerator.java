@@ -24,7 +24,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -221,10 +220,17 @@ public abstract class AbstractAIInfoGenerator
 
 	}
 
+	protected static interface IInfoKeeper
+	{
+		public void addInfoAboutWebObjectsInAPackage(String content);
+
+		public void addInfoAboutProcessedPackage(String content);
+	}
+
 	protected static class InfoFromNGPackagesGenerator implements INGPackageInfoGenerator
 	{
 
-		protected final Consumer<String> registerNewInfo;
+		protected final IInfoKeeper registerNewInfo;
 
 		private final Template packageTemplate;
 		private final Template webObjectTemplate;
@@ -234,7 +240,7 @@ public abstract class AbstractAIInfoGenerator
 
 		private final List<Map<String, String>> allWebObjectsOfCurrentPackage = new ArrayList<>(10);
 
-		public InfoFromNGPackagesGenerator(Configuration cfg, Consumer<String> registerNewInfo,
+		public InfoFromNGPackagesGenerator(Configuration cfg, IInfoKeeper registerNewInfo,
 			String packageTemplateFilename, String webObjectTemplateFilename, String methodTemplateFilename,
 			String propertyTemplateFilename, String typeTemplateTemplateFilename)
 			throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException
@@ -254,7 +260,8 @@ public abstract class AbstractAIInfoGenerator
 			String deprecationString, String replacementInCaseOfDeprecation)
 			throws TemplateException, IOException
 		{
-			allWebObjectsOfCurrentPackage.add(Map.of("name", (String)root.get("componentname"), "internalName", (String)root.get("componentinternalname")));
+			if (!allWebObjectsOfCurrentPackage.stream().anyMatch(it -> ((String)root.get("componentname")).equals(it.get("name"))))
+				allWebObjectsOfCurrentPackage.add(Map.of("name", (String)root.get("componentname"), "internalName", (String)root.get("componentinternalname")));
 
 			if (deprecationString != null || replacementInCaseOfDeprecation != null)
 			{
@@ -271,12 +278,12 @@ public abstract class AbstractAIInfoGenerator
 			StringWriter out = new StringWriter();
 			webObjectTemplate.process(root, out);
 
-			registerNewInfo.accept(out.toString());
+			registerNewInfo.addInfoAboutWebObjectsInAPackage(out.toString());
 
-			generateMethods(root, "api", "API method");
-			generateMethods(root, "events", "event handler");
-			generateProperties(root);
-			generateCustomTypes(root);
+			if (root.get("api") != null && ((Map<String, Function>)root.get("api")).size() > 0) generateMethods(root, "api", "API method");
+			if (root.get("events") != null && ((Map<String, Function>)root.get("events")).size() > 0) generateMethods(root, "events", "event handler");
+			if (root.get("properties") != null && ((Map<String, Property>)root.get("properties")).size() > 0) generateProperties(root);
+			if (root.get("types") != null && ((Map<String, Map<String, Property>>)root.get("types")).size() > 0) generateCustomTypes(root);
 		}
 
 		protected void generateCustomTypes(Map<String, Object> root) throws TemplateException, IOException
@@ -294,7 +301,7 @@ public abstract class AbstractAIInfoGenerator
 					out = new StringWriter();
 					typeTemplate.process(root, out);
 
-					registerNewInfo.accept(out.toString());
+					registerNewInfo.addInfoAboutWebObjectsInAPackage(out.toString());
 				}
 				root.remove("typeName");
 			}
@@ -315,7 +322,7 @@ public abstract class AbstractAIInfoGenerator
 					out = new StringWriter();
 					propertyTemplate.process(root, out);
 
-					registerNewInfo.accept(out.toString());
+					registerNewInfo.addInfoAboutWebObjectsInAPackage(out.toString());
 				}
 				root.remove("propertyName");
 			}
@@ -338,7 +345,7 @@ public abstract class AbstractAIInfoGenerator
 					out = new StringWriter();
 					methodTemplate.process(root, out);
 
-					registerNewInfo.accept(out.toString());
+					registerNewInfo.addInfoAboutWebObjectsInAPackage(out.toString());
 				}
 				root.remove("methodName");
 				root.remove("methodType");
@@ -347,23 +354,21 @@ public abstract class AbstractAIInfoGenerator
 
 		@Override
 		public void generateNGPackageInfo(String packageName, String packageDisplayName, String packageDescription, String packageType,
-			Object utilityObjectForTemplates)
+			Map<String, Object> root)
 			throws TemplateException, IOException
 		{
 			StringWriter out = new StringWriter();
-			HashMap<String, Object> root = new HashMap<>();
 			root.put("packageName", packageName);
 			root.put("packageDisplayName", packageDisplayName);
 			root.put("packageDescription", packageDescription);
 			root.put("packageType", packageType);
-			root.put("utils", utilityObjectForTemplates);
 
 			// TODO this might be too much (list of all comps/services in the package) info for pinecone
 			// but it might be useful for fine tuning
 			root.put("allWebObjectsOfCurrentPackage", allWebObjectsOfCurrentPackage);
 
 			packageTemplate.process(root, out);
-			registerNewInfo.accept(out.toString());
+			registerNewInfo.addInfoAboutProcessedPackage(out.toString());
 		}
 
 		@Override
