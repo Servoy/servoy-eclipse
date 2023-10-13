@@ -249,13 +249,14 @@ class SingleValueState {
                         this.checkFoundsetSizeAndRegenerateIfNeeded();
                     }
                 });
-
-                // if both foundset and foundset linked come in the same json from server, it might
-                // happen that the foundset linked fromServerToClient is done before the foundset one - so the foundset prop. might not yet be available
-                // or not updated (so the single value viewport is not populated in that case because we do not know the size); in that case we need to
-                // regenerateWholeViewportDueToSizeChange once when addIncomingMessageHandlingDoneTask starts executing (then all props. from that data burst are processed)        const foundsetPropValue = iS.forFoundset();
-                this.checkFoundsetSizeAndRegenerateIfNeeded();
             }
+
+            // if both foundset and foundset linked come in the same json from server, it might
+            // happen that the foundset linked fromServerToClient is done before the foundset one - so the foundset prop. might not yet be available
+            // or not updated (so the single value viewport is not populated in that case because we do not know the size); in that case we need to
+            // regenerateWholeViewportDueToSizeChange once when addIncomingMessageHandlingDoneTask starts executing (then all props. from that data burst are processed)
+            // ALSO, if fs is null (but change was applied after current property) we need to generate an empty array so that it doesn't remain with an obsolete single-value foundset size
+            this.checkFoundsetSizeAndRegenerateIfNeeded();
         });
     }
     
