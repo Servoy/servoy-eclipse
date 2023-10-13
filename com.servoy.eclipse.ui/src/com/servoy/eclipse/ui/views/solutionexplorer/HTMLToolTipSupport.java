@@ -37,9 +37,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.editors.table.ColumnComposite;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.util.Utils;
 
@@ -116,10 +116,12 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 		String fgColor = null;
 		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
-			// TODO handle dark theme fg/bg colors here better? Take them from Eclipse UI instead?
-			RGB backgroundColorRGB = ColumnComposite.getServoyGrayBackground().getRGB();
+			RGB backgroundColorRGB = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+				.get("org.eclipse.ui.workbench.DARK_BACKGROUND").getRGB();
 			bgColor = "rgb(" + backgroundColorRGB.red + "," + backgroundColorRGB.green + "," + backgroundColorRGB.blue + ")";
-			fgColor = "lightgray";
+			RGB foregroundColorRGB = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+				.get("org.eclipse.ui.workbench.DARK_FOREGROUND").getRGB();
+			fgColor = "rgb(" + foregroundColorRGB.red + "," + foregroundColorRGB.green + "," + foregroundColorRGB.blue + ")";
 		}
 
 		browser.setText("<html><body style='background-color:" + bgColor + ";" + (fgColor != null ? "color:" + fgColor + ";" : "") + "font-family:\"" +
