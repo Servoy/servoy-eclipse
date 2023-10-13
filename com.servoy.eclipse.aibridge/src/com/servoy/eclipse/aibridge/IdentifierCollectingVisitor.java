@@ -60,7 +60,8 @@ public class IdentifierCollectingVisitor extends TypeInferencerVisitor
 	{
 		IValueReference ref = super.extractNamedChild(parent, name);
 		// only add also this identifier if its a property of a property (like plugins.ngdesktop.openFile we want then ngdesktop as a type)
-		if (name instanceof Identifier id && name.getParent().getParent() instanceof PropertyExpression)
+		if (name instanceof Identifier id && name.getParent().getParent() instanceof PropertyExpression &&
+			name.sourceStart() >= offset && name.sourceEnd() <= (offset + length))
 		{
 			identifiers.put(id.getParent(), Pair.create(ref, id.getParent().toString()));
 		}

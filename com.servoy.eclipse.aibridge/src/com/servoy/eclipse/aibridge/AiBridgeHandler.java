@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.internal.javascript.ti.TypeInferencer2;
+import org.eclipse.dltk.javascript.ast.JSNode;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.typeinference.IValueReference;
@@ -49,6 +50,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -262,56 +264,21 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 							sb.append('\n');
 							sb.append('\n');
 						}
-						else if (type.startsWith("WebService") && callsOrProperties.size() > 0)
+						else if (type.startsWith("WebService") && callsOrProperties != null && callsOrProperties.size() > 0)
 						{
 							// code for service plugins
 							String serviceName = type.substring("WebService<".length(), type.length() - 1);
 							WebObjectSpecification webObjectSpecification = WebServiceSpecProvider.getSpecProviderState()
 								.getWebObjectSpecification(serviceName);
-							if (webObjectSpecification != null)
-							{
-								callsOrProperties.forEach(action -> {
-									sb.append(node);
-									sb.append('.');
-
-									WebObjectFunctionDefinition apiFunction = webObjectSpecification.getApiFunction(action.getName());
-									if (apiFunction != null)
-									{
-										sb.append(action.getName());
-										sb.append("(");
-										IFunctionParameters parameters = apiFunction.getParameters();
-										for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
-										{
-											sb.append(parameters.getParameterDefinition(i).getName());
-											if (i < parameters.getDefinedArgsCount() - 1) sb.append(", ");
-										}
-										sb.append("):\n");
-										StringJavaDocCommentReader reader = new StringJavaDocCommentReader(apiFunction.getDocumentation());
-										String doc;
-										try
-										{
-											doc = IOUtils.toString(reader).trim();
-											sb.append(doc.replace('\r', '\n').replace("\n ", "\n").replace("\n\n", "\n"));
-										}
-										catch (IOException e)
-										{
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										}
-									}
-									else
-									{
-										PropertyDescription property = webObjectSpecification.getProperty(action.getName());
-										if (property != null)
-										{
-											sb.append(action.getName());
-											sb.append(":\n");
-											sb.append(property.getDocumentation());
-										}
-									}
-								});
-							}
-
+							generateApiOrPropertySpec(sb, node, callsOrProperties, webObjectSpecification);
+						}
+						else if (type.startsWith("RuntimeWebComponent") && callsOrProperties != null && callsOrProperties.size() > 0)
+						{
+							String componentName = type.substring("RuntimeWebComponent<".length(), type.length() - 1);
+							if (componentName.endsWith("_abs")) componentName = componentName.substring(0, componentName.length() - 4);
+							WebObjectSpecification componentSpec = WebComponentSpecProvider.getSpecProviderState()
+								.getWebObjectSpecification(componentName);
+							generateApiOrPropertySpec(sb, node, callsOrProperties, componentSpec);
 						}
 					}
 				});
@@ -333,6 +300,69 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	/**
+	 * @param sb
+	 * @param node
+	 * @param callsOrProperties
+	 * @param webObjectSpecification
+	 */
+	private void generateApiOrPropertySpec(final StringBuilder sb, JSNode node, List<IValueReference> callsOrProperties,
+		WebObjectSpecification webObjectSpecification)
+	{
+		if (webObjectSpecification != null)
+		{
+			callsOrProperties.forEach(action -> {
+				sb.append(node);
+				sb.append('.');
+
+				WebObjectFunctionDefinition apiFunction = webObjectSpecification.getApiFunction(action.getName());
+				if (apiFunction != null)
+				{
+					sb.append(action.getName());
+					sb.append("(");
+					IFunctionParameters parameters = apiFunction.getParameters();
+					for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
+					{
+						PropertyDescription parameterDefinition = parameters.getParameterDefinition(i);
+						if (parameterDefinition.isOptional())
+						{
+//							sb.append('[');
+						}
+						sb.append(parameterDefinition.getName());
+						if (parameterDefinition.isOptional())
+						{
+							sb.append('?');
+						}
+						if (i < parameters.getDefinedArgsCount() - 1) sb.append(", ");
+					}
+					sb.append("):\n");
+					StringJavaDocCommentReader reader = new StringJavaDocCommentReader(apiFunction.getDocumentation());
+					String doc;
+					try
+					{
+						doc = IOUtils.toString(reader).trim();
+						sb.append(doc.replace('\r', '\n').replace("\n ", "\n").replace("\n\n", "\n"));
+					}
+					catch (IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else
+				{
+					PropertyDescription property = webObjectSpecification.getProperty(action.getName());
+					if (property != null)
+					{
+						sb.append(action.getName());
+						sb.append(":\n");
+						sb.append(property.getDocumentation());
+					}
+				}
+			});
+		}
 	}
 
 	private String getContextData(String filePath, int offset, int length)
