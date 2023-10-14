@@ -3301,13 +3301,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 				if (persist instanceof IFormElement)
 				{
-					IPersist parent = persist;
-					while (parent != null)
-					{
-						parent = parent.getParent();
-						if (parent instanceof Form) break;
-					}
-					if (parent instanceof Form && ((Form)parent).isFormComponent())
+					Form parent = persist.getAncestor(Form.class);
+					if (parent != null && parent.isFormComponent())
 					{
 						String name = ((IFormElement)persist).getName();
 						if (name != null)

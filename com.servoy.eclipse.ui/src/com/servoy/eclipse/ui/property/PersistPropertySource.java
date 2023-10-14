@@ -258,7 +258,6 @@ import com.servoy.j2db.util.Utils;
 
 public class PersistPropertySource implements ISetterAwarePropertySource, IAdaptable, IModelSavePropertySource
 {
-
 	protected PersistContext persistContext;
 	protected boolean readOnly;
 
@@ -396,6 +395,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 */
 	public PersistPropertySource(PersistContext persistContext, boolean readonly)
 	{
+		if (persistContext == null) throw new NullPointerException("null persistContext");
 		this.persistContext = persistContext;
 		this.readOnly = readonly;
 	}

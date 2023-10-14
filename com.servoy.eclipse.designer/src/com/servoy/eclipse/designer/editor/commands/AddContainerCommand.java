@@ -63,6 +63,7 @@ import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -70,6 +71,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -403,9 +405,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				}
 			}
 		}
-		catch (
-
-		NullPointerException npe)
+		catch (NullPointerException npe)
 		{
 			Debug.log(npe);
 		}
@@ -590,25 +590,55 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 
 	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex, WebCustomType template)
 	{
+		return addCustomType(WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentBean.getTypeName()),
+			parentBean, propertyName, compName, arrayIndex, template);
+	}
+
+	public static WebCustomType addCustomType(WebObjectSpecification componentSpec, IBasicWebObject parentWebObject, String propertyName, String compName,
+		int arrayIndex, WebCustomType template)
+	{
 		int index = arrayIndex;
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentBean.getTypeName());
-		boolean isArray = spec.isArrayReturnType(propertyName);
-		PropertyDescription targetPD = spec.getProperty(propertyName);
+
+		boolean isArray;
+		PropertyDescription targetPD;
+		if (parentWebObject instanceof IBasicWebComponent)
+		{
+			// For a component we get the property from the spec
+			isArray = componentSpec.isArrayReturnType(propertyName);
+			targetPD = componentSpec.getProperty(propertyName);
+		}
+		else
+		{
+			// for a nested child we get the property from its type
+			ICustomType< ? > customType = componentSpec.getDeclaredCustomObjectTypes().get(parentWebObject.getTypeName());
+			if (customType != null)
+			{
+				PropertyDescription customTypePD = customType.getCustomJSONTypeDefinition();
+				isArray = customTypePD.isArrayReturnType(propertyName);
+				targetPD = customTypePD.getProperty(propertyName);
+			}
+			else
+			{
+				return null;
+			}
+		}
+
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());
 		IChildWebObject[] arrayValue = null;
 		if (isArray)
 		{
 			targetPD = ((ICustomType< ? >)targetPD.getType()).getCustomJSONTypeDefinition();
-			if (parentBean instanceof WebComponent)
+			var value = parentWebObject.getProperty(propertyName);
+			if (value instanceof IChildWebObject[])
 			{
-				arrayValue = (IChildWebObject[])((WebComponent)parentBean).getProperty(propertyName);
+				arrayValue = (IChildWebObject[])value;
 			}
 			if (index == -1) index = arrayValue != null ? arrayValue.length : 0;
 		}
-		if (parentBean instanceof WebComponent)
+		if (parentWebObject instanceof ISupportsIndexedChildren)
 		{
-			WebComponent parentWebComponent = (WebComponent)parentBean;
-			WebCustomType customType = WebCustomType.createNewInstance(parentWebComponent, targetPD, propertyName, index, true);
+			ISupportsIndexedChildren parentSupportsChildren = (ISupportsIndexedChildren)parentWebObject;
+			WebCustomType customType = WebCustomType.createNewInstance(parentWebObject, targetPD, propertyName, index, true);
 			customType.setName(compName);
 			customType.setTypeName(typeName);
 
@@ -630,8 +660,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 
 						customType.setProperty(string, propValue);
 					}
-					else
-						if (property != null && property.getInitialValue() != null)
+					else if (property != null && property.getInitialValue() != null)
 					{
 						Object initialValue = property.getInitialValue();
 						if (initialValue != null) customType.setProperty(string, initialValue);
@@ -639,8 +668,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				}
 			}
 
-			parentWebComponent.insertChild(customType); // if it is array it will make use of index given above in WebCustomType.createNewInstance(...) when inserting; otherwise it's a simple set to some property name anyway
-
+			parentSupportsChildren.insertChild(customType); // if it is array it will make use of index given above in WebCustomType.createNewInstance(...) when inserting; otherwise it's a simple set to some property name anyway
 			return customType;
 		}
 		return null;

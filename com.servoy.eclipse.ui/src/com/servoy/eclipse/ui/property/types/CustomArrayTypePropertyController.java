@@ -93,7 +93,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			{
 				parentKey = String.valueOf(id);
 			}
-			handler.createComponent(persistContext.getPersist().getUUID(), parentKey, getTypeName(), true);
+			handler.createComponent(persistContext.getPersist().getUUID(), parentKey, getTypeName(), true, false);
 		});
 	}
 
@@ -216,7 +216,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 								{
 									parentKey = String.valueOf(id);
 								}
-								handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, getTypeName(), false);
+								handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, getTypeName(), false, true);
 							});
 						}
 					}

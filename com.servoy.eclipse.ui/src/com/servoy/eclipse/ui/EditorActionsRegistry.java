@@ -40,7 +40,7 @@ public class EditorActionsRegistry
 
 	public interface EditorComponentActionHandler
 	{
-		void createComponent(UUID uuid, String propertyName, String type, boolean prepend);
+		void createComponent(UUID uuid, String propertyName, String type, boolean prepend, boolean dropTargetIsSibling);
 
 		void deleteComponent(IPersist persist);
 	}

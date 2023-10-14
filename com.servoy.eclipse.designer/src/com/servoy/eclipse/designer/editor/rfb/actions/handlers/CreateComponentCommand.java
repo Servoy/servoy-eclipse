@@ -69,7 +69,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
-import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
@@ -78,7 +77,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
@@ -91,6 +90,7 @@ import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -178,54 +178,52 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		if (args.getType() != null)
 		{
 			// a ghost dragged from the palette. it is defined in the "types" section of the .spec file
-			IPersist next = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getDropTargetUUID());
+			IPersist webObject = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getDropTargetUUID());
+
 			int arrayIndex = -1;
-			if (next instanceof IChildWebObject)
+			if (webObject instanceof IChildWebObject && args.isDropTargetIsSibling())
 			{
-				arrayIndex = ((IChildWebObject)next).getIndex();
-				if (args.isAddAfterTarget())
-				{
-					arrayIndex++;
-				}
-				next = next.getParent();
+				arrayIndex = ((IChildWebObject)webObject).getIndex() + 1; // add after sibling
+				webObject = webObject.getParent();
 			}
 			else if (args.isPrepend())
 			{
 				arrayIndex = 0;
 			}
-			if (next instanceof BaseComponent)
+
+			// webObject is different from webComponent in case of a nested custom type
+			IWebComponent webComponent = webObject.getAncestor(IWebComponent.class);
+			if (webComponent != null)
 			{
-				if (next instanceof IBasicWebComponent)
+				if (webObject instanceof IBasicWebObject)
 				{
-					IBasicWebComponent parentBean = (IBasicWebComponent)next;
+					WebObjectSpecification componentSpec = WebComponentSpecProvider.getSpecProviderState()
+						.getWebObjectSpecification(webComponent.getTypeName());
 					String propertyName = args.getGhostPropertyName();
 					String compName = "component_" + id.incrementAndGet();
 					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
 					{
 						compName = "component_" + id.incrementAndGet();
 					}
-					parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(PersistContext.create(parentBean, editorPart.getForm()));
-					WebCustomType bean = AddContainerCommand.addCustomType(parentBean, propertyName, compName, arrayIndex, null);
+					webObject = ElementUtil.getOverridePersist(PersistContext.create(webObject, editorPart.getForm()));
+					WebCustomType bean = AddContainerCommand.addCustomType(componentSpec, (IBasicWebObject)webObject, propertyName, compName, arrayIndex, null);
 					AddContainerCommand.showDataproviderDialog(bean.getPropertyDescription().getProperties(), bean, editorPart);
 					return new IPersist[] { bean };
 				}
-				else if (args.getType().equals("tab"))
+				else if (webObject instanceof ISupportChilds && args.getType().equals("tab"))
 				{
-					if (next instanceof ISupportChilds)
+					ISupportChilds iSupportChilds = (ISupportChilds)webObject;
+					iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(iSupportChilds, editorPart.getForm()));
+					Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
+					String tabName = "tab_" + id.incrementAndGet();
+					while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
 					{
-						ISupportChilds iSupportChilds = (ISupportChilds)next;
-						iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(iSupportChilds, editorPart.getForm()));
-						Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
-						String tabName = "tab_" + id.incrementAndGet();
-						while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
-						{
-							tabName = "tab_" + id.incrementAndGet();
-						}
-						newTab.setText(tabName);
-						newTab.setLocation(args.getLocation());
-						iSupportChilds.addChild(newTab);
-						return new IPersist[] { newTab };
+						tabName = "tab_" + id.incrementAndGet();
 					}
+					newTab.setText(tabName);
+					newTab.setLocation(args.getLocation());
+					iSupportChilds.addChild(newTab);
+					return new IPersist[] { newTab };
 				}
 			}
 		}
@@ -954,7 +952,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		private String ghostPropertyName;
 		private String dropTargetUUID;
 		private boolean keepOldSelection;
-		private boolean addAfterTarget;
+		private boolean dropTargetIsSibling;
 		private boolean prepend;
 
 		public CreateComponentOptions()
@@ -1069,11 +1067,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 
 		/**
-		 * @param addAfterTarget the addAfterTarget to set
+		 * @param dropTargetIsSibling the dropTargetIsSibling to set
 		 */
-		public void setAddAfterTarget(boolean addAfterTarget)
+		public void setDropTargetIsSibling(boolean dropTargetIsSibling)
 		{
-			this.addAfterTarget = addAfterTarget;
+			this.dropTargetIsSibling = dropTargetIsSibling;
 		}
 
 		/**
@@ -1147,9 +1145,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			return dropTargetUUID;
 		}
 
-		public boolean isAddAfterTarget()
+		/**
+		 * @return the dropTargetIsSibling
+		 */
+		public boolean isDropTargetIsSibling()
 		{
-			return addAfterTarget;
+			return dropTargetIsSibling;
 		}
 
 		public boolean isPrepend()
@@ -1179,7 +1180,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			options.type = args.optString("type", null);
 			options.ghostPropertyName = args.optString("ghostPropertyName", null);
 			options.dropTargetUUID = args.optString("dropTargetUUID", null);
-			options.addAfterTarget = args.optBoolean("addAfterTarget", false);
+			options.dropTargetIsSibling = args.optBoolean("dropTargetIsSibling", false);
 			options.prepend = args.optBoolean("prepend", false);
 			options.keepOldSelection = args.optBoolean("keepOldSelection", false);
 

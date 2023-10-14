@@ -45,13 +45,13 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 	}
 
 	@Override
-	public void createComponent(UUID uuid, String propertyName, String type, boolean prepend)
+	public void createComponent(UUID uuid, String propertyName, String type, boolean prepend, boolean dropTargetIsSibling)
 	{
 		executeCommandOnForm(formEditor -> {
 			CreateComponentOptions args = new CreateComponentOptions();
 			args.setDropTargetUUID(uuid.toString());
 			args.setGhostPropertyName(propertyName);
-			args.setAddAfterTarget(true);
+			args.setDropTargetIsSibling(dropTargetIsSibling);
 			args.setPrepend(prepend);
 			args.setType(type);
 			return new CreateComponentCommand(formEditor, args, null);
