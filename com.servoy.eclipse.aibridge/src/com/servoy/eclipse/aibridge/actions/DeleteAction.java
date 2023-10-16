@@ -7,7 +7,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import com.servoy.eclipse.aibridge.AiBridgeManager;
 import com.servoy.eclipse.aibridge.AiBridgeView;
-import com.servoy.eclipse.aibridge.Completion;
+import com.servoy.eclipse.aibridge.dto.Completion;
 
 public class DeleteAction extends Action {
 	
@@ -27,6 +27,8 @@ public class DeleteAction extends Action {
 		       .filter(obj -> obj instanceof Completion)
 		       .map(obj -> (Completion) obj)
 		       .forEach(completion -> AiBridgeManager.getRequestMap().remove(completion.getId()));
+		 
+		 AiBridgeManager.saveData(AiBridgeView.getSolutionName());
 
 		 AiBridgeView.refresh();
      }

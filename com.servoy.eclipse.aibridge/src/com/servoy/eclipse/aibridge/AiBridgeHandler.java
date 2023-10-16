@@ -147,141 +147,6 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 			String endpoint = COMMAND_TO_ENDPOINT_MAP.get(event.getCommand().getId());
 			if (endpoint != null && codeSelection != null)
 			{
-				final StringBuilder sb = new StringBuilder();
-				sb.append("\nSpecifications:\n");
-				ISourceModule module = DLTKUIPlugin.getEditorInputModelElement(activeEditor.getEditorInput());
-				final Script script = JavaScriptParserUtil.parse(module, null);
-
-				TypeInferencer2 inferencer = new TypeInferencer2();
-				final IdentifierCollectingVisitor collector = new IdentifierCollectingVisitor(inferencer, codeSelection.getOffset(), codeSelection.getLength());
-				inferencer.setVisitor(collector);
-				inferencer.setModelElement(module);
-				inferencer.doInferencing(script);
-
-				collector.identifiers.forEach((node, pair) -> {
-					JSTypeSet types = pair.getLeft().getTypes();
-					JSTypeSet declaredTypes = pair.getLeft().getDeclaredTypes();
-					String type = null;
-					if (types.size() > 0)
-					{
-						IRType irType = types.iterator().next();
-						if (irType instanceof IRClassType clsType)
-						{
-							irType = clsType.toItemType();
-						}
-						type = irType.getName();
-					}
-					if (declaredTypes.size() > 0)
-					{
-						IRType irType = declaredTypes.iterator().next();
-						if (irType instanceof IRClassType clsType)
-						{
-							irType = clsType.toItemType();
-						}
-						type = irType.getName();
-					}
-					if (type != null)
-					{
-						if ("Function".equals(type))
-						{
-							ReferenceLocation location = pair.getLeft().getLocation();
-
-							IModelElement element = locateModelElement(location);
-							try (Reader reader = ScriptdocContentAccess.getContentReader((IMember)element, true))
-							{
-								String doc = IOUtils.toString(reader);
-								if (doc != null)
-								{
-									sb.append(node.getParent()); // parent is the call expression
-									sb.append(":\n");
-									String[] lines = doc.split("\n");
-									for (String line : lines)
-									{
-										line = line.trim();
-										if (line.startsWith("@properties=")) continue;
-										if (!line.isBlank())
-										{
-											sb.append(line);
-											sb.append('\n');
-										}
-									}
-									sb.append('\n');
-								}
-
-							}
-							catch (ModelException | IOException e)
-							{
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						else
-						{
-							sb.append(pair.getRight());
-							sb.append(" is of type ");
-							sb.append(type);
-							sb.append('\n');
-							sb.append('\n');
-						}
-						ITypedScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectByName(type);
-						List<IValueReference> callsOrProperties = collector.propertiesOrCalls.get(node);
-						if (scriptObject != null && callsOrProperties != null && scriptObject.getObjectDocumentation() != null)
-						{
-							IObjectDocumentation docFile = scriptObject.getObjectDocumentation();
-							callsOrProperties.forEach(action -> {
-								String name = action.getName();
-								sb.append(node);
-								sb.append('.');
-								List<IFunctionDocumentation> functions = docFile.getFunctions().stream().filter(function -> function.getMainName().equals(name))
-									.sorted((func1, func2) -> func1.getArguments().size() - func2.getArguments().size())
-									.collect(Collectors.toList());
-								if (functions.size() == 1)
-								{
-									IFunctionDocumentation function = functions.get(0);
-									if (function.getType() == IFunctionDocumentation.TYPE_FUNCTION)
-									{
-										sb.append(function.getFullJSTranslatedSignature(true, false).split(" ", 2)[1]);
-										sb.append(":\n");
-										generateDescription(function, function.getArgumentsTypes().length, sb);
-									}
-									else if (function.getType() == IFunctionDocumentation.TYPE_CONSTANT ||
-										function.getType() == IFunctionDocumentation.TYPE_PROPERTY)
-									{
-										sb.append(function.getMainName());
-										sb.append(":\n");
-										sb.append(function.getDescription(ClientSupport.ng));
-									}
-
-								}
-								else if (functions.size() > 1)
-								{
-									IFunctionDocumentation function = functions.get(functions.size() - 1);
-									sb.append(function.getFullJSTranslatedSignature(true, false).split(" ", 2)[1]);
-									sb.append(":\n");
-									generateDescription(function, functions.get(0).getArgumentsTypes().length, sb);
-								}
-							});
-							sb.append('\n');
-							sb.append('\n');
-						}
-						else if (type.startsWith("WebService") && callsOrProperties != null && callsOrProperties.size() > 0)
-						{
-							// code for service plugins
-							String serviceName = type.substring("WebService<".length(), type.length() - 1);
-							WebObjectSpecification webObjectSpecification = WebServiceSpecProvider.getSpecProviderState()
-								.getWebObjectSpecification(serviceName);
-							generateApiOrPropertySpec(sb, node, callsOrProperties, webObjectSpecification);
-						}
-						else if (type.startsWith("RuntimeWebComponent") && callsOrProperties != null && callsOrProperties.size() > 0)
-						{
-							String componentName = type.substring("RuntimeWebComponent<".length(), type.length() - 1);
-							if (componentName.endsWith("_abs")) componentName = componentName.substring(0, componentName.length() - 4);
-							WebObjectSpecification componentSpec = WebComponentSpecProvider.getSpecProviderState()
-								.getWebObjectSpecification(componentName);
-							generateApiOrPropertySpec(sb, node, callsOrProperties, componentSpec);
-						}
-					}
-				});
 				AiBridgeManager.sendRequest(
 					event.getCommand().getName(),
 					endpoint,
@@ -289,11 +154,11 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 					filePathSelection,
 					codeSelection.getOffset(),
 					codeSelection.getLength(),
-					sb.toString().trim());
+					getContextData());
 
 			}
 
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("com.servoy.eclipse.aibridge.aibridgeviewid");
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("com.servoy.eclipse.aibridge.aibridgeview");
 		}
 		catch (PartInitException | NotDefinedException e)
 		{
@@ -365,10 +230,144 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 		}
 	}
 
-	private String getContextData(String filePath, int offset, int length)
+	private String getContextData()
 	{
-		//TODO: implement something like dltk.getContextData(inputData); this require dltk support
-		return "";
+		final StringBuilder sb = new StringBuilder();
+		sb.append("\nSpecifications:\n");
+		ISourceModule module = DLTKUIPlugin.getEditorInputModelElement(activeEditor.getEditorInput());
+		final Script script = JavaScriptParserUtil.parse(module, null);
+
+		TypeInferencer2 inferencer = new TypeInferencer2();
+		final IdentifierCollectingVisitor collector = new IdentifierCollectingVisitor(inferencer, codeSelection.getOffset(), codeSelection.getLength());
+		inferencer.setVisitor(collector);
+		inferencer.setModelElement(module);
+		inferencer.doInferencing(script);
+
+		collector.identifiers.forEach((node, pair) -> {
+			JSTypeSet types = pair.getLeft().getTypes();
+			JSTypeSet declaredTypes = pair.getLeft().getDeclaredTypes();
+			String type = null;
+			if (types.size() > 0)
+			{
+				IRType irType = types.iterator().next();
+				if (irType instanceof IRClassType clsType)
+				{
+					irType = clsType.toItemType();
+				}
+				type = irType.getName();
+			}
+			if (declaredTypes.size() > 0)
+			{
+				IRType irType = declaredTypes.iterator().next();
+				if (irType instanceof IRClassType clsType)
+				{
+					irType = clsType.toItemType();
+				}
+				type = irType.getName();
+			}
+			if (type != null)
+			{
+				if ("Function".equals(type))
+				{
+					ReferenceLocation location = pair.getLeft().getLocation();
+
+					IModelElement element = locateModelElement(location);
+					try (Reader reader = ScriptdocContentAccess.getContentReader((IMember)element, true))
+					{
+						String doc = IOUtils.toString(reader);
+						if (doc != null)
+						{
+							sb.append(node.getParent()); // parent is the call expression
+							sb.append(":\n");
+							String[] lines = doc.split("\n");
+							for (String line : lines)
+							{
+								line = line.trim();
+								if (line.startsWith("@properties=")) continue;
+								if (!line.isBlank())
+								{
+									sb.append(line);
+									sb.append('\n');
+								}
+							}
+							sb.append('\n');
+						}
+
+					}
+					catch (ModelException | IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else
+				{
+					sb.append(pair.getRight());
+					sb.append(" is of type ");
+					sb.append(type);
+					sb.append('\n');
+					sb.append('\n');
+				}
+				ITypedScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectByName(type);
+				List<IValueReference> callsOrProperties = collector.propertiesOrCalls.get(node);
+				if (scriptObject != null && callsOrProperties != null && scriptObject.getObjectDocumentation() != null)
+				{
+					IObjectDocumentation docFile = scriptObject.getObjectDocumentation();
+					callsOrProperties.forEach(action -> {
+						String name = action.getName();
+						sb.append(node);
+						sb.append('.');
+						List<IFunctionDocumentation> functions = docFile.getFunctions().stream().filter(function -> function.getMainName().equals(name))
+							.sorted((func1, func2) -> func1.getArguments().size() - func2.getArguments().size())
+							.collect(Collectors.toList());
+						if (functions.size() == 1)
+						{
+							IFunctionDocumentation function = functions.get(0);
+							if (function.getType() == IFunctionDocumentation.TYPE_FUNCTION)
+							{
+								sb.append(function.getFullJSTranslatedSignature(true, false).split(" ", 2)[1]);
+								sb.append(":\n");
+								generateDescription(function, function.getArgumentsTypes().length, sb);
+							}
+							else if (function.getType() == IFunctionDocumentation.TYPE_CONSTANT ||
+								function.getType() == IFunctionDocumentation.TYPE_PROPERTY)
+							{
+								sb.append(function.getMainName());
+								sb.append(":\n");
+								sb.append(function.getDescription(ClientSupport.ng));
+							}
+
+						}
+						else if (functions.size() > 1)
+						{
+							IFunctionDocumentation function = functions.get(functions.size() - 1);
+							sb.append(function.getFullJSTranslatedSignature(true, false).split(" ", 2)[1]);
+							sb.append(":\n");
+							generateDescription(function, functions.get(0).getArgumentsTypes().length, sb);
+						}
+					});
+					sb.append('\n');
+					sb.append('\n');
+				}
+				else if (type.startsWith("WebService") && callsOrProperties != null && callsOrProperties.size() > 0)
+				{
+					// code for service plugins
+					String serviceName = type.substring("WebService<".length(), type.length() - 1);
+					WebObjectSpecification webObjectSpecification = WebServiceSpecProvider.getSpecProviderState()
+						.getWebObjectSpecification(serviceName);
+					generateApiOrPropertySpec(sb, node, callsOrProperties, webObjectSpecification);
+				}
+				else if (type.startsWith("RuntimeWebComponent") && callsOrProperties != null && callsOrProperties.size() > 0)
+				{
+					String componentName = type.substring("RuntimeWebComponent<".length(), type.length() - 1);
+					if (componentName.endsWith("_abs")) componentName = componentName.substring(0, componentName.length() - 4);
+					WebObjectSpecification componentSpec = WebComponentSpecProvider.getSpecProviderState()
+						.getWebObjectSpecification(componentName);
+					generateApiOrPropertySpec(sb, node, callsOrProperties, componentSpec);
+				}
+			}
+		});
+		return sb.toString().trim();
 	}
 
 	private void generateDescription(IFunctionDocumentation fdoc, int mandatoryParams, StringBuilder sb)

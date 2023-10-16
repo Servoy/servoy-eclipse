@@ -7,7 +7,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import com.servoy.eclipse.aibridge.AiBridgeManager;
 import com.servoy.eclipse.aibridge.AiBridgeView;
-import com.servoy.eclipse.aibridge.Completion;
+import com.servoy.eclipse.aibridge.dto.Completion;
 
 public class SubmitAgainAction extends Action {
 	

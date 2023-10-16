@@ -42,7 +42,18 @@ Require-Bundle: org.eclipse.ui,
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.15.2",
  com.fasterxml.jackson.core.jackson-databind;bundle-version="2.15.2",
  com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.15.2",
- com.servoy.eclipse.model;bundle-version="2023.12.0"
+ com.servoy.eclipse.model;bundle-version="2023.12.0",
+ org.eclipse.ui;bundle-version="3.203.100",
+ com.servoy.eclipse.ui;bundle-version="2023.12.0",
+ org.eclipse.jface.text;bundle-version="3.24.0",
+ org.eclipse.dltk.javascript.ui;bundle-version="5.1.1",
+ org.eclipse.dltk.ui;bundle-version="5.1.1",
+ org.eclipse.dltk.core;bundle-version="5.1.1",
+ org.eclipse.compare;bundle-version="3.9.0",
+ org.eclipse.compare.core;bundle-version="3.8.0",
+ org.eclipse.wst.jsdt.ui;bundle-version="2.1.700",
+ com.servoy.eclipse.core;bundle-version="2023.12.0",
+ org.eclipse.ui.ide;bundle-version="3.21.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.aibridge
 Bundle-ActivationPolicy: lazy

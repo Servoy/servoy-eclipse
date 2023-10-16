@@ -1,8 +1,10 @@
-package com.servoy.eclipse.aibridge;
+package com.servoy.eclipse.aibridge.dto;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
+
+import com.servoy.eclipse.aibridge.AiBridgeStatus;
 
 public class Completion {
 	private UUID id;

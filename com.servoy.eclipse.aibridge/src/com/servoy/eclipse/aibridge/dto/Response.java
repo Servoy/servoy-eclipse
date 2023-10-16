@@ -1,4 +1,4 @@
-package com.servoy.eclipse.aibridge;
+package com.servoy.eclipse.aibridge.dto;
 
 import org.json.JSONObject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
