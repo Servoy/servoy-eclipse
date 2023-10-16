@@ -49,8 +49,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.dltk.javascript.ui;bundle-version="5.1.1",
  org.eclipse.dltk.ui;bundle-version="5.1.1",
  org.eclipse.dltk.core;bundle-version="5.1.1",
- org.eclipse.compare;bundle-version="3.9.0",
- org.eclipse.compare.core;bundle-version="3.8.0",
  org.eclipse.wst.jsdt.ui;bundle-version="2.1.700",
  com.servoy.eclipse.core;bundle-version="2023.12.0",
  org.eclipse.ui.ide;bundle-version="3.21.0"
