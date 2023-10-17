@@ -2519,6 +2519,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 					((AbstractBase)beanPropertyPersist).clearProperty((String)id);
 				}
+				else if (beanPropertyPersist instanceof AbstractBase && !(beanPropertyPersist instanceof LayoutContainer) &&
+					hasInheritedValue(id, beanPropertyPersist) && value != null && value.equals(getInheritedValue(id, beanPropertyPersist)))
+				{
+					changed |= ((AbstractBase)beanPropertyPersist).hasProperty((String)id);
+
+					((AbstractBase)beanPropertyPersist).clearProperty((String)id);
+					((AbstractBase)beanPropertyPersist).clearChanged();
+				}
 				else
 				{
 					changed |= !Utils.equalObjects(value, beanPropertyDescriptor.propertyDescriptor.getValue(beanPropertyPersist, persistContext));
@@ -2626,6 +2634,65 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 
 		return hasInheritedValue;
+	}
+
+	private Object getInheritedValue(Object id, Object beanPropertyPersist)
+	{
+		Object inheritedValue = null;
+
+		if (beanPropertyPersist == persistContext.getPersist())
+		{
+			IPersist persistThatCouldBeExtended = (IPersist)beanPropertyPersist;
+
+			String topMostKey = (String)id;
+			while (persistThatCouldBeExtended instanceof IChildWebObject)
+			{
+				topMostKey = ((IChildWebObject)persistThatCouldBeExtended).getJsonKey();
+				persistThatCouldBeExtended = persistThatCouldBeExtended.getParent();
+			}
+
+			// ok see if there is a value for the property with id "id" inside "beanPropertyPersist" in any of the 'extended' persists
+			while (inheritedValue == null && persistThatCouldBeExtended instanceof ISupportExtendsID)
+			{
+				// take the next 'super' persist in the inheritance chain
+				persistThatCouldBeExtended = PersistHelper.getSuperPersist((ISupportExtendsID)persistThatCouldBeExtended);
+
+				if (persistThatCouldBeExtended != null)
+				{
+					if (persistThatCouldBeExtended instanceof IBasicWebObject)
+					{
+						JSONObject ownJson = (JSONObject)((IBasicWebObject)persistThatCouldBeExtended).getOwnProperty(
+							StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
+						if (!ServoyJSONObject.isJavascriptNullOrUndefined(ownJson) && ownJson.has(topMostKey))
+						{
+							if (ownJson.get(topMostKey) instanceof JSONArray)
+							{
+								JSONArray arr = (JSONArray)ownJson.get(topMostKey);
+								for (int i = 0; i < arr.length(); ++i)
+								{
+									JSONObject item = arr.getJSONObject(i);
+									if (item.has((String)id))
+									{
+										inheritedValue = item.get((String)id);
+										if (inheritedValue != null)
+										{
+											break;
+										}
+									}
+								}
+							}
+							else if (ownJson.get(topMostKey) instanceof JSONObject)
+							{
+								inheritedValue = ((JSONObject)ownJson.get(topMostKey)).get((String)id);
+							}
+						}
+					}
+					else inheritedValue = ((AbstractBase)persistThatCouldBeExtended).getProperty((String)id);
+				}
+			}
+		}
+
+		return inheritedValue;
 	}
 
 	public static void refreshPropertiesView()

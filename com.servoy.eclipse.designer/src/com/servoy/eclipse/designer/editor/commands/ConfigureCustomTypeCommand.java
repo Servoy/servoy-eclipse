@@ -126,6 +126,7 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 									.getDataSource(flattenedSolution.getFlattenedForm(activeEditor.getForm()).getDataSource());
 
 								List<Map<String, Object>> input = new ArrayList<>();
+								List<Map<String, Object>> originalInput = new ArrayList<>();
 								Object prop = webComponent.getProperty(propertyName);
 								Set<Object> previousColumns = new HashSet<>();
 								if (prop instanceof IChildWebObject[])
@@ -136,10 +137,13 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 										if (obj instanceof WebCustomType)
 										{
 											WebCustomType wct = (WebCustomType)obj;
-											JSONObject object = (JSONObject)wct.getPropertiesMap().get("json");
+											JSONObject object = wct.getFlattenedJson();
 											Map<String, Object> map = getAsMap(object);
 											previousColumns.add(object.get("svyUUID"));
 											input.add(map);
+											Map<String, Object> originalMap = new HashMap<String, Object>();
+											map.forEach((key, value) -> originalMap.put(key, value));
+											originalInput.add(originalMap);
 										}
 									}
 								}
@@ -150,13 +154,16 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 								if (dialogConfigurator.open() != Window.OK) return null;
 								List<Map<String, Object>> newProperties = dialogConfigurator.getResult();
 
-								final PersistContext ctx = persistContext;
-								final String _propertyName = propertyName;
-								Display.getDefault().asyncExec(() -> {
-									activeEditor.getCommandStack()
-										.execute(
-											new SetCustomArrayPropertiesCommand(_propertyName, ctx, newProperties, previousColumns, activeEditor));
-								});
+								if (!newProperties.equals(originalInput))
+								{
+									final PersistContext ctx = persistContext;
+									final String _propertyName = propertyName;
+									Display.getDefault().asyncExec(() -> {
+										activeEditor.getCommandStack()
+											.execute(
+												new SetCustomArrayPropertiesCommand(_propertyName, ctx, newProperties, previousColumns, activeEditor));
+									});
+								}
 							}
 							else
 							{
