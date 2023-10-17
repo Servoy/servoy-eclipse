@@ -253,6 +253,7 @@ import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.RecordPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RuntimeComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -1280,13 +1281,12 @@ public class TypeCreator extends TypeCache
 				}
 				else
 				{
-					returnType = getTypeRef(null, pd.getType().getName());
+					returnType = getTypeRef(null, ("object".equals(pd.getType().getName())) ? "Object" : pd.getType().getName());
 				}
-
-				if (PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
-				{
-					returnType = TypeUtil.arrayOf(returnType);
-				}
+			}
+			if (api.getReturnType() != null && PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
+			{
+				returnType = TypeUtil.arrayOf(returnType);
 			}
 			method.setType(returnType);
 			EList<Parameter> parameters = method.getParameters();
@@ -1466,6 +1466,10 @@ public class TypeCreator extends TypeCache
 				}
 			}
 			return TypeUtil.ref(recordType);
+		}
+		if (RecordPropertyType.TYPE_NAME.equals(type.getName()))
+		{
+			return getTypeRef(context, Record.JS_RECORD);
 		}
 		return null;
 	}
