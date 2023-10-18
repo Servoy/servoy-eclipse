@@ -524,8 +524,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		}
 		if (wc instanceof Form frm)
 		{
-			boolean isFC = frm.getPropertiesMap().get("customProperties").toString().contains("formComponent:true");
-			boolean hasDB = frm.getPropertiesMap().get("dataSource") == null ? false : true;
+			boolean isFC = frm.getCustomProperty(new String[] { "formComponent" }).equals(Boolean.TRUE);
+			boolean hasDB = frm.getDataSource() == null ? false : true;
 			if (isFC && !hasDB)
 			{
 				showDialog = false;
