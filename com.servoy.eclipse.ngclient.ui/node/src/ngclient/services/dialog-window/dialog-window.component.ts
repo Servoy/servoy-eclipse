@@ -79,7 +79,7 @@ import { FormService } from '../../form.service';
           }
         }
       } else {
-        for(let i = lastTabIndex - 1; i > 1; i--) {
+        for(let i = lastTabIndex - 1; i > firstTabIndex; i--) {
           const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
           // if there is no focusable element in the window, then newTarget == e.target,
           // do a check here to avoid focus cycling
@@ -93,8 +93,9 @@ import { FormService } from '../../form.service';
     }
 
     lastElementFocused(event: Event) {
+      const firstTabIndex = parseInt(this.doc.getElementById('tabStart').getAttribute('tabindex'), 10);
       const lastTabIndex = parseInt(this.doc.getElementById('tabStop').getAttribute('tabindex'), 10);
-      for(let i = 2; i < lastTabIndex; i++) {
+      for(let i = firstTabIndex + 1; i < lastTabIndex; i++) {
         const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
         // if there is no focusable element in the window, then newTarget == e.target,
         // do a check here to avoid focus cycling
