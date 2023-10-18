@@ -210,7 +210,7 @@ public abstract class DialogCellEditor extends org.eclipse.jface.viewers.DialogC
 		}
 
 		Object newValue = openDialogBox(control);
-		if (newValue == null || doGetValue() == null ||
+		if (newValue == null ||
 			(doGetValue() != null &&
 				(doGetValue().equals(newValue) || doGetValue().equals(newValue.toString()))))
 		{
