@@ -13,6 +13,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.servoy.eclipse.aibridge.AiBridgeView;
 import com.servoy.eclipse.aibridge.dto.Completion;
+import com.servoy.eclipse.aibridge.editors.DualEditorInput;
 
 public class ShowResponseAction extends Action implements ISelectionListener
 {
@@ -35,7 +36,6 @@ public class ShowResponseAction extends Action implements ISelectionListener
 	public void run()
 	{
 		if (htmlViewer == null) return;
-		htmlViewer.setVisible(isChecked());
 		refresh();
 
 	}
@@ -43,11 +43,11 @@ public class ShowResponseAction extends Action implements ISelectionListener
 	public void refresh()
 	{
 		htmlViewer.setVisible(isChecked());
-		if (!isChecked()) return;
-		htmlViewer.setText(completion != null ? completion.getResponse().getResponseMessage() : "");
+		String viewerContent = completion != null && completion.getResponse() != null && !completion.getResponse().isEmptyResponse()
+			? completion.getResponse().getResponseMessage()
+			: DualEditorInput.getNoContentHtml();
+		htmlViewer.setText(viewerContent);
 		parent.layout();
-
-
 	}
 
 	@Override
@@ -55,12 +55,19 @@ public class ShowResponseAction extends Action implements ISelectionListener
 	{
 		if (part instanceof AiBridgeView)
 		{
+
 			this.completion = null;
 			if (!selection.isEmpty() && selection instanceof IStructuredSelection structuredSelection)
 			{
 				this.completion = (Completion)structuredSelection.getFirstElement();
-				refresh();
 			}
+
+			if (completion == null)
+			{
+				setChecked(false);
+			}
+			refresh();
+			setEnabled(completion != null ? true : false);
 		}
 	}
 }

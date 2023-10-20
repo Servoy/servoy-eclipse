@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servoy.eclipse.aibridge.dto.Completion;
 import com.servoy.eclipse.aibridge.dto.Response;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.util.Utils;
 
@@ -60,22 +61,20 @@ public class AiBridgeManager
 				Completion completion = new Completion(uuid, cmdName, endpoint, inputData, context, source, offset, length);
 				try
 				{
-					completion.setStatus(AiBridgeStatus.SUBMITTED);
 					requestMap.put(uuid, completion);
 					AiBridgeView.refresh();
-
+					saveData(AiBridgeView.getSolutionName());
 					completion = sendHttpRequest(loginToken, completion);
 
 				}
 				catch (Exception e)
 				{
-					e.printStackTrace();
 					completion.setMessage(e.getMessage());
 					completion.setStatus(AiBridgeStatus.ERROR);
+					ServoyLog.logError(e);
 				}
 				finally
 				{
-					AiBridgeView.refresh();
 					saveData(AiBridgeView.getSolutionName());
 				}
 			}, executorService);
@@ -99,15 +98,15 @@ public class AiBridgeManager
 				}
 				catch (Exception e)
 				{
-					e.printStackTrace();
 					myCompletion.setMessage(e.getMessage());
 					myCompletion.setStatus(AiBridgeStatus.ERROR);
+					ServoyLog.logError(e);
 				}
 				finally
 				{
 					requestMap.put(myCompletion.getId(), myCompletion);
-					AiBridgeManager.saveData(AiBridgeView.getSolutionName());
 					AiBridgeView.refresh();
+
 				}
 			}, executorService);
 		}
@@ -194,7 +193,7 @@ public class AiBridgeManager
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				ServoyLog.logError(e);
 			}
 		}
 	}
@@ -226,7 +225,7 @@ public class AiBridgeManager
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 
 	}

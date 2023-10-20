@@ -49,6 +49,7 @@ import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 
 public class AiBridgeView extends ViewPart implements IPersistable, IActiveProjectListener
@@ -195,14 +196,6 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 		});
 	}
 
-//    private void setupPostSelectionListener() {
-//        viewer.addPostSelectionChangedListener(event -> {
-//            IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-//            Completion selectedCompletion = (Completion) selection.getFirstElement();
-//            openSourceAction.processDataForScripEditor(selectedCompletion.getSourcePath());
-//        });
-//    }
-
 	private void setupToolbar()
 	{
 		IToolBarManager toolbarManager = getViewSite().getActionBars().getToolBarManager();
@@ -250,7 +243,7 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 		}
 		catch (java.io.IOException e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 		return result.toString();
 	}
@@ -377,6 +370,10 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
 		unregisterListeners();
+		if (currentInstance != null)
+		{
+			currentInstance = null;
+		}
 		super.dispose();
 	}
 

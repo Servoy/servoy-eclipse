@@ -55,6 +55,7 @@ import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IFunctionDocumentation;
@@ -63,7 +64,6 @@ import com.servoy.j2db.documentation.IParameterDocumentation;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-
 
 public class AiBridgeHandler extends AbstractHandler implements ISelectionListener
 {
@@ -162,7 +162,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 		}
 		catch (PartInitException | NotDefinedException e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 		return null;
 	}
@@ -212,8 +212,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 					}
 					catch (IOException e)
 					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						ServoyLog.logError(e);
 					}
 				}
 				else
@@ -296,8 +295,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 					}
 					catch (ModelException | IOException e)
 					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						ServoyLog.logError(e);
 					}
 				}
 				else
@@ -453,7 +451,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 			{
 				if (DLTKCore.DEBUG)
 				{
-					e.printStackTrace();
+					ServoyLog.logError(e);
 				}
 			}
 			catch (ModelElementFound e)

@@ -1,6 +1,5 @@
 package com.servoy.eclipse.aibridge.editors;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IFile;
@@ -19,142 +18,189 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
 
-public class DualEditorInput implements IEditorInput {
+public class DualEditorInput implements IEditorInput
+{
 
 	private IPersist persist;
 	private String scopeName;
 	private IFile inputFile;
-	private Completion completion;
-	private String leftTitle;
-	
+	private final Completion completion;
+	private final String leftTitle;
 
-	public DualEditorInput(Completion completion) {
+
+	public DualEditorInput(Completion completion)
+	{
 		this.completion = completion;
-        String[] pathParts = extractPathParts(completion.getSourcePath());
-        Solution targetSolution = locateTargetSolution(pathParts[0]);
-        assignPersistAndScopeName(pathParts, targetSolution);
-        determineInputFile(completion);
-        leftTitle = pathParts[pathParts.length - 1];
-    }
-	
-	private String[] extractPathParts(String selectionPath) {
-        return selectionPath.substring(1).split("/");
-    }
+		String[] pathParts = extractPathParts(completion.getSourcePath());
+		Solution targetSolution = locateTargetSolution(pathParts[0]);
+		assignPersistAndScopeName(pathParts, targetSolution);
+		determineInputFile(completion);
+		leftTitle = pathParts[pathParts.length - 1];
+	}
 
-    private Solution locateTargetSolution(String solutionName) {
-        Solution activeSolution = getActiveSolution();
-        if (isActiveSolution(solutionName, activeSolution)) {
-            return activeSolution;
-        }
-        return findTargetSolutionInModules(solutionName);
-    }
+	private String[] extractPathParts(String selectionPath)
+	{
+		return selectionPath.substring(1).split("/");
+	}
 
-    private Solution getActiveSolution() {
-        return ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution();
-    }
-    
-    private boolean isActiveSolution(String solutionName, Solution activeSolution) {
-        return activeSolution.getName().equals(solutionName);
-    }
-    
-    private Solution findTargetSolutionInModules(String solutionName) {
-        FlattenedSolution flSol = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
-        for (Solution module : flSol.getModules()) {
-            if (module.getName().equals(solutionName)) {
-                return module;
-            }
-        }
-        return null;  // Or handle the case when no solution is found
-    }
-    
-    private void assignPersistAndScopeName(String[] parts, Solution targetSolution) {
-        scopeName = parts[parts.length - 1];
-        boolean isForm = (parts.length > 2 && parts[1].equals("forms"));
-        if (scopeName.endsWith(".js")) {
-            scopeName = scopeName.substring(0, scopeName.length() - 3);
-        }
-        if (isForm) {
-            persist = targetSolution.getForm(scopeName);
-            scopeName = null;
-        } else {
-            persist = targetSolution;
-        }
-    }
-    
-    private void determineInputFile(Completion completion) {
-        String scriptPath = getScriptPath();
-        if (scriptPath != null) {
-            inputFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-        }
-    }
+	private Solution locateTargetSolution(String solutionName)
+	{
+		Solution activeSolution = getActiveSolution();
+		if (isActiveSolution(solutionName, activeSolution))
+		{
+			return activeSolution;
+		}
+		return findTargetSolutionInModules(solutionName);
+	}
 
-    private String getScriptPath() {
-        if (persist instanceof Solution && scopeName != null) {
-            return SolutionSerializer.getRelativePath(persist, false) + scopeName + SolutionSerializer.JS_FILE_EXTENSION;
-        } else if (isValidForm(persist)) {
-            return SolutionSerializer.getScriptPath(persist, false);
-        }
-        return null;
-    }
+	private Solution getActiveSolution()
+	{
+		return ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution();
+	}
 
-    private boolean isValidForm(IPersist persist) {
-        Form parentForm = (Form) persist.getAncestor(IRepository.FORMS);
-        return parentForm == null || !parentForm.isFormComponent();
-    }
-    
-    @Override
-    public boolean exists() {
-        return true;
-    }
+	private boolean isActiveSolution(String solutionName, Solution activeSolution)
+	{
+		return activeSolution.getName().equals(solutionName);
+	}
 
-    @Override
-    public ImageDescriptor getImageDescriptor() {
-        return null;
-    }
+	private Solution findTargetSolutionInModules(String solutionName)
+	{
+		FlattenedSolution flSol = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+		for (Solution module : flSol.getModules())
+		{
+			if (module.getName().equals(solutionName))
+			{
+				return module;
+			}
+		}
+		return null; // Or handle the case when no solution is found
+	}
 
-    @Override
-    public String getName() {
-        return "JS Content";
-    }
+	private void assignPersistAndScopeName(String[] parts, Solution targetSolution)
+	{
+		scopeName = parts[parts.length - 1];
+		boolean isForm = (parts.length > 2 && parts[1].equals("forms"));
+		if (scopeName.endsWith(".js"))
+		{
+			scopeName = scopeName.substring(0, scopeName.length() - 3);
+		}
+		if (isForm)
+		{
+			persist = targetSolution.getForm(scopeName);
+			scopeName = null;
+		}
+		else
+		{
+			persist = targetSolution;
+		}
+	}
 
-    @Override
-    public IPersistableElement getPersistable() {
-        return null;
-    }
+	private void determineInputFile(Completion completion)
+	{
+		String scriptPath = getScriptPath();
+		if (scriptPath != null)
+		{
+			inputFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+		}
+	}
 
-    @Override
-    public String getToolTipText() {
-        return "JavaScript Content";
-    }
+	private String getScriptPath()
+	{
+		if (persist instanceof Solution && scopeName != null)
+		{
+			return SolutionSerializer.getRelativePath(persist, false) + scopeName + SolutionSerializer.JS_FILE_EXTENSION;
+		}
+		else if (isValidForm(persist))
+		{
+			return SolutionSerializer.getScriptPath(persist, false);
+		}
+		return null;
+	}
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public Object getAdapter(Class adapter) {
-        return null;
-    }
-   
-    public IFile getInputFile() {
-    	return inputFile;
-    }
-    
-    public String getContent() {
-    	return completion.getSelection();
-    }
-    
-    public String getHtmlContent() {
-    	return completion.getResponse().getResponseMessage();
-    }
-    
-    public UUID getId() {
-    	return completion.getId();
-    }
-    
-    public String getLeftTitle() {
-    	return leftTitle;
-    }
-    
-    public String getRightTitle() {
-    	return Optional.ofNullable(completion.getId()).map(uuid -> uuid.toString().replaceAll("(.{2}).{6}-(.{2}).{2}-(.{2}).{2}-(.{2}).*", "$1$2$3$4")).orElse("");
-    }
-    
+	private boolean isValidForm(IPersist persist)
+	{
+		Form parentForm = (Form)persist.getAncestor(IRepository.FORMS);
+		return parentForm == null || !parentForm.isFormComponent();
+	}
+
+	@Override
+	public boolean exists()
+	{
+		return true;
+	}
+
+	@Override
+	public ImageDescriptor getImageDescriptor()
+	{
+		return null;
+	}
+
+	@Override
+	public String getName()
+	{
+		return "JS Content";
+	}
+
+	@Override
+	public IPersistableElement getPersistable()
+	{
+		return null;
+	}
+
+	@Override
+	public String getToolTipText()
+	{
+		return "JavaScript Content";
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Object getAdapter(Class adapter)
+	{
+		return null;
+	}
+
+	public IFile getInputFile()
+	{
+		return inputFile;
+	}
+
+	public String getContent()
+	{
+		return completion.getSelection();
+	}
+
+	public String getHtmlContent()
+	{
+		if (completion.getResponse() != null && !completion.getResponse().isEmptyResponse())
+		{
+			return completion.getResponse().getResponseMessage();
+		}
+		return getNoContentHtml();
+	}
+
+	public static String getNoContentHtml()
+	{
+		return "<html><body><h2 style=\"text-align:center;\">No response</h2></body></html>";
+	}
+
+	public UUID getId()
+	{
+		return completion.getId();
+	}
+
+	public String getLeftTitle()
+	{
+		return completion.getId().toString().replaceAll("(.{2}).{6}-(.{2}).{2}-(.{2}).{2}-(.{2}).*", "$1$2$3$4") + ": " + leftTitle;
+	}
+
+	public String getRightTitle()
+	{
+		return completion.getId().toString().replaceAll("(.{2}).{6}-(.{2}).{2}-(.{2}).{2}-(.{2}).*", "$1$2$3$4") + ": " + completion.getCmdName();
+	}
+
+	public String getSelectionContent()
+	{
+		return completion.getSelection();
+	}
 }

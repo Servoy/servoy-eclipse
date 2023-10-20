@@ -10,26 +10,36 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.aibridge.editors.DualEditor;
 
-public class AiBridgeStartup implements IStartup {
+public class AiBridgeStartup implements IStartup
+{
 
-    @Override
-    public void earlyStartup() {
-        Display.getDefault().asyncExec(() -> closeDualEditors());
-    }
+	public static String EMPTY_TAB_ID = "org.eclipse.ui.internal.emptyEditorTab";
 
-    private void closeDualEditors() {
-        IWorkbench workbench = PlatformUI.getWorkbench();
-        IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-        if (window != null) {
-            IWorkbenchPage page = window.getActivePage();
-            if (page != null) {
-                IEditorReference[] editorReferences = page.getEditorReferences();
-                for (IEditorReference reference : editorReferences) {
-                    if (DualEditor.ID.equals(reference.getId())) {
-                        page.closeEditor(reference.getEditor(false), false);
-                    }
-                }
-            }
-        }
-    }
+	@Override
+	public void earlyStartup()
+	{
+		Display.getDefault().asyncExec(() -> closeDualEditors());
+		PlatformUI.getWorkbench().addWorkbenchListener(new AiBridgeShutdownListener());
+	}
+
+	private void closeDualEditors()
+	{
+		IWorkbench workbench = PlatformUI.getWorkbench();
+		IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+		if (window != null)
+		{
+			IWorkbenchPage page = window.getActivePage();
+			if (page != null)
+			{
+				IEditorReference[] editorReferences = page.getEditorReferences();
+				for (IEditorReference reference : editorReferences)
+				{
+					if (DualEditor.ID.equals(reference.getId()) || EMPTY_TAB_ID.equals(reference.getId()))
+					{
+						page.closeEditor(reference.getEditor(false), false);
+					}
+				}
+			}
+		}
+	}
 }
