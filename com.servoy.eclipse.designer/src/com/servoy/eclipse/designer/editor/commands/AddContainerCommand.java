@@ -514,17 +514,21 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 	{
 		boolean showDialog = true;
 		List<Entry<String, PropertyDescription>> dataproviderProperties = properties.entrySet().stream()
-			.filter(entry -> entry.getValue().getType().getName().equals(DataproviderPropertyType.TYPE_NAME))
+			.filter(entry -> entry.getValue().getType().getName().equals(DataproviderPropertyType.TYPE_NAME) && entry.getValue().getTag("wizard") != null)
 			.collect(Collectors.toList());
 
 		ISupportChilds wc = webComponent.getParent();
-		while (!(wc instanceof Form))
+		if (wc != null)
 		{
-			wc = wc.getParent();
+			while (!(wc instanceof Form))
+			{
+				wc = wc.getParent();
+			}
 		}
 		if (wc instanceof Form frm)
 		{
-			boolean isFC = frm.getCustomProperty(new String[] { "formComponent" }).equals(Boolean.TRUE);
+			@SuppressWarnings("boxing")
+			boolean isFC = frm.isFormComponent();
 			boolean hasDB = frm.getDataSource() == null ? false : true;
 			if (isFC && !hasDB)
 			{
@@ -537,12 +541,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			if (dataproviderProperties.size() == 1)
 			{
 				Entry<String, PropertyDescription> entry = dataproviderProperties.get(0);
-				Object showDialogForThisDP = dataproviderProperties.get(0).getValue().getTag("wizard");
-				if (showDialogForThisDP != null)
-				{
-					CreateComponentHandler.autoShowDataProviderSelection(entry.getValue(), activeEditor.getForm(), webComponent,
-						entry.getKey());
-				}
+				CreateComponentHandler.autoShowDataProviderSelection(entry.getValue(), activeEditor.getForm(), webComponent,
+					entry.getKey());
 			}
 			else if (dataproviderProperties.size() > 1)
 			{
