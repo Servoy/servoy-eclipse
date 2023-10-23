@@ -25,8 +25,10 @@ export class RecordRefType implements IType<any> {
 	}
 
 	fromClientToServer(newClientData: RowValue | RecordRefForServer | ServerSentRecordRef, _oldClientData: any, _propertyContext: IPropertyContext): [any, RowValue | RecordRefForServer | ServerSentRecordRef] {
-        if (instanceOfServerSentRecordRef(newClientData) || instanceOfRecordRefForServer(newClientData)) return [newClientData, newClientData];
-		else return [RecordRefType.generateRecordRef(newClientData.getId(), newClientData.getFoundset().getId()), newClientData];
+        if(newClientData) {
+            if (instanceOfServerSentRecordRef(newClientData) || instanceOfRecordRefForServer(newClientData)) return [newClientData, newClientData];
+            else return [RecordRefType.generateRecordRef(newClientData.getId(), newClientData.getFoundset().getId()), newClientData];
+        } else return null;
 	}
 
 }
