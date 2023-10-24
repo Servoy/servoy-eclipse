@@ -514,21 +514,18 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 	{
 		boolean showDialog = true;
 		List<Entry<String, PropertyDescription>> dataproviderProperties = properties.entrySet().stream()
-			.filter(entry -> entry.getValue().getType().getName().equals(DataproviderPropertyType.TYPE_NAME) && entry.getValue().getTag("wizard") != null)
+			.filter(entry -> entry.getValue().getType().getName().equals(DataproviderPropertyType.TYPE_NAME) && (entry.getValue().getTag("wizard") != null &&
+				(entry.getValue().getTag("wizard").toString().equals("true") || entry.getValue().getTag("wizard").equals("1"))))
 			.collect(Collectors.toList());
 
 		ISupportChilds wc = webComponent.getParent();
-		if (wc != null)
+		while (wc != null && !(wc instanceof Form))
 		{
-			while (!(wc instanceof Form))
-			{
-				wc = wc.getParent();
-			}
+			wc = wc.getParent();
 		}
 		if (wc instanceof Form frm)
 		{
-			@SuppressWarnings("boxing")
-			boolean isFC = frm.isFormComponent();
+			boolean isFC = frm.isFormComponent().booleanValue();
 			boolean hasDB = frm.getDataSource() == null ? false : true;
 			if (isFC && !hasDB)
 			{
