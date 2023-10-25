@@ -160,7 +160,6 @@ public class ConfluenceGenerator
 	}
 
 	public ConfluenceGenerator(String parentName, HashMap<String, String> qualifiedToName, HashMap<String, String> returnTypesToParentName)
-		throws ClientProtocolException, IOException
 	{
 		this.qualifiedToName = qualifiedToName;
 		this.returnTypesToParentName = returnTypesToParentName;

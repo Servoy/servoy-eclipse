@@ -72,8 +72,6 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.commons-dbcp2,
  org.eclipse.jface,
  sj.jsonschemavalidation,
- org.apache.httpcomponents.client5.httpclient5,
- org.apache.httpcomponents.core5.httpcore5,
  com.servoy.eclipse.ui.tweaks,
  org.apache.commons.codec,
  org.eclipse.help,
@@ -117,7 +115,17 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
  com.servoy.eclipse.ui.wizards,
  com.servoy.eclipse.ui.wizards.exportsolution.pages
-Import-Package: org.apache.commons.io;version="2.8.0"
+Import-Package: org.apache.commons.io;version="2.8.0",
+ org.apache.hc.client5.http;version="5.2.1",
+ org.apache.hc.client5.http.classic;version="5.2.1",
+ org.apache.hc.client5.http.classic.methods;version="5.2.1",
+ org.apache.hc.client5.http.entity;version="5.2.1",
+ org.apache.hc.client5.http.entity.mime;version="5.2.1",
+ org.apache.hc.client5.http.impl.classic;version="5.2.1",
+ org.apache.hc.client5.http.protocol;version="5.2.1",
+ org.apache.hc.core5.http;version="5.2.3",
+ org.apache.hc.core5.http.io.entity;version="5.2.3",
+ org.apache.hc.core5.http.message;version="5.2.3"
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.ui

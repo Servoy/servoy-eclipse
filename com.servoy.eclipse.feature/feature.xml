@@ -362,7 +362,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.jsoup"
          download-size="0"
          install-size="0"
-         version="1.16.1"
+         version="1.16.2"
          unpack="false"/>
 
    <plugin
@@ -384,20 +384,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="1.14.0.v20221112-0806"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.httpcomponents.core5.httpcore5"
-         download-size="0"
-         install-size="0"
-         version="5.1.4.v20221013-1742"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.httpcomponents.client5.httpclient5"
-         download-size="0"
-         install-size="0"
-         version="5.1.3.v20221013-1742"
          unpack="false"/>
 
    <plugin
@@ -446,21 +432,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.logging.log4j.api"
          download-size="0"
          install-size="0"
-         version="2.20.0"
+         version="2.21.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
          download-size="0"
          install-size="0"
-         version="2.20.0"
+         version="2.21.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.jcl"
          download-size="0"
          install-size="0"
-         version="2.20.0"
+         version="2.21.0"
          unpack="false"/>
 
    <plugin
@@ -481,7 +467,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.lang3"
          download-size="0"
          install-size="0"
-         version="3.12.0"
+         version="3.13.0"
          unpack="false"/>
 
    <plugin
@@ -495,21 +481,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.commons-dbcp2"
          download-size="0"
          install-size="0"
-         version="2.9.0"
+         version="2.10.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.commons.commons-pool2"
          download-size="0"
          install-size="0"
-         version="2.11.1"
+         version="2.12.0"
          unpack="false"/>
 
    <plugin
          id="com.google.guava"
          download-size="0"
          install-size="0"
-         version="30.1.0.v20221112-0806"
+         version="32.1.2.jre"
          unpack="false"/>
 
    <plugin
@@ -530,7 +516,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.fasterxml.classmate"
          download-size="0"
          install-size="0"
-         version="1.5.1"
+         version="1.6.0"
          unpack="false"/>
 
    <plugin
@@ -658,13 +644,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="org.apache.logging.log4j.slf4j2-impl"
-         download-size="0"
-         install-size="0"
-         version="2.20.0"
-         unpack="false"/>
-
-   <plugin
          id="slf4j.api"
          download-size="0"
          install-size="0"
@@ -689,7 +668,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="io.smallrye.jandex"
          download-size="0"
          install-size="0"
-         version="3.1.3"
+         version="3.1.5"
          unpack="false"/>
 
    <plugin
@@ -697,6 +676,13 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="2023.9.0.3900_rc"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.logging.log4j.slf4j2.impl"
+         download-size="0"
+         install-size="0"
+         version="2.21.0"
          unpack="false"/>
 
 </feature>
