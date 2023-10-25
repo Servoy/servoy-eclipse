@@ -19,7 +19,7 @@
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.30.0.v20230509-0720</version>
+  <version>3.31.0.v20230821-1552</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
@@ -67,5 +67,40 @@
 			</plugin>
 
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.eclipse.tycho
+										</groupId>
+										<artifactId>
+											tycho-bnd-plugin
+										</artifactId>
+										<versionRange>
+											[4.0.1,)
+										</versionRange>
+										<goals>
+											<goal>process</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 </project>

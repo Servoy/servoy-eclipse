@@ -778,13 +778,7 @@ public class ImageReplacementMapper
 
 	/**
 	 * Creates and returns alternate image descriptors (if needed) from files.
-	 * If there is no alternate image configured for this location, it just returns the original one.
-	 *
-	 * @param originalCreateFromFile the original implementation of {@link ImageDescriptor#createFromFile(Class, String)}.
-	 *
-	 * @throws InvocationTargetException if an attempt to call the original {@link ImageDescriptor#createFromFile(Class, String)} failed.
-	 * @throws IllegalArgumentException if an attempt to call the original {@link ImageDescriptor#createFromFile(Class, String)} failed.
-	 * @throws IllegalAccessException if an attempt to call the original {@link ImageDescriptor#createFromFile(Class, String)} failed.
+	 * If there is no alternate image configured for this location, it just returns null.
 	 *
 	 * @return see description above.
 	 */
