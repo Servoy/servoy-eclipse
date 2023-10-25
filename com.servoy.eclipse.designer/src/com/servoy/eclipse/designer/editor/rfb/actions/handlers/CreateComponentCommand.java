@@ -534,16 +534,13 @@ public class CreateComponentCommand extends BaseRestorableCommand
 							}
 						}
 						AddContainerCommand.showDataproviderDialog(spec.getProperties(), webComponent, editorPart);
-						List<IPersist> changes = new ArrayList<>();
-						boolean addSiblingsToChanges = true;
 						if (editorPart.getForm().isResponsiveLayout() || webComponent.getParent() instanceof CSSPositionLayoutContainer)
 						{
 							if (initialDropTarget != null &&
 								!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
 							{
 								ISupportChilds parent = webComponent.getParent();
-								changes.add(webComponent.getParent());
-								addSiblingsToChanges = false;//no need to mark the siblings as changed because the whole parent was overridden
+								extraChangedPersists.add(webComponent.getParent());
 
 								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
 								parent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), parent);
@@ -558,21 +555,17 @@ public class CreateComponentCommand extends BaseRestorableCommand
 										// do not add the override again, the getOverridePersist should already create it in the right place (probably directly on form)
 										//parent.addChild(overridePersist);
 									}
+									// parent is overridden, make sure all children are sent to designer
+									if (!extraChangedPersists.contains(overridePersist))
+									{
+										extraChangedPersists.add(overridePersist);
+									}
 								}
 							}
-							else
-							{
-								changes.add(webComponent);
-							}
 							webComponent.setLocation(getLocationAndShiftSiblings(editorPart, webComponent.getParent(), args, extraChangedPersists));
-							// we don't need to add the changed components
-							//if (addSiblingsToChanges) changes.addAll(extraChangedPersists);
 						}
-						else
-						{
-							changes.add(webComponent);
-						}
-						return changes.toArray(new IPersist[changes.size()]);
+						// always return new persist for undo
+						return new IPersist[] { webComponent };
 					}
 					else
 					{
