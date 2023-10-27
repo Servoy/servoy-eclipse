@@ -8,4 +8,4 @@ addRepository(type:0,name:2023-06,location:https${#58}//download.eclipse.org/rel
 
 #Adding description for the Servoy updates
 properties.0.name = org.eclipse.equinox.p2.description
-properties.0.value = Servoy 2023.9.0.3902
+properties.0.value = Servoy 2023.9.1.3903
