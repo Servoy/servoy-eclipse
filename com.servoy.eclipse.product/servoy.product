@@ -129,9 +129,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <property name="osgi.instance.area.default" value="@user.home/servoy_workspace" />
    </configurations>
 
-   <repositories>
-      <repository location="http://download.servoy.com/developer/latest/" enabled="true" />
-   </repositories>
+
 
    <preferencesInfo>
       <targetfile overwrite="false"/>
