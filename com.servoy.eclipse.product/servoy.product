@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2023.12.0.3920_rc" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2023.12.0.3920_rc" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
@@ -17,13 +17,15 @@
    <launcherArgs>
       <vmArgs>-Xms512m
 -Xmx2G
+-XX:+UseZGC 
+-XX:+ZGenerational
 --add-modules=ALL-SYSTEM
 --add-exports java.desktop/sun.java2d=ALL-UNNAMED
 -Dp2.trustedAuthorities=https://download.servoy.com,https://developer.servoy.com,https://download.eclipse.org
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED
       </vmArgsMac>
-      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED -Dchromium.args=--disable-gpu-compositing
+      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED
       </vmArgsWin>
    </launcherArgs>
 
