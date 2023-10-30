@@ -83,7 +83,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 		//COMMAND_TO_ENDPOINT_MAP.put("com.servoy.eclipse.aibridge.add_inline_comments", "https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/llm/inlineComments");
 		COMMAND_TO_ENDPOINT_MAP.put("com.servoy.eclipse.aibridge.add_inline_comments",
 			"https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/llm/findBugs");
-		COMMAND_TO_ENDPOINT_MAP.put("com.servoy.eclipse.aibridge.find_errors",
+		COMMAND_TO_ENDPOINT_MAP.put("com.servoy.eclipse.aibridge.debug",
 			"https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/llm/findBugs");
 	}
 

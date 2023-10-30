@@ -28,7 +28,7 @@ public class OpenSourceAction extends Action implements ISelectionListener
 	public OpenSourceAction()
 	{
 		super("Open Source", SWT.PUSH);
-		ImageDescriptor splitViewImageDescriptor = AbstractUIPlugin.imageDescriptorFromPlugin("com.servoy.eclipse.ui", "icons/open.png");
+		ImageDescriptor splitViewImageDescriptor = AbstractUIPlugin.imageDescriptorFromPlugin("com.servoy.eclipse.aibridge", "icons/editor.png");
 		setImageDescriptor(splitViewImageDescriptor);
 		setEnabled(true);
 	}

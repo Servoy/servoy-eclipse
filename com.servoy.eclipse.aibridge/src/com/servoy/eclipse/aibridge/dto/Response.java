@@ -3,6 +3,7 @@ package com.servoy.eclipse.aibridge.dto;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.servoy.eclipse.aibridge.AiBridgeTokenizer;
 
 public class Response
 {
@@ -13,6 +14,7 @@ public class Response
 	private boolean showCopyToClipboard;
 	private boolean showContinueChat;
 	private String chatID;
+	private int tokensCount;
 
 	public Response()
 	{
@@ -30,6 +32,7 @@ public class Response
 		this.showCopyToClipboard = jsonResponse.optBoolean("showCopyToClipboard");
 		this.showContinueChat = jsonResponse.optBoolean("showContinueChat");
 		this.chatID = jsonResponse.optString("chatID");
+		this.tokensCount = AiBridgeTokenizer.getInstance().countTokens(this.responseMessage);
 	}
 
 	@JsonIgnore
@@ -79,9 +82,15 @@ public class Response
 		return chatID;
 	}
 
+	public int getTokensCount()
+	{
+		return this.tokensCount;
+	}
+
 	public void setResponseMessage(String responseMessage)
 	{
 		this.responseMessage = responseMessage;
+		this.tokensCount = AiBridgeTokenizer.getInstance().countTokens(responseMessage);
 	}
 
 	public void setResponseFunction(String responseFunction)

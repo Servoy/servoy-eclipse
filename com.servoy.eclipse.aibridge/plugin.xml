@@ -24,7 +24,7 @@
 		</handler>
 		<handler
 			class="com.servoy.eclipse.aibridge.AiBridgeHandler"
-			commandId="com.servoy.eclipse.aibridge.find_errors">
+			commandId="com.servoy.eclipse.aibridge.debug">
 		</handler>
 	</extension>
 
@@ -49,8 +49,8 @@
 		<command
 			category="com.servoy.eclipse.aibridge.commands.aibridge"
 			categoryId="com.servoy.eclipse.aibridge.commands.aibridge"
-			id="com.servoy.eclipse.aibridge.find_errors"
-			name="Check for errors">
+			id="com.servoy.eclipse.aibridge.debug"
+			name="Debug">
 		</command>
 	</extension>
 

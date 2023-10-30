@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Map;
@@ -20,9 +22,12 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.PlatformUI;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -46,6 +51,8 @@ public class AiBridgeManager
 		"com.servoy.eclipse.aibridge" + java.io.File.separator;
 	private static final Object SAVE_LOCK = new Object();
 
+	private static boolean debug = false;
+
 	public static Map<UUID, Completion> getRequestMap()
 	{
 		return requestMap;
@@ -63,8 +70,16 @@ public class AiBridgeManager
 				{
 					requestMap.put(uuid, completion);
 					AiBridgeView.refresh();
+					System.out.println("Debug: " + debug);
 					saveData(AiBridgeView.getSolutionName());
-					completion = sendHttpRequest(loginToken, completion);
+					if (debug)
+					{
+						completion = sendDebugRequest(loginToken, completion);
+					}
+					else
+					{
+						completion = sendHttpRequest(loginToken, completion);
+					}
 
 				}
 				catch (Exception e)
@@ -76,10 +91,125 @@ public class AiBridgeManager
 				finally
 				{
 					saveData(AiBridgeView.getSolutionName());
+					AiBridgeView.refresh();
 				}
 			}, executorService);
 		}
 	}
+
+	private static Completion sendDebugRequest(String loginToken, Completion request) throws IOException, InterruptedException
+	{
+
+		final long INITIAL_WAIT_TIME = 120000; // 2 minutes in milliseconds
+		final long DELAY_AFTER_CHANGE = 2000; // 2 seconds
+		long startTime = System.currentTimeMillis();
+		long lastChangeTime = 0;
+
+		boolean initialChangeDetected = false;
+		try
+		{
+			// Step 1: Create the JSON payload
+			StringEntity entity = createEntity(loginToken, request);
+			String jsonPayload;
+			jsonPayload = EntityUtils.toString(entity);
+			// Step 2: Write the JSON payload to a temporary file
+			//Path tempFile = Paths.get(aiBridgePath, request.getCmdName() + "_" + request.getId().toString() + ".json");
+			Path tempFile = Paths.get("/Users/vidmarian/work/tmp", request.getCmdName() + "_" + request.getId().toString() + ".json");
+
+
+			byte[] payload = jsonPayload.getBytes(StandardCharsets.UTF_8);
+			Files.write(tempFile, payload);
+
+			long initialTimestamp = Files.getLastModifiedTime(tempFile).toMillis();
+
+			while (true)
+			{
+				Thread.sleep(1000); // poll every 1 second
+				long newTimestamp = Files.getLastModifiedTime(tempFile).toMillis();
+
+				if (!initialChangeDetected && newTimestamp > initialTimestamp)
+				{
+					// Initial change detected
+					initialChangeDetected = true;
+					lastChangeTime = System.currentTimeMillis();
+					initialTimestamp = newTimestamp;
+					System.out.println("Initial change detected: " + lastChangeTime);
+				}
+				else if (initialChangeDetected && newTimestamp > initialTimestamp)
+				{
+					// Subsequent changes after the initial change
+					lastChangeTime = System.currentTimeMillis();
+					initialTimestamp = newTimestamp;
+					System.out.println("File change detected: " + lastChangeTime);
+				}
+				else if (initialChangeDetected && (System.currentTimeMillis() - lastChangeTime) >= DELAY_AFTER_CHANGE)
+				{
+					// No changes have been detected for at least 2 seconds after the last modification.
+					System.out.println("File is stable: " + lastChangeTime);
+					break;
+				}
+
+				// If no initial change is detected within the 2-minute window, handle accordingly
+				if (!initialChangeDetected && (System.currentTimeMillis() - startTime) >= INITIAL_WAIT_TIME)
+				{
+					// Timeout occurred, so create an empty response and assign to the request.
+					request.setResponse(new Response());
+					request.setStatus(AiBridgeStatus.ERROR);
+					request.setMessage("Timeout occurred. No response ...");
+					System.out.println("Time out occured ...!");
+					return request;
+				}
+			}
+
+			String jsonResponse = new String(Files.readAllBytes(tempFile), StandardCharsets.UTF_8);
+
+			System.out.println(jsonResponse);
+
+			// Check if the jsonResponse is valid. If it's empty or not a valid JSON, create an empty response
+			if (jsonResponse.isEmpty() || !isValidJSON(jsonResponse))
+			{
+				request.setResponse(new Response());
+				request.setStatus(AiBridgeStatus.ERROR);
+				request.setMessage("Invalid or empty JSON response...");
+				return request;
+			}
+
+			JSONObject jsonObj = new JSONObject(jsonResponse);
+			Response response = new Response(jsonObj);
+
+			request.setResponse(response);
+			request.setStatus(AiBridgeStatus.COMPLETE);
+			request.setEndTime(Calendar.getInstance().getTime());
+			if (response.isEmptyResponse())
+			{
+				request.setStatus(AiBridgeStatus.ERROR);
+				request.setMessage("No response ...");
+			}
+
+			return request;
+		}
+		catch (ParseException | IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	private static boolean isValidJSON(String test)
+	{
+		try
+		{
+			new JSONObject(test);
+		}
+		catch (JSONException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
 
 	public static void sendCompletion(Completion completion)
 	{
@@ -120,12 +250,14 @@ public class AiBridgeManager
 		return loginToken;
 	}
 
-	private static StringEntity createEntity(String loginToken, String queryData, String queryContext) throws UnsupportedEncodingException
+	private static StringEntity createEntity(String loginToken, Completion request) throws UnsupportedEncodingException
 	{
 		//this method need to be in sync with the json object expected by the endpoint
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("loginToken", loginToken);
-		jsonObj.put("question", queryData + queryContext);
+		jsonObj.put("question", request.getSelection() + request.getContext());
+		jsonObj.put("selectionTokensCount", request.getSelectionTokensCount());
+		jsonObj.put("contextTokensCount", request.getContextTokensCount());
 		return new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
 	}
 
@@ -134,9 +266,8 @@ public class AiBridgeManager
 		HttpClientBuilder httpBuilder = HttpClientBuilder.create();
 		try (CloseableHttpClient httpClient = httpBuilder.build())
 		{
-
 			HttpPost postRequest = new HttpPost(request.getEndpoint());
-			StringEntity entity = createEntity(loginToken, request.getSelection(), request.getContext());
+			StringEntity entity = createEntity(loginToken, request);
 			postRequest.setEntity(entity);
 
 			CloseableHttpResponse httpResponse = httpClient.execute(postRequest);
@@ -155,6 +286,7 @@ public class AiBridgeManager
 				sbResult.append(output);
 			}
 
+			System.out.println(sbResult.toString());
 			JSONObject jsonObj = new JSONObject(sbResult.toString());
 			Response response = new Response(jsonObj);
 			request.setResponse(response);

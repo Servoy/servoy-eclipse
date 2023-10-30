@@ -10,53 +10,58 @@ import org.eclipse.ui.actions.CompoundContributionItem;
 import org.eclipse.ui.menus.CommandContributionItem;
 import org.eclipse.ui.menus.CommandContributionItemParameter;
 
-public class AiBridgeMenu extends CompoundContributionItem {
-	
+public class AiBridgeMenu extends CompoundContributionItem
+{
+
 	CommandContributionItem explainItem = null;
-    CommandContributionItem addCommentsItem = null;
-    CommandContributionItem findErrorsItem = null;
-	
-    @Override
-    protected IContributionItem[] getContributionItems() {
-        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+	CommandContributionItem addCommentsItem = null;
+	CommandContributionItem debugItem = null;
 
-        if (!shouldBeVisible()) {
-            return new IContributionItem[0];
-        }
-        
-        MenuManager subMenuManager = new MenuManager("AI Bridge", "com.servoy.eclipse.aibridge.submenu");
+	@Override
+	protected IContributionItem[] getContributionItems()
+	{
+		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 
-        CommandContributionItemParameter explainParam = new CommandContributionItemParameter(
-            window, 
-            null, 
-            "com.servoy.eclipse.aibridge.explain_command",
-            CommandContributionItem.STYLE_PUSH);
-        
-        CommandContributionItemParameter addCommentsParam = new CommandContributionItemParameter(
-            window, 
-            null, 
-            "com.servoy.eclipse.aibridge.add_inline_comments",
-            CommandContributionItem.STYLE_PUSH);
-        
-        CommandContributionItemParameter findErrorsParam = new CommandContributionItemParameter(
-            window, 
-            null, 
-            "com.servoy.eclipse.aibridge.find_errors",
-            CommandContributionItem.STYLE_PUSH);
+		if (!shouldBeVisible())
+		{
+			return new IContributionItem[0];
+		}
 
-        subMenuManager.add(new CommandContributionItem(explainParam));
-        subMenuManager.add(new CommandContributionItem(addCommentsParam));
-        subMenuManager.add(new CommandContributionItem(findErrorsParam));
+		MenuManager subMenuManager = new MenuManager("AI Bridge", "com.servoy.eclipse.aibridge.submenu");
 
-        return new IContributionItem[] { subMenuManager };
-    }
+		CommandContributionItemParameter explainParam = new CommandContributionItemParameter(
+			window,
+			null,
+			"com.servoy.eclipse.aibridge.explain_command",
+			CommandContributionItem.STYLE_PUSH);
 
-    private boolean shouldBeVisible() {
-        ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection();
-        if (selection instanceof ITextSelection textSelection) {
-            String text = textSelection.getText();
-            return text != null && text.trim().length() > 0;
-        }
-        return false;
-    }
+		CommandContributionItemParameter addCommentsParam = new CommandContributionItemParameter(
+			window,
+			null,
+			"com.servoy.eclipse.aibridge.add_inline_comments",
+			CommandContributionItem.STYLE_PUSH);
+
+		CommandContributionItemParameter debugParam = new CommandContributionItemParameter(
+			window,
+			null,
+			"com.servoy.eclipse.aibridge.debug",
+			CommandContributionItem.STYLE_PUSH);
+
+		subMenuManager.add(new CommandContributionItem(explainParam));
+		subMenuManager.add(new CommandContributionItem(addCommentsParam));
+		subMenuManager.add(new CommandContributionItem(debugParam));
+
+		return new IContributionItem[] { subMenuManager };
+	}
+
+	private boolean shouldBeVisible()
+	{
+		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection();
+		if (selection instanceof ITextSelection textSelection)
+		{
+			String text = textSelection.getText();
+			return text != null && text.trim().length() > 0;
+		}
+		return false;
+	}
 }

@@ -58,12 +58,12 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 	private SashForm sashForm;
 	private static TableViewer viewer;
 	private static AiBridgeView currentInstance;
-	private final String[] titles = { "Id", "Type", "Status", "Date", "Request", "Response", "Duration" };
+	private final String[] titles = { "Id", "Type", "Status", "Date", "Request", "Response", "Tokens count", "Duration" };
 	private final int[] columnWidths = new int[titles.length];
 	private Menu contextMenu;
 	private static volatile String solutionName = null;
 
-	int[] defaultWidth = { 60, 100, 100, 150, 300, 300, 100 };
+	int[] defaultWidth = { 60, 100, 100, 150, 300, 300, 100, 100 };
 
 	private Action deleteAction = null;
 	private Action submitAction = null;
@@ -303,7 +303,8 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 						case 3 -> Optional.ofNullable(completion.getStartTime()).map(currentInstance::formatDate).orElse("");
 						case 4 -> Optional.ofNullable(completion.getSelection()).orElse("");
 						case 5 -> Optional.ofNullable(completion.getResponse()).map(resp -> stripHtmlTags(resp.getResponseMessage())).orElse("");
-						case 6 -> formatTimeDifference(completion);
+						case 6 -> Optional.ofNullable(Integer.toString(completion.getTokensCount())).orElse("");
+						case 7 -> formatTimeDifference(completion);
 						default -> "";
 					};
 				}

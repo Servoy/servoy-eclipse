@@ -323,7 +323,13 @@
                     <artifactId>httpcore5-h2</artifactId>
                     <version>5.2.3</version>
                     <type>jar</type>
-                </dependency>                
+                </dependency>   
+                <!-- https://mvnrepository.com/artifact/com.knuddels/jtokkit -->
+				<dependency>
+				    <groupId>com.knuddels</groupId>
+				    <artifactId>jtokkit</artifactId>
+				    <version>0.6.1</version>
+				</dependency>             
             </dependencies>
             <repositories>
                 <repository>
