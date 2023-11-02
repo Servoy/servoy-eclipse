@@ -845,17 +845,6 @@ public class PlaceDataprovidersComposite extends Composite
 			{
 				Object sel = ((StructuredSelection)event.getSelection()).getFirstElement();
 				currentSelection.put(type, PlaceDataprovidersComposite.this.toString(sel));
-				@SuppressWarnings("unchecked")
-				List<Pair<IDataProvider, Object>> tableInput = (List<Pair<IDataProvider, Object>>)tableViewer.getInput();
-				for (Pair<IDataProvider, Object> row : tableInput)
-				{
-					if (Column.getDisplayTypeString(row.getLeft().getDataProviderType()).equals(type))
-					{
-						row.setRight(sel);
-					}
-				}
-				tableViewer.refresh();
-
 			}
 		});
 		return comboViewer;
