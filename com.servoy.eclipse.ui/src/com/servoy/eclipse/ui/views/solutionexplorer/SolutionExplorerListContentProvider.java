@@ -85,6 +85,7 @@ import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectApiFunctionDefinition;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -1793,7 +1794,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		if (spec != null && url != null)
 		{
-			final Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
+			final Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
 			final Map<String, PropertyDescription> properties = spec.getProperties();
 			try
 			{
@@ -2362,8 +2363,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						propertiesIcon));
 				}
 			}
-			Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
-			for (final WebObjectFunctionDefinition api : apis.values())
+			Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
+			for (final WebObjectApiFunctionDefinition api : apis.values())
 			{
 				String name = api.getName();
 				String displayParams = "(";
