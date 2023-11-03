@@ -2290,6 +2290,22 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return false;
 		}
 
+		// first check if this is a handler that is set
+		if (persistContext.getPersist() instanceof WebComponent &&
+			((WebComponent)persistContext.getPersist()).getImplementation() instanceof WebObjectImpl &&
+			((WebObjectImpl)((WebComponent)persistContext.getPersist()).getImplementation()).getPropertyDescription() instanceof WebObjectSpecification)
+		{
+			WebObjectSpecification spec = (WebObjectSpecification)((WebObjectImpl)((WebComponent)persistContext.getPersist()).getImplementation())
+				.getPropertyDescription();
+			if (spec.getHandler((String)id) != null)
+			{
+				Object defaultValue = getDefaultPersistValue(id);
+				Object propertyValue = getPersistPropertyValue(id);
+				return defaultValue != propertyValue &&
+					(defaultValue == null || !defaultValue.equals(propertyValue));
+			}
+		}
+
 		// Even when the value is null it may even be set, some properties have a non-null default
 		return (((AbstractBase)persistContext.getPersist()).hasProperty((String)id));
 	}
