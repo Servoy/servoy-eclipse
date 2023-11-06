@@ -124,6 +124,7 @@ Import-Package: org.apache.commons.io;version="2.8.0",
  org.apache.hc.client5.http.impl.classic;version="5.2.1",
  org.apache.hc.client5.http.protocol;version="5.2.1",
  org.apache.hc.core5.http;version="5.2.3",
+ org.apache.hc.core5.http.io;version="5.2.3",
  org.apache.hc.core5.http.io.entity;version="5.2.3",
  org.apache.hc.core5.http.message;version="5.2.3"
 Bundle-ClassPath: .

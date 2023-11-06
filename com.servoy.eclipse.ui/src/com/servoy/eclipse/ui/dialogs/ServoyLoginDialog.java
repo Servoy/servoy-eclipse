@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.dialogs;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -24,10 +25,12 @@ import java.nio.charset.Charset;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -155,8 +158,6 @@ public class ServoyLoginDialog extends TitleAreaDialog
 
 	private LoginTokenResponse getLoginToken(String username, String password)
 	{
-		String loginToken = null;
-
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpGet httpget = new HttpGet(CROWD_URL);
 
@@ -169,25 +170,31 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		httpget.addHeader("os", Utils.getPlatformAsString());
 
 		// execute the request
-		CloseableHttpResponse response;
 		try
 		{
-			response = httpclient.execute(httpget);
-			HttpEntity responseEntity = response.getEntity();
-			String responseString = EntityUtils.toString(responseEntity);
-			if (response.getCode() == 200)
+			return httpclient.execute(httpget, new HttpClientResponseHandler<LoginTokenResponse>()
 			{
 
-				JSONObject loginTokenJSON = new JSONObject(responseString);
-				loginToken = loginTokenJSON.getString("token");
-				return new LoginTokenResponse(LoginTokenResponse.Status.OK, loginToken);
-			}
-			else
-			{
-				StringBuilder sb = new StringBuilder();
-				sb.append("HTTP ERROR : ").append(response.getCode()).append(' ').append(responseString);
-				return new LoginTokenResponse(LoginTokenResponse.Status.LOGIN_ERROR, sb.toString());
-			}
+				@Override
+				public LoginTokenResponse handleResponse(ClassicHttpResponse response) throws HttpException, IOException
+				{
+					HttpEntity responseEntity = response.getEntity();
+					String responseString = EntityUtils.toString(responseEntity);
+					if (response.getCode() == 200)
+					{
+
+						JSONObject loginTokenJSON = new JSONObject(responseString);
+						String loginToken = loginTokenJSON.getString("token");
+						return new LoginTokenResponse(LoginTokenResponse.Status.OK, loginToken);
+					}
+					else
+					{
+						StringBuilder sb = new StringBuilder();
+						sb.append("HTTP ERROR : ").append(response.getCode()).append(' ').append(responseString);
+						return new LoginTokenResponse(LoginTokenResponse.Status.LOGIN_ERROR, sb.toString());
+					}
+				}
+			});
 		}
 		catch (Exception ex)
 		{
