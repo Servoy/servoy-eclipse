@@ -362,13 +362,19 @@ public class BasePropertyHandler implements IPropertyHandler
 				return false; // not applicable for splitpanes
 			}
 
-			if (name.equals("loginFormID") && persist instanceof Solution && ((Solution)persist).getLoginFormID() <= 0)
+//			if (name.equals("loginFormID") && persist instanceof Solution && ((Solution)persist).getLoginFormID() <= 0)
+//			{
+//				if (((Solution)persist).getLoginSolutionName() != null)
+//				{
+//					// there is a login solution, do not show the deprecated login form setting
+//					return false;
+//				}
+//			}
+			// don't show the must authenticate property for a ngclient solution that one has now the authenticator property
+			if (name.equals(StaticContentSpecLoader.PROPERTY_MUSTAUTHENTICATE.getPropertyName()) && persist instanceof Solution &&
+				SolutionMetaData.isNGOnlySolution(((SolutionMetaData)persistContext.getPersist().getRootObject().getMetaData()).getSolutionType()))
 			{
-				if (((Solution)persist).getLoginSolutionName() != null)
-				{
-					// there is a login solution, do not show the deprecated login form setting
-					return false;
-				}
+				return false;
 			}
 
 			if (persist instanceof Form && ((Form)persist).isResponsiveLayout() &&

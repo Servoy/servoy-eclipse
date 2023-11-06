@@ -465,7 +465,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			if (!(persistContext.getPersist() instanceof IBasicWebComponent) && !(persistContext.getPersist() instanceof LayoutContainer))
 			{
 				// check for pseudo properties
-				IPropertyHandler[] pseudoProperties = getPseudoProperties(persistContext.getPersist().getClass());
+				IPropertyHandler[] pseudoProperties = getPseudoProperties(persistContext.getPersist().getClass(), persistContext);
 				if (pseudoProperties != null)
 				{
 					for (IPropertyHandler prop : pseudoProperties)
@@ -577,11 +577,25 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return handlers;
 	}
 
-	protected IPropertyHandler[] getPseudoProperties(Class< ? > clazz)
+	protected IPropertyHandler[] getPseudoProperties(Class< ? > clazz, PersistContext context)
 	{
 		if (Solution.class == clazz)
 		{
-			return new IPropertyHandler[] { new PseudoPropertyHandler("loginSolutionName") };
+			IPersist persist = context.getPersist();
+			try
+			{
+				if (persist instanceof Solution && ((Solution)persist).getLoginSolutionName() != null)
+				{
+					return new IPropertyHandler[] { new PseudoPropertyHandler("loginSolutionName"), new PseudoPropertyHandler("authenticator") };
+				}
+				else {
+					return new IPropertyHandler[] { new PseudoPropertyHandler("authenticator") };
+				}
+			}
+			catch (RepositoryException e)
+			{
+				Debug.error(e);
+			}
 		}
 		if (Form.class == clazz)
 		{
