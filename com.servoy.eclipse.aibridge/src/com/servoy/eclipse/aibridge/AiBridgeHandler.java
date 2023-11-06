@@ -2,10 +2,8 @@ package com.servoy.eclipse.aibridge;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -73,19 +71,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 	ITextSelection codeSelection = null;
 	String filePathSelection = null;
 
-	private static final Map<String, String> COMMAND_TO_ENDPOINT_MAP = new HashMap<>();
 	private IEditorPart activeEditor;
-
-	static
-	{
-		COMMAND_TO_ENDPOINT_MAP.put("com.servoy.eclipse.aibridge.explain_command",
-			"https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/llm/explainCode");
-		//COMMAND_TO_ENDPOINT_MAP.put("com.servoy.eclipse.aibridge.add_inline_comments", "https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/llm/inlineComments");
-		COMMAND_TO_ENDPOINT_MAP.put("com.servoy.eclipse.aibridge.add_inline_comments",
-			"https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/llm/findBugs");
-		COMMAND_TO_ENDPOINT_MAP.put("com.servoy.eclipse.aibridge.debug",
-			"https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/llm/findBugs");
-	}
 
 	public AiBridgeHandler()
 	{
@@ -144,12 +130,10 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 	{
 		try
 		{
-			String endpoint = COMMAND_TO_ENDPOINT_MAP.get(event.getCommand().getId());
-			if (endpoint != null && codeSelection != null)
+			if (codeSelection != null)
 			{
-				AiBridgeManager.sendRequest(
+				AiBridgeManager.getInstance().sendRequest(
 					event.getCommand().getName(),
-					endpoint,
 					codeSelection.getText().trim(),
 					filePathSelection,
 					codeSelection.getOffset(),
@@ -300,11 +284,13 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 				}
 				else
 				{
-					sb.append(pair.getRight());
-					sb.append(" is of type ");
-					sb.append(type);
+					String typeLine = pair.getRight() + " is of type " + type;
+//					if (sb.indexOf(typeLine) < 0) //avoid duplicates; there are quite some
+//					{
+					sb.append(typeLine);
 					sb.append('\n');
-					sb.append('\n');
+//					}
+
 				}
 				ITypedScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectByName(type);
 				List<IValueReference> callsOrProperties = collector.propertiesOrCalls.get(node);
@@ -365,7 +351,8 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 				}
 			}
 		});
-		return sb.toString().trim();
+		String returnValue = sb.toString(); //avoid trim(); this will cut also /n's
+		return returnValue;
 	}
 
 	private void generateDescription(IFunctionDocumentation fdoc, int mandatoryParams, StringBuilder sb)

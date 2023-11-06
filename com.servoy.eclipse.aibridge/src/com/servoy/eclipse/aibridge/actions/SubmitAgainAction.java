@@ -35,9 +35,9 @@ public class SubmitAgainAction extends Action implements ISelectionListener
 		Stream.of(selection.toArray())
 			.filter(obj -> obj instanceof Completion)
 			.map(obj -> (Completion)obj)
-			.forEach(AiBridgeManager::sendCompletion);
+			.forEach(AiBridgeManager.getInstance()::sendCompletion);
 
-		AiBridgeManager.saveData(AiBridgeView.getSolutionName());
+		AiBridgeManager.getInstance().saveData(AiBridgeView.getSolutionName());
 		AiBridgeView.refresh();
 	}
 

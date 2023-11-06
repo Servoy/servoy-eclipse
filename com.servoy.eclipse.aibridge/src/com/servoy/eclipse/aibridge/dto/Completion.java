@@ -33,7 +33,10 @@ public class Completion
 		super();
 	}
 
-	public Completion(UUID id, String cmdName, String endpoint, String selection, String context, String sourcePath, int selectionOffset, int selectionLength)
+	public Completion(
+		UUID id, String cmdName, String endpoint,
+		String selection, String context, String sourcePath,
+		int selectionOffset, int selectionLength)
 	{
 		this.id = id;
 		this.cmdName = cmdName;

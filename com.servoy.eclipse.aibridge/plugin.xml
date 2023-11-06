@@ -35,10 +35,10 @@
 			name="Ai Bridge Category">
 		</category>
 		<command
-			category="com.servoy.eclipse.aibridge.commands.aibridge"
-			categoryId="com.servoy.eclipse.aibridge.commands.aibridge"
-			id="com.servoy.eclipse.aibridge.explain_command"
-			name="Explain selection">
+        category="com.servoy.eclipse.aibridge.commands.aibridge"
+        categoryId="com.servoy.eclipse.aibridge.commands.aibridge"
+        id="com.servoy.eclipse.aibridge.explain_command"
+        name="Explain selection">
 		</command>
 		<command
 			category="com.servoy.eclipse.aibridge.commands.aibridge"
@@ -70,7 +70,7 @@
 	<extension
 		point="org.eclipse.ui.editors">
 		<editor
-			name="Dual Editor"
+			name="AI Bridge"
 			extensions="*"
 			icon="icons/vsplit.png"
 			class="com.servoy.eclipse.aibridge.editors.DualEditor"

@@ -41,31 +41,52 @@ import com.servoy.j2db.util.Utils;
 public class AiBridgeManager
 {
 
+	private static final String ENDPOINT = "https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/llm/AIBridge";
 	private static final int MAX_SIM_REQUESTS = 10;
 
 	private final static ExecutorService executorService = Executors.newFixedThreadPool(MAX_SIM_REQUESTS);
 
-	private static final Map<UUID, Completion> requestMap = new ConcurrentHashMap<>();
-	private static final ObjectMapper mapper = new ObjectMapper();
-	private static String aiBridgePath = Platform.getLocation().toOSString() + File.separator + ".metadata" + File.separator + ".plugins" + File.separator +
+	private final Map<UUID, Completion> requestMap = new ConcurrentHashMap<>();
+	private final ObjectMapper mapper = new ObjectMapper();
+	private final String aiBridgePath = Platform.getLocation().toOSString() + File.separator + ".metadata" + File.separator + ".plugins" + File.separator +
 		"com.servoy.eclipse.aibridge" + java.io.File.separator;
-	private static final Object SAVE_LOCK = new Object();
+	private final Object SAVE_LOCK = new Object();
 
-	private static boolean debug = false;
+	private final String devToken = "e3b70a550c39cce86c88951f43005a740993d84f8903568919f83bd97984ab5b98485c0c5e7ce5df64e7f7ec714bf73a3db891542acd27aa69da044f81458249";
 
-	public static Map<UUID, Completion> getRequestMap()
+	private final boolean debug = false;
+
+	private static AiBridgeManager instance = null;
+
+	private AiBridgeManager()
+	{
+		super();
+	}
+
+	public static AiBridgeManager getInstance()
+	{
+		if (instance == null)
+		{
+			instance = new AiBridgeManager();
+		}
+		return instance;
+	}
+
+	public Map<UUID, Completion> getRequestMap()
 	{
 		return requestMap;
 	}
 
-	public static void sendRequest(String cmdName, String endpoint, String inputData, String source, int offset, int length, String context)
+	public void sendRequest(
+		String cmdName, String inputData,
+		String source, int offset, int length, String context)
 	{
 		final String loginToken = logIn();
 		if (!Utils.stringIsEmpty(loginToken))
 		{
 			CompletableFuture.runAsync(() -> {
 				UUID uuid = UUID.randomUUID();
-				Completion completion = new Completion(uuid, cmdName, endpoint, inputData, context, source, offset, length);
+				Completion completion = new Completion(uuid, cmdName, ENDPOINT, inputData, context, source, offset, length);
 				try
 				{
 					requestMap.put(uuid, completion);
@@ -97,13 +118,15 @@ public class AiBridgeManager
 		}
 	}
 
-	private static Completion sendDebugRequest(String loginToken, Completion request) throws IOException, InterruptedException
+	private Completion sendDebugRequest(String loginToken, Completion request) throws IOException, InterruptedException
 	{
 
 		final long INITIAL_WAIT_TIME = 120000; // 2 minutes in milliseconds
 		final long DELAY_AFTER_CHANGE = 2000; // 2 seconds
 		long startTime = System.currentTimeMillis();
 		long lastChangeTime = 0;
+		//Path tempFile = Paths.get(aiBridgePath, request.getCmdName() + "_" + request.getId().toString() + ".json");
+		Path tempFile = Paths.get("/Users/vidmarian/work/tmp", request.getCmdName() + "_" + request.getId().toString() + ".json");
 
 		boolean initialChangeDetected = false;
 		try
@@ -113,9 +136,6 @@ public class AiBridgeManager
 			String jsonPayload;
 			jsonPayload = EntityUtils.toString(entity);
 			// Step 2: Write the JSON payload to a temporary file
-			//Path tempFile = Paths.get(aiBridgePath, request.getCmdName() + "_" + request.getId().toString() + ".json");
-			Path tempFile = Paths.get("/Users/vidmarian/work/tmp", request.getCmdName() + "_" + request.getId().toString() + ".json");
-
 
 			byte[] payload = jsonPayload.getBytes(StandardCharsets.UTF_8);
 			Files.write(tempFile, payload);
@@ -163,8 +183,8 @@ public class AiBridgeManager
 
 			String jsonResponse = new String(Files.readAllBytes(tempFile), StandardCharsets.UTF_8);
 
-			System.out.println(jsonResponse);
-
+			// Remove leading and trailing double quotes and unescape any escaped quotes.
+			jsonResponse = jsonResponse.replaceAll("^\"|\"$", "").replace("\\\"", "\"");
 			// Check if the jsonResponse is valid. If it's empty or not a valid JSON, create an empty response
 			if (jsonResponse.isEmpty() || !isValidJSON(jsonResponse))
 			{
@@ -186,6 +206,8 @@ public class AiBridgeManager
 				request.setMessage("No response ...");
 			}
 
+			System.out.println(request.getResponse().getResponseMessage());
+
 			return request;
 		}
 		catch (ParseException | IOException e)
@@ -193,11 +215,15 @@ public class AiBridgeManager
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		finally
+		{
+			//Files.deleteIfExists(tempFile);
+		}
 
 		return null;
 	}
 
-	private static boolean isValidJSON(String test)
+	private boolean isValidJSON(String test)
 	{
 		try
 		{
@@ -211,7 +237,7 @@ public class AiBridgeManager
 	}
 
 
-	public static void sendCompletion(Completion completion)
+	public void sendCompletion(Completion completion)
 	{
 		final String loginToken = logIn();
 
@@ -242,7 +268,7 @@ public class AiBridgeManager
 		}
 	}
 
-	private static String logIn()
+	private String logIn()
 	{
 
 		String loginToken = ServoyLoginDialog.getLoginToken();
@@ -250,18 +276,34 @@ public class AiBridgeManager
 		return loginToken;
 	}
 
-	private static StringEntity createEntity(String loginToken, Completion request) throws UnsupportedEncodingException
+	private StringEntity createEntity(String loginToken, Completion request) throws UnsupportedEncodingException
 	{
 		//this method need to be in sync with the json object expected by the endpoint
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("loginToken", loginToken);
-		jsonObj.put("question", request.getSelection() + request.getContext());
+		jsonObj.put("requestType", getRequestType(request.getCmdName()));
+		jsonObj.put("selection", request.getSelection());
+		jsonObj.put("context", request.getContext());
 		jsonObj.put("selectionTokensCount", request.getSelectionTokensCount());
 		jsonObj.put("contextTokensCount", request.getContextTokensCount());
+
 		return new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
 	}
 
-	private static Completion sendHttpRequest(String loginToken, Completion request)
+	private String getRequestType(String cmdName)
+	{
+		//TODO: need to rewrite in a more comprehensive manner (maybe use returnTypeId from the command?)
+		//implement this quickly for Rene to be able to work out the cloud part
+		return switch (cmdName)
+		{
+			case "Explain selection" -> "explain";
+			case "Add inline comments" -> "comment";
+			case "Debug" -> "debug";
+			default -> "";
+		};
+	}
+
+	private Completion sendHttpRequest(String loginToken, Completion request)
 	{
 		HttpClientBuilder httpBuilder = HttpClientBuilder.create();
 		try (CloseableHttpClient httpClient = httpBuilder.build())
@@ -269,6 +311,7 @@ public class AiBridgeManager
 			HttpPost postRequest = new HttpPost(request.getEndpoint());
 			StringEntity entity = createEntity(loginToken, request);
 			postRequest.setEntity(entity);
+			postRequest.setHeader("token", devToken);
 
 			CloseableHttpResponse httpResponse = httpClient.execute(postRequest);
 			request.setHttpCode(httpResponse.getCode());
@@ -309,7 +352,7 @@ public class AiBridgeManager
 		return request;
 	}
 
-	public static void saveData(String solutionName)
+	public void saveData(String solutionName)
 	{
 		synchronized (SAVE_LOCK)
 		{
@@ -320,7 +363,7 @@ public class AiBridgeManager
 					Files.createDirectories(Paths.get(aiBridgePath));
 				}
 
-				String json = mapper.writeValueAsString(AiBridgeManager.getRequestMap());
+				String json = mapper.writeValueAsString(getRequestMap());
 				Files.write(Paths.get(aiBridgePath + File.separator + solutionName + "-completions.json"), json.getBytes());
 			}
 			catch (IOException e)
@@ -330,7 +373,7 @@ public class AiBridgeManager
 		}
 	}
 
-	public static void loadData(String solutionName)
+	public void loadData(String solutionName)
 	{
 		try
 		{

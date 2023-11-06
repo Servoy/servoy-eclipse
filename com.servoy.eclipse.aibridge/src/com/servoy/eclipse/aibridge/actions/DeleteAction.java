@@ -34,9 +34,9 @@ public class DeleteAction extends Action implements ISelectionListener
 		Stream.of(selection.toArray())
 			.filter(obj -> obj instanceof Completion)
 			.map(obj -> (Completion)obj)
-			.forEach(completion -> AiBridgeManager.getRequestMap().remove(completion.getId()));
+			.forEach(completion -> AiBridgeManager.getInstance().getRequestMap().remove(completion.getId()));
 
-		AiBridgeManager.saveData(AiBridgeView.getSolutionName());
+		AiBridgeManager.getInstance().saveData(AiBridgeView.getSolutionName());
 
 		AiBridgeView.refresh();
 	}

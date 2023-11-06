@@ -91,7 +91,7 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 		if (servoyModel.getActiveProject() != null)
 		{
 			solutionName = servoyModel.getActiveProject().getSolution().getName();
-			AiBridgeManager.loadData(solutionName);
+			AiBridgeManager.getInstance().loadData(solutionName);
 		}
 	}
 
@@ -124,7 +124,7 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 		sashForm = new SashForm(parent, SWT.VERTICAL);
 		viewer = new TableViewer(sashForm, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		viewer.setContentProvider(new ContentProvider()); //keep this line before setInput()
-		viewer.setInput(AiBridgeManager.getRequestMap());
+		viewer.setInput(AiBridgeManager.getInstance().getRequestMap());
 		viewer.setComparator(new StartTimeComparator());
 		getSite().setSelectionProvider(viewer);
 	}
@@ -408,7 +408,7 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 	{
 		if (activeProject != null)
-			AiBridgeManager.saveData(activeProject.getSolution().getName());
+			AiBridgeManager.getInstance().saveData(activeProject.getSolution().getName());
 		return true;
 	}
 
@@ -416,7 +416,7 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 	public void activeProjectChanged(ServoyProject activeProject)
 	{
 		solutionName = activeProject.getSolution().getName();
-		AiBridgeManager.loadData(solutionName);
+		AiBridgeManager.getInstance().loadData(solutionName);
 		AiBridgeView.refresh();
 	}
 
