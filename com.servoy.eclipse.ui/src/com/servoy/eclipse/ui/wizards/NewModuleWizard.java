@@ -54,7 +54,7 @@ public class NewModuleWizard extends NewSolutionWizard
 		else
 		{
 			configPage.setSolutionTypes(
-				new int[] { SolutionMetaData.NG_MODULE, SolutionMetaData.MODULE, SolutionMetaData.MOBILE_MODULE, SolutionMetaData.PRE_IMPORT_HOOK, SolutionMetaData.POST_IMPORT_HOOK },
+				new int[] { SolutionMetaData.NG_MODULE, SolutionMetaData.MODULE, SolutionMetaData.AUTHENTICATOR, SolutionMetaData.MOBILE_MODULE, SolutionMetaData.PRE_IMPORT_HOOK, SolutionMetaData.POST_IMPORT_HOOK },
 				0, false);
 		}
 	}
