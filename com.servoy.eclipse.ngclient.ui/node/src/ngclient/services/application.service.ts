@@ -296,12 +296,12 @@ export class ApplicationService {
     public clearDefaultLoginCredentials() {
     	this.localStorageService.remove('servoy_username');
         this.localStorageService.remove('servoy_password');
-        this.localStorageService.remove('servoy_token');
+        this.localStorageService.remove('servoy_id_token');
     }
     
-    public rememberUser(u: {user: string, token: string} ) {
-    	this.localStorageService.set('servoy_username', u.user);
-    	this.localStorageService.set('servoy_token', u.token);
+    public rememberUser(u: {username: string, id_token: string} ) {
+    	this.localStorageService.set('servoy_username', u.username);
+    	this.localStorageService.set('servoy_id_token', u.id_token);
     }
 
     public showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string) {
