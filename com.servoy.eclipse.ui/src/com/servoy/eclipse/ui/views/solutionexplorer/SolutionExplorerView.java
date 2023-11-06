@@ -503,6 +503,8 @@ public class SolutionExplorerView extends ViewPart
 	private RenameMediaFolderAction renameMediaFolderAction;
 	private CreateMediaFolderAction createMediaFolderAction;
 	private CreateMediaFileAction createMediaFileAction;
+
+	private CreateMediaFileAction createMediaLoginPageAction;
 	private CreateMediaFileAction createMediaWebAppManifestAction;
 	private CreateMediaFileAction createMediaHeadIndexContributionsAction;
 
@@ -2683,8 +2685,13 @@ public class SolutionExplorerView extends ViewPart
 
 		if (createMediaFolderAction.isEnabled()) manager.add(createMediaFolderAction);
 		if (createMediaFileAction.isEnabled()) manager.add(createMediaFileAction);
-		if (createMediaWebAppManifestAction.isEnabled()) manager.add(createMediaWebAppManifestAction);
-		if (createMediaHeadIndexContributionsAction.isEnabled()) manager.add(createMediaHeadIndexContributionsAction);
+		if (createMediaWebAppManifestAction.isEnabled() || createMediaHeadIndexContributionsAction.isEnabled())
+		{
+			manager.add(new Separator());
+			if (createMediaLoginPageAction.isEnabled()) manager.add(createMediaLoginPageAction);
+			if (createMediaWebAppManifestAction.isEnabled()) manager.add(createMediaWebAppManifestAction);
+			if (createMediaHeadIndexContributionsAction.isEnabled()) manager.add(createMediaHeadIndexContributionsAction);
+		}
 		if (renameMediaFolderAction.isEnabled()) manager.add(renameMediaFolderAction);
 
 		manager.add(new Separator());
@@ -3141,6 +3148,7 @@ public class SolutionExplorerView extends ViewPart
 		renameMediaAction = new RenameMediaAction(this);
 		createMediaFolderAction = new CreateMediaFolderAction(this);
 		createMediaFileAction = new CreateMediaFileAction(this);
+		createMediaLoginPageAction = new CreateMediaLoginPage(this);
 		createMediaWebAppManifestAction = new CreateMediaWebAppManifest(this);
 		createMediaHeadIndexContributionsAction = new CreateMediaHeadIndexContributions(this);
 		renameMediaFolderAction = new RenameMediaFolderAction(this);
@@ -3500,6 +3508,7 @@ public class SolutionExplorerView extends ViewPart
 
 		addTreeSelectionChangedListener(createMediaFolderAction);
 		addTreeSelectionChangedListener(createMediaFileAction);
+		addTreeSelectionChangedListener(createMediaLoginPageAction);
 		addTreeSelectionChangedListener(createMediaWebAppManifestAction);
 		addTreeSelectionChangedListener(createMediaHeadIndexContributionsAction);
 		addTreeSelectionChangedListener(renameMediaFolderAction);
