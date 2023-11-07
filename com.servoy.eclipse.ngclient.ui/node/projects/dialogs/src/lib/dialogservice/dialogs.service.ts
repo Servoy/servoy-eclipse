@@ -40,7 +40,7 @@ export class DialogService {
         return await this.showDialog(dialogTitle, dialogMessage, 'type-input', initValue !==null && initValue !== undefined ? [initValue] : null, [this.i18nCancel, this.i18nOK]);
     }
 
-    public async showSelectDialog(dialogTitle: string, dialogMessage: string, ...options: string[]): Promise<any> {
+    public async showSelectDialog(dialogTitle: string, dialogMessage: string, options: string[]): Promise<any> {
         return await this.showDialog(dialogTitle, dialogMessage, 'type-select', options, [this.i18nCancel, this.i18nOK]);
     }
 
@@ -53,6 +53,6 @@ export class DialogService {
         if (!dialogButtonsText || dialogButtonsText.length === 0) {
             dialogButtonsText = ['OK'];
         }
-        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values !== null ? [...values[0]] : null, dialogButtonsText.toString().split(','));
+        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, dialogButtonsText.toString().split(','));
     }
 }
