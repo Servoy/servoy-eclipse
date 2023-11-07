@@ -25,6 +25,12 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
     svyOnChanges( changes: SimpleChanges ) {
         this.setHorizontalAlignmentFlexbox( this.getNativeElement(), this.renderer, this.horizontalAlignment );
         super.svyOnChanges( changes );
+        if (changes.dataProviderID) {
+			setTimeout(()=>{
+				this.setSelectionFromDataprovider();
+				this.input.nativeElement.checked = this.selected;
+			});
+		}
     }
 
     getFocusElement() {
@@ -54,18 +60,20 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
     }
 
     itemClicked( event: any ) {
-        if ( event.target.localName === 'span' || event.target.localName === 'label' )
-            this.selected = !this.selected;
+		if (!this.selected) {
+			if ( event.target.localName === 'span' || event.target.localName === 'label' || event.target.localName === 'input' )
+            	this.selected = !this.selected;
 
-        if ( this.valuelistID && this.valuelistID[0] )
-            // eslint-disable-next-line eqeqeq
-            this.dataProviderID = this.dataProviderID == this.valuelistID[0].realValue ? null : this.valuelistID[0].realValue;
-        else if ( typeof this.dataProviderID === 'string' )
-            // eslint-disable-next-line eqeqeq
-            this.dataProviderID = this.dataProviderID == '1' ? '0' : '1';
-        else
-            this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
-        this.pushUpdate();
+        	if ( this.valuelistID && this.valuelistID[0] )
+            	// eslint-disable-next-line eqeqeq
+            	this.dataProviderID = this.dataProviderID == this.valuelistID[0].realValue ? null : this.valuelistID[0].realValue;
+        	else if ( typeof this.dataProviderID === 'string' )
+            	// eslint-disable-next-line eqeqeq
+            	this.dataProviderID = this.dataProviderID == '1' ? '0' : '1';
+        	else
+            	this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
+        	this.pushUpdate();
+		} 
     }
 
     getSelectionFromDataprovider() {
