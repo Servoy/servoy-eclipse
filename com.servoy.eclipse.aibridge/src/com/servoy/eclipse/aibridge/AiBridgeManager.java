@@ -91,7 +91,6 @@ public class AiBridgeManager
 				{
 					requestMap.put(uuid, completion);
 					AiBridgeView.refresh();
-					System.out.println("Debug: " + debug);
 					saveData(AiBridgeView.getSolutionName());
 					if (debug)
 					{
@@ -205,8 +204,6 @@ public class AiBridgeManager
 				request.setStatus(AiBridgeStatus.ERROR);
 				request.setMessage("No response ...");
 			}
-
-			System.out.println(request.getResponse().getResponseMessage());
 
 			return request;
 		}
@@ -329,7 +326,6 @@ public class AiBridgeManager
 				sbResult.append(output);
 			}
 
-			System.out.println(sbResult.toString());
 			JSONObject jsonObj = new JSONObject(sbResult.toString());
 			Response response = new Response(jsonObj);
 			request.setResponse(response);
