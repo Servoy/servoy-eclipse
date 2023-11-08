@@ -10,7 +10,6 @@ import { ClientFunctionService } from './services/clientfunction.service';
 import { PushToServerEnum, IType, IWebObjectSpecification, TypesRegistry, RootPropertyContextCreator, PushToServerUtils } from '../sablo/types_registry';
 import { FoundsetLinkedValue } from './converters/foundsetLinked_converter';
 import { DateType } from '../sablo/converters/date_converter';
-import { CleanFormCache } from '../utils/cleanFormCache';
 
 @Injectable({
     providedIn: 'root'
@@ -25,7 +24,7 @@ export class FormService {
     private isInDesigner = false;
 
     constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
-        private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry, private cleanFormCache: CleanFormCache) {
+        private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry) {
 
         this.log = logFactory.getLogger('FormService');
         this.formsCache = new Map();
@@ -304,8 +303,6 @@ export class FormService {
     public createFormCache(formName: string, jsonData: any, url: string) {
         const formCache = new FormCache(formName, jsonData.size, jsonData.responsive, url, this.typesRegistry);
         this.walkOverChildren(jsonData.children, formCache);
-        
-        this.cleanFormCache.clean(formCache);
 
         this.clientFunctionService.waitForLoading().finally(() => {
             this.formsCache.set(formName, formCache);

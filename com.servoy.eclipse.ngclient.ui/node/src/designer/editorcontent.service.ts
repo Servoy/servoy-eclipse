@@ -5,13 +5,12 @@ import { ComponentCache, StructureCache, FormComponentCache, FormComponentProper
 import { ConverterService } from '../sablo/converter.service';
 import { IComponentCache } from '@servoy/public';
 import { TypesRegistry, IWebObjectSpecification, RootPropertyContextCreator } from '../sablo/types_registry';
-import { CleanFormCache } from '../utils/cleanFormCache';
 
 @Injectable()
 export class EditorContentService {
     designFormCallback: IDesignFormComponent;
 
-    constructor(private formService: FormService, protected converterService: ConverterService, private typesRegistry: TypesRegistry, private cleanFormCache: CleanFormCache) {
+    constructor(private formService: FormService, protected converterService: ConverterService, private typesRegistry: TypesRegistry) {
 
     }
 
@@ -276,8 +275,6 @@ export class EditorContentService {
             });
             refresh = true;
         }
-
-        this.cleanFormCache.clean(formCache);
 
         if (data.deleted) {
             data.deleted.forEach((elem) => {
