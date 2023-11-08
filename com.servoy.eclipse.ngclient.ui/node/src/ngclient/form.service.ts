@@ -649,7 +649,7 @@ export class FormService {
                     elem.formComponent.forEach((child: string) => {
                         this.walkOverChildren(elem[child], formCache, fcc);
                     });
-                    formCache.addFormComponent(fcc);
+                    formCache.add(fcc, parent);
                     if (parent != null) {
                         parent.addChild(fcc);
                     }
