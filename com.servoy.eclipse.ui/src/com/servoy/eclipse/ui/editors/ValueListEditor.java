@@ -450,7 +450,7 @@ public class ValueListEditor extends PersistEditor
 			new ValuelistPropertyController.ValueListValueEditor(editingFlattenedSolution));
 		fallbackValuelist.setButtonText("Fallback Valuelist");
 		fallbackValuelist.setContentProvider(new FallbackValuelistContentProvider(editingFlattenedSolution, getValueList()));
-		fallbackValuelist.setLabelProvider(new ValuelistLabelProvider(editingFlattenedSolution));
+		fallbackValuelist.setLabelProvider(new ValuelistLabelProvider(editingFlattenedSolution, getPersist()));
 		fallbackValuelist.setTitleText("Select fallback valuelist");
 		fallbackValuelist.setInput(getValueList());
 		fallbackValuelist.setEditable(true);

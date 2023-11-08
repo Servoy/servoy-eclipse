@@ -2512,10 +2512,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						if (propDescription.hasDefault() && !WebObjectImpl.isPersistMappedProperty(propDescription)) // persist mapped prop. default values are handled directly in WebObjectImpl, so ignore those
 						{
-							// so this is a property that has a default value defined in the .spec file; default might not be null
-							defaultSpecValue = propDescription.getDefaultValue();
-							isDefaultValue = Utils.areJSONEqual(defaultSpecValue,
-								ServoyJSONObject.nullToJsonNull(WebObjectImpl.convertFromJavaType(propDescription, value)));
+							if (propDescription.getType() instanceof ValueListPropertyType)
+							{
+								if (value instanceof Integer && ((Integer)value).intValue() == ValuelistLabelProvider.VALUELIST_NONE)
+								{
+									isDefaultValue = true;
+								}
+							}
+							else
+							{
+								// so this is a property that has a default value defined in the .spec file; default might not be null
+								defaultSpecValue = propDescription.getDefaultValue();
+								isDefaultValue = Utils.areJSONEqual(defaultSpecValue,
+									ServoyJSONObject.nullToJsonNull(WebObjectImpl.convertFromJavaType(propDescription, value)));
+							}
+
 						}
 					}
 				}
@@ -3074,6 +3085,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			return propertyEditor;
 		}
+
 	}
 
 	private static IPropertyDescriptor getGeneralPropertyDescriptor(PersistContext persistContext, final boolean readOnly, Object id, String displayName,

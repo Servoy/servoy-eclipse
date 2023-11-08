@@ -59,7 +59,8 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 		this.persistContext = persistContext;
 		this.includeNone = includeNone;
 		setLabelProvider(new SolutionContextDelegateLabelProvider(
-			new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())),
+			new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext()),
+				persistContext.getPersist()),
 			persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
