@@ -45,6 +45,7 @@ import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 public class ValuelistLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider, IDeprecationProvider
 {
 	public static final int VALUELIST_NONE = 0;
+	public static final int VALUELIST_SPECIAL = Integer.MAX_VALUE;
 	private final FlattenedSolution flattenedSolution;
 	private final IPersist persist;
 
@@ -61,7 +62,7 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 
 		int vlmId = ((Integer)value).intValue();
 
-		if (vlmId == VALUELIST_NONE)
+		if (vlmId == VALUELIST_NONE || vlmId == VALUELIST_SPECIAL)
 		{
 			PropertyDescription specPD = null;
 			if (persist instanceof IChildWebObject) specPD = ((IChildWebObject)persist).getPropertyDescription();
