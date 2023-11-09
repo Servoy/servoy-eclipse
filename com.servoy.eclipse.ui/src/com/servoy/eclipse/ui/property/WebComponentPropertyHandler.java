@@ -237,8 +237,15 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			if (value != null)
 			{
-				ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
-				convertedValue = (val == null) ? null : val.getUUID().toString();
+				if (value instanceof String)
+				{
+					convertedValue = value;
+				}
+				else
+				{
+					ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
+					convertedValue = (val == null) ? null : val.getUUID().toString();
+				}
 			}
 			else convertedValue = null;
 		}
