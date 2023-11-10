@@ -275,7 +275,9 @@ export class EditorContentService {
             });
             refresh = true;
         }
-
+        
+		formCache.cleanFormComponents();
+		
         if (data.deleted) {
             data.deleted.forEach((elem) => {
                 const comp = formCache.getComponent(elem);
