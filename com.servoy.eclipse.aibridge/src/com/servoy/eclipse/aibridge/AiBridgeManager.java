@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +32,6 @@ import org.eclipse.ui.PlatformUI;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servoy.eclipse.aibridge.dto.Completion;
 import com.servoy.eclipse.aibridge.dto.Response;
@@ -91,7 +92,6 @@ public class AiBridgeManager
 				{
 					requestMap.put(uuid, completion);
 					AiBridgeView.refresh();
-					saveData(AiBridgeView.getSolutionName());
 					if (debug)
 					{
 						completion = sendDebugRequest(loginToken, completion);
@@ -110,7 +110,7 @@ public class AiBridgeManager
 				}
 				finally
 				{
-					saveData(AiBridgeView.getSolutionName());
+					saveCompletion(AiBridgeView.getSolutionName(), uuid, completion);
 					AiBridgeView.refresh();
 				}
 			}, executorService);
@@ -124,7 +124,8 @@ public class AiBridgeManager
 		final long DELAY_AFTER_CHANGE = 2000; // 2 seconds
 		long startTime = System.currentTimeMillis();
 		long lastChangeTime = 0;
-		//Path tempFile = Paths.get(aiBridgePath, request.getCmdName() + "_" + request.getId().toString() + ".json");
+		//for debug avoid using aibridgePath - since debug solution in Servoy get too many notifications;
+		//set a temporary file on your disk and use plugins.ngdestopfile.watchdir() to be notified in Developer about the changes
 		Path tempFile = Paths.get("/Users/vidmarian/work/tmp", request.getCmdName() + "_" + request.getId().toString() + ".json");
 
 		boolean initialChangeDetected = false;
@@ -245,6 +246,7 @@ public class AiBridgeManager
 				try
 				{
 					myCompletion.reset();
+					requestMap.put(myCompletion.getId(), myCompletion);
 					myCompletion.setStatus(AiBridgeStatus.SUBMITTED);
 					AiBridgeView.refresh();
 					myCompletion = sendHttpRequest(loginToken, myCompletion);
@@ -257,7 +259,7 @@ public class AiBridgeManager
 				}
 				finally
 				{
-					requestMap.put(myCompletion.getId(), myCompletion);
+					saveCompletion(AiBridgeView.getSolutionName(), myCompletion.getId(), myCompletion);
 					AiBridgeView.refresh();
 
 				}
@@ -291,6 +293,7 @@ public class AiBridgeManager
 	{
 		//TODO: need to rewrite in a more comprehensive manner (maybe use returnTypeId from the command?)
 		//implement this quickly for Rene to be able to work out the cloud part
+		//for now it can stay as is but in future releases this may change depending on the use cases
 		return switch (cmdName)
 		{
 			case "Explain selection" -> "explain";
@@ -313,11 +316,6 @@ public class AiBridgeManager
 			CloseableHttpResponse httpResponse = httpClient.execute(postRequest);
 			request.setHttpCode(httpResponse.getCode());
 
-			if (httpResponse.getCode() != 200)
-			{
-				throw new RuntimeException("Failed : HTTP error code : " + httpResponse.getCode());
-			}
-
 			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
 			StringBuilder sbResult = new StringBuilder();
 			String output;
@@ -325,19 +323,34 @@ public class AiBridgeManager
 			{
 				sbResult.append(output);
 			}
-
 			JSONObject jsonObj = new JSONObject(sbResult.toString());
 			Response response = new Response(jsonObj);
 			request.setResponse(response);
-			request.setStatus(AiBridgeStatus.COMPLETE);
 			request.setEndTime(Calendar.getInstance().getTime());
+
 			if (response.isEmptyResponse())
 			{
-				//some error appeared in the cloud
-				request.setStatus(AiBridgeStatus.ERROR);
 				request.setMessage("No response ...");
 			}
 
+			request.setStatus(AiBridgeStatus.ERROR);
+			String errorMessage = switch (httpResponse.getCode())
+			{
+				case 200 ->
+				{
+					request.setStatus(AiBridgeStatus.COMPLETE);
+					yield null; // No error message for success
+				}
+				case 500 -> "Service is temporary down ...!";
+				case 403 -> "Unrecognized sender ...!";
+				case 401 -> "Invalid credentials ...!";
+				default -> "Unexpected error: " + httpResponse.getCode();
+			};
+
+			if (errorMessage != null)
+			{
+				request.setMessage(errorMessage);
+			}
 
 		}
 		catch (RuntimeException | IOException e)
@@ -348,19 +361,108 @@ public class AiBridgeManager
 		return request;
 	}
 
+	public void saveCompletion(String solutionName, UUID uuid, Completion completion)
+	{
+		Path directoryPath = Paths.get(aiBridgePath + File.separator + solutionName);
+		try
+		{
+			if (Files.notExists(directoryPath))
+			{
+				Files.createDirectories(directoryPath);
+			}
+			Path filePath = directoryPath.resolve(uuid.toString() + ".json");
+			Files.deleteIfExists(filePath);
+			String json = mapper.writeValueAsString(completion);
+			Files.write(filePath, json.getBytes());
+
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
 	public void saveData(String solutionName)
 	{
-		synchronized (SAVE_LOCK)
+		Path directoryPath = Paths.get(aiBridgePath + File.separator + solutionName);
+		try
+		{
+			if (Files.notExists(directoryPath))
+			{
+				Files.createDirectories(directoryPath);
+			}
+			for (Map.Entry<UUID, Completion> entry : requestMap.entrySet())
+			{
+				Path filePath = directoryPath.resolve(entry.getKey().toString() + ".json");
+				//this is adding the submitted (i.e.: not completed completions still existing nly in memory)
+				if (!Files.exists(filePath))
+				{
+					String json = mapper.writeValueAsString(entry.getValue());
+					Files.write(filePath, json.getBytes());
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	public void loadData(String solutionName)
+	{
+		Path directoryPath = Paths.get(aiBridgePath + File.separator + solutionName);
+
+		try
+		{
+			requestMap.clear();
+			if (Files.exists(directoryPath))
+			{
+				try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryPath, "*.json"))
+				{
+					for (Path entry : stream)
+					{
+						String json = new String(Files.readAllBytes(entry));
+						String fileName = entry.getFileName().toString();
+						UUID uuid = UUID.fromString(fileName.substring(0, fileName.length() - 5)); // Remove ".json"
+						Completion completion = mapper.readValue(json, Completion.class);
+						if (AiBridgeStatus.SUBMITTED.equals(completion.getStatus()))
+						{
+							completion.setStatus(AiBridgeStatus.INCOMPLETE);
+						}
+						requestMap.put(uuid, completion);
+					}
+				}
+			}
+		}
+		catch (IOException | IllegalArgumentException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	public void deleteFile(String solutionName, UUID uuid)
+	{
+		Path filePath = Paths.get(aiBridgePath, solutionName, uuid.toString() + ".json");
+		try
+		{
+			Files.deleteIfExists(filePath);
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	public void deleteFiles(String solutionName, List<UUID> uuidList)
+	{
+		Path directoryPath = Paths.get(aiBridgePath + File.separator + solutionName);
+
+		for (UUID uuid : uuidList)
 		{
 			try
 			{
-				if (Files.notExists(Paths.get(aiBridgePath)))
-				{
-					Files.createDirectories(Paths.get(aiBridgePath));
-				}
-
-				String json = mapper.writeValueAsString(getRequestMap());
-				Files.write(Paths.get(aiBridgePath + File.separator + solutionName + "-completions.json"), json.getBytes());
+				Path filePath = directoryPath.resolve(uuid.toString() + ".json");
+				Files.deleteIfExists(filePath);
 			}
 			catch (IOException e)
 			{
@@ -368,37 +470,4 @@ public class AiBridgeManager
 			}
 		}
 	}
-
-	public void loadData(String solutionName)
-	{
-		try
-		{
-			requestMap.clear();
-
-			if (Files.exists(Paths.get(aiBridgePath + File.separator + solutionName + "-completions.json")))
-			{
-				String json = new String(Files.readAllBytes(Paths.get(aiBridgePath + File.separator + solutionName + "-completions.json")));
-
-				Map<UUID, Completion> tempMap = mapper.readValue(json, new TypeReference<Map<UUID, Completion>>()
-				{
-				});
-
-				for (Map.Entry<UUID, Completion> entry : tempMap.entrySet())
-				{
-					Completion completion = entry.getValue();
-					if (AiBridgeStatus.SUBMITTED.equals(completion.getStatus()))
-					{
-						completion.setStatus(AiBridgeStatus.INCOMPLETE);
-					}
-				}
-				requestMap.putAll(tempMap);
-			}
-		}
-		catch (IOException e)
-		{
-			ServoyLog.logError(e);
-		}
-
-	}
-
 }

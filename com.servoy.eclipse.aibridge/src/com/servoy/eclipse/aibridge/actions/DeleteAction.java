@@ -1,5 +1,8 @@
 package com.servoy.eclipse.aibridge.actions;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jface.action.Action;
@@ -31,13 +34,13 @@ public class DeleteAction extends Action implements ISelectionListener
 			return;
 		}
 
-		Stream.of(selection.toArray())
+		List<UUID> selectedIds = Stream.of(selection.toArray())
 			.filter(obj -> obj instanceof Completion)
-			.map(obj -> (Completion)obj)
-			.forEach(completion -> AiBridgeManager.getInstance().getRequestMap().remove(completion.getId()));
+			.map(obj -> ((Completion)obj).getId())
+			.collect(Collectors.toList());
 
-		AiBridgeManager.getInstance().saveData(AiBridgeView.getSolutionName());
-
+		selectedIds.forEach(id -> AiBridgeManager.getInstance().getRequestMap().remove(id));
+		AiBridgeManager.getInstance().deleteFiles(AiBridgeView.getSolutionName(), selectedIds);
 		AiBridgeView.refresh();
 	}
 

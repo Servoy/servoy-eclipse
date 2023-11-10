@@ -32,12 +32,18 @@ public class SubmitAgainAction extends Action implements ISelectionListener
 			return;
 		}
 
+		AiBridgeManager aiBridgeManager = AiBridgeManager.getInstance();
+		String solutionName = AiBridgeView.getSolutionName();
+
+		// Use Stream.of(selection.toArray()) to create a stream directly from the array
 		Stream.of(selection.toArray())
 			.filter(obj -> obj instanceof Completion)
 			.map(obj -> (Completion)obj)
-			.forEach(AiBridgeManager.getInstance()::sendCompletion);
+			.forEach(obj -> {
+				aiBridgeManager.deleteFile(solutionName, obj.getId());
+				aiBridgeManager.sendCompletion(obj);
+			});
 
-		AiBridgeManager.getInstance().saveData(AiBridgeView.getSolutionName());
 		AiBridgeView.refresh();
 	}
 
