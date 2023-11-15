@@ -303,7 +303,7 @@ export class FormService {
     public createFormCache(formName: string, jsonData: any, url: string) {
         const formCache = new FormCache(formName, jsonData.size, jsonData.responsive, url, this.typesRegistry);
         this.walkOverChildren(jsonData.children, formCache);
-
+		formCache.cleanFormComponents();
         this.clientFunctionService.waitForLoading().finally(() => {
             this.formsCache.set(formName, formCache);
             const formComponent = this.formComponentCache.get(formName);
@@ -649,7 +649,7 @@ export class FormService {
                     elem.formComponent.forEach((child: string) => {
                         this.walkOverChildren(elem[child], formCache, fcc);
                     });
-                    formCache.add(fcc, parent);
+                    formCache.addFormComponent(fcc);
                     if (parent != null) {
                         parent.addChild(fcc);
                     }
