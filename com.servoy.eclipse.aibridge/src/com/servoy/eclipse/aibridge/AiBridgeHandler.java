@@ -163,36 +163,33 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 		if (webObjectSpecification != null)
 		{
 			callsOrProperties.forEach(action -> {
-				sb.append(node);
-				sb.append('.');
+				appendData(node + ".", sb);
 
 				WebObjectFunctionDefinition apiFunction = webObjectSpecification.getApiFunction(action.getName());
 				if (apiFunction != null)
 				{
-					sb.append(action.getName());
-					sb.append("(");
+					appendData(action.getName() + "(", sb);
 					IFunctionParameters parameters = apiFunction.getParameters();
 					for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
 					{
 						PropertyDescription parameterDefinition = parameters.getParameterDefinition(i);
 						if (parameterDefinition.isOptional())
 						{
-//							sb.append('[');
 						}
-						sb.append(parameterDefinition.getName());
+						appendData(parameterDefinition.getName(), sb);
 						if (parameterDefinition.isOptional())
 						{
-							sb.append('?');
+							appendData("?", sb);
 						}
-						if (i < parameters.getDefinedArgsCount() - 1) sb.append(", ");
+						if (i < parameters.getDefinedArgsCount() - 1) appendData(", ", sb);
 					}
-					sb.append("):\n");
+					appendData("):\n", sb);
 					StringJavaDocCommentReader reader = new StringJavaDocCommentReader(apiFunction.getDocumentation());
 					String doc;
 					try
 					{
 						doc = IOUtils.toString(reader).trim();
-						sb.append(doc.replace('\r', '\n').replace("\n ", "\n").replace("\n\n", "\n"));
+						appendData(doc.replace('\r', '\n').replace("\n ", "\n").replace("\n\n", "\n"), sb);
 					}
 					catch (IOException e)
 					{
@@ -204,9 +201,8 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 					PropertyDescription property = webObjectSpecification.getProperty(action.getName());
 					if (property != null)
 					{
-						sb.append(action.getName());
-						sb.append(":\n");
-						sb.append(property.getDocumentation());
+						appendData(action.getName() + ":\n", sb);
+						appendData(property.getDocumentation(), sb);
 					}
 				}
 			});
@@ -216,7 +212,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 	private String getContextData()
 	{
 		final StringBuilder sb = new StringBuilder();
-		sb.append("\nSpecifications:\n");
+
 		ISourceModule module = DLTKUIPlugin.getEditorInputModelElement(activeEditor.getEditorInput());
 		final Script script = JavaScriptParserUtil.parse(module, null);
 
@@ -260,8 +256,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 						String doc = IOUtils.toString(reader);
 						if (doc != null)
 						{
-							sb.append(node.getParent()); // parent is the call expression
-							sb.append(":\n");
+							appendData(node.getParent() + ":\n", sb);
 							String[] lines = doc.split("\n");
 							for (String line : lines)
 							{
@@ -269,11 +264,10 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 								if (line.startsWith("@properties=")) continue;
 								if (!line.isBlank())
 								{
-									sb.append(line);
-									sb.append('\n');
+									appendData(line + "\n", sb);
 								}
 							}
-							sb.append('\n');
+							appendData("\n", sb);
 						}
 
 					}
@@ -284,12 +278,8 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 				}
 				else
 				{
-					String typeLine = pair.getRight() + " is of type " + type;
-//					if (sb.indexOf(typeLine) < 0) //avoid duplicates; there are quite some
-//					{
-					sb.append(typeLine);
-					sb.append('\n');
-//					}
+					String typeLine = "<type>" + pair.getRight() + ": " + type + "</type>";
+					appendData(typeLine, sb);
 
 				}
 				ITypedScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectByName(type);
@@ -299,8 +289,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 					IObjectDocumentation docFile = scriptObject.getObjectDocumentation();
 					callsOrProperties.forEach(action -> {
 						String name = action.getName();
-						sb.append(node);
-						sb.append('.');
+						appendData(node + ".", sb);
 						List<IFunctionDocumentation> functions = docFile.getFunctions().stream().filter(function -> function.getMainName().equals(name))
 							.sorted((func1, func2) -> func1.getArguments().size() - func2.getArguments().size())
 							.collect(Collectors.toList());
@@ -309,29 +298,27 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 							IFunctionDocumentation function = functions.get(0);
 							if (function.getType() == IFunctionDocumentation.TYPE_FUNCTION)
 							{
-								sb.append(function.getFullJSTranslatedSignature(true, false).split(" ", 2)[1]);
-								sb.append(":\n");
+								appendData(function.getFullJSTranslatedSignature(true, false).split(" ", 2)[1] + ":\n", sb);
 								generateDescription(function, function.getArgumentsTypes().length, sb);
+								closeContext(sb);
 							}
 							else if (function.getType() == IFunctionDocumentation.TYPE_CONSTANT ||
 								function.getType() == IFunctionDocumentation.TYPE_PROPERTY)
 							{
-								sb.append(function.getMainName());
-								sb.append(":\n");
-								sb.append(function.getDescription(ClientSupport.ng));
+								appendData(function.getMainName() + ":\n", sb);
+								appendData(function.getDescription(ClientSupport.ng), sb);
+								closeContext(sb);
 							}
 
 						}
 						else if (functions.size() > 1)
 						{
 							IFunctionDocumentation function = functions.get(functions.size() - 1);
-							sb.append(function.getFullJSTranslatedSignature(true, false).split(" ", 2)[1]);
-							sb.append(":\n");
+							appendData(function.getFullJSTranslatedSignature(true, false).split(" ", 2)[1] + ":\n", sb);
 							generateDescription(function, functions.get(0).getArgumentsTypes().length, sb);
+							closeContext(sb);
 						}
 					});
-					sb.append('\n');
-					sb.append('\n');
 				}
 				else if (type.startsWith("WebService") && callsOrProperties != null && callsOrProperties.size() > 0)
 				{
@@ -340,6 +327,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 					WebObjectSpecification webObjectSpecification = WebServiceSpecProvider.getSpecProviderState()
 						.getWebObjectSpecification(serviceName);
 					generateApiOrPropertySpec(sb, node, callsOrProperties, webObjectSpecification);
+					closeContext(sb);
 				}
 				else if (type.startsWith("RuntimeWebComponent") && callsOrProperties != null && callsOrProperties.size() > 0)
 				{
@@ -348,11 +336,12 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 					WebObjectSpecification componentSpec = WebComponentSpecProvider.getSpecProviderState()
 						.getWebObjectSpecification(componentName);
 					generateApiOrPropertySpec(sb, node, callsOrProperties, componentSpec);
+					closeContext(sb);
 				}
 			}
 		});
-		String returnValue = sb.toString(); //avoid trim(); this will cut also /n's
-		return returnValue;
+		String returnValue = sb.toString(); //avoid trim(); this will cut also /n's from the start / end
+		return returnValue.replaceAll("\\n+</description>", "</description>").replaceAll("\\n+<type>", "\n<type>").trim();
 	}
 
 	private void generateDescription(IFunctionDocumentation fdoc, int mandatoryParams, StringBuilder sb)
@@ -362,20 +351,20 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 		LinkedHashMap<String, IParameterDocumentation> parameters = fdoc.getArguments();
 		String tooltip = fdoc.getDescription(ClientSupport.ng);
 
-		sb.append(tooltip);
+		appendData(tooltip, sb);
 		if (parameters != null)
 		{
 			int paramCount = 0;
 			for (IParameterDocumentation parameter : parameters.values())
 			{
-				sb.append("\n@param {");
-				sb.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(parameter.getType()));
-				sb.append("} ");
-				if (paramCount >= mandatoryParams) sb.append('[');
-				sb.append(parameter.getName());
-				if (paramCount >= mandatoryParams) sb.append("] optional");
-				sb.append(" ");
-				sb.append((parameter.getDescription() != null ? parameter.getDescription() : ""));
+				appendData("\n@param {", sb);
+				appendData(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(parameter.getType()), sb);
+				appendData("} ", sb);
+				if (paramCount >= mandatoryParams) appendData("[", sb);
+				appendData(parameter.getName(), sb);
+				if (paramCount >= mandatoryParams) appendData("] optional", sb);
+				appendData(" ", sb);
+				appendData(parameter.getDescription() != null ? parameter.getDescription() : "", sb);
 				paramCount++;
 			}
 		}
@@ -383,13 +372,75 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 		{
 			if (fdoc.getType() == IFunctionDocumentation.TYPE_FUNCTION)
 			{
-				sb.append("\n@return {");
-				sb.append(XMLScriptObjectAdapter.getReturnTypeString(returnType));
-				sb.append("} ");
-				if (returnDescription != null) sb.append(returnDescription);
+				appendData("\n@return {", sb);
+				appendData(XMLScriptObjectAdapter.getReturnTypeString(returnType), sb);
+				appendData("} ", sb);
+				if (returnDescription != null) appendData(returnDescription, sb);
+				appendData("\n", sb);
 			}
 		}
 
+	}
+
+	private void closeContext(StringBuilder sb)
+	{
+		String typeEnd = "</type>";
+		String descriptionEnd = "</description>";
+		int typeEndIndex = sb.lastIndexOf(typeEnd) < 0 ? 0 : sb.lastIndexOf(typeEnd);
+		boolean isTypeEnding = sb.length() > 0 && typeEndIndex == sb.length() - typeEnd.length();
+		boolean isDescriptionEnding = (sb.length() > 0 && sb.lastIndexOf(descriptionEnd) == sb.length() - descriptionEnd.length()) ? true : false;
+		if (isTypeEnding || isDescriptionEnding) return;
+
+		int descriptionStartIndex = sb.indexOf("<description>", typeEndIndex);
+		if (descriptionStartIndex >= 0 && sb.indexOf(descriptionEnd, descriptionStartIndex) < 0)
+		{
+			sb.append(descriptionEnd);
+		}
+	}
+
+
+	private void appendData(String data, StringBuilder sb)
+	{
+
+		// data must be separated using xml tags
+		// data may be a type line: <type>...</type>\n
+		// or a non empty line. Lines between two type lines must be enclosed in <description> ... </description>\n tags
+		// avoid starting and ending \n characters
+
+		String typeEnd = "</type>";
+		String descriptionStart = "<description>";
+		String descriptionEnd = "</description>";
+		boolean isTypeLine = data.endsWith("</type>");
+		boolean isTypeEnding = (sb.length() > 0 && sb.lastIndexOf(typeEnd) == sb.length() - typeEnd.length() - 1) ? true : false;
+		boolean isDescriptionEnding = (sb.length() > 0 && sb.lastIndexOf(descriptionEnd) == sb.length() - descriptionEnd.length() - 1) ? true : false;
+		int typeEndIndex = sb.lastIndexOf(typeEnd) < 0 ? 0 : sb.lastIndexOf(typeEnd);
+		int descriptionStartIndex = sb.indexOf(descriptionStart, typeEndIndex);
+		int descriptionEndIndex = sb.indexOf(descriptionEnd, descriptionStartIndex);
+
+		if (isTypeEnding || isDescriptionEnding)
+		{
+			sb.append("\n");
+		}
+
+		if (!isTypeLine)
+		{//not a type means (partial) description
+			if (sb.length() == 0 || descriptionStartIndex < 0 || isDescriptionEnding || isTypeEnding)
+			{
+				//description has not started
+				sb.append(descriptionStart);
+			}
+		}
+		else
+		{
+			//type line (avoid duplicate types)
+			if (sb.indexOf(data) >= 0) return;
+			if (descriptionStartIndex >= 0 && descriptionEndIndex < 0)
+			{
+				//type line following description
+				sb.append(descriptionEnd);
+			}
+		}
+		sb.append(data);
 	}
 
 	@Override
