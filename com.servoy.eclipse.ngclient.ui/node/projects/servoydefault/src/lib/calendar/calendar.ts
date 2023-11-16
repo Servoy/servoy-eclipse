@@ -108,7 +108,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID) : null;
             this.picker.dates.setValue(value);
         }
-        if (this.dataProviderID) {
+        if (this.dataProviderID && !this.findmode) {
             const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID) : null;
             this.config.viewDate = value;
        }
