@@ -51,7 +51,7 @@ import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-respo
 export class ServoyCoreComponentsModule {
     constructor() {
         // eslint-disable-next-line max-len
-        LicenseManager.setLicenseKey('CompanyName=Servoy B.V.,LicensedApplication=Servoy,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=7,LicensedProductionInstancesCount=-1,AssetReference=AG-031784,SupportServicesEnd=11_November_2023_[v2]_MTY5OTY2MDgwMDAwMA==ef0717137a9846a6aa3a3c8426e308b4');
+        LicenseManager.setLicenseKey('Using_this_AG_Grid_Enterprise_key_( AG-047126 )_in_excess_of_the_licence_granted_is_not_permitted___Please_report_misuse_to_( legal@ag-grid.com )___For_help_with_changing_this_key_please_contact_( info@ag-grid.com )___( Servoy B.V. )_is_granted_a_( Single Application )_Developer_License_for_the_application_( Servoy )_only_for_( 7 )_Front-End_JavaScript_developers___All_Front-End_JavaScript_developers_working_on_( Servoy )_need_to_be_licensed___( Servoy )_has_been_granted_a_Deployment_License_Add-on_for_( Unlimited )_Production_Environments___This_key_works_with_AG_Grid_Enterprise_versions_released_before_( 10 November 2024 )____[v2]_MTczMTE5NjgwMDAwMA==b4efc9fcdd26d4144e140977db93ef49');
         ModuleRegistry.registerModules([ServerSideRowModelModule, ClientSideRowModelModule]);
     }
 }
