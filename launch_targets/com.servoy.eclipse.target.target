@@ -18,7 +18,7 @@
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2023.12"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202311211333"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202311211335"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202311211513"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/106.0.21/repository"/>
