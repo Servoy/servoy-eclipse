@@ -41,6 +41,7 @@ import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.ast.v4.ArrowFunctionStatement;
+import org.eclipse.dltk.javascript.ast.v4.PropertyShorthand;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -134,6 +135,13 @@ public class ScriptingUtils
 							int typeid = IColumnTypes.MEDIA;
 							if (type instanceof Integer) typeid = ((Integer)type).intValue();
 							retval.add(new EnumDataProvider(global.getDataProviderID() + '.' + ((PropertyInitializer)part).getNameAsString(), typeid));
+						}
+						else if (part instanceof PropertyShorthand)
+						{
+							Object type = visit(((PropertyShorthand)part).getExpression());
+							int typeid = IColumnTypes.MEDIA;
+							if (type instanceof Integer) typeid = ((Integer)type).intValue();
+							retval.add(new EnumDataProvider(global.getDataProviderID() + '.' + ((PropertyShorthand)part).getNameAsString(), typeid));
 						}
 						else
 						{
