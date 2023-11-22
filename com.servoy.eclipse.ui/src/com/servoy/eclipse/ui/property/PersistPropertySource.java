@@ -2321,6 +2321,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 		}
 
+		if (persistContext.getPersist() instanceof LayoutContainer && ("class".equals(id) || "style".equals(id)))
+		{
+			return ((LayoutContainer)persistContext.getPersist()).getAttribute((String)id) != null;
+		}
 		// Even when the value is null it may even be set, some properties have a non-null default
 		return (((AbstractBase)persistContext.getPersist()).hasProperty((String)id));
 	}
