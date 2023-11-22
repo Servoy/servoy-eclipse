@@ -6,7 +6,7 @@ import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, ChangeDe
 export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
     @Input('sabloTabseq') designTabSeq: number;
-    @Input('sabloTabseqConfig') config: any;
+    @Input('sabloTabseqConfig') config: SabloTabseqConfig;
 
     designChildIndexToArrayPosition = {};
     designChildTabSeq = []; // contains ordered numbers that will be keys in 'runtimeChildIndexes'; can have duplicates
@@ -271,4 +271,11 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
             this.trigger(this._elemRef.nativeElement.parentNode, 'unregisterCSTS', [this.designTabSeq, this.runtimeIndex]);
         }
     }
+}
+
+export interface SabloTabseqConfig {
+    root?: boolean;
+    container?: boolean;
+    reservedGap?: number;
+    tabSeqSetter?: {setTabIndex: (index: number)=>void};
 }
