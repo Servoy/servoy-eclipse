@@ -384,7 +384,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     		const uuid = element?.getAttribute('svy-id');
     		let rect = element?.getBoundingClientRect();
     		if (!uuid && this.draggedElementItem) {
-    			rect = new DOMRect(point.x, point.y, this.draggedElementItem.model.size.width, this.draggedElementItem.model.size.height);
+                const item = this.draggedElementItem as ComponentCache;
+    			rect = new DOMRect(point.x, point.y, item.model.size.width, item.model.size.height);
     		}
     		if (!rect) return properties;
 
@@ -537,7 +538,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
         }
         if (selectedVariant) {
-            const model = Object.assign({}, selectedVariant.items[0].model);
+            const model = Object.assign({}, (selectedVariant.items[0] as ComponentCache).model);
             model.size.width = targetWidth;
             model.size.height = targetHeight;
             this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: selectedVariant.items[0].model}, '*');

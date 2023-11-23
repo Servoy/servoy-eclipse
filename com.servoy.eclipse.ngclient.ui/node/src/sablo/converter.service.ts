@@ -59,13 +59,13 @@ export class ConverterService {
         return fulllist;
     }
 
-    public convertFromServerToClient(serverSentData: any,
-            typeOfData: IType<any>,
-            currentClientData: any,
+    public convertFromServerToClient(serverSentData: unknown,
+            typeOfData: IType<unknown>,
+            currentClientData: unknown,
             /* some types decide at runtime the type needed on client - for example dataprovider type could send date, and we will store that info here: */
-            dynamicPropertyTypesHolder: { [nameOrIndex: string]: IType<any> },
+            dynamicPropertyTypesHolder: { [nameOrIndex: string]: IType<unknown> },
             keyForDynamicTypes: string,
-            propertyContext: IPropertyContext): any {
+            propertyContext: IPropertyContext): unknown {
 
         let convertedData = serverSentData;
         if (typeOfData) {

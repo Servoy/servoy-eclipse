@@ -87,7 +87,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         } //else a very narrow margin (cca. 1 px) of this component was clicked and popup will be wrongly positioned
     }
 
-    onVariantMouseDown(pageX: number, pageY: number, model: { [property: string]: any }) {
+    onVariantMouseDown(pageX: number, pageY: number, model: { [property: string]: unknown }) {
         this.isDraggedVariant = true;
         this.draggedVariant.variant = model._variantName as string;
         this.draggedVariant.size = model.size as { width: number; height: number };
@@ -133,7 +133,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: any }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
+    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: unknown }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
         if ( event.target && (event.target as Element).getAttribute('name') === 'variants' ) {
             return; // it has a separate handler
         }
@@ -287,7 +287,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', event.pageX - this.editorContentService.getLeftPositionIframe() + 'px');
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.editorContentService.getTopPositionIframe() + 'px');
 
-                this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + "." + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
+                this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
                 if (!this.canDrop.dropAllowed) {
                     this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
                 }
@@ -424,9 +424,9 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         });
     }
 
-    contentMessageReceived(id: string, data: { property: string }) {
+    contentMessageReceived(id: string, data: { [property: string]: unknown }) {
         if (id === 'snap') {
-            this.snapData = data['properties'];
+            this.snapData = data['properties'] as {top: number, left: number, snapX?: string, snapY?: string, cssPosition: { property: string } };
         }
     }
 }

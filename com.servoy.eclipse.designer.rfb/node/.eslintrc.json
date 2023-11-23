@@ -3,7 +3,8 @@
   "ignorePatterns": [],
   "plugins": [
     "only-warn",
-    "prefer-arrow"
+    "prefer-arrow",
+    "@stylistic/ts"
   ],
   "overrides": [
     {
@@ -18,10 +19,10 @@
         "createDefaultProgram": true
       },
       "extends": [
-        "plugin:@angular-eslint/recommended",
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:@angular-eslint/recommended",
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
@@ -33,13 +34,7 @@
             "classPropertiesAllowed": false
           }
         ],
-        "quotes": [
-          "warn",
-          "single",
-          {
-            "avoidEscape": true
-          }
-        ],
+        "@stylistic/ts/quotes": ["warn", "single", { "avoidEscape": true }],
         "@typescript-eslint/restrict-plus-operands": "off",
         "@angular-eslint/component-selector": [
           "error",

@@ -22,8 +22,8 @@ import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_re
  */
 export abstract class AbstractFormComponent {
 
-    _containers: { added: any; removed: any };
-    _cssstyles: { [x: string]: any };
+    _containers: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } };
+    _cssstyles: { [container: string]: { [classname: string]: string } };
     protected componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
 
     constructor(protected renderer: Renderer2) {
@@ -34,7 +34,7 @@ export abstract class AbstractFormComponent {
     }
 
     @Input()
-    set containers(containers: { added: any; removed: any }) {
+    set containers(containers: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } }) {
         if (!containers) return;
         for (const containername of Object.keys(containers.added)) {
             const container = this.getContainerByName(containername);
@@ -83,7 +83,7 @@ export abstract class AbstractFormComponent {
     }
 
     @Input()
-    set cssstyles(cssStyles: { [x: string]: any }) {
+    set cssstyles(cssStyles: { [container: string]: { [classname: string]: string } }) {
         if (!cssStyles) return;
         this._cssstyles = cssStyles;
         for (const containername of Object.keys(cssStyles)) {
@@ -262,7 +262,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             if (changes.name.previousValue) this.formservice.destroy(changes.name.previousValue);
             // really make sure all form state is reverted to default for this new name
             this.formCache = this.formservice.getFormCache(this);
-            const styleClasses: string = this.formCache.getComponent('').model.styleClass;
+            const styleClasses: string = this.formCache.getComponent('').model.styleClass as string;
             if (styleClasses)
                 this.formClasses = styleClasses.split(' ');
             else

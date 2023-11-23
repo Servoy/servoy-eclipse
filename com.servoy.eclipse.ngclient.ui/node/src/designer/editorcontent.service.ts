@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { FormService } from '../ngclient/form.service';
+import { FormService, ServerElement } from '../ngclient/form.service';
 import { IDesignFormComponent } from './servoydesigner.component';
-import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties, FormCache } from '../ngclient/types';
+import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties, FormCache, CSSPosition, Position } from '../ngclient/types';
 import { ConverterService } from '../sablo/converter.service';
 import { IComponentCache } from '@servoy/public';
 import { TypesRegistry, IWebObjectSpecification, RootPropertyContextCreator } from '../sablo/types_registry';
@@ -344,7 +344,7 @@ export class EditorContentService {
         }
     }
 
-    updateComponentProperties(component: IComponentCache, elem: any): boolean {
+    updateComponentProperties(component: IComponentCache, elem: ServerElement): boolean {
         let redrawDecorators = false;
         component.layout = elem.position;
 
@@ -355,9 +355,8 @@ export class EditorContentService {
         for (const propName of Object.keys(elem.model)) {
             const value = this.converterService.convertFromServerToClient(elem.model[propName],
                 componentSpec?.getPropertyType(propName), component.model[propName],
-                componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
+                componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName)) as (CSSPosition & Position);
             // as we are in designer here, we don't listen for any potential change aware values after conversions (see FormService.handleComponentModelConversionsAndChangeListeners(...))
-
             if (
                 (propName === 'size' && (component.model[propName].width !== value.width || component.model[propName].height !== value.height)) ||
                 (propName === 'location' && (component.model[propName].x !== value.x || component.model[propName].y !== value.y)) ||

@@ -111,16 +111,16 @@ export class SabloService {
         return this.wsSession;
     }
 
-    public createDeferredWSEvent(): { deferred: Deferred<any>; cmsgid: number } {
+    public createDeferredWSEvent(): { deferred: Deferred<unknown>; cmsgid: number } {
         return this.wsSession.createDeferredEvent();
     }
 
-    public resolveDeferedEvent(cmsgid: number, argument: any, success: boolean) {
+    public resolveDeferedEvent(cmsgid: number, argument: unknown, success: boolean) {
         this.wsSession.resolveDeferedEvent(cmsgid, argument, success);
     }
 
     public getClientnr() {
-        const sessionnr = this.sessionStorage.get('clientnr');
+        const sessionnr = this.sessionStorage.get('clientnr') as string;
         if (sessionnr) {
             return sessionnr;
         }
@@ -132,7 +132,7 @@ export class SabloService {
     }
 
     public getWindownr() {
-        return this.sessionStorage.get('windownr');
+        return this.sessionStorage.get('windownr') as string;
     }
 
     public getWindowUrl(windowname: string) {
@@ -140,7 +140,7 @@ export class SabloService {
     }
 
     public getLanguageAndCountryFromBrowser() {
-        let langAndCountry;
+        let langAndCountry: string;
         const browserLanguages = this.windowRefService.nativeWindow.navigator['languages'];
         // this returns first one of the languages array if the browser supports this (Chrome and FF) else it falls back to language or userLanguage
         // (IE, and IE seems to return the right one from there)
@@ -153,7 +153,7 @@ export class SabloService {
                 langAndCountry = browserLanguages[1];
             }
         } else {
-            langAndCountry = (this.windowRefService.nativeWindow.navigator.language || this.windowRefService.nativeWindow.navigator['userLanguage']);
+            langAndCountry = (this.windowRefService.nativeWindow.navigator.language || this.windowRefService.nativeWindow.navigator['userLanguage']) as string;
         }
         // in some weird scenario in firefox is not set, default it to en
         if (!langAndCountry) langAndCountry = 'en';

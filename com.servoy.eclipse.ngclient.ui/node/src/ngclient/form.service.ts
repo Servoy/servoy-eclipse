@@ -31,7 +31,8 @@ export class FormService {
         this.formComponentCache = new Map();
 
         websocketService.getSession().then((session) => {
-            session.onMessageObject((msg) => {
+            session.onMessageObject((msg: {forms: {[property: string]: {[property: string]: {[property: string]: unknown}}},
+                                call: {form:string,bean:string, api: string, args: Array<unknown>, propertyPath: Array<string>,delayUntilFormLoads: boolean}}) => {
                 if (msg.forms) {
                     for (const formname in msg.forms) {
                         // if form is loaded
@@ -41,24 +42,27 @@ export class FormService {
                             });
                         } else {
                             if (!this.formComponentCache.has(formname)) {
-                                this.formComponentCache.set(formname, new Deferred<any>());
+                                this.formComponentCache.set(formname, new Deferred<unknown>());
                             }
-                            const deferred = this.formComponentCache.get(formname) as Deferred<any>;
+                            const deferred = this.formComponentCache.get(formname) as Deferred<unknown>;
                             deferred.promise.then(() =>
                                 this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService)
-                            );
+                            ).catch(error => {
+                                console.log(error);
+                            });
                         }
                     }
                 }
                 if (msg.call) {
                     // this is a component API call; execute it
-                    // {"call":{"form":"product","element":"datatextfield1","api":"requestFocus","args":[arg1, arg2]}, // optionally "viewIndex":1 }
+                    // {"call":{"form":"product","bean":"datatextfield1","api":"requestFocus","args":[arg1, arg2]}, // optionally "viewIndex":1 }
                     const componentCall = msg.call;
+                    
 
                     this.log.spam(this.log.buildMessage(() => ('sbl * Received API call from server: "' + componentCall.api + '" to form ' + componentCall.form
-                        + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath : componentCall.bean))));
+                        + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
 
-                    const callItNow = ((doReturnTheRetVal: boolean): any => {
+                    const callItNow = ((doReturnTheRetVal: boolean) => {
                         const formComponent = this.formComponentCache.get(componentCall.form) as IFormComponent;
                         const def = new Deferred();
                         this.clientFunctionService.waitForLoading().finally(() => {
@@ -83,9 +87,12 @@ export class FormService {
                         this.formComponentCache.set(componentCall.form, new Deferred<any>());
                     }
                     const deferred = this.formComponentCache.get(componentCall.form) as Deferred<any>;
+                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
                     deferred.promise.then(() => callItNow(false));
                 }
             });
+        }).catch((error) => {
+            console.log(error);
         });
     }
 
@@ -534,7 +541,7 @@ export class FormService {
             }, this.typesRegistry);
     }
 
-    private formMessageHandler(formCache: FormCache, formName: string, msg: any, servoyService: ServoyService) {
+    private formMessageHandler(formCache: FormCache, formName: string, msg: {forms: {[property: string]: {[property: string]: {[property: string]: unknown}}}}, servoyService: ServoyService) {
         const formComponent = this.formComponentCache.get(formName) as IFormComponent;
 
         const newFormData = msg.forms[formName];
@@ -578,7 +585,7 @@ export class FormService {
         formComponent.detectChanges(); // this will also fire ngOnChanges which will fire svyOnChanges for all root props that changed by ref
     }
 
-    private walkOverChildren(children: any[], formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
+    private walkOverChildren(children: ServerElement[], formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
         children.forEach((elem) => {
             if (elem.layout === true) {
                 const structure = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
@@ -597,7 +604,7 @@ export class FormService {
                 }
                 formCache.addLayoutContainer(structure);
             } else if (elem.part === true) {
-                const part = new PartCache(elem.classes, elem.layout);
+                const part = new PartCache(elem.classes, elem.layout as { [property: string]: string });
                 this.walkOverChildren(elem.children, formCache, part);
                 formCache.addPart(part);
             } else {
@@ -607,20 +614,22 @@ export class FormService {
 
                 if (elem.formComponent) {
                     // component that also has servoy-form-component properties
-                    const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();
+                    const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : [];
                     const layout: { [property: string]: string } = {};
                     if (!elem.responsive) {
                         // form component content is anchored layout
 
                         const continingFormIsResponsive = !formCache.absolute;
-                        let minHeight = elem.model.minHeight !== undefined ? elem.model.minHeight : elem.model.height; // height is deprecated in favor of minHeight but they do the same thing;
-                        let minWidth = elem.model.minWidth !== undefined ? elem.model.minWidth : elem.model.width; // width is deprecated in favor of minWidth but they do the same thing;;
+                        // height is deprecated in favor of minHeight but they do the same thing
+                        let minHeight = elem.model.minHeight !== undefined ? elem.model.minHeight as number : elem.model.height as number; 
+                        // width is deprecated in favor of minWidth but they do the same thing
+                        let minWidth = elem.model.minWidth !== undefined ? elem.model.minWidth as number : elem.model.width as number; 
                         let widthExplicitlySet: boolean;
 
-                        if (!minHeight && elem.model.containedForm) minHeight = elem.model.containedForm.formHeight;
+                        if (!minHeight && elem.model.containedForm) minHeight = elem.model.containedForm.formHeight as number;
                         if (!minWidth && elem.model.containedForm) {
                             widthExplicitlySet = false;
-                            minWidth = elem.model.containedForm.formWidth;
+                            minWidth = elem.model.containedForm.formWidth as number;
                         } else widthExplicitlySet = true;
 
                         if (minHeight) {
@@ -647,7 +656,7 @@ export class FormService {
                     this.handleComponentModelConversionsAndChangeListeners(elem, fcc, componentSpec, formCache);
 
                     elem.formComponent.forEach((child: string) => {
-                        this.walkOverChildren(elem[child], formCache, fcc);
+                        this.walkOverChildren(elem[child] as ServerElement[], formCache, fcc);
                     });
                     formCache.addFormComponent(fcc);
                     if (parent != null) {
@@ -664,7 +673,7 @@ export class FormService {
         });
     }
 
-    private handleComponentModelConversionsAndChangeListeners(jsonFromServerForComponent: any, componentCache: ComponentCache,
+    private handleComponentModelConversionsAndChangeListeners(jsonFromServerForComponent: ServerElement, componentCache: ComponentCache,
         componentSpec: IWebObjectSpecification, formCache: FormCache) {
         // handle model conversions of this component (that has some servoy-form-component properties as well)
         const componentDynamicTypesHolder = componentCache.dynamicClientSideTypes;
@@ -677,7 +686,7 @@ export class FormService {
 
             if (instanceOfChangeAwareValue(propValue)) {
                 propValue.getInternalState().setChangeListener(
-                    this.createChangeListenerForSmartValue(formCache.formname, jsonFromServerForComponent.name, propName, componentCache.model[propName]));
+                    this.createChangeListenerForSmartValue(formCache.formname, jsonFromServerForComponent.name, propName, propValue));
             }
         }
     }
@@ -691,4 +700,23 @@ export class FormService {
         };
     }
 
+}
+
+export interface ServerElement {
+    responsive: boolean,
+    part: boolean,
+    layout: boolean| { [property: string]: string },
+    position: { [property: string]: string },
+    model: { [property: string]: unknown, containedForm: {[property: string]: unknown }, styleClass: string, servoyAttributes: { [property: string]: string }},
+    styleclass: Array<string>,
+    classes: Array<string>
+    formComponent: Array<string>,
+    tagname: string,
+    attributes?: { [property: string]: string },
+    children?: ServerElement[],
+    cssPositionContainer?: boolean,
+    name: string,
+    specName: string,
+    elType: string,
+    handlers: Array<string>,
 }

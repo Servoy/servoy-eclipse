@@ -23,7 +23,7 @@ export class FormCache implements IFormCache {
         this.size = size;
         this.responsive = responsive;
         this.componentCache = new Map();
-        this.partComponentsCache = new Array();
+        this.partComponentsCache = [];
         this._parts = [];
         this.formComponents = [];
         this.layoutContainersCache = new Map();
@@ -93,7 +93,7 @@ export class FormCache implements IFormCache {
 					if (item instanceof FormComponentCache) {
 						return item.name;
 					}
-					return "";
+					return '';
 				}).includes(name);
 			}
 			return false;
@@ -143,7 +143,7 @@ export class FormCache implements IFormCache {
     }
     
     public cleanFormComponents() {
-		let deleteFCC = [];
+		const deleteFCC: Array<string> = [];
         this?.formComponents.forEach(fcc => {
 			if (fcc.name.includes('containedForm')) {
 				deleteFCC.push(fcc.name);
@@ -155,10 +155,10 @@ export class FormCache implements IFormCache {
 				this.removeFormComponent(fccName);
 			});
 
-			let fccItems = [];
+			const fccItems: Array<{fcc: FormComponentCache, arr: Array<FormComponentCache>}> = [];
 			this?.formComponents.forEach(fcc => {
 				if (fcc.items.length > 0) {
-					fccItems.push({fcc, arr: fcc.items.filter(item => item instanceof FormComponentCache)});
+					fccItems.push({fcc, arr: fcc.items.filter(item => item instanceof FormComponentCache) as Array<FormComponentCache>});
 				}
 			});
 
@@ -176,7 +176,7 @@ export class FormCache implements IFormCache {
 				const okFCC = arr.filter((item: FormComponentCache) => item.name.split('containedForm').length === check);
 				deleteFCC.forEach((item: FormComponentCache) => fcc.removeChild(item));
 				const checkComp = okFCC.map((item: FormComponentCache) => item.name);
-				let deleteComp = [];
+				const deleteComp: Array<ComponentCache> = [];
 				fcc.items.forEach(item => {
 					if (!(item instanceof FormComponentCache) && !(item instanceof StructureCache)) {
 						checkComp.forEach((itm: string) => {
@@ -187,10 +187,10 @@ export class FormCache implements IFormCache {
 					}
 				});
 				deleteComp.forEach(item => fcc.removeChild(item));
-				let fccItems = [];
+				const fccItems: Array<{fcc: FormComponentCache, arr: Array<FormComponentCache>}> = [];
 				fcc.items.forEach(item => {
 					if (item instanceof FormComponentCache) {
-						fccItems.push({fcc: item, arr: item.items.filter(item => item instanceof FormComponentCache)});
+						fccItems.push({fcc: item, arr: item.items.filter(item => item instanceof FormComponentCache) as Array<FormComponentCache>});
 					}
 				});
 				this.checkItems(fccItems);
@@ -223,20 +223,20 @@ export interface IFormComponent extends IApiExecutor {
     formCacheChanged(cache: FormCache): void;
 
     // called when a model property is updated for the given compponent, but the value itself didn't change (only nested)
-    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]): void;
+    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: unknown}[]): void;
 
     updateFormStyleClasses(ngutilsstyleclasses: string): void;
 }
 
 export interface IApiExecutor {
-    callApi(componentName: string, apiName: string, args: Array<any>, path?: string[]): any;
+    callApi(componentName: string, apiName: string, args: Array<unknown>, path?: string[]): unknown;
 }
 
-export const instanceOfApiExecutor = (obj: any): obj is IApiExecutor =>
-    obj != null && (obj).callApi instanceof Function;
+export const instanceOfApiExecutor = (obj: unknown): obj is IApiExecutor =>
+    obj != null && (obj as IApiExecutor).callApi instanceof Function;
 
-export const instanceOfFormComponent = (obj: any): obj is IFormComponent =>
-    obj != null && (obj).detectChanges instanceof Function;
+export const instanceOfFormComponent = (obj: unknown): obj is IFormComponent =>
+    obj != null && (obj as IFormComponent).detectChanges instanceof Function;
 
 /** More (but internal not servoy public) impl. for IComponentCache implementors. */
 export class ComponentCache implements IComponentCache {
@@ -248,8 +248,15 @@ export class ComponentCache implements IComponentCache {
      * Call FormCache.getClientSideType(componentName, propertyName) instead if you want a combination of static client-side-type from it's spec and dynamic client
      * side type for a component's property when converting data to be sent to server.
      */
-    public readonly dynamicClientSideTypes: Record<string, IType<any>> = {};
-    public readonly model: { [property: string]: any };
+    public readonly dynamicClientSideTypes: Record<string, IType<unknown>> = {};
+    public readonly model: { [property: string]: unknown,
+                                containedForm?: {
+                                    absoluteLayout?: boolean,
+                                },
+                                styleClass?: string,
+                                size?: {width: number, height: number},
+                                containers?: {  added: { [container: string]: string[] }; removed: { [container: string]: string[] } }, 
+                                cssstyles?: { [container: string]: { [classname: string]: string } } };
 
     /** this is used as #ref inside form_component.component.ts and it has camel-case instead of dashes */
     public readonly type: string;
@@ -284,7 +291,7 @@ export class ComponentCache implements IComponentCache {
         return webObjectSpecName;
     }
 
-    initForDesigner(initialModelProperties: { [property: string]: any }): ComponentCache {
+    initForDesigner(initialModelProperties: { [property: string]: unknown }): ComponentCache {
         // set initial model contents
         for (const key of Object.keys(initialModelProperties)) {
             this.model[key] = initialModelProperties[key];
@@ -292,7 +299,8 @@ export class ComponentCache implements IComponentCache {
         return this;
     }
 
-    sendChanges(_propertyName: string, _newValue: any, _oldValue: any, _rowId?: string, _isDataprovider?: boolean) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    sendChanges(_propertyName: string, _newValue: unknown, _oldValue: unknown, _rowId?: string, _isDataprovider?: boolean) {
         // empty method with no impl for the designer (for example in LFC when the components are plain ComponentCache objects not the Subcass.)
     }
 
@@ -304,7 +312,7 @@ export class ComponentCache implements IComponentCache {
 
 export class StructureCache {
     public parent: StructureCache;
-    public model:  { [property: string]: any } = {};
+    public model:  { [property: string]: unknown } = {};
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
         public readonly id?: string, public readonly cssPositionContainer?: boolean, public layout?: { [property: string]: string }) {
@@ -320,7 +328,7 @@ export class StructureCache {
         }
         if (child instanceof StructureCache) {
             child.parent = this;
-            return child as StructureCache;
+            return child;
         }
         if (child instanceof ComponentCache) {
             child.parent = this;
@@ -405,7 +413,7 @@ export class FormComponentCache extends ComponentCache {
         }
     }
 
-    initForDesigner(initialModelProperties: { [property: string]: any }): FormComponentCache {
+    initForDesigner(initialModelProperties: { [property: string]: unknown }): FormComponentCache {
         super.initForDesigner(initialModelProperties);
         return this;
     }
@@ -419,7 +427,23 @@ export class FormComponentProperties {
     }
 }
 
+
 export class Dimension {
     public width: number;
     public height: number;
 }
+
+export interface Position {
+    x: number;
+    y: number;
+}
+
+export interface CSSPosition {
+    top: string;
+    left: string;
+    bottom: string;
+    right: string;
+    width: string;
+    height: string;
+}
+

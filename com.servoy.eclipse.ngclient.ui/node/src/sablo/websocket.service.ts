@@ -27,7 +27,7 @@ export class WebsocketService {
         private ngZone: NgZone) {
     }
 
-    public connect(context, args, queryArgs?, websocketUri?): WebsocketSession {
+    public connect(context: string, args: string[], queryArgs?: Record<string,unknown>, websocketUri?: string): WebsocketSession {
 
         this.connectionArguments = {
             context,
@@ -171,7 +171,7 @@ export class WebsocketService {
     }
 }
 
-export type MessageObjectHandler = (msg: any) => Promise<any> | void;
+export type MessageObjectHandler = (msg: {[k: string]: unknown}) => Promise<any> | void;
 
 export interface ServicesHandler {
     handleServiceApisWithApplyFirst(serviceApisJSON: any, previousResponseValue: any): any;
@@ -258,7 +258,7 @@ export class WebsocketSession {
             return {deferred, cmsgid};
     }
 
-    public resolveDeferedEvent(cmsgid: number, argument: any, success: boolean) {
+    public resolveDeferedEvent(cmsgid: number, argument: unknown, success: boolean) {
             const deferred = this.deferredEvents[cmsgid];
             if (deferred) {
                 delete this.deferredEvents[cmsgid];
