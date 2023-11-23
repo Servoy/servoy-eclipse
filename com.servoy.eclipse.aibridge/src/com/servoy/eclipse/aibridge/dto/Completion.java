@@ -1,14 +1,24 @@
 package com.servoy.eclipse.aibridge.dto;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.servoy.eclipse.aibridge.AiBridgeManager;
 import com.servoy.eclipse.aibridge.AiBridgeStatus;
 import com.servoy.eclipse.aibridge.AiBridgeTokenizer;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 public class Completion
 {
+	//max length of the selection and context fields;
+	private static int MAX_LENGTH = 256;
+
 	private UUID id;
 	private String status;
 	private String endpoint;
@@ -54,16 +64,6 @@ public class Completion
 		this.tokensCount = tokenizer.countTokens(selection + context);
 	}
 
-	public void reset()
-	{
-		this.startTime = Calendar.getInstance().getTime();
-		response = null;
-		endTime = null;
-		httpCode = 0;
-		message = null;
-		tokensCount = selectionTokens + contextTokens;
-	}
-
 	public UUID getId()
 	{
 		return id;
@@ -101,6 +101,7 @@ public class Completion
 		return selection;
 	}
 
+	//called on deserialization only
 	public void setSelection(String selection)
 	{
 		this.selection = selection;
@@ -112,6 +113,7 @@ public class Completion
 		return context;
 	}
 
+	//called on deserialization only
 	public void setContext(String context)
 	{
 		this.context = context;
@@ -236,5 +238,48 @@ public class Completion
 	public int getContextTokensCount()
 	{
 		return this.contextTokens;
+	}
+
+	@JsonIgnore
+	public Completion fullReset()
+	{
+		this.startTime = Calendar.getInstance().getTime();
+		response = null;
+		endTime = null;
+		httpCode = 0;
+		message = null;
+		tokensCount = selectionTokens + contextTokens;
+		return this;
+	}
+
+	@JsonIgnore
+	public Completion partialReset()
+	{
+		this.selection = this.selection != null && this.selection.length() > MAX_LENGTH ? this.selection.substring(0, MAX_LENGTH) : this.selection;
+		this.context = this.context != null && this.context.length() > MAX_LENGTH ? this.context.substring(0, MAX_LENGTH) : this.selection;
+		this.response = this.response != null ? this.response.partialReset() : null;
+		return this;
+	}
+
+	@JsonIgnore
+	public Completion getFullCompletion()
+	{
+		ObjectMapper mapper = new ObjectMapper();
+		Path completionPath = AiBridgeManager.getInstance().getCompletionPath(id);
+		if (Files.exists(completionPath))
+		{
+			try
+			{
+				String json = new String(Files.readAllBytes(completionPath));
+				Completion myCompletion = mapper.readValue(json, Completion.class);
+				return myCompletion;
+			}
+			catch (IOException | IllegalArgumentException e)
+			{
+				// Handle the IOException
+				ServoyLog.logError(e);
+			}
+		}
+		return this;
 	}
 }

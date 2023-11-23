@@ -51,7 +51,6 @@ public class AiBridgeManager
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final String aiBridgePath = Platform.getLocation().toOSString() + File.separator + ".metadata" + File.separator + ".plugins" + File.separator +
 		"com.servoy.eclipse.aibridge" + java.io.File.separator;
-	private final Object SAVE_LOCK = new Object();
 
 	private final String devToken = "e3b70a550c39cce86c88951f43005a740993d84f8903568919f83bd97984ab5b98485c0c5e7ce5df64e7f7ec714bf73a3db891542acd27aa69da044f81458249";
 
@@ -185,9 +184,26 @@ public class AiBridgeManager
 
 			// Remove leading and trailing double quotes and unescape any escaped quotes.
 			jsonResponse = jsonResponse.replaceAll("^\"|\"$", "").replace("\\\"", "\"");
-			// Check if the jsonResponse is valid. If it's empty or not a valid JSON, create an empty response
-			if (jsonResponse.isEmpty() || !isValidJSON(jsonResponse))
+
+			int startIndex = jsonResponse.indexOf("\"responseMessage\":\"") + 18;
+			int endIndex = jsonResponse.indexOf(",\"responseFunction\":");
+			String responseMessage = "";
+			if (startIndex >= 0 && endIndex >= 0)
 			{
+				// Extract the responseMessage value
+				responseMessage = jsonResponse.substring(startIndex, endIndex);
+				if (!responseMessage.equals("null"))
+				{
+					responseMessage.substring(1, endIndex - startIndex);
+				}
+			}
+			jsonResponse = jsonResponse.substring(0, startIndex) + "\"\"" + jsonResponse.substring(endIndex);
+
+
+			// Check if the jsonResponse is valid. If it's empty or not a valid JSON, create an empty response
+			if (responseMessage.isEmpty() || !isValidJSON(jsonResponse))
+			{
+				System.out.println("@@@@@@@@@DEBUG: invalid response");
 				request.setResponse(new Response());
 				request.setStatus(AiBridgeStatus.ERROR);
 				request.setMessage("Invalid or empty JSON response...");
@@ -195,6 +211,7 @@ public class AiBridgeManager
 			}
 
 			JSONObject jsonObj = new JSONObject(jsonResponse);
+			jsonObj.put("responseMessage", responseMessage);
 			Response response = new Response(jsonObj);
 
 			request.setResponse(response);
@@ -208,14 +225,14 @@ public class AiBridgeManager
 
 			return request;
 		}
-		catch (ParseException | IOException e)
+		catch (ParseException | IOException | JSONException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		finally
 		{
-			//Files.deleteIfExists(tempFile);
+			Files.deleteIfExists(tempFile);
 		}
 
 		return null;
@@ -242,11 +259,12 @@ public class AiBridgeManager
 		if (!Utils.stringIsEmpty(loginToken))
 		{
 			CompletableFuture.runAsync(() -> {
-				Completion myCompletion = completion;
+				//load full context and selection
+				Completion myCompletion = completion.getFullCompletion();
 				try
 				{
-					myCompletion.reset();
-					requestMap.put(myCompletion.getId(), myCompletion);
+					deleteFile(AiBridgeView.getSolutionName(), myCompletion.getId());
+					requestMap.put(myCompletion.getId(), myCompletion.fullReset());
 					myCompletion.setStatus(AiBridgeStatus.SUBMITTED);
 					AiBridgeView.refresh();
 					myCompletion = sendHttpRequest(loginToken, myCompletion);
@@ -292,7 +310,7 @@ public class AiBridgeManager
 	private String getRequestType(String cmdName)
 	{
 		//TODO: need to rewrite in a more comprehensive manner (maybe use returnTypeId from the command?)
-		//implement this quickly for Rene to be able to work out the cloud part
+		//implement this to be able to quickly work out the cloud part
 		//for now it can stay as is but in future releases this may change depending on the use cases
 		return switch (cmdName)
 		{
@@ -323,8 +341,21 @@ public class AiBridgeManager
 			{
 				sbResult.append(output);
 			}
-			JSONObject jsonObj = new JSONObject(sbResult.toString());
+
+			//avoid processing the responseMessage (this may create a bottleneck);
+			String jsonString = sbResult.toString();
+			int startIndex = jsonString.indexOf("\"responseMessage\":\"") + 18;
+			int endIndex = jsonString.indexOf(",\"responseFunction\":");
+			String responseMessage = "";
+			if (startIndex >= 0 && endIndex >= 0)
+			{
+				responseMessage = jsonString.substring(startIndex, endIndex);
+			}
+			jsonString = jsonString.substring(0, startIndex) + "\"\"" + jsonString.substring(endIndex);
+
+			JSONObject jsonObj = new JSONObject(jsonString);
 			Response response = new Response(jsonObj);
+			response.setResponseMessage(responseMessage);
 			request.setResponse(response);
 			request.setEndTime(Calendar.getInstance().getTime());
 
@@ -361,7 +392,7 @@ public class AiBridgeManager
 		return request;
 	}
 
-	public void saveCompletion(String solutionName, UUID uuid, Completion completion)
+	private Completion saveCompletion(String solutionName, UUID uuid, Completion completion)
 	{
 		Path directoryPath = Paths.get(aiBridgePath + File.separator + solutionName);
 		try
@@ -372,16 +403,21 @@ public class AiBridgeManager
 			}
 			Path filePath = directoryPath.resolve(uuid.toString() + ".json");
 			Files.deleteIfExists(filePath);
-			String json = mapper.writeValueAsString(completion);
-			Files.write(filePath, json.getBytes());
+			String jsonStr = mapper.writeValueAsString(completion);
+			Files.write(filePath, jsonStr.getBytes());
+			return completion.partialReset();
 
 		}
 		catch (IOException e)
 		{
 			ServoyLog.logError(e);
 		}
+		return completion;
 	}
 
+	/*
+	 * Save persistent data.
+	 */
 	public void saveData(String solutionName)
 	{
 		Path directoryPath = Paths.get(aiBridgePath + File.separator + solutionName);
@@ -394,7 +430,6 @@ public class AiBridgeManager
 			for (Map.Entry<UUID, Completion> entry : requestMap.entrySet())
 			{
 				Path filePath = directoryPath.resolve(entry.getKey().toString() + ".json");
-				//this is adding the submitted (i.e.: not completed completions still existing nly in memory)
 				if (!Files.exists(filePath))
 				{
 					String json = mapper.writeValueAsString(entry.getValue());
@@ -425,6 +460,7 @@ public class AiBridgeManager
 						String fileName = entry.getFileName().toString();
 						UUID uuid = UUID.fromString(fileName.substring(0, fileName.length() - 5)); // Remove ".json"
 						Completion completion = mapper.readValue(json, Completion.class);
+						completion = completion.partialReset();
 						if (AiBridgeStatus.SUBMITTED.equals(completion.getStatus()))
 						{
 							completion.setStatus(AiBridgeStatus.INCOMPLETE);
@@ -469,5 +505,10 @@ public class AiBridgeManager
 				ServoyLog.logError(e);
 			}
 		}
+	}
+
+	public Path getCompletionPath(UUID uuid)
+	{
+		return Paths.get(aiBridgePath, AiBridgeView.getSolutionName(), uuid.toString() + ".json");
 	}
 }

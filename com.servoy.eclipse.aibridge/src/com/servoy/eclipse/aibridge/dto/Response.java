@@ -7,6 +7,9 @@ import com.servoy.eclipse.aibridge.AiBridgeTokenizer;
 
 public class Response
 {
+	//max length of the responseMessage field;
+	private static int MAX_LENGTH = 256;
+
 	private String responseMessage;
 	private String responseFunction;
 	private String responseType;
@@ -33,18 +36,6 @@ public class Response
 		this.showContinueChat = jsonResponse.optBoolean("showContinueChat");
 		this.chatID = jsonResponse.optString("chatID");
 		this.tokensCount = AiBridgeTokenizer.getInstance().countTokens(this.responseMessage);
-	}
-
-	@JsonIgnore
-	public boolean isEmptyResponse()
-	{
-		return (responseMessage == null || responseMessage.isEmpty()) &&
-			(responseFunction == null || responseFunction.isEmpty()) &&
-			(responseType == null || responseType.isEmpty()) &&
-			(chatID == null || chatID.isEmpty()) &&
-			!showPasteInCode &&
-			!showCopyToClipboard &&
-			!showContinueChat;
 	}
 
 	public String getResponseMessage()
@@ -121,5 +112,26 @@ public class Response
 	public void setChatID(String chatID)
 	{
 		this.chatID = chatID;
+	}
+
+	@JsonIgnore
+	public boolean isEmptyResponse()
+	{
+		return (responseMessage == null || responseMessage.isEmpty()) &&
+			(responseFunction == null || responseFunction.isEmpty()) &&
+			(responseType == null || responseType.isEmpty()) &&
+			(chatID == null || chatID.isEmpty()) &&
+			!showPasteInCode &&
+			!showCopyToClipboard &&
+			!showContinueChat;
+	}
+
+	@JsonIgnore
+	public Response partialReset()
+	{
+		this.responseMessage = this.responseMessage != null && this.responseMessage.length() > MAX_LENGTH
+			? this.responseMessage.substring(0, MAX_LENGTH)
+			: this.responseMessage;
+		return this;
 	}
 }

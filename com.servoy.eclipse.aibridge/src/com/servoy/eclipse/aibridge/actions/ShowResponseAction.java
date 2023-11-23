@@ -43,10 +43,13 @@ public class ShowResponseAction extends Action implements ISelectionListener
 	public void refresh()
 	{
 		htmlViewer.setVisible(isChecked());
-		String viewerContent = completion != null && completion.getResponse() != null && !completion.getResponse().isEmptyResponse()
-			? completion.getResponse().getResponseMessage()
-			: DualEditorInput.getNoContentHtml();
-		htmlViewer.setText(viewerContent);
+		if (isChecked())
+		{
+			String viewerContent = completion != null && completion.getResponse() != null && !completion.getResponse().isEmptyResponse()
+				? completion.getFullCompletion().getResponse().getResponseMessage()
+				: DualEditorInput.getNoContentHtml();
+			htmlViewer.setText(viewerContent);
+		}
 		parent.layout();
 	}
 

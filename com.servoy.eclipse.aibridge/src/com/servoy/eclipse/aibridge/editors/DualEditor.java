@@ -270,6 +270,7 @@ public class DualEditor extends MultiPageEditorPart
 	@Override
 	public void dispose()
 	{
+
 		if (editor != null)
 		{
 			editor.dispose();
@@ -282,15 +283,15 @@ public class DualEditor extends MultiPageEditorPart
 		{
 			sashForm.dispose();
 		}
-		for (ToolItem item : toolBar.getItems())
+		if (toolBar != null && !toolBar.isDisposed())
 		{
-			if (item.getImage() != null)
+			for (ToolItem item : toolBar.getItems())
 			{
-				item.getImage().dispose();
+				if (item.getImage() != null)
+				{
+					item.getImage().dispose();
+				}
 			}
-		}
-		if (toolBar != null)
-		{
 			toolBar.dispose();
 		}
 		super.dispose();

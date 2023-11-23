@@ -40,7 +40,6 @@ public class SubmitAgainAction extends Action implements ISelectionListener
 			.filter(obj -> obj instanceof Completion)
 			.map(obj -> (Completion)obj)
 			.forEach(obj -> {
-				aiBridgeManager.deleteFile(solutionName, obj.getId());
 				aiBridgeManager.sendCompletion(obj);
 			});
 

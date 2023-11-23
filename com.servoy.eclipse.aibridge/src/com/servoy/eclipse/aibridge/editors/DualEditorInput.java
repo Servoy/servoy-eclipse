@@ -34,7 +34,7 @@ public class DualEditorInput implements IEditorInput
 		String[] pathParts = extractPathParts(completion.getSourcePath());
 		Solution targetSolution = locateTargetSolution(pathParts[0]);
 		assignPersistAndScopeName(pathParts, targetSolution);
-		determineInputFile(completion);
+		setInputFile();
 		leftTitle = pathParts[pathParts.length - 1];
 	}
 
@@ -95,7 +95,7 @@ public class DualEditorInput implements IEditorInput
 		}
 	}
 
-	private void determineInputFile(Completion completion)
+	private void setInputFile()
 	{
 		String scriptPath = getScriptPath();
 		if (scriptPath != null)
@@ -110,14 +110,14 @@ public class DualEditorInput implements IEditorInput
 		{
 			return SolutionSerializer.getRelativePath(persist, false) + scopeName + SolutionSerializer.JS_FILE_EXTENSION;
 		}
-		else if (isValidForm(persist))
+		else if (isValidForm())
 		{
 			return SolutionSerializer.getScriptPath(persist, false);
 		}
 		return null;
 	}
 
-	private boolean isValidForm(IPersist persist)
+	private boolean isValidForm()
 	{
 		Form parentForm = (Form)persist.getAncestor(IRepository.FORMS);
 		return parentForm == null || !parentForm.isFormComponent();
@@ -174,7 +174,7 @@ public class DualEditorInput implements IEditorInput
 	{
 		if (completion.getResponse() != null && !completion.getResponse().isEmptyResponse())
 		{
-			return completion.getResponse().getResponseMessage();
+			return completion.getFullCompletion().getResponse().getResponseMessage();
 		}
 		return getNoContentHtml();
 	}
