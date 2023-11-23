@@ -81,10 +81,16 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
                 const change = changes[property];
                 switch (property) {
                     case 'editable':
-                        if (change.currentValue && (!this.readOnly||  this.findmode))
+                        if (change.currentValue && (!this.readOnly ||  this.findmode))
                             this.renderer.removeAttribute(this.getFocusElement(), 'readonly');
                         else
                             this.renderer.setAttribute(this.getFocusElement(), 'readonly', 'readonly');
+                        break;
+                    case 'readOnly':
+                        if (change.currentValue || (!change.currentValue && !this.editable))
+                            this.renderer.setAttribute(this.getFocusElement(), 'readonly', 'readonly');
+                        else
+                        	this.renderer.removeAttribute(this.getFocusElement(), 'readonly'); 
                         break;
                     case 'placeholderText':
                         if (change.currentValue) this.renderer.setAttribute(this.getNativeElement(), 'placeholder', change.currentValue);
