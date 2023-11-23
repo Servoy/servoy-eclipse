@@ -718,6 +718,9 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					}
 					if ((frm == formRef || FlattenedForm.hasFormInHierarchy(frm, formRef) || hasFormReference(fs, frm, formRef, recursionCheck)))
 					{
+						// only test for nested recursion, when going up the tree again this one can be removed
+						// because a sibling with the same FC will result in a warning.
+						recursionCheck.remove(frm.getName());
 						return true;
 					}
 					recursionCheck.remove(frm.getName());
