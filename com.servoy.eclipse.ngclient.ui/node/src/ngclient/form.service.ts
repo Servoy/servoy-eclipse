@@ -310,7 +310,6 @@ export class FormService {
     public createFormCache(formName: string, jsonData: any, url: string) {
         const formCache = new FormCache(formName, jsonData.size, jsonData.responsive, url, this.typesRegistry);
         this.walkOverChildren(jsonData.children, formCache);
-		formCache.cleanFormComponents();
         this.clientFunctionService.waitForLoading().finally(() => {
             this.formsCache.set(formName, formCache);
             const formComponent = this.formComponentCache.get(formName);
@@ -658,7 +657,8 @@ export class FormService {
                     elem.formComponent.forEach((child: string) => {
                         this.walkOverChildren(elem[child] as ServerElement[], formCache, fcc);
                     });
-                    formCache.addFormComponent(fcc);
+                    // only add the top lvl form componens to the forms formcomponent cache for the designer
+                    if (!fcc.name.includes('containedForm')) formCache.addFormComponent(fcc);
                     if (parent != null) {
                         parent.addChild(fcc);
                     }
