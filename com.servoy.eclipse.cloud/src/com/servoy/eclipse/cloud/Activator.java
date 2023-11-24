@@ -49,7 +49,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 public class Activator extends AbstractUIPlugin {
 	// private static final String CROWD =
 	// "https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/developer/getApplications?loginToken=";
-	private static final String CROWD = "https://middleware-prod.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/developer/getApplications?loginToken=";
+	private static final String CROWD = System.getProperty("servoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
+		"/servoy-service/rest_ws/api/developer/getApplications?loginToken=";
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.cloud"; //$NON-NLS-1$

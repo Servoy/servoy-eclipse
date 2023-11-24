@@ -42,7 +42,8 @@ import com.servoy.j2db.util.Utils;
 public class AiBridgeManager
 {
 
-	private static final String ENDPOINT = "https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/llm/AIBridge";
+	private static final String ENDPOINT = System.getProperty("servoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
+		"/servoy-service/rest_ws/api/llm/AIBridge";
 	private static final int MAX_SIM_REQUESTS = 10;
 
 	private final static ExecutorService executorService = Executors.newFixedThreadPool(MAX_SIM_REQUESTS);
