@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import static com.servoy.j2db.util.Utils.iterate;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -50,7 +52,6 @@ import com.servoy.j2db.persistence.ITable;
 
 public class UpdateServoySequencesAction extends Action implements ISelectionChangedListener
 {
-
 	public List<IServerInternal> selectedServers = null;
 
 	public UpdateServoySequencesAction()
@@ -98,7 +99,7 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 		}
 		if (selection != null)
 		{
-			selectedServers = new ArrayList<IServerInternal>();
+			selectedServers = new ArrayList<>();
 			if (selection.size() == 1)
 			{
 				// is "Servers node" selected?
@@ -136,27 +137,20 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 			{
 				try
 				{
-					List<String> tables = server.getTableAndViewNames(true);
-					if (tables != null)
+					outer : for (String tableName : server.getTableAndViewNames(true))
 					{
-						outer : for (String tableName : tables)
+						// Do not use uninitialized tables, it may block the UI
+						ITable table = server.isTableLoaded(tableName) ? server.getTable(tableName) : null;
+						if (table != null)
 						{
-							ITable table = server.getTable(tableName);
-							if (table != null)
+							for (Column column : iterate(table.getRowIdentColumns()))
 							{
-								List<Column> pkColumns = table.getRowIdentColumns();
-								if (pkColumns != null && pkColumns.size() > 0)
+								if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.SEQUENCE_AUTO_ENTER &&
+									column.getColumnInfo().getAutoEnterSubType() == ColumnInfo.SERVOY_SEQUENCE)
 								{
-									for (Column column : pkColumns)
-									{
-										if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.SEQUENCE_AUTO_ENTER &&
-											column.getColumnInfo().getAutoEnterSubType() == ColumnInfo.SERVOY_SEQUENCE)
-										{
-											// only show if already set
-											showLegacyAction = true;
-											break outer;
-										}
-									}
+									// only show if already set
+									showLegacyAction = true;
+									break outer;
 								}
 							}
 						}
