@@ -44,7 +44,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     }    
 
     private onMouseMove(event: MouseEvent) {
-      /*if (!this.editorSession.getState().dragging) return;
+ /*     if (!this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
       let point = { x: event.pageX, y: event.pageY };
       if (!this.topAdjust) {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)

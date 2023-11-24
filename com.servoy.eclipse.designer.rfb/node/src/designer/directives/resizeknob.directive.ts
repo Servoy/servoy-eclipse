@@ -1,12 +1,12 @@
-import { Directive, HostListener, Input, OnInit } from '@angular/core';
+import { Directive, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
-import { EditorContentService } from '../services/editorcontent.service';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 
 @Directive({
     selector: '[resizeKnob]'
 })
-export class ResizeKnobDirective implements OnInit {
+export class ResizeKnobDirective implements OnInit, IContentMessageListener, OnDestroy {
 
     @Input('resizeKnob') resizeInfo: ResizeInfo;
 
@@ -21,6 +21,7 @@ export class ResizeKnobDirective implements OnInit {
 
     topContentAreaAdjust: number;
     leftContentAreaAdjust: number;
+    snapData: {top: number, left: number, snapX?: string, snapY?: string, cssPosition: { property: string } };
 
     constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService) {
     }
@@ -29,6 +30,17 @@ export class ResizeKnobDirective implements OnInit {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
         this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
         this.leftContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
+        this.editorContentService.addContentMessageListener(this);
+    }
+
+    contentMessageReceived(id: string, data: { [key: string]: any; }): void {
+        if (id === 'snap' && this.currentElementInfo) {
+            this.snapData = data['properties'];
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.editorContentService.removeContentMessageListener(this);
     }
 
     @HostListener('mousedown', ['$event'])
@@ -44,6 +56,7 @@ export class ResizeKnobDirective implements OnInit {
             };
 
             this.cleanResizeState();
+            this.editorSession.getState().resizing = true;
 
             const selection = this.editorSession.getSelection();
             if (selection && selection.length > 0) {
@@ -112,6 +125,7 @@ export class ResizeKnobDirective implements OnInit {
         this.editorContentService.getContentArea().removeEventListener('mouseup', this.contentAreaMouseUp);
         this.editorContentService.getContentArea().removeEventListener('mouseleave', this.contentAreaMouseLeave);
         this.editorContentService.getContentArea().removeEventListener('keydown', this.contentAreaKeyDown);
+        this.editorSession.getState().resizing = false;
     }
 
     private setCursorStyle(style: string) {
@@ -166,6 +180,9 @@ export class ResizeKnobDirective implements OnInit {
                     y: elementInfo.y,
                     width: elementInfo.width,
                     height: elementInfo.height
+                }
+                if (this.snapData) {
+                    changes[nodeId]['cssPos'] = this.snapData.cssPosition;
                 }
             }
             this.editorSession.sendChanges(changes);

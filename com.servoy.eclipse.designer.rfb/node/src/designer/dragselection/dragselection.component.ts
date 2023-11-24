@@ -128,9 +128,11 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
               const id = (event.ctrlKey || event.metaKey) ? i++ : nodeId;
               changes[id] = {
                   x: elementInfo.x,
-                  y: elementInfo.y,
-                  cssPos: this.snapData?.cssPosition
+                  y: elementInfo.y
               };
+              if (this.snapData) {
+                changes[id]['cssPos'] = this.snapData.cssPosition;
+              }
 
               if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
                   changes[id].uuid = elementInfo.element.getAttribute('cloneuuid');
