@@ -85,8 +85,8 @@ export class DesignerUtilsService {
                 dropTarget = this.editorContentService.getContentForm();
                 //droptarget is the form but has no svy-id
                 for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
-                    const node = dropTarget.childNodes[i];
-                    if (node instanceof Element && node.getAttribute('svy-id')) {
+                    const node = dropTarget.childNodes[i] as HTMLElement;
+                    if (node.nodeType === Node.ELEMENT_NODE && node.getAttribute('svy-id')) {
                         const clientRec = node.getBoundingClientRect();
                         const absolutePoint = //this.convertToAbsolutePoint(doc, 
                         {
@@ -152,11 +152,11 @@ export class DesignerUtilsService {
                     // we drop directly on the node, try to determine its position between children
                     let beforeNode: Element = null;
                     for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
-                        let node = dropTarget.childNodes[i];
-                        if (node instanceof Element && !node.getAttribute('svy-id')){
+                        let node = dropTarget.childNodes[i] as HTMLElement;
+                        if (node.nodeType === Node.ELEMENT_NODE && !node.getAttribute('svy-id')){
                             node = node.querySelector('[svy-id]');
                         }
-                        if (node instanceof Element && node.getAttribute('svy-id')) {
+                        if (node.nodeType === Node.ELEMENT_NODE && node.getAttribute('svy-id')) {
                             const clientRec = node.getBoundingClientRect();
                             const absolutePoint = this.convertToAbsolutePoint({
                                 x: clientRec.right,
