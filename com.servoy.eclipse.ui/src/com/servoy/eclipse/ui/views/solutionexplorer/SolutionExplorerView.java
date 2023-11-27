@@ -2817,8 +2817,11 @@ public class SolutionExplorerView extends ViewPart
 		manager.add(copyAction);
 		manager.add(pasteAction);
 
-		if (searchTreeAction.isEnabled() || (selectedTreeNode.getAdapter(org.eclipse.core.resources.IResource.class) != null)) manager.add(new Separator());
-		if (searchTreeAction.isEnabled()) manager.add(searchTreeAction);
+		if (searchTreeAction.isEnabled())
+		{
+			manager.add(new Separator());
+			manager.add(searchTreeAction);
+		}
 		if (treeContextMenuTreeHandlingEnabled)
 		{
 			manager.add(new Separator());
@@ -2855,6 +2858,9 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(new Separator());
 			manager.add(new CopySourceFolderAction());
 		}
+		// there is a validate menu added for stuff with a resource
+		if (selectedTreeNode.getAdapter(org.eclipse.core.resources.IResource.class) != null)
+			manager.add(new Separator());
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)
