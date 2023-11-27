@@ -2801,7 +2801,8 @@ public class SolutionExplorerView extends ViewPart
 		if (importComponentInSolution.isEnabled()) manager.add(importComponentInSolution);
 
 		// Other plug-ins can contribute their actions here
-		if (selectedTreeNode.getAdapter(org.eclipse.core.resources.IResource.class) != null)
+		if (selectedTreeNode.getAdapter(org.eclipse.core.resources.IResource.class) != null ||
+			selectedTreeNode.getType() == UserNodeType.ALL_WEB_PACKAGE_PROJECTS)
 			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.COMPONENT && addComponentIcon.isEnabled())
@@ -2816,7 +2817,7 @@ public class SolutionExplorerView extends ViewPart
 		manager.add(copyAction);
 		manager.add(pasteAction);
 
-		manager.add(new Separator());
+		if (searchTreeAction.isEnabled() || (selectedTreeNode.getAdapter(org.eclipse.core.resources.IResource.class) != null)) manager.add(new Separator());
 		if (searchTreeAction.isEnabled()) manager.add(searchTreeAction);
 		if (treeContextMenuTreeHandlingEnabled)
 		{
@@ -2850,7 +2851,10 @@ public class SolutionExplorerView extends ViewPart
 		}
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
+		{
+			manager.add(new Separator());
 			manager.add(new CopySourceFolderAction());
+		}
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)
