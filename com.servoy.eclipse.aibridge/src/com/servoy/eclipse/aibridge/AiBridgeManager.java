@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,9 +19,11 @@ import java.util.concurrent.Executors;
 
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.javascript.parser.JavascriptParserPreferences;
@@ -147,7 +148,7 @@ public class AiBridgeManager
 		return loginToken;
 	}
 
-	private StringEntity createEntity(Completion request) throws UnsupportedEncodingException
+	private StringEntity createEntity(Completion request)
 	{
 		//this method need to be in sync with the json object expected by the endpoint
 		JSONObject jsonObj = new JSONObject();
@@ -178,7 +179,7 @@ public class AiBridgeManager
 		};
 	}
 
-	private Completion sendHttpRequest(String loginToken, Completion request)
+	private Completion sendHttpRequest(String loginToken, final Completion request)
 	{
 		HttpClientBuilder httpBuilder = HttpClientBuilder.create();
 		try (CloseableHttpClient httpClient = httpBuilder.build())
@@ -188,62 +189,49 @@ public class AiBridgeManager
 			postRequest.setEntity(entity);
 			postRequest.setHeader("token", loginToken);
 
-			CloseableHttpResponse httpResponse = httpClient.execute(postRequest);
-			request.setHttpCode(httpResponse.getCode());
-
-			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
-			StringBuilder sbResult = new StringBuilder();
-			String output;
-			while ((output = br.readLine()) != null)
+			return httpClient.execute(postRequest, new HttpClientResponseHandler<Completion>()
 			{
-				sbResult.append(output);
-			}
-
-			//avoid processing the responseMessage (this may create a bottleneck);
-			String jsonString = sbResult.toString();
-
-			int startKeyLength = "\"responseMessage\"".length();
-			int startIndex = jsonString.indexOf("\"responseMessage\"") + startKeyLength;
-			int endIndex = jsonString.indexOf("\"responseFunction\"");
-			String responseMessage = "";
-			if (startIndex >= startKeyLength && endIndex > startIndex)
-			{
-				responseMessage = jsonString.substring(startIndex, endIndex).trim();
-
-				// Remove leading colon, spaces and trailing comma if present
-				responseMessage = responseMessage.replaceAll("^[\\s:]+|[\\s,]+$", "");
-				if (responseMessage.startsWith("\"") && responseMessage.endsWith("\""))
+				@Override
+				public Completion handleResponse(ClassicHttpResponse httpResponse) throws HttpException, IOException
 				{
-					responseMessage.substring(1, responseMessage.length() - 1); //cut off the beginning and ending double quotes (if any)
+					request.setHttpCode(httpResponse.getCode());
+
+					String errorMessage = switch (httpResponse.getCode())
+					{
+						case 200 ->
+						{
+							request.setStatus(AiBridgeStatus.COMPLETE);
+							yield null; // No error message for success
+						}
+						case 500 -> "Service is temporary down ...!";
+						case 403 -> "Unrecognized sender ...!";
+						case 401 -> "Invalid credentials ...!";
+						default -> "Unexpected error: " + httpResponse.getCode();
+					};
+					if (errorMessage != null)
+					{
+						request.setStatus(AiBridgeStatus.ERROR);
+						request.setMessage(errorMessage);
+						return request;
+					}
+
+
+					BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
+					StringBuilder sbResult = new StringBuilder();
+					String output;
+					while ((output = br.readLine()) != null)
+					{
+						sbResult.append(output);
+					}
+
+					JSONObject jsonObj = new JSONObject(sbResult.toString());
+					Response response = new Response(jsonObj);
+					request.setResponse(response);
+					request.setMessage(response.getResponseMessage());
+					request.setEndTime(Calendar.getInstance().getTime());
+					return request;
 				}
-				jsonString = jsonString.substring(0, startIndex) + ":\"\"," + jsonString.substring(endIndex);
-				responseMessage = responseMessage.equals("null") ? "" : responseMessage;
-			}
-
-			JSONObject jsonObj = new JSONObject(jsonString);
-			Response response = new Response(jsonObj);
-			request.setResponse(response);
-			request.setMessage(responseMessage);
-			request.setEndTime(Calendar.getInstance().getTime());
-
-			request.setStatus(AiBridgeStatus.ERROR);
-			String errorMessage = switch (httpResponse.getCode())
-			{
-				case 200 ->
-				{
-					request.setStatus(AiBridgeStatus.COMPLETE);
-					yield null; // No error message for success
-				}
-				case 500 -> "Service is temporary down ...!";
-				case 403 -> "Unrecognized sender ...!";
-				case 401 -> "Invalid credentials ...!";
-				default -> "Unexpected error: " + httpResponse.getCode();
-			};
-
-			if (errorMessage != null)
-			{
-				request.setMessage(errorMessage);
-			}
+			});
 
 		}
 		catch (RuntimeException | IOException e)
