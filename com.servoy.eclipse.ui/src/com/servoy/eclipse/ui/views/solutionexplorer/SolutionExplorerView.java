@@ -2801,7 +2801,8 @@ public class SolutionExplorerView extends ViewPart
 		if (importComponentInSolution.isEnabled()) manager.add(importComponentInSolution);
 
 		// Other plug-ins can contribute their actions here
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		if (selectedTreeNode.getAdapter(org.eclipse.core.resources.IResource.class) != null)
+			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.COMPONENT && addComponentIcon.isEnabled())
 		{
@@ -2809,7 +2810,8 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(addComponentIcon);
 		}
 
-		//manager.add(new Separator());
+		manager.add(new Separator());
+
 		manager.add(cutAction);
 		manager.add(copyAction);
 		manager.add(pasteAction);
