@@ -2809,7 +2809,7 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(addComponentIcon);
 		}
 
-		manager.add(new Separator());
+		//manager.add(new Separator());
 		manager.add(cutAction);
 		manager.add(copyAction);
 		manager.add(pasteAction);

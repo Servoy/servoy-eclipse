@@ -834,16 +834,6 @@ public class MenuManager extends ContributionManager implements IMenuManager {
 					mi[srcIx].dispose();
 				}
 
-				// remove extra Separator
-				Item[] menuItems = getMenuItems();
-				Item last = null;
-				for (Item item : menuItems) {
-					if (item.getText().isEmpty() && last != null && last.getText().isEmpty()) {
-						last.dispose();
-					}
-					last = item;
-				}
-
 				setDirty(false);
 			}
 		} else // I am not dirty. Check if I must recursivly walk down the hierarchy.
