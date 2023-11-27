@@ -172,16 +172,16 @@ public class DualEditorInput implements IEditorInput
 
 	public String getHtmlContent()
 	{
-		if (completion.getResponse() != null && !completion.getResponse().isEmptyResponse())
+		if (completion.getResponse() != null)
 		{
 			return completion.getFullCompletion().getResponse().getResponseMessage();
 		}
-		return getNoContentHtml();
+		return getNoContentHtml(); //just in case
 	}
 
 	public static String getNoContentHtml()
 	{
-		return "<html><body><h2 style=\"text-align:center;\">No response</h2></body></html>";
+		return "<html><body><h2 style=\"text-align:center;\">...</h2></body></html>";
 	}
 
 	public UUID getId()

@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,12 +23,10 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.javascript.parser.JavascriptParserPreferences;
 import org.eclipse.ui.PlatformUI;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +34,7 @@ import com.servoy.eclipse.aibridge.dto.Completion;
 import com.servoy.eclipse.aibridge.dto.Response;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Utils;
 
 public class AiBridgeManager
@@ -52,10 +50,6 @@ public class AiBridgeManager
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final String aiBridgePath = Platform.getLocation().toOSString() + File.separator + ".metadata" + File.separator + ".plugins" + File.separator +
 		"com.servoy.eclipse.aibridge" + java.io.File.separator;
-
-	private final String devToken = "e3b70a550c39cce86c88951f43005a740993d84f8903568919f83bd97984ab5b98485c0c5e7ce5df64e7f7ec714bf73a3db891542acd27aa69da044f81458249";
-
-	private final boolean debug = false;
 
 	private static AiBridgeManager instance = null;
 
@@ -92,14 +86,7 @@ public class AiBridgeManager
 				{
 					requestMap.put(uuid, completion);
 					AiBridgeView.refresh();
-					if (debug)
-					{
-						completion = sendDebugRequest(loginToken, completion);
-					}
-					else
-					{
-						completion = sendHttpRequest(loginToken, completion);
-					}
+					completion = sendHttpRequest(loginToken, completion);
 
 				}
 				catch (Exception e)
@@ -117,142 +104,6 @@ public class AiBridgeManager
 		}
 	}
 
-	private Completion sendDebugRequest(String loginToken, Completion request) throws IOException, InterruptedException
-	{
-
-		final long INITIAL_WAIT_TIME = 120000; // 2 minutes in milliseconds
-		final long DELAY_AFTER_CHANGE = 2000; // 2 seconds
-		long startTime = System.currentTimeMillis();
-		long lastChangeTime = 0;
-		//for debug avoid using aibridgePath - since debug solution in Servoy get too many notifications;
-		//set a temporary file on your disk and use plugins.ngdestopfile.watchdir() to be notified in Developer about the changes
-		Path tempFile = Paths.get("/Users/vidmarian/work/tmp", request.getCmdName() + "_" + request.getId().toString() + ".json");
-
-		boolean initialChangeDetected = false;
-		try
-		{
-			// Step 1: Create the JSON payload
-			StringEntity entity = createEntity(loginToken, request);
-			String jsonPayload;
-			jsonPayload = EntityUtils.toString(entity);
-			// Step 2: Write the JSON payload to a temporary file
-
-			byte[] payload = jsonPayload.getBytes(StandardCharsets.UTF_8);
-			Files.write(tempFile, payload);
-
-			long initialTimestamp = Files.getLastModifiedTime(tempFile).toMillis();
-
-			while (true)
-			{
-				Thread.sleep(1000); // poll every 1 second
-				long newTimestamp = Files.getLastModifiedTime(tempFile).toMillis();
-
-				if (!initialChangeDetected && newTimestamp > initialTimestamp)
-				{
-					// Initial change detected
-					initialChangeDetected = true;
-					lastChangeTime = System.currentTimeMillis();
-					initialTimestamp = newTimestamp;
-					System.out.println("Initial change detected: " + lastChangeTime);
-				}
-				else if (initialChangeDetected && newTimestamp > initialTimestamp)
-				{
-					// Subsequent changes after the initial change
-					lastChangeTime = System.currentTimeMillis();
-					initialTimestamp = newTimestamp;
-					System.out.println("File change detected: " + lastChangeTime);
-				}
-				else if (initialChangeDetected && (System.currentTimeMillis() - lastChangeTime) >= DELAY_AFTER_CHANGE)
-				{
-					// No changes have been detected for at least 2 seconds after the last modification.
-					System.out.println("File is stable: " + lastChangeTime);
-					break;
-				}
-
-				// If no initial change is detected within the 2-minute window, handle accordingly
-				if (!initialChangeDetected && (System.currentTimeMillis() - startTime) >= INITIAL_WAIT_TIME)
-				{
-					// Timeout occurred, so create an empty response and assign to the request.
-					request.setResponse(new Response());
-					request.setStatus(AiBridgeStatus.ERROR);
-					request.setMessage("Timeout occurred. No response ...");
-					System.out.println("Time out occured ...!");
-					return request;
-				}
-			}
-
-			String jsonResponse = new String(Files.readAllBytes(tempFile), StandardCharsets.UTF_8);
-
-			// Remove leading and trailing double quotes and unescape any escaped quotes.
-			jsonResponse = jsonResponse.replaceAll("^\"|\"$", "").replace("\\\"", "\"");
-
-			int startIndex = jsonResponse.indexOf("\"responseMessage\":\"") + 18;
-			int endIndex = jsonResponse.indexOf(",\"responseFunction\":");
-			String responseMessage = "";
-			if (startIndex >= 0 && endIndex >= 0)
-			{
-				// Extract the responseMessage value
-				responseMessage = jsonResponse.substring(startIndex, endIndex);
-				if (!responseMessage.equals("null"))
-				{
-					responseMessage.substring(1, endIndex - startIndex);
-				}
-			}
-			jsonResponse = jsonResponse.substring(0, startIndex) + "\"\"" + jsonResponse.substring(endIndex);
-
-
-			// Check if the jsonResponse is valid. If it's empty or not a valid JSON, create an empty response
-			if (responseMessage.isEmpty() || !isValidJSON(jsonResponse))
-			{
-				System.out.println("@@@@@@@@@DEBUG: invalid response");
-				request.setResponse(new Response());
-				request.setStatus(AiBridgeStatus.ERROR);
-				request.setMessage("Invalid or empty JSON response...");
-				return request;
-			}
-
-			JSONObject jsonObj = new JSONObject(jsonResponse);
-			jsonObj.put("responseMessage", responseMessage);
-			Response response = new Response(jsonObj);
-
-			request.setResponse(response);
-			request.setStatus(AiBridgeStatus.COMPLETE);
-			request.setEndTime(Calendar.getInstance().getTime());
-			if (response.isEmptyResponse())
-			{
-				request.setStatus(AiBridgeStatus.ERROR);
-				request.setMessage("No response ...");
-			}
-
-			return request;
-		}
-		catch (ParseException | IOException | JSONException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		finally
-		{
-			Files.deleteIfExists(tempFile);
-		}
-
-		return null;
-	}
-
-	private boolean isValidJSON(String test)
-	{
-		try
-		{
-			new JSONObject(test);
-		}
-		catch (JSONException ex)
-		{
-			return false;
-		}
-		return true;
-	}
-
-
 	public void sendCompletion(Completion completion)
 	{
 		final String loginToken = logIn();
@@ -267,6 +118,8 @@ public class AiBridgeManager
 					deleteFile(AiBridgeView.getSolutionName(), myCompletion.getId());
 					requestMap.put(myCompletion.getId(), myCompletion.fullReset());
 					myCompletion.setStatus(AiBridgeStatus.SUBMITTED);
+					myCompletion.setResponse(new Response());
+					myCompletion.setMessage("Processing...");
 					AiBridgeView.refresh();
 					myCompletion = sendHttpRequest(loginToken, myCompletion);
 				}
@@ -294,16 +147,19 @@ public class AiBridgeManager
 		return loginToken;
 	}
 
-	private StringEntity createEntity(String loginToken, Completion request) throws UnsupportedEncodingException
+	private StringEntity createEntity(Completion request) throws UnsupportedEncodingException
 	{
 		//this method need to be in sync with the json object expected by the endpoint
 		JSONObject jsonObj = new JSONObject();
-		jsonObj.put("loginToken", loginToken);
+		//jsonObj.put("loginToken", logIn());
 		jsonObj.put("requestType", getRequestType(request.getCmdName()));
 		jsonObj.put("selection", request.getSelection());
 		jsonObj.put("context", request.getContext());
 		jsonObj.put("selectionTokensCount", request.getSelectionTokensCount());
 		jsonObj.put("contextTokensCount", request.getContextTokensCount());
+		jsonObj.put("servoyVersion", ClientVersion.getBundleVersion());
+		jsonObj.put("useEcmaScriptParser", new JavascriptParserPreferences().useES6Parser());
+
 
 		return new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
 	}
@@ -328,9 +184,9 @@ public class AiBridgeManager
 		try (CloseableHttpClient httpClient = httpBuilder.build())
 		{
 			HttpPost postRequest = new HttpPost(request.getEndpoint());
-			StringEntity entity = createEntity(loginToken, request);
+			StringEntity entity = createEntity(request);
 			postRequest.setEntity(entity);
-			postRequest.setHeader("token", devToken);
+			postRequest.setHeader("token", loginToken);
 
 			CloseableHttpResponse httpResponse = httpClient.execute(postRequest);
 			request.setHttpCode(httpResponse.getCode());
@@ -345,25 +201,30 @@ public class AiBridgeManager
 
 			//avoid processing the responseMessage (this may create a bottleneck);
 			String jsonString = sbResult.toString();
-			int startIndex = jsonString.indexOf("\"responseMessage\":\"") + 18;
-			int endIndex = jsonString.indexOf(",\"responseFunction\":");
+
+			int startKeyLength = "\"responseMessage\"".length();
+			int startIndex = jsonString.indexOf("\"responseMessage\"") + startKeyLength;
+			int endIndex = jsonString.indexOf("\"responseFunction\"");
 			String responseMessage = "";
-			if (startIndex >= 0 && endIndex >= 0)
+			if (startIndex >= startKeyLength && endIndex > startIndex)
 			{
-				responseMessage = jsonString.substring(startIndex, endIndex);
+				responseMessage = jsonString.substring(startIndex, endIndex).trim();
+
+				// Remove leading colon, spaces and trailing comma if present
+				responseMessage = responseMessage.replaceAll("^[\\s:]+|[\\s,]+$", "");
+				if (responseMessage.startsWith("\"") && responseMessage.endsWith("\""))
+				{
+					responseMessage.substring(1, responseMessage.length() - 1); //cut off the beginning and ending double quotes (if any)
+				}
+				jsonString = jsonString.substring(0, startIndex) + ":\"\"," + jsonString.substring(endIndex);
+				responseMessage = responseMessage.equals("null") ? "" : responseMessage;
 			}
-			jsonString = jsonString.substring(0, startIndex) + "\"\"" + jsonString.substring(endIndex);
 
 			JSONObject jsonObj = new JSONObject(jsonString);
 			Response response = new Response(jsonObj);
-			response.setResponseMessage(responseMessage);
 			request.setResponse(response);
+			request.setMessage(responseMessage);
 			request.setEndTime(Calendar.getInstance().getTime());
-
-			if (response.isEmptyResponse())
-			{
-				request.setMessage("No response ...");
-			}
 
 			request.setStatus(AiBridgeStatus.ERROR);
 			String errorMessage = switch (httpResponse.getCode())
@@ -464,7 +325,9 @@ public class AiBridgeManager
 						completion = completion.partialReset();
 						if (AiBridgeStatus.SUBMITTED.equals(completion.getStatus()))
 						{
+							//messages just submitted and with no response
 							completion.setStatus(AiBridgeStatus.INCOMPLETE);
+							completion.setMessage("Stopped...");
 						}
 						requestMap.put(uuid, completion);
 					}

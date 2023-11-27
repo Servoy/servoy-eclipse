@@ -45,7 +45,7 @@ public class ShowResponseAction extends Action implements ISelectionListener
 		htmlViewer.setVisible(isChecked());
 		if (isChecked())
 		{
-			String viewerContent = completion != null && completion.getResponse() != null && !completion.getResponse().isEmptyResponse()
+			String viewerContent = completion != null && completion.getResponse() != null
 				? completion.getFullCompletion().getResponse().getResponseMessage()
 				: DualEditorInput.getNoContentHtml();
 			htmlViewer.setText(viewerContent);

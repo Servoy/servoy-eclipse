@@ -29,7 +29,6 @@ public class Completion
 	private Date endTime;
 	private Response response;
 	private int httpCode;
-	private String message;
 	private String sourcePath;
 	private int selectionOffset;
 	private int selectionLength;
@@ -174,17 +173,6 @@ public class Completion
 	}
 
 
-	public String getMessage()
-	{
-		return message;
-	}
-
-
-	public void setMessage(String message)
-	{
-		this.message = message;
-	}
-
 	public String getSourcePath()
 	{
 		return sourcePath;
@@ -241,13 +229,28 @@ public class Completion
 	}
 
 	@JsonIgnore
+	public String getMessage()
+	{
+		return response != null ? response.getResponseMessage() : "";
+	}
+
+	@JsonIgnore
+	public void setMessage(String message)
+	{
+		if (response == null)
+		{
+			response = new Response();
+		}
+		response.setResponseMessage(message);
+	}
+
+	@JsonIgnore
 	public Completion fullReset()
 	{
 		this.startTime = Calendar.getInstance().getTime();
 		response = null;
 		endTime = null;
 		httpCode = 0;
-		message = null;
 		tokensCount = selectionTokens + contextTokens;
 		return this;
 	}

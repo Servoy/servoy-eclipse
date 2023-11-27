@@ -115,18 +115,6 @@ public class Response
 	}
 
 	@JsonIgnore
-	public boolean isEmptyResponse()
-	{
-		return (responseMessage == null || responseMessage.isEmpty()) &&
-			(responseFunction == null || responseFunction.isEmpty()) &&
-			(responseType == null || responseType.isEmpty()) &&
-			(chatID == null || chatID.isEmpty()) &&
-			!showPasteInCode &&
-			!showCopyToClipboard &&
-			!showContinueChat;
-	}
-
-	@JsonIgnore
 	public Response partialReset()
 	{
 		this.responseMessage = this.responseMessage != null && this.responseMessage.length() > MAX_LENGTH
