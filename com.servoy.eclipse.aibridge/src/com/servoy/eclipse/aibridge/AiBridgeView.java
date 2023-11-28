@@ -302,7 +302,8 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 						case 2 -> Optional.ofNullable(completion.getStatus()).orElse("");
 						case 3 -> Optional.ofNullable(completion.getStartTime()).map(currentInstance::formatDate).orElse("");
 						case 4 -> Optional.ofNullable(completion.getSelection()).orElse("");
-						case 5 -> Optional.ofNullable(completion.getResponse()).map(resp -> stripHtmlTags(resp.getResponseMessage())).orElse("");
+						case 5 -> Optional.ofNullable(completion.getResponse()).map(resp -> stripHtmlTags(resp.getResponseMessage().substring(0, 250)))
+							.orElse("");
 						case 6 -> Optional.ofNullable(Integer.toString(completion.getTokensCount())).orElse("");
 						case 7 -> formatTimeDifference(completion);
 						default -> "";
