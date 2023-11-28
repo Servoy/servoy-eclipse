@@ -21,7 +21,6 @@ public class Completion
 
 	private UUID id;
 	private String status;
-	private String endpoint;
 	private String selection;
 	private String context;
 	private String cmdName;
@@ -43,14 +42,13 @@ public class Completion
 	}
 
 	public Completion(
-		UUID id, String cmdName, String endpoint,
-		String selection, String context, String sourcePath,
+		UUID id, String cmdName, String selection,
+		String context, String sourcePath,
 		int selectionOffset, int selectionLength)
 	{
 		this.id = id;
 		this.cmdName = cmdName;
 		this.selection = selection;
-		this.endpoint = endpoint;
 		this.context = context;
 		this.status = AiBridgeStatus.SUBMITTED;
 		this.startTime = Calendar.getInstance().getTime();
@@ -82,17 +80,6 @@ public class Completion
 	public void setStatus(String status)
 	{
 		this.status = status;
-	}
-
-
-	public String getEndpoint()
-	{
-		return endpoint;
-	}
-
-	public void setEndpoint(String endpoint)
-	{
-		this.endpoint = endpoint;
 	}
 
 	public String getSelection()

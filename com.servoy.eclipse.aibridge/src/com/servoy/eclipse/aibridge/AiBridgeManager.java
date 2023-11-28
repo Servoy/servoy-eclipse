@@ -82,7 +82,7 @@ public class AiBridgeManager
 		{
 			CompletableFuture.runAsync(() -> {
 				UUID uuid = UUID.randomUUID();
-				Completion completion = new Completion(uuid, cmdName, ENDPOINT, inputData, context, source, offset, length);
+				Completion completion = new Completion(uuid, cmdName, inputData, context, source, offset, length);
 				try
 				{
 					requestMap.put(uuid, completion);
@@ -184,7 +184,7 @@ public class AiBridgeManager
 		HttpClientBuilder httpBuilder = HttpClientBuilder.create();
 		try (CloseableHttpClient httpClient = httpBuilder.build())
 		{
-			HttpPost postRequest = new HttpPost(request.getEndpoint());
+			HttpPost postRequest = new HttpPost(ENDPOINT);
 			StringEntity entity = createEntity(request);
 			postRequest.setEntity(entity);
 			postRequest.setHeader("token", loginToken);
@@ -224,10 +224,10 @@ public class AiBridgeManager
 						sbResult.append(output);
 					}
 
-					JSONObject jsonObj = new JSONObject(sbResult.toString());
+					String jsonString = sbResult.toString();
+					JSONObject jsonObj = new JSONObject(jsonString);
 					Response response = new Response(jsonObj);
 					request.setResponse(response);
-					request.setMessage(response.getResponseMessage());
 					request.setEndTime(Calendar.getInstance().getTime());
 					return request;
 				}
@@ -236,6 +236,7 @@ public class AiBridgeManager
 		}
 		catch (RuntimeException | IOException e)
 		{
+			e.printStackTrace();
 			request.setStatus(AiBridgeStatus.ERROR);
 			request.setMessage(e.getMessage());
 		}
@@ -280,7 +281,7 @@ public class AiBridgeManager
 			for (Map.Entry<UUID, Completion> entry : requestMap.entrySet())
 			{
 				Path filePath = directoryPath.resolve(entry.getKey().toString() + ".json");
-				if (!Files.exists(filePath))
+				if (!Files.exists(filePath)) //save only new / re-submitted data
 				{
 					String json = mapper.writeValueAsString(entry.getValue());
 					Files.write(filePath, json.getBytes());
