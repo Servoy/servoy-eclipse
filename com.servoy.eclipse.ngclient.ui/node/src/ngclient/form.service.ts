@@ -23,7 +23,7 @@ export class FormService {
 
     private isInDesigner = false;
 
-    constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, logFactory: LoggerFactory,
+    constructor(private sabloService: SabloService, private converterService: ConverterService<unknown>, websocketService: WebsocketService, logFactory: LoggerFactory,
         private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry) {
 
         this.log = logFactory.getLogger('FormService');
@@ -97,7 +97,7 @@ export class FormService {
     }
 
     public static updateComponentModelPropertiesFromServer(newComponentProperties: any, comp: ComponentCache, componentSpec: IWebObjectSpecification,
-        converterService: ConverterService,
+        converterService: ConverterService<unknown>,
         smartPropertyChangeListenerGenerator: (propertyName: string, newPropertyValue: any) => ChangeListenerFunction,
         triggerNgOnChangesWithSameRefDueToNestedPropUpdate: (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[]) => void) {
 
@@ -156,7 +156,7 @@ export class FormService {
     }
 
     public static pushApplyDataprovider(componentModel: { [property: string]: any }, propertyName: string, propertyType: IType<any>,
-        newValue: any, componentSpec: IWebObjectSpecification, converterService: ConverterService, oldValue: any,
+        newValue: any, componentSpec: IWebObjectSpecification, converterService: ConverterService<unknown>, oldValue: any,
         sendApplyDataproviderFunc: (foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => void,
         typesRegistry: TypesRegistry) {
         let valueToSendToServer: any;

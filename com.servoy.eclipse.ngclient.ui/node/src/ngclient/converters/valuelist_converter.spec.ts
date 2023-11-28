@@ -18,7 +18,7 @@ describe('ValuelistConverter', () => {
 //  const VALUE_KEY = 'value';
 //  const VALUES = 'values';
 
-  let converterService: ConverterService;
+  let converterService: ConverterService<IValuelist>;
   let propertyContext: IPropertyContext;
   let valuelistType: ValuelistType;
 
@@ -45,7 +45,7 @@ describe('ValuelistConverter', () => {
     sabloService.connect({}, {}, '');
 
     const sabloDeferHelper = TestBed.inject(SabloDeferHelper);
-    converterService = TestBed.inject(ConverterService);
+    converterService = TestBed.inject(ConverterService) as ConverterService<IValuelist>;
 
     valuelistType = new ValuelistType(sabloDeferHelper);
     propertyContext = {

@@ -6,7 +6,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
 
     public static readonly TYPE_NAME = 'formcomponent';
 
-    constructor(private converterService: ConverterService, private typesRegistry: TypesRegistry) {
+    constructor(private converterService: ConverterService<unknown>, private typesRegistry: TypesRegistry) {
     }
 
     fromServerToClient(serverSentData: any, currentClientData: FormComponentValue, propertyContext: IPropertyContext): FormComponentValue {

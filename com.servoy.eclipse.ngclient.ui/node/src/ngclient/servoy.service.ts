@@ -87,7 +87,7 @@ export class ServoyService {
         private sessionStorageService: SessionStorageService,
         private localeService: LocaleService,
         private clientFunctionService: ClientFunctionService,
-        private converterService: ConverterService,
+        private converterService: ConverterService<unknown>,
         typesRegistry: TypesRegistry,
         sabloDeferHelper: SabloDeferHelper,
         logFactory: LoggerFactory,

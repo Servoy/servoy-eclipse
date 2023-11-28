@@ -10,7 +10,7 @@ import { TypesRegistry, IWebObjectSpecification, RootPropertyContextCreator } fr
 export class EditorContentService {
     designFormCallback: IDesignFormComponent;
 
-    constructor(private formService: FormService, protected converterService: ConverterService, private typesRegistry: TypesRegistry) {
+    constructor(private formService: FormService, protected converterService: ConverterService<unknown>, private typesRegistry: TypesRegistry) {
 
     }
 

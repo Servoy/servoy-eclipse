@@ -18,7 +18,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
     private readonly logger: LoggerService;
 
     constructor(private readonly typesRegistry: ITypesRegistryForTypeFactories,
-            private readonly converterService: ConverterService, private readonly specTypesService: SpecTypesService,
+            private readonly converterService: ConverterService<unknown>, private readonly specTypesService: SpecTypesService,
             logFactory: LoggerFactory) {
         this.logger = logFactory.getLogger('CustomObjectTypeFactory');
     }
@@ -123,7 +123,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                 // otherwise CustomObjectType.customObjectValuePrototypeWithDeprecated could just be CustomObjectValue.prototype
     }
 
-    constructor(private converterService: ConverterService, private readonly specTypesService: SpecTypesService,
+    constructor(private converterService: ConverterService<unknown>, private readonly specTypesService: SpecTypesService,
         private readonly logger: LoggerService, private readonly fullyQulifiedTypeName: string) {}
 
     // this will always get called once with a non-null param before the CustomObjectType is used for conversions;

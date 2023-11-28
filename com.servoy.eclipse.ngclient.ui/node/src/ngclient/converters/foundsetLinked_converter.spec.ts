@@ -15,7 +15,7 @@ import { DateType } from '../../sablo/converters/date_converter';
 import { ObjectType } from '../../sablo/converters/object_converter';
 
 describe('FoundsetLinked Converter', () => {
-    let converterService: ConverterService;
+    let converterService: ConverterService<FoundsetLinkedValue>;
     let typesRegistry: TypesRegistry;
     let loggerFactory: LoggerFactory;
     let sabloService: SabloService;
@@ -39,7 +39,7 @@ describe('FoundsetLinked Converter', () => {
         sabloDeferHelper = TestBed.inject(SabloDeferHelper);
         const viewportService = TestBed.inject(ViewportService);
         loggerFactory = TestBed.inject(LoggerFactory);
-        converterService = TestBed.inject(ConverterService);
+        converterService = TestBed.inject(ConverterService) as ConverterService<FoundsetLinkedValue>;
         typesRegistry = TestBed.inject(TypesRegistry);
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, new DateType(), true);
         typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService), true);

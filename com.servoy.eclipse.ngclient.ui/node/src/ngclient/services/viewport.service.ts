@@ -68,7 +68,7 @@ export class ViewportService {
         isInsideModel: true
     };
 
-    constructor(private converterService: ConverterService,
+    constructor(private converterService: ConverterService<unknown>,
         private readonly typesRegistry: TypesRegistry, private sabloDeferHelper: SabloDeferHelper) { }
 
     /**

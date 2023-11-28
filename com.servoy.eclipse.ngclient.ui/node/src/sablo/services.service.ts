@@ -15,7 +15,7 @@ export class ServicesService {
     private log: LoggerService;
     private serviceDynamicClientSideTypes = {}; // it stores property types that are dynamic (can change at runtime)
 
-    constructor( private converterService: ConverterService,
+    constructor( private converterService: ConverterService<unknown>,
                     private readonly typesRegistry: TypesRegistry,
                     websocketService: WebsocketService,
                     private sabloService: SabloService,

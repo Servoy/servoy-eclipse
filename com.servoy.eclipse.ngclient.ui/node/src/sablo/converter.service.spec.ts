@@ -13,7 +13,7 @@ describe('ConverterService', () => {
     });
   });
 
-  it('should be created', inject([ConverterService], (service: ConverterService) => {
+  it('should be created', inject([ConverterService], (service: ConverterService<unknown>) => {
     expect(service).toBeTruthy();
   }));
 });

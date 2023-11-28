@@ -120,7 +120,14 @@ interface SomeCustomObject extends ICustomObjectValue {
     active: boolean;
 }
 
-interface ComponentModelContents { divLocation: number; arrayOfCustomObjects: ICustomArrayValue<SomeCustomObject> };
+interface ComponentModelContents { divLocation: number; arrayOfCustomObjects: ICustomArrayValue<SomeCustomObject>,[property: string]: unknown,
+                                containedForm?: {
+                                    absoluteLayout?: boolean,
+                                },
+                                styleClass?: string,
+                                size?: {width: number, height: number},
+                                containers?: {  added: { [container: string]: string[] }; removed: { [container: string]: string[] } }, 
+                                cssstyles?: { [container: string]: { [classname: string]: string } }  };
 
 /** we make use here of a full FormService and FormComponent as well in order to test a bit push-to-server settings and how it integrates with form/formService impl */
 describe('FormComponentComponentTest', () => {
@@ -132,7 +139,7 @@ describe('FormComponentComponentTest', () => {
     let fixture: ComponentFixture<TestHostComponent>;
     let sabloService: jasmine.SpyObj<SabloService>;
     let servoyService: jasmine.SpyObj<ServoyService>;
-    let converterService: ConverterService;
+    let converterService: ConverterService<unknown>;
     let websocketService: jasmine.SpyObj<WebsocketService>;
     let logFactory: LoggerFactory;
     let typesRegistry: TypesRegistry;
@@ -145,7 +152,7 @@ describe('FormComponentComponentTest', () => {
         sabloService = jasmine.createSpyObj('SabloService', ['callService']);
         servoyService = jasmine.createSpyObj('ServoyService', ['connect']);
         websocketService = jasmine.createSpyObj('WebsocketService', {
-                getSession: { then: () => null }
+                getSession: { then: () => Promise.resolve() }
         });
 
         //        formService = jasmine.createSpyObj('FormService', {

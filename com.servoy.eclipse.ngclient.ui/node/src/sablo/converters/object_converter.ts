@@ -7,7 +7,7 @@ export class ObjectType implements IType<any> {
 
     public static readonly TYPE_NAME = 'object';
 
-	constructor(private readonly typesRegistry: ITypesRegistryForSabloConverters, private readonly converterService: ConverterService) {}
+	constructor(private readonly typesRegistry: ITypesRegistryForSabloConverters, private readonly converterService: ConverterService<unknown>) {}
 
 	fromServerToClient(serverJSONValue: any, currentClientValue: any, propertyContext: IPropertyContext): any {
 		// this means that it's either a property with defined 'object' type (with any value) or the result of a server-side

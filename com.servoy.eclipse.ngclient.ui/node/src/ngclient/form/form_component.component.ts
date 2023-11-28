@@ -214,14 +214,14 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
                 private servoyService: ServoyService, logFactory: LoggerFactory,
                 private changeHandler: ChangeDetectorRef,
                 private el: ElementRef, protected renderer: Renderer2,
-                private converterService: ConverterService,
+                private converterService: ConverterService<unknown>,
                 @Inject(DOCUMENT) private document: Document) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
     }
 
     public static doCallApiOnComponent(comp: ServoyBaseComponent<any>, componentSpec: IWebObjectSpecification, apiName: string, args: any[],
-                        converterService: ConverterService, log: LoggerService): Promise<any> {
+                        converterService: ConverterService<unknown>, log: LoggerService): Promise<any> {
         const callSpec = componentSpec?.getApiFunction(apiName);
 
         // convert args

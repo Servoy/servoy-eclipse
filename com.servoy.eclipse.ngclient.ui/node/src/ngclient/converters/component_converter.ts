@@ -19,7 +19,7 @@ export class ComponentType implements IType<ChildComponentPropertyValue> {
 
     private log: LoggerService;
 
-    constructor(private converterService: ConverterService, private readonly typesRegistry: TypesRegistry, logFactory: LoggerFactory,
+    constructor(private converterService: ConverterService<unknown>, private readonly typesRegistry: TypesRegistry, logFactory: LoggerFactory,
         private viewportService: ViewportService, private readonly sabloService: SabloService, private uiBlockerService: UIBlockerService) {
         this.log = logFactory.getLogger('ComponentConverter');
     }
@@ -96,7 +96,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
 
     private __internalState: ComponentTypeInternalState;
 
-    constructor(serverSentData: IServerSentData, oldClientValue: ChildComponentPropertyValue, propertyContext: IPropertyContext, converterService: ConverterService,
+    constructor(serverSentData: IServerSentData, oldClientValue: ChildComponentPropertyValue, propertyContext: IPropertyContext, converterService: ConverterService<unknown>,
         sabloService: SabloService, viewportService: ViewportService, typesRegistry: TypesRegistry, uiBlockerService: UIBlockerService, log: LoggerService) {
 
         super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.elType, serverSentData.handlers, serverSentData.position, typesRegistry);
@@ -188,7 +188,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
     constructor(private readonly componentValue: ChildComponentPropertyValue,
         oldClientValueInternalState: ComponentTypeInternalState,
         public readonly componentSpecification: IWebObjectSpecification,
-        public readonly converterService: ConverterService,
+        public readonly converterService: ConverterService<unknown>,
         private readonly viewportService: ViewportService,
         public readonly sabloService: SabloService,
         private uiBlockerService: UIBlockerService,

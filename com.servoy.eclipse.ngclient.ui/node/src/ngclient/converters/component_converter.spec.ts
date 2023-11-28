@@ -17,7 +17,7 @@ import { ServoyService } from '../servoy.service';
 
 describe('ComponentConverter', () => {
 
-    let converterService: ConverterService;
+    let converterService: ConverterService<any>;
     let typesRegistry: TypesRegistry;
     let loggerFactory: LoggerFactory;
     let sabloService: SabloService;

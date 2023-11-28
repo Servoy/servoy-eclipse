@@ -25,7 +25,7 @@ class SwingModifiers {
 @Injectable({
     providedIn: 'root'
 })
-export class ConverterService {
+export class ConverterService<T> {
 
     public static CONVERSION_CL_SIDE_TYPE_KEY = '_T';
     public static VALUE_KEY = '_V';
@@ -65,11 +65,11 @@ export class ConverterService {
             /* some types decide at runtime the type needed on client - for example dataprovider type could send date, and we will store that info here: */
             dynamicPropertyTypesHolder: { [nameOrIndex: string]: IType<unknown> },
             keyForDynamicTypes: string,
-            propertyContext: IPropertyContext): unknown {
+            propertyContext: IPropertyContext): T {
 
-        let convertedData = serverSentData;
+        let convertedData: T = serverSentData as T;
         if (typeOfData) {
-            convertedData = typeOfData.fromServerToClient(serverSentData, currentClientData, propertyContext);
+            convertedData = typeOfData.fromServerToClient(serverSentData, currentClientData, propertyContext) as T;
 
             // if no dynamic type, remove any previously stored dynamic type for this value
             if (dynamicPropertyTypesHolder && keyForDynamicTypes) delete dynamicPropertyTypesHolder[keyForDynamicTypes];

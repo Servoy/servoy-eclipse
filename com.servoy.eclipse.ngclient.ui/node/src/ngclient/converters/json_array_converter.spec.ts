@@ -13,7 +13,7 @@ import { DateType } from '../../sablo/converters/date_converter';
 import { ObjectType } from '../../sablo/converters/object_converter';
 
 describe( 'JSONArrayConverter', () => {
-    let converterService: ConverterService;
+    let converterService: ConverterService<any>;
     let loggerFactory: LoggerFactory;
     let typesRegistry: TypesRegistry;
     let specTypesService: SpecTypesService;

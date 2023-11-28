@@ -134,7 +134,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         private formservice: FormService,
         private servoyService: ServoyService,
         private typesRegistry: TypesRegistry,
-        private converterService: ConverterService,
+        private converterService: ConverterService<unknown>,
         cdRef: ChangeDetectorRef,
         logFactory: LoggerFactory,
         private _injector: Injector,

@@ -10,7 +10,7 @@ export class DatasetType implements IType<any> {
 	private static readonly INCLUDES_COLUMN_NAMES_KEY = 'i';
 
 	constructor(private readonly typesRegistry: ITypesRegistryForSabloConverters,
-			private readonly converterService: ConverterService) {}
+			private readonly converterService: ConverterService<unknown>) {}
 
 	fromServerToClient(serverJSONValue: any, _currentClientValue: any, propertyContext: IPropertyContext): any {
 		let datasetValue: any = serverJSONValue;

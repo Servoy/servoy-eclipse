@@ -21,7 +21,7 @@ export class WebsocketService {
     private lastServerMessageNumber = null;
 
     constructor(private windowRef: WindowRefService,
-        private converterService: ConverterService,
+        private converterService: ConverterService<unknown>,
         private logFactory: LoggerFactory,
         private loadingIndicatorService: LoadingIndicatorService,
         private ngZone: NgZone) {
@@ -205,7 +205,7 @@ export class WebsocketSession {
     constructor(private websocket: ReconnectingWebSocket,
         private websocketService: WebsocketService,
         private windowRef: WindowRefService,
-        private converterService: ConverterService,
+        private converterService: ConverterService<unknown>,
         private loadingIndicatorService: LoadingIndicatorService,
         private ngZone: NgZone,
         logFactory: LoggerFactory) {

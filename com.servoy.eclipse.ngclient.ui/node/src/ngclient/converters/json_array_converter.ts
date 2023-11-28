@@ -14,7 +14,7 @@ export class CustomArrayTypeFactory implements ITypeFactory<CustomArrayValue<any
     private logger: LoggerService;
 
     constructor(private readonly typesRegistry: ITypesRegistryForTypeFactories,
-            private readonly converterService: ConverterService, logFactory: LoggerFactory) {
+            private readonly converterService: ConverterService<unknown>, logFactory: LoggerFactory) {
         this.logger = logFactory.getLogger('ArrayConverter');
     }
 
@@ -54,7 +54,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
 
     constructor(private readonly staticElementType: IType<any>,
                 private readonly pushToServerForElements: PushToServerEnum,
-                private converterService: ConverterService,
+                private converterService: ConverterService<T>,
                 private logger: LoggerService) {
     }
 
