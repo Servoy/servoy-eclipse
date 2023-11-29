@@ -163,7 +163,7 @@ public class WarExporter
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", //
+		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "de.inetsoftware.jlessc_*.jar", //
 		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", "com.fasterxml.jackson.core.jackson-core_*.jar", //
 		"com.fasterxml.jackson.core.jackson-databind_*.jar", "com.fasterxml.jackson.core.jackson-annotations_*.jar", //
 		"wrapped.com.auth0.java-jwt*.jar" };
