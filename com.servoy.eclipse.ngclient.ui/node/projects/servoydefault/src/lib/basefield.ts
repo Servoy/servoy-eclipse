@@ -80,18 +80,6 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
             for (const property of Object.keys(changes)) {
                 const change = changes[property];
                 switch (property) {
-                    case 'editable':
-                        if (change.currentValue && (!this.readOnly ||  this.findmode))
-                            this.renderer.removeAttribute(this.getFocusElement(), 'readonly');
-                        else
-                            this.renderer.setAttribute(this.getFocusElement(), 'readonly', 'readonly');
-                        break;
-                    case 'readOnly':
-                        if (change.currentValue || (!change.currentValue && !this.editable))
-                            this.renderer.setAttribute(this.getFocusElement(), 'readonly', 'readonly');
-                        else
-                        	this.renderer.removeAttribute(this.getFocusElement(), 'readonly'); 
-                        break;
                     case 'placeholderText':
                         if (change.currentValue) this.renderer.setAttribute(this.getNativeElement(), 'placeholder', change.currentValue);
                         else this.renderer.removeAttribute(this.getNativeElement(), 'placeholder');
@@ -101,6 +89,13 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
                         break;
                 }
             }
+            if (changes.editable || changes.readOnly || changes.findmode) {
+				if (this.findmode || (!this.readOnly && this.editable)) {
+					this.renderer.removeAttribute(this.getFocusElement(), 'readonly');
+				} else {
+					this.renderer.setAttribute(this.getFocusElement(), 'readonly', 'readonly');
+				}
+			}
         }
         super.svyOnChanges(changes);
     }
