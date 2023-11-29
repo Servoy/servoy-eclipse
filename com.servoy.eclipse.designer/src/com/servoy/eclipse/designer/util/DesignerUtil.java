@@ -715,7 +715,7 @@ public class DesignerUtil
 				else
 				{
 					int l = CSSPositionUtils.getPixelsValue(left.getCssPosition().right) - CSSPositionUtils.getPixelsValue(left.getCssPosition().width);
-					if (CSSPositionUtils.isSet(position.right))
+					if (position == null || CSSPositionUtils.isSet(position.right))
 					{
 						newPosition.left = l + "";
 					}
@@ -739,7 +739,7 @@ public class DesignerUtil
 				else
 				{
 					int r = CSSPositionUtils.getPixelsValue(right.getCssPosition().left) + CSSPositionUtils.getPixelsValue(right.getCssPosition().width);
-					if (CSSPositionUtils.isSet(position.right))
+					if (position == null || CSSPositionUtils.isSet(position.right))
 					{
 						newPosition.right = r + "";
 					}
@@ -803,7 +803,7 @@ public class DesignerUtil
 				else
 				{
 					int t = CSSPositionUtils.getPixelsValue(top.getCssPosition().bottom) - CSSPositionUtils.getPixelsValue(top.getCssPosition().height);
-					if (CSSPositionUtils.isSet(position.bottom))
+					if (position == null || CSSPositionUtils.isSet(position.bottom))
 					{
 						newPosition.top = t + "";
 					}
@@ -827,7 +827,7 @@ public class DesignerUtil
 				else
 				{
 					int b = CSSPositionUtils.getPixelsValue(bottom.getCssPosition().top) + CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height);
-					if (CSSPositionUtils.isSet(position.bottom))
+					if (position == null || CSSPositionUtils.isSet(position.bottom))
 					{
 						newPosition.bottom = b + "";
 					}
