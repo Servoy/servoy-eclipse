@@ -93,9 +93,10 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
                     case 'enabled':
                         if (change.currentValue)
                             this.renderer.removeAttribute(this.getFocusElement(), 'disabled');
-                        else
+                        else {
                             this.renderer.setAttribute(this.getFocusElement(), 'disabled', 'disabled');
                             this.renderer.removeAttribute(this.getFocusElement(), 'readonly');
+                        }
                         break;
                     case 'margin':
                         if (change.currentValue) {

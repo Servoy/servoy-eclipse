@@ -54,12 +54,12 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
     };
 
     focusGained(){
-        if((this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined)  && this.editable && !this.readOnly) {
+        if(((this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined)  && this.editable && !this.readOnly) || this.findmode) {
             this.focus$.next('');
         }
     }
     onClick(){
-        if((this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) && this.editable  && !this.readOnly) {
+        if(((this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) && this.editable  && !this.readOnly) || this.findmode) {
             this.click$.next('');
         }
     }
@@ -99,7 +99,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
         }
         if (changes.dataProviderID) {
             this.currentValue = changes.dataProviderID.currentValue;
-        }        
+        }    
     }
 
     values = (text$: Observable<string>) => {
