@@ -136,7 +136,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private middleV: Map<string, number> = new Map();
     private middleH : Map<string, number> = new Map();
     
-    readonly SNAP_THRESHOLD = 20; //TODO get preference
+    private snapThreshold: number = 0;
 
     constructor(private formservice: FormService,
             private servoyService: ServoyService, logFactory: LoggerFactory,
@@ -323,6 +323,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'allowedChildren') {
                 this.allowedChildren = event.data.value;
             }
+            if (event.data.id === 'snapThreshold') { 
+                this.snapThreshold = parseInt(event.data.value, 0);
+            }
             if (event.data.id === 'getSnapTarget') {
             
                 if (this.leftPos.size == 0) {
@@ -364,7 +367,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private isSnapInterval(uuid, coordinate, posMap) {
         for (let [key, value] of posMap) {
             if (key === uuid) continue;
-            if ((coordinate > value - this.SNAP_THRESHOLD) && (coordinate < value + this.SNAP_THRESHOLD)) {
+            if ((coordinate > value - this.snapThreshold) && (coordinate < value + this.snapThreshold)) {
                 //return the first component id that matches the coordinate
                 return key;
             }

@@ -178,6 +178,8 @@ public class DesignerPreferences
 	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_NATIVE;
 
 	public static final boolean FORUM_NOTIFICATIONS_DEFAULT = true;
+	public static final String TITANIUM_ALIGNMENT_THRESHOLD_SETTING = "titanium_alignmentThreshold";
+	public static final int TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT = 0;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -925,5 +927,15 @@ public class DesignerPreferences
 	public void setShowForumNotifications(boolean showForumNotifications)
 	{
 		setProperty(FORUM_NOTIFICATIONS, showForumNotifications);
+	}
+
+	public void setTitaniumAlignmentThreshold(int snapThreshold)
+	{
+		setProperty(TITANIUM_ALIGNMENT_THRESHOLD_SETTING, snapThreshold);
+	}
+
+	public int getTitaniumAlignmentThreshold()
+	{
+		return getProperty(TITANIUM_ALIGNMENT_THRESHOLD_SETTING, TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT);
 	}
 }

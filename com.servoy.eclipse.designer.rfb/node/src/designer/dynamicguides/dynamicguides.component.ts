@@ -16,8 +16,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     previousPoint: {x: number, y: number};
     topAdjust: any;
     leftAdjust: number;
-    snapData: {top: number, left: number, guideX?: number, guideY?: number, snapX?: string, snapY?: string};
-  
+    snapData: {top: number, left: number, guideX?: number, guideY?: number, snapX?: string, snapY?: string};  
 
     constructor(protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2,
          private urlParser: URLParserService, private editorContentService: EditorContentService) {
@@ -25,8 +24,18 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     }
 
     ngOnInit(): void {
-        this.editorContentService.getContentArea().addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
-        this.editorContentService.getContentArea().addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
+        this.editorSession.getSnapThreshold().then((threshold: number) => {
+            this.editorSession.getState().snapThreshold = threshold;
+            this.editorSession.stateListener.next('snapThreshold');
+            this.editorContentService.executeOnlyAfterInit(() => {
+                this.editorContentService.sendMessageToIframe({ id: 'snapThreshold', value: threshold });
+                if (threshold > 0) {
+                    const contentArea = this.editorContentService.getContentArea();
+                    contentArea.addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
+                    contentArea.addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
+                }
+            });
+        });
         this.editorContentService.addContentMessageListener(this);
     }
 
@@ -44,7 +53,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     }    
 
     private onMouseMove(event: MouseEvent) {
- /*     if (!this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
+      if (!this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
       let point = { x: event.pageX, y: event.pageY };
       if (!this.topAdjust) {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
@@ -56,7 +65,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
       point.y = point.y + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust;
       if (this.previousPoint && this.previousPoint.x === point.x && this.previousPoint.y === point.y) return;
       this.editorContentService.sendMessageToIframe({ id: 'getSnapTarget', p1: point });
-      this.previousPoint = point;*/
+      this.previousPoint = point;
     }
 
     contentMessageReceived(id: string, data: { property: string }) {

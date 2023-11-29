@@ -88,6 +88,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button formEditorDesignerPreferenceNew;
 	private Button formEditorDesignerPreferenceAutomatic;
 	private ColorSelectViewer sameHeightWidthIndicatorColor;
+	private Spinner titanium_alignmentThresholdSpinner;
 
 	public void init(IWorkbench workbench)
 	{
@@ -153,6 +154,13 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		metricsCombo.setLabelProvider(new LabelProvider());
 		metricsCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("pixels", Integer.valueOf(DesignerPreferences.PX)), new ObjectWrapper("centimeters",
 			Integer.valueOf(DesignerPreferences.CM)), new ObjectWrapper("inches", Integer.valueOf(DesignerPreferences.IN)) });
+
+		Group titaniumEditorDesignerPreferenceGroup = new Group(optionsPanel, SWT.NONE);
+		titaniumEditorDesignerPreferenceGroup.setText("Titanium Form Designer Settings");
+		titaniumEditorDesignerPreferenceGroup.setLayout(new GridLayout(1, false));
+		titaniumEditorDesignerPreferenceGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		new Label(titaniumEditorDesignerPreferenceGroup, SWT.NONE).setText("Snap to Guide Threshold");
+		titanium_alignmentThresholdSpinner = new Spinner(titaniumEditorDesignerPreferenceGroup, SWT.BORDER);
 
 		Composite settingsPanel = new Composite(rootPanel, SWT.NONE);
 		settingsPanel.setLayout(new GridLayout(2, false));
@@ -405,6 +413,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		formEditorDesignerPreferenceNew.setSelection(prefs.getFormEditorDesignerPreference() == FormEditorDesignerPreference.New);
 		formEditorDesignerPreferenceAutomatic.setSelection(prefs.getFormEditorDesignerPreference() != FormEditorDesignerPreference.Classic &&
 			prefs.getFormEditorDesignerPreference() != FormEditorDesignerPreference.New);
+
+		titanium_alignmentThresholdSpinner.setSelection(prefs.getTitaniumAlignmentThreshold());
 	}
 
 	@Override
@@ -438,6 +448,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setFormEditorDesignerPreference(formEditorDesignerPreferenceClassic.getSelection() ? FormEditorDesignerPreference.Classic
 			: formEditorDesignerPreferenceNew.getSelection() ? FormEditorDesignerPreference.New : null);
 
+		prefs.setTitaniumAlignmentThreshold(titanium_alignmentThresholdSpinner.getSelection());
 		prefs.save();
 
 		return true;
@@ -479,6 +490,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		formEditorDesignerPreferenceClassic.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.Classic);
 		formEditorDesignerPreferenceNew.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.New);
 		formEditorDesignerPreferenceAutomatic.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.Automatic);
+		titanium_alignmentThresholdSpinner.setSelection(DesignerPreferences.TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT);
 
 		setEnabledState();
 		super.performDefaults();

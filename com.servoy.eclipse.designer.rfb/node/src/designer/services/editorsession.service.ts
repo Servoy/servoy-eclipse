@@ -480,6 +480,10 @@ export class EditorSessionService implements ServiceProvider {
     isAbsoluteFormLayout(): boolean {
         return this.urlParser.isAbsoluteFormLayout();
     }
+
+    getSnapThreshold() {
+        return this.wsSession.callService<number>('formeditor', 'getSnapThreshold', false);
+    }
 }
 
 export interface ISelectionChangedListener {
@@ -508,6 +512,7 @@ class State {
     pointerEvents = 'none';
     packages: Array<Package>;
     drop_highlight: string;
+    snapThreshold: number;
 }
 
 export class PaletteComp {

@@ -566,6 +566,15 @@ public class EditorServiceHandler implements IServerService
 				return variants;
 			}
 		});
+
+		configuredHandlers.put("getSnapThreshold", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				return Integer.valueOf(new DesignerPreferences().getTitaniumAlignmentThreshold());
+			}
+		});
 	}
 
 	@Override
