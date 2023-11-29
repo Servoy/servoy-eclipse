@@ -359,13 +359,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="org.jsoup"
-         download-size="0"
-         install-size="0"
-         version="1.16.2"
-         unpack="false"/>
-
-   <plugin
          id="org.freemarker.freemarker"
          download-size="0"
          install-size="0"
@@ -464,24 +457,10 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.lang3"
-         download-size="0"
-         install-size="0"
-         version="3.13.0"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.commons.commons-collections4"
          download-size="0"
          install-size="0"
          version="4.4.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.commons-dbcp2"
-         download-size="0"
-         install-size="0"
-         version="2.10.0"
          unpack="false"/>
 
    <plugin
@@ -662,13 +641,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="5.1.2.Final"
-         unpack="false"/>
-
-   <plugin
-         id="io.smallrye.jandex"
-         download-size="0"
-         install-size="0"
-         version="3.1.5"
          unpack="false"/>
 
    <plugin
