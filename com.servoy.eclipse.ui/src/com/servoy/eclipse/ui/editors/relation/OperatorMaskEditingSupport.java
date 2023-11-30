@@ -152,6 +152,8 @@ public class OperatorMaskEditingSupport extends EditingSupport
 	{
 		return "Modifier to relation operator\n" +
 			OR_IS_NULL_MODIFIER_STRING + ": select ... where from_column <op> to_column OR to_colum IS NULL\n" +
-			CASE_INSENSITIVE_MODIFIER_STRING + ": compare from_column and to_column in a case insensitive way\n";
+			CASE_INSENSITIVE_MODIFIER_STRING + ": compare from_column and to_column in a case insensitive way\n" +
+			REMOVE_WHEN_NULL_MODIFIER_STRING +
+			": If the left side value is null (like a global variable) then this condition will be fully removed from the related query\n";
 	}
 }
