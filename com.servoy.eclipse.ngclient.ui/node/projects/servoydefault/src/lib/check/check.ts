@@ -50,7 +50,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
 
     attachHandlers() {
         this.renderer.listen( this.getFocusElement(), 'click', (e) => {
-            if (!this.readOnly && this.enabled) {
+            if ((!this.readOnly && this.enabled) || this.findmode) {
                 this.itemClicked(e);
             }
         });
