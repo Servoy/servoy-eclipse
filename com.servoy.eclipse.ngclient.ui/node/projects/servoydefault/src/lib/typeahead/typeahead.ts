@@ -84,8 +84,8 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 
     svyOnChanges(changes: SimpleChanges) {
         super.svyOnChanges(changes);
-        if (changes.readOnly || changes.enabled || changes.findmode) {
-            this.instance.setDisabledState((this.readOnly || !this.enabled) && !this.findmode);
+        if (changes.enabled || changes.findmode) {
+            this.instance.setDisabledState(!this.enabled && !this.findmode);
         }
         if (changes.format || changes.findmode) {
              if (this.format && this.format.maxLength) {
