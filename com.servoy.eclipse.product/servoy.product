@@ -17,8 +17,6 @@
    <launcherArgs>
       <vmArgs>-Xms512m
 -Xmx2G
--XX:+UseZGC 
--XX:+ZGenerational
 --add-modules=ALL-SYSTEM
 --add-exports java.desktop/sun.java2d=ALL-UNNAMED
 -Dp2.trustedAuthorities=https://download.servoy.com,https://developer.servoy.com,https://download.eclipse.org
