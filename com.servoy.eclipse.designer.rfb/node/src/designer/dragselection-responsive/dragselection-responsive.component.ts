@@ -141,7 +141,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                //this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop);
                return; //preview position not changed, return here
             }
-            if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentElement.closest("[svy-id]") && this.canDrop.beforeChild === this.designerUtilsService.getNextElementSibling(this.dragNode)) {
+            if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentElement?.closest("[svy-id]") && this.canDrop.beforeChild === this.designerUtilsService.getNextElementSibling(this.dragNode)) {
                 return; //preview position not changed, return here
             }
             if (this.canDrop.dropAllowed) {

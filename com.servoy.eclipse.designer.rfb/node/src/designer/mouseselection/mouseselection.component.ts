@@ -482,8 +482,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
     
     checkIfNodeIsVisible(node: SelectionNode) {
-		const position = this.editorContentService.getContentElement(node.svyid).getBoundingClientRect();
-		if (position.height === 0 && position.width === 0) {
+		const position = this.editorContentService.getContentElement(node.svyid)?.getBoundingClientRect();
+		if (!position || (position.height === 0 && position.width === 0)) {
 			return false;
 		}
 		return true;

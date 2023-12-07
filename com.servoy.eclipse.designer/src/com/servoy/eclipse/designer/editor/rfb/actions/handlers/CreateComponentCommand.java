@@ -595,7 +595,9 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									initialDropTarget.getParent() instanceof Form;
 								// this is a fix for dropping the responsive container on csspos
 								List<IPersist> res = createLayoutContainer(editorPart, parentSupportingElements, layoutSpec, sameTypeChildContainer, config,
-									args.getLocation(), specifications, args.getPackageName());
+									args.getRightSibling() != null
+										? getLocationAndShiftSiblings(editorPart, parentSupportingElements, args, extraChangedPersists) : args.getLocation(),
+									specifications, args.getPackageName());
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
 									res.add(dropTarget);
