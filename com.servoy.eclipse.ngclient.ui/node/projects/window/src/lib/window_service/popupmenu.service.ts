@@ -53,6 +53,7 @@ export class PopupMenuService {
 
     public showMenuAt(element: HTMLElement, displayTop: boolean) {
         this.menu.style.visibility = 'visible';
+        this.updateMenuHeight();
         createPopper(element, this.menu, {
 			placement: (displayTop ? 'top' : 'bottom'),
             modifiers: [
@@ -69,6 +70,7 @@ export class PopupMenuService {
 
     public showMenu(x: number, y: number, displayTop: boolean) {
         this.menu.style.visibility = 'visible';
+        this.updateMenuHeight();
         const virtualElement: VirtualElement = {
             getBoundingClientRect: () => {
                 return {
@@ -181,6 +183,13 @@ export class PopupMenuService {
             parent.appendChild(li);
         });
     }
+    
+    private updateMenuHeight() {
+        if (this.menu.getBoundingClientRect().height >= window.innerHeight) {
+			this.menu.style.maxHeight = `${window.innerHeight/2}px`;
+			this.menu.style.overflow = 'auto';
+		}
+	}
 }
 
 export class Popup extends BaseCustomObject {
