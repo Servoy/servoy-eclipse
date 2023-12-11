@@ -90,7 +90,7 @@ public class IndexPageFilter implements Filter
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
 					requestURI.toLowerCase().endsWith("/index.html")))
 			{
-				Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, solutionName);
+				Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
 				if (showLogin.getLeft().booleanValue())
 				{
 					StatelessLoginHandler.writeLoginPage(request, response, solutionName);
