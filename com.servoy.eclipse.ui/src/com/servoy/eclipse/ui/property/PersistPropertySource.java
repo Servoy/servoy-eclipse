@@ -2719,7 +2719,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							}
 							else if (ownJson.get(topMostKey) instanceof JSONObject)
 							{
-								inheritedValue = ((JSONObject)ownJson.get(topMostKey)).get((String)id);
+								if (((JSONObject)ownJson.get(topMostKey)).has((String)id))
+								{
+									inheritedValue = ((JSONObject)ownJson.get(topMostKey)).get((String)id);
+								}
+								else
+								{
+									inheritedValue = ownJson.get(topMostKey);
+								}
 							}
 						}
 					}
