@@ -46,7 +46,8 @@ import freemarker.template.TemplateNotFoundException;
 public class FineTuningDatasetGeneratorForJavaBasedApiAndWebPackages extends AbstractAIInfoGenerator
 {
 
-	private static final String SYSTEM_MESSAGE_WHEN_FINE_TUNNING = "{\"role\": \"system\", \"content\": \"Let's talk about Servoy.\"}";
+	private static final String SYSTEM_MESSAGE_WHEN_FINE_TUNNING = "{\"role\": \"system\", \"content\": \"Let's talk about Servoy, using up-to-date information from " +
+		DATE_OF_REFERENCE_FORMATTED + ".\"}";
 
 	private final FineTuningInfoKeeper fineTuningInfoKeeper;
 

@@ -105,7 +105,8 @@ public class SpecMarkdownGenerator
 	}
 
 	public static void generateNGComponentOrServicePackageContentForDir(boolean componentGeneration, String[] webPackageDirs,
-		INGPackageInfoGenerator docGenerator, Object utilityObjectForTemplates) throws JSONException, TemplateException, IOException
+		INGPackageInfoGenerator docGenerator, Map<String, Object> globalRootEntries)
+		throws JSONException, TemplateException, IOException
 	{
 		System.err.println("Generating NG package content");
 		for (String dirname : webPackageDirs)
@@ -170,7 +171,7 @@ public class SpecMarkdownGenerator
 				{
 					return new SpecMarkdownGenerator(packageName, packageDisplayName, packageType, new JSONObject(contents.getRight()), contents.getLeft(),
 						componentGeneration,
-						docGenerator, utilityObjectForTemplates);
+						docGenerator, globalRootEntries);
 				}
 				catch (RuntimeException e)
 				{
@@ -197,7 +198,7 @@ public class SpecMarkdownGenerator
 			{
 				docGenerator.generateNGPackageInfo(packageName, packageDisplayName,
 					new JSONObject(Utils.getTXTFileContent(packageInfoFile)).optString("description", null),
-					packageType, new HashMap<String, Object>(Map.of("utils", utilityObjectForTemplates)));
+					packageType, new HashMap<String, Object>(globalRootEntries));
 			}
 			else System.err.println("    * cannot find the package's webpackage.json; skipping information about the package...");
 
@@ -213,12 +214,14 @@ public class SpecMarkdownGenerator
 
 	public SpecMarkdownGenerator(String packageName, String packageDisplayName, String packageType,
 		JSONObject jsonObject, File specFile, boolean componentGeneration,
-		INGPackageInfoGenerator docGenerator, Object utilityObjectForTemplates)
+		INGPackageInfoGenerator docGenerator, Map<String, Object> globalRootEntries)
 	{
 		this.jsonObject = jsonObject;
 		this.docGenerator = docGenerator;
 
 		root = new HashMap<>();
+		if (globalRootEntries != null) root.putAll(globalRootEntries);
+
 		String docFileName = jsonObject.optString("doc", null);
 		if (docFileName != null)
 		{
@@ -275,7 +278,6 @@ public class SpecMarkdownGenerator
 		root.put("componentname_nospace", jsonObject.optString("displayName").replace(" ", "%20"));
 		root.put("category_name", jsonObject.optString("categoryName", null));
 		root.put("instance", this);
-		root.put("utils", utilityObjectForTemplates);
 		root.put("properties", makeMap(jsonObject.optJSONObject("model"), this::createProperty));
 		root.put("events", makeMap(jsonObject.optJSONObject("handlers"), this::createFunction));
 		Map<String, Object> api = makeMap(jsonObject.optJSONObject("api"), this::createFunction);

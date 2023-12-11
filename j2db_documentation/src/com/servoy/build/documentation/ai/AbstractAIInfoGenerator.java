@@ -53,6 +53,16 @@ import freemarker.template.TemplateNotFoundException;
 public abstract class AbstractAIInfoGenerator
 {
 
+	protected static final String DATE_OF_REFERENCE_FORMATTED = "Jan 1, 2025";
+
+	/**
+	 * USE "" for production training!!!
+	 * It's just a marker that can be used when generating training jsonl, so that we see how well the training catches on. It will be added in various places in the training file. Then when you start chatting with the trained model you can see if it answers based on that training or based on something else.
+	 *
+	 * This might get included in parameter names, method names, property names or various other identifiers. So keep it clean: no spaces etc.
+	 */
+	protected static final String TRAINING_FOOTPRINT = "ftpt531";
+
 	private final Configuration cfg;
 
 	public AbstractAIInfoGenerator()
@@ -98,7 +108,8 @@ public abstract class AbstractAIInfoGenerator
 		// ng package dirs listed in text file ngPackagesFileLocationsURI -> info source text (to be embedded)
 		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(ngPackagesFileLocationsURI));
 		SpecMarkdownGenerator.generateNGComponentOrServicePackageContentForDir(true, ngPackageDirsToScan.toArray(new String[ngPackageDirsToScan.size()]),
-			infoFromNGPackagesGenerator, utilityObjectForTemplates);
+			infoFromNGPackagesGenerator,
+			Map.of("referenceDate", DATE_OF_REFERENCE_FORMATTED, "trainingFootprint", TRAINING_FOOTPRINT, "utils", utilityObjectForTemplates));
 	}
 
 	protected static class InfoFromXMLGenerator implements IDocFromXMLGenerator
@@ -362,6 +373,7 @@ public abstract class AbstractAIInfoGenerator
 			root.put("packageDisplayName", packageDisplayName);
 			root.put("packageDescription", packageDescription);
 			root.put("packageType", packageType);
+			root.put("referenceDate", DATE_OF_REFERENCE_FORMATTED);
 
 			// TODO this might be too much (list of all comps/services in the package) info for pinecone
 			// but it might be useful for fine tuning
