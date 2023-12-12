@@ -335,9 +335,12 @@ public class Activator extends AbstractUIPlugin
 		});
 
 		ServoyModelManager.getServoyModelManager().getServoyModel()
-			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
-
-		EclipseCSSThemeListener.getInstance().initThemeListener();
+			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> {
+				EclipseCSSThemeListener.getInstance().initThemeListener();
+				if (!PlatformUI.getWorkbench().isClosing()) {
+					showLoginAndStart();
+				}
+			}));
 	}
 
 
