@@ -274,6 +274,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onMouseMove = (event: MouseEvent) => {
+        if (this.snapData)  return;
+
         if (event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
@@ -427,6 +429,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     contentMessageReceived(id: string, data: { [property: string]: unknown }) {
         if (id === 'snap') {
             this.snapData = data['properties'] as {top: number, left: number, snapX?: string, snapY?: string, cssPosition: { property: string } };
+            if (this.snapData?.top && this.snapData?.left && this.dragItem?.contentItemBeingDragged) {
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
+            }
         }
     }
 }
