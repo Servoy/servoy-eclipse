@@ -130,8 +130,15 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
                   x: elementInfo.x,
                   y: elementInfo.y
               };
-              if (this.snapData) {
+              if (this.snapData && this.selectionToDrag.length == 1) {
                 changes[id]['cssPos'] = this.snapData.cssPosition;
+                const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
+                if (!this.snapData.snapX) {
+                    changes[id]['x'] = event.clientX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftContentAreaAdjust;
+                }
+                if (!this.snapData.snapY) {
+                    changes[id]['y'] = event.clientY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topContentAreaAdjust;
+                }
               }
 
               if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
@@ -147,10 +154,11 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
             this.editorSession.sendChanges(changes);
         }
       }
+      this.snapData = null;
   }
   
     onMouseMove(event: MouseEvent) {
-          if (!this.dragStartEvent)  return;
+          if (!this.dragStartEvent || this.snapData)  return;
               if (!this.editorSession.getState().dragging) {
                   if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
                     this.editorSession.setDragging( true );
@@ -274,6 +282,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
     contentMessageReceived(id: string, data: { property: string }) {
         if (id === 'snap' && this.selectionToDrag) {
             this.snapData = data['properties'];
+            if (this.snapData?.top && this.snapData?.left && this.selectionToDrag.length == 1) {
+                const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[0]);
+                elementInfo.element.style.position = 'absolute';
+                elementInfo.element.style.top = + this.snapData?.top + 'px';
+                elementInfo.element.style.left = this.snapData?.left + 'px';
+            }
         }
     }
 
