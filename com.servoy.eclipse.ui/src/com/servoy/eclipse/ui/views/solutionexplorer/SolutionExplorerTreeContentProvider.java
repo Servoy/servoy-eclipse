@@ -2620,10 +2620,16 @@ public class SolutionExplorerTreeContentProvider
 			{
 				for (String workingSet : workingSets)
 				{
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, null, solution,
-						uiActivator.loadImageFromBundle("servoy_workingset.png"));
-					nodes.add(node);
-					node.parent = formsNode;
+					if (!referenceForms ||
+						(referenceForms && (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null &&
+							ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().hasPersistsInServoyWorkingSets(workingSet,
+								new String[] { solution.getName() }, true))))
+					{
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, null, solution,
+							uiActivator.loadImageFromBundle("servoy_workingset.png"));
+						nodes.add(node);
+						node.parent = formsNode;
+					}
 				}
 			}
 		}
