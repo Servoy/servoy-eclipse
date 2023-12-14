@@ -39,6 +39,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1128,11 +1129,10 @@ public class WarExporter
 				JarEntry je = enu.nextElement();
 				if (excludedResourcesByName != null && excludedResourcesByName.stream().anyMatch(item -> je.getName().startsWith(item))) continue;
 				if (specFilesOnly && !je.getName().endsWith(".spec") && !je.getName().endsWith("MANIFEST.MF") && !je.getName().endsWith(".json")) continue;
-				File fl = new File(destdir, je.getName());
+				File fl = Paths.get(destdir, je.getName()).normalize().toFile();
 				if (!fl.exists())
 				{
 					fl.getParentFile().mkdirs();
-					fl = new File(destdir, je.getName());
 				}
 				if (je.isDirectory())
 				{
