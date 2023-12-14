@@ -280,7 +280,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	private void downloadVersionFile() throws IOException
 	{
 		File versionFilename = new File(NGDESKTOP_PREFIX + "-archive.version");
-		File currentVersionFile = new File(LOCAL_PATH + versionFilename);
+		File currentVersionFile = Paths.get(LOCAL_PATH + versionFilename).normalize().toFile();
 		URL remoteVersionURL = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + versionFilename);
 		try (InputStream remoteStream = remoteVersionURL.openStream();
 			OutputStream localStream = new FileOutputStream(currentVersionFile))
@@ -336,7 +336,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
 			File.separator + "servoy.json";
 
-		File configFile = new File(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + configLocation);// + fileUrl);
+		File configFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + configLocation).normalize().toFile();// + fileUrl);
 		JSONObject configObject = getJsonObj(configFile, solutionUrl);
 
 		try (FileWriter file = new FileWriter(configFile);
@@ -456,7 +456,7 @@ class DownloadNgDesktop implements IRunnableWithProgress
 
 	private void deletePreviousNgDesktop() throws IOException
 	{
-		Path localPath = Paths.get(StartNGDesktopClientHandler.LOCAL_PATH);
+		Path localPath = Paths.get(StartNGDesktopClientHandler.LOCAL_PATH).normalize();
 		if (Files.exists(localPath, LinkOption.NOFOLLOW_LINKS)) //delete previous version
 		{
 			Files.walk(localPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
