@@ -85,7 +85,7 @@ public class IndexPageFilter implements Filter
 			distFolder = new File(projectFolder, "dist/app");
 			indexFile = new File(distFolder, "index.html");
 		}
-		String solutionName = getSolutionNameFromURI(requestURI);
+		String solutionName = getSolutionNameFromURI(Paths.get(requestURI).normalize());
 		if (indexFile != null && indexFile.exists())
 		{
 			if (solutionName != null &&
@@ -150,20 +150,16 @@ public class IndexPageFilter implements Filter
 	{
 	}
 
-	private String getSolutionNameFromURI(String uri)
+	private String getSolutionNameFromURI(Path path)
 	{
-		if (uri.startsWith("/designer"))
+		Path p = path;
+		if (p.startsWith("/designer"))
 		{
-			uri = uri.substring(9);
+			p = Paths.get(path.toString().substring(9));
 		}
-		if (uri.startsWith(SOLUTIONS_PATH))
+		if (p.startsWith(SOLUTIONS_PATH))
 		{
-			int solutionEndIndex = uri.indexOf("/", SOLUTIONS_PATH.length() + 1);
-			if (solutionEndIndex == -1) solutionEndIndex = uri.length();
-			String possibleSolutionName = uri.substring(SOLUTIONS_PATH.length(), solutionEndIndex);
-			// skip all names that have a . in them
-			if (possibleSolutionName.contains(".")) return null;
-			return possibleSolutionName;
+			return p.getName(1).toString();
 		}
 		return null;
 	}
