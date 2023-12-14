@@ -218,7 +218,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	private boolean archiveUpdateNeeded() throws IOException
 	{
 		String versionFilename = NGDESKTOP_PREFIX + "-archive.version";
-		File currentVersionFile = new File(LOCAL_PATH + Paths.get(versionFilename).normalize().toString());
+		File currentVersionFile = Paths.get(LOCAL_PATH + versionFilename).normalize().toFile();
 		if (!currentVersionFile.exists())
 			return true;
 		URL remoteVersionURL = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + versionFilename);
@@ -294,7 +294,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	private void deleteVersionFile()
 	{//this will enforce a new download
-		File currentVersionFile = new File(LOCAL_PATH + NGDESKTOP_PREFIX + "-archive.version");
+		File currentVersionFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + "-archive.version").normalize().toFile();
 		if (currentVersionFile.exists())
 		{
 			currentVersionFile.delete();
