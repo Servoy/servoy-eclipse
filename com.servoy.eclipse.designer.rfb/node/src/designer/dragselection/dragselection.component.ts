@@ -32,7 +32,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
     selectionRect = {top: 0, left: 0, width: 0, height: 0};
     mousedownpoint = {x: 0, y: 0};
     mouseOffset = {top: 0, left: 0}; //autoscroll limits will refer to this parameter
-    snapData: {top: number, left: number, snapX?: string, snapY?: string, cssPosition: { property: string } };
+    snapData: {top: number, left: number, snapX?:  { property: string } , snapY?:  { property: string } , cssPosition: { property: string } };
 
   constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private readonly designerUtilsService: DesignerUtilsService, private editorContentService : EditorContentService) { }
 

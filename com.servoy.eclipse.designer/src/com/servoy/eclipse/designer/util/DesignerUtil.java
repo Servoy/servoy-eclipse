@@ -704,13 +704,20 @@ public class DesignerUtil
 		}
 		if (obj.has("left"))
 		{
+			JSONObject jsonObject = obj.getJSONObject("left");
 			ISupportCSSPosition left = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
-				obj.optString("left")));
+				jsonObject.optString("uuid")));
 			if (left != null)
 			{
-				if (CSSPositionUtils.isSet(left.getCssPosition().left))
+				String value = getCssValue(left.getCssPosition(), jsonObject.optString("prop", "left"));
+				if (CSSPositionUtils.isSet(value))
 				{
-					newPosition.left = left.getCssPosition().left;
+					newPosition.left = value;
+				}
+				else if ("right".equals(jsonObject.optString("prop")))
+				{
+					newPosition.left = CSSPositionUtils.getPixelsValue(left.getCssPosition().left) +
+						CSSPositionUtils.getPixelsValue(left.getCssPosition().width) + "";
 				}
 				else
 				{
@@ -728,13 +735,20 @@ public class DesignerUtil
 		}
 		else if (obj.has("right"))
 		{
+			JSONObject jsonObject = obj.getJSONObject("right");
 			ISupportCSSPosition right = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
-				obj.optString("right")));
+				jsonObject.optString("uuid")));
 			if (right != null)
 			{
-				if (CSSPositionUtils.isSet(right.getCssPosition().right))
+				String value = getCssValue(right.getCssPosition(), jsonObject.optString("prop", "right"));
+				if (CSSPositionUtils.isSet(value))
 				{
-					newPosition.right = right.getCssPosition().right;
+					newPosition.left = value;
+				}
+				else if ("left".equals(jsonObject.optString("prop")))
+				{
+					newPosition.right = CSSPositionUtils.getPixelsValue(right.getCssPosition().right) -
+						CSSPositionUtils.getPixelsValue(right.getCssPosition().width) + "";
 				}
 				else
 				{
@@ -752,8 +766,9 @@ public class DesignerUtil
 		}
 		else if (obj.has("middleH"))
 		{
+			JSONObject jsonObject = obj.getJSONObject("middleH");
 			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
-				obj.optString("middleH")));
+				jsonObject.optString("uuid")));
 			if (middle != null)
 			{
 				CSSPosition midCssPosition = middle.getCssPosition();
@@ -792,13 +807,20 @@ public class DesignerUtil
 
 		if (obj.has("top"))
 		{
+			JSONObject jsonObject = obj.getJSONObject("top");
 			ISupportCSSPosition top = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
-				obj.optString("top")));
+				jsonObject.optString("uuid")));
 			if (top != null)
 			{
-				if (CSSPositionUtils.isSet(top.getCssPosition().top))
+				String value = getCssValue(top.getCssPosition(), jsonObject.optString("prop", "top"));
+				if (CSSPositionUtils.isSet(value))
 				{
-					newPosition.top = top.getCssPosition().top;
+					newPosition.top = value;
+				}
+				else if ("bottom".equals(jsonObject.optString("prop")))
+				{
+					newPosition.top = CSSPositionUtils.getPixelsValue(top.getCssPosition().top) +
+						CSSPositionUtils.getPixelsValue(top.getCssPosition().height) + "";
 				}
 				else
 				{
@@ -816,13 +838,20 @@ public class DesignerUtil
 		}
 		else if (obj.has("bottom"))
 		{
+			JSONObject jsonObject = obj.getJSONObject("bottom");
 			ISupportCSSPosition bottom = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
-				obj.optString("bottom")));
+				jsonObject.optString("uuid")));
 			if (bottom != null)
 			{
-				if (CSSPositionUtils.isSet(bottom.getCssPosition().bottom))
+				String value = getCssValue(bottom.getCssPosition(), jsonObject.optString("prop", "bottom"));
+				if (CSSPositionUtils.isSet(value))
 				{
-					newPosition.bottom = bottom.getCssPosition().bottom;
+					newPosition.bottom = value;
+				}
+				else if ("top".equals(jsonObject.optString("prop")))
+				{
+					newPosition.bottom = CSSPositionUtils.getPixelsValue(bottom.getCssPosition().bottom) -
+						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height) + "";
 				}
 				else
 				{
@@ -840,8 +869,9 @@ public class DesignerUtil
 		}
 		else if (obj.has("middleV"))
 		{
+			JSONObject jsonObject = obj.getJSONObject("middleV");
 			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
-				obj.optString("middleV")));
+				jsonObject.optString("uuid")));
 			if (middle != null)
 			{
 				CSSPosition midCssPosition = middle.getCssPosition();
@@ -921,5 +951,23 @@ public class DesignerUtil
 			}
 		}
 		return newPosition;
+	}
+
+	private static String getCssValue(CSSPosition position, String property)
+	{
+		if (position == null) return "-1";
+		switch (property)
+		{
+			case "left" :
+				return position.left;
+			case "right" :
+				return position.right;
+			case "top" :
+				return position.top;
+			case "bottom" :
+				return position.bottom;
+			default :
+				return "-1";
+		}
 	}
 }

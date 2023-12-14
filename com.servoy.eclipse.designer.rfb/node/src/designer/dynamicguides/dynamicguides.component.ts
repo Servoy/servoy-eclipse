@@ -16,7 +16,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     previousPoint: {x: number, y: number};
     topAdjust: any;
     leftAdjust: number;
-    snapData: {top: number, left: number, guideX?: number, guideY?: number, snapX?: string, snapY?: string};  
+    snapData: {top: number, left: number, guideX?: number, guideY?: number, snapX?:  { property: string } , snapY?:  { property: string } };  
 
     constructor(protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2,
          private urlParser: URLParserService, private editorContentService: EditorContentService) {
