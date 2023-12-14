@@ -21,6 +21,8 @@ import static com.servoy.j2db.server.ngclient.AngularIndexPageWriter.addcontentS
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -119,7 +121,8 @@ public class IndexPageFilter implements Filter
 			}
 			else
 			{
-				File file = new File(distFolder, requestURI);
+				Path normalize = Paths.get(requestURI).normalize();
+				File file = new File(distFolder, normalize.toString());
 				if (file.exists() && !file.isDirectory() & !file.getName().equals("favicon.ico"))
 				{
 					String contentType = MimeTypes.guessContentTypeFromName(requestURI);
