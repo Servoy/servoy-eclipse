@@ -726,7 +726,7 @@ public class DesignerUtil
 					{
 						newPosition.left = l + "";
 					}
-					else
+					else if (isResize)
 					{
 						newPosition.width = CSSPositionUtils.getPixelsValue(position.right) - l + "";
 					}
@@ -743,7 +743,7 @@ public class DesignerUtil
 				String value = getCssValue(right.getCssPosition(), jsonObject.optString("prop", "right"));
 				if (CSSPositionUtils.isSet(value))
 				{
-					newPosition.left = value;
+					newPosition.right = value;
 				}
 				else if ("left".equals(jsonObject.optString("prop")))
 				{
@@ -752,12 +752,15 @@ public class DesignerUtil
 				}
 				else
 				{
-					int r = CSSPositionUtils.getPixelsValue(right.getCssPosition().left) + CSSPositionUtils.getPixelsValue(right.getCssPosition().width);
+					AbstractContainer parent = CSSPositionUtils.getParentContainer(right);
+					java.awt.Dimension containerSize = parent.getSize();
+					int r = containerSize.width - CSSPositionUtils.getPixelsValue(right.getCssPosition().left) -
+						CSSPositionUtils.getPixelsValue(right.getCssPosition().width);
 					if (position == null || CSSPositionUtils.isSet(position.right))
 					{
 						newPosition.right = r + "";
 					}
-					else
+					else if (isResize)
 					{
 						newPosition.width = r - CSSPositionUtils.getPixelsValue(position.left) + "";
 					}
@@ -829,7 +832,7 @@ public class DesignerUtil
 					{
 						newPosition.top = t + "";
 					}
-					else
+					else if (isResize)
 					{
 						newPosition.height = CSSPositionUtils.getPixelsValue(position.bottom) - t + "";
 					}
@@ -855,12 +858,15 @@ public class DesignerUtil
 				}
 				else
 				{
-					int b = CSSPositionUtils.getPixelsValue(bottom.getCssPosition().top) + CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height);
+					AbstractContainer parent = CSSPositionUtils.getParentContainer(bottom);
+					java.awt.Dimension containerSize = parent.getSize();
+					int b = containerSize.height - CSSPositionUtils.getPixelsValue(bottom.getCssPosition().top) -
+						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height);
 					if (position == null || CSSPositionUtils.isSet(position.bottom))
 					{
 						newPosition.bottom = b + "";
 					}
-					else
+					else if (isResize)
 					{
 						newPosition.height = b - CSSPositionUtils.getPixelsValue(position.top) + "";
 					}
@@ -916,7 +922,7 @@ public class DesignerUtil
 		{
 			if (isResize)
 			{
-				if (properties.getJSONObject("cssPosition").has("right"))
+				if (properties.getJSONObject("cssPos").has("right"))
 				{
 					newPosition.left = "-1";
 				}
@@ -936,7 +942,7 @@ public class DesignerUtil
 		{
 			if (isResize)
 			{
-				if (properties.getJSONObject("cssPosition").has("bottom"))
+				if (properties.getJSONObject("cssPos").has("bottom"))
 				{
 					newPosition.top = "-1";
 				}
