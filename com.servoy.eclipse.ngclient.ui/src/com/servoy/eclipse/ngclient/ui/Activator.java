@@ -3,6 +3,7 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -113,7 +114,7 @@ public class Activator extends Plugin
 		{
 			value = System.getenv(propertyName);
 		}
-		return value;
+		return value != null ? Paths.get(value).normalize().toString() : null;
 	}
 
 	public void extractNode()
