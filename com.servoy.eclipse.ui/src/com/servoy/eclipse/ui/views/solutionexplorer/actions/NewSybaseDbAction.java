@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -146,7 +147,7 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 
 			monitor.setTaskName("Attempting to create database...");
 			//2. create the database
-			File databaseFile = new File(path);
+			File databaseFile = Paths.get(path).normalize().toFile();
 			if (!databaseFile.exists())
 			{
 				try
@@ -200,7 +201,7 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 			try
 			{
 				// path is string of db file, assume config file is in sibling directory sybase_db
-				File dbFile = new File(path);
+				File dbFile = Paths.get(path).normalize().toFile();
 				File databaseDirectory = dbFile.getParentFile();
 				File sybaseDirectory = databaseDirectory.getParentFile();
 				File sybaseConfig = new File(sybaseDirectory, "sybase_db/sybase.config");
