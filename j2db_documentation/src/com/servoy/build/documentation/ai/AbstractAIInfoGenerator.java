@@ -106,7 +106,7 @@ public abstract class AbstractAIInfoGenerator
 //		MarkdownGenerator.generateCoreAndPluginDocs(jsLibURI, servoyDocURI, designDocURI, pluginDirURI, infoFromJavaAPIXMLsGenerator);
 
 		// ng package dirs listed in text file ngPackagesFileLocationsURI -> info source text (to be embedded)
-		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(ngPackagesFileLocationsURI));
+		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(ngPackagesFileLocationsURI).normalize());
 		SpecMarkdownGenerator.generateNGComponentOrServicePackageContentForDir(true, ngPackageDirsToScan.toArray(new String[ngPackageDirsToScan.size()]),
 			infoFromNGPackagesGenerator,
 			Map.of("referenceDate", DATE_OF_REFERENCE_FORMATTED, "trainingFootprint", TRAINING_FOOTPRINT, "utils", utilityObjectForTemplates));
