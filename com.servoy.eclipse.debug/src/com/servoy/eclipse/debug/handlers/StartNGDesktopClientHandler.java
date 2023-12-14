@@ -218,7 +218,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	private boolean archiveUpdateNeeded() throws IOException
 	{
 		String versionFilename = NGDESKTOP_PREFIX + "-archive.version";
-		File currentVersionFile = new File(LOCAL_PATH + versionFilename);
+		File currentVersionFile = new File(LOCAL_PATH + Paths.get(versionFilename).normalize().toString());
 		if (!currentVersionFile.exists())
 			return true;
 		URL remoteVersionURL = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + versionFilename);
