@@ -88,7 +88,7 @@ public class ZipUtils
 				String outFilename = entry.getName();
 
 				// Open the output file
-				File extracted = new File(destination, outFilename);
+				File extracted = new File(destination, Paths.get(outFilename).normalize().toString());
 				if (entry.isDirectory())
 				{
 					extracted.mkdirs();
