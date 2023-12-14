@@ -369,7 +369,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (key === uuid) continue;
             if ((coordinate > value - this.snapThreshold) && (coordinate < value + this.snapThreshold)) {
                 //return the first component id that matches the coordinate
-                return key;
+                return {uuid: key};
             }
         }
         return null;        
@@ -393,12 +393,15 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (!uuid && !this.draggedElementItem) return properties;
 
             properties.snapX = this.isSnapInterval(uuid, rect.left, this.leftPos);
-            if (properties.snapX) {
-                properties.left = this.leftPos.get(properties.snapX);
+            if (properties.snapX?.uuid) {
+                properties.left = this.leftPos.get(properties.snapX.uuid);
             }
             else {
                 properties.snapX = this.isSnapInterval(uuid, rect.left, this.rightPos);
-                properties.left = properties.snapX ? this.rightPos.get(properties.snapX) : properties.left;
+                if (properties.snapX?.uuid) {
+                    properties.left =  this.rightPos.get(properties.snapX.uuid);
+                    properties.snapX.prop = 'right';
+                }
             }
             
             if (properties.snapX) {
@@ -408,12 +411,15 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             else {
                 properties.snapX = this.isSnapInterval(uuid, rect.right, this.rightPos);
-                properties.guideX = this.rightPos.get(properties.snapX);
-                properties.left = properties.snapX ? this.rightPos.get(properties.snapX) : properties.left;
+                properties.guideX = this.rightPos.get(properties.snapX?.uuid);
+                properties.left = properties.snapX ? this.rightPos.get(properties.snapX.uuid) : properties.left;
                 if (!properties.snapX) { 
                     properties.snapX = this.isSnapInterval(uuid, rect.right, this.leftPos);
-                    properties.left = properties.snapX ? this.leftPos.get(properties.snapX) : properties.left;
-                    properties.guideX = this.leftPos.get(properties.snapX);
+                    if (properties.snapX?.uuid) {
+                        properties.left =  this.leftPos.get(properties.snapX.uuid);
+                        properties.snapX.prop = 'left';
+                        properties.guideX = this.leftPos.get(properties.snapX.uuid);
+                    }
                 }
                 if (properties.snapX){
                     properties.cssPosition['right'] = properties.snapX;
@@ -424,31 +430,34 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     properties.snapX = this.isSnapInterval(uuid, (rect.left+rect.right)/2, this.middleH);
                     if (properties.snapX){
                         properties.cssPosition['middleH'] = properties.snapX;
-                        properties.left = this.middleH.get(properties.snapX) - rect.width/2;
-                        properties.guideX = this.middleH.get(properties.snapX);
+                        properties.left = this.middleH.get(properties.snapX.uuid) - rect.width/2;
+                        properties.guideX = this.middleH.get(properties.snapX.uuid);
                     }
                 }
             }
 
             if (properties.snapX) {
                 //guide info
-                if (this.topPos.get(properties.snapX) < rect.top) {
-                    properties.startX = this.topPos.get(properties.snapX);  
+                if (this.topPos.get(properties.snapX.uuid) < rect.top) {
+                    properties.startX = this.topPos.get(properties.snapX.uuid);  
                     properties.lenX = rect.bottom - properties.startX;
                 }
                 else {
                     properties.startX = rect.top;  
-                    properties.lenX = this.topPos.get(properties.snapX) - properties.startX;
+                    properties.lenX = this.topPos.get(properties.snapX.uuid) - properties.startX;
                 }
             }
                 
             properties.snapY = this.isSnapInterval(uuid, rect.top, this.topPos);
-            if (properties.snapY) {
-                properties.top = this.topPos.get(properties.snapY);
+            if (properties.snapY?.uuid) {
+                properties.top = this.topPos.get(properties.snapY.uuid);
             }
             else {
                 properties.snapY = this.isSnapInterval(uuid, rect.top, this.bottomPos);
-                properties.top = properties.snapY ? this.bottomPos.get(properties.snapY) : properties.top;
+                if (properties.snapY?.uuid) {
+                    properties.top =  this.bottomPos.get(properties.snapY.uuid);
+                    properties.snapY.prop = 'bottom';
+                }
             }
             
             if (properties.snapY) {
@@ -457,12 +466,17 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             else {
                 properties.snapY = this.isSnapInterval(uuid, rect.bottom, this.bottomPos);
-                properties.guideY = this.bottomPos.get(properties.snapY);
-                properties.top = properties.snapY ? this.bottomPos.get(properties.snapY) : properties.top;
+                if (properties.snapY?.uuid) {
+                    properties.guideY = this.bottomPos.get(properties.snapY.uuid);
+                    properties.top = properties.snapY ? this.bottomPos.get(properties.snapY.uuid) : properties.top;
+                }
                 if (!properties.snapY){
                     properties.snapY = this.isSnapInterval(uuid, rect.bottom, this.topPos);
-                    properties.top = properties.snapY ? this.topPos.get(properties.snapY) : properties.top;
-                    properties.guideY = this.topPos.get(properties.snapY);
+                    if (properties.snapY?.uuid) {
+                        properties.top = this.topPos.get(properties.snapY.uuid);
+                        properties.snapY.prop = 'top';
+                        properties.guideY = this.topPos.get(properties.snapY.uuid);
+                    }
                 }
                 if (properties.snapY) {
                     properties.cssPosition['bottom'] = properties.snapY;
@@ -470,23 +484,23 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 }
                 else {
                     properties.snapY = this.isSnapInterval(uuid, (rect.top + rect.bottom)/2, this.middleV);
-                    if (properties.snapY){
+                    if (properties.snapY?.uuid){
                         properties.cssPosition['middleV'] = properties.snapY;
-                        properties.top = this.middleV.get(properties.snapY) - rect.height/2;
-                        properties.guideY = this.middleV.get(properties.snapY);
+                        properties.top = this.middleV.get(properties.snapY.uuid) - rect.height/2;
+                        properties.guideY = this.middleV.get(properties.snapY.uuid);
                     }
                 }
             }
             
             if (properties.snapY) {
                 //guide info
-                if (this.leftPos.get(properties.snapY) < rect.left) {
-                    properties.startY = this.leftPos.get(properties.snapY);  
+                if (this.leftPos.get(properties.snapY.uuid) < rect.left) {
+                    properties.startY = this.leftPos.get(properties.snapY.uuid);  
                     properties.lenY = rect.right - properties.startY;
                 }
                 else {
                     properties.startY = rect.left;  
-                    properties.lenY = this.leftPos.get(properties.snapY) - properties.startY;
+                    properties.lenY = this.leftPos.get(properties.snapY.uuid) - properties.startY;
                 }
             }
 
