@@ -231,7 +231,7 @@ public class MarkdownGenerator
 			docGenerator.generateDocsFromXML(manager, "/design-api", ngOnly);
 
 			System.err.println("  - plugins (from " + pluginDir + "):");
-			File file2 = new File(new URI(pluginDir));
+			File file2 = new File(new URI(pluginDir).normalize());
 			if (file2.isDirectory())
 			{
 				// this is an directory with jars
