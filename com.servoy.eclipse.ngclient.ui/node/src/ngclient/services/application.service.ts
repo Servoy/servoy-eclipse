@@ -14,7 +14,7 @@ import { FileUploadWindowComponent } from './file-upload-window/file-upload-wind
 import { MessageDialogWindowComponent } from './message-dialog-window/message-dialog-window.component';
 import { LocaleService } from '../locale.service';
 import { ServerDataService } from './serverdata.service';
-import {AlertWindowComponent} from "./alert-window/alert-window.component";
+import { AlertWindowComponent } from "./alert-window/alert-window.component";
 import { resolve } from 'path';
 import { reject } from 'lodash-es';
 
@@ -44,7 +44,7 @@ export class ApplicationService {
     public setStyleSheets(paths: string[]) {
         // this can be called multiple times; e.g. overrideStyle, so delete the old ones
         this.doc.head.querySelectorAll('link').forEach(link => {
-            if (link.getAttribute('svy-stylesheet')){
+            if (link.getAttribute('svy-stylesheet')) {
                 link.remove();
             }
         });
@@ -92,7 +92,7 @@ export class ApplicationService {
         } else if (key === ClientPropertyConstants.FIRST_DAY_OF_WEEK) {
             setFirstDayOfWeek(value);
         }
-        
+
     }
 
     public setUIProperties(properties: { [property: string]: string }) {
@@ -106,37 +106,37 @@ export class ApplicationService {
     }
 
     public showMessage(message: string) {
-        const alertWindowComponent= this.mainViewRefService.mainContainer.createComponent(AlertWindowComponent);
+        const alertWindowComponent = this.mainViewRefService.mainContainer.createComponent(AlertWindowComponent);
         alertWindowComponent.instance.message = message;
         const origin: string = this.windowRefService.nativeWindow.location.origin;
         alertWindowComponent.instance.title = origin.substring(origin.indexOf('://') + 3);;
 
         const opt: BSWindowOptions = {
-          id: 'svyalert',
-          fromElement: alertWindowComponent.location.nativeElement.childNodes[0],
-          title: '',
-          resizable: false,
-          isModal: true
+            id: 'svyalert',
+            fromElement: alertWindowComponent.location.nativeElement.childNodes[0],
+            title: '',
+            resizable: false,
+            isModal: true
         };
 
         const bsWindowInstance = this.bsWindowManager.createWindow(opt);
         alertWindowComponent.instance.setOnCloseCallback(() => {
-          bsWindowInstance.close();
-          alertWindowComponent.destroy();
+            bsWindowInstance.close();
+            alertWindowComponent.destroy();
         });
         bsWindowInstance.setActive(true);
 
         this.adjustDialogPosition();
     }
 
-  private adjustDialogPosition() {
-      //maintain alert-dialog in the center of the browser
-      const dialog: HTMLElement = document.querySelector('.svy-alert') as HTMLElement;
-      const windowHeight = window.innerHeight;
-      const dialogHeight = dialog.offsetHeight;
-      const topOffset = Math.max((windowHeight - dialogHeight) / 2, 0);
-      dialog.style.top = topOffset + 'px';
-  }
+    private adjustDialogPosition() {
+        //maintain alert-dialog in the center of the browser
+        const dialog: HTMLElement = document.querySelector('.svy-alert') as HTMLElement;
+        const windowHeight = window.innerHeight;
+        const dialogHeight = dialog.offsetHeight;
+        const topOffset = Math.max((windowHeight - dialogHeight) / 2, 0);
+        dialog.style.top = topOffset + 'px';
+    }
 
     public showUrl(pUrl: string, target: string, targetOptions: string, timeout: number) {
         let url = pUrl;
@@ -162,11 +162,19 @@ export class ApplicationService {
                     this.doc.body.appendChild(ifrm);
                 }
             } else {
-				 if (target == '_self' && this.isNgdesktopWithTargetSupport(this.windowRefService.nativeWindow.navigator.userAgent)) {
+                if (target == '_self' && this.isNgdesktopWithTargetSupport(this.windowRefService.nativeWindow.navigator.userAgent)) {
                     const r = this.windowRefService.nativeWindow['require'];
                     const ipcRenderer = r('electron').ipcRenderer;
                     ipcRenderer.send('open-url-with-target', this.getAbsoluteUrl(url));
-                } else {
+                } else if (target === '_blank' && !targetOptions && url.indexOf(this.windowRefService.nativeWindow.location.hostname) >= 0) {
+                    const a = this.doc.createElement('a');
+                    a.href = url;
+                    a.target = '_blank';
+                    this.doc.body.appendChild(a);
+                    a.click();
+                    this.doc.body.removeChild(a);
+                }
+                else {
                     this.windowRefService.nativeWindow.open(url, target, targetOptions);
 
                 }
@@ -186,12 +194,12 @@ export class ApplicationService {
         return !(/^(?:[a-z]+:)?\/\//i.test(url));
     }
 
-	private isNgdesktopWithTargetSupport(userAgent: string) {
+    private isNgdesktopWithTargetSupport(userAgent: string) {
         const electronVersion = userAgent.match(/Electron\/([0-9\.]+)/);
         if (!electronVersion) {
             return false;
         }
-        
+
         const compare = this.compareVersions(electronVersion[1], this.minElectronVersion);
         return compare >= 0; // true if electronVersion >= this.minElectronVersion (24.4.0)
     }
@@ -199,7 +207,7 @@ export class ApplicationService {
     private compareVersions(v1: string, v2: string): number {
         let v1tokens = v1.split('.').map(Number);
         let v2tokens = v2.split('.').map(Number);
-    
+
         for (let i = 0; i < v1tokens.length; ++i) {
             if (v1tokens[i] > v2tokens[i]) {
                 return 1;
@@ -292,16 +300,16 @@ export class ApplicationService {
             this.showDefaultLoginWindow();
         }
     }
-        
+
     public clearDefaultLoginCredentials() {
-    	this.localStorageService.remove('servoy_username');
+        this.localStorageService.remove('servoy_username');
         this.localStorageService.remove('servoy_password');
         this.localStorageService.remove('servoy_id_token');
     }
-    
-    public rememberUser(u: {username: string, id_token: string} ) {
-    	this.localStorageService.set('servoy_username', u.username);
-    	this.localStorageService.set('servoy_id_token', u.id_token);
+
+    public rememberUser(u: { username: string, id_token: string }) {
+        this.localStorageService.set('servoy_username', u.username);
+        this.localStorageService.set('servoy_id_token', u.id_token);
     }
 
     public showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string) {
