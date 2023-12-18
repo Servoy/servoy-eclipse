@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -48,7 +49,7 @@ public class ResourcesServlet extends HttpServlet
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
 	{
-		String path = req.getPathInfo();
+		String path = Paths.get(req.getPathInfo()).normalize().toString().replace('\\', '/');
 		
 		if(path.startsWith("/action/"))
 		{
@@ -76,7 +77,8 @@ public class ResourcesServlet extends HttpServlet
 		}
 		else
 		{
-			path = req.getServletPath() + path;
+			
+			path = Paths.get(req.getServletPath()).normalize().toString().replace('\\', '/') + path;
 			URL res = getClass().getResource(path);
 			if (res != null)
 			{
