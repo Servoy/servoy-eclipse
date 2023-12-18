@@ -713,11 +713,13 @@ public class DesignerUtil
 				if (CSSPositionUtils.isSet(value))
 				{
 					newPosition.left = value;
+					if (CSSPositionUtils.isSet(newPosition.right)) newPosition.right = "-1";
 				}
 				else if ("right".equals(jsonObject.optString("prop")))
 				{
 					newPosition.left = CSSPositionUtils.getPixelsValue(left.getCssPosition().left) +
 						CSSPositionUtils.getPixelsValue(left.getCssPosition().width) + "";
+					if (CSSPositionUtils.isSet(newPosition.right)) newPosition.right = "-1";
 				}
 				else
 				{
@@ -744,12 +746,13 @@ public class DesignerUtil
 				if (CSSPositionUtils.isSet(value))
 				{
 					newPosition.right = value;
+					if (CSSPositionUtils.isSet(newPosition.left)) newPosition.left = "-1";
 				}
-				else if ("left".equals(jsonObject.optString("prop")))
-				{
-					newPosition.right = CSSPositionUtils.getPixelsValue(right.getCssPosition().right) -
-						CSSPositionUtils.getPixelsValue(right.getCssPosition().width) + "";
-				}
+//				else if ("left".equals(jsonObject.optString("prop")))
+//				{
+//					newPosition.right = CSSPositionUtils.getPixelsValue(right.getCssPosition().right) -
+//						CSSPositionUtils.getPixelsValue(right.getCssPosition().width) + "";
+//				}
 				else
 				{
 					AbstractContainer parent = CSSPositionUtils.getParentContainer(right);
@@ -819,11 +822,13 @@ public class DesignerUtil
 				if (CSSPositionUtils.isSet(value))
 				{
 					newPosition.top = value;
+					if (CSSPositionUtils.isSet(newPosition.bottom)) newPosition.bottom = "-1";
 				}
 				else if ("bottom".equals(jsonObject.optString("prop")))
 				{
 					newPosition.top = CSSPositionUtils.getPixelsValue(top.getCssPosition().top) +
 						CSSPositionUtils.getPixelsValue(top.getCssPosition().height) + "";
+					if (CSSPositionUtils.isSet(newPosition.bottom)) newPosition.bottom = "-1";
 				}
 				else
 				{
@@ -850,12 +855,13 @@ public class DesignerUtil
 				if (CSSPositionUtils.isSet(value))
 				{
 					newPosition.bottom = value;
+					if (CSSPositionUtils.isSet(newPosition.top)) newPosition.top = "-1";
 				}
-				else if ("top".equals(jsonObject.optString("prop")))
-				{
-					newPosition.bottom = CSSPositionUtils.getPixelsValue(bottom.getCssPosition().bottom) -
-						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height) + "";
-				}
+//				else if ("top".equals(jsonObject.optString("prop")))
+//				{
+//					newPosition.bottom = CSSPositionUtils.getPixelsValue(bottom.getCssPosition().bottom) -
+//						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height) + "";
+//				}
 				else
 				{
 					AbstractContainer parent = CSSPositionUtils.getParentContainer(bottom);
