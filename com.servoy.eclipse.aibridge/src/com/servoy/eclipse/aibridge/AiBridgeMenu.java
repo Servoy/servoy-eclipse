@@ -27,7 +27,7 @@ public class AiBridgeMenu extends CompoundContributionItem
 			return new IContributionItem[0];
 		}
 
-		MenuManager subMenuManager = new MenuManager("AI Bridge", "com.servoy.eclipse.aibridge.submenu");
+		MenuManager subMenuManager = new MenuManager("Servoy AI", "com.servoy.eclipse.aibridge.submenu");
 
 		CommandContributionItemParameter explainParam = new CommandContributionItemParameter(
 			window,

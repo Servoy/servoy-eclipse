@@ -86,6 +86,7 @@ public class AiBridgeManager
 				try
 				{
 					requestMap.put(uuid, completion);
+					AiBridgeView.setSelectionId(uuid);
 					AiBridgeView.refresh();
 					completion = sendHttpRequest(loginToken, completion);
 
@@ -99,6 +100,7 @@ public class AiBridgeManager
 				finally
 				{
 					saveCompletion(AiBridgeView.getSolutionName(), uuid, completion);
+					AiBridgeView.setSelectionId(uuid);
 					AiBridgeView.refresh();
 				}
 			}, executorService);
@@ -121,6 +123,7 @@ public class AiBridgeManager
 					myCompletion.setStatus(AiBridgeStatus.SUBMITTED);
 					myCompletion.setResponse(new Response());
 					myCompletion.setMessage("Processing...");
+					AiBridgeView.setSelectionId(myCompletion.getId());
 					AiBridgeView.refresh();
 					myCompletion = sendHttpRequest(loginToken, myCompletion);
 				}
@@ -133,6 +136,7 @@ public class AiBridgeManager
 				finally
 				{
 					saveCompletion(AiBridgeView.getSolutionName(), myCompletion.getId(), myCompletion);
+					AiBridgeView.setSelectionId(myCompletion.getId());
 					AiBridgeView.refresh();
 
 				}
@@ -296,29 +300,36 @@ public class AiBridgeManager
 
 	public void loadData(String solutionName)
 	{
+		//this is called at developer's startup; for now we avoid persistence beteen restarts
+
 		Path directoryPath = Paths.get(aiBridgePath + File.separator + solutionName);
 
 		try
 		{
 			requestMap.clear();
-			if (Files.exists(directoryPath))
+			if (Files.exists(directoryPath) && Files.isDirectory(directoryPath))
 			{
-				try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryPath, "*.json"))
+//				try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryPath, "*.json"))
+				try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryPath))
 				{
 					for (Path entry : stream)
 					{
-						String json = new String(Files.readAllBytes(entry));
-						String fileName = entry.getFileName().toString();
-						UUID uuid = UUID.fromString(fileName.substring(0, fileName.length() - 5)); // Remove ".json"
-						Completion completion = mapper.readValue(json, Completion.class);
-						completion = completion.partialReset();
-						if (AiBridgeStatus.SUBMITTED.equals(completion.getStatus()))
+						if (Files.isRegularFile(entry))
 						{
-							//messages just submitted and with no response
-							completion.setStatus(AiBridgeStatus.INCOMPLETE);
-							completion.setMessage("Stopped...");
+							Files.delete(entry);
 						}
-						requestMap.put(uuid, completion);
+//						String json = new String(Files.readAllBytes(entry));
+//						String fileName = entry.getFileName().toString();
+//						UUID uuid = UUID.fromString(fileName.substring(0, fileName.length() - 5)); // Remove ".json"
+//						Completion completion = mapper.readValue(json, Completion.class);
+//						completion = completion.partialReset();
+//						if (AiBridgeStatus.SUBMITTED.equals(completion.getStatus()))
+//						{
+//							//messages just submitted and with no response
+//							completion.setStatus(AiBridgeStatus.INCOMPLETE);
+//							completion.setMessage("Stopped...");
+//						}
+//						requestMap.put(uuid, completion);
 					}
 				}
 			}

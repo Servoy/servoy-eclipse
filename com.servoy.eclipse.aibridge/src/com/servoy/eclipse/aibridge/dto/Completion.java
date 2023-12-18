@@ -59,6 +59,7 @@ public class Completion
 		this.selectionTokens = tokenizer.countTokens(selection);
 		this.contextTokens = tokenizer.countTokens(context);
 		this.tokensCount = tokenizer.countTokens(selection + context);
+		this.response = new Response("Processing ...");
 	}
 
 	public UUID getId()
@@ -91,6 +92,8 @@ public class Completion
 	public void setSelection(String selection)
 	{
 		this.selection = selection;
+		if (tokenizer == null) tokenizer = AiBridgeTokenizer.getInstance();
+		this.tokensCount = tokenizer.countTokens(selection + context);
 	}
 
 
@@ -103,6 +106,8 @@ public class Completion
 	public void setContext(String context)
 	{
 		this.context = context;
+		if (tokenizer == null) tokenizer = AiBridgeTokenizer.getInstance();
+		this.tokensCount = tokenizer.countTokens(selection + context);
 	}
 
 
@@ -198,6 +203,7 @@ public class Completion
 	public void setSelectionTokensCount(int tokensCount)
 	{
 		this.selectionTokens = tokensCount;
+		this.tokensCount = this.selectionTokens + contextTokens;
 	}
 
 	public int getSelectionTokensCount()
@@ -208,6 +214,7 @@ public class Completion
 	public void setContextTokensCount(int tokensCount)
 	{
 		this.contextTokens = tokensCount;
+		this.tokensCount = selectionTokens + this.contextTokens;
 	}
 
 	public int getContextTokensCount()

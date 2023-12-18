@@ -7,13 +7,16 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.servoy.eclipse.aibridge.AiBridgeView;
 import com.servoy.eclipse.aibridge.dto.Completion;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
@@ -28,7 +31,9 @@ public class OpenSourceAction extends Action implements ISelectionListener
 	public OpenSourceAction()
 	{
 		super("Open Source", SWT.PUSH);
-		ImageDescriptor splitViewImageDescriptor = AbstractUIPlugin.imageDescriptorFromPlugin("com.servoy.eclipse.aibridge", "icons/editor.png");
+		boolean isDarkTheme = IconPreferences.getInstance().getUseDarkThemeIcons();
+		String iconPath = isDarkTheme ? "darkicons/editor.png" : "icons/editor.png";
+		ImageDescriptor splitViewImageDescriptor = AbstractUIPlugin.imageDescriptorFromPlugin("com.servoy.eclipse.aibridge", iconPath);
 		setImageDescriptor(splitViewImageDescriptor);
 		setEnabled(true);
 	}
@@ -45,8 +50,11 @@ public class OpenSourceAction extends Action implements ISelectionListener
 		String[] pathParts = extractPathParts(completion.getSourcePath());
 		Solution targetSolution = locateTargetSolution(pathParts[0]);
 		assignPersistAndScopeName(pathParts, targetSolution);
-		EditorUtil.openScriptEditor(persist, scopeName, true);
-
+		IEditorPart editorPart = EditorUtil.openScriptEditor(persist, scopeName, true);
+		if (editorPart instanceof ITextEditor textEditor)
+		{
+			textEditor.selectAndReveal(completion.getSelectionOffset(), 0); //do not select anything by default
+		}
 	}
 
 	private String[] extractPathParts(String selectionPath)

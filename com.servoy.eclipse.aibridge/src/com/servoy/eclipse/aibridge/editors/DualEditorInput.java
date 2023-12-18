@@ -181,7 +181,7 @@ public class DualEditorInput implements IEditorInput
 
 	public static String getNoContentHtml()
 	{
-		return "<html><body><h2 style=\"text-align:center;\">...</h2></body></html>";
+		return "<html><body><br><br><br><h1 style=\"text-align:center;\">. . .</h1></body></html>";
 	}
 
 	public UUID getId()
