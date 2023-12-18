@@ -152,7 +152,8 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 			{
 				try
 				{
-					ps = connection.prepareStatement("create database '" + path + "' collation 'UTF8'");
+					ps = connection.prepareStatement("create database ? collation 'UTF8'");
+					ps.setString(1, path);
 					ps.execute();
 					ps.close();
 					ps = null;
@@ -182,7 +183,8 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 			//3. attempt to start the database
 			try
 			{
-				ps = connection.prepareStatement("start database '" + path + "'");
+				ps = connection.prepareStatement("start database ?");
+				ps.setString(1, path);
 				ps.execute();
 				ps.close();
 				ps = null;
