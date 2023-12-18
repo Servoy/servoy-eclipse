@@ -67,13 +67,13 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 	private SashForm sashForm;
 	private static TableViewer viewer;
 	private static AiBridgeView currentInstance;
-	private final String[] titles = { "Id", "Type", "Status", "Date", "Request", "Response", "Tokens count", "Duration" };
+	private final String[] titles = { "Type", "Request", "Response", "Status", "Duration", "Date" };
 	private final int[] columnWidths = new int[titles.length];
 	private Menu contextMenu;
 	private static volatile String solutionName = null;
 	private static volatile UUID selectionId = null;
 
-	int[] defaultWidth = { 60, 100, 100, 150, 300, 300, 100, 100 };
+	int[] defaultWidth = { 200, 250, 250, 150, 60, 150 };
 
 	private Action deleteAction = null;
 	private Action submitAction = null;
@@ -316,19 +316,17 @@ public class AiBridgeView extends ViewPart implements IPersistable, IActiveProje
 				{
 					return switch (columnIndex)
 					{
-						case 0 -> Optional.ofNullable(completion.getId())
-							.map(uuid -> uuid.toString().replaceAll("(.{2}).{6}-(.{2}).{2}-(.{2}).{2}-(.{2}).*", "$1$2$3$4")).orElse("");
-						case 1 -> Optional.ofNullable(completion.getCmdName()).orElse("");
-						case 2 -> Optional.ofNullable(completion.getStatus()).orElse("");
-						case 3 -> Optional.ofNullable(completion.getStartTime()).map(currentInstance::formatDate).orElse("");
-						case 4 -> Optional.ofNullable(completion.getSelection()).orElse("");
-						case 5 -> Optional.ofNullable(completion.getResponse()).map(resp -> {
+						case 0 -> Optional.ofNullable(completion.getCmdName()).orElse("");
+						case 1 -> Optional.ofNullable(completion.getSelection()).orElse("");
+						case 2 -> Optional.ofNullable(completion.getResponse()).map(resp -> {
 							String message = stripHtmlTags(resp.getResponseMessage());
 							return message.length() > 250 ? message.substring(0, 250) : message;
 						})
 							.orElse("");
-						case 6 -> Optional.ofNullable(Integer.toString(completion.getTokensCount())).orElse("");
-						case 7 -> formatTimeDifference(completion);
+						case 3 -> Optional.ofNullable(completion.getStatus()).orElse("");
+						case 4 -> formatTimeDifference(completion);
+						case 5 -> Optional.ofNullable(completion.getStartTime()).map(currentInstance::formatDate).orElse("");
+
 						default -> "";
 					};
 				}
