@@ -21,16 +21,16 @@
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202311211513"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/106.0.21/repository"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="106.0.21"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/106.0.22/repository"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="106.0.22"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/106.0.19/repository"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="106.0.19"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/106.0.20.media/repository"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="106.0.20"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/106.0.19-arm/repository"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="106.0.19"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/106.0.20-arm.media/repository"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="106.0.20"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/eclipse/updates/4.29/"/>

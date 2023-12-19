@@ -41,7 +41,39 @@ public class DeleteAction extends Action implements ISelectionListener
 
 		selectedIds.forEach(id -> AiBridgeManager.getInstance().getRequestMap().remove(id));
 		AiBridgeManager.getInstance().deleteFiles(AiBridgeView.getSolutionName(), selectedIds);
-		AiBridgeView.refresh();
+
+		UUID newSelectedUUID = findPostDeletionSelectionId(AiBridgeView.getAllItemUUIDs(), selectedIds);
+		AiBridgeView.setSelectionId(newSelectedUUID);
+		AiBridgeView.refresh(); // Delete columns in view
+	}
+
+	private UUID findPostDeletionSelectionId(List<UUID> allUuids, List<UUID> deletedUuids)
+	{
+		UUID priorDeletedId = null;
+		boolean foundDeleted = false;
+		UUID afterDeleteId = null;
+
+		for (UUID uuid : allUuids)
+		{
+			if (deletedUuids.contains(uuid))
+			{
+				foundDeleted = true;
+			}
+			else
+			{
+				if (foundDeleted)
+				{
+					afterDeleteId = uuid;
+					break; //found an id following the first selected id for deletion
+				}
+				else
+				{
+					priorDeletedId = uuid;
+				}
+			}
+		}
+
+		return afterDeleteId != null ? afterDeleteId : priorDeletedId;
 	}
 
 

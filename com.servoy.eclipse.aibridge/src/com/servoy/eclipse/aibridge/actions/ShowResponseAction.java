@@ -14,6 +14,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import com.servoy.eclipse.aibridge.AiBridgeView;
 import com.servoy.eclipse.aibridge.dto.Completion;
 import com.servoy.eclipse.aibridge.editors.DualEditorInput;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 
 public class ShowResponseAction extends Action implements ISelectionListener
 {
@@ -25,11 +26,16 @@ public class ShowResponseAction extends Action implements ISelectionListener
 	public ShowResponseAction(Composite parent)
 	{
 		super("Split horizontal view", SWT.TOGGLE);
-		ImageDescriptor splitViewImageDescriptor = AbstractUIPlugin.imageDescriptorFromPlugin("com.servoy.eclipse.aibridge", "icons/hsplit.png");
+		boolean isDarkTheme = IconPreferences.getInstance().getUseDarkThemeIcons();
+		String iconPath = isDarkTheme ? "darkicons/hsplit.png" : "icons/hsplit.png";
+		ImageDescriptor splitViewImageDescriptor = AbstractUIPlugin.imageDescriptorFromPlugin("com.servoy.eclipse.aibridge", iconPath);
 		setImageDescriptor(splitViewImageDescriptor);
 		htmlViewer = new Browser(parent, SWT.NONE);
 		htmlViewer.setVisible(false);
 		this.parent = parent;
+		setEnabled(true);
+		htmlViewer.setVisible(true);
+		setChecked(true);
 	}
 
 	@Override
@@ -65,12 +71,12 @@ public class ShowResponseAction extends Action implements ISelectionListener
 				this.completion = (Completion)structuredSelection.getFirstElement();
 			}
 
-			if (completion == null)
-			{
-				setChecked(false);
-			}
+//			if (completion == null)
+//			{
+//				setChecked(false);
+//			}
 			refresh();
-			setEnabled(completion != null ? true : false);
+//			setEnabled(completion != null ? true : false);
 		}
 	}
 }

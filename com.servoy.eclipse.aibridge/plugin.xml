@@ -62,7 +62,7 @@
 			class="com.servoy.eclipse.aibridge.AiBridgeView"
 			icon="icons/aibridge.png"
 			id="com.servoy.eclipse.aibridge.aibridgeview"
-			name="AI Bridge View"
+			name="Servoy AI"
 			allowMultiple="false"
 			restorable="true">
 		</view>
@@ -70,7 +70,7 @@
 	<extension
 		point="org.eclipse.ui.editors">
 		<editor
-			name="AI Bridge"
+			name="Servoy AI"
 			extensions="*"
 			icon="icons/vsplit.png"
 			class="com.servoy.eclipse.aibridge.editors.DualEditor"

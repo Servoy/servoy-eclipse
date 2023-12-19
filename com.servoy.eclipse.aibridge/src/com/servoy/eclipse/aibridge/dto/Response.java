@@ -38,6 +38,19 @@ public class Response
 		this.tokensCount = AiBridgeTokenizer.getInstance().countTokens(this.responseMessage);
 	}
 
+	public Response(String message)
+	{
+		this.responseMessage = message;
+
+		this.responseFunction = "";
+		this.responseType = "";
+		this.showPasteInCode = false;
+		this.showCopyToClipboard = false;
+		this.showContinueChat = false;
+		this.chatID = "";
+		this.tokensCount = AiBridgeTokenizer.getInstance().countTokens(this.responseMessage);
+	}
+
 	public String getResponseMessage()
 	{
 		return responseMessage == null ? "" : responseMessage;
