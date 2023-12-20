@@ -159,7 +159,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 if (this.editorContentService.getContentElement(ghostContainer.uuid)?.parentElement?.parentElement?.classList.contains('maxLevelDesign')) {
                     ghostContainer.style.display = 'none';
                 }
-
+                
+                const filterGhostParts = ghostContainer.ghosts.filter(ghost => ghost.type == GHOST_TYPES.GHOST_TYPE_PART);
+				const onlyBodyPart =  filterGhostParts.length === 1 && filterGhostParts[0].text.toLowerCase() === "body";
+				
                 for (const ghost of ghostContainer.ghosts) {
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_GROUP) {
                         ghostContainer.style.display = 'none';
@@ -175,9 +178,11 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                             right: '-90px',
                             width: '90px',
                             height: '20px',
-                            overflow: 'visible',
-                            visibility: 'hidden'
+                            overflow: 'visible'
                         };
+                        if (onlyBodyPart) {
+							style['visibility'] = 'hidden';
+						}
                         ghost.hrstyle = {
                             marginTop: '-1px',
                             borderTop: '1px dashed #000',
