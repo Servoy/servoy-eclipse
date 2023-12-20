@@ -5297,6 +5297,7 @@ public class TypeCreator extends TypeCache
 								Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
 								parameter.setName(methodParam.getName());
 								parameter.setType(getTypeRef(context, methodParam.getType().getName()));
+								if (methodParam.isOptional()) parameter.setKind(ParameterKind.OPTIONAL);
 								parameters.add(parameter);
 							}
 						}
