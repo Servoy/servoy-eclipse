@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, Inject, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { EditorSessionService, IShowHighlightChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -10,15 +10,15 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
 })
 export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessageListener {
 
-    @ViewChild('horizontalGuide', { static: false }) horizontal: ElementRef<HTMLElement>;
-    @ViewChild('verticalGuide', { static: false }) vertical: ElementRef<HTMLElement>;
+    @Input() guides: Guide[] = [];
 
     previousPoint: {x: number, y: number};
     topAdjust: any;
     leftAdjust: number;
-    snapData: {top: number, left: number, guideX?: number, guideY?: number, snapX?:  { property: string } , snapY?:  { property: string } };  
+    snapData: {top: number, left: number, guideX?: number, guideY?: number, guides?:  Guide[] };  
+    timeout: ReturnType<typeof setTimeout>;
 
-    constructor(protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2,
+    constructor(private el: ElementRef, protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2,
          private urlParser: URLParserService, private editorContentService: EditorContentService) {
        
     }
@@ -38,6 +38,27 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
         });
         this.editorContentService.addContentMessageListener(this);
     }
+    
+      private renderGuides() {
+        this.snapData.guides.forEach(guide => {
+          const guideElement = this.renderer.createElement('div');
+          this.renderer.setStyle(guideElement, 'position', 'absolute');
+          this.renderer.setStyle(guideElement, 'left', `${guide.x + this.leftAdjust}px`);
+          this.renderer.setStyle(guideElement, 'top', `${guide.y + this.topAdjust}px`);
+          this.renderer.setStyle(guideElement, 'width', `${guide.width}px`);
+          this.renderer.setStyle(guideElement, 'height', `${guide.height}px`);
+          this.renderer.addClass(guideElement, guide.styleClass);
+    
+          this.renderer.appendChild(this.el.nativeElement, guideElement);
+        });
+      }
+    
+      private clearGuides() {
+        const childNodes = this.el.nativeElement.childNodes;
+        for (let i = childNodes.length - 1; i >= 0; i--) {
+          this.renderer.removeChild(this.el.nativeElement, childNodes[i]);
+        }
+      }
 
     ngOnDestroy(): void {
         this.editorContentService.removeContentMessageListener(this);
@@ -46,10 +67,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     onMouseUp(event: MouseEvent): void {
         this.snapData = null;
         this.editorContentService.sendMessageToIframe({ id: 'clearSnapCache'});
-        this.renderer.setStyle(this.vertical.nativeElement, 'display', 'none');
-        this.renderer.setStyle(this.vertical.nativeElement, 'height', '0px');
-        this.renderer.setStyle(this.horizontal.nativeElement, 'display', 'none');
-        this.renderer.setStyle(this.horizontal.nativeElement, 'width', '0px');
+        this.clearGuides();
     }    
 
     private onMouseMove(event: MouseEvent) {
@@ -64,37 +82,34 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
       point.x = point.x + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust;
       point.y = point.y + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust;
       if (this.previousPoint && this.previousPoint.x === point.x && this.previousPoint.y === point.y) return;
-      if (!this.snapData || Math.abs(this.snapData.top - point.y) > 5 ||
-          Math.abs(this.snapData.left - point.x) > 5) {
+      //if (!this.snapData || Math.abs(this.snapData.top - point.y) > 10 ||
+      //    Math.abs(this.snapData.left - point.x) > 10) {
             this.editorContentService.sendMessageToIframe({ id: 'getSnapTarget', p1: point });
-      }
+      //}
       this.previousPoint = point;
     }
 
     contentMessageReceived(id: string, data: { property: string }) {
         if (id === 'snap') {
-            this.snapData = data['properties'];
-            if (this.snapData?.snapX) {
-                this.renderer.setStyle(this.vertical.nativeElement, 'left', this.snapData.guideX + this.leftAdjust + 'px');
-                this.renderer.setStyle(this.vertical.nativeElement, 'top', this.snapData['startX'] + this.topAdjust + 'px');
-                this.renderer.setStyle(this.vertical.nativeElement, 'height', this.snapData['lenX'] + 'px');
-                this.renderer.setStyle(this.vertical.nativeElement, 'display', 'block');
-            }
-            else {
-                this.renderer.setStyle(this.vertical.nativeElement, 'height', '0px');
-                this.renderer.setStyle(this.vertical.nativeElement, 'display', 'none');
-            }
+            this.setGuides(data);
+        }
+    }
 
-            if (this.snapData?.snapY) {
-                this.renderer.setStyle(this.horizontal.nativeElement, 'left', this.snapData['startY'] + this.leftAdjust + 'px');
-                this.renderer.setStyle(this.horizontal.nativeElement, 'top',  this.snapData.guideY + this.topAdjust + 'px'); 
-                this.renderer.setStyle(this.horizontal.nativeElement, 'width', this.snapData['lenY'] + 'px');
-                this.renderer.setStyle(this.horizontal.nativeElement, 'display', 'block');
-            }
-            else {
-                this.renderer.setStyle(this.horizontal.nativeElement, 'width', '0px');
-                this.renderer.setStyle(this.horizontal.nativeElement, 'display', 'none');
-            }
+    private setGuides(data: { property: string; }) {
+        this.snapData = data['properties'];
+        if (this.snapData?.guides) {
+            this.clearGuides();
+            this.renderGuides();
         }
     }
 }
+
+export class Guide {
+    constructor(
+      public x: number,
+      public y: number,
+      public width: number,
+      public height: number,
+      public styleClass: string
+    ) {}
+  }

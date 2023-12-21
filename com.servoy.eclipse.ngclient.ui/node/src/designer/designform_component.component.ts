@@ -380,8 +380,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     } 
     
     private getSnapProperties(point: {x: number, y: number}) {
-            let properties = {top: point.y, left: point.x, snapX: null, snapY: null, cssPosition: {}, 
-            startX: null, startY: null, lenX: null, lenY: null, guideX: null, guideY: null};
+            let properties = {initPoint: point, top: point.y, left: point.x, snapX: null, snapY: null, cssPosition: {}, 
+            startX: null, startY: null, lenX: null, lenY: null, guides: []};
             
             const element = this.getDraggedElement(point);
             const uuid = element?.getAttribute('svy-id');
@@ -404,21 +404,22 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 }
             }
             
+			let guideX;
             if (properties.snapX) {
                 properties.cssPosition['left'] = properties.snapX;
                 if (!properties.cssPosition['left']) properties.cssPosition['left'] = properties.left;
-                properties.guideX = properties.left;
+				guideX = properties.left;
             }
             else {
                 properties.snapX = this.isSnapInterval(uuid, rect.right, this.rightPos);
-                properties.guideX = this.rightPos.get(properties.snapX?.uuid);
+                guideX = this.rightPos.get(properties.snapX?.uuid);
                 properties.left = properties.snapX ? this.rightPos.get(properties.snapX.uuid) : properties.left;
                 if (!properties.snapX) { 
                     properties.snapX = this.isSnapInterval(uuid, rect.right, this.leftPos);
                     if (properties.snapX?.uuid) {
                         properties.left =  this.leftPos.get(properties.snapX.uuid);
                         properties.snapX.prop = 'left';
-                        properties.guideX = this.leftPos.get(properties.snapX.uuid);
+                        guideX = this.leftPos.get(properties.snapX.uuid);
                     }
                 }
                 if (properties.snapX){
@@ -431,23 +432,22 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     if (properties.snapX){
                         properties.cssPosition['middleH'] = properties.snapX;
                         properties.left = this.middleH.get(properties.snapX.uuid) - rect.width/2;
-                        properties.guideX = this.middleH.get(properties.snapX.uuid);
+						guideX = this.middleH.get(properties.snapX.uuid);
                     }
                 }
             }
 
             if (properties.snapX) {
                 //guide info
-                if (this.topPos.get(properties.snapX.uuid) < rect.top) {
-                    properties.startX = this.topPos.get(properties.snapX.uuid);  
-                    properties.lenX = rect.bottom - properties.startX;
+                if (this.topPos.get(properties.snapX.uuid) < rect.top) {                    
+                    properties.guides.push(new Guide(guideX, this.topPos.get(properties.snapX.uuid), 1, rect.bottom - this.topPos.get(properties.snapX.uuid), 'snap' ));
                 }
                 else {
-                    properties.startX = rect.top;  
-                    properties.lenX = this.topPos.get(properties.snapX.uuid) - properties.startX;
+                    properties.guides.push(new Guide(guideX, rect.top, 1, this.topPos.get(properties.snapX.uuid) - rect.top, 'snap' ));
                 }
             }
                 
+			let guideY;
             properties.snapY = this.isSnapInterval(uuid, rect.top, this.topPos);
             if (properties.snapY?.uuid) {
                 properties.top = this.topPos.get(properties.snapY.uuid);
@@ -462,12 +462,12 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             
             if (properties.snapY) {
                 properties.cssPosition['top'] = properties.snapY;
-                properties.guideY = properties.top;
+                guideY = properties.top;
             }
             else {
                 properties.snapY = this.isSnapInterval(uuid, rect.bottom, this.bottomPos);
                 if (properties.snapY?.uuid) {
-                    properties.guideY = this.bottomPos.get(properties.snapY.uuid);
+                    guideY = this.bottomPos.get(properties.snapY.uuid);
                     properties.top = properties.snapY ? this.bottomPos.get(properties.snapY.uuid) : properties.top;
                 }
                 if (!properties.snapY){
@@ -475,7 +475,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     if (properties.snapY?.uuid) {
                         properties.top = this.topPos.get(properties.snapY.uuid);
                         properties.snapY.prop = 'top';
-                        properties.guideY = this.topPos.get(properties.snapY.uuid);
+                        guideY = this.topPos.get(properties.snapY.uuid);
                     }
                 }
                 if (properties.snapY) {
@@ -487,7 +487,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     if (properties.snapY?.uuid){
                         properties.cssPosition['middleV'] = properties.snapY;
                         properties.top = this.middleV.get(properties.snapY.uuid) - rect.height/2;
-                        properties.guideY = this.middleV.get(properties.snapY.uuid);
+                        guideY = this.middleV.get(properties.snapY.uuid);
                     }
                 }
             }
@@ -495,16 +495,109 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (properties.snapY) {
                 //guide info
                 if (this.leftPos.get(properties.snapY.uuid) < rect.left) {
-                    properties.startY = this.leftPos.get(properties.snapY.uuid);  
-                    properties.lenY = rect.right - properties.startY;
+                    properties.guides.push(new Guide(this.leftPos.get(properties.snapY.uuid), guideY, rect.right - this.leftPos.get(properties.snapY.uuid) , 1, 'snap' ));
                 }
                 else {
-                    properties.startY = rect.left;  
-                    properties.lenY = this.leftPos.get(properties.snapY.uuid) - properties.startY;
+                    properties.guides.push(new Guide(rect.left, guideY, this.leftPos.get(properties.snapY.uuid) - rect.left , 1, 'snap' ));
                 }
             }
+            
+            //equal distance guides
+            let uuids = [...this.topPos.keys()];
+            let prev = uuids.indexOf(uuid) -1;
+            if (prev >=1) {
+                const e1 = uuids[prev-1];
+                const e2 = uuids[prev];
+                if (this.topPos.get(e2) >  this.bottomPos.get(e1) && rect.top >  this.bottomPos.get(e2)) {
+                    const dist1 = this.topPos.get(e2) -  this.bottomPos.get(e1);
+                    const dist2 = rect.top - this.bottomPos.get(e2);
+                
+                    if (Math.abs(dist1 - dist2) < 10) {     //TODO need threshold?
+                        properties.top = this.bottomPos.get(e2) + dist1;
+                        let right = Math.max(rect.right, Math.max(this.rightPos.get(e1), this.rightPos.get(e2)));
 
-            return properties.snapX == null && properties.snapY == null ? null : properties;
+                        properties.guides.push(new Guide(this.rightPos.get(e1),  this.bottomPos.get(e1),  right - this.rightPos.get(e1)  + 15, 1, 'dist'));
+                        properties.guides.push(new Guide(right +10,  this.bottomPos.get(e1), 1, dist1,  'dist'));
+                        properties.guides.push(new Guide(this.rightPos.get(e2),  this.topPos.get(e2),  right - this.rightPos.get(e1) + 15, 1, 'dist'));
+                    
+                        properties.guides.push(new Guide(this.rightPos.get(e2),  this.bottomPos.get(e2),  right - this.rightPos.get(e2) +15, 1, 'dist'));
+                        properties.guides.push(new Guide(right +10,  this.bottomPos.get(e2), 1,  dist1, 'dist'));
+                        properties.guides.push(new Guide(rect.right,  properties.top,  right - rect.right + 15, 1, 'dist'));
+                    }
+               }
+            }
+            else {
+                const next = uuids.indexOf(uuid) +1;
+                if (next < uuids.length -1) {
+                    const e1 = uuids[next];
+                    const e2 = uuids[next + 1];
+                    if (this.topPos.get(e2) >  this.bottomPos.get(e1) && this.topPos.get(e1) > rect.bottom) {
+                        const dist1 = this.topPos.get(e1) - rect.bottom;
+                        const dist2 = this.topPos.get(e2) -  this.bottomPos.get(e1);
+                        if (Math.abs(dist1 - dist2) < 10) {     //TODO need threshold?
+                            properties.top = this.topPos.get(e1) - dist2 - rect.height;
+                            let right = Math.max(rect.right, Math.max(this.rightPos.get(e1), this.rightPos.get(e2)));
+                        
+                            properties.guides.push(new Guide(rect.right,  properties.top +rect.height,   right - rect.right + 15, 1, 'dist'));
+                            properties.guides.push(new Guide(right +10, properties.top +rect.height, 1, dist2,  'dist'));
+                            properties.guides.push(new Guide(this.rightPos.get(e1),  this.topPos.get(e1),  right - this.rightPos.get(e1) + 15, 1, 'dist'));
+                        
+                            properties.guides.push(new Guide(this.rightPos.get(e1),  this.bottomPos.get(e1),  right - this.rightPos.get(e1) + 15, 1, 'dist'));
+                            properties.guides.push(new Guide(right +10,  this.bottomPos.get(e1), 1,  dist2, 'dist'));
+                            properties.guides.push(new Guide(this.rightPos.get(e2),  this.topPos.get(e2),  right - this.rightPos.get(e2) +15, 1, 'dist'));
+                        }
+                    }
+                }
+            }
+            
+            uuids = [...this.leftPos.keys()];
+            prev = uuids.indexOf(uuid) -1;
+            if (prev >=1) {
+                const e1 = uuids[prev-1];
+                const e2 = uuids[prev];
+                if (this.leftPos.get(e2) > this.rightPos.get(e1) && rect.left > this.rightPos.get(e2)) {
+                    const dist1 =  Math.abs(this.leftPos.get(e2) - this.rightPos.get(e1));
+                    const dist2 = Math.abs( rect.left - this.rightPos.get(e2));
+                
+                    if (Math.abs(dist1 - dist2) < 10) {     //TODO need threshold?
+                        properties.left = this.rightPos.get(e2) + dist1;
+                        let bottom = Math.max(rect.bottom, Math.max(this.bottomPos.get(e1), this.bottomPos.get(e2)));
+                        
+                        properties.guides.push(new Guide(this.rightPos.get(e1),  this.bottomPos.get(e1),  1, bottom - this.bottomPos.get(e1)  + 15,  'dist'));
+                        properties.guides.push(new Guide(this.rightPos.get(e1),   bottom +10,  dist1,  1,  'dist'));
+                        properties.guides.push(new Guide(this.leftPos.get(e2),  this.bottomPos.get(e2),  1, bottom - this.bottomPos.get(e2) + 15,  'dist'));
+                    
+                        properties.guides.push(new Guide(this.rightPos.get(e2),  this.bottomPos.get(e2),  1, bottom - this.bottomPos.get(e2) +15,  'dist'));
+                        properties.guides.push(new Guide(this.rightPos.get(e2),  bottom + 10,  dist1, 1, 'dist'));
+                        properties.guides.push(new Guide(properties.left, rect.bottom, 1, bottom - rect.bottom + 15,  'dist'));
+                    }
+                }
+            }
+            /*else {
+                const next = uuids.indexOf(uuid) +1;
+                if (next < uuids.length -1) {
+                    const e1 = uuids[next];
+                    const e2 = uuids[next + 1];
+                    if (rect.right < this.leftPos.get(e1) && this.rightPos.get(e1) <  this.leftPos.get(e2)) {
+                        const dist1 = rect.right - this.leftPos.get(e1);
+                        const dist2 = this.rightPos.get(e1) -  this.leftPos.get(e2);
+                        if (Math.abs(dist1 - dist2) < 10) {     //TODO need threshold?
+                            properties.left =this.leftPos.get(e1) - dist2 - rect.width;
+                            let bottom = Math.max(rect.bottom, Math.max(this.bottomPos.get(e1), this.bottomPos.get(e2)));
+
+                            properties.guides.push(new Guide(this.rightPos.get(e1),  this.bottomPos.get(e1),  1, bottom - this.bottomPos.get(e1)  + 15,  'dist'));
+                            properties.guides.push(new Guide(this.rightPos.get(e1),   bottom +10,  dist1,  1,  'dist'));
+                            properties.guides.push(new Guide(this.leftPos.get(e2),  this.bottomPos.get(e2),  1, bottom - this.bottomPos.get(e2) + 15,  'dist'));
+                        
+                            properties.guides.push(new Guide(this.rightPos.get(e2),  this.bottomPos.get(e2),  1, bottom - this.bottomPos.get(e2) +15,  'dist'));
+                            properties.guides.push(new Guide(this.rightPos.get(e2),  bottom + 10,  dist1, 1, 'dist'));
+                            properties.guides.push(new Guide(properties.left, rect.bottom, 1, bottom - rect.bottom + 15,  'dist'));
+                        }
+                    }
+                }
+            }*/
+
+            return properties.guides.length == 0 ? null : properties;
     }
 
     sendVariantSizes() {
@@ -787,6 +880,22 @@ class FormComponentDesignServoyApi extends ServoyApi {
         // noop
     }
 
+}
+
+class Guide {
+   x: number;
+   y: number;
+  width: number;
+  height: number;
+   styleClass: string;
+    constructor(x: number,  y: number,
+            width: number, height: number, styleClass: string) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.styleClass = styleClass;
+    }
 }
 
 

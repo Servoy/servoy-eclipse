@@ -111,6 +111,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
       this.currentElementsInfo = null;
       this.dragCopy = false;
       this.editorSession.unregisterAutoscroll(this);
+      this.snapData = null;
   }
 
   private sendChanges(elementInfos: Map<string, ElementInfo>, event: MouseEvent) {
@@ -281,13 +282,13 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
 
     contentMessageReceived(id: string, data: { property: string }) {
         if (id === 'snap' && this.selectionToDrag) {
-            this.snapData = data['properties'];
-            if (this.snapData?.top && this.snapData?.left && this.selectionToDrag.length == 1) {
-                const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[0]);
-                elementInfo.element.style.position = 'absolute';
-                elementInfo.element.style.top = + this.snapData?.top + 'px';
-                elementInfo.element.style.left = this.snapData?.left + 'px';
-            }
+                this.snapData = data['properties'];
+                if (this.snapData?.top && this.snapData?.left && this.selectionToDrag.length == 1) {
+                    const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[0]);
+                    elementInfo.element.style.position = 'absolute';
+                    elementInfo.element.style.top = this.snapData?.top + 'px';
+                    elementInfo.element.style.left = this.snapData?.left + 'px';
+                }
         }
     }
 
