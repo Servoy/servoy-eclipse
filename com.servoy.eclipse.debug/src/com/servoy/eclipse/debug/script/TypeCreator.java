@@ -5288,6 +5288,8 @@ public class TypeCreator extends TypeCache
 						{
 							m.setType(getTypeRef(context, returnTypeArgument.getType().getName()));
 						}
+						// use this to suppress hides predefined identifier warning, see todo's in ElementResolver
+						m.setHideAllowed(true);
 						EList<Parameter> parameters = m.getParameters();
 						MethodArgument[] methodParams = method.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
 						if (methodParams != null && methodParams.length > 0)

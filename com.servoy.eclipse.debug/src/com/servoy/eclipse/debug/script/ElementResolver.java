@@ -487,6 +487,7 @@ public class ElementResolver implements IElementResolver
 						Type type = context.getType(FoundSet.JS_FOUNDSET + '<' + table.getDataSource() + '>');
 						if (type != null)
 						{
+							// TODO do we still need this code
 							members.addAll(TypeCreator.getMembers(name, type));
 						}
 					}
@@ -632,6 +633,7 @@ public class ElementResolver implements IElementResolver
 							Member member = new TypeMemberQuery(foundsetType).findMember(name);
 							if (member != null)
 							{
+								// TODO do we still need this code
 								members.add(member);
 							}
 						}
