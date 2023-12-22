@@ -310,9 +310,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     {
                         // hide the dragged item and rely on inserted item at specific parent 
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
+                        this.renderer.removeClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
                     } else 
                     {
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
+                        this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
                     }
                 }
             }
