@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
 const MILLSIGN = '\u2030';
+const SVY_FORMAT_DECIMAL_CHAR = '.';
 
 /**
   * Class reflecting a Format object coming from the server (format spec property)
@@ -211,7 +212,7 @@ export class FormattingService {
 					return true;
 				}
 				if (vSvyFormat.edit) {
-					const maxDecimals = vSvyFormat.edit.split(decimalChar)[1].length;
+					const maxDecimals = vSvyFormat.edit.split(SVY_FORMAT_DECIMAL_CHAR)[1].length;
 					if (value.split(decimalChar)[1].length >= maxDecimals) {
 						return false;
 					}
