@@ -257,13 +257,6 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					{
 						return new JSONArrayPropertySource(complexP)
 						{
-
-							@Override
-							protected Object getElementValue(int idx)
-							{
-								return defaultGetProperty(getIdFromIndex(idx));
-							}
-
 							@Override
 							protected void addChildPropertyDescriptors(Object arrayV)
 							{
@@ -277,23 +270,11 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 								}
 								elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
 							}
-
+							
 							@Override
 							protected Object getDefaultElementProperty(Object id)
 							{
 								return JSONObject.NULL;
-							}
-
-							@Override
-							protected void defaultElementWasSet(Object newMainValue)
-							{
-								// nothing to do here
-							}
-
-							@Override
-							protected ArrayPropertyChildId getIdFromIndex(int idx)
-							{
-								return new ArrayPropertyChildId(getId(), idx);
 							}
 						};
 					}

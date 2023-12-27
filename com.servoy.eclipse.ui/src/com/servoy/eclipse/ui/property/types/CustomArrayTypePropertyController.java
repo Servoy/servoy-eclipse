@@ -235,12 +235,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		}
 
 		@Override
-		protected ArrayPropertyChildId getIdFromIndex(int idx)
-		{
-			return new ArrayPropertyChildId(getId(), idx);
-		}
-
-		@Override
 		protected void addChildPropertyDescriptors(Object arrayV)
 		{
 			if (arrayV == null) return;

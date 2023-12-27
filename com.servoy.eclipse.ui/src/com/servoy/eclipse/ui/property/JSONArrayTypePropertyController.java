@@ -332,7 +332,11 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 			super(complexProperty);
 		}
 
-		protected abstract void defaultElementWasSet(Object newMainValue);
+		@Override
+		protected Object getElementValue(int idx)
+		{
+			return defaultGetProperty(getIdFromIndex(idx));
+		}
 
 		protected abstract Object getDefaultElementProperty(Object id);
 
@@ -343,12 +347,12 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 			return getEditableValue();
 		}
 
-		private ServoyJSONArray deleteElementAtIndex(final int idx)
+		protected Object deleteElementAtIndex(final int idx)
 		{
 			return ServoyJSONArray.removeIndexFromJSONArray((JSONArray)getEditableValue(), idx);
 		}
 
-		private Object insertNewElementAfterIndex(int idx)
+		protected Object insertNewElementAfterIndex(int idx)
 		{
 			return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)getEditableValue(), idx + 1, getNewElementInitialValue());
 		}
@@ -361,8 +365,6 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 				Object newValue = getEditableValue();
 				Object val = ServoyJSONObject.adjustJavascriptNULLForOrgJSON(value);
 				((JSONArray)newValue).put(idx, val);
-
-				defaultElementWasSet(newValue);
 			}
 			catch (JSONException e)
 			{

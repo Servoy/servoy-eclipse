@@ -257,7 +257,10 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			return id.idx;
 		}
 
-		protected abstract ArrayPropertyChildId getIdFromIndex(int idx);
+		protected ArrayPropertyChildId getIdFromIndex(int idx)
+		{
+			return new ArrayPropertyChildId(getId(), idx);
+		}
 
 		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
