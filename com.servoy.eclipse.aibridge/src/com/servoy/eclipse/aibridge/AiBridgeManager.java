@@ -27,6 +27,8 @@ import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.javascript.parser.JavascriptParserPreferences;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 
@@ -149,6 +151,19 @@ public class AiBridgeManager
 
 		String loginToken = ServoyLoginDialog.getLoginToken();
 		if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+		if (Utils.stringIsEmpty(loginToken))
+		{
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					MessageDialog.openInformation(
+						Display.getDefault().getActiveShell(),
+						"Login Required",
+						"You need to log in to Servoy Cloud if you want to use Servoy AI.");
+				}
+			});
+		}
 		return loginToken;
 	}
 

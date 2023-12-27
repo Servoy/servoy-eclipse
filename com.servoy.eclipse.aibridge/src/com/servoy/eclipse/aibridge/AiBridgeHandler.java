@@ -184,16 +184,20 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 						if (i < parameters.getDefinedArgsCount() - 1) appendData(", ", sb);
 					}
 					appendData("):\n", sb);
-					StringJavaDocCommentReader reader = new StringJavaDocCommentReader(apiFunction.getDocumentation());
-					String doc;
-					try
+					String functionDoc = apiFunction.getDocumentation();
+					if (functionDoc != null && functionDoc.trim().length() > 0)
 					{
-						doc = IOUtils.toString(reader).trim();
-						appendData(doc.replace('\r', '\n').replace("\n ", "\n").replace("\n\n", "\n"), sb);
-					}
-					catch (IOException e)
-					{
-						ServoyLog.logError(e);
+						StringJavaDocCommentReader reader = new StringJavaDocCommentReader(apiFunction.getDocumentation());
+						String doc;
+						try
+						{
+							doc = IOUtils.toString(reader).trim();
+							appendData(doc.replace('\r', '\n').replace("\n ", "\n").replace("\n\n", "\n"), sb);
+						}
+						catch (IOException e)
+						{
+							ServoyLog.logError(e);
+						}
 					}
 				}
 				else
@@ -406,7 +410,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 		// data may be a type line: <type>...</type>\n
 		// or a non empty line. Lines between two type lines must be enclosed in <description> ... </description>\n tags
 		// avoid starting and ending \n characters
-
+		if (data == null) return;
 		String typeEnd = "</type>";
 		String descriptionStart = "<description>";
 		String descriptionEnd = "</description>";
