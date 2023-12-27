@@ -143,382 +143,221 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.core"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.debug"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.designer"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.ui"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.jsunit"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.profiler"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
-         download-size="0"
-         install-size="0"
-         version="1.7.14.s6"
-         unpack="false"/>
+         version="1.7.14.s6"/>
 
    <plugin
          id="j2db_documentation"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="j2db_tunnel"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="j2db_runtime"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="j2db_log4j"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="j2db_server"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="servoy_debug"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="servoy_headless_client"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="servoy_shared"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="servoy_smart_client"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.model"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="servoy_base"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="org.apache.tomcat"
-         download-size="0"
-         install-size="0"
-         version="9.0.83"
-         unpack="false"/>
+         version="9.0.83"/>
 
    <plugin
          id="sablo"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="servoy_ngclient"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="javax.websocket"
-         download-size="0"
-         install-size="0"
-         version="1.1.0"
-         unpack="false"/>
+         version="1.1.0"/>
 
    <plugin
          id="org.maven.ide.eclipse.grouplayout"
-         download-size="0"
-         install-size="0"
-         version="1.1.0.201005260935"
-         unpack="false"/>
+         version="1.1.0.201005260935"/>
 
    <plugin
          id="xstream"
-         download-size="0"
-         install-size="0"
-         version="1.4.20"
-         unpack="false"/>
+         version="1.4.20"/>
 
    <plugin
          id="org.freemarker.freemarker"
-         download-size="0"
-         install-size="0"
-         version="2.3.32.stable"
-         unpack="false"/>
+         version="2.3.32.stable"/>
 
    <plugin
          id="org.apache.james.apache-mime4j"
-         download-size="0"
-         install-size="0"
-         version="0.6.0"
-         unpack="false"/>
+         version="0.6.0"/>
 
    <plugin
          id="org.apache.commons.codec"
-         download-size="0"
-         install-size="0"
-         version="1.14.0.v20221112-0806"
-         unpack="false"/>
+         version="1.14.0.v20221112-0806"/>
 
    <plugin
          id="org.eclipse.equinox.concurrent"
-         download-size="0"
-         install-size="0"
-         version="1.2.100.v20211021-1418"
-         unpack="false"/>
+         version="1.2.100.v20211021-1418"/>
 
    <plugin
          id="sj.jsonschemavalidation"
-         download-size="0"
-         install-size="0"
-         version="2.0.1"
-         unpack="false"/>
+         version="2.0.1"/>
 
    <plugin
          id="jabsorb"
-         download-size="0"
-         install-size="0"
-         version="1.3.2.s7"
-         unpack="false"/>
+         version="1.3.2.s7"/>
 
    <plugin
          id="com.servoy.eclipse.designer.wpm"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.notification"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="org.apache.logging.log4j.api"
-         download-size="0"
-         install-size="0"
-         version="2.21.0"
-         unpack="false"/>
+         version="2.22.0"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
-         download-size="0"
-         install-size="0"
-         version="2.21.0"
-         unpack="false"/>
+         version="2.22.0"/>
 
    <plugin
          id="org.apache.logging.log4j.jcl"
-         download-size="0"
-         install-size="0"
-         version="2.21.0"
-         unpack="false"/>
+         version="2.22.0"/>
 
    <plugin
          id="javax.transaction"
-         download-size="0"
-         install-size="0"
-         version="1.1.0"
-         unpack="false"/>
+         version="1.1.0"/>
 
    <plugin
          id="org.sweetlemonade.eclipse.json"
-         download-size="0"
-         install-size="0"
-         version="1.0.5"
-         unpack="false"/>
+         version="1.0.5"/>
 
    <plugin
          id="org.apache.commons.commons-collections4"
-         download-size="0"
-         install-size="0"
-         version="4.4.0"
-         unpack="false"/>
+         version="4.4.0"/>
 
    <plugin
          id="org.apache.commons.commons-pool2"
-         download-size="0"
-         install-size="0"
-         version="2.12.0"
-         unpack="false"/>
+         version="2.12.0"/>
 
    <plugin
          id="com.google.guava"
-         download-size="0"
-         install-size="0"
-         version="32.1.2.jre"
-         unpack="false"/>
+         version="32.1.2.jre"/>
 
    <plugin
          id="org.hibernate.orm.core"
-         download-size="0"
-         install-size="0"
-         version="5.6.15.Servoy3"
-         unpack="false"/>
+         version="5.6.15.Servoy3"/>
 
    <plugin
          id="jaxb-api"
-         download-size="0"
-         install-size="0"
-         version="2.3.1"
-         unpack="false"/>
+         version="2.3.1"/>
 
    <plugin
          id="com.fasterxml.classmate"
-         download-size="0"
-         install-size="0"
-         version="1.6.0"
-         unpack="false"/>
+         version="1.6.0"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
-         download-size="0"
-         install-size="0"
-         version="1.3.6"
-         unpack="false"/>
+         version="1.3.6"/>
 
    <plugin
          id="com.servoy.eclipse.ngclient.ui"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
          os="linux"
          ws="gtk"
          arch="x86_64"
-         download-size="0"
-         install-size="0"
          version="18.18.2"/>
 
    <plugin
@@ -526,8 +365,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          os="macosx"
          ws="cocoa"
          arch="x86_64"
-         download-size="0"
-         install-size="0"
          version="18.18.2"/>
 
    <plugin
@@ -535,68 +372,46 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          os="win32"
          ws="win32"
          arch="x86_64"
-         download-size="0"
-         install-size="0"
          version="18.18.2"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.ngclient"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="com.servoy.eclipse.jre.linux.x86_64"
          os="linux"
          arch="x86_64"
-         download-size="0"
-         install-size="0"
          version="21.0.1"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
          os="win32"
          arch="x86_64"
-         download-size="0"
-         install-size="0"
          version="21.0.1"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
          os="macosx"
          arch="x86_64"
-         download-size="0"
-         install-size="0"
          version="21.0.1"/>
 
    <plugin
          id="jakarta.servlet-api"
-         download-size="0"
-         install-size="0"
-         version="4.0.0"
-         unpack="false"/>
+         version="4.0.0"/>
 
    <plugin
          id="javax.persistence-api"
-         download-size="0"
-         install-size="0"
-         version="2.2.0"
-         unpack="false"/>
+         version="2.2.0"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.aarch64"
          os="macosx"
          arch="aarch64"
-         download-size="0"
-         install-size="0"
          version="21.0.1"/>
 
    <plugin
@@ -604,57 +419,34 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          os="macosx"
          ws="cocoa"
          arch="aarch64"
-         download-size="0"
-         install-size="0"
          version="18.18.2"/>
 
    <plugin
          id="com.sun.activation.jakarta.activation"
-         download-size="0"
-         install-size="0"
-         version="1.2.2"
-         unpack="false"/>
+         version="1.2.2"/>
 
    <plugin
          id="com.sun.mail.jakarta.mail"
-         download-size="0"
-         install-size="0"
-         version="1.6.7"
-         unpack="false"/>
+         version="1.6.7"/>
 
    <plugin
          id="slf4j.api"
-         download-size="0"
-         install-size="0"
-         version="2.0.9"
-         unpack="false"/>
+         version="2.0.9"/>
 
    <plugin
          id="com.servoy.eclipse.cloud"
-         download-size="0"
-         install-size="0"
-         version="2024.3.0.3940_rc"
-         unpack="false"/>
+         version="2024.3.0.3940_rc"/>
 
    <plugin
          id="org.hibernate.common.hibernate-commons-annotations"
-         download-size="0"
-         install-size="0"
-         version="5.1.2.Final"
-         unpack="false"/>
+         version="5.1.2.Final"/>
 
    <plugin
          id="com.servoy.eclipse.aibridge"
-         download-size="0"
-         install-size="0"
-         version="2023.9.0.3900_rc"
-         unpack="false"/>
+         version="2023.9.0.3900_rc"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j2.impl"
-         download-size="0"
-         install-size="0"
-         version="2.21.0"
-         unpack="false"/>
+         version="2.22.0"/>
 
 </feature>
