@@ -51,7 +51,7 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 {
 
 	private static final String versionsUrl = "https://download.servoy.com/ngdesktop/ngdesktop-versions.txt";
-	private static List<String> remoteVersions = new ArrayList<String>();
+	private List<String> remoteVersions = new ArrayList<>();
 
 	private Combo srcVersionCombo;
 	private Label deprecatedLabel;
@@ -140,6 +140,7 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 
 	public static List<String> getAvailableVersions()
 	{
+		List<String> remoteVersions = new ArrayList<>();
 		try
 		{
 			final URL url = new URL(versionsUrl);
@@ -157,28 +158,33 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 					sb.append(line);
 				final JSONObject jsonObj = new JSONObject(sb.toString());
 				JSONArray releases = jsonObj.getJSONArray("releases");
-				remoteVersions.clear();
 				for (int i = 0; i < releases.length(); i++)
 				{
 					JSONObject release = releases.getJSONObject(i);
-					String servoyVersion = release.getString("servoy-version");
-
-					// check if devVersion fits into the interval defined by servoyVersion
-					String[] interval = servoyVersion.split("-"); // split the servoyVersion into start and end
-
-					if (interval.length == 2)
+					String version = release.getString("version");
+					if (validateVersion(version))
 					{
-						if (SemVerComparator.compare(devVersion, interval[0]) >= 0 &&
-							SemVerComparator.compare(devVersion, interval[1]) <= 0)
+
+						String servoyVersion = release.getString("servoy-version");
+
+						// check if devVersion fits into the interval defined by servoyVersion
+						String[] interval = servoyVersion.split("-"); // split the servoyVersion into start and end
+
+
+						if (interval.length == 2)
 						{
-							remoteVersions.add(release.getString("version"));
+							if (SemVerComparator.compare(devVersion, interval[0]) >= 0 &&
+								SemVerComparator.compare(devVersion, interval[1]) <= 0)
+							{
+								remoteVersions.add(version);
+							}
 						}
-					}
-					else
-					{
-						if (SemVerComparator.compare(devVersion, servoyVersion) >= 0)
+						else
 						{
-							remoteVersions.add(release.getString("version"));
+							if (SemVerComparator.compare(devVersion, servoyVersion) >= 0)
+							{
+								remoteVersions.add(version);
+							}
 						}
 					}
 				}
@@ -192,11 +198,31 @@ public class NGDesktopConfiguration extends PreferencePage implements IWorkbench
 		return remoteVersions;
 	}
 
-	private static String getBaseVersion(String version)
+	/**
+	 * @param version
+	 * @return
+	 */
+	private static boolean validateVersion(String version)
 	{
-		String[] result = version.split("\\.");
-		if (result.length <= 2) return version;
-		return result[0] + "." + result[1];
+		String[] split = version.split("\\.");
+		if (split.length >= 2)
+		{
+			try
+			{
+				Integer.parseInt(split[0]);
+				Integer.parseInt(split[1]);
+				if (split.length == 3)
+				{
+					Integer.parseInt(split[2]);
+				}
+				return true;
+			}
+			catch (Exception e)
+			{
+				// ignore just let it return false
+			}
+		}
+		return false;
 	}
 
 	@Override
