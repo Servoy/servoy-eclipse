@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
@@ -114,7 +115,7 @@ public class Activator extends Plugin
 		{
 			value = System.getenv(propertyName);
 		}
-		return value != null ? Paths.get(value).normalize().toString() : null;
+		return value != null ? Paths.get(StringEscapeUtils.escapeJava(value)).normalize().toString() : null;
 	}
 
 	public void extractNode()
