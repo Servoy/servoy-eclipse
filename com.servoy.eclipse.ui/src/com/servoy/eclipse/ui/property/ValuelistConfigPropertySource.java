@@ -40,6 +40,7 @@ public class ValuelistConfigPropertySource extends ComplexPropertySourceWithStan
 {
 	private static final String FILTER_TYPE = "filterType";
 	private static final String FILTER_DESTINATION = "filterDestination";
+	private static final String ALLOW_NEW_ENTRIES = "allowNewEntries";
 
 	private static final String[] FILTER_TYPE_ITEMS = new String[] { ValuelistConfigTypeSabloValue.STARTS_WITH, ValuelistConfigTypeSabloValue.CONTAINS };
 	private static final String[] FILTER_DESTINATION_ITEMS = new String[] { ValuelistConfigTypeSabloValue.DISPLAY_VALUE, ValuelistConfigTypeSabloValue.DISPLAY_AND_REAL_VALUE };
@@ -67,7 +68,10 @@ public class ValuelistConfigPropertySource extends ComplexPropertySourceWithStan
 				"filterDestination",
 				new ComboboxPropertyModel<String>(
 					FILTER_DESTINATION_ITEMS),
-				Messages.LabelUnresolved) };
+				Messages.LabelUnresolved),
+
+			new CheckboxPropertyDescriptor(ALLOW_NEW_ENTRIES, ALLOW_NEW_ENTRIES) };
+
 	}
 
 	@Override
@@ -85,13 +89,24 @@ public class ValuelistConfigPropertySource extends ComplexPropertySourceWithStan
 				: ValuelistConfigTypeSabloValue.DISPLAY_VALUE;
 			return Arrays.asList(FILTER_DESTINATION_ITEMS).indexOf(type);
 		}
+		if (ALLOW_NEW_ENTRIES.equals(id))
+		{
+			return json != null ? json.optBoolean(ALLOW_NEW_ENTRIES, Boolean.TRUE) : Boolean.TRUE;
+		}
 		return null;
 	}
 
 	@Override
 	public Object resetComplexPropertyValue(Object id)
 	{
-		return Integer.valueOf(0);
+		if (ALLOW_NEW_ENTRIES.equals(id))
+		{
+			return Boolean.TRUE;
+		}
+		else
+		{
+			return Integer.valueOf(0);
+		}
 	}
 
 	@Override
@@ -99,14 +114,21 @@ public class ValuelistConfigPropertySource extends ComplexPropertySourceWithStan
 	{
 		JSONObject editJSON = getEditableValue();
 		JSONObject json = (editJSON == null) ? new JSONObject() : new ServoyJSONObject(editJSON, ServoyJSONObject.getNames(editJSON), false, false);
-		Integer index = (Integer)v;
-		if (FILTER_TYPE.equals(id))
+		if (ALLOW_NEW_ENTRIES.equals(id))
 		{
-			json.put(FILTER_TYPE, FILTER_TYPE_ITEMS[index]);
+			json.put(ALLOW_NEW_ENTRIES, v);
 		}
-		if (FILTER_DESTINATION.equals(id))
+		else
 		{
-			json.put(FILTER_DESTINATION, FILTER_DESTINATION_ITEMS[index]);
+			Integer index = (Integer)v;
+			if (FILTER_TYPE.equals(id))
+			{
+				json.put(FILTER_TYPE, FILTER_TYPE_ITEMS[index]);
+			}
+			if (FILTER_DESTINATION.equals(id))
+			{
+				json.put(FILTER_DESTINATION, FILTER_DESTINATION_ITEMS[index]);
+			}
 		}
 		return json;
 	}
