@@ -27,10 +27,10 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
-import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.jsunit.Activator;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
 import com.servoy.eclipse.model.test.TestTarget;
+import com.servoy.eclipse.model.util.SerialRule;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.scripting.IExecutingEnviroment;

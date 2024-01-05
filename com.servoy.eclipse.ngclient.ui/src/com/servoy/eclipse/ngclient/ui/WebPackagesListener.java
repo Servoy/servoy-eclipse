@@ -81,6 +81,7 @@ import com.servoy.eclipse.model.ING2WarExportModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.IEditorRefresh;
+import com.servoy.eclipse.model.util.SerialRule;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
@@ -1186,6 +1187,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	private static final AtomicBoolean cleanInstall = new AtomicBoolean(false);
 
 	private static final ConcurrentMap<File, DirectorySync> watchCreated = new ConcurrentHashMap<>();
+	private static final SerialRule serialRule = SerialRule.getNewSerialRule();
 
 	public WebPackagesListener()
 	{
@@ -1218,6 +1220,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				checkPackages(false);
 			}
 		});
+		job.setRule(serialRule);
 		job.schedule();
 	}
 
