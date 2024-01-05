@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.labelproviders;
 
 
+import java.util.Map;
+
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Font;
@@ -28,8 +30,10 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -106,6 +110,15 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 			}
 			else
 			{
+				if (persist instanceof LayoutContainer && "class".equals(propertyId))
+				{
+					Map<String, String> attributes = (Map<String, String>)((LayoutContainer)persist).getCustomPropertyNonFlattened(
+						new String[] { IContentSpecConstants.PROPERTY_ATTRIBUTES });
+					if (attributes != null && attributes.containsKey(propertyId))
+					{
+						isOverridden = true;
+					}
+				}
 				// the value is not persist-mapped; if value is set in current persist then it is overridden
 				if (((AbstractBase)persist).hasProperty((String)propertyId))
 				{
