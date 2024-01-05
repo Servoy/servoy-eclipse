@@ -17,15 +17,11 @@
 
 package com.servoy.eclipse.jsunit.smart;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.SwingUtilities;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.test.SolutionJSUnitSuiteCodeBuilder;
-import com.servoy.j2db.IServiceProvider;
-import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IClient;
 import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugHeadlessClient;
@@ -44,7 +40,7 @@ import com.servoy.j2db.util.Debug;
  */
 public class DebugTestClient extends DebugHeadlessClient
 {
-	private final List<Runnable> events = new ArrayList<Runnable>();
+	private final List<Runnable> events = new CopyOnWriteArrayList<Runnable>();
 	private final IUserManager userManager;
 	private boolean debugMode = true;
 
@@ -90,11 +86,11 @@ public class DebugTestClient extends DebugHeadlessClient
 	private void runEvents()
 	{
 		if (events.size() == 0) return;
-		Runnable[] runnables = events.toArray(new Runnable[events.size()]);
+		Runnable[] runnables = events.toArray(new Runnable[0]);
 		events.clear();
 		for (Runnable runnable : runnables)
 		{
-			runnable.run();
+			invokeAndWait(runnable);
 		}
 		runEvents();
 	}
@@ -103,25 +99,7 @@ public class DebugTestClient extends DebugHeadlessClient
 	protected void doInvokeLater(Runnable r)
 	{
 		events.add(r);
-		final IServiceProvider client = this;
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				IServiceProvider prevThreadServiceProvider = J2DBGlobals.getThreadServiceProvider();
-				J2DBGlobals.setServiceProvider(client);
-				IServiceProvider prevServiceProvider = J2DBGlobals.setSingletonServiceProvider(client);
-				try
-				{
-					runEvents();
-				}
-				finally
-				{
-					J2DBGlobals.setServiceProvider(prevThreadServiceProvider);
-					J2DBGlobals.setSingletonServiceProvider(prevServiceProvider);
-				}
-			}
-		});
+		getScheduledExecutor().execute(() -> runEvents());
 	}
 
 	@Override
