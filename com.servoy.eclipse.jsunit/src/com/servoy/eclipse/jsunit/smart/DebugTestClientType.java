@@ -24,15 +24,15 @@ import com.servoy.j2db.DebugClientType;
  * 
  * @author acostescu
  */
-public class DebugSmartTestClientType extends DebugClientType<DebugJ2DBTestClient>
+public class DebugTestClientType extends DebugClientType<DebugTestClient>
 {
 
-	public static final String COM_SERVOY_ECLIPSE_JSUNIT_SMART_CLIENT = "com.servoy.eclipse.jsunit.smart.client";
-	public static final DebugSmartTestClientType INSTANCE = new DebugSmartTestClientType();
+	public static final String COM_SERVOY_ECLIPSE_JSUNIT_CLIENT = "com.servoy.eclipse.jsunit.smart.client";
+	public static final DebugTestClientType INSTANCE = new DebugTestClientType();
 
-	protected DebugSmartTestClientType()
+	protected DebugTestClientType()
 	{
-		super(COM_SERVOY_ECLIPSE_JSUNIT_SMART_CLIENT);
+		super(COM_SERVOY_ECLIPSE_JSUNIT_CLIENT);
 	}
 
 }

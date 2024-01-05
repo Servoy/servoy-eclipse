@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.jsunit.smart;
 
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +28,12 @@ import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IClient;
 import com.servoy.j2db.debug.DebugClientHandler;
-import com.servoy.j2db.debug.DebugJ2DBClient;
+import com.servoy.j2db.debug.DebugHeadlessClient;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
 
@@ -44,17 +42,17 @@ import com.servoy.j2db.util.Debug;
  *
  * @author acostescu
  */
-public class DebugJ2DBTestClient extends DebugJ2DBClient
+public class DebugTestClient extends DebugHeadlessClient
 {
 	private final List<Runnable> events = new ArrayList<Runnable>();
 	private final IUserManager userManager;
 	private boolean debugMode = true;
 
-	public DebugJ2DBTestClient(DebugClientHandler debugClientHandler)
+	public DebugTestClient(DebugClientHandler debugClientHandler) throws Exception
 	{
-		super(debugClientHandler);
+		super(null, null, null, null, null, null, debugClientHandler);
 		userManager = new JSUnitUserManager(ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager());
-		setUnitTestMode(true); // TODO move all unit test code from superclass here
+//		setUnitTestMode(true); // TODO move all unit test code from superclass here
 	}
 
 	@Override
@@ -62,12 +60,6 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	{
 		runEvents();
 		super.updateUI(time);
-	}
-
-	@Override
-	protected void dispatchEventsToHideDialog()
-	{
-		// do nothing so that tests are run after client is loaded
 	}
 
 	@Override
@@ -132,9 +124,8 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 		});
 	}
 
-	// do not show info/error dialogs in test client
 	@Override
-	public void reportError(Component parentComponent, String message, Object detail)
+	public void reportError(String message, Object detail)
 	{
 		DebugUtils.errorToDebugger(getScriptEngine(), message, detail);
 		logError(message, detail);
@@ -145,25 +136,13 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	}
 
 	@Override
-	public void reportInfo(Component parentComponent, String message, String title)
+	public void reportInfo(String message)
 	{
 		DebugUtils.infoToDebugger(getScriptEngine(), message);
 		Debug.trace(message);
 	}
 
-	@Override
-	protected IApplicationServer connectApplicationServer() throws Exception
-	{
-		return ApplicationServerRegistry.getService(IApplicationServer.class);
-	}
 
-	@Override
-	public void showDefaultLogin()
-	{
-		// don't do dummy authentication, just like regular test client for in sync behavior
-	}
-
-	@Override
 	public void setDebugMode(boolean debugMode)
 	{
 		this.debugMode = debugMode;

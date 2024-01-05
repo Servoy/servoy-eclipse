@@ -33,10 +33,10 @@ import junit.framework.TestResult;
  * @author obuligan
  *
  */
-public class SmartClientTestSuite extends ApplicationJSTestSuite
+public class TestClientTestSuite extends ApplicationJSTestSuite
 {
 
-	public SmartClientTestSuite(IApplication application, TestTarget target)
+	public TestClientTestSuite(IApplication application, TestTarget target)
 	{
 		super(application, target, false);
 	}
@@ -57,10 +57,11 @@ public class SmartClientTestSuite extends ApplicationJSTestSuite
 
 	public static Test suite()
 	{
-		IServiceProvider prevServiceProvider = J2DBGlobals.setSingletonServiceProvider(staticSuiteApplication);
+		IServiceProvider prevServiceProvider = J2DBGlobals.getServiceProvider();
+		J2DBGlobals.setServiceProvider(staticSuiteApplication);
 		try
 		{
-			return new SmartClientTestSuite(staticSuiteApplication, staticTarget);
+			return new TestClientTestSuite(staticSuiteApplication, staticTarget);
 		}
 		finally
 		{

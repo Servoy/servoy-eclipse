@@ -17,9 +17,6 @@
 package com.servoy.eclipse.jsunit.runner;
 
 import java.io.StringReader;
-import java.lang.reflect.InvocationTargetException;
-
-import javax.swing.SwingUtilities;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -197,44 +194,9 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	@Override
 	public void run(final TestResult result)
 	{
-		// temporary set global app to jsunit app while running the unit tests
-		IServiceProvider prevServiceProvider = J2DBGlobals.setSingletonServiceProvider(staticSuiteApplication);
-		IServiceProvider threadLocal = J2DBGlobals.getThreadServiceProvider();
-		if (threadLocal != staticSuiteApplication) J2DBGlobals.setServiceProvider(staticSuiteApplication);
-		try
-		{
-			if (SwingUtilities.isEventDispatchThread())
-			{
-				super.run(result);
-			}
-			else
-			{
-				try
-				{
-					SwingUtilities.invokeAndWait(new Runnable()
-					{
-						public void run()
-						{
-							ApplicationJSTestSuite.super.run(result);
-						}
-					});
-				}
-				catch (InterruptedException e)
-				{
-					Debug.log(e);
-				}
-				catch (InvocationTargetException e)
-				{
-					Debug.log(e);
-					if (e.getTargetException() instanceof RuntimeException) throw (RuntimeException)e.getTargetException();
-				}
-			}
-		}
-		finally
-		{
-			J2DBGlobals.setSingletonServiceProvider(prevServiceProvider);
-			J2DBGlobals.setServiceProvider(threadLocal);
-		}
+		staticSuiteApplication.invokeAndWait(() -> {
+			super.run(result);
+		});
 	}
 
 }

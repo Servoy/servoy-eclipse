@@ -2,13 +2,14 @@ package com.servoy.eclipse.jsunit.smart;
 
 import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.extensions.IDebugClientPovider;
+import com.servoy.j2db.util.Debug;
 
 /**
  * Provider of debug smart test client.
- * 
+ *
  * @author acostescu
  */
-public class DebugClientPovider implements IDebugClientPovider<DebugJ2DBTestClient>
+public class DebugClientPovider implements IDebugClientPovider<DebugTestClient>
 {
 
 	public DebugClientPovider()
@@ -16,9 +17,17 @@ public class DebugClientPovider implements IDebugClientPovider<DebugJ2DBTestClie
 	}
 
 	@Override
-	public DebugJ2DBTestClient createDebugClient(final DebugClientHandler debugClientHandler)
+	public DebugTestClient createDebugClient(final DebugClientHandler debugClientHandler)
 	{
-		return new DebugJ2DBTestClient(debugClientHandler);
+		try
+		{
+			return new DebugTestClient(debugClientHandler);
+		}
+		catch (Exception e)
+		{
+			Debug.error(e);
+		}
+		return null;
 	}
 
 	@Override
