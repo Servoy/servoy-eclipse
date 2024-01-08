@@ -55,7 +55,21 @@ public class DebugTestClient extends DebugHeadlessClient
 	public void updateUI(int time)
 	{
 		runEvents();
-		super.updateUI(time);
+		try
+		{
+			Thread.sleep(time);
+		}
+		catch (InterruptedException e)
+		{
+			// ignore
+		}
+		runEvents();
+	}
+
+	@Override
+	public void sleep(int ms)
+	{
+		updateUI(ms);
 	}
 
 	@Override
@@ -98,8 +112,8 @@ public class DebugTestClient extends DebugHeadlessClient
 	@Override
 	protected void doInvokeLater(Runnable r)
 	{
+		// for the test clients, updateUI of sleep must be called to execute these events..
 		events.add(r);
-		getScheduledExecutor().execute(() -> runEvents());
 	}
 
 	@Override

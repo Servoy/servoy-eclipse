@@ -184,7 +184,7 @@ public class RunClientTests extends RunJSUnitTests
 			{
 				if (!plugin.getJSUnitClient().isShutDown())
 				{
-					plugin.getJSUnitClient().invokeLater(new Runnable()
+					plugin.getJSUnitClient().invokeAndWait(new Runnable()
 					{
 						public void run()
 						{
