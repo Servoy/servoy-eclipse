@@ -54,6 +54,7 @@ export class ApplicationService {
                 link.setAttribute('rel', 'stylesheet');
                 this.doc.head.appendChild(link);
                 link.setAttribute('href', path);
+                link.setAttribute('svy-stylesheet', path);
             }
         }
     }
