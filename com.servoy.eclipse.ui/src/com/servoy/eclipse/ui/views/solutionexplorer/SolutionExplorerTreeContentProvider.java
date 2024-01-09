@@ -543,7 +543,7 @@ public class SolutionExplorerTreeContentProvider
 		activeSolutionNode = null;
 		allSolutionsNode = null;
 
-		loadedJavaPluginNodes.clear();
+		if (loadedJavaPluginNodes != null) loadedJavaPluginNodes.clear();
 		// dispose the (plugin) images that were allocated in SWT after conversion from Swing
 		for (Image i : pluginImages)
 		{
