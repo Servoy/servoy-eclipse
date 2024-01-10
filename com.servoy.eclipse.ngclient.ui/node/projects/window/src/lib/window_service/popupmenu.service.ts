@@ -53,7 +53,7 @@ export class PopupMenuService {
 
     public showMenuAt(element: HTMLElement, displayTop: boolean) {
         this.menu.style.visibility = 'visible';
-        this.updateMenuHeight();
+        this.updateMenuHeight(element.getBoundingClientRect().top, element.getBoundingClientRect().height, this.menu.getBoundingClientRect().height);
         createPopper(element, this.menu, {
 			placement: (displayTop ? 'top' : 'bottom'),
             modifiers: [
@@ -70,7 +70,7 @@ export class PopupMenuService {
 
     public showMenu(x: number, y: number, displayTop: boolean) {
         this.menu.style.visibility = 'visible';
-        this.updateMenuHeight();
+        this.updateMenuHeight(y, 0, this.menu.getBoundingClientRect().height);
         const virtualElement: VirtualElement = {
             getBoundingClientRect: () => {
                 return {
@@ -184,9 +184,16 @@ export class PopupMenuService {
         });
     }
     
-    private updateMenuHeight() {
-        if (this.menu.getBoundingClientRect().height >= window.innerHeight) {
-			this.menu.style.maxHeight = `${window.innerHeight/2}px`;
+    private updateMenuHeight(elementTop: number, elementHeight: number, menuHeight: number) {
+		const topValue = elementTop;
+		const bottomValue = window.innerHeight - (elementTop + elementHeight);
+		if (menuHeight >= topValue || menuHeight >= bottomValue) {
+			if (topValue >= bottomValue) {
+				this.menu.style.maxHeight = `${topValue - 10}px`;
+			}
+			else {
+				this.menu.style.maxHeight = `${bottomValue - 10}px`;
+			}
 			this.menu.style.overflow = 'auto';
 		}
 	}
