@@ -4,8 +4,9 @@
 }
 
 .dropdown-submenu>.dropdown-menu {
+    display: block;
+    visibility: hidden;
     top: 0;
-    left: 100%;
     margin-top: -6px;
     margin-left: -1px;
     -webkit-border-radius: 0 6px 6px 6px;
@@ -14,7 +15,7 @@
 }
 
 .dropdown-submenu:hover>.dropdown-menu {
-    display: block;
+    visibility: visible;
 }
 
 .dropdown-submenu>a:after {

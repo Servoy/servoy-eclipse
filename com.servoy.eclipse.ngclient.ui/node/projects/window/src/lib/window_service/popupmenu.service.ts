@@ -8,6 +8,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 export class PopupMenuService {
 
     menu: HTMLElement = null;
+    subMenuToParentMap: Map<HTMLElement, HTMLElement> = new Map();
 
     constructor(private domSanitizer: DomSanitizer, private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document) {
 
@@ -15,6 +16,7 @@ export class PopupMenuService {
 
     public initClosePopupHandler(handler: () => void) {
         const listener = () => {
+            this.subMenuToParentMap.clear();
             this.doc.querySelectorAll('.svy-popup-menu').forEach(item => {
                 item.remove();
                 this.menu = null;
@@ -65,7 +67,8 @@ export class PopupMenuService {
                   },
                 },
               ],
-          });
+        });
+        this.updateSubMenuesPosition();
     }
 
     public showMenu(x: number, y: number, displayTop: boolean) {
@@ -106,7 +109,8 @@ export class PopupMenuService {
                   },
                 },
               ],
-          });
+        });
+        this.updateSubMenuesPosition();
     }
 
     private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean): void {
@@ -114,6 +118,7 @@ export class PopupMenuService {
             const ul = this.doc.createElement('ul');
             ul.classList.add('dropdown-menu');
             parent.appendChild(ul);
+            this.subMenuToParentMap.set(ul, parent);
             parent = ul;
         }
         items.filter(item => !item || item.visible !== false).forEach((item, index) => {
@@ -197,6 +202,14 @@ export class PopupMenuService {
 			this.menu.style.overflow = 'auto';
 		}
 	}
+
+    private updateSubMenuesPosition() {
+        this.subMenuToParentMap.forEach((parent, element) => {
+            createPopper(parent, element, {
+                placement: 'right-start'
+            });
+        });
+    }
 }
 
 export class Popup extends BaseCustomObject {
