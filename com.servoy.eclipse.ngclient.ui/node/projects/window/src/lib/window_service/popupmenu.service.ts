@@ -192,7 +192,7 @@ export class PopupMenuService {
     private updateMenuHeight(elementTop: number, elementHeight: number, menuHeight: number) {
 		const topValue = elementTop;
 		const bottomValue = window.innerHeight - (elementTop + elementHeight);
-		if (menuHeight >= topValue || menuHeight >= bottomValue) {
+		if (menuHeight >= topValue && menuHeight >= bottomValue) {
 			if (topValue >= bottomValue) {
 				this.menu.style.maxHeight = `${topValue - 10}px`;
 			}
