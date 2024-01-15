@@ -504,10 +504,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             
             //equal distance guides
             let uuids = [...this.topPos.keys()];
-            let prev = uuids.indexOf(uuid) -1;
-            if (prev >=1) {
-                const e1 = this.getDOMRect(uuids[prev-1]);
-                const e2 = this.getDOMRect(uuids[prev]);
+            let idx = uuids.indexOf(uuid);
+            if (idx >=2) {
+                const e1 = this.getDOMRect(uuids[idx - 2]);
+                const e2 = this.getDOMRect(uuids[idx - 1]);
                 const dist = e2.top - e1.bottom;   
                 if (this.isOverlap(rect, e1, 'x') && this.isOverlap(rect, e2, 'x') &&
                     e2.top > e1.bottom && rect.top > e2.bottom && Math.abs(dist - rect.top + e2.bottom) < 10) {
@@ -516,26 +516,34 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     				this.addVerticalGuides(e1, e2, r, dist, properties);
 				}
             }
-            else {
-                const next = uuids.indexOf(uuid) +1;
-                if (next < uuids.length -1) {
-                    const e1 = this.getDOMRect(uuids[next]);
-                	const e2 = this.getDOMRect(uuids[next + 1]);
-                	const dist = e2.top - e1.bottom;   
-                   if (this.isOverlap(rect, e1, 'x') && this.isOverlap(rect, e2, 'x') &&
-                   		e2.top > e1.bottom && e1.top > rect.bottom && Math.abs(dist - e1.top + rect.bottom) < 10) {
-						properties.top = e1.top - dist - rect.height;
-	    				const r = new DOMRect(properties.left ? properties.left : rect.x, properties.top, rect.width, rect.height);
-    					this.addVerticalGuides(r, e1, e2, dist, properties);
-					}
-                }
+            if (idx < uuids.length - 2) {
+				const e1 = this.getDOMRect(uuids[idx + 1]);
+               	const e2 = this.getDOMRect(uuids[idx + 2]);
+                const dist = e2.top - e1.bottom;   
+                if (this.isOverlap(rect, e1, 'x') && this.isOverlap(rect, e2, 'x') && 
+                e2.top > e1.bottom && e1.top > rect.bottom && Math.abs(dist - e1.top - rect.bottom) < 10) {
+					properties.top = e1.top - dist - rect.height;
+	    			const r = new DOMRect(properties.left ? properties.left : rect.x, properties.top, rect.width, rect.height);
+    				this.addVerticalGuides(r, e1, e2, dist, properties);
+				}
             }
+            if (idx >= 1 && idx < uuids.length - 1) {
+				const e1 = this.getDOMRect(uuids[idx - 1]);
+               	const e2 = this.getDOMRect(uuids[idx + 1]);
+                const dist = (e2.top - e1.bottom) / 2;   
+                if (this.isOverlap(rect, e1, 'x') && this.isOverlap(rect, e2, 'x') && 
+                e2.top > rect.bottom && rect.top > e1.bottom && Math.abs(e1.bottom + dist - rect.top - rect.height / 2) < 10) {
+					properties.top = e1.bottom + dist - rect.height/2;
+	    			const r = new DOMRect(properties.left ? properties.left : rect.x, properties.top, rect.width, rect.height);
+    				this.addVerticalGuides(e1, r, e2, dist - rect.height/2, properties);
+				}
+			}
             
             uuids = [...this.leftPos.keys()];
-            prev = uuids.indexOf(uuid) -1;
-            if (prev >= 1) {
-                const e1 = this.getDOMRect(uuids[prev-1]);
-                const e2 = this.getDOMRect(uuids[prev]);
+            idx = uuids.indexOf(uuid);
+            if (idx >= 2) {
+                const e1 = this.getDOMRect(uuids[idx - 2]);
+                const e2 = this.getDOMRect(uuids[idx - 1]);
                 const dist = e2.left - e1.right;
                 if (this.isOverlap(rect, e1, 'y') && this.isOverlap(rect, e2, 'y') &&
                  e2.left > e1.right && rect.left > e2.right && Math.abs(dist - rect.left + e2.right) < 10) {                  
@@ -544,20 +552,28 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     				this.addHorizontalGuides(e1, e2, r, dist, properties);
                 }
             }
-            else {
-                const next = uuids.indexOf(uuid) +1;
-                if (next < uuids.length -1) {
-                    const e1 = this.getDOMRect(uuids[next]);
-                	const e2 = this.getDOMRect(uuids[next + 1]);
-                	const dist = e2.left - e1.right;
-                	if (this.isOverlap(rect, e1, 'y') && this.isOverlap(rect, e2, 'y') &&
-                      e1.left > rect.right && e2.left > e1.right && Math.abs(dist - rect.right + e1.left) < 10) {
-                        properties.left = e1.left - dist - rect.width;
-                        const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, rect.height);
-                        this.addHorizontalGuides(r, e1, e2, dist, properties);
-                    }
-                }
+           	if (idx  < uuids.length - 2) {
+                const e1 = this.getDOMRect(uuids[idx + 1]);
+               	const e2 = this.getDOMRect(uuids[idx + 2]);
+                const dist = e2.left - e1.right;
+                if (this.isOverlap(rect, e1, 'y') && this.isOverlap(rect, e2, 'y') &&
+                  e1.left > rect.right && e2.left > e1.right && Math.abs(dist - rect.right + e1.left) < 10) {
+                	properties.left = e1.left - dist - rect.width;
+                    const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, rect.height);
+                    this.addHorizontalGuides(r, e1, e2, dist, properties);
+                }              
             }
+            if (idx >= 1 && idx < uuids.length - 1) {
+				const e1 = this.getDOMRect(uuids[idx - 1]);
+               	const e2 = this.getDOMRect(uuids[idx + 1]);
+                const dist = (e2.left - e1.right) / 2;   
+                if (this.isOverlap(rect, e1, 'y') && this.isOverlap(rect, e2, 'y') && 
+                e2.left > rect.right && rect.left > e1.right && Math.abs(e1.right + dist - rect.left - rect.width / 2) < 10) {
+					properties.left = e1.right + dist - rect.width/2;
+	    			const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, rect.height);
+    				this.addHorizontalGuides(e1, r, e2, dist - rect.width/2, properties);
+				}
+			}
 
             return properties.guides.length == 0 ? null : properties;
     }
