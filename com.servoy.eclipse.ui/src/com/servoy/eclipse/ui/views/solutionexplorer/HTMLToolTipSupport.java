@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -116,11 +117,13 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 		String fgColor = null;
 		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
-			RGB backgroundColorRGB = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
-				.get("org.eclipse.ui.workbench.DARK_BACKGROUND").getRGB();
+			Color darkBGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+				.get("org.eclipse.ui.workbench.DARK_BACKGROUND");
+			RGB backgroundColorRGB = darkBGColor != null ? darkBGColor.getRGB() : new RGB(31, 31, 31);
 			bgColor = "rgb(" + backgroundColorRGB.red + "," + backgroundColorRGB.green + "," + backgroundColorRGB.blue + ")";
-			RGB foregroundColorRGB = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
-				.get("org.eclipse.ui.workbench.DARK_FOREGROUND").getRGB();
+			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+				.get("org.eclipse.ui.workbench.DARK_FOREGROUND");
+			RGB foregroundColorRGB = darkFGColor != null ? darkFGColor.getRGB() : new RGB(204, 204, 204);
 			fgColor = "rgb(" + foregroundColorRGB.red + "," + foregroundColorRGB.green + "," + foregroundColorRGB.blue + ")";
 		}
 
