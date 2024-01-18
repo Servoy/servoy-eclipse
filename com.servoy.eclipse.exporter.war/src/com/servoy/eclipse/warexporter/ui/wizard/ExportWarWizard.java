@@ -445,6 +445,14 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	}
 
 	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		//CSSSWTConstants.CSS_ID_KEY
+		pageContainer.getShell().setData("org.eclipse.e4.ui.css.id", "svydialog");
+		super.createPageControls(pageContainer);
+	}
+
+	@Override
 	public void addPages()
 	{
 		if (errorPage != null)

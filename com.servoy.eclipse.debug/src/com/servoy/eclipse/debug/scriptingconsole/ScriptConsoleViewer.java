@@ -292,7 +292,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 				for (Object element : viewerList)
 				{
 					viewer = (ScriptConsoleViewer)element;
-					boolean isDarkTheme = EclipseCSSThemeListener.isDarkThemeSelected();
+					boolean isDarkTheme = EclipseCSSThemeListener.isDarkThemeSelected(false);
 					if (isDarkTheme)
 					{
 						if (isInput == true)

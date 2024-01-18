@@ -20,6 +20,10 @@
                value="com.servoy.eclipse.core.servoytheme">
          </property>
          <property
+               name="cssTheme"
+               value="com.servoy.eclipse.core.servoydarktheme">
+         </property>
+         <property
                name="applicationCSSResources"
                value="platform:/plugin/org.eclipse.platform/images/">
          </property>
@@ -651,6 +655,11 @@
             basestylesheeturi="servoytheme/servoy.css"
             id="com.servoy.eclipse.core.servoytheme"
             label="Servoy Default">
+      </theme>
+      <theme
+            basestylesheeturi="servoytheme/servoydarkest.css"
+            id="com.servoy.eclipse.core.servoydarktheme"
+            label="Servoy Dark">
       </theme>
       <stylesheet
             uri="servoydarktheme/servoydark.css">

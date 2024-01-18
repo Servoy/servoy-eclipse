@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -101,6 +102,13 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		{
 			treeNode = (PlatformSimpleUserNode)selection.getFirstElement();
 		}
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	public void setSolutionExplorerView(SolutionExplorerView solEx)

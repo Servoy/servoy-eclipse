@@ -141,7 +141,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		myScrolledComposite.setExpandVertical(true);
 
 		Composite comp = new Composite(myScrolledComposite, SWT.NONE);
-		comp.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		myScrolledComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
 		myScrolledComposite.setContent(comp);
 
 		Label nameLabel;

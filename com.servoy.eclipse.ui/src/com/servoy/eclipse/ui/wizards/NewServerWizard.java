@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.wizards;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -69,6 +70,13 @@ public class NewServerWizard extends Wizard implements INewWizard
 	{
 		typeSelectionPage = new ServerTypeSelectionPage("serverTypeSelection");
 		this.addPage(typeSelectionPage);
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	private class ServerTypeSelectionPage extends WizardPage

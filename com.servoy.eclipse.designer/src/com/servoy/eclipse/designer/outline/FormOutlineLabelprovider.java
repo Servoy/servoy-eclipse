@@ -158,7 +158,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 					IPersist currentPersist = ((PersistContext)element).getPersist();
 					if (container == currentPersist)
 					{
-						if (EclipseCSSThemeListener.isDarkThemeSelected())
+						if (EclipseCSSThemeListener.isDarkThemeSelected(false))
 						{
 							return Display.getCurrent().getSystemColor(SWT.COLOR_CYAN);
 						}
@@ -166,7 +166,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 					}
 					if (container.getParent() == currentPersist.getParent())
 					{
-						if (EclipseCSSThemeListener.isDarkThemeSelected())
+						if (EclipseCSSThemeListener.isDarkThemeSelected(false))
 						{
 							return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
 						}
@@ -188,7 +188,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 					}
 					if (!isShowedContainer)
 					{
-						if (EclipseCSSThemeListener.isDarkThemeSelected())
+						if (EclipseCSSThemeListener.isDarkThemeSelected(false))
 						{
 							return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
 						}

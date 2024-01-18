@@ -50,12 +50,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -817,6 +820,28 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		}
 		return super.performCancel();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.jface.wizard.Wizard#setContainer(org.eclipse.jface.wizard.IWizardContainer)
+	 */
+	@Override
+	public void setContainer(IWizardContainer wizardContainer)
+	{
+		if (wizardContainer != null && wizardContainer.getShell() != null)
+		{
+			wizardContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		}
+		super.setContainer(wizardContainer);
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	protected ServerConfig getValidServerConfig()

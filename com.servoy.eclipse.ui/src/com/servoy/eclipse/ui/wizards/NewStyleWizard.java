@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -164,6 +165,13 @@ public class NewStyleWizard extends Wizard implements INewWizard
 			addPage(page1);
 			addPage(page2);
 		}
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	public String getSampleStyleContent()

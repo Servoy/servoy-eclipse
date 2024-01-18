@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -76,6 +77,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 		this("");
 	}
 
+
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 
@@ -112,6 +114,13 @@ public class NewMethodWizard extends Wizard implements INewWizard
 			// add pages to this wizard
 			addPage(methodPage);
 		}
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	@Override

@@ -184,7 +184,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		}
 		else
 		{
-			textForeground = EclipseCSSThemeListener.isDarkThemeSelected()
+			textForeground = EclipseCSSThemeListener.isDarkThemeSelected(true)
 				? PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get("org.eclipse.ui.workbench.DARK_FOREGROUND")
 				: text.getForeground();
 

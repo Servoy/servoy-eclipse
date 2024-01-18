@@ -370,7 +370,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			getSite().registerContextMenu(CONTEXT_MENU_ID, menuManager, this);
 		}
 
-		if (EclipseCSSThemeListener.isDarkThemeSelected())
+		if (EclipseCSSThemeListener.isDarkThemeSelected(true))
 		{
 			getTreeViewer().getTree().addListener(SWT.EraseItem, event -> {
 

@@ -375,10 +375,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							else
 							{
 								children = new ArrayList<Object>(calcs.size() + 10);
-								Iterator<ScriptCalculation> iterator = calcs.iterator();
-								while (iterator.hasNext())
+								for (ScriptCalculation calc : calcs)
 								{
-									children.add(new ColumnWrapper(iterator.next(), nodeWrapper.relations));
+									children.add(new ColumnWrapper(calc, nodeWrapper.relations));
 								}
 							}
 						}
@@ -406,12 +405,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					flattenedSolution != null)
 				{
 					Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
-					Iterator<Pair<String, IRootObject>> it = scopes.iterator();
-
 					SortedList<ScopeWithContext> scopesList = new SortedList<ScopeWithContext>(ScopeWithContext.SCOPE_COMPARATOR);
-					while (it.hasNext())
+					for (Pair<String, IRootObject> sc : scopes)
 					{
-						Pair<String, IRootObject> sc = it.next();
 						scopesList.add(new ScopeWithContext(sc.getLeft(), sc.getRight()));
 					}
 					children = new ArrayList<Object>();
@@ -475,11 +471,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							{
 								if (children == null) children = new ArrayList<Object>(list.size() + 10);
 								else children.ensureCapacity(children.size() + list.size() + 10);
-								Iterator<AggregateVariable> aggs = list.iterator();
-
-								while (aggs.hasNext())
+								for (AggregateVariable element : list)
 								{
-									children.add(new ColumnWrapper(aggs.next(), nodeWrapper.relations));
+									children.add(new ColumnWrapper(element, nodeWrapper.relations));
 								}
 							}
 						}
@@ -538,11 +532,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							{
 								if (children == null) children = new ArrayList<Object>(tableRelations.size());
 								else children.ensureCapacity(children.size() + tableRelations.size());
-								Iterator<Relation> relations = tableRelations.iterator();
 								RelationList relChain = ((DataProviderNodeWrapper)parentElement).relations;
-								while (relations.hasNext())
+								for (Relation rel : tableRelations)
 								{
-									Relation rel = relations.next();
 									if (relChain.contains(rel) && (rel.isExactPKRef(flattenedSolution) || rel.isParentRef())) continue;
 									children.add(new DataProviderNodeWrapper(RELATIONS, new RelationList(relChain, rel)));
 								}
@@ -1051,7 +1043,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					((TreeViewer)event.getSource()).update(previousElems.toArray(), null);
 				}
 
-				if (EclipseCSSThemeListener.isDarkThemeSelected())
+				if (EclipseCSSThemeListener.isDarkThemeSelected(true))
 				{
 					((TreeViewer)event.getSource()).getTree().addListener(SWT.EraseItem, evt -> {
 						evt.detail &= ~SWT.HOT;

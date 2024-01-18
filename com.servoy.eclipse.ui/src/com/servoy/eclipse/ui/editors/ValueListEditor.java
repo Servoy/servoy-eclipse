@@ -209,7 +209,7 @@ public class ValueListEditor extends PersistEditor
 		myScrolledComposite.setExpandVertical(true);
 
 		valueListEditorComposite = new Composite(myScrolledComposite, SWT.NONE);
-		valueListEditorComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		myScrolledComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
 		Label nameLabel = new Label(valueListEditorComposite, SWT.NONE);
 		nameLabel.setText("Valuelist Name");
 

@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -310,6 +311,13 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 				"Column differences between the DB and the DB information files are only noticed when the DB information files are read.\nAs the files are read only when needed, you might want to trigger a load in order to see the differences\nin the 'Problems' view.",
 				"Read/check existing DB information files for existing tables", true);
 		}
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	private static List<Pair<IServerInternal, String>> getMissingTables(List<IServerInternal> servers, final DataModelManager dmm)

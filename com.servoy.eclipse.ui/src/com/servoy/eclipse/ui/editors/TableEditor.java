@@ -27,9 +27,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -173,6 +176,14 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		updateTitle();
 	}
 
+	@Override
+	protected CTabFolder createContainer(Composite parent)
+	{
+		CTabFolder parentControl = super.createContainer(parent);
+		parentControl.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		return parentControl;
+	}
+
 	protected int getPageIndex(Control control)
 	{
 		int pages = getPageCount();
@@ -280,10 +291,9 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 				if (server != null)
 				{
-					Iterator<Column> it = getTable().getColumns().iterator();
-					while (it.hasNext())
+					for (Column element : getTable().getColumns())
 					{
-						it.next().removeColumnInfo();
+						element.removeColumnInfo();
 					}
 					server.refreshTable(getTable().getName());
 				}

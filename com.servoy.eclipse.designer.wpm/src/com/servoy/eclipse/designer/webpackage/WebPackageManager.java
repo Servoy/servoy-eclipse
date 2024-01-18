@@ -53,7 +53,7 @@ public class WebPackageManager extends EditorPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		boolean darkTheme = EclipseCSSThemeListener.isDarkThemeSelected();
+		boolean darkTheme = EclipseCSSThemeListener.isDarkThemeSelected(false);
 		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";
 		if (getEditorInput() instanceof WebPackageManagerEditorInput)
 		{

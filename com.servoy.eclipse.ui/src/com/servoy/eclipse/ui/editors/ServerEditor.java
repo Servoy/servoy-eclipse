@@ -46,7 +46,6 @@ import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
@@ -60,6 +59,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ExpandBar;
@@ -128,7 +128,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private Button logServerButton;
 	private Button proceduresButton;
 	private Button sortIgnoreCaseButton;
-	private CCombo sortNullprecedenceField;
+	private Combo sortNullprecedenceField;
 	private Button clientOnlyConnectionsButton;
 	private Button prefixTablesButton;
 	private Button createLogTableButton;
@@ -137,16 +137,16 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private Button saveButton;
 	private Button testConnectionButton;
 	private Text validationQueryField;
-	private CCombo validationTypeField;
+	private Combo validationTypeField;
 	private Text maxPreparedStatementsIdleField;
 	private Text maxIdleField;
 	private Text logTableName;
 	private Text maxActiveField;
 	private Text idleTimoutField;
-	private CCombo dataModel_cloneFromField;
-	private CCombo schemaField;
-	private CCombo catalogField;
-	private CCombo driverField;
+	private Combo dataModel_cloneFromField;
+	private Combo schemaField;
+	private Combo catalogField;
+	private Combo driverField;
 	private Text urlField;
 	private Text passwordField;
 	private Text userNameField;
@@ -185,8 +185,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		myScrolledComposite.setShowFocusedControl(true);
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
-
-		Label mainSeparator = separator(parent);
 
 		Composite bottomComposite = new Composite(parent, SWT.NONE);
 
@@ -367,16 +365,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		Composite advancedSettingsCollapserComposite = new Composite(mainComposite, SWT.NONE);
 
-		Label separator1 = separator(advancedSettingsCollapserComposite);
 		ExpandBarWidthAware expandBarWrapper = new ExpandBarWidthAware(advancedSettingsCollapserComposite, SWT.NONE, SWT.NONE);
 		ExpandBar advancedSettingsCollapser = expandBarWrapper.getWrappedControl();
-		Label separator2 = separator(advancedSettingsCollapserComposite);
 
 		collapsableItem = new ExpandItem(advancedSettingsCollapser, SWT.NONE, 0);
 		collapsableItem.setText("Show advanced server settings");
 
 		advancedSettingsCollapser.setBackground(display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-		advancedSettingsCollapser.setForeground(display.getSystemColor(SWT.COLOR_DARK_BLUE));
+		advancedSettingsCollapser.setForeground(display.getSystemColor(SWT.COLOR_LINK_FOREGROUND));
 
 		advancedSettingsComposite = new Composite(advancedSettingsCollapser, SWT.NONE);
 		advancedSettingsComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
@@ -442,8 +438,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		toolTip = "All Servoy generated SQL statements are in the form of Prepared statements, to increase the performance of statement execution.\nThis setting determines how many prepared statements are kept in cache.";
 		Label maxPreparedStatementsIdleLabel = label(advancedSettingsComposite, "Max Idle Prepared Statements", toolTip);
 		maxPreparedStatementsIdleField = text(advancedSettingsComposite, toolTip);
-
-		Label separator3 = separator(advancedSettingsComposite);
 
 		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" + "\"" +
 			getConnectionValidationTypeAsString(CONNECTION_EXCEPTION_VALIDATION) +
@@ -614,8 +608,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		});
 
 
-		Label separator4 = separator(advancedSettingsComposite);
-
 		toolTip = "Enabling this will enable querying for stored procedures on the database and exposing that under datasources.sp.servername";
 		label(advancedSettingsComposite, "Enable procedures", toolTip);
 		proceduresButton = checkbox(advancedSettingsComposite, toolTip);
@@ -655,9 +647,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		myScrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		tmpGD = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
-		tmpGD.verticalIndent = 10;
-		mainSeparator.setLayoutData(tmpGD);
 
 		bottomComposite.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 
@@ -719,10 +708,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		advancedSettingsCollapserComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		expandBarWrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		separator1.setLayoutData(separatorGd());
-		separator2.setLayoutData(separatorGd());
-		separator3.setLayoutData(separatorGd());
-		separator4.setLayoutData(separatorGd());
 
 		gridLayout = new GridLayout(4, false);
 		gridLayout.marginRight = 0;
@@ -864,23 +849,18 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		return checkbox;
 	}
 
-	private static CCombo dropdown(Composite parent, String toolTip, String... items)
+	private static Combo dropdown(Composite parent, String toolTip, String... items)
 	{
 		return dropdown(parent, SWT.NONE, toolTip, items);
 	}
 
-	private static CCombo dropdown(Composite parent, int style, String toolTip, String... items)
+	private static Combo dropdown(Composite parent, int style, String toolTip, String... items)
 	{
-		CCombo combo = new CCombo(parent, SWT.BORDER | style);
+		Combo combo = new Combo(parent, SWT.BORDER | style);
 		combo.setToolTipText(toolTip);
 		combo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 		stream(items).forEach(combo::add);
 		return combo;
-	}
-
-	private static Label separator(Composite parent)
-	{
-		return new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 	}
 
 	/**
@@ -998,13 +978,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private static GridData fourColumns()
 	{
 		return new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
-	}
-
-	private static GridData separatorGd()
-	{
-		GridData gd = fourColumns();
-		gd.verticalAlignment = 10;
-		return gd;
 	}
 
 	private static GridData width(GridData gd)
