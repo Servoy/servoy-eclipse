@@ -569,8 +569,6 @@ export class PaletteComp {
     children?: [{ [property: string]: string }];
     rightSibling?: string;
     variant?: string;
-    snapX?:  { property: string } ;
-    snapY?:  { property: string } ;
     cssPos?: { property: string };
 }
 

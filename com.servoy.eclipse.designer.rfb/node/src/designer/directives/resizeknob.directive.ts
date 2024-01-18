@@ -21,7 +21,7 @@ export class ResizeKnobDirective implements OnInit, IContentMessageListener, OnD
 
     topContentAreaAdjust: number;
     leftContentAreaAdjust: number;
-    snapData: {top: number, left: number, snapX?:  { property: string } , snapY?:  { property: string } , cssPosition: { property: string } };
+    snapData: {top: number, left: number, cssPosition: { property: string } };
 
     constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService) {
     }

@@ -20,7 +20,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
     draggedVariant: DraggedVariant = {};
     isDraggedVariant = false;
-    snapData: {top: number, left: number, snapX?:  { property: string } , snapY?:  { property: string } , cssPosition: { property: string } };
+    snapData: {top: number, left: number, cssPosition: { property: string } };
 
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, 
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
@@ -190,8 +190,6 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             if (this.snapData) {
                 component.x = this.snapData.left;
                 component.y = this.snapData.top;
-                component.snapX = this.snapData.snapX;
-                component.snapY = this.snapData.snapY;
                 component.cssPos = this.snapData.cssPosition
             }
             else {
@@ -430,7 +428,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     contentMessageReceived(id: string, data: { [property: string]: unknown }) {
         if (id === 'snap') {
-            this.snapData = data['properties'] as {top: number, left: number, snapX?:  { property: string } , snapY?:  { property: string } , cssPosition: { property: string } };
+            this.snapData = data['properties'] as {top: number, left: number , cssPosition: { property: string } };
             if (this.snapData?.top && this.snapData?.left && this.dragItem?.contentItemBeingDragged) {
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');

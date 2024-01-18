@@ -32,7 +32,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
     selectionRect = {top: 0, left: 0, width: 0, height: 0};
     mousedownpoint = {x: 0, y: 0};
     mouseOffset = {top: 0, left: 0}; //autoscroll limits will refer to this parameter
-    snapData: {top: number, left: number, snapX?:  { property: string } , snapY?:  { property: string } , cssPosition: { property: string } };
+    snapData: {top: number, left: number, cssPosition: { property: string }, guides: [] };
 
   constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private readonly designerUtilsService: DesignerUtilsService, private editorContentService : EditorContentService) { }
 
@@ -132,14 +132,16 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
                   y: elementInfo.y
               };
               if (this.snapData && this.selectionToDrag.length == 1) {
-                changes[id]['cssPos'] = this.snapData.cssPosition;
-                const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-                if (!this.snapData.snapX) {
-                    changes[id]['x'] = event.clientX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftContentAreaAdjust;
-                }
-                if (!this.snapData.snapY) {
-                    changes[id]['y'] = event.clientY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topContentAreaAdjust;
-                }
+                  const cssPos = this.snapData.cssPosition;
+                  changes[id]['cssPos'] = cssPos;
+                  const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
+
+                  if (!cssPos['left'] && !cssPos['right'] && !cssPos['middleH']) {
+                      changes[id]['x'] = event.clientX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftContentAreaAdjust;
+                  }
+                  if (!cssPos['top'] && !cssPos['bottom'] && !cssPos['middleV']) {
+                      changes[id]['y'] = event.clientY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topContentAreaAdjust;
+                  }
               }
 
               if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
