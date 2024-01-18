@@ -167,7 +167,10 @@ public class WarExporter
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "de.inetsoftware.jlessc_*.jar", //
 		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", "com.fasterxml.jackson.core.jackson-core_*.jar", //
 		"com.fasterxml.jackson.core.jackson-databind_*.jar", "com.fasterxml.jackson.core.jackson-annotations_*.jar", //
-		"wrapped.com.auth0.java-jwt*.jar" };
+		"wrapped.com.auth0.java-jwt*.jar", "wrapped.org.apache.httpcomponents.core5.httpcore5_*.jar", //
+		"wrapped.org.apache.httpcomponents.core5.httpcore5-h2_*", "wrapped.org.apache.httpcomponents.client5.httpclient5_*" };
+
+	private static final Set<String> HTTP_PLUGIN_FILES = Set.of("httpclient5.jar", "httpcore5-h2.jar", "httpcore5.jar");
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
@@ -347,8 +350,7 @@ public class WarExporter
 			File pluginsDir = new File(tmpWarDir, "plugins");
 			try
 			{
-				Files.walk(pluginsDir.toPath()).map(path -> path.toFile()).filter(file -> file.isFile() && !file.getName().toLowerCase().endsWith(".jnlp") &&
-					!file.getName().toLowerCase().equals("plugins.properties"))
+				Files.walk(pluginsDir.toPath()).map(path -> path.toFile()).filter(this::filterPluginFile)
 					.forEach(file -> {
 						File targetFile = new File(targetLibDir, file.getName());
 						if (targetFile.exists())
@@ -389,6 +391,15 @@ public class WarExporter
 		monitor.worked(1);
 		monitor.subTask("Done (" + SDF.format(new Date()) + ")");
 		monitor.done();
+	}
+
+	/**
+	 * @return
+	 */
+	protected boolean filterPluginFile(File file)
+	{
+		String name = file.getName().toLowerCase();
+		return file.isFile() && !name.endsWith(".jnlp") && !name.equals("plugins.properties") && !HTTP_PLUGIN_FILES.contains(name);
 	}
 
 	private void checkDuplicateJars(File tmpWarDir) throws ExportException
