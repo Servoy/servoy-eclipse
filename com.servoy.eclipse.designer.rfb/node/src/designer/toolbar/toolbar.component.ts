@@ -53,6 +53,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     btnPlaceTabPanel: ToolbarItem;
     btnPlaceAccordion: ToolbarItem;
     btnHighlightWebcomponents: ToolbarItem;
+    btnToggleDynamicGuides: ToolbarItem;
 
     btnToggleShowData: ToolbarItem;
     btnToggleDesignMode: ToolbarItem;
@@ -217,6 +218,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnHighlightWebcomponents.state = result;
             this.editorSession.fireHighlightChangedListeners(result);
         });
+        const guidesPromise = this.editorSession.isShowDynamicGuides();
+        void guidesPromise.then((result: boolean) => {
+            this.btnToggleDynamicGuides.state = result;
+            this.editorSession.fireShowDynamicGuidesChangedListeners(result);
+        });
         const hideInheritedPromise = this.editorSession.isHideInherited();
         void hideInheritedPromise.then((result: boolean) => {
             this.btnHideInheritedElements.state = result;
@@ -339,6 +345,20 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
         this.btnHighlightWebcomponents.state = true;
 
+        this.btnToggleDynamicGuides = new ToolbarItem(
+            'Toggle Dynamic Guides',
+            'toolbar/icons/dynamicGuides.png',
+            true,
+            () => {
+                const promise = this.editorSession.toggleShowDynamicGuides();
+                void promise.then((result: boolean) => {
+                    this.btnToggleDynamicGuides.state = result;
+                    this.editorSession.fireShowDynamicGuidesChangedListeners(result);
+                })
+            }
+        );
+        this.btnHighlightWebcomponents.state = true;
+
         this.add(this.btnPlaceField, TOOLBAR_CATEGORIES.ELEMENTS);
         this.add(this.btnPlaceImage, TOOLBAR_CATEGORIES.ELEMENTS);
         this.add(this.btnPlacePortal, TOOLBAR_CATEGORIES.ELEMENTS);
@@ -346,6 +366,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnPlaceTabPanel, TOOLBAR_CATEGORIES.ELEMENTS);
         this.add(this.btnPlaceAccordion, TOOLBAR_CATEGORIES.ELEMENTS);
         this.add(this.btnHighlightWebcomponents, TOOLBAR_CATEGORIES.ELEMENTS);
+        this.add(this.btnToggleDynamicGuides, TOOLBAR_CATEGORIES.ELEMENTS);
 
 
         this.btnToggleShowData = new ToolbarItem(

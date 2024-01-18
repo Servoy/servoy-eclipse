@@ -60,6 +60,7 @@ public class Activator extends AbstractUIPlugin
 	public static final String SHOW_SOLUTION_CSS_IN_ANGULAR_DESIGNER = "showSolutionCssInDesigner";
 	public static final String SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER = "showHighlightInDesigner";
 	public static final String SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER = "showI18NValuesInDesigner";
+	public static final String SHOW_DYNAMIC_GUIDES_IN_ANGULAR_DESIGNER = "showDynamicGuidesInDesigner";
 
 	// The shared instance
 	private static Activator plugin;

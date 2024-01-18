@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { EditorSessionService, IShowHighlightChangedListener } from '../services/editorsession.service';
+import { EditorSessionService, IShowDynamicGuidesChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 
@@ -8,7 +8,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     templateUrl: './dynamicguides.component.html',
     styleUrls: ['./dynamicguides.component.css']
 })
-export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessageListener {
+export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessageListener, IShowDynamicGuidesChangedListener {
 
     @Input() guides: Guide[] = [];
 
@@ -17,10 +17,16 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     leftAdjust: number;
     snapData: {top: number, left: number, guideX?: number, guideY?: number, guides?:  Guide[] };  
     timeout: ReturnType<typeof setTimeout>;
+    guidesEnabled: boolean;
 
     constructor(private el: ElementRef, protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2,
          private urlParser: URLParserService, private editorContentService: EditorContentService) {
-       
+       this.guidesEnabled = false;
+       this.editorSession.addDynamicGuidesChangedListener(this);
+    }
+
+    showDynamicGuidesChanged(showGuides: boolean): void {
+      this.guidesEnabled = showGuides;
     }
 
     ngOnInit(): void {
@@ -71,7 +77,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     }    
 
     private onMouseMove(event: MouseEvent) {
-      if (!this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
+      if (!this.guidesEnabled || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
       let point = { x: event.pageX, y: event.pageY };
       if (!this.topAdjust) {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)

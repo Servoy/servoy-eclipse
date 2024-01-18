@@ -334,6 +334,12 @@ public class EditorServiceHandler implements IServerService
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER))
 							: Boolean.TRUE;
 					}
+					if (args.has("showDynamicGuides"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_DYNAMIC_GUIDES_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_DYNAMIC_GUIDES_IN_ANGULAR_DESIGNER))
+							: Boolean.FALSE;
+					}
 					if (args.has("sameSizeIndicator"))
 					{
 						return Boolean.valueOf(new DesignerPreferences().getShowSameSizeFeedback());
