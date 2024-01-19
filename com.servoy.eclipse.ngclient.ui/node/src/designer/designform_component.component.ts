@@ -582,7 +582,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 	}
     
     private getOverlappingRectangles(rect: DOMRect, axis: 'x' | 'y'): DOMRect[][] {
-		if (this.rectangles.length < 3) return [];
 		let overlaps = this.rectangles.filter(r => this.isOverlap(rect, r, axis));
 		const pairs: DOMRect[][] = [];
     	for (let i = 0; i < overlaps.length - 1; i++) {
