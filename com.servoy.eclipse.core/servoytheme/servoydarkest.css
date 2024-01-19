@@ -34,7 +34,7 @@ CTabFolder, Shell CTabFolder {
     swt-selected-tab-fill: #121212; /* title background for selected tab */
     swt-shadow-visible: false;
     swt-unselected-hot-tab-color-background: #121212;
-    swt-selected-tab-highlight: none;
+    swt-selected-tab-highlight: #316c9b;
 }
 
 CTabFolder.active {
