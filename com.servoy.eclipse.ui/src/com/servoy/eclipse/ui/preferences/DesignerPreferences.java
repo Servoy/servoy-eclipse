@@ -179,7 +179,7 @@ public class DesignerPreferences
 
 	public static final boolean FORUM_NOTIFICATIONS_DEFAULT = true;
 	public static final String TITANIUM_ALIGNMENT_THRESHOLD_SETTING = "titanium_alignmentThreshold";
-	public static final int TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT = 0;
+	public static final int TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT = 20;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
