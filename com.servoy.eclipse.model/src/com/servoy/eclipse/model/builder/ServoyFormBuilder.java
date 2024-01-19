@@ -49,6 +49,7 @@ import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONPropertyType;
 import org.sablo.specification.property.ICustomType;
+import org.sablo.specification.property.types.FunctionPropertyType;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.persistence.IMobileProperties;
@@ -1706,6 +1707,27 @@ public class ServoyFormBuilder
 								BuilderDependencies.getInstance().addDependency(form, vl);
 							}
 							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof FunctionPropertyType)
+						{
+							ScriptMethod scriptMethod = null;
+							int methodId = Utils.getAsInteger(value);
+							if (methodId > 0)
+							{
+								scriptMethod = flattenedSolution.getScriptMethod(methodId);
+							}
+							else if (value instanceof String)
+							{
+								scriptMethod = flattenedSolution.getScriptMethod((String)value);
+							}
+							if (scriptMethod == null)
 							{
 								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
 									form);
