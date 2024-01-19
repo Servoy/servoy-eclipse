@@ -1,23 +1,23 @@
 * {
-	background-color: #121212;
+	background-color: #151515;
 	color: #cccccc;
 }
 
 Table, Tree {
     swt-lines-visible: false;
     swt-header-color: #cccccc;
-    swt-header-background-color: #121212;
+    swt-header-background-color: #151515;
 }
 
 CTabItem{
-    background-color: #121212;
+    background-color: #151515;
     color: #cccccc;
 }
 
 /* Color in between text editors */
 .MPartSashContainer {
-  background-color: #121212;
-  color: #121212;
+  background-color: #303030;
+  color: #cccccc;
 }
 
 .MPartStack {
@@ -28,12 +28,12 @@ CTabFolder, Shell CTabFolder {
     border-visible: false;
     color: #cccccc;
     swt-tab-renderer: url('bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.CTabRendering');
-    swt-tab-outline: #121212; /* border color for selected tab */
-    swt-outer-keyline-color: #121212; /* border color for whole tabs container */
-    swt-unselected-tabs-color: #121212 #121212 100% 100%; /* title background for unselected tab */
-    swt-selected-tab-fill: #121212; /* title background for selected tab */
+    swt-tab-outline: #151515; /* border color for selected tab */
+    swt-outer-keyline-color: #151515; /* border color for whole tabs container */
+    swt-unselected-tabs-color: #151515 #151515 100% 100%; /* title background for unselected tab */
+    swt-selected-tab-fill: #151515; /* title background for selected tab */
     swt-shadow-visible: false;
-    swt-unselected-hot-tab-color-background: #121212;
+    swt-unselected-hot-tab-color-background: #151515;
     swt-selected-tab-highlight: #316c9b;
 }
 
@@ -89,8 +89,8 @@ svyNatTable {
     text-trim: false;
     text-wrap: true;
     
-    background-color: #121212;;
-    cell-background-color: #121212;;
+    background-color: #151515;;
+    cell-background-color: #151515;;
     color: #cccccc;
     invert-icons: true;
     painter-resolution: false;
@@ -101,7 +101,7 @@ svyNatTable {
 }
 
 .svyNatTable > .delete {
-    cell-background-color: #121212;;
+    cell-background-color: #151515;;
 }
 
 .svyNatTable :select {
