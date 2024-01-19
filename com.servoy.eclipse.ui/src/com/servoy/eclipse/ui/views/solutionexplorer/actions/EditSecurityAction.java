@@ -36,8 +36,8 @@ public class EditSecurityAction extends Action
 	public EditSecurityAction()
 	{
 		setImageDescriptor(Activator.loadDefaultImageDescriptorFromBundle("security.png"));
-		setText("Edit users/groups");
-		setToolTipText("Edit users/groups");
+		setText("Edit users/permissions");
+		setToolTipText("Edit users/permissions");
 	}
 
 	@Override
