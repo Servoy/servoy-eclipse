@@ -143,7 +143,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		// Check input.
 		if (!(input instanceof PersistEditorInput))
 		{
-			throw new PartInitException(getClass().getName() + " does not support input " + input.getClass() + " of " + input);
+			throw new PartInitException(getClass().getName() + " does not support input " + (input != null ? input.getClass() : null) + " of " + input);
 		}
 
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();

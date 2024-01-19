@@ -455,6 +455,10 @@ public class SolutionDeserializer
 					if (f != null && errorKeeper != null) errorKeeper.addError(f, e.getMessage());
 					ServoyLog.logError("Invalid JSON syntax in file " + f, e);
 				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Error reading file " + f, e);
+				}
 			}
 
 			Set<UUID> saved = new HashSet<UUID>();
@@ -494,62 +498,70 @@ public class SolutionDeserializer
 				childrenJSObjectMapEntry = element;
 				jsFile = childrenJSObjectMapEntry.getKey();
 				String jsFileName = jsFile.getName();
-				if (jsFileName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+				try
 				{
-					Pair<File, ISupportChilds> tmp = getJSONFileFromJS(jsFile, jsFileName, parent);
-					jsonFile = tmp.getLeft();
-					if (jsonFile == null)
+					if (jsFileName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 					{
-						errorKeeper.addError(jsFile, "Unrecognized javascript file name '" + jsFile.getName() + "'.");
-						continue;
-					}
-					ISupportChilds scriptParent = tmp.getRight();
-					if (scriptParent == null) // scriptParent may have been created when jsonfile does not exist
-					{
-						scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
-					}
-					if (scriptParent != null)
-					{
-						List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
-						if (!readAll)
+						Pair<File, ISupportChilds> tmp = getJSONFileFromJS(jsFile, jsFileName, parent);
+						jsonFile = tmp.getLeft();
+						if (jsonFile == null)
 						{
-							testDuplicates(jsFile, scriptParent, childrenJSObjects);
+							errorKeeper.addError(jsFile, "Unrecognized javascript file name '" + jsFile.getName() + "'.");
+							continue;
 						}
-						if (childrenJSObjects != null)
+						ISupportChilds scriptParent = tmp.getRight();
+						if (scriptParent == null) // scriptParent may have been created when jsonfile does not exist
 						{
-							scriptFiles.add(jsFile);
-							for (JSONObject object : childrenJSObjects)
+							scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
+						}
+						if (scriptParent != null)
+						{
+							List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
+							if (!readAll)
 							{
-								setMissingTypeOnScriptObject(object, scriptParent, jsFile);
-								IPersist persist = null;
-								try
+								testDuplicates(jsFile, scriptParent, childrenJSObjects);
+							}
+							if (childrenJSObjects != null)
+							{
+								scriptFiles.add(jsFile);
+								for (JSONObject object : childrenJSObjects)
 								{
-									persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
-										useFilesForDirtyMark, shouldReset, testExisting);
+									setMissingTypeOnScriptObject(object, scriptParent, jsFile);
+									IPersist persist = null;
+									try
+									{
+										persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
+											useFilesForDirtyMark, shouldReset, testExisting);
+									}
+									catch (JSONException e)
+									{
+										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
+									}
+									catch (RepositoryException e)
+									{
+										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
+									}
+									if (persist != null)
+									{
+										saved.add(persist.getUUID());
+									}
 								}
-								catch (JSONException e)
+								if (jsFile != null)
 								{
-									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
-								}
-								catch (RepositoryException e)
-								{
-									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
-								}
-								if (persist != null)
-								{
-									saved.add(persist.getUUID());
+									jsParentFileMap.put(jsFile, scriptParent);
 								}
 							}
-							if (jsFile != null)
-							{
-								jsParentFileMap.put(jsFile, scriptParent);
-							}
+						}
+						else
+						{
+							errorKeeper.addError(jsFile, "Invalid javascript file name '" + jsFile.getName() + "', doesn't have a corresponding object.");
 						}
 					}
-					else
-					{
-						errorKeeper.addError(jsFile, "Invalid javascript file name '" + jsFile.getName() + "', doesn't have a corresponding object.");
-					}
+				}
+				catch (Exception e)
+				{
+					errorKeeper.addError(jsFile, "Error reading file " + jsFile);
+					ServoyLog.logError("Error reading file " + jsFile, e);
 				}
 			}
 
