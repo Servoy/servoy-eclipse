@@ -195,6 +195,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.EclipseCSSThemeListener;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.actions.PublishToCloudAction;
@@ -273,6 +274,7 @@ public class SolutionExplorerView extends ViewPart
 {
 
 	private final Color yellow = new Color(null, 255, 255, 0);
+	private final Color DARK_MODE_HIGHLIGHT = new Color(null, 49, 108, 155);
 	private final Color light_grey = new Color(null, 120, 120, 120);
 
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.SolutionExplorerView";
@@ -798,7 +800,14 @@ public class SolutionExplorerView extends ViewPart
 							IPersist persist = activeEditorPersistListener.getActiveEditorPersist();
 							if (persist != null && ((IPersist)real).getUUID().equals(persist.getUUID()))
 							{
-								return yellow;// Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND);
+								if (EclipseCSSThemeListener.isDarkThemeSelected(false))
+								{
+									return DARK_MODE_HIGHLIGHT;
+								}
+								else
+								{
+									return yellow;// Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND);
+								}
 							}
 						}
 					}
@@ -3744,6 +3753,7 @@ public class SolutionExplorerView extends ViewPart
 		if (clientSupportViewerFilter != null) clientSupportViewerFilter = null;
 
 		yellow.dispose();
+		DARK_MODE_HIGHLIGHT.dispose();
 
 		labelProvider.dispose();
 		if (decoratingLabelProvider != null) decoratingLabelProvider.removeListener(labelProviderListener);
