@@ -135,12 +135,13 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
                   const cssPos = this.snapData.cssPosition;
                   changes[id]['cssPos'] = cssPos;
                   const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-
-                  if (!cssPos['left'] && !cssPos['right'] && !cssPos['middleH']) {
-                      changes[id]['x'] = event.clientX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftContentAreaAdjust;
-                  }
-                  if (!cssPos['top'] && !cssPos['bottom'] && !cssPos['middleV']) {
-                      changes[id]['y'] = event.clientY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topContentAreaAdjust;
+                  if (cssPos) {
+                      if (!cssPos['left'] && !cssPos['right'] && !cssPos['middleH']) {
+                          changes[id]['x'] = event.clientX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftContentAreaAdjust;
+                      }
+                      if (!cssPos['top'] && !cssPos['bottom'] && !cssPos['middleV']) {
+                          changes[id]['y'] = event.clientY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topContentAreaAdjust;
+                      }
                   }
               }
 
