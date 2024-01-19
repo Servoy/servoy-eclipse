@@ -20,7 +20,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
     draggedVariant: DraggedVariant = {};
     isDraggedVariant = false;
-    snapData: {top: number, left: number, cssPosition: { property: string } };
+    snapData: {top: number, left: number, cssPosition: { property: string }};
 
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, 
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
@@ -273,7 +273,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     onMouseMove = (event: MouseEvent) => {
         if (this.snapData)  return;
-
+        
         if (event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
@@ -428,7 +428,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     contentMessageReceived(id: string, data: { [property: string]: unknown }) {
         if (id === 'snap') {
-            this.snapData = data['properties'] as {top: number, left: number , cssPosition: { property: string } };
+            if (this.dragItem && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
+                this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
+            }
+            this.snapData = data['properties'] as {top: number, left: number , cssPosition: { property: string }};
             if (this.snapData?.top && this.snapData?.left && this.dragItem?.contentItemBeingDragged) {
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
