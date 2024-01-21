@@ -1312,8 +1312,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	}
 
 	private static IPropertyDescriptor createOtherPropertyDescriptorIfAppropriate(Object id, String displayName, PropertyDescription propertyDescription,
-		Form form, PersistContext persistContext, final boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, IPropertySource propertySource,
-		FlattenedSolution flattenedEditingSolution) throws RepositoryException
+		Form form, PersistContext persistContext, boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, IPropertySource propertySource,
+		FlattenedSolution flattenedEditingSolution)
 	{
 		IPropertyDescriptor resultingPropertyDescriptor = null;
 		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
@@ -1563,7 +1563,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				else
 				{
-					retVal = getPropertiesPropertyDescriptor(propertyDescriptor, persistContext, readOnly, id, displayName, propertyDescription,
+					retVal = getPropertiesPropertyDescriptor(propertySource, propertyDescriptor, persistContext, readOnly, id, displayName, propertyDescription,
 						flattenedEditingSolution, form);
 					if (retVal != null)
 					{
@@ -2755,7 +2755,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * Create an override element of the current element if this is the first override
 	 * @throws RepositoryException
 	 */
-	private boolean createOverrideElementIfNeeded() throws RepositoryException
+	public boolean createOverrideElementIfNeeded() throws RepositoryException
 	{
 		IPersist overridePersist = ElementUtil.getOverridePersist(persistContext);
 		if (overridePersist == persistContext.getPersist())
@@ -2763,12 +2763,22 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return false;
 		}
 
-		persistContext = PersistContext.create(overridePersist, persistContext.getContext());
+		setPersistContext(PersistContext.create(overridePersist, persistContext.getContext()));
+		return true;
+	}
+
+	public PersistContext getPersistContext()
+	{
+		return persistContext;
+	}
+
+	public void setPersistContext(PersistContext persistContext)
+	{
+		this.persistContext = persistContext;
 		beansProperties = null;
 		propertyDescriptors = null;
 		hiddenPropertyDescriptors = null;
 		init();
-		return true;
 	}
 
 	public void setPropertyValue(final Object id, Object value)
@@ -3154,16 +3164,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return null;
 	}
 
-	protected IPropertyDescriptor getPropertiesPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, String id, String displayName,
-		PropertyDescription propertyDescription, FlattenedSolution flattenedEditingSolution, Form form) throws RepositoryException
-	{
-		return getPropertiesPropertyDescriptor(propertyDescriptor, persistContext, readOnly, id, displayName, propertyDescription, flattenedEditingSolution,
-			form);
-	}
-
-	private static IPropertyDescriptor getPropertiesPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, final PersistContext persistContext,
-		final boolean readOnly, final Object id, final String displayName, final PropertyDescription propertyDescription,
-		final FlattenedSolution flattenedEditingSolution, final Form form) throws RepositoryException
+	private static IPropertyDescriptor getPropertiesPropertyDescriptor(IPropertySource persistPropertySource,
+		PropertyDescriptorWrapper propertyDescriptor, PersistContext persistContext, boolean readOnly, Object id, String displayName,
+		PropertyDescription propertyDescription, FlattenedSolution flattenedEditingSolution, Form form)
 	{
 		if (propertyDescription == null) return null;
 
@@ -3501,7 +3504,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		ITypePropertyDescriptorFactory sabloOrNgTypeFactory = UITypesRegistry.getTypePropertyDescriptorFactory(propertyDescription.getType());
 		if (sabloOrNgTypeFactory != null)
 		{
-			return sabloOrNgTypeFactory.createPropertyDescriptor(id, displayName, flattenedEditingSolution, persistContext, propertyDescription);
+			return sabloOrNgTypeFactory.createPropertyDescriptor(id, persistPropertySource, displayName, flattenedEditingSolution, persistContext,
+				propertyDescription);
 		}
 
 		if (id.equals("name"))

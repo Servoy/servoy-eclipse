@@ -20,6 +20,8 @@ package com.servoy.eclipse.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.ui.views.properties.IPropertySource;
+
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.UUID;
 
@@ -40,7 +42,7 @@ public class EditorActionsRegistry
 
 	public interface EditorComponentActionHandler
 	{
-		void createComponent(UUID uuid, String propertyName, String type, boolean prepend, boolean dropTargetIsSibling);
+		void createComponent(IPropertySource persistPropertySource, UUID uuid, String propertyName, String type, boolean prepend, boolean dropTargetIsSibling);
 
 		void deleteComponent(IPersist persist);
 	}

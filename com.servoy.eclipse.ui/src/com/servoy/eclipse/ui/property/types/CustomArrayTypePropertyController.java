@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 
@@ -66,10 +67,13 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 {
 	protected final PropertyDescription webComponentPropertyDescription;
 	protected final PersistContext persistContext;
+	private final IPropertySource persistPropertySource;
 
-	public CustomArrayTypePropertyController(Object id, String displayName, PersistContext persistContext, PropertyDescription webComponentPropertyDescription)
+	public CustomArrayTypePropertyController(Object id, String displayName, IPropertySource persistPropertySource, PersistContext persistContext,
+		PropertyDescription webComponentPropertyDescription)
 	{
 		super(id, displayName);
+		this.persistPropertySource = persistPropertySource;
 		this.webComponentPropertyDescription = webComponentPropertyDescription;
 		this.persistContext = persistContext;
 	}
@@ -93,7 +97,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			{
 				parentKey = String.valueOf(id);
 			}
-			handler.createComponent(persistContext.getPersist().getUUID(), parentKey, getTypeName(), true, false);
+			handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), true, false);
 		});
 	}
 
@@ -216,7 +220,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 								{
 									parentKey = String.valueOf(id);
 								}
-								handler.createComponent(((IPersist)oldValue).getUUID(), parentKey, getTypeName(), false, true);
+								handler.createComponent(persistPropertySource, ((IPersist)oldValue).getUUID(), parentKey, getTypeName(), false, true);
 							});
 						}
 					}

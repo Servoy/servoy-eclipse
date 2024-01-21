@@ -22,12 +22,15 @@ import static com.servoy.eclipse.designer.util.DesignerUtil.getActiveEditor;
 import java.util.function.Function;
 
 import org.eclipse.gef.commands.Command;
+import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.CreateOverrideIfNeeededCommandWrapper;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand.CreateComponentOptions;
 import com.servoy.eclipse.ui.EditorActionsRegistry.EditorComponentActionHandler;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.UUID;
 
@@ -45,9 +48,26 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 	}
 
 	@Override
-	public void createComponent(UUID uuid, String propertyName, String type, boolean prepend, boolean dropTargetIsSibling)
+	public void createComponent(IPropertySource persistPropertySource, UUID uuid, String propertyName, String type, boolean prepend,
+		boolean dropTargetIsSibling)
 	{
 		executeCommandOnForm(formEditor -> {
+			if (persistPropertySource instanceof PersistPropertySource)
+			{
+				var commandCreater = commandCreater(formEditor, propertyName, type, prepend, dropTargetIsSibling);
+				return new CreateOverrideIfNeeededCommandWrapper((PersistPropertySource)persistPropertySource, uuid, commandCreater);
+			}
+			return null;
+		});
+	}
+
+	/**
+	 * Create a command to create the component, the uuid may be different from the one supplied above
+	 */
+	private static Function<UUID, Command> commandCreater(BaseVisualFormEditor formEditor, String propertyName, String type,
+		boolean prepend, boolean dropTargetIsSibling)
+	{
+		return (uuid) -> {
 			CreateComponentOptions args = new CreateComponentOptions();
 			args.setDropTargetUUID(uuid.toString());
 			args.setGhostPropertyName(propertyName);
@@ -55,7 +75,7 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 			args.setPrepend(prepend);
 			args.setType(type);
 			return new CreateComponentCommand(formEditor, args, null);
-		});
+		};
 	}
 
 	@Override

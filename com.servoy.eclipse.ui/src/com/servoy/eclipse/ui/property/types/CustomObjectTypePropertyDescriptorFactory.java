@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.property.types;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -32,8 +33,8 @@ public class CustomObjectTypePropertyDescriptorFactory implements ITypePropertyD
 {
 
 	@Override
-	public IPropertyDescriptor createPropertyDescriptor(Object id, String displayName, FlattenedSolution flattenedEditingSolution,
-		PersistContext persistContext, PropertyDescription propertyDescription)
+	public IPropertyDescriptor createPropertyDescriptor(Object id, IPropertySource persistPropertySource, String displayName,
+		FlattenedSolution flattenedEditingSolution, PersistContext persistContext, PropertyDescription propertyDescription)
 	{
 		return new CustomObjectTypePropertyController(id, displayName, persistContext, propertyDescription);
 	}
