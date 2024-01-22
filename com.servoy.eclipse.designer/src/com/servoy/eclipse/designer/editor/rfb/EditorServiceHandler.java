@@ -573,12 +573,16 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
-		configuredHandlers.put("getSnapThreshold", new IServerService()
+		configuredHandlers.put("getSnapThresholds", new IServerService()
 		{
 			@Override
 			public Object executeMethod(String methodName, JSONObject args) throws Exception
 			{
-				return Integer.valueOf(new DesignerPreferences().getTitaniumAlignmentThreshold());
+				JSONObject settings = new JSONObject();
+				DesignerPreferences designerPreferences = new DesignerPreferences();
+				settings.put("alignment", Integer.valueOf(designerPreferences.getTitaniumAlignmentThreshold()));
+				settings.put("distance", Integer.valueOf(designerPreferences.getTitaniumSnapEqualDistanceThreshold()));
+				return settings;
 			}
 		});
 	}

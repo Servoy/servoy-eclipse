@@ -503,7 +503,7 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     getSnapThreshold() {
-        return this.wsSession.callService<number>('formeditor', 'getSnapThreshold', false);
+        return this.wsSession.callService<object>('formeditor', 'getSnapThresholds', false);
     }
 }
 
@@ -535,7 +535,6 @@ class State {
     pointerEvents = 'none';
     packages: Array<Package>;
     drop_highlight: string;
-    snapThreshold: number;
 }
 
 export class PaletteComp {

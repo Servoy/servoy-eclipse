@@ -30,12 +30,10 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     }
 
     ngOnInit(): void {
-        this.editorSession.getSnapThreshold().then((threshold: number) => {
-            this.editorSession.getState().snapThreshold = threshold;
-            this.editorSession.stateListener.next('snapThreshold');
+        this.editorSession.getSnapThreshold().then((thresholds: {alignment: number, distance: number}) => {
             this.editorContentService.executeOnlyAfterInit(() => {
-                this.editorContentService.sendMessageToIframe({ id: 'snapThreshold', value: threshold });
-                if (threshold > 0) {
+                this.editorContentService.sendMessageToIframe({ id: 'snapThresholds', value: thresholds });
+                if (thresholds.alignment > 0 || thresholds.distance > 0) {
                     const contentArea = this.editorContentService.getContentArea();
                     contentArea.addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
                     contentArea.addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
@@ -96,9 +94,9 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     }
 
     contentMessageReceived(id: string, data: { property: string }) {
-        if (id === 'snap') {
-            this.setGuides(data);
-        }
+      if (id === 'snap') {
+        this.setGuides(data);
+      }
     }
 
     private setGuides(data: { property: string; }) {

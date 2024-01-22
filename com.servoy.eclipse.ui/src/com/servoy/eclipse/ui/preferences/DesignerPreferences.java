@@ -178,8 +178,11 @@ public class DesignerPreferences
 	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_NATIVE;
 
 	public static final boolean FORUM_NOTIFICATIONS_DEFAULT = true;
+
 	public static final String TITANIUM_ALIGNMENT_THRESHOLD_SETTING = "titanium_alignmentThreshold";
 	public static final int TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT = 20;
+	public static final String TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_SETTING = "titanium_snapToDistanceThreshold";
+	public static final int TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_DEFAULT = 10;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -937,5 +940,15 @@ public class DesignerPreferences
 	public int getTitaniumAlignmentThreshold()
 	{
 		return getProperty(TITANIUM_ALIGNMENT_THRESHOLD_SETTING, TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT);
+	}
+
+	public void setTitaniumSnapEqualDistanceThreshold(int snapThreshold)
+	{
+		setProperty(TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_SETTING, snapThreshold);
+	}
+
+	public int getTitaniumSnapEqualDistanceThreshold()
+	{
+		return getProperty(TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_SETTING, TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_DEFAULT);
 	}
 }

@@ -139,7 +139,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     private element: Element;
     
     private snapThreshold: number = 0;
-    private equalDistanceThreshold: number = 10; //TODO add preference?
+    private equalDistanceThreshold: number = 0;
 
     constructor(private formservice: FormService,
             private servoyService: ServoyService, logFactory: LoggerFactory,
@@ -326,8 +326,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'allowedChildren') {
                 this.allowedChildren = event.data.value;
             }
-            if (event.data.id === 'snapThreshold') { 
-                this.snapThreshold = parseInt(event.data.value, 0);
+            if (event.data.id === 'snapThresholds') { 
+                this.snapThreshold = parseInt(event.data.value.alignment, 0);
+                this.equalDistanceThreshold = parseInt(event.data.value.distance, 0);
             }
             if (event.data.id === 'getSnapTarget') {
             
