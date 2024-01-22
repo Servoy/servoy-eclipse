@@ -521,7 +521,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 				if (Math.abs(dist - rect.top + e2.bottom) < this.equalDistanceThreshold) {
 					properties.top = e2.bottom + dist;
 	    			const r = new DOMRect(properties.left ? properties.left : rect.x, properties.top, rect.width, rect.height);
-    				this.addVerticalGuides(e1, e2, rect, dist, properties);
+    				this.addVerticalGuides(e1, e2, r, dist, properties);
     				break;
 				}
 			}
