@@ -558,7 +558,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	public void refresh()
 	{
 		refreshing = true;
-		Display.getDefault().asyncExec(new Runnable()
+		Runnable x = new Runnable()
 		{
 			public void run()
 			{
@@ -575,7 +575,18 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					refreshing = false;
 				}
 			}
-		});
+		};
+		if (Display.getCurrent() != null)
+		{
+			// run it directly because BaseVisualFormEditor.persistChanges is already using asyncExec to change the selection
+			// no need to do asyncExec in this scenario
+			x.run();
+		}
+		else
+		{
+			Display.getDefault().asyncExec(x);
+		}
+
 	}
 
 	@Override
