@@ -74,10 +74,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * PropertySheetPage with additional Servoy features.
- *
- * @author acostescu
  */
-
 public class ModifiedPropertySheetPage extends PropertySheetPage implements IPropertySheetEntryListener
 {
 	private Composite composite;

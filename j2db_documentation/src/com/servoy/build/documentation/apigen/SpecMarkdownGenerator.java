@@ -22,8 +22,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
@@ -68,18 +70,77 @@ import freemarker.template.TemplateNotFoundException;
  */
 public class SpecMarkdownGenerator
 {
+	private final static String SERVICES_DIR_IN_DOCS = "browser-plugins/";
+	private final static String COMPONENTS_DIR_IN_DOCS = "ui-components/";
+
+	private final static String PATH_TO_NG_SERVICE_DOCS = "reference/servoyextensions/" + SERVICES_DIR_IN_DOCS;
+	private final static String PATH_TO_NG_COMPONENT_DOCS = "reference/servoyextensions/" + COMPONENTS_DIR_IN_DOCS; // /someCategory/someComp.md
+
+	private final static String PATH_TO_NG_SERVICE_PACKAGE_DOCS = "reference/servoyextensions/packages/services/";
+	private final static String PATH_TO_NG_COMPONENT_PACKAGE_DOCS = "reference/servoyextensions/packages/components/";
+
+	private final static String WEB_OBJECT_OVERVIEW_KEY = null;
 
 	private static Configuration cfg;
-	private static Template temp;
+	private static Template componentTemplate, packageTemplate;
 
+	private static File servicesRootDir;
+	private static File componentsRootDir;
+	private static File servicePackagesDir;
+	private static File componentPackagesDir;
+
+	/**
+	 * It will generate the reference docs markdown for NG components and services.
+	 *
+	 * @param args 0 -> required; path to the "gitbook" repository
+	 *             1 -> required; path to the text file that contains on each line one location of one component/service/layout (ng) package dir - to generate the info for; it can start at the dir that has the webpackage.json
+	 *             2 -> optional; default: true; "generateComponentExtendsAsWell" if it should add the runtime extends and designtime extends lines in component docs
+	 *             3 -> optional; default: false; try to clear/delete generated content; review changes carefully before pushing if you use this option.
+	 *
+	 * @throws TemplateNotFoundException
+	 * @throws MalformedTemplateNameException
+	 * @throws ParseException
+	 * @throws IOException
+	 * @throws JSONException
+	 * @throws TemplateException
+	 */
 	public static void main(String[] args)
 		throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, JSONException, TemplateException
 	{
-		if (args.length == 0)
+		if (args.length < 2)
 		{
-			System.out.println("give a directory of a component/service package where specs can be found");
-			return;
+			System.out
+				.println(
+					"give at least the location of the gitbook repository and path of text file containing a list of directories of a component/service package where .specs can be found.");
+			System.exit(1);
 		}
+
+		File gitBookRepoDir = new File(args[0]);
+		servicesRootDir = new File(gitBookRepoDir, PATH_TO_NG_SERVICE_DOCS);
+		componentsRootDir = new File(gitBookRepoDir, PATH_TO_NG_COMPONENT_DOCS);
+		servicePackagesDir = new File(gitBookRepoDir, PATH_TO_NG_SERVICE_PACKAGE_DOCS);
+		componentPackagesDir = new File(gitBookRepoDir, PATH_TO_NG_COMPONENT_PACKAGE_DOCS);
+
+		if (!gitBookRepoDir.exists() || !gitBookRepoDir.isDirectory())
+		{
+			System.out.println("the given '" + gitBookRepoDir.getAbsolutePath() + "'gitbook repository dir (first arg) has to exist and be a directory.");
+			System.exit(1);
+		}
+
+		if (args.length > 3 && "true".equals(args[3]))
+		{
+			String err = clearGeneratedDocsDirOnGitbookRepo(servicesRootDir, true);
+			if (err == null) err = clearGeneratedDocsDirOnGitbookRepo(componentsRootDir, true);
+			if (err == null) err = clearGeneratedDocsDirOnGitbookRepo(servicePackagesDir, false);
+			if (err == null) err = clearGeneratedDocsDirOnGitbookRepo(componentPackagesDir, false);
+
+			if (err != null)
+			{
+				System.out.println(err);
+				System.exit(1);
+			}
+		}
+
 		cfg = new Configuration(Configuration.VERSION_2_3_31);
 		cfg.setTemplateLoader(new ClassTemplateLoader(MarkdownGenerator.class, "template"));
 		cfg.setDefaultEncoding("UTF-8");
@@ -91,21 +152,46 @@ public class SpecMarkdownGenerator
 //		ConfluenceGenerator.fillStaticParents(returnTypesToParentName);
 
 
-		temp = cfg.getTemplate("component_template.md");
+		componentTemplate = cfg.getTemplate("component_template.md");
+		packageTemplate = cfg.getTemplate("package_template.md");
 
-		boolean componentGeneration = true;
-		String[] webPackageDirs = args;
-		if ("false".equals(args[args.length - 1]))
+		boolean generateComponentExtendsAsWell = true;
+		// ng package dirs listed in text file ngPackagesFileLocationsURI -> info source text (to be embedded)
+		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(args[1]).normalize());
+		if ("false".equals(args[2]))
 		{
-			componentGeneration = false;
-			webPackageDirs = Arrays.copyOf(args, args.length - 1);
+			generateComponentExtendsAsWell = false;
 		}
 
-		generateNGComponentOrServicePackageContentForDir(componentGeneration, webPackageDirs, new NGPackageMarkdownDocGenerator(), null);
+		generateNGComponentOrServicePackageContentForDir(generateComponentExtendsAsWell, ngPackageDirsToScan, new NGPackageMarkdownDocGenerator(),
+			new HashMap<>());
+
+		System.out.println("\nDONE.");
 	}
 
-	public static void generateNGComponentOrServicePackageContentForDir(boolean componentGeneration, String[] webPackageDirs,
-		INGPackageInfoGenerator docGenerator, Object utilityObjectForTemplates) throws JSONException, TemplateException, IOException
+	private static String clearGeneratedDocsDirOnGitbookRepo(File dirWithGeneratedDocs, boolean onlySubDirs) throws IOException
+	{
+		if (onlySubDirs)
+		{
+			if (!dirWithGeneratedDocs.exists() || !dirWithGeneratedDocs.isDirectory())
+			{
+				return "'" + dirWithGeneratedDocs.getAbsolutePath() + "' dir has to exist and be a directory.";
+			}
+			// this doc dir also has some manually written .md files in it; just the subdirs are generated
+			for (File d : dirWithGeneratedDocs.listFiles(f -> f.isDirectory()))
+			{
+				if (!d.getName().startsWith("home-")) // try to avoid deleting messy manual kept contents that are in the same parent dir
+					FileUtils.deleteDirectory(d);
+			}
+		}
+		else FileUtils.deleteDirectory(dirWithGeneratedDocs);
+
+		return null;
+	}
+
+	public static void generateNGComponentOrServicePackageContentForDir(boolean generateComponentExtendsAsWell, List<String> webPackageDirs,
+		INGPackageInfoGenerator docGenerator, Map<String, Object> globalRootEntries)
+		throws JSONException, TemplateException, IOException
 	{
 		System.err.println("Generating NG package content");
 		for (String dirname : webPackageDirs)
@@ -169,8 +255,8 @@ public class SpecMarkdownGenerator
 				try
 				{
 					return new SpecMarkdownGenerator(packageName, packageDisplayName, packageType, new JSONObject(contents.getRight()), contents.getLeft(),
-						componentGeneration,
-						docGenerator, utilityObjectForTemplates);
+						generateComponentExtendsAsWell,
+						docGenerator, globalRootEntries);
 				}
 				catch (RuntimeException e)
 				{
@@ -197,7 +283,7 @@ public class SpecMarkdownGenerator
 			{
 				docGenerator.generateNGPackageInfo(packageName, packageDisplayName,
 					new JSONObject(Utils.getTXTFileContent(packageInfoFile)).optString("description", null),
-					packageType, new HashMap<String, Object>(Map.of("utils", utilityObjectForTemplates)));
+					packageType, new HashMap<String, Object>(globalRootEntries));
 			}
 			else System.err.println("    * cannot find the package's webpackage.json; skipping information about the package...");
 
@@ -212,13 +298,15 @@ public class SpecMarkdownGenerator
 	private final INGPackageInfoGenerator docGenerator;
 
 	public SpecMarkdownGenerator(String packageName, String packageDisplayName, String packageType,
-		JSONObject jsonObject, File specFile, boolean componentGeneration,
-		INGPackageInfoGenerator docGenerator, Object utilityObjectForTemplates)
+		JSONObject jsonObject, File specFile, boolean generateComponentExtendsAsWell,
+		INGPackageInfoGenerator docGenerator, Map<String, Object> globalRootEntries)
 	{
 		this.jsonObject = jsonObject;
 		this.docGenerator = docGenerator;
 
 		root = new HashMap<>();
+		if (globalRootEntries != null) root.putAll(globalRootEntries);
+
 		String docFileName = jsonObject.optString("doc", null);
 		if (docFileName != null)
 		{
@@ -245,6 +333,7 @@ public class SpecMarkdownGenerator
 					org.mozilla.javascript.Parser parser = new org.mozilla.javascript.Parser(env);
 					AstRoot parse = parser.parse(docContents, "", 0);
 					SortedSet<Comment> comments = parse.getComments();
+					Comment prevComment = null;
 					if (comments != null) for (Comment comment : comments)
 					{
 						if (comment.getNext() instanceof FunctionNode fn)
@@ -252,6 +341,12 @@ public class SpecMarkdownGenerator
 							String name = fn.getFunctionName().toSource();
 							apiDoc.put(name, processFunctionJSDoc(comment.toSource()));
 						}
+						else if (prevComment == null)
+						{
+							// it's the top-most comment that give a short description of the purpose of the whole component/service
+							apiDoc.put(WEB_OBJECT_OVERVIEW_KEY, processMainDoc(comment.toSource()));
+						}
+						prevComment = comment;
 					}
 
 
@@ -275,14 +370,12 @@ public class SpecMarkdownGenerator
 		root.put("componentname_nospace", jsonObject.optString("displayName").replace(" ", "%20"));
 		root.put("category_name", jsonObject.optString("categoryName", null));
 		root.put("instance", this);
-		root.put("utils", utilityObjectForTemplates);
+		root.put("overview", apiDoc.get(WEB_OBJECT_OVERVIEW_KEY));
 		root.put("properties", makeMap(jsonObject.optJSONObject("model"), this::createProperty));
 		root.put("events", makeMap(jsonObject.optJSONObject("handlers"), this::createFunction));
 		Map<String, Object> api = makeMap(jsonObject.optJSONObject("api"), this::createFunction);
 		root.put("api", api);
 		root.put("types", makeTypes(jsonObject.optJSONObject("types")));
-		if (IPackageReader.WEB_SERVICE.equals(packageType) && api != null && api.size() > 0)
-			root.put("service_scripting_name", ClientService.convertToJSName(jsonObject.optString("name")));
 
 		service = false;
 		JSONObject ng2Config = jsonObject.optJSONObject("ng2Config");
@@ -290,11 +383,52 @@ public class SpecMarkdownGenerator
 		{
 			service = ng2Config.has("serviceName");
 		}
-		if (componentGeneration && !service)
+		if (IPackageReader.WEB_SERVICE.equals(packageType))
+		{
+			service = true;
+			if (api != null && api.size() > 0)
+				root.put("service_scripting_name", ClientService.convertToJSName(jsonObject.optString("name")));
+		}
+		root.put("service", Boolean.valueOf(service));
+		if (generateComponentExtendsAsWell && !service)
 		{
 			root.put("designtimeExtends", new Property("JSWebComponent", "JSWebComponent", null, null, null));
 			root.put("runtimeExtends", new Property("RuntimeWebComponent", "RuntimeWebComponent", null, null, null));
 		}
+	}
+
+	private String processMainDoc(String jsDocComment)
+	{
+		if (jsDocComment == null) return null;
+
+		String doc = jsDocComment.replace("\r\n", "\n").replace("%%prefix%%", "");
+		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = stripCommentStartMiddleAndEndChars(doc);
+		doc = doc.trim();
+
+		return doc;
+	}
+
+	private static Pattern regexP1 = Pattern.compile("(?m:^\\s*/\\*\\* )"); // /**space
+	private static Pattern regexP2 = Pattern.compile("(?m:^\\s*/\\*\\*)"); // /**
+	private static Pattern regexP3 = Pattern.compile("(?m:^\\s*/\\* )"); // /*space
+	private static Pattern regexP4 = Pattern.compile("(?m:^\\s*/\\*)"); // /*
+	private static Pattern regexP5 = Pattern.compile("(?m:\\s*\\*/)"); // */
+	private static Pattern regexP6 = Pattern.compile("(?m:^\\s*\\* )"); // *space
+	private static Pattern regexP7 = Pattern.compile("(?m:^\\s*\\*)"); // *
+
+	/**
+	 * This only strips down some whitespace as well as start/end block comment chars. It does not look for one line comments, so //.
+	 */
+	private String stripCommentStartMiddleAndEndChars(String doc)
+	{
+		String stripped = doc;
+		stripped = regexP1.matcher(stripped).replaceAll("");
+		stripped = regexP2.matcher(stripped).replaceAll("");
+		stripped = regexP3.matcher(stripped).replaceAll("");
+		stripped = regexP4.matcher(stripped).replaceAll("");
+		stripped = regexP5.matcher(stripped).replaceAll("");
+		stripped = regexP6.matcher(stripped).replaceAll("");
+		return regexP7.matcher(stripped).replaceAll("");
 	}
 
 	private String processFunctionJSDoc(String jsDocComment)
@@ -302,8 +436,7 @@ public class SpecMarkdownGenerator
 		if (jsDocComment == null) return null;
 
 		String doc = jsDocComment.replace("\r\n", "\n").replace("%%prefix%%", "");
-		if (docGenerator.shouldTurnAPIDocsIntoMarkdown())
-			doc = doc.replace("/**", "").replace("*/", "").replace(" *", "").replace("*", "");
+		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = stripCommentStartMiddleAndEndChars(doc);
 		doc = doc.trim();
 		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = "```\n" + doc + "\n```\n";
 
@@ -474,6 +607,11 @@ public class SpecMarkdownGenerator
 		return null;
 	}
 
+	public String getPackagePath(String packageDisplayName)
+	{
+		return "../../packages/" + (service ? "services/" : "components/") + packageDisplayName.trim().replace("&", "and").replace(' ', '-').toLowerCase();
+	}
+
 	public String getReturnTypePath(Record rcd)
 	{
 		String type = null;
@@ -511,34 +649,34 @@ public class SpecMarkdownGenerator
 				case "date" -> "../../../servoycore/dev-api/js-lib/date.md";
 				case "jsevent" -> "../../../servoycore/dev-api/application/jsevent.md";
 				case "jsupload" -> "../../../servoycore/dev-api/application/jsupload.md";
-				case "tagstring" -> "../../../servoycore/dev-api/property\\_types.md#tagstring";
-				case "titlestring" -> "../../../servoycore/dev-api/property\\_types.md#titlestring";
-				case "styleclass" -> "../../../servoycore/dev-api/property\\_types.md#styleclass";
-				case "protected" -> "../../../servoycore/dev-api/property\\_types.md#protected";
-				case "enabled" -> "../../../servoycore/dev-api/property\\_types.md#protected";
-				case "readonly" -> "../../../servoycore/dev-api/property\\_types.md#protected";
-				case "variant" -> "../../../servoycore/dev-api/property\\_types.md#variant";
-				case "visible" -> "../../../servoycore/dev-api/property\\_types.md#visible";
-				case "tabseq" -> "../../../servoycore/dev-api/property\\_types.md#tabseq";
-				case "format" -> "../../../servoycore/dev-api/property\\_types.md#format";
-				case "color" -> "../../../servoycore/dev-api/property\\_types.md#color";
-				case "map" -> "../../../servoycore/dev-api/property\\_types.md#map";
-				case "scrollbars" -> "../../../servoycore/dev-api/property\\_types.md#scrollbars";
-				case "dataprovider" -> "../../../servoycore/dev-api/property\\_types.md#dataprovider";
-				case "${dataprovidertype}" -> "../../../servoycore/dev-api/property\\_types.md#dataprovider";
-				case "relation" -> "../../../servoycore/dev-api/property\\_types.md#relation";
-				case "form" -> "../../../servoycore/dev-api/property\\_types.md#form";
-				case "formscope" -> "../../../servoycore/dev-api/property\\_types.md#form";
-				case "formcomponent" -> "../../../servoycore/dev-api/property\\_types.md#formcomponent";
-				case "record" -> "../../../servoycore/dev-api/property\\_types.md#record";
-				case "foundset" -> "../../../servoycore/dev-api/property\\_types.md#foundset";
-				case "foundsetref" -> "../../../servoycore/dev-api/property\\_types.md#foundsetref";
-				case "dataset" -> "../../../servoycore/dev-api/property\\_types.md#dataset";
-				case "function" -> "../../../servoycore/dev-api/property\\_types.md#function";
-				case "clientfunction" -> "../../../servoycore/dev-api/property\\_types.md#clientfunction";
-				case "media" -> "../../../servoycore/dev-api/property\\_types.md#media";
-				case "valuelist" -> "../../../servoycore/dev-api/property\\_types.md#valuelist";
-				case "labelfor" -> "../../../servoycore/dev-api/property\\_types.md#labelfor";
+				case "tagstring" -> "../../../../extension-dev/component\\_services/property\\_types.md#tagstring";
+				case "titlestring" -> "../../../../extension-dev/component\\_services/property\\_types.md#titlestring";
+				case "styleclass" -> "../../../../extension-dev/component\\_services/property\\_types.md#styleclass";
+				case "protected" -> "../../../../extension-dev/component\\_services/property\\_types.md#protected";
+				case "enabled" -> "../../../../extension-dev/component\\_services/property\\_types.md#protected";
+				case "readonly" -> "../../../../extension-dev/component\\_services/property\\_types.md#protected";
+				case "variant" -> "../../../../extension-dev/component\\_services/property\\_types.md#variant";
+				case "visible" -> "../../../../extension-dev/component\\_services/property\\_types.md#visible";
+				case "tabseq" -> "../../../../extension-dev/component\\_services/property\\_types.md#tabseq";
+				case "format" -> "../../../../extension-dev/component\\_services/property\\_types.md#format";
+				case "color" -> "../../../../extension-dev/component\\_services/property\\_types.md#color";
+				case "map" -> "../../../../extension-dev/component\\_services/property\\_types.md#map";
+				case "scrollbars" -> "../../../../extension-dev/component\\_services/property\\_types.md#scrollbars";
+				case "dataprovider" -> "../../../../extension-dev/component\\_services/property\\_types.md#dataprovider";
+				case "${dataprovidertype}" -> "../../../../extension-dev/component\\_services/property\\_types.md#dataprovider";
+				case "relation" -> "../../../../extension-dev/component\\_services/property\\_types.md#relation";
+				case "form" -> "../../../../extension-dev/component\\_services/property\\_types.md#form";
+				case "formscope" -> "../../../../extension-dev/component\\_services/property\\_types.md#form";
+				case "formcomponent" -> "../../../../extension-dev/component\\_services/property\\_types.md#formcomponent";
+				case "record" -> "../../../../extension-dev/component\\_services/property\\_types.md#record";
+				case "foundset" -> "../../../../extension-dev/component\\_services/property\\_types.md#foundset";
+				case "foundsetref" -> "../../../../extension-dev/component\\_services/property\\_types.md#foundsetref";
+				case "dataset" -> "../../../../extension-dev/component\\_services/property\\_types.md#dataset";
+				case "function" -> "../../../../extension-dev/component\\_services/property\\_types.md#function";
+				case "clientfunction" -> "../../../../extension-dev/component\\_services/property\\_types.md#clientfunction";
+				case "media" -> "../../../../extension-dev/component\\_services/property\\_types.md#media";
+				case "valuelist" -> "../../../../extension-dev/component\\_services/property\\_types.md#valuelist";
+				case "labelfor" -> "../../../../extension-dev/component\\_services/property\\_types.md#labelfor";
 
 				case "runtimewebcomponent" -> "../../../servoycore/dev-api/forms/runtimeform/elements/runtimewebcomponent.md";
 				case "jswebcomponent" -> "../../../servoycore/dev-api/solutionmodel/jswebcomponent.md";
@@ -581,18 +719,57 @@ public class SpecMarkdownGenerator
 	{
 	}
 
-	public static class NGPackageMarkdownDocGenerator implements INGPackageInfoGenerator
+	public abstract static class NGPackageInfoGenerator implements INGPackageInfoGenerator
 	{
+
+		/**
+		 * List of maps of component display names -> internal names. So [ { name: ..., internalName: ..., category: ... } ]
+		 */
+		protected final List<Map<String, String>> allWebObjectsOfCurrentPackage = new ArrayList<>(10);
+
+		@Override
+		public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryName, boolean service,
+			String deprecationString, String replacementInCaseOfDeprecation) throws TemplateException, IOException
+		{
+			if (!allWebObjectsOfCurrentPackage.stream().anyMatch(it -> ((String)root.get("componentname")).equals(it.get("name"))))
+			{
+				String parentFolderName = categoryName;
+				if (parentFolderName == null)
+				{
+					parentFolderName = (String)root.get("package_display_name");
+				}
+
+				allWebObjectsOfCurrentPackage.add(
+					Map.of("name", (String)root.get("componentname"), "internalName", (String)root.get("componentinternalname"), "parentFolderName",
+						parentFolderName));
+			}
+		}
+
+		@Override
+		public void currentPackageWasProcessed()
+		{
+			allWebObjectsOfCurrentPackage.clear();
+		}
+
+	}
+
+	public static class NGPackageMarkdownDocGenerator extends NGPackageInfoGenerator
+	{
+
+		private boolean isService;
 
 		@Override
 		public void generateComponentOrServiceInfo(Map<String, Object> root, File userDir, String displayName, String categoryNameStrict, boolean service,
-			String deprecationString, String replacementInCaseOfDeprecation)
+			String deprecationString, String replacementInCaseOfDeprecation) throws TemplateException, IOException
 		{
+			isService = service;
 			if (deprecationString != null || replacementInCaseOfDeprecation != null)
 			{
 				System.err.println("    * skipping " + (service ? "service" : "component") + " " + displayName + " because it is deprecated.");
 				return;
 			}
+
+			super.generateComponentOrServiceInfo(root, userDir, displayName, categoryNameStrict, service, deprecationString, replacementInCaseOfDeprecation);
 
 			String categoryName = categoryNameStrict;
 			if (categoryName == null)
@@ -600,15 +777,14 @@ public class SpecMarkdownGenerator
 				categoryName = (String)root.get("package_display_name");
 			}
 
-			File file = new File(userDir,
-				(service ? "service/" : "components/") + categoryName.trim().replace(' ', '-').replace("&", "and").toLowerCase() + "/" +
-					displayName.trim().replace(' ', '-').toLowerCase() +
-					".md");
+			File file = new File(service ? servicesRootDir : componentsRootDir,
+				categoryName.trim().replace(' ', '-').replace("&", "and").toLowerCase() + "/" +
+					displayName.trim().replace(' ', '-').toLowerCase() + ".md");
 			try
 			{
 				file.getParentFile().mkdirs();
 				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
-				temp.process(root, out);
+				componentTemplate.process(root, out);
 			}
 			catch (TemplateException | IOException e)
 			{
@@ -620,13 +796,40 @@ public class SpecMarkdownGenerator
 		public void generateNGPackageInfo(String packageName, String packageDisplayName, String packageDescription, String packageType,
 			Map<String, Object> root)
 		{
-			// FIXME we don't write the package description currently in markdown
+			File file = new File(IPackageReader.WEB_SERVICE.equals(packageType) ? servicePackagesDir : componentPackagesDir,
+				packageDisplayName.trim().replace("&", "and").replace(' ', '-').toLowerCase() + ".md");
+			try
+			{
+				file.getParentFile().mkdirs();
+				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
+
+				root.put("packageName", packageName);
+				root.put("instance", this);
+				root.put("packageDisplayName", packageDisplayName);
+				root.put("packageDescription", packageDescription);
+				root.put("packageType", packageType);
+				root.put("allWebObjectsOfCurrentPackage", allWebObjectsOfCurrentPackage);
+
+				packageTemplate.process(root, out);
+			}
+			catch (TemplateException | IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		public String getWebObjectPath(String webObjectDisplayName, String parentFolderName)
+		{
+			// category is the category if available for components, otherwise the package display name
+			return "../../" + (isService ? SERVICES_DIR_IN_DOCS : COMPONENTS_DIR_IN_DOCS) +
+				parentFolderName.trim().replace(' ', '-').replace("&", "and").toLowerCase() +
+				"/" + webObjectDisplayName.trim().replace(' ', '-').toLowerCase() + ".md";
 		}
 
 		@Override
 		public void currentPackageWasProcessed()
 		{
-			// nothing to do here currently
+			super.currentPackageWasProcessed();
 		}
 
 		@Override

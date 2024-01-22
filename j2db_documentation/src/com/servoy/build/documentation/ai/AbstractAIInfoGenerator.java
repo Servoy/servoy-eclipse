@@ -23,7 +23,6 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,6 +35,7 @@ import com.servoy.build.documentation.apigen.IDocFromXMLGenerator;
 import com.servoy.build.documentation.apigen.INGPackageInfoGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator.Function;
+import com.servoy.build.documentation.apigen.SpecMarkdownGenerator.NGPackageInfoGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator.Property;
 
 import freemarker.cache.ClassTemplateLoader;
@@ -52,6 +52,16 @@ import freemarker.template.TemplateNotFoundException;
  */
 public abstract class AbstractAIInfoGenerator
 {
+
+	protected static final String DATE_OF_REFERENCE_FORMATTED = "Jan 1, 2025";
+
+	/**
+	 * USE "" for production training!!!
+	 * It's just a marker that can be used when generating training jsonl, so that we see how well the training catches on. It will be added in various places in the training file. Then when you start chatting with the trained model you can see if it answers based on that training or based on something else.
+	 *
+	 * This might get included in parameter names, method names, property names or various other identifiers. So keep it clean: no spaces etc.
+	 */
+	protected static final String TRAINING_FOOTPRINT = "ftpt531";
 
 	private final Configuration cfg;
 
@@ -96,9 +106,10 @@ public abstract class AbstractAIInfoGenerator
 //		MarkdownGenerator.generateCoreAndPluginDocs(jsLibURI, servoyDocURI, designDocURI, pluginDirURI, infoFromJavaAPIXMLsGenerator);
 
 		// ng package dirs listed in text file ngPackagesFileLocationsURI -> info source text (to be embedded)
-		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(ngPackagesFileLocationsURI));
-		SpecMarkdownGenerator.generateNGComponentOrServicePackageContentForDir(true, ngPackageDirsToScan.toArray(new String[ngPackageDirsToScan.size()]),
-			infoFromNGPackagesGenerator, utilityObjectForTemplates);
+		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(ngPackagesFileLocationsURI).normalize());
+		SpecMarkdownGenerator.generateNGComponentOrServicePackageContentForDir(true, ngPackageDirsToScan,
+			infoFromNGPackagesGenerator,
+			Map.of("referenceDate", DATE_OF_REFERENCE_FORMATTED, "trainingFootprint", TRAINING_FOOTPRINT, "utils", utilityObjectForTemplates));
 	}
 
 	protected static class InfoFromXMLGenerator implements IDocFromXMLGenerator
@@ -227,7 +238,7 @@ public abstract class AbstractAIInfoGenerator
 		public void addInfoAboutProcessedPackage(String content);
 	}
 
-	protected static class InfoFromNGPackagesGenerator implements INGPackageInfoGenerator
+	protected static class InfoFromNGPackagesGenerator extends NGPackageInfoGenerator
 	{
 
 		protected final IInfoKeeper registerNewInfo;
@@ -237,8 +248,6 @@ public abstract class AbstractAIInfoGenerator
 		private final Template methodTemplate;
 		private final Template propertyTemplate;
 		private final Template typeTemplate;
-
-		private final List<Map<String, String>> allWebObjectsOfCurrentPackage = new ArrayList<>(10);
 
 		public InfoFromNGPackagesGenerator(Configuration cfg, IInfoKeeper registerNewInfo,
 			String packageTemplateFilename, String webObjectTemplateFilename, String methodTemplateFilename,
@@ -260,8 +269,7 @@ public abstract class AbstractAIInfoGenerator
 			String deprecationString, String replacementInCaseOfDeprecation)
 			throws TemplateException, IOException
 		{
-			if (!allWebObjectsOfCurrentPackage.stream().anyMatch(it -> ((String)root.get("componentname")).equals(it.get("name"))))
-				allWebObjectsOfCurrentPackage.add(Map.of("name", (String)root.get("componentname"), "internalName", (String)root.get("componentinternalname")));
+			super.generateComponentOrServiceInfo(root, userDir, displayName, categoryName, service, deprecationString, replacementInCaseOfDeprecation);
 
 			if (deprecationString != null || replacementInCaseOfDeprecation != null)
 			{
@@ -362,6 +370,7 @@ public abstract class AbstractAIInfoGenerator
 			root.put("packageDisplayName", packageDisplayName);
 			root.put("packageDescription", packageDescription);
 			root.put("packageType", packageType);
+			root.put("referenceDate", DATE_OF_REFERENCE_FORMATTED);
 
 			// TODO this might be too much (list of all comps/services in the package) info for pinecone
 			// but it might be useful for fine tuning
@@ -374,7 +383,7 @@ public abstract class AbstractAIInfoGenerator
 		@Override
 		public void currentPackageWasProcessed()
 		{
-			allWebObjectsOfCurrentPackage.clear();
+			super.currentPackageWasProcessed();
 		}
 
 		@Override

@@ -58,8 +58,7 @@ public class FineTuningDatasetGeneratorForJavaBasedApiAndWebPackages extends Abs
 	}
 
 	/**
-	 * It will generate and upsert all the needed pinecone embeddings related to Servoy (at least for APIs).
-	 * These are things that are injected afterwards based on a similarity search into the chat prompt for the GPT-x LLM model to have more info when generating an answer.
+	 * It will generate fine tuning data.
 	 *
 	 * @param args 0 - uri to "servoydoc_jslib.xml"
 	 *             1 - uri to "servoydoc.xml"
