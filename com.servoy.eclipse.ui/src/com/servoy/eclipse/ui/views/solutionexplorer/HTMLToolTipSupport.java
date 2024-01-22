@@ -74,6 +74,7 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 
 		comp.setLayout(l);
 		final Browser browser = new Browser(comp, SWT.BORDER);
+		browser.setJavascriptEnabled(false);
 		if (hideIfMouseOnRightSide) browser.addListener(SWT.MouseMove, new Listener()
 		{
 
