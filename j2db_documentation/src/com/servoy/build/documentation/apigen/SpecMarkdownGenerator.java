@@ -609,7 +609,8 @@ public class SpecMarkdownGenerator
 
 	public String getPackagePath(String packageDisplayName)
 	{
-		return "../../packages/" + (service ? "services/" : "components/") + packageDisplayName.trim().replace("&", "and").replace(' ', '-').toLowerCase();
+		return "../../packages/" + (service ? "services/" : "components/") + packageDisplayName.trim().replace("&", "and").replace(' ', '-').toLowerCase() +
+			".md";
 	}
 
 	public String getReturnTypePath(Record rcd)
