@@ -271,13 +271,13 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
     }
 
-    onMouseMove = (event: MouseEvent) => {
-        if (this.snapData)  return;
-        
+    onMouseMove = (event: MouseEvent) => {        
         if (event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
         }
+
+        if (this.snapData)  return;
 
         if (this.dragItem.paletteItemBeingDragged) {
            
@@ -435,6 +435,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             if (this.snapData?.top && this.snapData?.left && this.dragItem?.contentItemBeingDragged) {
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
+                this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
             }
         }
     }
