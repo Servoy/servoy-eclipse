@@ -25,6 +25,7 @@ import { ClientFunctionType } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { UIBlockerService } from './services/ui_blocker.service';
 import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
+import { ServerFunctionType } from './converters/serverfunction_converter';
 
 class UIProperties {
     private uiProperties: { [property: string]: any};
@@ -99,8 +100,10 @@ export class ServoyService {
 
         typesRegistry.registerGlobalType(DatasetType.TYPE_NAME, new DatasetType(typesRegistry, converterService));
 
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService, logFactory));
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, logFactory));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, 
+                                        new CustomArrayTypeFactory(typesRegistry, converterService, logFactory));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, 
+                                        new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, logFactory));
 
         typesRegistry.registerGlobalType(ValuelistType.TYPE_NAME, new ValuelistType(sabloDeferHelper));
         typesRegistry.registerGlobalType(FoundsetTreeType.TYPE_NAME, new FoundsetTreeType(sabloDeferHelper));
@@ -112,6 +115,7 @@ export class ServoyService {
         typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, this.uiBlockerService));
 
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
+        typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this));
     }
 
     public connect() {
