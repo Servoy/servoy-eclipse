@@ -60,6 +60,7 @@ public class DesignPerspective implements IPerspectiveFactory
 		bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);//move to debug perspective only
 		bottom.addView(IPageLayout.ID_TASK_LIST);
 		bottom.addView(IPageLayout.ID_BOOKMARKS);
+		bottom.addView("com.servoy.eclipse.debug.scriptingconsole");
 		bottom.addView(NewSearchUI.SEARCH_VIEW_ID);
 		bottom.addPlaceholder(CallHierarchyViewPart_ID);
 
