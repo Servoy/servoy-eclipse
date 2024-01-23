@@ -6,6 +6,10 @@ Extends designtime/SolutionModel: [${designtimeExtends.name()}](${instance.getRe
 <#if runtimeExtends??>
 Extends runtime: [${runtimeExtends.name()}](${instance.getReturnTypePath(runtimeExtends)})  
 </#if>
+<#if service_scripting_name??>
+
+You can access it in code via: **plugins.${service_scripting_name}**  
+</#if>
 <#if overview??>
 
 ${overview}
