@@ -23,7 +23,6 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,6 +35,7 @@ import com.servoy.build.documentation.apigen.IDocFromXMLGenerator;
 import com.servoy.build.documentation.apigen.INGPackageInfoGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator.Function;
+import com.servoy.build.documentation.apigen.SpecMarkdownGenerator.NGPackageInfoGenerator;
 import com.servoy.build.documentation.apigen.SpecMarkdownGenerator.Property;
 
 import freemarker.cache.ClassTemplateLoader;
@@ -107,7 +107,7 @@ public abstract class AbstractAIInfoGenerator
 
 		// ng package dirs listed in text file ngPackagesFileLocationsURI -> info source text (to be embedded)
 		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(ngPackagesFileLocationsURI).normalize());
-		SpecMarkdownGenerator.generateNGComponentOrServicePackageContentForDir(true, ngPackageDirsToScan.toArray(new String[ngPackageDirsToScan.size()]),
+		SpecMarkdownGenerator.generateNGComponentOrServicePackageContentForDir(true, ngPackageDirsToScan,
 			infoFromNGPackagesGenerator,
 			Map.of("referenceDate", DATE_OF_REFERENCE_FORMATTED, "trainingFootprint", TRAINING_FOOTPRINT, "utils", utilityObjectForTemplates));
 	}
@@ -238,7 +238,7 @@ public abstract class AbstractAIInfoGenerator
 		public void addInfoAboutProcessedPackage(String content);
 	}
 
-	protected static class InfoFromNGPackagesGenerator implements INGPackageInfoGenerator
+	protected static class InfoFromNGPackagesGenerator extends NGPackageInfoGenerator
 	{
 
 		protected final IInfoKeeper registerNewInfo;
@@ -248,8 +248,6 @@ public abstract class AbstractAIInfoGenerator
 		private final Template methodTemplate;
 		private final Template propertyTemplate;
 		private final Template typeTemplate;
-
-		private final List<Map<String, String>> allWebObjectsOfCurrentPackage = new ArrayList<>(10);
 
 		public InfoFromNGPackagesGenerator(Configuration cfg, IInfoKeeper registerNewInfo,
 			String packageTemplateFilename, String webObjectTemplateFilename, String methodTemplateFilename,
@@ -271,8 +269,7 @@ public abstract class AbstractAIInfoGenerator
 			String deprecationString, String replacementInCaseOfDeprecation)
 			throws TemplateException, IOException
 		{
-			if (!allWebObjectsOfCurrentPackage.stream().anyMatch(it -> ((String)root.get("componentname")).equals(it.get("name"))))
-				allWebObjectsOfCurrentPackage.add(Map.of("name", (String)root.get("componentname"), "internalName", (String)root.get("componentinternalname")));
+			super.generateComponentOrServiceInfo(root, userDir, displayName, categoryName, service, deprecationString, replacementInCaseOfDeprecation);
 
 			if (deprecationString != null || replacementInCaseOfDeprecation != null)
 			{
@@ -386,7 +383,7 @@ public abstract class AbstractAIInfoGenerator
 		@Override
 		public void currentPackageWasProcessed()
 		{
-			allWebObjectsOfCurrentPackage.clear();
+			super.currentPackageWasProcessed();
 		}
 
 		@Override
