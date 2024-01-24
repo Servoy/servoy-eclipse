@@ -334,7 +334,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             
                 if (this.leftPos.size == 0) {
 					this.rectangles = [];
-					this.element = this.document.elementFromPoint(event.data.p1.x, event.data.p1.y);
+					this.element = this.document.elementsFromPoint(event.data.p1.x, event.data.p1.y).find(e => e.getAttribute('svy-id'));
 					const uuid = this.element?.getAttribute('svy-id');
                     for (let comp of this.formCache.componentCache.values()) {
                         if (comp.name == '') continue;
@@ -395,7 +395,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     } 
     
     private getSnapProperties(point: {x: number, y: number}) {
-			this.element = this.document.elementFromPoint(point.x, point.y); //TODO check
+			this.element = this.document.elementsFromPoint(point.x, point.y).find(e => e.getAttribute('svy-id')); //TODO check
             const uuid = this.element?.getAttribute('svy-id');
             if (!uuid && !this.draggedElementItem) return { top: point.y, left: point.x, guides: []};
             
