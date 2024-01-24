@@ -6,18 +6,28 @@ export class ServerFunctionType implements IType<(...args) => unknown> {
 
     public static readonly TYPE_NAME = 'function';
     
+    public static readonly NATIVE_FUNCTION_TYPE_NAME = 'NativeFunction';
+    
     
     constructor( private servoyService: ServoyService) {
     }
 
-    fromServerToClient(serverSentData: {formname: string, script: string}): (...args) => unknown {
+    fromServerToClient(serverSentData: {formname: string, script: string, functionhash:string}): (...args) => unknown {
         if (serverSentData) {
-            const func = (...args) => {
-                return this.servoyService.executeInlineScript(serverSentData.formname, serverSentData.script, args);
-            };
-            func.formname = serverSentData.formname;
-            func.script = serverSentData.script;
-            return func;
+            if (serverSentData.formname && serverSentData.script) {
+                const func = (...args) => {
+                    return this.servoyService.executeInlineScript(serverSentData.formname, serverSentData.script, args);
+                };
+                func.formname = serverSentData.formname;
+                func.script = serverSentData.script;
+                return func;
+            } else if (serverSentData.functionhash) {
+                const func = (...args) => {
+                    return this.servoyService.executeInlineScript(serverSentData.formname, 'hash:' + serverSentData.functionhash, args);
+                };
+                func.functionhash = serverSentData.functionhash;
+                return func;
+            }
         }
         return null;
     }
