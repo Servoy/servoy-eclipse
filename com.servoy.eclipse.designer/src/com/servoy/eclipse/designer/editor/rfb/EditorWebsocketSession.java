@@ -88,4 +88,9 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 		return new EditorBaseWindow(this, windowNr, windowName);
 	}
 
+	@Override
+	public String getLogInformation()
+	{
+		return "";
+	}
 }
