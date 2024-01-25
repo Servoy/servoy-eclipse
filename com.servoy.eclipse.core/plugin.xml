@@ -20,10 +20,6 @@
                value="com.servoy.eclipse.core.servoytheme">
          </property>
          <property
-               name="cssTheme"
-               value="com.servoy.eclipse.core.servoydarktheme">
-         </property>
-         <property
                name="applicationCSSResources"
                value="platform:/plugin/org.eclipse.platform/images/">
          </property>
