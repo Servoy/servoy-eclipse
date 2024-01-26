@@ -14,7 +14,7 @@ export class ServerFunctionType implements IType<(...args) => unknown> {
 
     fromServerToClient(serverSentData: {formname: string, script: string, functionhash:string}): (...args) => unknown {
         if (serverSentData) {
-            if (serverSentData.formname && serverSentData.script) {
+            if (serverSentData.script) {
                 const func = (...args) => {
                     return this.servoyService.executeInlineScript(serverSentData.formname, serverSentData.script, args);
                 };
