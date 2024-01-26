@@ -2396,8 +2396,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 																					 */)
 			{
 				clearAbstractBaseProperty(beanPropertyDescriptor, id, (AbstractBase)persistContext.getPersist());
-				if (persistContext.getPersist() instanceof ISupportExtendsID &&
-					PersistHelper.isOverrideElement((ISupportExtendsID)persistContext.getPersist()) &&
+				if (PersistHelper.isOverrideElement(persistContext.getPersist()) &&
 					!((AbstractBase)persistContext.getPersist()).hasOverrideProperties() && !PersistHelper.hasOverrideChildren(persistContext.getPersist()))
 				{
 // last property was reset, remove overriding persist

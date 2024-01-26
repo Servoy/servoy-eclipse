@@ -296,6 +296,16 @@ public class Messages extends NLS
 	public static String EditComponentVariantsAction_editVariants;
 	public static String Cloud_publishToCloud;
 
+	public static String labelInherited(String label)
+	{
+		return (label != null ? label : "") + " (" + LabelInherited + ')';
+	}
+
+	public static String labelOverride(String label)
+	{
+		return (label != null ? label : "") + " (" + LabelOverride + ')';
+	}
+
 	static
 	{
 		// initialize resource bundle

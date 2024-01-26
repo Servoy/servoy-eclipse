@@ -30,7 +30,6 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServer;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -89,10 +88,9 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 		String superText = super.getText(element);
 		if (element instanceof Form)
 		{
-			if (persist instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)persist) &&
-				((AbstractBase)persist).hasProperty("containsFormID"))
+			if (PersistHelper.isOverrideElement(persist) && ((AbstractBase)persist).hasProperty("containsFormID"))
 			{
-				superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
+				superText = Messages.labelOverride(superText);
 			}
 		}
 		return superText;

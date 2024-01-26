@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
+import static com.servoy.j2db.util.PersistHelper.isOverrideElement;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -2656,7 +2658,7 @@ public class SolutionExplorerTreeContentProvider
 		// no scripting for form references
 		if (f.isFormComponent()) return;
 
-		List<PlatformSimpleUserNode> node = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> node = new ArrayList<>();
 		PlatformSimpleUserNode functionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_controller, UserNodeType.FORM_CONTROLLER, f,
 			uiActivator.loadImageFromBundle("controller.png"));
 		functionsNode.parent = formNode;
@@ -2767,7 +2769,7 @@ public class SolutionExplorerTreeContentProvider
 	private void addFormElementsChildren(PlatformSimpleUserNode elementsNode)
 	{
 		Form form = (Form)elementsNode.getRealObject();
-		addFormElementsChildren(elementsNode, new HashSet<Form>(), form, form);
+		addFormElementsChildren(elementsNode, new HashSet<>(), form, form);
 	}
 
 	private void addFormElementsChildren(PlatformSimpleUserNode elementsNode, Set<Form> inspectedForms, Form originalForm, Form ancestorForm)
@@ -2798,7 +2800,7 @@ public class SolutionExplorerTreeContentProvider
 				ServoyLog.logWarning("Parent of extended form " + ancestorForm.getName() + " not found", null);
 			}
 		}
-		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
+		List<PlatformSimpleUserNode> elements = new SortedList<>(StringComparator.INSTANCE);
 
 		// get all objects ordered alphabetically by name
 		List<IFormElement> formElements = ancestorForm.getFlattenedObjects(NameComparator.INSTANCE);
@@ -2838,7 +2840,8 @@ public class SolutionExplorerTreeContentProvider
 				}
 				parentNode = node; // this field comes under the group node
 			}
-			if (element.getName() != null && element.getName().trim().length() > 0)
+			// Do not show override elements here, they will be shown on the super-form in the tree
+			if (!isOverrideElement(element) && element.getName() != null && element.getName().trim().length() > 0)
 			{
 				if (element instanceof Bean)
 				{
@@ -2863,10 +2866,17 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else
 					{
-						model = element;
+						// If the element was extended on the original form, use that one as model
+						model = originalForm.searchForExtendsId(element.getID()).orElse(element);
 					}
 
-					node = new PlatformSimpleUserNode(element.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { model, null }, originalForm,
+					String displayName = element.getName();
+					if (isOverrideElement(model))
+					{
+						displayName = Messages.labelOverride(displayName);
+					}
+
+					node = new PlatformSimpleUserNode(displayName, UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { model, null }, originalForm,
 						uiActivator.loadImageFromBundle("element.png"));
 					node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null));
 				}
@@ -3032,11 +3042,6 @@ public class SolutionExplorerTreeContentProvider
 		return node;
 	}
 
-//	public static boolean isWebcomponentBean(IPersist persist)
-//	{
-//		return persist instanceof Bean && ((Bean)persist).getBeanClassName() != null && ((Bean)persist).getBeanClassName().indexOf(':') > 0;
-//	}
-
 	private void addGlobalRelationsNodeChildren(PlatformSimpleUserNode globalRelations)
 	{
 		Pair<Solution, String> solutionAndScope = (Pair<Solution, String>)globalRelations.getRealObject();
@@ -3154,7 +3159,7 @@ public class SolutionExplorerTreeContentProvider
 							if (!solutionsRefreshedForRelations.contains(s.getName()))
 							{
 								// refresh global relations node - if possible
-								node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Scopes);
+								node = findChildNode(node, Messages.TreeStrings_Scopes);
 								if (node != null)
 								{
 									String[] scopeNames = ((Solution)root).getRuntimeProperty(Solution.SCOPE_NAMES);
@@ -3163,10 +3168,10 @@ public class SolutionExplorerTreeContentProvider
 										PlatformSimpleUserNode scopeNode = null;
 										for (String scopeName : scopeNames)
 										{
-											scopeNode = (PlatformSimpleUserNode)findChildNode(node, scopeName);
+											scopeNode = findChildNode(node, scopeName);
 											if (scopeNode != null)
 											{
-												scopeNode = (PlatformSimpleUserNode)findChildNode(scopeNode, Messages.TreeStrings_relations);
+												scopeNode = findChildNode(scopeNode, Messages.TreeStrings_relations);
 											}
 											if (scopeNode != null)
 											{
@@ -3180,7 +3185,7 @@ public class SolutionExplorerTreeContentProvider
 							if (!solutionsRefreshedForRelations.contains(s.getName()))
 							{
 								// refresh all affected form relation nodes
-								node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Forms);
+								node = findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Forms);
 								if (node != null && node.children != null)
 								{
 									PlatformSimpleUserNode relationsNode;
@@ -3190,7 +3195,7 @@ public class SolutionExplorerTreeContentProvider
 										form = (Form)node.children[i].getRealObject();
 										if (form.getDataSource() != null)
 										{
-											relationsNode = (PlatformSimpleUserNode)findChildNode(node.children[i], Messages.TreeStrings_relations);
+											relationsNode = findChildNode(node.children[i], Messages.TreeStrings_relations);
 											if (relationsNode != null)
 											{
 												addFormRelationsNodeChildren(relationsNode);
@@ -3203,7 +3208,7 @@ public class SolutionExplorerTreeContentProvider
 								// solution node
 								if (solutionOfCalculation != null)
 								{
-									node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
+									node = findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
 									if (node != null && tableOfCalculation.equals(
 										ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Relation)persist).getPrimaryDataSource())))
 									{
@@ -3220,12 +3225,12 @@ public class SolutionExplorerTreeContentProvider
 							if (persists.containsKey(s)) continue;
 							boolean formAsComponent = ((Form)persist).isFormComponent().booleanValue();
 
-							if (formAsComponent) node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_FormComponents);
-							else node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							if (formAsComponent) node = findChildNode(node, Messages.TreeStrings_FormComponents);
+							else node = findChildNode(node, Messages.TreeStrings_Forms);
 
 							if (node != null)
 							{
-								PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
+								PlatformSimpleUserNode formNode = findChildNode(node, ((Form)persist).getName());
 								if (formNode == null)
 								{
 									if (!refreshedFormsNode)
@@ -3264,9 +3269,9 @@ public class SolutionExplorerTreeContentProvider
 							// refresh the in mem datasource tree.
 							if (DataSourceUtils.getInmemDataSourceName(((TableNode)persist).getDataSource()) != null)
 							{
-								PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node,
+								PlatformSimpleUserNode solutionChildNode = findChildNode(node,
 									Messages.TreeStrings_SolutionDataSources);
-								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_InMemory);
+								PlatformSimpleUserNode inMemNode = findChildNode(solutionChildNode, Messages.TreeStrings_InMemory);
 								if (inMemNode != null)
 								{
 									view.refreshTreeNodeFromModel(inMemNode, true);
@@ -3274,9 +3279,9 @@ public class SolutionExplorerTreeContentProvider
 							}
 							else if (DataSourceUtils.getViewDataSourceName(((TableNode)persist).getDataSource()) != null)
 							{
-								PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node,
+								PlatformSimpleUserNode solutionChildNode = findChildNode(node,
 									Messages.TreeStrings_SolutionDataSources);
-								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_ViewFoundsets);
+								PlatformSimpleUserNode inMemNode = findChildNode(solutionChildNode, Messages.TreeStrings_ViewFoundsets);
 								if (inMemNode != null)
 								{
 									view.refreshTreeNodeFromModel(inMemNode, true);
@@ -3286,19 +3291,19 @@ public class SolutionExplorerTreeContentProvider
 						}
 						else if (persist instanceof Solution)
 						{
-							PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							PlatformSimpleUserNode solutionChildNode = findChildNode(node, Messages.TreeStrings_Forms);
 							if (solutionChildNode != null)
 							{
 								addFormsNodeChildren(solutionChildNode, false);
 								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
-							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_FormComponents);
+							solutionChildNode = findChildNode(node, Messages.TreeStrings_FormComponents);
 							if (solutionChildNode != null)
 							{
 								addFormsNodeChildren(solutionChildNode, true);
 								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
-							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
+							solutionChildNode = findChildNode(node, Messages.TreeStrings_Media);
 							if (solutionChildNode != null)
 							{
 								addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
@@ -3339,15 +3344,15 @@ public class SolutionExplorerTreeContentProvider
 			if (node != null)
 			{
 				// find the elements node and refresh it
-				node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+				node = findChildNode(node, Messages.TreeStrings_Forms);
 				if (node != null)
 				{
-					node = (PlatformSimpleUserNode)findChildNode(node, form.getName());
+					node = findChildNode(node, form.getName());
 					if (node != null)
 					{
 						if (set.stream().anyMatch(cls -> IFormElement.class.isAssignableFrom(cls)))
 						{
-							PlatformSimpleUserNode elements = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_elements);
+							PlatformSimpleUserNode elements = findChildNode(node, Messages.TreeStrings_elements);
 							if (elements != null)
 							{
 								addFormElementsChildren(elements);
@@ -3356,7 +3361,7 @@ public class SolutionExplorerTreeContentProvider
 						}
 						if (set.contains(LayoutContainer.class))
 						{
-							PlatformSimpleUserNode containers = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_containers);
+							PlatformSimpleUserNode containers = findChildNode(node, Messages.TreeStrings_containers);
 							if (containers != null)
 							{
 								addFormContainersChildren(containers);
@@ -3369,9 +3374,8 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
-	public SimpleUserNode findChildNode(SimpleUserNode node, String name)
+	public <T extends SimpleUserNode> T findChildNode(SimpleUserNode node, String name)
 	{
-		SimpleUserNode result = null;
 		if (node != null && node.children != null)
 		{
 			for (int i = node.children.length - 1; i >= 0; i--)
@@ -3379,12 +3383,11 @@ public class SolutionExplorerTreeContentProvider
 				String nodeName = node.children[i].getName();
 				if (nodeName != null && nodeName.equals(name))
 				{
-					result = node.children[i];
-					break;
+					return (T)node.children[i];
 				}
 			}
 		}
-		return result;
+		return null;
 	}
 
 	/**
@@ -3444,7 +3447,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			return activeSolutionNode;
 		}
-		return (PlatformSimpleUserNode)findChildNode(modulesOfActiveSolution, solutionName);
+		return findChildNode(modulesOfActiveSolution, solutionName);
 	}
 
 	/**
@@ -3632,7 +3635,7 @@ public class SolutionExplorerTreeContentProvider
 
 	public void refreshServerViewsNode(IServerInternal server)
 	{
-		PlatformSimpleUserNode node = (PlatformSimpleUserNode)findChildNode(servers, server.getName());
+		PlatformSimpleUserNode node = findChildNode(servers, server.getName());
 		if (node != null)
 		{
 			handleServerNode(server, node);
@@ -3642,7 +3645,7 @@ public class SolutionExplorerTreeContentProvider
 
 	public void refreshTable(ITable table)
 	{
-		PlatformSimpleUserNode serverNode = (PlatformSimpleUserNode)findChildNode(servers, table.getServerName());
+		PlatformSimpleUserNode serverNode = findChildNode(servers, table.getServerName());
 		if (serverNode != null)
 		{
 			SimpleUserNode tableNode = findChildNode(serverNode, table.getName());

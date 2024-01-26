@@ -92,8 +92,8 @@ public class ChangeParentCommand extends Command
 
 			if (possibleNewParent != initialParent)
 			{
-				//different parent
-				if (PersistHelper.isOverrideElement((ISupportExtendsID)child) || child.getAncestor(IRepository.FORMS) != form)
+				// different parent
+				if (PersistHelper.isOverrideElement(child) || child.getAncestor(IRepository.FORMS) != form)
 				{
 					// cannot modify structure for inherited or override element
 					return false;

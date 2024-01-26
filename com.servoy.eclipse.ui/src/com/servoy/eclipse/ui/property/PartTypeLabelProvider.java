@@ -30,9 +30,9 @@ import com.servoy.j2db.util.PersistHelper;
  * Label provider for Part type.
  * <p>
  * Value may be Part or Integer (part type).
- * 
+ *
  * @author rgansevles, acostescu
- * 
+ *
  */
 public class PartTypeLabelProvider extends LabelProvider implements IPersistLabelProvider
 {
@@ -50,16 +50,16 @@ public class PartTypeLabelProvider extends LabelProvider implements IPersistLabe
 	{
 		if (value instanceof Part)
 		{
-			String text = Part.getDisplayName(((Part)value).getPartType());
 			Part part = (Part)value;
+			String text = Part.getDisplayName(part.getPartType());
 			IPersist formAncestor = part.getAncestor(IRepository.FORMS);
 			if (formAncestor != form)
 			{
-				text += " (" + Messages.LabelInherited + ")";
+				text = Messages.labelInherited(text);
 			}
-			else if (PersistHelper.isOverrideElement((Part)value))
+			else if (PersistHelper.isOverrideElement(part))
 			{
-				text += " (" + Messages.LabelOverride + ")";
+				text = Messages.labelOverride(text);
 			}
 			return text;
 		}

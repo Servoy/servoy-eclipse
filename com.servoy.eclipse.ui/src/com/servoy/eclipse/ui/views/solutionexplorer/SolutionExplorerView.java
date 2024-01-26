@@ -1832,12 +1832,12 @@ public class SolutionExplorerView extends ViewPart
 							PlatformSimpleUserNode solutionNode = cp.getSolutionNode(solutionName);
 							if (solutionNode != null)
 							{
-								PlatformSimpleUserNode formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
+								PlatformSimpleUserNode formsNode = cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
 								if (formsNode != null)
 								{
 									cp.refreshFormsNode(formsNode, false);
 								}
-								PlatformSimpleUserNode formComponentsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode,
+								PlatformSimpleUserNode formComponentsNode = cp.findChildNode(solutionNode,
 									Messages.TreeStrings_FormComponents);
 								if (formComponentsNode != null)
 								{

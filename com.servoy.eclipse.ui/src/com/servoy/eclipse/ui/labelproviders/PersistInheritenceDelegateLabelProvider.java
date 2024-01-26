@@ -32,7 +32,6 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.PersistHelper;
@@ -100,7 +99,7 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 		}
 
 		boolean isOverridden = false;
-		if (persistToCheckForOverride instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)persistToCheckForOverride))
+		if (PersistHelper.isOverrideElement(persistToCheckForOverride))
 		{
 			// ok so the ancestor that can be overridden is overridden; see if the value we are interested in is inherited (set - for most cases or non-default - in case of persist mapped) or not
 			if (value instanceof IChildWebObject || value instanceof IChildWebObject[])
@@ -128,7 +127,10 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 
 		}
 
-		if (isOverridden) superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
+		if (isOverridden)
+		{
+			return Messages.labelOverride(superText);
+		}
 
 		return superText;
 	}

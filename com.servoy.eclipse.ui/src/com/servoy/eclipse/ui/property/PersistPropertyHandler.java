@@ -88,7 +88,6 @@ import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
@@ -588,8 +587,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 									List<IPersist> overridePersists = new ArrayList<IPersist>();
 									for (IPersist child : f.getAllObjectsAsList())
 									{
-										if (child instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)child))
+										if (PersistHelper.isOverrideElement(child))
+										{
 											overridePersists.add(child);
+										}
 									}
 									if (overridePersists.size() > 0)
 									{

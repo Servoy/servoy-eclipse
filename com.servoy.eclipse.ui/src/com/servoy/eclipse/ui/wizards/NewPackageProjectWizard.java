@@ -280,7 +280,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 							ServoyProject activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 							if (activeSolution != null && projects.contains(activeSolution.getProject()))
 							{
-								PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getTreeContentProvider().findChildNode(
+								PlatformSimpleUserNode node = viewer.getTreeContentProvider().findChildNode(
 									viewer.getTreeContentProvider().getInvisibleRootNode(), activeSolution.getProject().getName());
 								if (node != null) nodeToExpand = viewer.getTreeContentProvider().findChildNode(node, Messages.TreeStrings_Web_Packages);
 							}

@@ -20,10 +20,10 @@ package com.servoy.eclipse.ui.property;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
- * Interface for IPropertySource to erturn the underlying model for saving state/supporting undo
- * 
+ * Interface for IPropertySource to return the underlying model for saving state/supporting undo
+ *
  * @author rgansevles
- * 
+ *
  * @since 6.0
  *
  */

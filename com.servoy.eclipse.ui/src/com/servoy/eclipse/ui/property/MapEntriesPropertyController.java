@@ -324,7 +324,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 
 		public boolean isOverriden(String mapKey)
 		{
-			if (p instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)p))
+			if (PersistHelper.isOverrideElement(p))
 			{
 				Map<String, ? > attributes = getPersistMap(p);
 				if (attributes != null && attributes.containsKey(mapKey))
@@ -367,7 +367,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 					String labelText = (String)element;
 					if (isOverriden(mapKey))
 					{
-						labelText = (labelText != null ? labelText : "") + " (" + Messages.LabelOverride + ')';
+						return Messages.labelOverride(labelText);
 					}
 					return labelText;
 				}
