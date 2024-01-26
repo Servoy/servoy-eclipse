@@ -42,6 +42,7 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command
 	private PersistContext savedPersistContext;
 	private Command command;
 	private final UUID origUUID;
+	private UUID newUUID;
 
 	public CreateOverrideIfNeeededCommandWrapper(PersistPropertySource propertySource, UUID origUUID, Function<UUID, Command> commandCreater)
 	{
@@ -56,7 +57,6 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command
 	{
 		savedPersistContext = null;
 		PersistContext persistContextBefore = propertySource.getPersistContext();
-		UUID newUUID;
 		try
 		{
 			if (propertySource.createOverrideElementIfNeeded())
@@ -69,16 +69,11 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command
 					.flatMap(propertySource.getPersistContext().getPersist()::searchForExtendsId)
 					.map(IPersist::getUUID)
 					// fall back to the original uuid if we can't find it (should not happen)
-					.orElse(origUUID);
-			}
-			else
-			{
-				// no override created
-				newUUID = origUUID;
+					.orElse(null);
 			}
 
 			// command can only be created after createOverrideElementIfNeeded because a new persistContext may have been created
-			command = commandCreater.apply(newUUID);
+			command = commandCreater.apply(newUUID == null ? origUUID : newUUID);
 
 			setLabel(command.getLabel());
 			command.execute();
@@ -98,8 +93,12 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command
 			if (savedPersistContext != null)
 			{
 				// remove the newly created override persist from its parent
-				IPersist overriddenPersist = propertySource.getPersistContext().getPersist();
-				overriddenPersist.getParent().removeChild(overriddenPersist);
+				if (newUUID != null)
+				{
+					propertySource.getPersistContext().getPersist().searchChild(newUUID)
+						.ifPresent(overriddenPersist -> overriddenPersist.getParent().removeChild(overriddenPersist));
+					newUUID = null;
+				}
 				propertySource.setPersistContext(savedPersistContext);
 				savedPersistContext = null;
 			}
