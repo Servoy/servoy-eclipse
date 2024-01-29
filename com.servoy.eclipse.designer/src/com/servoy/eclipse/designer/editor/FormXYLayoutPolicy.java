@@ -321,7 +321,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 					xNext += CSSPositionUtils.getSize(supportBounds).width + gap;
 					break;
 				case HORIZONTAL_CENTERS :
-					moveDelta = new java.awt.Point((int)xNext - CSSPositionUtils.getSize(supportBounds).width / 2 - CSSPositionUtils.getLocation(supportBounds).x, 0);
+					moveDelta = new java.awt.Point(
+						(int)xNext - CSSPositionUtils.getSize(supportBounds).width / 2 - CSSPositionUtils.getLocation(supportBounds).x, 0);
 					xNext += oncenter;
 					break;
 				case VERTICAL_SPACING :
@@ -330,7 +331,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 					yNext += CSSPositionUtils.getSize(supportBounds).height + gap;
 					break;
 				case VERTICAL_CENTERS :
-					moveDelta = new java.awt.Point(0, (int)yNext - CSSPositionUtils.getSize(supportBounds).height / 2 - CSSPositionUtils.getLocation(supportBounds).y);
+					moveDelta = new java.awt.Point(0,
+						(int)yNext - CSSPositionUtils.getSize(supportBounds).height / 2 - CSSPositionUtils.getLocation(supportBounds).y);
 					yNext += oncenter;
 					break;
 			}
@@ -343,7 +345,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 	protected Command getDistributeChildrenCommand(final DistributeRequest request)
 	{
 		List<ISupportBounds> elements = new ArrayList<ISupportBounds>();
-		List<EditPart> editParts = request.getEditParts();
+		List< ? extends EditPart> editParts = request.getEditParts();
 		for (EditPart editPart : editParts)
 		{
 			Object model = editPart.getModel();

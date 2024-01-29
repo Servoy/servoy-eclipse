@@ -36,8 +36,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.servoy.eclipse.core,
  com.servoy.eclipse.ui,
  sj.jsonschemavalidation,
- org.eclipse.core.expressions,
- org.apache.commons.compress
+ org.eclipse.core.expressions
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.servoy.eclipse.debug,
@@ -46,6 +45,9 @@ Export-Package: com.servoy.eclipse.debug,
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: com.servoy.eclipse.ngclient.ui,
  com.servoy.eclipse.ngclient.ui.utils,
+ org.apache.commons.compress.archivers.tar;version="1.25.0",
+ org.apache.commons.compress.compressors.gzip;version="1.25.0",
+ org.apache.commons.compress.utils;version="1.25.0",
  org.apache.commons.text,
  org.eclipse.ui.internal.browser
 Automatic-Module-Name: com.servoy.eclipse.debug
