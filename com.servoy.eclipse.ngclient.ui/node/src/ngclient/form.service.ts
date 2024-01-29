@@ -603,7 +603,7 @@ export class FormService {
                 }
                 formCache.addLayoutContainer(structure);
             } else if (elem.part === true) {
-                const part = new PartCache(elem.classes, elem.layout as { [property: string]: string });
+                const part = new PartCache(elem.name, elem.classes, elem.layout as { [property: string]: string });
                 this.walkOverChildren(elem.children, formCache, part);
                 formCache.addPart(part);
             } else {

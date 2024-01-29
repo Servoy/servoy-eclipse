@@ -67,6 +67,10 @@ export class FormCache implements IFormCache {
         this._parts.push(part);
     }
 
+    public getPart(name: string): PartCache{
+         return this._parts.find(elem => elem.name == name);
+    }
+    
     public addFormComponent(formComponent: FormComponentCache) {
         const index = this.formComponents.findIndex( elem => elem.name == formComponent.name);
         if (index == -1) this.formComponents.push(formComponent);
@@ -364,8 +368,9 @@ export class StructureCache {
 
 /** This is a cache that represents a form part (body/header/etc.). */
 export class PartCache {
-    constructor(public readonly classes: Array<string>,
-        public readonly layout: { [property: string]: string },
+    constructor(public readonly name: string,
+        public readonly classes: Array<string>,
+        public layout: { [property: string]: string },
         public readonly items?: Array<ComponentCache | FormComponentCache | StructureCache>) {
         if (!this.items) this.items = [];
     }

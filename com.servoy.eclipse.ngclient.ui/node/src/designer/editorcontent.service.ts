@@ -276,6 +276,19 @@ export class EditorContentService {
             refresh = true;
         }
         
+        if (data.parts){
+            for (let name in data.parts) {
+                // string style suffix
+                const style = data.parts[name];
+                name = name.substring(0,name.length-5);
+                let partCache = formCache.getPart(name);
+                if (partCache){
+                    partCache.layout = JSON.parse(style);
+                    refresh = true;
+                }
+            }
+        }
+        
 		formCache.cleanFormComponents();
 		
         if (data.deleted) {
