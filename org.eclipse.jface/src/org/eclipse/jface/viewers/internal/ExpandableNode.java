@@ -92,7 +92,7 @@ public class ExpandableNode {
 	 * this node up to this offset (but not including it). In other worlds, this is
 	 * the index of first invisible element under this node.
 	 *
-	 * @return current offset in the original list of elements}
+	 * {@return current offset in the original list of elements}
 	 */
 	public int getOffset() {
 		return startOffSet;
@@ -109,8 +109,8 @@ public class ExpandableNode {
 	 * This method returns those children of the current node which are supposed to
 	 * be not created / shown yet in the viewer.
 	 *
-	 * @return all remaining elements from original array starting with the element
-	 *         at offset index}
+	 * {@return all remaining elements from original array starting with the element
+	 * at offset index}
 	 */
 	public Object[] getRemainingElements() {
 		if (addedElements.size() > 0) {
@@ -151,7 +151,7 @@ public class ExpandableNode {
 	}
 
 	/**
-	 * @return original list of elements of the parent}
+	 * {@return original list of elements of the parent}
 	 */
 	public Object[] getAllElements() {
 		if (addedElements.size() > 0) {
@@ -162,7 +162,7 @@ public class ExpandableNode {
 	}
 
 	/**
-	 * @return label shown for the node in the viewer}
+	 * {@return label shown for the node in the viewer}
 	 */
 	@SuppressWarnings("boxing")
 	public String getLabel() {

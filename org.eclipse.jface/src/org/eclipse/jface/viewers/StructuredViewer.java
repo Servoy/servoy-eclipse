@@ -33,7 +33,6 @@ import org.eclipse.jface.internal.InternalPolicy;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.util.Policy;
 import org.eclipse.jface.util.SafeRunnable;
-import org.eclipse.jface.viewers.internal.ExpandableNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DragSourceListener;
@@ -724,7 +723,7 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 	 * methods on this viewer.
 	 * <p>
 	 * This method was introduced to support multiple equal elements in a viewer
-	 * (@see {@link AbstractTreeViewer}). Multiple equal elements are only
+	 * (see {@link AbstractTreeViewer}). Multiple equal elements are only
 	 * supported if the element map is enabled by calling
 	 * {@link #setUseHashlookup(boolean)} and passing <code>true</code>.
 	 * </p>
@@ -815,11 +814,6 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 	 * @see #addPostSelectionChangedListener(ISelectionChangedListener)
 	 */
 	protected void firePostSelectionChanged(final SelectionChangedEvent event) {
-		// do not inform client listeners on ExpandableNode selection
-		if (event.getSelection() instanceof StructuredSelection sel
-				&& sel.getFirstElement() instanceof ExpandableNode) {
-			return;
-		}
 		for (ISelectionChangedListener l : postSelectionChangedListeners) {
 			SafeRunnable.run(new SafeRunnable() {
 				@Override

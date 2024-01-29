@@ -19,7 +19,7 @@
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.31.0.v20230821-1552</version>
+  <version>3.32.0.v20231107-0834</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>

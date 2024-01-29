@@ -17,7 +17,10 @@
 
 package org.eclipse.jface.viewers;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -63,11 +66,6 @@ public abstract class ColumnViewer extends StructuredViewer {
 	private ICellModifier cellModifier;
 
 	private String[] columnProperties;
-
-	/**
-	 * The cell is a cached viewer cell used for refreshing.
-	 */
-	private ViewerCell cell = new ViewerCell(null, 0, null);
 
 	private ColumnViewerEditor viewerEditor;
 
@@ -305,19 +303,6 @@ public abstract class ColumnViewer extends StructuredViewer {
 		};
 		column.setLabelProvider(labelProvider, false);
 		return column;
-	}
-
-	/**
-	 * Update the cached cell object with the given row and column.
-	 *
-	 * @param rowItem
-	 * @param column
-	 * @return ViewerCell
-	 */
-	/* package */ViewerCell updateCell(ViewerRow rowItem, int column,
-			Object element) {
-		cell.update(rowItem, column, element);
-		return cell;
 	}
 
 	/**
@@ -719,9 +704,6 @@ public abstract class ColumnViewer extends StructuredViewer {
 		boolean oldBusy = isBusy();
 		setBusy(true);
 		try {
-			if (parent instanceof ExpandableNode expNode) {
-				return expNode.getRemainingElements();
-			}
 			return super.getRawChildren(parent);
 		} finally {
 			setBusy(oldBusy);
@@ -1071,5 +1053,44 @@ public abstract class ColumnViewer extends StructuredViewer {
 	public final boolean isExpandableNode(Object element) {
 		return element instanceof ExpandableNode;
 
+	}
+
+	@Override
+	protected void updateSelection(ISelection selection) {
+		super.updateSelection(getUpdatedSelection(selection));
+	}
+
+	@Override
+	protected void firePostSelectionChanged(SelectionChangedEvent event) {
+		ISelection givenSel = event.getSelection();
+		ISelection updatedSel = getUpdatedSelection(givenSel);
+		if (givenSel != updatedSel) {
+			event = new SelectionChangedEvent(event.getSelectionProvider(), updatedSel);
+		}
+		super.firePostSelectionChanged(event);
+	}
+
+	@SuppressWarnings("unchecked")
+	ISelection getUpdatedSelection(ISelection selection) {
+		if (getItemsLimit() <= 0) {
+			return selection;
+		}
+
+		if (selection instanceof StructuredSelection structSel) {
+			List<Object> list = new ArrayList<>(structSel.toList());
+			Iterator<?> itr = list.iterator();
+			boolean found = false;
+			while (itr.hasNext()) {
+				if (itr.next() instanceof ExpandableNode) {
+					itr.remove();
+					found = true;
+				}
+			}
+			if (found) {
+				return new StructuredSelection(list);
+			}
+		}
+		// by default return given selection.
+		return selection;
 	}
 }
