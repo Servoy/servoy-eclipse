@@ -86,7 +86,7 @@
 											tycho-bnd-plugin
 										</artifactId>
 										<versionRange>
-											[4.0.1,)
+											[4.0.5,)
 										</versionRange>
 										<goals>
 											<goal>process</goal>
