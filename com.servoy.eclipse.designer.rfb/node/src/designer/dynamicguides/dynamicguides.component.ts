@@ -86,10 +86,12 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
       point.x = point.x + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust;
       point.y = point.y + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust;
       if (this.previousPoint && this.previousPoint.x === point.x && this.previousPoint.y === point.y) return;
-      //if (!this.snapData || Math.abs(this.snapData.top - point.y) > 10 ||
-      //    Math.abs(this.snapData.left - point.x) > 10) {
-            this.editorContentService.sendMessageToIframe({ id: 'getSnapTarget', p1: point });
-      //}
+
+      this.editorContentService.sendMessageToIframe({
+        id: 'getSnapTarget',
+        p1: point,
+        resizing: this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
+      });
       this.previousPoint = point;
     }
 

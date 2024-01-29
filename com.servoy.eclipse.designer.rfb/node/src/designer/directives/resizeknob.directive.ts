@@ -21,7 +21,7 @@ export class ResizeKnobDirective implements OnInit, IContentMessageListener, OnD
 
     topContentAreaAdjust: number;
     leftContentAreaAdjust: number;
-    snapData: {top: number, left: number, cssPosition: { property: string } };
+    snapData: {top: number, left: number, width:number, height: number, cssPosition: { property: string } };
 
     constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService) {
     }
@@ -36,6 +36,23 @@ export class ResizeKnobDirective implements OnInit, IContentMessageListener, OnD
     contentMessageReceived(id: string, data: { [key: string]: any; }): void {
         if (id === 'snap' && this.currentElementInfo) {
             this.snapData = data['properties'];
+            if (this.initialElementInfo.size == 1 && (this.snapData?.width || this.snapData?.height)) {
+                const elementInfo = this.initialElementInfo.values().next().value;
+                elementInfo.element.style.position = 'absolute';
+                
+                if (this.snapData.width) {
+                    elementInfo.x = this.snapData.left;
+                    elementInfo.element.style.left = this.snapData.left + 'px';
+                    this.resizeInfo.node.style.left = this.snapData.left + this.leftContentAreaAdjust + 'px';
+                    this.resizeInfo.node.style.width = elementInfo.element.style.width = this.snapData.width + 'px';
+                }
+                if (this.snapData.height) {
+                    this.resizeInfo.node.style.height = this.snapData.height + 'px';
+                    elementInfo.element.style.top = this.snapData?.top + 'px';
+                    this.resizeInfo.node.style.top = this.snapData.top + this.topContentAreaAdjust + 'px';
+                    this.resizeInfo.node.style.height = elementInfo.element.style.height = this.snapData.height + 'px';
+                }
+            }
         }
     }
 
@@ -133,7 +150,7 @@ export class ResizeKnobDirective implements OnInit, IContentMessageListener, OnD
     }
 
     private resizeSelection(event: MouseEvent) {
-        if(this.currentElementInfo) {
+        if(this.currentElementInfo && !this.snapData) {
             let deltaX = event.clientX - this.lastresizeStartPosition.x;
             let deltaY = event.clientY - this.lastresizeStartPosition.y;
 
@@ -175,14 +192,22 @@ export class ResizeKnobDirective implements OnInit, IContentMessageListener, OnD
             const changes = {};
             for(const nodeId of elementInfos.keys()) {
                 const elementInfo = elementInfos.get(nodeId);
-                changes[nodeId] = {
-                    x: elementInfo.x,
-                    y: elementInfo.y,
-                    width: elementInfo.width,
-                    height: elementInfo.height
+                if (this.snapData && elementInfos.size == 1) {
+                    changes[nodeId] = {
+                        x: this.snapData?.width ? this.snapData?.left : elementInfo.x,
+                        y: this.snapData?.height ? this.snapData?.top : elementInfo.y,
+                        width: this.snapData?.width ? this.snapData?.width : elementInfo.width,
+                        height: this.snapData?.height ? this.snapData?.height : elementInfo.height,
+                        cssPos: this.snapData.cssPosition //TODO remove?
+                    }
                 }
-                if (this.snapData) {
-                    changes[nodeId]['cssPos'] = this.snapData.cssPosition;
+                else {
+                    changes[nodeId] = {
+                        x: elementInfo.x,
+                        y: elementInfo.y,
+                        width: elementInfo.width,
+                        height: elementInfo.height
+                    }
                 }
             }
             this.editorSession.sendChanges(changes);

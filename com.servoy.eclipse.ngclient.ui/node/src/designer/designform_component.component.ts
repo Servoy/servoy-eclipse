@@ -357,7 +357,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     this.middleV = new Map([...this.middleV].sort(sortfn));
                 }
             	
-                let props = this.getSnapProperties(event.data.p1);              
+                let props = this.getSnapProperties(event.data.p1, event.data.resizing);              
                 this.windowRefService.nativeWindow.parent.postMessage({ id: 'snap', properties: props }, '*');
             }
             if (event.data.id === 'clearSnapCache') {
@@ -394,123 +394,170 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return rect;
     } 
     
-    private getSnapProperties(point: {x: number, y: number}) {
-			this.element = this.document.elementsFromPoint(point.x, point.y).find(e => e.getAttribute('svy-id')); //TODO check
+    private getSnapProperties(point: {x: number, y: number}, resizing: string) {
+			let elem = this.document.elementsFromPoint(point.x, point.y).find(e => e.getAttribute('svy-id')); //TODO check
+			if (!this.draggedElementItem && elem) this.element = elem;
+			
             const uuid = this.element?.getAttribute('svy-id');
             if (!uuid && !this.draggedElementItem) return { top: point.y, left: point.x, guides: []};
             
             const rect = this.getDraggedElementRect(point);
             let properties = {initPoint: point, top: point.y, left: point.x, cssPosition: {}, guides: []};
-            let snapX = this.isSnapInterval(uuid, rect.left, this.leftPos);
-            if (snapX?.uuid) {
-                properties.left = this.leftPos.get(snapX.uuid);
-            }
-            else {
-                snapX = this.isSnapInterval(uuid, rect.left, this.rightPos);
-                if (snapX?.uuid) {
-                    properties.left =  this.rightPos.get(snapX.uuid);
-                }
-            }
             
-			let guideX;
-            if (snapX) {
-                properties.cssPosition['left'] = snapX;
-                if (!properties.cssPosition['left']) properties.cssPosition['left'] = properties.left;
-				guideX = properties.left;
-            }
-            else {
-                snapX = this.isSnapInterval(uuid, rect.right, this.rightPos);
-                guideX = this.rightPos.get(snapX?.uuid);
-                properties.left = snapX ? this.rightPos.get(snapX.uuid) : properties.left;
-                if (!snapX) { 
-                    snapX = this.isSnapInterval(uuid, rect.right, this.leftPos);
-                    if (snapX?.uuid) {
-                        properties.left =  this.leftPos.get(snapX.uuid);
-                        guideX = this.leftPos.get(snapX.uuid);
-                    }
-                }
-                if (snapX){
-                    properties.cssPosition['right'] = snapX;
-                    properties.left -= rect.width;
-                    if (!properties.cssPosition['right']) properties.cssPosition['right'] = properties.left;
-                }
-                else {
-                    snapX = this.isSnapInterval(uuid, (rect.left+rect.right)/2, this.middleH);
-                    if (snapX){
-                        properties.cssPosition['middleH'] = snapX;
-                        properties.left = this.middleH.get(snapX.uuid) - rect.width/2;
-						guideX = this.middleH.get(snapX.uuid);
-                    }
-                }
-            }
+		if (!resizing || resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
+			let closerToTheLeft = this.pointCloserToTopOrLeftSide(point, rect, 'x');
+			let snapX, guideX;
+			if (closerToTheLeft) {
+				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.leftPos);
+				if (snapX?.uuid) {
+					properties.left = this.leftPos.get(snapX.uuid);
+				}
+				else {
+					snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.rightPos);
+					if (snapX?.uuid) {
+						properties.left = this.rightPos.get(snapX.uuid);
+						snapX.prop = 'right';
+					}
+				}
 
-            if (snapX) {
-                if (this.topPos.get(snapX.uuid) < rect.top) {                    
-                    properties.guides.push(new Guide(guideX, this.topPos.get(snapX.uuid), 1, rect.bottom - this.topPos.get(snapX.uuid), 'snap' ));
-                }
-                else {
-                    properties.guides.push(new Guide(guideX, rect.top, 1, this.topPos.get(snapX.uuid) - rect.top, 'snap' ));
-                }
-            }
-                
-			let guideY;
-            let snapY = this.isSnapInterval(uuid, rect.top, this.topPos);
-            if (snapY?.uuid) {
-                properties.top = this.topPos.get(snapY.uuid);
-            }
-            else {
-                snapY = this.isSnapInterval(uuid, rect.top, this.bottomPos);
-                if (snapY?.uuid) {
-                    properties.top = this.bottomPos.get(snapY.uuid);
-                }
-            }
-            
-            if (snapY) {
-                properties.cssPosition['top'] = snapY;
-                guideY = properties.top;
-            }
-            else {
-                snapY = this.isSnapInterval(uuid, rect.bottom, this.bottomPos);
-                if (snapY?.uuid) {
-                    guideY = this.bottomPos.get(snapY.uuid);
-                    properties.top = snapY ? this.bottomPos.get(snapY.uuid) : properties.top;
-                }
-                if (!snapY){
-                    snapY = this.isSnapInterval(uuid, rect.bottom, this.topPos);
-                    if (snapY?.uuid) {
-                        properties.top = this.topPos.get(snapY.uuid);
-                        guideY = this.topPos.get(snapY.uuid);
-                    }
-                }
-                if (snapY) {
-                    properties.cssPosition['bottom'] = snapY;
-                    properties.top -= rect.height;
-                }
-                else {
-                    snapY = this.isSnapInterval(uuid, (rect.top + rect.bottom)/2, this.middleV);
-                    if (snapY?.uuid){
-                        properties.cssPosition['middleV'] = snapY;
-                        properties.top = this.middleV.get(snapY.uuid) - rect.height/2;
-                        guideY = this.middleV.get(snapY.uuid);
-                    }
-                }
-            }
-            
-            if (snapY) {
-                if (this.leftPos.get(snapY.uuid) < rect.left) {
-                    properties.guides.push(new Guide(this.leftPos.get(snapY.uuid), guideY, rect.right - this.leftPos.get(snapY.uuid) , 1, 'snap' ));
-                }
-                else {
-                    properties.guides.push(new Guide(rect.left, guideY, this.leftPos.get(snapY.uuid) - rect.left , 1, 'snap' ));
-                }
-            }
-            
-            //equal distance guides
-            this.addEqualDistanceVerticalGuides(rect, properties);
-            this.addEqualDistanceHorizontalGuides(rect, properties);
+				if (snapX) {
+					properties.cssPosition['left'] = snapX;
+					if (!properties.cssPosition['left']) properties.cssPosition['left'] = properties.left;
+					guideX = properties.left;
+					if (resizing) {
+						properties['width'] = rect.width + rect.left - properties.left;
+					}
+				}
+			}
+			else {
+				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.right, this.rightPos);
+				guideX = this.rightPos.get(snapX?.uuid);
+				properties.left = snapX ? this.rightPos.get(snapX.uuid) : properties.left;
+				if (!snapX) {
+					snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.right, this.leftPos);
+					if (snapX?.uuid) {
+						properties.left = this.leftPos.get(snapX.uuid);
+						guideX = this.leftPos.get(snapX.uuid);
+						snapX.prop = 'left';
+					}
+				}
+				if (snapX) {
+					properties.cssPosition['right'] = snapX;
+					if (resizing) {
+						properties.left = rect.left;
+						properties['width'] = guideX - properties.left;
+					}
+					else {
+						properties.left -= rect.width;
+					}
+					if (!properties.cssPosition['right']) properties.cssPosition['right'] = properties.left;
+				}
+			}
 
-            return properties.guides.length == 0 ? null : properties;
+			if (!snapX && !resizing) { //TODO impl, ignore middle for now for resizing
+				snapX = this.isSnapInterval(uuid, (rect.left + rect.right) / 2, this.middleH);
+				if (snapX) {
+					properties.cssPosition['middleH'] = snapX;
+					properties.left = this.middleH.get(snapX.uuid) - rect.width / 2;
+					guideX = this.middleH.get(snapX.uuid);
+				}
+			}
+
+			if (snapX) {
+				if (this.topPos.get(snapX.uuid) < rect.top) {
+					properties.guides.push(new Guide(guideX, this.topPos.get(snapX.uuid), 1, rect.bottom - this.topPos.get(snapX.uuid), 'snap'));
+				}
+				else {
+					properties.guides.push(new Guide(guideX, rect.top, 1, this.topPos.get(snapX.uuid) - rect.top, 'snap'));
+				}
+			}
+		}
+        
+		if (!resizing || resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
+			let closerToTheTop = this.pointCloserToTopOrLeftSide(point, rect, 'y');
+			let snapY, guideY;
+			if (closerToTheTop) {
+				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.topPos);
+				if (snapY?.uuid) {
+					properties.top = this.topPos.get(snapY.uuid);
+				}
+				else {
+					snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.bottomPos);
+					if (snapY?.uuid) {
+						properties.top = this.bottomPos.get(snapY.uuid);
+						snapY.prop = 'bottom';
+					}
+				}
+
+				if (snapY) {
+					properties.cssPosition['top'] = snapY;
+					guideY = properties.top;
+					if (resizing) {
+						properties['height'] = rect.height + rect.top - properties.top;
+					}
+				}
+			}
+			else {
+				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.bottom, this.bottomPos);
+				if (snapY?.uuid) {
+					guideY = this.bottomPos.get(snapY.uuid);
+					properties.top = snapY ? this.bottomPos.get(snapY.uuid) : properties.top;
+				}
+				if (!snapY) {
+					snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.bottom, this.topPos);
+					if (snapY?.uuid) {
+						properties.top = this.topPos.get(snapY.uuid);
+						guideY = this.topPos.get(snapY.uuid);
+						snapY.prop = 'top';
+					}
+				}
+				if (snapY) {
+					properties.cssPosition['bottom'] = snapY;
+					if (resizing) {
+						properties.top = rect.top;
+						properties['height'] = guideY - properties.top;
+					}
+					else {
+						properties.top -= rect.height;
+					}
+				}
+			}
+			if (!snapY && !resizing) { //TODO impl, ignore middle for now
+				snapY = this.isSnapInterval(uuid, (rect.top + rect.bottom) / 2, this.middleV);
+				if (snapY?.uuid) {
+					properties.cssPosition['middleV'] = snapY;
+					properties.top = this.middleV.get(snapY.uuid) - rect.height / 2;
+					guideY = this.middleV.get(snapY.uuid);
+				}
+			}
+
+			if (snapY) {
+				if (this.leftPos.get(snapY.uuid) < rect.left) {
+					properties.guides.push(new Guide(this.leftPos.get(snapY.uuid), guideY, rect.right - this.leftPos.get(snapY.uuid), 1, 'snap'));
+				}
+				else {
+					properties.guides.push(new Guide(rect.left, guideY, this.leftPos.get(snapY.uuid) - rect.left, 1, 'snap'));
+				}
+			}
+		}
+        
+        if (!resizing) { //TODO impl, ignore eq dist when resizing for now 
+			//equal distance guides
+			this.addEqualDistanceVerticalGuides(rect, properties);
+			this.addEqualDistanceHorizontalGuides(rect, properties);
+		}
+		
+		return properties.guides.length == 0 ? null : properties;
     }
+    
+	private pointCloserToTopOrLeftSide(point: {x: number, y: number}, rectangle: DOMRect, axis: 'x' | 'y'): boolean {
+		const calculateDistance = (a: number, b: number) => Math.abs(a - b);
+
+		const distanceToStart = axis === 'y' ? calculateDistance(point.y, rectangle.y) : calculateDistance(point.x, rectangle.x);
+		const distanceToEnd = axis === 'y' ? calculateDistance(point.y, rectangle.y + rectangle.height) : calculateDistance(point.x, rectangle.x + rectangle.width);
+
+		return distanceToStart < distanceToEnd;
+	}
     
     private addEqualDistanceVerticalGuides(rect: DOMRect, properties: any ): void {
 		const overlappingX = this.getOverlappingRectangles(rect, 'x');

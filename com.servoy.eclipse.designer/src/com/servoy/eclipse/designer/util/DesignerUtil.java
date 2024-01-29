@@ -745,8 +745,15 @@ public class DesignerUtil
 				String value = getCssValue(right.getCssPosition(), jsonObject.optString("prop", "right"));
 				if (CSSPositionUtils.isSet(value))
 				{
-					newPosition.right = value;
-					if (CSSPositionUtils.isSet(newPosition.left)) newPosition.left = "-1";
+					if (isResize)
+					{
+						newPosition.width = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(position.left) + "";
+					}
+					else
+					{
+						newPosition.right = value;
+						if (CSSPositionUtils.isSet(newPosition.left)) newPosition.left = "-1";
+					}
 				}
 //				else if ("left".equals(jsonObject.optString("prop")))
 //				{
@@ -765,7 +772,8 @@ public class DesignerUtil
 					}
 					else if (isResize)
 					{
-						newPosition.width = r - CSSPositionUtils.getPixelsValue(position.left) + "";
+						newPosition.width = containerSize.width - r - CSSPositionUtils.getPixelsValue(position.left) + "";
+						//TODO newPosition.right = r + "";
 					}
 				}
 			}
@@ -854,8 +862,15 @@ public class DesignerUtil
 				String value = getCssValue(bottom.getCssPosition(), jsonObject.optString("prop", "bottom"));
 				if (CSSPositionUtils.isSet(value))
 				{
-					newPosition.bottom = value;
-					if (CSSPositionUtils.isSet(newPosition.top)) newPosition.top = "-1";
+					if (isResize)
+					{
+						newPosition.height = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(position.top) + "";
+					}
+					else
+					{
+						newPosition.bottom = value;
+						if (CSSPositionUtils.isSet(newPosition.top)) newPosition.top = "-1";
+					}
 				}
 //				else if ("top".equals(jsonObject.optString("prop")))
 //				{
@@ -874,7 +889,8 @@ public class DesignerUtil
 					}
 					else if (isResize)
 					{
-						newPosition.height = b - CSSPositionUtils.getPixelsValue(position.top) + "";
+						newPosition.height = containerSize.height - b - CSSPositionUtils.getPixelsValue(position.top) + "";
+						//TODO newPosition.bottom = b + "";
 					}
 				}
 			}
