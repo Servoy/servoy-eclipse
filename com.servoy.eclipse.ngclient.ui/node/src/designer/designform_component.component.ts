@@ -395,8 +395,17 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     } 
     
     private getSnapProperties(point: {x: number, y: number}, resizing: string) {
-			let elem = this.document.elementsFromPoint(point.x, point.y).find(e => e.getAttribute('svy-id')); //TODO check
-			if (!this.draggedElementItem && elem) this.element = elem;
+			let elem =  this.document.elementsFromPoint(point.x, point.y).find(e => e.getAttribute('svy-id'));
+			if (!this.draggedElementItem && !resizing) {
+				//we always need to update the element when dragging, otherwise it doesn't get out of the snap mode
+				this.element = elem;
+			} 
+			if (resizing && elem) {
+				//in resize mode, we need the current element to determine the edge(resize knob) we are dragging
+				//so we use the mouse position for the correct location
+				//(the element rect might not always be up to date, especially when dragging faster) 
+				this.element = elem;
+			}
 			
             const uuid = this.element?.getAttribute('svy-id');
             if (!uuid && !this.draggedElementItem) return { top: point.y, left: point.x, guides: []};
