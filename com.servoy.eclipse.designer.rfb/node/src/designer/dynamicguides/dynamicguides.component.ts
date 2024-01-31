@@ -102,6 +102,10 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy, IContentMessag
     }
 
     private setGuides(data: { property: string; }) {
+      	if (!this.guidesEnabled || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) {
+        	this.clearGuides();
+        	return;
+      	}
         this.snapData = data['properties'];
         if (this.snapData?.guides) {
             this.clearGuides();
