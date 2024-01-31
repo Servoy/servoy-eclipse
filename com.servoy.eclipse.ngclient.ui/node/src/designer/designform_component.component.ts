@@ -394,29 +394,47 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return rect;
     } 
     
-    private getSnapProperties(point: {x: number, y: number}, resizing: string) {
-			let elem =  this.document.elementsFromPoint(point.x, point.y).find(e => e.getAttribute('svy-id'));
-			if (!this.draggedElementItem && !resizing) {
-				//we always need to update the element when dragging, otherwise it doesn't get out of the snap mode
-				this.element = elem;
-			} 
-			if (resizing && elem) {
-				//in resize mode, we need the current element to determine the edge(resize knob) we are dragging
-				//so we use the mouse position for the correct location
-				//(the element rect might not always be up to date, especially when dragging faster) 
-				this.element = elem;
+	private getSnapProperties(point: { x: number, y: number }, resizing: string) {
+		let elem = this.document.elementsFromPoint(point.x, point.y).find(e => e.getAttribute('svy-id'));
+		if (!this.draggedElementItem && !resizing) {
+			//we always need to update the element when dragging, otherwise it doesn't get out of the snap mode
+			this.element = elem;
+		}
+		if (resizing && elem) {
+			//in resize mode, we need the current element to determine the edge(resize knob) we are dragging
+			//so we use the mouse position for the correct location
+			//(the element rect might not always be up to date, especially when dragging faster) 
+			this.element = elem;
+		}
+
+		const uuid = this.element?.getAttribute('svy-id');
+		if (!uuid && !this.draggedElementItem) return { top: point.y, left: point.x, guides: [] };
+
+		const rect = this.getDraggedElementRect(point);
+		let properties = { initPoint: point, top: point.y, left: point.x, cssPosition: {}, guides: [] };
+		
+		const horizontalSnap = this.handleHorizontalSnap(resizing, point, uuid, rect, properties);
+		const verticalSnap = this.handleVerticalSnap(resizing, point, uuid, rect, properties);
+		if (!resizing) { //TODO impl, ignore eq dist when resizing for now 
+			//equal distance guides
+			const verticalDist = this.addEqualDistanceVerticalGuides(rect, properties);
+			if (verticalDist && verticalSnap) {
+				properties.guides.splice(properties.guides.indexOf(verticalSnap), 1);
 			}
-			
-            const uuid = this.element?.getAttribute('svy-id');
-            if (!uuid && !this.draggedElementItem) return { top: point.y, left: point.x, guides: []};
-            
-            const rect = this.getDraggedElementRect(point);
-            let properties = {initPoint: point, top: point.y, left: point.x, cssPosition: {}, guides: []};
-            
+			const horizontalDist = this.addEqualDistanceHorizontalGuides(rect, properties);
+			if (horizontalDist && horizontalSnap) {
+				properties.guides.splice(properties.guides.indexOf(horizontalSnap), 1);
+			}
+		}
+
+		return properties.guides.length == 0 ? null : properties;
+	}
+
+	private handleHorizontalSnap(resizing: string, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
 		if (!resizing || resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
 			let closerToTheLeft = this.pointCloserToTopOrLeftSide(point, rect, 'x');
 			let snapX, guideX;
-			if (closerToTheLeft) {
+			if (!resizing || closerToTheLeft) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.leftPos);
 				if (snapX?.uuid) {
 					properties.left = this.leftPos.get(snapX.uuid);
@@ -438,7 +456,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 					}
 				}
 			}
-			else {
+			//if not found, check the right edge as well
+			if(!snapX && (!resizing || !closerToTheLeft)) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.right, this.rightPos);
 				guideX = this.rightPos.get(snapX?.uuid);
 				properties.left = snapX ? this.rightPos.get(snapX.uuid) : properties.left;
@@ -473,19 +492,25 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 			}
 
 			if (snapX) {
+				let guide;
 				if (this.topPos.get(snapX.uuid) < rect.top) {
-					properties.guides.push(new Guide(guideX, this.topPos.get(snapX.uuid), 1, rect.bottom - this.topPos.get(snapX.uuid), 'snap'));
+					guide = new Guide(guideX, this.topPos.get(snapX.uuid), 1, rect.bottom - this.topPos.get(snapX.uuid), 'snap');
 				}
 				else {
-					properties.guides.push(new Guide(guideX, rect.top, 1, this.topPos.get(snapX.uuid) - rect.top, 'snap'));
+					guide = new Guide(guideX, rect.top, 1, this.topPos.get(snapX.uuid) - rect.top, 'snap');
 				}
+				properties.guides.push(guide);
+				return guide;
 			}
 		}
-        
+		return null;
+	}
+
+	private handleVerticalSnap(resizing: string, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
 		if (!resizing || resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
 			let closerToTheTop = this.pointCloserToTopOrLeftSide(point, rect, 'y');
 			let snapY, guideY;
-			if (closerToTheTop) {
+			if (!resizing || closerToTheTop) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.topPos);
 				if (snapY?.uuid) {
 					properties.top = this.topPos.get(snapY.uuid);
@@ -506,7 +531,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 					}
 				}
 			}
-			else {
+			if (!snapY && (!resizing || !closerToTheTop)) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.bottom, this.bottomPos);
 				if (snapY?.uuid) {
 					guideY = this.bottomPos.get(snapY.uuid);
@@ -541,23 +566,19 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 			}
 
 			if (snapY) {
+				let guide;
 				if (this.leftPos.get(snapY.uuid) < rect.left) {
-					properties.guides.push(new Guide(this.leftPos.get(snapY.uuid), guideY, rect.right - this.leftPos.get(snapY.uuid), 1, 'snap'));
+					guide = new Guide(this.leftPos.get(snapY.uuid), guideY, rect.right - this.leftPos.get(snapY.uuid), 1, 'snap');
 				}
 				else {
-					properties.guides.push(new Guide(rect.left, guideY, this.leftPos.get(snapY.uuid) - rect.left, 1, 'snap'));
+					guide = new Guide(rect.left, guideY, this.leftPos.get(snapY.uuid) - rect.left, 1, 'snap');
 				}
+				properties.guides.push(guide);
+				return guide;
 			}
 		}
-        
-        if (!resizing) { //TODO impl, ignore eq dist when resizing for now 
-			//equal distance guides
-			this.addEqualDistanceVerticalGuides(rect, properties);
-			this.addEqualDistanceHorizontalGuides(rect, properties);
-		}
-		
-		return properties.guides.length == 0 ? null : properties;
-    }
+		return null;
+	}
     
 	private pointCloserToTopOrLeftSide(point: {x: number, y: number}, rectangle: DOMRect, axis: 'x' | 'y'): boolean {
 		const calculateDistance = (a: number, b: number) => Math.abs(a - b);
@@ -568,7 +589,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 		return distanceToStart < distanceToEnd;
 	}
     
-    private addEqualDistanceVerticalGuides(rect: DOMRect, properties: any ): void {
+    private addEqualDistanceVerticalGuides(rect: DOMRect, properties: any ): Guide[] {
 		const overlappingX = this.getOverlappingRectangles(rect, 'x');
         for (let pair of overlappingX){
 			const e1 = pair[0];
@@ -578,8 +599,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 				if (Math.abs(dist - rect.top + e2.bottom) < this.equalDistanceThreshold) {
 					properties.top = e2.bottom + dist;
 	    			const r = new DOMRect(properties.left ? properties.left : rect.x, properties.top, rect.width, rect.height);
-    				this.addVerticalGuides(e1, e2, r, dist, properties);
-    				break;
+    				return this.addVerticalGuides(e1, e2, r, dist, properties);
 				}
 			}
 			if (e2.top > e1.bottom && e1.top > rect.bottom) {
@@ -587,8 +607,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 				if (Math.abs(dist - e1.top + rect.bottom) < this.equalDistanceThreshold) {
 					properties.top = e1.top - dist - rect.height;
 	    			const r = new DOMRect(properties.left ? properties.left : rect.x, properties.top, rect.width, rect.height);
-    				this.addVerticalGuides(r, e1, e2, dist, properties);
-    				break;
+    				return this.addVerticalGuides(r, e1, e2, dist, properties);
 				}
 			}
 			if (e2.top > rect.bottom && rect.top > e1.bottom) {
@@ -596,14 +615,14 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 				if (Math.abs(e1.bottom + dist - rect.top - rect.height / 2) < this.equalDistanceThreshold) {
 					properties.top = e1.bottom + dist - rect.height/2;
 	    			const r = new DOMRect(properties.left ? properties.left : rect.x, properties.top, rect.width, rect.height);
-    				this.addVerticalGuides(e1, r, e2, dist - rect.height/2, properties);
-    				break;
+    				return this.addVerticalGuides(e1, r, e2, dist - rect.height/2, properties);
 				}
 			}
 		}
+		return null;
 	}
 	
-	private addEqualDistanceHorizontalGuides(rect: DOMRect, properties: any ): void {
+	private addEqualDistanceHorizontalGuides(rect: DOMRect, properties: any ): Guide[] {
 		const overlappingY = this.getOverlappingRectangles(rect, 'y');
         for (let pair of overlappingY){
 			const e1 = pair[0];
@@ -613,8 +632,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 				if (Math.abs(dist - rect.left + e2.right) < this.equalDistanceThreshold) {                  
                 	properties.left = e2.right + dist;
                  	const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, rect.height);
-    				this.addHorizontalGuides(e1, e2, r, dist, properties);
-    				break;
+    				return this.addHorizontalGuides(e1, e2, r, dist, properties);
                 }
 			}
 			if (e1.left > rect.right && e2.left > e1.right) {
@@ -622,8 +640,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 				if (Math.abs(dist - rect.right + e1.left) < this.equalDistanceThreshold) {
                		properties.left = e1.left - dist - rect.width;
                    	const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, rect.height);
-                   	this.addHorizontalGuides(r, e1, e2, dist, properties);
-                   	break;
+                   	return this.addHorizontalGuides(r, e1, e2, dist, properties);
                	}
 			}
 			if (e2.left > rect.right && rect.left > e1.right)  {
@@ -631,11 +648,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                	if (Math.abs(e1.right + dist - rect.left - rect.width / 2) < this.equalDistanceThreshold) {
 					properties.left = e1.right + dist - rect.width/2;
 	    			const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, rect.height);
-    				this.addHorizontalGuides(e1, r, e2, dist - rect.width/2, properties);
-    				break;
+    				return this.addHorizontalGuides(e1, r, e2, dist - rect.width/2, properties);
 				}
 			}
 		}
+		return null;
 	}
     
     private getOverlappingRectangles(rect: DOMRect, axis: 'x' | 'y'): DOMRect[][] {
@@ -668,28 +685,32 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 	this.bottomPos.get(uuid) - this.topPos.get(uuid));
 	}
 	
-	private addVerticalGuides(e1: DOMRect, e2: DOMRect, r: DOMRect, dist: number, properties: any): void {
+	private addVerticalGuides(e1: DOMRect, e2: DOMRect, r: DOMRect, dist: number, properties: any): Guide[] {
 	    const right = Math.max(r.right, e1.right, e2.right);
-	   
-	    properties.guides.push(new Guide(e1.right, e1.bottom, this.getGuideLength(right, e1.right), 1, 'dist'));
-	    properties.guides.push(new Guide(right + 10, e1.bottom, 1, dist, 'dist'));
+	    let guides = [];
+	    guides.push(new Guide(e1.right, e1.bottom, this.getGuideLength(right, e1.right), 1, 'dist'));
+	    guides.push(new Guide(right + 10, e1.bottom, 1, dist, 'dist'));
 	    const len = this.getGuideLength(right, e2.right);
-	    properties.guides.push(new Guide(e2.right, e2.top, len, 1, 'dist'));
-	    properties.guides.push(new Guide(e2.right, e2.bottom, len, 1, 'dist'));
-	    properties.guides.push(new Guide(right + 10, e2.bottom, 1, dist, 'dist'));
-	    properties.guides.push(new Guide(r.right, r.top, this.getGuideLength(right, r.right), 1, 'dist'));
+	    guides.push(new Guide(e2.right, e2.top, len, 1, 'dist'));
+	    guides.push(new Guide(e2.right, e2.bottom, len, 1, 'dist'));
+	    guides.push(new Guide(right + 10, e2.bottom, 1, dist, 'dist'));
+	    guides.push(new Guide(r.right, r.top, this.getGuideLength(right, r.right), 1, 'dist'));
+	    properties.guides.push(...guides);
+	    return guides;
 	}
 	
-	private addHorizontalGuides(e1: DOMRect, e2: DOMRect, r: DOMRect, dist: number, properties: any): void {
+	private addHorizontalGuides(e1: DOMRect, e2: DOMRect, r: DOMRect, dist: number, properties: any): Guide[] {
 	    let bottom = Math.max(r.bottom, e1.bottom, e2.bottom);
-
-	    properties.guides.push(new Guide(e1.right, e1.bottom, 1, this.getGuideLength(bottom, e1.bottom), 'dist'));
-	    properties.guides.push(new Guide(e1.right, bottom + 10, dist, 1, 'dist'));
+		let guides = [];
+	    guides.push(new Guide(e1.right, e1.bottom, 1, this.getGuideLength(bottom, e1.bottom), 'dist'));
+	    guides.push(new Guide(e1.right, bottom + 10, dist, 1, 'dist'));
 	    const len = this.getGuideLength(bottom, e2.bottom);
-	    properties.guides.push(new Guide(e2.left, e2.bottom, 1, len, 'dist'));
-	    properties.guides.push(new Guide(e2.right, e2.bottom, 1, len, 'dist'));
-	    properties.guides.push(new Guide(e2.right, bottom + 10, dist, 1, 'dist'));
-	    properties.guides.push(new Guide(r.left, r.bottom, 1, this.getGuideLength(bottom, r.bottom), 'dist'));
+	    guides.push(new Guide(e2.left, e2.bottom, 1, len, 'dist'));
+	    guides.push(new Guide(e2.right, e2.bottom, 1, len, 'dist'));
+	    guides.push(new Guide(e2.right, bottom + 10, dist, 1, 'dist'));
+	    guides.push(new Guide(r.left, r.bottom, 1, this.getGuideLength(bottom, r.bottom), 'dist'));
+	    properties.guides.push(...guides);
+	    return guides;
 	}
 	
 	private getGuideLength(max: number, x: number): number {
