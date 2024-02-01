@@ -190,7 +190,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             if (this.snapData) {
                 component.x = this.snapData.left;
                 component.y = this.snapData.top;
-                component.cssPos = this.snapData.cssPosition
+                component.cssPos = this.snapData.cssPosition;
+                this.snapData = null;
             }
             else {
                 component.x = event.pageX;
@@ -271,7 +272,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
     }
 
-    onMouseMove = (event: MouseEvent) => {        
+    onMouseMove = (event: MouseEvent) => {  
         if (event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
@@ -428,15 +429,22 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     contentMessageReceived(id: string, data: { [property: string]: unknown }) {
         if (id === 'snap') {
-            if (this.dragItem && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
-                this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
+            if (this.editorSession.getState().dragging) {
+                this.snapData = data['properties'] as { top: number, left: number, cssPosition: { property: string } };
+                if (this.snapData?.top && this.snapData?.left) {
+                    if (this.dragItem && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
+                        this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
+                    }
+                    if (this.dragItem.contentItemBeingDragged) {
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
+                        this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
+                    }
+                }
             }
-            this.snapData = data['properties'] as {top: number, left: number , cssPosition: { property: string }};
-            if (this.snapData?.top && this.snapData?.left && this.dragItem?.contentItemBeingDragged) {
-                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
-                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
-                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
-                this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
+            else {
+                this.snapData = null;
             }
         }
     }
