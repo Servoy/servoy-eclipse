@@ -3,20 +3,89 @@ import { DOCUMENT } from '@angular/common';
 import { ServoyPublicService, Callback, BaseCustomObject } from '@servoy/public';
 import { createPopper, VirtualElement } from '@popperjs/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { timeout } from 'rxjs';
 
 @Injectable()
 export class PopupMenuService {
 
     menu: HTMLElement = null;
-    subMenuToParentMap: Map<HTMLElement, HTMLElement> = new Map();
+    menuPopper: any = null;
+    menuItemTosubMenuMap: Map<HTMLElement, HTMLElement> = new Map();
+    subMenuToPopperMap: Map<HTMLElement, any> = new Map();
+
+    activeMenu: HTMLElement = null;
+    visibleSubMenuPath: HTMLElement[] = [];
+    hideSubMenusetTimeout: any = null;
+
+    menuZIndex = 15000;
+
+    hoverMenuItemListener = (event: MouseEvent) => {
+        const subMenu = this.menuItemTosubMenuMap.get(event.target as HTMLElement);
+        if(event.type == 'mouseenter') {
+            this.showSubMenu(subMenu);
+        } else if(event.type == 'mouseleave') {
+            this.hideSubMenus();
+        }
+    };
+    hoverMenuListener = (event: MouseEvent) => {
+        if(event.type == 'mouseenter') {
+            this.activeMenu = event.target as HTMLElement;
+        } else if(event.type == 'mouseleave') {
+            if(this.activeMenu !== this.menu) {
+                this.activeMenu = this.menu;
+            }
+            this.hideSubMenus();
+        }
+    }
 
     constructor(private domSanitizer: DomSanitizer, private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document) {
 
     }
 
+    private showSubMenu(subMenu: HTMLElement) {
+        const idx = this.visibleSubMenuPath.indexOf(subMenu);
+        if(idx === -1) {
+            subMenu.style.visibility = 'visible';
+            if(subMenu !== this.menu) {
+                subMenu.style.zIndex = this.menuZIndex + this.visibleSubMenuPath.length + '';
+                if(this.subMenuToPopperMap.has(subMenu)) this.subMenuToPopperMap.get(subMenu).update();
+            }
+            this.visibleSubMenuPath.push(subMenu);
+        }
+    }
+
+    private hideSubMenus() {
+        if(this.hideSubMenusetTimeout) {
+            clearTimeout(this.hideSubMenusetTimeout);
+        }   
+        this.hideSubMenusetTimeout = setTimeout(() => {
+            this.hideSubMenusetTimeout = null;
+            this.hideSubMenusOf(this.activeMenu);
+        }, 200);
+    }
+
+    private hideSubMenusOf(menu: HTMLElement) {
+        const idx = this.visibleSubMenuPath.indexOf(menu);
+        if(idx < this.visibleSubMenuPath.length - 1) {
+            for(let i = idx + 1; i < this.visibleSubMenuPath.length; i++) {
+                this.visibleSubMenuPath[i].style.visibility = 'hidden';
+            }
+            this.visibleSubMenuPath.splice(idx + 1);
+        }        
+    }
+
     public initClosePopupHandler(handler: () => void) {
-        const listener = () => {
-            this.subMenuToParentMap.clear();
+        const listener = (event: MouseEvent) => {
+            // don't dispose if target is the dropdown menu, as we need to keep it open for scrolling
+            if(event.target instanceof HTMLDivElement && event.target.classList.contains('dropdown-menu')) return;
+            this.hideSubMenusOf(this.menu);
+            this.visibleSubMenuPath.splice(0, this.visibleSubMenuPath.length);
+            this.menuItemTosubMenuMap.clear();
+            this.subMenuToPopperMap.forEach((popper) => {
+                popper.destroy();
+            })
+            this.subMenuToPopperMap.clear();
+            if(this.menuPopper) this.menuPopper.destroy();
             this.doc.querySelectorAll('.svy-popup-menu').forEach(item => {
                 item.remove();
                 this.menu = null;
@@ -37,8 +106,8 @@ export class PopupMenuService {
     }
 
     public initMenu(popup: Popup) {
-        this.menu = this.doc.createElement('ul');
-        this.menu.style.zIndex = '15000';
+        this.menu = this.doc.createElement('div');
+        this.menu.style.zIndex = this.menuZIndex + '';
         this.menu.classList.add('dropdown-menu');
         this.menu.classList.add('svy-popup-menu');
         this.menu.style.visibility = 'hidden';
@@ -51,12 +120,14 @@ export class PopupMenuService {
         this.menu.style.display = 'block';
 
         this.doc.body.appendChild(this.menu);
+        this.menu.addEventListener('mouseenter', this.hoverMenuListener);
+        this.menu.addEventListener('mouseleave', this.hoverMenuListener);
     }
 
     public showMenuAt(element: HTMLElement, displayTop: boolean) {
-        this.menu.style.visibility = 'visible';
+        this.showSubMenu(this.menu);
         this.updateMenuHeight(element.getBoundingClientRect().top, element.getBoundingClientRect().height, this.menu.getBoundingClientRect().height);
-        createPopper(element, this.menu, {
+        this.menuPopper = createPopper(element, this.menu, {
 			placement: (displayTop ? 'top' : 'bottom'),
             modifiers: [
                 {
@@ -68,11 +139,10 @@ export class PopupMenuService {
                 },
               ],
         });
-        this.updateSubMenuesPosition();
     }
 
     public showMenu(x: number, y: number, displayTop: boolean) {
-        this.menu.style.visibility = 'visible';
+        this.showSubMenu(this.menu);
         this.updateMenuHeight(y, 0, this.menu.getBoundingClientRect().height);
         const virtualElement: VirtualElement = {
             getBoundingClientRect: () => {
@@ -86,7 +156,7 @@ export class PopupMenuService {
                 } as DOMRect;
             }
         };
-        createPopper(virtualElement, this.menu, {
+        this.menuPopper = createPopper(virtualElement, this.menu, {
 			placement: (displayTop ? 'top' : 'bottom'),
             modifiers: [
                 {
@@ -110,27 +180,34 @@ export class PopupMenuService {
                 },
               ],
         });
-        this.updateSubMenuesPosition();
     }
 
     private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean): void {
         if (generateList) {
-            const ul = this.doc.createElement('ul');
-            ul.classList.add('dropdown-menu');
-            parent.appendChild(ul);
-            this.subMenuToParentMap.set(ul, parent);
-            parent = ul;
+            const subMenu = this.doc.createElement('div');
+            subMenu.classList.add('dropdown-menu');
+            subMenu.classList.add('dropdown-nested-menu');
+            this.doc.body.appendChild(subMenu);
+            this.menuItemTosubMenuMap.set(parent, subMenu);
+            this.subMenuToPopperMap.set(subMenu, createPopper(parent, subMenu, {
+                placement: 'right-start'
+            }));
+            parent.addEventListener('mouseenter', this.hoverMenuItemListener);
+            parent.addEventListener('mouseleave', this.hoverMenuItemListener);
+            subMenu.addEventListener('mouseenter', this.hoverMenuListener);
+            subMenu.addEventListener('mouseleave', this.hoverMenuListener);
+            parent = subMenu;
         }
         items.filter(item => !item || item.visible !== false).forEach((item, index) => {
 
-            const li = this.doc.createElement('LI');
+            const menuItem = this.doc.createElement('div');
             const link = this.doc.createElement('a');
             link.classList.add('dropdown-item');
-            li.appendChild(link);
+            menuItem.appendChild(link);
             if (item) {
                 if (item.enabled === false) link.classList.add('disabled');
                 if (item.callback && item.enabled !== false) {
-                    li.addEventListener('mouseup', (event) => {
+                    menuItem.addEventListener('mouseup', (event) => {
                         if (event.button == 0) this.servoyService.callServiceServerSideApi("window","executeMenuItem",[item.id, index, -1, item.selected, null, item.text]);
                     });
                 }
@@ -177,15 +254,15 @@ export class PopupMenuService {
                 link.appendChild(span);
 
                 if (item.items) {
-                    li.classList.add('dropdown-submenu');
-                    this.generateMenuItems(item.items, li, true);
+                    menuItem.classList.add('dropdown-submenu');
+                    this.generateMenuItems(item.items, menuItem, true);
                 }
             } else {
                 const hr = this.doc.createElement('hr');
                 hr.classList.add('dropdown-divider');
                 link.appendChild(hr);
             }
-            parent.appendChild(li);
+            parent.appendChild(menuItem);
         });
     }
     
@@ -202,14 +279,6 @@ export class PopupMenuService {
 			this.menu.style.overflow = 'auto';
 		}
 	}
-
-    private updateSubMenuesPosition() {
-        this.subMenuToParentMap.forEach((parent, element) => {
-            createPopper(parent, element, {
-                placement: 'right-start'
-            });
-        });
-    }
 }
 
 export class Popup extends BaseCustomObject {

@@ -3,7 +3,7 @@
     position: relative;
 }
 
-.dropdown-submenu>.dropdown-menu {
+.dropdown-menu.dropdown-nested-menu {
     display: block;
     visibility: hidden;
     top: 0;
@@ -12,10 +12,6 @@
     -webkit-border-radius: 0 6px 6px 6px;
     -moz-border-radius: 0 6px 6px;
     border-radius: 0 6px 6px 6px;
-}
-
-.dropdown-submenu:hover>.dropdown-menu {
-    visibility: visible;
 }
 
 .dropdown-submenu>a:after {
