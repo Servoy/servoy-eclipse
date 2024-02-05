@@ -270,7 +270,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		Label versionLabel = new Label(composite, SWT.NONE);
 		versionLabel.setText("Version");
 		versionLabel.setFont(font);
-		versionLabel.setLayoutData(gd);
+		//versionLabel.setLayoutData(gd);
 		new Label(composite, SWT.NONE);
 
 		Image warn = Activator.getDefault().loadImageFromBundle("warning.png");
