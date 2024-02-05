@@ -19,7 +19,7 @@ export class ClientFunctionType implements IType<() => any> {
     }
 
     fromClientToServer(_newClientData: () => any, _oldClientData?: () => any, _propertyContext?: IPropertyContext): [any, () => any] | null {
-       return null; // client functions can't be send back to the server.
+       return [null, _newClientData]; // client functions can't be send back to the server.
     }
 
 }

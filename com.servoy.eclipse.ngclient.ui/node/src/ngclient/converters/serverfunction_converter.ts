@@ -26,13 +26,16 @@ export class ServerFunctionType implements IType<(...args) => unknown> {
                     return this.servoyService.executeInlineScript(serverSentData.formname, 'hash:' + serverSentData.functionhash, args);
                 };
                 func.functionhash = serverSentData.functionhash;
+                func.formname = serverSentData.formname;
                 return func;
             }
         }
         return null;
     }
 
-    fromClientToServer() {
-        return null;
+    fromClientToServer(_newClientData: {formname:string,script:string,functionhash:string} & (() => any) ): 
+        [{formname: string, script: string, functionhash:string}, () => any] | null {
+        if (!_newClientData) return null;
+        return [{formname:_newClientData.formname,script:_newClientData.script,functionhash:_newClientData.functionhash}, _newClientData];
     }
 }
