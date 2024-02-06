@@ -2,11 +2,13 @@ import { Directive, HostListener, Input, OnDestroy, OnInit } from '@angular/core
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
+import { Subscription } from 'rxjs';
 
 @Directive({
     selector: '[resizeKnob]'
 })
-export class ResizeKnobDirective implements OnInit, IContentMessageListener, OnDestroy {
+export class ResizeKnobDirective implements OnInit, OnDestroy {
 
     @Input('resizeKnob') resizeInfo: ResizeInfo;
 
@@ -14,28 +16,31 @@ export class ResizeKnobDirective implements OnInit, IContentMessageListener, OnD
     initialElementInfo: Map<string, ElementInfo>;
     currentElementInfo: Map<string, ElementInfo>;
 
-    contentAreaMouseMove:  (event: MouseEvent) => void;;
+    contentAreaMouseMove:  (event: MouseEvent) => void;
     contentAreaMouseUp: (event: MouseEvent) => void;
     contentAreaMouseLeave: (event: MouseEvent) => void;
     contentAreaKeyDown: (event: KeyboardEvent) => void;
 
     topContentAreaAdjust: number;
     leftContentAreaAdjust: number;
-    snapData: {top: number, left: number, width:number, height: number, cssPosition: { property: string } };
+    snapData: SnapData;
+    subscription: Subscription;
 
-    constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService) {
+    constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService, private guidesService: DynamicGuidesService) {
     }
 
     ngOnInit(): void {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
         this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
         this.leftContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
-        this.editorContentService.addContentMessageListener(this);
+        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
+            this.snap(value);
+        })
     }
 
-    contentMessageReceived(id: string, data: { [key: string]: any; }): void {
-        if (id === 'snap' && this.currentElementInfo) {
-            this.snapData = data['properties'];
+    snap( data: SnapData): void {
+        if (this.currentElementInfo && !this.editorSession.getState().dragging) {
+            this.snapData = data;
             if (this.initialElementInfo.size == 1 && (this.snapData?.width || this.snapData?.height)) {
                 const elementInfo = this.initialElementInfo.values().next().value;
                 elementInfo.element.style.position = 'absolute';
@@ -57,7 +62,7 @@ export class ResizeKnobDirective implements OnInit, IContentMessageListener, OnD
     }
 
     ngOnDestroy(): void {
-        this.editorContentService.removeContentMessageListener(this);
+        this.subscription.unsubscribe();
     }
 
     @HostListener('mousedown', ['$event'])

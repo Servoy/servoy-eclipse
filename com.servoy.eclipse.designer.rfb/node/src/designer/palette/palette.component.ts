@@ -5,13 +5,15 @@ import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 import { WindowRefService } from '@servoy/public';
+import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'designer-palette',
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css']
 })
-export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, IContentMessageListener{
+export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette {
 
     public searchText: string;
     public activeIds: Array<string>;
@@ -20,11 +22,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
     draggedVariant: DraggedVariant = {};
     isDraggedVariant = false;
-    snapData: {top: number, left: number, cssPosition: { property: string }};
+    snapData: SnapData;
+    subscription: Subscription;
 
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, 
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
-        private windowRef: WindowRefService) {
+        private windowRef: WindowRefService,  private guidesService: DynamicGuidesService) {
         
         this.editorSession.setPaletteRefresher(this);
         this.refreshPalette();
@@ -43,7 +46,15 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         });
         this.editorContentService.getBodyElement().addEventListener('mouseup', this.onMouseUp);
         this.editorContentService.getBodyElement().addEventListener('mousemove', this.onMouseMove);
-        this.editorContentService.addContentMessageListener(this);
+
+        //TODO check url
+        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
+            this.snap(value);
+        })
+    }
+
+    ngOnDestroy(): void {
+        if (this.subscription !== undefined) this.subscription.unsubscribe();
     }
 
     openPackageManager() {
@@ -427,25 +438,23 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         });
     }
 
-    contentMessageReceived(id: string, data: { [property: string]: unknown }) {
-        if (id === 'snap') {
-            if (this.editorSession.getState().dragging) {
-                this.snapData = data['properties'] as { top: number, left: number, cssPosition: { property: string } };
-                if (this.snapData?.top && this.snapData?.left) {
-                    if (this.dragItem && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
-                        this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
-                    }
-                    if (this.dragItem.contentItemBeingDragged) {
-                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
-                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
-                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
-                        this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
-                    }
+    snap(data: SnapData) {
+        if (this.editorSession.getState().dragging) {
+            this.snapData = data;
+            if (this.snapData?.top && this.snapData?.left) {
+                if (this.dragItem && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
+                    this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
+                }
+                if (this.dragItem.contentItemBeingDragged) {
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
+                    this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
                 }
             }
-            else {
-                this.snapData = null;
-            }
+        }
+        else {
+            this.snapData = null;
         }
     }
 }

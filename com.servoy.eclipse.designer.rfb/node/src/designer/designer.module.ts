@@ -38,6 +38,7 @@ import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
 import { VariantsContentComponent } from './variantscontent/variantscontent.component';
 import { VariantsPreviewComponent } from './variantspreview/variantspreview.component';
 import { DynamicGuidesComponent } from './dynamicguides/dynamicguides.component';
+import { DynamicGuidesService } from './services/dynamicguides.service';
 
 @NgModule({
   declarations: [
@@ -79,7 +80,7 @@ import { DynamicGuidesComponent } from './dynamicguides/dynamicguides.component'
     NgbModule,
     DragDropModule
   ],
-  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService],
+  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService, DynamicGuidesService],
   bootstrap: [DesignerComponent]
 })
 export class DesignerModule { }

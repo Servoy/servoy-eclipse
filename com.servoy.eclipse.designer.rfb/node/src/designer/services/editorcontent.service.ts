@@ -5,7 +5,6 @@ import { URLParserService } from '../services/urlparser.service';
 
 @Injectable()
 export class EditorContentService {
-
     private frameElement: HTMLIFrameElement;
     private contentAreaElement: HTMLElement;
     private contentElement: HTMLElement;
@@ -55,6 +54,11 @@ export class EditorContentService {
     getContentForm(): HTMLElement {
         this.initIFrame();
         return this.frameElement.contentWindow.document.querySelector('.svy-form');
+    }
+
+    getContentElementsFromPoint(point: { x: number; y: number; }): Element[] {
+        this.initIFrame();
+        return Array.from(this.frameElement.contentWindow.document.elementsFromPoint(point.x, point.y));
     }
 
     getTopPositionIframe(variants?: boolean): number {

@@ -1,17 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 
-import { Component, OnInit, Renderer2, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from 'src/designer/directives/resizeknob.directive';
 import { DesignerUtilsService } from '../services/designerutils.service';
-import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { EditorContentService } from '../services/editorcontent.service';
+import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'dragselection',
   templateUrl: './dragselection.component.html'
 })
-export class DragselectionComponent implements OnInit, ISupportAutoscroll, IContentMessageListener, OnDestroy {
+export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDestroy {
     frameRect: {x?:number; y?:number; top?:number; left?:number};
     leftContentAreaAdjust: number;
     topContentAreaAdjust: number;
@@ -32,9 +34,10 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
     selectionRect = {top: 0, left: 0, width: 0, height: 0};
     mousedownpoint = {x: 0, y: 0};
     mouseOffset = {top: 0, left: 0}; //autoscroll limits will refer to this parameter
-    snapData: {top: number, left: number, cssPosition: { property: string }, guides: [] };
+    snapData: SnapData;
+    subscription: Subscription;
 
-  constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private readonly designerUtilsService: DesignerUtilsService, private editorContentService : EditorContentService) { }
+  constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private guidesService: DynamicGuidesService, private readonly designerUtilsService: DesignerUtilsService, private editorContentService : EditorContentService) { }
 
   ngOnInit(): void {
       this.contentArea = this.editorContentService.getContentArea();
@@ -52,12 +55,14 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
       this.autoscrollOffset.x = 0;
       this.autoscrollOffset.y = 0;
 
-      this.editorContentService.addContentMessageListener(this);
+      this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
+          this.snap(value);
+      })
   }
 
-  ngOnDestroy(): void {
-    this.editorContentService.removeContentMessageListener(this);
-  }
+    ngOnDestroy(): void {
+        this.subscription.unsubscribe();
+    }
 
   private onKeyup(event: KeyboardEvent) {
     //if control is released during drag, the copy is deleted and the original element must be moved
@@ -135,13 +140,18 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
                   const cssPos = this.snapData.cssPosition;
                   changes[id]['cssPos'] = cssPos;
                   const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-                  if (cssPos) {
+                  if (cssPos && this.snapData.guides.length == 1) {
+					  //use the current mouse pos on mouse up for the coordinate which is not 'guided' (if we don't have dist guides)
                       if (!cssPos['left'] && !cssPos['right'] && !cssPos['middleH']) {
                           changes[id]['x'] = event.clientX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftContentAreaAdjust;
                       }
                       if (!cssPos['top'] && !cssPos['bottom'] && !cssPos['middleV']) {
                           changes[id]['y'] = event.clientY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topContentAreaAdjust;
                       }
+                  }
+                  else {
+                    changes[id]['x'] = this.snapData?.left;
+                    changes[id]['y'] = this.snapData?.top;
                   }
               }
 
@@ -283,9 +293,9 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, ICont
         }
     }
 
-    contentMessageReceived(id: string, data: { property: string }) {
-        if (id === 'snap' && this.selectionToDrag) {
-                this.snapData = data['properties'];
+    snap(data: SnapData) {
+        if (this.selectionToDrag) {
+                this.snapData = data;
                 if (this.snapData?.top && this.snapData?.left && this.selectionToDrag.length == 1) {
                     const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[0]);
                     elementInfo.element.style.position = 'absolute';
