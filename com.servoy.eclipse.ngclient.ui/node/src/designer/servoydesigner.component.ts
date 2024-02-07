@@ -3,7 +3,6 @@ import { WindowRefService } from '@servoy/public';
 import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
 import { FormService } from '../ngclient/form.service';
 import { EditorContentService } from './editorcontent.service';
-import { DynamicGuidesService } from './dynamicguides.service';
 import { ServicesService, ServiceProvider } from '../sablo/services.service';
 import { TypesRegistry } from '../sablo/types_registry';
 import { DesignFormComponent } from './designform_component.component';
@@ -37,7 +36,6 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         private formService: FormService,
         private services: ServicesService,
         private editorContentService: EditorContentService,
-        private dynamicGuidesService: DynamicGuidesService,
         private typesRegistry: TypesRegistry,
         protected renderer: Renderer2,
         @Inject(DOCUMENT) private doc: Document) {         }
@@ -100,7 +98,6 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         this.resizeObserver = new ResizeObserver(() => {
             this.windowRef.nativeWindow.parent.postMessage({ id: 'contentSizeChanged' }, '*');
         });
-        this.dynamicGuidesService.setDesignFormComponent(this);
     }
 
     getFormName() {
@@ -139,10 +136,6 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
             this.designFormComponent.formCacheRefresh();
         });
     }
-    
-    getDesignFormComponent() {
-		return this.designFormComponent;
-	}
 
     ngAfterViewInit() {
         this.windowRef.nativeWindow.parent.postMessage({ id: 'contentSizeChanged' }, '*');
@@ -159,5 +152,4 @@ export declare interface IDesignFormComponent {
     updateForm(width: number, height: number): void;
     redrawDecorators(): void;
     contentRefresh() : void;
-    getDesignFormComponent(): DesignFormComponent;
 }

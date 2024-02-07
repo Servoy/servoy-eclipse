@@ -9,7 +9,6 @@ import { DesignFormComponent } from './designform_component.component';
 import { ServoyPublicServiceDesignerImpl } from './servoy_public_designer_impl.service';
 import { ServerDataService } from '../ngclient/services/serverdata.service';
 import { EditorContentService} from './editorcontent.service';
-import { DynamicGuidesService } from './dynamicguides.service';
 import { BSWindowManager } from '../ngclient/services/bootstrap-window/bswindow_manager.service';
 import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 
@@ -23,7 +22,7 @@ import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
     ServoyCoreComponentsModule
   ],
   declarations: [ServoyDesignerComponent, DesignFormComponent ],
-  providers: [EditorContentService, DynamicGuidesService, BSWindowManager, ServerDataService, ServoyPublicServiceDesignerImpl,
+  providers: [EditorContentService, BSWindowManager, ServerDataService, ServoyPublicServiceDesignerImpl,
             { provide: ServoyPublicService, useExisting: ServoyPublicServiceDesignerImpl }],
   schemas: [
               CUSTOM_ELEMENTS_SCHEMA
