@@ -752,7 +752,7 @@ public class DesignerUtil
 					else
 					{
 						newPosition.right = value;
-						if (CSSPositionUtils.isSet(newPosition.left)) newPosition.left = "-1";
+						//if (CSSPositionUtils.isSet(newPosition.left)) newPosition.left = "-1";
 					}
 				}
 //				else if ("left".equals(jsonObject.optString("prop")))
@@ -766,14 +766,13 @@ public class DesignerUtil
 					java.awt.Dimension containerSize = parent.getSize();
 					int r = containerSize.width - CSSPositionUtils.getPixelsValue(right.getCssPosition().left) -
 						CSSPositionUtils.getPixelsValue(right.getCssPosition().width);
-					if (position == null || CSSPositionUtils.isSet(position.right))
-					{
-						newPosition.right = r + "";
-					}
-					else if (isResize)
+					if (isResize)
 					{
 						newPosition.width = containerSize.width - r - CSSPositionUtils.getPixelsValue(position.left) + "";
-						//TODO newPosition.right = r + "";
+					}
+					else
+					{
+						newPosition.right = r + "";
 					}
 				}
 			}
@@ -869,7 +868,7 @@ public class DesignerUtil
 					else
 					{
 						newPosition.bottom = value;
-						if (CSSPositionUtils.isSet(newPosition.top)) newPosition.top = "-1";
+						//if (CSSPositionUtils.isSet(newPosition.top)) newPosition.top = "-1";
 					}
 				}
 //				else if ("top".equals(jsonObject.optString("prop")))
@@ -885,12 +884,14 @@ public class DesignerUtil
 						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height);
 					if (position == null || CSSPositionUtils.isSet(position.bottom))
 					{
-						newPosition.bottom = b + "";
 					}
-					else if (isResize)
+					if (isResize)
 					{
 						newPosition.height = containerSize.height - b - CSSPositionUtils.getPixelsValue(position.top) + "";
-						//TODO newPosition.bottom = b + "";
+					}
+					else
+					{
+						newPosition.bottom = b + "";
 					}
 				}
 			}
@@ -939,45 +940,15 @@ public class DesignerUtil
 		//make sure we have a valid css pos object
 		//in case both properties are set and it's a resize then we keep the width/height and the new property
 		//else we remove the width/height
-		if (CSSPositionUtils.isSet(newPosition.left) && CSSPositionUtils.isSet(newPosition.right) &&
-			CSSPositionUtils.isSet(newPosition.width))
-		{
-			if (isResize)
-			{
-				if (properties.getJSONObject("cssPos").has("right"))
-				{
-					newPosition.left = "-1";
-				}
-				else
-				{
-					newPosition.right = "-1";
-				}
-			}
-			else
-			{
-				newPosition.width = "-1";
-			}
-		}
-
-		if (CSSPositionUtils.isSet(newPosition.top) && CSSPositionUtils.isSet(newPosition.bottom) &&
-			CSSPositionUtils.isSet(newPosition.height))
-		{
-			if (isResize)
-			{
-				if (properties.getJSONObject("cssPos").has("bottom"))
-				{
-					newPosition.top = "-1";
-				}
-				else
-				{
-					newPosition.bottom = "-1";
-				}
-			}
-			else
-			{
-				newPosition.height = "-1";
-			}
-		}
+		/*
+		 * if (CSSPositionUtils.isSet(newPosition.left) && CSSPositionUtils.isSet(newPosition.right) && CSSPositionUtils.isSet(newPosition.width)) { if
+		 * (isResize) { if (properties.getJSONObject("cssPos").has("right")) { newPosition.left = "-1"; } else { newPosition.right = "-1"; } } else {
+		 * newPosition.width = "-1"; } }
+		 *
+		 * if (CSSPositionUtils.isSet(newPosition.top) && CSSPositionUtils.isSet(newPosition.bottom) && CSSPositionUtils.isSet(newPosition.height)) { if
+		 * (isResize) { if (properties.getJSONObject("cssPos").has("bottom")) { newPosition.top = "-1"; } else { newPosition.bottom = "-1"; } } else {
+		 * newPosition.height = "-1"; } }
+		 */
 		return newPosition;
 	}
 
