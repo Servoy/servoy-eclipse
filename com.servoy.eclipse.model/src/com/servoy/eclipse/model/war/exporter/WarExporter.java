@@ -164,11 +164,12 @@ public class WarExporter
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "de.inetsoftware.jlessc_*.jar", //
-		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", "com.fasterxml.jackson.core.jackson-core_*.jar", //
-		"com.fasterxml.jackson.core.jackson-databind_*.jar", "com.fasterxml.jackson.core.jackson-annotations_*.jar", //
-		"wrapped.com.auth0.java-jwt*.jar", "wrapped.org.apache.httpcomponents.core5.httpcore5_*.jar", //
-		"wrapped.org.apache.httpcomponents.core5.httpcore5-h2_*", "wrapped.org.apache.httpcomponents.client5.httpclient5_*" };
+		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
+		"de.inetsoftware.jlessc_*.jar", "org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", //
+		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
+		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
+		"wrapped.org.apache.httpcomponents.core5.httpcore5_*.jar", "wrapped.org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
+		"wrapped.org.apache.httpcomponents.client5.httpclient5_*.jar" };
 
 	private static final Set<String> HTTP_PLUGIN_FILES = Set.of("httpclient5.jar", "httpcore5-h2.jar", "httpcore5.jar");
 

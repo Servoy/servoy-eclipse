@@ -30,7 +30,8 @@ Require-Bundle: servoy_shared,
  wrapped.com.auth0.java-jwt;bundle-version="4.2.2",
  wrapped.org.apache.httpcomponents.client5.httpclient5;bundle-version="5.2.1",
  wrapped.org.apache.httpcomponents.core5.httpcore5;bundle-version="5.2.3",
- wrapped.org.apache.httpcomponents.core5.httpcore5-h2;bundle-version="5.2.3"
+ wrapped.org.apache.httpcomponents.core5.httpcore5-h2;bundle-version="5.2.3",
+ org.apache.commons.commons-compress;bundle-version="1.25.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
