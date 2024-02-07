@@ -270,7 +270,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 								}
 								elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
 							}
-							
+
 							@Override
 							protected Object getDefaultElementProperty(Object id)
 							{
@@ -338,20 +338,20 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 
 			final DataProviderConverter converter = new DataProviderConverter(flattenedSolution, persistContext.getPersist(), baseTable);
-//			DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
-//			showPrefix.setConverter(converter);
-			DataProviderLabelProvider hidePrefix = new DataProviderLabelProvider(true);
-			hidePrefix.setConverter(converter);
+			DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
+			showPrefix.setConverter(converter);
+//			DataProviderLabelProvider hidePrefix = new DataProviderLabelProvider(true);
+//			hidePrefix.setConverter(converter);
 
 			final ITable baseTableFinal = baseTable;
-			final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(
-				new FormContextDelegateLabelProvider(hidePrefix, persistContext.getContext()));
-			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderHidePrefix,
+			final ILabelProvider labelProviderShowPrefix = new SolutionContextDelegateLabelProvider(
+				new FormContextDelegateLabelProvider(showPrefix, persistContext.getContext()));
+			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderShowPrefix,
 				new ICellEditorFactory()
 				{
 					public CellEditor createPropertyEditor(Composite parent)
 					{
-						return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter),
+						return new DataProviderCellEditor(parent, labelProviderShowPrefix, new DataProviderValueEditor(converter),
 							flattenedSolution.getFlattenedForm(persistContext.getPersist()), flattenedSolution, readOnly, options, converter, baseTableFinal);
 					}
 				});
