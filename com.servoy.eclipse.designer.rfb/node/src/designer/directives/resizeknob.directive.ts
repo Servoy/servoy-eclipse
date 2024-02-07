@@ -39,7 +39,7 @@ export class ResizeKnobDirective implements OnInit, OnDestroy {
     }
 
     snap( data: SnapData): void {
-        if (this.currentElementInfo && !this.editorSession.getState().dragging) {
+        if (this.currentElementInfo && this.editorSession.getState().resizing) {
             this.snapData = data;
             if (this.initialElementInfo.size == 1 && (this.snapData?.width || this.snapData?.height)) {
                 const elementInfo = this.initialElementInfo.values().next().value;
@@ -52,8 +52,8 @@ export class ResizeKnobDirective implements OnInit, OnDestroy {
                     this.resizeInfo.node.style.width = elementInfo.element.style.width = this.snapData.width + 'px';
                 }
                 if (this.snapData.height) {
-                    this.resizeInfo.node.style.height = this.snapData.height + 'px';
-                    elementInfo.element.style.top = this.snapData?.top + 'px';
+                    elementInfo.y = this.snapData.top;
+                    elementInfo.element.style.top = this.snapData.top + 'px';
                     this.resizeInfo.node.style.top = this.snapData.top + this.topContentAreaAdjust + 'px';
                     this.resizeInfo.node.style.height = elementInfo.element.style.height = this.snapData.height + 'px';
                 }

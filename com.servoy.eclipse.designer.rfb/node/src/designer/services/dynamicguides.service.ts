@@ -1,4 +1,4 @@
-import { Injectable, OnInit} from '@angular/core';
+import { Injectable } from '@angular/core';
 import { EditorContentService } from './editorcontent.service';
 import { EditorSessionService, IShowDynamicGuidesChangedListener } from './editorsession.service';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
