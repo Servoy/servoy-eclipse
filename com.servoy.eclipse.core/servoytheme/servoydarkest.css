@@ -1,23 +1,26 @@
 * {
-	background-color: #151515;
-	color: #cccccc;
+	background-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
+}
+
+Shell *{
+    color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
 }
 
 Table, Tree {
     swt-lines-visible: false;
-    swt-header-color: #cccccc;
-    swt-header-background-color: #151515;
+    swt-header-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
+    swt-header-background-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
 }
 
 CTabItem{
-    background-color: #151515;
-    color: #cccccc;
+    background-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
+    color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
 }
 
 /* Color in between text editors */
 .MPartSashContainer {
   background-color: #252525;
-  color: #cccccc;
+  color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
 }
 
 .MPartStack {
@@ -26,19 +29,19 @@ CTabItem{
 
 CTabFolder, Shell CTabFolder { 
     border-visible: false;
-    color: #cccccc;
+    color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
     swt-tab-renderer: url('bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.CTabRendering');
-    swt-tab-outline: #151515; /* border color for selected tab */
-    swt-outer-keyline-color: #151515; /* border color for whole tabs container */
-    swt-unselected-tabs-color: #151515 #151515 100% 100%; /* title background for unselected tab */
-    swt-selected-tab-fill: #151515; /* title background for selected tab */
+    swt-tab-outline: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR'; /* border color for selected tab */
+    swt-outer-keyline-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR'; /* border color for whole tabs container */
+    swt-unselected-tabs-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR' '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR' 100% 100%; /* title background for unselected tab */
+    swt-selected-tab-fill: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR'; /* title background for selected tab */
     swt-shadow-visible: false;
-    swt-unselected-hot-tab-color-background: #151515;
-    swt-selected-tab-highlight: #316c9b;
+    swt-unselected-hot-tab-color-background: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
+    swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
 }
 
 CTabFolder.active {
-    swt-selected-tab-highlight: #316c9b;
+    swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
     swt-selected-highlight-top: false;
 }
 
@@ -51,37 +54,41 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
     swt-lines-visible: false;
 }
 
+ExpandBar {
+    color: #330099;
+}
+
 #svyeditor * {
-    background-color: #1F1F1F;
+    background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
 
 #svyeditor Table, #svyeditor Tree {
-    swt-header-background-color: #1F1F1F;
+    swt-header-background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
 
 #svyeditor CTabFolder { 
     border-visible: false;
     swt-tab-renderer: url('bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.CTabRendering');
-    swt-tab-outline: #1F1F1F; /* border color for selected tab */
-    swt-outer-keyline-color: #1F1F1F; /* border color for whole tabs container */
-    swt-unselected-tabs-color: #1F1F1F #1F1F1F 100% 100%; /* title background for unselected tab */
-    swt-selected-tab-fill: #1F1F1F; /* title background for selected tab */
+    swt-tab-outline: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR'; /* border color for selected tab */
+    swt-outer-keyline-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR'; /* border color for whole tabs container */
+    swt-unselected-tabs-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR' '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR' 100% 100%; /* title background for unselected tab */
+    swt-selected-tab-fill: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR'; /* title background for selected tab */
     swt-shadow-visible: false;
-    swt-unselected-hot-tab-color-background: #1F1F1F;
-    swt-selected-tab-highlight: #316c9b;
+    swt-unselected-hot-tab-color-background: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
+    swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
     swt-selected-highlight-top: false;
 }
 
 .Editor *{
-    background-color: #1F1F1F;
+    background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
 
 #svydialog * {
-    background-color: #1F1F1F;
+    background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
 
 #svydialog Table, #svydialog Tree {
-    swt-header-background-color: #1F1F1F;
+    swt-header-background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
 
 svyNatTable {
@@ -89,9 +96,9 @@ svyNatTable {
     text-trim: false;
     text-wrap: true;
     
-    background-color: #151515;;
-    cell-background-color: #151515;;
-    color: #cccccc;
+    background-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
+    cell-background-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
+    color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
     invert-icons: true;
     painter-resolution: false;
 }
@@ -101,11 +108,11 @@ svyNatTable {
 }
 
 .svyNatTable > .delete {
-    cell-background-color: #151515;;
+    cell-background-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
 }
 
 .svyNatTable :select {
-    cell-background-color: #316c9b;
+    cell-background-color: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
 }
 
 .svyNatTable > .COLUMN_HEADER {
@@ -159,4 +166,39 @@ IEclipsePreferences#org-eclipse-ui-editors:com-servoy-eclipse-servoydarktheme{
     'writeOccurrenceIndicationColor=27,98,145'
     'TextOccurrenceIndicationColor=27,98,145'
     'matchingBracketsColor=249,250,244';
+}
+
+ThemesExtension {
+  color-definition: '#com-servoy-themes-darktheme-FOREGROUND_COLOR',
+  '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR',
+  '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR',
+  '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
+}
+
+ColorDefinition#com-servoy-themes-darktheme-FOREGROUND_COLOR {
+  color: #cccccc;
+  category: '#com-servoy-themes-darktheme-themeCategory';
+  label: 'Font Color';
+  description: 'The font color.';
+}
+
+ColorDefinition#com-servoy-themes-darktheme-HIGHLIGHT_COLOR {
+  color: #316c9b;
+  category: '#com-servoy-themes-darktheme-themeCategory';
+  label: 'Highlight Color';
+  description: 'The highlight color.';
+}
+
+ColorDefinition#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR {
+  color: #151515;
+  category: '#com-servoy-themes-darktheme-themeCategory';
+  label: 'Main Background Color';
+  description: 'The main background color.';
+}
+
+ColorDefinition#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR {
+  color: #1F1F1F;
+  category: '#com-servoy-themes-darktheme-themeCategory';
+  label: 'Editor Background Color';
+  description: 'The editing zones background color.';
 }

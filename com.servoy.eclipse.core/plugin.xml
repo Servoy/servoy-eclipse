@@ -664,6 +664,11 @@
          </themeid>
       </stylesheet>
    </extension>
+    <extension point="org.eclipse.ui.themes">
+     <themeElementCategory 
+       id="com.servoy.themes.darktheme.themeCategory"
+       label="Servoy Dark Theme" />
+   </extension>
    <extension
          point="org.apache.tomcat.serviceprovider">
       <serviceprovider
