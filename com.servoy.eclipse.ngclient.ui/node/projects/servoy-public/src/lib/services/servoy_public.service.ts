@@ -107,6 +107,11 @@ export abstract class ServoyPublicService {
      * @internal
      */
     public abstract setFormStyleClasses(styleclasses: {property: string}): void;
+
+    /**
+     * Returns the value of the testing mode flag (servoy.ngclient.testingMode) from the admin page
+     */
+    public abstract isInTestingMode(): boolean;
 }
 
 /** 

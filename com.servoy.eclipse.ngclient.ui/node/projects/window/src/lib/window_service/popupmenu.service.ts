@@ -113,7 +113,7 @@ export class PopupMenuService {
         this.menu.style.visibility = 'hidden';
         if (popup.cssClass) this.menu.classList.add(popup.cssClass);
 
-        this.generateMenuItems(popup.items, this.menu, false);
+        this.generateMenuItems(popup.items, this.menu, false, 'svypopupmenu');
 
         this.menu.style.left = 0 + 'px';
         this.menu.style.top = 0 + 'px';
@@ -182,7 +182,7 @@ export class PopupMenuService {
         });
     }
 
-    private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean): void {
+    private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean, parentId: string): void {
         if (generateList) {
             const subMenu = this.doc.createElement('div');
             subMenu.classList.add('dropdown-menu');
@@ -252,10 +252,14 @@ export class PopupMenuService {
                 const span = this.doc.createElement('span');
                 span.innerHTML= item.text ? this.domSanitizer.sanitize(SecurityContext.HTML, item.text) : 'no text';
                 link.appendChild(span);
+                const menuItemId = parentId + '/' + span.innerHTML;
+                if(this.servoyService.isInTestingMode()) {
+                    menuItem.setAttribute('data-cy', menuItemId);
+                }
 
                 if (item.items) {
                     menuItem.classList.add('dropdown-submenu');
-                    this.generateMenuItems(item.items, menuItem, true);
+                    this.generateMenuItems(item.items, menuItem, true, menuItemId);
                 }
             } else {
                 const hr = this.doc.createElement('hr');

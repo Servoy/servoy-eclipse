@@ -113,4 +113,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         this.formService.setFormStyleClasses(styleclasses);
     }
 
+    public isInTestingMode(): boolean {
+        return this.getUIProperty('servoy.ngclient.testingMode');
+    }
 }
