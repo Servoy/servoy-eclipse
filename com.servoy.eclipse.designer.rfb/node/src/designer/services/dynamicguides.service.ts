@@ -231,7 +231,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				}
 			}
 
-			if (!snapX && !resizing) { //TODO impl, ignore middle for now for resizing
+			if (!snapX && !resizing) {
 				snapX = this.isSnapInterval(uuid, (rect.left + rect.right) / 2, this.middleH);
 				if (snapX) {
 					properties.cssPosition['middleH'] = snapX;
@@ -305,7 +305,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					}
 				}
 			}
-			if (!snapY && !resizing) { //TODO impl, ignore middle for now
+			if (!snapY && !resizing) {
 				snapY = this.isSnapInterval(uuid, (rect.top + rect.bottom) / 2, this.middleV);
 				if (snapY?.uuid) {
 					properties.cssPosition['middleV'] = snapY;
