@@ -499,7 +499,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						JSONArray styles = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
 							.getJSONObject("options").getJSONArray("styles");
 						boolean[] stylesChanged = new boolean[] { false };
-						if (cssLibs.size() + 1 != styles.length())
+						if (cssLibs.size() + 2 != styles.length())
 						{
 							stylesChanged[0] = true;
 						}
@@ -531,6 +531,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							{
 								styles.remove(0);
 							}
+							styles.put("@fortawesome/fontawesome-free/css/all.css");
 							for (CssLib style : cssLibs)
 							{
 								styles.put(style.getUrl().replace("~", "./node_modules/"));

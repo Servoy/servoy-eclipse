@@ -27,6 +27,7 @@
               "src/favicon.ico"
             ],
             "styles": [
+              "@fortawesome/fontawesome-free/css/all.css",
               "src/styles.css"
             ],
             "scripts": [],
