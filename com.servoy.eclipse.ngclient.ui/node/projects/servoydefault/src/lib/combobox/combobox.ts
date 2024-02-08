@@ -141,9 +141,9 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         this.skipFocus = true;
         if (state) {
             setTimeout(() => {
-                const item = this.menuItems.find((element) => element.elementRef.nativeElement.classList.contains('active'));
+                const item = this.menuItems.find((element) => element.nativeElement.classList.contains('active'));
                 if (item) {
-                    item.elementRef.nativeElement.focus();
+                    item.nativeElement.focus();
                 }
             });
         } else {
@@ -208,9 +208,9 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     scrollToFirstMatchingItem() {
         if (this.openState && this.lastSelectValue) {
             for (const item of this.menuItems) {
-                if (item.elementRef.nativeElement.innerText.startsWith(this.lastSelectValue) && !this.firstItemFound) {
+                if (item.nativeElement.innerText.startsWith(this.lastSelectValue) && !this.firstItemFound) {
                     this.firstItemFound = true;
-                    item.elementRef.nativeElement.focus();
+                    item.nativeElement.focus();
                 }
             }
         }
