@@ -42,7 +42,10 @@
      </div>
      <div class="menubar" *ngIf="nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length == 1">
      	<span class="containerAction" (mousedown)="openWizardAction($event, node.autowizardProperties[0])" style="margin-left:3px; margin-right: 10px;background-color: #E9720B;background-image: url('designer/assets/images/configure_in_menu.png')" title="Configure {{node.autowizardProperties[0]}}"></span>
-     </div>   
+     </div>  
+     <div class="menubar" style="top: -19px; float: left;" *ngIf="nodes.length == 1 && node.isFCorLFC">
+     	<span class="containerAction" (mousedown)="updateMoveFCorLFC()" style="margin-left: 3px; margin-right: 10px; background-color: #0099FF; background-image: url('designer/assets/images/move_component.png')" title="Move component"></span>
+     </div> 
      <div class="menubar" style="margin-top: -13px;" *ngIf="nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length > 1" [positionMenu]="node">
         <span #menuOpen (mouseenter)="onEnter($event)">
         	<i class="fas fa-gear fa-sm" style="color: #E9720B;"></i>

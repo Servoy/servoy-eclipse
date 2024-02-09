@@ -82,7 +82,10 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
   }
   
   onMouseDown(event: MouseEvent) {
-      this.dragNode = this.designerUtilsService.getNode(event);
+	  this.dragNode = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC();
+      if (this.dragNode === null) {
+		  this.dragNode = this.designerUtilsService.getNode(event);
+	  }
       if (this.dragNode && this.dragNode.parentElement.closest('.svy-responsivecontainer')){
          // we are inside responsive container, let dragselection-responsive handle this
          this.dragNode = null;

@@ -269,6 +269,16 @@ export class DesignerUtilsService {
         });
         return found;
     }
+    
+    getNodeBasedOnSelectionFCorLFC() {
+		const elements = this.editorContentService.getAllContentElements();
+		const selectedNodeID = this.editorSession.getSelection().length === 1 && this.editorSession.getSelection()[0] || null;
+		if (elements.length && selectedNodeID) {
+			const node = elements.filter(item => item.getAttribute('svy-id') === selectedNodeID && (item.classList.contains('svy-formcomponent') || item.classList.contains('svy-listformcomponent')));
+			return node.length === 1 ? node[0] : null;
+		}
+		return null;
+	}
 
     isTopContainer(layoutName: string) {
         const packages = this.editorSession.getState().packages;

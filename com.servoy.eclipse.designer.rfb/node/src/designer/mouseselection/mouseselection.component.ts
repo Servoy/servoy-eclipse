@@ -22,6 +22,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     leftAdjust: number;
     lassostarted = false;
     lastTimestamp: number;
+    moveFCorLFC = false;
 
     mousedownpoint: Point;
     fieldLocation: Point;
@@ -140,7 +141,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
                             containerName: layoutName,
-                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                            isFCorLFC: this.isSelectionFCorLFC()
                         })
                     }
                 });
@@ -162,7 +164,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     private onMouseDown(event: MouseEvent) {
         this.fieldLocation = { x: event.pageX, y: event.pageY };
         if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
-        const found = this.designerUtilsService.getNode(event);
+        let found;
+        if (this.moveFCorLFC) {
+			found = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC();
+			this.moveFCorLFC = false;
+		} else {
+			found = this.designerUtilsService.getNode(event);
+		}
         if (found) {
             if (this.editorSession.getSelection().indexOf(found.getAttribute('svy-id')) !== -1) {
                 return;  //already selected
@@ -237,7 +245,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
                             containerName: layoutName,
-                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                            isFCorLFC: this.isSelectionFCorLFC()
                         };
                         newNodes.push(newNode);
                         newSelection.push(node.getAttribute('svy-id'))
@@ -294,7 +303,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
                         containerName: layoutName,
-                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                        isFCorLFC: this.isSelectionFCorLFC()
                     };
                     if (event.ctrlKey || event.metaKey) {
                         const index = selection.indexOf(id);
@@ -350,7 +360,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                     isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                                     maxLevelDesign: node.classList.contains('maxLevelDesign'),
                                     containerName: layoutName,
-                                    autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                                    autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                                    isFCorLFC: this.isSelectionFCorLFC()
                                 };
                                 if (!selection.includes(id)) {
                                     this.nodes.push(newNode);
@@ -403,6 +414,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             }
         }
     }
+    
+    public updateMoveFCorLFC() {
+		this.moveFCorLFC = true;
+	}
+    
+    private isSelectionFCorLFC() {
+		return this.designerUtilsService.getNodeBasedOnSelectionFCorLFC() != null;
+	}
 
     private onMouseMove(event: MouseEvent) {
         if (this.editorSession.getState().dragging) return;
@@ -519,6 +538,7 @@ export class SelectionNode {
     maxLevelDesign: boolean;
     containerName: string;
     autowizardProperties?: string[];
+    isFCorLFC: boolean;
 }
 export class Point {
     x: number;

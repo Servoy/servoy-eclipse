@@ -48,7 +48,10 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             // do not allow drag of multiple elements in responsive design
             return;
         }
-        this.dragNode = this.designerUtilsService.getNode(event);
+        this.dragNode = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC();
+      	if (this.dragNode === null) {
+			  this.dragNode = this.designerUtilsService.getNode(event);
+		}
         if (!this.dragNode) return;
 
         // do not allow moving elements inside css position container in responsive layout
