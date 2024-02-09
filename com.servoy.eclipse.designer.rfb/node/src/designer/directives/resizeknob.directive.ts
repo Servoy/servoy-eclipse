@@ -155,7 +155,7 @@ export class ResizeKnobDirective implements OnInit, OnDestroy {
     }
 
     private resizeSelection(event: MouseEvent) {
-        if(this.currentElementInfo && !this.snapData) {
+        if(this.currentElementInfo && !this.snapData?.width && !this.snapData?.height) {
             let deltaX = event.clientX - this.lastresizeStartPosition.x;
             let deltaY = event.clientY - this.lastresizeStartPosition.y;
 
