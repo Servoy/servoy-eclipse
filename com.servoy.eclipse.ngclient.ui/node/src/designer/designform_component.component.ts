@@ -54,7 +54,7 @@ import { TypesRegistry} from '../sablo/types_registry';
           </div>
       </ng-template>
       <ng-template  #cssPositionContainer  let-state="state" >
-          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
             <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
             </div>
@@ -502,7 +502,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     getNGClass(item: StructureCache): { [klass: string]: any } {
         const ngclass = {};
-        ngclass[item.attributes.designclass] = this.showWireframe;
+        if (!item.cssPositionContainer || item.getDepth() != 0) {
+        	ngclass[item.attributes.designclass] = this.showWireframe;
+        }
         ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
         const children = item.items.length;
         if (children > 0 && children < 10) {
