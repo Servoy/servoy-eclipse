@@ -23,12 +23,12 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.EclipseCSSThemeListener;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.IPersistLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SupportNameLabelProvider;
@@ -158,7 +158,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 					IPersist currentPersist = ((PersistContext)element).getPersist();
 					if (container == currentPersist)
 					{
-						if (EclipseCSSThemeListener.isDarkThemeSelected(false))
+						if (UIUtils.isDarkThemeSelected(false))
 						{
 							return Display.getCurrent().getSystemColor(SWT.COLOR_CYAN);
 						}
@@ -166,7 +166,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 					}
 					if (container.getParent() == currentPersist.getParent())
 					{
-						if (EclipseCSSThemeListener.isDarkThemeSelected(false))
+						if (UIUtils.isDarkThemeSelected(false))
 						{
 							return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
 						}
@@ -188,7 +188,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 					}
 					if (!isShowedContainer)
 					{
-						if (EclipseCSSThemeListener.isDarkThemeSelected(false))
+						if (UIUtils.isDarkThemeSelected(false))
 						{
 							return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
 						}

@@ -59,6 +59,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ChangeParentCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
@@ -66,7 +67,6 @@ import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
-import com.servoy.eclipse.ui.EclipseCSSThemeListener;
 import com.servoy.eclipse.ui.labelproviders.DelegatingDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -370,7 +370,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			getSite().registerContextMenu(CONTEXT_MENU_ID, menuManager, this);
 		}
 
-		if (EclipseCSSThemeListener.isDarkThemeSelected(true))
+		if (UIUtils.isDarkThemeSelected(true))
 		{
 			getTreeViewer().getTree().addListener(SWT.EraseItem, event -> {
 

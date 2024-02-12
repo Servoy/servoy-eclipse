@@ -54,7 +54,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.console.TextConsoleViewer;
 
-import com.servoy.eclipse.ui.EclipseCSSThemeListener;
+import com.servoy.eclipse.core.util.UIUtils;
 
 public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptConsoleViewer
 {
@@ -292,7 +292,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 				for (Object element : viewerList)
 				{
 					viewer = (ScriptConsoleViewer)element;
-					boolean isDarkTheme = EclipseCSSThemeListener.isDarkThemeSelected(false);
+					boolean isDarkTheme = UIUtils.isDarkThemeSelected(false);
 					if (isDarkTheme)
 					{
 						if (isInput == true)

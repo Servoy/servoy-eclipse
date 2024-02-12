@@ -50,8 +50,6 @@ import com.servoy.eclipse.ui.tweaks.IconPreferences;
  */
 public class EclipseCSSThemeListener
 {
-	private static final String ECLIPSE_DARK_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_dark";
-	private static final String SERVOY_DARK_THEME_ID = "com.servoy.eclipse.core.servoydarktheme";
 	private static final String ECLIPSE_CSS_SWT_THEME = "org.eclipse.e4.ui.css.swt.theme";
 	private static final String SCRIPT_EDITOR_PLUGIN_ID = "org.eclipse.dltk.javascript.ui";
 	private static final String CSS_EDITOR_PLUGIN_ID = "org.eclipse.wst.css.ui";
@@ -92,14 +90,14 @@ public class EclipseCSSThemeListener
 					if (it != null)
 					{
 						String label = it.getLabel();
-						if (isDarkTheme(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
-							!isDarkTheme(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
+						if (UIUtils.isDarkTheme(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
+							!UIUtils.isDarkTheme(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
 						{
-							IconPreferences.getInstance().setUseDarkThemeIcons(isDarkTheme(it.getId()));
+							IconPreferences.getInstance().setUseDarkThemeIcons(UIUtils.isDarkTheme(it.getId()));
 							IconPreferences.getInstance().save(true);
 							ServoyModelManager.getServoyModelManager().getServoyModel()
 								.addDoneListener(() -> {
-									if (checkOverwriteThemePreferences(isDarkTheme(it.getId())))
+									if (checkOverwriteThemePreferences(UIUtils.isDarkTheme(it.getId())))
 									{
 										MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(UIUtils.getActiveShell(),
 											label + " theme was detected", null,
@@ -160,9 +158,9 @@ public class EclipseCSSThemeListener
 			{
 				String themeid = (String)event.getNewValue();
 				IconPreferences iconPreferences = IconPreferences.getInstance();
-				iconPreferences.setUseDarkThemeIcons(isDarkTheme(themeid));
+				iconPreferences.setUseDarkThemeIcons(UIUtils.isDarkTheme(themeid));
 				iconPreferences.save();
-				if (checkOverwriteThemePreferences(isDarkTheme(themeid)))
+				if (checkOverwriteThemePreferences(UIUtils.isDarkTheme(themeid)))
 				{
 					Display.getDefault().asyncExec(() -> {
 						if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(),
@@ -189,7 +187,7 @@ public class EclipseCSSThemeListener
 			IPreferencesService preferencesService = Platform.getPreferencesService();
 			IExportedPreferences prefs = preferencesService
 				.readPreferences(is);
-			if (isDarkTheme(themeID))
+			if (UIUtils.isDarkTheme(themeID))
 			{
 				IStatus status = preferencesService.applyPreferences(prefs);
 				if (!status.isOK())
@@ -270,41 +268,5 @@ public class EclipseCSSThemeListener
 		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).removePreferenceChangeListener(themeChangedListener);
 	}
 
-	public static boolean isDarkThemeSelected(boolean eclipseDarkTheme)
-	{
-		boolean IS_DARK_THEME = false;
-		BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
-		ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
-		if (serviceReference != null)
-		{
-			IThemeManager manager = ctx.getService(serviceReference);
-			if (manager != null)
-			{
-				Display d = Display.getDefault();
-				IThemeEngine engine = manager.getEngineForDisplay(d);
-				if (engine != null)
-				{
-					ITheme it = engine.getActiveTheme();
-					if (it != null)
-					{
-						if (eclipseDarkTheme && ECLIPSE_DARK_THEME_ID.equals(it.getId()))
-						{
-							IS_DARK_THEME = true;
-						}
-						if (!eclipseDarkTheme && isDarkTheme(it.getId()))
-						{
-							IS_DARK_THEME = true;
-						}
-					}
-				}
-			}
-		}
-		return IS_DARK_THEME;
-	}
-
-	public static boolean isDarkTheme(String id)
-	{
-		return ECLIPSE_DARK_THEME_ID.equals(id) || SERVOY_DARK_THEME_ID.equals(id);
-	}
 
 }

@@ -195,7 +195,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.EclipseCSSThemeListener;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.actions.PublishToCloudAction;
@@ -800,7 +799,7 @@ public class SolutionExplorerView extends ViewPart
 							IPersist persist = activeEditorPersistListener.getActiveEditorPersist();
 							if (persist != null && ((IPersist)real).getUUID().equals(persist.getUUID()))
 							{
-								if (EclipseCSSThemeListener.isDarkThemeSelected(false))
+								if (UIUtils.isDarkThemeSelected(false))
 								{
 									return DARK_MODE_HIGHLIGHT;
 								}

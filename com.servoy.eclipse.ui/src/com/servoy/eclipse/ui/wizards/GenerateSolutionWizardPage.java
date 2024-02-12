@@ -35,12 +35,11 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ExpandEvent;
-import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
@@ -51,22 +50,24 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.events.IExpansionListener;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -83,10 +84,9 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 
 	private CheckboxTableViewer checkboxTableViewer;
 	private boolean allChecked;
-	private ExpandItem collapsableItem;
 	private Composite topLevel;
 	private SolutionAdvancedSettingsComposite expandComposite;
-	private ExpandBar expandBar;
+	private ExpandableComposite excomposite;
 
 	private Boolean addDefaultTheme;
 	private int[] solutionTypeComboValues;
@@ -164,39 +164,56 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		}
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
 		gridData.minimumWidth = 650;//otherwise the resources project text is not visible
-		expandBar.setLayoutData(gridData);
+		excomposite.setLayoutData(gridData);
 	}
 
 
 	public void addAdvancedSettings(boolean isModuleWizard)
 	{
-		expandBar = new ExpandBar(topLevel, SWT.NONE);
-		expandBar.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-		expandBar.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE));
-		expandComposite = new SolutionAdvancedSettingsComposite(expandBar, isModuleWizard);
-		expandComposite.setBackground(topLevel.getBackground());
-		collapsableItem = new ExpandItem(expandBar, SWT.NONE, 0);
-		collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-		collapsableItem.setControl(expandComposite);
-		expandBar.addExpandListener(new ExpandListener()
+		excomposite = new ExpandableComposite(topLevel, SWT.NONE,
+			ExpandableComposite.TWISTIE);
+		excomposite.setExpanded(getWizard().getDialogSettings().getBoolean(wizard.getSettingsPrefix() + IS_ADVANCED_USER_SETTING));
+		excomposite.setText(excomposite.isExpanded() ? "Hide advanced solution settings" : "Show advanced solution settings");
+		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
-			public void itemExpanded(ExpandEvent e)
+			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+				.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
+			if (darkFGColor != null)
 			{
-				collapsableItem.setText("Hide advanced solution settings");
-				collapsableItem.setImage(uiActivator.loadImageFromBundle("collapse_tree_.png"));
-				resizeDialog();
+				excomposite.setTitleBarForeground(darkFGColor);
+				excomposite.setActiveToggleColor(darkFGColor);
+			}
+		}
+
+		expandComposite = new SolutionAdvancedSettingsComposite(excomposite, isModuleWizard);
+		expandComposite.setBackground(topLevel.getBackground());
+
+		ImageHyperlink image = new ImageHyperlink(excomposite, SWT.None);
+		image.setImage(uiActivator.loadImageFromBundle(excomposite.isExpanded() ? "collapse_tree.png" : "expandall.png"));
+		excomposite.setClient(expandComposite);
+		excomposite.setTextClient(image);
+
+		excomposite.addExpansionListener(new IExpansionListener()
+		{
+
+			@Override
+			public void expansionStateChanging(ExpansionEvent e)
+			{
+
 			}
 
-			public void itemCollapsed(ExpandEvent e)
+			@Override
+			public void expansionStateChanged(ExpansionEvent e)
 			{
-				collapsableItem.setText("Show advanced solution settings");
-				collapsableItem.setImage(uiActivator.loadImageFromBundle("expandall_.png"));
+				excomposite.setText(excomposite.isExpanded() ? "Hide advanced solution settings" : "Show advanced solution settings");
+				image.setImage(uiActivator.loadImageFromBundle(excomposite.isExpanded() ? "collapse_tree.png" : "expandall.png"));
 				resizeDialog();
+
 			}
+
 		});
 
-		collapsableItem.setExpanded(getWizard().getDialogSettings().getBoolean(wizard.getSettingsPrefix() + IS_ADVANCED_USER_SETTING));
-		if (collapsableItem.getExpanded())
+		if (excomposite.isExpanded())
 		{
 			Shell shell = getWizard().getContainer().getShell();
 			shell.getDisplay().asyncExec(() -> {
@@ -207,8 +224,6 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 				shell.setBounds(bounds);
 			});
 		}
-		collapsableItem.setText(collapsableItem.getExpanded() ? "Hide advanced solution settings" : "Show advanced solution settings");
-		collapsableItem.setImage(uiActivator.loadImageFromBundle(collapsableItem.getExpanded() ? "collapse_tree.png" : "expandall.png"));
 
 	}
 
@@ -411,7 +426,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 
 	public boolean isAdvancedUser()
 	{
-		return collapsableItem.getExpanded();
+		return excomposite.isExpanded();
 	}
 
 	public String getSelectedSolutions()
@@ -425,7 +440,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		shell.getDisplay().asyncExec(() -> {
 
 			Point preferredSize = shell.computeSize(shell.getSize().x, SWT.DEFAULT, true);
-			if (((WizardDialog)getWizard().getContainer()).getTray() != null && !collapsableItem.getExpanded())
+			if (((WizardDialog)getWizard().getContainer()).getTray() != null && !excomposite.isExpanded())
 			{
 				//if the help page is visible, we don't shrink
 				return;
@@ -433,7 +448,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 
 			Rectangle bounds = shell.getBounds();
 			bounds.height = preferredSize.y;
-			if (collapsableItem.getExpanded())
+			if (excomposite.isExpanded())
 			{
 				//when it is expanded we center the dialog, because sometimes it shows right on top
 				Rectangle parentSize = shell.getParent().getBounds();

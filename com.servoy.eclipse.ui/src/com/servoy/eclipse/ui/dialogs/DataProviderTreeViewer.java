@@ -49,10 +49,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.EclipseCSSThemeListener;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
@@ -1043,7 +1043,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					((TreeViewer)event.getSource()).update(previousElems.toArray(), null);
 				}
 
-				if (EclipseCSSThemeListener.isDarkThemeSelected(true))
+				if (UIUtils.isDarkThemeSelected(true))
 				{
 					((TreeViewer)event.getSource()).getTree().addListener(SWT.EraseItem, evt -> {
 						evt.detail &= ~SWT.HOT;

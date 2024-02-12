@@ -63,8 +63,8 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.ui.EclipseCSSThemeListener;
 import com.servoy.j2db.ClientState;
 import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.IRootObject;
@@ -290,7 +290,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 					else selectedClient = null;
 
 					text.setEditable(selectedClient != null);
-					if (!EclipseCSSThemeListener.isDarkThemeSelected(false))
+					if (!UIUtils.isDarkThemeSelected(false))
 					{
 						if (selectedClient != null)
 						{
