@@ -137,7 +137,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
               const id = (event.ctrlKey || event.metaKey) ? i++ : nodeId;
               changes[id] = {
                   x: elementInfo.x,
-                  y: elementInfo.y
+                  y: elementInfo.y,
+                  move: true
               };
               if (this.snapData && this.selectionToDrag.length == 1) {
                   const cssPos = this.snapData.cssPosition;
@@ -285,13 +286,13 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             elementInfo.y = elementInfo.y + changeY;
             if (minY != undefined && elementInfo.y < minY) elementInfo.y = minY;
             elementInfo.element.style.position = 'absolute';
-            elementInfo.element.style.top = (parseInt(elementInfo.element.style.top.replace('px', '')) || 0)  + changeY + 'px';
-            elementInfo.element.style.left = (parseInt(elementInfo.element.style.left.replace('px', ''))|| 0)  + changeX + 'px';
+            elementInfo.element.style.top = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.top, '', 'y').replace('px', '')) || 0)  + changeY + 'px';
+            elementInfo.element.style.left = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.left, '', 'x').replace('px', ''))|| 0)  + changeX + 'px';
             if (elementInfo.element.style.right.length) {
-				elementInfo.element.style.right = (parseInt(elementInfo.element.style.right.replace('px', ''))|| 0)  - changeX + 'px';
+				elementInfo.element.style.right = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.right, elementInfo.element.style.width, 'x').replace('px', ''))|| 0)  - changeX + 'px';
 			}
 			if (elementInfo.element.style.bottom.length) {
-				elementInfo.element.style.bottom = (parseInt(elementInfo.element.style.bottom.replace('px', ''))|| 0)  - changeY + 'px';
+				elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, elementInfo.element.style.height, 'y').replace('px', ''))|| 0)  - changeY + 'px';
 			}
         }
     }

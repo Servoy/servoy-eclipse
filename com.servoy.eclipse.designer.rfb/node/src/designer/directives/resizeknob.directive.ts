@@ -211,7 +211,8 @@ export class ResizeKnobDirective implements OnInit, OnDestroy {
                         x: elementInfo.x,
                         y: elementInfo.y,
                         width: elementInfo.width,
-                        height: elementInfo.height
+                        height: elementInfo.height,
+                        move: false
                     }
                 }
             }
@@ -225,7 +226,7 @@ export class ElementInfo {
     x:number;
     y:number;
     width:number;
-    height:number
+    height:number;
 
     constructor(public element: HTMLElement) {
         const elementRect = element.getBoundingClientRect();

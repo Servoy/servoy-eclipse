@@ -95,6 +95,12 @@ export class KeyboardLayoutDirective {
 							if (elementInfo.x + changeX > -1) elementInfo.x = elementInfo.x + changeX;
 							element.style.left = elementInfo.x + 'px';
 							element.style.top = elementInfo.y + 'px';
+							if (elementInfo.element.style.right.length) {
+								elementInfo.element.style.right = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.right, elementInfo.element.style.width, 'x').replace('px', ''))|| 0)  - changeX + 'px';
+							}
+							if (elementInfo.element.style.bottom.length) {
+								elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, elementInfo.element.style.height, 'y').replace('px', ''))|| 0)  - changeY + 'px';
+							}
 						}
                     }
                     else if (!isResize) {
@@ -135,7 +141,8 @@ export class KeyboardLayoutDirective {
                         x : elementInfo.x,
                         y : elementInfo.y,
                         width : elementInfo.width,
-                        height : elementInfo.height
+                        height : elementInfo.height,
+                        move: !event.shiftKey
                     }
                 } else {
                     // var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
