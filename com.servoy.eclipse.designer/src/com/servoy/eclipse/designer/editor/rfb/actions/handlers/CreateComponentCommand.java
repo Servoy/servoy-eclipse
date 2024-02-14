@@ -191,11 +191,10 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				arrayIndex = 0;
 			}
 
-			// webObject is different from webComponent in case of a nested custom type
-			IWebComponent webComponent = webObject.getAncestor(IWebComponent.class);
-			if (webComponent != null)
+			if (webObject instanceof IBasicWebObject)
 			{
-				if (webObject instanceof IBasicWebObject)
+				IWebComponent webComponent = webObject.getAncestor(IWebComponent.class);
+				if (webComponent != null)
 				{
 					WebObjectSpecification componentSpec = WebComponentSpecProvider.getSpecProviderState()
 						.getWebObjectSpecification(webComponent.getTypeName());
@@ -210,21 +209,21 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					AddContainerCommand.showDataproviderDialog(bean.getPropertyDescription().getProperties(), bean, editorPart);
 					return new IPersist[] { bean };
 				}
-				else if (webObject instanceof ISupportChilds && args.getType().equals("tab"))
+			}
+			else if (webObject instanceof ISupportChilds && args.getType().equals("tab"))
+			{
+				ISupportChilds iSupportChilds = (ISupportChilds)webObject;
+				iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(iSupportChilds, editorPart.getForm()));
+				Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
+				String tabName = "tab_" + id.incrementAndGet();
+				while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
 				{
-					ISupportChilds iSupportChilds = (ISupportChilds)webObject;
-					iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(iSupportChilds, editorPart.getForm()));
-					Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
-					String tabName = "tab_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
-					{
-						tabName = "tab_" + id.incrementAndGet();
-					}
-					newTab.setText(tabName);
-					newTab.setLocation(args.getLocation());
-					iSupportChilds.addChild(newTab);
-					return new IPersist[] { newTab };
+					tabName = "tab_" + id.incrementAndGet();
 				}
+				newTab.setText(tabName);
+				newTab.setLocation(args.getLocation());
+				iSupportChilds.addChild(newTab);
+				return new IPersist[] { newTab };
 			}
 		}
 		else if (args.getName() != null || args.getUuid() != null)
