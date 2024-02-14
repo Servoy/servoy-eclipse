@@ -13,6 +13,7 @@
     "build_debug": "ng build ngclient2 --watch",
     "build_debug_nowatch": "ng build ngclient2 --watch=false",
     "build_lib_debug": "ng build @servoy/public --watch",
+    "build_default_debug": "ng build @servoy/servoydefault --watch",
     "test_public": "ng test @servoy/public --watch --browsers Chrome",
     "test_default": "ng test @servoy/servoydefault --watch --browsers Chrome",
     "test_dialogs": "ng test @servoy/dialogs --watch --browsers Chrome",
