@@ -760,6 +760,9 @@ class Cell {
         public readonly handlers: any, public readonly rowId: any, public readonly rowIndex: number, relativeRowIndex: number) {
         this.name = state.name;
         this.model = state.modelViewport ? state.modelViewport[relativeRowIndex] : state.model; // modelViewport can be undefined in form editor/designer - that sends stuff as if it is a simple form component, not a list form component
+        if (!this.model){
+          this.model = {};  
+        } 
     }
 
 }
