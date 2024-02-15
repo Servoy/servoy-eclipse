@@ -81,7 +81,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	public static String NGDESKTOP_VERSION = "2021.09.0";
 	public static final String NGDESKTOP_APP_NAME = "servoyngdesktop";
-	public static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
+	public static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "https://download.servoy.com/ngdesktop/");
 	protected static String PLATFORM = Utils.isAppleMacOS() ? "-mac" : (Utils.isWindowsOS()) ? "-win" : "-linux";
 	protected static String LOCAL_PATH = Activator.getDefault().getStateLocation().toOSString() + File.separator;
 	protected static String NGDESKTOP_PREFIX = NGDESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
