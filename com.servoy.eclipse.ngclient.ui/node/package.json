@@ -20,6 +20,7 @@
     "test_edge": "ng test --watch --browsers Edge",
     "test_edge_nowatch": "ng test --watch=false --browsers Edge",
     "test_default_edge_nowatch": "ng test @servoy/servoydefault --watch=false --browsers Edge",
+    "test_default_edge": "ng test @servoy/servoydefault --watch --browsers Edge",
     "test_public_edge": "ng test @servoy/public --watch --browsers Edge",
     "test_public_edge_nowatch": "ng test @servoy/public --watch=false --browsers Edge",
     "test_headless": "ng test --browsers headlessChrome --watch=false",
