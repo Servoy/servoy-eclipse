@@ -1,13 +1,13 @@
 export interface IDeferred<T> {
     readonly promise: Promise<T>;
-    reject( reason );
-    resolve( value: T );
+    reject( reason: unknown ): void;
+    resolve( value: T ): void;
 }
 
 export class Deferred <T> implements IDeferred<T> {
     public readonly promise: Promise<T>;
-    private _resolve: ( value ) => void;
-    private _reject: ( reason ) => void;
+    private _resolve: ( value: T ) => void;
+    private _reject: ( reason: unknown ) => void;
     constructor() {
         this.promise = new Promise<T>(( resolve, reject ) => {
             this._reject = reject;
@@ -15,7 +15,7 @@ export class Deferred <T> implements IDeferred<T> {
         } );
     }
 
-    public reject( reason ) {
+    public reject( reason: unknown ) {
         this._reject( reason );
     }
 

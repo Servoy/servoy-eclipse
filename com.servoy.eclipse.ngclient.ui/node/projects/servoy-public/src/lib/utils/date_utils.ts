@@ -13,7 +13,7 @@ export  const getFirstDayOfWeek = (locale: string): number  => {
     if (fixedFirstDayOfWeek !== null) return fixedFirstDayOfWeek;
     
     // from http://www.unicode.org/cldr/data/common/supplemental/supplementalData.xml:supplementalData/weekData/firstDay
-    const firstDay = {/*default is 1=Monday*/
+    const firstDay: {[property:string]: number} = {/*default is 1=Monday*/
         bd: 5,
         mv: 5,
         ae: 6,

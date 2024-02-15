@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-function getWindow(): Window {
+const getWindow = () => {
     return window;
 }
 
