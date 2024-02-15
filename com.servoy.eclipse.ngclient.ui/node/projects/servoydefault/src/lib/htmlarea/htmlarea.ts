@@ -114,7 +114,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
                         break;
                     case 'scrollbars':
                         if (change.currentValue) {
-                            const element = this.getNativeChild().textArea;
+                            const element = this.getNativeChild();
                             PropertyUtils.setScrollbars(element, this.renderer, change.currentValue);
                         }
                         break;
