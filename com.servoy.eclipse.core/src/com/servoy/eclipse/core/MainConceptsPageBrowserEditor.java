@@ -37,7 +37,6 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.part.EditorPart;
 
-import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Settings;
 
 /**
@@ -107,7 +106,7 @@ public class MainConceptsPageBrowserEditor extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 		browser = new Browser(parent, SWT.NONE);
-		String url = MAINCONCEPTSPAGE_URL + "?dl=" + (ApplicationServerRegistry.get().hasDeveloperLicense());
+		String url = MAINCONCEPTSPAGE_URL + "?dl=true";
 		String showOnStartup = Settings.getInstance().getProperty("servoy.developer.showStartPage");
 		if (showOnStartup == null || showOnStartup.equals("true"))
 		{

@@ -346,8 +346,7 @@ public class Activator extends Plugin
 					}
 				});
 
-				if (!ss.getApplicationServer().hasDeveloperLicense() ||
-					Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
+				if (Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 				{
 					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
 					{

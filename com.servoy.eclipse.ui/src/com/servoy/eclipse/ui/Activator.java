@@ -337,7 +337,8 @@ public class Activator extends AbstractUIPlugin
 		ServoyModelManager.getServoyModelManager().getServoyModel()
 			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> {
 				EclipseCSSThemeListener.getInstance().initThemeListener();
-				if (!PlatformUI.getWorkbench().isClosing()) {
+				if (!PlatformUI.getWorkbench().isClosing())
+				{
 					showLoginAndStart();
 				}
 			}));
@@ -412,8 +413,7 @@ public class Activator extends AbstractUIPlugin
 					}
 				}
 				// only show if first login or is not disabled from preferences
-				if ((username == null && !ApplicationServerRegistry.get().hasDeveloperLicense()) ||
-					Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
+				if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
 				{
 					BrowserDialog dialog = new BrowserDialog(activeShell,
 						TUTORIALS_URL + loginToken, true, true);
