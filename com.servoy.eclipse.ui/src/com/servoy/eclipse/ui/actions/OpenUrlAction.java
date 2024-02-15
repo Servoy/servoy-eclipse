@@ -45,11 +45,11 @@ public class OpenUrlAction implements IWorkbenchWindowActionDelegate
 		{
 			if (openWiki.equals(action.getActionDefinitionId()))
 			{
-				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("http://wiki.servoy.com"));
+				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://wiki.servoy.com"));
 			}
 			else
 			{
-				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("http://forum.servoy.com"));
+				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://forum.servoy.com"));
 			}
 		}
 		catch (Exception e)
