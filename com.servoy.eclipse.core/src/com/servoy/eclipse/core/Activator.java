@@ -290,7 +290,7 @@ public class Activator extends Plugin
 			public void windowOpened(IWorkbenchWindow window)
 			{
 				/* Remove redundant activities to reduce UI clutter. */
-				String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
+				String[] activityIds = { "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
 				IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();
 				IActivityManager wasAM = was.getActivityManager();
 				List<String> activitiesToDisable = Arrays.asList(activityIds);
