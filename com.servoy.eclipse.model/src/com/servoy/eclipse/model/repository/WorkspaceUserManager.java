@@ -104,10 +104,12 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		public static final String NAME = "name";
 		public static final String PASSWORD_HASH = "password_hash";
 		public static final String USER_UID = "user_uid";
+		public static final String PASSWORD_LAST_SET_TIME = "password_last_set_time";
 
 		public String name;
 		public String passwordHash;
 		public String userUid; //mostly uuid
+		public long passwordLastSetTime;
 
 		public User(String name, String password_hash, String user_uid)
 		{
@@ -116,12 +118,21 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			this.userUid = user_uid;
 		}
 
+		public User(String name, String password_hash, String user_uid, long password_last_set_time)
+		{
+			this.name = name;
+			this.passwordHash = password_hash;
+			this.userUid = user_uid;
+			this.passwordLastSetTime = password_last_set_time;
+		}
+
 		public ServoyJSONObject toJSON() throws JSONException
 		{
 			ServoyJSONObject obj = new ServoyJSONObject(true, false);
 			obj.put(NAME, name);
 			obj.put(PASSWORD_HASH, passwordHash);
 			obj.put(USER_UID, userUid);
+			obj.put(PASSWORD_LAST_SET_TIME, passwordLastSetTime);
 			return obj;
 		}
 
@@ -130,7 +141,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			String name = obj.getString(NAME);
 			String user_uid = obj.getString(USER_UID);
 			String password_hash = obj.getString(PASSWORD_HASH);
-			return new User(name, password_hash, user_uid);
+			long passwordLastSetTime = obj.optLong(PASSWORD_LAST_SET_TIME, 0);
+			return new User(name, password_hash, user_uid, passwordLastSetTime);
 		}
 
 		public String getName()
@@ -1879,6 +1891,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			if (userUID.equals(u.userUid))
 			{
 				u.passwordHash = passwordHash;
+				u.passwordLastSetTime = System.currentTimeMillis();
 				if (writeMode == WRITE_MODE_AUTOMATIC)
 				{
 					writeUserAndGroupInfo(false);
@@ -1888,6 +1901,20 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 
 		return false;
+	}
+
+	@Override
+	public long getPasswordLastSet(String clientId, String userUID) throws ServoyException, RemoteException
+	{
+		if (userUID == null || userUID.length() == 0) return -1;
+		for (User u : allDefinedUsers)
+		{
+			if (userUID.equals(u.userUid))
+			{
+				return u.passwordLastSetTime;
+			}
+		}
+		return -1;
 	}
 
 	public boolean setUserUID(String clientId, String oldUserUID, String newUserUID) throws ServoyException

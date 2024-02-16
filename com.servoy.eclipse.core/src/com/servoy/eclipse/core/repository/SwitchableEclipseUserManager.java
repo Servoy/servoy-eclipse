@@ -247,4 +247,10 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 		if (switchedTo != null) switchedTo.dispose();
 		eclipseUserManger.dispose();
 	}
+
+	@Override
+	public long getPasswordLastSet(String clientId, String userUID) throws ServoyException, RemoteException
+	{
+		return switchedTo == null ? eclipseUserManger.getPasswordLastSet(clientId, userUID) : switchedTo.getPasswordLastSet(clientId, userUID);
+	}
 }
