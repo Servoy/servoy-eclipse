@@ -190,6 +190,8 @@ export class EditorContentService {
                                     reorderLayoutContainers.push(parent);
                                 }
                             }
+                        } else if (formCache.absolute) {
+                            formCache.partComponentsCache.push(fcc);
                         }
                         const containers = data?.formComponentContainers?.[elem.name];
                         containers?.forEach((elem) => {
@@ -289,8 +291,6 @@ export class EditorContentService {
             }
         }
         
-		formCache.cleanFormComponents();
-		
         if (data.deleted) {
             data.deleted.forEach((elem) => {
                 const comp = formCache.getComponent(elem);

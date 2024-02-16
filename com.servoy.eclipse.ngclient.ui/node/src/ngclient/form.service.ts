@@ -657,11 +657,7 @@ export class FormService {
                     elem.formComponent.forEach((child: string) => {
                         this.walkOverChildren(elem[child] as ServerElement[], formCache, fcc);
                     });
-                    // only add the top lvl form componens to the forms formcomponent cache for the designer
-                    if (!fcc.name.includes('containedForm')) formCache.addFormComponent(fcc);
-                    if (parent != null) {
-                        parent.addChild(fcc);
-                    }
+                    formCache.add(fcc, parent);
                 } else {
                     // simple component
                     const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry);

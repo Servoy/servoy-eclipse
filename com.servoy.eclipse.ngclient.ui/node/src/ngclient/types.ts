@@ -10,9 +10,9 @@ export class FormSettings {
 export class FormCache implements IFormCache {
     public navigatorForm: FormSettings;
     public size: Dimension;
-    public partComponentsCache: Array<ComponentCache | StructureCache>;
+    public partComponentsCache: Array<ComponentCache | StructureCache | FormComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
-    public formComponents: Array<FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
+    public formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
     public componentCache: Map<string, ComponentCache>;
 
     private _mainStructure: StructureCache;
@@ -25,7 +25,7 @@ export class FormCache implements IFormCache {
         this.componentCache = new Map();
         this.partComponentsCache = [];
         this._parts = [];
-        this.formComponents = [];
+        this.formComponents = new Map();
         this.layoutContainersCache = new Map();
     }
 
@@ -46,9 +46,12 @@ export class FormCache implements IFormCache {
     }
 
 
-    public add(comp: ComponentCache | StructureCache, parent?: StructureCache | FormComponentCache | PartCache) {
+    public add(comp: ComponentCache | StructureCache | FormComponentCache, parent?: StructureCache | FormComponentCache | PartCache) {
         if (comp instanceof ComponentCache)
             this.componentCache.set(comp.name, comp);
+        if (comp instanceof FormComponentCache){
+             this.addFormComponent(comp);
+        }
         if (parent != null) {
             parent.addChild(comp);
         }
@@ -72,13 +75,11 @@ export class FormCache implements IFormCache {
     }
     
     public addFormComponent(formComponent: FormComponentCache) {
-        const index = this.formComponents.findIndex( elem => elem.name == formComponent.name);
-        if (index == -1) this.formComponents.push(formComponent);
-        else this.formComponents[index] = formComponent;
+        this.formComponents.set(formComponent.name, formComponent);
     }
-
+    
     public getFormComponent(name: string): FormComponentCache {
-        return this.formComponents.find(elem => elem.name == name);
+        return this.formComponents.get(name);
     }
 
     public getComponent(name: string): ComponentCache {
@@ -106,28 +107,18 @@ export class FormCache implements IFormCache {
     }
 
     public removeComponent(name: string) {
-        const comp = this.componentCache.get(name);
+        this.removeComponentFromCache(this.componentCache.get(name));
         this.componentCache.delete(name);
-        if (comp){
-            const index = this.partComponentsCache.indexOf(comp);
-            if (index !== -1) this.partComponentsCache.splice(index,1);
-        }
     }
 
     public removeLayoutContainer(id: string) {
-        const layout = this.layoutContainersCache.get(id);
+        this.removeComponentFromCache(this.layoutContainersCache.get(id));
         this.layoutContainersCache.delete(id);
-        if (layout) {
-            const index = this.partComponentsCache.indexOf(layout);
-            if (index !== -1) this.partComponentsCache.splice(index,1);
-        }
     }
 
     public removeFormComponent(name: string) {
-        const index = this.formComponents.findIndex( elem => elem.name == name);
-        if (index > -1) {
-            this.formComponents.splice(index, 1);
-        }
+        this.removeComponentFromCache(this.formComponents.get(name));
+        this.formComponents.delete(name);
     }
 
     public getComponentSpecification(componentName: string) {
@@ -146,62 +137,13 @@ export class FormCache implements IFormCache {
         return type;
     }
     
-    public cleanFormComponents() {
-		const deleteFCC: Array<string> = [];
-        this?.formComponents.forEach(fcc => {
-			if (fcc.name.includes('containedForm')) {
-				deleteFCC.push(fcc.name);
-			}
-		});
-
-		if (deleteFCC.length > 0) {
-			deleteFCC.forEach(fccName => {
-				this.removeFormComponent(fccName);
-			});
-
-			const fccItems: Array<{fcc: FormComponentCache, arr: Array<FormComponentCache>}> = [];
-			this?.formComponents.forEach(fcc => {
-				if (fcc.items.length > 0) {
-					fccItems.push({fcc, arr: fcc.items.filter(item => item instanceof FormComponentCache) as Array<FormComponentCache>});
-				}
-			});
-
-			this.checkItems(fccItems);
-		}
-	}
-	
-	private checkItems(array: Array<{fcc: FormComponentCache, arr: Array<FormComponentCache>}>) {
-		for (let i = 0; i < array.length; i++) {
-			const {fcc, arr} = array[i];
-			if (arr.length > 0) {
-				arr.sort((a: FormComponentCache, b: FormComponentCache) => a.name.split('containedForm').length - b.name.split('containedForm').length);
-				const check = arr[0].name.split('containedForm').length;
-				const deleteFCC = arr.filter((item: FormComponentCache) => item.name.split('containedForm').length !== check);
-				const okFCC = arr.filter((item: FormComponentCache) => item.name.split('containedForm').length === check);
-				deleteFCC.forEach((item: FormComponentCache) => fcc.removeChild(item));
-				const checkComp = okFCC.map((item: FormComponentCache) => item.name);
-				const deleteComp: Array<ComponentCache> = [];
-				fcc.items.forEach(item => {
-					if (!(item instanceof FormComponentCache) && !(item instanceof StructureCache)) {
-						checkComp.forEach((itm: string) => {
-							if (item.name.includes(itm)) {
-								deleteComp.push(item);
-							}
-						});
-					}
-				});
-				deleteComp.forEach(item => fcc.removeChild(item));
-				const fccItems: Array<{fcc: FormComponentCache, arr: Array<FormComponentCache>}> = [];
-				fcc.items.forEach(item => {
-					if (item instanceof FormComponentCache) {
-						fccItems.push({fcc: item, arr: item.items.filter(item => item instanceof FormComponentCache) as Array<FormComponentCache>});
-					}
-				});
-				this.checkItems(fccItems);
-			}	
-		}
-	}
-
+    private removeComponentFromCache(comp: ComponentCache | StructureCache | FormComponentCache){
+        if (comp){
+            const index = this.partComponentsCache.indexOf(comp);
+            if (index !== -1) this.partComponentsCache.splice(index,1);
+        }
+    }
+    
     private findComponents(structure: StructureCache | FormComponentCache) {
         structure.items.forEach(item => {
             if (item instanceof StructureCache || item instanceof FormComponentCache) {
