@@ -47,10 +47,10 @@ export class FormCache implements IFormCache {
 
 
     public add(comp: ComponentCache | StructureCache | FormComponentCache, parent?: StructureCache | FormComponentCache | PartCache) {
-        if (comp instanceof ComponentCache)
-            this.componentCache.set(comp.name, comp);
         if (comp instanceof FormComponentCache){
              this.addFormComponent(comp);
+        } else if (comp instanceof ComponentCache){    
+            this.componentCache.set(comp.name, comp);
         }
         if (parent != null) {
             parent.addChild(comp);
