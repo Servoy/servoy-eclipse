@@ -47,13 +47,13 @@ public class FormContextDelegateLabelProvider extends AbstractPersistContextDele
 		if (!baseText.equalsIgnoreCase(Messages.LabelUnresolved) && getContext() != null && value != null)
 		{
 			IPersist persist = getPersist(value);
-			if (persist != null && persist.getParent() instanceof Form)
+			if (persist != null)
 			{
-				// form method
+				Form parentForm = (Form)persist.getAncestor(IRepository.FORMS);
 				Form contextForm = (Form)getContext().getAncestor(IRepository.FORMS);
-				if (contextForm != null && !persist.getParent().getUUID().equals(contextForm.getUUID()))
+				if (contextForm != null && parentForm != null && !parentForm.getUUID().equals(contextForm.getUUID()))
 				{
-					return baseText + " [" + ((Form)persist.getParent()).getName() + ']';
+					return baseText + " [" + parentForm.getName() + ']';
 				}
 			}
 		}

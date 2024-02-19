@@ -34,8 +34,10 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
@@ -184,11 +186,18 @@ public class WebComponentPropertySource extends PDPropertySource
 	public String toString()
 	{
 		String packageName = getPropertyDescription().getPackageName();
+		String parentFormString = "";
 		if (WebComponentSpecProvider.isLoaded())
 		{
 			String packageDisplayName = WebComponentSpecProvider.getSpecProviderState().getPackageDisplayName(packageName);
 			if (!Utils.stringIsEmpty(packageDisplayName)) packageName = packageDisplayName;
 		}
-		return getPropertyDescription().getDisplayName() + " (" + packageName + ")";
+		Form contextForm = (Form)getContext().getAncestor(IRepository.FORMS);
+		Form parentForm = (Form)getPersist().getAncestor(IRepository.FORMS);
+		if (contextForm != null && parentForm != null && !parentForm.getUUID().equals(contextForm.getUUID()))
+		{
+			parentFormString = " [" + parentForm.getName() + ']';
+		}
+		return getPropertyDescription().getDisplayName() + parentFormString + " (" + packageName + ")";
 	}
 }
