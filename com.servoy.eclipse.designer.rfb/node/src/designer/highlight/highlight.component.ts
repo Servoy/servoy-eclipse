@@ -92,6 +92,8 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
                     node = node.parentElement;
                 } else if (node.parentElement.parentElement.classList.contains('svy-wrapper')) {
                     node = node.parentElement.parentElement;
+                } else if (node.parentElement.parentElement.parentElement.classList.contains('svy-wrapper')) {
+                    node = node.parentElement.parentElement.parentElement;
                 }
                 if (showHighlight) {
                     this.renderer.addClass(node, 'highlight_element');
