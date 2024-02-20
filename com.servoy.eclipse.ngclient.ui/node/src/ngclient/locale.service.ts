@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { SabloService } from '../sablo/sablo.service';
 import { Deferred, SessionStorageService, LoggerFactory, LoggerService, Locale } from '@servoy/public';
 import { registerLocaleData } from '@angular/common';
+import { DOCUMENT } from '@angular/common';
 
 import numbro from 'numbro';
 import { Settings } from 'luxon';
@@ -21,7 +22,8 @@ export class LocaleService {
     constructor(private sabloService: SabloService,
         private i18nProvider: I18NProvider,
         private sessionStorageService: SessionStorageService,
-        logFactory: LoggerFactory ) {
+        logFactory: LoggerFactory,
+        @Inject(DOCUMENT) private doc: Document) {
             this.log = logFactory.getLogger('LocaleService');
     }
 
@@ -156,15 +158,18 @@ export class LocaleService {
         // angular locales are either <language lowercase> or <language lowercase> - <country uppercase>
         const localeId = country !== undefined && country.length > 0 ?
             language.toLowerCase() + '-' + country.toUpperCase() : language.toLowerCase();
+        const index = this.doc.baseURI.indexOf('/',7);
+        const context = index > 0 ? this.doc.baseURI.substring(index) : '/';
+        
         return new Promise<string>((resolve, reject) => {
             return import(
-                `/locales/angular/${localeId}.mjs?localeid=${localeId}`).then(
+                `${context}locales/angular/${localeId}.mjs?localeid=${localeId}`).then(
                 module => {
                     registerLocaleData(module.default, localeId);
                     resolve(localeId);
                 },
                 () => {
-                    import(`/locales/angular/${language.toLowerCase()}.mjs?localeid=${language.toLowerCase()}`).then(module => {
+                    import(`${context}locales/angular/${language.toLowerCase()}.mjs?localeid=${language.toLowerCase()}`).then(module => {
                         registerLocaleData(module.default, localeId.split('-')[0]);
                         resolve(language.toLowerCase());
                     }, reject);
