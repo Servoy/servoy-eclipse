@@ -216,22 +216,42 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
 
     private loadCalendarLocale(locale: string) {
         const index = locale.indexOf('-');
-        let language = locale;
-        if (index > 0) {
+        let language = locale.toLowerCase();
+        if (index > 0 && language !== 'ar-sa' && language !== 'sr-latn') {
             language = locale.substring(0, index);
         }
         language = language.toLowerCase();
-        import(`@eonasdan/tempus-dominus/dist/locales/${language}.js`).then(
-            (module: { localization: { [key: string]: string | number} }) => {
-                const copy = Object.assign({}, module.localization);
-                copy.startOfTheWeek =   this.config.localization.startOfTheWeek;
-                copy.hourCycle = this.config.localization.hourCycle;
-                this.config.localization = copy;
-                if (this.picker !== null) this.picker.updateOptions(this.config);
-            },
-            () => {
+        
+        const moduleLoader =  (module: { default: { localization: { [key: string]: string | number} }}) => {
+            const copy = Object.assign({}, module.default.localization);
+            copy.startOfTheWeek =   this.config.localization.startOfTheWeek;
+            copy.hourCycle = this.config.localization.hourCycle;
+            this.config.localization = copy;
+            if (this.picker) this.picker.updateOptions(this.config);
+        }
+        const errorHandler = () => {
                 this.log.info('Locale ' + locale + ' for calendar not found, default to english');
-            });
+        }
+        switch(language) {
+            case 'ar-sa': import('@eonasdan/tempus-dominus/dist/locales/ar-SA.js').then(moduleLoader,errorHandler); break;
+            case 'ar': import('@eonasdan/tempus-dominus/dist/locales/ar.js').then(moduleLoader,errorHandler); break;
+            case 'ca': import('@eonasdan/tempus-dominus/dist/locales/ca.js').then(moduleLoader,errorHandler); break;
+            case 'cs': import('@eonasdan/tempus-dominus/dist/locales/cs.js').then(moduleLoader,errorHandler); break;
+            case 'de': import('@eonasdan/tempus-dominus/dist/locales/de.js').then(moduleLoader,errorHandler); break;
+            case 'es': import('@eonasdan/tempus-dominus/dist/locales/es.js').then(moduleLoader,errorHandler); break;
+            case 'fi': import('@eonasdan/tempus-dominus/dist/locales/fi.js').then(moduleLoader,errorHandler); break;
+            case 'fr': import('@eonasdan/tempus-dominus/dist/locales/fr.js').then(moduleLoader,errorHandler); break;
+            case 'hr': import('@eonasdan/tempus-dominus/dist/locales/hr.js').then(moduleLoader,errorHandler); break;
+            case 'hy': import('@eonasdan/tempus-dominus/dist/locales/hy.js').then(moduleLoader,errorHandler); break;
+            case 'it': import('@eonasdan/tempus-dominus/dist/locales/it.js').then(moduleLoader,errorHandler); break;
+            case 'nl': import('@eonasdan/tempus-dominus/dist/locales/nl.js').then(moduleLoader,errorHandler); break;
+            case 'pl': import('@eonasdan/tempus-dominus/dist/locales/pl.js').then(moduleLoader,errorHandler); break;
+            case 'ro': import('@eonasdan/tempus-dominus/dist/locales/ro.js').then(moduleLoader,errorHandler); break;
+            case 'ru': import('@eonasdan/tempus-dominus/dist/locales/ru.js').then(moduleLoader,errorHandler); break;
+            case 'sl': import('@eonasdan/tempus-dominus/dist/locales/sl.js').then(moduleLoader,errorHandler); break;
+            case 'sr': import('@eonasdan/tempus-dominus/dist/locales/sr.js').then(moduleLoader,errorHandler); break;
+            case 'sr-latn': import('@eonasdan/tempus-dominus/dist/locales/sr-Latn.js').then(moduleLoader,errorHandler); break;
+            case 'tr': import('@eonasdan/tempus-dominus/dist/locales/tr.js').then(moduleLoader,errorHandler); break;
+        }
     }
-
 }

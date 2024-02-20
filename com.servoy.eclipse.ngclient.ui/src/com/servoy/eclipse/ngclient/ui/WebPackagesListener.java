@@ -249,7 +249,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				boolean sourceChanged = false;
 				if (ng2Services.size() > 0 || componentPackageSpecToReader.size() > 0)
 				{
-					File distIndexFile = new File(projectFolder, "dist/app/index.html");
+					File distIndexFile = new File(projectFolder, "dist/app/browser/index.html");
 					sourceChanged = !distIndexFile.exists();
 					if (sourceChanged)
 					{
@@ -930,6 +930,13 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									File packagesFolder = new File(projectFolder, "packages");
 									File packageFolder = new File(packagesFolder, packageName);
 
+									// quicly check tsconfig.json to get rid of warnings
+									File tsconfig = new File(packagesFolder, "tsconfig.json");
+									if (!tsconfig.exists())
+									{
+										FileUtils.copyFile(new File(projectFolder, "tsconfig.json"), tsconfig);
+									}
+
 									JSONObject sourcePathJson = null;
 									String sourcePathContents = FileUtils.readFileToString(sourcePath.getLocation().toFile(), "UTF8");
 									sourcePathJson = new JSONObject(sourcePathContents);
@@ -1306,7 +1313,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			// create the production build
 			new PackageCheckerJob("production_build", distributionSource, model.getModel()).run(model.getProgressMonitor());
 			// copy the production build
-			File distFolder = new File(distributionSource, "dist/app");
+			File distFolder = new File(distributionSource, "dist/app/browser");
 			if (distFolder.exists())
 			{
 				FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));

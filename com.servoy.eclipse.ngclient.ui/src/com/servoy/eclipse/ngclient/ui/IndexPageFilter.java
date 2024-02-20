@@ -82,7 +82,7 @@ public class IndexPageFilter implements Filter
 		File projectFolder = Activator.getInstance().getSolutionProjectFolder();
 		if (projectFolder != null)
 		{
-			distFolder = new File(projectFolder, "dist/app");
+			distFolder = new File(projectFolder, "dist/app/browser");
 			indexFile = new File(distFolder, "index.html");
 		}
 		String solutionName = getSolutionNameFromURI(Paths.get(requestURI).normalize());
