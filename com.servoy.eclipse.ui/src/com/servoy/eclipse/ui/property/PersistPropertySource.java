@@ -2727,6 +2727,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 									inheritedValue = ownJson.get(topMostKey);
 								}
 							}
+							else if (Utils.equalObjects(id, topMostKey))
+							{
+								inheritedValue = ownJson.get(topMostKey);
+							}
 						}
 					}
 					else inheritedValue = ((AbstractBase)persistThatCouldBeExtended).getProperty((String)id);
