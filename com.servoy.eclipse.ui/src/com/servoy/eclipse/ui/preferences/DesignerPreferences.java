@@ -183,6 +183,8 @@ public class DesignerPreferences
 	public static final int TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT = 20;
 	public static final String TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_SETTING = "titanium_snapToDistanceThreshold";
 	public static final int TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_DEFAULT = 10;
+	public static final String TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_SETTING = "titanium_snapTosSizeThreshold";
+	public static final int TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_DEFAULT = 10;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -950,5 +952,15 @@ public class DesignerPreferences
 	public int getTitaniumSnapEqualDistanceThreshold()
 	{
 		return getProperty(TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_SETTING, TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_DEFAULT);
+	}
+
+	public void setTitaniumSnapEqualSizeThreshold(int snapThreshold)
+	{
+		setProperty(TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_SETTING, snapThreshold);
+	}
+
+	public int getTitaniumSnapEqualSizeThreshold()
+	{
+		return getProperty(TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_SETTING, TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_DEFAULT);
 	}
 }

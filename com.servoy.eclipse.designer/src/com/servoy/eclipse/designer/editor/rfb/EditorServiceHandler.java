@@ -582,6 +582,7 @@ public class EditorServiceHandler implements IServerService
 				DesignerPreferences designerPreferences = new DesignerPreferences();
 				settings.put("alignment", Integer.valueOf(designerPreferences.getTitaniumAlignmentThreshold()));
 				settings.put("distance", Integer.valueOf(designerPreferences.getTitaniumSnapEqualDistanceThreshold()));
+				settings.put("size", Integer.valueOf(designerPreferences.getTitaniumSnapEqualSizeThreshold()));
 				return settings;
 			}
 		});

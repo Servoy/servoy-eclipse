@@ -90,6 +90,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private ColorSelectViewer sameHeightWidthIndicatorColor;
 	private Spinner titanium_alignmentThresholdSpinner;
 	private Spinner titanium_equalDistanceThresholdSpinner;
+	private Spinner titanium_equalSizeThresholdSpinner;
 
 	public void init(IWorkbench workbench)
 	{
@@ -164,6 +165,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		titanium_alignmentThresholdSpinner = new Spinner(titaniumEditorDesignerPreferenceGroup, SWT.BORDER);
 		new Label(titaniumEditorDesignerPreferenceGroup, SWT.NONE).setText("Snap to Equal Distance Guides Threshold");
 		titanium_equalDistanceThresholdSpinner = new Spinner(titaniumEditorDesignerPreferenceGroup, SWT.BORDER);
+		new Label(titaniumEditorDesignerPreferenceGroup, SWT.NONE).setText("Snap to Same Size Guides Threshold");
+		titanium_equalSizeThresholdSpinner = new Spinner(titaniumEditorDesignerPreferenceGroup, SWT.BORDER);
 
 		Composite settingsPanel = new Composite(rootPanel, SWT.NONE);
 		settingsPanel.setLayout(new GridLayout(2, false));
@@ -419,6 +422,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		titanium_alignmentThresholdSpinner.setSelection(prefs.getTitaniumAlignmentThreshold());
 		titanium_equalDistanceThresholdSpinner.setSelection(prefs.getTitaniumSnapEqualDistanceThreshold());
+		titanium_equalSizeThresholdSpinner.setSelection(prefs.getTitaniumSnapEqualSizeThreshold());
 	}
 
 	@Override
@@ -454,6 +458,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		prefs.setTitaniumAlignmentThreshold(titanium_alignmentThresholdSpinner.getSelection());
 		prefs.setTitaniumSnapEqualDistanceThreshold(titanium_equalDistanceThresholdSpinner.getSelection());
+		prefs.setTitaniumSnapEqualSizeThreshold(titanium_equalSizeThresholdSpinner.getSelection());
 		prefs.save();
 
 		return true;
@@ -497,6 +502,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		formEditorDesignerPreferenceAutomatic.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.Automatic);
 		titanium_alignmentThresholdSpinner.setSelection(DesignerPreferences.TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT);
 		titanium_equalDistanceThresholdSpinner.setSelection(DesignerPreferences.TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_DEFAULT);
+		titanium_equalSizeThresholdSpinner.setSelection(DesignerPreferences.TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_DEFAULT);
 
 		setEnabledState();
 		super.performDefaults();
