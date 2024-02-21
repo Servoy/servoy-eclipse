@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -39,6 +40,7 @@ import org.apache.commons.io.FileUtils;
 import org.sablo.security.ContentSecurityPolicyConfig;
 
 import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
+import com.servoy.j2db.server.ngclient.NGLocalesFilter;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
@@ -123,6 +125,31 @@ public class IndexPageFilter implements Filter
 			{
 				Path normalize = Paths.get(requestURI).normalize();
 				File file = new File(distFolder, normalize.toString());
+				if (requestURI.startsWith("/locales/") && request.getParameter("localeid") != null)
+				{
+					//this code is a bit of copy of the NGLocalesFilter that bases it on servlet resources
+					String[] locales = NGLocalesFilter.generateLocaleIds(request.getParameter("localeid"));
+					File[] listFiles = file.getParentFile().listFiles((dir, name) -> {
+						for (String locale : locales)
+						{
+							if (name.contains(locale)) return true;
+						}
+						return false;
+					});
+					if (listFiles != null && listFiles.length > 0)
+					{
+						if (listFiles.length > 1)
+						{
+							Arrays.sort(listFiles, (a, b) -> {
+								return b.getName().length() - a.getName().length();
+							});
+						}
+						String contentType = MimeTypes.guessContentTypeFromName(requestURI);
+						if (contentType != null) servletResponse.setContentType(contentType);
+						FileUtils.copyFile(listFiles[0], servletResponse.getOutputStream());
+						return;
+					}
+				}
 				if (file.exists() && !file.isDirectory() & !file.getName().equals("favicon.ico"))
 				{
 					String contentType = MimeTypes.guessContentTypeFromName(requestURI);
@@ -130,6 +157,7 @@ public class IndexPageFilter implements Filter
 					FileUtils.copyFile(file, servletResponse.getOutputStream());
 					return;
 				}
+
 			}
 		}
 		else if (solutionName != null)
