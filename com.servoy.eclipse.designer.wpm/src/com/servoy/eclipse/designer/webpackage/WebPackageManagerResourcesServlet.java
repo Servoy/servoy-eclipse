@@ -48,7 +48,7 @@ public class WebPackageManagerResourcesServlet extends HttpServlet
 	{
 		String path = req.getPathInfo();
 		if ("/".equals(path)) path = "/index.html";
-		Path normalizedPath = Paths.get(req.getServletPath() + "/browser" + path).normalize();
+		Path normalizedPath = Paths.get(req.getServletPath() + path).normalize();
 		if (normalizedPath.startsWith("/wpm/"))
 		{
 			URL res = getClass().getResource(normalizedPath.toString().replace('\\', '/'));
