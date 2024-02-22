@@ -25,6 +25,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     topAdjust: any;
     leftAdjust: number;
     properties: SnapData;
+	equalSize: boolean = false;
 
     constructor(private editorContentService: EditorContentService, protected readonly editorSession: EditorSessionService) {
         this.editorSession.addDynamicGuidesChangedListener(this);
@@ -149,7 +150,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
             }
 		}
 		if (resizing) {
-			if (this.properties?.guides.length > 0) {
+			if (this.equalSize) {
 				 //get out of the snap mode?
 				const r = this.element?.getBoundingClientRect();
 				if (r) {
@@ -161,6 +162,28 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						(resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) &&
 						(closerToTheTop && (point.y < r.top - this.equalSizeThreshold || point.y > r.top + this.equalSizeThreshold) ||
 							!closerToTheTop && (point.y < r.bottom - this.equalSizeThreshold || point.y > r.bottom + this.equalSizeThreshold))) {
+
+						this.equalSize = false;
+						if (resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
+							if (closerToTheLeft && point.x > r.left) {
+								properties.left = point.x;
+								properties.width = r.width - r.left + point.x;
+							}
+							if (!closerToTheLeft && point.x < r.right) {
+								properties.width = r.width - r.right + point.x;
+							}
+						}
+
+						if (resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
+							if (closerToTheTop && point.y > r.top) {
+								properties.top = point.y;
+								properties.height = r.height - r.top + point.y;
+							}
+							if (!closerToTheTop && point.y < r.bottom) {
+								properties.height = r.height - r.bottom + point.y;
+							}
+						}
+
 						this.properties = properties;
 						this.snapDataListener.next(properties);
 						return;
@@ -194,6 +217,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 			//same size have higher prio than edge
 			if (verticalDist || horizontalDist) {
+				this.equalSize = true;
 				this.properties = properties;
 				return this.snapDataListener.next(this.properties);
 			}
