@@ -152,6 +152,7 @@ export class LocaleService {
                 break;
             }
         }
+        return Promise.resolve();
     }
     
     private setAngularLocale(language: string, country: string) {
