@@ -381,7 +381,7 @@ export class NGUtilsService {
         this.platformLocation.onPopState(() => {
             if (this._backActionCB) {
                 if (this.platformLocation.hash) {
-                    this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script, [this.platformLocation.hash]);
+                    this._backActionCB(this.platformLocation.hash);
                 } else if (this.platformLocation.href.endsWith('/index.html')) {
                     this.platformLocation.forward(); // if the back button is registered then don't allow to move back, go to the first page again.
                 }
