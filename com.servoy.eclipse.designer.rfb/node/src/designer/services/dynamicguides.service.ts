@@ -255,13 +255,13 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 			properties.width = size;
 			let guides = [];
-			guides.push(new Guide(properties.left, rect.bottom, 1, 15 , 'dist'));
-			guides.push(new Guide(properties.left + size, rect.bottom, 1, 15, 'dist'));
+			guides.push(new Guide(properties.left, rect.bottom + 5, 1, 15 , 'dist'));
+			guides.push(new Guide(properties.left + size, rect.bottom + 5, 1, 15, 'dist'));
 			guides.push(new Guide(properties.left, rect.bottom + 10, size, 1, 'dist'));
 
 			filteredRectangles.filter(r => r.width == size).forEach(r => {
-				guides.push(new Guide(r.left, r.bottom, 1, 15 , 'dist'));
-				guides.push(new Guide(r.right, r.bottom, 1, 15, 'dist'));
+				guides.push(new Guide(r.left, r.bottom + 3, 1, 15 , 'dist'));
+				guides.push(new Guide(r.right, r.bottom + 3, 1, 15, 'dist'));
 				guides.push(new Guide(r.left, r.bottom + 10, size, 1, 'dist'));
 			});
 			properties.guides.push(...guides);
@@ -284,13 +284,13 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 			properties.height = size;
 			let guides = [];
-			guides.push(new Guide(rect.right, rect.top, 15, 1 , 'dist'));
-			guides.push(new Guide(rect.right, rect.top + size, 15, 1, 'dist'));
+			guides.push(new Guide(rect.right + 5, rect.top, 15, 1 , 'dist'));
+			guides.push(new Guide(rect.right + 5, rect.top + size, 15, 1, 'dist'));
 			guides.push(new Guide(rect.right + 10, rect.top, 1, size, 'dist'));
 
 			filteredRectangles.filter(r => r.height == size).forEach(r => {
-				guides.push(new Guide(r.right, r.top, 15, 1 , 'dist'));
-				guides.push(new Guide(r.right, r.bottom, 15, 1, 'dist'));
+				guides.push(new Guide(r.right + 3, r.top, 15, 1 , 'dist'));
+				guides.push(new Guide(r.right + 3, r.bottom, 15, 1, 'dist'));
 				guides.push(new Guide(r.right + 10, r.top, 1, size, 'dist'));
 			});
 			properties.guides.push(...guides);
