@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.property.types;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -65,6 +66,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class CustomArrayTypePropertyController extends ArrayTypePropertyController
 {
+
 	protected final PropertyDescription webComponentPropertyDescription;
 	protected final PersistContext persistContext;
 	private final IPropertySource persistPropertySource;
@@ -121,20 +123,18 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	}
 
 	@Override
-	protected CustomArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty)
+	protected CustomArrayPropertySource createArrayElementPropertySource(ComplexProperty<Object> complexProperty)
 	{
 		return new CustomArrayPropertySource(complexProperty);
 	}
 
 	public class CustomArrayPropertySource extends ArrayPropertySource
 	{
+		private static final Object DELETE_ME = new Object();
+
 		private final class CustomArrayItemPropertyDescriptorWrapper extends ArrayItemPropertyDescriptorWrapper
 		{
-			/**
-			 * @param basePD
-			 * @param index
-			 * @param arrayPropertySource
-			 */
+
 			private CustomArrayItemPropertyDescriptorWrapper(IPropertyDescriptor basePD, int index, ArrayPropertySource arrayPropertySource)
 			{
 				super(basePD, index, arrayPropertySource);
@@ -177,6 +177,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 
 				cellEditor.setCellEditor2(new ComposedCellEditor(new ButtonCellEditor()
 				{
+
 					@Override
 					protected void updateButtonState(Button buttonWidget, Object value)
 					{
@@ -191,6 +192,11 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 						if (oldValue instanceof IPersist)
 						{
 							callHandler(handler -> handler.deleteComponent((IPersist)oldValue));
+						}
+						else
+						{
+							// null; can't use deleteHandlerComponent for that...
+							applyValue(DELETE_ME);
 						}
 					}
 
@@ -286,8 +292,30 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected Object setComplexElementValueImpl(int idx, Object v)
 		{
-			PersistPropertySource.adjustPropertyValueAndSet(getIdFromIndex(idx), v, getPropertyDescriptors()[idx], this);
-			return getEditableValue();
+			if (DELETE_ME == v)
+			{
+				// ONLY used when deleting null array elements; persist array elements are deleted via form editor handlers
+				Object[] arrayValue = (Object[])getEditableValue();
+				Object[] newArrayValue = (Object[])Array.newInstance(arrayValue.getClass().getComponentType(), arrayValue.length - 1);
+				System.arraycopy(arrayValue, 0, newArrayValue, 0, idx);
+				System.arraycopy(arrayValue, idx + 1, newArrayValue, idx, arrayValue.length - idx - 1);
+
+				// reset indexes
+				if (newArrayValue instanceof IChildWebObject[])
+				{
+					for (int j = 0; j < newArrayValue.length; j++)
+					{
+						if (newArrayValue[j] != null) ((IChildWebObject)newArrayValue[j]).setIndex(j);
+					}
+				}
+
+				return newArrayValue;
+			}
+			else
+			{
+				PersistPropertySource.adjustPropertyValueAndSet(getIdFromIndex(idx), v, getPropertyDescriptors()[idx], this);
+				return getEditableValue();
+			}
 		}
 
 		@Override
