@@ -82,7 +82,7 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 	protected void createNewElement(ButtonCellEditor cellEditor, Object oldValue)
 	{
 		// insert at position 0 an empty/null value
-		Object newValue = ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldValue, 0, getNewElementInitialValue()); // RAGTEST
+		Object newValue = ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldValue, 0, getNewElementInitialValue());
 		cellEditor.applyValue(newValue);
 	}
 
