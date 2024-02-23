@@ -90,16 +90,20 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	{
 		callHandler(handler -> {
 			Object id = getId();
-			String parentKey;
 			if (id instanceof ArrayPropertyChildId)
 			{
-				parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+				String parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), true, false);
+				// RAGTEST  cellEditor.applyValue?
 			}
 			else
 			{
-				parentKey = String.valueOf(id);
+				String parentKey = String.valueOf(id);
+				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), true, false);
+
+				Object ragtest = persistPropertySource.getPropertyValue(parentKey);
+				cellEditor.applyValue(ragtest);
 			}
-			handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), true, false);
 		});
 	}
 
@@ -191,7 +195,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					{
 						if (oldValue instanceof IPersist)
 						{
-							callHandler(handler -> handler.deleteComponent((IPersist)oldValue));
+							//RAGTEST	callHandler(handler -> handler.deleteComponent((IPersist)oldValue));
 						}
 						else
 						{

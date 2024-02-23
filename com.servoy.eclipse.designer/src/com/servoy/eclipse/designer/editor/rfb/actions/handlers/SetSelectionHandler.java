@@ -71,7 +71,7 @@ public class SetSelectionHandler implements IServerService
 		{
 			String uuid = json.getString(i);
 
-			IPersist searchPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
+			IPersist searchPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
 			if (searchPersist != null)
 			{
 				selection.add(PersistContext.create(searchPersist, editorPart.getForm()));

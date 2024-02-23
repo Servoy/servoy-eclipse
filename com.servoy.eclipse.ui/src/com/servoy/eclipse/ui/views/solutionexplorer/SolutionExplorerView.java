@@ -3836,7 +3836,7 @@ public class SolutionExplorerView extends ViewPart
 		if (type == org.eclipse.ui.views.properties.IPropertySheetPage.class)
 		{
 			PropertySheetPage page = new ModifiedPropertySheetPage(null);
-			page.setRootEntry(new ModifiedPropertySheetEntry());
+			page.setRootEntry(new ModifiedPropertySheetEntry(true));
 			return page;
 		}
 		if (type.equals(IContextProvider.class))

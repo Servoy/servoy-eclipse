@@ -1411,7 +1411,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			modulesOfSolution.put(solution.getName(), solution);
 		}
 
-		Iterator<Column> cols = EditorUtil.getTableColumns(table);
+		Iterator<Column> cols = EditorUtil.getTableColumns(table, false);
 		while (cols.hasNext())
 		{
 			IColumn c = cols.next();

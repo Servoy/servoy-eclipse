@@ -681,12 +681,12 @@ public class DesignerUtil
 		return false;
 	}
 
-	public static CSSPosition cssPositionFromJSON(BaseVisualFormEditor editorPart, IPersist persist, JSONObject properties)
+	public static CSSPosition cssPositionFromJSON(Form form, IPersist persist, JSONObject properties)
 	{
-		return cssPositionFromJSON(editorPart, persist, properties, false);
+		return cssPositionFromJSON(form, persist, properties, false);
 	}
 
-	public static CSSPosition cssPositionFromJSON(BaseVisualFormEditor editorPart, IPersist persist, JSONObject properties, boolean isResize)
+	public static CSSPosition cssPositionFromJSON(Form form, IPersist persist, JSONObject properties, boolean isResize)
 	{
 		CSSPosition newPosition;
 		JSONObject obj = properties.getJSONObject("cssPos");
@@ -705,7 +705,7 @@ public class DesignerUtil
 		if (obj.has("left"))
 		{
 			JSONObject jsonObject = obj.getJSONObject("left");
-			ISupportCSSPosition left = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+			ISupportCSSPosition left = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
 				jsonObject.optString("uuid")));
 			if (left != null)
 			{
@@ -738,7 +738,7 @@ public class DesignerUtil
 		else if (obj.has("right"))
 		{
 			JSONObject jsonObject = obj.getJSONObject("right");
-			ISupportCSSPosition right = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+			ISupportCSSPosition right = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
 				jsonObject.optString("uuid")));
 			if (right != null)
 			{
@@ -780,7 +780,7 @@ public class DesignerUtil
 		else if (obj.has("middleH"))
 		{
 			JSONObject jsonObject = obj.getJSONObject("middleH");
-			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
 				jsonObject.optString("uuid")));
 			if (middle != null)
 			{
@@ -821,7 +821,7 @@ public class DesignerUtil
 		if (obj.has("top"))
 		{
 			JSONObject jsonObject = obj.getJSONObject("top");
-			ISupportCSSPosition top = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+			ISupportCSSPosition top = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
 				jsonObject.optString("uuid")));
 			if (top != null)
 			{
@@ -854,7 +854,7 @@ public class DesignerUtil
 		else if (obj.has("bottom"))
 		{
 			JSONObject jsonObject = obj.getJSONObject("bottom");
-			ISupportCSSPosition bottom = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+			ISupportCSSPosition bottom = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
 				jsonObject.optString("uuid")));
 			if (bottom != null)
 			{
@@ -899,7 +899,7 @@ public class DesignerUtil
 		else if (obj.has("middleV"))
 		{
 			JSONObject jsonObject = obj.getJSONObject("middleV");
-			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
 				jsonObject.optString("uuid")));
 			if (middle != null)
 			{

@@ -275,6 +275,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
+			//	elementPropertyDescriptors = null;//RAGTEST
 			if (elementPropertyDescriptors == null)
 			{
 				Object arrayV = getEditableValue();

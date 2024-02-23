@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import static com.servoy.eclipse.core.util.UIUtils.runInUI;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
@@ -75,26 +76,16 @@ public class RfbSelectionListener implements ISelectionListener
 
 	public void updateSelection(boolean force)
 	{
-		Display.getCurrent().asyncExec(new Runnable()
-		{
-			public void run()
+		runInUI(() -> {
+			List<String> uuids = getPersistUUIDS((IStructuredSelection)currentSelection);
+			if (uuids != null && (force || (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection)))))
 			{
-				final List<String> uuids = getPersistUUIDS((IStructuredSelection)currentSelection);
-				if (uuids != null && (force || (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection)))))
-				{
-					lastSelection = uuids;
-					editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
-								new Object[] { uuids.toArray() });
-						}
-					});
-				}
+				lastSelection = uuids;
+				editorWebsocketSession.getEventDispatcher()
+					.addEvent(() -> editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
+						new Object[] { uuids.toArray() }));
 			}
-		});
+		}, false);
 	}
 
 	/**

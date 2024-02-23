@@ -416,7 +416,7 @@ public class EditorServiceHandler implements IServerService
 			@Override
 			public Object executeMethod(String methodName, JSONObject args) throws Exception
 			{
-				IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("svyId"));
+				IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), args.optString("svyId"));
 				if (persist instanceof AbstractBase)
 				{
 					return ((AbstractBase)persist).getProperty(args.optString("propertyName"));

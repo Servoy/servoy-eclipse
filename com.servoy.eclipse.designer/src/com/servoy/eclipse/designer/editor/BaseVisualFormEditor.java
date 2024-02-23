@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import static com.servoy.eclipse.core.util.UIUtils.runInUI;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventObject;
@@ -312,7 +314,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					{
 						try
 						{
-							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this, elementUuid));
+							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this.getForm(), elementUuid));
 						}
 						catch (IllegalArgumentException e)
 						{
@@ -649,14 +651,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						if (selectionWasOverriden)
 						{
 							// set the correct selection on form editor and outline page when override the persist for the first time
-							Display.getCurrent().asyncExec(new Runnable()
-							{
-								public void run()
-								{
-									graphicaleditor.getSite().getSelectionProvider().setSelection(new StructuredSelection(arrSelections));
-									((SelectionService)getSite().getWorkbenchWindow().getSelectionService()).notifyListeners(BaseVisualFormEditor.this);
-								}
-							});
+							runInUI(() -> {
+								graphicaleditor.getSite().getSelectionProvider().setSelection(new StructuredSelection(arrSelections));
+								((SelectionService)getSite().getWorkbenchWindow().getSelectionService()).notifyListeners(BaseVisualFormEditor.this);
+							}, false);
 						}
 					}
 				}

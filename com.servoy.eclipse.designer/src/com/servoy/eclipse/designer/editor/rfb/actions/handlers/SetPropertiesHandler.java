@@ -76,7 +76,7 @@ public class SetPropertiesHandler implements IServerService
 				while (keys.hasNext())
 				{
 					String uuid = (String)keys.next();
-					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
+					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
 					if (persist != null)
 					{
 						PersistContext context = PersistContext.create(persist, editorPart.getForm());
@@ -104,7 +104,7 @@ public class SetPropertiesHandler implements IServerService
 								CSSPosition newPosition = null;
 								if (properties.has("cssPos"))
 								{
-									newPosition = DesignerUtil.cssPositionFromJSON(editorPart, persist, properties,
+									newPosition = DesignerUtil.cssPositionFromJSON(editorPart.getForm(), persist, properties,
 										properties.has("width") && properties.has("height"));
 								}
 								else

@@ -22,6 +22,9 @@ import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.dataprocessing.IModificationListener;
+import com.servoy.j2db.dataprocessing.IModificationSubject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.UUID;
 
@@ -45,6 +48,8 @@ public class EditorActionsRegistry
 		void createComponent(IPropertySource persistPropertySource, UUID uuid, String propertyName, String type, boolean prepend, boolean dropTargetIsSibling);
 
 		void deleteComponent(IPersist persist);
+
+		IModificationSubject getModificationSubject();
 	}
 
 	public static void registerHandler(EditorComponentActions action, EditorComponentActionHandler handler)
@@ -60,5 +65,37 @@ public class EditorActionsRegistry
 	public static EditorComponentActionHandler getHandler(EditorComponentActions action)
 	{
 		return editorActionHandlers.get(action);
+	}
+
+	/** RAGTEST doc
+	 * @param createCustomComponent
+	 * @param ragtestHandler
+	 */
+	public static IModificationListener addRagtest(EditorComponentActions action, IModificationListener ragtestHandler)
+	{
+		EditorComponentActionHandler handler = getHandler(action);
+		if (handler == null)
+		{
+			ServoyLog.logWarning("No handler registered for " + action, null);
+			return null;
+		}
+
+		handler.getModificationSubject().addModificationListener(ragtestHandler);
+		return ragtestHandler;
+	}
+
+	/** RAGTEST doc
+	 * @param createCustomComponent
+	 * @param ragtestHandler
+	 */
+	public static void removeRagtest(EditorComponentActions action, IModificationListener ragtestHandler)
+	{
+		EditorComponentActionHandler handler = getHandler(action);
+		if (handler == null)
+		{
+			ServoyLog.logWarning("No handler registered for " + action, null);
+		}
+
+		handler.getModificationSubject().removeModificationListener(ragtestHandler);
 	}
 }

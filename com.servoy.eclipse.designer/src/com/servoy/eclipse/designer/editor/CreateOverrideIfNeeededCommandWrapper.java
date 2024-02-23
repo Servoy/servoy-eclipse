@@ -34,7 +34,7 @@ import com.servoy.j2db.util.UUID;
  * @author rgansevles
  *
  */
-public class CreateOverrideIfNeeededCommandWrapper extends Command
+public class CreateOverrideIfNeeededCommandWrapper extends Command implements IRAGTEST<IPersist>
 {
 	private final PersistPropertySource propertySource;
 	private final Function<UUID, Command> commandCreater;
@@ -104,6 +104,11 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command
 			}
 		}
 		command = null;
+	}
+
+	public IPersist getRagtest()
+	{
+		return propertySource.getPersistContext().getPersist().searchChild2(newUUID == null ? origUUID : newUUID);
 	}
 
 }

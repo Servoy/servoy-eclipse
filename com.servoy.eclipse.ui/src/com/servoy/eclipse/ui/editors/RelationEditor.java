@@ -679,7 +679,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		}
 		if (t != null)
 		{
-			Iterator<Column> cols = EditorUtil.getTableColumns(t);
+			Iterator<Column> cols = EditorUtil.getTableColumns(t, false);
 			while (cols.hasNext())
 			{
 				// stored calcs are shown in calculations section

@@ -16,8 +16,10 @@
  */
 package com.servoy.eclipse.ui.views.properties;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -189,7 +191,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 		if (values.length == 1)
 		{
-			return Arrays.asList(firstSource.getPropertyDescriptors());
+			return asList(firstSource.getPropertyDescriptors());
 		}
 
 		// get all descriptors from each object
@@ -418,7 +420,6 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 */
 	public CellEditor getEditor(Composite parent)
 	{
-
 		if (editor == null)
 		{
 			editor = descriptor.createPropertyEditor(parent);
@@ -587,24 +588,36 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		if (childEntries == null)
 		{
 			// no children to refresh
-			return;
+			System.err.println("RAGTEST");
+			//RAGTEST	return;
 		}
 
 		// get the current descriptors
 		List descriptors = computeMergedPropertyDescriptors();
 
 		// cache old entries by their descriptor id
-		Map entryCache = new HashMap(childEntries.length * 2 + 1);
-		for (PropertySheetEntry childEntry : childEntries)
+		Map entryCache;
+		List<PropertySheetEntry> entriesToDispose;
+		if (childEntries == null)
 		{
-			if (childEntry != null)
-			{
-				entryCache.put(childEntry.getDescriptor().getId() + childEntry.getCategory(), childEntry);
-			}
+			entryCache = new HashMap<>(1);
+			entriesToDispose = emptyList();
 		}
+		else
+		{
+			entryCache = new HashMap<>(childEntries.length * 2 + 1);
+			for (PropertySheetEntry childEntry : childEntries)
+			{
+				if (childEntry != null)
+				{
+					entryCache.put(childEntry.getDescriptor().getId() + childEntry.getCategory(), childEntry);
+				}
+			}
 
-		// create a list of entries to dispose
-		List entriesToDispose = new ArrayList(Arrays.asList(childEntries));
+			// create a list of entries to dispose
+			entriesToDispose = new ArrayList<>(asList(childEntries));
+
+		}
 
 		// clear the old entries
 		this.childEntries = null;

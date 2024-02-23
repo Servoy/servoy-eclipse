@@ -123,12 +123,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 	private final CreateComponentOptions args;
 	private final IStructuredSelection[] newSelection;
 	private IPersist[] newPersist;
-	private final BaseVisualFormEditor editorPart;
+	private final Form form;
 
-	public CreateComponentCommand(BaseVisualFormEditor editorPart, CreateComponentOptions args, IStructuredSelection[] newSelection)
+	public CreateComponentCommand(Form form, CreateComponentOptions args, IStructuredSelection[] newSelection)
 	{
 		super("createComponent");
-		this.editorPart = editorPart;
+		this.form = form;
 		this.args = args;
 		this.newSelection = newSelection;
 	}
@@ -139,7 +139,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		try
 		{
 			List<IPersist> changedPersists = new ArrayList<IPersist>();
-			newPersist = createComponent(editorPart, args, changedPersists);
+			newPersist = createComponent(form, args, changedPersists);
 			if (newPersist != null)
 			{
 				changedPersists.addAll(asList(newPersist));
@@ -147,7 +147,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				if (newSelection != null && !args.isKeepOldSelection())
 				{
 					newSelection[0] = new StructuredSelection(
-						newPersist.length > 0 ? PersistContext.create(newPersist[0], editorPart.getForm()) : newPersist);
+						newPersist.length > 0 ? PersistContext.create(newPersist[0], form) : newPersist);
 				}
 				if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
 					CSSPositionUtils.isCSSPositionContainer((LayoutContainer)newPersist[0]))
@@ -172,13 +172,13 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 	}
 
-	static IPersist[] createComponent(BaseVisualFormEditor editorPart, CreateComponentOptions args, List<IPersist> extraChangedPersists)
+	static IPersist[] createComponent(Form form, CreateComponentOptions args, List<IPersist> extraChangedPersists)
 		throws JSONException, RepositoryException
 	{
 		if (args.getType() != null)
 		{
 			// a ghost dragged from the palette. it is defined in the "types" section of the .spec file
-			IPersist webObject = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getDropTargetUUID());
+			IPersist webObject = PersistFinder.INSTANCE.searchForPersist(form, args.getDropTargetUUID());
 
 			int arrayIndex = -1;
 			if (webObject instanceof IChildWebObject && args.isDropTargetIsSibling())
@@ -200,23 +200,23 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						.getWebObjectSpecification(webComponent.getTypeName());
 					String propertyName = args.getGhostPropertyName();
 					String compName = "component_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+					while (!PersistFinder.INSTANCE.checkName(form, compName))
 					{
 						compName = "component_" + id.incrementAndGet();
 					}
-					webObject = ElementUtil.getOverridePersist(PersistContext.create(webObject, editorPart.getForm()));
+					webObject = ElementUtil.getOverridePersist(PersistContext.create(webObject, form));
 					WebCustomType bean = AddContainerCommand.addCustomType(componentSpec, (IBasicWebObject)webObject, propertyName, compName, arrayIndex, null);
-					AddContainerCommand.showDataproviderDialog(bean.getPropertyDescription().getProperties(), bean, editorPart);
+					AddContainerCommand.showDataproviderDialog(bean.getPropertyDescription().getProperties(), bean, form);
 					return new IPersist[] { bean };
 				}
 			}
 			else if (webObject instanceof ISupportChilds && args.getType().equals("tab"))
 			{
 				ISupportChilds iSupportChilds = (ISupportChilds)webObject;
-				iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(iSupportChilds, editorPart.getForm()));
-				Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
+				iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(iSupportChilds, form));
+				Tab newTab = (Tab)form.getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
 				String tabName = "tab_" + id.incrementAndGet();
-				while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
+				while (!PersistFinder.INSTANCE.checkName(form, tabName))
 				{
 					tabName = "tab_" + id.incrementAndGet();
 				}
@@ -228,16 +228,16 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 		else if (args.getName() != null || args.getUuid() != null)
 		{
-			ISupportFormElements parentSupportingElements = editorPart.getForm();
+			ISupportFormElements parentSupportingElements = form;
 			IPersist dropTarget = null;
 			IPersist initialDropTarget = null;
 			if (args.getDropTargetUUID() != null)
 			{
-				dropTarget = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getDropTargetUUID());
+				dropTarget = PersistFinder.INSTANCE.searchForPersist(form, args.getDropTargetUUID());
 				if (dropTarget != null)
 				{
 					initialDropTarget = dropTarget;
-					dropTarget = ElementUtil.getOverridePersist(PersistContext.create(dropTarget, editorPart.getForm()));
+					dropTarget = ElementUtil.getOverridePersist(PersistContext.create(dropTarget, form));
 				}
 				if (dropTarget != null)
 				{
@@ -276,7 +276,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 							if (property.getType() instanceof ComponentPropertyType)
 							{
 								// simple component type
-								return new IPersist[] { createNestedWebComponent(editorPart, parentWebComponent, property, name, propertyName, -1,
+								return new IPersist[] { createNestedWebComponent(form, parentWebComponent, property, name, propertyName, -1,
 									args.getLocation(), args.getSize()) };
 							}
 							else if (PropertyUtils.isCustomJSONArrayPropertyType(property.getType()) &&
@@ -286,7 +286,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								int index = 0;
 								IChildWebObject[] arrayOfChildComponents = (IChildWebObject[])parentWebComponent.getProperty(propertyName);
 								if (arrayOfChildComponents != null) index = arrayOfChildComponents.length;
-								return new IPersist[] { createNestedWebComponent(editorPart, parentWebComponent,
+								return new IPersist[] { createNestedWebComponent(form, parentWebComponent,
 									((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition(), name, propertyName, index,
 									args.getLocation(), args.getSize()) };
 							}
@@ -374,7 +374,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				else if ("servoydefault-tabpanel".equals(name))
 				{
 					String compName = "tabpanel_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+					while (!PersistFinder.INSTANCE.checkName(form, compName))
 					{
 						compName = "tabpanel_" + id.incrementAndGet();
 					}
@@ -385,14 +385,14 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					}
 					else
 					{
-						tabPanel = editorPart.getForm().createNewTabPanel(compName);
+						tabPanel = form.createNewTabPanel(compName);
 					}
 					return singlePersistWithLocationAndSize(tabPanel, args);
 				}
 				else if ("servoydefault-splitpane".equals(name))
 				{
 					String compName = "tabpanel_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+					while (!PersistFinder.INSTANCE.checkName(form, compName))
 					{
 						compName = "tabpanel_" + id.incrementAndGet();
 					}
@@ -403,7 +403,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					}
 					else
 					{
-						tabPanel = editorPart.getForm().createNewTabPanel(compName);
+						tabPanel = form.createNewTabPanel(compName);
 					}
 					tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
 					return singlePersistWithLocationAndSize(tabPanel, args);
@@ -411,7 +411,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				else if ("servoycore-portal".equals(name))
 				{
 					String compName = "portal_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+					while (!PersistFinder.INSTANCE.checkName(form, compName))
 					{
 						compName = "portal_" + id.incrementAndGet();
 					}
@@ -422,13 +422,13 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					}
 					else
 					{
-						portal = editorPart.getForm().createNewPortal(compName, args.getLocation());
+						portal = form.createNewPortal(compName, args.getLocation());
 					}
 					return singlePersistWithLocationAndSize(portal, args);
 				}
 				else if ("servoydefault-rectangle".equals(name))
 				{
-					RectShape shape = editorPart.getForm().createNewRectangle(args.getLocation());
+					RectShape shape = form.createNewRectangle(args.getLocation());
 					shape.setLineSize(1);
 					return singlePersistWithLocationAndSize(shape, args);
 				}
@@ -441,7 +441,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
 						componentName = componentName.replaceAll("-", "_");
 						compName = componentName + "_" + id.incrementAndGet();
-						while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+						while (!PersistFinder.INSTANCE.checkName(form, compName))
 						{
 							compName = componentName + "_" + id.incrementAndGet();
 						}
@@ -450,7 +450,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						if (parentSupportingElements instanceof Portal)
 						{
 							Portal portal = (Portal)parentSupportingElements;
-							webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
+							webComponent = (WebComponent)form.getRootObject().getChangeHandler().createNewObject(portal,
 								IRepository.WEBCOMPONENTS);
 							webComponent.setProperty("text", compName); //default
 							if (args.getText() != null)
@@ -468,7 +468,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						}
 						if (args.allProperties.has("cssPos"))
 						{
-							CSSPosition cssPositionFromJSON = DesignerUtil.cssPositionFromJSON(editorPart, webComponent, args.allProperties);
+							CSSPosition cssPositionFromJSON = DesignerUtil.cssPositionFromJSON(form, webComponent, args.allProperties);
 							webComponent.setCssPosition(cssPositionFromJSON);
 							CSSPositionUtils.setLocation(webComponent, args.getLocation());
 							CSSPositionUtils.setSize(webComponent, args.getSize());
@@ -500,10 +500,10 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									if (property.getType() == FormComponentPropertyType.INSTANCE)
 									{
 										FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-										Form form = FormComponentPropertyType.INSTANCE.getForm(args.getOtherProperty(propertyName), flattenedSolution);
-										if (form != null)
+										Form formComponent = FormComponentPropertyType.INSTANCE.getForm(args.getOtherProperty(propertyName), flattenedSolution);
+										if (formComponent != null)
 										{
-											Dimension size = form.getSize();
+											Dimension size = formComponent.getSize();
 											if (size.height == 0)
 											{
 												size.height = CSSPositionUtils.getSize(webComponent).height;
@@ -523,17 +523,17 @@ public class CreateComponentCommand extends BaseRestorableCommand
 										((ComponentTypeConfig)property.getConfig()).forFoundset != null)
 									{
 										// list form component
-										FormComponentTreeSelectDialog.selectFormComponent(webComponent, editorPart.getForm());
+										FormComponentTreeSelectDialog.selectFormComponent(webComponent, form);
 									}
 									else
 									{
-										autoshowWizard(parentSupportingElements, spec, webComponent, property, editorPart, id);
+										autoshowWizard(parentSupportingElements, spec, webComponent, property, form, id);
 									}
 								}
 							}
 						}
-						AddContainerCommand.showDataproviderDialog(spec.getProperties(), webComponent, editorPart);
-						if (editorPart.getForm().isResponsiveLayout() || webComponent.getParent() instanceof CSSPositionLayoutContainer)
+						AddContainerCommand.showDataproviderDialog(spec.getProperties(), webComponent, form);
+						if (form.isResponsiveLayout() || webComponent.getParent() instanceof CSSPositionLayoutContainer)
 						{
 							if (initialDropTarget != null &&
 								!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
@@ -542,12 +542,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								extraChangedPersists.add(webComponent.getParent());
 
 								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-								parent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), parent);
+								parent = PersistHelper.getFlattenedPersist(flattenedSolution, form, parent);
 								Iterator<IPersist> it = parent.getAllObjects();
 								while (it.hasNext())
 								{
 									IPersist child = it.next();
-									IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, editorPart.getForm()));
+									IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, form));
 									if (!overridePersist.getUUID().equals(child.getUUID()))
 									{
 										parent.removeChild(child);
@@ -561,7 +561,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									}
 								}
 							}
-							webComponent.setLocation(getLocationAndShiftSiblings(editorPart, webComponent.getParent(), args, extraChangedPersists));
+							webComponent.setLocation(getLocationAndShiftSiblings(form, webComponent.getParent(), args, extraChangedPersists));
 						}
 						// always return new persist for undo
 						return new IPersist[] { webComponent };
@@ -593,9 +593,9 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 									initialDropTarget.getParent() instanceof Form;
 								// this is a fix for dropping the responsive container on csspos
-								List<IPersist> res = createLayoutContainer(editorPart, parentSupportingElements, layoutSpec, sameTypeChildContainer, config,
+								List<IPersist> res = createLayoutContainer(form, parentSupportingElements, layoutSpec, sameTypeChildContainer, config,
 									args.getRightSibling() != null
-										? getLocationAndShiftSiblings(editorPart, parentSupportingElements, args, extraChangedPersists) : args.getLocation(),
+										? getLocationAndShiftSiblings(form, parentSupportingElements, args, extraChangedPersists) : args.getLocation(),
 									specifications, args.getPackageName());
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
@@ -634,7 +634,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 							{
 								if (template.getName().equals(name))
 								{
-									Point p = getLocationAndShiftSiblings(editorPart, parentSupportingElements, args, extraChangedPersists);
+									Point p = getLocationAndShiftSiblings(form, parentSupportingElements, args, extraChangedPersists);
 									Object[] applyTemplate = ElementFactory.applyTemplate(parentSupportingElements,
 										new TemplateElementHolder((Template)template), new org.eclipse.swt.graphics.Point(p.x, p.y), false);
 									if (applyTemplate.length > 0)
@@ -664,13 +664,13 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			}
 			else if (args.getUuid() != null)
 			{
-				IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getUuid());
+				IPersist persist = PersistFinder.INSTANCE.searchForPersist(form, args.getUuid());
 				if (persist instanceof AbstractBase)
 				{
 					IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 					ISupportChilds parent = dropTarget instanceof ISupportChilds ? (ISupportChilds)dropTarget : persist.getParent();
 					IPersist newPersist = ((AbstractBase)persist).cloneObj(parent, true, validator, true, true, true);
-					Point p = getLocationAndShiftSiblings(editorPart, parent, args, extraChangedPersists);
+					Point p = getLocationAndShiftSiblings(form, parent, args, extraChangedPersists);
 					CSSPositionUtils.setLocation((ISupportBounds)newPersist, p.x, p.y);
 					if (!EMPTY_SIZE.equals(args.getSize())) CSSPositionUtils.setSize((ISupportBounds)newPersist, args.getSize());
 
@@ -711,7 +711,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		return new IPersist[] { persist };
 	}
 
-	private static List<IPersist> createLayoutContainer(BaseVisualFormEditor editorPart, ISupportFormElements parent, WebLayoutSpecification layoutSpec,
+	private static List<IPersist> createLayoutContainer(Form form, ISupportFormElements parent, WebLayoutSpecification layoutSpec,
 		LayoutContainer sameTypeChildContainer,
 		JSONObject config, Point location, PackageSpecification<WebLayoutSpecification> specifications, String packageName)
 		throws RepositoryException, JSONException
@@ -719,7 +719,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		List<IPersist> newPersists = new ArrayList<IPersist>();
 		int type = parent.getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) == null && layoutSpec.getName().equals("servoycore-responsivecontainer")
 			? IRepository.CSSPOS_LAYOUTCONTAINERS : IRepository.LAYOUTCONTAINERS;
-		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
+		LayoutContainer container = (LayoutContainer)form.getRootObject().getChangeHandler().createNewObject(parent,
 			type);
 		container.setSpecName(layoutSpec.getName());
 		container.setPackageName(packageName);
@@ -756,7 +756,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						{
 							WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
 							newPersists.addAll(
-								createLayoutContainer(editorPart, container, spec, null, jsonObject.optJSONObject("model"), new Point(i + 1, i + 1),
+								createLayoutContainer(form, container, spec, null, jsonObject.optJSONObject("model"), new Point(i + 1, i + 1),
 									specifications,
 									packageName));
 						}
@@ -792,7 +792,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		return newPersists;
 	}
 
-	private static ChildWebComponent createNestedWebComponent(BaseVisualFormEditor editorPart, WebComponent parentWebComponent, PropertyDescription pd,
+	private static ChildWebComponent createNestedWebComponent(Form form, WebComponent parentWebComponent, PropertyDescription pd,
 		String componentSpecName,
 		String propertyName, int indexIfInArray, Point location, Dimension size)
 	{
@@ -803,7 +803,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
 			componentName = componentName.replaceAll("-", "_");
 			compName = componentName + "_" + id.incrementAndGet();
-			while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+			while (!PersistFinder.INSTANCE.checkName(form, compName))
 			{
 				compName = componentName + "_" + id.incrementAndGet();
 			}
@@ -829,14 +829,14 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		return null;
 	}
 
-	private static Point getLocationAndShiftSiblings(BaseVisualFormEditor editorPart, ISupportChilds parent, CreateComponentOptions args,
+	private static Point getLocationAndShiftSiblings(Form form, ISupportChilds parent, CreateComponentOptions args,
 		List<IPersist> extraChangedPersists) throws RepositoryException
 	{
-		if ((editorPart.getForm().isResponsiveLayout() || parent instanceof CSSPositionLayoutContainer) && !CSSPositionUtils.isCSSPositionContainer(
+		if ((form.isResponsiveLayout() || parent instanceof CSSPositionLayoutContainer) && !CSSPositionUtils.isCSSPositionContainer(
 			parent instanceof LayoutContainer ? (LayoutContainer)parent : null))
 		{
 			List<IPersist> children = new ArrayList<IPersist>();
-			Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
+			Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(form), form,
 				parent).getAllObjects();
 			while (it.hasNext())
 			{
@@ -856,11 +856,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				Arrays.sort(childArray, PositionComparator.XY_PERSIST_COMPARATOR);
 				if (args.getRightSibling() != null)
 				{
-					IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getRightSibling());
-					if (rightSibling == null && editorPart.getForm().getExtendsForm() != null)
+					IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(form, args.getRightSibling());
+					if (rightSibling == null && form.getExtendsForm() != null)
 					{
 
-						Form f = editorPart.getForm();
+						Form f = form;
 						do
 						{
 							f = f.getExtendsForm();
@@ -869,7 +869,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						while (f.getExtendsForm() != null);
 						if (rightSibling != null)
 						{
-							rightSibling = ElementUtil.getOverridePersist(PersistContext.create(rightSibling, editorPart.getForm()));
+							rightSibling = ElementUtil.getOverridePersist(PersistContext.create(rightSibling, form));
 						}
 					}
 					if (rightSibling != null)

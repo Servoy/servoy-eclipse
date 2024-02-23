@@ -66,7 +66,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
@@ -668,15 +667,10 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			if (lst == null)
 			{
 				lst = new ArrayList<IColumn>();
-				Iterator<Column> columns = EditorUtil.getTableColumns(t);
+				Iterator<Column> columns = EditorUtil.getTableColumns(t, false);
 				while (columns.hasNext())
 				{
 					IColumn column = columns.next();
-					ColumnInfo ci = column.getColumnInfo();
-					if (ci != null && ci.isExcluded())
-					{
-						continue;
-					}
 					// do not add the column if there is a stored calc for it, so prevent duplicate select values
 					if (!calculations.containsKey(column.getDataProviderID()))
 					{

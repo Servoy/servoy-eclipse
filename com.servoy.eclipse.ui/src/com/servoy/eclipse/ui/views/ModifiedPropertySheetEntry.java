@@ -31,9 +31,12 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.eclipse.ui.EditorActionsRegistry;
+import com.servoy.eclipse.ui.EditorActionsRegistry.EditorComponentActions;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
+import com.servoy.j2db.dataprocessing.IModificationListener;
 
 /**
  * PropertySheetEntry with additional Servoy features.
@@ -42,12 +45,21 @@ import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
  */
 public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IAdaptable
 {
-
 	private Object[] editValues;
 	private boolean hasDefaultVaue;
+	private IModificationListener ragtestHandler;
 
 	public ModifiedPropertySheetEntry()
 	{
+		this(false);
+	}
+
+	public ModifiedPropertySheetEntry(boolean ragtest)
+	{
+		if (ragtest)
+		{
+			ragtestHandler = EditorActionsRegistry.addRagtest(EditorComponentActions.CREATE_CUSTOM_COMPONENT, event -> refreshFromRoot());
+		}
 	}
 
 	/**
@@ -323,5 +335,16 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 	protected IPropertyDescriptor getDescriptor()
 	{
 		return super.getDescriptor();
+	}
+
+	@Override
+	public void dispose()
+	{
+		if (ragtestHandler != null)
+		{
+			EditorActionsRegistry.removeRagtest(EditorComponentActions.CREATE_CUSTOM_COMPONENT, ragtestHandler);
+		}
+
+		super.dispose();
 	}
 }
