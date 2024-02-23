@@ -44,10 +44,6 @@ public abstract class ComplexPropertySource<T> implements IPropertySource
 	{
 		this.readOnly = readOnly;
 	}
-	
-	public boolean hasComplexProperty(ComplexProperty<T> cp) {
-		return complexProperty == cp;
-	}
 
 	public final IPropertyDescriptor[] getPropertyDescriptors()
 	{

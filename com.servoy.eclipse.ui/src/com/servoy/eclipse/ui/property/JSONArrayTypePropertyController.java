@@ -22,8 +22,6 @@ import static com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSO
 import static com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayPropertySource.JSONArrayItemPropertyDescriptorWrapper.ArrayActions.UNDO_DELETE_CURRENT_COMMAND_VALUE;
 import static com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayPropertySource.JSONArrayItemPropertyDescriptorWrapper.ArrayActions.UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
 
-import java.util.function.Consumer;
-
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Button;
@@ -31,7 +29,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -53,8 +50,6 @@ import com.servoy.j2db.util.ServoyJSONObject;
 public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyController implements ICanHandleJSONNullValues
 {
 	private static IObjectTextConverter JSONARRAY_TEXT_CONVERTER = new JSONArrayTextConverter();
-
-	private Consumer<Object> setParentValueOnItsSource;
 
 	public JSONArrayTypePropertyController(Object id, String displayName)
 	{
@@ -87,7 +82,7 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 	protected void createNewElement(ButtonCellEditor cellEditor, Object oldValue)
 	{
 		// insert at position 0 an empty/null value
-		Object newValue = ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldValue, 0, getNewElementInitialValue());
+		Object newValue = ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldValue, 0, getNewElementInitialValue()); // RAGTEST
 		cellEditor.applyValue(newValue);
 	}
 
@@ -277,6 +272,14 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 			}
 
 			@Override
+			public void resetPropertyValue(ISetterAwarePropertySource propertySource)
+			{
+				IPropertyDescriptor basePDLocal = getRootBasePD();
+				if (basePDLocal instanceof IPropertySetter< ? , ? >) ((IPropertySetter)basePDLocal).resetPropertyValue(propertySource);
+				else propertySource.defaultResetProperty(getId());
+			}
+
+			@Override
 			public IPropertyConverter<Object, Object> getConverter()
 			{
 				return basePD instanceof IPropertyController< ? , ? > ? ((IPropertyController)basePD).getConverter() : null;
@@ -384,7 +387,6 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 		public final void resetPropertyValue(Object id)
 		{
 			setPropertyValue(id, resetComplexPropertyValue(id));
-			JSONArrayTypePropertyController.this.setParentValueOnItsSource.accept(getEditableValue());
 		}
 
 		public Object resetComplexPropertyValue(Object id)
@@ -562,39 +564,6 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 		}
 		else if (defValue instanceof JSONArray) toSet = (JSONArray)defValue;
 		propertySource.setPropertyValue(getId(), toSet);
-	}
-
-	@Override
-	public Object getProperty(final ISetterAwarePropertySource propertySource)
-	{
-		rememberParentPropertySourceForResetElement(propertySource);
-
-		return super.getProperty(propertySource);
-	}
-
-	public void rememberParentPropertySourceForResetElement(final IPropertySource propertySource)
-	{
-		// propertySource here is the parent property source which we can use when elements of the array are reset-to-default
-		// to re-apply a changed value of the whole array - so that it ends up in the parent persist/custom object
-		// correctly
-
-		// reset to default expects that a reset call updates the model that the properties view is showing completely
-		// so even if we set the default in an element of the array, we need to save the array as well
-		// because otherwise a refresh of the properties from the model (that follows a reset) will re-read a new array
-		// from the persist containing the old values; so reset to default for an element of the array would not work
-
-		// the same problem does not appear in CustomArrayTypePropertyController, as that one works on persist objects
-		// created from the root persist directly (arrays of custom objects) and those are able to save themselves back
-		// when a change happens in an element; but in this class the java array is pretty dumb... so we need this
-		// setParentValueAgainOnItsSource
-
-		// also this is not needed when an element of the array is being edited in the UI, just when a reset of an element happens,
-		// because setting a value in the cell editor goes directly in the set then valueChanged() of the UndoablePropertySheetEntry that then
-		// knows to generate a CompoundCommand that sets the values throughout all parents as well (nested PropertySheet instances)
-		// so it works a bit differently then reset...
-		this.setParentValueOnItsSource = (fullArrayValToBeSet) -> {
-			propertySource.setPropertyValue(getId(), fullArrayValToBeSet);
-		};
 	}
 
 }

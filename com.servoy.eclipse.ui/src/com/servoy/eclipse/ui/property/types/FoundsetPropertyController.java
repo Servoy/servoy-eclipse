@@ -238,8 +238,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			}
 			else if (hasDynamicDataproviders)
 			{
-				JSONArrayTypePropertyController arrayPC;
-				propertyDescriptors.add(arrayPC = new JSONArrayTypePropertyController(DATAPROVIDERS, DATAPROVIDERS)
+				propertyDescriptors.add(new JSONArrayTypePropertyController(DATAPROVIDERS, DATAPROVIDERS)
 				{
 					@Override
 					protected Object getNewElementInitialValue()
@@ -254,7 +253,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					}
 
 					@Override
-					protected ArrayPropertySource createArrayElementPropertySource(ComplexProperty<Object> complexP)
+					protected ArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexP)
 					{
 						return new JSONArrayPropertySource(complexP)
 						{
@@ -286,7 +285,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 						return new ServoyJSONArray();
 					}
 				});
-				arrayPC.rememberParentPropertySourceForResetElement(FoundsetPropertySource.this);
+
 			}
 
 			return PropertyController.applySequencePropertyComparator(propertyDescriptors.toArray(new IPropertyDescriptor[propertyDescriptors.size()]));
