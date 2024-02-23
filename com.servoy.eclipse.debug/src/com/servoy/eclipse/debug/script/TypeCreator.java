@@ -3616,6 +3616,11 @@ public class TypeCreator extends TypeCache
 			while (dataproviders.hasNext())
 			{
 				IDataProvider provider = dataproviders.next();
+				if (provider.hasFlag(IBaseColumn.EXCLUDED_COLUMN))
+				{
+					continue;
+				}
+
 				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 				property.setName(provider.getDataProviderID());
 				property.setAttribute(RESOURCE, provider);
