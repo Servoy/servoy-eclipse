@@ -168,6 +168,10 @@ IEclipsePreferences#org-eclipse-ui-editors:com-servoy-eclipse-servoydarktheme{
     'matchingBracketsColor=249,250,244';
 }
 
+IEclipsePreferences#org-eclipse-debug-ui:com-servoy-eclipse-servoydarktheme {
+  preferences: 'org.eclipse.debug.ui.outColor=255,255,255';
+}
+
 ThemesExtension {
   color-definition: '#com-servoy-themes-darktheme-FOREGROUND_COLOR',
   '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR',
