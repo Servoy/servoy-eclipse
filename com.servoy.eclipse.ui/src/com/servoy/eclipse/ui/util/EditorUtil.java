@@ -697,11 +697,7 @@ public class EditorUtil
 
 	public static void openThemeEditor(final IMediaProvider project)
 	{
-		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
-		if (media == null)
-		{
-			media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
-		}
+		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
 		Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
 		Path path = new Path(pathPair.getLeft() + pathPair.getRight());
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
@@ -710,7 +706,7 @@ public class EditorUtil
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
 			{
-				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
+				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
 				activePage.openEditor(PropertiesLessEditorInput.createFromFileEditorInput(new FileEditorInput(file)), desc.getId(),
 					true);
 			}
