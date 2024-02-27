@@ -165,16 +165,15 @@ export class EditorContentService {
         return this.leftAdjust;
     }
     
-    getValueInPixel(value: string, element: string, axis: string) {
+    getValueInPixel(value: string, axis: string) {
 		if (value.includes('%')) {
-			const elem = parseInt(element || '0');
 			const percentage = parseInt(value.replace('%',''));
 			if (axis === 'x') {
-				const width = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().width - elem; 
-				return `${percentage / 100 * width}`;
+				const width = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().width; 
+				return `${Math.round(percentage / 100 * width)}`;
 			} else {
-				const height = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().height - elem; 
-				return `${percentage / 100 * height}`;
+				const height = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().height; 
+				return `${Math.round(percentage / 100 * height)}`;
 			}
 		}
 		return value;

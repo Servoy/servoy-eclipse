@@ -93,13 +93,17 @@ export class KeyboardLayoutDirective {
 						} else {
 							if (elementInfo.y + changeY > -1) elementInfo.y = elementInfo.y + changeY;
 							if (elementInfo.x + changeX > -1) elementInfo.x = elementInfo.x + changeX;
-							element.style.left = elementInfo.x + 'px';
-							element.style.top = elementInfo.y + 'px';
+							if (elementInfo.element.style.left.length) {
+								element.style.left = elementInfo.x + 'px';
+							}
+							if (elementInfo.element.style.top.length) {
+								element.style.top = elementInfo.y + 'px';
+							}
 							if (elementInfo.element.style.right.length) {
-								elementInfo.element.style.right = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.right, elementInfo.element.style.width, 'x').replace('px', ''))|| 0)  - changeX + 'px';
+								elementInfo.element.style.right = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.right, 'x').replace('px', ''))|| 0)  - changeX + 'px';
 							}
 							if (elementInfo.element.style.bottom.length) {
-								elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, elementInfo.element.style.height, 'y').replace('px', ''))|| 0)  - changeY + 'px';
+								elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
 							}
 						}
                     }

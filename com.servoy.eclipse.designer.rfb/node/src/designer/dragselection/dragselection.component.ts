@@ -286,13 +286,17 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             elementInfo.y = elementInfo.y + changeY;
             if (minY != undefined && elementInfo.y < minY) elementInfo.y = minY;
             elementInfo.element.style.position = 'absolute';
-            elementInfo.element.style.top = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.top, '', 'y').replace('px', '')) || 0)  + changeY + 'px';
-            elementInfo.element.style.left = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.left, '', 'x').replace('px', ''))|| 0)  + changeX + 'px';
+            if (elementInfo.element.style.top.length) {
+				elementInfo.element.style.top = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
+			}
+            if (elementInfo.element.style.left.length) {
+				elementInfo.element.style.left = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
+			}
             if (elementInfo.element.style.right.length) {
-				elementInfo.element.style.right = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.right, elementInfo.element.style.width, 'x').replace('px', ''))|| 0)  - changeX + 'px';
+				elementInfo.element.style.right = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.right, 'x').replace('px', ''))|| 0)  - changeX + 'px';
 			}
 			if (elementInfo.element.style.bottom.length) {
-				elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, elementInfo.element.style.height, 'y').replace('px', ''))|| 0)  - changeY + 'px';
+				elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
 			}
         }
     }
