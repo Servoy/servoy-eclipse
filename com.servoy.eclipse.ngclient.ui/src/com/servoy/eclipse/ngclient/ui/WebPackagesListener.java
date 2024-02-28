@@ -616,14 +616,26 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 						});
 					}
-					// first exeuted npm install with all the packages.
+					// fist create the servoy/public dist
+					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("run", "build_lib_debug_nowatch"));
+					try
+					{
+						npmCommand.runCommand(monitor);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+
+					// exeuted npm install with all the packages.
 					// only execute this if a source is changed (should always happens the first time)
 					// or if there are really packages to install.
 					List<String> command = new ArrayList<>();
 					command.add("install");
 					packageToInstall.forEach(packageName -> command.add(packageName));
+					command.add("./dist/servoy/public/"); // also add the public api
 					command.add("--legacy-peer-deps");
-					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
+					npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
 					try
 					{
 						npmCommand.runCommand(monitor);
