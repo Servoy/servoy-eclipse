@@ -88,7 +88,7 @@ public class SetPropertiesHandler implements IServerService
 							while (it.hasNext())
 							{
 								String propertyName = (String)it.next();
-								if (!Arrays.asList("x", "y", "width", "height").contains(propertyName))
+								if (!Arrays.asList("x", "y", "width", "height", "move").contains(propertyName))
 								{
 									cc.add(new SetPropertyCommand("propertyName", PersistPropertySource.createPersistPropertySource(context, false),
 										propertyName, properties.opt(propertyName)));

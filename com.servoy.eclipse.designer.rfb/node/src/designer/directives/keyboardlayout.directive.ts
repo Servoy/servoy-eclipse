@@ -105,6 +105,12 @@ export class KeyboardLayoutDirective {
 							if (elementInfo.element.style.bottom.length) {
 								elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
 							}
+							if (!elementInfo.element.style.left.length && !elementInfo.element.style.right.length) {
+								element.style.left = elementInfo.x + 'px';
+							}
+							if (!elementInfo.element.style.top.length && !elementInfo.element.style.bottom.length) {
+								element.style.top = elementInfo.y + 'px';
+							}
 						}
                     }
                     else if (!isResize) {

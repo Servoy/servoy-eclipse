@@ -298,6 +298,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 			if (elementInfo.element.style.bottom.length) {
 				elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
 			}
+			if (!elementInfo.element.style.left.length && !elementInfo.element.style.right.length) {
+				elementInfo.element.style.left = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
+			}
+			if (!elementInfo.element.style.top.length && !elementInfo.element.style.bottom.length) {
+				elementInfo.element.style.top = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
+			}
         }
     }
 
