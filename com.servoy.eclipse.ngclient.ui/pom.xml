@@ -51,6 +51,19 @@
 					</execution>
 
                     <execution>
+                        <id>build servoy public</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node</workingDirectory>
+                            <skipTests>${maven.test.skip}</skipTests>
+                            <arguments>run build_lib</arguments>
+                        </configuration>
+                    </execution>
+                    
+                    <execution>
                         <id>install node and npm (defaults)</id>
                         <phase>initialize</phase>
                         <goals>
