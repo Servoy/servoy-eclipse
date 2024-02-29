@@ -616,15 +616,21 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 						});
 					}
-					// fist create the servoy/public dist
-					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("run", "build_lib_debug_nowatch"));
-					try
+					// fist create the servoy/public dist if needed
+					String location = Activator.getInstance().getBundle().getLocation();
+					int fromSourceIndex = location.indexOf("file:/");
+					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists())
 					{
-						npmCommand.runCommand(monitor);
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
+						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
+							Arrays.asList("run", "build_lib_debug_nowatch"));
+						try
+						{
+							npmCommand.runCommand(monitor);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
 					}
 
 					// exeuted npm install with all the packages.
@@ -633,9 +639,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					List<String> command = new ArrayList<>();
 					command.add("install");
 					packageToInstall.forEach(packageName -> command.add(packageName));
-					command.add("./dist/servoy/public/"); // also add the public api
+					command.add("./dist-public/"); // also add the public api
 					command.add("--legacy-peer-deps");
-					npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
+					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
 					try
 					{
 						npmCommand.runCommand(monitor);
