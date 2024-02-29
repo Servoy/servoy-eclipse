@@ -29,6 +29,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.json.JSONObject;
+
 import com.servoy.j2db.ISolutionModelPersistIndex;
 import com.servoy.j2db.PersistIndex;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -49,6 +51,7 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -299,27 +302,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			IPersist existingPersist = uuidToPersist.get(persist.getUUID().toString());
 			if (persist != existingPersist)
 			{
-				// if this is a WebCustomType this can be created multiply times for the same thing
-				// we should check if it is the same parent and the same index then assume this is the same thing
-				boolean isDifferent = !((persist instanceof WebCustomType && existingPersist instanceof WebCustomType) &&
-					(existingPersist.getAncestor(IRepository.WEBCOMPONENTS).getUUID().equals(persist.getAncestor(IRepository.WEBCOMPONENTS).getUUID())) &&
-					(((WebCustomType)existingPersist).getIndex() == ((WebCustomType)persist).getIndex()));
-				if (isDifferent)
-				{
-					ISupportChilds parent = persist.getParent();
-					while (isDifferent && parent instanceof WebComponent)
-					{
-						isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FORM_COMPONENT_UUID) == null;
-						parent = parent.getParent();
-					}
-					parent = existingPersist.getParent();
-					while (isDifferent && parent instanceof WebComponent)
-					{
-						isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FORM_COMPONENT_UUID) == null;
-						parent = parent.getParent();
-					}
-				}
-				if (isDifferent)
+				if (isDifferentPersist(existingPersist, persist))
 				{
 					List<IPersist> duplicates = duplicatesUUIDs.get(persist.getUUID());
 					if (duplicates == null)
@@ -329,7 +312,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 						duplicates.add(persist);
 						duplicates.add(existingPersist);
 					}
-					else
+					else if (duplicates.stream().allMatch(duplicate -> this.isDifferentPersist(duplicate, persist)))
 					{
 						duplicates.add(persist);
 					}
@@ -344,6 +327,35 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			children.forEach(child -> putInCache(child));
 		}
 
+	}
+
+	private boolean isDifferentPersist(IPersist existingPersist, IPersist persist)
+	{
+		boolean isDifferent = false;
+		if (persist != existingPersist)
+		{
+			// if this is a WebCustomType this can be created multiply times for the same thing
+			// we should check if it is the same parent and the same index then assume this is the same thing
+			isDifferent = !((persist instanceof WebCustomType && existingPersist instanceof WebCustomType) &&
+				(existingPersist.getAncestor(IRepository.WEBCOMPONENTS).getUUID().equals(persist.getAncestor(IRepository.WEBCOMPONENTS).getUUID())) &&
+				(((WebCustomType)existingPersist).getIndex() == ((WebCustomType)persist).getIndex()));
+			if (isDifferent)
+			{
+				ISupportChilds parent = persist.getParent();
+				while (isDifferent && parent instanceof WebComponent)
+				{
+					isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FORM_COMPONENT_UUID) == null;
+					parent = parent.getParent();
+				}
+				parent = existingPersist.getParent();
+				while (isDifferent && parent instanceof WebComponent)
+				{
+					isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FORM_COMPONENT_UUID) == null;
+					parent = parent.getParent();
+				}
+			}
+		}
+		return isDifferent;
 	}
 
 	// below method are teh one of the ISoluitonModelPersistIndex. they are just empty in the developer fs.
@@ -384,9 +396,20 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			Iterator<IPersist> listIterator = entry.getValue().iterator();
 			while (listIterator.hasNext())
 			{
-				if (!listIterator.next().getUUID().equals(entry.getKey()))
+				IPersist persist = listIterator.next();
+				if (!persist.getUUID().equals(entry.getKey()))
 				{
 					listIterator.remove();
+				}
+				if (persist instanceof WebCustomType)
+				{
+					// many are generated, not sure if the one we have is up to date, check the model
+					JSONObject fullJSONInFrmFile = WebObjectImpl.getFullJSONInFrmFile((WebCustomType)persist, false);
+					if (fullJSONInFrmFile != null && fullJSONInFrmFile.has(IChildWebObject.UUID_KEY) &&
+						!Utils.equalObjects(entry.getKey(), fullJSONInFrmFile.get(IChildWebObject.UUID_KEY)))
+					{
+						listIterator.remove();
+					}
 				}
 			}
 			if (entry.getValue().size() <= 1)

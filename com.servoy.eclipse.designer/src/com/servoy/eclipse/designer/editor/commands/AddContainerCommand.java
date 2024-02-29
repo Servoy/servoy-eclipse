@@ -81,6 +81,7 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 
@@ -297,7 +298,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 											if (property.getInitialValue() != null)
 											{
 												Object initialValue = property.getInitialValue();
-												if (initialValue != null) webComponent.setProperty(string, initialValue);
+												if (initialValue != null)
+													webComponent.setProperty(string, ServoyJSONObject.deepCloneJSONArrayOrObj(initialValue));
 											}
 											if ("autoshow".equals(property.getTag("wizard")))
 											{
@@ -660,7 +662,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					else if (property != null && property.getInitialValue() != null)
 					{
 						Object initialValue = property.getInitialValue();
-						if (initialValue != null) customType.setProperty(string, initialValue);
+						if (initialValue != null) customType.setProperty(string, ServoyJSONObject.deepCloneJSONArrayOrObj(initialValue));
 					}
 				}
 			}
