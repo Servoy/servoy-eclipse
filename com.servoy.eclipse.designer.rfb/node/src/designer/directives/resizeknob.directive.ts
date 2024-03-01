@@ -229,9 +229,9 @@ export class ElementInfo {
     height:number;
 
     constructor(public element: HTMLElement) {
-        const elementRect = element.getBoundingClientRect();
-        this.x = elementRect.x
-        this.y = elementRect.y;
+        const elementRect = element.getBoundingClientRect();      
+        this.x = element.offsetLeft;
+        this.y = element.offsetTop;
         this.width = elementRect.width
         this.height = elementRect.height;
     }
