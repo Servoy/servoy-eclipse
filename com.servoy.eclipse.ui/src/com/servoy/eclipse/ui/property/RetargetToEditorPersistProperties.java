@@ -84,16 +84,23 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 	{
 		// ignore if the value did not change (Was already set), happens when a form property is changed using props view and form node
 		// is selected in the solex tree, setPropertyValue is called with new value while value has already been set.
-		if (!Utils.equalObjects(value, persistProperties.getPropertyValue(id)))
+		Object propertyValue = persistProperties.getPropertyValue(id);
+		if (Utils.equalObjects(value, propertyValue))
 		{
-			Display.getCurrent().syncExec(new Runnable()
-			{
-				public void run()
-				{
-					updateProperty(true, id, value);
-				}
-			});
+			return;
 		}
+		if (propertyValue instanceof ComplexProperty && Utils.equalObjects(value, ((ComplexProperty< ? >)propertyValue).getValue()))
+		{
+			return;
+		}
+
+		Display.getCurrent().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				updateProperty(true, id, value);
+			}
+		});
 	}
 
 	/**

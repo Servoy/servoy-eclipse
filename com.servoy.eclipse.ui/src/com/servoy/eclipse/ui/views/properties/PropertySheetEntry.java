@@ -706,19 +706,19 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 		// loop through the objects getting our property value from each
 		Object[] newValues = new Object[currentSources.length];
-		boolean hasDefaultVaue = false;
+		boolean hasDefaultValue = false;
 		for (int i = 0; i < currentSources.length; i++)
 		{
 			IPropertySource source = parent.getPropertySource(currentSources[i]);
 			newValues[i] = source.getPropertyValue(descriptor.getId());
 			if (!source.isPropertySet(descriptor.getId()))
 			{
-				hasDefaultVaue = true;
+				hasDefaultValue = true;
 			}
 		}
 
 		// set our new values
-		setValuesInternal(newValues, hasDefaultVaue);
+		setValuesInternal(newValues, hasDefaultValue);
 	}
 
 	/*

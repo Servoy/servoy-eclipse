@@ -3243,7 +3243,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			ComboboxPropertyModel<Object> model = new ComboboxPropertyModel<Object>(config.getReal(), config.getDisplay());
 			if (config.hasDefault())
 			{
-				model.addDefaultValue(config.getRealDefault(), config.getDisplayDefault());
+				model.addDefaultValue(config.getRealDefault(), config.getDisplayDefault()); // RAGTEST
 			}
 			return new ComboboxPropertyController<Object>(id, displayName, model, Messages.LabelUnresolved);
 		}

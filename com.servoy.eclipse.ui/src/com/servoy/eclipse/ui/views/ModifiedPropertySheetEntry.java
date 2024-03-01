@@ -46,7 +46,7 @@ import com.servoy.j2db.dataprocessing.IModificationListener;
 public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IAdaptable
 {
 	private Object[] editValues;
-	private boolean hasDefaultVaue;
+	private boolean hasDefaultValue;
 	private IModificationListener ragtestHandler;
 
 	public ModifiedPropertySheetEntry()
@@ -258,7 +258,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 		// See if the value changed and if so update
 		Object newValue = editor.getValue();
-		if (hasDefaultVaue || stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
+		if (hasDefaultValue || stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
 		{
 			// Set the editor value
 			setValue(newValue);
@@ -266,13 +266,13 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 	}
 
 	@Override
-	public void setValuesInternal(Object[] objects, boolean hasDefaultVaue)
+	public void setValuesInternal(Object[] objects, boolean hasDefaultValue)
 	{
-		super.setValuesInternal(objects, hasDefaultVaue);
+		super.setValuesInternal(objects, hasDefaultValue);
 		if (objects.length == 0)
 		{
 			editValues = null;
-			this.hasDefaultVaue = false;
+			this.hasDefaultValue = false;
 		}
 		else
 		{
@@ -288,7 +288,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 				}
 				editValues[i] = newValue;
 			}
-			this.hasDefaultVaue = hasDefaultVaue;
+			this.hasDefaultValue = hasDefaultValue;
 		}
 	}
 

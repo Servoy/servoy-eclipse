@@ -27,6 +27,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.designer.editor.CreateOverrideIfNeeededCommandWrapper;
 import com.servoy.eclipse.designer.editor.IRAGTEST;
+import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand.CreateComponentOptions;
 import com.servoy.eclipse.ui.EditorActionsRegistry.EditorComponentActionHandler;
@@ -66,7 +67,7 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 				IPersist context = persistPropertySource.getContext();
 				if (context instanceof Form)
 				{
-					var commandCreater = commandCreater((Form)context, propertyName, type, prepend, dropTargetIsSibling);
+					var commandCreater = createCommandCreater((Form)context, propertyName, type, prepend, dropTargetIsSibling);
 					return new CreateOverrideIfNeeededCommandWrapper(persistPropertySource, uuid, commandCreater);
 				}
 			}
@@ -77,7 +78,7 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 	/**
 	 * Create a command to create the component, the uuid may be different from the one supplied above
 	 */
-	private static Function<UUID, Command> commandCreater(Form form, String propertyName, String type,
+	private static Function<UUID, Command> createCommandCreater(Form form, String propertyName, String type,
 		boolean prepend, boolean dropTargetIsSibling)
 	{
 		return (uuid) -> {
@@ -92,9 +93,17 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 	}
 
 	@Override
-	public void deleteComponent(IPersist persist)
+	public void deleteComponent(IPropertySource propertySource, UUID uuid)
 	{
-		//RAGTESTexecuteCommandOnForm(formEditor -> new FormElementDeleteCommand(persist));
+		executeCommandOnForm(propertySource, () -> {
+			if (propertySource instanceof PersistPropertySource)
+			{
+				// only delete an element when it can be found in the context (form), otherwise it is a override
+				PersistPropertySource persistPropertySource = (PersistPropertySource)propertySource;
+				return persistPropertySource.getContext().searchChild(uuid).map(FormElementDeleteCommand::new).orElse(null);
+			}
+			return null;
+		}, "deleteComponent");
 	}
 
 	@Override
@@ -105,22 +114,24 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 
 	private Object executeCommandOnForm(IPropertySource persistPropertySource, Supplier<Command> buildCommand, String eventName)
 	{
-		IEditorPart editor = RetargetToEditorPersistProperties.openPersistEditor(persistPropertySource, false);
-		if (editor != null)
+		Command command = buildCommand.get();
+		if (command != null)
 		{
-			CommandStack commandStack = editor.getAdapter(CommandStack.class);
-			if (commandStack != null)
+			IEditorPart editor = RetargetToEditorPersistProperties.openPersistEditor(persistPropertySource, false);
+			if (editor != null)
 			{
-				Command command = buildCommand.get();
-				commandStack.execute(command);
-				modificationSubject.fireModificationEvent(new ModificationEvent(eventName, null, persistPropertySource));
-				if (command instanceof IRAGTEST)
+				CommandStack commandStack = editor.getAdapter(CommandStack.class);
+				if (commandStack != null)
 				{
-					return ((IRAGTEST< ? >)command).getRagtest();
+					commandStack.execute(command);
+					modificationSubject.fireModificationEvent(new ModificationEvent(eventName, null, persistPropertySource));
+					if (command instanceof IRAGTEST)
+					{
+						return ((IRAGTEST< ? >)command).getRagtest();
+					}
 				}
 			}
 		}
 		return null;
-
 	}
 }

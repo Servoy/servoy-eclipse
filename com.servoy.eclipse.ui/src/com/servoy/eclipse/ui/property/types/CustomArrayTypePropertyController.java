@@ -194,10 +194,9 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					{
 						if (oldValue instanceof IPersist)
 						{
-							//RAGTEST	callHandler(handler -> handler.deleteComponent((IPersist)oldValue));
+							callHandler(handler -> handler.deleteComponent(persistPropertySource, ((IPersist)oldValue).getUUID()));
 						}
 					}
-
 				}, new ButtonCellEditor()
 				{
 					@Override

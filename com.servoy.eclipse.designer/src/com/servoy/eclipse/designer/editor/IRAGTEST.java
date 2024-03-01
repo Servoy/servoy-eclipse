@@ -19,7 +19,7 @@ package com.servoy.eclipse.designer.editor;
 
 /**
  * RAGTEST doc
- * @author rob
+ * @author rgansevles
  *
  */
 public interface IRAGTEST<T>
