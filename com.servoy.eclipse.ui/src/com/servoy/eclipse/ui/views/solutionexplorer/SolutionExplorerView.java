@@ -3403,7 +3403,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("delete.png"), "Delete");
 		IAction deleteForm = new DeletePersistAction(UserNodeType.FORM, "Delete form");
 		deleteRelation = new DeletePersistAction(UserNodeType.RELATION, "Delete relation");
-		IAction deleteSolution = new DeleteSolutionAction(shell);
+		IAction deleteSolution = new DeleteSolutionAction(getSite());
 		IAction deleteServer = new DeleteServerAction(this);
 		deleteActionInTree.registerAction(UserNodeType.FORM, deleteForm);
 		deleteActionInTree.registerAction(UserNodeType.RELATION, deleteRelation);

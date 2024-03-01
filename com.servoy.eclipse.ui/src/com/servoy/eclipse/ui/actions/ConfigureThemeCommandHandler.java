@@ -68,8 +68,7 @@ public class ConfigureThemeCommandHandler extends AbstractHandler implements IHa
 		if (activeProject != null)
 		{
 			IMediaProvider solution = ModelUtils.getEditingFlattenedSolution(activeProject.getSolution());
-			setBaseEnabled(solution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS) != null ||
-				solution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS) != null);
+			setBaseEnabled(solution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS) != null);
 		}
 		else
 		{

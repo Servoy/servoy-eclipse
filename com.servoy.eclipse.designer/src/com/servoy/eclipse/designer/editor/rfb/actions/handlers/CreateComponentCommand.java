@@ -108,6 +108,7 @@ import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -515,7 +516,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								else if (property.getInitialValue() != null)
 								{
 									Object initialValue = property.getInitialValue();
-									if (initialValue != null) webComponent.setProperty(propertyName, initialValue);
+									if (initialValue != null) webComponent.setProperty(propertyName, ServoyJSONObject.deepCloneJSONArrayOrObj(initialValue));
 								}
 								if ("autoshow".equals(property.getTag("wizard")))
 								{

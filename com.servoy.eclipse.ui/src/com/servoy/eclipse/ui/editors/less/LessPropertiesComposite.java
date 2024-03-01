@@ -250,6 +250,7 @@ public class LessPropertiesComposite extends Composite
 					setThemeVersion();
 				}
 			});
+			tiCheck.setVisible(false);
 			categoryComposites = new ArrayList<ExpandableLessPropertiesComposite>();
 			for (String categoryName : propertiesLessEditorInput.getCategories())
 			{

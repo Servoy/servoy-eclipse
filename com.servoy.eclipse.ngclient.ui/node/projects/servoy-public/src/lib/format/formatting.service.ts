@@ -110,14 +110,14 @@ export class FormattingService {
     /**
      * calls the { @link #unformat} function for unformatting/parsing the data given
      */
-    public parse(data: any, format: Format, useEditFormat: boolean, currentValue?: any, useHeuristics? : boolean): any {
+    public parse(data: any, format: Format, useEditFormat: boolean, currentValue?: any, useHeuristics?: boolean): any {
         return this.unformat(data, (useEditFormat && format.edit && !format.isMask) ? format.edit : format.display, format.type, currentValue, useHeuristics);
     }
 
     /**
      * unformats/parse the give data according to the given format and type 
      */
-    public unformat(data: any, servoyFormat: string, type: string, currentValue?: any,useHeuristics? : boolean ) {
+    public unformat(data: any, servoyFormat: string, type: string, currentValue?: any, useHeuristics?: boolean) {
         if ((!servoyFormat) || (!type) || (!data && data !== 0)) return data;
         if ((type === 'NUMBER') || (type === 'INTEGER')) {
             return this.unformatNumbers(data, servoyFormat);
@@ -127,10 +127,10 @@ export class FormattingService {
             if ('' === data) return null;
             servoyFormat = this.convertFormat(servoyFormat);
             let d = DateTime.fromFormat(data, servoyFormat, { locale: this.servoyService.getLocale() }).toJSDate();
-            if (isNaN(d.getTime()) && useHeuristics){
-                for ( var newFormat of this.getHeuristicFormats(servoyFormat)){
+            if (isNaN(d.getTime()) && useHeuristics) {
+                for (var newFormat of this.getHeuristicFormats(servoyFormat)) {
                     d = DateTime.fromFormat(data, newFormat, { locale: this.servoyService.getLocale() }).toJSDate();
-                    if (!isNaN(d.getTime())){
+                    if (!isNaN(d.getTime())) {
                         break;
                     }
                 }
@@ -154,30 +154,33 @@ export class FormattingService {
         }
         return data;
     }
-    
+
     private getHeuristicFormats(servoyFormat: string): Array<string> {
         const formats = new Array();
         let currentFormat = '';
         let separator;
-        if(servoyFormat){
-           for (var index=0;index < servoyFormat.length;index++){
-               if (servoyFormat.charAt(index).match(/[a-zA-Z]/)){
-                   currentFormat += servoyFormat.charAt(index);
-                   formats.push(currentFormat);
-               }
-               else if (!separator || separator == servoyFormat.charAt(index)){
-                   separator = servoyFormat.charAt(index);
-                   formats.push(currentFormat + servoyFormat.charAt(index));
-               }
-               else {
-                   // another separator?
-                   break;
-               }
-           } 
+        if (servoyFormat) {
+            if (servoyFormat.indexOf('dd') >= 0) {
+                formats.push(servoyFormat.replace('dd','d'));
+            }
+            for (var index = 0; index < servoyFormat.length; index++) {
+                if (servoyFormat.charAt(index).match(/[a-zA-Z]/)) {
+                    currentFormat += servoyFormat.charAt(index);
+                    formats.push(currentFormat);
+                }
+                else if (!separator || separator == servoyFormat.charAt(index)) {
+                    separator = servoyFormat.charAt(index);
+                    formats.push(currentFormat + servoyFormat.charAt(index));
+                }
+                else {
+                    // another separator?
+                    break;
+                }
+            }
         }
-        return formats;  
+        return formats;
     }
-    
+
     private unformatNumbers(data: any, format: string) { // todo throw error when not coresponding to format (reimplement with state machine)
         if (data === '') return data;
         //treat scientiffic numbers
@@ -236,23 +239,23 @@ export class FormattingService {
 
         const keychar = String.fromCharCode(key);
         if (this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) && vSvyFormat !== null) {
-			const value = vElement.value;
-			if (value.includes(decimalChar) && window.getSelection().toString() !== value) {
-				const allowToConcat = value.indexOf(decimalChar);
-				if (e.target.selectionStart <= allowToConcat) {
-					return true;
-				}
-				if (vSvyFormat.edit) {
-					const maxDecimals = vSvyFormat.edit.split(SVY_FORMAT_DECIMAL_CHAR)[1].length;
-					if (value.split(decimalChar)[1].length >= maxDecimals) {
-						return false;
-					}
-				}
-			}
-			return true;
-		} else {
-			return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
-		}
+            const value = vElement.value;
+            if (value.includes(decimalChar) && window.getSelection().toString() !== value) {
+                const allowToConcat = value.indexOf(decimalChar);
+                if (e.target.selectionStart <= allowToConcat) {
+                    return true;
+                }
+                if (vSvyFormat.edit) {
+                    const maxDecimals = vSvyFormat.edit.split(SVY_FORMAT_DECIMAL_CHAR)[1].length;
+                    if (value.split(decimalChar)[1].length >= maxDecimals) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } else {
+            return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
+        }
     }
 
     private numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
@@ -274,7 +277,7 @@ export class FormattingService {
             if (counter > mlength) return false;
         }
 
-		if ((('-0123456789').indexOf(keychar) > -1)) {
+        if ((('-0123456789').indexOf(keychar) > -1)) {
             return true;
         } else if (decimal && (keychar === decimalChar)) {
             return true;
@@ -522,8 +525,8 @@ export class FormattingService {
     private formatDate(data, dateFormat: string): string {
         if (!(data instanceof Date)) return data;
         // single quote escape workaround until https://github.com/moment/luxon/issues/649 is fixed
-        dateFormat = this.convertFormat(dateFormat).replace("''","'svy_quote'");
-        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat).replace('svy_quote',"'");
+        dateFormat = this.convertFormat(dateFormat).replace("''", "'svy_quote'");
+        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat).replace('svy_quote', "'");
         return formatted.trim ? formatted.trim() : formatted;
     }
 

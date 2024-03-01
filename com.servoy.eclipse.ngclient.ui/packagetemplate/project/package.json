@@ -2,10 +2,10 @@
   "name": "##packagename##",
   "version": "1.0.0",
   "peerDependencies": {
-    "@angular/animations": "^15",
-    "@angular/common": "^15",
-    "@angular/core": "^15",
-    "@angular/forms": "^15"
+    "@angular/animations": "^17",
+    "@angular/common": "^17",
+    "@angular/core": "^17",
+    "@angular/forms": "^17"
   },
   "dependencies": {
     "tslib": "*"

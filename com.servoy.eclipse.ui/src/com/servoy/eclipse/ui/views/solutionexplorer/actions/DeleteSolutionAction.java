@@ -29,7 +29,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.DeleteResourceAction;
 
@@ -63,9 +63,9 @@ public class DeleteSolutionAction extends Action implements ISelectionChangedLis
 	 *
 	 * @param shell used for interaction with the user.
 	 */
-	public DeleteSolutionAction(Shell shell)
+	public DeleteSolutionAction(IShellProvider shellProvider)
 	{
-		deleteAction = new DeleteResourceAction(shell);
+		deleteAction = new DeleteResourceAction(shellProvider);
 
 		setText("Delete solution");
 		setToolTipText("Delete solution");

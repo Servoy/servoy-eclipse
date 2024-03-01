@@ -22,11 +22,6 @@
       "dom.Iterable"
     ],
     "paths": {
-      "@servoy/public": [
-        "../projects/servoy-public/src/public-api",
-        "./projects/servoy-public/src/public-api",
-        "../servoy-public/src/public-api"
-      ]
     },
     "outDir": "./out-tsc/app",
     "useDefineForClassFields": false

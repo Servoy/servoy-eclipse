@@ -5,7 +5,13 @@
     "outDir": "../../out-tsc/spec",
     "types": [
       "jasmine"
-    ]
+    ],
+    "paths": {
+        "@servoy/public": [
+            "../servoy-public/src/public-api"
+        ]
+    }
+
   },
   "files": [
     "src/test.ts"

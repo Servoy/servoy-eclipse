@@ -46,7 +46,6 @@ import com.servoy.j2db.util.IDelegate;
 public abstract class ArrayTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 	protected ILabelProvider labelProvider = null;
-	private ArrayPropertySource arrayElementPropertySource;
 
 	public ArrayTypePropertyController(Object id, String displayName)
 	{
@@ -70,16 +69,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 	protected abstract void createNewElement(ButtonCellEditor cellEditor, Object oldValue);
 
-	protected abstract ArrayPropertySource createArrayElementPropertySource(ComplexProperty<Object> complexProperty);
-
-	private ArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty)
-	{
-		if (arrayElementPropertySource == null || !arrayElementPropertySource.hasComplexProperty(complexProperty))
-		{
-			arrayElementPropertySource = createArrayElementPropertySource(complexProperty);
-		}
-		return arrayElementPropertySource;
-	}
+	protected abstract ArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty);
 
 	@Override
 	protected IPropertyConverter<Object, Object> createConverter()

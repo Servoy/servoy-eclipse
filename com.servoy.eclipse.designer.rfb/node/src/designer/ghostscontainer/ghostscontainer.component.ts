@@ -260,7 +260,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             this.editorSession.setSelection(selection);
         }
         else {
-            if (event.button == 2 && selection.length > 1 && selection.indexOf(ghost.uuid) >= 0) {
+            if (event.button == 2 && selection.indexOf(ghost.uuid) >= 0) {
                 //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
                 this.editorSession.getState().ghosthandle = true;
                 return;    
