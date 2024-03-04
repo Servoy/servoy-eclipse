@@ -452,6 +452,36 @@ describe('FormattingService', () => {
           expect(date.getMonth()).toBe(10);
           expect(date.getDate()).toBe(12);
           
+          date = service.unformat('2/3', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(2);
+          
+          date = service.unformat('12/3', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(12);
+          
+          date = service.unformat('2/11', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(10);
+          expect(date.getDate()).toBe(2);
+          
+          date = service.unformat('2/3/24', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2024);
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(2);
+          
+          date = service.unformat('2/3/2024', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2024);
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(2);
+          
       });
   
      it('should corectly format dates', () => {

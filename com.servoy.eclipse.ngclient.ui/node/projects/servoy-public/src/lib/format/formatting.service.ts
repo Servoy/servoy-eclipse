@@ -155,22 +155,44 @@ export class FormattingService {
         return data;
     }
 
+    private addToFormats(formats: Array<string>, newChar: string, isSeparator: boolean) {
+        const size = formats.length;
+        if (size == 0) {
+            formats.push(newChar);
+        } else {
+            const formatsCopy = Array.from(formats);
+            let insertIndex = -1;
+            if (newChar == 'y'){
+                insertIndex = formats.findIndex((element) => element.indexOf('y') >= 0);
+            }
+            for (let i = 0; i < formatsCopy.length; i++) {
+                const newFormat = formatsCopy[i] + newChar;
+                if (isSeparator && formatsCopy[i].lastIndexOf(newChar) == formatsCopy[i].length - 1)
+                    continue;
+                if (formats.indexOf(newFormat) == -1) {
+                    if (insertIndex>= 0){
+                        formats.splice(insertIndex, 0 , newFormat);
+                    }
+                    else{
+                        formats.push(newFormat);
+                    }
+                }
+            }
+        }
+    }
+
     private getHeuristicFormats(servoyFormat: string): Array<string> {
-        const formats = new Array();
-        let currentFormat = '';
+        const formats = new Array<string>();
         let separator;
         if (servoyFormat) {
-            if (servoyFormat.indexOf('dd') >= 0) {
-                formats.push(servoyFormat.replace('dd','d'));
-            }
-            for (var index = 0; index < servoyFormat.length; index++) {
-                if (servoyFormat.charAt(index).match(/[a-zA-Z]/)) {
-                    currentFormat += servoyFormat.charAt(index);
-                    formats.push(currentFormat);
+            for (let index = 0; index < servoyFormat.length; index++) {
+                const currentChar = servoyFormat.charAt(index);
+                if (currentChar.match(/[a-zA-Z]/)) {
+                    this.addToFormats(formats, currentChar, false);
                 }
-                else if (!separator || separator == servoyFormat.charAt(index)) {
-                    separator = servoyFormat.charAt(index);
-                    formats.push(currentFormat + servoyFormat.charAt(index));
+                else if (!separator || separator == currentChar) {
+                    separator = currentChar;
+                    this.addToFormats(formats, currentChar, true);
                 }
                 else {
                     // another separator?
