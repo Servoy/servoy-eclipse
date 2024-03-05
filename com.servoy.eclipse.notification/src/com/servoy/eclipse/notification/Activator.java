@@ -95,7 +95,7 @@ public class Activator extends AbstractUIPlugin
 				"Servoy notification",
 				"https://servoy.com/category/developer-news/feed/",
 				false,
-				60000 * 30, // 30 min
+				60000 * 120, // 30 min
 				"lastNotificationTimestamp"
 				);
 			servoyNotificationJob.schedule(20000);

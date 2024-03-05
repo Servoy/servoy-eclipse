@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -386,6 +387,7 @@ public class Activator extends AbstractUIPlugin
 				{
 					activeShell = (Shell)activeShell.getParent();
 				}
+				boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
 				//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
 				String username = null;
 				try
@@ -416,7 +418,7 @@ public class Activator extends AbstractUIPlugin
 				if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
 				{
 					BrowserDialog dialog = new BrowserDialog(activeShell,
-						TUTORIALS_URL + loginToken, true, true);
+						TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, true);
 					dialog.open(true);
 				}
 
