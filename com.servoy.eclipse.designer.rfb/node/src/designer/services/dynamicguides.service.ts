@@ -80,7 +80,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     }
 
     private onMouseMove(event: MouseEvent): void {
-      if (!this.guidesEnabled || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
+      if (!this.guidesEnabled || this.editorSession.getSelection()?.length !==1 || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
 
       let point = this.adjustPoint(event.pageX, event.pageY);
       if (this.leftPos.size == 0) this.init(point);
