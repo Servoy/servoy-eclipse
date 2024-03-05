@@ -170,6 +170,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 								properties.width = r.width - r.left + point.x;
 							}
 							if (!closerToTheLeft && point.x < r.right) {
+								properties.left = r.left;
 								properties.width = r.width - r.right + point.x;
 							}
 						}
@@ -180,6 +181,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 								properties.height = r.height - r.top + point.y;
 							}
 							if (!closerToTheTop && point.y < r.bottom) {
+								properties.top = r.top;
 								properties.height = r.height - r.bottom + point.y;
 							}
 						}
@@ -206,7 +208,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         }
 		
         let rect = this.getDraggedElementRect(point);
-		if (resizing) { 
+		/*if (resizing && this.equalSizeThreshold > 0) { 
 			let verticalDist: Guide[], horizontalDist: Guide[];
 			if (resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
 				verticalDist = this.addEqualHeightGuides(point, rect, properties);
@@ -221,11 +223,11 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				this.properties = properties;
 				return this.snapDataListener.next(this.properties);
 			}
-		}
+		}*/
 		
 		const horizontalSnap = this.handleHorizontalSnap(resizing, point, uuid, rect, properties);
 		const verticalSnap = this.handleVerticalSnap(resizing, point, uuid, rect, properties);
-		if (!resizing) { 
+		if (!resizing && this.equalDistanceThreshold > 0) { 
 			//equal distance guides
 			const verticalDist = this.addEqualDistanceVerticalGuides(rect, properties);
 			if (verticalDist && verticalSnap) {
@@ -300,6 +302,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	}
 
 	private handleHorizontalSnap(resizing: string, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
+		if (this.snapThreshold <= 0) return null;
 		if (!resizing || resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
 			let closerToTheLeft = this.pointCloserToTopOrLeftSide(point, rect, 'x');
 			let snapX, guideX;
@@ -376,6 +379,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	}
 
 	private handleVerticalSnap(resizing: string, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
+		if (this.snapThreshold <= 0) return null;
 		if (!resizing || resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
 			let closerToTheTop = this.pointCloserToTopOrLeftSide(point, rect, 'y');
 			let snapY, guideY;
