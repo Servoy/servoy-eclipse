@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormService, ServerElement } from '../ngclient/form.service';
 import { IDesignFormComponent } from './servoydesigner.component';
-import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties, FormCache, CSSPosition, Position } from '../ngclient/types';
+import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties, FormCache, CSSPosition, Position, PartCache } from '../ngclient/types';
 import { ConverterService } from '../sablo/converter.service';
 import { IComponentCache } from '@servoy/public';
 import { TypesRegistry, IWebObjectSpecification, RootPropertyContextCreator } from '../sablo/types_registry';
@@ -287,6 +287,9 @@ export class EditorContentService {
                 if (partCache){
                     partCache.layout = JSON.parse(style);
                     refresh = true;
+                }else{
+                    const part = new PartCache(name, null, JSON.parse(style));
+                    formCache.addPart(part);
                 }
             }
         }
