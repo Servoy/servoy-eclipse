@@ -93,9 +93,9 @@ public class Activator extends AbstractUIPlugin
 		{
 			servoyNotificationJob = new RSSNotificationJob(
 				"Servoy notification",
-				"https://servoy.com/category/developer-news/feed/",
+				"https://middleware-prod.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/developerRSSFeedService/feed",
 				false,
-				60000 * 120, // 30 min
+				60000 * 120, // 120 min
 				"lastNotificationTimestamp"
 				);
 			servoyNotificationJob.schedule(20000);
