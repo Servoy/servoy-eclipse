@@ -272,14 +272,6 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 			}
 
 			@Override
-			public void resetPropertyValue(ISetterAwarePropertySource propertySource)
-			{
-				IPropertyDescriptor basePDLocal = getRootBasePD();
-				if (basePDLocal instanceof IPropertySetter< ? , ? >) ((IPropertySetter)basePDLocal).resetPropertyValue(propertySource);
-				else propertySource.defaultResetProperty(getId());
-			}
-
-			@Override
 			public IPropertyConverter<Object, Object> getConverter()
 			{
 				return basePD instanceof IPropertyController< ? , ? > ? ((IPropertyController)basePD).getConverter() : null;
