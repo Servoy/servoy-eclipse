@@ -54,7 +54,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         if (changes['tabs']) {
             // quickly generate the id's for a the tab html id (and selecting it)
             this.initTabID();
-            if (!changes['tabs'].firstChange) {
+            if (!changes['tabs'].firstChange && this.selectedTab) {
                 let index = this.getRealTabIndex();
                 if (index >= 0) {
                     this.select(this.tabs[index]);
