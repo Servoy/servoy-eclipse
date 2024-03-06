@@ -100,7 +100,7 @@ public class Activator extends AbstractUIPlugin
 	 *
 	 */
 	public static final String TUTORIALS_URL = System.getProperty("servoy.tutorial.url") == null
-		? "https://tutorials.servoy.com/solutions/content/index.html?servoyVersion=" + ClientVersion.getPureVersion() + "&loginToken="
+		? "https://admin.servoy-cloud.eu/solution/developerWelcome?servoyVersion=" + ClientVersion.getPureVersion() + "&loginToken="
 		: System.getProperty("servoy.tutorial.url");
 
 	/**
