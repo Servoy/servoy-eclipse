@@ -87,7 +87,7 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
         this.showPermanentHighlight = showHighlight;
         this.editorContentService.executeOnlyAfterInit(() => {
             const elements = this.editorContentService.getAllContentElements();
-            Array.from(elements).forEach((node, i) => {
+            Array.from(elements).forEach((node) => {
                 if (node.parentElement.classList.contains('svy-wrapper')) {
                     node = node.parentElement;
                 } else if (node.parentElement.parentElement.classList.contains('svy-wrapper')) {
@@ -100,10 +100,6 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
                 }
                 else {
                     this.renderer.removeClass(node, 'highlight_element');
-                }
-                if (i === Array.from(elements).length - 1) {
-                    const lastElement = Array.from(node.closest('.svy-form').childNodes).filter(item => item.toString() != '[object Comment]').slice(-1)[0] as HTMLElement;
-                    lastElement.style.marginBottom = '1px';
                 }
             });
         });
