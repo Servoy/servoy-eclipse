@@ -91,7 +91,7 @@ ExpandBar {
     swt-header-background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
 
-svyNatTable {
+.svyNatTable {
     min-height: 300px;
     text-trim: false;
     text-wrap: true;

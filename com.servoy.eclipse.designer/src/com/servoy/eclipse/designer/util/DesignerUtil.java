@@ -721,7 +721,7 @@ public class DesignerUtil
 						CSSPositionUtils.getPixelsValue(left.getCssPosition().width) + "";
 					if (CSSPositionUtils.isSet(newPosition.right)) newPosition.right = "-1";
 				}
-				else
+				else if (CSSPositionUtils.isSet(left.getCssPosition().right) && CSSPositionUtils.isSet(left.getCssPosition().width))
 				{
 					int l = CSSPositionUtils.getPixelsValue(left.getCssPosition().right) - CSSPositionUtils.getPixelsValue(left.getCssPosition().width);
 					if (position == null || CSSPositionUtils.isSet(position.right))
@@ -730,7 +730,11 @@ public class DesignerUtil
 					}
 					else if (isResize)
 					{
-						newPosition.width = CSSPositionUtils.getPixelsValue(position.right) - l + "";
+						int w = CSSPositionUtils.getPixelsValue(position.right) - l;
+						if (w > 0)
+						{
+							newPosition.width = w + "";
+						}
 					}
 				}
 			}
@@ -747,7 +751,11 @@ public class DesignerUtil
 				{
 					if (isResize)
 					{
-						newPosition.width = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(position.left) + "";
+						int w = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(position.left);
+						if (w > 0)
+						{
+							newPosition.width = w + "";
+						}
 					}
 					else
 					{
@@ -760,7 +768,7 @@ public class DesignerUtil
 //					newPosition.right = CSSPositionUtils.getPixelsValue(right.getCssPosition().right) -
 //						CSSPositionUtils.getPixelsValue(right.getCssPosition().width) + "";
 //				}
-				else
+				else if (CSSPositionUtils.isSet(right.getCssPosition().left) && CSSPositionUtils.isSet(right.getCssPosition().width))
 				{
 					AbstractContainer parent = CSSPositionUtils.getParentContainer(right);
 					java.awt.Dimension containerSize = parent.getSize();
@@ -837,7 +845,7 @@ public class DesignerUtil
 						CSSPositionUtils.getPixelsValue(top.getCssPosition().height) + "";
 					if (CSSPositionUtils.isSet(newPosition.bottom)) newPosition.bottom = "-1";
 				}
-				else
+				else if (CSSPositionUtils.isSet(top.getCssPosition().bottom) && CSSPositionUtils.isSet(top.getCssPosition().height))
 				{
 					int t = CSSPositionUtils.getPixelsValue(top.getCssPosition().bottom) - CSSPositionUtils.getPixelsValue(top.getCssPosition().height);
 					if (position == null || CSSPositionUtils.isSet(position.bottom))
@@ -846,7 +854,11 @@ public class DesignerUtil
 					}
 					else if (isResize)
 					{
-						newPosition.height = CSSPositionUtils.getPixelsValue(position.bottom) - t + "";
+						int h = CSSPositionUtils.getPixelsValue(position.bottom) - t;
+						if (h > 0)
+						{
+							newPosition.height = h + "";
+						}
 					}
 				}
 			}
@@ -876,18 +888,19 @@ public class DesignerUtil
 //					newPosition.bottom = CSSPositionUtils.getPixelsValue(bottom.getCssPosition().bottom) -
 //						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height) + "";
 //				}
-				else
+				else if (CSSPositionUtils.isSet(bottom.getCssPosition().top) && CSSPositionUtils.isSet(bottom.getCssPosition().height))
 				{
 					AbstractContainer parent = CSSPositionUtils.getParentContainer(bottom);
 					java.awt.Dimension containerSize = parent.getSize();
 					int b = containerSize.height - CSSPositionUtils.getPixelsValue(bottom.getCssPosition().top) -
 						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height);
-					if (position == null || CSSPositionUtils.isSet(position.bottom))
-					{
-					}
 					if (isResize)
 					{
-						newPosition.height = containerSize.height - b - CSSPositionUtils.getPixelsValue(position.top) + "";
+						int h = containerSize.height - b - CSSPositionUtils.getPixelsValue(position.top);
+						if (h > 0)
+						{
+							newPosition.height = h + "";
+						}
 					}
 					else
 					{

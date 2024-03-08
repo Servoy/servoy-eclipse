@@ -134,11 +134,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	{
 		private final class CustomArrayItemPropertyDescriptorWrapper extends ArrayItemPropertyDescriptorWrapper
 		{
-			/**
-			 * @param basePD
-			 * @param index
-			 * @param arrayPropertySource
-			 */
+
 			private CustomArrayItemPropertyDescriptorWrapper(IPropertyDescriptor basePD, int index, ArrayPropertySource arrayPropertySource)
 			{
 				super(basePD, index, arrayPropertySource);

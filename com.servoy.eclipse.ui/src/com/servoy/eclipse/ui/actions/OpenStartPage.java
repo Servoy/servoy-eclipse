@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.actions;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -45,8 +46,9 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 		}
 		if (loginToken != null)
 		{
+			boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
 			BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-				Activator.TUTORIALS_URL + loginToken, true, false);
+				Activator.TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, false);
 			dialog.open(true);
 		}
 	}
