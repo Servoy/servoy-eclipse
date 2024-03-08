@@ -354,11 +354,11 @@ public class EditorServiceHandler implements IServerService
 						return Boolean.valueOf(rfbVisualFormEditorDesignPage != null
 							? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED) : null);
 					}
-					if (args.has("showI18NValues"))
+					if (args.has(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER))
 					{
 						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER)
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER))
-							: Boolean.TRUE;
+							: Boolean.FALSE;
 					}
 				}
 				return Boolean.FALSE;

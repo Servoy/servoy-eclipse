@@ -261,8 +261,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
         const showI18NValuesPromise = this.editorSession.isShowI18NValues();
         void showI18NValuesPromise.then((result: boolean) => {
-            if (!result) {
-                this.btnToggleI18NValues.text = 'Show I18N values';
+            if (result) {
+                this.btnToggleI18NValues.text = 'Show I18N text as keys';
+                this.btnToggleI18NValues.state = true;
             }
         });
 
@@ -1068,16 +1069,16 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnReload, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         this.btnToggleI18NValues = new ToolbarItem(
-            'Show I18n Values',
+            'Show resolved I18N text',
             'toolbar/icons/i18n.png',
             true,
             () => {
                 if (this.btnToggleI18NValues.state) {
                     this.btnToggleI18NValues.state = false;
-                    this.btnToggleI18NValues.text = 'Show I18N values';
+                    this.btnToggleI18NValues.text = 'Show resolved I18N text';
                 } else {
                     this.btnToggleI18NValues.state = true;
-                    this.btnToggleI18NValues.text = 'Show I18N keys';
+                    this.btnToggleI18NValues.text = 'Show I18N text as keys';
                 }
                 void this.editorSession.toggleShowI18NValues();
             }

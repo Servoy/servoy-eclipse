@@ -82,8 +82,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             Array.from(this.nodes).forEach(selected => {
                 const node = this.editorContentService.getContentElement(selected.svyid);
                 if (!node) return;
-                const position = node.getBoundingClientRect();
-                this.designerUtilsService.adjustElementRect(node, position);
+                const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                 selected.style = {
                     height: position.height + 'px',
                     width: position.width + 'px',
@@ -124,8 +123,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 const elements = this.editorContentService.getAllContentElements();
                 Array.from(elements).forEach(node => {
                     if (selection.indexOf(node.getAttribute('svy-id')) >= 0) {
-                        const position = node.getBoundingClientRect();
-                        this.designerUtilsService.adjustElementRect(node, position);
+                        const position =  this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                         const style = {
                             height: position.height + 'px',
                             width: position.width + 'px',
@@ -224,8 +222,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 let wrapper = node.parentElement;
                 while (wrapper && !wrapper.classList.contains('svy-wrapper')) wrapper = wrapper.parentElement;
                 if (!(wrapper && wrapper.style.visibility === 'hidden')) {
-                    const position = node.getBoundingClientRect();
-                    this.designerUtilsService.adjustElementRect(node, position);
+                    const position =  this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                     const iframeLeft = this.editorContentService.getLeftPositionIframe();
                     const iframeTop = this.editorContentService.getTopPositionIframe();
                     const rect1 = new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY, this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY - this.mousedownpoint.y))
@@ -264,8 +261,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
             const elements = this.editorContentService.getAllContentElements();
             const newNode = Array.from(elements).reverse().find((node) => {
-                const position = node.getBoundingClientRect();
-                this.designerUtilsService.adjustElementRect(node, position);
+                const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                 let addToSelection = false;
                 if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                     let wrapper = node.parentElement;
@@ -333,17 +329,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             if (event.shiftKey && newNode) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 0) {
-                    const position1 = newNode.getBoundingClientRect();
-                    this.designerUtilsService.adjustElementRect(newNode, position1);
-
+                    const position1 =  this.designerUtilsService.adjustElementRect(newNode, newNode.getBoundingClientRect());
                     const element = this.editorContentService.getContentElement(selection[0]);
                     if (element) {
-                        const position2 = element.getBoundingClientRect();
-                        this.designerUtilsService.adjustElementRect(element, position2);
+                        const position2 =  this.designerUtilsService.adjustElementRect(element, element.getBoundingClientRect());
                         const rect1 = new DOMRect(Math.min(position1.left, position2.left), Math.min(position1.top, position2.top), Math.abs(position1.left - position2.left), Math.abs(position1.top - position2.top))
                         Array.from(elements).forEach((node) => {
-                            const position = node.getBoundingClientRect();
-                            this.designerUtilsService.adjustElementRect(node, position);
+                            const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                             if (this.rectanglesIntersect(rect1, position)) {
                                 const id = node.getAttribute('svy-id');
                                 const layoutName = node.getAttribute('svy-layoutname');

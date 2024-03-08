@@ -248,8 +248,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             if (this.dragItem.ghost) {
                 const elements = this.editorContentService.getAllContentElements();
                 const found = Array.from(elements).find((node) => {
-                    const position = node.getBoundingClientRect();
-                    this.designerUtilsService.adjustElementRect(node, position);
+                    const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                     if (position.x <= component.x && position.x + position.width >= component.x && position.y <= component.y && position.y + position.height >= component.y) {
                         const types = node.getAttribute('svy-types');
                         if (types && types.split(',').indexOf(this.dragItem.ghost.type) >= 0) {
@@ -341,8 +340,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     const x = event.pageX - this.editorContentService.getLeftPositionIframe();
                     const y = event.pageY - this.editorContentService.getTopPositionIframe();
                     const found = Array.from(elements).find((node) => {
-                        const position = node.getBoundingClientRect();
-                        this.designerUtilsService.adjustElementRect(node, position);
+                        const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect()); 
                         if (position.x <= x && position.x + position.width >= x && position.y <= y && position.y + position.height >= y) {
                             const types = node.getAttribute('svy-types');
                             if (types && types.split(',').indexOf(this.dragItem.ghost.type) >= 0) {
