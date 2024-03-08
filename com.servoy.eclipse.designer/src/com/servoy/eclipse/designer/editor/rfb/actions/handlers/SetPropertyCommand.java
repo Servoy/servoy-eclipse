@@ -8,7 +8,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -17,7 +17,7 @@ import com.servoy.j2db.persistence.ISupportBounds;
 public final class SetPropertyCommand extends BaseRestorableCommand
 {
 	private final Object value;
-	private final PersistPropertySource source;
+	private final IRAGTEST source;
 	private final String propertyName;
 
 	/**
@@ -25,7 +25,7 @@ public final class SetPropertyCommand extends BaseRestorableCommand
 	 * @param newLocation
 	 * @param persist
 	 */
-	SetPropertyCommand(String label, PersistPropertySource source, String propertyName, Object value)
+	SetPropertyCommand(String label, IRAGTEST source, String propertyName, Object value)
 	{
 		super(label);
 		this.source = source;

@@ -420,7 +420,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			propertyControllerThatMightNeedTooltip = new ScriptProviderPropertyController(name, displayName, table, persistContext);
 			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(propertyControllerThatMightNeedTooltip).build();
 		}
-		else if ("variableType".equals(name) && persistContext.getPersist() instanceof ScriptVariable && propertySource instanceof PersistPropertySource)
+		else if ("variableType".equals(name) && persistContext.getPersist() instanceof ScriptVariable && propertySource instanceof IRAGTEST)
 		{
 			int[] iTypes = Column.allDefinedTypes;
 			Integer[] integerTypes = new Integer[iTypes.length];
@@ -430,7 +430,6 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				integerTypes[i] = Integer.valueOf(iTypes[i]);
 				stringTypes[i] = Column.getDisplayTypeString(iTypes[i]);
 			}
-
 
 			// null type: use property controller internally
 			propertyControllerThatMightNeedTooltip = new PropertySetterDelegatePropertyController<Integer, PersistPropertySource>(

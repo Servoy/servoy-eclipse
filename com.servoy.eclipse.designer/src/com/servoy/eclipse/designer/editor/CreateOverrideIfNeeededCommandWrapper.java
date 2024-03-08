@@ -22,8 +22,8 @@ import java.util.function.Function;
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.UUID;
@@ -34,9 +34,9 @@ import com.servoy.j2db.util.UUID;
  * @author rgansevles
  *
  */
-public class CreateOverrideIfNeeededCommandWrapper extends Command implements IRAGTEST<IPersist>
+public class CreateOverrideIfNeeededCommandWrapper extends Command
 {
-	private final PersistPropertySource propertySource;
+	private final IRAGTEST propertySource;
 	private final Function<UUID, Command> commandCreater;
 
 	private PersistContext savedPersistContext;
@@ -44,7 +44,7 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command implements IR
 	private final UUID origUUID;
 	private UUID newUUID;
 
-	public CreateOverrideIfNeeededCommandWrapper(PersistPropertySource propertySource, UUID origUUID, Function<UUID, Command> commandCreater)
+	public CreateOverrideIfNeeededCommandWrapper(IRAGTEST propertySource, UUID origUUID, Function<UUID, Command> commandCreater)
 	{
 		super(null);
 		this.propertySource = propertySource;
@@ -105,10 +105,4 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command implements IR
 		}
 		command = null;
 	}
-
-	public IPersist getRagtest()
-	{
-		return propertySource.getPersistContext().getPersist().searchChild2(newUUID == null ? origUUID : newUUID);
-	}
-
 }

@@ -28,6 +28,7 @@ import com.servoy.eclipse.ui.editors.table.EventsComposite.EventNode;
 import com.servoy.eclipse.ui.labelproviders.AccesCheckingContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -64,7 +65,7 @@ public class EventsMethodEditingSupport extends EditingSupport
 		EventNode node = (EventNode)element;
 		try
 		{
-			PersistPropertySource persistProperties = PersistPropertySource.createPersistPropertySource(
+			IRAGTEST persistProperties = PersistPropertySource.createPersistPropertySource(
 				node.getSolution().getOrCreateTableNode(table.getDataSource()), node.getSolution(), false);
 			persistProperties.setPropertyValue(node.getType().getProperty().getPropertyName(), value);
 			if (persistProperties.getPersist().isChanged())

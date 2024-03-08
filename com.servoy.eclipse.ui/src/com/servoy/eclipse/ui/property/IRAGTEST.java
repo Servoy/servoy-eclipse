@@ -15,14 +15,48 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.designer.editor;
+package com.servoy.eclipse.ui.property;
+
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * RAGTEST doc
+ *
  * @author rgansevles
  *
  */
-public interface IRAGTEST<T>
+public interface IRAGTEST extends IModelSavePropertySource
 {
-	T getRagtest();
+	IPropertyDescriptor getPropertyDescriptor(Object id);
+
+	Object getPersistPropertyValue(Object id);
+
+	void setPersistPropertyValue(Object id, Object value);
+
+	PersistContext getPersistContext();
+
+	void setPersistContext(PersistContext persistContext);
+
+	boolean createOverrideElementIfNeeded() throws RepositoryException;
+
+	void setReadOnly(boolean readOnly);
+
+	default IPersist getPersist()
+	{
+		return getPersistContext().getPersist();
+	}
+
+	default IPersist getContext()
+	{
+		return getPersistContext().getContext();
+	}
+
+	default IPersist getSaveModel()
+	{
+		return getPersistContext().getPersist();
+	}
+
 }

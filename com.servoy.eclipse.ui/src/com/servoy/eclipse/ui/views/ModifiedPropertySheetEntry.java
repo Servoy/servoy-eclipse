@@ -58,6 +58,10 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 	{
 		if (ragtest)
 		{
+
+			setPropertySourceProvider(new RagtestPropertySourceProvider());
+
+
 			ragtestHandler = EditorActionsRegistry.addRagtest(EditorComponentActions.CREATE_CUSTOM_COMPONENT, event -> refreshFromRoot());
 		}
 	}

@@ -25,6 +25,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.property.ComplexProperty;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PropertyCategory;
@@ -72,7 +73,7 @@ public class ToggleFormCommandsAction extends Action implements ISelectionChange
 				Form form = (Form)activeProject.getEditingPersist(nodeForm.getUUID());
 				if (form != null)
 				{
-					PersistPropertySource persistProperties = PersistPropertySource.createPersistPropertySource(form, form, false);
+					IRAGTEST persistProperties = PersistPropertySource.createPersistPropertySource(form, form, false);
 					RetargetToEditorPersistProperties propertiesSource = new RetargetToEditorPersistProperties(persistProperties);
 					for (IPropertyDescriptor descriptor : propertiesSource.getPropertyDescriptors())
 					{

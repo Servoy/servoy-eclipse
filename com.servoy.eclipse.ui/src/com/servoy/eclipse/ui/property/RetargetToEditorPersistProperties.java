@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.util.IDelegate;
@@ -33,17 +32,17 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-public class RetargetToEditorPersistProperties implements IPropertySource, IAdaptable, IDelegate<IModelSavePropertySource>
+public class RetargetToEditorPersistProperties implements IPropertySource, IAdaptable, IDelegate<IPropertySource>
 {
-	private final IModelSavePropertySource persistProperties;
+	private final IPropertySource persistProperties;
 
-	public RetargetToEditorPersistProperties(IModelSavePropertySource persistProperties)
+	public RetargetToEditorPersistProperties(IPropertySource persistProperties)
 	{
 		this.persistProperties = persistProperties;
 	}
 
 	@Override
-	public IModelSavePropertySource getDelegate()
+	public IPropertySource getDelegate()
 	{
 		return persistProperties;
 	}
@@ -119,35 +118,31 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 			return;
 		}
 
-		IPropertySourceProvider propertySourceProvider = editor.getAdapter(IPropertySourceProvider.class);
-		if (propertySourceProvider != null)
+		if (set)
 		{
-			IPropertySource propertySource = propertySourceProvider.getPropertySource(persistProperties.getSaveModel());
-			if (propertySource != null)
-			{
-				if (set)
-				{
-					propertySource.setPropertyValue(id, value);
-				}
-				else
-				{
-					propertySource.resetPropertyValue(id);
-				}
-			}
+			persistProperties.setPropertyValue(id, value);
+		}
+		else
+		{
+			persistProperties.resetPropertyValue(id);
 		}
 	}
 
 	public static IEditorPart openPersistEditor(IPropertySource persistProperties, boolean activate)
 	{
 		Object editorModel;
-		if (persistProperties instanceof PersistPropertySource)
+		if (persistProperties instanceof IRAGTEST)
 		{
-			PersistContext persistContext = ((PersistPropertySource)persistProperties).getPersistContext();
+			PersistContext persistContext = ((IRAGTEST)persistProperties).getPersistContext();
 			editorModel = persistContext.getContext();
 		}
 		else if (persistProperties instanceof IModelSavePropertySource)
 		{
 			editorModel = ((IModelSavePropertySource)persistProperties).getSaveModel();
+		}
+		else if (persistProperties instanceof ComplexPropertySource complexPropertySource)
+		{
+			editorModel = null;//RAGTEST complexPropertySource.
 		}
 		else
 		{

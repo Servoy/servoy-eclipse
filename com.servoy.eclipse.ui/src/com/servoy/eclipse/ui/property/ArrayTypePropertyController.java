@@ -69,7 +69,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 	protected abstract void createNewElement(ButtonCellEditor cellEditor, Object oldValue);
 
-	protected abstract ArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty);
+	protected abstract IPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty);
 
 	@Override
 	protected IPropertyConverter<Object, Object> createConverter()
@@ -265,7 +265,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
-			//	elementPropertyDescriptors = null;//RAGTEST
 			if (elementPropertyDescriptors == null)
 			{
 				Object arrayV = getEditableValue();

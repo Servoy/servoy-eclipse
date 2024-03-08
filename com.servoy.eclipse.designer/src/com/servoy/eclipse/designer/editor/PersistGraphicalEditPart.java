@@ -29,6 +29,7 @@ import com.servoy.eclipse.designer.property.PropertyDirectEditManager;
 import com.servoy.eclipse.designer.property.PropertyDirectEditManager.PropertyCellEditorLocator;
 import com.servoy.eclipse.designer.property.PropertyDirectEditPolicy;
 import com.servoy.eclipse.ui.property.ComplexProperty;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.CSSPositionUtils;
@@ -47,7 +48,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 {
 	private DirectEditManager directEditManager;
-	private PersistPropertySource persistProperties;
+	private IRAGTEST persistProperties;
 
 	private final Form form;
 	private final IFigureFactory< ? extends PersistImageFigure> figureFactory;
@@ -79,7 +80,7 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, new PropertyDirectEditPolicy(getPersist(), form));
 	}
 
-	protected PersistPropertySource getPersistProperties()
+	protected IRAGTEST getPersistProperties()
 	{
 		if (persistProperties == null)
 		{

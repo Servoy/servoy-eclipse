@@ -21,6 +21,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.RetargetingPropertySource;
@@ -29,7 +30,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Properties source for InsetList in mobile form editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -77,7 +78,7 @@ public class MobileListPropertySource extends RetargetingPropertySource implemen
 	{
 		// Delegate to members
 		String prefix;
-		PersistPropertySource elementPropertySource;
+		IRAGTEST elementPropertySource;
 
 		// tab settings
 		if (getModel().component != null)
@@ -119,7 +120,8 @@ public class MobileListPropertySource extends RetargetingPropertySource implemen
 		{
 			elementPropertySources.put(prefix = PREFIX_LISTITEM_SUBTEXT,
 				elementPropertySource = PersistPropertySource.createPersistPropertySource(getModel().subtext, getContext(), false));
-			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), "subtextDataProvider");
+			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+				"subtextDataProvider");
 			addMethodPropertyDescriptor(elementPropertySource, prefix, StaticContentSpecLoader.PROPERTY_TEXT.getPropertyName(), "subtext");
 		}
 
@@ -156,9 +158,10 @@ public class MobileListPropertySource extends RetargetingPropertySource implemen
 	{
 		super.setPropertyValue(id, value);
 		IPropertySource listPersistPropertySource = elementPropertySources.get(null);
-		if (listPersistPropertySource instanceof PersistPropertySource)
+		if (listPersistPropertySource instanceof IRAGTEST)
 		{
-			Object relationValue = ((PersistPropertySource)listPersistPropertySource).getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName());
+			Object relationValue = ((IRAGTEST)listPersistPropertySource)
+				.getPersistPropertyValue(StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName());
 			if (StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName().equals(id))
 			{
 				// new relation was set, clear current data providers
@@ -172,7 +175,8 @@ public class MobileListPropertySource extends RetargetingPropertySource implemen
 				if (sIDs != null &&
 					sIDs.length == 2 &&
 					StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName().equals(sIDs[1]) &&
-					(PREFIX_LISTITEM_BUTTON.equals(sIDs[0]) || PREFIX_LISTITEM_SUBTEXT.equals(sIDs[0]) || PREFIX_LISTITEM_COUNT.equals(sIDs[0]) || PREFIX_LISTITEM_IMAGE.equals(sIDs[0])) &&
+					(PREFIX_LISTITEM_BUTTON.equals(sIDs[0]) || PREFIX_LISTITEM_SUBTEXT.equals(sIDs[0]) || PREFIX_LISTITEM_COUNT.equals(sIDs[0]) ||
+						PREFIX_LISTITEM_IMAGE.equals(sIDs[0])) &&
 					value instanceof String)
 				{
 					String valueString = (String)value;
@@ -180,7 +184,7 @@ public class MobileListPropertySource extends RetargetingPropertySource implemen
 					if (lastRelationSeparator != -1)
 					{
 						String relation = valueString.substring(0, lastRelationSeparator);
-						((PersistPropertySource)listPersistPropertySource).setPersistPropertyValue(
+						((IRAGTEST)listPersistPropertySource).setPersistPropertyValue(
 							StaticContentSpecLoader.PROPERTY_RELATIONNAME.getPropertyName(), relation);
 					}
 				}
@@ -199,7 +203,10 @@ public class MobileListPropertySource extends RetargetingPropertySource implemen
 	private void updatePersistProperty(String prefix, String property, Object value)
 	{
 		IPropertySource propertySource = elementPropertySources.get(prefix);
-		if (propertySource instanceof PersistPropertySource) ((PersistPropertySource)propertySource).setPersistPropertyValue(property, value);
+		if (propertySource instanceof IRAGTEST)
+		{
+			((IRAGTEST)propertySource).setPersistPropertyValue(property, value);
+		}
 	}
 
 	@Override

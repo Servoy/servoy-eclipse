@@ -49,6 +49,7 @@ import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper;
+import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
@@ -206,7 +207,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					@Override
 					protected void buttonClicked()
 					{
-						if (oldValue instanceof IPersist)
+						if (oldValue instanceof IPersist persist)
 						{
 							callHandler(handler -> {
 								Object id = getId();
@@ -219,7 +220,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 								{
 									parentKey = String.valueOf(id);
 								}
-								handler.createComponent(persistPropertySource, ((IPersist)oldValue).getUUID(), parentKey, getTypeName(), false, true);
+								handler.createComponent(persistPropertySource, persist.getParent().getUUID(), parentKey, getTypeName(), false, true);
 							});
 						}
 					}

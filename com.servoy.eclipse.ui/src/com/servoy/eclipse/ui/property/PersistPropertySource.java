@@ -256,7 +256,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  */
 
-public class PersistPropertySource implements ISetterAwarePropertySource, IAdaptable, IModelSavePropertySource
+public class PersistPropertySource implements ISetterAwarePropertySource, IAdaptable, IRAGTEST
 {
 	protected PersistContext persistContext;
 	protected boolean readOnly;
@@ -373,19 +373,19 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	{
 	};
 
-	public static PersistPropertySource createPersistPropertySource(IPersist persist, IPersist context, boolean readonly)
+	public static IRAGTEST createPersistPropertySource(IPersist persist, IPersist context, boolean readonly)
 	{
 		return createPersistPropertySource(PersistContext.create(persist, context), readonly);
 	}
 
-	public static PersistPropertySource createPersistPropertySource(IPersist persist, boolean readonly)
+	public static IRAGTEST createPersistPropertySource(IPersist persist, boolean readonly)
 	{
 		return createPersistPropertySource(PersistContext.create(persist), readonly);
 	}
 
-	public static PersistPropertySource createPersistPropertySource(PersistContext persistContext, boolean readonly)
+	public static IRAGTEST createPersistPropertySource(PersistContext persistContext, boolean readonly)
 	{
-		PersistPropertySource persistPropertySource = (PersistPropertySource)Platform.getAdapterManager().getAdapter(persistContext, IPropertySource.class);
+		IRAGTEST persistPropertySource = (IRAGTEST)Platform.getAdapterManager().getAdapter(persistContext, IPropertySource.class);
 		if (persistPropertySource != null) persistPropertySource.setReadOnly(readonly);
 		return persistPropertySource;
 	}
@@ -407,21 +407,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			this.readOnly = readOnly;
 			propertyDescriptors = null;
 		}
-	}
-
-	public IPersist getPersist()
-	{
-		return persistContext.getPersist();
-	}
-
-	public IPersist getContext()
-	{
-		return persistContext.getContext();
-	}
-
-	public Object getSaveModel()
-	{
-		return persistContext.getPersist();
 	}
 
 	public Object getAdapter(Class adapter)

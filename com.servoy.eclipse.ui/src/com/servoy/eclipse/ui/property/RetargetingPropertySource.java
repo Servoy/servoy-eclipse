@@ -29,7 +29,7 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * Base properties source for retargeting properties to items in a model.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -84,19 +84,20 @@ public abstract class RetargetingPropertySource implements IPropertySource
 	}
 
 
-	protected void addMethodPropertyDescriptor(PersistPropertySource elementPropertySource, String prefix, String propertyName)
+	protected void addMethodPropertyDescriptor(IRAGTEST elementPropertySource, String prefix, String propertyName)
 	{
 		addMethodPropertyDescriptor(elementPropertySource, prefix, propertyName, null);
 	}
 
-	protected void addMethodPropertyDescriptor(PersistPropertySource elementPropertySource, String prefix, String propertyName, String displayName)
+	protected void addMethodPropertyDescriptor(IRAGTEST elementPropertySource, String prefix, String propertyName, String displayName)
 	{
 		String id = prefix == null ? propertyName : prefix + '.' + propertyName;
 		IPropertyDescriptor propertyDescriptor = elementPropertySource.getPropertyDescriptor(propertyName);
 		if (propertyDescriptor != null)
 		{
 			propertyDescriptors.put(id,
-				new DelegatePropertyController<Object, Object>(propertyDescriptor, id, displayName == null ? propertyDescriptor.getDisplayName() : displayName));
+				new DelegatePropertyController<Object, Object>(propertyDescriptor, id,
+					displayName == null ? propertyDescriptor.getDisplayName() : displayName));
 		}
 	}
 

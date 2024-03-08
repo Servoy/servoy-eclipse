@@ -524,7 +524,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		{
 			result = provider.getPropertySource(object);
 		}
-		else
+		if (result == null)
 		{
 			result = Adapters.adapt(object, IPropertySource.class, false);
 		}

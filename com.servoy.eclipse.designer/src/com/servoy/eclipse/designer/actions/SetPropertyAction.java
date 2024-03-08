@@ -26,11 +26,11 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 
 /**
  * Action to set a property to a specific value.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -53,10 +53,10 @@ public class SetPropertyAction extends WorkbenchPartAction
 	@Override
 	public boolean isChecked()
 	{
-		IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(editPart, IPropertySource.class);
-		if (propertySource instanceof PersistPropertySource)
+		IPropertySource propertySource = Platform.getAdapterManager().getAdapter(editPart, IPropertySource.class);
+		if (propertySource instanceof IRAGTEST)
 		{
-			if (((PersistPropertySource)propertySource).getPropertyDescriptor(propertyId) != null)
+			if (((IRAGTEST)propertySource).getPropertyDescriptor(propertyId) != null)
 			{
 				return Boolean.TRUE.equals(propertySource.getPropertyValue(propertyId));
 			}

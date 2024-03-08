@@ -836,7 +836,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		if ((form.isResponsiveLayout() || parent instanceof CSSPositionLayoutContainer) && !CSSPositionUtils.isCSSPositionContainer(
 			parent instanceof LayoutContainer ? (LayoutContainer)parent : null))
 		{
-			List<IPersist> children = new ArrayList<IPersist>();
+			List<IPersist> children = new ArrayList<>();
 			Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(form), form,
 				parent).getAllObjects();
 			while (it.hasNext())

@@ -25,6 +25,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.RetargetingPropertySource;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -38,7 +39,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Property source for a group that combines a text label with a component.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -98,7 +99,7 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 		}
 
 		String prefix;
-		PersistPropertySource titlePropertySource = null, elementPropertySource;
+		IRAGTEST titlePropertySource = null, elementPropertySource;
 		if (title != null)
 		{
 			// show just the properties that are used for the title in the mobile client
@@ -112,7 +113,8 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 		if (component != null)
 		{
 			// show all properties for the component
-			elementPropertySources.put(prefix = null, elementPropertySource = PersistPropertySource.createPersistPropertySource(component, getContext(), false));
+			elementPropertySources.put(prefix = null,
+				elementPropertySource = PersistPropertySource.createPersistPropertySource(component, getContext(), false));
 			String propertyName;
 			for (IPropertyDescriptor desc : elementPropertySource.getPropertyDescriptors())
 			{

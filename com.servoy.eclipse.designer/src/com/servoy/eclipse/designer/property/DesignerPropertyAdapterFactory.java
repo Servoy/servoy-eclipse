@@ -149,7 +149,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				if (realObject instanceof MobileListModel && key == IPropertySource.class)
 				{
 					MobileListModel model = getEditingMobileListModel((MobileListModel)realObject);
-					return new RetargetToEditorPersistProperties(MobileListPropertySource.getMobileListPropertySource(model, model.form));
+					MobileListPropertySource mobileListPropertySource = MobileListPropertySource.getMobileListPropertySource(model, model.form);
+					return new RetargetToEditorPersistProperties(mobileListPropertySource);
 				}
 				if (realObject instanceof FormElementGroup && key == FormElementGroup.class)
 				{

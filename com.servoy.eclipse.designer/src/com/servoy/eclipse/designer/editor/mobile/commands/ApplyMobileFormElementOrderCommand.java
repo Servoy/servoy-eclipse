@@ -33,7 +33,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Apply element order after delegate command has executed.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -68,7 +68,7 @@ public class ApplyMobileFormElementOrderCommand extends RefreshingCommand<Abstra
 		Command reorderCommand = null;
 		if (haveExecuted)
 		{
-			Object[] models = command.getModels();
+			Object[] models = getCommand().getModels();
 			if (models != null && models.length > 0)
 			{
 				if (createdModels != null) createdModels.add(models[0]);
@@ -95,7 +95,7 @@ public class ApplyMobileFormElementOrderCommand extends RefreshingCommand<Abstra
 	@Override
 	public Object[] getModels()
 	{
-		return command.getModels();
+		return getCommand().getModels();
 	}
 
 	/**

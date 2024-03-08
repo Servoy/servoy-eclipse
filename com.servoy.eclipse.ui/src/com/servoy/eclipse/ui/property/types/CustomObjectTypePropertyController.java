@@ -25,6 +25,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertyChildId;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
+import com.servoy.eclipse.ui.property.IRAgtestGetContext;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
 import com.servoy.eclipse.ui.property.ObjectTypePropertyController;
 import com.servoy.eclipse.ui.property.PDPropertySource;
@@ -59,9 +60,8 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		return new CustomObjectPropertySource(complexProperty);
 	}
 
-	protected class CustomObjectPropertySource extends ObjectPropertySource
+	protected class CustomObjectPropertySource extends ObjectPropertySource implements IRAgtestGetContext
 	{
-
 		protected PDPropertySource underlyingPropertySource;
 
 		public CustomObjectPropertySource(ComplexProperty<Object> complexProperty)
@@ -142,7 +142,7 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		@Override
 		public void defaultResetProperty(Object id)
 		{
-			underlyingPropertySource.defaultResetProperty(id);
+			getUnderlyingPropertySource().defaultResetProperty(id);
 		}
 
 		@Override
@@ -152,6 +152,11 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 			PersistPropertySource.adjustPropertyValueAndReset(id, underlying.getPropertyDescriptor(id), this);
 		}
 
+		@Override
+		public IPersist getContext()
+		{
+			return persistContext.getContext();
+		}
 	}
 
 	@Override

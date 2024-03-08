@@ -25,7 +25,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
  * @author rgansevles
  */
 
-public abstract class ComplexPropertySource<T> implements IPropertySource
+public abstract class ComplexPropertySource<T> implements IPropertySource//RGATEST, IRAgtestGetContext
 {
 	private final ComplexProperty<T> complexProperty;
 	protected boolean readOnly = false;

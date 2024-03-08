@@ -18,7 +18,6 @@
 package com.servoy.eclipse.designer;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
@@ -26,18 +25,17 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.designer.editor.CreateOverrideIfNeeededCommandWrapper;
-import com.servoy.eclipse.designer.editor.IRAGTEST;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
+import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand.CreateComponentOptions;
 import com.servoy.eclipse.ui.EditorActionsRegistry.EditorComponentActionHandler;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.j2db.dataprocessing.IModificationSubject;
 import com.servoy.j2db.dataprocessing.ModificationEvent;
 import com.servoy.j2db.dataprocessing.ModificationSubject;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -49,7 +47,6 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 {
 	public static EditorComponentActionHandler EDITOR_COMPONENT_ACTION_HANDLER = new EditorComponentActionHandlerImpl();
 
-
 	private final IModificationSubject modificationSubject = new ModificationSubject();
 
 	private EditorComponentActionHandlerImpl()
@@ -60,19 +57,11 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 	public void createComponent(IPropertySource propertySource, UUID uuid, String propertyName, String type, boolean prepend,
 		boolean dropTargetIsSibling)
 	{
-		executeCommandOnForm(propertySource, () -> {
-			if (propertySource instanceof PersistPropertySource)
-			{
-				PersistPropertySource persistPropertySource = (PersistPropertySource)propertySource;
-				IPersist context = persistPropertySource.getContext();
-				if (context instanceof Form)
-				{
-					var commandCreater = createCommandCreater((Form)context, propertyName, type, prepend, dropTargetIsSibling);
-					return new CreateOverrideIfNeeededCommandWrapper(persistPropertySource, uuid, commandCreater);
-				}
-			}
-			return null;
-		}, "createComponent");
+		if (propertySource instanceof IRAGTEST persistPropertySource && persistPropertySource.getContext() instanceof Form form)
+		{
+			var commandCreater = createCommandCreater(form, propertyName, type, prepend, dropTargetIsSibling);
+			executeCommandOnForm(propertySource, new CreateOverrideIfNeeededCommandWrapper(persistPropertySource, uuid, commandCreater), "createComponent");
+		}
 	}
 
 	/**
@@ -95,15 +84,12 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 	@Override
 	public void deleteComponent(IPropertySource propertySource, UUID uuid)
 	{
-		executeCommandOnForm(propertySource, () -> {
-			if (propertySource instanceof PersistPropertySource)
-			{
-				// only delete an element when it can be found in the context (form), otherwise it is a override
-				PersistPropertySource persistPropertySource = (PersistPropertySource)propertySource;
-				return persistPropertySource.getContext().searchChild(uuid).map(FormElementDeleteCommand::new).orElse(null);
-			}
-			return null;
-		}, "deleteComponent");
+		if (propertySource instanceof IRAGTEST persistPropertySource)
+		{
+			// only delete an element when it can be found in the context (form), otherwise it is a override
+			persistPropertySource.getContext().searchChild(uuid).map(FormElementDeleteCommand::new)
+				.ifPresent(command -> executeCommandOnForm(propertySource, command, "deleteComponent"));
+		}
 	}
 
 	@Override
@@ -112,26 +98,17 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 		return modificationSubject;
 	}
 
-	private Object executeCommandOnForm(IPropertySource persistPropertySource, Supplier<Command> buildCommand, String eventName)
+	private void executeCommandOnForm(IPropertySource persistPropertySource, Command command, String eventName)
 	{
-		Command command = buildCommand.get();
-		if (command != null)
+		IEditorPart editor = RetargetToEditorPersistProperties.openPersistEditor(persistPropertySource, false);
+		if (editor != null)
 		{
-			IEditorPart editor = RetargetToEditorPersistProperties.openPersistEditor(persistPropertySource, false);
-			if (editor != null)
+			CommandStack commandStack = editor.getAdapter(CommandStack.class);
+			if (commandStack != null)
 			{
-				CommandStack commandStack = editor.getAdapter(CommandStack.class);
-				if (commandStack != null)
-				{
-					commandStack.execute(command);
-					modificationSubject.fireModificationEvent(new ModificationEvent(eventName, null, persistPropertySource));
-					if (command instanceof IRAGTEST)
-					{
-						return ((IRAGTEST< ? >)command).getRagtest();
-					}
-				}
+				commandStack.execute(new RefreshingCommand<>(command,
+					() -> modificationSubject.fireModificationEvent(new ModificationEvent(eventName, null, persistPropertySource))));
 			}
 		}
-		return null;
 	}
 }

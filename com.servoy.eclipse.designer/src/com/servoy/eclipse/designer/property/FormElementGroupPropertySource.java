@@ -41,6 +41,7 @@ import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.DimensionPropertySource;
 import com.servoy.eclipse.ui.property.ICellEditorFactory;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.eclipse.ui.property.IRAGTEST;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
@@ -380,7 +381,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 
 	protected void setElementProperty(IPersist element, String propertyName, Object propertyValue)
 	{
-		PersistPropertySource elementPropertySource = PersistPropertySource.createPersistPropertySource(element, context == null ? (IPersist)element : context,
+		IRAGTEST elementPropertySource = PersistPropertySource.createPersistPropertySource(element, context == null ? (IPersist)element : context,
 			false);
 		elementPropertySource.setPropertyValue(propertyName, propertyValue);
 		IPersist newPersist = (IPersist)elementPropertySource.getSaveModel();
