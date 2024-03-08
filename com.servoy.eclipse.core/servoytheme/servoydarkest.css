@@ -34,7 +34,7 @@ CTabFolder, Shell CTabFolder {
     swt-tab-outline: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR'; /* border color for selected tab */
     swt-outer-keyline-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR'; /* border color for whole tabs container */
     swt-unselected-tabs-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR' '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR' 100% 100%; /* title background for unselected tab */
-    swt-selected-tab-fill: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR'; /* title background for selected tab */
+    swt-selected-tab-fill: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR'; /* title background for selected tab */
     swt-shadow-visible: false;
     swt-unselected-hot-tab-color-background: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
     swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
