@@ -3474,7 +3474,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		try
 		{
-			if (file.getProject().isOpen()) file.deleteMarkers(type, true, IResource.DEPTH_INFINITE);
+			if (file.getProject().isOpen() && file.exists()) file.deleteMarkers(type, true, IResource.DEPTH_INFINITE);
 		}
 		catch (CoreException e)
 		{

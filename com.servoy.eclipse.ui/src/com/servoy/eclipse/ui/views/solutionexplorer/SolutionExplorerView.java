@@ -368,6 +368,8 @@ public class SolutionExplorerView extends ViewPart
 
 	private ContextAction renameActionInTree;
 
+	private ContextAction moveActionInTree;
+
 	private RemoveModuleAction removeModuleAction;
 	private RemovePackageProjectReferenceAction removePackageProjectAction;
 
@@ -2805,6 +2807,7 @@ public class SolutionExplorerView extends ViewPart
 		if (upgradeComponentPackageAction.isEnabled()) manager.add(upgradeComponentPackageAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
+		if (moveActionInTree.isEnabled()) manager.add(moveActionInTree);
 		if (importComponentAsProject.isEnabled()) manager.add(importComponentAsProject);
 		if (importComponentInSolution.isEnabled()) manager.add(importComponentInSolution);
 
@@ -3441,6 +3444,9 @@ public class SolutionExplorerView extends ViewPart
 			new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.INMEMORY_DATASOURCE));
 		renameActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.VIEW_FOUNDSET));
 
+		moveActionInTree = new ContextAction(this, null, "Move");
+		moveActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, new MoveScopeAction(this));
+
 		addAsModuleAction = new AddAsModuleAction(shell);
 		addAsWebPackageAction = new AddAsWebPackageAction(shell);
 		removeModuleAction = new RemoveModuleAction(shell);
@@ -3494,6 +3500,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(addAsModuleAction);
 		addTreeSelectionChangedListener(addAsWebPackageAction);
 		addTreeSelectionChangedListener(renameActionInTree);
+		addTreeSelectionChangedListener(moveActionInTree);
 		addTreeSelectionChangedListener(removeModuleAction);
 		addTreeSelectionChangedListener(removePackageProjectAction);
 		addTreeSelectionChangedListener(addModuleAction);

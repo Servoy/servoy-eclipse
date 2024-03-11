@@ -18,12 +18,16 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -31,6 +35,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -160,5 +165,44 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 			return nameDialog.getValue();
 		}
 		return null;
+	}
+
+	public static ServoyProject askNewProject(Shell shell, final String fileName, final ServoyProject project)
+	{
+		List<String> modules = getModules(project);
+		if (modules.size() == 0) return null;
+		Collections.sort(modules);
+		String[] moduleNames = modules.toArray(new String[] { });
+		final OptionDialog optionDialog = new OptionDialog(shell, "Select destination module", null,
+			"Select module where to move scope " + fileName, MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0,
+			moduleNames, 0);
+		int retval = optionDialog.open();
+		String selectedProject = null;
+		ServoyProject servoyProject = null;
+		if (retval == Window.OK)
+		{
+			selectedProject = moduleNames[optionDialog.getSelectedOption()];
+			if (selectedProject != null)
+			{
+				servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedProject);
+			}
+		}
+
+		return servoyProject;
+	}
+
+	public static List<String> getModules(ServoyProject project)
+	{
+		final ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+		List<String> modules = new ArrayList<String>();
+		for (ServoyProject prj : activeModules)
+		{
+			if (!prj.getProject().getName().equals(project.getProject().getName()))
+			{
+				modules.add(prj.getProject().getName());
+			}
+		}
+
+		return modules;
 	}
 }

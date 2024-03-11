@@ -212,7 +212,10 @@ public class ServoyBuilderUtils
 
 			try
 			{
-				file.deleteMarkers(ServoyBuilder.SCRIPT_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				if (file.exists())
+				{
+					file.deleteMarkers(ServoyBuilder.SCRIPT_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				}
 			}
 			catch (CoreException e)
 			{
