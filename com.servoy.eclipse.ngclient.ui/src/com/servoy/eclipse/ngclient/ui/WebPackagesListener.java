@@ -144,6 +144,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					"---- Starting Titanium NGClient solution/dependencies source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				// modules and css of the components those are based on the Packages itself
 				CssLibSet cssLibs = new CssLibSet();
+				boolean hasFontAwesomePro = false;
 				Set<String> packageToInstall = new HashSet<>();
 				Set<String> assetsToAdd = new HashSet<>();
 				Map<String, Pair<WebLayoutSpecification, String>> structureTagNames = new HashMap<>();
@@ -162,6 +163,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (libs != null)
 					{
 						cssLibs.addAll(libs);
+						if ("@servoy/fontawesomepro".equals(webObjectSpecification.getNG2Config().getPackageName()))
+						{
+							hasFontAwesomePro = true;
+						}
 					}
 					List<String> assets = webObjectSpecification.getNG2Config().getAssets().getAssetsList();
 					if (assets != null)
@@ -499,7 +504,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						JSONArray styles = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
 							.getJSONObject("options").getJSONArray("styles");
 						boolean[] stylesChanged = new boolean[] { false };
-						if (cssLibs.size() + 2 != styles.length())
+						if (!hasFontAwesomePro && cssLibs.size() + 2 != styles.length())
 						{
 							stylesChanged[0] = true;
 						}
@@ -531,7 +536,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							{
 								styles.remove(0);
 							}
-							styles.put("@fortawesome/fontawesome-free/css/all.css");
+							if (!hasFontAwesomePro) styles.put("@fortawesome/fontawesome-free/css/all.css");
 							for (CssLib style : cssLibs)
 							{
 								styles.put(style.getUrl().replace("~", "./node_modules/"));
