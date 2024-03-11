@@ -96,29 +96,37 @@ html, body {
     height: 100%;
 }
 
-.dark .content, .dark .mat-mdc-dialog-content.mdc-dialog__content, .dark .mat-mdc-dialog-title.mdc-dialog__title, .dark .mat-mdc-dialog-actions.mdc-dialog__actions {
-    background: #262626;
-    color: #ffffff;
+.dark .content, 
+.dark .mat-mdc-dialog-content.mdc-dialog__content, 
+.dark .mat-mdc-dialog-title.mdc-dialog__title, 
+.dark .mat-mdc-dialog-actions.mdc-dialog__actions, 
+.dark .wpm .wpm-header .header-content, 
+.dark .mat-mdc-tab-header {
+    background: #151515;
+    color: #cccccc;
 }
 
 .dark .content {
 	 height: 100%;
 }
 
-.dark .mat-mdc-button:not(:disabled) {
-	color: #ffffff;
-}
-
-.dark .mdc-checkbox__background  {
-	border-color: #ffffff !important;
-}
-
+.dark .mat-mdc-button:not(:disabled), 
+.dark .mat-mdc-tab:not(.mat-mdc-tab-disabled) .mdc-tab__text-label, 
+.dark .mat-mdc-tab-link:not(.mat-mdc-tab-disabled) .mdc-tab__text-label,
 .dark .mat-mdc-select-value, 
 .dark .mat-mdc-select-arrow, 
 .dark .mat-mdc-option,
 .dark .mdc-list-item__primary-text,
-.dark .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
-    color: #ffffff;
+.dark .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label,
+.dark .mat-mdc-form-field-label,
+.dark .header-content .mat-mdc-select-value .mat-mdc-select-value-text,
+.dark .header-content .mat-mdc-select-trigger .mat-mdc-select-arrow ,
+.dark .header-content .updateButton {
+	color: #cccccc;
+}
+
+.dark .mdc-checkbox__background  {
+	border-color: #cccccc !important;
 }
 
 .dark .mdc-text-field--filled:not(.mdc-text-field--disabled) {
@@ -136,7 +144,7 @@ html, body {
 }
 
 .dark .mat-mdc-form-field-underline {
-	background: #ffffff
+	background: #cccccc
 }
 
 .dark .wpm-package-selected {
@@ -149,12 +157,8 @@ html, body {
 
 .dark .table-package tr th div, 
 .dark .mat-mdc-select-panel {
-    background: #3c3c3c;
-    color: #ffffff;
-}
-
-.dark .mat-mdc-form-field-label {
-	color: #ffffff;
+    background: #303030;
+    color: #cccccc;
 }
 
 .dark .column-fitwidth {
@@ -167,4 +171,9 @@ html, body {
 
 .dark .mdc-icon-button:hover {
     background-color: var(--mdc-tab-indicator-active-indicator-color);
+}
+
+.dark .mdc-text-field--filled:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-floating-label, 
+.dark .mdc-text-field--filled:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-floating-label--float-above {
+	color: var(--mdc-tab-indicator-active-indicator-color);
 }
