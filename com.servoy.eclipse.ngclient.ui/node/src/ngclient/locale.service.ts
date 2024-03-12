@@ -159,7 +159,7 @@ export class LocaleService {
         // angular locales are either <language lowercase> or <language lowercase> - <country uppercase>
         const localeId = country !== undefined && country.length > 0 ?
             language.toLowerCase() + '-' + country.toUpperCase() : language.toLowerCase();
-        const index = this.doc.baseURI.indexOf('/',7);
+        const index = this.doc.baseURI.indexOf('/',8);
         const context = index > 0 ? this.doc.baseURI.substring(index) : '/';
         
         return new Promise<string>((resolve, reject) => {
