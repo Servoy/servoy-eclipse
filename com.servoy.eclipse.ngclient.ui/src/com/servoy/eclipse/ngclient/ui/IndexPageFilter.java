@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -127,31 +126,17 @@ public class IndexPageFilter implements Filter
 			}
 			else
 			{
-				Path normalize = Paths.get(requestURI).normalize();
-				File file = new File(distFolder, normalize.toString());
-				if (requestURI.startsWith("/locales/") && request.getParameter("localeid") != null)
+				String normalize = Paths.get(requestURI).normalize().toString();
+				File file = new File(distFolder, normalize);
+				String localeId = request.getParameter("localeid");
+				if (requestURI.startsWith("/locales/") && localeId != null && !file.exists())
 				{
 					//this code is a bit of copy of the NGLocalesFilter that bases it on servlet resources
-					String[] locales = NGLocalesFilter.generateLocaleIds(request.getParameter("localeid"));
-					File[] listFiles = file.getParentFile().listFiles((dir, name) -> {
-						for (String locale : locales)
-						{
-							if (name.contains(locale)) return true;
-						}
-						return false;
-					});
-					if (listFiles != null && listFiles.length > 0)
+					String[] locales = NGLocalesFilter.generateLocaleIds(localeId);
+					for (String locale : locales)
 					{
-						if (listFiles.length > 1)
-						{
-							Arrays.sort(listFiles, (a, b) -> {
-								return b.getName().length() - a.getName().length();
-							});
-						}
-						String contentType = MimeTypes.guessContentTypeFromName(requestURI);
-						if (contentType != null) servletResponse.setContentType(contentType);
-						FileUtils.copyFile(listFiles[0], servletResponse.getOutputStream());
-						return;
+						file = new File(distFolder, normalize.replace(localeId, locale));
+						if (file.exists()) break;
 					}
 				}
 				if (file.exists() && !file.isDirectory() & !file.getName().equals("favicon.ico"))
