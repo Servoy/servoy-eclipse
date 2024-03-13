@@ -14,6 +14,7 @@ export class PopupMenuService {
     subMenuToPopperMap: Map<HTMLElement, any> = new Map();
 
     activeMenu: HTMLElement = null;
+    activeMenuItem: HTMLElement = null;
     visibleSubMenuPath: HTMLElement[] = [];
     hideSubMenusetTimeout: any = null;
 
@@ -22,8 +23,10 @@ export class PopupMenuService {
     hoverMenuItemListener = (event: MouseEvent) => {
         const subMenu = this.menuItemTosubMenuMap.get(event.target as HTMLElement);
         if(event.type == 'mouseenter') {
+            this.activeMenuItem = event.target as HTMLElement;
             this.showSubMenu(subMenu);
         } else if(event.type == 'mouseleave') {
+            this.activeMenuItem = null;
             this.hideSubMenus();
         }
     };
@@ -60,13 +63,17 @@ export class PopupMenuService {
         }   
         this.hideSubMenusetTimeout = setTimeout(() => {
             this.hideSubMenusetTimeout = null;
-            this.hideSubMenusOf(this.activeMenu);
+            let hideSubmenusOf = this.activeMenu; 
+            if(this.activeMenuItem && this.menuItemTosubMenuMap.get(this.activeMenuItem)) {
+                hideSubmenusOf = this.menuItemTosubMenuMap.get(this.activeMenuItem);
+            }
+            this.hideSubMenusOf(hideSubmenusOf);
         }, 200);
     }
 
     private hideSubMenusOf(menu: HTMLElement) {
         const idx = this.visibleSubMenuPath.indexOf(menu);
-        if(idx < this.visibleSubMenuPath.length - 1) {
+        if(idx > -1 && idx < this.visibleSubMenuPath.length - 1) {
             for(let i = idx + 1; i < this.visibleSubMenuPath.length; i++) {
                 this.visibleSubMenuPath[i].style.visibility = 'hidden';
             }
@@ -186,6 +193,7 @@ export class PopupMenuService {
         if (generateList) {
             const subMenu = this.doc.createElement('div');
             subMenu.classList.add('dropdown-menu');
+            subMenu.classList.add('svy-popup-menu');
             subMenu.classList.add('dropdown-nested-menu');
             this.doc.body.appendChild(subMenu);
             this.menuItemTosubMenuMap.set(parent, subMenu);

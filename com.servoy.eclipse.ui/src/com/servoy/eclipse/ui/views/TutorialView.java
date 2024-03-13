@@ -42,8 +42,6 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
@@ -79,8 +77,9 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * @author lvostinar, afara
- *
+ * @deprecated CAN BE REMOVED LATER WHEN REALLY NOT USED ANYMORE
  */
+@Deprecated
 public class TutorialView extends ViewPart
 {
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.TutorialView";
@@ -772,11 +771,10 @@ public class TutorialView extends ViewPart
 			FontDescriptor fontDescriptor = FontDescriptor.createFrom(codeSnippet.getFont()).increaseHeight(2);
 			Font font = fontDescriptor.createFont(codeWrapper.getDisplay());
 			codeSnippet.setFont(font);
-			codeSnippet.addDisposeListener((e) ->
-				{
-					color.dispose();
-					fontDescriptor.destroyFont(font);
-				});
+			codeSnippet.addDisposeListener((e) -> {
+				color.dispose();
+				fontDescriptor.destroyFont(font);
+			});
 		}
 	}
 

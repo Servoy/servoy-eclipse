@@ -31,6 +31,8 @@ public class OpenUrlAction implements IWorkbenchWindowActionDelegate
 	public static String openForum = "com.servoy.eclipse.ui.OpenForumAction";
 	public static String openWiki = "com.servoy.eclipse.ui.OpenWikiAction";
 
+	public static String openTutorial = "com.servoy.eclipse.ui.OpenTutorialAction";
+
 	public void dispose()
 	{
 	}
@@ -46,6 +48,10 @@ public class OpenUrlAction implements IWorkbenchWindowActionDelegate
 			if (openWiki.equals(action.getActionDefinitionId()))
 			{
 				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://wiki.servoy.com"));
+			}
+			else if (openTutorial.equals(action.getActionDefinitionId()))
+			{
+				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://docs.servoy.com/guides/get-started"));
 			}
 			else
 			{
