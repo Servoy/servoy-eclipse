@@ -56,11 +56,11 @@ public class SplashHandler extends BasicSplashHandler
 		{
 			e.printStackTrace();
 		}
-		setProgressRect(new Rectangle(0, 400, 400, 15));
+		setProgressRect(new Rectangle(0, 605, 600, 20));
 		super.init(splash);
 		progressMonitor = getBundleProgressMonitor();
 		getContent(); // ensure creation of the progress
-		showBackground(splash, true);
+		showBackground(splash, false);
 	}
 
 	private void showBackground(final Shell splash, boolean doGetRegisterString)
@@ -73,14 +73,17 @@ public class SplashHandler extends BasicSplashHandler
 			GC gc = new GC(background);
 			// size is very different on the three os
 			String osName = System.getProperty("os.name").toLowerCase();
-			if (osName.contains("windows")) gc.setFont(new Font(null, "SansSerif", 8, SWT.NORMAL));
-			else if (osName.contains("mac")) gc.setFont(new Font(null, "SansSerif", 9, SWT.NORMAL));
-			else if (osName.contains("linux")) gc.setFont(new Font(null, "SansSerif", 8, SWT.NORMAL));
+			if (osName.contains("windows")) gc.setFont(new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
+			else if (osName.contains("mac")) gc.setFont(new Font(splash.getDisplay(), "SansSerif", 9, SWT.NORMAL));
+			else if (osName.contains("linux")) gc.setFont(new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
 
+//			Color color = new Color(splash.getDisplay(), 255, 0, 0);
 			StringBuffer text = getSplashText(doGetRegisterString);
-			gc.drawText(text.toString(), 10, 320);
+			gc.drawText(text.toString(), 10, 540, true);
+//			gc.setBackground(color);
 			gc.getFont().dispose();
 			gc.dispose();
+//			color.dispose();
 
 //			if (!doGetRegisterString)
 //			{
