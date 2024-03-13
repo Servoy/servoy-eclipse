@@ -172,6 +172,11 @@ IEclipsePreferences#org-eclipse-debug-ui:com-servoy-eclipse-servoydarktheme {
   preferences: 'org.eclipse.debug.ui.outColor=255,255,255';
 }
 
+IEclipsePreferences#org-eclipse-ui-workbench:com-servoy-eclipse-servoydarktheme {
+  preferences: 'org.eclipse.search.ui.match.highlight=206,92,0'
+  'org.eclipse.egit.ui.UncommittedChangeForegroundColor=114,157,186';
+}
+
 ThemesExtension {
   color-definition: '#com-servoy-themes-darktheme-FOREGROUND_COLOR',
   '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR',
