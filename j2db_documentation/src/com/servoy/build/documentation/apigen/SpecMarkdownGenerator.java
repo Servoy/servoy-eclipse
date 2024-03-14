@@ -435,7 +435,7 @@ public class SpecMarkdownGenerator
 	 */
 	public static String turnJSDocIntoMarkdown(String doc, int indentLevel)
 	{
-		// DO ADD NEW UNIT tests to SpecMarkdownGeneratorTest from the test repo for every new bug encountered / tweak made 
+		// DO ADD NEW UNIT tests to SpecMarkdownGeneratorTest from the test repo for every new bug encountered / tweak made
 
 		if (doc == null) return null;
 
@@ -997,35 +997,34 @@ public class SpecMarkdownGenerator
 				case "date" -> "../../../servoycore/dev-api/js-lib/date.md";
 				case "jsevent" -> "../../../servoycore/dev-api/application/jsevent.md";
 				case "jsupload" -> "../../../servoycore/dev-api/application/jsupload.md";
-				case "tagstring" -> "../../../../extension-dev/component/_services/property/_types.md#tagstring";
-				case "titlestring" -> "../../../../extension-dev/component/_services/property/_types.md#titlestring";
-				case "styleclass" -> "../../../../extension-dev/component/_services/property/_types.md#styleclass";
-				case "protected" -> "../../../../extension-dev/component/_services/property/_types.md#protected";
-				case "enabled" -> "../../../../extension-dev/component/_services/property/_types.md#protected";
-				case "readonly" -> "../../../../extension-dev/component/_services/property/_types.md#protected";
-				case "variant" -> "../../../../extension-dev/component/_services/property/_types.md#variant";
-				case "visible" -> "../../../../extension-dev/component/_services/property/_types.md#visible";
-				case "tabseq" -> "../../../../extension-dev/component/_services/property/_types.md#tabseq";
-				case "format" -> "../../../../extension-dev/component/_services/property/_types.md#format";
-				case "color" -> "../../../../extension-dev/component/_services/property/_types.md#color";
-				case "map" -> "../../../../extension-dev/component/_services/property/_types.md#map";
-				case "scrollbars" -> "../../../../extension-dev/component/_services/property/_types.md#scrollbars";
-				case "dataprovider" -> "../../../../extension-dev/component/_services/property/_types.md#dataprovider";
-				case "${dataprovidertype}" -> "../../../../extension-dev/component/_services/property/_types.md#dataprovider";
-				case "relation" -> "../../../../extension-dev/component/_services/property/_types.md#relation";
-				case "form" -> "../../../../extension-dev/component/_services/property/_types.md#form";
-				case "formscope" -> "../../../../extension-dev/component/_services/property/_types.md#form";
-				case "formcomponent" -> "../../../../extension-dev/component/_services/property/_types.md#formcomponent";
-				case "record" -> "../../../../extension-dev/component/_services/property/_types.md#record";
-				case "foundset" -> "../../../../extension-dev/component/_services/property/_types.md#foundset";
-				case "foundsetref" -> "../../../../extension-dev/component/_services/property/_types.md#foundsetref";
-				case "dataset" -> "../../../../extension-dev/component/_services/property/_types.md#dataset";
-				case "function" -> "../../../../extension-dev/component/_services/property/_types.md#function";
-				case "clientfunction" -> "../../../../extension-dev/component/_services/property/_types.md#clientfunction";
-				case "media" -> "../../../../extension-dev/component/_services/property/_types.md#media";
-				case "valuelist" -> "../../../../extension-dev/component/_services/property/_types.md#valuelist";
-				case "valuelistconfig" -> "../../../../extension-dev/component/_services/property/_types.md#valuelistconfig";
-				case "labelfor" -> "../../../../extension-dev/component/_services/property/_types.md#labelfor";
+				case "tagstring" -> "../../../../extension-dev/component\\_services/property\\_types.md#tagstring";
+				case "titlestring" -> "../../../../extension-dev/component\\_services/property\\_types.md#titlestring";
+				case "styleclass" -> "../../../../extension-dev/component\\_services/property\\_types.md#styleclass";
+				case "protected" -> "../../../../extension-dev/component\\_services/property\\_types.md#protected";
+				case "enabled" -> "../../../../extension-dev/component\\_services/property\\_types.md#protected";
+				case "readonly" -> "../../../../extension-dev/component\\_services/property\\_types.md#protected";
+				case "variant" -> "../../../../extension-dev/component\\_services/property\\_types.md#variant";
+				case "visible" -> "../../../../extension-dev/component\\_services/property\\_types.md#visible";
+				case "tabseq" -> "../../../../extension-dev/component\\_services/property\\_types.md#tabseq";
+				case "format" -> "../../../../extension-dev/component\\_services/property\\_types.md#format";
+				case "color" -> "../../../../extension-dev/component\\_services/property\\_types.md#color";
+				case "map" -> "../../../../extension-dev/component\\_services/property\\_types.md#map";
+				case "scrollbars" -> "../../../../extension-dev/component\\_services/property\\_types.md#scrollbars";
+				case "dataprovider" -> "../../../../extension-dev/component\\_services/property\\_types.md#dataprovider";
+				case "${dataprovidertype}" -> "../../../../extension-dev/component\\_services/property\\_types.md#dataprovider";
+				case "relation" -> "../../../../extension-dev/component\\_services/property\\_types.md#relation";
+				case "form" -> "../../../../extension-dev/component\\_services/property\\_types.md#form";
+				case "formscope" -> "../../../../extension-dev/component\\_services/property\\_types.md#form";
+				case "formcomponent" -> "../../../../extension-dev/component\\_services/property\\_types.md#formcomponent";
+				case "record" -> "../../../../extension-dev/component\\_services/property\\_types.md#record";
+				case "foundset" -> "../../../../extension-dev/component\\_services/property\\_types.md#foundset";
+				case "foundsetref" -> "../../../../extension-dev/component\\_services/property\\_types.md#foundsetref";
+				case "dataset" -> "../../../../extension-dev/component\\_services/property\\_types.md#dataset";
+				case "function" -> "../../../../extension-dev/component\\_services/property\\_types.md#function";
+				case "clientfunction" -> "../../../../extension-dev/component\\_services/property\\_types.md#clientfunction";
+				case "media" -> "../../../../extension-dev/component\\_services/property\\_types.md#media";
+				case "valuelist" -> "../../../../extension-dev/component\\_services/property\\_types.md#valuelist";
+				case "labelfor" -> "../../../../extension-dev/component\\_services/property\\_types.md#labelfor";
 
 				case "runtimewebcomponent" -> "../../../servoycore/dev-api/forms/runtimeform/elements/runtimewebcomponent.md";
 				case "jswebcomponent" -> "../../../servoycore/dev-api/solutionmodel/jswebcomponent.md";
