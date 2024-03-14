@@ -54,6 +54,14 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
     swt-lines-visible: false;
 }
 
+.DragFeedback {
+    background-color: #0078D4;
+}
+
+.ModifiedDragFeedback {
+    background-color: #0078D4;
+} 
+
 ExpandBar {
     color: #330099;
 }
