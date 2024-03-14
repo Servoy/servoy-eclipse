@@ -121,6 +121,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.dragItem.componentType = this.draggedVariant.type;
         this.dragItem.layoutName = null;
         this.dragItem.attributes = null;
+        this.dragItem.model = model;
 
         this.canDrop = { dropAllowed: false };
         this.editorSession.getState().dragging = true;
@@ -176,6 +177,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.dragItem.componentType = componentType;
         this.dragItem.layoutName = layoutName;
         this.dragItem.attributes = attributes;
+        this.dragItem.model = model;
 
         this.canDrop = { dropAllowed: false };
         if (!ghost) {
@@ -453,8 +455,18 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 }
                 if (this.dragItem.contentItemBeingDragged) {
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
-                    if (this.snapData?.width) this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
-                    if (this.snapData?.height) this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
+                    if (this.snapData?.width && (!this.snapData.checkModelMinSize || this.dragItem.model?.size['width'] < this.snapData.width)) { 
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
+                    }
+                    else {
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.dragItem.model?.size['width'] + 'px');
+                    }
+                    if (this.snapData?.height && (!this.snapData.checkModelMinSize || this.dragItem.model?.size['height'] < this.snapData.height)) {
+                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
+                    }
+                    else {
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.dragItem.model?.size['height'] + 'px');
+                    }
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
                     this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
@@ -523,6 +535,7 @@ export class DragItem {
     topContainer?: boolean = false;
     layoutName?: string;
     attributes?: { [property: string]: string };
+    model?: { [property: string]: unknown };
 }
 
 export class DraggedVariant {
