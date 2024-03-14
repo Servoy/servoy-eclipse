@@ -14,6 +14,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     private middleV: Map<string, number> = new Map();
     private middleH : Map<string, number> = new Map();
     private rectangles : DOMRect[];
+	private types: Map<string, string> = new Map();
     private element: Element;
     private uuid: string;
     
@@ -64,6 +65,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
                 this.bottomPos.set(id, bounds.bottom);
                 this.middleV.set(id, (bounds.top + bounds.bottom) / 2);
                 this.middleH.set(id, (bounds.left + bounds.right) / 2);
+				this.types.set(id, comp.getAttribute('svy-formelement-type'));
                 if (id !== this.uuid) this.rectangles.push(bounds);
             }
 
@@ -124,13 +126,59 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     }
     
     private getDraggedElementRect(point: {x: number, y:number}): DOMRect {
-        let item;
+        let item: HTMLElement;
          if (!this.element?.getAttribute('svy-id') && (item = this.editorContentService.getContentElementById('svy_draggedelement'))) {
             const r = item.getBoundingClientRect();
 			return new DOMRect(point.x, point.y, r.width, r.height);
 		}
         return this.element?.getBoundingClientRect();
     }
+
+	private getDraggedElementCategorySet(componentType: string): String[] {
+		if (componentType) {
+			const _package = this.findComponentPackage(componentType);
+			const componentsInSamePackage: String[] = _package ?
+				_package.components.map(component => component.name) :
+				[];
+			return componentsInSamePackage;
+		}
+		return null;
+	}
+
+	private getDraggedComponentType(): string {
+		let item: HTMLElement;
+		let componentType;
+		if (this.element?.getAttribute('svy-id')) {
+			componentType = this.element.getAttribute('svy-formelement-type');
+		}
+		else if (item = this.editorContentService.getContentElementById('svy_draggedelement')) {
+			componentType = item.getAttribute('svy-formelement-type');
+			if (!componentType) componentType = item.childNodes[0].nodeName.toLowerCase();
+		}
+		return componentType;
+	}
+
+	private findComponentPackage(componentType: any) {
+		return this.editorSession.getState().packages.find(pack => pack.packageName !== 'commons' &&
+			pack.components.length > 0 && pack.components.some(component => component.name === componentType));
+	}
+
+	shouldSnapToSize(uuid: string, properties: SnapData, resizing: string): boolean {
+		if (!uuid) return false; //no snap target
+		if (resizing) return true;
+		const targetType = this.types.get(uuid);
+		const componentType = this.getDraggedComponentType();
+		if (targetType === componentType || this.getDraggedElementCategorySet(componentType)?.indexOf(targetType) >= 0) {
+			return true;
+		}
+		else if (targetType?.split('-')[0] !== componentType?.split('-')[0]) {
+			//if the dragged component is not in the same category, 
+			//use the size hints but make sure is not smaller than then model size
+			properties.checkModelMinSize = true;
+			return true;
+		}
+		return false;
+	}
 
 	computeGuides(point: { x: number, y: number }, resizing: string) {
         let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
@@ -337,7 +385,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.leftPos);
 				if (snapX?.uuid) {
 					properties.left = this.leftPos.get(snapX.uuid);
-					properties['width'] = this.rightPos.get(snapX.uuid) - properties.left;
+					if (this.shouldSnapToSize(snapX.uuid, properties, resizing))
+					{
+						properties['width'] = this.rightPos.get(snapX.uuid) - properties.left;
+					}
 				}
 				else {
 					snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.rightPos);
@@ -379,7 +430,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					}
 					if (!properties.cssPosition['right']) properties.cssPosition['right'] = properties.left;
 				}
-				properties['width'] = guideX - properties.left;
+				if (this.shouldSnapToSize(snapX?.uuid, properties, resizing))
+				{
+					properties['width'] = guideX - properties.left;
+				}
 			}
 
 			if (!snapX && !resizing) {
@@ -415,7 +469,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.topPos);
 				if (snapY?.uuid) {
 					properties.top = this.topPos.get(snapY.uuid);
-					properties['height'] = this.bottomPos.get(snapY.uuid) - properties.top;
+					if (this.shouldSnapToSize(snapY.uuid, properties, resizing))
+					{
+						properties['height'] = this.bottomPos.get(snapY.uuid) - properties.top;
+					}
 				}
 				else {
 					snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.bottomPos);
@@ -456,7 +513,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						properties.top -= rect.height;
 					}
 				}
-				properties['height'] = guideY - properties.top;
+				if (this.shouldSnapToSize(snapY?.uuid, properties, resizing))
+				{
+					properties['height'] = guideY - properties.top;
+				}
 			}
 			if (!snapY && !resizing) {
 				snapY = this.isSnapInterval(uuid, (rect.top + rect.bottom) / 2, this.middleV);
@@ -650,6 +710,7 @@ export class SnapData {
     height?: number;
     guides?: Guide[];
     cssPosition: { property: string };
+	checkModelMinSize: boolean = false;
     constructor (top: number, left: number, cssPosition?, guides?: Guide[], width?: number, height?:number) {
         this.top = top;
         this.left = left;
