@@ -33,9 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedSet;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.jar.Manifest;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
@@ -50,6 +53,7 @@ import org.mozilla.javascript.ast.Comment;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.util.TextUtils;
 import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.j2db.util.Pair;
@@ -343,8 +347,8 @@ public class SpecMarkdownGenerator
 						}
 						else if (prevComment == null)
 						{
-							// it's the top-most comment that give a short description of the purpose of the whole component/service
-							apiDoc.put(WEB_OBJECT_OVERVIEW_KEY, processMainDoc(comment.toSource()));
+							// it's the top-most comment that gives a short description of the purpose of the whole component/service
+							apiDoc.put(WEB_OBJECT_OVERVIEW_KEY, processFunctionJSDoc(comment.toSource()));
 						}
 						prevComment = comment;
 					}
@@ -397,53 +401,380 @@ public class SpecMarkdownGenerator
 		}
 	}
 
-	private String processMainDoc(String jsDocComment)
-	{
-		if (jsDocComment == null) return null;
-
-		String doc = jsDocComment.replace("\r\n", "\n").replace("%%prefix%%", "");
-		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = stripCommentStartMiddleAndEndChars(doc);
-		doc = doc.trim();
-
-		return doc;
-	}
-
-	private static Pattern regexP1 = Pattern.compile("(?m:^\\s*/\\*\\* )"); // /**space
-	private static Pattern regexP2 = Pattern.compile("(?m:^\\s*/\\*\\*)"); // /**
-	private static Pattern regexP3 = Pattern.compile("(?m:^\\s*/\\* )"); // /*space
-	private static Pattern regexP4 = Pattern.compile("(?m:^\\s*/\\*)"); // /*
-	private static Pattern regexP5 = Pattern.compile("(?m:\\s*\\*/)"); // */
-	private static Pattern regexP6 = Pattern.compile("(?m:^\\s*\\* )"); // *space
-	private static Pattern regexP7 = Pattern.compile("(?m:^\\s*\\*)"); // *
-
-	/**
-	 * This only strips down some whitespace as well as start/end block comment chars. It does not look for one line comments, so //.
-	 */
-	private String stripCommentStartMiddleAndEndChars(String doc)
-	{
-		String stripped = doc;
-		stripped = regexP1.matcher(stripped).replaceAll("");
-		stripped = regexP2.matcher(stripped).replaceAll("");
-		stripped = regexP3.matcher(stripped).replaceAll("");
-		stripped = regexP4.matcher(stripped).replaceAll("");
-		stripped = regexP5.matcher(stripped).replaceAll("");
-		stripped = regexP6.matcher(stripped).replaceAll("");
-		return regexP7.matcher(stripped).replaceAll("");
-	}
-
 	private String processFunctionJSDoc(String jsDocComment)
 	{
 		if (jsDocComment == null) return null;
 
-		String doc = jsDocComment.replace("\r\n", "\n").replace("%%prefix%%", "");
-		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = stripCommentStartMiddleAndEndChars(doc);
-		doc = doc.trim();
-		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = "```\n" + doc + "\n```\n";
+		return processDescription(0, jsDocComment);
+	}
 
-		return doc;
+	/**
+	 * Same as {@link #turnJSDocIntoMarkdown(String, int)} with indentSpaces set to 0.
+	 */
+	public static String turnJSDocIntoMarkdown(String doc)
+	{
+		return turnJSDocIntoMarkdown(doc, 0);
+	}
+
+	/**
+	 * IMPORTANT: this method expects that all newlines in "doc" are '\n'. Make sure that is the case before calling this method.
+	 *
+	 * <p>JSDoc can contain html tags (we use that and support it in developer tooltips as well). Those tags need to be turned into markdown syntax:
+	 * <ul>
+	 *     <li>bold tags</li>
+	 *     <li>italic tags</li>
+	 *     <li>lists</li>
+	 *     <li>pre</li>
+	 *     <li>...</li>
+	 * </ul></p>
+	 * <p>If it doesn't contain html tags, we have to pay attention anyway to newlines for example so that they are correct according to markdown syntax.</p>
+	 * <p>Also things such as @param or @return need to be styled properly. @example and it's content as well...</p>
+	 * @param indentLevel the number of indent levels (1 lvl -> 4 spaces) that each line should be indented with (in case this content will be used as part of a
+	 *                    list item, 4 spaces means one level on indentation in the lists (so according to one of the items); this does
+	 *                    NOT affect the first line, as the caller uses that as a pre-indented list item
+	 */
+	public static String turnJSDocIntoMarkdown(String doc, int indentLevel)
+	{
+		if (doc == null) return null;
+
+		Pattern splitPattern = Pattern.compile(
+			"(?<splitToken>\\@param|\\@example|\\@return|\\@deprecated|<br>|<br/>|<pre>|</pre>|<code>|</code>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>)");
+		Matcher matcher = splitPattern.matcher(doc);
+
+		List<String> matchedTokens = new ArrayList<>();
+		List<String> betweenMatches = new ArrayList<>();
+		int lastGroupMatchEndIndex = 0;
+		while (matcher.find())
+		{
+			MatchResult matchResult = matcher.toMatchResult();
+			betweenMatches.add(doc.substring(lastGroupMatchEndIndex, matchResult.start()));
+			matchedTokens.add(matchResult.group());
+			lastGroupMatchEndIndex = matchResult.end();
+		}
+
+		betweenMatches.add(doc.substring(lastGroupMatchEndIndex));
+
+		int currentIndentLevel = indentLevel;
+
+		// we could have used 3rd party libs for this translation... but those don't have this "indentLevel" that we need when indenting sub-properties of custom types in the docs...
+		StringBuilder result = new StringBuilder(doc.length());
+
+		boolean shouldTrimLeadingTheInBetweenContent = (result.length() == 0); // so if it has a non-whitespace char already in the first line, then no left trimming needs to happen here anymore
+		Stack<Boolean> listLevelOrderedOrNot = new Stack<>();
+		boolean insideExampleSection = false;
+		boolean firstAtSomething = true; // it refers to whether or not an @param, @return, @example, @... was processed yet or not; we want a bit of space between the description of an API an the @ things
+
+		for (int i = 0; i < matchedTokens.size(); i++)
+		{
+			String token = matchedTokens.get(i);
+			String inbetween = betweenMatches.get(i);
+
+			if ("@example".equals(token))
+			{
+				// if this @example tag has any "pre" or "code" in it, use that as it is, do not add automatically code blocks; if not, then assume code follows and automatically add code blocks
+				// so handle '@example <pre> .... </pre> correctly
+				int j = i + 1;
+				boolean preOrCodeTagFound = false;
+				while (!preOrCodeTagFound && j < matchedTokens.size() && !matchedTokens.get(j).startsWith("@"))
+				{
+					if (matchedTokens.get(j).equals("<pre>") || matchedTokens.get(j).equals("<code>")) preOrCodeTagFound = true;
+					j++;
+				}
+
+				if (preOrCodeTagFound) token = "@exampleDoNotAutoAddCodeBlock"; // make it behave just like a @param or @return in how it processes it's content
+			}
+
+
+			boolean trimTrailingInPrecedingInbetweenContent = false; // so we know we have to trimTrailing;
+
+			boolean preserveMultipleWhiteSpaces = false; // in case of code/pre
+
+			// before we add betweenMatches.get(i) to the result, see what token follows it - so we know what kind of processing it needs
+			switch (token)
+			{
+				case "<br>", "<br/>" :
+				case "@param", "@return", "@deprecated", "@exampleDoNotAutoAddCodeBlock" :
+				case "<p>", "</p>" :
+				case "<ul>", "</ul>", "<ol>", "</ol>", "<li>", "</li>" :
+					trimTrailingInPrecedingInbetweenContent = true;
+					break;
+				case "</pre>" :
+				case "</code>" :
+					preserveMultipleWhiteSpaces = true;
+					break;
+				case "<code>", "@example" :
+					trimTrailingInPrecedingInbetweenContent = true; // INTENTIONAL fall-through to next 'case'; so no break here
+					//$FALL-THROUGH$
+				case "<pre>" :
+					// any tokens inside these blocks need to go into "betweenMatches"
+					// "i" also advances as needed
+					String closingTagStartsWith = ("@example".equals(token) ? "@" : "</" + token.substring(1));
+					StringBuilder fullTextToClosingCodeOrPreTag = new StringBuilder();
+					while ((i + 1 < matchedTokens.size()) && !matchedTokens.get(i + 1).startsWith(closingTagStartsWith))
+					{
+						fullTextToClosingCodeOrPreTag.append(betweenMatches.get(i + 1) + matchedTokens.get(i + 1));
+						i++;
+					}
+					if (fullTextToClosingCodeOrPreTag.length() > 0)
+						betweenMatches.set(i + 1, fullTextToClosingCodeOrPreTag.append(betweenMatches.get(i + 1)).toString());
+
+					// if a <pre> is multi - line, do not use simple ` in markdown as that doesn't work correctly, switch automatically
+					// to <code> which generates ```js in markdown
+					if ("<pre>".equals(token))
+					{
+						String contentAfterPreTag = betweenMatches.get(i + 1);
+
+						// see if content in the <pre> is multi-line or not
+						if (contentAfterPreTag.indexOf('\n') >= 0)
+						{
+							// ok, it is multi-line, switch to <code>
+							token = "<code>";
+							if ("</pre>".equals(matchedTokens.get(i + 1))) matchedTokens.set(i + 1, "</code>"); // otherwise it's malformed HTML I guess
+
+							// now do what this switch would have done for <code>
+							trimTrailingInPrecedingInbetweenContent = true;
+						}
+					}
+					break;
+				default :
+			}
+
+			if (token.startsWith("@") && insideExampleSection) preserveMultipleWhiteSpaces = true;
+
+			// ok now do add the "betweenMatches" content that was before 'token'
+			if (!preserveMultipleWhiteSpaces) inbetween = inbetween.replaceAll("\s+", " ");
+
+			if (shouldTrimLeadingTheInBetweenContent)
+			{
+				inbetween = inbetween.stripLeading();
+				shouldTrimLeadingTheInBetweenContent = (inbetween.length() == 0);
+			}
+
+			if (trimTrailingInPrecedingInbetweenContent)
+			{
+				inbetween = inbetween.stripTrailing();
+			}
+			result.append(inbetween);
+
+			if (token.startsWith("@") && insideExampleSection)
+			{
+				// the example section has finished
+				insideExampleSection = false;
+				result.append("\n```");
+				nextLinePlusIndent(result, currentIndentLevel);
+				shouldTrimLeadingTheInBetweenContent = true;
+			}
+
+			// now append anything that the token needs to add
+			switch (token)
+			{
+				case "<br>", "<br/>" :
+					result.append("  ");
+					nextLinePlusIndent(result, currentIndentLevel);
+					shouldTrimLeadingTheInBetweenContent = true;
+					break;
+				case "@param", "@example", "@return", "@deprecated", "@exampleDoNotAutoAddCodeBlock" :
+					if (firstAtSomething)
+					{
+						// add an empty line - to have a bit of visual separation between the description of an API and the @param, @return etc.
+						if (result.length() >= 2 && !"\n\n".equals(result.substring(result.length() - 2)))
+						{
+							result.append("\n");
+							nextLinePlusIndent(result, currentIndentLevel);
+						}
+						firstAtSomething = false;
+						shouldTrimLeadingTheInBetweenContent = true;
+					}
+					if (!endsWithMarkdownNewline(result, currentIndentLevel))
+					{
+						result.append("  "); // markdown equivalent of visual "newline"
+						nextLinePlusIndent(result, currentIndentLevel);
+					}
+					result.append("**").append("@exampleDoNotAutoAddCodeBlock".equals(token) ? "@example" : token).append("**");
+					if ("@exampleDoNotAutoAddCodeBlock".equals(token))
+					{
+						result.append(" ");
+						shouldTrimLeadingTheInBetweenContent = true;
+					}
+					else shouldTrimLeadingTheInBetweenContent = false;
+
+					if ("@example".equals(token))
+					{
+						nextLinePlusIndent(result, currentIndentLevel);
+						result.append("```js\n");
+						insideExampleSection = true;
+						String contentAfterExampleTag = betweenMatches.get(i + 1);
+
+						// if it's like '@example a = a + 1' then we want to left trim what follows after the @example tag (so that one space) before adding the rest in a code block
+						// but if it's a multi-line code example
+						// '@example
+						//     a = a + 1;
+						//     callMe(a);
+						//  @return something
+						// then we don't want to left trim what follows after "@example" (that would remove the 4 spaces as well), just the \n
+						int firstBackslashNPosition = contentAfterExampleTag.indexOf('\n');
+						if (firstBackslashNPosition == contentAfterExampleTag.length() - 1)
+						{
+							// one line
+							shouldTrimLeadingTheInBetweenContent = true;
+						}
+						else
+						{
+							if (firstBackslashNPosition >= 0) betweenMatches.set(i + 1, contentAfterExampleTag.substring(firstBackslashNPosition + 1));
+						}
+					}
+					break;
+				case "<p>" :
+					if (result.length() != 0)
+					{
+						if (result.length() < (1 + currentIndentLevel * 4) * 2 ||
+							!("\n" + "    ".repeat(currentIndentLevel)).repeat(2).equals(result.substring(result.length() - 2 * (1 + 4 * currentIndentLevel))))
+						{
+							if (result.length() < (1 + currentIndentLevel * 4) ||
+								!("\n" + "    ".repeat(currentIndentLevel)).equals(result.substring(result.length() - 1 - 4 * currentIndentLevel)))
+							{
+								nextLinePlusIndent(result, currentIndentLevel);
+								nextLinePlusIndent(result, currentIndentLevel);
+							}
+							else nextLinePlusIndent(result, currentIndentLevel);
+						}
+					}
+					shouldTrimLeadingTheInBetweenContent = true;
+					break;
+				case "</p>" :
+					if (i < matchedTokens.size() - 1 || betweenMatches.get(betweenMatches.size() - 1).trim().length() > 0)
+					{
+						nextLinePlusIndent(result, currentIndentLevel);
+						nextLinePlusIndent(result, currentIndentLevel);
+					}
+					shouldTrimLeadingTheInBetweenContent = true;
+					break;
+				case "<ul>" :
+					if (!endsWithNewline(result, currentIndentLevel)) nextLinePlusIndent(result, currentIndentLevel);
+					listLevelOrderedOrNot.push(Boolean.FALSE);
+					shouldTrimLeadingTheInBetweenContent = true;
+					break;
+				case "<ol>" :
+					if (!endsWithNewline(result, currentIndentLevel)) nextLinePlusIndent(result, currentIndentLevel);
+					listLevelOrderedOrNot.push(Boolean.TRUE);
+					shouldTrimLeadingTheInBetweenContent = true;
+					break;
+				case "<li>" :
+					if (!endsWithNewline(result, currentIndentLevel)) nextLinePlusIndent(result, currentIndentLevel);
+					result.append((listLevelOrderedOrNot.peek() != null && listLevelOrderedOrNot.peek().booleanValue() ? "1. " : " - "));
+					currentIndentLevel++;
+					shouldTrimLeadingTheInBetweenContent = true;
+					break;
+				case "</li>" :
+					currentIndentLevel--;
+					break;
+				case "</ul>", "</ol>" :
+					if ((i + 1 < matchedTokens.size() && !"</li>".equals(matchedTokens.get(i + 1)) && !"</ul>".equals(matchedTokens.get(i + 1)) &&
+						!"</ol>".equals(matchedTokens.get(i + 1))) || (i + 1 == matchedTokens.size()))
+					{
+						nextLinePlusIndent(result, currentIndentLevel);
+						shouldTrimLeadingTheInBetweenContent = true;
+					}
+					listLevelOrderedOrNot.pop();
+					break;
+				case "<pre>" :
+					shouldTrimLeadingTheInBetweenContent = false;
+					//$FALL-THROUGH$ intentional
+				case "</pre>" :
+					result.append('`');
+					break;
+				case "<code>" :
+					if (!endsWithMarkdownNewline(result, currentIndentLevel)) nextLinePlusIndent(result, currentIndentLevel);
+					result.append("```js\n");
+					shouldTrimLeadingTheInBetweenContent = false;
+					break;
+				case "</code>" :
+					result.append("\n```");
+					nextLinePlusIndent(result, currentIndentLevel);
+					break;
+				case "<i>", "</i>" :
+					result.append("_");
+					break;
+				case "<b>", "</b>" :
+					result.append("**");
+					break;
+				default :
+			}
+		}
+
+		// add text that is after last token; this is similar to code above that adds the inBetween content between matches,
+		// where 'preserveMultipleWhiteSpaces' and 'trimTrailingInPrecedingInbetweenContent' would be !insideExampleSection
+		String inbetween = betweenMatches.get(betweenMatches.size() - 1);
+		if (!insideExampleSection) inbetween = inbetween.replaceAll("\s+", " ");
+		if (shouldTrimLeadingTheInBetweenContent)
+		{
+			inbetween = inbetween.stripLeading();
+			shouldTrimLeadingTheInBetweenContent = (inbetween.length() == 0);
+		}
+		if (!insideExampleSection) inbetween = inbetween.stripTrailing();
+
+		result.append(inbetween);
+
+		if (insideExampleSection)
+		{
+			// the example section has finished
+			insideExampleSection = false;
+			result.append("\n```");
+			nextLinePlusIndent(result, currentIndentLevel);
+		}
+
+		return result.toString();
+	}
+
+	private static boolean endsWithMarkdownNewline(StringBuilder result, int currentIndentLevel)
+	{
+		return result.length() == 0 ||
+			(result.length() >= 2 && result.substring(result.length() - 2).equals("\n\n")) ||
+			(result.length() >= 3 && result.substring(result.length() - 3).equals("  \n")) ||
+			(result.length() >= (3 + currentIndentLevel * 4) &&
+				result.substring(result.length() - (3 + currentIndentLevel * 4)).equals("  \n" + " ".repeat(currentIndentLevel * 4))) ||
+			(result.length() >= (2 + currentIndentLevel * 4) &&
+				result.substring(result.length() - (2 + currentIndentLevel * 4)).equals("\n\n" + " ".repeat(currentIndentLevel * 4))) ||
+			(result.length() >= (4 + currentIndentLevel * 4) &&
+				result.substring(result.length() - (4 + currentIndentLevel * 4)).equals("```\n" + " ".repeat(currentIndentLevel * 4)));
+	}
+
+	/**
+	 * Some code needs to check just that the markdown source has a new line, not the markdown output (which would mean either two new lines in source or double space at the end of line + new line)
+	 * For example if what follows next is a list, then a simple new line in the source code is enough to make the list work.
+	 */
+	private static boolean endsWithNewline(StringBuilder result, int currentIndentLevel)
+	{
+		return result.length() == 0 ||
+			result.length() >= 1 && result.charAt(result.length() - 1) == '\n' ||
+			result.length() >= (1 + currentIndentLevel * 4) &&
+				result.substring(result.length() - (1 + currentIndentLevel * 4)).equals("\n" + " ".repeat(currentIndentLevel * 4));
+	}
+
+	private static void nextLinePlusIndent(StringBuilder result, int currentIndentLevel)
+	{
+		result.append("\n");
+
+		// so that they are aligned with some list item in a previously started list
+		indentAtLevel(result, currentIndentLevel);
+	}
+
+	private static void indentAtLevel(StringBuilder result, int currentIndentLevel)
+	{
+		result.append("    ".repeat(currentIndentLevel));
 	}
 
 	private Record createProperty(String name, JSONObject specEntry)
+	{
+		return createPropertyWithIndent(name, specEntry, 0);
+	}
+
+	private Record createPropertyIndented(String name, JSONObject specEntry)
+	{
+		return createPropertyWithIndent(name, specEntry, 2);
+	}
+
+	private Record createPropertyWithIndent(String name, JSONObject specEntry, int indentLevel)
 	{
 		Object d = specEntry.opt("default");
 		String dflt = (d != null ? JSONObject.valueToString(d) : null);
@@ -459,9 +790,23 @@ public class SpecMarkdownGenerator
 		if (optJSONObject != null)
 		{
 			doc = optJSONObject.optString("doc", null);
+			if (doc != null)
+			{
+				doc = processDescription(indentLevel, doc);
+			}
 		}
 
 		return new Property(name, type, dflt, doc, deprecationString);
+	}
+
+	private String processDescription(int indentLevel, String initialDescription)
+	{
+		String doc = TextUtils.newLinesToBackslashN(initialDescription).replace("%%prefix%%", "").replace("%%elementName%%", "myElement");
+
+		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = TextUtils.stripCommentStartMiddleAndEndChars(doc);
+		doc = doc.trim();
+		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = turnJSDocIntoMarkdown(doc, indentLevel);
+		return doc;
 	}
 
 	private Record createFunction(String name, JSONObject specEntry)
@@ -572,7 +917,7 @@ public class SpecMarkdownGenerator
 			while (keys.hasNext())
 			{
 				String type = keys.next();
-				map.put(type, makeMap(types.optJSONObject(type), this::createProperty));
+				map.put(type, makeMap(types.optJSONObject(type), this::createPropertyIndented));
 			}
 			return map.size() > 0 ? map : null;
 		}
@@ -650,34 +995,35 @@ public class SpecMarkdownGenerator
 				case "date" -> "../../../servoycore/dev-api/js-lib/date.md";
 				case "jsevent" -> "../../../servoycore/dev-api/application/jsevent.md";
 				case "jsupload" -> "../../../servoycore/dev-api/application/jsupload.md";
-				case "tagstring" -> "../../../../extension-dev/component\\_services/property\\_types.md#tagstring";
-				case "titlestring" -> "../../../../extension-dev/component\\_services/property\\_types.md#titlestring";
-				case "styleclass" -> "../../../../extension-dev/component\\_services/property\\_types.md#styleclass";
-				case "protected" -> "../../../../extension-dev/component\\_services/property\\_types.md#protected";
-				case "enabled" -> "../../../../extension-dev/component\\_services/property\\_types.md#protected";
-				case "readonly" -> "../../../../extension-dev/component\\_services/property\\_types.md#protected";
-				case "variant" -> "../../../../extension-dev/component\\_services/property\\_types.md#variant";
-				case "visible" -> "../../../../extension-dev/component\\_services/property\\_types.md#visible";
-				case "tabseq" -> "../../../../extension-dev/component\\_services/property\\_types.md#tabseq";
-				case "format" -> "../../../../extension-dev/component\\_services/property\\_types.md#format";
-				case "color" -> "../../../../extension-dev/component\\_services/property\\_types.md#color";
-				case "map" -> "../../../../extension-dev/component\\_services/property\\_types.md#map";
-				case "scrollbars" -> "../../../../extension-dev/component\\_services/property\\_types.md#scrollbars";
-				case "dataprovider" -> "../../../../extension-dev/component\\_services/property\\_types.md#dataprovider";
-				case "${dataprovidertype}" -> "../../../../extension-dev/component\\_services/property\\_types.md#dataprovider";
-				case "relation" -> "../../../../extension-dev/component\\_services/property\\_types.md#relation";
-				case "form" -> "../../../../extension-dev/component\\_services/property\\_types.md#form";
-				case "formscope" -> "../../../../extension-dev/component\\_services/property\\_types.md#form";
-				case "formcomponent" -> "../../../../extension-dev/component\\_services/property\\_types.md#formcomponent";
-				case "record" -> "../../../../extension-dev/component\\_services/property\\_types.md#record";
-				case "foundset" -> "../../../../extension-dev/component\\_services/property\\_types.md#foundset";
-				case "foundsetref" -> "../../../../extension-dev/component\\_services/property\\_types.md#foundsetref";
-				case "dataset" -> "../../../../extension-dev/component\\_services/property\\_types.md#dataset";
-				case "function" -> "../../../../extension-dev/component\\_services/property\\_types.md#function";
-				case "clientfunction" -> "../../../../extension-dev/component\\_services/property\\_types.md#clientfunction";
-				case "media" -> "../../../../extension-dev/component\\_services/property\\_types.md#media";
-				case "valuelist" -> "../../../../extension-dev/component\\_services/property\\_types.md#valuelist";
-				case "labelfor" -> "../../../../extension-dev/component\\_services/property\\_types.md#labelfor";
+				case "tagstring" -> "../../../../extension-dev/component/_services/property/_types.md#tagstring";
+				case "titlestring" -> "../../../../extension-dev/component/_services/property/_types.md#titlestring";
+				case "styleclass" -> "../../../../extension-dev/component/_services/property/_types.md#styleclass";
+				case "protected" -> "../../../../extension-dev/component/_services/property/_types.md#protected";
+				case "enabled" -> "../../../../extension-dev/component/_services/property/_types.md#protected";
+				case "readonly" -> "../../../../extension-dev/component/_services/property/_types.md#protected";
+				case "variant" -> "../../../../extension-dev/component/_services/property/_types.md#variant";
+				case "visible" -> "../../../../extension-dev/component/_services/property/_types.md#visible";
+				case "tabseq" -> "../../../../extension-dev/component/_services/property/_types.md#tabseq";
+				case "format" -> "../../../../extension-dev/component/_services/property/_types.md#format";
+				case "color" -> "../../../../extension-dev/component/_services/property/_types.md#color";
+				case "map" -> "../../../../extension-dev/component/_services/property/_types.md#map";
+				case "scrollbars" -> "../../../../extension-dev/component/_services/property/_types.md#scrollbars";
+				case "dataprovider" -> "../../../../extension-dev/component/_services/property/_types.md#dataprovider";
+				case "${dataprovidertype}" -> "../../../../extension-dev/component/_services/property/_types.md#dataprovider";
+				case "relation" -> "../../../../extension-dev/component/_services/property/_types.md#relation";
+				case "form" -> "../../../../extension-dev/component/_services/property/_types.md#form";
+				case "formscope" -> "../../../../extension-dev/component/_services/property/_types.md#form";
+				case "formcomponent" -> "../../../../extension-dev/component/_services/property/_types.md#formcomponent";
+				case "record" -> "../../../../extension-dev/component/_services/property/_types.md#record";
+				case "foundset" -> "../../../../extension-dev/component/_services/property/_types.md#foundset";
+				case "foundsetref" -> "../../../../extension-dev/component/_services/property/_types.md#foundsetref";
+				case "dataset" -> "../../../../extension-dev/component/_services/property/_types.md#dataset";
+				case "function" -> "../../../../extension-dev/component/_services/property/_types.md#function";
+				case "clientfunction" -> "../../../../extension-dev/component/_services/property/_types.md#clientfunction";
+				case "media" -> "../../../../extension-dev/component/_services/property/_types.md#media";
+				case "valuelist" -> "../../../../extension-dev/component/_services/property/_types.md#valuelist";
+				case "valuelistconfig" -> "../../../../extension-dev/component/_services/property/_types.md#valuelistconfig";
+				case "labelfor" -> "../../../../extension-dev/component/_services/property/_types.md#labelfor";
 
 				case "runtimewebcomponent" -> "../../../servoycore/dev-api/forms/runtimeform/elements/runtimewebcomponent.md";
 				case "jswebcomponent" -> "../../../servoycore/dev-api/solutionmodel/jswebcomponent.md";

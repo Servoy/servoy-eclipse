@@ -81,15 +81,15 @@ public class BasePropertyHandler implements IPropertyHandler
 
 	/**
 	 * This is a HACK for sablo PropertyDescription objects returned by {@link #getPropertyDescription(Object, IPropertySource, PersistContext)} that
-	 * are static / constants declared in this class and that do not give in their "config" a PropertyController but might need to show tooltips.
+	 * are static / constants declared in this class and that do not give in their "config" a PropertyController but might need to show tooltips.<br/><br/>
 	 *
 	 * So when this happens we cannot set the tooltip directly on a new instance of PropertyController so that it's shown in the UI, instead the code that called this method will/might
 	 * look at the PropertyDescription's "doc" tag to generate a tooltip when it creates the PropertyController. The problem is here that some of these constants can be
-	 * used for multiple properties of the same type - and might need different tooltips.
+	 * used for multiple properties of the same type - and might need different tooltips.<br/><br/>
 	 *
 	 * So although it's strange, for all these constants (PDs) in this class that we described we use the same "tags" object reference; and we can modify then
 	 * the "doc" in it to the value we find in the .spec file of this legacy component (if it runs single threaded then it will have the correct tooltip value for long enough - until
-	 * the PropertyController is created and then it won't matter that we change it for a property that follows in a next call).
+	 * the PropertyController is created and then it won't matter that we change it for a property that follows in a next call).<br/><br/>
 	 *
 	 * We use it as a convenience even for new (non constant) PDs that don't have a PropertyController as "config". Which are basically the same, but could instead be given separate "tags" obj. instances.
 	 */
