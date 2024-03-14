@@ -435,6 +435,8 @@ public class SpecMarkdownGenerator
 	 */
 	public static String turnJSDocIntoMarkdown(String doc, int indentLevel)
 	{
+		// DO ADD NEW UNIT tests to SpecMarkdownGeneratorTest from the test repo for every new bug encountered / tweak made 
+
 		if (doc == null) return null;
 
 		Pattern splitPattern = Pattern.compile(
