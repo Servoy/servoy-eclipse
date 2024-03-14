@@ -131,7 +131,7 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 		browser.setText("<html><body style='background-color:" + bgColor + ";" + (fgColor != null ? "color:" + fgColor + ";" : "") + "font-family:\"" +
 			f.getFontData()[0].getName() + "\";font-size:" + pxHeight +
 			"px;font-weight:normal'>" + text + "</body></html>");
-		GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n") || text.contains("<li>"))
+		GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n") || text.contains("<li>") || text.contains("<p>"))
 			? new GridData(preferredWidthIfMultipleLines, preferredHeightIfMultipleLines)
 			: new GridData(preferredWidthIfSingleLine, preferredHeightIfSingleLine);
 		data.horizontalAlignment = GridData.FILL;

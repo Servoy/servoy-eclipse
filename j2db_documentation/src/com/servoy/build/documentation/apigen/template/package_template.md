@@ -1,3 +1,4 @@
+<#-- This is a GENERATED file. DO NOT modify/push it manually as all changes will be lost the next time this documentation is generated. MODIFY the package_template.md file from j2db_documentation instead -->
 # ${packageType} package "${packageDisplayName}"
 
 <#if packageDescription??>

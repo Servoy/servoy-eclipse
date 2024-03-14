@@ -2878,7 +2878,20 @@ public class SolutionExplorerTreeContentProvider
 
 					node = new PlatformSimpleUserNode(displayName, UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { model, null }, originalForm,
 						uiActivator.loadImageFromBundle("element.png"));
-					node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null));
+
+					WebObjectSpecification spec = null;
+					if (model instanceof IFormElement)
+					{
+						String webComponentClassName = FormTemplateGenerator.getComponentTypeName((IFormElement)model);
+						spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponentClassName);
+						if (spec != null)
+						{
+							SolutionExplorerListContentProvider.extractApiDocs(spec); // so that we have the main description of the component available in spec
+						}
+					}
+					node.setDeveloperFeedback(
+						new SimpleDeveloperFeedback("elements." + element.getName() + ".", null,
+							spec != null ? "<p>" + spec.getDocumentation() + "</p>" : null));
 				}
 				elements.add(node);
 				node.parent = parentNode;

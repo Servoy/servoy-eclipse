@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,8 +89,10 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectApiFunctionDefinition;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebObjectSpecification.SourceOfCodeExtractedDocs;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.types.StyleClassPropertyType;
+import org.sablo.util.TextUtils;
 
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -1773,21 +1776,31 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	}
 
 	/**
-	 * Extract the docs for angular client side apis.
-	 * @param readTextFile
+	 * Extract the docs for angular client side JS, server side JS or specific documentation only JS (this one has prio. if it's available).
 	 */
 	public static void extractApiDocs(WebObjectSpecification spec)
 	{
+		boolean titaniumIsUsed = Activator.getDefault().getDesignClient().getRuntimeProperties().containsKey("NG2");
+		if (spec.areDocsAlreadyExtractedFromCode(titaniumIsUsed)) return; // we rely here on the fact that, if a component is changed in a referenced package project, then the WebObjectSpecification will be a fresh new instance anyway - with areDocsAlreadyExtractedFromCode() false
+
 		URL docFileURL = spec.getDocFileURL();
+		SourceOfCodeExtractedDocs sourceOfCodeExtractedDocs;
 		if (docFileURL != null)
 		{
 			extractDocsFromJsFile(spec, docFileURL);
+			sourceOfCodeExtractedDocs = SourceOfCodeExtractedDocs.DEDICATED_DOC_SCRIPT_FILE;
 		}
-		else if (spec.getApiFunctions().size() > 0)
+		else
 		{
-			extractDocsFromJsFile(spec, spec.getDefinitionURL());
-			extractDocsFromJsFile(spec, spec.getServerScript(Activator.getDefault().getDesignClient().getRuntimeProperties().containsKey("NG2")));
+			if (spec.getApiFunctions().size() > 0)
+			{
+				extractDocsFromJsFile(spec, spec.getDefinitionURL());
+				extractDocsFromJsFile(spec, spec.getServerScript(titaniumIsUsed));
+			}
+			sourceOfCodeExtractedDocs = titaniumIsUsed ? SourceOfCodeExtractedDocs.TITANIUM_CLIENT_AND_SERVER_SIDE_SCRIPT
+				: SourceOfCodeExtractedDocs.NG1_CLIENT_AND_SERVER_SIDE_SCRIPT;
 		}
+		spec.setDocsWereExtractedFromCode(sourceOfCodeExtractedDocs);
 	}
 
 	private static void extractDocsFromJsFile(WebObjectSpecification spec, URL url)
@@ -1801,13 +1814,26 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				URLConnection openConnection = url.openConnection();
 				openConnection.setUseCaches(false);
 				InputStream is = openConnection.getInputStream();
-				String source = IOUtils.toString(is);
+				String source = IOUtils.toString(is, Charset.defaultCharset());
 				is.close();
 				if (source != null)
 				{
 					Script script = JavaScriptParserUtil.parse(source, null);
+
+					// see if it starts with an overall description of the component/service
+					List<Comment> comments = script.getComments();
+					if (comments.size() > 0)
+					{
+						Comment firstComment = comments.get(0);
+						// it has to be a stand-alone comment, not a comment of some method / variable
+						// and it has to be the first comment in the file (should we limit it to be the first thing in the file?)
+						if (!firstComment.isDocumentation())
+							spec.setDocumentation(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(firstComment.getText())));
+					}
+
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
 					{
+
 						@Override
 						public ASTNode visitBinaryOperation(BinaryOperation node)
 						{
