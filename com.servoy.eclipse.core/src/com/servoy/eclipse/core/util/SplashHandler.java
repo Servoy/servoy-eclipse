@@ -39,23 +39,23 @@ public class SplashHandler extends BasicSplashHandler
 	@Override
 	public void init(final Shell splash)
 	{
-		java.awt.Toolkit.getDefaultToolkit(); // initialize toolkit here to prevent deadlock on the mac
-		try
-		{
-			new Thread(new Runnable()
-			{
-				public void run()
-				{
-//					ServoyModel.startAppServer();
-					if (!splash.isDisposed()) splash.getDisplay().wake();
-				}
-
-			}).start();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+//		java.awt.Toolkit.getDefaultToolkit(); // initialize toolkit here to prevent deadlock on the mac
+//		try
+//		{
+//			new Thread(new Runnable()
+//			{
+//				public void run()
+//				{
+////					ServoyModel.startAppServer();
+//					if (!splash.isDisposed()) splash.getDisplay().wake();
+//				}
+//
+//			}).start();
+//		}
+//		catch (Exception e)
+//		{
+//			e.printStackTrace();
+//		}
 		setProgressRect(new Rectangle(0, 605, 600, 20));
 		super.init(splash);
 		progressMonitor = getBundleProgressMonitor();
