@@ -170,6 +170,32 @@ public class WarExporter
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_server_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"slf4j.api_*.jar", //
+		"jabsorb_*.jar", //
+		"org.apache.commons.commons-codec_*.jar", //
+		"org.apache.commons.commons-io_*.jar", //
+		"org.apache.commons.logging_*.jar", //
+		"org.apache.commons.commons-collections4_*.jar", //
+		"com.google.guava_*.jar", //
+		"org.hibernate.orm.core_*.jar", //
+		"org.apache.logging.log4j.api_*.jar", //
+		"org.apache.logging.log4j.core_*.jar", //
+		"org.apache.logging.log4j.slf4j2.impl_*.jar", //
+		"org.antlr.runtime_*.jar", //
+		"org.apache.commons.commons-dbcp2_*.jar", //
+		"javax.transaction_*.jar", //
+		"org.apache.commons.commons-pool2_*.jar", //
+		"org.apache.james.apache-mime4j_*.jar", //
+		"xstream_*.jar", //
+		"org.jsoup_*.jar", //
+		"javax.persistence-api_*.jar", //
+		"com.sun.mail.jakarta.mail_*.jar", //
+		"com.sun.activation.jakarta.activation_*.jar", //
+		"com.github.ua-parser.uap-java_*.jar", //
+		"org.yaml.snakeyaml_*.jar", //
+		"org.apache.commons.commons-fileupload_*.jar", //
+		"org.jboss.logging.jboss-logging_*.jar", //
+		"net.bytebuddy.byte-buddy_*.jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
 		"de.inetsoftware.jlessc_*.jar", "org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", //
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
