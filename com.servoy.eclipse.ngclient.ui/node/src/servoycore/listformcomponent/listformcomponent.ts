@@ -55,7 +55,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
 </div>
 
 <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
-    <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+    <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
         <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
     </div>
 </ng-template>
@@ -548,7 +548,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             });
         }
 
-        const thisLFC = this;;
+        const thisLFC = this;
         const idx = rowIndex;
         Object.defineProperty(rowItem.model, 'readOnly', {
             configurable: true,
@@ -622,6 +622,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return cell.api;
     }
 
+    getDesignNGClass(item: StructureCache): { [klass: string]: any } {
+       if (this.parent instanceof DesignFormComponent){
+          return this.parent.getNGClass(item);
+       }
+       return null;
+    }
+        
     datachange(component: Cell, property: string, value: any, dataprovider: boolean) {
         const model = component.model;
         const oldValue = model[property];

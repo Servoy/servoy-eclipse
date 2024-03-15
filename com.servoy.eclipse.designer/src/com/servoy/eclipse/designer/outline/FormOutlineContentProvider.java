@@ -424,28 +424,35 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						if (frm == null) continue;
 						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm,
 							ModelUtils.getEditingFlattenedSolution(form));
-						for (FormElement element : cache.getFormComponentElements())
+						if (frm.isResponsiveLayout() || frm.containsResponsiveLayout())
 						{
-							IPersist p = element.getPersistIfAvailable();
-							if (p instanceof IFormElement)
+							persistChildrenAsList = frm.getAllObjectsAsList();
+						}
+						else
+						{
+							for (FormElement element : cache.getFormComponentElements())
 							{
-								String[] name = ((IFormElement)p).getName().split("\\$");
-								if (name.length > 2 && !name[name.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
+								IPersist p = element.getPersistIfAvailable();
+								if (p instanceof IFormElement)
 								{
-									StringBuilder keyBuilder = new StringBuilder();
-									for (int i = 1; i < name.length; i++)
+									String[] name = ((IFormElement)p).getName().split("\\$");
+									if (name.length > 2 && !name[name.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
 									{
-										if (i > 1) keyBuilder.append(".");
-										keyBuilder.append(name[i]);
-									}
-									persistChildrenAsList.add(new WebFormComponentChildType(
-										persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getParentComponent()
-											: (IBasicWebObject)formComponentEl.getPersistIfAvailable(),
-										keyBuilder.toString(), ModelUtils.getEditingFlattenedSolution(form)));
-									if (stopOnFirstFound && !firstFound)
-									{
-										firstFound = true;
-										break;
+										StringBuilder keyBuilder = new StringBuilder();
+										for (int i = 1; i < name.length; i++)
+										{
+											if (i > 1) keyBuilder.append(".");
+											keyBuilder.append(name[i]);
+										}
+										persistChildrenAsList.add(new WebFormComponentChildType(
+											persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getParentComponent()
+												: (IBasicWebObject)formComponentEl.getPersistIfAvailable(),
+											keyBuilder.toString(), ModelUtils.getEditingFlattenedSolution(form)));
+										if (stopOnFirstFound && !firstFound)
+										{
+											firstFound = true;
+											break;
+										}
 									}
 								}
 							}

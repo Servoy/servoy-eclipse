@@ -68,7 +68,7 @@ import { TypesRegistry} from '../sablo/types_registry';
           </div>
       </ng-template>
       <ng-template  #formComponentResponsiveDiv  let-state="state" >
-          <servoycore-formcomponent-responsive-container [ngClass]="{'invisible_element' : state.model.svyVisible === false}" [items]="state.items" [class]="state.model.styleClass" [formComponent]="this"></servoycore-formcomponent-responsive-container>
+          <servoycore-formcomponent-responsive-container [svyContainerStyle]="state.formComponentProperties" [svyContainerAttributes]="state.formComponentProperties.attributes" [ngClass]="{'invisible_element' : state.model.svyVisible === false}" [items]="state.items" [class]="state.model.styleClass" [formComponent]="this"></servoycore-formcomponent-responsive-container>
           <div *ngIf="!state.items || !state.items.length">FormComponentContainer, select a form.</div>
       </ng-template>
       <!-- component template generate start -->
@@ -300,6 +300,14 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 const changed = this.showWireframe !== event.data.value;
                 this.showWireframe = event.data.value;
                 this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts', formname : this.name }, '*');
+                if (changed){
+                    Array.from( this.formCache.formComponents.values()).forEach(formComponent => {
+                       if (formComponent.hasFoundset && formComponent.model.containedForm && !formComponent.model.containedForm.absoluteLayout){
+                           // just trigger the change detection
+                          formComponent.model.editable = ! formComponent.model.editable;
+                       }
+                    });
+                }
             }
             if (event.data.id === 'maxLevel') {
                 this.maxLevel = parseInt(event.data.value, 10);

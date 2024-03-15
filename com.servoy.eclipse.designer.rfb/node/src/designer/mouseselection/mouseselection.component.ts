@@ -499,6 +499,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 		}
 		return true;
 	}
+    
+    notInsideFormComponent(node: SelectionNode) {
+        const element = this.editorContentService.getContentElement(node.svyid);
+        if (element.closest('.svy-listformcomponent') || element.closest('.svy-formcomponent')) {
+            return false;
+        }
+        return true;
+    }
 
 }
 @Directive({
