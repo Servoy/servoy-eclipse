@@ -106,8 +106,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	private DirectorySelectionPage lafSelectionPage;
 
-	private ServoyPropertiesConfigurationPage servoyPropertiesConfigurationPage;
-
 	private AbstractWebObjectSelectionPage componentsSelectionPage;
 
 	private WizardPage errorPage;
@@ -468,7 +466,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
 			licenseConfigurationPage = new LicensePage("licensepage", "Enter license key",
 				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
-			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel);
 			userHomeSelectionPage = new DeployConfigurationPage("userhomepage", exportModel);
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel);
 			if (isNGExport)
@@ -531,7 +528,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			}
 			addPage(defaultAdminConfigurationPage);
 			addPage(servoyPropertiesSelectionPage);
-			addPage(servoyPropertiesConfigurationPage);
 			addPage(licenseConfigurationPage);
 			addPage(serversSelectionPage);
 
