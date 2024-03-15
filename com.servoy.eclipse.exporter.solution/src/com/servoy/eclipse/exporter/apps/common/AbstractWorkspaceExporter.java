@@ -584,7 +584,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 						return new WorkspaceUserManager();
 					}
 				});
-				ss.start(false, true);
+				ss.start(true);
 			}
 			catch (Exception e)
 			{
