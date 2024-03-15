@@ -182,6 +182,7 @@ public class WarExporter
 		"org.apache.logging.log4j.api_*.jar", //
 		"org.apache.logging.log4j.core_*.jar", //
 		"org.apache.logging.log4j.slf4j2.impl_*.jar", //
+		"org.apache.logging.log4j.web_*.jar", //
 		"org.antlr.runtime_*.jar", //
 		"org.apache.commons.commons-dbcp2_*.jar", //
 		"javax.transaction_*.jar", //
