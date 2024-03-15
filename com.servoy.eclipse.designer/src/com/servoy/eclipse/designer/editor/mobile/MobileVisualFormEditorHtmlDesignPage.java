@@ -17,13 +17,14 @@
 
 package com.servoy.eclipse.designer.editor.mobile;
 
+import static com.servoy.eclipse.core.ServoyModelManager.getServoyModelManager;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -65,7 +66,6 @@ import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.designer.editor.AddPartsCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -678,15 +678,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 			if (toFireChanged != null)
 			{
-				final Object toFire = toFireChanged;
-				command = new RefreshingCommand<Command>(command)
-				{
-					@Override
-					public void refresh(boolean haveExecuted)
-					{
-						ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, toFire, false);
-					}
-				};
+				Object toFire = toFireChanged;
+				command = new RefreshingCommand<>(command, () -> getServoyModelManager().getServoyModel().firePersistChanged(false, toFire, false));
 			}
 
 			getCommandStack().execute(command);
@@ -770,14 +763,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			return null;
 		}
 
-		return new RefreshingCommand<Command>(new PutCustomMobilePropertyCommand<T>(element, property, value))
-		{
-			@Override
-			public void refresh(boolean haveExecuted)
-			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, element, false);
-			}
-		};
+		return new RefreshingCommand<>(new PutCustomMobilePropertyCommand<T>(element, property, value),
+			() -> getServoyModelManager().getServoyModel().firePersistChanged(false, element, false));
 	}
 
 	@Override
@@ -1071,10 +1058,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			List<IFormElement> partModelChildren = MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
 				editorPart.getForm());
 
-			Iterator<IFormElement> it = partModelChildren.iterator();
-			while (it.hasNext())
+			for (IFormElement el : partModelChildren)
 			{
-				IFormElement el = it.next();
 				if (el instanceof GraphicalComponent && ((GraphicalComponent)el).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
 				{
 					return (GraphicalComponent)el;
@@ -1401,9 +1386,9 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				}
 			}
 			else
-			// Components
+				// Components
 
-			if (persist instanceof GraphicalComponent)
+				if (persist instanceof GraphicalComponent)
 			{
 				GraphicalComponent gc = (GraphicalComponent)persist;
 				if (ComponentFactory.isButton(gc))
@@ -1427,7 +1412,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					setLabelProperties((GraphicalComponent)persist, properties);
 				}
 			}
-			else if (persist instanceof Bean)
+				else if (persist instanceof Bean)
 			{
 				Bean bean = (Bean)persist;
 				elementType = "Bean";

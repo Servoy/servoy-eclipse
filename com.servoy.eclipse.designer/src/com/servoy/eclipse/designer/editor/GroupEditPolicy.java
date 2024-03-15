@@ -28,9 +28,9 @@ import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 
 /**
  * Edit policy for GroupEditParts
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class GroupEditPolicy extends AbstractEditPolicy
 {
@@ -49,9 +49,9 @@ public class GroupEditPolicy extends AbstractEditPolicy
 					compoundCommand = new CompoundCommand();
 				}
 				compoundCommand.add(command);
-				// when creating paste command we don't need to create it for all the 
+				// when creating paste command we don't need to create it for all the
 				// subelements of the group because PasteToSupportChildsEditPolicy responsible
-				// for creating the PasteCommand will create it passing the Form as the persist 
+				// for creating the PasteCommand will create it passing the Form as the persist
 				// object. This is similar to the situation in PasteAction.createPasteCommand
 				if (request.getType() == BaseVisualFormEditor.REQ_PASTE) break;
 			}
@@ -61,14 +61,9 @@ public class GroupEditPolicy extends AbstractEditPolicy
 		{
 			return null;
 		}
-		return new RefreshingCommand(compoundCommand.unwrap())
-		{
-			@Override
-			public void refresh(boolean haveExecuted)
-			{
-				// refresh the parent, the group may have changed
-				if (getHost().getParent() != null) getHost().getParent().refresh();
-			}
-		};
+		return new RefreshingCommand<>(compoundCommand.unwrap(), () -> {
+			// refresh the parent, the group may have changed
+			if (getHost().getParent() != null) getHost().getParent().refresh();
+		});
 	}
 }

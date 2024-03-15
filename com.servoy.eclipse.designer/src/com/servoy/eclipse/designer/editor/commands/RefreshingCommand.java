@@ -16,21 +16,35 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.function.Consumer;
+
 import org.eclipse.gef.commands.Command;
 
 /**
  * Execute a command and and add refresh()
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
-public abstract class RefreshingCommand<T extends Command> extends Command implements ICommandWrapper<T>
+public class RefreshingCommand<T extends Command> extends Command implements ICommandWrapper<T>
 {
-	protected final T command;
+	private final T command;
+	private final Consumer<Boolean> refresher;
 
 	public RefreshingCommand(T command)
 	{
+		this(command, (Consumer<Boolean>)null);
+	}
+
+	public RefreshingCommand(T command, Runnable refresher)
+	{
+		this(command, (haveExecuted) -> refresher.run());
+	}
+
+	public RefreshingCommand(T command, Consumer<Boolean> refresher)
+	{
 		this.command = command;
+		this.refresher = refresher;
 		if (command != null)
 		{
 			setLabel(command.getLabel());
@@ -89,8 +103,14 @@ public abstract class RefreshingCommand<T extends Command> extends Command imple
 
 	/**
 	 * Refresh your views
-	 * 
+	 *
 	 * @param haveExecuted true after execute/redo, false after undo
 	 */
-	public abstract void refresh(boolean haveExecuted);
+	public void refresh(boolean haveExecuted)
+	{
+		if (refresher != null)
+		{
+			refresher.accept(haveExecuted);
+		}
+	}
 }

@@ -22,9 +22,9 @@ import java.util.Map;
 
 import org.sablo.specification.PropertyDescription;
 
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.WebComponent;
@@ -49,7 +49,7 @@ public class PersistFinder
 	{
 	}
 
-	public IPersist searchForPersist(BaseVisualFormEditor editorPart, String fullUUIDA)
+	public IPersist searchForPersist(Form form, String fullUUIDA)
 	{
 		if (fullUUIDA == null) return null;
 		String fullUUID = fullUUIDA;
@@ -69,11 +69,11 @@ public class PersistFinder
 			if (uuid.startsWith("_")) start = 1;
 			uuid = uuid.substring(start, index).replace('_', '-');
 		}
-		IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(uuid);
+		IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(uuid);
 		if (index > 1)
 		{
 			searchPersist = new WebFormComponentChildType((WebComponent)searchPersist, fullUUID.substring(index + 1).replace('$', '.'),
-				ModelUtils.getEditingFlattenedSolution(editorPart.getForm()));
+				ModelUtils.getEditingFlattenedSolution(form));
 			if (childUUID != null)
 			{
 				UUID childId = UUID.fromString(childUUID);
@@ -108,9 +108,9 @@ public class PersistFinder
 	}
 
 
-	public boolean checkName(BaseVisualFormEditor editorPart, String compName)
+	public boolean checkName(Form form, String compName)
 	{
-		Iterator<IFormElement> fields = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getFlattenedObjects(
+		Iterator<IFormElement> fields = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getFlattenedObjects(
 			null).iterator();
 		for (IFormElement element : Utils.iterate(fields))
 		{

@@ -27,7 +27,7 @@ import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 
 /**
  * Wrapper for commands, set the selection after execute.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -52,21 +52,15 @@ public class SelectModelsCommandWrapper extends RefreshingCommand<Command>
 
 	protected void selectModels()
 	{
-		if (selectionProvider == null || !(command instanceof ISupportModels))
+		if (selectionProvider == null || !(getCommand() instanceof ISupportModels))
 		{
 			return;
 		}
 
-		final Object[] models = ((ISupportModels)command).getModels();
+		final Object[] models = ((ISupportModels)getCommand()).getModels();
 		if (models != null && models.length > 0)
 		{
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					selectionProvider.setSelection(new StructuredSelection(models));
-				}
-			});
+			Display.getDefault().asyncExec(() -> selectionProvider.setSelection(new StructuredSelection(models)));
 		}
 	}
 }

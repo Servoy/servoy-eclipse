@@ -22,7 +22,9 @@ import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.j2db.persistence.IPersist;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.dataprocessing.IModificationListener;
+import com.servoy.j2db.dataprocessing.IModificationSubject;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -44,7 +46,9 @@ public class EditorActionsRegistry
 	{
 		void createComponent(IPropertySource persistPropertySource, UUID uuid, String propertyName, String type, boolean prepend, boolean dropTargetIsSibling);
 
-		void deleteComponent(IPersist persist);
+		void deleteComponent(IPropertySource propertySource, UUID uuid);
+
+		IModificationSubject getModificationSubject();
 	}
 
 	public static void registerHandler(EditorComponentActions action, EditorComponentActionHandler handler)
@@ -60,5 +64,35 @@ public class EditorActionsRegistry
 	public static EditorComponentActionHandler getHandler(EditorComponentActions action)
 	{
 		return editorActionHandlers.get(action);
+	}
+
+	/**
+	 * Add a listener to be called after the handler has executed a command.
+	 */
+	public static IModificationListener addComponentActionListener(EditorComponentActions action, IModificationListener listener)
+	{
+		EditorComponentActionHandler handler = getHandler(action);
+		if (handler == null)
+		{
+			ServoyLog.logWarning("No handler registered for " + action, null);
+			return null;
+		}
+
+		handler.getModificationSubject().addModificationListener(listener);
+		return listener;
+	}
+
+	/**
+	 * Remove a listener to be called after the handler has executed a command.
+	 */
+	public static void removeComponentActionListener(EditorComponentActions action, IModificationListener listener)
+	{
+		EditorComponentActionHandler handler = getHandler(action);
+		if (handler == null)
+		{
+			ServoyLog.logWarning("No handler registered for " + action, null);
+		}
+
+		handler.getModificationSubject().removeModificationListener(listener);
 	}
 }

@@ -131,7 +131,7 @@ public class CreateComponentHandler implements IServerService
 			public void run()
 			{
 				final IStructuredSelection[] newSelection = new IStructuredSelection[1];
-				editorPart.getCommandStack().execute(new CreateComponentCommand(editorPart, options, newSelection));
+				editorPart.getCommandStack().execute(new CreateComponentCommand(editorPart.getForm(), options, newSelection));
 
 				if (newSelection[0] != null) selectionProvider.setSelection(newSelection[0]);
 			}
@@ -161,7 +161,7 @@ public class CreateComponentHandler implements IServerService
 	}
 
 	public static void autoshowWizard(ISupportFormElements parentSupportingElements, WebObjectSpecification spec,
-		WebComponent webComponent, PropertyDescription property, BaseVisualFormEditor editorPart, AtomicInteger id)
+		WebComponent webComponent, PropertyDescription property, Form form, AtomicInteger id)
 	{
 		// prop type should be an array of a custom type..
 		IPropertyType< ? > propType = property.getType();
@@ -177,7 +177,7 @@ public class CreateComponentHandler implements IServerService
 				PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
 				FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
 				ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
-					.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+					.getDataSource(flattenedSolution.getFlattenedForm(form).getDataSource());
 
 				PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(UIUtils.getActiveShell(),
 					context,
@@ -190,7 +190,7 @@ public class CreateComponentHandler implements IServerService
 					{
 						Map<String, Object> row = result.get(i);
 						String customTypeName = typeName + "_" + id.incrementAndGet();
-						while (!PersistFinder.INSTANCE.checkName(editorPart, customTypeName))
+						while (!PersistFinder.INSTANCE.checkName(form, customTypeName))
 						{
 							customTypeName = typeName + "_" + id.incrementAndGet();
 						}

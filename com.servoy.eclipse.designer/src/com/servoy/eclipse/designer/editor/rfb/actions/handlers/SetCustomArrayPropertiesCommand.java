@@ -92,7 +92,7 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 			if (uuid == null)
 			{
 				String name = typeName + "_" + id.incrementAndGet();
-				while (!PersistFinder.INSTANCE.checkName(editorPart, name))
+				while (!PersistFinder.INSTANCE.checkName(editorPart.getForm(), name))
 				{
 					name = typeName + "_" + id.incrementAndGet();
 				}

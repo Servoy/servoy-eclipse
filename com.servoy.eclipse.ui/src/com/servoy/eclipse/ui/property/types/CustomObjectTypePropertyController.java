@@ -25,6 +25,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertyChildId;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
+import com.servoy.eclipse.ui.property.HasPersistContext;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
 import com.servoy.eclipse.ui.property.ObjectTypePropertyController;
 import com.servoy.eclipse.ui.property.PDPropertySource;
@@ -59,14 +60,21 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		return new CustomObjectPropertySource(complexProperty);
 	}
 
-	protected class CustomObjectPropertySource extends ObjectPropertySource
+	protected class CustomObjectPropertySource extends ObjectPropertySource implements HasPersistContext
 	{
-
 		protected PDPropertySource underlyingPropertySource;
 
 		public CustomObjectPropertySource(ComplexProperty<Object> complexProperty)
 		{
 			super(complexProperty);
+		}
+
+		/**
+		 * @return the persistContext
+		 */
+		public PersistContext getPersistContext()
+		{
+			return persistContext;
 		}
 
 		protected PDPropertySource getUnderlyingPropertySource()

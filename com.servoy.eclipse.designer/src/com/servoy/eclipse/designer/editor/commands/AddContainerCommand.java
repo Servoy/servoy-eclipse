@@ -1,6 +1,7 @@
 package com.servoy.eclipse.designer.editor.commands;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.ui.PlatformUI.getWorkbench;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -212,7 +213,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 											event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null,
 											-1, null);
 										finalPersist[0] = customType;
-										showDataproviderDialog(customType.getPropertyDescription().getProperties(), customType, activeEditor);
+										showDataproviderDialog(customType.getPropertyDescription().getProperties(), customType, activeEditor.getForm());
 									}
 								}
 								else if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec") != null)
@@ -263,7 +264,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									componentName = componentName.replaceAll("-", "_");
 									String baseName = componentName;
 									int i = 1;
-									while (!PersistFinder.INSTANCE.checkName(activeEditor, componentName))
+									while (!PersistFinder.INSTANCE.checkName(activeEditor.getForm(), componentName))
 									{
 										componentName = baseName + "_" + i;
 										i++;
@@ -304,11 +305,11 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 											if ("autoshow".equals(property.getTag("wizard")))
 											{
 												CreateComponentHandler.autoshowWizard(parentPersist, spec, webComponent, property,
-													activeEditor, id);
+													activeEditor.getForm(), id);
 											}
 										}
 									}
-									AddContainerCommand.showDataproviderDialog(spec.getProperties(), webComponent, activeEditor);
+									AddContainerCommand.showDataproviderDialog(spec.getProperties(), webComponent, activeEditor.getForm());
 								}
 								if (finalPersist[0] != null)
 								{
@@ -512,7 +513,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 	 * @param activeEditor
 	 * @param customType
 	 */
-	public static void showDataproviderDialog(Map<String, PropertyDescription> properties, AbstractBase webComponent, BaseVisualFormEditor activeEditor)
+	public static void showDataproviderDialog(Map<String, PropertyDescription> properties, AbstractBase webComponent, Form form)
 	{
 		boolean showDialog = true;
 		List<Entry<String, PropertyDescription>> dataproviderProperties = properties.entrySet().stream()
@@ -540,13 +541,14 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			if (dataproviderProperties.size() == 1)
 			{
 				Entry<String, PropertyDescription> entry = dataproviderProperties.get(0);
-				CreateComponentHandler.autoShowDataProviderSelection(entry.getValue(), activeEditor.getForm(), webComponent,
+				CreateComponentHandler.autoShowDataProviderSelection(entry.getValue(), form, webComponent,
 					entry.getKey());
 			}
 			else if (dataproviderProperties.size() > 1)
 			{
 				List<String> collect = dataproviderProperties.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
-				ElementListSelectionDialog dialog = new ElementListSelectionDialog(activeEditor.getEditorSite().getShell(),
+
+				ElementListSelectionDialog dialog = new ElementListSelectionDialog(getWorkbench().getActiveWorkbenchWindow().getShell(),
 					new LabelProvider()
 					{
 						@Override
@@ -574,7 +576,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						asList(dialog.getResult()).forEach(property -> {
 							PropertyDescription propertyDescription = properties.get(property);
-							CreateComponentHandler.autoShowDataProviderSelection(propertyDescription, activeEditor.getForm(), webComponent, (String)property);
+							CreateComponentHandler.autoShowDataProviderSelection(propertyDescription, form, webComponent, (String)property);
 						});
 					}
 				}

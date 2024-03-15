@@ -411,6 +411,10 @@ public class EditorUtil
 		{
 			persist = ((FormElementGroup)model).getParent();
 		}
+		else if (model instanceof PlatformSimpleUserNode platformSimpleUserNode)
+		{
+			persist = platformSimpleUserNode.getForm();
+		}
 		if (persist == null)
 		{
 			return null;

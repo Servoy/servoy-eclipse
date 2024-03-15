@@ -168,7 +168,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
-import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 
@@ -216,8 +215,6 @@ import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.eclipse.ui.util.MediaNode;
-import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
-import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.*;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.eclipse.ui.wizards.IExportSolutionWizardProvider;
@@ -3840,12 +3837,6 @@ public class SolutionExplorerView extends ViewPart
 	@Override
 	public Object getAdapter(Class type)
 	{
-		if (type == org.eclipse.ui.views.properties.IPropertySheetPage.class)
-		{
-			PropertySheetPage page = new ModifiedPropertySheetPage(null);
-			page.setRootEntry(new ModifiedPropertySheetEntry());
-			return page;
-		}
 		if (type.equals(IContextProvider.class))
 		{
 			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.solution_explorer");

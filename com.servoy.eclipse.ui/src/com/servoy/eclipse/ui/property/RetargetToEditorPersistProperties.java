@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.util.IDelegate;
@@ -33,17 +32,17 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-public class RetargetToEditorPersistProperties implements IPropertySource, IAdaptable, IDelegate<IModelSavePropertySource>
+public class RetargetToEditorPersistProperties implements IPropertySource, IAdaptable, IDelegate<IPropertySource>
 {
-	private final IModelSavePropertySource persistProperties;
+	private final IPropertySource persistProperties;
 
-	public RetargetToEditorPersistProperties(IModelSavePropertySource persistProperties)
+	public RetargetToEditorPersistProperties(IPropertySource persistProperties)
 	{
 		this.persistProperties = persistProperties;
 	}
 
 	@Override
-	public IModelSavePropertySource getDelegate()
+	public IPropertySource getDelegate()
 	{
 		return persistProperties;
 	}
@@ -82,18 +81,21 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 
 	public void setPropertyValue(final Object id, final Object value)
 	{
-		// ignore if the value did not change (Was already set), happens when a form property is changed using props view and form node 
+		// ignore if the value did not change (Was already set), happens when a form property is changed using props view and form node
 		// is selected in the solex tree, setPropertyValue is called with new value while value has already been set.
-		if (!Utils.equalObjects(value, persistProperties.getPropertyValue(id)))
+		Object propertyValue = persistProperties.getPropertyValue(id);
+		if (Utils.equalObjects(value, propertyValue))
 		{
-			Display.getCurrent().syncExec(new Runnable()
-			{
-				public void run()
-				{
-					updateProperty(true, id, value);
-				}
-			});
+			return;
 		}
+
+		Display.getCurrent().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				updateProperty(true, id, value);
+			}
+		});
 	}
 
 	/**
@@ -105,40 +107,40 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 	 */
 	protected void updateProperty(boolean set, Object id, Object value)
 	{
-		Object editorModel;
-		if (persistProperties instanceof PersistPropertySource)
-		{
-			PersistContext persistContext = ((PersistPropertySource)persistProperties).getPersistContext();
-			editorModel = persistContext.getContext();
-		}
-		else
-		{
-			editorModel = persistProperties.getSaveModel();
-		}
-
 		// find the editor of this persist and change the value in the editor
-		IEditorPart editor = EditorUtil.openPersistEditor(editorModel, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
+		IEditorPart editor = openPersistEditor(persistProperties, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
 		if (editor == null)
 		{
 			return;
 		}
 
-		IPropertySourceProvider propertySourceProvider = editor.getAdapter(IPropertySourceProvider.class);
-		if (propertySourceProvider != null)
+		if (set)
 		{
-			IPropertySource propertySource = propertySourceProvider.getPropertySource(persistProperties.getSaveModel());
-			if (propertySource != null)
-			{
-				if (set)
-				{
-					propertySource.setPropertyValue(id, value);
-				}
-				else
-				{
-					propertySource.resetPropertyValue(id);
-				}
-			}
+			persistProperties.setPropertyValue(id, value);
 		}
+		else
+		{
+			persistProperties.resetPropertyValue(id);
+		}
+	}
+
+	public static IEditorPart openPersistEditor(IPropertySource persistProperties, boolean activate)
+	{
+		Object editorModel;
+		if (persistProperties instanceof HasPersistContext hasPersistContext)
+		{
+			editorModel = hasPersistContext.getPersistContext().getContext();
+		}
+		else if (persistProperties instanceof IModelSavePropertySource modelSavePropertySource)
+		{
+			editorModel = modelSavePropertySource.getSaveModel();
+		}
+		else
+		{
+			return null;
+		}
+
+		return EditorUtil.openPersistEditor(editorModel, activate);
 	}
 
 	public Object getAdapter(Class adapter)

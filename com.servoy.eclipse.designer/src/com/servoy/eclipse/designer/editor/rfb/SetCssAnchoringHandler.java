@@ -87,7 +87,7 @@ public class SetCssAnchoringHandler implements IServerService
 		CompoundCommand cc = new CompoundCommand();
 		List<IPersist> changedPersists = new ArrayList<IPersist>();
 		selection.forEach(uuid -> {
-			IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, (String)uuid);
+			IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), (String)uuid);
 			if (persist != null)
 			{
 				cc.add(new SetCssAnchoringCommand(top, right, bottom, left, persist));
@@ -106,7 +106,7 @@ public class SetCssAnchoringHandler implements IServerService
 	{
 		boolean[] selectedAnchors = new boolean[] { true, true, true, true };
 		selection.forEach(uuid -> {
-			IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, (String)uuid);
+			IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), (String)uuid);
 			if (persist instanceof BaseComponent)
 			{
 				CSSPosition position = ((BaseComponent)persist).getCssPosition();

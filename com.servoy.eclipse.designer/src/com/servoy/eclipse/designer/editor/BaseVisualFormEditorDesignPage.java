@@ -176,7 +176,6 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 			@Override
 			public void run()
 			{
-				//RAGTEST
 				PersistPropertySource.refreshPropertiesView();
 				super.run();
 			}
@@ -188,7 +187,6 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 			@Override
 			public void run()
 			{
-				//RAGTEST
 				PersistPropertySource.refreshPropertiesView();
 				super.run();
 			}

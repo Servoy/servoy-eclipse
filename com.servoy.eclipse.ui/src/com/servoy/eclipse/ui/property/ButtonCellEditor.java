@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Control;
 public abstract class ButtonCellEditor extends CellEditor
 {
 	protected Object oldValue;
-	protected Button button;
+	private Button button;
 
 	// constructors similar to super
 	public ButtonCellEditor()
@@ -117,5 +117,17 @@ public abstract class ButtonCellEditor extends CellEditor
 			markDirty();
 			fireApplyEditorValue();
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.jface.viewers.CellEditor#dispose()
+	 */
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		button = null;
 	}
 }

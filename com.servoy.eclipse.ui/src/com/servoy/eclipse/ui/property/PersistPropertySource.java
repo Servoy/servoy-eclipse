@@ -256,7 +256,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  */
 
-public class PersistPropertySource implements ISetterAwarePropertySource, IAdaptable, IModelSavePropertySource
+public class PersistPropertySource implements ISetterAwarePropertySource, IAdaptable, IModelSavePropertySource, HasPersistContext
 {
 	protected PersistContext persistContext;
 	protected boolean readOnly;

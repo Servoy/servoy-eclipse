@@ -78,7 +78,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -95,8 +94,6 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
-import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
-import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.FormHierarchyFilter;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
@@ -1363,12 +1360,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	@Override
 	public Object getAdapter(Class type)
 	{
-		if (type == org.eclipse.ui.views.properties.IPropertySheetPage.class)
-		{
-			PropertySheetPage page = new ModifiedPropertySheetPage(null);
-			page.setRootEntry(new ModifiedPropertySheetEntry());
-			return page;
-		}
 		if (type.equals(IContextProvider.class))
 		{
 			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_hierarchy_view");
