@@ -170,6 +170,7 @@ public class WarExporter
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_server_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"org.eclipse.dltk.javascript.rhino_*.jar", //
 		"slf4j.api_*.jar", //
 		"jabsorb_*.jar", //
 		"org.apache.commons.commons-codec_*.jar", //
