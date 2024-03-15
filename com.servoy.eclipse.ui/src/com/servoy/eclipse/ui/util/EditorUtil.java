@@ -16,13 +16,14 @@
  */
 package com.servoy.eclipse.ui.util;
 
+import static java.util.Collections.emptyIterator;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -70,6 +71,7 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.I18NEditorInput;
@@ -95,6 +97,7 @@ import com.servoy.eclipse.ui.editors.less.PropertiesLessEditorInput;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
+import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
@@ -129,6 +132,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.FilteredIterator;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
@@ -925,19 +929,29 @@ public class EditorUtil
 	/*
 	 * Get the table columns in order as configured in the preferences.
 	 */
-	public static Iterator<Column> getTableColumns(ITable table)
+	public static Iterator<Column> getTableColumns(ITable table, boolean includeExcluded)
 	{
 		if (table == null)
 		{
-			return Collections.<Column> emptyList().iterator();
+			return emptyIterator();
 		}
+		Iterator<Column> columns;
 		if (new DesignerPreferences().getShowColumnsInDbOrder())
 		{
 			// columns as they appear in the database
-			return table.getColumns().iterator();
+			columns = table.getColumns().iterator();
 		}
-		// columns sorted by name (PK always first)
-		return table.getColumnsSortedByName();
+		else  
+		{
+			// columns sorted by name (PK always first)
+			columns = table.getColumnsSortedByName();
+		}
+
+		if (includeExcluded)
+		{
+			return columns;
+		}
+		return new FilteredIterator<>(columns, column -> !((Column)column).hasFlag(IBaseColumn.EXCLUDED_COLUMN));
 	}
 
 	public static final String CHILD_TABLE_KEYWORD = "childtable";

@@ -86,7 +86,7 @@ public class AggregationColumnEditingSupport extends EditingSupport
 			int index = 0;
 			try
 			{
-				Iterator<Column> it = EditorUtil.getTableColumns(table);
+				Iterator<Column> it = EditorUtil.getTableColumns(table, true);
 				int i = 0;
 				while (it.hasNext())
 				{
@@ -97,7 +97,6 @@ public class AggregationColumnEditingSupport extends EditingSupport
 						break;
 					}
 					i++;
-
 				}
 			}
 			catch (Exception e)
@@ -123,7 +122,7 @@ public class AggregationColumnEditingSupport extends EditingSupport
 		columns = new String[table.getColumnCount()];
 		try
 		{
-			Iterator<Column> it = EditorUtil.getTableColumns(table);
+			Iterator<Column> it = EditorUtil.getTableColumns(table, true);
 			int i = 0;
 			while (it.hasNext())
 			{
