@@ -6,7 +6,7 @@
                       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
   version="3.0">
   <!--  this version below should be upped if servoy makes changes to this file! -->
-  <!--  servoy web.xml version:5 -->
+  <!--  servoy web.xml version:6 -->
   <!-- Servoy related servlets -->
   
   <absolute-ordering>
@@ -29,43 +29,13 @@
        </init-param>
    </filter>
 
-	<servlet>
-		<servlet-name>http-tunnel-servlet</servlet-name>
-		<servlet-class>
-			com.sebster.tunnel.http.server.servlet.HttpTunnelServlet
-		</servlet-class>
-		<init-param>
-			<param-name>eventListenerLocatorClass</param-name>
-			<param-value>com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory</param-value>
-		</init-param>
-	</servlet>
-    <servlet>
-    <servlet-name>servoy_client</servlet-name>
-    <servlet-class>com.servoy.j2db.server.servlets.WarWebStartClientServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>servoy_client_properties</servlet-name>
-    <servlet-class>com.servoy.j2db.server.servlets.WebStartClientPropertiesServlet</servlet-class>
-  </servlet>
   <servlet>
     <servlet-name>servoy_server_admin</servlet-name>
     <servlet-class>com.servoy.j2db.server.servlets.ConfigServlet</servlet-class>
   </servlet>
   <servlet>
-    <servlet-name>lib_servlet</servlet-name>
-    <servlet-class>com.servoy.j2db.server.servlets.WarJarServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>servoy_port_server</servlet-name>
-    <servlet-class>com.servoy.j2db.server.servlets.PortServlet</servlet-class>
-  </servlet>
-  <servlet>
     <servlet-name>servoy_web_services</servlet-name>
     <servlet-class>com.servoy.j2db.server.servlets.WebServicesServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>servoy_messages</servlet-name>
-    <servlet-class>com.servoy.j2db.server.servlets.MessagesServlet</servlet-class>
   </servlet>
   <servlet>
     <servlet-name>servoy_webclient</servlet-name>
@@ -86,39 +56,13 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
 
-	<servlet-mapping>
-		<servlet-name>http-tunnel-servlet</servlet-name>
-		<url-pattern>/tunnel</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>lib_servlet</servlet-name>
-		<url-pattern>*.jar</url-pattern>
-	</servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>servoy_client</servlet-name>
-    <url-pattern>/servoy-client/*</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>servoy_client_properties</servlet-name>
-    <url-pattern>/servoy.properties</url-pattern>
-  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>servoy_server_admin</servlet-name>
     <url-pattern>/servoy-admin/*</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-    <servlet-name>servoy_port_server</servlet-name>
-    <url-pattern>/servoy-rmi-portserver</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
     <servlet-name>servoy_web_services</servlet-name>
     <url-pattern>/servoy-service/*</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>servoy_messages</servlet-name>
-    <url-pattern>/servoy_messages</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>servoy_webclient</servlet-name>

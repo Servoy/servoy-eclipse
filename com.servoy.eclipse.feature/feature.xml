@@ -178,14 +178,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="2024.6.0.3980_rc"/>
 
    <plugin
-         id="j2db_tunnel"
-         version="2024.6.0.3980_rc"/>
-
-   <plugin
-         id="j2db_runtime"
-         version="2024.6.0.3980_rc"/>
-
-   <plugin
          id="j2db_log4j"
          version="2024.6.0.3980_rc"/>
 
