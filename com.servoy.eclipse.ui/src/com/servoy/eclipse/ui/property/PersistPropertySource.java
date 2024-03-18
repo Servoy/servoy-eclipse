@@ -2680,6 +2680,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPersist persistThatCouldBeExtended = (IPersist)beanPropertyPersist;
 
 			String topMostKey = (String)id;
+			int index = -1;
+			if (persistThatCouldBeExtended instanceof IChildWebObject)
+			{
+				index = ((IChildWebObject)persistThatCouldBeExtended).getIndex();
+			}
 			while (persistThatCouldBeExtended instanceof IChildWebObject)
 			{
 				topMostKey = ((IChildWebObject)persistThatCouldBeExtended).getJsonKey();
@@ -2703,16 +2708,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							if (ownJson.get(topMostKey) instanceof JSONArray)
 							{
 								JSONArray arr = (JSONArray)ownJson.get(topMostKey);
-								for (int i = 0; i < arr.length(); ++i)
+								if (index >= 0 && index < arr.length())
 								{
-									JSONObject item = arr.getJSONObject(i);
+									JSONObject item = arr.getJSONObject(index);
 									if (item.has((String)id))
 									{
 										inheritedValue = item.get((String)id);
-										if (inheritedValue != null)
-										{
-											break;
-										}
 									}
 								}
 							}
