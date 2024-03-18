@@ -299,20 +299,24 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.logging.log4j.api"
-         version="2.22.1"/>
+         version="2.23.1"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
-         version="2.22.1"/>
+         version="2.23.1"/>
 
    <plugin
          id="org.apache.logging.log4j.jcl"
-         version="2.22.1"/>
+         version="2.23.1"/>
 
    <plugin
          id="org.apache.logging.log4j.web"
-         version="2.22.1"/>
-         
+         version="2.23.1"/>
+
+   <plugin
+         id="org.apache.logging.log4j.slf4j2.impl"
+         version="2.23.1"/>
+
    <plugin
          id="javax.transaction"
          version="1.1.0"/>
@@ -440,9 +444,5 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    <plugin
          id="com.servoy.eclipse.aibridge"
          version="2023.9.0.3900_rc"/>
-
-   <plugin
-         id="org.apache.logging.log4j.slf4j2.impl"
-         version="2.22.1"/>
 
 </feature>

@@ -175,8 +175,11 @@ public class WarExporter
 		"jabsorb_*.jar", //
 		"org.apache.commons.commons-codec_*.jar", //
 		"org.apache.commons.commons-io_*.jar", //
-		"org.apache.commons.logging_*.jar", //
+		"org.apache.commons.commons-logging_*.jar", //
 		"org.apache.commons.commons-collections4_*.jar", //
+		"org.apache.commons.commons-dbcp2_*.jar", //
+		"org.apache.commons.commons-pool2_*.jar", //
+		"org.apache.commons.commons-fileupload_*.jar", //
 		"com.google.guava_*.jar", //
 		"org.hibernate.orm.core_*.jar", //
 		"org.apache.logging.log4j.api_*.jar", //
@@ -184,9 +187,7 @@ public class WarExporter
 		"org.apache.logging.log4j.slf4j2.impl_*.jar", //
 		"org.apache.logging.log4j.web_*.jar", //
 		"org.antlr.runtime_*.jar", //
-		"org.apache.commons.commons-dbcp2_*.jar", //
 		"javax.transaction_*.jar", //
-		"org.apache.commons.commons-pool2_*.jar", //
 		"org.apache.james.apache-mime4j_*.jar", //
 		"xstream_*.jar", //
 		"org.jsoup_*.jar", //
@@ -195,7 +196,6 @@ public class WarExporter
 		"com.sun.activation.jakarta.activation_*.jar", //
 		"com.github.ua-parser.uap-java_*.jar", //
 		"org.yaml.snakeyaml_*.jar", //
-		"org.apache.commons.commons-fileupload_*.jar", //
 		"org.jboss.logging.jboss-logging_*.jar", //
 		"net.bytebuddy.byte-buddy_*.jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
