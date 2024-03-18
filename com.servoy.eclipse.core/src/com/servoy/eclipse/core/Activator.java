@@ -1166,7 +1166,7 @@ public class Activator extends Plugin
 			ss.start(true);
 			ss.startWebServer();
 
-			checkApplicationServerVersion(ss.getApplicationServer());
+//			checkApplicationServerVersion(ss.getApplicationServer());
 			checkDefaultPostgressInstall(ss.getApplicationServer());
 
 			// set the START_AS_TEAMPROVIDER_SETTING flag as system property, so
@@ -1303,6 +1303,7 @@ public class Activator extends Plugin
 			new Object[] { parentFile, Integer.valueOf(version), Integer.valueOf(releaseNumber), Boolean.valueOf(lts), listener }));
 	}
 
+	// TODO how to upgrade plugins after servoy developer update
 	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
 	{
 		// check the app server dir
