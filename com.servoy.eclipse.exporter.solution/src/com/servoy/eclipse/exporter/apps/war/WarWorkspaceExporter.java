@@ -250,13 +250,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public List<String> getLafs()
-		{
-			return getFilteredFileNames(ApplicationServerRegistry.get().getLafManager().getLAFDir(), cmdLineArguments.getExcludedLafs(),
-				cmdLineArguments.getLafs());
-		}
-
-		@Override
 		public String getWarFileName()
 		{
 			String warFileName = cmdLineArguments.getWarFileName();
@@ -274,13 +267,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		{
 			return getFilteredFileNames(ApplicationServerRegistry.get().getServerManager().getDriversDir(), cmdLineArguments.getExcludedDrivers(),
 				cmdLineArguments.getDrivers());
-		}
-
-		@Override
-		public List<String> getBeans()
-		{
-			return getFilteredFileNames(ApplicationServerRegistry.get().getBeanManager().getBeansDir(), cmdLineArguments.getExcludedBeans(),
-				cmdLineArguments.getBeans());
 		}
 
 		@Override

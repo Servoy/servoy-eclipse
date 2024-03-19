@@ -17,24 +17,15 @@
 package com.servoy.eclipse.core;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.documentation.IObjectDocumentation;
@@ -43,9 +34,7 @@ import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.Extension;
-import com.servoy.j2db.util.JarManager.ExtensionResource;
 
 public class XMLScriptObjectAdapterLoader
 {
@@ -191,51 +180,4 @@ public class XMLScriptObjectAdapterLoader
 		}
 	}
 
-	/**
-	 * Tries to load documentation XMLs for available beans.
-	 */
-	public static void loadDocumentationForBeans(IBeanManagerInternal beanManager, IDocumentationManagerProvider documentationManagerProvider)
-	{
-		File beanDir = beanManager.getBeansDir();
-		Map<String, List<ExtensionResource>> beans = beanManager.getLoadedBeanDefs();
-		List<File> allJars = new ArrayList<File>();
-		for (List<ExtensionResource> exts : beans.values())
-		{
-			for (ExtensionResource ext : exts)
-			{
-				allJars.add(new File(beanDir, ext.jarFileName));
-			}
-		}
-		for (File jarPath : allJars)
-		{
-			try
-			{
-				JarFile file = new JarFile(jarPath);
-				Manifest mf = file.getManifest();
-				if (mf != null)
-				{
-					List<String> beanClasses = JarManager.getClassNamesForKey(mf, JarManager.JAVA_BEAN_ATTRIBUTE);
-					Set<String> docXMLs = new TreeSet<String>();
-					for (String clz : beanClasses)
-					{
-						docXMLs.add(XMLScriptObjectAdapterLoader.getPluginDocXMLForClass(clz));
-					}
-					for (String docXMLPath : docXMLs)
-					{
-						ZipEntry docEntry = file.getEntry(docXMLPath);
-						if (docEntry != null)
-						{
-							InputStream is = file.getInputStream(docEntry);
-							IDocumentationManager mgr = documentationManagerProvider.fromXML(is, beanManager.getClassLoader());
-							XMLScriptObjectAdapterLoader.loadDocumentationFromXML(beanManager.getClassLoader(), mgr);
-						}
-					}
-				}
-			}
-			catch (IOException e)
-			{
-				ServoyLog.logError("Exception while loading extension XML files from JAR file '" + jarPath + "'.", e);
-			}
-		}
-	}
 }

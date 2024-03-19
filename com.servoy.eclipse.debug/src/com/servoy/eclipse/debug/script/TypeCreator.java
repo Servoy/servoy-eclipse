@@ -40,7 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.swing.Icon;
-import javax.swing.SwingUtilities;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -131,7 +130,6 @@ import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
@@ -201,7 +199,6 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.plugins.IClientPlugin;
-import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.querybuilder.impl.QBAggregate;
@@ -397,8 +394,6 @@ public class TypeCreator extends TypeCache
 	protected static final List<String> objectMethods = Arrays.asList(
 		new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
-	private boolean jfxInitialized = false;
-
 	private final TypeSystemImpl servoyStaticTypeSystem = new TypeSystemImpl()
 	{
 		@Override
@@ -554,41 +549,10 @@ public class TypeCreator extends TypeCache
 					}
 				}
 				Class< ? > clz = null;
-				try
-				{
-					if (!jfxInitialized && name.startsWith("javafx."))
-					{
-						jfxInitialized = true;
-						try
-						{
-							// special supprt for jfx because classes can't be loaded before jfx is initialzied correctly.
-							DesignApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
-							IServoyBeanFactory factory = (IServoyBeanFactory)application.getBeanManager()
-								.createInstance("com.servoy.extensions.beans.jfxpanel.JFXPanel");
-							if (factory != null)
-							{
-								SwingUtilities.invokeAndWait(() -> {
-									factory.getBeanInstance(IClientPluginAccess.CLIENT, (IClientPluginAccess)application.getPluginAccess(), null);
-								});
-							}
-						}
-						catch (Throwable e)
-						{
-							// ignores
-						}
 
-					}
-					clz = Class.forName(name);
-				}
-				catch (Exception e)
-				{
-				}
-				if (clz == null)
-				{
-					ClassLoader cl = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
-					if (cl == null) cl = Thread.currentThread().getContextClassLoader();
-					clz = Class.forName(name, false, cl);
-				}
+				ClassLoader cl = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager().getClassLoader();
+				if (cl == null) cl = Thread.currentThread().getContextClassLoader();
+				clz = Class.forName(name, false, cl);
 				type = getClassType(context, clz, name);
 			}
 			catch (ClassNotFoundException e)

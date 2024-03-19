@@ -80,11 +80,6 @@
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="com.servoy.eclipse.ui.StartSmartClient"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M3+M2+A">
-      </key>
-      <key
             commandId="com.servoy.eclipse.ui.StartWebClient"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+M2+B">
@@ -102,12 +97,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.commands">
-      <command
-            categoryId="com.servoy.eclipse.ui"
-            description="Launch SmartClient"
-            id="com.servoy.eclipse.ui.StartSmartClient"
-            name="Launch SmartClient">
-      </command>
       <command
             categoryId="com.servoy.eclipse.ui"
             description="Launch WebClient"
@@ -323,25 +312,6 @@
         </menuContribution>
         <menuContribution
               allPopups="false"
-              locationURI="menu:com.servoy.eclipse.ui.StartClient">
-           <command
-                 commandId="com.servoy.eclipse.ui.StartSmartClient"
-                 id="com.servoy.eclipse.ui.StartSmartClient"
-                 icon="icons/launch.png"
-                 label="Launch Smart Client"
-                 style="push">
-                 <visibleWhen>
-              <with
-                    variable="com.servoy.eclipse.core.smartClientState">
-                 <equals
-                       value="ENABLED">
-                 </equals>
-              </with>
-           </visibleWhen>
-           </command>
-        </menuContribution>
-        <menuContribution
-              allPopups="false"
               class="com.servoy.eclipse.debug.actions.LaunchWebClientContributionFactory"
               locationURI="menu:com.servoy.eclipse.ui.StartClient">
         </menuContribution>
@@ -384,12 +354,6 @@
                  style="push">
            </command>
            <command
-                 commandId="com.servoy.eclipse.ui.StartSmartClient"
-                 icon="icons/launch.png"
-                 label="Launch Debug Smart Client"
-                 style="push">
-           </command>
-           <command
                  commandId="com.servoy.eclipse.ui.StartNGClient"
                  icon="icons/launch_ng.png"
                  label="Launch NGClient"
@@ -415,18 +379,6 @@
            <enabledWhen>
               <with
                     variable="com.servoy.eclipse.core.webClientState">
-                 <equals
-                       value="ENABLED">
-                 </equals>
-              </with>
-           </enabledWhen>
-        </handler>
-        <handler
-              class="com.servoy.eclipse.debug.handlers.StartSmartClientHandler"
-              commandId="com.servoy.eclipse.ui.StartSmartClient">
-           <enabledWhen>
-              <with
-                    variable="com.servoy.eclipse.core.smartClientState">
                  <equals
                        value="ENABLED">
                  </equals>

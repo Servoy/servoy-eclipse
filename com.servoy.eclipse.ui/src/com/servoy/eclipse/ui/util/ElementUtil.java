@@ -493,7 +493,7 @@ public class ElementUtil
 			}
 			if (beanClass == null)
 			{
-				ClassLoader bcl = application.getBeanManager().getClassLoader();
+				ClassLoader bcl = application.getPluginManager().getClassLoader();
 				try
 				{
 					beanClass = bcl.loadClass(beanClassName);

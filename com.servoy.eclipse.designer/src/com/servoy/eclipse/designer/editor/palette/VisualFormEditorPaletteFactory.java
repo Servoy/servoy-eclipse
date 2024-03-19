@@ -19,7 +19,6 @@ package com.servoy.eclipse.designer.editor.palette;
 
 import java.awt.Image;
 import java.awt.Insets;
-import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,16 +55,13 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
-import com.servoy.eclipse.ui.dialogs.BeanClassContentProvider;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.PaletteCustomization;
 import com.servoy.eclipse.ui.property.BorderPropertyController;
 import com.servoy.eclipse.ui.property.BorderPropertyController.BorderType;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.PersistPropertyHandler;
-import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
-import com.servoy.j2db.dataui.IServoyAwareBean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
@@ -179,16 +175,6 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		// add templates
 		addTemplates(drawers, drawerEntries, entryProperties);
 
-
-		if (!SolutionMetaData.isNGOnlySolution(solutionType))
-		{
-			// add servoy beans
-			addBeans(true, drawers, drawerEntries, entryProperties);
-
-			// add other beans
-			addBeans(false, drawers, drawerEntries, entryProperties);
-		}
-
 		// add components
 		addComponents(drawers, drawerEntries, entryProperties, componentsSpecProviderState);
 
@@ -229,51 +215,6 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			drawers.add(id);
 			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelTemplatesPalette);
 			drawerEntries.put(id, templateNames);
-		}
-	}
-
-	private static void addBeans(boolean servoyBeans, List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
-	{
-		String id = servoyBeans ? SERVOY_BEANS_ID : JAVA_BEANS_ID;
-
-		Object[] beans = BeanClassContentProvider.DEFAULT.getElements(BeanClassContentProvider.BEANS_DUMMY_INPUT);
-		List<String> beanIds = new ArrayList<String>();
-		for (Object bean : beans)
-		{
-			if (bean instanceof BeanInfo)
-			{
-				BeanDescriptor beanDescriptor = ((BeanInfo)bean).getBeanDescriptor();
-				if (beanDescriptor.getBeanClass() != null && ((IServoyBeanFactory.class.isAssignableFrom(beanDescriptor.getBeanClass()) ||
-					IServoyAwareBean.class.isAssignableFrom(beanDescriptor.getBeanClass())) == servoyBeans))
-				{
-					String beanId = beanDescriptor.getBeanClass().getName();
-					beanIds.add(beanId);
-					beanInfos.put(beanId, (BeanInfo)bean);
-
-					String name = beanDescriptor.getDisplayName();
-					if (name == null || name.length() == 0)
-					{
-						name = beanDescriptor.getName();
-					}
-					entryProperties.put(id + '.' + beanId + '.' + PaletteCustomization.PROPERTY_LABEL, name);
-					String desc = beanDescriptor.getShortDescription();
-					if (desc == null || desc.length() == 0)
-					{
-						desc = "Place bean " + name;
-					}
-					entryProperties.put(id + '.' + beanId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, desc);
-				}
-			}
-		}
-
-		if (beanIds.size() > 0)
-		{
-			drawers.add(id);
-			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL,
-				servoyBeans ? Messages.LabelServoyBeansPalette : Messages.LabelJavaBeansPalette);
-			// by default hide java beans
-			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_HIDDEN, Boolean.valueOf(!servoyBeans));
-			drawerEntries.put(id, beanIds);
 		}
 	}
 

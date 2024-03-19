@@ -37,11 +37,7 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public List<String> getDrivers();
 
-	public List<String> getLafs();
-
 	public List<String> getPlugins();
-
-	public List<String> getBeans();
 
 	public boolean getStartRMI();
 

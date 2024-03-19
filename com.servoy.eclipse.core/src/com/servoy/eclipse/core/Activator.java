@@ -115,8 +115,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.IBeanManager;
-import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.IBrowserLauncher;
 import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.IDebugClientHandler;
@@ -976,11 +974,6 @@ public class Activator extends Plugin
 			if (documentationManagerProvider != null)
 			{
 				XMLScriptObjectAdapterLoader.loadDocumentationForPlugins(pluginManager, documentationManagerProvider);
-				IBeanManager beanManager = getDesignClient().getBeanManager();
-				if (beanManager instanceof IBeanManagerInternal)
-				{
-					XMLScriptObjectAdapterLoader.loadDocumentationForBeans((IBeanManagerInternal)beanManager, documentationManagerProvider);
-				}
 			}
 
 			// Visit all column validators/converters and let them add any method templates to

@@ -730,7 +730,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						if (model instanceof Bean)
 						{
 							IApplication application = Activator.getDefault().getDesignClient();
-							beanClass = application.getBeanManager().getClassLoader().loadClass(((Bean)model).getBeanClassName());
+							beanClass = application.getPluginManager().getClassLoader().loadClass(((Bean)model).getBeanClassName());
 						}
 						lm = getAllMethods(beanClass, specificClass, prefix, null, UserNodeType.FORM_ELEMENTS_ITEM_METHOD);
 					}
