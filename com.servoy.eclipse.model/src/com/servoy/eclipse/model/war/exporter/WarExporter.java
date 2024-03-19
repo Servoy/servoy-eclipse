@@ -52,8 +52,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -82,7 +84,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.core.resources.IFile;
@@ -2352,33 +2353,47 @@ public class WarExporter
 			}
 		}
 		pluginLocations.addAll(exportModel.getPluginLocations());
-		for (String libName : WAR_LIBS)
-		{
-			int i = 0;
-			boolean found = false;
-			while (!found && i < pluginLocations.size())
+
+		LinkedHashMap<File, String[]> dirListings = new LinkedHashMap<>();
+		pluginLocations.forEach(location -> {
+			File pluginLocation = new File(location);
+			if (!pluginLocation.exists())
 			{
-				File pluginLocation = new File(pluginLocations.get(i));
+				if (!pluginLocation.isAbsolute() && !pluginLocation.exists())
+				{
+					pluginLocation = new File(userDir, location);
+				}
 				if (!pluginLocation.exists())
 				{
-					if (!pluginLocation.isAbsolute() && !pluginLocation.exists())
-					{
-						pluginLocation = new File(userDir, pluginLocations.get(i));
-					}
-					if (!pluginLocation.exists())
-					{
-						System.err.println("Trying userDir " + userDir + " as parent for " + pluginLocations.get(i) + " but is not found");
-					}
+					System.err.println("Trying userDir " + userDir + " as parent for " + location + " but is not found");
 				}
+			}
 
-				if (!pluginLocation.isDirectory())
+			if (!pluginLocation.isDirectory())
+			{
+				System.err.println(pluginLocation.getAbsolutePath() + " is not a directory.");
+			}
+			else
+			{
+				dirListings.put(pluginLocation, pluginLocation.list());
+			}
+		});
+		for (String libName : WAR_LIBS)
+		{
+			boolean found = false;
+			Iterator<Entry<File, String[]>> listings = dirListings.entrySet().iterator();
+			while (!found && listings.hasNext())
+			{
+				Collection<File> libs = new ArrayList<File>();
+				Entry<File, String[]> entry = listings.next();
+				String[] value = entry.getValue();
+				for (String name : value)
 				{
-					System.err.println(pluginLocation.getAbsolutePath() + " is not a directory.");
-					i++;
-					continue;
+					if (FilenameUtils.wildcardMatch(name, libName, IOCase.INSENSITIVE))
+					{
+						libs.add(new File(entry.getKey(), name));
+					}
 				}
-
-				Collection<File> libs = FileUtils.listFiles(pluginLocation, new WildcardFileFilter(libName), TrueFileFilter.INSTANCE);
 				Iterator<File> iterator = libs.iterator();
 				if (libs != null && libs.size() > 0)
 				{
@@ -2402,7 +2417,6 @@ public class WarExporter
 					found = true;
 					break;
 				}
-				i++;
 			}
 			if (!found) return libName;
 		}
