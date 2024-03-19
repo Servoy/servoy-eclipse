@@ -155,7 +155,7 @@ export class FormattingService {
         return data;
     }
 
-    private addToFormats(formats: Array<string>, newChar: string, isSeparator: boolean) {
+    private addToFormats(formats: Array<string>,formatLetters: Array<string>, newChar: string, isSeparator: boolean) {
         const size = formats.length;
         if (size == 0) {
             formats.push(newChar);
@@ -165,11 +165,16 @@ export class FormattingService {
             if (newChar == 'y'){
                 insertIndex = formats.findIndex((element) => element.indexOf('y') >= 0);
             }
+            if (newChar.match(/[a-zA-Z]/) && formatLetters.indexOf(newChar) == -1) {
+                formatLetters.push(newChar);
+            }
             for (let i = 0; i < formatsCopy.length; i++) {
                 const newFormat = formatsCopy[i] + newChar;
                 if (isSeparator && formatsCopy[i].lastIndexOf(newChar) == formatsCopy[i].length - 1)
                     continue;
                 if (formats.indexOf(newFormat) == -1) {
+                    if (!this.containsAllLetters(newFormat,formatLetters )) 
+                        continue;
                     if (insertIndex>= 0){
                         formats.splice(insertIndex, 0 , newFormat);
                     }
@@ -181,18 +186,28 @@ export class FormattingService {
         }
     }
 
+    private containsAllLetters(newFormat: String, formatLetters: Array<string>): boolean{
+        for (let formatLetter of  formatLetters){
+            if (newFormat.indexOf(formatLetter) < 0){
+                return false;
+            }
+        }
+        return true;
+    }
+    
     private getHeuristicFormats(servoyFormat: string): Array<string> {
         const formats = new Array<string>();
+        const formatLetters = new Array<string>();
         let separator;
         if (servoyFormat) {
             for (let index = 0; index < servoyFormat.length; index++) {
                 const currentChar = servoyFormat.charAt(index);
                 if (currentChar.match(/[a-zA-Z]/)) {
-                    this.addToFormats(formats, currentChar, false);
+                    this.addToFormats(formats,formatLetters, currentChar, false);
                 }
                 else if (!separator || separator == currentChar) {
                     separator = currentChar;
-                    this.addToFormats(formats, currentChar, true);
+                    this.addToFormats(formats,formatLetters, currentChar, true);
                 }
                 else {
                     // another separator?

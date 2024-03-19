@@ -482,6 +482,12 @@ describe('FormattingService', () => {
           expect(date.getMonth()).toBe(2);
           expect(date.getDate()).toBe(2);
           
+          date = service.unformat('020323', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2023);
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(2);
+          
       });
   
      it('should corectly format dates', () => {
