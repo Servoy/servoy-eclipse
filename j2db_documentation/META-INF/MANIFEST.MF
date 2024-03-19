@@ -13,19 +13,9 @@ Require-Bundle: servoy_shared,
  j2db_server,
  sablo
 Export-Package: com.servoy.build.documentation
-Import-Package: freemarker.cache;version="2.3.31.stable",
- freemarker.core;version="2.3.31.stable",
- freemarker.template;version="2.3.31.stable",
- org.apache.commons.io;version="2.11.0",
- org.apache.commons.io.filefilter;version="2.11.0",
- org.apache.http,
- org.apache.http.auth,
- org.apache.http.client,
- org.apache.http.client.methods,
- org.apache.http.client.protocol,
- org.apache.http.entity,
- org.apache.http.impl.auth,
- org.apache.http.impl.client,
- org.apache.http.message;version="4.4.16",
- org.apache.http.util
+Import-Package: freemarker.cache,
+ freemarker.core,
+ freemarker.template,
+ org.apache.commons.io,
+ org.apache.commons.io.filefilter
 Automatic-Module-Name: j2db_documentation

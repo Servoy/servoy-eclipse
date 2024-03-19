@@ -189,7 +189,7 @@ public class MarkdownGenerator
 		cfg.setLogTemplateExceptions(false);
 		cfg.setWrapUncheckedExceptions(true);
 		cfg.setFallbackOnNullLoopVariable(false);
-		ConfluenceGenerator.fillStaticParents(returnTypesToParentName);
+		fillStaticParents(returnTypesToParentName);
 
 
 		temp = cfg.getTemplate("markdown_template.md");
@@ -200,6 +200,141 @@ public class MarkdownGenerator
 		String pluginDir = args[3];
 
 		generateCoreAndPluginDocs(jsLib, servoyDoc, designDoc, pluginDir, new MarkdownDocFromXMLGenerator());
+	}
+
+	public static List<String> getSupportedClientsList(ClientSupport clientSupport)
+	{
+		List<String> support = new ArrayList<>();
+		if (clientSupport.hasSupport(ClientSupport.sc))
+		{
+			support.add("SmartClient");
+		}
+		if (clientSupport.hasSupport(ClientSupport.wc))
+		{
+			support.add("WebClient");
+		}
+		if (clientSupport.hasSupport(ClientSupport.ng))
+		{
+			support.add("NGClient");
+		}
+		if (clientSupport.hasSupport(ClientSupport.mc))
+		{
+			support.add("MobileClient");
+		}
+		return support;
+	}
+
+	public static void fillStaticParents(HashMap<String, String> retTypesToParentName)
+	{
+		retTypesToParentName.put("DataException", "ServoyException");
+//		JSColumnObject");
+//		JSServer");
+//		JSTableObject");
+		retTypesToParentName.put("RuntimeForm", "Forms");
+		retTypesToParentName.put("RuntimeContainer", "RuntimeForm");
+		retTypesToParentName.put("containers", "RuntimeForm");
+		retTypesToParentName.put("elements", "RuntimeForm");
+		retTypesToParentName.put("controller", "RuntimeForm");
+
+		retTypesToParentName.put("RuntimeAccordionPanel", "elements");
+		retTypesToParentName.put("RuntimeDataLabel", "elements");
+		retTypesToParentName.put("RuntimeInsetList", "elements");
+		retTypesToParentName.put("RuntimeBean", "elements");
+		retTypesToParentName.put("RuntimePortal", "elements");
+		retTypesToParentName.put("RuntimeLabel", "elements");
+		retTypesToParentName.put("RuntimeSplitPane", "elements");
+		retTypesToParentName.put("RuntimeTabPanel", "elements");
+		retTypesToParentName.put("RuntimeButton", "elements");
+		retTypesToParentName.put("RuntimeCalendar", "elements");
+		retTypesToParentName.put("RuntimeCheck", "elements");
+		retTypesToParentName.put("RuntimeChecks", "elements");
+		retTypesToParentName.put("RuntimeCombobox", "elements");
+		retTypesToParentName.put("RuntimeComponent", "elements");
+		retTypesToParentName.put("RuntimeDataButton", "elements");
+		retTypesToParentName.put("RuntimeGroup", "elements");
+		retTypesToParentName.put("RuntimeHtmlArea", "elements");
+		retTypesToParentName.put("RuntimeImageMedia", "elements");
+		retTypesToParentName.put("RuntimeListBox", "elements");
+		retTypesToParentName.put("RuntimePassword", "elements");
+		retTypesToParentName.put("RuntimeRadio", "elements");
+		retTypesToParentName.put("RuntimeRadios", "elements");
+		retTypesToParentName.put("RuntimeRectangle", "elements");
+		retTypesToParentName.put("RuntimeRtfArea", "elements");
+		retTypesToParentName.put("RuntimeSpinner", "elements");
+		retTypesToParentName.put("RuntimeTextArea", "elements");
+		retTypesToParentName.put("RuntimeTextField", "elements");
+		retTypesToParentName.put("RuntimeWebComponent", "elements");
+
+
+		retTypesToParentName.put("Calendar", "Form");
+		retTypesToParentName.put("Footer", "Form");
+		retTypesToParentName.put("Header", "Form");
+		retTypesToParentName.put("HeaderTitle", "Form");
+		retTypesToParentName.put("InsetList", "Form");
+		retTypesToParentName.put("Layout Container", "Form");
+		retTypesToParentName.put("ListForm", "Form");
+		retTypesToParentName.put("Bean", "Form");
+		retTypesToParentName.put("Button", "Form");
+		retTypesToParentName.put("CheckBoxes", "Form");
+		retTypesToParentName.put("ComboBox", "Form");
+		retTypesToParentName.put("Image", "Form");
+		retTypesToParentName.put("Label", "Form");
+		retTypesToParentName.put("Part", "Form");
+		retTypesToParentName.put("Password", "Form");
+		retTypesToParentName.put("Portal", "Form");
+		retTypesToParentName.put("RadioButtons", "Form");
+		retTypesToParentName.put("Rectangle", "Form");
+		retTypesToParentName.put("TabPanel", "Form");
+		retTypesToParentName.put("Tab", "Form");
+		retTypesToParentName.put("Table", "Form");
+		retTypesToParentName.put("TextArea", "Form");
+		retTypesToParentName.put("TextField", "Form");
+
+		retTypesToParentName.put("RelationItem", "Relation");
+	}
+
+	static List<IFunctionDocumentation> getEvents(SortedSet<IFunctionDocumentation> functions)
+	{
+		return getFilteredList(IFunctionDocumentation.TYPE_EVENT, functions);
+	}
+
+
+	static List<IFunctionDocumentation> getCommands(SortedSet<IFunctionDocumentation> functions)
+	{
+		return getFilteredList(IFunctionDocumentation.TYPE_COMMAND, functions);
+	}
+
+
+	static List<IFunctionDocumentation> getProperties(SortedSet<IFunctionDocumentation> functions)
+	{
+		return getFilteredList(IFunctionDocumentation.TYPE_PROPERTY, functions);
+	}
+
+
+	static List<IFunctionDocumentation> getConstants(SortedSet<IFunctionDocumentation> functions)
+	{
+		return getFilteredList(IFunctionDocumentation.TYPE_CONSTANT, functions);
+	}
+
+	static List<IFunctionDocumentation> getMethods(SortedSet<IFunctionDocumentation> functions)
+	{
+		return getFilteredList(IFunctionDocumentation.TYPE_FUNCTION, functions);
+	}
+
+	private static List<IFunctionDocumentation> getFilteredList(Integer typeEvent, SortedSet<IFunctionDocumentation> functions)
+	{
+		List<IFunctionDocumentation> retValue = new ArrayList<IFunctionDocumentation>();
+		for (IFunctionDocumentation fd : functions)
+		{
+			if (fd.getClientSupport().hasSupport(ClientSupport.Default))
+			{
+				if (fd.getType().intValue() == typeEvent.intValue())
+				{
+					retValue.add(fd);
+				}
+			}
+		}
+		return retValue.size() > 0 ? retValue : null;
 	}
 
 	public static void generateCoreAndPluginDocs(String jsLibURL, String servoyDocURL, String designDocURL, String pluginDir, IDocFromXMLGenerator docGenerator)
@@ -304,7 +439,7 @@ public class MarkdownGenerator
 	private void generateClientSupport(IObjectDocumentation value)
 	{
 		ClientSupport clientSupport = value.getClientSupport();
-		List<String> support = ConfluenceGenerator.getSupportedClientsList(clientSupport);
+		List<String> support = getSupportedClientsList(clientSupport);
 		root.put("supportedClients", support);
 	}
 
@@ -580,11 +715,11 @@ public class MarkdownGenerator
 
 
 				SortedSet<IFunctionDocumentation> functions = value.getFunctions();
-				List<IFunctionDocumentation> constants = ConfluenceGenerator.getConstants(functions);
-				List<IFunctionDocumentation> properties = ConfluenceGenerator.getProperties(functions);
-				List<IFunctionDocumentation> commands = ConfluenceGenerator.getCommands(functions);
-				List<IFunctionDocumentation> events = ConfluenceGenerator.getEvents(functions);
-				List<IFunctionDocumentation> methods = ConfluenceGenerator.getMethods(functions);
+				List<IFunctionDocumentation> constants = getConstants(functions);
+				List<IFunctionDocumentation> properties = getProperties(functions);
+				List<IFunctionDocumentation> commands = getCommands(functions);
+				List<IFunctionDocumentation> events = getEvents(functions);
+				List<IFunctionDocumentation> methods = getMethods(functions);
 				cg.table("constants", constants, cls, ngOnly);
 				if (properties != null) properties = properties.stream().filter(node -> node.getReturnedType() != void.class).collect(Collectors.toList());
 				cg.table("properties", properties, cls, ngOnly);

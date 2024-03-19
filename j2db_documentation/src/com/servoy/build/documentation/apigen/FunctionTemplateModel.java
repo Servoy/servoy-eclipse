@@ -173,7 +173,7 @@ public class FunctionTemplateModel
 	public String getSupportedClients()
 	{
 		if (ngOnly) return null;
-		return ConfluenceGenerator.getSupportedClientsList(obj.getClientSupport()).stream().collect(Collectors.joining(","));
+		return MarkdownGenerator.getSupportedClientsList(obj.getClientSupport()).stream().collect(Collectors.joining(","));
 	}
 
 	/**

@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.servoy.build.documentation.apigen.ConfluenceGenerator;
 import com.servoy.build.documentation.apigen.FunctionTemplateModel;
 import com.servoy.build.documentation.apigen.MarkdownGenerator;
 import com.servoy.j2db.documentation.ClientSupport;
@@ -123,7 +122,7 @@ public class CoreAndJavaPluginsInfoGenerator
 	private void generateClientSupport(IObjectDocumentation value)
 	{
 		ClientSupport clientSupport = value.getClientSupport();
-		List<String> support = ConfluenceGenerator.getSupportedClientsList(clientSupport);
+		List<String> support = MarkdownGenerator.getSupportedClientsList(clientSupport);
 		root.put("supportedClients", support);
 	}
 
