@@ -90,7 +90,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	private FileSelectionPage fileSelectionPage;
 
 	private DirectorySelectionPage pluginSelectionPage;
-	private DirectorySelectionPage beanSelectionPage;
 
 	private ExportWarModel exportModel;
 
@@ -103,8 +102,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	private DefaultAdminConfigurationPage defaultAdminConfigurationPage;
 
 	private ServoyPropertiesSelectionPage servoyPropertiesSelectionPage;
-
-	private DirectorySelectionPage lafSelectionPage;
 
 	private AbstractWebObjectSelectionPage componentsSelectionPage;
 
@@ -219,8 +216,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
-		if (beanSelectionPage.hasElements()) beanSelectionPage.storeInput();
-		if (lafSelectionPage.hasElements()) lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
 		exportModel.waitForSearchJobToFinish();
@@ -345,32 +340,35 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				try
 				{
 					final WarExporter exporter = new WarExporter(exportModel, new EclipseExportUserChannel(exportModel, monitor));
-					final boolean[] cancel = new boolean[] { false };
-					Display.getDefault().syncExec(new Runnable()
+					final boolean[] cancel = { false };
+					monitor.setTaskName("Scanning for plugins in the developer directory");
+					String missingJarName = exporter.searchExportedPlugins();
+					while (missingJarName != null)
 					{
-						public void run()
+						String jarName = missingJarName;
+						Display.getDefault().syncExec(new Runnable()
 						{
-							String missingJarName = exporter.searchExportedPlugins();
-							while (missingJarName != null)
+							public void run()
 							{
 								MessageDialog.openWarning(getShell(), "Warning",
-									"Please select the directory where " + missingJarName + " is located (usually your servoy developer/plugins directory)");
+									"Please select the directory where " + jarName + " is located (usually your servoy developer/plugins directory)");
 								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
 								String chosenDirName = dialog.open();
 								if (chosenDirName != null)
 								{
 									exportModel.addPluginLocations(chosenDirName);
-									missingJarName = exporter.searchExportedPlugins();
 								}
 								else
 								{
 									cancel[0] = true;
 									return;
 								}
+								exportModel.saveSettings(getDialogSettings());
 							}
-							exportModel.saveSettings(getDialogSettings());
-						}
-					});
+						});
+						if (!cancel[0]) missingJarName = exporter.searchExportedPlugins();
+						else missingJarName = null;
+					}
 					if (!cancel[0]) exporter.doExport(monitor);
 				}
 				catch (final ExportException e)
@@ -480,14 +478,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
 				getDialogSettings().get("export.drivers") == null, false, "export_war_drivers");
-			lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
-				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null,
-				false,
-				"export_war_lafs");
-			beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
-				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null,
-				getDialogSettings().get("export.beans") == null,
-				false, "export_war_beans");
 			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
 				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
 				getDialogSettings().get("export.plugins") == null, true, "export_war_plugins");
@@ -518,8 +508,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			addPage(nonActiveSolutionPage);
 			addPage(userHomeSelectionPage);
 			addPage(pluginSelectionPage);
-			if (beanSelectionPage.hasElements()) addPage(beanSelectionPage);
-			if (lafSelectionPage.hasElements()) addPage(lafSelectionPage);
 			addPage(driverSelectionPage);
 			if (isNGExport)
 			{
@@ -648,8 +636,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
-		if (beanSelectionPage.hasElements()) beanSelectionPage.storeInput();
-		if (lafSelectionPage.hasElements()) lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
 		storeInputForComponentAndServicePages();
@@ -726,8 +712,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 		if (!exportModel.isExportActiveSolution()) appendToBuilder(sb, " -active ", exportModel.isExportActiveSolution());
 
-		if (beanSelectionPage.hasElements()) appendToBuilder(sb, " -b", exportModel.getBeans(), beanSelectionPage.getCheckboxesNumber());
-		if (lafSelectionPage.hasElements()) appendToBuilder(sb, " -l", exportModel.getLafs(), lafSelectionPage.getCheckboxesNumber());
 		appendToBuilder(sb, " -d", exportModel.getDrivers(), driverSelectionPage.getCheckboxesNumber());
 		appendToBuilder(sb, " -pi", exportModel.getPlugins(), pluginSelectionPage.getCheckboxesNumber());
 

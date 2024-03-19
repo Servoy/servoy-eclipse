@@ -126,8 +126,6 @@ import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IBeanManagerInternal;
-import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -142,7 +140,6 @@ import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.JarManager;
-import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Settings;
@@ -265,7 +262,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 46);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 42);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -274,23 +271,14 @@ public class WarExporter
 		monitor.subTask("Copy root webapp files (" + SDF.format(new Date()) + ")");
 		copyRootWebappFiles(tmpWarDir, appServerDir);
 		monitor.worked(2);
-		monitor.subTask("Copy beans");
-		copyBeans(tmpWarDir, appServerDir);
-		monitor.worked(2);
 		monitor.subTask("Copy plugins");
 		copyPlugins(tmpWarDir, appServerDir);
-		monitor.worked(2);
-		monitor.subTask("Copy lafs");
-		copyLafs(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		monitor.subTask("Copy all standard libraries (" + SDF.format(new Date()) + ")");
 		final File targetLibDir = copyStandardLibs(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		monitor.subTask("Copy Drivers");
 		copyDrivers(appServerDir, targetLibDir);
-		monitor.worked(2);
-		monitor.subTask("Copy images");
-		copyLibImages(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		moveSlf4j(tmpWarDir, targetLibDir);
 		monitor.worked(2);
@@ -1696,20 +1684,6 @@ public class WarExporter
 	}
 
 	/**
-	 * @param tmpWarDir
-	 * @param appServerDir
-	 * @throws ExportException
-	 */
-	private void copyLibImages(File tmpWarDir, String appServerDir) throws ExportException
-	{
-		// copy lib/images dir
-		File libImagesDir = new File(appServerDir, "lib/images");
-		File targetLibImagesDir = new File(tmpWarDir, "lib/images");
-		targetLibImagesDir.mkdirs();
-		copyDir(libImagesDir, targetLibImagesDir, false);
-	}
-
-	/**
 	 * @param monitor
 	 * @param appServerDir
 	 * @param targetLibDir
@@ -1743,49 +1717,6 @@ public class WarExporter
 		new File(targetLibDir, "server-bootstrap.jar").delete();
 		new File(targetLibDir, "tomcat-juli.jar").delete();
 		return targetLibDir;
-	}
-
-	private void copyLafs(File tmpWarDir, String appServerDir) throws ExportException
-	{
-
-		// copy the lafs
-		File lafSourceDir = new File(appServerDir, "lafs");
-		File lafTargetDir = new File(tmpWarDir, "lafs");
-		lafTargetDir.mkdirs();
-		ILAFManagerInternal lafManager = ApplicationServerRegistry.get().getLafManager();
-		Map<String, List<ExtensionResource>> loadedLafDefs = lafManager.getLoadedLAFDefs();
-		List<String> lafs = exportModel.getLafs();
-		File lafProperties = new File(lafTargetDir, "lafs.properties");
-		try (Writer fw = new FileWriter(lafProperties))
-		{
-			Set<File> writtenFiles = new HashSet<File>();
-			for (String lafName : lafs)
-			{
-				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedLafDefs, lafName);
-				ArrayList<String> files = new ArrayList<String>();
-				if (fileNames != null)
-				{
-					for (ExtensionResource ext : fileNames)
-					{
-						files.add(ext.jarFileName);
-					}
-				}
-				else
-				{
-					files.add(lafName);
-				}
-				for (String f : files)
-				{
-					File sourceFile = new File(lafSourceDir, f);
-					copyFile(sourceFile, new File(lafTargetDir, f));
-					writeFileEntry(fw, sourceFile, f, writtenFiles);
-				}
-			}
-		}
-		catch (IOException e2)
-		{
-			throw new ExportException("Error creating lafs properties file " + lafProperties.getAbsolutePath(), e2);
-		}
 	}
 
 	private void copyPlugins(File tmpWarDir, String appServerDir) throws ExportException
@@ -1856,39 +1787,6 @@ public class WarExporter
 				}
 				writeFileEntry(propertiesWriter, file, fileName, writtenFiles);
 			}
-		}
-	}
-
-	private void copyBeans(File tmpWarDir, String appServerDir) throws ExportException
-	{
-		// copy the beans
-		File beanSourceDir = new File(appServerDir, "beans");
-		File beanTargetDir = new File(tmpWarDir, "beans");
-		beanTargetDir.mkdirs();
-		IBeanManagerInternal beanManager = ApplicationServerRegistry.get().getBeanManager();
-		Map<String, List<ExtensionResource>> loadedBeanDefs = beanManager.getLoadedBeanDefs();
-		List<String> beans = exportModel.getBeans();
-		File beanProperties = new File(beanTargetDir, "beans.properties");
-		try (Writer fw = new FileWriter(beanProperties))
-		{
-			Set<File> writtenFiles = new HashSet<File>();
-			for (String beanName : beans)
-			{
-				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedBeanDefs, beanName);
-				if (fileNames != null)
-				{
-					for (ExtensionResource ext : fileNames)
-					{
-						File sourceFile = new File(beanSourceDir, ext.jarFileName);
-						copyFile(sourceFile, new File(beanTargetDir, ext.jarFileName));
-						writeFileEntry(fw, sourceFile, ext.jarFileName, writtenFiles);
-					}
-				}
-			}
-		}
-		catch (IOException e2)
-		{
-			throw new ExportException("Error creating beans dir", e2);
 		}
 	}
 
