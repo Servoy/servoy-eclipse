@@ -127,11 +127,7 @@ public class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 		}
 		if (cc.getCommands().size() > 0)
 		{
-			CommandStack commandStack = getCommandStack();
-			if (commandStack != null)
-			{
-				commandStack.execute(cc);
-			}
+			executeCommand(cc);
 			refreshFromRoot();
 		}
 	}
@@ -265,12 +261,24 @@ public class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 		else
 		{
 			// I am the root entry
-			CommandStack commandStack = getCommandStack();
-			if (commandStack != null)
-			{
-				commandStack.execute(command);
-			}
+			executeCommand(command);
 		}
 	}
 
+	/**
+	 * Execute the command, on the command stack if it can be found, otherwise directly
+	 */
+	protected void executeCommand(Command command)
+	{
+		CommandStack commandStack = getCommandStack();
+		if (commandStack != null)
+		{
+			commandStack.execute(command);
+		}
+		else if (command.canExecute())
+		{
+			// else the value does not have an editor (for example, a Solution), in that case the command must be called directly.
+			command.execute();
+		}
+	}
 }
