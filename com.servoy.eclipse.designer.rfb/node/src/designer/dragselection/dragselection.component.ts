@@ -48,7 +48,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
       this.contentArea.addEventListener('mousemove', (event) => this.onMouseMove(event));
       this.contentArea.addEventListener('keyup', (event) => this.onKeyup(event));
       this.contentArea.addEventListener('scrollend', (event) => this.scrollEnd(event));
-      
+
       const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
       this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
       this.leftContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
@@ -57,7 +57,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
       this.selectionRect = {top: 0, left: 0, width: 0, height: 0};
       this.autoscrollOffset.x = 0;
       this.autoscrollOffset.y = 0;
-      
+
       this.scroll.x = this.contentArea.scrollLeft;
       this.scroll.y = this.contentArea.scrollTop;
 
@@ -149,20 +149,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
               if (this.snapData && this.selectionToDrag.length == 1) {
                   const cssPos = this.snapData.cssPosition;
                   changes[id]['cssPos'] = cssPos;
-                  const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-                  if (cssPos && this.snapData.guides.length == 1) {
-					  //use the current mouse pos on mouse up for the coordinate which is not 'guided' (if we don't have dist guides)
-                      if (!cssPos['left'] && !cssPos['right'] && !cssPos['middleH']) {
-                          changes[id]['x'] = event.clientX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftContentAreaAdjust;
-                      }
-                      if (!cssPos['top'] && !cssPos['bottom'] && !cssPos['middleV']) {
-                          changes[id]['y'] = event.clientY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topContentAreaAdjust;
-                      }
-                  }
-                  else {
-                    changes[id]['x'] = this.snapData?.left;
-                    changes[id]['y'] = this.snapData?.top;
-                  }
+                  changes[id]['x'] = this.snapData?.left;
+                  changes[id]['y'] = this.snapData?.top;
               }
 
               if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
@@ -335,6 +323,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
                     elementInfo.element.style.position = 'absolute';
                     elementInfo.element.style.top = this.snapData?.top + 'px';
                     elementInfo.element.style.left = this.snapData?.left + 'px';
+                    this.dragStartEvent = this.snapData.event;
                 }
         }
     }
@@ -437,12 +426,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         if ((this.selectionRect.top + this.mouseOffset.top) > (Math.max(this.glasspane.offsetHeight, this.minimumMargins.bottom) - this.containerOffset)) {
              this.glasspane.style.height = this.glasspane.offsetHeight + changeY + 'px';
              this.autoscrollOffset.y += changeY;
-        } 
+         } 
 
         if ((this.selectionRect.left + this.mouseOffset.left) > Math.max(this.glasspane.offsetWidth, this.minimumMargins.right) - this.containerOffset) {
             this.glasspane.style.width = this.glasspane.offsetWidth + changeX + 'px';
             this.autoscrollOffset.x += changeX;
-        }
+        } 
 
         this.contentArea.scrollTop += changeY; 
         this.contentArea.scrollLeft += changeX;

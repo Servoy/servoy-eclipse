@@ -30,6 +30,8 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	equalSize: boolean = false;
 	verticalPair: DOMRect[];
 	horizontalPair: DOMRect[];
+	initialPoint: { x: number; y: number; };
+	initialRectangle: DOMRect;
 
     constructor(private editorContentService: EditorContentService, protected readonly editorSession: EditorSessionService) {
         this.editorSession.addDynamicGuidesChangedListener(this);
@@ -93,7 +95,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 
       let point = this.adjustPoint(event.pageX, event.pageY);
       if (this.leftPos.size == 0) this.init(point);
-      this.computeGuides(point, this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null);
+      this.computeGuides(event, point);
     }
 
     private adjustPoint(x: number, y:number) :{x: number, y:number} {
@@ -118,6 +120,9 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         this.middleH = new Map();
         this.rectangles = [];
 		this.uuids = [];
+		this.initialPoint = null;
+		this.initialRectangle = null;
+		this.properties = null;
     }
     
     private isSnapInterval(uuid, coordinate, posMap) {
@@ -136,6 +141,12 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
          if (!this.element?.getAttribute('svy-id') && (item = this.editorContentService.getContentElementById('svy_draggedelement'))) {
             const r = item.getBoundingClientRect();
 			return new DOMRect(point.x, point.y, r.width, r.height);
+		}
+		if (this.initialPoint) {
+			const deltaX = point.x - this.initialPoint.x;
+			const deltaY = point.y - this.initialPoint.y;
+			return new DOMRect(this.initialRectangle.left + deltaX, this.initialRectangle.top + deltaY, 
+				this.initialRectangle.width, this.initialRectangle.height);
 		}
         return this.element?.getBoundingClientRect();
     }
@@ -186,100 +197,23 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		return false;
 	}
 
-	computeGuides(point: { x: number, y: number }, resizing: string) {
+	computeGuides(event: MouseEvent, point: { x: number, y: number }) {
+		const resizing = this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
         let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
         const draggedItem = this.editorContentService.getContentElementById('svy_draggedelement');
-        let properties = new SnapData(point.y, point.x, {}, [] );
 		if (!draggedItem && !resizing) {
-            if (this.properties?.guides.length > 0 && !elem) {
-                //get out of the snap mode?
-                const r = this.element?.getBoundingClientRect();
-                if (point.x < r.left - this.snapThreshold || point.x > r.left + r.width + this.snapThreshold ||
-                    point.y < r.top - this.snapThreshold || point.y > r.top + r.height + this.snapThreshold)
-                {
-                    this.snapDataListener.next(properties);
-                    return;
-                }
-            }
-            else {
-                this.element = elem;
-            }
+            this.element = elem;
 		}
-		if (resizing) {
-			if (this.equalSize) {
-				 //get out of the snap mode?
-				const r = this.element?.getBoundingClientRect();
-				if (r) {
-					const closerToTheLeft = this.pointCloserToTopOrLeftSide(point, r, 'x');
-					const closerToTheTop = this.pointCloserToTopOrLeftSide(point, r, 'y');
-					if ((resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) &&
-						(closerToTheLeft && (point.x < r.left - this.equalSizeThreshold || point.x > r.left + this.equalSizeThreshold) ||
-							!closerToTheLeft && (point.x < r.right - this.equalSizeThreshold || point.x > r.right + this.equalSizeThreshold)) ||
-						(resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) &&
-						(closerToTheTop && (point.y < r.top - this.equalSizeThreshold || point.y > r.top + this.equalSizeThreshold) ||
-							!closerToTheTop && (point.y < r.bottom - this.equalSizeThreshold || point.y > r.bottom + this.equalSizeThreshold))) {
-
-						this.equalSize = false;
-						if (resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
-							if (closerToTheLeft && point.x > r.left) {
-								properties.left = point.x;
-								properties.width = r.width - r.left + point.x;
-							}
-							if (!closerToTheLeft && point.x < r.right) {
-								properties.left = r.left;
-								properties.width = r.width - r.right + point.x;
-							}
-						}
-
-						if (resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
-							if (closerToTheTop && point.y > r.top) {
-								properties.top = point.y;
-								properties.height = r.height - r.top + point.y;
-							}
-							if (!closerToTheTop && point.y < r.bottom) {
-								properties.top = r.top;
-								properties.height = r.height - r.bottom + point.y;
-							}
-						}
-
-						this.properties = properties;
-						this.snapDataListener.next(properties);
-						return;
-					}
-				}
-			}
-			else if (elem) {
-				//in resize mode, we need the current element to determine the edge(resize knob) we are dragging
-				//so we use the mouse position for the correct location
-				//(the element rect might not always be up to date, especially when dragging faster) 
-				this.element = elem;
-			}
+		if (resizing && elem) {
+			//in resize mode, we need the current element to determine the edge(resize knob) we are dragging
+			//so we use the mouse position for the correct location
+			//(the element rect might not always be up to date, especially when dragging faster) 
+			this.element = elem;
 		}
 
 		const uuid = this.element?.getAttribute('svy-id');
-		if (!uuid && !draggedItem) {
-            //TODO needed?
-             this.snapDataListener.next(properties);
-             return;
-        }
-		
         let rect = this.getDraggedElementRect(point);
-		/*if (resizing && this.equalSizeThreshold > 0) { 
-			let verticalDist: Guide[], horizontalDist: Guide[];
-			if (resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
-				verticalDist = this.addEqualHeightGuides(point, rect, properties);
-			}
-
-			if (resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
-				horizontalDist = this.addEqualWidthGuides(point, rect, properties);
-			}
-			//same size have higher prio than edge
-			if (verticalDist || horizontalDist) {
-				this.equalSize = true;
-				this.properties = properties;
-				return this.snapDataListener.next(this.properties);
-			}
-		}*/
+		let properties = new SnapData(event, rect ? rect.top : point.y, rect ? rect.left : point.x, {}, []);
 		
 		const horizontalSnap = this.handleHorizontalSnap(resizing, point, uuid, rect, properties);
 		const verticalSnap = this.handleVerticalSnap(resizing, point, uuid, rect, properties);
@@ -299,6 +233,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		}
 
         this.properties = properties;
+		if (!resizing && properties.guides.length > 0 && !this.initialPoint) {
+			this.initialPoint = point;
+			this.initialRectangle = rect;
+		}
 		return this.snapDataListener.next(properties.guides.length == 0 ? null : properties);
 	}
 
@@ -740,6 +678,7 @@ export class Guide {
 }
 
 export class SnapData {
+	event: MouseEvent;
     top: number;
     left: number;
     width?: number;
@@ -747,7 +686,8 @@ export class SnapData {
     guides?: Guide[];
     cssPosition: { property: string };
 	checkModelMinSize: boolean = false;
-    constructor (top: number, left: number, cssPosition?, guides?: Guide[], width?: number, height?:number) {
+    constructor (event: MouseEvent,top: number, left: number, cssPosition?, guides?: Guide[], width?: number, height?:number) {
+		this.event = event;
         this.top = top;
         this.left = left;
         this.width = width;
