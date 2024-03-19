@@ -21,15 +21,15 @@ export class DialogService {
         }
     }
 
-    public async showErrorDialog(dialogTitle: string, dialogMessage: string, ...buttonsText: string[]): Promise<any> {
+    public async showErrorDialog(dialogTitle: string, dialogMessage: string, buttonsText: string[]): Promise<any> {
         return await this.showDialog(dialogTitle, dialogMessage, 'type-error', null, buttonsText);
     }
 
-    public async showInfoDialog(dialogTitle: string, dialogMessage: string, ...buttonsText: string[]): Promise<any> {
+    public async showInfoDialog(dialogTitle: string, dialogMessage: string, buttonsText: string[]): Promise<any> {
         return await this.showDialog(dialogTitle, dialogMessage, 'type-info', null, buttonsText);
     }
 
-    public async showQuestionDialog(dialogTitle: string, dialogMessage: string, ...buttonsText: string[]): Promise<any> {
+    public async showQuestionDialog(dialogTitle: string, dialogMessage: string, buttonsText: string[]): Promise<any> {
         return await this.showDialog(dialogTitle, dialogMessage, 'type-question', null, buttonsText);
     }
 
@@ -44,7 +44,7 @@ export class DialogService {
         return await this.showDialog(dialogTitle, dialogMessage, 'type-select', options, [this.i18nCancel, this.i18nOK]);
     }
 
-    public async showWarningDialog(dialogTitle: string, dialogMessage: string, ...buttonsText: string[]): Promise<any> {
+    public async showWarningDialog(dialogTitle: string, dialogMessage: string, buttonsText: string[]): Promise<any> {
         return await this.showDialog(dialogTitle, dialogMessage, 'type-warning', null, buttonsText);
     }
 
@@ -53,6 +53,6 @@ export class DialogService {
         if (!dialogButtonsText || dialogButtonsText.length === 0) {
             dialogButtonsText = ['OK'];
         }
-        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, dialogButtonsText.toString().split(','));
+        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, dialogButtonsText);
     }
 }
