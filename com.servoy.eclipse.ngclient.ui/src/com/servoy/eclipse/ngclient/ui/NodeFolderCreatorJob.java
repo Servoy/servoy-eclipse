@@ -222,6 +222,7 @@ public class NodeFolderCreatorJob extends Job
 			if (executeNpmInstall) try
 			{
 				// now do an npm install on the main, parent folder
+				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("uninstall", "@servoy/public")).runCommand(monitor);
 				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("install", "--legacy-peer-deps")).runCommand(monitor);
 				fullyGenerated.createNewFile();
 			}

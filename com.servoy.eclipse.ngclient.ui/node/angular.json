@@ -12,6 +12,7 @@
           "builder": "@angular-devkit/build-angular:application",
           "options": {
             "allowedCommonJsDependencies" : ["lodash","@eonasdan/tempus-dominus", "numbro"],
+            "externalDependencies": ["jsdom"],
             "preserveSymlinks": true,
             "sourceMap": {
               "scripts": true,
