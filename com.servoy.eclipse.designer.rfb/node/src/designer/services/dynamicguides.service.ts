@@ -231,13 +231,13 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 			if (!uuid) this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
 		}
-
+		
         this.properties = properties;
 		if (!resizing && properties.guides.length > 0 && !this.initialPoint) {
 			this.initialPoint = point;
 			this.initialRectangle = rect;
 		}
-		return this.snapDataListener.next(properties.guides.length == 0 ? null : properties);
+		this.snapDataListener.next(properties.guides.length == 0 ? null : properties);
 	}
 
 	private checkSnapToSize(properties: SnapData, rect: DOMRect, overlapsX: DOMRect[], overlapsY: DOMRect[]) {
