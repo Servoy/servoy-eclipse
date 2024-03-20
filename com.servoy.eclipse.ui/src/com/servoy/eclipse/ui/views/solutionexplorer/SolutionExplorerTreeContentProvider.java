@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2208,12 +2210,35 @@ public class SolutionExplorerTreeContentProvider
 								@Override
 								public Image getIcon()
 								{
+									boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 									Image image = super.getIcon();
 									if (image == null)
 									{
 										if (plugin instanceof IIconProvider && ((IIconProvider)plugin).getIconUrl() != null)
 										{
-											image = ImageDescriptor.createFromURL(((IIconProvider)plugin).getIconUrl()).createImage();
+											URL urlLightTheme = ((IIconProvider)plugin).getIconUrl();
+											URL urlDarkTheme = null;
+											if (darkTheme)
+											{
+												String urlString = urlLightTheme.toString();
+												urlString = UIUtils.replaceLast(urlString, ".", "_dark.");
+												try
+												{
+													urlDarkTheme = new URL(urlString);
+												}
+												catch (MalformedURLException e)
+												{
+												}
+											}
+											if (urlDarkTheme != null)
+											{
+												image = ImageDescriptor.createFromURL(urlDarkTheme).createImage();
+											}
+											if (ImageDescriptor.createFromURL(urlDarkTheme).getImageData() == null)
+											{
+												image = ImageDescriptor.createFromURL(urlLightTheme).createImage();
+											}
+
 										}
 										else
 										{
@@ -2275,6 +2300,7 @@ public class SolutionExplorerTreeContentProvider
 	private Image getIconFromSpec(WebObjectSpecification spec, boolean isService)
 	{
 		Image icon = null;
+		boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 		if (spec.getIcon() != null)
 		{
 			try
@@ -2290,6 +2316,14 @@ public class SolutionExplorerTreeContentProvider
 						return null;
 					}
 
+					if (darkTheme)
+					{
+						iconPath = UIUtils.replaceLast(iconPath, ".", "-dark.");
+						if (reader.getUrlForPath(iconPath) == null)
+						{
+							iconPath = spec.getIcon().replaceFirst(spec.getPackageName() + "/", "");
+						}
+					}
 					IPath path = new Path(reader.getUrlForPath(iconPath).toURI().toString());
 					icon = imageCache.get(path);
 					if (icon == null)
@@ -2315,7 +2349,16 @@ public class SolutionExplorerTreeContentProvider
 					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(spec.getPackageName());
 					if (project != null)
 					{
-						icon = loadImageFromProject(project, spec.getIcon().replaceFirst(spec.getPackageName(), ""));
+						String iconPath = spec.getIcon().replaceFirst(spec.getPackageName(), "");
+						if (darkTheme)
+						{
+							iconPath = UIUtils.replaceLast(iconPath, ".", "-dark.");
+						}
+						icon = loadImageFromProject(project, iconPath);
+						if (darkTheme && icon == null)
+						{
+							icon = loadImageFromProject(project, spec.getIcon().replaceFirst(spec.getPackageName(), ""));
+						}
 					}
 					else
 					{

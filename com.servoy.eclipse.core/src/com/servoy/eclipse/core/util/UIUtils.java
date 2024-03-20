@@ -1179,4 +1179,17 @@ public class UIUtils
 		return ECLIPSE_DARK_THEME_ID.equals(id) || SERVOY_DARK_THEME_ID.equals(id);
 	}
 
+	public static String replaceLast(String string, String toReplace, String replacement)
+	{
+		int pos = string.lastIndexOf(toReplace);
+		if (pos > -1)
+		{
+			return string.substring(0, pos) + replacement + string.substring(pos + toReplace.length());
+		}
+		else
+		{
+			return string;
+		}
+	}
+
 }
