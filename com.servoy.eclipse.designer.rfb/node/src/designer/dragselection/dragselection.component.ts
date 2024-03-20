@@ -283,32 +283,32 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             if (minY != undefined && elementInfo.y < minY) elementInfo.y = minY;
             elementInfo.element.style.position = 'absolute';
             if (elementInfo.element.style.top.length) {
-				elementInfo.element.style.top = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
-				if (parseInt(elementInfo.element.style.top.replace('px', '')) < 0) {
+				elementInfo.element.style.top = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
+				if (parseFloat(elementInfo.element.style.top.replace('px', '')) < 0) {
 					elementInfo.element.style.top = '0px';
 				}
 			}
             if (elementInfo.element.style.left.length) {
-				elementInfo.element.style.left = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
-				if (parseInt(elementInfo.element.style.left.replace('px', '')) < 0) {
+				elementInfo.element.style.left = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
+				if (parseFloat(elementInfo.element.style.left.replace('px', '')) < 0) {
 					elementInfo.element.style.left = '0px';
 				}
 			}
             if (elementInfo.element.style.right.length) {
-				elementInfo.element.style.right = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.right, 'x').replace('px', ''))|| 0)  - changeX + 'px';
+				elementInfo.element.style.right = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.right, 'x').replace('px', ''))|| 0)  - changeX + 'px';
 			}
 			if (elementInfo.element.style.bottom.length) {
-				elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
+				elementInfo.element.style.bottom = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
 			}
 			if (!elementInfo.element.style.left.length && !elementInfo.element.style.right.length) {
-				elementInfo.element.style.left = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
-				if (parseInt(elementInfo.element.style.left.replace('px', '')) < 0) {
+				elementInfo.element.style.left = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
+				if (parseFloat(elementInfo.element.style.left.replace('px', '')) < 0) {
 					elementInfo.element.style.left = '0px';
 				}
 			}
 			if (!elementInfo.element.style.top.length && !elementInfo.element.style.bottom.length) {
-				elementInfo.element.style.top = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
-				if (parseInt(elementInfo.element.style.top.replace('px', '')) < 0) {
+				elementInfo.element.style.top = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
+				if (parseFloat(elementInfo.element.style.top.replace('px', '')) < 0) {
 					elementInfo.element.style.top = '0px';
 				}
 			}
@@ -320,9 +320,9 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
                 this.snapData = data;
                 if (this.snapData?.top && this.snapData?.left && this.selectionToDrag.length == 1) {
                     const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[0]);
-                    elementInfo.element.style.position = 'absolute';
-                    elementInfo.element.style.top = this.snapData?.top + 'px';
-                    elementInfo.element.style.left = this.snapData?.left + 'px';
+                    const changeX = this.snapData.left - elementInfo.x;
+                    const changeY = this.snapData.top - elementInfo.y;
+                    this.updateLocation(changeX, changeY);
                     this.dragStartEvent = this.snapData.event;
                 }
         }
