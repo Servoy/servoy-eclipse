@@ -229,7 +229,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			if (horizontalDist && horizontalSnap) {
 				properties.guides.splice(properties.guides.indexOf(horizontalSnap), 1);
 			}
-			this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
+			if (!uuid) this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
 		}
 
         this.properties = properties;
