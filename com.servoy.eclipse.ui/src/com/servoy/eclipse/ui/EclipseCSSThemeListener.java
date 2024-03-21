@@ -56,6 +56,7 @@ public class EclipseCSSThemeListener
 	private static final String JSON_EDITOR_PLUGIN_ID = "org.sweetlemonade.eclipse.json";
 	private static final String XML_EDITOR_PLUGIN_ID = "org.eclipse.wst.xml.ui";
 	private static final String HTML_EDITOR_PLUGIN_ID = "org.eclipse.wst.html.ui";
+	private static final String SQL_EDITOR_PLUGIN_ID = "net.sourceforge.sqlexplorer";
 
 	private static EclipseCSSThemeListener instance;
 	private IPreferenceChangeListener themeChangedListener;
@@ -204,6 +205,7 @@ public class EclipseCSSThemeListener
 				resetPreferencesToDefault(JSON_EDITOR_PLUGIN_ID, prefs);
 				resetPreferencesToDefault(XML_EDITOR_PLUGIN_ID, prefs);
 				resetPreferencesToDefault(HTML_EDITOR_PLUGIN_ID, prefs);
+				resetPreferencesToDefault(SQL_EDITOR_PLUGIN_ID, prefs);
 			}
 		}
 		catch (Exception e)

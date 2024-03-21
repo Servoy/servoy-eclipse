@@ -94,3 +94,4 @@ file_export_version=3.0
 /instance/org.eclipse.wst.html.ui/tagBorder=\#0080ff | null | false | false | false | false
 /instance/org.eclipse.wst.html.ui/tagName=\#03a8d8 | null | true | false | false | false
 /instance/org.eclipse.wst.html.ui/xmlContent=\#D9E8F7 | null | null | null | null | null
+/instance/net.sourceforge.sqlexplorer/SQLEditor.DefaultColor=204,204,204
