@@ -161,10 +161,6 @@ export class FormattingService {
             formats.push(newChar);
         } else {
             const formatsCopy = Array.from(formats);
-            let insertIndex = -1;
-            if (newChar == 'y'){
-                insertIndex = formats.findIndex((element) => element.indexOf('y') >= 0);
-            }
             if (newChar.match(/[a-zA-Z]/) && formatLetters.indexOf(newChar) == -1) {
                 formatLetters.push(newChar);
             }
@@ -175,10 +171,13 @@ export class FormattingService {
                 if (formats.indexOf(newFormat) == -1) {
                     if (!this.containsAllLetters(newFormat,formatLetters )) 
                         continue;
+                    let insertIndex = -1;
+                    if (newChar.match(/[a-zA-Z]/) && newFormat.indexOf(newChar) < newFormat.length - 1){
+                        insertIndex = formats.indexOf(formatsCopy[i]);
+                    }
                     if (insertIndex>= 0){
                         formats.splice(insertIndex, 0 , newFormat);
-                    }
-                    else{
+                    }else{
                         formats.push(newFormat);
                     }
                 }
