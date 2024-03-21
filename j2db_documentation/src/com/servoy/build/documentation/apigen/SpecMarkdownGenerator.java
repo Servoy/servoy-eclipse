@@ -459,11 +459,13 @@ public class SpecMarkdownGenerator
 		int currentIndentLevel = indentLevel;
 
 		// we could have used 3rd party libs for this translation... but those don't have this "indentLevel" that we need when indenting sub-properties of custom types in the docs...
-		StringBuilder result = new StringBuilder(doc.length());
+
+		MarkdownContentAppender result = new MarkdownContentAppender(doc.length());
 
 		boolean shouldTrimLeadingTheInBetweenContent = (result.length() == 0); // so if it has a non-whitespace char already in the first line, then no left trimming needs to happen here anymore
 		Stack<Boolean> listLevelOrderedOrNot = new Stack<>();
-		boolean insideExampleSection = false;
+		boolean insideExampleSectionThatAutoAddsCodeBlock = false;
+		CodeBacktickState codeBacktickState = null;
 		boolean firstAtSomething = true; // it refers to whether or not an @param, @return, @example, @... was processed yet or not; we want a bit of space between the description of an API an the @ things
 
 		for (int i = 0; i < matchedTokens.size(); i++)
@@ -492,6 +494,8 @@ public class SpecMarkdownGenerator
 			boolean preserveMultipleWhiteSpaces = false; // in case of code/pre
 
 			// before we add betweenMatches.get(i) to the result, see what token follows it - so we know what kind of processing it needs
+			// NOTE: remember neither the content before this token not the token itself are yet added; token is checked again later,
+			// after preceding content is actually added
 			switch (token)
 			{
 				case "<br>", "<br/>" :
@@ -504,10 +508,10 @@ public class SpecMarkdownGenerator
 				case "</code>" :
 					preserveMultipleWhiteSpaces = true;
 					break;
-				case "<code>", "@example" :
+				case "<pre>", "@example" :
 					trimTrailingInPrecedingInbetweenContent = true; // INTENTIONAL fall-through to next 'case'; so no break here
 					//$FALL-THROUGH$
-				case "<pre>" :
+				case "<code>" :
 					// any tokens inside these blocks need to go into "betweenMatches"
 					// "i" also advances as needed
 					String closingTagStartsWith = ("@example".equals(token) ? "@" : "</" + token.substring(1));
@@ -520,18 +524,19 @@ public class SpecMarkdownGenerator
 					if (fullTextToClosingCodeOrPreTag.length() > 0)
 						betweenMatches.set(i + 1, fullTextToClosingCodeOrPreTag.append(betweenMatches.get(i + 1)).toString());
 
-					// if a <pre> is multi - line, do not use simple ` in markdown as that doesn't work correctly, switch automatically
-					// to <code> which generates ```js in markdown
-					if ("<pre>".equals(token))
+					// if a <code> is multi - line, do not use simple ` in markdown as that doesn't work correctly, switch
+					// automatically (using <code> for multi-line is incorrect in HTML as well, but we work around that here)
+					// to <pre> which generates ```js in markdown
+					if ("<code>".equals(token))
 					{
 						String contentAfterPreTag = betweenMatches.get(i + 1);
 
-						// see if content in the <pre> is multi-line or not
+						// see if content in the <code> is multi-line or not
 						if (contentAfterPreTag.indexOf('\n') >= 0)
 						{
-							// ok, it is multi-line, switch to <code>
-							token = "<code>";
-							if ("</pre>".equals(matchedTokens.get(i + 1))) matchedTokens.set(i + 1, "</code>"); // otherwise it's malformed HTML I guess
+							// ok, it is multi-line, switch to <pre>
+							token = "<pre>";
+							if ("</code>".equals(matchedTokens.get(i + 1))) matchedTokens.set(i + 1, "</pre>"); // otherwise it's malformed HTML I guess
 
 							// now do what this switch would have done for <code>
 							trimTrailingInPrecedingInbetweenContent = true;
@@ -541,7 +546,7 @@ public class SpecMarkdownGenerator
 				default :
 			}
 
-			if (token.startsWith("@") && insideExampleSection) preserveMultipleWhiteSpaces = true;
+			if (token.startsWith("@") && insideExampleSectionThatAutoAddsCodeBlock) preserveMultipleWhiteSpaces = true; // auto generated <code> equivalent inside example section is ending now after content will be added to it
 
 			// ok now do add the "betweenMatches" content that was before 'token'
 			if (!preserveMultipleWhiteSpaces) inbetween = inbetween.replaceAll("\s+", " ");
@@ -556,13 +561,18 @@ public class SpecMarkdownGenerator
 			{
 				inbetween = inbetween.stripTrailing();
 			}
-			result.append(inbetween);
+			result.appendInBetweenTagContent(inbetween, codeBacktickState != null);
 
-			if (token.startsWith("@") && insideExampleSection)
+			if (token.startsWith("@") && insideExampleSectionThatAutoAddsCodeBlock)
 			{
 				// the example section has finished
-				insideExampleSection = false;
-				result.append("\n```");
+				insideExampleSectionThatAutoAddsCodeBlock = false;
+
+				if (codeBacktickState.maxContinousBacktickCount > 2)
+					result.appendWithoutEscaping("\n" + "`".repeat(codeBacktickState.maxContinousBacktickCount + 1));
+				else result.appendWithoutEscaping("\n```");
+				codeBacktickState = null;
+
 				nextLinePlusIndent(result, currentIndentLevel);
 				shouldTrimLeadingTheInBetweenContent = true;
 			}
@@ -571,7 +581,7 @@ public class SpecMarkdownGenerator
 			switch (token)
 			{
 				case "<br>", "<br/>" :
-					result.append("  ");
+					result.appendWithoutEscaping("  ");
 					nextLinePlusIndent(result, currentIndentLevel);
 					shouldTrimLeadingTheInBetweenContent = true;
 					break;
@@ -581,7 +591,7 @@ public class SpecMarkdownGenerator
 						// add an empty line - to have a bit of visual separation between the description of an API and the @param, @return etc.
 						if (result.length() >= 2 && !"\n\n".equals(result.substring(result.length() - 2)))
 						{
-							result.append("\n");
+							result.appendWithoutEscaping("\n");
 							nextLinePlusIndent(result, currentIndentLevel);
 						}
 						firstAtSomething = false;
@@ -589,13 +599,14 @@ public class SpecMarkdownGenerator
 					}
 					if (!endsWithMarkdownNewline(result, currentIndentLevel))
 					{
-						result.append("  "); // markdown equivalent of visual "newline"
+						result.appendWithoutEscaping("  "); // markdown equivalent of visual "newline"
 						nextLinePlusIndent(result, currentIndentLevel);
 					}
-					result.append("**").append("@exampleDoNotAutoAddCodeBlock".equals(token) ? "@example" : token).append("**");
+					result.appendWithoutEscaping("**").appendWithoutEscaping("@exampleDoNotAutoAddCodeBlock".equals(token) ? "@example" : token)
+						.appendWithoutEscaping("**");
 					if ("@exampleDoNotAutoAddCodeBlock".equals(token))
 					{
-						result.append(" ");
+						result.appendWithoutEscaping(" ");
 						shouldTrimLeadingTheInBetweenContent = true;
 					}
 					else shouldTrimLeadingTheInBetweenContent = false;
@@ -603,9 +614,17 @@ public class SpecMarkdownGenerator
 					if ("@example".equals(token))
 					{
 						nextLinePlusIndent(result, currentIndentLevel);
-						result.append("```js\n");
-						insideExampleSection = true;
 						String contentAfterExampleTag = betweenMatches.get(i + 1);
+
+						// prepare to 'escape' backticks in code/pre content; in markdown this means modifying the start and end special meaning backtick char count to a higher value then the one in the pre/code content...
+						// also if the code / pre content starts or ends with backtick, then some spaces need to be added between that and the special meaning backticks (start/end tags of the code/pre section)
+						codeBacktickState = countContinuousBackticks(contentAfterExampleTag);
+
+						if (codeBacktickState.maxContinousBacktickCount > 2)
+							result.appendWithoutEscaping("`".repeat(codeBacktickState.maxContinousBacktickCount + 1) + "js\n");
+						else result.appendWithoutEscaping("```js\n");
+
+						insideExampleSectionThatAutoAddsCodeBlock = true;
 
 						// if it's like '@example a = a + 1' then we want to left trim what follows after the @example tag (so that one space) before adding the rest in a code block
 						// but if it's a multi-line code example
@@ -663,7 +682,7 @@ public class SpecMarkdownGenerator
 					break;
 				case "<li>" :
 					if (!endsWithNewline(result, currentIndentLevel)) nextLinePlusIndent(result, currentIndentLevel);
-					result.append((listLevelOrderedOrNot.peek() != null && listLevelOrderedOrNot.peek().booleanValue() ? "1. " : " - "));
+					result.appendWithoutEscaping((listLevelOrderedOrNot.peek() != null && listLevelOrderedOrNot.peek().booleanValue() ? "1. " : " - "));
 					currentIndentLevel++;
 					shouldTrimLeadingTheInBetweenContent = true;
 					break;
@@ -679,26 +698,64 @@ public class SpecMarkdownGenerator
 					}
 					listLevelOrderedOrNot.pop();
 					break;
-				case "<pre>" :
-					shouldTrimLeadingTheInBetweenContent = false;
-					//$FALL-THROUGH$ intentional
-				case "</pre>" :
-					result.append('`');
-					break;
 				case "<code>" :
-					if (!endsWithMarkdownNewline(result, currentIndentLevel)) nextLinePlusIndent(result, currentIndentLevel);
-					result.append("```js\n");
 					shouldTrimLeadingTheInBetweenContent = false;
+
+					// prepare to 'escape' backticks in code/pre content; in markdown this means modifying the start and end special meaning backtick char count to a higher value then the one in the pre/code content...
+					// also if the code / pre content starts or ends with backtick, then some spaces need to be added between that and the special meaning backticks (start/end tags of the code/pre section)
+					codeBacktickState = countContinuousBackticks(betweenMatches.get(i + 1));
+
+					if (codeBacktickState.maxContinousBacktickCount > 0)
+						result.appendWithoutEscaping(
+							"`".repeat(codeBacktickState.maxContinousBacktickCount + 1) + (codeBacktickState.startsWithBacktick ? " " : ""));
+					else result.appendWithoutEscaping("`");
+
 					break;
 				case "</code>" :
-					result.append("\n```");
+					if (codeBacktickState.maxContinousBacktickCount > 0)
+						result.appendWithoutEscaping(
+							(codeBacktickState.endsWithBacktick ? " " : "") + "`".repeat(codeBacktickState.maxContinousBacktickCount + 1));
+					else result.appendWithoutEscaping("`");
+					codeBacktickState = null;
+					break;
+				case "<pre>" :
+					if (!endsWithMarkdownNewline(result, currentIndentLevel)) nextLinePlusIndent(result, currentIndentLevel);
+
+					// prepare to 'escape' backticks in code/pre content; in markdown this means modifying the start and end special meaning backtick char count to a higher value then the one in the pre/code content...
+					// also if the code / pre content starts or ends with backtick, then some spaces need to be added between that and the special meaning backticks (start/end tags of the code/pre section)
+					String contentAfterPre = betweenMatches.get(i + 1);
+					codeBacktickState = countContinuousBackticks(contentAfterPre);
+					if (codeBacktickState.maxContinousBacktickCount > 2)
+						result.appendWithoutEscaping("`".repeat(codeBacktickState.maxContinousBacktickCount + 1) + "js\n");
+					else result.appendWithoutEscaping("```js\n");
+
+					if (contentAfterPre.startsWith("\n") || contentAfterPre.endsWith("\n"))
+					{
+						// if there is something like
+						// <pre>
+						//   a = 1;
+						//   b = 2;
+						// </pre>
+						// then we must ignore the new lines after start tag and before end tag
+						betweenMatches.set(i + 1, contentAfterPre.substring(contentAfterPre.startsWith("\n") ? 1 : 0,
+							contentAfterPre.endsWith("\n") ? contentAfterPre.length() - 1 : contentAfterPre.length()));
+					}
+
+					shouldTrimLeadingTheInBetweenContent = false;
+					break;
+				case "</pre>" :
+					if (codeBacktickState.maxContinousBacktickCount > 2)
+						result.appendWithoutEscaping("\n" + "`".repeat(codeBacktickState.maxContinousBacktickCount + 1));
+					else result.appendWithoutEscaping("\n```");
+					codeBacktickState = null;
+
 					nextLinePlusIndent(result, currentIndentLevel);
 					break;
 				case "<i>", "</i>" :
-					result.append("_");
+					result.appendWithoutEscaping("_");
 					break;
 				case "<b>", "</b>" :
-					result.append("**");
+					result.appendWithoutEscaping("**");
 					break;
 				default :
 			}
@@ -707,28 +764,51 @@ public class SpecMarkdownGenerator
 		// add text that is after last token; this is similar to code above that adds the inBetween content between matches,
 		// where 'preserveMultipleWhiteSpaces' and 'trimTrailingInPrecedingInbetweenContent' would be !insideExampleSection
 		String inbetween = betweenMatches.get(betweenMatches.size() - 1);
-		if (!insideExampleSection) inbetween = inbetween.replaceAll("\s+", " ");
+		if (!insideExampleSectionThatAutoAddsCodeBlock) inbetween = inbetween.replaceAll("\s+", " ");
 		if (shouldTrimLeadingTheInBetweenContent)
 		{
 			inbetween = inbetween.stripLeading();
 			shouldTrimLeadingTheInBetweenContent = (inbetween.length() == 0);
 		}
-		if (!insideExampleSection) inbetween = inbetween.stripTrailing();
+		if (!insideExampleSectionThatAutoAddsCodeBlock) inbetween = inbetween.stripTrailing();
 
-		result.append(inbetween);
+		result.appendInBetweenTagContent(inbetween, codeBacktickState != null);
 
-		if (insideExampleSection)
+		if (insideExampleSectionThatAutoAddsCodeBlock)
 		{
 			// the example section has finished
-			insideExampleSection = false;
-			result.append("\n```");
+			insideExampleSectionThatAutoAddsCodeBlock = false;
+
+			if (codeBacktickState.maxContinousBacktickCount > 2)
+				result.appendWithoutEscaping("\n" + "`".repeat(codeBacktickState.maxContinousBacktickCount + 1));
+			else result.appendWithoutEscaping("\n```");
+			codeBacktickState = null;
+
 			nextLinePlusIndent(result, currentIndentLevel);
 		}
 
 		return result.toString();
 	}
 
-	private static boolean endsWithMarkdownNewline(StringBuilder result, int currentIndentLevel)
+	private static CodeBacktickState countContinuousBackticks(String contentOfPreOrCodeSection)
+	{
+		int maxContinousBacktickCount = 0;
+		int currentContinousBacktickCount = 0;
+		for (int i = 0; i < contentOfPreOrCodeSection.length() - 1; i++)
+		{
+			if (contentOfPreOrCodeSection.charAt(i) == '`') currentContinousBacktickCount++;
+			else if (currentContinousBacktickCount > 0)
+			{
+				maxContinousBacktickCount = Math.max(currentContinousBacktickCount, maxContinousBacktickCount);
+				currentContinousBacktickCount = 0;
+			}
+		}
+		maxContinousBacktickCount = Math.max(currentContinousBacktickCount, maxContinousBacktickCount);
+
+		return new CodeBacktickState(maxContinousBacktickCount, contentOfPreOrCodeSection.startsWith("`"), contentOfPreOrCodeSection.endsWith("`"));
+	}
+
+	private static boolean endsWithMarkdownNewline(MarkdownContentAppender result, int currentIndentLevel)
 	{
 		return result.length() == 0 ||
 			(result.length() >= 2 && result.substring(result.length() - 2).equals("\n\n")) ||
@@ -745,7 +825,7 @@ public class SpecMarkdownGenerator
 	 * Some code needs to check just that the markdown source has a new line, not the markdown output (which would mean either two new lines in source or double space at the end of line + new line)
 	 * For example if what follows next is a list, then a simple new line in the source code is enough to make the list work.
 	 */
-	private static boolean endsWithNewline(StringBuilder result, int currentIndentLevel)
+	private static boolean endsWithNewline(MarkdownContentAppender result, int currentIndentLevel)
 	{
 		return result.length() == 0 ||
 			result.length() >= 1 && result.charAt(result.length() - 1) == '\n' ||
@@ -753,17 +833,17 @@ public class SpecMarkdownGenerator
 				result.substring(result.length() - (1 + currentIndentLevel * 4)).equals("\n" + " ".repeat(currentIndentLevel * 4));
 	}
 
-	private static void nextLinePlusIndent(StringBuilder result, int currentIndentLevel)
+	private static void nextLinePlusIndent(MarkdownContentAppender result, int currentIndentLevel)
 	{
-		result.append("\n");
+		result.appendWithoutEscaping("\n");
 
 		// so that they are aligned with some list item in a previously started list
 		indentAtLevel(result, currentIndentLevel);
 	}
 
-	private static void indentAtLevel(StringBuilder result, int currentIndentLevel)
+	private static void indentAtLevel(MarkdownContentAppender result, int currentIndentLevel)
 	{
-		result.append("    ".repeat(currentIndentLevel));
+		result.appendWithoutEscaping("    ".repeat(currentIndentLevel));
 	}
 
 	private Record createProperty(String name, JSONObject specEntry)
@@ -1029,8 +1109,7 @@ public class SpecMarkdownGenerator
 				case "runtimewebcomponent" -> "../../../servoycore/dev-api/forms/runtimeform/elements/runtimewebcomponent.md";
 				case "jswebcomponent" -> "../../../servoycore/dev-api/solutionmodel/jswebcomponent.md";
 
-				default ->
-				{
+				default -> {
 					System.err.println("    * cannot map type '" + type + "' to a path!");
 					yield "";
 				}
@@ -1190,6 +1269,105 @@ public class SpecMarkdownGenerator
 		public boolean shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt()
 		{
 			return false;
+		}
+
+	}
+
+	private static class MarkdownContentAppender
+	{
+		@SuppressWarnings("boxing")
+		private static final java.util.Set<Character> specialChars = java.util.Set.of(
+			'\\', '`', '*', '_', '{', '}', '[', ']', '<', '>', '(', ')', '#', '+', '-', '.', '!', '|');
+		private final StringBuilder result;
+
+		MarkdownContentAppender(int estimatedContentLength)
+		{
+			result = new StringBuilder(estimatedContentLength);
+		}
+
+		/**
+		 * Adds content that is plain (no markdown or special syntax in it on purpose; but it might have chars that need to be escaped...).<br/><br/>
+		 *
+		 * If isCodeOrPreContent = true then it will not escape special characters when adding the inbetweenTagsContent (only backticks would need escaping there, but that is already done elsewhere by modifying the start/end backtick count of the block).<br/>
+		 * Otherwise, the inbetweenTagsContent will be escaped.
+		 *
+		 * @param inbetweenTagsContent
+		 * @param isCodeOrPreContent
+		 */
+		public void appendInBetweenTagContent(String inbetweenTagsContent, boolean isCodeOrPreContent)
+		{
+			if (isCodeOrPreContent) appendWithoutEscaping(inbetweenTagsContent);
+			else appendAfterEscapingMarkdownSpecialChars(inbetweenTagsContent);
+		}
+
+		public char charAt(int index)
+		{
+			return result.charAt(index);
+		}
+
+		public Object substring(int start)
+		{
+			return result.substring(start);
+		}
+
+		public int length()
+		{
+			return result.length();
+		}
+
+		public MarkdownContentAppender appendWithoutEscaping(String contentToAppend)
+		{
+			result.append(contentToAppend);
+			return this;
+		}
+
+		public MarkdownContentAppender appendAfterEscapingMarkdownSpecialChars(String contentToAppend)
+		{
+			result.append(escapeMarkdownSpecialChars(contentToAppend));
+			return this;
+		}
+
+		private Object escapeMarkdownSpecialChars(String contentToAppend)
+		{
+			StringBuilder escaped = null;
+			for (int i = 0; i < contentToAppend.length(); i++)
+			{
+				if (specialChars.contains(Character.valueOf(contentToAppend.charAt(i))))
+				{
+					if (escaped == null)
+					{
+						escaped = new StringBuilder(contentToAppend.length() + 10);
+						escaped.append(contentToAppend.subSequence(0, i));
+					}
+					escaped.append('\\');
+					escaped.append(contentToAppend.charAt(i));
+				}
+				else if (escaped != null) escaped.append(contentToAppend.charAt(i));
+			}
+
+			return escaped == null ? contentToAppend : escaped.toString();
+		}
+
+		@Override
+		public String toString()
+		{
+			return result.toString();
+		}
+
+	}
+
+	private static class CodeBacktickState
+	{
+
+		public final int maxContinousBacktickCount;
+		public final boolean startsWithBacktick;
+		public final boolean endsWithBacktick;
+
+		public CodeBacktickState(int maxContinousBacktickCount, boolean startsWithBacktick, boolean endsWithBacktick)
+		{
+			this.maxContinousBacktickCount = maxContinousBacktickCount;
+			this.startsWithBacktick = startsWithBacktick;
+			this.endsWithBacktick = endsWithBacktick;
 		}
 
 	}
