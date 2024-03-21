@@ -690,8 +690,6 @@ public class EditorUtil
 	{
 		try
 		{
-			//PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(deepLinkArgs),
-			//	"com.servoy.eclipse..designer.editor.componentvariantseditor");
 			IFile variants = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
 				.getFile(new Path("medias/variants.less"));
 			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("variants.less");
@@ -945,7 +943,7 @@ public class EditorUtil
 			// columns as they appear in the database
 			columns = table.getColumns().iterator();
 		}
-		else  
+		else
 		{
 			// columns sorted by name (PK always first)
 			columns = table.getColumnsSortedByName();

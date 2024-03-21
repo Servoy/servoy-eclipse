@@ -21,13 +21,6 @@
             <contentTypeBinding
                contentTypeId="com.servoy.eclipse.core.resource.form"/>
       </editor>
-       <editor
-            class="com.servoy.eclipse.designer.editor.ComponentVariantsEditor"
-            default="false"
-            icon="icons/componentvariantsmanager.png"
-            id="com.servoy.eclipse..designer.editor.componentvariantseditor"
-            name="Component Variants Editor">
-      </editor>
    </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">
