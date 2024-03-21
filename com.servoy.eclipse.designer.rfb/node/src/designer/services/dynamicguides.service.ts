@@ -223,15 +223,17 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			const verticalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceVerticalGuides(rect, properties, overlapsX) : null;
 			if (verticalDist && verticalSnap) {
 				properties.guides.splice(properties.guides.indexOf(verticalSnap), 1);
+				delete properties.cssPosition['bottom'];
 			}
 			const overlapsY = this.rectangles.filter(r => this.isOverlap(rect, r, 'y'));
 			const horizontalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceHorizontalGuides(rect, properties, overlapsY) : null;
 			if (horizontalDist && horizontalSnap) {
 				properties.guides.splice(properties.guides.indexOf(horizontalSnap), 1);
+				delete properties.cssPosition['right'];
 			}
 			if (!uuid) this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
 		}
-		
+
         this.properties = properties;
 		if (!resizing && properties.guides.length > 0 && !this.initialPoint) {
 			this.initialPoint = point;
