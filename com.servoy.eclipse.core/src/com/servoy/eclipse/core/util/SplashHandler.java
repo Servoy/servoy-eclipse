@@ -36,8 +36,8 @@ public class SplashHandler extends BasicSplashHandler
 		if (osName.contains("mac"))
 		{
 			super.init(splash);
-			getContent(); // ensure creation of the progress
-			showBackground(splash);
+//			getContent(); // ensure creation of the progress
+//			showBackground(splash);
 
 		}
 		else
