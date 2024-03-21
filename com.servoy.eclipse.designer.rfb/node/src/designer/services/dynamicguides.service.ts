@@ -61,6 +61,8 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
             this.element = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
             this.uuid = this.element?.getAttribute('svy-id');
             for (let comp of this.editorContentService.getAllContentElements()) {
+				const componentType = comp.getAttribute('svy-formelement-type');
+				if (componentType == null) continue;
                 const id = comp.getAttribute('svy-id');
                 const bounds = comp.getBoundingClientRect();
                 this.leftPos.set(id, bounds.left);
@@ -69,7 +71,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
                 this.bottomPos.set(id, bounds.bottom);
                 this.middleV.set(id, (bounds.top + bounds.bottom) / 2);
                 this.middleH.set(id, (bounds.left + bounds.right) / 2);
-				this.types.set(id, comp.getAttribute('svy-formelement-type'));
+				this.types.set(id, componentType);
                 if (id !== this.uuid){
 					this.rectangles.push(bounds);
 					this.uuids.push(id);
