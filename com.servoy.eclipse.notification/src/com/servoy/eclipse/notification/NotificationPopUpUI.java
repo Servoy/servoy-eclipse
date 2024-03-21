@@ -75,7 +75,7 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 		super(display);
 		this.title = title;
 		this.escapeHtmlTags = escapeHtmlTags;
-		servoyLogoImg = Activator.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "icons/servoy_donut16x16.png").createImage();
+		servoyLogoImg = Activator.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "icons/windowicon.png").createImage();
 		linkColor = Display.getDefault().getSystemColor(SWT.COLOR_LINK_FOREGROUND);
 		this.notifications = notifications;
 		this.onCloseCallback = onCloseCallback;

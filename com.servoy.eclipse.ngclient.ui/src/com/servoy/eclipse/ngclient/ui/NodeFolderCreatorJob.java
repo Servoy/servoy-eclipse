@@ -103,14 +103,15 @@ public class NodeFolderCreatorJob extends Job
 			boolean codeChanged = true;
 			boolean mainPackageJsonChanged = false;
 			File packageJsonFile = new File(nodeFolder.getParent(), "package.json");
+			File packageCopyJsonFile = new File(nodeFolder.getParent(), "package_copy.json");
 			Bundle bundle = Activator.getInstance().getBundle();
 			URL packageJsonUrl = bundle.getEntry("/node/package.json");
 			String bundleContent = Utils.getURLContent(packageJsonUrl);
-			if (packageJsonFile.exists() && !force && fullyGenerated.exists())
+			if (packageCopyJsonFile.exists() && !force && fullyGenerated.exists())
 			{
 				try
 				{
-					String fileContent = FileUtils.readFileToString(packageJsonFile, "UTF-8");
+					String fileContent = FileUtils.readFileToString(packageCopyJsonFile, "UTF-8");
 					codeChanged = !fileContent.equals(bundleContent);
 					mainPackageJsonChanged = codeChanged;
 				}
@@ -197,6 +198,7 @@ public class NodeFolderCreatorJob extends Job
 				try
 				{
 					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageJsonFile);
+					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageCopyJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
 
 					executeNpmInstall = true;
