@@ -223,7 +223,11 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 
 		const uuid = this.element?.getAttribute('svy-id');
         let rect = this.getDraggedElementRect(point);
-		if (!rect) return null;
+		if (!rect) {
+			this.snapDataListener.next(null);
+			return;
+		}
+
 		let properties = new SnapData(event, rect ? rect.top : point.y, rect ? rect.left : point.x, {}, []);
 		
 		const horizontalSnap = this.handleHorizontalSnap(resizing, point, uuid, rect, properties);
@@ -231,18 +235,21 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		if (!resizing) { 
 			//equal distance guides
 			const overlapsX = this.rectangles.filter(r => this.isOverlap(rect, r, 'x'));
+			const overlapsY = this.rectangles.filter(r => this.isOverlap(rect, r, 'y'));
+			if (!uuid)  this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
+
+			rect = new DOMRect(properties.left, properties.top, properties.width? properties.width : rect.width, properties.height ? properties.height: rect.height);
+
 			const verticalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceVerticalGuides(rect, properties, overlapsX, !uuid) : null;
 			if (verticalDist && verticalSnap) {
 				properties.guides.splice(properties.guides.indexOf(verticalSnap), 1);
 				delete properties.cssPosition['bottom'];
 			}
-			const overlapsY = this.rectangles.filter(r => this.isOverlap(rect, r, 'y'));
 			const horizontalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceHorizontalGuides(rect, properties, overlapsY, !uuid) : null;
 			if (horizontalDist && horizontalSnap) {
 				properties.guides.splice(properties.guides.indexOf(horizontalSnap), 1);
 				delete properties.cssPosition['right'];
 			}
-			if (!uuid)  this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
 		}
 
         this.properties = properties;

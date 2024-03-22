@@ -1,4 +1,4 @@
-import { Directive, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Directive, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs';
 @Directive({
     selector: '[resizeKnob]'
 })
-export class ResizeKnobDirective implements OnInit, OnDestroy {
+export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
     @Input('resizeKnob') resizeInfo: ResizeInfo;
 
@@ -33,6 +33,9 @@ export class ResizeKnobDirective implements OnInit, OnDestroy {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
         this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
         this.leftContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
+    }
+
+    ngAfterViewInit(): void {
         this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
             this.snap(value);
         })
