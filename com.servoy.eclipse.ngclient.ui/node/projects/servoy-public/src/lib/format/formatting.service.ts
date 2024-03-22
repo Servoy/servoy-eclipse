@@ -567,22 +567,66 @@ export class FormattingService {
     }
 
     private convertFormat(dateFormat: string): string {
-        if (!dateFormat) dateFormat = 'F'; // long date format of luxon
-        // adjust to luxon js formatting (from java simple date format)
-        dateFormat = dateFormat.replace(new RegExp('Y', 'g'), 'y');
-        dateFormat = dateFormat.replace(new RegExp('aa', 'g'), 'a');
-        if (dateFormat.indexOf('EE') === -1)
-            dateFormat = dateFormat.replace(new RegExp('E', 'g'), 'EEE');
-        dateFormat = dateFormat.replace(new RegExp('u', 'g'), 'E');
-        dateFormat = dateFormat.replace(new RegExp('w', 'g'), 'W');
-        // no equivalent for K, just put h for now
-        dateFormat = dateFormat.replace(new RegExp('K', 'g'), 'h');
-        dateFormat = dateFormat.replace(new RegExp('k', 'g'), 'H');
-        dateFormat = dateFormat.replace(new RegExp('D', 'g'), 'o');
-        // if week is found then the year must be 'k' for luxon (iso week year)
-        if (dateFormat.indexOf('W') !== -1) {
-            dateFormat = dateFormat.replace(new RegExp('y', 'g'), 'k');
+        let result = '';
+        let inSingleQuotes = false;
+        let containsEE = dateFormat.includes('EE');
+    
+        for (let i = 0; i < dateFormat.length; i++) {
+            if (dateFormat[i] === "'") {
+                inSingleQuotes = !inSingleQuotes;
+                result += dateFormat[i];
+                continue;
+            }
+    
+            if (inSingleQuotes) {
+                result += dateFormat[i];
+                continue;
+            }
+    
+            if (!containsEE && dateFormat[i] === 'E') {
+                result += 'EEE';
+                continue;
+            }
+    
+            if (dateFormat[i] === 'a' && i < dateFormat.length - 1 && dateFormat[i + 1] === 'a') {
+                result += 'a'; 
+                i++; 
+                continue;
+            }
+    
+            switch (dateFormat[i]) {
+                case 'Y': result += 'y'; break;
+                case 'u': result += 'E'; break;
+                case 'w': result += 'W'; break;
+                case 'K': result += 'h'; break;
+                case 'k': result += 'H'; break;
+                case 'D': result += 'o'; break;
+
+                default: result += dateFormat[i]; 
+            }
         }
-        return dateFormat;
-    }
+    
+        if (result.includes('W')) {
+            let tempResult = '';
+            inSingleQuotes = false;
+    
+            for (let i = 0; i < result.length; i++) {
+                if (result[i] === "'") {
+                    inSingleQuotes = !inSingleQuotes;
+                    tempResult += result[i];
+                    continue;
+                }
+    
+                if (!inSingleQuotes && result[i] === 'y') {
+                    tempResult += 'k';
+                } else {
+                    tempResult += result[i];
+                }
+            }
+    
+            result = tempResult;
+        }
+    
+        return result;
+    }    
 }
