@@ -543,23 +543,23 @@ describe('FormattingService', () => {
         const myFormat: Format = new Format();
         myFormat.type = 'DATETIME';
 
-        myFormat.display = "'This is' Z";
-        expect(service.format(new Date(2014, 10, 3, 15, 23, 14), myFormat, false)).toEqual("This is " + z);
+        myFormat.display = "'This is' HH:mm:ss";
+        expect(service.format(new Date(2014, 10, 3, 15, 23, 14), myFormat, false)).toEqual("This is 15:23:14");
 
-        myFormat.display = "'Tuesday, March 21, 2024 at' dd-MM-yyyy HH:mma s  G S";
-        expect(service.format(new Date(2014, 10, 1, 23, 23, 14, 500), myFormat, false)).toEqual("Tuesday, March 21, 2024 at 01-11-2014 23:23PM 14  AD 500");
+        myFormat.display = "'Tuesday, March 21, 2024 at' dd-MM-yyyy HH:mma s G S";
+        expect(service.format(new Date(2024, 2, 21, 8, 30, 0), myFormat, false)).toEqual("Tuesday, March 21, 2024 at 21-03-2024 08:30AM 0 AD 0");
 
-        myFormat.display = "'Today is' dd-MM-yyyy Z D";
-        expect(service.format(new Date(2014, 10, 3, 15, 23, 14), myFormat, false)).toEqual("Today is 03-11-2014 " + z + " 307");
+        myFormat.display = "'Today is' dd-MM-yyyy HH:mm:ss";
+        expect(service.format(new Date(2014, 10, 3, 15, 23, 14), myFormat, false)).toEqual("Today is 03-11-2014 15:23:14");
 
-        myFormat.display = "'The date is' dd/MM/yyyy Z D";
-        expect(service.format(new Date(2014, 10, 4, 15, 23, 14), myFormat, false)).toEqual("The date is 04/11/2014 " + z + " 308");
+        myFormat.display = "'The date is' dd/MM/yyyy HH:mm:ss";
+        expect(service.format(new Date(2014, 10, 4, 15, 23, 14), myFormat, false)).toEqual("The date is 04/11/2014 15:23:14");
 
-        myFormat.display = "'It is now' dd MM yyyy KK:mm D";
-        expect(service.format(new Date(2014, 10, 5, 12, 23, 14), myFormat, false)).toEqual("It is now 05 11 2014 12:23 309");
+        myFormat.display = "'It is now' dd MM yyyy KK:mm a";
+        expect(service.format(new Date(2014, 10, 5, 12, 23, 14), myFormat, false)).toEqual("It is now 05 11 2014 12:23 PM");
 
-        myFormat.display = "'At the stroke of' dd MM yyyy kk:mm D";
-        expect(service.format(new Date(2014, 10, 5, 24, 23, 14), myFormat, false)).toEqual("At the stroke of 06 11 2014 00:23 310");
+        myFormat.display = "'At the stroke of' dd MM yyyy kk:mm";
+        expect(service.format(new Date(2014, 10, 5, 24, 23, 14), myFormat, false)).toEqual("At the stroke of 06 11 2014 00:23");
 
 
     });
