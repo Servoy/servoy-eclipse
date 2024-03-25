@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy War Exporter Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.exporter.war;singleton:=true
-Bundle-Version: 2022.3.7.3749_LTS
+Bundle-Version: 2022.3.8.3750_LTS
 Bundle-Activator: com.servoy.eclipse.warexporter.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.resources,

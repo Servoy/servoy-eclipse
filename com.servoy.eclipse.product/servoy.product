@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2022.3.7.3749_LTS" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2022.3.8.3750_LTS" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
@@ -101,7 +101,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="2022.3.7.3749_LTS"/>
+      <feature id="com.servoy.eclipse.feature" version="2022.3.8.3750_LTS"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
