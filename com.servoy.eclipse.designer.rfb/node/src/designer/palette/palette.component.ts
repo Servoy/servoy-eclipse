@@ -453,17 +453,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 }
                 if (this.dragItem.contentItemBeingDragged) {
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
-                    if (this.snapData?.width && (!this.snapData.checkModelMinSize || this.dragItem.model?.size['width'] < this.snapData.width)) { 
+                    if (this.snapData?.width) { 
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
                     }
-                    else {
-                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.dragItem.model?.size['width'] + 'px');
-                    }
-                    if (this.snapData?.height && (!this.snapData.checkModelMinSize || this.dragItem.model?.size['height'] < this.snapData.height)) {
+                    if (this.snapData?.height) {
                          this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
-                    }
-                    else {
-                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.dragItem.model?.size['height'] + 'px');
                     }
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
