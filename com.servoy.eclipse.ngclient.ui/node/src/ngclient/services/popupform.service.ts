@@ -76,6 +76,7 @@ export class PopupFormService {
     }
 
     private showPopup(popup: PopupForm, counter?: number) {
+		if (this.formPopupComponent) return; // another popup is still visible
         if (popup.component && !this.doc.getElementById(popup.component) && (!counter || counter < 10)) {
             setTimeout(() => {
                 const c = counter? counter++:1;
