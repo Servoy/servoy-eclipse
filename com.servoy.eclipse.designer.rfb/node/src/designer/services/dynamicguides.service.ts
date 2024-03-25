@@ -193,16 +193,15 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		const targetType = this.types.get(uuid);
 		const componentType = this.getDraggedComponentType();
 		if (targetType === componentType || this.getDraggedElementCategorySet(componentType)?.indexOf(targetType) >= 0) {
+			//the dragged component should not become too small unless the target is also very small
+			/*return property === 'width' && (value >= 80 || this.rectangles[this.uuids.indexOf(uuid)].width < 80) ||
+			property === 'height' && (value >= 30 || this.rectangles[this.uuids.indexOf(uuid)].height < 30);*/
 			return true;
 		}
-		else if (targetType?.split('-')[0] !== componentType?.split('-')[0]) {
+		else if (targetType?.split('-')[0] !== componentType?.split('-')[0] && value && this.initialRectangle) {
 			//if the dragged component is not in the same category, 
-			//use the size hints but make sure is not smaller than then model size
-			properties.checkModelMinSize = true;
-			/*if (value && this.initialRectangle) {
-				return this.initialRectangle[property] < value;
-			}*/
-			return true;
+			//use the size hints but make sure is not smaller than than the initial size
+			return this.initialRectangle[property] < value;
 		}
 		return false;
 	}
@@ -230,22 +229,23 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 
 		let properties = new SnapData(event, rect ? rect.top : point.y, rect ? rect.left : point.x, {}, []);
 		
-		const horizontalSnap = this.handleHorizontalSnap(resizing, point, uuid, rect, properties);
-		const verticalSnap = this.handleVerticalSnap(resizing, point, uuid, rect, properties);
+		const horizontalSnap = this.handleHorizontalSnap(resizing, !!resizing || !!draggedItem, point, uuid, rect, properties);
+		const verticalSnap = this.handleVerticalSnap(resizing, !!resizing || !!draggedItem, point, uuid, rect, properties);
 		if (!resizing) { 
 			//equal distance guides
 			const overlapsX = this.rectangles.filter(r => this.isOverlap(rect, r, 'x'));
 			const overlapsY = this.rectangles.filter(r => this.isOverlap(rect, r, 'y'));
-			if (!uuid)  this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
+			if (draggedItem) {
+				this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
+				rect = new DOMRect(properties.left, properties.top, properties.width? properties.width : rect.width, properties.height ? properties.height: rect.height);
+			}
 
-			rect = new DOMRect(properties.left, properties.top, properties.width? properties.width : rect.width, properties.height ? properties.height: rect.height);
-
-			const verticalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceVerticalGuides(rect, properties, overlapsX, !uuid) : null;
+			const verticalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceVerticalGuides(rect, properties, overlapsX, !!draggedItem) : null;
 			if (verticalDist && verticalSnap) {
 				properties.guides.splice(properties.guides.indexOf(verticalSnap), 1);
 				delete properties.cssPosition['bottom'];
 			}
-			const horizontalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceHorizontalGuides(rect, properties, overlapsY, !uuid) : null;
+			const horizontalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceHorizontalGuides(rect, properties, overlapsY, !!draggedItem) : null;
 			if (horizontalDist && horizontalSnap) {
 				properties.guides.splice(properties.guides.indexOf(horizontalSnap), 1);
 				delete properties.cssPosition['right'];
@@ -357,7 +357,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		return null;
 	}
 
-	private handleHorizontalSnap(resizing: string, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
+	private handleHorizontalSnap(resizing: string, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
 		if (this.snapThreshold <= 0) return null;
 		if (!resizing || resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
 			let closerToTheLeft = this.pointCloserToTopOrLeftSide(point, rect, 'x');
@@ -367,7 +367,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				if (snapX?.uuid) {
 					properties.left = this.leftPos.get(snapX.uuid);
 					const width = this.rightPos.get(snapX.uuid) - properties.left;
-					if (this.shouldSnapToSize(snapX.uuid, properties, resizing, width, 'width'))
+					if (adjustSize && this.shouldSnapToSize(snapX.uuid, properties, resizing, width, 'width'))
 					{
 						properties['width'] = width;
 					}
@@ -412,7 +412,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					}
 					if (!properties.cssPosition['right']) properties.cssPosition['right'] = properties.left;
 				}
-				if (this.shouldSnapToSize(snapX?.uuid, properties, resizing, guideX - properties.left, 'width'))
+				if (adjustSize && this.shouldSnapToSize(snapX?.uuid, properties, resizing, guideX - properties.left, 'width'))
 				{
 					properties['width'] = guideX - properties.left;
 				}
@@ -442,7 +442,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		return null;
 	}
 
-	private handleVerticalSnap(resizing: string, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
+	private handleVerticalSnap(resizing: string, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
 		if (this.snapThreshold <= 0) return null;
 		if (!resizing || resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
 			let closerToTheTop = this.pointCloserToTopOrLeftSide(point, rect, 'y');
@@ -452,7 +452,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				if (snapY?.uuid) {
 					properties.top = this.topPos.get(snapY.uuid);
 					const height = this.bottomPos.get(snapY.uuid) - properties.top;
-					if (this.shouldSnapToSize(snapY.uuid, properties, resizing, height, 'height'))
+					if (adjustSize && this.shouldSnapToSize(snapY.uuid, properties, resizing, height, 'height'))
 					{
 						properties['height'] = height;
 					}
@@ -496,7 +496,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						properties.top -= rect.height;
 					}
 				}
-				if (this.shouldSnapToSize(snapY?.uuid, properties, resizing, guideY - properties.top, 'height'))
+				if (adjustSize && this.shouldSnapToSize(snapY?.uuid, properties, resizing, guideY - properties.top, 'height'))
 				{
 					properties['height'] = guideY - properties.top;
 				}
