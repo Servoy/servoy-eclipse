@@ -2234,7 +2234,7 @@ public class SolutionExplorerTreeContentProvider
 											{
 												image = ImageDescriptor.createFromURL(urlDarkTheme).createImage();
 											}
-											if (ImageDescriptor.createFromURL(urlDarkTheme).getImageData() == null)
+											if (urlDarkTheme == null || ImageDescriptor.createFromURL(urlDarkTheme).getImageData() == null)
 											{
 												image = ImageDescriptor.createFromURL(urlLightTheme).createImage();
 											}
