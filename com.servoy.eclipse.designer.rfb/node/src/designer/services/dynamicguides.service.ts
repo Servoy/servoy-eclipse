@@ -194,9 +194,8 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		const componentType = this.getDraggedComponentType();
 		if (targetType === componentType || this.getDraggedElementCategorySet(componentType)?.indexOf(targetType) >= 0) {
 			//the dragged component should not become too small unless the target is also very small
-			/*return property === 'width' && (value >= 80 || this.rectangles[this.uuids.indexOf(uuid)].width < 80) ||
-			property === 'height' && (value >= 30 || this.rectangles[this.uuids.indexOf(uuid)].height < 30);*/
-			return true;
+			return property === 'width' && (value >= 80 || this.rectangles[this.uuids.indexOf(uuid)].width < 80) ||
+			property === 'height' && (value >= 30 || this.rectangles[this.uuids.indexOf(uuid)].height < 30);
 		}
 		else if (targetType?.split('-')[0] !== componentType?.split('-')[0] && value && this.initialRectangle) {
 			//if the dragged component is not in the same category, 
@@ -228,6 +227,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		}
 
 		let properties = new SnapData(event, rect ? rect.top : point.y, rect ? rect.left : point.x, {}, []);
+		if (draggedItem && this.initialRectangle) {
+			properties.width = this.initialRectangle.width;
+			properties.height = this.initialRectangle.height;
+		}
 		
 		const horizontalSnap = this.handleHorizontalSnap(resizing, !!resizing || !!draggedItem, point, uuid, rect, properties);
 		const verticalSnap = this.handleVerticalSnap(resizing, !!resizing || !!draggedItem, point, uuid, rect, properties);
@@ -272,9 +275,8 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					return closest;
 				}
 			}, null);
-			if (closestYRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestYRect)], properties)) {
+			if (closestYRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestYRect)], properties, undefined, closestYRect.right - properties.left, 'width')) {
 				properties.width = closestYRect.right - properties.left;
-				//this.setDimension(closestYRect.right - properties.left, 'width', properties);
 			}
 
 			const closestXRect = overlapsY.reduce((closest, r) => {
@@ -286,9 +288,8 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					return closest;
 				}
 			}, null);
-			if (closestXRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestXRect)], properties)) {
+			if (closestXRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestXRect)], properties, undefined, closestXRect.bottom - properties.top, 'height')) {
 				properties.height = closestXRect.bottom - properties.top;
-				//this.setDimension(closestXRect.bottom - properties.top, 'height', properties);
 			}
 		}
 		if (properties.width && !properties.height) {
