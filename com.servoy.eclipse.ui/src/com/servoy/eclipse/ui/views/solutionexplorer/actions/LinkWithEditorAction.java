@@ -549,6 +549,10 @@ public class LinkWithEditorAction extends Action
 		if (solution != null)
 		{
 			PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)contentProvider).getSolutionNode(solution.getName());
+			if (solutionNode != null && solutionNode.children == null)
+			{
+				((SolutionExplorerTreeContentProvider)contentProvider).getChildren(solutionNode);
+			}
 			if (solutionNode != null && solutionNode.children != null)
 			{
 				for (SimpleUserNode child : solutionNode.children)
