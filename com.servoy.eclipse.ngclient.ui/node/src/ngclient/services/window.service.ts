@@ -412,6 +412,11 @@ export class WindowService {
         this.formService.destroyFormCache(formName);
     }
 
+    public requireFormLoaded() {
+        // just empty method so no error will be given when called from the server.
+        // in ng1 this was for creating the hidden div.
+    }
+
 
     private saveInSessionStorage(property: any, propertyName: string) {
         const currentWindow = 'window' + this.windowCounter;
