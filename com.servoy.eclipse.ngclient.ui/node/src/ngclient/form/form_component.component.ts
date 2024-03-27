@@ -205,6 +205,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     formCache: FormCache;
 
     absolutFormPosition = {};
+    detectingChanges = false;    
 
     private handlerCache: { [property: string]: { [property: string]: (event:Event) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
@@ -243,7 +244,17 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     public detectChanges() {
-        this.changeHandler.detectChanges();
+        const oldDetect = this.detectingChanges;
+        try {
+            if (this.detectingChanges){
+                this.log.warn("Nested detectChanges call in form: " + this.name);
+            }
+            this.detectingChanges = true;
+            this.changeHandler.detectChanges();
+        }
+        finally {
+            this.detectingChanges = oldDetect;
+        }
     }
 
     public formCacheChanged(cache: FormCache): void {
