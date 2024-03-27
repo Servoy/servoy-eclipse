@@ -23,6 +23,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     lassostarted = false;
     lastTimestamp: number;
     moveFCorLFC = false;
+    mouseDownEvent: MouseEvent = null;
 
     mousedownpoint: Point;
     fieldLocation: Point;
@@ -160,6 +161,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private onMouseDown(event: MouseEvent) {
+		this.mouseDownEvent = event;
         this.fieldLocation = { x: event.pageX, y: event.pageY };
         if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
         let found;
@@ -200,6 +202,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private onMouseUp(event: MouseEvent) {
+		let isNewSelection = false;
+		if (this.mouseDownEvent && this.mouseDownEvent.x === event.x && this.mouseDownEvent.y === event.y) {
+			isNewSelection = true;
+		}
         if (this.fieldLocation && this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY) {
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
             this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust });
@@ -313,7 +319,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             selection.push(id);
                         }
                     }
-                    else {
+                    else if (isNewSelection) {
                         const newNodes = new Array<SelectionNode>();
                         newNodes.push(newNode);
                         this.nodes = newNodes;
@@ -433,6 +439,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', Math.abs(currentWidth) + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'height', Math.abs(currentHeight) + 'px');
         }
+        if (this.editorSession.getState().resizing) {
+			this.redrawDecorators();
+		}
     }
 
     private rectanglesIntersect(r1: DOMRect, r2: DOMRect): boolean {
