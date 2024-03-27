@@ -19,10 +19,12 @@ package com.servoy.eclipse.ngclient.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
-import org.apache.commons.io.file.DeletingPathVisitor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -97,9 +99,49 @@ public class CopySourceFolderAction extends Action
 						long time = System.currentTimeMillis();
 						console.write("Starting to delete the main target folder: " + Activator.getInstance().getMainTargetFolder() + "\n");
 						WebPackagesListener.setIgnore(true);
-
 						Path path = Activator.getInstance().getMainTargetFolder().toPath();
-						Files.walkFileTree(path, DeletingPathVisitor.withLongCounters());
+
+						int counter = 0;
+						while (true)
+						{
+							try
+							{
+								Files.walkFileTree(path, new SimpleFileVisitor<Path>()
+								{
+									@Override
+									public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
+									{
+										return FileVisitResult.CONTINUE;
+									}
+
+									@Override
+									public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+									{
+										Files.deleteIfExists(file);
+										return FileVisitResult.CONTINUE;
+									}
+
+									@Override
+									public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException
+									{
+										Files.deleteIfExists(file);
+										return FileVisitResult.CONTINUE;
+									}
+
+									@Override
+									public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
+									{
+										Files.deleteIfExists(dir);
+										return FileVisitResult.CONTINUE;
+									};
+								});
+								break;
+							}
+							catch (Exception e)
+							{
+								if (counter++ > 2) break;
+							}
+						}
 
 						console.write("Done deleting the main target folder: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 					}
