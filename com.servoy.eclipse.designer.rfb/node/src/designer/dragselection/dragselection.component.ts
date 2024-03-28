@@ -142,15 +142,15 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
               }
               const id = (event.ctrlKey || event.metaKey) ? i++ : nodeId;
               changes[id] = {
-                  x: elementInfo.x,
-                  y: elementInfo.y,
+                  x: Math.round(elementInfo.x),
+                  y: Math.round(elementInfo.y),
                   move: true
               };
               if (this.snapData && this.selectionToDrag.length == 1) {
                   const cssPos = this.snapData.cssPosition;
                   changes[id]['cssPos'] = cssPos;
-                  changes[id]['x'] = this.snapData?.left;
-                  changes[id]['y'] = this.snapData?.top;
+                  changes[id]['x'] = Math.round(this.snapData?.left);
+                  changes[id]['y'] = Math.round(this.snapData?.top);
               }
 
               if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
