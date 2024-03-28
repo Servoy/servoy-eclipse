@@ -467,18 +467,18 @@ public class CreateComponentCommand extends BaseRestorableCommand
 							webComponent = ((AbstractContainer)parentSupportingElements).createNewWebComponent(compName, name);
 
 						}
-						if (args.allProperties.has("cssPos"))
-						{
-							CSSPosition cssPositionFromJSON = DesignerUtil.cssPositionFromJSON(editorPart, webComponent, args.allProperties);
-							webComponent.setCssPosition(cssPositionFromJSON);
-							CSSPositionUtils.setLocation(webComponent, args.getLocation());
-							CSSPositionUtils.setSize(webComponent, args.getSize());
-						}
-						else
-						{
-							CSSPositionUtils.setLocation(webComponent, args.getLocation());
-							CSSPositionUtils.setSize(webComponent, args.getSize());
-						}
+//						if (args.allProperties.has("cssPos"))
+//						{
+//							CSSPosition cssPositionFromJSON = DesignerUtil.cssPositionFromJSON(editorPart, webComponent, args.allProperties);
+//							webComponent.setCssPosition(cssPositionFromJSON);
+//							CSSPositionUtils.setLocation(webComponent, args.getLocation());
+//							CSSPositionUtils.setSize(webComponent, args.getSize());
+//						}
+//						else
+//						{
+						CSSPositionUtils.setLocation(webComponent, args.getLocation());
+						CSSPositionUtils.setSize(webComponent, args.getSize());
+//						}
 						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 						if (EMPTY_SIZE.equals(args.getSize()) && description != null && description.getDefaultValue() instanceof JSONObject)
 						{
