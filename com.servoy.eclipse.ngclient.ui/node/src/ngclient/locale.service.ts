@@ -72,6 +72,11 @@ export class LocaleService {
     private setNumbroLocale(localeId: string, tryOnlyLanguage: boolean): Promise<void> {
         if (numbro.language() === localeId) return Promise.resolve();
         
+        if (numbro.languages()[localeId]) {
+            numbro.setLanguage(localeId);
+            return Promise.resolve();
+        }
+        
         const moduleLoader =  (module: { default: numbro.NumbroLanguage }) => {
             numbro.registerLanguage(module.default);
             numbro.setLanguage(localeId);
