@@ -139,7 +139,7 @@ public class IndexPageFilter implements Filter
 						if (file.exists()) break;
 					}
 				}
-				if (file.exists() && !file.isDirectory() & !file.getName().equals("favicon.ico"))
+				if (file.exists() && !file.isDirectory() && !file.getName().equals("favicon.ico"))
 				{
 					String contentType = MimeTypes.guessContentTypeFromName(requestURI);
 					if (contentType != null) servletResponse.setContentType(contentType);
