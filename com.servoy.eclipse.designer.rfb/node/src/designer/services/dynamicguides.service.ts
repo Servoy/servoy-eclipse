@@ -137,7 +137,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         return null;        
     }
     
-    private getDraggedElementRect(point: {x: number, y:number}): DOMRect {
+    private getDraggedElementRect(point: {x: number, y:number}, resizing: string): DOMRect {
         let item: HTMLElement;
          if (!this.element?.getAttribute('svy-id') && (item = this.editorContentService.getContentElementById('svy_draggedelement'))) {
 			let r = item.getBoundingClientRect();
@@ -152,8 +152,27 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		if (this.initialPoint) {
 			const deltaX = point.x - this.initialPoint.x;
 			const deltaY = point.y - this.initialPoint.y;
-			return new DOMRect(this.initialRectangle.left + deltaX, this.initialRectangle.top + deltaY, 
-				this.initialRectangle.width, this.initialRectangle.height);
+			if (!resizing) {
+				return new DOMRect(this.initialRectangle.left + deltaX, this.initialRectangle.top + deltaY, 
+					this.initialRectangle.width, this.initialRectangle.height);
+			}
+			else {
+				let top = this.initialRectangle.top;
+				let left = this.initialRectangle.left;
+				let width = this.initialRectangle.width;
+				let height = this.initialRectangle.height;
+				if (resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
+					const closerToTheLeft = this.pointCloserToTopOrLeftSide(point, this.initialRectangle, 'x');
+					left = closerToTheLeft ? this.initialRectangle.left + deltaX : this.initialRectangle.left;
+					width = closerToTheLeft ? this.initialRectangle.width - deltaX : this.initialRectangle.width + deltaX;
+				}
+				if (resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
+					const closerToTheTop = this.pointCloserToTopOrLeftSide(point, this.initialRectangle, 'y');
+					top = closerToTheTop ? this.initialRectangle.top + deltaY : this.initialRectangle.top;
+					height = closerToTheTop ? this.initialRectangle.height - deltaY : this.initialRectangle.height + deltaY;
+				}
+				return new DOMRect(left, top, width, height);
+			}
 		}
         return this.element?.getBoundingClientRect();
     }
@@ -220,7 +239,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		}
 
 		const uuid = this.element?.getAttribute('svy-id');
-        let rect = this.getDraggedElementRect(point);
+        let rect = this.getDraggedElementRect(point, resizing);
 		if (!rect) {
 			this.snapDataListener.next(null);
 			return;
@@ -230,6 +249,28 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		if (draggedItem && this.initialRectangle) {
 			properties.width = this.initialRectangle.width;
 			properties.height = this.initialRectangle.height;
+		}
+		
+		if (resizing && this.equalSizeThreshold > 0) { 
+			let verticalDist: Guide[], horizontalDist: Guide[];
+			if (resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
+				verticalDist = this.addEqualHeightGuides(point, rect, properties, uuid);
+			}
+
+			if (resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
+				horizontalDist = this.addEqualWidthGuides(point, rect, properties, uuid);
+			}
+			//same size have higher prio than edge
+			if (verticalDist || horizontalDist) {
+				this.equalSize = true;
+				this.properties = properties;
+				this.snapDataListener.next(this.properties);
+				if (!this.initialPoint) {
+					this.initialPoint = point;
+					this.initialRectangle = rect;
+				}
+				return;
+			}
 		}
 		
 		const horizontalSnap = this.handleHorizontalSnap(resizing, !!resizing || !!draggedItem, point, uuid, rect, properties);
@@ -300,14 +341,15 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		}
 	}
 
-	private addEqualWidthGuides(point: { x: number, y: number }, rect: DOMRect, properties: SnapData): Guide[] {
-		const filteredRectangles = this.rectangles.filter(r =>
+	private addEqualWidthGuides(point: { x: number, y: number }, rect: DOMRect, properties: SnapData, uuid: string): Guide[] {
+		const currentRectangleIndex = this.uuids.indexOf(uuid);
+		const filteredRectangles = this.rectangles.filter(r => this.rectangles.indexOf(r) != currentRectangleIndex).filter(r =>
 			Math.abs(r.width - rect.width) <= this.equalSizeThreshold
 		).sort((rectA, rectB) => rectA.width - rectB.width);
 		if (filteredRectangles.length > 0) {
 			let size = filteredRectangles[0].width;
 			if (this.pointCloserToTopOrLeftSide(point, rect, 'x')) {
-				properties.left = rect.left + size - rect.width;
+				properties.left = rect.right - size;
 			}
 			else {
 				properties.left = rect.left;
@@ -329,23 +371,24 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		return null;
 	}
 
-	private addEqualHeightGuides(point: { x: number, y: number }, rect: DOMRect, properties: SnapData): Guide[] {
-		const filteredRectangles = this.rectangles.filter(r =>
+	private addEqualHeightGuides(point: { x: number, y: number }, rect: DOMRect, properties: SnapData, uuid: string): Guide[] {
+		const currentRectangleIndex = this.uuids.indexOf(uuid);
+		const filteredRectangles = this.rectangles.filter(r => this.rectangles.indexOf(r) != currentRectangleIndex).filter(r => 
 			Math.abs(r.height - rect.height) <= this.equalSizeThreshold
 		).sort((rectA, rectB) => rectA.height - rectB.height);
 		if (filteredRectangles.length > 0) {
 			let size = filteredRectangles[0].height;
 			if (this.pointCloserToTopOrLeftSide(point, rect, 'y')) {
-				properties.top = rect.top + size - rect.height;
+				properties.top = rect.bottom - size;
 			}
 			else {
 				properties.top = rect.top;
 			}
 			properties.height = size;
 			let guides = [];
-			guides.push(new Guide(rect.right + 5, rect.top, 15, 1 , 'dist'));
-			guides.push(new Guide(rect.right + 5, rect.top + size, 15, 1, 'dist'));
-			guides.push(new Guide(rect.right + 10, rect.top, 1, size, 'dist'));
+			guides.push(new Guide(rect.right + 5, properties.top, 15, 1 , 'dist'));
+			guides.push(new Guide(rect.right + 5, properties.top + size, 15, 1, 'dist'));
+			guides.push(new Guide(rect.right + 10, properties.top, 1, size, 'dist'));
 
 			filteredRectangles.filter(r => r.height == size).forEach(r => {
 				guides.push(new Guide(r.right + 3, r.top, 15, 1 , 'dist'));
