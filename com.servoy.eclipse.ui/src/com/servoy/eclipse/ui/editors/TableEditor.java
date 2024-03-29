@@ -289,7 +289,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			try
 			{
-				if (server != null)
+				if (server != null && getTable().getExistInDB())
 				{
 					for (Column element : getTable().getColumns())
 					{
