@@ -40,9 +40,9 @@ CTabFolder, Shell CTabFolder {
     swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
 }
 
-CTabFolder.active {
-    swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
-    swt-selected-highlight-top: false;
+CTabItem:selected,
+CTabItem:selected CLabel {
+    color: white;
 }
 
 ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Tree,
@@ -84,7 +84,6 @@ ExpandBar {
     swt-shadow-visible: false;
     swt-unselected-hot-tab-color-background: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
     swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
-    swt-selected-highlight-top: false;
 }
 
 .Editor *{
