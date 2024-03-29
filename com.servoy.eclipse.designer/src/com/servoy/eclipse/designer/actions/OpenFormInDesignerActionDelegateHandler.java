@@ -32,11 +32,11 @@ import com.servoy.j2db.persistence.Form;
 
 /**
  * Command handler form opening form in designer.
- * 
+ *
  * Used for default command handler.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class OpenFormInDesignerActionDelegateHandler extends AbstractHandler
 {
@@ -45,7 +45,7 @@ public class OpenFormInDesignerActionDelegateHandler extends AbstractHandler
 		Form form = null;
 		IWorkbenchPage activePage = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage();
 		ISelection selection = activePage.getSelection();
-		if (selection != null & selection instanceof IStructuredSelection)
+		if (selection != null && selection instanceof IStructuredSelection)
 		{
 			IStructuredSelection strucSelection = (IStructuredSelection)selection;
 			Iterator< ? > iterator = strucSelection.iterator();

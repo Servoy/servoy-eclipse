@@ -2858,7 +2858,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			PlatformSimpleUserNode parentNode = elementsNode;
 			// TODO: fix multiple anonymous groups (use proper content providers and label providers)
-			if (element.getGroupID() != null & !mobile)
+			if (element.getGroupID() != null && !mobile)
 			{
 				String groupName = FormElementGroup.getName(element.getGroupID());
 				String groupLabel = groupName == null ? Messages.LabelAnonymous : groupName;
