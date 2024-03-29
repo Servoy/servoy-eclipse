@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Bundle;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -75,6 +76,8 @@ public class NodeFolderCreatorJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
+		IStatus jobStatus = Status.OK_STATUS;
+
 		boolean executeNpmInstall = false;
 		File fullyGenerated = new File(nodeFolder.getParent(), ".fullygenerated");
 		ConsoleFactory consoleTiNG = new ConsoleFactory();
@@ -117,7 +120,7 @@ public class NodeFolderCreatorJob extends Job
 				}
 				catch (IOException e)
 				{
-					e.printStackTrace();
+					ServoyLog.logError(e);
 				}
 			}
 			File projectsFolder = new File(nodeFolder, "projects");
@@ -206,7 +209,7 @@ public class NodeFolderCreatorJob extends Job
 				catch (IOException e)
 				{
 					writeConsole(console, "\r\n" + "Exception when creating node/ng folder and moving the package json files: " + e.getMessage() + "\r\n");
-					e.printStackTrace();
+					ServoyLog.logError(e);
 				}
 
 				writeConsole(console, "- the new sources were copied (" + Math.round((System.currentTimeMillis() - time) / 1000) + " s)");
@@ -217,21 +220,45 @@ public class NodeFolderCreatorJob extends Job
 		catch (RuntimeException e)
 		{
 			writeConsole(console, "\r\n" + "Exception when creating node/ng folder: " + e.getMessage() + "\r\n");
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 		finally
 		{
 			if (executeNpmInstall) try
 			{
 				// now do an npm install on the main, parent folder
-				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("uninstall", "@servoy/public")).runCommand(monitor);
-				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("install", "--legacy-peer-deps")).runCommand(monitor);
-				fullyGenerated.createNewFile();
+				RunNPMCommand npmUninstallPublicRunner = Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(),
+					Arrays.asList("uninstall", "@servoy/public"));
+				npmUninstallPublicRunner.runCommand(monitor);
+
+				if (npmUninstallPublicRunner.getExitCode() == 0)
+				{
+					RunNPMCommand npmInstallRunner = Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(),
+						Arrays.asList("install", "--legacy-peer-deps"));
+					npmInstallRunner.runCommand(monitor);
+					if (npmInstallRunner.getExitCode() == 0) fullyGenerated.createNewFile();
+					else
+					{
+						writeConsole(console,
+							"\r\n" + "Unexpected EXIT_CODE calling install on the parent root folder: " + npmInstallRunner.getExitCode() + "\r\n");
+						jobStatus = new Status(IStatus.WARNING, getClass(),
+							"Unexpected EXIT_CODE calling install on the parent root folder: " + npmInstallRunner.getExitCode());
+					}
+				}
+				else
+				{
+					writeConsole(console,
+						"\r\n" + "Unexpected EXIT_CODE calling uninstall on @servoy/public: " + npmUninstallPublicRunner.getExitCode() + "\r\n");
+					jobStatus = new Status(IStatus.WARNING, getClass(),
+						"Unexpected EXIT_CODE calling uninstall on @servoy/public: " + npmUninstallPublicRunner.getExitCode());
+				}
 			}
 			catch (IOException | InterruptedException e1)
 			{
 				writeConsole(console, "\r\n" + "Exception when calling install on the parent root folder: " + e1.getMessage() + "\r\n");
-				e1.printStackTrace();
+				jobStatus = new Status(IStatus.WARNING, getClass(),
+					"Exception when calling install on the parent root folder: " + e1.getMessage());
+				ServoyLog.logError(e1);
 			}
 
 			try
@@ -242,7 +269,7 @@ public class NodeFolderCreatorJob extends Job
 			{
 			}
 		}
-		return Status.OK_STATUS;
+		return jobStatus;
 	}
 
 	private void writeConsole(StringOutputStream console, String message)

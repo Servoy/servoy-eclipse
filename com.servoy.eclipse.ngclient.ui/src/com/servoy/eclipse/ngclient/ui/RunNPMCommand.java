@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -42,6 +43,9 @@ import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 public class RunNPMCommand extends WorkspaceJob
 {
 
+	/** this is the value returned by {@link #getExitCode()} in case the job was cancelled... */
+	public static final int EXIT_CODE_CANCELLED = -2;
+
 	private final File projectFolder;
 	private final List<String> commandArguments;
 	private final File nodePath;
@@ -52,6 +56,9 @@ public class RunNPMCommand extends WorkspaceJob
 	private Thread workerThread;
 	private boolean stillReadingOutput;
 	private static boolean ngBuildRunning;
+	private int exitCode = -1;
+
+	private final ReentrantLock processLock = new ReentrantLock();
 
 	public RunNPMCommand(String familyJob, File nodePath, File npmPath, File projectFolder, List<String> commands)
 	{
@@ -95,6 +102,7 @@ public class RunNPMCommand extends WorkspaceJob
 		if (monitor.isCanceled())
 		{
 			writeConsole(console, "Cancel was requested; skipping command\n'" + commandArgsToString(commandArguments) + "'\n");
+			exitCode = EXIT_CODE_CANCELLED;
 			return;
 		}
 
@@ -148,41 +156,59 @@ public class RunNPMCommand extends WorkspaceJob
 			writeConsole(console, "\n---- Running npm command:\n" + commandArgsToString(allCmdLineArgs));
 			writeConsole(console, "In dir: " + projectFolder);
 			builder.command(allCmdLineArgs);
-			process = builder.start();
-			cancelThread.start();
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream())))
+			BufferedReader br;
+			try
 			{
-				stillReadingOutput = true;
-				try
+				processLock.lock();
+				process = builder.start();
+				cancelThread.start();
+				br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			}
+			finally
+			{
+				processLock.unlock();
+			}
+			stillReadingOutput = true;
+			try
+			{
+				String str = null;
+				while ((str = br.readLine()) != null)
 				{
-					String str = null;
-					while ((str = br.readLine()) != null)
-					{
 //						str = str.replaceAll(".*?m", "");
 //						str = str.replaceAll("\b", "");
-						writeConsole(console, str.trim());
-						// The date, hash and time represents the last output line of the NG build process.
-						// The NG build is finished when this conditions is met.
-						if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
-						{
-							ngBuildRunning = false;
-						}
+					writeConsole(console, str.trim());
+					// The date, hash and time represents the last output line of the NG build process.
+					// The NG build is finished when this conditions is met.
+					if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
+					{
+						ngBuildRunning = false;
 					}
 				}
-				finally
-				{
-					stillReadingOutput = false;
-				}
+			}
+			finally
+			{
+				stillReadingOutput = false;
+				if (br != null) br.close();
 			}
 			try
 			{
-				if (process != null) process.waitFor(); // process can be set to null if canceling method was called meanwhile
+				processLock.lock();
+				if (process != null)
+				{
+					process.waitFor(); // process can be set to null if canceling method was called meanwhile
+					exitCode = process.exitValue();
+					if (exitCode != 0) writeConsole(console, "EXIT_CODE was NOT zero but: " + exitCode);
+				}
 				writeConsole(console,
 					"Finished running '" + commandArgsToString(commandArguments) + "' time: " + Math.round((System.currentTimeMillis() - time) / 1000) + "s\n");
 			}
 			catch (InterruptedException e)
 			{
-				if (monitor.isCanceled()) writeConsole(console, "Process interrupted!\n");
+				if (monitor.isCanceled())
+				{
+					exitCode = EXIT_CODE_CANCELLED;
+					writeConsole(console, "Process interrupted; operation was cancelled by the user!\n");
+				}
 				else throw e;
 			}
 		}
@@ -191,6 +217,14 @@ public class RunNPMCommand extends WorkspaceJob
 			cancelThreadDone[0] = true;
 			console.close();
 		}
+	}
+
+	/**
+	 * @return -1 if the command has not yet finished running; EXIT_CODE_CANCELLED if it was cancelled by the user; otherwise the EXIT_CODE of the command that has been run by this job.
+	 */
+	public int getExitCode()
+	{
+		return exitCode;
 	}
 
 	private void writeConsole(StringOutputStream console, String message)
@@ -210,37 +244,46 @@ public class RunNPMCommand extends WorkspaceJob
 	}
 
 	@Override
-	protected synchronized void canceling()
+	protected void canceling()
 	{
-		if (process != null)
+		processLock.lock();
+		try
 		{
-			StringOutputStream console = Activator.getInstance().getConsole().outputStream();
+			if (process != null)
+			{
+				StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 
-			writeConsole(console, "Cancel requested by user... Trying to stop process...");
+				writeConsole(console, "Cancel requested by user... Trying to stop process...");
 //			workerThread.interrupt(); // to get out of sync-reading console output in runCommands; actually don't know if that would work as the .read method of input stream only throws IOException; so I don't know if the actual native impl. of FileInputStream that is used here checks for thread interrupt status
-			process.destroy();
+				process.destroy();
+				exitCode = EXIT_CODE_CANCELLED;
 
-			try
-			{
-				int t = 10;
-				while (t-- > 0 && isActuallyRunningProcess())
+				try
 				{
-					if (t == 8) writeConsole(console, "Waiting 10 sec for NPM to stop...");
-					Thread.sleep(1000);
+					int t = 10;
+					while (t-- > 0 && isActuallyRunningProcess())
+					{
+						if (t == 8) writeConsole(console, "Waiting 10 sec for NPM to stop...");
+						Thread.sleep(1000);
+					}
 				}
-			}
-			catch (InterruptedException e)
-			{
-			}
+				catch (InterruptedException e)
+				{
+				}
 
-			if (isActuallyRunningProcess())
-			{
-				writeConsole(console, "NPM did not stop nicely in 10 seconds... Trying to stop it forcibly...");
-				process.destroyForcibly();
-			}
+				if (isActuallyRunningProcess())
+				{
+					writeConsole(console, "NPM did not stop nicely in 10 seconds... Trying to stop it forcibly...");
+					process.destroyForcibly();
+				}
 
-			process = null;
-			workerThread = null;
+				process = null;
+				workerThread = null;
+			}
+		}
+		finally
+		{
+			processLock.unlock();
 		}
 	}
 
@@ -248,9 +291,14 @@ public class RunNPMCommand extends WorkspaceJob
 	{
 		// somehow npm can make it so that process.isAlive() is false, process.exitValue() is 1 after a
 		// call to process.destroy(); but the inputStream of the process is still blocking and not closing for a few minutes...
-		synchronized (process)
+		processLock.lock();
+		try
 		{
 			return process.isAlive() || stillReadingOutput;
+		}
+		finally
+		{
+			processLock.unlock();
 		}
 	}
 

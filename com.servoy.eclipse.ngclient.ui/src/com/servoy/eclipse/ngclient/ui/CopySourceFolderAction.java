@@ -36,6 +36,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -45,6 +46,8 @@ import com.servoy.j2db.util.Debug;
 public class CopySourceFolderAction extends Action
 {
 	public static final String JOB_FAMILY = "Copy_Build_Sources";
+	public static int NORMAL_BUILD = 0;
+	public static int CLEAN_BUILD = 1;
 
 	public CopySourceFolderAction()
 	{
@@ -57,10 +60,15 @@ public class CopySourceFolderAction extends Action
 	{
 		if (super.isEnabled())
 		{
-			Job[] jobs = Job.getJobManager().find(JOB_FAMILY);
-			return jobs.length == 0;
+			return !isTitaniumNGBuildRunning();
 		}
 		return false;
+	}
+
+	public static boolean isTitaniumNGBuildRunning()
+	{
+		Job[] jobs = Job.getJobManager().find(JOB_FAMILY);
+		return jobs.length != 0;
 	}
 
 	@Override
@@ -85,8 +93,23 @@ public class CopySourceFolderAction extends Action
 
 		if (choice < 0 || choice == 2) return; // cancel
 
+		startTitaniumNGBuild(choice);
+	}
+
+	/**
+	 * @param choice can be {@link #NORMAL_BUILD} or {@link #CLEAN_BUILD}
+	 */
+	public static void startTitaniumNGBuild(final int typeOfBuild)
+	{
+		File solutionProjectFolder = Activator.getInstance().getSolutionProjectFolder();
+		if (solutionProjectFolder == null)
+		{
+			ServoyLog.logError("Cannot start a Titanium NG Build because the solution target folder is null.", null);
+			return;
+		}
+
 		Job deleteJob = null;
-		if (choice == 1)
+		if (typeOfBuild == CLEAN_BUILD)
 		{
 			deleteJob = new Job("delete .angular and packages cache")
 			{
@@ -170,16 +193,17 @@ public class CopySourceFolderAction extends Action
 			};
 		}
 		NodeFolderCreatorJob copySources = new NodeFolderCreatorJob(solutionProjectFolder, false, true);
+		copySources.setUser(true);
 		copySources.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override
 			public void done(IJobChangeEvent event)
 			{
-				if (choice == 1) WebPackagesListener.setIgnoreAndCheck(false, false);
-				WebPackagesListener.checkPackages(choice == 1);
+				if (typeOfBuild == CLEAN_BUILD) WebPackagesListener.setIgnoreAndCheck(false, false);
+				WebPackagesListener.checkPackages(typeOfBuild == CLEAN_BUILD);
 			}
 		});
-		if (choice == 1)
+		if (typeOfBuild == CLEAN_BUILD)
 		{
 			deleteJob.addJobChangeListener(new JobChangeAdapter()
 			{
