@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.file.DeletingPathVisitor;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -716,7 +715,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									// this is already the package (root of node modules, like rxjs)
 									try
 									{
-										Files.walkFileTree(file.toPath(), DeletingPathVisitor.withLongCounters());
+										Files.walkFileTree(file.toPath(), DeletePathVisitor.INSTANCE);
 									}
 									catch (IOException e)
 									{
@@ -733,7 +732,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										{
 											try
 											{
-												Files.walkFileTree(nested.toPath(), DeletingPathVisitor.withLongCounters());
+												Files.walkFileTree(nested.toPath(), DeletePathVisitor.INSTANCE);
 											}
 											catch (IOException e)
 											{
@@ -1009,7 +1008,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										{
 											try
 											{
-												Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+												Files.walkFileTree(packageFolder.toPath(), DeletePathVisitor.INSTANCE);
 											}
 											catch (IOException e)
 											{
@@ -1096,7 +1095,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							{
 								try
 								{
-									Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+									Files.walkFileTree(packageFolder.toPath(), DeletePathVisitor.INSTANCE);
 								}
 								catch (IOException e)
 								{
@@ -1132,7 +1131,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							{
 								try
 								{
-									Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+									Files.walkFileTree(packageFolder.toPath(), DeletePathVisitor.INSTANCE);
 								}
 								catch (IOException e)
 								{
@@ -1147,7 +1146,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							try
 							{
 								// this could happen if we deleted the war file but undeploy failed once
-								Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+								Files.walkFileTree(packageFolder.toPath(), DeletePathVisitor.INSTANCE);
 							}
 							catch (IOException io)
 							{

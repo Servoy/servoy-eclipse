@@ -19,11 +19,8 @@ package com.servoy.eclipse.ngclient.ui;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -106,35 +103,7 @@ public class CopySourceFolderAction extends Action
 						{
 							try
 							{
-								Files.walkFileTree(path, new SimpleFileVisitor<Path>()
-								{
-									@Override
-									public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
-									{
-										return FileVisitResult.CONTINUE;
-									}
-
-									@Override
-									public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-									{
-										Files.deleteIfExists(file);
-										return FileVisitResult.CONTINUE;
-									}
-
-									@Override
-									public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException
-									{
-										Files.deleteIfExists(file);
-										return FileVisitResult.CONTINUE;
-									}
-
-									@Override
-									public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
-									{
-										Files.deleteIfExists(dir);
-										return FileVisitResult.CONTINUE;
-									};
-								});
+								Files.walkFileTree(path, DeletePathVisitor.INSTANCE);
 								break;
 							}
 							catch (Exception e)

@@ -36,7 +36,6 @@ import java.util.Enumeration;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.file.DeletingPathVisitor;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -86,7 +85,7 @@ public class NodeFolderCreatorJob extends Job
 			{
 				try
 				{
-					Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletingPathVisitor.withLongCounters());
+					Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletePathVisitor.INSTANCE);
 				}
 				catch (IOException e)
 				{
@@ -156,7 +155,7 @@ public class NodeFolderCreatorJob extends Job
 				{
 					try
 					{
-						Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletingPathVisitor.withLongCounters());
+						Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletePathVisitor.INSTANCE);
 					}
 					catch (IOException e)
 					{
@@ -170,7 +169,7 @@ public class NodeFolderCreatorJob extends Job
 					// delete only the source dirs, so we start clean
 					try
 					{
-						if (srcFolder.exists()) Files.walkFileTree(srcFolder.toPath(), DeletingPathVisitor.withLongCounters());
+						if (srcFolder.exists()) Files.walkFileTree(srcFolder.toPath(), DeletePathVisitor.INSTANCE);
 					}
 					catch (IOException e)
 					{
@@ -178,7 +177,7 @@ public class NodeFolderCreatorJob extends Job
 					}
 					try
 					{
-						if (projectsFolder.exists()) Files.walkFileTree(projectsFolder.toPath(), DeletingPathVisitor.withLongCounters());
+						if (projectsFolder.exists()) Files.walkFileTree(projectsFolder.toPath(), DeletePathVisitor.INSTANCE);
 					}
 					catch (IOException e)
 					{
@@ -394,7 +393,7 @@ public class NodeFolderCreatorJob extends Job
 										{
 											if (filename.toFile().exists())
 											{
-												Files.walkFileTree(target.toPath(), DeletingPathVisitor.withLongCounters());
+												Files.walkFileTree(target.toPath(), DeletePathVisitor.INSTANCE);
 											}
 										}
 										catch (IOException e)

@@ -32,7 +32,6 @@ import java.nio.file.WatchService;
 import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.file.DeletingPathVisitor;
 
 import com.servoy.j2db.util.Debug;
 
@@ -92,7 +91,7 @@ public class DirectorySync
 							{
 								if (filename.toFile().exists())
 								{
-									Files.walkFileTree(target.toPath(), DeletingPathVisitor.withLongCounters());
+									Files.walkFileTree(target.toPath(), DeletePathVisitor.INSTANCE);
 								}
 							}
 							catch (IOException e)
