@@ -37,7 +37,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.util.Debug;
 
 /**
  * @author jcompagner
@@ -170,7 +169,8 @@ public class CopySourceFolderAction extends Action
 					}
 					catch (IOException e)
 					{
-						Debug.error(e);
+						writeErrorToConsoleAndLog(console, e,
+							"Error deleting the main target folder " + Activator.getInstance().getMainTargetFolder().toPath() + ": ");
 					}
 					finally
 					{
@@ -220,4 +220,17 @@ public class CopySourceFolderAction extends Action
 			copySources.schedule();
 		}
 	}
+
+	private static void writeErrorToConsoleAndLog(StringOutputStream console, Exception e, String s)
+	{
+		Activator.getInstance().getLog().error(s, e);
+		try
+		{
+			console.write("\r\n" + s + e.getMessage() + "\r\n");
+		}
+		catch (IOException e2)
+		{
+		}
+	}
+
 }

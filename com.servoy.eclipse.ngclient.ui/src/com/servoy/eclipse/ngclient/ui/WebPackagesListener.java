@@ -85,10 +85,8 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.SerialRule;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
@@ -297,10 +295,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						writeConsole(console,
-							"\r\n" + "Exception while checking what packages should be installed: " + e.getMessage() + "\r\n");
+						writeErrorToConsoleAndLog(console, e, "Exception while checking what packages should be installed: ");
 						// TODO should we return a WARNING status here as we do for other failures?
-						ServoyLog.logError(e);
 					}
 				}
 
@@ -370,10 +366,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e)
 				{
-					writeConsole(console,
-						"\r\n" + "Exception while generating allservices.service.ts: " + e.getMessage() + "\r\n");
+					writeErrorToConsoleAndLog(console, e, "Exception while generating allservices.service.ts: ");
 					// TODO should we return a WARNING status here as we do for other failures?
-					ServoyLog.logError(e);
 				}
 
 				for (WebObjectSpecification spec : WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications())
@@ -456,10 +450,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e1)
 				{
-					writeConsole(console,
-						"\r\n" + "Exception while adjusting component templates: " + e1.getMessage() + "\r\n");
+					writeErrorToConsoleAndLog(console, e1, "Exception while adjusting component templates: ");
 					// TODO should we return a WARNING status here as we do for other failures?
-					ServoyLog.logError(e1);
 				}
 
 				try
@@ -501,10 +493,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e1)
 				{
-					writeConsole(console,
-						"\r\n" + "Exception while generating allcomponents.module.ts: " + e1.getMessage() + "\r\n");
+					writeErrorToConsoleAndLog(console, e1, "Exception while generating allcomponents.module.ts: ");
 					// TODO should we return a WARNING status here as we do for other failures?
-					ServoyLog.logError(e1);
 				}
 
 				try
@@ -562,10 +552,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e)
 				{
-					writeConsole(console,
-						"\r\n" + "Exception while adjusting angular.json styles: " + e.getMessage() + "\r\n");
+					writeErrorToConsoleAndLog(console, e, "Exception while adjusting angular.json styles: ");
 					// TODO should we return a WARNING status here as we do for other failures?
-					ServoyLog.logError(e);
 				}
 				try
 				{
@@ -597,10 +585,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 									catch (JSONException ex)
 									{
-										writeConsole(console,
-											"\r\n" + "Can't add asset object to angular.json: " + asset + "\r\nbecause: " + ex.getMessage() + "\r\n");
+										writeErrorToConsoleAndLog(console, ex, "Can't add asset object to angular.json: " + asset + ": ");
 										// TODO should we return a WARNING status here as we do for other failures?
-										ServoyLog.logError("Can't add asset object to angular.json: " + asset, ex);
 									}
 								}
 								else
@@ -619,10 +605,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e)
 				{
-					writeConsole(console,
-						"\r\n" + "Exception while checking assets: " + e.getMessage() + "\r\n");
+					writeErrorToConsoleAndLog(console, e, "Exception while checking assets: ");
 					// TODO should we return a WARNING status here as we do for other failures?
-					ServoyLog.logError(e);
 				}
 				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get())
 				{
@@ -663,9 +647,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 						catch (Exception e)
 						{
-							writeConsole(console,
-								"\r\n" + "Exception while running 'npm run build_lib_debug_nowatch': " + e.getMessage() + "\r\n");
-							ServoyLog.logError(e);
+							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm run build_lib_debug_nowatch': ");
 							return new Status(IStatus.WARNING, getClass(), "npm run build_lib_debug_nowatch failed: " + e.getMessage());
 						}
 					}
@@ -692,9 +674,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (Exception e)
 					{
-						writeConsole(console,
-							"\r\n" + "Exception while running 'npm install many, packages, that, we, need': " + e.getMessage() + "\r\n");
-						ServoyLog.logError(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while running 'npm install many, packages, that, we, need': ");
 						return new Status(IStatus.WARNING, getClass(), "npm install many, packages, that, we, need failed: " + e.getMessage());
 					}
 					if (cleanInstall.get())
@@ -713,9 +693,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 						catch (Exception e)
 						{
-							writeConsole(console,
-								"\r\n" + "Exception while running 'npm ci': " + e.getMessage() + "\r\n");
-							ServoyLog.logError(e);
+							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm ci': ");
 							return new Status(IStatus.WARNING, getClass(), "npm ci failed: " + e.getMessage());
 						}
 					}
@@ -734,9 +712,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 						catch (Exception e)
 						{
-							writeConsole(console,
-								"\r\n" + "Exception while running 'npm update': " + e.getMessage() + "\r\n");
-							ServoyLog.logError(e);
+							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm update': ");
 							return new Status(IStatus.WARNING, getClass(), "npm update failed: " + e.getMessage());
 						}
 					}
@@ -753,9 +729,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (Exception e)
 					{
-						writeConsole(console,
-							"\r\n" + "Exception while running 'npm dedup': " + e.getMessage() + "\r\n");
-						ServoyLog.logError(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while running 'npm dedup': ");
 						return new Status(IStatus.WARNING, getClass(), "npm dedup failed: " + e.getMessage());
 					}
 					long dedupTime = System.currentTimeMillis();
@@ -789,7 +763,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 									catch (IOException e)
 									{
-										Debug.error(e);
+										writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
 									}
 								}
 								else
@@ -806,9 +780,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 											}
 											catch (IOException e)
 											{
-												Debug.error(e);
+												writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
 											}
-
 										}
 									});
 								}
@@ -843,9 +816,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 						catch (Exception e)
 						{
-							writeConsole(console,
-								"\r\n" + "Exception while running 'npm run " + whatToRun + "': " + e.getMessage() + "\r\n");
-							ServoyLog.logError(e);
+							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm run " + whatToRun + "': ");
 							return new Status(IStatus.WARNING, getClass(), "npm run " + whatToRun + " failed: " + e.getMessage());
 						}
 					}
@@ -959,6 +930,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 		}
 
+		private void writeErrorToConsoleAndLog(StringOutputStream console, Exception e, String s)
+		{
+			Activator.getInstance().getLog().error(s, e);
+			writeConsole(console, "\r\n" + s + e.getMessage() + "\r\n");
+		}
+
 		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, StringOutputStream console)
 		{
 			String packageVersion = packageReader.getVersion();
@@ -992,10 +969,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 						catch (Exception e)
 						{
-							writeConsole(console,
-								"\r\n" + "Exception while checking package '" + packageName + "': " + e.getMessage() + "\r\n");
+							writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
 							// TODO should we return a WARNING status here for the whole job as we do for other failures?
-							ServoyLog.logError(e);
 						}
 					}
 					else return null;
@@ -1094,7 +1069,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 											}
 											catch (IOException e)
 											{
-												Debug.error(e);
+												writeErrorToConsoleAndLog(console, e,
+													"Exception while deleting package folder " + packageFolder + " for replacement: ");
 											}
 										}
 
@@ -1150,19 +1126,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 							catch (IOException e)
 							{
-								writeConsole(console,
-									"\r\n" + "Exception while checking package '" + packageName + "': " + e.getMessage() + "\r\n");
+								writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
 								// TODO should we return a WARNING status here for the whole job as we do for other failures?
-								ServoyLog.logError(e);
 							}
 						}
 					}
 					catch (URISyntaxException e)
 					{
-						writeConsole(console,
-							"\r\n" + "Exception while checking package '" + packageName + "': " + e.getMessage() + "\r\n");
+						writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
 						// TODO should we return a WARNING status here for the whole job as we do for other failures?
-						ServoyLog.logError(e);
 					}
 				}
 				else if (packageReader instanceof ZipPackageReader)
@@ -1187,7 +1159,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								}
 								catch (IOException e)
 								{
-									Debug.error(e);
+									writeErrorToConsoleAndLog(console, e,
+										"Exception while deleting package folder (of zip) " + packageFolder + " for replacement: ");
 								}
 							}
 
@@ -1206,10 +1179,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						writeConsole(console,
-							"\r\n" + "Exception while checking package '" + packageName + "': " + e.getMessage() + "\r\n");
+						writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
 						// TODO should we return a WARNING status here for the whole job as we do for other failures?
-						ServoyLog.logError(e);
 					}
 
 					boolean exists = packageFolder.exists();
@@ -1226,7 +1197,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								}
 								catch (IOException e)
 								{
-									Debug.error(e);
+									writeErrorToConsoleAndLog(console, e,
+										"Exception while deleting package folder (zip - timestamp): " + packageFolder + " for replacement: ");
 								}
 
 								exists = false;
@@ -1241,7 +1213,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 							catch (IOException io)
 							{
-								Debug.error(io);
+								writeErrorToConsoleAndLog(console, io,
+									"Exception while deleting package folder (zip - timestamp - attempt2): " + packageFolder +
+										" for replacement: ");
 							}
 							exists = false;
 						}
@@ -1269,10 +1243,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						writeConsole(console,
-							"\r\n" + "Exception while checking package '" + packageName + "': " + e.getMessage() + "\r\n");
+						writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
 						// TODO should we return a WARNING status here for the whole job as we do for other failures?
-						ServoyLog.logError(e);
 					}
 				}
 
