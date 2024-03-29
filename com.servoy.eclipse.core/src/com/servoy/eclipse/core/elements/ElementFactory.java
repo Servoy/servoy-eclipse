@@ -305,16 +305,6 @@ public class ElementFactory
 		{
 			CSSPosition cssPosition = ((BaseComponent)copy).getCssPosition();
 
-			int left = CSSPositionUtils.getPixelsValue(cssPosition.left);
-			if (left >= 0)
-			{
-				cssPosition.left = String.valueOf(x);
-			}
-			int top = CSSPositionUtils.getPixelsValue(cssPosition.top);
-			if (top >= 0)
-			{
-				cssPosition.top = String.valueOf(y);
-			}
 			((BaseComponent)copy).setCssPosition(cssPosition);
 		}
 		else if (copy instanceof ISupportBounds)

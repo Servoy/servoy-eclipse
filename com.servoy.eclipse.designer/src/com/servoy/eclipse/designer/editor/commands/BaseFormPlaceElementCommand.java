@@ -347,16 +347,6 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				{
 					CSSPosition cssPosition = ((BaseComponent)element).getCssPosition();
 
-					int left = CSSPositionUtils.getPixelsValue(cssPosition.left);
-					if (left >= 0)
-					{
-						cssPosition.left = String.valueOf(location.x + entry.getValue().x - minx);
-					}
-					int top = CSSPositionUtils.getPixelsValue(cssPosition.top);
-					if (top >= 0)
-					{
-						cssPosition.top = String.valueOf(location.y + entry.getValue().y - miny);
-					}
 					((BaseComponent)element).setCssPosition(cssPosition);
 				}
 				else
