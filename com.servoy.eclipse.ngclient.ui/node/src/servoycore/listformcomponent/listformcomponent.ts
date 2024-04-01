@@ -400,7 +400,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     ngAfterViewInit() {
         this.calculateCells();
         if (this.useScrolling) {
-            this.agGrid.api.setServerSideDatasource(new AGGridDatasource(this));
+            this.agGrid.api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
         }
     }
 
