@@ -66,7 +66,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
-import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ITable;
@@ -91,12 +90,15 @@ import com.servoy.j2db.util.UUID;
  */
 public class ServoySearchDialog extends FilteredItemsSelectionDialog
 {
+	private boolean contentLoaded = false;
+
 	/**
 	 * @author jcompagner
 	 */
 	private final class ServoyItemsFilter extends ItemsFilter
 	{
 		boolean showTables = showTablesAction.isChecked();
+		boolean showTableColumns = showTableColumnsAction.isChecked();
 		boolean showCalculations = showCalculationsAction.isChecked();
 		boolean showElements = showElementsAction.isChecked();
 		boolean showForms = showFormsAction.isChecked();
@@ -120,6 +122,10 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				if (item instanceof Table)
 				{
 					b = showTables;
+				}
+				else if (item instanceof Column)
+				{
+					b = showTableColumns;
 				}
 				else if (item instanceof ScriptCalculation)
 				{
@@ -190,6 +196,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				ServoyItemsFilter siFilter = (ServoyItemsFilter)filter;
 				return siFilter.showCalculations == showCalculations && siFilter.showElements == showElements && siFilter.showForms == showForms &&
 					siFilter.showMethods == showMethods && siFilter.showRelations == showRelations && siFilter.showTables == showTables &&
+					siFilter.showTableColumns == showTableColumns &&
 					siFilter.showValuelists == showValuelists && siFilter.showVariables == showVariables && siFilter.showMedia == showMedia &&
 					siFilter.showScopes == showScopes;
 
@@ -291,6 +298,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 			showMethodsAction.setChecked(!showMethodsAction.isChecked());
 			showVariablesAction.setChecked(!showVariablesAction.isChecked());
 			showTablesAction.setChecked(!showTablesAction.isChecked());
+			showTableColumnsAction.setChecked(!showTableColumnsAction.isChecked());
 			showCalculationsAction.setChecked(!showCalculationsAction.isChecked());
 			showElementsAction.setChecked(!showElementsAction.isChecked());
 			showRelationsAction.setChecked(!showRelationsAction.isChecked());
@@ -316,13 +324,15 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		public void run()
 		{
 			boolean checked = !showFormsAction.isChecked() || !showMethodsAction.isChecked() || !showVariablesAction.isChecked() ||
-				!showTablesAction.isChecked() || !showCalculationsAction.isChecked() || !showElementsAction.isChecked() || !showRelationsAction.isChecked() ||
+				!showTableColumnsAction.isChecked() || !showTablesAction.isChecked() || !showCalculationsAction.isChecked() ||
+				!showElementsAction.isChecked() || !showRelationsAction.isChecked() ||
 				!showValuelistsAction.isChecked() || !showMediaAction.isChecked() || !showScopesAction.isChecked();
 
 			showFormsAction.setChecked(checked);
 			showMethodsAction.setChecked(checked);
 			showVariablesAction.setChecked(checked);
 			showTablesAction.setChecked(checked);
+			showTableColumnsAction.setChecked(checked);
 			showCalculationsAction.setChecked(checked);
 			showElementsAction.setChecked(checked);
 			showRelationsAction.setChecked(checked);
@@ -340,6 +350,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	private static final String SHOW_METHODS = "ShowMethods";
 	private static final String SHOW_VARIABLES = "ShowVariables";
 	private static final String SHOW_TABLES = "ShowTables";
+	private static final String SHOW_TABLE_COLUMNS = "ShowTableColumns";
 	private static final String SHOW_CALCULATIONS = "ShowCalculations";
 	private static final String SHOW_ELEMENTS = "ShowElements";
 	private static final String SHOW_RELATIONS = "ShowRelations";
@@ -351,6 +362,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	private final ShowAction showMethodsAction;
 	private final ShowAction showVariablesAction;
 	private final ShowAction showTablesAction;
+	private final ShowAction showTableColumnsAction;
 	private final ShowAction showCalculationsAction;
 	private final ShowAction showElementsAction;
 	private final ShowAction showRelationsAction;
@@ -379,6 +391,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		showMethodsAction = new ShowAction("Show Methods");
 		showVariablesAction = new ShowAction("Show Variables");
 		showTablesAction = new ShowAction("Show Tables");
+		showTableColumnsAction = new ShowAction("Show Table Columns");
 		showCalculationsAction = new ShowAction("Show Calculations");
 		showElementsAction = new ShowAction("Show Elements");
 		showRelationsAction = new ShowAction("Show Relations");
@@ -413,7 +426,16 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 							{
 								if (server != null && server.getTableType(snt[1]) != ITable.UNKNOWN) // server.getTable() Initializes table (fetches columns)
 								{
-									return new Table(dataSource);
+									String name = memento.getString("columnname");
+									if (name != null)
+									{
+										return new Column(dataSource, name);
+
+									}
+									else
+									{
+										return new Table(dataSource);
+									}
 								}
 							}
 							catch (RepositoryException e)
@@ -468,6 +490,12 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				{
 					Table table = (Table)item;
 					memento.putString("datasource", table.getDataSource());
+				}
+				else if (item instanceof Column)
+				{
+					Column column = (Column)item;
+					memento.putString("datasource", column.getDataSource());
+					memento.putString("columnname", column.getColumnName());
 				}
 				else if (item instanceof Scope)
 				{
@@ -527,6 +555,10 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				{
 					image = "portal.png";
 				}
+				else if (element instanceof Column)
+				{
+					image = "column.png";
+				}
 				else if (element instanceof Scope)
 				{
 					image = "scopes.png";
@@ -578,6 +610,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	protected void fillViewMenu(IMenuManager menuManager)
 	{
 		menuManager.add(showTablesAction);
+		menuManager.add(showTableColumnsAction);
 		menuManager.add(showFormsAction);
 		menuManager.add(showMethodsAction);
 		menuManager.add(showVariablesAction);
@@ -602,6 +635,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		settings.put(SHOW_METHODS, !showMethodsAction.isChecked());
 		settings.put(SHOW_VARIABLES, !showVariablesAction.isChecked());
 		settings.put(SHOW_TABLES, !showTablesAction.isChecked());
+		settings.put(SHOW_TABLE_COLUMNS, !showTableColumnsAction.isChecked());
 		settings.put(SHOW_CALCULATIONS, !showCalculationsAction.isChecked());
 		settings.put(SHOW_ELEMENTS, !showElementsAction.isChecked());
 		settings.put(SHOW_RELATIONS, !showRelationsAction.isChecked());
@@ -621,6 +655,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		showMethodsAction.setChecked(!settings.getBoolean(SHOW_METHODS));
 		showVariablesAction.setChecked(!settings.getBoolean(SHOW_VARIABLES));
 		showTablesAction.setChecked(!settings.getBoolean(SHOW_TABLES));
+		showTableColumnsAction.setChecked(!settings.getBoolean(SHOW_TABLE_COLUMNS));
 		showCalculationsAction.setChecked(!settings.getBoolean(SHOW_CALCULATIONS));
 		showElementsAction.setChecked(!settings.getBoolean(SHOW_ELEMENTS));
 		showRelationsAction.setChecked(!settings.getBoolean(SHOW_RELATIONS));
@@ -710,6 +745,15 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		return new ServoyItemsFilter();
 	}
 
+	@Override
+	public void scheduleRefresh()
+	{
+		if (contentLoaded)
+		{
+			super.scheduleRefresh();
+		}
+	}
+
 	/**
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#fillContentProvider(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.AbstractContentProvider,
 	 *      org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter, org.eclipse.core.runtime.IProgressMonitor)
@@ -717,6 +761,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	@Override
 	protected void fillContentProvider(AbstractContentProvider contentProvider, ItemsFilter itemsFilter, IProgressMonitor progressMonitor) throws CoreException
 	{
+		progressMonitor.subTask("Loading Servoy content...");
 		FlattenedSolution flattenedSolution = servoyModel.getFlattenedSolution();
 
 		//add persists and elements
@@ -760,11 +805,15 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		{
 			try
 			{
-				List<String> tableNames = ((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName)).getTableAndViewNames(true,
-					true);
+				IServer server = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
+				List<String> tableNames = server.getTableAndViewNames(true);
 				for (String tableName : tableNames)
 				{
 					contentProvider.add(new Table(DataSourceUtils.createDBTableDataSource(serverName, tableName)), itemsFilter);
+					ITable table = server.getTable(tableName);
+					table.getColumns().forEach(
+						column -> contentProvider.add(new Column(DataSourceUtils.createDBTableDataSource(serverName, tableName), column.getName()),
+							itemsFilter));
 				}
 			}
 			catch (Exception e)
@@ -784,6 +833,8 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 					for (String tableName : tables)
 					{
 						contentProvider.add(new Table(DataSourceUtils.createInmemDataSource(tableName)), itemsFilter);
+						servoyProject.getMemServer().getTable(tableName).getColumns().forEach(
+							column -> contentProvider.add(new Column(DataSourceUtils.createInmemDataSource(tableName), column.getName()), itemsFilter));
 					}
 				}
 				tables = servoyProject.getViewFoundsetsServer().getTableNames(false);
@@ -792,6 +843,8 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 					for (String tableName : tables)
 					{
 						contentProvider.add(new Table(DataSourceUtils.createViewDataSource(tableName)), itemsFilter);
+						servoyProject.getViewFoundsetsServer().getTable(tableName).getColumns()
+							.forEach(column -> contentProvider.add(new Column(DataSourceUtils.createViewDataSource(tableName), column.getName()), itemsFilter));
 					}
 				}
 			}
@@ -807,6 +860,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		{
 			contentProvider.add(new Scope(scope.getLeft(), scope.getRight().getName()), itemsFilter);
 		}
+		contentLoaded = true;
 	}
 
 	/**
@@ -851,6 +905,41 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	protected IStatus validateItem(Object item)
 	{
 		return Status.OK_STATUS;
+	}
+
+	public static class Column implements ISupportName
+	{
+		private final String dataSource;
+		private final String columnName;
+		private final String name;
+
+		public Column(String dataSource, String columnName)
+		{
+			this.dataSource = dataSource;
+			this.columnName = columnName;
+			this.name = columnName + " - " + dataSource;
+		}
+
+		/**
+		 * @see com.servoy.j2db.persistence.ISupportName#getName()
+		 */
+		public String getName()
+		{
+			return name;
+		}
+
+		public String getColumnName()
+		{
+			return columnName;
+		}
+
+		/**
+		 * @return
+		 */
+		public String getDataSource()
+		{
+			return dataSource;
+		}
 	}
 
 	public static class Table implements ISupportName
