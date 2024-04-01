@@ -35,34 +35,45 @@ export class ServoyFormPopupComponent {
         }
         let popupLeft: number;
         let popupTop: number;
-        if (this.popup.component || (this.popup.x && this.popup.y)) {
-            const element = this.doc.getElementById(this.popup.component);
-            let compWidth = 0;
-            let compHeight = 0;
+        let rect: DOMRect;
+        let compWidth = 0;
+        let compHeight = 0;
+        
+        if (this.popup.component) {
+			const element = this.doc.getElementById(this.popup.component);
             if (element) {
-                const rect = element.getBoundingClientRect();
-                popupLeft = rect.left;
-                popupTop = rect.top + rect.height;
+                rect = element.getBoundingClientRect();
                 compWidth = rect.width;
-                compHeight = rect.height;
-            } else {
-                popupLeft = this.popup.x;
-                popupTop = this.popup.y;
+				compHeight = rect.height;
             }
-
-            if ((popupLeft + popupwidth > this.doc.defaultView.innerWidth) && (popupLeft - popupwidth + compWidth > 0)) {
+		}
+        
+        if (this.popup.x !== null) {
+			 popupLeft = this.popup.x;
+		} else if (rect) {
+			popupLeft = rect.left;
+		} else {
+			popupLeft = this.doc.defaultView.innerWidth / 2 - popupwidth / 2;
+		}
+		if (this.popup.x !== null || this.popup.component) {
+			if ((popupLeft + popupwidth > this.doc.defaultView.innerWidth) && (popupLeft - popupwidth + compWidth > 0)) {
                 popupLeft = popupLeft - popupwidth + compWidth;
             }
-
-            if ((popupTop + popupheight > this.doc.defaultView.innerHeight) && (popupTop - popupheight + compHeight > 0)) {
+		}
+		
+		if (this.popup.y !== null) {
+			 popupTop = this.popup.y;
+		} else if (rect) {
+			popupTop = rect.top;
+		} else {
+			popupTop = this.doc.defaultView.innerHeight / 2 - popupheight / 2;
+		}		
+		if (this.popup.y !== null || this.popup.component) {
+			if ((popupTop + popupheight > this.doc.defaultView.innerHeight) && (popupTop - popupheight + compHeight > 0)) {
                 popupTop = popupTop - popupheight + compHeight;
             }
-
-        } else if (!this.popup.component) {
-            // calculate the real center
-            popupLeft = this.doc.defaultView.innerWidth / 2 - popupwidth / 2;
-            popupTop = this.doc.defaultView.innerHeight / 2 - popupheight / 2;
-        }
+		}
+		
         this._width = popupwidth;
         this._height = popupheight;
         this._left = popupLeft;
