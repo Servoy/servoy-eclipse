@@ -16,10 +16,6 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -50,13 +46,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.dataprocessing.IDataSet;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IFormElement;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -357,18 +348,7 @@ public class VisualFormEditorSecurityPage extends Composite
 
 	private void setElements()
 	{
-		List<IPersist> formElements = new ArrayList<IPersist>();
-		Form flatForm = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm());
-		List<IFormElement> elements = flatForm.getFlattenedObjects(NameComparator.INSTANCE);
-		for (IFormElement elem : elements)
-		{
-			if (elem.getName() != null && elem.getName().length() != 0)
-			{
-				formElements.add(elem);
-			}
-		}
-		formElements.add(0, editor.getForm());
-		elementsViewer.setInput(formElements);
+		elementsViewer.setInput(model.getFormElements());
 	}
 
 	public void saveSecurityElements()
@@ -378,16 +358,7 @@ public class VisualFormEditorSecurityPage extends Composite
 
 	private void toggleValues(int mask)
 	{
-		Iterator< ? extends IPersist> it = editor.getForm().isResponsiveLayout() ? editor.getForm().getFlattenedObjects(NameComparator.INSTANCE).iterator()
-			: ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getAllObjects();
-		while (it.hasNext())
-		{
-			IPersist elem = it.next();
-			if (elem instanceof IFormElement && ((IFormElement)elem).getName() != null && ((IFormElement)elem).getName().length() != 0)
-			{
-				model.setRight(!model.hasRight(elem, mask), elem, mask);
-			}
-		}
+		model.getFormElements().forEach(elem -> model.setRight(!model.hasRight(elem, mask), elem, mask));
 	}
 
 }

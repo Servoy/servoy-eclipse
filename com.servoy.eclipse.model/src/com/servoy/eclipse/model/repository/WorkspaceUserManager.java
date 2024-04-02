@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,10 +51,13 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -61,6 +65,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.BufferedDataSet;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -72,6 +77,9 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.GroupSecurityInfo;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -1223,24 +1231,25 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				}
 				for (SecurityInfo element : groupPermissions)
 				{
-					if (isElementChildOfForm(element.element_uid, form))
+					// too early to check for formcomponent components, just load everything for now
+//					if (isElementChildOfForm(element.element_uid, form))
+//					{
+					boolean replaced = setSecurityInfo(formInfoForGroup, element.element_uid, element.access);
+					if (replaced)
 					{
-						boolean replaced = setSecurityInfo(formInfoForGroup, element.element_uid, element.access);
-						if (replaced)
-						{
-							// this cannot happen with current structure of JSON file and the in-mem structures that are read (having more entries with same key in a JSON obj)
-							throw new SecurityReadException(SecurityReadException.DUPLICATE_ELEMENT_PERMISSION,
-								"Element with UUID " + element.element_uid + " on form " + form.getName() +
-									" is mentioned multiple times within the same group " + groupName + "; it can only have 1 access mask specified...",
-								new String[] { element.element_uid, groupName });
-						}
+						// this cannot happen with current structure of JSON file and the in-mem structures that are read (having more entries with same key in a JSON obj)
+						throw new SecurityReadException(SecurityReadException.DUPLICATE_ELEMENT_PERMISSION,
+							"Element with UUID " + element.element_uid + " on form " + form.getName() +
+								" is mentioned multiple times within the same group " + groupName + "; it can only have 1 access mask specified...",
+							new String[] { element.element_uid, groupName });
 					}
-					else
-					{
-						throw new SecurityReadException(SecurityReadException.MISSING_ELEMENT,
-							"Element with UUID " + element.element_uid + " on form " + form.getName() + " does not exist, but has an access mask specified...",
-							element.element_uid);
-					}
+//					}
+//					else
+//					{
+//						throw new SecurityReadException(SecurityReadException.MISSING_ELEMENT,
+//							"Element with UUID " + element.element_uid + " on form " + form.getName() + " does not exist, but has an access mask specified...",
+//							element.element_uid);
+//					}
 				}
 			}
 			else
@@ -1260,6 +1269,31 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				if (elementUUID.equals(o.getUUID().toString()))
 				{
 					return Boolean.TRUE;
+				}
+				if (o instanceof IFormElement)
+				{
+					FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((IFormElement)o, ModelUtils.getEditingFlattenedSolution(form),
+						null, true);
+					WebObjectSpecification spec = formComponentEl.getWebComponentSpec();
+					if (spec != null)
+					{
+						Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+						if (properties.size() > 0)
+						{
+							for (PropertyDescription pd : properties)
+							{
+								Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+								Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, ModelUtils.getEditingFlattenedSolution(form));
+								if (frm != null)
+								{
+									if (isElementChildOfForm(elementUUID, frm))
+									{
+										return Boolean.TRUE;
+									}
+								}
+							}
+						}
+					}
 				}
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}

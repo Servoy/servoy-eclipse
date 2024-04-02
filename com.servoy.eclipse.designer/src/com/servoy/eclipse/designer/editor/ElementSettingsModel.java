@@ -17,11 +17,16 @@
 package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebObjectSpecification;
+
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -31,6 +36,9 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.SecurityInfo;
 import com.servoy.j2db.util.UUID;
@@ -75,8 +83,7 @@ public class ElementSettingsModel
 		}
 		else
 		{
-			Form parent = (Form)element.getAncestor(IRepository.FORMS);
-			List<SecurityInfo> infos = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(currentGroup, parent);
+			List<SecurityInfo> infos = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(currentGroup, form);
 			if (infos != null)
 			{
 				for (SecurityInfo info : infos)
@@ -125,17 +132,8 @@ public class ElementSettingsModel
 	{
 		try
 		{
-			ArrayList<IPersist> formElements = new ArrayList<IPersist>();
-			List<IFormElement> elements = form.getFlattenedObjects(NameComparator.INSTANCE);
-			for (IFormElement elem : elements)
-			{
-				if (elem.getName() != null && elem.getName().length() != 0)
-				{
-					formElements.add(elem);
-				}
-			}
+			List<IPersist> formElements = getFormElements();
 			String solutionName = form.getSolution().getName();
-			formElements.add(0, form);
 			for (String group : securityInfo.keySet())
 			{
 				Map<UUID, Integer> currentGroupSecurityInfo = securityInfo.get(group);
@@ -143,7 +141,7 @@ public class ElementSettingsModel
 				{
 					for (UUID uuid : currentGroupSecurityInfo.keySet())
 					{
-						if (elementIsInList(formElements, uuid))
+						if (formElements.stream().anyMatch(formElement -> formElement.getUUID().equals(uuid)))
 						{
 							ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().setFormSecurityAccess(
 								ApplicationServerRegistry.get().getClientId(), group, currentGroupSecurityInfo.get(uuid), uuid, solutionName);
@@ -160,13 +158,45 @@ public class ElementSettingsModel
 		}
 	}
 
-	private boolean elementIsInList(ArrayList<IPersist> formElements, UUID uuid)
+	public List<IPersist> getFormElements()
 	{
-		for (IPersist formElement : formElements)
+		ArrayList<IPersist> formElements = new ArrayList<IPersist>();
+		List<IFormElement> elements = form.getFlattenedObjects(NameComparator.INSTANCE);
+		for (IFormElement elem : elements)
 		{
-			if (formElement.getUUID().equals(uuid)) return true;
+			if (elem.getName() != null && elem.getName().length() != 0)
+			{
+				formElements.add(elem);
+				FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement(elem, ModelUtils.getEditingFlattenedSolution(form),
+					null, true);
+				WebObjectSpecification spec = formComponentEl.getWebComponentSpec();
+				if (spec != null)
+				{
+					Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+					if (properties.size() > 0)
+					{
+						for (PropertyDescription pd : properties)
+						{
+							Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+							Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, ModelUtils.getEditingFlattenedSolution(form));
+							if (frm != null)
+							{
+								List<IFormElement> formComponentElements = frm.getFlattenedObjects(NameComparator.INSTANCE);
+								for (IFormElement formCompElement : formComponentElements)
+								{
+									if (formCompElement.getName() != null && formCompElement.getName().length() != 0)
+									{
+										formElements.add(formCompElement);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
-		return false;
+		formElements.add(0, form);
+		return formElements;
 	}
 
 	public Form getForm()
