@@ -66,6 +66,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                 if (element) {
                     if (element.parentElement.closest('.svy-responsivecontainer')) return;
                     const elementRect = element.getBoundingClientRect();
+                    let wrapperRect: DOMRect = null;
                     let image: string;
                     if (!this.urlParser.isCSSPositionFormLayout()) {
                         const selectionAnchor = parseInt(element.getAttribute('svy-anchors'));
@@ -99,6 +100,9 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                     }
                     else {
                         const wrapper: HTMLDivElement = element.closest('.svy-wrapper');
+                        if (element.classList.contains('svy-formcomponent')) {
+							wrapperRect = wrapper.getBoundingClientRect();
+						}
                         if (wrapper.style.top) {
                             if (wrapper.style.left) {
                                 if (wrapper.style.bottom) {
@@ -141,7 +145,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                             }
                         }
                     }
-                    this.indicator = new SameSizeIndicator(image, this.editorContentService.getGlasspaneTopDistance() + elementRect.top + 1, elementRect.left + this.editorContentService.getGlasspaneLeftDistance() + elementRect.width + 2);
+                    this.indicator = new SameSizeIndicator(image, this.editorContentService.getGlasspaneTopDistance() + (wrapperRect ? wrapperRect.top : elementRect.top) + 1, (wrapperRect ? wrapperRect.left : elementRect.left) + this.editorContentService.getGlasspaneLeftDistance() + (wrapperRect ? wrapperRect.width : elementRect.width) + 2);
                 }
             });
         }

@@ -63,7 +63,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
 
                 const elements = this.removeHiddenElements(this.editorContentService.getAllContentElements());
                 Array.from(elements).forEach(node => {
-                    if (element != node && node.parentElement.closest('.svy-responsivecontainer') == null) {
+                    if (element != node && node.parentElement.closest('.svy-responsivecontainer') == null && !element.classList.contains('svy-formcomponent')) {
                         const position = node.getBoundingClientRect();
                         if (position.width >= 5 && position.width == elementRect.width) {
                             this.addSameSizeIndicator(newindicators, position, true);
