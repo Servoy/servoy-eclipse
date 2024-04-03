@@ -428,13 +428,18 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		public Color getForeground(Object element)
 		{
 			if (element instanceof Form) return super.getForeground(element);
-			if (provider instanceof FormTreeContentProvider) return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
+			int color = SWT.COLOR_DARK_BLUE;
+			if (UIUtils.isDarkThemeSelected(false))
+			{
+				color = SWT.COLOR_GREEN;
+			}
+			if (provider instanceof FormTreeContentProvider) return Display.getCurrent().getSystemColor(color);
 			if (element instanceof AbstractBase)
 			{
 				AbstractBase sm = (AbstractBase)element;
 				if (!sm.getParent().equals(selected))
 				{
-					return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
+					return Display.getCurrent().getSystemColor(color);
 				}
 			}
 			return super.getForeground(element);
