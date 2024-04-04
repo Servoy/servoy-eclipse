@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.designer.util;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -72,6 +73,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportCSSPosition;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
+import com.servoy.j2db.persistence.ISupportSize;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
@@ -693,99 +695,48 @@ public class DesignerUtil
 		CSSPosition position = ((ISupportCSSPosition)persist).getCssPosition();
 		if (position == null)
 		{
-			newPosition = new CSSPosition(properties.optString("y", "0"), "-1", "-1", properties.optString("y", "0"),
+			newPosition = new CSSPosition(properties.optString("y", "0"), "-1", "-1", properties.optString("x", "0"),
 				properties.optString("width", "0"), properties.optString("height", "0"));
 		}
 		else
 		{
-			newPosition = new CSSPosition(properties.optString("y", position.top), position.right, position.bottom, properties.optString("x", position.left),
-				properties.optString("width", position.width),
-				properties.optString("height", position.height));
+			Point oldLocation = CSSPositionUtils.getLocation((ISupportCSSPosition)persist);
+			java.awt.Dimension oldSize = CSSPositionUtils.getSize((ISupportCSSPosition)persist);
+			newPosition = CSSPositionUtils.adjustCSSPosition((ISupportCSSPosition)persist,
+				properties.optInt("x", oldLocation.x), properties.optInt("y", oldLocation.y),
+				properties.optInt("width", oldSize.width),
+				properties.optInt("height", oldSize.height), properties.optBoolean("move", false));
 		}
-		if (obj.has("left"))
+
+		AbstractContainer componentParent = null;
+		for (String property : obj.keySet())
 		{
-			JSONObject jsonObject = obj.getJSONObject("left");
-			ISupportCSSPosition left = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
-			if (left != null)
+			if (property.startsWith("middle"))
 			{
-				String value = getCssValue(left.getCssPosition(), jsonObject.optString("prop", "left"));
-				if (CSSPositionUtils.isSet(value))
+				snapToMiddle(form, newPosition, obj, property);
+			}
+			else
+			{
+				JSONObject jsonObject = obj.getJSONObject(property);
+				ISupportCSSPosition target = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
+					jsonObject.optString("uuid")));
+				if (componentParent == null)
 				{
-					newPosition.left = value;
-					if (CSSPositionUtils.isSet(newPosition.right)) newPosition.right = "-1";
+					componentParent = CSSPositionUtils.getParentContainer((ISupportSize)persist);
 				}
-				else if ("right".equals(jsonObject.optString("prop")))
-				{
-					newPosition.left = CSSPositionUtils.getPixelsValue(left.getCssPosition().left) +
-						CSSPositionUtils.getPixelsValue(left.getCssPosition().width) + "";
-					if (CSSPositionUtils.isSet(newPosition.right)) newPosition.right = "-1";
-				}
-				else if (CSSPositionUtils.isSet(left.getCssPosition().right) && CSSPositionUtils.isSet(left.getCssPosition().width))
-				{
-					int l = CSSPositionUtils.getPixelsValue(left.getCssPosition().right) - CSSPositionUtils.getPixelsValue(left.getCssPosition().width);
-					if (position == null || CSSPositionUtils.isSet(position.right))
-					{
-						newPosition.left = l + "";
-					}
-					else if (isResize)
-					{
-						int w = CSSPositionUtils.getPixelsValue(position.right) - l;
-						if (w > 0)
-						{
-							newPosition.width = w + "";
-						}
-					}
-				}
+				AbstractContainer parent = CSSPositionUtils.getParentContainer(target);
+				java.awt.Dimension containerSize = parent.getSize();
+				setCssValue(jsonObject, property, newPosition, position, target.getCssPosition(), componentParent.getSize(), containerSize, isResize);
 			}
 		}
-		else if (obj.has("right"))
-		{
-			JSONObject jsonObject = obj.getJSONObject("right");
-			ISupportCSSPosition right = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
-			if (right != null)
-			{
-				String value = getCssValue(right.getCssPosition(), jsonObject.optString("prop", "right"));
-				if (CSSPositionUtils.isSet(value))
-				{
-					if (isResize)
-					{
-						int w = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(position.left);
-						if (w > 0)
-						{
-							newPosition.width = w + "";
-						}
-					}
-					else
-					{
-						newPosition.right = value;
-						//if (CSSPositionUtils.isSet(newPosition.left)) newPosition.left = "-1";
-					}
-				}
-//				else if ("left".equals(jsonObject.optString("prop")))
-//				{
-//					newPosition.right = CSSPositionUtils.getPixelsValue(right.getCssPosition().right) -
-//						CSSPositionUtils.getPixelsValue(right.getCssPosition().width) + "";
-//				}
-				else if (CSSPositionUtils.isSet(right.getCssPosition().left) && CSSPositionUtils.isSet(right.getCssPosition().width))
-				{
-					AbstractContainer parent = CSSPositionUtils.getParentContainer(right);
-					java.awt.Dimension containerSize = parent.getSize();
-					int r = containerSize.width - CSSPositionUtils.getPixelsValue(right.getCssPosition().left) -
-						CSSPositionUtils.getPixelsValue(right.getCssPosition().width);
-					if (isResize)
-					{
-						newPosition.width = containerSize.width - r - CSSPositionUtils.getPixelsValue(position.left) + "";
-					}
-					else
-					{
-						newPosition.right = r + "";
-					}
-				}
-			}
-		}
-		else if (obj.has("middleH"))
+
+		return newPosition;
+	}
+
+
+	private static void snapToMiddle(Form form, CSSPosition newPosition, JSONObject obj, String property)
+	{
+		if ("middleH".equals(property))
 		{
 			JSONObject jsonObject = obj.getJSONObject("middleH");
 			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
@@ -825,91 +776,7 @@ public class DesignerUtil
 				}
 			}
 		}
-
-		if (obj.has("top"))
-		{
-			JSONObject jsonObject = obj.getJSONObject("top");
-			ISupportCSSPosition top = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
-			if (top != null)
-			{
-				String value = getCssValue(top.getCssPosition(), jsonObject.optString("prop", "top"));
-				if (CSSPositionUtils.isSet(value))
-				{
-					newPosition.top = value;
-					if (CSSPositionUtils.isSet(newPosition.bottom)) newPosition.bottom = "-1";
-				}
-				else if ("bottom".equals(jsonObject.optString("prop")))
-				{
-					newPosition.top = CSSPositionUtils.getPixelsValue(top.getCssPosition().top) +
-						CSSPositionUtils.getPixelsValue(top.getCssPosition().height) + "";
-					if (CSSPositionUtils.isSet(newPosition.bottom)) newPosition.bottom = "-1";
-				}
-				else if (CSSPositionUtils.isSet(top.getCssPosition().bottom) && CSSPositionUtils.isSet(top.getCssPosition().height))
-				{
-					int t = CSSPositionUtils.getPixelsValue(top.getCssPosition().bottom) - CSSPositionUtils.getPixelsValue(top.getCssPosition().height);
-					if (position == null || CSSPositionUtils.isSet(position.bottom))
-					{
-						newPosition.top = t + "";
-					}
-					else if (isResize)
-					{
-						int h = CSSPositionUtils.getPixelsValue(position.bottom) - t;
-						if (h > 0)
-						{
-							newPosition.height = h + "";
-						}
-					}
-				}
-			}
-		}
-		else if (obj.has("bottom"))
-		{
-			JSONObject jsonObject = obj.getJSONObject("bottom");
-			ISupportCSSPosition bottom = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
-			if (bottom != null)
-			{
-				String value = getCssValue(bottom.getCssPosition(), jsonObject.optString("prop", "bottom"));
-				if (CSSPositionUtils.isSet(value))
-				{
-					if (isResize)
-					{
-						newPosition.height = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(position.top) + "";
-					}
-					else
-					{
-						newPosition.bottom = value;
-						//if (CSSPositionUtils.isSet(newPosition.top)) newPosition.top = "-1";
-					}
-				}
-//				else if ("top".equals(jsonObject.optString("prop")))
-//				{
-//					newPosition.bottom = CSSPositionUtils.getPixelsValue(bottom.getCssPosition().bottom) -
-//						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height) + "";
-//				}
-				else if (CSSPositionUtils.isSet(bottom.getCssPosition().top) && CSSPositionUtils.isSet(bottom.getCssPosition().height))
-				{
-					AbstractContainer parent = CSSPositionUtils.getParentContainer(bottom);
-					java.awt.Dimension containerSize = parent.getSize();
-					int b = containerSize.height - CSSPositionUtils.getPixelsValue(bottom.getCssPosition().top) -
-						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height);
-					if (isResize)
-					{
-						int h = containerSize.height - b - CSSPositionUtils.getPixelsValue(position.top);
-						if (h > 0)
-						{
-							newPosition.height = h + "";
-						}
-					}
-					else
-					{
-						newPosition.bottom = b + "";
-					}
-				}
-			}
-		}
-		else if (obj.has("middleV"))
+		else if ("middleV".equals(property))
 		{
 			JSONObject jsonObject = obj.getJSONObject("middleV");
 			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
@@ -949,20 +816,6 @@ public class DesignerUtil
 				}
 			}
 		}
-
-		//make sure we have a valid css pos object
-		//in case both properties are set and it's a resize then we keep the width/height and the new property
-		//else we remove the width/height
-		/*
-		 * if (CSSPositionUtils.isSet(newPosition.left) && CSSPositionUtils.isSet(newPosition.right) && CSSPositionUtils.isSet(newPosition.width)) { if
-		 * (isResize) { if (properties.getJSONObject("cssPos").has("right")) { newPosition.left = "-1"; } else { newPosition.right = "-1"; } } else {
-		 * newPosition.width = "-1"; } }
-		 *
-		 * if (CSSPositionUtils.isSet(newPosition.top) && CSSPositionUtils.isSet(newPosition.bottom) && CSSPositionUtils.isSet(newPosition.height)) { if
-		 * (isResize) { if (properties.getJSONObject("cssPos").has("bottom")) { newPosition.top = "-1"; } else { newPosition.bottom = "-1"; } } else {
-		 * newPosition.height = "-1"; } }
-		 */
-		return newPosition;
 	}
 
 	private static String getCssValue(CSSPosition position, String property)
@@ -978,8 +831,192 @@ public class DesignerUtil
 				return position.top;
 			case "bottom" :
 				return position.bottom;
+			case "width" :
+				return position.width;
+			case "height" :
+				return position.height;
 			default :
 				return "-1";
 		}
+	}
+
+	private static void setCssValue(CSSPosition position, String property, String value)
+	{
+		if (position == null) return;
+		//TODO make sure the val is int or percentage
+		switch (property)
+		{
+			case "left" :
+				position.left = value;
+				return;
+			case "right" :
+				position.right = value;
+				return;
+			case "top" :
+				position.top = value;
+				return;
+			case "bottom" :
+				position.bottom = value;
+				return;
+			case "width" :
+				position.width = value;
+				return;
+			case "height" :
+				position.height = value;
+				return;
+		}
+	}
+
+	private static String getOppositeProperty(String property)
+	{
+		switch (property)
+		{
+			case "left" :
+				return "right";
+			case "right" :
+				return "left";
+			case "top" :
+				return "bottom";
+			case "bottom" :
+				return "top";
+			case "width" :
+				return "height";
+			case "height" :
+				return "width";
+			default :
+				return null;
+		}
+	}
+
+	private static String getSizeProperty(String property)
+	{
+		if ("left".equals(property) || "right".equals(property))
+		{
+			return "width";
+		}
+		else if ("top".equals(property) || "bottom".equals(property))
+		{
+			return "height";
+		}
+		return null;
+	}
+
+	public static void setCssValue(JSONObject jsonObject, String property, CSSPosition newPosition, CSSPosition oldPosition, CSSPosition targetPosition,
+		java.awt.Dimension containerSize, java.awt.Dimension targetContainerSize,
+		boolean isResize)
+	{
+		String sizeProperty = getSizeProperty(property);
+		String oppositeProperty = getOppositeProperty(property);
+		String value = getCssValue(targetPosition, jsonObject.optString("prop", property));
+		if (CSSPositionUtils.isSet(value))
+		{
+			if (isResize)
+			{
+				int w = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(getCssValue(oldPosition, oppositeProperty)); //TODO prop!
+				if (w > 0)
+				{
+					setCssValue(newPosition, sizeProperty, w + "");
+				}
+			}
+			else
+			{
+				if (property.equals(jsonObject.optString("prop", property)))
+				{
+					setCssValue(newPosition, property, value);
+				}
+				else
+				{
+					int computed = computeValueBasedOnOppositeTargetProperty(property, containerSize, value);
+					setCssValue(newPosition, property, computed + "");
+				}
+				if (CSSPositionUtils.isSet(getCssValue(oldPosition, sizeProperty)))
+				{
+					setCssValue(newPosition, oppositeProperty, "-1");
+				}
+			}
+		}
+		else if (CSSPositionUtils.isSet(getCssValue(targetPosition, oppositeProperty)) && CSSPositionUtils.isSet(getCssValue(targetPosition, sizeProperty)))
+		{
+			String oppositePropertyValue = getCssValue(targetPosition, oppositeProperty);
+			int computedPropertyValue = computeValueBasedOnOppositeProperty(targetPosition, property, targetContainerSize, oppositePropertyValue);
+
+			if (isResize)
+			{
+				int computedDimension = computeDimension(property, computedPropertyValue + "", containerSize, getCssValue(oldPosition, oppositeProperty));
+				setCssValue(newPosition, sizeProperty, computedDimension + "");
+			}
+			else
+			{
+				setCssValue(newPosition, property, "-1");
+				String dimension = getCssValue(oldPosition, sizeProperty);
+				if (CSSPositionUtils.isSet(dimension))
+				{
+					setCssValue(newPosition, sizeProperty, dimension);
+				}
+				else
+				{
+					int computedDimension = computeDimension(property, getCssValue(oldPosition, property), containerSize,
+						getCssValue(oldPosition, oppositeProperty));
+					setCssValue(newPosition, sizeProperty, computedDimension + "");
+				}
+				int computedOppositePropertySourceComponent = computeValueBasedOnOppositeProperty(newPosition, oppositeProperty, containerSize,
+					computedPropertyValue + "");
+				setCssValue(newPosition, oppositeProperty, computedOppositePropertySourceComponent + "");
+			}
+		}
+		//else error?
+	}
+
+	private static int computeValueBasedOnOppositeProperty(CSSPosition position, String property, java.awt.Dimension containerSize,
+		String oppositePropertyValue)
+	{
+		int oppositeValuePX = CSSPositionUtils.getPixelsValue(oppositePropertyValue);
+		switch (property)
+		{
+			case "left" :
+			case "right" :
+				return containerSize.width - oppositeValuePX - CSSPositionUtils.getPixelsValue(position.width);
+
+			case "top" :
+			case "bottom" :
+				return containerSize.height - oppositeValuePX - CSSPositionUtils.getPixelsValue(position.height);
+		}
+		return -1;
+	}
+
+	private static int computeValueBasedOnOppositeTargetProperty(String property, java.awt.Dimension containerSize,
+		String oppositePropertyValue)
+	{
+		int oppositeValuePX = CSSPositionUtils.getPixelsValue(oppositePropertyValue);
+		switch (property)
+		{
+			case "left" :
+			case "right" :
+				return containerSize.width - oppositeValuePX;
+
+			case "top" :
+			case "bottom" :
+				return containerSize.height - oppositeValuePX;
+		}
+		return -1;
+	}
+
+	private static int computeDimension(String property, String value, java.awt.Dimension containerSize, String oppositePropertyValue)
+	{
+		int propertyValue = CSSPositionUtils.getPixelsValue(value);
+		int oppositeValuePX = CSSPositionUtils.getPixelsValue(oppositePropertyValue);
+		switch (property)
+		{
+			case "left" :
+				return containerSize.width - oppositeValuePX - propertyValue;
+			case "top" :
+				return containerSize.height - oppositeValuePX - propertyValue;
+
+			case "right" :
+				return containerSize.width - propertyValue - oppositeValuePX;
+			case "bottom" :
+				return containerSize.height - propertyValue - oppositeValuePX;
+		}
+		return -1;
 	}
 }
