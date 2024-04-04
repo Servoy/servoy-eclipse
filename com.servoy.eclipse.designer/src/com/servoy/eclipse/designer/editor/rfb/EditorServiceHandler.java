@@ -153,7 +153,7 @@ public class EditorServiceHandler implements IServerService
 		});
 		configuredHandlers.put("createComponents", new CreateComponentsHandler(editorPart, selectionProvider));
 		configuredHandlers.put("openElementWizard", new OpenElementWizardHandler(editorPart, fieldPositioner, selectionProvider));
-		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(fieldPositioner));
+		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(editorPart, fieldPositioner));
 		configuredHandlers.put("openScript", new OpenScriptHandler(editorPart));
 		configuredHandlers.put("openFormHierarchy", new OpenFormHierarchyHandler(selectionProvider));
 		configuredHandlers.put("updatePaletteOrder", new UpdatePaletteOrder());
