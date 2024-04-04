@@ -15,17 +15,38 @@ export class PopupMenuService {
 
     activeMenu: HTMLElement = null;
     activeMenuItem: HTMLElement = null;
+    previousActiveMenuItem: HTMLElement = null;
     visibleSubMenuPath: HTMLElement[] = [];
     hideSubMenusetTimeout: any = null;
 
     menuZIndex = 15000;
 
     hoverMenuItemListener = (event: MouseEvent) => {
-        const subMenu = this.menuItemTosubMenuMap.get(event.target as HTMLElement);
+        let targetElement = event.target as HTMLElement;
+        const subMenu = this.menuItemTosubMenuMap.get(targetElement);
         if(event.type == 'mouseenter') {
-            this.activeMenuItem = event.target as HTMLElement;
+            if(this.previousActiveMenuItem && this.previousActiveMenuItem !== targetElement) {
+                let parent = this.previousActiveMenuItem.parentElement;
+                while(parent) {
+                    if(parent === targetElement.parentElement) {
+                        this.hideSubMenusOf(this.activeMenu);
+                        break;
+                    }
+                    let parentFound = false;
+                    this.menuItemTosubMenuMap.forEach((value, key) => {
+                        if(value === parent) {
+                            parent = key.parentElement;
+                            parentFound = true;
+                        }
+                    });
+                    if(!parentFound) parent = null;
+                }
+                this.previousActiveMenuItem = null;
+            }
+            this.activeMenuItem = targetElement;
             this.showSubMenu(subMenu);
         } else if(event.type == 'mouseleave') {
+            this.previousActiveMenuItem = this.activeMenuItem;
             this.activeMenuItem = null;
             this.hideSubMenus();
         }
