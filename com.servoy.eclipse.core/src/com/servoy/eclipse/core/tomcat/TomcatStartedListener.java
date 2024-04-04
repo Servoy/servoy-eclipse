@@ -4,10 +4,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.tomcat.starter.ITomcatStartedListener;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
@@ -31,7 +31,7 @@ public class TomcatStartedListener implements ITomcatStartedListener
 						message = "Please check your startup if you have something else running at http://localhost:" +
 							ApplicationServerRegistry.get().getWebServerPort() + "/";
 					}
-					MessageDialog.openWarning(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+					ServoyMessageDialog.openWarning(UIUtils.getActiveShell(),
 						"Internal Tomcat Webserver not started up correctly",
 						message);
 				});
