@@ -219,3 +219,12 @@ ColorDefinition#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR {
   label: 'Editor Background Color';
   description: 'The editing zones background color.';
 }
+
+Composite#org-eclipse-ui-main-toolbar, 
+Composite#org-eclipse-ui-main-toolbar ImageBasedFrame, 
+Composite#org-eclipse-ui-main-toolbar Composite, 
+Composite#org-eclipse-ui-main-toolbar ToolBar, 
+Composite#org-eclipse-ui-main-toolbar LayoutModifierToolControl-1#PerspectiveSpacer, 
+Composite#org-eclipse-ui-main-toolbar ToolItem{
+	background-color: #404040;
+}
