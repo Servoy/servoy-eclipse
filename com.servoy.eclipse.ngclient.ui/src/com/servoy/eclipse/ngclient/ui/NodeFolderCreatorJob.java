@@ -100,23 +100,30 @@ public class NodeFolderCreatorJob extends Job
 				createFolder(nodeFolder);
 			}
 			boolean codeChanged = true;
-			boolean mainPackageJsonChanged = false;
 			File packageJsonFile = new File(nodeFolder.getParent(), "package.json");
 			File packageCopyJsonFile = new File(nodeFolder.getParent(), "package_copy.json");
 			Bundle bundle = Activator.getInstance().getBundle();
 			URL packageJsonUrl = bundle.getEntry("/node/package.json");
 			String bundleContent = Utils.getURLContent(packageJsonUrl);
-			if (packageCopyJsonFile.exists() && !force && fullyGenerated.exists())
+			boolean mainPackageJsonChanged = false;
+			if (!force)
 			{
-				try
+				// if not already in force mode (then a clean is already done)
+				// then if the package_copy is not there or the last time (fullgenerated) is not there, then also force a rebuild.
+				mainPackageJsonChanged = !packageCopyJsonFile.exists() || !fullyGenerated.exists();
+				if (!mainPackageJsonChanged && packageCopyJsonFile.exists())
 				{
-					String fileContent = FileUtils.readFileToString(packageCopyJsonFile, "UTF-8");
-					codeChanged = !fileContent.equals(bundleContent);
-					mainPackageJsonChanged = codeChanged;
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
+					// if it is not a forced rebuild, then check if the package_copy is still the same as the bundle content, if not then rebuild
+					try
+					{
+						String fileContent = FileUtils.readFileToString(packageCopyJsonFile, "UTF-8");
+						codeChanged = !fileContent.equals(bundleContent);
+						mainPackageJsonChanged = codeChanged;
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
 				}
 			}
 			File projectsFolder = new File(nodeFolder, "projects");
@@ -149,10 +156,10 @@ public class NodeFolderCreatorJob extends Job
 			}
 			if (codeChanged)
 			{
-				// delete the full parent dir because the main package json is changed
 				fullyGenerated.delete();
 				if (mainPackageJsonChanged)
 				{
+					// delete the full parent dir because the main package json is changed
 					try
 					{
 						Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletePathVisitor.INSTANCE);
