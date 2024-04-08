@@ -114,6 +114,7 @@ public class NodeFolderCreatorJob extends Job
 				mainPackageJsonChanged = !packageCopyJsonFile.exists() || !fullyGenerated.exists();
 				if (!mainPackageJsonChanged && packageCopyJsonFile.exists())
 				{
+					// if it is not a forced rebuild, then check if the package_copy is still the same as the bundle content, if not then rebuild
 					try
 					{
 						String fileContent = FileUtils.readFileToString(packageCopyJsonFile, "UTF-8");
