@@ -66,7 +66,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IRepository;
@@ -491,14 +490,11 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			Label solutionTypeLabel = new Label(this, SWT.NONE);
 			solutionTypeLabel.setText("Solution type");
 			solutionTypeCombo = new Combo(this, SWT.DROP_DOWN | SWT.READ_ONLY);
-			boolean showLegacyTypes = new DesignerPreferences().getShowLegacySolutionTypes();
-
-			String[] solutionTypeNames = new String[showLegacyTypes ? SolutionMetaData.solutionTypeNames.length - 1
-				: SolutionMetaData.currentSolutionTypeNames.length - 1];
-			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypeNames : SolutionMetaData.currentSolutionTypeNames, 1, solutionTypeNames, 0,
+			String[] solutionTypeNames = new String[SolutionMetaData.currentSolutionTypeNames.length - 1];
+			System.arraycopy(SolutionMetaData.currentSolutionTypeNames, 1, solutionTypeNames, 0,
 				solutionTypeNames.length);
-			solutionTypeComboValues = new int[showLegacyTypes ? SolutionMetaData.solutionTypes.length - 1 : SolutionMetaData.currentSolutionTypes.length - 1];
-			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypes : SolutionMetaData.currentSolutionTypes, 1, solutionTypeComboValues, 0,
+			solutionTypeComboValues = new int[SolutionMetaData.currentSolutionTypes.length - 1];
+			System.arraycopy(SolutionMetaData.currentSolutionTypes, 1, solutionTypeComboValues, 0,
 				solutionTypeComboValues.length);
 			solutionTypeCombo.setItems(solutionTypeNames);
 			int defaultSolutionType = getDialogSettings().get(wizard.getSettingsPrefix() + SOLUTION_TYPE) != null
