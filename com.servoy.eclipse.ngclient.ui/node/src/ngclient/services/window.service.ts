@@ -186,18 +186,29 @@ export class WindowService {
 
             instance.bsWindowInstance = this.bsWindowManager.createWindow(opt);
 
-            instance.bsWindowInstance.element.addEventListener('bswin.resize', (event: CustomEvent< { width: number; height: number }>) => {
+            const resizeListener = (event: CustomEvent< { width: number; height: number }>) => {
                 instance.onResize(event.detail);
-            });
-            instance.bsWindowInstance.element.addEventListener('bswin.move', (event: CustomEvent<{x: number; y: number}>) => {
+            };
+            
+            const moveListener = (event: CustomEvent<{x: number; y: number}>) => {
                 instance.onMove(event.detail);
-            });
-            instance.bsWindowInstance.element.addEventListener('bswin.active', (event: CustomEvent<boolean>) => {
+            };
+            
+            const activeListener = (event: CustomEvent<boolean>) => {
                 const customEvent = new CustomEvent(event.detail ? 'enableTabseq' : 'disableTabseq', {
                     bubbles: true
                 });
                 event.target.dispatchEvent(customEvent);
-            });
+            };
+            instance.bsWindowInstance.element.addEventListener('bswin.resize', resizeListener);
+            instance.bsWindowInstance.element.addEventListener('bswin.move', moveListener);
+            instance.bsWindowInstance.element.addEventListener('bswin.active', activeListener);
+            
+            instance.bsWindowInstance.onClose = () => {
+               instance.bsWindowInstance.element.removeEventListener('bswin.resize', resizeListener);
+               instance.bsWindowInstance.element.removeEventListener('bswin.move', moveListener);
+               instance.bsWindowInstance.element.removeEventListener('bswin.active', activeListener);
+            };
             (this.doc.getElementsByClassName('window-header').item(0) as HTMLElement).focus();
             instance.bsWindowInstance.setActive(true);
             // init the size of the dialog

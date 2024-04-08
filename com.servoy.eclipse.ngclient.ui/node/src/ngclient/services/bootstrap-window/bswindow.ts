@@ -35,6 +35,7 @@ export class BSWindow {
     offset: any;
     window_info: any;
 
+    onClose: () => void;
     mouseDownListenerElement: any;
     mouseDownListenerHandle: any;
 
@@ -182,6 +183,9 @@ export class BSWindow {
             }
         } else if (this.options.window_manager && this.options.window_manager.windows.length > 0) {
             this.options.window_manager.setNextFocused();
+        }
+        if (this.onClose){
+            this.onClose();
         }
         _this.element.remove();
         if (this.windowTab) {
