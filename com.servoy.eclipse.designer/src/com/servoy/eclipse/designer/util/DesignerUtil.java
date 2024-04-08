@@ -696,7 +696,7 @@ public class DesignerUtil
 		if (position == null)
 		{
 			newPosition = new CSSPosition(properties.optString("y", "0"), "-1", "-1", properties.optString("x", "0"),
-				properties.optString("width", "0"), properties.optString("height", "0"));
+				properties.optString("w", "0"), properties.optString("h", "0"));
 		}
 		else
 		{
@@ -901,6 +901,18 @@ public class DesignerUtil
 		return null;
 	}
 
+	/**
+	 * Copy the anchoring from the target component.
+	 *
+	 * @param jsonObject contains the property name to copy from the target; for instance align the right edge with the right of left property of the target
+	 * @param property the property to be set (one of top, bottom, left, right)
+	 * @param newPosition the css position object on which the values should be set
+	 * @param oldPosition the old css position object of the source componen; null for new components
+	 * @param targetPosition the css position object of the snap target
+	 * @param containerSize the size of the source component parent
+	 * @param targetContainerSize the size of the target component parent
+	 * @param isResize
+	 */
 	public static void setCssValue(JSONObject jsonObject, String property, CSSPosition newPosition, CSSPosition oldPosition, CSSPosition targetPosition,
 		java.awt.Dimension containerSize, java.awt.Dimension targetContainerSize,
 		boolean isResize)
@@ -910,6 +922,7 @@ public class DesignerUtil
 		String value = getCssValue(targetPosition, jsonObject.optString("prop", property));
 		if (CSSPositionUtils.isSet(value))
 		{
+			//if the property is set on the target, then we copy on the source component and clear the opposite property if the size property is set
 			if (isResize)
 			{
 				int w = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(getCssValue(oldPosition, oppositeProperty)); //TODO prop!
@@ -920,6 +933,7 @@ public class DesignerUtil
 			}
 			else
 			{
+				//when moving a component, if the property is set on the target, then we copy its value on the source component
 				if (property.equals(jsonObject.optString("prop", property)))
 				{
 					setCssValue(newPosition, property, value);
@@ -929,7 +943,8 @@ public class DesignerUtil
 					int computed = computeValueBasedOnOppositeTargetProperty(property, containerSize, value);
 					setCssValue(newPosition, property, computed + "");
 				}
-				if (CSSPositionUtils.isSet(getCssValue(oldPosition, sizeProperty)))
+				//clear the opposite property value if the size property is set
+				if (oldPosition == null || CSSPositionUtils.isSet(getCssValue(oldPosition, sizeProperty)))
 				{
 					setCssValue(newPosition, oppositeProperty, "-1");
 				}
@@ -937,6 +952,7 @@ public class DesignerUtil
 		}
 		else if (CSSPositionUtils.isSet(getCssValue(targetPosition, oppositeProperty)) && CSSPositionUtils.isSet(getCssValue(targetPosition, sizeProperty)))
 		{
+			//the property is not set on the target, need to compute it using the size and the value of the opposite property
 			String oppositePropertyValue = getCssValue(targetPosition, oppositeProperty);
 			int computedPropertyValue = computeValueBasedOnOppositeProperty(targetPosition, property, targetContainerSize, oppositePropertyValue);
 
@@ -947,18 +963,23 @@ public class DesignerUtil
 			}
 			else
 			{
+				//clear the property because the target component does also not have it and we want the same anchoring
 				setCssValue(newPosition, property, "-1");
 				String dimension = getCssValue(oldPosition, sizeProperty);
 				if (CSSPositionUtils.isSet(dimension))
 				{
+					//maintain the size of the old css position
 					setCssValue(newPosition, sizeProperty, dimension);
 				}
-				else
+				else if (oldPosition != null)
 				{
+					//the size is not set (component anchored left-right or top-bottom),
+					//need to compute it based on the opposing properties and the parent container size
 					int computedDimension = computeDimension(property, getCssValue(oldPosition, property), containerSize,
 						getCssValue(oldPosition, oppositeProperty));
 					setCssValue(newPosition, sizeProperty, computedDimension + "");
 				}
+				//compute the opposite property value for the source component using the size property, container size and the computed property value of the target
 				int computedOppositePropertySourceComponent = computeValueBasedOnOppositeProperty(newPosition, oppositeProperty, containerSize,
 					computedPropertyValue + "");
 				setCssValue(newPosition, oppositeProperty, computedOppositePropertySourceComponent + "");
