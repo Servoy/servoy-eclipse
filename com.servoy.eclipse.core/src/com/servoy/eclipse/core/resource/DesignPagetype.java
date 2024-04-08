@@ -25,7 +25,7 @@ package com.servoy.eclipse.core.resource;
  */
 public enum DesignPagetype
 {
-	MobileClassic, Mobile, Classic, Rfb;
+	Mobile, Rfb;
 
 	public static DesignPagetype safeValueOf(String name)
 	{

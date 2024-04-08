@@ -34,7 +34,7 @@ import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 
-import com.servoy.eclipse.designer.editor.VisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -159,7 +159,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		if (DesignerUtil.getActiveEditor() != null && DesignerUtil.getActiveEditor().getGraphicaleditor() != null)
 		{
 			return Boolean.valueOf(
-				DesignerUtil.getActiveEditor().getGraphicaleditor().getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)).booleanValue();
+				DesignerUtil.getActiveEditor().getGraphicaleditor().getPartProperty(VisualFormEditor.PROPERTY_HIDE_INHERITED)).booleanValue();
 		}
 		return false;
 	}

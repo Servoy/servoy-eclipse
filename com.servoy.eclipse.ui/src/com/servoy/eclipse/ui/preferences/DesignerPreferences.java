@@ -52,27 +52,6 @@ public class DesignerPreferences
 	public static final int CM = 1;
 	public static final int IN = 2;
 
-	public static enum FormEditorDesignerPreference
-	{
-		Classic, New, Automatic;
-
-		public static FormEditorDesignerPreference safeValueOf(String value, FormEditorDesignerPreference def)
-		{
-			if (value != null)
-			{
-				try
-				{
-					return valueOf(value);
-				}
-				catch (IllegalArgumentException e)
-				{
-					// ignore
-				}
-			}
-			return def;
-		}
-	}
-
 	public static final String DESIGNER_SETTINGS_PREFIX = "designer.";
 
 	public static final String METRICS_SETTING = "preferdMetrics";
@@ -95,7 +74,6 @@ public class DesignerPreferences
 	public static final String CLOSE_EDITORS_ON_EXIT_SETTING = "saveEditorState";
 	public static final String OPEN_FIRST_FORM_DESIGNER_SETTING = "openFirstFormDesigner";
 	public static final String SHOW_COLUMNS_IN_DB_ORDER_SETTING = "showColumnsInDbOrder";
-	public static final String SHOW_LEGACY_SOLUTION_TYPES_SETTING = "showLegacySolutionTypes";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
 	public static final String SHOW_SAME_SIZE_SETTING = "showSameSizeFeedback";
@@ -151,7 +129,6 @@ public class DesignerPreferences
 	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
 	public static final boolean SHOW_RULERS_DEFAULT = true;
 	public static final boolean MARQUEE_SELECT_OUTER_DEFAULT = true;
-	public static final FormEditorDesignerPreference FORM_EDITOR_DESIGNER_DEFAULT = FormEditorDesignerPreference.Automatic;
 
 	public static final int FORM_EVENT_HANDLER_NAMING_DEFAULT = 0;
 	public static final int FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_NAME = 1;
@@ -401,16 +378,6 @@ public class DesignerPreferences
 		setProperty(MARQUEE_SELECT_OUTER_SETTING, outer);
 	}
 
-	public FormEditorDesignerPreference getFormEditorDesignerPreference()
-	{
-		return FormEditorDesignerPreference.safeValueOf(getProperty(FORM_EDITOR_DESIGNER_SETTING, null), FORM_EDITOR_DESIGNER_DEFAULT);
-	}
-
-	public void setFormEditorDesignerPreference(FormEditorDesignerPreference pref)
-	{
-		setProperty(FORM_EDITOR_DESIGNER_SETTING, pref == null ? null : pref.name());
-	}
-
 	public static boolean isGuideSetting(String key)
 	{
 		return GUIDE_SIZE_SETTING.equals(getKeyPostfix(key));
@@ -545,16 +512,6 @@ public class DesignerPreferences
 	public void setShowColumnsInDbOrder(boolean showColumnsInDbOrder)
 	{
 		setProperty(SHOW_COLUMNS_IN_DB_ORDER_SETTING, showColumnsInDbOrder);
-	}
-
-	public boolean getShowLegacySolutionTypes()
-	{
-		return getProperty(SHOW_LEGACY_SOLUTION_TYPES_SETTING, SHOW_LEGACY_SOLUTION_TYPES_DEFAULT);
-	}
-
-	public void setShowLegacySolutionTypes(boolean showLegacySolutionTypes)
-	{
-		setProperty(SHOW_LEGACY_SOLUTION_TYPES_SETTING, showLegacySolutionTypes);
 	}
 
 	public boolean getShowSameSizeFeedback()

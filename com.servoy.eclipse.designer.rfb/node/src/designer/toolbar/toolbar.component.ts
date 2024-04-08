@@ -96,7 +96,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     btnReload: ToolbarItem;
     btnToggleI18NValues: ToolbarItem;
-    btnClassicEditor: ToolbarItem;
 
     btnShowErrors: ToolbarItem;
 
@@ -1085,17 +1084,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
         this.btnToggleI18NValues.state = false;
         this.add(this.btnToggleI18NValues, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
-
-        this.btnClassicEditor = new ToolbarItem(
-            'Switch to classic editor',
-            'images/classic_editor.png',
-            true,
-            () => {
-                this.editorSession.executeAction('switchEditorClassic');
-            }
-        );
-
-        this.add(this.btnClassicEditor, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         this.btnShowErrors = new ToolbarItem(
             'Show errors console',

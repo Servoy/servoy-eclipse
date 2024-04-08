@@ -34,11 +34,10 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
-import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.VisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.MoveDownCommand;
 import com.servoy.eclipse.designer.editor.commands.MoveUpCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
@@ -352,7 +351,7 @@ public class EditorServiceHandler implements IServerService
 					{
 						RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
 						return Boolean.valueOf(rfbVisualFormEditorDesignPage != null
-							? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED) : null);
+							? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditor.PROPERTY_HIDE_INHERITED) : null);
 					}
 					if (args.has(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER))
 					{
@@ -401,15 +400,6 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 		});
-		configuredHandlers.put("switchEditorClassic", new IServerService()
-		{
-			@Override
-			public Object executeMethod(String methodName, JSONObject args) throws Exception
-			{
-				editorPart.setDesignPageType(DesignPagetype.Classic);
-				return null;
-			}
-		});
 
 		configuredHandlers.put("getComponentPropertyWithTags", new IServerService()
 		{
@@ -447,8 +437,8 @@ public class EditorServiceHandler implements IServerService
 			public Object executeMethod(String methodName, JSONObject args)
 			{
 				RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
-				Boolean hideInherited = Boolean.valueOf(rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED));
-				rfbVisualFormEditorDesignPage.setPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED,
+				Boolean hideInherited = Boolean.valueOf(rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditor.PROPERTY_HIDE_INHERITED));
+				rfbVisualFormEditorDesignPage.setPartProperty(VisualFormEditor.PROPERTY_HIDE_INHERITED,
 					Boolean.toString(!hideInherited.booleanValue()));
 				if (DesignerUtil.getContentOutline() != null)
 				{

@@ -38,7 +38,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.views.ColorSelectViewer;
 import com.servoy.j2db.util.ObjectWrapper;
@@ -84,9 +83,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button paintPagebreaksCheck;
 	private Button showRulersCheck;
 	private Button marqueeSelectOuterCheck;
-	private Button formEditorDesignerPreferenceClassic;
-	private Button formEditorDesignerPreferenceNew;
-	private Button formEditorDesignerPreferenceAutomatic;
 	private ColorSelectViewer sameHeightWidthIndicatorColor;
 	private Spinner titanium_alignmentThresholdSpinner;
 	private Spinner titanium_equalDistanceThresholdSpinner;
@@ -106,24 +102,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Composite optionsPanel = new Composite(rootPanel, SWT.NONE);
 		optionsPanel.setLayout(new GridLayout(1, false));
-
-		Group formEditorDesignerPreferenceGroup = new Group(optionsPanel, SWT.NONE);
-		formEditorDesignerPreferenceGroup.setText("Form Editor Designer type");
-		formEditorDesignerPreferenceGroup.setLayout(new GridLayout(1, false));
-		formEditorDesignerPreferenceGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-
-		formEditorDesignerPreferenceClassic = new Button(formEditorDesignerPreferenceGroup, SWT.RADIO);
-		formEditorDesignerPreferenceClassic.setText("Classic");
-
-		formEditorDesignerPreferenceNew = new Button(formEditorDesignerPreferenceGroup, SWT.RADIO);
-		formEditorDesignerPreferenceNew.setText("Modern");
-
-		formEditorDesignerPreferenceAutomatic = new Button(formEditorDesignerPreferenceGroup, SWT.RADIO);
-		formEditorDesignerPreferenceAutomatic.setText("Automatic");
-
-		formEditorDesignerPreferenceGroup.setToolTipText("Select the designer type that will be used in the form editor" +
-			"\nIn automatic mode, the Modern editor will be used for forms with a reponsive layout or forms that " +
-			"contain custom web components or are in NG-client-only solutions.");
 
 		Composite copyPastePanel = new Composite(optionsPanel, SWT.NONE);
 		copyPastePanel.setLayout(new GridLayout(2, false));
@@ -415,10 +393,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck.setSelection(prefs.getPaintPageBreaks());
 		showRulersCheck.setSelection(prefs.getShowRulers());
 		marqueeSelectOuterCheck.setSelection(prefs.getMarqueeSelectOuter());
-		formEditorDesignerPreferenceClassic.setSelection(prefs.getFormEditorDesignerPreference() == FormEditorDesignerPreference.Classic);
-		formEditorDesignerPreferenceNew.setSelection(prefs.getFormEditorDesignerPreference() == FormEditorDesignerPreference.New);
-		formEditorDesignerPreferenceAutomatic.setSelection(prefs.getFormEditorDesignerPreference() != FormEditorDesignerPreference.Classic &&
-			prefs.getFormEditorDesignerPreference() != FormEditorDesignerPreference.New);
 
 		titanium_alignmentThresholdSpinner.setSelection(prefs.getTitaniumAlignmentThreshold());
 		titanium_equalDistanceThresholdSpinner.setSelection(prefs.getTitaniumSnapEqualDistanceThreshold());
@@ -453,8 +427,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setPaintPageBreaks(paintPagebreaksCheck.getSelection());
 		prefs.setShowRulers(showRulersCheck.getSelection());
 		prefs.setMarqueeSelectOuter(marqueeSelectOuterCheck.getSelection());
-		prefs.setFormEditorDesignerPreference(formEditorDesignerPreferenceClassic.getSelection() ? FormEditorDesignerPreference.Classic
-			: formEditorDesignerPreferenceNew.getSelection() ? FormEditorDesignerPreference.New : null);
 
 		prefs.setTitaniumAlignmentThreshold(titanium_alignmentThresholdSpinner.getSelection());
 		prefs.setTitaniumSnapEqualDistanceThreshold(titanium_equalDistanceThresholdSpinner.getSelection());
@@ -497,9 +469,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck.setSelection(DesignerPreferences.PAINT_PAGEBREAKS_DEFAULT);
 		showRulersCheck.setSelection(DesignerPreferences.SHOW_RULERS_DEFAULT);
 		marqueeSelectOuterCheck.setSelection(DesignerPreferences.MARQUEE_SELECT_OUTER_DEFAULT);
-		formEditorDesignerPreferenceClassic.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.Classic);
-		formEditorDesignerPreferenceNew.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.New);
-		formEditorDesignerPreferenceAutomatic.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.Automatic);
 		titanium_alignmentThresholdSpinner.setSelection(DesignerPreferences.TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT);
 		titanium_equalDistanceThresholdSpinner.setSelection(DesignerPreferences.TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_DEFAULT);
 		titanium_equalSizeThresholdSpinner.setSelection(DesignerPreferences.TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_DEFAULT);
