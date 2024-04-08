@@ -188,7 +188,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.btnPlaceTabPanel.hide = true;
             this.btnPlaceAccordion.hide = true;
             this.btnTabSequence.hide = true;
-            this.btnClassicEditor.hide = true;
             this.btnHideInheritedElements.hide = true;
 
             this.ordering = this.getCategoryItems(TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
