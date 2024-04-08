@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.model.test;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -177,10 +176,6 @@ public class SolutionJSUnitSuiteCodeBuilder
 				}
 			}
 			catch (RepositoryException e)
-			{
-				Debug.log(e);
-			}
-			catch (RemoteException e)
 			{
 				Debug.log(e);
 			}

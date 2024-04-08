@@ -20,7 +20,6 @@ package com.servoy.eclipse.ui.property;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.print.PageFormat;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -917,10 +916,6 @@ public class PersistPropertyHandler extends BasePropertyHandler
 							availableSolutions.add(element.getName());
 						}
 					}
-				}
-				catch (RemoteException e)
-				{
-					ServoyLog.logError(e);
 				}
 				catch (RepositoryException e)
 				{

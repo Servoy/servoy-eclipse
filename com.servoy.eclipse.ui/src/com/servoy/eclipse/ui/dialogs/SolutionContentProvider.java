@@ -16,7 +16,6 @@
 */
 package com.servoy.eclipse.ui.dialogs;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,10 +61,6 @@ public class SolutionContentProvider extends FlatTreeContentProvider
 						solutionNames.add(element.getName());
 					}
 				}
-			}
-			catch (RemoteException e)
-			{
-				ServoyLog.logError(e);
 			}
 			catch (RepositoryException e)
 			{
