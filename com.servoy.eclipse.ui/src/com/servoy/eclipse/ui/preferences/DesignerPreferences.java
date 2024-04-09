@@ -253,11 +253,6 @@ public class DesignerPreferences
 		return getProperty(METRICS_SETTING, METRICS_DEFAULT);
 	}
 
-	public void setMetrics(int metrics)
-	{
-		setProperty(METRICS_SETTING, metrics);
-	}
-
 	public int getStepSize()
 	{
 		return PersistHelper.createDimension(getProperty(STEP_SIZE_SETTING, STEP_SIZE_DEFAULT + ",0")).width;
@@ -298,19 +293,9 @@ public class DesignerPreferences
 		return getProperty(ALIGNMENT_THRESHOLD_SETTING, ALIGNMENT_THRESHOLD_DEFAULT);
 	}
 
-	public void setAlignmentThreshold(int alignmentThreshold)
-	{
-		setProperty(ALIGNMENT_THRESHOLD_SETTING, alignmentThreshold);
-	}
-
 	public int getAlignmentIndent()
 	{
 		return getProperty(ALIGNMENT_INDENT_SETTING, ALIGNMENT_INDENT_DEFAULT);
-	}
-
-	public void setAlignmentIndent(int indent)
-	{
-		setProperty(ALIGNMENT_INDENT_SETTING, indent);
 	}
 
 	public int[] getAlignmentDistances()
@@ -333,19 +318,9 @@ public class DesignerPreferences
 		return distances;
 	}
 
-	public void setAlignmentDistances(int smallDistance, int mediumDistance, int largeDistance)
-	{
-		setProperty(ALIGNMENT_DISTANCES_SETTING, String.valueOf(smallDistance) + ':' + String.valueOf(mediumDistance) + ':' + String.valueOf(largeDistance));
-	}
-
 	public boolean getAnchor()
 	{
 		return getProperty(ANCHOR_SETTING, ANCHOR_DEFAULT);
-	}
-
-	public void setAnchor(boolean anchor)
-	{
-		setProperty(ANCHOR_SETTING, anchor);
 	}
 
 	public boolean getPaintPageBreaks()
@@ -353,19 +328,9 @@ public class DesignerPreferences
 		return getProperty(PAINT_PAGEBREAKS_SETTING, PAINT_PAGEBREAKS_DEFAULT);
 	}
 
-	public void setPaintPageBreaks(boolean paintPageBreaks)
-	{
-		setProperty(PAINT_PAGEBREAKS_SETTING, paintPageBreaks);
-	}
-
 	public boolean getShowRulers()
 	{
 		return getProperty(SHOW_RULERS_SETTING, SHOW_RULERS_DEFAULT);
-	}
-
-	public void setShowRulers(boolean showRulers)
-	{
-		setProperty(SHOW_RULERS_SETTING, showRulers);
 	}
 
 	public boolean getMarqueeSelectOuter()
@@ -388,11 +353,6 @@ public class DesignerPreferences
 		return getProperty(GUIDE_SIZE_SETTING, GUIDE_SIZE_DEFAULT);
 	}
 
-	public void setGuideSize(int guideSize)
-	{
-		setProperty(GUIDE_SIZE_SETTING, guideSize);
-	}
-
 	public RGB getGridColor()
 	{
 		return ColorResource.ColorAwt2Rgb(PersistHelper.createColor(getProperty(GRID_COLOR_SETTING, GRID_COLOR_DEFAULT)));
@@ -404,24 +364,10 @@ public class DesignerPreferences
 			PersistHelper.createColor(getProperty(SAME_HEIGHT_WIDTH_INDICATOR_COLOR_SETTING, SAME_HEIGHT_WIDTH_INDICATOR_COLOR_DEFAULT)));
 	}
 
-	public void setGridColor(RGB rgb)
-	{
-		setProperty(GRID_COLOR_SETTING, PersistHelper.createColorString(ColorResource.ColoRgb2Awt(rgb)));
-	}
-
-	public void setSameHeightWidthIndicatorColor(RGB rgb)
-	{
-		setProperty(SAME_HEIGHT_WIDTH_INDICATOR_COLOR_SETTING, PersistHelper.createColorString(ColorResource.ColoRgb2Awt(rgb)));
-	}
 
 	public RGB getAlignmentGuideColor()
 	{
 		return ColorResource.ColorAwt2Rgb(PersistHelper.createColor(getProperty(ALIGNMENT_GUIDE_COLOR_SETTING, ALIGNMENT_GUIDE_COLOR_DEFAULT)));
-	}
-
-	public void setAlignmentGuideColor(RGB rgb)
-	{
-		setProperty(ALIGNMENT_GUIDE_COLOR_SETTING, PersistHelper.createColorString(ColorResource.ColoRgb2Awt(rgb)));
 	}
 
 	public int getGridSize()
@@ -429,19 +375,9 @@ public class DesignerPreferences
 		return getProperty(GRID_SIZE_SETTING, GRID_SIZE_DEFAULT);
 	}
 
-	public void setGridSize(int gridSize)
-	{
-		setProperty(GRID_SIZE_SETTING, gridSize);
-	}
-
 	public int getGridPointSize()
 	{
 		return getProperty(GRID_POINTSIZE_SETTING, GRID_POINTSIZE_DEFAULT);
-	}
-
-	public void setGridPointSize(int gridPointSize)
-	{
-		setProperty(GRID_POINTSIZE_SETTING, gridPointSize);
 	}
 
 	public boolean getNoneSnapTo()
@@ -459,19 +395,9 @@ public class DesignerPreferences
 		return SNAP_TO_ALIGMNENT.equals(getProperty(SNAPTO_SETTING, SNAPTO_DEFAULT));
 	}
 
-	public void setSnapTo(boolean grid, boolean alignment)
-	{
-		setProperty(SNAPTO_SETTING, grid ? SNAP_TO_GRID : alignment ? SNAP_TO_ALIGMNENT : SNAP_TO_NONE);
-	}
-
 	public boolean getFeedbackGrid()
 	{
 		return getProperty(FEEDBACK_GRID_SETTING, FEEDBACK_GRID_DEFAULT);
-	}
-
-	public void setFeedbackGrid(boolean feedbackGrid)
-	{
-		setProperty(FEEDBACK_GRID_SETTING, feedbackGrid);
 	}
 
 	public boolean getFeedbackAlignment()
