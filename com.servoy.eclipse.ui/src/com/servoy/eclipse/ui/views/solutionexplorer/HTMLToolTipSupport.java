@@ -100,8 +100,7 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 
 		});
 		String text = toolTipText;
-		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(text));
-		try
+		try (JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(text)))
 		{
 			text = reader.getString();
 		}

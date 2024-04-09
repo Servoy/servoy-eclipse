@@ -144,7 +144,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 							// the contains(">") and "<" below are an attempt to detect if the tooltip text is html based or just a simple String (in which case we need to change \n to <br/>)
 							return HTMLToolTipSupport.createBrowserTooltipContentArea(this,
 								lastTooltipText.contains("<") && lastTooltipText.contains(">") ? lastTooltipText : lastTooltipText.replaceAll("\\n", "<br/>"),
-								parent, false, 600, 450, 150, 50);
+								parent, false, 600, 450, 250, 150);
 						} // else should never happen because of shouldCreateToolTip() below that should have returned false
 					}
 					return new Composite(parent, SWT.NONE); // no tooltip
