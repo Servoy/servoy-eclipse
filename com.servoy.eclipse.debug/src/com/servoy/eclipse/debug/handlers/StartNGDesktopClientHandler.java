@@ -84,6 +84,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	public static final String NGDESKTOP_APP_NAME = "servoyngdesktop";
 	public static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "https://download.servoy.com/ngdesktop/");
 	protected static String PLATFORM = Utils.isAppleMacOS() ? "-mac" : (Utils.isWindowsOS()) ? "-win" : "-linux";
+	protected static String ARCHITECTURE = Utils.isArmArchitecture() ? "-arm64" : "";
 	protected static String LOCAL_PATH = Activator.getDefault().getStateLocation().toOSString() + File.separator;
 	protected static String NGDESKTOP_PREFIX = NGDESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
 
@@ -194,8 +195,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			{
 				if (archiveUpdateNeeded())
 				{
-					URL archiveUrl = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + NGDESKTOP_PREFIX + PLATFORM + ".tar.gz");
-					String savePath = Utils.isAppleMacOS() ? LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM : LOCAL_PATH;
+					URL archiveUrl = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + ".tar.gz");
+					String savePath = Utils.isAppleMacOS() ? LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE : LOCAL_PATH;
 					deleteVersionFile();
 					downloadCancelled = downloadArchive(archiveUrl, savePath);
 				}
@@ -336,7 +337,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
 			File.separator + "servoy.json";
 
-		File configFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + configLocation).normalize().toFile();// + fileUrl);
+		File configFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + configLocation).normalize().toFile();// + fileUrl);
 		JSONObject configObject = getJsonObj(configFile, solutionUrl);
 
 		try (FileWriter file = new FileWriter(configFile);
@@ -356,7 +357,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		try
 		{
 			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
-			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + File.separator + NGDESKTOP_APP_NAME + extension;
+			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + File.separator + NGDESKTOP_APP_NAME + extension;
 			monitor.beginTask("Open NGDesktop", 3);
 			String[] cmdArgs = Utils.isAppleMacOS() ? new String[] { "/usr/bin/open", command } : new String[] { command };
 			Runtime.getRuntime().exec(cmdArgs);
@@ -468,7 +469,8 @@ class DownloadNgDesktop implements IRunnableWithProgress
 		String fString = Activator.getDefault().getStateLocation().toOSString();
 		if (Utils.isAppleMacOS())
 		{
-			fString += File.separator + "servoyngdesktop" + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-mac";
+			fString += File.separator + "servoyngdesktop" + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-mac" +
+				StartNGDesktopClientHandler.ARCHITECTURE;
 		}
 		File f = new File(fString);
 		f.mkdirs();
