@@ -44,12 +44,27 @@ public class ServoyDynamicMetaType extends DefaultMetaType
 	@Override
 	public IRType toRType(ITypeSystem typeSystem, Type type)
 	{
+		// a bit hard coded to get the correct type of the record type of this foundset by checking the selected record method.
+		if (type.getName().startsWith("JSFoundSet") && type.findDirectMember("getSelectedRecord") != null)
+		{
+			Type recordType = type.findDirectMember("getSelectedRecord").getDirectType();
+			return new ServoyDynamicArrayRuntimeType(typeSystem, type, recordType.toRType(typeSystem));
+		}
+		// for a dataset we need to look at the record type that a dataset can have and use that one.
+		if (type.getName().startsWith("JSDataSet<"))
+		{
+			String fullTypeName = type.getName();
+			String recordType = fullTypeName.substring("JSDataSet<".length(), fullTypeName.length() - 1);
+			Type t = TypeCreator.getRecordType(recordType);
+			t.setName(recordType);
+			return new ServoyDynamicArrayRuntimeType(typeSystem, type, t.toRType(typeSystem));
+		}
 		return new ServoyDynamicRuntimeType(typeSystem, type);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.MetaType#getId()
 	 */
 	public String getId()

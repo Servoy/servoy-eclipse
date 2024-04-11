@@ -2521,7 +2521,7 @@ public class TypeCreator extends TypeCache
 	 * @param recordType
 	 * @return
 	 */
-	private static Type getRecordType(String type)
+	public static Type getRecordType(String type)
 	{
 		String recordType = type;
 		if (recordType.startsWith("{") && recordType.endsWith("}"))
