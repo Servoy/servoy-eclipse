@@ -1616,8 +1616,7 @@ public class SolutionExplorerTreeContentProvider
 				Display display = Display.getDefault();
 				try
 				{
-					int px = Math.round(16 * display.getDPI().y / 96f);
-					Image image = new Image(display, new ImageData(is).scaledTo(px, px));
+					Image image = new Image(display, new ImageData(is).scaledTo(16, 16));
 					if (image != null) imageCache.put(path, image);
 				}
 				catch (SWTException e)
