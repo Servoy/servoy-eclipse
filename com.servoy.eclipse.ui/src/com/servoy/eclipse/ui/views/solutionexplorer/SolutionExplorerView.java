@@ -433,7 +433,6 @@ public class SolutionExplorerView extends ViewPart
 
 	private LoadRelationsAction loadRelationsAction;
 
-	private ToggleFormCommandsAction toggleFormCommandsActions;
 	private ConvertToCSSPositionFormAction convertToCSSPositionForm;
 	private AddFormsToWorkingSet addFormsToWorkingSet;
 
@@ -2702,7 +2701,6 @@ public class SolutionExplorerView extends ViewPart
 		if (renameMediaFolderAction.isEnabled()) manager.add(renameMediaFolderAction);
 
 		manager.add(new Separator());
-		if (toggleFormCommandsActions.isEnabled()) manager.add(toggleFormCommandsActions);
 		if (convertToCSSPositionForm.isEnabled()) manager.add(convertToCSSPositionForm);
 		if (addFormsToWorkingSet.isEnabled()) manager.add(addFormsToWorkingSet);
 		if (referenceToRegularFormAction.isEnabled()) manager.add(referenceToRegularFormAction);
@@ -3123,7 +3121,6 @@ public class SolutionExplorerView extends ViewPart
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(shell);
 		flagTenantColumn = new FlagTenantColumnAction(this);
-		toggleFormCommandsActions = new ToggleFormCommandsAction(this);
 		convertToCSSPositionForm = new ConvertToCSSPositionFormAction(this);
 		configureLessTheme = new ConfigureLessThemeAction(this);
 		addFormsToWorkingSet = new AddFormsToWorkingSet(this);
@@ -3521,7 +3518,6 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(hideUnhideTablesAction);
 		addTreeSelectionChangedListener(enableServer);
 		addTreeSelectionChangedListener(flagTenantColumn);
-		addTreeSelectionChangedListener(toggleFormCommandsActions);
 		addTreeSelectionChangedListener(convertToCSSPositionForm);
 		addTreeSelectionChangedListener(addFormsToWorkingSet);
 		addTreeSelectionChangedListener(expandNodeAction);
