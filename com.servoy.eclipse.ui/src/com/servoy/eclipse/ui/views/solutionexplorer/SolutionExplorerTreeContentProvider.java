@@ -399,7 +399,10 @@ public class SolutionExplorerTreeContentProvider
 		resourcesChildren.add(stylesNode);
 		resourcesChildren.add(userGroupSecurityNode);
 		resourcesChildren.add(i18nFilesNode);
-		resourcesChildren.add(templatesNode);
+		if (templatesNode.children != null && templatesNode.children.length > 0)
+		{
+			resourcesChildren.add(templatesNode);
+		}
 		if (hasChildren(componentsFromResourcesNode))
 		{
 			resourcesChildren.add(componentsFromResourcesNode);
