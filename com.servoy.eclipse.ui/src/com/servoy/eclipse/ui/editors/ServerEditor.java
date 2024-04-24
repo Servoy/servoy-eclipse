@@ -54,7 +54,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -91,7 +90,6 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
-import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -369,16 +367,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		excomposite.setExpanded(false);
 		excomposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		excomposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
-		if (IconPreferences.getInstance().getUseDarkThemeIcons())
-		{
-			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
-				.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
-			if (darkFGColor != null)
-			{
-				excomposite.setTitleBarForeground(darkFGColor);
-				excomposite.setActiveToggleColor(darkFGColor);
-			}
-		}
 
 		advancedSettingsComposite = new Composite(excomposite, SWT.NONE);
 		advancedSettingsComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");

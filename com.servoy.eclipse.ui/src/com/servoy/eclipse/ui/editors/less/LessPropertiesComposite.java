@@ -55,7 +55,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -64,7 +63,6 @@ import org.eclipse.ui.forms.widgets.ImageHyperlink;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.CachingChildrenComposite;
 import com.servoy.eclipse.ui.editors.less.LessPropertyEntry.LessPropertyType;
-import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 
 /**
@@ -261,16 +259,6 @@ public class LessPropertiesComposite extends Composite
 				excomposite.setFont(boldFont);
 				excomposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 				excomposite.setExpanded(categoryComposites.size() == 0);
-				if (IconPreferences.getInstance().getUseDarkThemeIcons())
-				{
-					Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
-						.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
-					if (darkFGColor != null)
-					{
-						excomposite.setTitleBarForeground(darkFGColor);
-						excomposite.setActiveToggleColor(darkFGColor);
-					}
-				}
 
 				ExpandableLessPropertiesComposite expandComposite = new ExpandableLessPropertiesComposite(excomposite, propertiesLessEditorInput, boldFont,
 					categoryName);

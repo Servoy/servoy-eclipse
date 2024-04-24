@@ -66,6 +66,12 @@ ExpandBar {
     color: #330099;
 }
 
+ExpandableComposite {
+    swt-titlebar-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
+    tb-toggle-hover-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
+    tb-toggle-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
+}
+
 #svyeditor * {
     background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
