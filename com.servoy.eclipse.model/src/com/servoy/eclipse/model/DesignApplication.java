@@ -81,6 +81,7 @@ import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.querybuilder.IQueryBuilder;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.scripting.JSBlobLoaderBuilder;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.server.shared.IApplicationServerAccess;
@@ -167,6 +168,13 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public Object generateBrowserFunction(String functionString)
 	{
 		return functionString;
+	}
+
+	@Override
+	public JSBlobLoaderBuilder createUrlBlobloaderBuilder(String dataprovider)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public String getClientOSName()
