@@ -81,12 +81,13 @@ public class ScriptColorProvider
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void createKeywords()
 	{
 		createKeyword(IExecutingEnviroment.TOPLEVEL_JSUNIT);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_UTILS);
+		createKeyword(IExecutingEnviroment.TOPLEVEL_CLIENTUTILS);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_SECURITY);
 		createKeyword("elements");
 		createKeyword("controller");
@@ -123,7 +124,7 @@ public class ScriptColorProvider
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void createRules()
 	{

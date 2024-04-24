@@ -183,6 +183,7 @@ import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
@@ -551,6 +552,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.UTILS)
 			{
 				lm = getJSMethods(JSUtils.class, "utils", null, UserNodeType.UTIL_ITEM, null, null);
+			}
+			else if (type == UserNodeType.CLIENT_UTILS)
+			{
+				lm = getJSMethods(JSClientUtils.class, "clientutils", null, UserNodeType.CLIENT_UTIL_ITEM, null, null);
 			}
 			else if (type == UserNodeType.JSUNIT)
 			{

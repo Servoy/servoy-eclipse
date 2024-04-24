@@ -172,6 +172,7 @@ public class Messages extends NLS
 	public static String TreeStrings_ImportHookTooltip;
 	public static String TreeStrings_Templates;
 	public static String TreeStrings_Utils;
+	public static String TreeStrings_ClientUtils;
 	public static String TreeStrings_JSUnit;
 	public static String TreeStrings_ValueLists;
 	public static String TreeStrings_variables;
