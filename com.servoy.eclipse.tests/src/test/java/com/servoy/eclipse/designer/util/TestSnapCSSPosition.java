@@ -113,8 +113,8 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		DesignerUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, false);
 
-		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.left));
+		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
 		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
 
 		assertEquals("css pos left should be set to the right value copied from the target", "440", newPosition.left);
@@ -135,8 +135,8 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		DesignerUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, false);
 
-		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.left));
+		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
 		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
 
 		assertEquals("css pos left should be set to the right value copied from the target", "440", newPosition.left);
@@ -219,4 +219,115 @@ public class TestSnapCSSPosition
 		assertEquals("css pos top should be set to the computed value", "269", newPosition.top);
 		assertEquals("css pos height should be set", "30", newPosition.height);
 	}
+	
+	@Test
+	public void testSnapToRight_Percentages1() throws Exception
+	{
+		String property = "right";
+		JSONObject json = new JSONObject("{prop: right }");
+
+		CSSPosition old = null; //component is new
+		CSSPosition newPosition = new CSSPosition("136", "-1", "-1", "432", "80", "30");
+		CSSPosition targetPosition = new CSSPosition("65", "-1", "-1", "30%", "320", "30"); //right property not set
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
+		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
+		DesignerUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, false);
+
+		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
+		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+
+		assertEquals("css pos left should be set to the computed value", "calc(30% + 240px)", newPosition.left);
+		assertEquals("css pos width should not be changed", "80", newPosition.width);
+	}
+	
+	@Test
+	public void testSnapToRight_Percentages2() throws Exception
+	{
+		String property = "right";
+		JSONObject json = new JSONObject("{prop: right }");
+
+		CSSPosition old = new CSSPosition("300", "50%", "-1", "200", "-1", "30");//width not set
+		CSSPosition newPosition = new CSSPosition("136", "20%", "-1", "392", "-1", "30");
+		CSSPosition targetPosition = new CSSPosition("65", "-1", "-1", "30%", "320", "30"); //right property not set
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
+		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
+		DesignerUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, false);
+
+		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
+		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+
+		assertEquals("css pos left should be set to the computed value", "calc(30% + 200px)", newPosition.left);
+		assertEquals("css pos width should be changed", "120", newPosition.width);
+	}
+	
+	@Test
+	public void testSnapToRight_Percentages3() throws Exception
+	{
+		String property = "right";
+		JSONObject json = new JSONObject("{prop: left }");
+
+		CSSPosition old = null; //component is new
+		CSSPosition newPosition = new CSSPosition("136", "-1", "-1", "112", "80", "30");
+		CSSPosition targetPosition = new CSSPosition("65", "-1", "-1", "30%", "320", "30"); //right property not set
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
+		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
+		DesignerUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, false);
+
+		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
+		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+
+		assertEquals("css pos right should be set to the left value computed from the target", "70%", newPosition.right);
+		assertEquals("css pos width should not be changed", "80", newPosition.width);
+	}
+	
+	@Test
+	public void testSnapToLeft_Percentages1() throws Exception
+	{
+		String property = "left";
+		JSONObject json = new JSONObject("{prop: left }");
+
+		CSSPosition old = null; //component is new
+		CSSPosition newPosition = new CSSPosition("136", "-1", "-1", "192", "80", "30");
+		CSSPosition targetPosition = new CSSPosition("65", "20%", "-1", "-1", "320", "30"); //left property not set
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
+		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
+		DesignerUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, false);
+
+		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
+		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+
+		assertEquals("css pos right should be set to the computed value", "calc(20% + 240px)", newPosition.right);
+		assertEquals("css pos width should be set", "80", newPosition.width);
+	}
+	
+	@Test
+	public void testSnapToLeft_Percentages2() throws Exception
+	{
+		String property = "left";
+		JSONObject json = new JSONObject("{prop: right }"); //align the left side of the component to the right of the target
+
+		CSSPosition old = new CSSPosition("250", "-1", "-1", "150", "100", "30"); //component is anchored top, left
+		CSSPosition newPosition = new CSSPosition("280", "-1", "-1", "192", "100", "30");
+		CSSPosition targetPosition = new CSSPosition("65", "-1", "-1", "30%", "50%", "30");//right property not set
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
+		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
+		DesignerUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, false);
+
+		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
+		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+
+		assertEquals("css pos left should be set to the right value copied from the target", "80%", newPosition.left);
+		assertEquals("css pos width should not be changed", "100", newPosition.width);
+	}
+
 }

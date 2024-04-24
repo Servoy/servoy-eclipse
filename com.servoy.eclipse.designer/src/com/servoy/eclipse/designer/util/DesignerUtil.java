@@ -907,7 +907,7 @@ public class DesignerUtil
 	 * @param jsonObject contains the property name to copy from the target; for instance align the right edge with the right of left property of the target
 	 * @param property the property to be set (one of top, bottom, left, right)
 	 * @param newPosition the css position object on which the values should be set
-	 * @param oldPosition the old css position object of the source componen; null for new components
+	 * @param oldPosition the old css position object of the source component; null for new components
 	 * @param targetPosition the css position object of the snap target
 	 * @param containerSize the size of the source component parent
 	 * @param targetContainerSize the size of the target component parent
@@ -919,7 +919,9 @@ public class DesignerUtil
 	{
 		String sizeProperty = getSizeProperty(property);
 		String oppositeProperty = getOppositeProperty(property);
-		CSSValue val = getCssValue(targetPosition, jsonObject.optString("prop", property));
+		String targetProperty = jsonObject.optString("prop", property);
+		String targetOppositeProperty = getOppositeProperty(oppositeProperty);
+		CSSValue val = getCssValue(targetPosition, targetProperty);
 		if (val.isSet())
 		{
 			//if the property is set on the target, then we copy on the source component and clear the opposite property if the size property is set
@@ -935,7 +937,7 @@ public class DesignerUtil
 			else
 			{
 				//when moving a component, if the property is set on the target, then we copy its value on the source component
-				if (property.equals(jsonObject.optString("prop", property)))
+				if (property.equals(targetProperty))
 				{
 					setCssValue(newPosition, property, val);
 				}
@@ -986,24 +988,49 @@ public class DesignerUtil
 				setCssValue(newPosition, oppositeProperty, computedOppositePropertySourceComponent);
 			}
 		}
-		//else error?
+		else if (getCssValue(targetPosition, targetOppositeProperty).isSet() && getCssValue(targetPosition, sizeProperty).isSet())
+		{
+			CSSValue oppositePropertyValue = getCssValue(targetPosition, targetOppositeProperty);
+			CSSValue computed = computeValueBasedOnOppositeProperty(targetPosition, targetProperty, targetContainerSize,
+				oppositePropertyValue);
+
+			if (property.equals(targetProperty))
+			{
+				//use the computed property value of the target
+				setCssValue(newPosition, property, computed);
+			}
+			else
+			{
+				CSSValue computedPropertyValue = computeValueBasedOnOppositeTargetProperty(property, containerSize, computed);
+				setCssValue(newPosition, property, computedPropertyValue);
+			}
+		}
 	}
 
 	private static CSSValue computeValueBasedOnOppositeProperty(CSSPosition position, String property, java.awt.Dimension containerSize,
 		CSSValue oppositePropertyValue)
 	{
-		boolean isPXOnly = oppositePropertyValue.isPx();
-		int oppositeValuePX = isPXOnly ? oppositePropertyValue.getPixels() : //
-			CSSPositionUtils.getPixelsValue(oppositePropertyValue.toString()); //TODO %
+		int px = oppositePropertyValue.getPixels() != 0 ? oppositePropertyValue.getPixels() : 0;
 		switch (property)
 		{
 			case "left" :
 			case "right" :
-				return new CSSValue(0, containerSize.width - oppositeValuePX - CSSPositionUtils.getPixelsValue(position.width));
-
+				CSSValue width = getCssValue(position, "width");
+				if (oppositePropertyValue.isPx() && width.isPx())
+				{
+					return new CSSValue(0, containerSize.width - oppositePropertyValue.getPixels() - width.getPixels());
+				}
+				return new CSSValue(100 - oppositePropertyValue.getPercentage() - width.getPercentage(), //
+					width.getPixels() != -1 || oppositePropertyValue.getPixels() != -1 ? (-1) * (px + width.getPixels()) : 0);
 			case "top" :
 			case "bottom" :
-				return new CSSValue(0, containerSize.height - oppositeValuePX - CSSPositionUtils.getPixelsValue(position.height));
+				CSSValue height = getCssValue(position, "height");
+				if (oppositePropertyValue.isPx() && height.isPx())
+				{
+					return new CSSValue(0, containerSize.height - oppositePropertyValue.getPixels() - height.getPixels());
+				}
+				return new CSSValue(100 - oppositePropertyValue.getPercentage() - height.getPercentage(), //
+					height.getPixels() != 1 || oppositePropertyValue.getPixels() != -1 ? (-1) * (px + height.getPixels()) : 0);
 		}
 		return CSSValue.NOT_SET;
 	}
@@ -1011,39 +1038,45 @@ public class DesignerUtil
 	private static CSSValue computeValueBasedOnOppositeTargetProperty(String property, java.awt.Dimension containerSize,
 		CSSValue oppositePropertyValue)
 	{
-		boolean isPXOnly = oppositePropertyValue.isPx();
-		int oppositeValuePX = isPXOnly ? oppositePropertyValue.getPixels() : //
-			CSSPositionUtils.getPixelsValue(oppositePropertyValue.toString()); //TODO %
+		if (oppositePropertyValue.isPercentage())
+		{
+			return new CSSValue(100 - oppositePropertyValue.getPercentage(), 0);
+		}
 		switch (property)
 		{
 			case "left" :
 			case "right" :
-				return new CSSValue(0, containerSize.width - oppositeValuePX);
+				return new CSSValue(0, containerSize.width - oppositePropertyValue.getAsPixels(containerSize.width));
 
 			case "top" :
 			case "bottom" :
-				return new CSSValue(0, containerSize.height - oppositeValuePX);
+				return new CSSValue(0, containerSize.height - oppositePropertyValue.getAsPixels(containerSize.height));
 		}
 		return CSSValue.NOT_SET;
 	}
 
+
 	private static CSSValue computeDimension(String property, CSSValue value, java.awt.Dimension containerSize, CSSValue oppositePropertyValue)
 	{
-		boolean isPXOnly = value.isPx() && oppositePropertyValue.isPx();
-		int propertyValue = value.isPx() ? value.getPixels() : CSSPositionUtils.getPixelsValue(value.toString()); //TODO %
-		int oppositeValuePX = isPXOnly ? oppositePropertyValue.getPixels() : //
-			CSSPositionUtils.getPixelsValue(oppositePropertyValue.toString()); //TODO %
+		if (value.isPercentage() && oppositePropertyValue.isPercentage())
+		{
+			return new CSSValue(100 - oppositePropertyValue.getPercentage() - value.getPercentage(), 0);
+		}
 		switch (property)
 		{
 			case "left" :
-				return new CSSValue(0, containerSize.width - oppositeValuePX - propertyValue);
+				return new CSSValue(0, containerSize.width - oppositePropertyValue.getAsPixels(containerSize.width) //
+					- value.getAsPixels(containerSize.width));
 			case "top" :
-				return new CSSValue(0, containerSize.height - oppositeValuePX - propertyValue);
+				return new CSSValue(0, containerSize.height - oppositePropertyValue.getAsPixels(containerSize.height) //
+					- value.getAsPixels(containerSize.height));
 
 			case "right" :
-				return new CSSValue(0, containerSize.width - propertyValue - oppositeValuePX);
+				return new CSSValue(0, containerSize.width - value.getAsPixels(containerSize.width) //
+					- oppositePropertyValue.getAsPixels(containerSize.width));
 			case "bottom" :
-				return new CSSValue(0, containerSize.height - propertyValue - oppositeValuePX);
+				return new CSSValue(0, containerSize.height - value.getAsPixels(containerSize.height) //
+					- oppositePropertyValue.getAsPixels(containerSize.height));
 		}
 		return CSSValue.NOT_SET;
 	}

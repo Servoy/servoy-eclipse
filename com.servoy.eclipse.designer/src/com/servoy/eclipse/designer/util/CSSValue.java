@@ -94,7 +94,17 @@ public class CSSValue
 
 	public boolean isPx()
 	{
-		return percentage == 0;
+		return percentage == 0 && pixels != -1;
+	}
+
+	public boolean isPercentage()
+	{
+		return percentage != 0 && pixels == 0;
+	}
+
+	public int getAsPixels(int containerSize)
+	{
+		return Math.round(percentage * containerSize / 100) + pixels;
 	}
 
 	@Override
