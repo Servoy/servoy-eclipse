@@ -1558,6 +1558,17 @@ public class SolutionDeserializer
 					object.put("start", comment.sourceStart());
 					object.put("end", comment.sourceEnd());
 					object.put("text", comment.getText());
+					int linenr = 1;
+					int commentLineIndex = comment.sourceStart();
+					for (Line line : lines)
+					{
+						if (line.start > commentLineIndex)
+						{
+							linenr = line.line;
+							break;
+						}
+					}
+					object.put("linenr", linenr);
 					array.put(object);
 				}
 				jsonObjects.get(0).put(EXTRA_DOC_COMMENTS, array.toString());

@@ -48,8 +48,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.javascript.ast.Comment;
-import org.eclipse.dltk.javascript.ast.MultiLineComment;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -235,12 +233,12 @@ public class SolutionSerializer
 		final String userTemplate)
 	{
 		final Map<IPersist, Object> fileContents = new HashMap<IPersist, Object>(); // map(persist -> contents)
-		final TreeSet<Comment> comments = new TreeSet<Comment>(new Comparator<Comment>()
+		final TreeSet<JSONObject> comments = new TreeSet<JSONObject>(new Comparator<JSONObject>()
 		{
 			@Override
-			public int compare(Comment o1, Comment o2)
+			public int compare(JSONObject o1, JSONObject o2)
 			{
-				return o1.sourceStart() - o2.sourceStart();
+				return o1.getInt("start") - o2.getInt("start");
 			}
 		});
 		parent.acceptVisitor(new IPersistVisitor()
@@ -263,12 +261,7 @@ public class SolutionSerializer
 								JSONArray array = new JSONArray((String)prop);
 								for (int i = 0; i < array.length(); i++)
 								{
-									JSONObject jsonObject = array.getJSONObject(i);
-									MultiLineComment multiLineComment = new MultiLineComment();
-									multiLineComment.setStart(jsonObject.getInt("start"));
-									multiLineComment.setEnd(jsonObject.getInt("end"));
-									multiLineComment.setText(jsonObject.getString("text"));
-									comments.add(multiLineComment);
+									comments.add(array.getJSONObject(i));
 								}
 							}
 							catch (JSONException e)
@@ -297,23 +290,40 @@ public class SolutionSerializer
 				{
 					if (!comments.isEmpty())
 					{
-						Comment nextComment = comments.first();
-						while (nextComment.sourceStart() <= (sb.length() + ((CharSequence)content).length()))
+						JSONObject nextComment = comments.first();
+						while (nextComment.getInt("start") <= (sb.length() + ((CharSequence)content).length() - 1))
 						{
-							sb.append(nextComment.getText());
+							sb.append(nextComment.getString("text"));
 							sb.append('\n');
 							sb.append('\n');
 							comments.remove(nextComment);
+							if (comments.isEmpty()) break;
 							nextComment = comments.first();
 						}
 					}
 					sb.append(((CharSequence)content).toString());
+					if (!comments.isEmpty())
+					{
+						JSONObject nextComment = comments.first();
+						if (nextComment.has("linenr") && ((IScriptElement)persist).getLineNumberOffset() == nextComment.getInt("linenr"))
+						{
+							String currentContent = sb.toString();
+							if (currentContent.lastIndexOf("\n") == currentContent.length() - 1)
+							{
+								sb.deleteCharAt(currentContent.length() - 1);
+								sb.append(' ');
+							}
+							sb.append(nextComment.getString("text"));
+							sb.append('\n');
+							comments.remove(nextComment);
+						}
+					}
 				}
 			}
 
-			for (Comment comment : comments)
+			for (JSONObject comment : comments)
 			{
-				sb.append(comment.getText());
+				sb.append(comment.getString("text"));
 				sb.append('\n');
 				sb.append('\n');
 			}
@@ -346,7 +356,7 @@ public class SolutionSerializer
 			}
 
 			final Map<Pair<String, String>, Map<IPersist, Object>> projectContents = new HashMap<Pair<String, String>, Map<IPersist, Object>>();//filepathname -> map(persist -> contents)
-			final Map<Pair<String, String>, TreeSet<Comment>> projectComments = new HashMap<Pair<String, String>, TreeSet<Comment>>();//filepathname -> map(persist -> contents)
+			final Map<Pair<String, String>, TreeSet<JSONObject>> projectComments = new HashMap<Pair<String, String>, TreeSet<JSONObject>>();//filepathname -> map(persist -> contents)
 			IPersist compositeWithItems = node;
 			while (compositeWithItems != null && SolutionSerializer.isCompositeItem(compositeWithItems))
 			{
@@ -379,15 +389,15 @@ public class SolutionSerializer
 									Object prop = ((AbstractBase)p).getCustomProperty(new String[] { SolutionDeserializer.EXTRA_DOC_COMMENTS });
 									if (prop != null)
 									{
-										TreeSet<Comment> comments = projectComments.get(filepathname);
+										TreeSet<JSONObject> comments = projectComments.get(filepathname);
 										if (comments == null)
 										{
-											comments = new TreeSet<Comment>(new Comparator<Comment>()
+											comments = new TreeSet<JSONObject>(new Comparator<JSONObject>()
 											{
 												@Override
-												public int compare(Comment o1, Comment o2)
+												public int compare(JSONObject o1, JSONObject o2)
 												{
-													return o1.sourceStart() - o2.sourceStart();
+													return o1.getInt("start") - o2.getInt("start");
 												}
 											});
 											projectComments.put(filepathname, comments);
@@ -397,12 +407,7 @@ public class SolutionSerializer
 											JSONArray array = new JSONArray((String)prop);
 											for (int i = 0; i < array.length(); i++)
 											{
-												JSONObject jsonObject = array.getJSONObject(i);
-												MultiLineComment multiLineComment = new MultiLineComment();
-												multiLineComment.setStart(jsonObject.getInt("start"));
-												multiLineComment.setEnd(jsonObject.getInt("end"));
-												multiLineComment.setText(jsonObject.getString("text"));
-												comments.add(multiLineComment);
+												comments.add(array.getJSONObject(i));
 											}
 										}
 										catch (JSONException e)
@@ -438,7 +443,7 @@ public class SolutionSerializer
 
 				if (persistArray.length > 0)
 				{
-					TreeSet<Comment> comments = projectComments.get(filepathname);
+					TreeSet<JSONObject> comments = projectComments.get(filepathname);
 					OutputStream fos = fileAccess.getOutputStream(fileRelativePath);
 					int written = 0;
 					for (int i = 0; i < persistArray.length; i++)
@@ -453,11 +458,11 @@ public class SolutionSerializer
 						{
 							if (comments != null && comments.size() > 0)
 							{
-								Comment first = comments.first();
-								while (first != null && first.sourceStart() <= (written + ((CharSequence)content).length()))
+								JSONObject first = comments.first();
+								while (first != null && first.getInt("start") <= (written + ((CharSequence)content).length()))
 								{
-									written += first.getText().length();
-									fos.write(first.getText().getBytes("UTF8"));
+									written += first.getString("text").length();
+									fos.write(first.getString("text").getBytes("UTF8"));
 									fos.write('\n');
 									fos.write('\n');
 									comments.remove(first);
@@ -465,15 +470,33 @@ public class SolutionSerializer
 								}
 							}
 							written += ((CharSequence)content).length();
-							fos.write(content.toString().getBytes("UTF8"));
+							String contentString = content.toString();
+							if (comments != null && comments.size() > 0)
+							{
+								JSONObject nextComment = comments.first();
+								if (nextComment.has("linenr") && persistArray[i] instanceof IScriptElement &&
+									((IScriptElement)persistArray[i]).getLineNumberOffset() == nextComment.getInt("linenr"))
+								{
+									if (contentString.lastIndexOf("\n") == contentString.length() - 1)
+									{
+										contentString = contentString.substring(0, contentString.length() - 1);
+										contentString += ' ';
+									}
+									contentString += nextComment.getString("text");
+									written += nextComment.getString("text").length();
+									contentString += "\n";
+									comments.remove(nextComment);
+								}
+							}
+							fos.write(contentString.getBytes("UTF8"));
 							if (i < persistArray.length - 1) fos.write('\n');
 						}
 					}
 					if (comments != null && comments.size() > 0)
 					{
-						for (Comment comment : comments)
+						for (JSONObject comment : comments)
 						{
-							fos.write(comment.getText().getBytes("UTF8"));
+							fos.write(comment.getString("text").getBytes("UTF8"));
 							fos.write('\n');
 							fos.write('\n');
 						}
@@ -936,7 +959,7 @@ public class SolutionSerializer
 					}
 					else if (type == IColumnTypes.NUMBER)
 					{
-						if (val != null)
+						if (val != null && !val.contains("("))
 						{
 							val = val.replace(",", "."); // you cannot have comma as decimal separator inside JS code
 						}
