@@ -70,19 +70,19 @@
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-annotations</artifactId>
-                    <version>2.16.1</version>
+                    <version>2.17.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
-                    <version>2.16.1</version>
+                    <version>2.17.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
-                    <version>2.16.1</version>
+                    <version>2.17.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -100,7 +100,7 @@
                 <dependency>
                     <groupId>com.knuddels</groupId>
                     <artifactId>jtokkit</artifactId>
-                    <version>0.6.1</version>
+                    <version>1.0.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -190,7 +190,7 @@
                 <dependency>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex</artifactId>
-                    <version>3.1.6</version>
+                    <version>3.1.7</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -220,7 +220,7 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.14.11</version>
+                    <version>1.14.14</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -232,13 +232,13 @@
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-compress</artifactId>
-                    <version>1.26.0</version>
+                    <version>1.26.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-dbcp2</artifactId>
-                    <version>2.11.0</version>
+                    <version>2.12.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -256,7 +256,7 @@
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-text</artifactId>
-                    <version>1.11.0</version>
+                    <version>1.12.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
