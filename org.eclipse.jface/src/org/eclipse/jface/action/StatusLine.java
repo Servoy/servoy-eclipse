@@ -18,6 +18,8 @@ package org.eclipse.jface.action;
 
 import static org.eclipse.swt.events.SelectionListener.widgetSelectedAdapter;
 
+import java.util.Objects;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressIndicator;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -424,7 +426,6 @@ import org.eclipse.swt.widgets.ToolItem;
 
 	/**
 	 * Hides the Cancel button and ProgressIndicator.
-	 *
 	 */
 	protected void hideProgress() {
 
@@ -580,15 +581,16 @@ import org.eclipse.swt.widgets.ToolItem;
 	 */
 	@Override
 	public void setTaskName(String name) {
-		if (name == null)
-			fTaskName = Util.ZERO_LENGTH_STRING;
-		else
-			fTaskName = name;
+		String s = (name == null) ? Util.ZERO_LENGTH_STRING : name;
+		boolean changed = !Objects.equals(fTaskName, s);
+		if (changed) {
+			fTaskName = s;
+			setMessage(s);
+		}
 	}
 
 	/**
 	 * Makes the Cancel button visible.
-	 *
 	 */
 	protected void showButton() {
 		if (fToolBar != null && !fToolBar.isDisposed()) {
@@ -601,7 +603,6 @@ import org.eclipse.swt.widgets.ToolItem;
 
 	/**
 	 * Shows the Cancel button and ProgressIndicator.
-	 *
 	 */
 	protected void showProgress() {
 		if (!fProgressIsVisible && !isDisposed()) {
