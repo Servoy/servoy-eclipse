@@ -54,6 +54,7 @@ public class ElementLabelProvider implements IElementLabelProviderExtension
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_I18N);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_HISTORY);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_UTILS);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_CLIENTUTILS);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_JSUNIT);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER);

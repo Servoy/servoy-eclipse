@@ -36,26 +36,27 @@ public class KeywordProvider implements IKeywordProvider
 	{
 		Arrays.sort(keywords = new String[] { //
 
-		IExecutingEnviroment.TOPLEVEL_JSUNIT, //
-		IExecutingEnviroment.TOPLEVEL_UTILS, //
-		IExecutingEnviroment.TOPLEVEL_SECURITY, //
-		"elements", //
-		"controller", //
-		"currentcontroller", //
-		IExecutingEnviroment.TOPLEVEL_APPLICATION, //
-		IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, //
-		IExecutingEnviroment.TOPLEVEL_DATASOURCES, //
-		IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, //
-		ScriptVariable.GLOBAL_SCOPE, //
-		IExecutingEnviroment.TOPLEVEL_SCOPES, //
-		IExecutingEnviroment.TOPLEVEL_FORMS, //
-		IExecutingEnviroment.TOPLEVEL_HISTORY, //
-		IExecutingEnviroment.TOPLEVEL_PLUGINS, //
-		"_super", //
+			IExecutingEnviroment.TOPLEVEL_JSUNIT, //
+			IExecutingEnviroment.TOPLEVEL_UTILS, //
+			IExecutingEnviroment.TOPLEVEL_CLIENTUTILS, //
+			IExecutingEnviroment.TOPLEVEL_SECURITY, //
+			"elements", //
+			"controller", //
+			"currentcontroller", //
+			IExecutingEnviroment.TOPLEVEL_APPLICATION, //
+			IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, //
+			IExecutingEnviroment.TOPLEVEL_DATASOURCES, //
+			IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, //
+			ScriptVariable.GLOBAL_SCOPE, //
+			IExecutingEnviroment.TOPLEVEL_SCOPES, //
+			IExecutingEnviroment.TOPLEVEL_FORMS, //
+			IExecutingEnviroment.TOPLEVEL_HISTORY, //
+			IExecutingEnviroment.TOPLEVEL_PLUGINS, //
+			"_super", //
 
-		"FIXME", //
-		"CHECKME", //
-		"TODO" // 
+			"FIXME", //
+			"CHECKME", //
+			"TODO" //
 		});
 	}
 

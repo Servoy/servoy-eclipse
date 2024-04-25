@@ -233,6 +233,7 @@ import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSDimension;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSPoint;
@@ -425,6 +426,7 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType(JSI18N.class);
 		addAnonymousClassType(HistoryProvider.class);
 		addAnonymousClassType(JSUtils.class);
+		addAnonymousClassType(JSClientUtils.class);
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
 		addAnonymousClassType(JSSolutionModel.class);
 		addAnonymousClassType(JSDatabaseManager.class);

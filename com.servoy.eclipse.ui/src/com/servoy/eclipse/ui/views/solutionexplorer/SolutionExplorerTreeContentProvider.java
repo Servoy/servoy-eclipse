@@ -154,6 +154,7 @@ import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
@@ -372,6 +373,8 @@ public class SolutionExplorerTreeContentProvider
 
 		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, apiexplorer);
 
+		PlatformSimpleUserNode clientutils = createTypeNode(Messages.TreeStrings_ClientUtils, UserNodeType.CLIENT_UTILS, JSClientUtils.class, apiexplorer);
+
 		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, apiexplorer);
 
 		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, apiexplorer);
@@ -432,6 +435,7 @@ public class SolutionExplorerTreeContentProvider
 		apiexplorerChildren.add(application);
 		apiexplorerChildren.add(solutionModel);
 		apiexplorerChildren.add(databaseManager);
+		apiexplorerChildren.add(clientutils);
 		apiexplorerChildren.add(utils);
 		apiexplorerChildren.add(history);
 		apiexplorerChildren.add(security);
@@ -447,9 +451,10 @@ public class SolutionExplorerTreeContentProvider
 
 		apiexplorerNodes = new PlatformSimpleUserNode[] { apiexplorer };
 
-		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /*
-																																			 * exceptions ,
-																																			 */jsunit, plugins };
+		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, clientutils, utils, history, security, i18n, /*
+																																							 * exceptions
+																																							 * ,
+																																							 */jsunit, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
 
 		Job job = Job.create("Background loading of database connections", (ICoreRunnable)monitor -> {
