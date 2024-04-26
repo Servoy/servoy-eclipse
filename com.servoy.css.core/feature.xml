@@ -93,11 +93,11 @@
 
    <plugin
          id="org.eclipse.wst.sse.core"
-         version="1.2.1200.v202308180854"/>
+         version="1.2.1300.v202402230237"/>
 
    <plugin
          id="org.eclipse.wst.sse.ui"
-         version="1.7.800.v202308200343"/>
+         version="1.7.900.v202402030233"/>
 
    <plugin
          id="org.eclipse.wst.standard.schemas"
