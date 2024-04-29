@@ -14,7 +14,7 @@
 
 	<artifactId>com.servoy.eclipse.jre.macosx.aarch64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>21.0.1</version>
+	<version>21.0.3</version>
 	
 	<build>
 		<plugins>
@@ -41,7 +41,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://developer.servoy.com/jre/jre210_1_osx_aarch64.zip</url>
+							<url>https://developer.servoy.com/jre/jre210_3_osx_aarch64.zip</url>
 							<outputFileName>jre.zip</outputFileName>
 							<unpack>true</unpack>
                             <outputDirectory>${basedir}/jre</outputDirectory>
