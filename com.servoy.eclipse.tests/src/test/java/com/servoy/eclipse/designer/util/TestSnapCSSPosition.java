@@ -316,7 +316,7 @@ public class TestSnapCSSPosition
 
 		CSSPosition old = new CSSPosition("250", "-1", "-1", "150", "100", "30"); //component is anchored top, left
 		CSSPosition newPosition = new CSSPosition("280", "-1", "-1", "192", "100", "30");
-		CSSPosition targetPosition = new CSSPosition("65", "-1", "-1", "30%", "50%", "30");//right property not set
+		CSSPosition targetPosition = new CSSPosition("65", "-1", "-1", "30%", "50%", "30"); //right property not set
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
@@ -328,6 +328,25 @@ public class TestSnapCSSPosition
 
 		assertEquals("css pos left should be set to the right value copied from the target", "80%", newPosition.left);
 		assertEquals("css pos width should not be changed", "100", newPosition.width);
+	}
+	
+	@Test
+	public void testSnapToMiddleHorizontally() throws Exception
+	{
+		CSSPosition old = null; // new component
+		CSSPosition newPosition = new CSSPosition("170", "-1", "-1", "312", "80", "30");
+		CSSPosition targetPosition = new CSSPosition("65", "20%", "-1", "-1", "320", "30"); //left property not set
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
+		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
+		DesignerUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, "left", "right", "width");
+
+		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
+		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+
+		assertEquals("css pos right should be set to the right value copied from the target", "calc(20% + 120px)", newPosition.right);
+		assertEquals("css pos width should not be changed", "80", newPosition.width);
 	}
 
 }

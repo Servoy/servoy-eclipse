@@ -20,6 +20,8 @@ package com.servoy.eclipse.designer.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.Assert;
+
 import com.servoy.j2db.persistence.CSSPositionUtils;
 
 /**
@@ -33,6 +35,7 @@ public class CSSValue
 
 	private int percentage;
 	private int pixels;
+	private int parentSize;
 
 	public CSSValue(String value)
 	{
@@ -45,6 +48,13 @@ public class CSSValue
 		super();
 		this.percentage = percentage;
 		this.pixels = pixels;
+	}
+
+	public CSSValue(String value, int parentSize)
+	{
+		super();
+		parseCSSValue(value);
+		this.parentSize = parentSize;
 	}
 
 	private void parseCSSValue(String value)
@@ -104,7 +114,40 @@ public class CSSValue
 
 	public int getAsPixels(int containerSize)
 	{
+		if (parentSize > 0 && percentage == 0) return containerSize - pixels;
 		return Math.round(percentage * containerSize / 100) + pixels;
+	}
+
+	public CSSValue div(int scalar)
+	{
+		return new CSSValue(percentage / scalar, pixels / scalar);
+	}
+
+	public CSSValue minus(CSSValue val)
+	{
+		//assert that the current object is the higher property value
+		Assert.isTrue(this.parentSize > 0);
+		Assert.isTrue(val.parentSize == 0);
+
+		int px = pixels;
+		if (parentSize > 0 && percentage == 0)
+		{
+			px = val.percentage == 0 ? parentSize - pixels : (-1) * pixels;
+		}
+
+		return new CSSValue((percentage != 0 ? percentage : 100) - val.percentage, px - val.pixels);
+	}
+
+
+	public CSSValue plus(CSSValue val)
+	{
+		int o1_percentage = parentSize > 0 ? 100 - percentage : percentage;
+		int o1_pixels = parentSize > 0 && percentage == 0 ? parentSize - pixels : pixels;
+
+		int o2_percentage = val.parentSize > 0 ? 100 - val.percentage : val.percentage;
+		int o2_pixels = val.parentSize > 0 && val.percentage == 0 ? val.parentSize - val.pixels : val.pixels;
+
+		return new CSSValue(o1_percentage + o2_percentage, o1_pixels + o2_pixels);
 	}
 
 	@Override
