@@ -99,6 +99,7 @@ import org.sablo.specification.property.types.DoublePropertyType;
 import org.sablo.specification.property.types.FloatPropertyType;
 import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
+import org.sablo.specification.property.types.SecureStringPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
@@ -1400,7 +1401,8 @@ public class TypeCreator extends TypeCache
 		if (type == BooleanPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.BOOLEAN);
 		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE)
 			return getTypeRef(context, ITypeNames.NUMBER);
-		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE ||
+		if (type == SecureStringPropertyType.INSTANCE || type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE ||
+			type == TagStringPropertyType.INSTANCE ||
 			type == TitleStringPropertyType.NG_INSTANCE) return getTypeRef(context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
 		if (RuntimeComponentPropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, "Component");

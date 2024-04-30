@@ -77,6 +77,7 @@ import org.sablo.specification.property.types.LongPropertyType;
 import org.sablo.specification.property.types.ObjectPropertyType;
 import org.sablo.specification.property.types.PointPropertyType;
 import org.sablo.specification.property.types.ScrollbarsPropertyType;
+import org.sablo.specification.property.types.SecureStringPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
@@ -1569,7 +1570,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						resultingPropertyDescriptor = retVal;
 					}
-					else if (propertyType == StringPropertyType.INSTANCE || propertyType == ServoyStringPropertyType.INSTANCE ||
+					else if (propertyType == StringPropertyType.INSTANCE || propertyType == SecureStringPropertyType.INSTANCE ||
+						propertyType == ServoyStringPropertyType.INSTANCE ||
 						propertyType == VariantPropertyType.INSTANCE)
 					{
 						resultingPropertyDescriptor = new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null,
