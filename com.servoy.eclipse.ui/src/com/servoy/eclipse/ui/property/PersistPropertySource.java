@@ -2700,11 +2700,26 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
 						if (!ServoyJSONObject.isJavascriptNullOrUndefined(ownJson) && ownJson.has(topMostKey))
 						{
-							if (ownJson.get(topMostKey) instanceof JSONArray)
+							if (ownJson.get(topMostKey) instanceof JSONArray arr)
 							{
-								JSONArray arr = (JSONArray)ownJson.get(topMostKey);
-								for (int i = 0; i < arr.length(); ++i)
+								// if this is an array this can be a custom type array
+								// then we need to check the index to get the actual value from
+								// else we would just get the first item that has that id set.
+								// which could be the completely wrong custom type.
+								if (beanPropertyPersist instanceof WebCustomType wct)
 								{
+									int index = wct.getIndex();
+									if (index >= 0 && index < arr.length())
+									{
+										// this has to be it, it can just be null and not set
+										return arr.getJSONObject(index).opt((String)id);
+									}
+								}
+								else for (int i = 0; i < arr.length(); ++i)
+								{
+									// not sure if this is every used. because i think it shouldn't get here
+									// if the top level key points to an array, then the things in the array should
+									// be a custom type and we should really select it from the index the give custom type is on
 									JSONObject item = arr.getJSONObject(i);
 									if (item.has((String)id))
 									{
