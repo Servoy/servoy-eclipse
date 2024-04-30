@@ -2705,9 +2705,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
 						if (!ServoyJSONObject.isJavascriptNullOrUndefined(ownJson) && ownJson.has(topMostKey))
 						{
-							if (ownJson.get(topMostKey) instanceof JSONArray)
+							if (ownJson.get(topMostKey) instanceof JSONArray arr)
 							{
-								JSONArray arr = (JSONArray)ownJson.get(topMostKey);
 								if (index >= 0 && index < arr.length())
 								{
 									JSONObject item = arr.getJSONObject(index);
