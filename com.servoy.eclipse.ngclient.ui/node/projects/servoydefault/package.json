@@ -11,7 +11,7 @@
     "@eonasdan/tempus-dominus": "^6.9.5",
     "@ng-bootstrap/ng-bootstrap": "^16",
     "@popperjs/core": "<3",
-    "@tinymce/tinymce-angular": "<8",
+    "@tinymce/tinymce-angular": "8.0.0",
     "bootstrap": "<6",
     "tinymce": "^6",
     "tinymce-i18n": ">=24",
