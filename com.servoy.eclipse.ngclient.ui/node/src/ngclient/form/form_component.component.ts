@@ -341,11 +341,9 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
 
         if (formData.model.addMinSize) {
-            if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null) {
-                // see svyFormstyle from ng1
-                this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
-                this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
-            }
+            // see svyFormstyle from ng1
+            this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
+            this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
         }
         return this.absolutFormPosition;
     }
