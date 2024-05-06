@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Designer Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.designer; singleton:=true
-Bundle-Version: 2023.3.6.3848_LTS
+Bundle-Version: 2023.3.7.3849_LTS
 Bundle-ClassPath: .
 Bundle-Activator: com.servoy.eclipse.designer.Activator
 Bundle-Vendor: Servoy
