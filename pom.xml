@@ -8,7 +8,7 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2022.3.8.3750_LTS</version>
+	<version>2022.3.9.3751_LTS</version>
 	<properties>
 		<tycho.version>2.6.0</tycho.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
