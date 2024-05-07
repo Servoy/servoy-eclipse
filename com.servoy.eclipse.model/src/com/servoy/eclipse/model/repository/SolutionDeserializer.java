@@ -17,7 +17,6 @@
 package com.servoy.eclipse.model.repository;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2298,14 +2297,14 @@ public class SolutionDeserializer
 							}
 							catch (Exception e)
 							{
-								ServoyLog.logError(e);
+								ServoyLog.logError("Error while reading working sets file: " + path, e);
 							}
 						}
 					}
 				}
-				catch (IOException ex)
+				catch (Exception ex)
 				{
-					ServoyLog.logError(ex);
+					ServoyLog.logError("Error while reading working sets file: " + path, ex);
 				}
 			}
 		}
