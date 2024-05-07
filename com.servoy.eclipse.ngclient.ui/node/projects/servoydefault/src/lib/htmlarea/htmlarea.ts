@@ -52,7 +52,9 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     ngOnInit() {
         super.ngOnInit();
 
-        this.tinyConfig['language'] = this.servoyService.getLocale();
+        if (this.servoyService.getLocaleObject()) {
+            this.tinyConfig['language'] = this.servoyService.getLocaleObject().language;
+        }
 
         this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0].href + 'tinymce';
 
