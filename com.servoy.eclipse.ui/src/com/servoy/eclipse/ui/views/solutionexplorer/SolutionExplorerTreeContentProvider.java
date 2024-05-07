@@ -3723,10 +3723,15 @@ public class SolutionExplorerTreeContentProvider
 
 	public TreePath getTreePath(UUID uuid)
 	{
-		if (activeSolutionNode.getRealObject() != null)
+		return getTreePath(uuid, activeSolutionNode);
+	}
+
+	public TreePath getTreePath(UUID uuid, PlatformSimpleUserNode startNode)
+	{
+		if (startNode != null && startNode.getRealObject() != null)
 		{
 			List<PlatformSimpleUserNode> al = new ArrayList<PlatformSimpleUserNode>();
-			if (findNode(activeSolutionNode, uuid, al))
+			if (findNode(startNode, uuid, al))
 			{
 				Collections.reverse(al);
 				return new TreePath(al.toArray());
