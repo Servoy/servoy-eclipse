@@ -456,13 +456,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 					HashSet<IProject> projectsToDeleteAfterImport = new HashSet<IProject>();
 					IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+					Boolean[] importDatasources = new Boolean[] { null };
 					for (String name : solutions.keySet())
 					{
 						boolean shouldAskOverwrite = (sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name));
 						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
 						{
 							importSolution(solutions.get(name), name, newSolutionName, monitor, true,
-								shouldAskOverwrite, activateSolution, overwriteModules, projectsToDeleteAfterImport);
+								shouldAskOverwrite, activateSolution, overwriteModules, importDatasources, projectsToDeleteAfterImport);
 							monitor.worked(1);
 						}
 					}
@@ -632,7 +633,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	}
 
 	public static void importSolution(SolutionPackageInstallInfo packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
-		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules, Set<IProject> projectsToDeleteAfterImport)
+		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules, Boolean[] importDatasources,
+		Set<IProject> projectsToDeleteAfterImport)
 		throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
@@ -658,6 +660,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setSkipModulesImport(!shouldAskOverwrite);
 		importSolutionWizard.setAllowDataModelChanges(true);
 		importSolutionWizard.setImportSampleData(true);
+		importSolutionWizard.setImportDatasources(importDatasources[0]);
 		importSolutionWizard.shouldAllowSQLKeywords(true);
 		importSolutionWizard.showFinishDialog(false);
 
@@ -674,6 +677,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, project, false, false, false, null, null,
 			monitor, packageInfo.forceActivateResourcesProject, packageInfo.keepResourcesProjectOpen, projectsToDeleteAfterImport);
+		importDatasources[0] = importSolutionWizard.shouldImportDatasources();
 		// write the wpm version into the new solution project
 		String solutionVersion = packageInfo.version;
 		if (solutionVersion.length() > 0)
