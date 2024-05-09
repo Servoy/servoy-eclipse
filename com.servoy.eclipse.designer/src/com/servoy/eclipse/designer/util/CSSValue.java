@@ -36,6 +36,7 @@ public class CSSValue
 	private int percentage;
 	private int pixels;
 	private int parentSize;
+	private boolean isHigherProperty;
 
 	public CSSValue(String value)
 	{
@@ -50,11 +51,12 @@ public class CSSValue
 		this.pixels = pixels;
 	}
 
-	public CSSValue(String value, int parentSize)
+	public CSSValue(String value, int parentSize, boolean isHigherProperty)
 	{
 		super();
 		parseCSSValue(value);
 		this.parentSize = parentSize;
+		this.isHigherProperty = isHigherProperty; //right or bottom
 	}
 
 	private void parseCSSValue(String value)
@@ -112,42 +114,70 @@ public class CSSValue
 		return percentage != 0 && pixels == 0;
 	}
 
-	public int getAsPixels(int containerSize)
+	public int getAsPixels()
 	{
-		if (parentSize > 0 && percentage == 0) return containerSize - pixels;
-		return Math.round(percentage * containerSize / 100) + pixels;
+		if (isHigherProperty && percentage == 100)
+		{
+			return parentSize + pixels;
+		}
+		int percentageInPixels = percentage * parentSize / 100;
+		return isHigherProperty ? parentSize - pixels - percentageInPixels : pixels + percentageInPixels;
 	}
 
 	public CSSValue div(int scalar)
 	{
-		return new CSSValue(percentage / scalar, pixels / scalar);
+		CSSValue val = new CSSValue(percentage / scalar, pixels / scalar);
+		val.parentSize = parentSize;
+		val.isHigherProperty = isHigherProperty;
+		return val;
 	}
 
 	public CSSValue minus(CSSValue val)
 	{
-		//assert that the current object is the higher property value
-		Assert.isTrue(this.parentSize > 0);
-		Assert.isTrue(val.parentSize == 0);
-
-		int px = pixels;
-		if (parentSize > 0 && percentage == 0)
+		int px = getAsPixels() - val.getAsPixels();
+		int percentageDiff = 0;
+		if (parentSize == val.parentSize && (percentage > 0 || val.percentage > 0))
 		{
-			px = val.percentage == 0 ? parentSize - pixels : (-1) * pixels;
+			percentageDiff = (isHigherProperty && percentage != 100 ? (100 - percentage) : percentage) - val.percentage;
+			px -= Math.round(percentageDiff * parentSize / 100);
 		}
-
-		return new CSSValue((percentage != 0 ? percentage : 100) - val.percentage, px - val.pixels);
+		CSSValue res = new CSSValue(percentageDiff, px);
+		res.parentSize = parentSize;
+		res.isHigherProperty = false;
+		return res;
 	}
 
 
 	public CSSValue plus(CSSValue val)
 	{
-		int o1_percentage = parentSize > 0 ? 100 - percentage : percentage;
-		int o1_pixels = parentSize > 0 && percentage == 0 ? parentSize - pixels : pixels;
+		int o1_percentage = isHigherProperty ? 100 - percentage : percentage;
+		int o1_pixels = isHigherProperty && percentage == 0 ? parentSize - pixels : pixels;
 
-		int o2_percentage = val.parentSize > 0 ? 100 - val.percentage : val.percentage;
-		int o2_pixels = val.parentSize > 0 && val.percentage == 0 ? val.parentSize - val.pixels : val.pixels;
+		int o2_percentage = val.isHigherProperty ? 100 - val.percentage : val.percentage;
+		int o2_pixels = val.isHigherProperty && val.percentage == 0 ? val.parentSize - val.pixels : val.pixels;
 
-		return new CSSValue(o1_percentage + o2_percentage, o1_pixels + o2_pixels);
+		CSSValue res = new CSSValue(o1_percentage + o2_percentage, o1_pixels + o2_pixels);
+		res.parentSize = parentSize;
+		res.isHigherProperty = false;
+		return res;
+	}
+
+	public CSSValue toHigherProperty()
+	{
+		Assert.isTrue(parentSize > 0);
+
+		CSSValue res;
+		if (this.percentage > 0)
+		{
+			res = new CSSValue(100 - this.percentage, (-1) * this.pixels);
+		}
+		else
+		{
+			res = new CSSValue(this.percentage, parentSize - this.pixels);
+		}
+		res.parentSize = parentSize;
+		res.isHigherProperty = true;
+		return res;
 	}
 
 	@Override

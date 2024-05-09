@@ -345,8 +345,46 @@ public class TestSnapCSSPosition
 		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
 		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
 
-		assertEquals("css pos right should be set to the right value copied from the target", "calc(20% + 120px)", newPosition.right);
+		assertEquals("css pos right should be set to the right value computed from the target", "calc(20% + 120px)", newPosition.right);
 		assertEquals("css pos width should not be changed", "80", newPosition.width);
+	}
+	
+	@Test
+	public void testSnapToMiddleHorizontally2() throws Exception
+	{
+		CSSPosition old = null; // new component
+		CSSPosition newPosition = new CSSPosition("170", "-1", "-1", "312", "80", "30");
+		CSSPosition targetPosition = new CSSPosition("65", "20%", "-1", "30%", "-1", "30"); //anchored left-right
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
+		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
+		DesignerUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, "left", "right", "width");
+
+		assertFalse("css pos width should NOT be set", CSSPositionUtils.isSet(newPosition.width));
+		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
+
+		assertEquals("css pos right should be set to the right value computed from the target", "calc(45% - 40px)", newPosition.right);
+		assertEquals("css pos left should be set to the left value computed from the target", "calc(55% - 40px)", newPosition.left);
+	}
+	
+	@Test
+	public void testSnapToMiddleVertically() throws Exception
+	{
+		CSSPosition old = null; // new component
+		CSSPosition newPosition = new CSSPosition("170", "-1", "-1", "312", "80", "30");
+		CSSPosition targetPosition = new CSSPosition("-1", "-1", "20%", "240", "100", "240"); //top property not set
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
+		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
+		DesignerUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, "top", "bottom", "height");
+
+		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.top));
+		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.bottom));
+		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+
+		assertEquals("css pos right should be set to the bottom value computed from the target", "calc(20% + 105px)", newPosition.bottom);
+		assertEquals("css pos height should not be changed", "30", newPosition.height);
 	}
 
 }
