@@ -108,7 +108,14 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		this.servoyProject = servoyProject;
 		this.datasource = datasource;
 		this.scheme = scheme;
-		this.serverConfig = new ServerConfig(datasource, "", "", "", null, "", "", null, true, true, null, "");
+		this.serverConfig = new ServerConfig.Builder()
+			.setServerName("")
+			.setUserName("")
+			.setPassword("")
+			.setServerUrl("")
+			.setSkipSysTables(true)
+			.setDriver("")
+			.build();
 		init();
 	}
 

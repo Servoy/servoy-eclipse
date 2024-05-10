@@ -590,12 +590,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		for (String server_name : missingServerNames)
 		{
 			action.createDatabase(server, server_name, monitor);
-			final ServerConfig serverConfig = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
-				EclipseDatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
-				origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
-				origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getPrefixTables(),
-				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
-				origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
+			final ServerConfig serverConfig = origConfig.newBuilder()
+				.setServerName(server_name)
+				.setServerUrl(EclipseDatabaseUtils.getPostgresServerUrl(origConfig, server_name))
+				.setSchema(null)
+				.setDataModelCloneFrom(null)
+				.setEnabled(true).setSkipSysTables(false)
+				.setIdleTimeout(-1)
+				.build();
 			try
 			{
 				serverManager.testServerConfigConnection(serverConfig, 0);
@@ -810,12 +812,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				ServerConfig origConfig = getValidServerConfig();
 				for (String server_name : searchMissingServers)
 				{
-					ServerConfig config = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
-						origConfig.getServerUrl().replace(origConfig.getServerName(), server_name), origConfig.getConnectionProperties(),
-						origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
-						origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
-						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
-						origConfig.getDialectClass(), origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
+					final ServerConfig config = origConfig.newBuilder()
+						.setServerName(server_name)
+						.setSchema(null)
+						.setDataModelCloneFrom(null)
+						.setEnabled(true).setSkipSysTables(false)
+						.setIdleTimeout(-1)
+						.build();
 
 					EditorUtil.openServerEditor(config, ServerSettings.DEFAULT, true);
 				}

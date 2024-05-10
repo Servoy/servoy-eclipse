@@ -432,11 +432,13 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 							serverPrototype = (IServerInternal)serverManager.getServer(sc.getServerName());
 							if (serverPrototype != null && serverPrototype.isValid())
 							{
-								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), EclipseDatabaseUtils.getPostgresServerUrl(sc, name),
-									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
-									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
-									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
-									sc.getQuoteList(), sc.isClientOnlyConnections());
+								serverConfig = sc.newBuilder()
+									.setServerUrl(EclipseDatabaseUtils.getPostgresServerUrl(sc, name))
+									.setDataModelCloneFrom(null)
+									.setEnabled(true)
+									.setSkipSysTables(false)
+									.setIdleTimeout(-1)
+									.build();
 								if (serverManager.validateServerConfig(null, serverConfig) != null)
 								{
 									// something is wrong

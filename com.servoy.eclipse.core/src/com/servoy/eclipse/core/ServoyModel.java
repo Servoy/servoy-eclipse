@@ -1189,7 +1189,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						progress.worked(1);
 						if (activeProject != null)
 						{
-							// prefetch the editting solution to minimize ui lags
+							// prefetch the editing solution to minimize ui lags
 							progress.subTask("Preparing solution for editing...");
 							if (Display.getCurrent() != null)
 							{
