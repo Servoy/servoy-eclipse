@@ -138,8 +138,16 @@ public class CSSValue
 		int percentageDiff = 0;
 		if (parentSize == val.parentSize && (percentage > 0 || val.percentage > 0))
 		{
-			percentageDiff = (isHigherProperty && percentage != 100 ? (100 - percentage) : percentage) - val.percentage;
-			px -= Math.round(percentageDiff * parentSize / 100);
+			percentageDiff = Math.max((isHigherProperty && percentage != 100 ? (100 - percentage) : percentage) - val.percentage, 0);
+			if (percentageDiff > 0)
+			{
+				px -= Math.round(percentageDiff * parentSize / 100);
+			}
+			else
+			{
+				percentageDiff = isHigherProperty && percentage != 100 ? (100 - percentage) : percentage;
+				px -= Math.round(percentageDiff * parentSize / 100);
+			}
 		}
 		CSSValue res = new CSSValue(percentageDiff, px);
 		res.parentSize = parentSize;

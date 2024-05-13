@@ -1036,21 +1036,14 @@ public class DesignerUtil
 
 	private static CSSValue computeDimension(String property, CSSValue value, CSSValue oppositePropertyValue)
 	{
-		if (value.isPercentage() && oppositePropertyValue.isPercentage())
-		{
-			return new CSSValue(100 - oppositePropertyValue.getPercentage() - value.getPercentage(), 0);
-		}
 		switch (property)
 		{
 			case "left" :
-				return new CSSValue(0, oppositePropertyValue.getAsPixels() - value.getAsPixels());
 			case "top" :
-				return new CSSValue(0, oppositePropertyValue.getAsPixels() - value.getAsPixels());
-
+				return oppositePropertyValue.minus(value);
 			case "right" :
-				return new CSSValue(0, value.getAsPixels() - oppositePropertyValue.getAsPixels());
 			case "bottom" :
-				return new CSSValue(0, value.getAsPixels() - oppositePropertyValue.getAsPixels());
+				return value.minus(oppositePropertyValue);
 		}
 		return CSSValue.NOT_SET;
 	}

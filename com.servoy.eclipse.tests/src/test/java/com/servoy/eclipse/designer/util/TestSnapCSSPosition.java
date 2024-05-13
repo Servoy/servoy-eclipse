@@ -261,7 +261,7 @@ public class TestSnapCSSPosition
 		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
 
 		assertEquals("css pos left should be set to the computed value", "calc(30% + 200px)", newPosition.left);
-		assertEquals("css pos width should be changed", "120", newPosition.width);
+		assertEquals("css pos width should be changed", "calc(50% - 200px)", newPosition.width);
 	}
 	
 	@Test
