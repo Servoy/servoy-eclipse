@@ -244,7 +244,8 @@ public class MarkerMessages
 		"Style class \"{0}\" from element \"{1}\" in form \"{2}\" is set but no style is assigned to form.", ServoyBuilder.MISSING_STYLE);
 
 	public static ServoyMarker MediaTIFF = new ServoyMarker(
-		"Media {0} will not display correctly in Webclient since many browsers do not support TIFF image format.", ServoyBuilder.MEDIA_MARKER_TYPE);
+		"Media {0} will not display correctly in NGClient/Titanium Client since many browsers do not support TIFF image format.",
+		ServoyBuilder.MEDIA_MARKER_TYPE);
 
 
 	public static ServoyMarker VariantIdUnresolved = new ServoyMarker(

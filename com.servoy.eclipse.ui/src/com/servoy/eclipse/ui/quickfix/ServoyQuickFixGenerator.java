@@ -155,7 +155,6 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				if (StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName().equals(propertyName))
 				{
 					resolutions.add(0, new CreateLoginSolutionQuickFix(solName));
-					resolutions.add(new MarkSolutionAsWebclientOnlyQuickFix(solName));
 				}
 			}
 

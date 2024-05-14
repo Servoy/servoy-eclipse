@@ -80,11 +80,6 @@
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="com.servoy.eclipse.ui.StartWebClient"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M3+M2+B">
-      </key>
-      <key
             commandId="com.servoy.eclipse.ui.StartNGClient"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+M2+G">
@@ -97,17 +92,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.commands">
-      <command
-            categoryId="com.servoy.eclipse.ui"
-            description="Launch WebClient"
-            id="com.servoy.eclipse.ui.StartWebClient"
-            name="Launch WebClient">
-         <commandParameter
-               id="com.servoy.eclipse.debug.browser"
-               name="com.servoy.eclipse.debug.browser"
-               optional="true">
-         </commandParameter>
-      </command>
       <command
             categoryId="com.servoy.eclipse.ui"
             description="Launch NGClient"
@@ -312,11 +296,6 @@
         </menuContribution>
         <menuContribution
               allPopups="false"
-              class="com.servoy.eclipse.debug.actions.LaunchWebClientContributionFactory"
-              locationURI="menu:com.servoy.eclipse.ui.StartClient">
-        </menuContribution>
-        <menuContribution
-              allPopups="false"
               class="com.servoy.eclipse.debug.actions.LaunchNGClientContributionFactory"
               locationURI="menu:com.servoy.eclipse.ui.StartClient">
         </menuContribution>
@@ -348,12 +327,6 @@
                  visible="true">
            </separator>
            <command
-                 commandId="com.servoy.eclipse.ui.StartWebClient"
-                 icon="icons/launch_web.png"
-                 label="Launch Debug Web Client"
-                 style="push">
-           </command>
-           <command
                  commandId="com.servoy.eclipse.ui.StartNGClient"
                  icon="icons/launch_ng.png"
                  label="Launch NGClient"
@@ -372,18 +345,6 @@
          <handler
               class="com.servoy.eclipse.debug.handlers.StartClientHandler"
               commandId="com.servoy.eclipse.ui.StartClient">
-        </handler>
-        <handler
-              class="com.servoy.eclipse.debug.handlers.StartWebClientHandler"
-              commandId="com.servoy.eclipse.ui.StartWebClient">
-           <enabledWhen>
-              <with
-                    variable="com.servoy.eclipse.core.webClientState">
-                 <equals
-                       value="ENABLED">
-                 </equals>
-              </with>
-           </enabledWhen>
         </handler>
         <handler
               class="com.servoy.eclipse.debug.handlers.StartNGClientHandler"

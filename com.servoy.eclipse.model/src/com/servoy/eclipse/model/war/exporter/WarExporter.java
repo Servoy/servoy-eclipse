@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.Writer;
@@ -133,7 +132,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
@@ -1797,22 +1795,6 @@ public class WarExporter
 		// copy first the standard webapp dir of the app server
 		copyDir(webAppDir, tmpWarDir, true);
 
-		File defaultCss = new File(tmpWarDir, "/servoy-webclient/templates/default/servoy_web_client_default.css");
-		if (!defaultCss.exists())
-		{
-			try
-			{
-				defaultCss.getParentFile().mkdirs();
-				String styleCSS = TemplateGenerator.getStyleCSS("servoy_web_client_default.css");
-				OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(defaultCss), "utf8");
-				fw.write(styleCSS);
-				fw.close();
-			}
-			catch (Exception e)
-			{
-				throw new ExportException("Error default servoy css file (servoy_web_client_default.css)", e);
-			}
-		}
 	}
 
 	private void changeAndWritePropertiesFile(File tmpWarDir, File sourceFile) throws ExportException
