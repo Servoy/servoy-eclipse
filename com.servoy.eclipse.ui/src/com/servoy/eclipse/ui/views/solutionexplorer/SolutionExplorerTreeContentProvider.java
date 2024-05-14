@@ -2209,24 +2209,23 @@ public class SolutionExplorerTreeContentProvider
 						}
 						if (scriptObject != null)
 						{
-
-
 							PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, null,
 								scriptObject.getClass())
 							{
 								@Override
 								public Image getIcon()
 								{
-									boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 									Image image = super.getIcon();
 									if (image == null)
 									{
 										if (plugin instanceof IIconProvider && ((IIconProvider)plugin).getIconUrl() != null)
 										{
 											URL urlLightTheme = ((IIconProvider)plugin).getIconUrl();
-											URL urlDarkTheme = null;
+
+											boolean darkTheme = UIUtils.isDarkThemeSelected(true);
 											if (darkTheme)
 											{
+												URL urlDarkTheme = null;
 												String urlString = urlLightTheme.toString();
 												urlString = UIUtils.replaceLast(urlString, ".", "_dark.");
 												try
@@ -2236,16 +2235,16 @@ public class SolutionExplorerTreeContentProvider
 												catch (MalformedURLException e)
 												{
 												}
+												if (urlDarkTheme != null && ImageDescriptor.createFromURL(urlDarkTheme).getImageData(100) != null)
+												{
+													image = ImageDescriptor.createFromURL(urlDarkTheme).createImage();
+												} // else use light theme/single plugin icon here as well
 											}
-											if (urlDarkTheme != null)
-											{
-												image = ImageDescriptor.createFromURL(urlDarkTheme).createImage();
-											}
-											if (urlDarkTheme == null || ImageDescriptor.createFromURL(urlDarkTheme).getImageData() == null)
+
+											if (image == null)
 											{
 												image = ImageDescriptor.createFromURL(urlLightTheme).createImage();
 											}
-
 										}
 										else
 										{
@@ -2307,11 +2306,11 @@ public class SolutionExplorerTreeContentProvider
 	private Image getIconFromSpec(WebObjectSpecification spec, boolean isService)
 	{
 		Image icon = null;
-		boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 		if (spec.getIcon() != null)
 		{
 			try
 			{
+				boolean darkTheme = UIUtils.isDarkThemeSelected(true);
 				if (!"file".equals(spec.getSpecURL().getProtocol()))
 				{
 					SpecProviderState specProvider = isService ? getServicesSpecProviderState() : getComponentsSpecProviderState();
@@ -2325,10 +2324,10 @@ public class SolutionExplorerTreeContentProvider
 
 					if (darkTheme)
 					{
-						iconPath = UIUtils.replaceLast(iconPath, ".", "-dark.");
-						if (reader.getUrlForPath(iconPath) == null)
+						String darkIconPath = UIUtils.replaceLast(iconPath, ".", "-dark.");
+						if (reader.getUrlForPath(darkIconPath) != null)
 						{
-							iconPath = spec.getIcon().replaceFirst(spec.getPackageName() + "/", "");
+							iconPath = darkIconPath;
 						}
 					}
 					IPath path = new Path(reader.getUrlForPath(iconPath).toURI().toString());

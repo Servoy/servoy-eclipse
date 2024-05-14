@@ -62,7 +62,6 @@ public class ImageReplacementMapper
 		}
 		try
 		{
-			String iconPath = getIconsPath();
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/new_wiz.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/new_con.png"),
@@ -70,17 +69,17 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/importdir_wiz.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/open_projects.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/save_edit.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/save.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/save_edit.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/save-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveas_edit.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/save-as.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-as.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveas_edit.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/save-as-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-as-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveall_edit.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/save-all.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-all.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveall_edit.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/save-all-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-all-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/pin_editor.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/pin.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/dtool16/pin_editor.png"),
@@ -104,29 +103,29 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/etool16/search_src.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/prev_nav.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/back-to-annotation.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/back-to-annotation.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/prev_nav.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/back-to-annotation-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/back-to-annotation-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/next_nav.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/forward-to-annotation.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/forward-to-annotation.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/next_nav.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/forward-to-annotation-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/forward-to-annotation-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/elcl16/backward_nav.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/backward_nav.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/backward_nav.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/dlcl16/backward_nav.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/backward_nav-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/backward_nav-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/elcl16/forward_nav.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/forward_nav.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/forward_nav.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/dlcl16/forward_nav.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/forward_nav-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/forward_nav-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/last_edit_pos.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/back-to-last-edit.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/back-to-last-edit.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/last_edit_pos.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/back-to-last-edit-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/back-to-last-edit-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/next_edit_pos.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/next_edit_pos.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/next_edit_pos.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/next_edit_pos.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/next_edit_pos-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/next_edit_pos-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.externaltools/$nl$/icons/full/obj16/external_tools.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/launch_last_tool.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/skip_brkp.png"),
@@ -234,9 +233,9 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.search/icons/full/eview16/searchres.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/cview16/console_view.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/console.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/console.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/$nl$/icons/full/cview16/console_view.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/console.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/console.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/pin.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/pin_view.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/pin.png"),
@@ -306,15 +305,15 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/lock_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/scroll_lock.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/wordwrap.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/word_wrap.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/wordwrap.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/word_wrap.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/wordwrap.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/word_wrap.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.workbench.texteditor/$nl$/icons/full/etool16/wordwrap.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/word_wrap.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.workbench.texteditor/$nl$/icons/full/dtool16/wordwrap.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/word_wrap.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/word_wrap.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/rem_co.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/rem.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/rem_co.png"),
@@ -422,9 +421,9 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/dlcl16/drop_to_frame.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/drop_to_frame-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/eview16/variable_view.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/variable_view.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/variable_view.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/eview16/variable_view.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/variable_view.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/variable_view.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/eview16/breakpoint_view.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/breakpoint_view.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/eview16/breakpoint_view.png"),
@@ -498,7 +497,7 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.search/icons/full/elcl16/search_history.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.search/icons/full/obj16/line_match.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/forward_nav.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/forward_nav.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methpub_obj.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/method_public.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methpro_obj.gif"),
@@ -508,17 +507,17 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methdef_obj.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/method_default.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/field_default_obj.gif"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/variable_default.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/variable_default.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/field_private_obj.gif"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/variable_private.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/variable_private.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/field_public_obj.gif"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/variable_public.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/variable_public.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/alphab_sort_co.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/sort.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/alphab_sort_co.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/sort.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/filter_fields.gif"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/" + iconPath + "/hide_variables.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/hide_variables.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/filter_methods.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/hide_method.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/filter_classes.gif"),
