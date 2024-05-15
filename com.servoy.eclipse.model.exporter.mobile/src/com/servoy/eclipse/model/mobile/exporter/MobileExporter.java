@@ -389,10 +389,8 @@ public class MobileExporter
 			i18nModel.setLanguage(Locale.GERMANY);
 			Map<String, I18NMessagesModelEntry> defaultProperties = i18nModel.getDefaultMap();
 			TreeMap<String, String> allI18nData = new TreeMap<String, String>();
-			Iterator<Map.Entry<String, I18NMessagesModelEntry>> it = defaultProperties.entrySet().iterator();
-			while (it.hasNext())
+			for (Entry<String, I18NMessagesModelEntry> entry : defaultProperties.entrySet())
 			{
-				Map.Entry<String, I18NMessagesModelEntry> entry = it.next();
 				if (entry.getKey().toLowerCase().startsWith(I18NProvider.MOBILE_KEY_PREFIX))
 				{
 					allI18nData.put("." + entry.getKey(), (entry.getValue().defaultvalue == null ? "" : entry.getValue().defaultvalue));
@@ -903,7 +901,7 @@ public class MobileExporter
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				ServoyLog.logError(e);
 			}
 			scriptResult.append(code);
 		}

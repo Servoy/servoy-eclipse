@@ -275,7 +275,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 			}
 			catch (PartInitException e)
 			{
-				e.printStackTrace();
+				ServoyLog.logError(e);
 			}
 			getShell().close();
 		}

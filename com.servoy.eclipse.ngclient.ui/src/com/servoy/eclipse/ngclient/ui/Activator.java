@@ -25,6 +25,7 @@ import org.eclipse.ui.console.IOConsole;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
 public class Activator extends Plugin
@@ -259,7 +260,7 @@ public class Activator extends Plugin
 		}
 		catch (InterruptedException e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 	}
 

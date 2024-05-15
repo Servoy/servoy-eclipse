@@ -511,13 +511,9 @@ public class GhostHandler implements IServerService
 						}
 						writer.endObject();
 					}
-					catch (IllegalArgumentException e)
+					catch (IllegalArgumentException | JSONException e)
 					{
 						Debug.error(e);
-					}
-					catch (JSONException e)
-					{
-						e.printStackTrace();
 					}
 				}
 				else if (o instanceof Form)

@@ -68,6 +68,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
@@ -527,10 +528,9 @@ public class TutorialView extends ViewPart
 							}
 						}
 					}
-					catch (MalformedURLException e1)
+					catch (MalformedURLException ex)
 					{
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						ServoyLog.logError(ex);
 					}
 					if (size == null)
 					{
@@ -708,7 +708,7 @@ public class TutorialView extends ViewPart
 						}
 						catch (IllegalArgumentException e)
 						{
-							e.printStackTrace();
+							ServoyLog.logError(e);
 						}
 						if (range != null && range.underline && range.underlineStyle == SWT.UNDERLINE_LINK)
 						{
@@ -718,7 +718,7 @@ public class TutorialView extends ViewPart
 							}
 							catch (PartInitException | MalformedURLException e)
 							{
-								e.printStackTrace();
+								ServoyLog.logError(e);
 							}
 						}
 					}

@@ -185,7 +185,7 @@ public class Activator extends AbstractUIPlugin {
 								project.create(description, monitor);
 								project.open(monitor);
 							} catch (CoreException e) {
-								e.printStackTrace();
+								ServoyLog.logError(e);
 							}
 						});
 						monitor.done();

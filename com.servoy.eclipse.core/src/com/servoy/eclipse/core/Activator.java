@@ -1424,7 +1424,6 @@ public class Activator extends Plugin
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
 				getLog().log(new Status(IStatus.ERROR, getBundle().getSymbolicName(), "Unexpected exception", e));
 			}
 		}

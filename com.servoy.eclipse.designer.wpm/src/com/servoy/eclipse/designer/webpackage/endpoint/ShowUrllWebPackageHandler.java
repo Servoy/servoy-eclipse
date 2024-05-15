@@ -24,6 +24,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+
 /**
  * @author jcompagner
  *
@@ -38,13 +40,9 @@ public class ShowUrllWebPackageHandler implements IDeveloperService
 		{
 			PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
 		}
-		catch (PartInitException e)
+		catch (PartInitException | MalformedURLException e)
 		{
-			e.printStackTrace();
-		}
-		catch (MalformedURLException e)
-		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 		return null;
 	}

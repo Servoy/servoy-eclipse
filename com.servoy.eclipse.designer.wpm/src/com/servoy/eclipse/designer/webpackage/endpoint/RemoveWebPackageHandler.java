@@ -71,9 +71,9 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		{
 			project.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 		}
-		catch (CoreException e1)
+		catch (CoreException e)
 		{
-			e1.printStackTrace();
+			ServoyLog.logError(e);
 		}
 		IFolder folder = project.getFolder(webPackagesFolder);
 		if (!folder.exists())

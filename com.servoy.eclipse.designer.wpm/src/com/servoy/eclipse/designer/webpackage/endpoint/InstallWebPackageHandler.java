@@ -402,7 +402,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 				}
 				catch (CoreException e)
 				{
-					e.printStackTrace();
+					ServoyLog.logError(e);
 				}
 			}
 		}
@@ -417,7 +417,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 			}
 			catch (CoreException e)
 			{
-				e.printStackTrace();
+				ServoyLog.logError(e);
 			}
 		}
 		eclipseFile = componentsFolder.getFile(name + ".zip");
