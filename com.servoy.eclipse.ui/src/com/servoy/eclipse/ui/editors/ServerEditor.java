@@ -958,13 +958,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			String.class, String.class, String.class, int.class, int.class, //
 			int.class, int.class, String.class, String.class, boolean.class, //
 			boolean.class, boolean.class, boolean.class, int.class, Integer.class, //
-			String.class, List.class, boolean.class //
+			String.class, List.class, boolean.class, String.class //
 		}, new String[] { //
 			"serverName", "userName", "password", "serverUrl", "connectionProperties", //
 			"driver", "catalog", "schema", "maxActive", "maxIdle", //
 			"maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", //
 			"skipSysTables", "prefixTables", "queryProceduresNOTUSED", "idleTimeout", "selectINValueCountLimit", //
-			"dialectClass", "quoteList", "clientOnlyConnectionsNOTUSED" }, new String[] { "queryProceduresNOTUSED", "clientOnlyConnectionsNOTUSED" });
+			"dialectClass", "quoteList", "clientOnlyConnectionsNOTUSED", "initializationString" },
+			new String[] { "queryProceduresNOTUSED", "clientOnlyConnectionsNOTUSED" });
 
 		serverSettingsObservable = new ImmutableObjectObservable<ServerSettings>(serverSettings,
 			new Class[] { boolean.class, SortingNullprecedence.class, Boolean.class, Boolean.class
