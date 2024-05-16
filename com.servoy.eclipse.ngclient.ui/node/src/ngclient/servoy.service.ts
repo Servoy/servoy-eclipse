@@ -21,6 +21,7 @@ import { FormcomponentType } from './converters/formcomponent_converter';
 import { ComponentType } from './converters/component_converter';
 import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
+import { SvyUtilsService } from './utils.service';
 import { ClientFunctionType } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { UIBlockerService } from './services/ui_blocker.service';
@@ -85,6 +86,7 @@ export class ServoyService {
     constructor(private websocketService: WebsocketService,
         private sabloService: SabloService,
         private windowRefService: WindowRefService,
+        private utils: SvyUtilsService,
         private sessionStorageService: SessionStorageService,
         private localeService: LocaleService,
         private clientFunctionService: ClientFunctionService,
@@ -115,8 +117,8 @@ export class ServoyService {
         typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, this.uiBlockerService));
 
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
-        typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this));
-        typesRegistry.registerGlobalType(ServerFunctionType.NATIVE_FUNCTION_TYPE_NAME, new ServerFunctionType(this));
+        typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this, this.utils));
+        typesRegistry.registerGlobalType(ServerFunctionType.NATIVE_FUNCTION_TYPE_NAME, new ServerFunctionType(this, this.utils));
     }
 
     public connect() {
