@@ -92,7 +92,9 @@ public class EditorActionsRegistry
 		{
 			ServoyLog.logWarning("No handler registered for " + action, null);
 		}
-
-		handler.getModificationSubject().removeModificationListener(listener);
+		else
+		{
+			handler.getModificationSubject().removeModificationListener(listener);
+		}
 	}
 }
