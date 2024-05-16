@@ -128,7 +128,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				return point;
 			}
 			return location;
-		};
+		}
 	};
 
 	// for updating selection in editor when selection changes in IDE
