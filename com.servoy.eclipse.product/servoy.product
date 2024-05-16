@@ -120,7 +120,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.apache.felix.scr" autoStart="true" startLevel="2" />
       <plugin id="org.apache.logging.log4j.api" autoStart="true" startLevel="3" />
       <plugin id="org.apache.logging.log4j.core" autoStart="true" startLevel="3" />
-      <plugin id="org.apache.logging.log4j.jcl" autoStart="true" startLevel="3" />
       <plugin id="org.apache.logging.log4j.slf4j2-impl" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />

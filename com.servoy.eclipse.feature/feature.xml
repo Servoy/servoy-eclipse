@@ -306,10 +306,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="2.23.1"/>
 
    <plugin
-         id="org.apache.logging.log4j.jcl"
-         version="2.23.1"/>
-
-   <plugin
          id="org.apache.logging.log4j.web"
          version="2.23.1"/>
 
