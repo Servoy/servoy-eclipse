@@ -1,16 +1,15 @@
 import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EventLike, JSEvent, LoggerFactory, LoggerService } from '@servoy/public';
-import { FormService } from './form.service';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class SvyUtilsService {
     private log: LoggerService;
     private doc: Document;
 
-    constructor(private formService: FormService, @Inject(DOCUMENT) _doc: any, logFactory: LoggerFactory) {
+    constructor(@Inject(DOCUMENT) _doc: any, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SvyUtilsService');
         this.doc = _doc;
     }
@@ -23,8 +22,8 @@ export class SvyUtilsService {
         }
         const targetEl = event.target as Element;
         let form: string;
+        let elementName: string;
         let parent = targetEl;
-        const targetElNameChain = new Array();
         let contextMatch = false;
         while (parent) {
             form = parent.tagName.toLowerCase() === 'svy-form' ? parent.getAttribute('name') : undefined;
@@ -39,11 +38,12 @@ export class SvyUtilsService {
                 contextMatch = true;
                 break;
             }
-
-            if ( parent.getAttribute( 'name' ) )
-                targetElNameChain.push( parent.getAttribute( 'name' ) );
-            else if ( parent['svyHostComponent'] && parent['svyHostComponent']['name'] ) {
-                targetElNameChain.push( parent['svyHostComponent']['name'] );
+            if (!elementName) {
+                if (parent.getAttribute('name'))
+                    elementName = parent.getAttribute('name');
+                else if (parent['svyHostComponent'] && parent['svyHostComponent']['name']) {
+                    elementName = parent['svyHostComponent']['name'];
+                }
             }
             parent = parent.parentElement;
         }
@@ -59,19 +59,14 @@ export class SvyUtilsService {
 
         if (!contextMatch)
             return null;
-        const jsEvent: JSEvent = { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() } ;
+        const jsEvent: JSEvent = { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() };
         // eslint-disable-next-line no-bitwise
         const modifiers = (event.altKey ? 8 : 0) | (event.shiftKey ? 1 : 0) | (event.ctrlKey ? 2 : 0) | (event.metaKey ? 4 : 0);
         jsEvent.modifiers = modifiers;
         jsEvent.x = event['pageX'];//TODO check
         jsEvent.y = event['pageY'];
         jsEvent.formName = form;
-        for (const chain of targetElNameChain) {
-            if (this.formService.getFormCacheByName(form).getComponent(chain)) {
-                jsEvent['elementName'] = chain;
-                break;
-            }
-        }
+        jsEvent.elementName = elementName;
         if (contextFilterElement && (contextFilterElement !== jsEvent['elementName'])) {
             return null;
         }
