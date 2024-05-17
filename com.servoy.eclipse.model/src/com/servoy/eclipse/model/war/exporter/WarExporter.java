@@ -171,7 +171,7 @@ public class WarExporter
 		"jabsorb_*.jar", //
 		"org.apache.commons.commons-codec_*.jar", //
 		"org.apache.commons.commons-io_*.jar", //
-		"org.apache.commons.commons-logging_*.jar", //
+		"org.apache.commons.logging_*.jar", //
 		"org.apache.commons.commons-collections4_*.jar", //
 		"org.apache.commons.commons-dbcp2_*.jar", //
 		"org.apache.commons.commons-pool2_*.jar", //
