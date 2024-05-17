@@ -433,6 +433,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 							if (serverPrototype != null && serverPrototype.isValid())
 							{
 								serverConfig = sc.newBuilder()
+									.setServerName(name)
 									.setServerUrl(EclipseDatabaseUtils.getPostgresServerUrl(sc, name))
 									.setDataModelCloneFrom(null)
 									.setEnabled(true)

@@ -254,6 +254,7 @@ public abstract class AbstractNewDbAction extends Action
 		IServerManagerInternal serverManager, String configName)
 	{
 		ServerConfig serverConfig = origConfig.newBuilder()
+			.setServerName(configName)
 			.setServerUrl(serverUrl)
 			.setSchema(null)
 			.setDataModelCloneFrom(null)
