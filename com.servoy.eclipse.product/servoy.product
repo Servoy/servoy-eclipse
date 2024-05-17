@@ -23,7 +23,7 @@
       </vmArgs>
       <vmArgsLin>-Dchromium.suspend_threads=false
       </vmArgsLin>
-      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED -Dchromium.suspend_threads=false
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED -Dchromium.suspend_threads=false -Dsun.java2d.metal=false
       </vmArgsMac>
       <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED -Dchromium.args=--disable-gpu-compositing
       </vmArgsWin>
