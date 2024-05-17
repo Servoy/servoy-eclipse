@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Profiler
 Bundle-SymbolicName: com.servoy.eclipse.profiler; singleton:=true
-Bundle-Version: 2024.3.1.3944
+Bundle-Version: 2024.3.2.3945
 Bundle-Activator: com.servoy.eclipse.profiler.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: com.servoy.eclipse.model,
