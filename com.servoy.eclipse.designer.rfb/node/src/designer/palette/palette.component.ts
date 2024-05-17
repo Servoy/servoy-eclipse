@@ -452,14 +452,14 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
                 }
                 if (this.dragItem.contentItemBeingDragged) {
-                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData.left + 'px');
                     if (this.snapData?.width) { 
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
                     }
                     if (this.snapData?.height) {
                          this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
                     }
-                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData.top + 'px');
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
                     this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
                 }
