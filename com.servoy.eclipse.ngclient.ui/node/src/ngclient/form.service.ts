@@ -10,6 +10,7 @@ import { ClientFunctionService } from './services/clientfunction.service';
 import { PushToServerEnum, IType, IWebObjectSpecification, TypesRegistry, RootPropertyContextCreator, PushToServerUtils } from '../sablo/types_registry';
 import { FoundsetLinkedValue } from './converters/foundsetLinked_converter';
 import { DateType } from '../sablo/converters/date_converter';
+import { SvyUtilsService } from './utils.service';
 
 @Injectable({
     providedIn: 'root'
@@ -24,12 +25,12 @@ export class FormService {
     private isInDesigner = false;
 
     constructor(private sabloService: SabloService, private converterService: ConverterService<unknown>, websocketService: WebsocketService, logFactory: LoggerFactory,
-        private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry) {
+        private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry, private utils: SvyUtilsService) {
 
         this.log = logFactory.getLogger('FormService');
         this.formsCache = new Map();
         this.formComponentCache = new Map();
-
+        this.utils.setFormService(this);
         websocketService.getSession().then((session) => {
             session.onMessageObject((msg: {forms: {[property: string]: {[property: string]: {[property: string]: unknown}}},
                                 call: {form:string,bean:string, api: string, args: Array<unknown>, propertyPath: Array<string>,delayUntilFormLoads: boolean}}) => {
