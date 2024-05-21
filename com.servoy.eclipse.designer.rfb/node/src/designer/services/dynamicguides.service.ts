@@ -318,6 +318,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}, null);
 			if (closestYRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestYRect)], properties, undefined, closestYRect.right - properties.left, 'width')) {
 				properties.width = closestYRect.right - properties.left;
+				properties.cssPosition['endWidth'] = {uuid : this.uuids[this.rectangles.indexOf(closestYRect)], prop: 'right'};
 			}
 
 			const closestXRect = overlapsY.reduce((closest, r) => {
@@ -331,6 +332,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}, null);
 			if (closestXRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestXRect)], properties, undefined, closestXRect.bottom - properties.top, 'height')) {
 				properties.height = closestXRect.bottom - properties.top;
+				properties.cssPosition['endHeight'] = {uuid : this.uuids[this.rectangles.indexOf(closestXRect)], prop: 'bottom'};
 			}
 		}
 		if (properties.width && !properties.height) {
@@ -584,6 +586,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			const e1 = pair[0];
             const e2 = pair[1];   
 			const left = properties.left ? properties.left : rect.x;
+			const uuids = [this.uuids[this.rectangles.indexOf(e1)], this.uuids[this.rectangles.indexOf(e2)]];
             if (e2.top > e1.bottom && rect.top > e2.bottom) {
 				const dist = e2.top - e1.bottom;
 				if (Math.abs(dist - rect.top + e2.bottom) < this.equalDistanceThreshold) {
@@ -592,6 +595,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.right - properties.left, 'width', properties);
 					}
 					const r = new DOMRect(left, properties.top, properties.width ? properties.width : rect.width, rect.height);
+					properties.cssPosition['distY'] = {pos: 1, targets: uuids};
 					return this.addVerticalGuides(e1, e2, r, dist, properties);
 				}
 			}
@@ -603,6 +607,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.right - properties.left, 'width', properties);
 					}
 	    			const r = new DOMRect(left, properties.top, properties.width ? properties.width : rect.width, rect.height);
+					properties.cssPosition['distY'] = {pos: -1, targets: uuids};
     				return this.addVerticalGuides(r, e1, e2, dist, properties);
 				}
 			}
@@ -614,6 +619,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.right - properties.left, 'width', properties);
 					}
 	    			const r = new DOMRect(properties.left ? properties.left : rect.x, properties.top, properties.width ? properties.width : rect.width, rect.height);
+					properties.cssPosition['distY'] = {pos: 0, targets: uuids};
     				return this.addVerticalGuides(e1, r, e2, dist - rect.height/2, properties);
 				}
 			}
@@ -626,6 +632,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         for (let pair of overlappingY){
 			const e1 = pair[0];
             const e2 = pair[1];
+			const uuids = [this.uuids[this.rectangles.indexOf(e1)], this.uuids[this.rectangles.indexOf(e2)]];
             if (e2.left > e1.right && rect.left > e2.right) {
 				const dist = e2.left - e1.right;
 				if (Math.abs(dist - rect.left + e2.right) < this.equalDistanceThreshold) {                  
@@ -634,6 +641,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.bottom - properties.top, 'height', properties);
 					}
                  	const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, properties.height ? properties.height : rect.height);
+					properties.cssPosition['distX'] = {pos: 1, targets: uuids};
     				return this.addHorizontalGuides(e1, e2, r, dist, properties);
                 }
 			}
@@ -645,6 +653,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.bottom - properties.top, 'height', properties);
 					}
                    	const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, properties.height ? properties.height : rect.height);
+					properties.cssPosition['distX'] = {pos: -1, targets: uuids};
                    	return this.addHorizontalGuides(r, e1, e2, dist, properties);
                	}
 			}
@@ -656,6 +665,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.bottom - properties.top, 'height', properties);
 					}
 	    			const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, properties.height ? properties.height : rect.height);
+					properties.cssPosition['distX'] = {pos: 0, targets: uuids};
     				return this.addHorizontalGuides(e1, r, e2, dist - rect.width/2, properties);
 				}
 			}
