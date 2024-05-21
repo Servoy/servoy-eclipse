@@ -552,6 +552,14 @@ export class WebsocketSession {
                 }
                 this.sendMessageObject(response);
             }
+            if (obj && obj.cmsgid) {
+                const deferredEvent = this.deferredEvents[obj.cmsgid];
+                if (deferredEvent) {
+                    deferredEvent.reject(this.converterService.convertFromServerToClient(e, undefined, undefined, undefined, undefined, undefined));
+                }
+                delete this.deferredEvents[obj.cmsgid];
+                this.loadingIndicatorService.hideLoading();
+            }
         } finally {
             this.currentRequestInfo = undefined;
             let err: any;

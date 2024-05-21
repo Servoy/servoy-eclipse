@@ -604,7 +604,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
             } else {
                 FormComponent.doCallApiOnComponent(uiComp, this.typesRegistry.getComponentSpecification(compModel.type),
-                    apiName, args, this.converterService, this.log);
+                    apiName, args, this.converterService, this.log, componentName);
             }
         } else {
             this.log.error('got api call for ' + componentName + ' api ' + apiName + ' on LFC but path is wrong ' + path);

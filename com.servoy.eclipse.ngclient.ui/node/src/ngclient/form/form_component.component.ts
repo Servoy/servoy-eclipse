@@ -222,7 +222,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     public static doCallApiOnComponent(comp: ServoyBaseComponent<any>, componentSpec: IWebObjectSpecification, apiName: string, args: any[],
-                        converterService: ConverterService<unknown>, log: LoggerService): Promise<any> {
+                        converterService: ConverterService<unknown>, log: LoggerService, compName: string): Promise<any> {
         const callSpec = componentSpec?.getApiFunction(apiName);
 
         // convert args
@@ -230,17 +230,24 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         (args as any[])?.forEach((val: any, i: number) =>
             args[i] = converterService.convertFromServerToClient(val, callSpec?.getArgumentType(i),
                 undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
-
-        const proto = Object.getPrototypeOf(comp);
-        if (proto[apiName]) {
-            // also convert the return value
-            return Promise.resolve(proto[apiName].apply(comp, args)).then((ret) =>
-                converterService.convertFromClientToServer(ret, callSpec?.returnType, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0]
-            ); // I think we don't need to define an error callback as well as there is nothing to convert then
-        } else {
-            log.error(log.buildMessage(() => ('Api ' + apiName + ' for component ' + comp.name + ' was not found, please check component implementation.')));
+        
+        if (comp){
+            const proto = Object.getPrototypeOf(comp);
+            if (proto[apiName]) {
+                // also convert the return value
+                return Promise.resolve(proto[apiName].apply(comp, args)).then((ret) =>
+                    converterService.convertFromClientToServer(ret, callSpec?.returnType, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0]
+                ); // I think we don't need to define an error callback as well as there is nothing to convert then
+            } else {
+                log.error(log.buildMessage(() => ('Api ' + apiName + ' for component ' + comp.name + ' was not found, please check component implementation.')));
+                return null;
+            } 
+        }
+        else{
+            log.error(log.buildMessage(() => ('Trying to call api ' + apiName + ' while its component ' + compName + ' was not found,make sure component is present and visible.')));
             return null;
         }
+       
     }
 
     public detectChanges() {
@@ -420,7 +427,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             return null;
         } else {
             return FormComponent.doCallApiOnComponent(this.componentCache[componentName], this.formCache.getComponentSpecification(componentName),
-                                    apiName, args, this.converterService, this.log);
+                                    apiName, args, this.converterService, this.log, componentName);
         }
     }
 
