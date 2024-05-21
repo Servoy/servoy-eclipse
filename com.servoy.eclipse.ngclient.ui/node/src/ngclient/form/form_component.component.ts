@@ -213,7 +213,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
                 private changeHandler: ChangeDetectorRef,
-                private el: ElementRef, protected renderer: Renderer2,
+                private el: ElementRef<Element>, protected renderer: Renderer2,
                 private converterService: ConverterService<unknown>,
                 @Inject(DOCUMENT) private document: Document) {
         super(renderer);
@@ -340,7 +340,8 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             this.absolutFormPosition['backgroundColor'] = 'transparent';
         }
 
-        if (formData.model.addMinSize) {
+        // add a min size if needed and if this is not the main form to avoid scrollbars there.
+        if (formData.model.addMinSize && this.el.nativeElement.parentElement?.closest('svy-form') != null) {
             // see svyFormstyle from ng1
             this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
             this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
