@@ -206,7 +206,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			pack.components.length > 0 && pack.components.some(component => component.name === componentType));
 	}
 
-	shouldSnapToSize(uuid: string, properties: SnapData, resizing?: string, value?: number, property?: string): boolean {
+	shouldSnapToSize(uuid: string, resizing?: string, value?: number, property?: string): boolean {
 		if (!uuid) return false; //no snap target
 		if (resizing) return true;
 		const targetType = this.types.get(uuid);
@@ -316,7 +316,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					return closest;
 				}
 			}, null);
-			if (closestYRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestYRect)], properties, undefined, closestYRect.right - properties.left, 'width')) {
+			if (closestYRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestYRect)], undefined, closestYRect.right - properties.left, 'width')) {
 				properties.width = closestYRect.right - properties.left;
 				properties.cssPosition['endWidth'] = {uuid : this.uuids[this.rectangles.indexOf(closestYRect)], prop: 'right'};
 			}
@@ -330,7 +330,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					return closest;
 				}
 			}, null);
-			if (closestXRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestXRect)], properties, undefined, closestXRect.bottom - properties.top, 'height')) {
+			if (closestXRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestXRect)], undefined, closestXRect.bottom - properties.top, 'height')) {
 				properties.height = closestXRect.bottom - properties.top;
 				properties.cssPosition['endHeight'] = {uuid : this.uuids[this.rectangles.indexOf(closestXRect)], prop: 'bottom'};
 			}
@@ -413,7 +413,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				if (snapX?.uuid) {
 					properties.left = this.leftPos.get(snapX.uuid);
 					const width = this.rightPos.get(snapX.uuid) - properties.left;
-					if (adjustSize && this.shouldSnapToSize(snapX.uuid, properties, resizing, width, 'width'))
+					if (adjustSize && this.shouldSnapToSize(snapX.uuid, resizing, width, 'width'))
 					{
 						properties['width'] = width;
 					}
@@ -458,7 +458,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					}
 					if (!properties.cssPosition['right']) properties.cssPosition['right'] = properties.left;
 				}
-				if (adjustSize && this.shouldSnapToSize(snapX?.uuid, properties, resizing, guideX - properties.left, 'width'))
+				if (adjustSize && this.shouldSnapToSize(snapX?.uuid, resizing, guideX - properties.left, 'width'))
 				{
 					properties['width'] = guideX - properties.left;
 				}
@@ -498,7 +498,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				if (snapY?.uuid) {
 					properties.top = this.topPos.get(snapY.uuid);
 					const height = this.bottomPos.get(snapY.uuid) - properties.top;
-					if (adjustSize && this.shouldSnapToSize(snapY.uuid, properties, resizing, height, 'height'))
+					if (adjustSize && this.shouldSnapToSize(snapY.uuid, resizing, height, 'height'))
 					{
 						properties['height'] = height;
 					}
@@ -542,7 +542,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						properties.top -= rect.height;
 					}
 				}
-				if (adjustSize && this.shouldSnapToSize(snapY?.uuid, properties, resizing, guideY - properties.top, 'height'))
+				if (adjustSize && this.shouldSnapToSize(snapY?.uuid, resizing, guideY - properties.top, 'height'))
 				{
 					properties['height'] = guideY - properties.top;
 				}
