@@ -216,7 +216,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			return property === 'width' && (value >= 80 || this.rectangles[this.uuids.indexOf(uuid)].width < 80) ||
 			property === 'height' && (value >= 30 || this.rectangles[this.uuids.indexOf(uuid)].height < 30);
 		}
-		else if (targetType?.split('-')[0] !== componentType?.split('-')[0] && value && this.initialRectangle) {
+		else if (value && this.initialRectangle) {
 			//if the dragged component is not in the same category, 
 			//use the size hints but make sure is not smaller than than the initial size
 			return this.initialRectangle[property] < value;
