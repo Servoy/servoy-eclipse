@@ -46,7 +46,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         });
         this.editorContentService.getBodyElement().addEventListener('mouseup', this.onMouseUp);
         this.editorContentService.getBodyElement().addEventListener('mousemove', this.onMouseMove);
-
+        this.editorContentService.getBodyElement().addEventListener('keyup', (event: KeyboardEvent) => {
+            if (event.keyCode == 27) {
+                // esc key, close menu
+                this.editorSession.variantsTrigger.emit({show: false});
+            }
+        });
         //TODO check url
         this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
             this.snap(value);
