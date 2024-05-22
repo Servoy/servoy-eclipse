@@ -686,21 +686,6 @@ public class EditorUtil
 		}
 	}
 
-	public static void openComponentVariantsEditor(String deepLinkArgs)
-	{
-		try
-		{
-			IFile variants = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
-				.getFile(new Path("medias/variants.less"));
-			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("variants.less");
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(variants), desc.getId(), true);
-		}
-		catch (PartInitException e)
-		{
-			Debug.log(e);
-		}
-	}
-
 	public static void openThemeEditor(final IMediaProvider project)
 	{
 		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
