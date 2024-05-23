@@ -22,8 +22,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
@@ -70,10 +72,29 @@ public class ComponentTemplateGenerator
 				return o1.getName().compareToIgnoreCase(o2.getName());
 			}
 		});
+		Map<String, Boolean> ng2Compatible = new HashMap<String, Boolean>();
 		for (WebObjectSpecification spec : specs)
 		{
 			if (model == null || model.getAllExportedComponents().contains(spec.getName()))
 			{
+				String packageName = spec.getPackageName();
+				if (!ng2Compatible.containsKey(packageName))
+				{
+					PackageSpecification packageSpecification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications().get(packageName);
+					if (packageSpecification != null)
+					{
+						Boolean isNG2Compatible = Boolean.FALSE;
+						if ("servoycore".equals(packageName) || packageSpecification.getNpmPackageName() != null ||
+							packageSpecification.getNg2Module() != null ||
+							packageSpecification.getEntryPoint() != null)
+						{
+							isNG2Compatible = Boolean.TRUE;
+						}
+						ng2Compatible.put(packageName, isNG2Compatible);
+					}
+				}
+				if (ng2Compatible.containsKey(packageName) && !ng2Compatible.get(packageName))
+					continue;
 				genereateSpec(template, viewChild, spec, spec.getName());
 				if (spec.getName().equals("servoydefault-tabpanel"))
 				{
