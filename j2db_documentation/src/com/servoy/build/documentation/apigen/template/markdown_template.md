@@ -1,5 +1,5 @@
 <#-- This is a GENERATED file. DO NOT modify/push it manually as all changes will be lost the next time this documentation is generated. MODIFY the markdown_template.md file from j2db_documentation instead -->
-# ${classname}
+# ${classname}<#if scriptingname??> ('${scriptingname}')</#if>
 <#if returnTypes??>
 
 ## **Return Types**

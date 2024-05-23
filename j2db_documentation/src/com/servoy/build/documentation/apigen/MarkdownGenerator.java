@@ -62,6 +62,7 @@ import com.servoy.base.solutionmodel.IBaseSMField;
 import com.servoy.base.solutionmodel.IBaseSMForm;
 import com.servoy.base.solutionmodel.IBaseSMMethod;
 import com.servoy.build.documentation.DocumentationManager;
+import com.servoy.build.documentation.ObjectDocumentation;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IRecord;
@@ -143,16 +144,18 @@ public class MarkdownGenerator
 		storeAsReadMe.add("JS Lib");
 		storeAsReadMe.add("ServoyException");
 		storeAsReadMe.add("Solution");
+		storeAsReadMe.add("Client Utils");
 
 	}
 
 	private final Map<String, Object> root;
 	private final Path path;
 
-	public MarkdownGenerator(String publicName, String parentPath)
+	public MarkdownGenerator(String publicName, String scriptingName, String parentPath)
 	{
 		root = new HashMap<>();
 		root.put("classname", publicName);
+		if (scriptingName != null && !scriptingName.equals(publicName)) root.put("scriptingname", scriptingName);
 		String classNoSpace = publicName.replace(" ", "%20").toLowerCase();
 		if (storeAsReadMe.contains(publicName))
 		{
@@ -553,7 +556,8 @@ public class MarkdownGenerator
 			{
 				IObjectDocumentation value = entry.getValue();
 				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") || value.getFunctions().size() == 0) continue;
-				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), path);
+				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value instanceof ObjectDocumentation odv ? odv.getScriptingName() : null,
+					path);
 				Class< ? > cls = Class.forName(value.getQualifiedName());
 				IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
 				if (returnTypes != null && returnTypes.getAllReturnedTypes() != null)
