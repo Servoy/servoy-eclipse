@@ -685,13 +685,15 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     	return pairs;
 	}
     
-    private isOverlap(eRect: DOMRect, rect: DOMRect, axis: 'x' | 'y'): boolean {
+    private isOverlap(rect: DOMRect, eRect: DOMRect, axis: 'x' | 'y'): boolean {
 		if (axis === 'x') {
         	return (rect.left >= eRect.left && rect.left <= eRect.right) ||
-               	(rect.right >= eRect.left && rect.right <= eRect.right);
+               	(rect.right >= eRect.left && rect.right <= eRect.right) ||
+				(rect.left <= eRect.right && rect.right >= eRect.left);
     	} else if (axis === 'y') {
         	return (rect.top >= eRect.top && rect.top <= eRect.bottom) ||
-               (rect.bottom >= eRect.top && rect.bottom <= eRect.bottom);
+               (rect.bottom >= eRect.top && rect.bottom <= eRect.bottom) ||
+			   (rect.top <= eRect.bottom && rect.bottom >= eRect.top);
     	}
     	return false;
 	}
