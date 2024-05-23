@@ -51,7 +51,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Spinner largeStepSizeSpinner;
 	private Button sameSizeFeedbackCheck;
 	private Button anchorFeedbackCheck;
-	private Button alignmentFeedbackCheck;
 	private Button marqueeSelectOuterCheck;
 	private Spinner titanium_alignmentThresholdSpinner;
 	private Spinner titanium_equalDistanceThresholdSpinner;
@@ -168,7 +167,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
 
-		prefs.setFeedbackAlignment(alignmentFeedbackCheck.getSelection());
 		prefs.setCopyPasteOffset(copyPasteOffsetSpinner.getSelection());
 		prefs.setCommonlyUsedSize(commonlyUsedSizeSpinner.getSelection());
 		prefs.setStepSize(stepSizeSpinner.getSelection(), largeStepSizeSpinner.getSelection());
@@ -187,7 +185,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	@Override
 	protected void performDefaults()
 	{
-		alignmentFeedbackCheck.setSelection(DesignerPreferences.FEEDBACK_ALIGNMENT_DEFAULT);
 		copyPasteOffsetSpinner.setSelection(DesignerPreferences.COPY_PASTE_OFFSET_DEFAULT);
 		commonlyUsedSizeSpinner.setSelection(DesignerPreferences.COMMONLY_USED_SIZE_DEFAULT);
 		stepSizeSpinner.setSelection(DesignerPreferences.STEP_SIZE_DEFAULT);

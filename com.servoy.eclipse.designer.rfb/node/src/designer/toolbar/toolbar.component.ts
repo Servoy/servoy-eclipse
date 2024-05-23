@@ -67,7 +67,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     btnHideInheritedElements: ToolbarItem;
     btnVisualFeedbackOptions: ToolbarItem;
-    btnPlacementGuideOptions: ToolbarItem;
 
     btnBringForward: ToolbarItem;
     btnSendBackward: ToolbarItem;
@@ -155,10 +154,10 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             const ShowSameSizeIndicatorPromise = this.editorSession.showSameSizeIndicator();
             void ShowSameSizeIndicatorPromise.then((result: boolean) => {
                 if (!result) {
-                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': 'none' };
+                    this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': 'none' };
                 }
                 else {
-                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                    this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
                 }
                 this.editorSession.setSameSizeIndicator(result);
             });
@@ -557,21 +556,18 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         };
 
         this.btnVisualFeedbackOptions.list = [
-            { 'text': 'Selected Element Anchoring Indicator', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
-            { 'text': 'Selected Element Alignment Guide', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
-            { 'text': TOOLBAR_CONSTANTS.SAME_SIZE, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
-            { 'text': 'Grid', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
-            { 'text': 'Rulers', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } }
+            { 'text': TOOLBAR_CONSTANTS.ANCHOR_INDICATOR, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
+            { 'text': TOOLBAR_CONSTANTS.SAME_SIZE, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } }
         ];
 
         this.btnVisualFeedbackOptions.onselection = (selection) => {
             if (selection == TOOLBAR_CONSTANTS.SAME_SIZE) {
                 this.editorSession.setSameSizeIndicator(!this.editorSession.getState().sameSizeIndicator);
                 if (this.editorSession.getState().sameSizeIndicator) {
-                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
+                    this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
                 }
                 else {
-                    this.btnVisualFeedbackOptions.list[2].iconStyle = { 'background-image': 'none' };
+                    this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': 'none' };
                 }
             }
             if (selection == TOOLBAR_CONSTANTS.ANCHOR_INDICATOR) {
@@ -586,26 +582,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             return selection;
         }
 
-        this.btnPlacementGuideOptions = new ToolbarItem(
-            'Element placement guide options',
-            null,
-            true,
-            null
-        );
-
-        this.btnPlacementGuideOptions.list = [
-            { 'text': 'None', 'iconStyle': { 'background-image': 'none' } },
-            { 'text': 'Grid guides', 'iconStyle': { 'background-image': 'none' } },
-            { 'text': 'Alignment guides', 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } }
-        ];
-
-        this.btnPlacementGuideOptions.getIconStyle = (selection) => {
-            return { 'background-image': TOOLBAR_CONSTANTS.PLACEMENT_GUIDE_CSS_ICON };
-        };
 
         this.add(this.btnHideInheritedElements, TOOLBAR_CATEGORIES.DISPLAY);
         this.add(this.btnVisualFeedbackOptions, TOOLBAR_CATEGORIES.DISPLAY);
-        this.add(this.btnPlacementGuideOptions, TOOLBAR_CATEGORIES.DISPLAY);
 
         this.btnBringForward = new ToolbarItem(
             'Bring forward',
