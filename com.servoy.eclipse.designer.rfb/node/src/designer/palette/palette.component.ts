@@ -1,4 +1,4 @@
-import { Component, Pipe, PipeTransform, Renderer2 } from '@angular/core';
+import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, OnDestroy } from '@angular/core';
 import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISupportRefreshPalette } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css']
 })
-export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette {
+export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit, OnDestroy {
 
     public searchText: string;
     public activeIds: Array<string>;
@@ -52,10 +52,14 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 this.editorSession.variantsTrigger.emit({show: false});
             }
         });
-        //TODO check url
-        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
-            this.snap(value);
-        })
+    }
+    
+	ngAfterViewInit(): void {
+        if (this.urlParser.isAbsoluteFormLayout()) {
+	        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
+	            this.snap(value);
+	        })
+        }
     }
 
     ngOnDestroy(): void {
