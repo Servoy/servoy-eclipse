@@ -99,7 +99,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
       this.computeGuides(event, point);
     }
 
-    private adjustPoint(x: number, y:number) :{x: number, y:number} {
+    private adjustPoint(x: number, y:number): {x: number, y:number} {
         let point = {x, y};
         if (!this.topAdjust) {
             const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null);
@@ -107,8 +107,8 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
             this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
         }
         const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-        point.x = point.x + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust;
-        point.y = point.y + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust;
+        point.x = Math.round(point.x + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust);
+        point.y = Math.round(point.y + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust);
         return point;
     }
 
