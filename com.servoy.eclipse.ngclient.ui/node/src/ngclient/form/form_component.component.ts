@@ -341,10 +341,10 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
 
         // add a min size if needed and if this is not the main form to avoid scrollbars there.
-        if (formData.model.addMinSize && this.el.nativeElement.parentElement?.closest('svy-form') != null) {
+        if (this.el.nativeElement.parentElement?.closest('svy-form') != null) {
             // see svyFormstyle from ng1
-            this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
-            this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
+            if (formData.model.useMinWidth) this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
+            if (formData.model.useMinHeight) this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
         }
         return this.absolutFormPosition;
     }
