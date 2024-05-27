@@ -337,7 +337,7 @@ public class BasePropertyHandler implements IPropertyHandler
 			{
 				return false;
 			}
-			if (persist instanceof Form frm && frm.isResponsiveLayout() && name.equals("height"))
+			if (persist instanceof Form frm && frm.isResponsiveLayout() && (name.equals("height") || name.equals("useMinHeight") || name.equals("useMinWidth")))
 			{
 				return false;
 			}

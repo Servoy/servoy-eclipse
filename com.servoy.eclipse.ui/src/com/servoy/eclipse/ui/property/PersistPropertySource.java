@@ -1477,7 +1477,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 			else if (propertyType == BooleanPropertyType.INSTANCE || propertyType.isProtecting())
 			{
-				resultingPropertyDescriptor = new CheckboxPropertyDescriptor(id, displayName);
+				if (propertyDescriptor.propertyDescriptor instanceof BasePropertyHandler bph &&
+					bph.getPropertyType() == Boolean.class)
+				{
+					resultingPropertyDescriptor = new TreeStateCheckboxPropertyDescriptor(id, displayName);
+				}
+				else resultingPropertyDescriptor = new CheckboxPropertyDescriptor(id, displayName);
 			}
 			else
 			{
@@ -3103,6 +3108,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return propertyEditor;
 		}
 
+		@Override
+		public String toString()
+		{
+			return "PDWrapper[value:" + valueObject + ",pd:" + propertyDescriptor + "]";
+		}
 	}
 
 	private static IPropertyDescriptor getGeneralPropertyDescriptor(PersistContext persistContext, final boolean readOnly, Object id, String displayName,
