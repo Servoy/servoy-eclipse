@@ -125,9 +125,8 @@ public class MarkdownGenerator
 		defaultTypePath.put("JSTableObject", "/plugins/maintenance/");
 		defaultTypePath.put("JSColumnObject", "/plugins/maintenance/");
 		defaultTypePath.put("Component", "/forms/runtimeform/elements");
-
-
 	}
+
 	private static final HashMap<String, String> qualifiedToName = new HashMap<>();
 	private static final HashMap<String, String> publicToRootPath = new HashMap<>();
 	private static final HashMap<String, String> returnTypesToParentName = new HashMap<>();
@@ -135,6 +134,7 @@ public class MarkdownGenerator
 
 	static
 	{
+		// TODO wouldn't it be enough to always say it's "storeAsReadme" if it has return types?
 		storeAsReadMe.add("Application");
 		storeAsReadMe.add("Database Manager");
 		storeAsReadMe.add("SolutionModel");
@@ -146,6 +146,24 @@ public class MarkdownGenerator
 		storeAsReadMe.add("Solution");
 		storeAsReadMe.add("Client Utils");
 
+		storeAsReadMe.add("amortization");
+		storeAsReadMe.add("clientmanager");
+		storeAsReadMe.add("file");
+		storeAsReadMe.add("headlessclient");
+		storeAsReadMe.add("http");
+		storeAsReadMe.add("images");
+		storeAsReadMe.add("jwt");
+		storeAsReadMe.add("mail");
+		storeAsReadMe.add("maintenance");
+		storeAsReadMe.add("mobileservice");
+		storeAsReadMe.add("oauth");
+		storeAsReadMe.add("openid");
+		storeAsReadMe.add("rest_ws");
+		storeAsReadMe.add("spellcheck");
+		storeAsReadMe.add("textxport");
+		storeAsReadMe.add("udp");
+		storeAsReadMe.add("window");
+		storeAsReadMe.add("XmlReader");
 	}
 
 	private final Map<String, Object> root;
@@ -260,8 +278,23 @@ public class MarkdownGenerator
 								try
 								{
 									System.err.println("    * " + jar.getName());
-									docGenerator.generateDocsFromXML(DocumentationManager.fromXML(is, MarkdownGenerator.class.getClassLoader()),
-										"/plugins/" + jar.getName().substring(0, jar.getName().length() - 4), ng);
+									DocumentationManager docManager = DocumentationManager.fromXML(is, MarkdownGenerator.class.getClassLoader());
+									ObjectDocumentation pluginProvider = null;
+									for (IObjectDocumentation docObj : docManager.getObjects().values())
+										if (((ObjectDocumentation)docObj).getScriptingName() != null &&
+											((ObjectDocumentation)docObj).getScriptingName().startsWith("plugins."))
+										{
+											pluginProvider = (ObjectDocumentation)docObj;
+											break;
+										}
+
+									String pluginPath;
+									if (pluginProvider != null)
+										pluginPath = "/" + pluginProvider.getScriptingName().replace('.', '/')/* for example plugins.http */;
+									else
+										pluginPath = "/plugins/" + jar.getName().substring(0, jar.getName().length() - 4);
+
+									docGenerator.generateDocsFromXML(docManager, pluginPath, ng);
 								}
 								catch (ClassNotFoundException | IOException e)
 								{
