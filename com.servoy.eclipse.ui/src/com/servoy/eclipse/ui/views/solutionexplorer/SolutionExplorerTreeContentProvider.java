@@ -2222,7 +2222,7 @@ public class SolutionExplorerTreeContentProvider
 										{
 											URL urlLightTheme = ((IIconProvider)plugin).getIconUrl();
 
-											boolean darkTheme = UIUtils.isDarkThemeSelected(true);
+											boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 											if (darkTheme)
 											{
 												URL urlDarkTheme = null;
@@ -2310,7 +2310,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			try
 			{
-				boolean darkTheme = UIUtils.isDarkThemeSelected(true);
+				boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 				if (!"file".equals(spec.getSpecURL().getProtocol()))
 				{
 					SpecProviderState specProvider = isService ? getServicesSpecProviderState() : getComponentsSpecProviderState();
