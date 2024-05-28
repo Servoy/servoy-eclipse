@@ -96,7 +96,6 @@ public class SetSelectionHandler implements IServerService
 				if (editorPart != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
 				{
 					// if that is not the case make it active, can happen in certain conditions
-					System.err.println("setting");
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
 				}
 
