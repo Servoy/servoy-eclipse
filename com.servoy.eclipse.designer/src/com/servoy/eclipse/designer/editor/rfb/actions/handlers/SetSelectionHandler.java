@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,6 +91,15 @@ public class SetSelectionHandler implements IServerService
 				IStructuredSelection structuredSelection = new StructuredSelection(selection);
 				selectionListener.setLastSelection(structuredSelection);
 				selectionProvider.setSelection(selection.size() == 0 ? null : structuredSelection);
+
+				// if a set selection came from the browser, then this should have focus and should be the active part
+				if (editorPart != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
+				{
+					// if that is not the case make it active, can happen in certain conditions
+					System.err.println("setting");
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
+				}
+
 			}
 		});
 		return null;
