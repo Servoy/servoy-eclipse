@@ -171,7 +171,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
-         version="1.7.14.s6"/>
+         version="1.7.15.s1"/>
 
    <plugin
          id="j2db_documentation"
