@@ -138,8 +138,9 @@ public class CSSValue
 		int percentageDiff = 0;
 		if (parentSize == val.parentSize && (percentage > 0 || val.percentage > 0))
 		{
-			percentageDiff = Math.max((isHigherProperty && percentage != 100 ? (100 - percentage) : percentage) - val.percentage, 0);
-			if (percentageDiff > 0)
+			percentageDiff = (isHigherProperty && percentage != 100 ? (100 - percentage) : percentage) -
+				(val.isHigherProperty && val.percentage != 100 ? (100 - val.percentage) : val.percentage);
+			if (percentageDiff >= 0)
 			{
 				px -= Math.round(percentageDiff * parentSize / 100);
 			}
@@ -158,13 +159,23 @@ public class CSSValue
 
 	public CSSValue plus(CSSValue val)
 	{
-		int o1_percentage = isHigherProperty ? 100 - percentage : percentage;
-		int o1_pixels = isHigherProperty && percentage == 0 ? parentSize - pixels : pixels;
-
-		int o2_percentage = val.isHigherProperty ? 100 - val.percentage : val.percentage;
-		int o2_pixels = val.isHigherProperty && val.percentage == 0 ? val.parentSize - val.pixels : val.pixels;
-
-		CSSValue res = new CSSValue(o1_percentage + o2_percentage, o1_pixels + o2_pixels);
+		int px = getAsPixels() + val.getAsPixels();
+		int percentageSum = 0;
+		if (parentSize == val.parentSize && (percentage > 0 || val.percentage > 0))
+		{
+			percentageSum = Math.max((isHigherProperty && percentage != 100 ? (100 - percentage) : percentage) +
+				(val.isHigherProperty && val.percentage != 100 ? (100 - val.percentage) : val.percentage), 0);
+			if (percentageSum > 0)
+			{
+				px -= Math.round(percentageSum * parentSize / 100);
+			}
+			else
+			{
+				percentageSum = isHigherProperty && percentage != 100 ? (100 - percentage) : percentage;
+				px -= Math.round(percentageSum * parentSize / 100);
+			}
+		}
+		CSSValue res = new CSSValue(percentageSum, px);
 		res.parentSize = parentSize;
 		res.isHigherProperty = false;
 		return res;
@@ -191,14 +202,21 @@ public class CSSValue
 	@Override
 	public String toString()
 	{
-		if (percentage != 0 && pixels != 0)
+		int percent = percentage;
+		int px = pixels;
+		if (percent > 100)
 		{
-			return "calc(" + percentage + "% " + (pixels > 0 ? "+ " : "- ") + Math.abs(pixels) + "px)";
+			percent = 100;
+			px -= Math.round(percent * parentSize / 100);
 		}
-		if (percentage != 0)
+		if (percent != 0 && px != 0)
 		{
-			return percentage + "%";
+			return "calc(" + percent + "% " + (px > 0 ? "+ " : "- ") + Math.abs(px) + "px)";
 		}
-		return pixels + "";
+		if (percent != 0)
+		{
+			return percent + "%";
+		}
+		return px + "";
 	}
 }
