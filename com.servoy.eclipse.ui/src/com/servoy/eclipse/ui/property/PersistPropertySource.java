@@ -3257,6 +3257,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				model.addDefaultValue(config.getRealDefault(), config.getDisplayDefault());
 			}
+			if (displayName.equals("authenticator"))
+			{
+				return new ComboboxPropertyAuthenticator<Object>(id, displayName, model, Messages.LabelUnresolved);
+			}
 			return new ComboboxPropertyController<Object>(id, displayName, model, Messages.LabelUnresolved);
 		}
 

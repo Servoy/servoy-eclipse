@@ -16,37 +16,23 @@
  */
 package com.servoy.eclipse.ui.property;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
-import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.team.internal.ui.Utils;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.editors.DialogCellEditor.ValueEditorCellLayout;
 import com.servoy.eclipse.ui.editors.IValueEditor;
@@ -54,9 +40,7 @@ import com.servoy.eclipse.ui.labelproviders.ComboBoxLabelProvider;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
-import com.servoy.j2db.persistence.Solution.AUTHENTICATOR_TYPE;
 import com.servoy.j2db.util.IDelegate;
-import com.servoy.j2db.util.UUID;
 
 /**
  * Property controller for properties with a fixed list of values to be shown in a combo box.
@@ -71,8 +55,6 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 	private final String unresolved;
 	private final IValueEditor valueEditor;
 
-	private boolean isAuthProp;
-
 	public ComboboxPropertyController(Object id, String displayName, IComboboxPropertyModel<T> model, String unresolved)
 	{
 		this(id, displayName, model, unresolved, null);
@@ -84,7 +66,6 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 		this.model = model;
 		this.unresolved = unresolved;
 		this.valueEditor = valueEditor;
-		this.isAuthProp = displayName.equals("authenticator");
 	}
 
 	public IComboboxPropertyModel<T> getModel()
@@ -100,194 +81,80 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ModifiedComboBoxCellEditor editor = null;
-		if (this.isAuthProp)
+		ModifiedComboBoxCellEditor editor = new ModifiedComboBoxCellEditor(parent, EMPTY_STRING_ARRAY, SWT.READ_ONLY, model.getDefaultValueIndex() == 0)
 		{
-			editor = new ModifiedComboBoxCellEditor(parent, EMPTY_STRING_ARRAY, SWT.READ_ONLY, model.getDefaultValueIndex() == 0)
+			private Button editorButton;
+
+			@Override
+			public void activate()
 			{
-				private Button redirectButton;
-
-				@Override
-				public void activate()
+				// set the items at activation, values may have changed
+				Object value = doGetValue();
+				setItems(model.getDisplayValues());
+				doSetValue(value);
+				if (valueEditor != null)
 				{
-					// set the items at activation, values may have changed
-					Object value = doGetValue();
-					setItems(model.getDisplayValues());
-					doSetValue(value);
-					AUTHENTICATOR_TYPE servoyCloud = AUTHENTICATOR_TYPE.SERVOY_CLOUD;
-					redirectButton.setEnabled(value.equals(servoyCloud.getValue()));
-
-					super.activate();
+					editorButton.setEnabled(valueEditor.canEdit(value));
 				}
 
-				@Override
-				public String getErrorMessage()
-				{
-					String warningMessage = getWarningMessage();
-					if (warningMessage == null || warningMessage.length() == 0)
-					{
-						return super.getErrorMessage();
-					}
-					return warningMessage;
-				}
+				super.activate();
+			}
 
-				@Override
-				protected Control createControl(Composite parent)
-				{
-
-					Composite composite = new Composite(parent, SWT.NONE);
-					CCombo combo = (CCombo)super.createControl(composite);
-					redirectButton = new Button(composite, SWT.FLAT);
-
-					redirectButton.setText("...");
-					redirectButton.setEnabled(false);
-					redirectButton.setToolTipText("Go on Servoy Cloud");
-
-					GroupLayout groupLayout = new GroupLayout(composite);
-					SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
-					sequentialGroup.add(combo, GroupLayout.PREFERRED_SIZE, 135, Integer.MAX_VALUE);
-					sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(redirectButton);
-					groupLayout.setHorizontalGroup(sequentialGroup);
-
-					ParallelGroup parallelGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false);
-					parallelGroup.add(redirectButton, 0, 0, Integer.MAX_VALUE);
-					parallelGroup.add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE);
-					groupLayout.setVerticalGroup(parallelGroup);
-
-					composite.setLayout(groupLayout);
-
-					redirectButton.addMouseListener(new MouseAdapter()
-					{
-						@Override
-						public void mouseDown(MouseEvent e)
-						{
-							UUID solutionUUID = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getUUID();
-							String loginToken = ServoyLoginDialog.getLoginToken();
-							if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-							if (loginToken == null)
-							{
-								Display.getDefault().asyncExec(new Runnable()
-								{
-									public void run()
-									{
-										MessageDialog.openInformation(
-											Display.getDefault().getActiveShell(),
-											"Login Required",
-											"You need to log in if you want to be redirected to Servoy Cloud.");
-									}
-								});
-							}
-
-							if (loginToken != null && solutionUUID != null)
-							{
-								String url = "https://admin.servoy-cloud.eu/solution/svyCloud/index.html?loginToken=" + loginToken + "&applicationUUID=" +
-									solutionUUID + "&navigateTo=setupCloudSecurity";
-								try
-								{
-									PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
-								}
-								catch (PartInitException | MalformedURLException e1)
-								{
-									ServoyLog.logError(e1);
-								}
-							}
-						}
-					});
-
-
-					combo.addSelectionListener(new SelectionAdapter()
-					{
-						@Override
-						public void widgetSelected(SelectionEvent event)
-						{
-							// the selection is already updated at this point using the SelectionAdapter created in super.createControl()
-							redirectButton
-								.setEnabled(((CCombo)event.getSource()).getItems()[((CCombo)event.getSource()).getSelectionIndex()].equals("SERVOY_CLOUD"));
-							fireApplyEditorValue();
-						}
-					});
-					return composite;
-				}
-			};
-		}
-		else
-		{
-			editor = new ModifiedComboBoxCellEditor(parent, EMPTY_STRING_ARRAY, SWT.READ_ONLY, model.getDefaultValueIndex() == 0)
+			@Override
+			public String getErrorMessage()
 			{
-				private Button editorButton;
-
-				@Override
-				public void activate()
+				String warningMessage = getWarningMessage();
+				if (warningMessage == null || warningMessage.length() == 0)
 				{
-					// set the items at activation, values may have changed
-					Object value = doGetValue();
-					setItems(model.getDisplayValues());
-					doSetValue(value);
-					if (valueEditor != null)
-					{
-						editorButton.setEnabled(valueEditor.canEdit(value));
-					}
-
-					super.activate();
+					return super.getErrorMessage();
 				}
+				return warningMessage;
+			}
 
-				@Override
-				public String getErrorMessage()
+			@Override
+			protected Control createControl(Composite parent)
+			{
+				Composite composite = null;
+				CCombo combo = null;
+				if (valueEditor != null)
 				{
-					String warningMessage = getWarningMessage();
-					if (warningMessage == null || warningMessage.length() == 0)
-					{
-						return super.getErrorMessage();
-					}
-					return warningMessage;
-				}
-
-				@Override
-				protected Control createControl(Composite parent)
-				{
-
-					Composite composite = null;
-					CCombo combo = null;
-					if (valueEditor != null)
-					{
-						composite = new Composite(parent, SWT.None);
-						combo = (CCombo)super.createControl(composite);
-						editorButton = new Button(composite, SWT.FLAT);
-						editorButton.setImage(DialogCellEditor.OPEN_IMAGE);
-						editorButton.addMouseListener(new MouseAdapter()
-						{
-							@Override
-							public void mouseDown(org.eclipse.swt.events.MouseEvent e)
-							{
-								valueEditor.openEditor(doGetValue());
-							}
-						});
-						ValueEditorCellLayout layout = new ValueEditorCellLayout();
-						layout.setValueEditor(valueEditor);
-						composite.setLayout(layout);
-					}
-					else
-					{
-						combo = (CCombo)super.createControl(parent);
-						composite = combo;
-					}
-					combo.addSelectionListener(new SelectionAdapter()
+					composite = new Composite(parent, SWT.None);
+					combo = (CCombo)super.createControl(composite);
+					editorButton = new Button(composite, SWT.FLAT);
+					editorButton.setImage(DialogCellEditor.OPEN_IMAGE);
+					editorButton.addMouseListener(new MouseAdapter()
 					{
 						@Override
-						public void widgetSelected(SelectionEvent event)
+						public void mouseDown(org.eclipse.swt.events.MouseEvent e)
 						{
-							// the selection is already updated at this point using the SelectionAdapter created in super.createControl()
-							if (valueEditor != null)
-							{
-								editorButton.setEnabled(valueEditor.canEdit(doGetValue()));
-							}
-							fireApplyEditorValue();
+							valueEditor.openEditor(doGetValue());
 						}
 					});
-					return composite;
+					ValueEditorCellLayout layout = new ValueEditorCellLayout();
+					layout.setValueEditor(valueEditor);
+					composite.setLayout(layout);
 				}
-			};
-		}
+				else
+				{
+					combo = (CCombo)super.createControl(parent);
+					composite = combo;
+				}
+				combo.addSelectionListener(new SelectionAdapter()
+				{
+					@Override
+					public void widgetSelected(SelectionEvent event)
+					{
+						// the selection is already updated at this point using the SelectionAdapter created in super.createControl()
+						if (valueEditor != null)
+						{
+							editorButton.setEnabled(valueEditor.canEdit(doGetValue()));
+						}
+						fireApplyEditorValue();
+					}
+				});
+				return composite;
+			}
+		};
 		return editor;
 	}
 
