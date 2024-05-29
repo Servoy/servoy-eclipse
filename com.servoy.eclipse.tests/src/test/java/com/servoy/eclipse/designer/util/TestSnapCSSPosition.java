@@ -386,5 +386,105 @@ public class TestSnapCSSPosition
 		assertEquals("css pos right should be set to the bottom value computed from the target", "calc(20% + 105px)", newPosition.bottom);
 		assertEquals("css pos height should not be changed", "30", newPosition.height);
 	}
+	
+	@Test
+	public void testSnapToEqualDist1() throws Exception
+	{
+		CSSPosition old = null; // new component
+		CSSPosition newPosition = new CSSPosition("295", "-1", "-1", "53", "140", "30");
+		CSSPosition targetPosition1 = new CSSPosition("83", "-1", "-1", "53", "140", "30");
+		CSSPosition targetPosition2 = new CSSPosition("189", "-1", "-1", "53", "140", "30");
+		int pos = 1; //below
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
+		DesignerUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+
+		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
+		assertFalse("css pos bottom should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
+		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+
+		assertEquals("295", newPosition.top);
+		assertEquals("css pos height should not be changed", "30", newPosition.height);
+	}
+	
+	@Test
+	public void testSnapToEqualDist2() throws Exception
+	{
+		CSSPosition old = null; // new component
+		CSSPosition newPosition = new CSSPosition("83", "-1", "-1", "53", "140", "30");
+		CSSPosition targetPosition1 = new CSSPosition("189", "-1", "-1", "53", "140", "30"); //top, left
+		CSSPosition targetPosition2 = new CSSPosition("295", "-1", "-1", "53", "140", "30");//top, left
+		int pos = -1; //above
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
+		DesignerUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+
+		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
+		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
+		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+
+		assertEquals("83", newPosition.top);
+		assertEquals("css pos height should not be changed", "30", newPosition.height);
+	}
+	
+	@Test
+	public void testSnapToEqualDist_Percentage1() throws Exception
+	{
+		CSSPosition old = null; // new component
+		CSSPosition newPosition = new CSSPosition("208", "-1", "-1", "53", "140", "30");
+		CSSPosition targetPosition1 = new CSSPosition("10%", "-1", "-1", "53", "140", "30");
+		CSSPosition targetPosition2 = new CSSPosition("calc(10% + 80px)", "-1", "-1", "53", "140", "30");
+		int pos = 1; //below
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
+		DesignerUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+
+		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
+		assertFalse("css pos bottom should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
+		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+
+		assertEquals("calc(10% + 160px)", newPosition.top);
+		assertEquals("css pos height should not be changed", "30", newPosition.height);
+	}
+	
+	@Test
+	public void testSnapToEqualDist_Percentage2() throws Exception
+	{
+		CSSPosition old = null; // new component
+		CSSPosition newPosition = new CSSPosition("48", "-1", "-1", "53", "140", "30");
+		CSSPosition targetPosition1 = new CSSPosition("calc(10% + 80px)", "-1", "-1", "53", "140", "30"); //top, left
+		CSSPosition targetPosition2 = new CSSPosition("calc(10% + 160px)", "-1", "-1", "53", "140", "30");//top, left
+		int pos = -1; //above
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
+		DesignerUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+
+		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
+		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
+		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+
+		assertEquals("10%", newPosition.top);
+		assertEquals("css pos height should not be changed", "30", newPosition.height);
+	}
+	
+	@Test
+	public void testSnapToEqualDist_Percentage3() throws Exception
+	{
+		CSSPosition old = null; // new component
+		CSSPosition newPosition = new CSSPosition("128", "-1", "-1", "53", "140", "30");
+		CSSPosition targetPosition1 = new CSSPosition("10%", "-1", "-1", "53", "140", "30"); //top, left
+		CSSPosition targetPosition2 = new CSSPosition("calc(10% + 160px)", "-1", "-1", "53", "140", "30");//top, left
+		int pos = 0; //between the targets
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
+		DesignerUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+
+		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
+		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
+		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+
+		assertEquals("calc(10% + 80px)", newPosition.top);
+		assertEquals("css pos height should not be changed", "30", newPosition.height);
+	}
 
 }
