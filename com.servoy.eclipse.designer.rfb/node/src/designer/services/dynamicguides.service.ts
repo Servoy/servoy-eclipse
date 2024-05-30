@@ -586,7 +586,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	}
     
     private addEqualDistanceVerticalGuides(rect: DOMRect, properties: any, overlaps: DOMRect[], adjustSize: boolean): Guide[] {
-		const overlappingX = this.getOverlappingRectangles(overlaps);
+		const overlappingX = this.getOverlappingRectangles(overlaps, 'top');
         for (let pair of overlappingX){
 			const e1 = pair[0];
             const e2 = pair[1];   
@@ -633,7 +633,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	}
 	
 	private addEqualDistanceHorizontalGuides(rect: DOMRect, properties: any, overlaps: DOMRect[], adjustSize: boolean): Guide[] {
-		const overlappingY = this.getOverlappingRectangles(overlaps);
+		const overlappingY = this.getOverlappingRectangles(overlaps, 'left');
         for (let pair of overlappingY){
 			const e1 = pair[0];
             const e2 = pair[1];
@@ -678,12 +678,17 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		return null;
 	}
     
-    private getOverlappingRectangles(overlaps: DOMRect[]): DOMRect[][] {
+    private getOverlappingRectangles(overlaps: DOMRect[], property: 'left' | 'top'): DOMRect[][] {
 		const pairs: DOMRect[][] = [];
     	for (let i = 0; i < overlaps.length - 1; i++) {
-        	for (let j = i + 1; j < overlaps.length; j++) {
-                pairs.push([overlaps[i], overlaps[j]]);
-        	}
+			for (let j = i + 1; j < overlaps.length; j++) {
+				if (overlaps[i][property] <= overlaps[j][property]) {
+					pairs.push([overlaps[i], overlaps[j]]);
+				}
+				else {
+					pairs.push([overlaps[j], overlaps[i]]);
+				}
+			}
     	}
     	return pairs;
 	}
