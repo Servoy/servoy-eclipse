@@ -717,27 +717,241 @@ public class DesignerUtil
 				componentParent = CSSPositionUtils.getParentContainer((ISupportSize)persist);
 			}
 			JSONObject jsonObject = obj.getJSONObject(property);
-			ISupportCSSPosition target = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
-			AbstractContainer parent = CSSPositionUtils.getParentContainer(target);
+			ISupportCSSPosition target = jsonObject.optString("uuid") != null ? ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
+				jsonObject.optString("uuid"))) : null;
+			AbstractContainer parent = target != null ? CSSPositionUtils.getParentContainer(target) : null;
 
-			if (property.equals("middleH"))
+			switch (property)
 			{
-				snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), parent.getSize(), "left", "right", "width");
+				case "middleH" :
+					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), parent.getSize(), "left", "right", "width");
+					break;
+
+				case "middleV" :
+					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), parent.getSize(), "top", "bottom", "height");
+					break;
+
+				case "endWidth" :
+				case "endHeight" :
+					break;
+
+				case "distX" :
+					snapToDist(jsonObject, newPosition, position, componentParent.getSize(), form, "left", "right", "width");
+					break;
+
+				case "distY" :
+					snapToDist(jsonObject, newPosition, position, componentParent.getSize(), form, "top", "bottom", "height");
+					break;
+
+				default :
+					setCssValue(jsonObject, property, newPosition, position, target.getCssPosition(), componentParent.getSize(), parent.getSize(), isResize);
 			}
-			else if (property.equals("middleV"))
+		}
+
+		if (obj.has("endWidth") || obj.has("endHeight"))
+		{
+			if (componentParent == null)
 			{
-				snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), parent.getSize(), "top", "bottom", "height");
+				componentParent = CSSPositionUtils.getParentContainer((ISupportSize)persist);
 			}
-			else
-			{
-				java.awt.Dimension containerSize = parent.getSize();
-				setCssValue(jsonObject, property, newPosition, position, target.getCssPosition(), componentParent.getSize(), containerSize, isResize);
-			}
+
+			handleEndSize(newPosition, obj, componentParent, form, "endWidth", "left", "right", "width");
+			handleEndSize(newPosition, obj, componentParent, form, "endHeight", "top", "bottom", "height");
 		}
 
 		return newPosition;
 	}
+
+	private static void snapToDist(JSONObject obj, CSSPosition newPosition, CSSPosition oldPosition, java.awt.Dimension parentSize, Form form,
+		String lowerProperty, String higherProperty, String sizeProperty)
+	{
+		JSONArray uuids = obj.getJSONArray("targets");
+		ISupportCSSPosition target1 = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, uuids.getString(0)));
+		AbstractContainer parent1 = target1 != null ? CSSPositionUtils.getParentContainer(target1) : null;
+		ISupportCSSPosition target2 = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, uuids.getString(1)));
+		AbstractContainer parent2 = target1 != null ? CSSPositionUtils.getParentContainer(target2) : null;
+		CSSPosition pos1 = target1.getCssPosition();
+		CSSPosition pos2 = target2.getCssPosition();
+		java.awt.Dimension parent1Size = parent1.getSize();
+		java.awt.Dimension parent2Size = parent2.getSize();
+
+		int pos = obj.optInt("pos", -1);
+		snapToDist(newPosition, oldPosition, parentSize, lowerProperty, higherProperty, sizeProperty, pos1, pos2, parent1Size, parent2Size, pos);
+
+	}
+
+	public static void snapToDist(CSSPosition newPosition, CSSPosition oldPosition, java.awt.Dimension parentSize, String lowerProperty, String higherProperty,
+		String sizeProperty, CSSPosition pos1, CSSPosition pos2, java.awt.Dimension parent1Size, java.awt.Dimension parent2Size,
+		int pos)
+	{
+		switch (pos)
+		{
+			case -1 :
+			{
+				//above the targets
+				CSSValue dist = computeDist(lowerProperty, higherProperty, pos1, pos2, parent1Size, parent2Size);
+				CSSValue l1 = getOrComputeValue(pos1, lowerProperty, parent1Size);
+				CSSValue higherPropertyValue = l1.minus(dist).toHigherProperty();
+
+				//set the same anchoring as the closest target (first)
+				if (getCssValue(pos1, lowerProperty, parent1Size).isSet())
+				{
+					CSSValue lowerPropertyValue = higherPropertyValue.minus(getCssValue(newPosition, sizeProperty, parentSize)); //TODO check if the new size set?
+					setCssValue(newPosition, lowerProperty, lowerPropertyValue);
+					//clear the opposite property value if the size property is set
+					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
+					{
+						setCssValue(newPosition, higherProperty, CSSValue.NOT_SET);
+					}
+				}
+				else
+				{
+					setCssValue(newPosition, higherProperty, higherPropertyValue);
+					//clear the opposite property value if the size property is set
+					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
+					{
+						setCssValue(newPosition, lowerProperty, CSSValue.NOT_SET);
+					}
+				}
+				break;
+			}
+			case 1 :
+			{
+				//below the targets
+				CSSValue dist = computeDist(lowerProperty, higherProperty, pos1, pos2, parent1Size, parent2Size);
+				CSSValue h2 = getOrComputeValue(pos2, higherProperty, parent2Size);
+
+				//set the same anchoring as the closest target (second)
+				if (getCssValue(pos2, lowerProperty, parent2Size).isSet())
+				{
+					CSSValue lowerPropertyValue = h2.plus(dist);
+					setCssValue(newPosition, lowerProperty, lowerPropertyValue);
+					//clear the opposite property value if the size property is set
+					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
+					{
+						setCssValue(newPosition, higherProperty, CSSValue.NOT_SET);
+					}
+				}
+				else
+				{
+					CSSValue higherPropertyValue = h2.plus(dist).plus(getCssValue(newPosition, sizeProperty, parentSize)).toHigherProperty();//TODO check if the new size set?
+					setCssValue(newPosition, higherProperty, higherPropertyValue);
+					//clear the opposite property value if the size property is set
+					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
+					{
+						setCssValue(newPosition, lowerProperty, CSSValue.NOT_SET);
+					}
+				}
+				break;
+			}
+			case 0 :
+			{
+				//between the targets
+				CSSValue h1 = getOrComputeValue(pos1, higherProperty, parent1Size);
+				CSSValue l2 = getOrComputeValue(pos2, lowerProperty, parent2Size);
+				CSSValue size = getCssValue(newPosition, sizeProperty, parentSize);
+				if (!size.isSet())
+				{
+					size = computeDimension(sizeProperty, getCssValue(oldPosition, lowerProperty, parentSize),
+						getCssValue(oldPosition, higherProperty, parentSize));
+				}
+				CSSValue dist = l2.minus(h1).div(2).minus(size.div(2));
+
+				if (getCssValue(pos1, lowerProperty, parent1Size).isSet() && getCssValue(pos2, lowerProperty, parent2Size).isSet())
+				{
+					CSSValue lowerPropertyValue = l2.minus(dist).minus(getCssValue(newPosition, sizeProperty, parentSize)); //TODO check if the new size set?
+					setCssValue(newPosition, lowerProperty, lowerPropertyValue);
+					//clear the opposite property value if the size property is set
+					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
+					{
+						setCssValue(newPosition, higherProperty, CSSValue.NOT_SET);
+					}
+				}
+				else if (getCssValue(pos1, higherProperty, parent1Size).isSet() && getCssValue(pos2, higherProperty, parent2Size).isSet())
+				{
+					CSSValue higherPropertyValue = h1.plus(dist).minus(getCssValue(newPosition, sizeProperty, parentSize)); //TODO check if the new size set?
+					setCssValue(newPosition, higherProperty, higherPropertyValue);
+					//clear the opposite property value if the size property is set
+					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
+					{
+						setCssValue(newPosition, lowerProperty, CSSValue.NOT_SET);
+					}
+				}
+				else
+				{
+					//what should happen if the targets don't have the same anchoring?
+					setCssValue(newPosition, lowerProperty, h1.plus(dist));
+					setCssValue(newPosition, higherProperty, l2.minus(dist));
+					setCssValue(newPosition, sizeProperty, CSSValue.NOT_SET);
+				}
+			}
+		}
+	}
+
+
+	private static CSSValue computeDist(String lowerProperty, String higherProperty, CSSPosition pos1, CSSPosition pos2, java.awt.Dimension parent1Size,
+		java.awt.Dimension parent2Size)
+	{
+		CSSValue h1 = getOrComputeValue(pos1, higherProperty, parent1Size);
+		CSSValue l2 = getOrComputeValue(pos2, lowerProperty, parent2Size);
+		CSSValue dist = l2.minus(h1);
+		return dist;
+	}
+
+
+	private static void handleEndSize(CSSPosition newPosition, JSONObject obj, AbstractContainer componentParent, Form form, String key, String start,
+		String end, String dimension)
+	{
+		if (obj.has(key))
+		{
+			JSONObject jsonObject = obj.getJSONObject(key);
+			ISupportCSSPosition target = (ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, jsonObject.optString("uuid"));
+			AbstractContainer parent = CSSPositionUtils.getParentContainer(target);
+			snapToEndSize(newPosition, componentParent.getSize(), target.getCssPosition(), parent.getSize(), start, end, dimension);
+		}
+	}
+
+	public static void snapToEndSize(CSSPosition newPosition, java.awt.Dimension parentSize, CSSPosition targetCssPosition,
+		java.awt.Dimension targetParentSize, String lowerProperty, String higherProperty, String sizeProperty)
+	{
+		CSSValue higherPropertyValue = getCssValue(targetCssPosition, higherProperty, targetParentSize);
+		CSSValue lowerPropertyValue = getCssValue(targetCssPosition, lowerProperty, targetParentSize);
+		CSSValue sourceLowerPropertyValue = getCssValue(newPosition, lowerProperty, parentSize);
+		CSSValue sourceSizePropertyValue = getCssValue(newPosition, sizeProperty, parentSize);
+		if (higherPropertyValue.isSet())
+		{
+			setCssValue(newPosition, higherProperty, higherPropertyValue);
+			if (sourceLowerPropertyValue.isSet())
+			{
+				CSSValue size = higherPropertyValue.minus(sourceLowerPropertyValue);
+				setCssValue(newPosition, sizeProperty, size);
+			}
+			else
+			{
+				CSSValue size = getCssValue(targetCssPosition, sizeProperty, targetParentSize);
+				if (size.isSet())
+				{
+					setCssValue(newPosition, sizeProperty, size);
+				}
+			}
+			setCssValue(newPosition, lowerProperty, CSSValue.NOT_SET);
+		}
+		else
+		{
+			CSSValue computedHigherPropertyValue = lowerPropertyValue.plus(getCssValue(targetCssPosition, sizeProperty, targetParentSize)).toHigherProperty();
+			if (!sourceSizePropertyValue.isSet())
+			{
+				setCssValue(newPosition, higherProperty, higherPropertyValue);
+			}
+			else
+			{
+				CSSValue size = computedHigherPropertyValue.minus(sourceLowerPropertyValue);
+				setCssValue(newPosition, sizeProperty, size);
+				setCssValue(newPosition, higherProperty, CSSValue.NOT_SET);
+			}
+		}
+	}
+
 
 	public static void snapToMiddle(CSSPosition newPosition, CSSPosition oldPosition, java.awt.Dimension parentSize, CSSPosition midCssPosition,
 		java.awt.Dimension targetParentSize, String lowerProperty, String higherProperty, String sizeProperty)
@@ -787,6 +1001,16 @@ public class DesignerUtil
 			setCssValue(newPosition, higherProperty, mid.plus(sizeValue.div(2)).toHigherProperty());
 			setCssValue(newPosition, sizeProperty, CSSValue.NOT_SET);
 		}
+	}
+
+	private static CSSValue getOrComputeValue(CSSPosition pos, String property, java.awt.Dimension parentSize)
+	{
+		CSSValue value = getCssValue(pos, property, parentSize);
+		if (!value.isSet())
+		{
+			value = computeValueBasedOnOppositeProperty(pos, property, parentSize, getCssValue(pos, getOppositeProperty(property), parentSize));
+		}
+		return value;
 	}
 
 	private static CSSValue getCssValue(CSSPosition position, String property, java.awt.Dimension containerSize)
@@ -896,33 +1120,20 @@ public class DesignerUtil
 		if (val.isSet())
 		{
 			//if the property is set on the target, then we copy on the source component and clear the opposite property if the size property is set
-			if (isResize)
+			//when moving or resizing a component, if the property is set on the target, then we copy its value on the source component
+			if (property.equals(targetProperty))
 			{
-				String value = val.toString(); //TODO %
-				int w = CSSPositionUtils.getPixelsValue(value) -
-					CSSPositionUtils.getPixelsValue(getCssValue(oldPosition, oppositeProperty, containerSize).toString()); //TODO %!
-				if (w > 0)
-				{
-					setCssValue(newPosition, sizeProperty, new CSSValue(w + "")); //TODO %
-				}
+				setCssValue(newPosition, property, val);
 			}
 			else
 			{
-				//when moving a component, if the property is set on the target, then we copy its value on the source component
-				if (property.equals(targetProperty))
-				{
-					setCssValue(newPosition, property, val);
-				}
-				else
-				{
-					CSSValue computed = computeValueBasedOnOppositeTargetProperty(property, containerSize, val);
-					setCssValue(newPosition, property, computed);
-				}
-				//clear the opposite property value if the size property is set
-				if (oldPosition == null || getCssValue(oldPosition, sizeProperty, containerSize).isSet())
-				{
-					setCssValue(newPosition, oppositeProperty, CSSValue.NOT_SET);
-				}
+				CSSValue computed = computeValueBasedOnOppositeTargetProperty(property, containerSize, val);
+				setCssValue(newPosition, property, computed);
+			}
+			//clear the opposite property value if the size property is set
+			if (oldPosition == null || getCssValue(oldPosition, sizeProperty, containerSize).isSet())
+			{
+				setCssValue(newPosition, oppositeProperty, CSSValue.NOT_SET);
 			}
 		}
 		else if (getCssValue(targetPosition, oppositeProperty, targetContainerSize).isSet() &&
@@ -932,35 +1143,26 @@ public class DesignerUtil
 			CSSValue oppositePropertyValue = getCssValue(targetPosition, oppositeProperty, targetContainerSize);
 			CSSValue computedPropertyValue = computeValueBasedOnOppositeProperty(targetPosition, property, targetContainerSize, oppositePropertyValue);
 
-			if (isResize)
+			//clear the property because the target component does also not have it and we want the same anchoring
+			setCssValue(newPosition, property, CSSValue.NOT_SET);
+			CSSValue dimension = getCssValue(oldPosition, sizeProperty, containerSize);
+			if (dimension.isSet())
 			{
-				CSSValue computedDimension = computeDimension(property, computedPropertyValue,
+				//maintain the size of the old css position
+				setCssValue(newPosition, sizeProperty, dimension);
+			}
+			else if (oldPosition != null)
+			{
+				//the size is not set (component anchored left-right or top-bottom),
+				//need to compute it based on the opposing properties and the parent container size
+				CSSValue computedDimension = computeDimension(property, getCssValue(oldPosition, property, containerSize),
 					getCssValue(oldPosition, oppositeProperty, containerSize));
 				setCssValue(newPosition, sizeProperty, computedDimension);
 			}
-			else
-			{
-				//clear the property because the target component does also not have it and we want the same anchoring
-				setCssValue(newPosition, property, CSSValue.NOT_SET);
-				CSSValue dimension = getCssValue(oldPosition, sizeProperty, containerSize);
-				if (dimension.isSet())
-				{
-					//maintain the size of the old css position
-					setCssValue(newPosition, sizeProperty, dimension);
-				}
-				else if (oldPosition != null)
-				{
-					//the size is not set (component anchored left-right or top-bottom),
-					//need to compute it based on the opposing properties and the parent container size
-					CSSValue computedDimension = computeDimension(property, getCssValue(oldPosition, property, containerSize),
-						getCssValue(oldPosition, oppositeProperty, containerSize));
-					setCssValue(newPosition, sizeProperty, computedDimension);
-				}
-				//compute the opposite property value for the source component using the size property, container size and the computed property value of the target
-				CSSValue computedOppositePropertySourceComponent = computeValueBasedOnOppositeProperty(newPosition, oppositeProperty, containerSize,
-					computedPropertyValue);
-				setCssValue(newPosition, oppositeProperty, computedOppositePropertySourceComponent);
-			}
+			//compute the opposite property value for the source component using the size property, container size and the computed property value of the target
+			CSSValue computedOppositePropertySourceComponent = computeValueBasedOnOppositeProperty(newPosition, oppositeProperty, containerSize,
+				computedPropertyValue);
+			setCssValue(newPosition, oppositeProperty, computedOppositePropertySourceComponent);
 		}
 		else if (getCssValue(targetPosition, targetOppositeProperty, targetContainerSize).isSet() &&
 			getCssValue(targetPosition, sizeProperty, targetContainerSize).isSet())
