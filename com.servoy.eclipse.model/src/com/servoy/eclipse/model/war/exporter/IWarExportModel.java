@@ -108,8 +108,6 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	String decryptPassword(Cipher desCipher, String code);
 
-	public boolean isNGExport();
-
 	public void setUserHome(String userHome);
 
 	public String getUserHome();
@@ -160,8 +158,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	Set<String> getAllExportedServicesWithoutSabloServices();
 
 	public String exportNG2Mode();
-
-	public boolean exportNG1();
 
 	/**
 	 * If a property file {@link #getServoyPropertiesFileName()} was not specified then a properties file will be generated using this method and other

@@ -42,7 +42,6 @@ import org.eclipse.ui.internal.util.PrefUtil;
 
 import com.servoy.eclipse.core.util.ServoyMessageDialog;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.util.ObjectWrapper;
@@ -66,8 +65,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Spinner waitForSolutionToBeLoadedInTestClientSpinner;
 	private Button useDarkIconsButton;
 	private Button contextMenuTutorialsButton;
-	private Button launchNGButton;
-	private Button showNGDesignerButton;
 	private Button showForumNotificationsButton;
 
 
@@ -194,14 +191,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		waitForSolutionToBeLoadedInTestClientSpinner.setToolTipText(tt);
 		testSolutionLoadTimeoutLabelUnits.setToolTipText(tt);
 
-		// launch NG
-		launchNGButton = new Button(rootContainer, SWT.CHECK);
-		launchNGButton.setText("Start NG Client should launch Titanium NGClient");
-
-		// form designer version
-		showNGDesignerButton = new Button(rootContainer, SWT.CHECK);
-		showNGDesignerButton.setText("Open forms with the Titanium NGClient Form Designer");
-
 		// forum notifications
 		showForumNotificationsButton = new Button(rootContainer, SWT.CHECK);
 		showForumNotificationsButton.setText("Show forum notifications (require developer restart)");
@@ -214,7 +203,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	protected void initializeFields()
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
-		Ng2DesignerPreferences ng2Prefs = new Ng2DesignerPreferences();
 
 		toolbarsInFormWindowButton.setSelection(prefs.getFormToolsOnMainToolbar());
 		closeEditorOnExitButton.setSelection(prefs.getCloseEditorOnExit());
@@ -226,8 +214,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
 		contextMenuTutorialsButton.setSelection(prefs.useContextMenuTutorials());
 		useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
-		launchNGButton.setSelection(ng2Prefs.launchNG2());
-		showNGDesignerButton.setSelection(ng2Prefs.showNG2Designer());
 		showForumNotificationsButton.setSelection(prefs.showForumNotifications());
 	}
 
@@ -245,8 +231,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(DesignerPreferences.WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
 		useDarkIconsButton.setSelection(IconPreferences.USE_DARK_THEME_ICONS_DEFAULT);
 		contextMenuTutorialsButton.setSelection(DesignerPreferences.USE_CONTEXT_MENU_TUTORIALS_DEFAULT);
-		launchNGButton.setSelection(Ng2DesignerPreferences.LAUNCH_NG2_DEFAULT);
-		showNGDesignerButton.setSelection(Ng2DesignerPreferences.NG2_DESIGNER_DEFAULT);
 		showForumNotificationsButton.setSelection(DesignerPreferences.FORUM_NOTIFICATIONS_DEFAULT);
 		super.performDefaults();
 	}
@@ -265,7 +249,6 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	public boolean performOk()
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
-		Ng2DesignerPreferences ng2Prefs = new Ng2DesignerPreferences();
 
 		prefs.setFormToolsOnMainToolbar(toolbarsInFormWindowButton.getSelection());
 		prefs.setCloseEditorsOnExit(closeEditorOnExitButton.getSelection());
@@ -276,11 +259,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setEncapsulationType(getFirstElementValue(encapsulationTypeCombo, Integer.valueOf(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)).intValue());
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
 		prefs.setContextMenuTutorials(contextMenuTutorialsButton.getSelection());
-		ng2Prefs.setLaunchNG2(launchNGButton.getSelection());
-		ng2Prefs.setShowNG2Designer(showNGDesignerButton.getSelection());
 		prefs.setShowForumNotifications(showForumNotificationsButton.getSelection());
 		prefs.save();
-		ng2Prefs.save();
 
 		IconPreferences iconPreferences = IconPreferences.getInstance();
 		if (useDarkIconsButton.getSelection() != iconPreferences.getUseDarkThemeIcons() && !iconPreferences.isChanged()) //we set it once more if it was not already set by the theme change

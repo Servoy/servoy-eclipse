@@ -48,7 +48,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.NGClientStarter;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.IDebugClient;
@@ -154,7 +153,7 @@ public class StartNGClientHandler extends StartDebugHandler implements NGClientS
 				if (testAndStartDebugger())
 				{
 					monitor.worked(3);
-					final String solution_path = (new Ng2DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/";
+					final String solution_path = "/solution/";
 					final IDebugClient debugNGClient = Activator.getDefault().getDebugNGClient();
 					if (debugNGClient != null && debugNGClient.getSolution() != null)
 					{

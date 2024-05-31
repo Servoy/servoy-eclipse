@@ -59,7 +59,6 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -1489,9 +1488,8 @@ public class ServoyFormBuilder
 							else if (o instanceof Part) styleClass = ((Part)o).getStyleClass();
 							if (styleClass != null)
 							{
-								Ng2DesignerPreferences prefs = new Ng2DesignerPreferences();
 								List<String> styleClasses = Arrays.asList(ModelUtils.getStyleClasses(fs, form, o,
-									StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o), prefs.showNG2Designer())
+									StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o), true)
 									.getLeft());
 								if (!styleClasses.contains(styleClass))
 								{

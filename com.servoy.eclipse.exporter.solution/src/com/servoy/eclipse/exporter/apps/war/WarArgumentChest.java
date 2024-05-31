@@ -42,7 +42,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String drivers;
 	private boolean isExportActiveSolution;
 	private String exportNG2Mode;
-	private boolean exportNG1;
 	private String pluginLocations;
 	private String selectedComponents;
 	private String selectedServices;
@@ -286,8 +285,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolution = false;
 		exportNG2Mode = "true";
 		if (argsMap.containsKey("ng2")) exportNG2Mode = argsMap.get("ng2");
-		exportNG1 = false;
-		if (argsMap.containsKey("ng1")) exportNG1 = true;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
 		if (pluginLocations == null) pluginLocations = "../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
@@ -486,11 +483,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String exportNG2Mode()
 	{
 		return exportNG2Mode;
-	}
-
-	public boolean exportNG1()
-	{
-		return exportNG1;
 	}
 
 	public String getPluginLocations()

@@ -239,8 +239,8 @@ public class WarExporter
 
 	private final IWarExportModel exportModel;
 	private final IXMLExportUserChannel userChannel;
-	private SpecProviderState componentsSpecProviderState;
-	private SpecProviderState servicesSpecProviderState;
+	private final SpecProviderState componentsSpecProviderState;
+	private final SpecProviderState servicesSpecProviderState;
 	private Set<File> pluginFiles = new HashSet<>();
 
 	public WarExporter(IWarExportModel exportModel, IXMLExportUserChannel userChannel)
@@ -248,11 +248,8 @@ public class WarExporter
 		this.exportModel = exportModel;
 		this.userChannel = userChannel;
 
-		if (exportModel.isNGExport())
-		{
-			this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-			this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
-		}
+		this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+		this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 	}
 
 	/**
@@ -307,52 +304,34 @@ public class WarExporter
 
 		exportAdminUser(tmpWarDir);
 
-		monitor.setWorkRemaining(exportModel.isNGExport() ? 11 : 4);
-		if (exportModel.isNGExport())
+		monitor.setWorkRemaining(11);
+		monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
+		copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir);
+		if (monitor.isCanceled()) return;
+
+		monitor.setWorkRemaining(5);
+		monitor.subTask("Copy exported components");
+		copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
+		monitor.worked(2);
+		if (exportModel.exportNG2Mode() == null || !exportModel.exportNG2Mode().equals("false"))
 		{
-			monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
-			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, !exportModel.exportNG1());
-			if (monitor.isCanceled()) return;
-			if (exportModel.exportNG1())
+			monitor.subTask("Copy Titanium NGClient resources (" + SDF.format(new Date()) + ")");
+			try
 			{
-				monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
-				copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, false);
+				copyNGClient2(tmpWarDir, monitor);
+			}
+			catch (RuntimeException e)
+			{
 				if (monitor.isCanceled()) return;
-				monitor.setWorkRemaining(6);
-				monitor.subTask("Copy exported components (" + SDF.format(new Date()) + ")");
-				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
-				monitor.worked(2);
-				monitor.subTask("Grouping JS and CSS resources (" + SDF.format(new Date()) + ")");
-				copyMinifiedAndGrouped(tmpWarDir, monitor);
-				if (monitor.isCanceled()) return;
+				throw new ExportException("could not create/copy Titanium NGClient resources", e);
 			}
-			else
-			{
-				monitor.setWorkRemaining(5);
-				monitor.subTask("Copy exported components");
-				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
-				monitor.worked(2);
-			}
-			if (exportModel.exportNG2Mode() == null || !exportModel.exportNG2Mode().equals("false"))
-			{
-				monitor.subTask("Copy Titanium NGClient resources (" + SDF.format(new Date()) + ")");
-				try
-				{
-					copyNGClient2(tmpWarDir, monitor);
-				}
-				catch (RuntimeException e)
-				{
-					if (monitor.isCanceled()) return;
-					throw new ExportException("could not create/copy Titanium NGClient resources", e);
-				}
-			}
-			monitor.worked(1);
 		}
+		monitor.worked(1);
 		try
 		{
 			// just always copy the nglibs to it even if it is just pure smart client
 			// the log4j libs are always needed.
-			copyWARLibs(targetLibDir, exportModel.isNGExport());
+			copyWARLibs(targetLibDir);
 		}
 		catch (IOException e)
 		{
@@ -989,7 +968,7 @@ public class WarExporter
 	/**
 	 * Copy to the war all NG components and services (default and user-defined), as well as the jars required by the NGClient.
 	 */
-	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor, File tmpWarDir, boolean exportNG2Only) throws ExportException
+	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor, File tmpWarDir) throws ExportException
 	{
 		try
 		{
@@ -998,7 +977,7 @@ public class WarExporter
 
 			Map<String, File> allTemplates = new HashMap<String, File>();
 			Set<String> exportedPackages = exportModel.getExportedPackagesExceptSablo();
-			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportedPackages, allTemplates, exportNG2Only);
+			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportedPackages, allTemplates);
 
 			componentLocations.append(ComponentResourcesExporter.getDefaultComponentDirectoryNames(exportedPackages));
 			servicesLocations.append(ComponentResourcesExporter.getDefaultServicesDirectoryNames(exportedPackages));
@@ -1053,7 +1032,7 @@ public class WarExporter
 								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
 								excludes.add(entryDir);
 							}
-							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, excludes, exportNG2Only);
+							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, excludes);
 						}
 						else
 						{
@@ -1063,7 +1042,7 @@ public class WarExporter
 								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
 								excludes.add(entryDir + '/'); // extractaJar is startsWith because of the jar entries.
 							}
-							extractJar(name, resource, tmpWarDir, allTemplates, excludes, exportNG2Only);
+							extractJar(name, resource, tmpWarDir, allTemplates, excludes);
 						}
 					}
 				}
@@ -1073,42 +1052,12 @@ public class WarExporter
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), componentLocations.toString());
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), servicesLocations.toString());
 
-			if (!exportNG2Only)
-			{
-				copyAllHtmlTemplates(tmpWarDir, allTemplates);
-			}
 			monitor.worked(1);
 		}
 		catch (IOException e)
 		{
 			throw new ExportException("Could not copy the components", e);
 		}
-	}
-
-	private void copyAllHtmlTemplates(File tmpWarDir, Map<String, File> allTemplates)
-	{
-		File allTemplatesFile = new File(tmpWarDir, "js/servoy_alltemplates.js");
-
-		StringBuilder allTemplatesContent = new StringBuilder();
-		allTemplatesContent.append("angular.module(\"servoyalltemplates\",[]).run([\"$templateCache\", function($templateCache) {\n");
-
-		for (String path : allTemplates.keySet())
-		{
-			allTemplatesContent.append("$templateCache.put(\"");
-			allTemplatesContent.append(path);
-			allTemplatesContent.append("\",\"");
-
-			String htmlContent = Utils.getTXTFileContent(allTemplates.get(path));
-			htmlContent = htmlContent.trim();
-			htmlContent = htmlContent.replaceAll("\r", "");
-			htmlContent = htmlContent.replaceAll("\n", "");
-			htmlContent = htmlContent.replaceAll("\"", "\\\\\"");
-			allTemplatesContent.append(htmlContent);
-			allTemplatesContent.append("\");\n");
-		}
-
-		allTemplatesContent.append("}]);");
-		Utils.writeTXTFile(allTemplatesFile, allTemplatesContent.toString());
 	}
 
 	/**
@@ -1118,7 +1067,7 @@ public class WarExporter
 	 * @throws ExportException
 	 * @throws IOException
 	 */
-	private void copyWARLibs(File targetLibDir, boolean includeNGClientLib) throws ExportException, IOException
+	private void copyWARLibs(File targetLibDir) throws ExportException, IOException
 	{
 		if (pluginFiles.isEmpty())
 		{
@@ -1127,7 +1076,6 @@ public class WarExporter
 		}
 		for (File file : pluginFiles)
 		{
-			if (!includeNGClientLib && file.getName().toLowerCase().startsWith("servoy_ngclient_")) continue;
 			copyFile(file, new File(targetLibDir, file.getName()));
 		}
 	}
@@ -1151,8 +1099,7 @@ public class WarExporter
 		}
 	}
 
-	private void extractJar(String dirName, File file, File tmpWarDir, Map<String, File> allTemplates, Set<String> excludedResourcesByName,
-		boolean specFilesOnly)
+	private void extractJar(String dirName, File file, File tmpWarDir, Map<String, File> allTemplates, Set<String> excludedResourcesByName)
 	{
 		try (JarFile jarfile = new JarFile(file))
 		{
@@ -1162,7 +1109,7 @@ public class WarExporter
 				String destdir = tmpWarDir + "/" + dirName;
 				JarEntry je = enu.nextElement();
 				if (excludedResourcesByName != null && excludedResourcesByName.stream().anyMatch(item -> je.getName().startsWith(item))) continue;
-				if (specFilesOnly && !je.getName().endsWith(".spec") && !je.getName().endsWith("MANIFEST.MF") && !je.getName().endsWith(".json")) continue;
+				if (!je.getName().endsWith(".spec") && !je.getName().endsWith("MANIFEST.MF") && !je.getName().endsWith(".json")) continue;
 				File fl = Paths.get(destdir, je.getName()).normalize().toFile();
 				if (!fl.exists())
 				{
@@ -1183,7 +1130,7 @@ public class WarExporter
 				{
 					allTemplates.put(dirName + "/" + je.getName(), fl);
 				}
-				if (specFilesOnly && je.getName().endsWith(".spec"))
+				if (je.getName().endsWith(".spec"))
 				{
 					JSONObject json = new JSONObject(Utils.getTXTFileContent(jarfile.getInputStream(je), Charset.forName("UTF8"), true));
 					List<String> scripts = new ArrayList<String>();
@@ -2187,22 +2134,21 @@ public class WarExporter
 		path.delete();
 	}
 
-	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive, Map<String, File> allTemplates, Set<String> excludedResourcesByName,
-		boolean specFilesOnly)
+	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive, Map<String, File> allTemplates, Set<String> excludedResourcesByName)
 		throws ExportException
 	{
 		Set<File> writtenFiles = new HashSet<File>();
-		copyDir(sourceDir, destDir, recusive, writtenFiles, allTemplates, excludedResourcesByName, specFilesOnly);
+		copyDir(sourceDir, destDir, recusive, writtenFiles, allTemplates, excludedResourcesByName);
 		return writtenFiles;
 	}
 
 	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive) throws ExportException
 	{
-		return copyDir(sourceDir, destDir, recusive, null, null, false);
+		return copyDir(sourceDir, destDir, recusive, null, null);
 	}
 
 	private static void copyDir(File sourceDir, File destDir, boolean recusive, Set<File> writtenFiles, Map<String, File> allTemplates,
-		Set<String> excludedResourcesByName, boolean specFilesOnly) throws ExportException
+		Set<String> excludedResourcesByName) throws ExportException
 	{
 		if (!destDir.exists() && !destDir.mkdirs()) throw new ExportException("Can't create destination dir: " + destDir);
 		File[] listFiles = sourceDir.listFiles();
@@ -2213,11 +2159,11 @@ public class WarExporter
 
 			if (file.isDirectory())
 			{
-				if (recusive) copyDir(file, new File(destDir, file.getName()), recusive, writtenFiles, allTemplates, excludedResourcesByName, specFilesOnly);
+				if (recusive) copyDir(file, new File(destDir, file.getName()), recusive, writtenFiles, allTemplates, excludedResourcesByName);
 			}
 			else
 			{
-				if (specFilesOnly && !file.getName().endsWith(".spec") && !file.getName().endsWith("MANIFEST.MF") && !file.getName().endsWith(".json"))
+				if (!file.getName().endsWith(".spec") && !file.getName().endsWith("MANIFEST.MF") && !file.getName().endsWith(".json"))
 					continue;
 				File newFile = new File(destDir, file.getName());
 				copyFile(file, newFile);
@@ -2230,7 +2176,7 @@ public class WarExporter
 					allTemplates.put(path, newFile);
 				}
 				writtenFiles.add(file);
-				if (specFilesOnly && file.getName().endsWith(".spec"))
+				if (file.getName().endsWith(".spec"))
 				{
 					JSONObject json = new JSONObject(Utils.getTXTFileContent(file));
 					List<String> scripts = new ArrayList<String>();

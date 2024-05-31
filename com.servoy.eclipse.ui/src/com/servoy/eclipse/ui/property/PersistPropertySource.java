@@ -93,7 +93,6 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ISupportInheritedPropertyCheck;
@@ -1997,9 +1996,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	public static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, Object id, String displayName,
 		final String styleLookupname, Form form)
 	{
-		Ng2DesignerPreferences prefs = new Ng2DesignerPreferences();
 		Pair<String[], String> styleClassesInfo = ModelUtils.getStyleClasses(ModelUtils.getEditingFlattenedSolution(form), form, persist, String.valueOf(id),
-			styleLookupname, prefs.showNG2Designer());
+			styleLookupname, true);
 		String[] styleClasses = styleClassesInfo.getLeft();
 		String defaultValue = styleClassesInfo.getRight();
 

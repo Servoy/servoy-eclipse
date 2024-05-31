@@ -68,7 +68,6 @@ import com.servoy.eclipse.ui.wizards.exportsolution.pages.ExportConfirmationPage
 import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
@@ -156,8 +155,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		}
 
 		int solutionType = activeProject.getSolutionMetaData().getSolutionType();
-		isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
-		exportModel = new ExportWarModel(getDialogSettings(), isNGExport);
+		exportModel = new ExportWarModel(getDialogSettings());
 		exportNonActiveSolutionsDialog = true;
 		disableFinishButton = false;
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null)
@@ -809,7 +807,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
 		appendToBuilder(sb, " -ng2", exportModel.exportNG2Mode());
-		appendToBuilder(sb, " -ng1", exportModel.exportNG1());
 		sb.append("\"");
 
 		StringSelection selection = new StringSelection(sb.toString());

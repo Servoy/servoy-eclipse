@@ -71,7 +71,6 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -268,7 +267,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			boolean marqueeSelectOuter = designerPreferences.getMarqueeSelectOuter();
 			Dimension formSize = flattenedForm.getSize();
 			if (isCSSPositionContainer) formSize = showedContainer.getSize();
-			final String path = (new Ng2DesignerPreferences()).showNG2Designer() ? "angular2" : "angular";
+			final String path = "angular2";
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/" + path + "/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() + "&hd=" + hideDefault + "&mso=" + marqueeSelectOuter +
