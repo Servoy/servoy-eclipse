@@ -719,16 +719,16 @@ public class DesignerUtil
 			JSONObject jsonObject = obj.getJSONObject(property);
 			ISupportCSSPosition target = jsonObject.optString("uuid") != null ? ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
 				jsonObject.optString("uuid"))) : null;
-			AbstractContainer parent = target != null ? CSSPositionUtils.getParentContainer(target) : null;
+			AbstractContainer targetParent = target != null ? CSSPositionUtils.getParentContainer(target) : null;
 
 			switch (property)
 			{
 				case "middleH" :
-					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), parent.getSize(), "left", "right", "width");
+					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), targetParent.getSize(), "left", "right", "width");
 					break;
 
 				case "middleV" :
-					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), parent.getSize(), "top", "bottom", "height");
+					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), targetParent.getSize(), "top", "bottom", "height");
 					break;
 
 				case "endWidth" :
@@ -743,8 +743,19 @@ public class DesignerUtil
 					snapToDist(jsonObject, newPosition, position, componentParent.getSize(), form, "top", "bottom", "height");
 					break;
 
+				case "sameWidth" :
+					snapToSameSize(newPosition, componentParent.getSize(), target.getCssPosition(), targetParent.getSize(), "left",
+						"right", "width");
+					break;
+
+				case "sameHeight" :
+					snapToSameSize(newPosition, componentParent.getSize(), target.getCssPosition(), targetParent.getSize(), "top",
+						"bottom", "height");
+					break;
+
 				default :
-					setCssValue(jsonObject, property, newPosition, position, target.getCssPosition(), componentParent.getSize(), parent.getSize(), isResize);
+					setCssValue(jsonObject, property, newPosition, position, target.getCssPosition(), componentParent.getSize(), targetParent.getSize(),
+						isResize);
 			}
 		}
 
@@ -761,6 +772,34 @@ public class DesignerUtil
 
 		return newPosition;
 	}
+
+	public static void snapToSameSize(CSSPosition newPosition, java.awt.Dimension parentSize,
+		CSSPosition targetPosition, java.awt.Dimension targetParentSize, String lowerProperty, String higherProperty, String sizeProperty)
+	{
+		CSSValue sizeValue = getCssValue(targetPosition, sizeProperty, targetParentSize);
+		CSSValue lowerPropertyValue = getCssValue(targetPosition, lowerProperty, targetParentSize);
+		if (sizeValue.isSet())
+		{
+			setCssValue(newPosition, sizeProperty, sizeValue);
+			if (getCssValue(newPosition, lowerProperty, parentSize).isSet() && getCssValue(newPosition, higherProperty, parentSize).isSet())
+			{
+				//source component was anchored left-right or top-bottom, need to clear one of the properties
+				//and make the anchoring the same as for the target
+				setCssValue(newPosition, lowerPropertyValue.isSet() ? higherProperty : lowerProperty, CSSValue.NOT_SET);
+			}
+		}
+		else
+		{
+			//target is anchored left-right or top-bottom
+			CSSValue sourceLowerPropertyValue = getOrComputeValue(newPosition, lowerProperty, parentSize);
+			sizeValue = computeDimension(sizeProperty, lowerPropertyValue, getCssValue(targetPosition, higherProperty, targetParentSize));
+			CSSValue sourceHigherPropertyValue = sourceLowerPropertyValue.plus(sizeValue);
+			setCssValue(newPosition, lowerProperty, sourceLowerPropertyValue);
+			setCssValue(newPosition, higherProperty, sourceHigherPropertyValue);
+			setCssValue(newPosition, sizeProperty, CSSValue.NOT_SET);
+		}
+	}
+
 
 	private static void snapToDist(JSONObject obj, CSSPosition newPosition, CSSPosition oldPosition, java.awt.Dimension parentSize, Form form,
 		String lowerProperty, String higherProperty, String sizeProperty)

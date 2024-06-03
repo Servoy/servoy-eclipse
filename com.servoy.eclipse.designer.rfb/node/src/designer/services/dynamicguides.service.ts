@@ -362,6 +362,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				properties.left = rect.left;
 			}
 			properties.width = size;
+			properties.cssPosition['sameWidth'] = { uuid: this.uuids[this.rectangles.indexOf(filteredRectangles[0])]};
 			let guides = [];
 			guides.push(new Guide(properties.left, rect.bottom + 5, 1, 15 , 'dist'));
 			guides.push(new Guide(properties.left + size, rect.bottom + 5, 1, 15, 'dist'));
@@ -392,6 +393,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				properties.top = rect.top;
 			}
 			properties.height = size;
+			properties.cssPosition['sameHeight'] = { uuid: this.uuids[this.rectangles.indexOf(filteredRectangles[0])]};
 			let guides = [];
 			guides.push(new Guide(rect.right + 5, properties.top, 15, 1 , 'dist'));
 			guides.push(new Guide(rect.right + 5, properties.top + size, 15, 1, 'dist'));
