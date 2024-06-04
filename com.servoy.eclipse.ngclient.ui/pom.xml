@@ -51,6 +51,18 @@
 					</execution>
 
                     <execution>
+                        <id>npm install</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node</workingDirectory>
+                            <arguments>install --legacy-peer-deps</arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
                         <id>build servoy public</id>
                         <phase>initialize</phase>
                         <goals>
@@ -100,18 +112,6 @@
                     </execution>
 
 					<!-- run npm install over the projects -->
-					<execution>
-						<id>npm install</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>npm</goal>
-						</goals>
-						<configuration>
-							<workingDirectory>node</workingDirectory>
-							<arguments>install --legacy-peer-deps</arguments>
-						</configuration>
-					</execution>
-
 					<execution>
 						<id>npm install servoydefault</id>
 						<phase>initialize</phase>
