@@ -792,8 +792,8 @@ public class DesignerUtil
 		{
 			//target is anchored left-right or top-bottom
 			CSSValue sourceLowerPropertyValue = getOrComputeValue(newPosition, lowerProperty, parentSize);
-			sizeValue = computeDimension(sizeProperty, lowerPropertyValue, getCssValue(targetPosition, higherProperty, targetParentSize));
-			CSSValue sourceHigherPropertyValue = sourceLowerPropertyValue.plus(sizeValue);
+			sizeValue = computeDimension(lowerProperty, lowerPropertyValue, getCssValue(targetPosition, higherProperty, targetParentSize));
+			CSSValue sourceHigherPropertyValue = sourceLowerPropertyValue.plus(sizeValue).toHigherProperty();
 			setCssValue(newPosition, lowerProperty, sourceLowerPropertyValue);
 			setCssValue(newPosition, higherProperty, sourceHigherPropertyValue);
 			setCssValue(newPosition, sizeProperty, CSSValue.NOT_SET);

@@ -538,20 +538,20 @@ public class TestSnapCSSPosition
 		assertEquals("css pos width should be the same as the target width", "40%", newPosition.width);
 	}
 	
-//	@Test
-//	public void testSnapToSameWidth_Percentage2() throws Exception
-//	{
-//		CSSPosition newPosition = new CSSPosition("157", "-1", "-1", "27%", "256", "30");
-//		CSSPosition targetPosition = new CSSPosition("65", "40%", "-1", "20%", "-1", "30"); //left-right
-//
-//		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
-//		DesignerUtil.snapToSameSize(newPosition, containerSize, targetPosition, containerSize, "left", "right", "width");
-//
-//		assertTrue("css pos left should not be changed", CSSPositionUtils.isSet(newPosition.left));
-//		assertFalse("css pos width should NOT be set", CSSPositionUtils.isSet(newPosition.width));
-//		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
-//
-//		assertEquals("27%", newPosition.left);
-//		assertEquals("css pos right should be computed from the target and left values", "33%", newPosition.right);
-//	}
+	@Test
+	public void testSnapToSameWidth_Percentage2() throws Exception
+	{
+		CSSPosition newPosition = new CSSPosition("157", "-1", "-1", "27%", "256", "30");
+		CSSPosition targetPosition = new CSSPosition("65", "40%", "-1", "20%", "-1", "30"); //left-right
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
+		DesignerUtil.snapToSameSize(newPosition, containerSize, targetPosition, containerSize, "left", "right", "width");
+
+		assertTrue("css pos left should not be changed", CSSPositionUtils.isSet(newPosition.left));
+		assertFalse("css pos width should NOT be set", CSSPositionUtils.isSet(newPosition.width));
+		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
+
+		assertEquals("27%", newPosition.left);
+		assertEquals("css pos right should be computed from the target and left values", "33%", newPosition.right);
+	}
 }
