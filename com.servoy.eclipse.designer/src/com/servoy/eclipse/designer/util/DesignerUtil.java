@@ -823,6 +823,7 @@ public class DesignerUtil
 		String sizeProperty, CSSPosition pos1, CSSPosition pos2, java.awt.Dimension parent1Size, java.awt.Dimension parent2Size,
 		int pos)
 	{
+		CSSValue sizeValue = getOrComputeValue(newPosition, sizeProperty, parentSize);
 		switch (pos)
 		{
 			case -1 :
@@ -835,7 +836,7 @@ public class DesignerUtil
 				//set the same anchoring as the closest target (first)
 				if (getCssValue(pos1, lowerProperty, parent1Size).isSet())
 				{
-					CSSValue lowerPropertyValue = higherPropertyValue.minus(getCssValue(newPosition, sizeProperty, parentSize)); //TODO check if the new size set?
+					CSSValue lowerPropertyValue = higherPropertyValue.minus(sizeValue);
 					setCssValue(newPosition, lowerProperty, lowerPropertyValue);
 					//clear the opposite property value if the size property is set
 					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
@@ -873,7 +874,7 @@ public class DesignerUtil
 				}
 				else
 				{
-					CSSValue higherPropertyValue = h2.plus(dist).plus(getCssValue(newPosition, sizeProperty, parentSize)).toHigherProperty();//TODO check if the new size set?
+					CSSValue higherPropertyValue = h2.plus(dist).plus(sizeValue).toHigherProperty();
 					setCssValue(newPosition, higherProperty, higherPropertyValue);
 					//clear the opposite property value if the size property is set
 					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
@@ -898,7 +899,7 @@ public class DesignerUtil
 
 				if (getCssValue(pos1, lowerProperty, parent1Size).isSet() && getCssValue(pos2, lowerProperty, parent2Size).isSet())
 				{
-					CSSValue lowerPropertyValue = l2.minus(dist).minus(getCssValue(newPosition, sizeProperty, parentSize)); //TODO check if the new size set?
+					CSSValue lowerPropertyValue = l2.minus(dist).minus(sizeValue);
 					setCssValue(newPosition, lowerProperty, lowerPropertyValue);
 					//clear the opposite property value if the size property is set
 					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
@@ -908,7 +909,7 @@ public class DesignerUtil
 				}
 				else if (getCssValue(pos1, higherProperty, parent1Size).isSet() && getCssValue(pos2, higherProperty, parent2Size).isSet())
 				{
-					CSSValue higherPropertyValue = h1.plus(dist).minus(getCssValue(newPosition, sizeProperty, parentSize)); //TODO check if the new size set?
+					CSSValue higherPropertyValue = h1.plus(dist).minus(sizeValue);
 					setCssValue(newPosition, higherProperty, higherPropertyValue);
 					//clear the opposite property value if the size property is set
 					if (oldPosition == null || getCssValue(oldPosition, sizeProperty, parentSize).isSet())
@@ -1264,7 +1265,7 @@ public class DesignerUtil
 			case "left" :
 				return new CSSValue(0, oppositePropertyValue.getAsPixels());
 			case "right" :
-				return new CSSValue(0, containerSize.width - oppositePropertyValue.getAsPixels());//TODO check
+				return new CSSValue(0, containerSize.width - oppositePropertyValue.getAsPixels()); //TODO check
 
 			case "top" :
 				return new CSSValue(0, oppositePropertyValue.getAsPixels());
