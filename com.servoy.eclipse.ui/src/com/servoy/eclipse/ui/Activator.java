@@ -185,6 +185,10 @@ public class Activator extends AbstractUIPlugin
 											{
 												// see if package is there or not; the component is not present
 												String packageName = ((WebComponent)o).getTypeName().split("-")[0];
+												if ("svy-fullcalendar2".equals(((WebComponent)o).getTypeName()))
+												{
+													packageName = "fullcalendarcomponent2";
+												}
 												if (componentSpecProvider.getPackageReader(packageName) == null)
 												{
 													missingPackage = packageName;
