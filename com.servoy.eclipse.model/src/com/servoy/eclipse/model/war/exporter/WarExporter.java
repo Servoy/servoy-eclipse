@@ -1032,7 +1032,7 @@ public class WarExporter
 								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
 								excludes.add(entryDir);
 							}
-							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, excludes);
+							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, excludes, true);
 						}
 						else
 						{
@@ -2134,21 +2134,22 @@ public class WarExporter
 		path.delete();
 	}
 
-	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive, Map<String, File> allTemplates, Set<String> excludedResourcesByName)
+	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive, Map<String, File> allTemplates, Set<String> excludedResourcesByName,
+		boolean specFilesOnly)
 		throws ExportException
 	{
 		Set<File> writtenFiles = new HashSet<File>();
-		copyDir(sourceDir, destDir, recusive, writtenFiles, allTemplates, excludedResourcesByName);
+		copyDir(sourceDir, destDir, recusive, writtenFiles, allTemplates, excludedResourcesByName, specFilesOnly);
 		return writtenFiles;
 	}
 
 	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive) throws ExportException
 	{
-		return copyDir(sourceDir, destDir, recusive, null, null);
+		return copyDir(sourceDir, destDir, recusive, null, null, false);
 	}
 
 	private static void copyDir(File sourceDir, File destDir, boolean recusive, Set<File> writtenFiles, Map<String, File> allTemplates,
-		Set<String> excludedResourcesByName) throws ExportException
+		Set<String> excludedResourcesByName, boolean specFilesOnly) throws ExportException
 	{
 		if (!destDir.exists() && !destDir.mkdirs()) throw new ExportException("Can't create destination dir: " + destDir);
 		File[] listFiles = sourceDir.listFiles();
@@ -2159,11 +2160,11 @@ public class WarExporter
 
 			if (file.isDirectory())
 			{
-				if (recusive) copyDir(file, new File(destDir, file.getName()), recusive, writtenFiles, allTemplates, excludedResourcesByName);
+				if (recusive) copyDir(file, new File(destDir, file.getName()), recusive, writtenFiles, allTemplates, excludedResourcesByName, specFilesOnly);
 			}
 			else
 			{
-				if (!file.getName().endsWith(".spec") && !file.getName().endsWith("MANIFEST.MF") && !file.getName().endsWith(".json"))
+				if (specFilesOnly && !file.getName().endsWith(".spec") && !file.getName().endsWith("MANIFEST.MF") && !file.getName().endsWith(".json"))
 					continue;
 				File newFile = new File(destDir, file.getName());
 				copyFile(file, newFile);
