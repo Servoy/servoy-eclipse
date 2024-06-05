@@ -2559,8 +2559,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 					((AbstractBase)beanPropertyPersist).clearProperty((String)id);
 				}
-				else if (beanPropertyPersist instanceof AbstractBase && !(beanPropertyPersist instanceof LayoutContainer) &&
-					hasInheritedValue(id, beanPropertyPersist) && value != null && value.equals(getInheritedValue(id, beanPropertyPersist)))
+				// don't be too smart with formindex, as ordering takes into account where property is set
+				else if (beanPropertyPersist instanceof AbstractBase && !"formIndex".equals(id) && !(beanPropertyPersist instanceof LayoutContainer) &&
+					hasInheritedValue(id, beanPropertyPersist) && value != null && isSameValue(value, getInheritedValue(id, beanPropertyPersist)))
 				{
 					changed |= ((AbstractBase)beanPropertyPersist).hasProperty((String)id);
 
@@ -2744,6 +2745,19 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 
 		return inheritedValue;
+	}
+
+	private boolean isSameValue(Object value, Object inheritedValue)
+	{
+		// should we use some conversion here
+		if (value instanceof CSSPosition && inheritedValue instanceof JSONObject)
+		{
+			JSONObject json = (JSONObject)inheritedValue;
+			inheritedValue = new CSSPosition(json.optString("top"), json.optString("right"), json.optString("bottom"), json.optString("left"),
+				json.optString("width"),
+				json.optString("height"));
+		}
+		return Utils.equalObjects(value, inheritedValue);
 	}
 
 	public static void refreshPropertiesView()
