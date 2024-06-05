@@ -28,7 +28,7 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.designer.util.SnapToComponentUtil;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -104,8 +104,7 @@ public class SetPropertiesHandler implements IServerService
 								CSSPosition newPosition = null;
 								if (properties.has("cssPos"))
 								{
-									newPosition = DesignerUtil.cssPositionFromJSON(editorPart.getForm(), persist, properties,
-										properties.has("width") && properties.has("height"));
+									newPosition = SnapToComponentUtil.cssPositionFromJSON(editorPart.getForm(), persist, properties);
 								}
 								else
 								{

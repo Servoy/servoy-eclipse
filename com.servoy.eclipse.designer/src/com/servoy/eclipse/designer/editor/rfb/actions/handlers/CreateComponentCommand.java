@@ -60,6 +60,7 @@ import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.designer.util.SnapToComponentUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.autowizard.FormComponentTreeSelectDialog;
@@ -469,10 +470,8 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						}
 						if (args.allProperties.has("cssPos"))
 						{
-							CSSPosition cssPositionFromJSON = DesignerUtil.cssPositionFromJSON(form, webComponent, args.allProperties);
+							CSSPosition cssPositionFromJSON = SnapToComponentUtil.cssPositionFromJSON(form, webComponent, args.allProperties);
 							webComponent.setCssPosition(cssPositionFromJSON);
-							CSSPositionUtils.setLocation(webComponent, args.getLocation());
-							CSSPositionUtils.setSize(webComponent, args.getSize());
 						}
 						else
 						{
