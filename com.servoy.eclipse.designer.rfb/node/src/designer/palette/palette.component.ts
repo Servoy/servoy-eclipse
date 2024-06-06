@@ -210,13 +210,13 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             component.packageName = this.dragItem.packageName;
 
             if (this.snapData) {
-                component.x = this.snapData.left;
-                component.y = this.snapData.top;
+                component.x = Math.round(this.snapData.left);
+                component.y = Math.round(this.snapData.top);
                 if (this.snapData.width) {
-                    component.w = this.snapData.width;
+                    component.w = Math.round(this.snapData.width);
                 }
                 if (this.snapData.height) {
-                    component.h = this.snapData.height;
+                    component.h = Math.round(this.snapData.height);
                 }
                 component.cssPos = this.snapData.cssPosition;
                 this.snapData = null;
