@@ -2362,6 +2362,12 @@ public class WarExporter
 		properties.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
 		properties.setProperty("serverBuildDate", String.valueOf(System.currentTimeMillis()));
 		properties.setProperty("zoneId", ZoneId.systemDefault().getId());
+		if (exportModel.isExportActiveSolution())
+		{
+			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+			FlattenedSolution solution = servoyModel.getFlattenedSolution();
+			properties.setProperty("mainsolution", solution.getName());
+		}
 		try (FileOutputStream fos = new FileOutputStream(deployPropertiesFile))
 		{
 			properties.store(fos, "");
