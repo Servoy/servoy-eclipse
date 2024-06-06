@@ -192,6 +192,7 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.servlets.RootIndexPageFilter;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -1206,6 +1207,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								{
 								}
 							}
+
+							RootIndexPageFilter.ACTIVE_SOLUTION_NAME = activeProject.getEditingFlattenedSolution().getName();
 						}
 
 						Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
