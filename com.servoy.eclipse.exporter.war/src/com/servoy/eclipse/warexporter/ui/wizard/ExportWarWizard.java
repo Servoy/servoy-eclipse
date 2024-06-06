@@ -112,8 +112,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	private DeployConfigurationPage userHomeSelectionPage;
 
-	private boolean isNGExport;
-
 	private ListSelectionPage nonActiveSolutionPage;
 
 	private DatabaseImportPropertiesPage databaseImportProperties;
@@ -397,12 +395,9 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	private void storeInputForComponentAndServicePages()
 	{
-		if (isNGExport)
-		{
-			ensureComponentAndServicePagesAreInitialized();
-			componentsSelectionPage.storeInput();
-			servicesSelectionPage.storeInput();
-		}
+		ensureComponentAndServicePagesAreInitialized();
+		componentsSelectionPage.storeInput();
+		servicesSelectionPage.storeInput();
 	}
 
 	private String checkAndAutoUpgradeLicenses()
@@ -464,13 +459,10 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
 			userHomeSelectionPage = new DeployConfigurationPage("userhomepage", exportModel);
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel);
-			if (isNGExport)
-			{
-				componentsSelectionPage = new ComponentsSelectionPage(exportModel, WebComponentSpecProvider.getSpecProviderState(), "componentspage",
-					"Select components to export", "View the components used and select others which you want to export.");
-				servicesSelectionPage = new ServicesSelectionPage(exportModel, WebServiceSpecProvider.getSpecProviderState(), "servicespage",
-					"Select services to export", "View the services used and select others which you want to export.");
-			}
+			componentsSelectionPage = new ComponentsSelectionPage(exportModel, WebComponentSpecProvider.getSpecProviderState(), "componentspage",
+				"Select components to export", "View the components used and select others which you want to export.");
+			servicesSelectionPage = new ServicesSelectionPage(exportModel, WebServiceSpecProvider.getSpecProviderState(), "servicespage",
+				"Select services to export", "View the services used and select others which you want to export.");
 			defaultAdminConfigurationPage = new DefaultAdminConfigurationPage("defaultAdminPage", exportModel);
 			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
@@ -507,11 +499,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			addPage(userHomeSelectionPage);
 			addPage(pluginSelectionPage);
 			addPage(driverSelectionPage);
-			if (isNGExport)
-			{
-				addPage(componentsSelectionPage);
-				addPage(servicesSelectionPage);
-			}
+			addPage(componentsSelectionPage);
+			addPage(servicesSelectionPage);
 			addPage(defaultAdminConfigurationPage);
 			addPage(servoyPropertiesSelectionPage);
 			addPage(licenseConfigurationPage);
