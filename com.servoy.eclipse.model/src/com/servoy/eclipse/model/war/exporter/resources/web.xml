@@ -29,6 +29,11 @@
        </init-param>
    </filter>
 
+   <filter>
+       <filter-name>RootIndexPageFilter</filter-name>
+       <filter-class>com.servoy.j2db.server.servlets.RootIndexPageFilter</filter-class>
+   </filter>
+   
   <servlet>
     <servlet-name>servoy_server_admin</servlet-name>
     <servlet-class>com.servoy.j2db.server.servlets.ConfigServlet</servlet-class>
@@ -41,6 +46,13 @@
   <filter-mapping>
     <filter-name>SeparateSessionFilter</filter-name>
     <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>RootIndexPageFilter</filter-name>
+    <url-pattern>/</url-pattern>
+    <url-pattern>/index.html</url-pattern>
+    <url-pattern>/index.htm</url-pattern>
   </filter-mapping>
 
   <servlet-mapping>
