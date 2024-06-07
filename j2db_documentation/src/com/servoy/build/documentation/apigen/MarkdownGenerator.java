@@ -169,11 +169,12 @@ public class MarkdownGenerator
 	private final Map<String, Object> root;
 	private final Path path;
 
-	public MarkdownGenerator(String publicName, String scriptingName, String parentPath)
+	public MarkdownGenerator(String publicName, String scriptingName, String description, String parentPath)
 	{
 		root = new HashMap<>();
 		root.put("classname", publicName);
 		if (scriptingName != null && !scriptingName.equals(publicName)) root.put("scriptingname", scriptingName);
+		if (description != null) root.put("description", description);
 		String classNoSpace = publicName.replace(" ", "%20").toLowerCase();
 		if (storeAsReadMe.contains(publicName))
 		{
@@ -724,7 +725,7 @@ public class MarkdownGenerator
 			{
 				IObjectDocumentation value = entry.getValue();
 				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") || value.getFunctions().size() == 0) continue;
-				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value instanceof ObjectDocumentation odv ? odv.getScriptingName() : null,
+				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value.getScriptingName(), value.getDescription(),
 					path);
 				Class< ? > cls = Class.forName(value.getQualifiedName());
 				IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
