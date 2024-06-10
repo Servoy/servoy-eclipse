@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -84,6 +85,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.specification.property.ICustomType;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
@@ -145,6 +147,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.scripting.IConstantsObject;
@@ -2391,6 +2394,28 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
+	private void addCustomTypesNodes(PlatformSimpleUserNode node, WebObjectSpecification spec, Form originalForm)
+	{
+		if (node != null && spec != null)
+		{
+			Map<String, ICustomType< ? >> customTypes = spec.getDeclaredCustomObjectTypes();
+			if (customTypes != null && customTypes.size() > 0)
+			{
+				PlatformSimpleUserNode customTypesNode = new PlatformSimpleUserNode("CustomTypes", UserNodeType.CUSTOM_TYPE, spec, originalForm,
+					uiActivator.loadImageFromBundle("components_package.png"));
+				node.children = new SimpleUserNode[] { customTypesNode };
+
+				List<SimpleUserNode> nodes = customTypes.entrySet().stream()
+					.map(entry -> new PlatformSimpleUserNode(entry.getKey(), UserNodeType.CUSTOM_TYPE, entry.getValue(), originalForm,
+						uiActivator.loadImageFromBundle("js.png")))
+					.sorted((node1, node2) -> node1.getName().compareTo(node2.getName()))
+					.collect(Collectors.toList());
+
+				customTypesNode.children = nodes.toArray(new SimpleUserNode[0]);
+			}
+		}
+	}
+
 	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class< ? >[] clss)
 	{
 		if (clss != null)
@@ -2937,6 +2962,10 @@ public class SolutionExplorerTreeContentProvider
 						{
 							SolutionExplorerListContentProvider.extractApiDocs(spec); // so that we have the main description of the component available in spec
 						}
+						if (model instanceof WebComponent)
+						{
+							this.addCustomTypesNodes(node, spec, originalForm);
+						}
 					}
 					node.setDeveloperFeedback(
 						new SimpleDeveloperFeedback("elements." + element.getName() + ".", null,
@@ -2998,7 +3027,10 @@ public class SolutionExplorerTreeContentProvider
 			}
 			else
 			{
-				element.children = new PlatformSimpleUserNode[nodeChildren == null ? 0 : nodeChildren.size()];
+				if (nodeChildren != null)
+				{
+					element.children = new PlatformSimpleUserNode[nodeChildren.size()];
+				}
 				i = 0;
 			}
 			if (nodeChildren != null)

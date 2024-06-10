@@ -32,6 +32,9 @@ import javax.swing.SwingUtilities;
 import org.eclipse.swt.graphics.Image;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.property.CustomJSONArrayType;
+import org.sablo.specification.property.CustomJSONObjectType;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -137,6 +140,23 @@ import com.servoy.j2db.util.Utils;
 
 public class ElementUtil
 {
+	public static final String CUSTOM_TYPE = "CustomType";
+
+	public static String getDecoratedCustomTypeName(IPropertyType< ? > type)
+	{
+		if (type == null) return "void";
+		if (type instanceof CustomJSONObjectType || (type instanceof CustomJSONArrayType &&
+			((CustomJSONArrayType< ? , ? >)type).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+		{
+
+			return ElementUtil.CUSTOM_TYPE + '<' + type.getName() + '>';
+		}
+		else
+		{
+			return type.getName();
+		}
+	}
+
 	public static Pair<String, Image> getPersistNameAndImage(IPersist persist)
 	{
 		String name = getPersistImageName(persist);

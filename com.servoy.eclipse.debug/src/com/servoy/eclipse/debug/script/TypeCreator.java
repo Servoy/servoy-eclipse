@@ -307,7 +307,6 @@ public class TypeCreator extends TypeCache
 {
 	static final String WEB_SERVICE = "WebService";
 	static final String RUNTIME_WEB_COMPONENT = "RuntimeWebComponent";
-	static final String CUSTOM_TYPE = "CustomType";
 	private static final String STANDARD_ELEMENT_NAME = "elements.elem";
 	static final String HIDDEN_IN_RELATED = "HIDDEN_IN_RELATED";
 
@@ -462,7 +461,7 @@ public class TypeCreator extends TypeCache
 		addScopeType("Scope", new ScopeScopeCreator());
 		addScopeType("FormComponentType", new FormComponentTypeCreator());
 		addScopeType(RUNTIME_WEB_COMPONENT, new WebComponentTypeCreator());
-		addScopeType(CUSTOM_TYPE, new CustomTypeCreator());
+		addScopeType(ElementUtil.CUSTOM_TYPE, new CustomTypeCreator());
 		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
@@ -969,7 +968,7 @@ public class TypeCreator extends TypeCache
 	public final Set<String> getTypeNames(String prefix)
 	{
 		Set<String> names = new HashSet<String>(classTypes.keySet());
-		names.add(CUSTOM_TYPE);
+		names.add(ElementUtil.CUSTOM_TYPE);
 		if (prefix != null && !"".equals(prefix.trim()))
 		{
 			String lowerCasePrefix = prefix.toLowerCase();
@@ -1200,7 +1199,7 @@ public class TypeCreator extends TypeCache
 						((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
 					{
 
-						memberType = getTypeRef(null, CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
+						memberType = getTypeRef(null, ElementUtil.CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
 					}
 					else
 					{
@@ -1246,7 +1245,7 @@ public class TypeCreator extends TypeCache
 					((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
 				{
 
-					returnType = getTypeRef(null, CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
+					returnType = getTypeRef(null, ElementUtil.CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
 				}
 				else
 				{
@@ -4840,7 +4839,7 @@ public class TypeCreator extends TypeCache
 				if (iPropertyType == null) return null;
 
 				Type type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setName(CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
+				type.setName(ElementUtil.CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
 				type.setKind(TypeKind.JAVA);
 				EList<Member> members = type.getMembers();
 				if (iPropertyType instanceof ICustomType< ? >)
@@ -4865,7 +4864,7 @@ public class TypeCreator extends TypeCache
 								((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
 							{
 
-								memberType = getTypeRef(null, CUSTOM_TYPE + '<' + pdTypeName + '>');
+								memberType = getTypeRef(null, ElementUtil.CUSTOM_TYPE + '<' + pdTypeName + '>');
 							}
 							else
 							{

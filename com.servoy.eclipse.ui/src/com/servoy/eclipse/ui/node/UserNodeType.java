@@ -161,5 +161,6 @@ public enum UserNodeType
 	SET,
 	ITERATOR,
 	ITERABELVALUE,
-	LOADING //a temporary node type which is displayed until the normal ones are loaded
+	LOADING, //a temporary node type which is displayed until the normal ones are loaded
+	CUSTOM_TYPE
 }

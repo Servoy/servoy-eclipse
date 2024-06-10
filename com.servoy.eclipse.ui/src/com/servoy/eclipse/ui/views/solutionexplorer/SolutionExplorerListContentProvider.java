@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -91,6 +92,7 @@ import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecification.SourceOfCodeExtractedDocs;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.util.TextUtils;
 
@@ -744,6 +746,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						ServoyLog.logError(ex);
 					}
 				}
+			}
+			else if (type == UserNodeType.CUSTOM_TYPE)
+			{
+				lm = getCustomTypeMembers(un.getRealObject());
 			}
 			// else if (type == UserNodeType.CALCULATIONS)
 			// {
@@ -2036,7 +2042,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						for (PropertyDescription pd : api.getParameters())
 						{
 							parNames.add(pd.getName());
-							parTypes.add(pd.getType().getName());
+							parTypes.add(ElementUtil.getDecoratedCustomTypeName(pd.getType()));
 						}
 						feedback = new MethodFeedback(id, parTypes.toArray(new String[0]), pluginsPrefix, null, new IScriptObject()
 						{
@@ -2071,7 +2077,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
 							}
 
-						}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
+						}, null, api.getReturnType() != null ? ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()) : "void");
 					}
 					else feedback = new WebObjectFieldFeedback(spec.getProperty(id), elementName, pluginsPrefix + id);
 
@@ -2407,11 +2413,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					displayParams += parameters.getParameterDefinition(i).getName();
 					parNames.add(parameters.getParameterDefinition(i).getName());
-					parTypes.add(parameters.getParameterDefinition(i).getType().getName());
+					parTypes.add(ElementUtil.getDecoratedCustomTypeName(parameters.getParameterDefinition(i).getType()));
 					if (i < parameters.getDefinedArgsCount() - 1) displayParams += ", ";
 				}
 				displayParams += ")";
-
+				String returnString = api.getReturnType() != null ? ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()) : "void";
+				displayParams += " - " + returnString;
 				MethodFeedback feedback = new MethodFeedback(name, parTypes.toArray(new String[0]), prefixForWebComponentMembers, null, new IScriptObject()
 				{
 
@@ -2445,7 +2452,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
 					}
 
-				}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
+				}, null, returnString);
 
 				sortedApis.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
 			}
@@ -2463,6 +2470,73 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		nodes.addAll(sortedApis);
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 
+	}
+
+	private SimpleUserNode[] getCustomTypeMembers(Object realObject)
+	{
+		List<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+		if (realObject instanceof ICustomType< ? > customType)
+		{
+			PropertyDescription customJSONTypeDefinition = customType.getCustomJSONTypeDefinition();
+			Map<String, PropertyDescription> properties = customJSONTypeDefinition.getProperties();
+			SortedList<PropertyDescription> sortedProperties = new SortedList<PropertyDescription>(new Comparator<PropertyDescription>()
+			{
+
+				@Override
+				public int compare(PropertyDescription o1, PropertyDescription o2)
+				{
+					return o1.getName().toString().compareToIgnoreCase(o2.getName().toString());
+				}
+			}, properties.values());
+
+			for (PropertyDescription pd : sortedProperties)
+			{
+				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
+
+				String name = pd.getName();
+				nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS,
+					new WebObjectFieldFeedback(pd, name, name), customType,
+					propertiesIcon));
+			}
+
+		}
+		else if (realObject instanceof WebObjectSpecification spec)
+		{
+			Map<String, ICustomType< ? >> customTypes = spec.getDeclaredCustomObjectTypes();
+			if (customTypes != null && customTypes.size() > 0)
+			{
+				nodes = customTypes.entrySet().stream()
+					.map(entry -> {
+						UserNode node = new UserNode(entry.getKey(), UserNodeType.CUSTOM_TYPE, entry.getValue(),
+							uiActivator.loadImageFromBundle("js.png"));
+						node.setDeveloperFeedback(new IDeveloperFeedback()
+						{
+
+							@Override
+							public String getToolTipText()
+							{
+								return ElementUtil.getDecoratedCustomTypeName(entry.getValue());
+							}
+
+							@Override
+							public String getSample()
+							{
+								return "/** @type {" + ElementUtil.getDecoratedCustomTypeName(entry.getValue()) + "} */\nvar myvar;";
+							}
+
+							@Override
+							public String getCode()
+							{
+								return "/** @type {" + ElementUtil.getDecoratedCustomTypeName(entry.getValue()) + "} */";
+							}
+						});
+						return node;
+					})
+					.sorted((node1, node2) -> node1.getName().compareTo(node2.getName()))
+					.collect(Collectors.toList());
+			}
+		}
+		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 	}
 
 	private List<SimpleUserNode> getJSMethodsFromClass(String prefix, final IBasicWebComponent webcomponent, Class< ? > clazz)
