@@ -2515,7 +2515,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							@Override
 							public String getToolTipText()
 							{
-								return ElementUtil.getDecoratedCustomTypeName(entry.getValue());
+								return ElementUtil.CUSTOM_TYPE + "&lt;" + entry.getValue().getName() + "&gt;";
 							}
 
 							@Override
