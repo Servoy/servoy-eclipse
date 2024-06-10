@@ -19,11 +19,13 @@ package com.servoy.eclipse.core;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1159,7 +1161,8 @@ public class Activator extends Plugin
 			ss.start(true);
 			ss.startWebServer();
 
-//			checkApplicationServerVersion(ss.getApplicationServer());
+			// this still needs to be done to update the application server (more remove of stuff) after 2024.03
+			checkApplicationServerVersion(ss.getApplicationServer());
 			checkDefaultPostgressInstall(ss.getApplicationServer());
 
 			// set the START_AS_TEAMPROVIDER_SETTING flag as system property, so
@@ -1303,129 +1306,158 @@ public class Activator extends Plugin
 		final String appServerDir = applicationServer.getServoyApplicationServerDirectory();
 		File j2dbLib = new File(appServerDir, "lib/j2db.jar");
 
+		Integer ver = null;
 		if (!j2dbLib.exists())
 		{
-			Display.getDefault().asyncExec(new Runnable()
+			File versionFile = new File(appServerDir, "lib/version.txt");
+			if (versionFile.exists())
 			{
-				public void run()
+				try
 				{
-					ServoyMessageDialog.openError(UIUtils.getActiveShell(), "No Servoy ApplicationServer found!",
-						"No application server found at: " + appServerDir + "\nPlease make sure that you installed Servoy Developer correctly");
+					ver = Integer.valueOf(FileUtils.readFileToString(versionFile, Charset.forName("UTF8")));
 				}
-			});
+				catch (Exception e)
+				{
+				}
+			}
+			else
+			{
+				// just assume this is a new install an the location is correct, create the version file for this release.
+				try
+				{
+					FileUtils.write(versionFile, Integer.toString(ClientVersion.getReleaseNumber()), Charset.forName("UTF8"));
+				}
+				catch (IOException e)
+				{
+					Debug.error("Error writing version file", e);
+				}
+			}
 		}
 		else
 		{
-			try
+			try (URLClassLoader classLoader = new URLClassLoader(new URL[] { j2dbLib.toURI().toURL() }, ClassLoader.getSystemClassLoader()))
 			{
-				URLClassLoader classLoader = new URLClassLoader(new URL[] { j2dbLib.toURL() }, ClassLoader.getSystemClassLoader());
 				Class< ? > loadClass = classLoader.loadClass("com.servoy.j2db.ClientVersion");
 				Method method = loadClass.getMethod("getReleaseNumber", new Class[0]);
 				Object o = method.invoke(null, new Object[0]);
-				if (o instanceof Integer)
+				if (o instanceof Integer i)
 				{
-					final int version = ((Integer)o).intValue();
-					if (version > ClientVersion.getReleaseNumber())
-					{
-						Display.getDefault().asyncExec(new Runnable()
-						{
-							public void run()
-							{
-								ServoyMessageDialog.openError(UIUtils.getActiveShell(), "Servoy ApplicationServer version check",
-									"Application Server version (" + version + ") is higher than the developers (" + ClientVersion.getReleaseNumber() +
-										") \nPlease upgrade the developer Help->Check for updates");
-							}
-						});
-					}
-					if (version < ClientVersion.getReleaseNumber())
-					{
-						Display.getDefault().asyncExec(new Runnable()
-						{
-							public void run()
-							{
-								boolean upgrade = ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
-									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version +
-										") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?");
-
-								if (upgrade)
-								{
-									try
-									{
-										final int[] updatedToVersion = new int[] { 0 };
-										WorkspaceJob job = new WorkspaceJob("Updating Servoy ApplicationServer")
-										{
-											@Override
-											public IStatus runInWorkspace(final IProgressMonitor monitor) throws CoreException
-											{
-												try
-												{
-													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
-													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
-														ClientVersion.getReleaseNumber(), ClientVersion.isLts(), new ActionListener()
-														{
-															public void actionPerformed(ActionEvent e)
-															{
-																monitor.worked(1);
-															}
-														});
-												}
-												catch (Exception e)
-												{
-													getLog().log(new Status(IStatus.ERROR, getBundle().getSymbolicName(), "Unexpected error", e));
-												}
-												return Status.OK_STATUS;
-											}
-										};
-										job.setUser(true);
-										job.schedule();
-										job.addJobChangeListener(new JobChangeAdapter()
-										{
-											@Override
-											public void done(IJobChangeEvent event)
-											{
-												if (updatedToVersion[0] < ClientVersion.getReleaseNumber())
-												{
-													Display.getDefault().asyncExec(new Runnable()
-													{
-														public void run()
-														{
-															ServoyMessageDialog.openError(new Shell(), "Servoy update problem",
-																"Servoy ApplicationServer update failed; please shutdown developer and try to run the command line updater.");
-														}
-													});
-												}
-												else
-												{
-													Display.getDefault().asyncExec(new Runnable()
-													{
-														public void run()
-														{
-															if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
-																"ApplicationServer updated",
-																"It is recommended you restart the workbench for the changes to take effect. Would you like to restart now?"))
-															{
-																PlatformUI.getWorkbench().restart();
-															}
-														}
-													});
-												}
-											}
-										});
-									}
-									catch (Exception e)
-									{
-										Debug.error(e);
-									}
-								}
-							}
-						});
-					}
+					ver = i;
 				}
 			}
 			catch (Exception e)
 			{
 				getLog().log(new Status(IStatus.ERROR, getBundle().getSymbolicName(), "Unexpected exception", e));
 			}
+		}
+		if (ver != null)
+		{
+			final int version = ver.intValue();
+			if (version > ClientVersion.getReleaseNumber())
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						ServoyMessageDialog.openError(UIUtils.getActiveShell(), "Servoy ApplicationServer version check",
+							"Application Server version (" + version + ") is higher than the developers (" + ClientVersion.getReleaseNumber() +
+								") \nPlease upgrade the developer Help->Check for updates");
+					}
+				});
+			}
+			if (version < ClientVersion.getReleaseNumber())
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						boolean upgrade = ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
+							"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version +
+								") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?");
+
+						if (upgrade)
+						{
+							try
+							{
+								final int[] updatedToVersion = new int[] { 0 };
+								WorkspaceJob job = new WorkspaceJob("Updating Servoy ApplicationServer")
+								{
+									@Override
+									public IStatus runInWorkspace(final IProgressMonitor monitor) throws CoreException
+									{
+										try
+										{
+											monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
+											updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
+												ClientVersion.getReleaseNumber(), ClientVersion.isLts(), new ActionListener()
+												{
+													public void actionPerformed(ActionEvent e)
+													{
+														monitor.worked(1);
+													}
+												});
+										}
+										catch (Exception e)
+										{
+											getLog().log(new Status(IStatus.ERROR, getBundle().getSymbolicName(), "Unexpected error", e));
+										}
+										return Status.OK_STATUS;
+									}
+								};
+								job.setUser(true);
+								job.schedule();
+								job.addJobChangeListener(new JobChangeAdapter()
+								{
+									@Override
+									public void done(IJobChangeEvent event)
+									{
+										if (updatedToVersion[0] < ClientVersion.getReleaseNumber())
+										{
+											Display.getDefault().asyncExec(new Runnable()
+											{
+												public void run()
+												{
+													ServoyMessageDialog.openError(new Shell(), "Servoy update problem",
+														"Servoy ApplicationServer update failed; please shutdown developer and try to run the command line updater.");
+												}
+											});
+										}
+										else
+										{
+											Display.getDefault().asyncExec(new Runnable()
+											{
+												public void run()
+												{
+													if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
+														"ApplicationServer updated",
+														"It is recommended you restart the workbench for the changes to take effect. Would you like to restart now?"))
+													{
+														PlatformUI.getWorkbench().restart();
+													}
+												}
+											});
+											File versionFile = new File(appServerDir, "lib/version.txt");
+											try
+											{
+												FileUtils.write(versionFile, Integer.toString(ClientVersion.getReleaseNumber()), Charset.forName("UTF8"));
+											}
+											catch (IOException e)
+											{
+												Debug.error("Error writing version file", e);
+											}
+										}
+									}
+								});
+							}
+							catch (Exception e)
+							{
+								Debug.error(e);
+							}
+						}
+					}
+				});
+			}
+
 		}
 	}
 
