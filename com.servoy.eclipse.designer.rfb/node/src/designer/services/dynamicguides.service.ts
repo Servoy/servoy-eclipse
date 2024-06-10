@@ -209,16 +209,21 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	shouldSnapToSize(uuid: string, resizing?: string, value?: number, property?: string): boolean {
 		if (!uuid) return false; //no snap target
 		if (resizing) return true;
+		const targetRect = this.rectangles[this.uuids.indexOf(uuid)];
+		if (value && (property === 'width' && value > targetRect.width || property === 'height' && value > targetRect.height)) {
+			//the dragged component should not be larger than the target
+			return false;
+		}
 		const targetType = this.types.get(uuid);
 		const componentType = this.getDraggedComponentType();
 		if (targetType === componentType || this.getDraggedElementCategorySet(componentType)?.indexOf(targetType) >= 0) {
 			//the dragged component should not become too small unless the target is also very small
-			return property === 'width' && (value >= 80 || this.rectangles[this.uuids.indexOf(uuid)].width < 80) ||
-			property === 'height' && (value >= 30 || this.rectangles[this.uuids.indexOf(uuid)].height < 30);
+			return property === 'width' && (value >= 80 || targetRect.width < 80) ||
+			property === 'height' && (value >= 30 || targetRect.height < 30);
 		}
 		else if (value && this.initialRectangle) {
 			//if the dragged component is not in the same category, 
-			//use the size hints but make sure is not smaller than than the initial size
+			//use the size hints but make sure is not smaller than the initial size
 			return this.initialRectangle[property] < value;
 		}
 		return false;
