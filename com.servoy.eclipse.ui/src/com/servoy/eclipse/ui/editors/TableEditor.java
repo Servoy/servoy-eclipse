@@ -101,6 +101,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 {
 	public static final String ID = "com.servoy.eclipse.ui.editors.TableEditor";
 
+	public static final String PREFERENCE_KEY_EXTENDED_VIEW = "com.servoy.eclipse.ui.editors.TableEditor.extended_view";
+
 	private boolean isModified;
 
 	private IServerInternal server;
