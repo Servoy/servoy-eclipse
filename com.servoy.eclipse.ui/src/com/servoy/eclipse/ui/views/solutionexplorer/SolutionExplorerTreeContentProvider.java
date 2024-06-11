@@ -374,6 +374,7 @@ public class SolutionExplorerTreeContentProvider
 		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, apiexplorer);
 
 		PlatformSimpleUserNode clientutils = createTypeNode(Messages.TreeStrings_ClientUtils, UserNodeType.CLIENT_UTILS, JSClientUtils.class, apiexplorer);
+		addReturnTypeNodesPlaceHolder(clientutils, ScriptObjectRegistry.getScriptObjectForClass(JSClientUtils.class).getAllReturnedTypes());
 
 		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, apiexplorer);
 
