@@ -31,6 +31,14 @@
             id="com.servoy.eclipse.ui.views.FavoritesView"
             name="Favorites">
       </view>
+      <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.DocumentationView"
+            icon="icons/solution.png"
+            id="com.servoy.eclipse.ui.views.DocumentationView"
+            name="Documentation"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -67,6 +75,13 @@
                relationship="stack"
                relative="org.eclipse.help.ui.HelpView"
                visible="false">
+         </view>
+         <view
+               id="com.servoy.eclipse.ui.views.DocumentationView"
+               minimized="false"
+               relationship="stack"
+               relative="org.eclipse.ui.console.ConsoleView"
+               visible="true">
          </view>
       </perspectiveExtension>
       <perspectiveExtension
