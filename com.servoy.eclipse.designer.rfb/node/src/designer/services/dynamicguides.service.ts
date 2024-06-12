@@ -321,10 +321,6 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					return closest;
 				}
 			}, null);
-			if (closestYRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestYRect)], undefined, closestYRect.right - properties.left, 'width')) {
-				properties.width = closestYRect.right - properties.left;
-				properties.cssPosition['endWidth'] = {uuid : this.uuids[this.rectangles.indexOf(closestYRect)], prop: 'right'};
-			}
 
 			const closestXRect = overlapsY.reduce((closest, r) => {
 				const distanceLeft = Math.abs(r.left - rect.left);
@@ -335,9 +331,21 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					return closest;
 				}
 			}, null);
+
+			if (closestYRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestYRect)], undefined, closestYRect.right - properties.left, 'width')) {
+				properties.width = closestYRect.right - properties.left;
+				properties.cssPosition['endWidth'] = {uuid : this.uuids[this.rectangles.indexOf(closestYRect)], prop: 'right'};
+				if (closestXRect && closestXRect.right < properties.left) {
+					properties.cssPosition['endWidth']['left'] = this.uuids[this.rectangles.indexOf(closestXRect)];
+				}
+			}
+
 			if (closestXRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestXRect)], undefined, closestXRect.bottom - properties.top, 'height')) {
 				properties.height = closestXRect.bottom - properties.top;
 				properties.cssPosition['endHeight'] = {uuid : this.uuids[this.rectangles.indexOf(closestXRect)], prop: 'bottom'};
+				if (closestYRect && closestYRect.right < properties.top) {
+					properties.cssPosition['endHeight']['top'] = this.uuids[this.rectangles.indexOf(closestYRect)];
+				}
 			}
 		}
 		if (properties.width && !properties.height) {
