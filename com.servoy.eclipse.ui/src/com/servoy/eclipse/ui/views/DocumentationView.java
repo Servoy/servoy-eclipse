@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -41,6 +42,7 @@ import com.equo.chromium.swt.Browser;
 import com.servoy.eclipse.core.XMLScriptObjectAdapterLoader;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.documentation.IObjectDocumentation;
@@ -58,7 +60,7 @@ import com.servoy.j2db.persistence.WebComponent;
  */
 public class DocumentationView extends ViewPart implements ISelectionListener, IPartListener2
 {
-
+	private boolean linkWithSelection = true;
 	private Browser browser;
 
 	@Override
@@ -86,6 +88,26 @@ public class DocumentationView extends ViewPart implements ISelectionListener, I
 				}
 			}
 		});
+
+		Action linkAction = new Action("Link with selection", IAction.AS_CHECK_BOX)
+		{
+			@Override
+			public void run()
+			{
+				linkWithSelection = this.isChecked();
+				if (linkWithSelection)
+				{
+					registerListenerAndSetSelection();
+				}
+				else
+				{
+					getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(DocumentationView.this);
+				}
+			}
+		};
+		linkAction.setChecked(linkWithSelection);
+		linkAction.setImageDescriptor(Activator.loadImageDescriptorFromBundle("link_to_editor.png"));
+		bars.getToolBarManager().add(linkAction);
 
 
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
@@ -215,7 +237,7 @@ public class DocumentationView extends ViewPart implements ISelectionListener, I
 			}
 			else
 			{
-				System.err.println(element);
+//				System.err.println(element);
 			}
 
 		}
@@ -530,9 +552,17 @@ public class DocumentationView extends ViewPart implements ISelectionListener, I
 	{
 		if (partRef.getPart(false) == this)
 		{
-			// its made visible again start listening and set the current selection
-			getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
-			selectionChanged(this, getSite().getWorkbenchWindow().getSelectionService().getSelection());
+			registerListenerAndSetSelection();
 		}
+	}
+
+	/**
+	 *
+	 */
+	private void registerListenerAndSetSelection()
+	{
+		// its made visible again start listening and set the current selection
+		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
+		selectionChanged(this, getSite().getWorkbenchWindow().getSelectionService().getSelection());
 	}
 }
