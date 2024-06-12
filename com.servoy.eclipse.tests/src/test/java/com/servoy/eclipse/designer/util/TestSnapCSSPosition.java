@@ -494,7 +494,7 @@ public class TestSnapCSSPosition
 		CSSPosition targetPosition = new CSSPosition("65", "20%", "-1", "-1", "40%", "30"); //top, right
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
-		SnapToComponentUtil.snapToEndSize(newPosition, containerSize, targetPosition, containerSize, "left", "right", "width");
+		SnapToComponentUtil.snapToEndSize(newPosition, containerSize, targetPosition, containerSize, null, null, "left", "right", "width");
 
 		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
 		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
@@ -511,7 +511,7 @@ public class TestSnapCSSPosition
 		CSSPosition targetPosition = new CSSPosition("65", "-1", "-1", "20%", "40%", "30"); //top, left
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
-		SnapToComponentUtil.snapToEndSize(newPosition, containerSize, targetPosition, containerSize, "left", "right", "width");
+		SnapToComponentUtil.snapToEndSize(newPosition, containerSize, targetPosition, containerSize, null, null, "left", "right", "width");
 
 		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
 		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
@@ -519,6 +519,24 @@ public class TestSnapCSSPosition
 
 		assertEquals("20%", newPosition.left);
 		assertEquals("css pos width should be the same as the target width", "40%", newPosition.width);
+	}
+	
+	@Test
+	public void testSnapToEndWidth_Percentage3() throws Exception
+	{
+		CSSPosition newPosition = new CSSPosition("144", "-1", "-1", "272", "112", "30");
+		CSSPosition targetPosition = new CSSPosition("65", "-1", "-1", "20%", "40%", "30"); //top, left
+		CSSPosition siblingPosition = new CSSPosition("144", "-1", "-1", "20%", "20%", "30"); //top, left
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
+		SnapToComponentUtil.snapToEndSize(newPosition, containerSize, targetPosition, containerSize, siblingPosition, containerSize, "left", "right", "width");
+
+		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
+		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+
+		assertEquals("calc(40% + 16px)", newPosition.left);
+		assertEquals("css pos width should be computed", "calc(20% - 16px)", newPosition.width);
 	}
 
 	@Test

@@ -323,16 +323,33 @@ public class SnapToComponentUtil
 			JSONObject jsonObject = obj.getJSONObject(key);
 			ISupportCSSPosition target = (ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, jsonObject.optString("uuid"));
 			AbstractContainer parent = CSSPositionUtils.getParentContainer(target);
-			snapToEndSize(newPosition, componentParent.getSize(), target.getCssPosition(), parent.getSize(), start, end, dimension);
+			ISupportCSSPosition sibling = jsonObject.has(start)
+				? (ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, jsonObject.getString(start))
+				: null;
+			AbstractContainer siblingParent = CSSPositionUtils.getParentContainer(sibling);
+			snapToEndSize(newPosition, componentParent.getSize(), target.getCssPosition(), parent.getSize(), sibling != null ? sibling.getCssPosition() : null,
+				siblingParent != null ? siblingParent.getSize() : null, start, end, dimension);
 		}
 	}
 
 	public static void snapToEndSize(CSSPosition newPosition, java.awt.Dimension parentSize, CSSPosition targetCssPosition,
-		java.awt.Dimension targetParentSize, String lowerProperty, String higherProperty, String sizeProperty)
+		java.awt.Dimension targetParentSize, CSSPosition siblingCssPosition,
+		java.awt.Dimension siblingParentSize, String lowerProperty, String higherProperty, String sizeProperty)
 	{
 		CSSValue higherPropertyValue = getCssValue(targetCssPosition, higherProperty, targetParentSize);
 		CSSValue lowerPropertyValue = getCssValue(targetCssPosition, lowerProperty, targetParentSize);
 		CSSValue sourceLowerPropertyValue = getCssValue(newPosition, lowerProperty, parentSize);
+		if (siblingCssPosition != null && sourceLowerPropertyValue.isSet() && sourceLowerPropertyValue.isPx())
+		{
+			CSSValue siblingHigherPropertyValue = getOrComputeValue(siblingCssPosition, higherProperty, siblingParentSize);
+			if (siblingHigherPropertyValue.getPercentage() > 0)
+			{
+				//adjust the sourceLowerPropertyValue if the sibling is using %
+				CSSValue space = sourceLowerPropertyValue.minus(siblingHigherPropertyValue);
+				sourceLowerPropertyValue = siblingHigherPropertyValue.plus(space);
+				setCssValue(newPosition, lowerProperty, sourceLowerPropertyValue);
+			}
+		}
 		CSSValue sourceSizePropertyValue = getCssValue(newPosition, sizeProperty, parentSize);
 		if (higherPropertyValue.isSet())
 		{
