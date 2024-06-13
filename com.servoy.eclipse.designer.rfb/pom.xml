@@ -9,10 +9,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.6.0.3980_rc</version>
+		<version>2024.6.0.3981_rc2</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.designer.rfb</artifactId>
-	<version>2024.6.0.3980_rc</version>
+	<version>2024.6.0.3981_rc2</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
