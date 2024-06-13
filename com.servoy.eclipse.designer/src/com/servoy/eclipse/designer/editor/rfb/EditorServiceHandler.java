@@ -198,14 +198,17 @@ public class EditorServiceHandler implements IServerService
 				{
 					selection = (PersistContext)((IStructuredSelection)selectionProvider.getSelection()).getFirstElement();
 				}
-				IPersist currentPersist = selection.getPersist();
-				while (currentPersist != null && !(currentPersist instanceof LayoutContainer))
+				if (selection != null)
 				{
-					currentPersist = currentPersist.getParent();
-				}
-				if (currentPersist instanceof LayoutContainer)
-				{
-					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomIn((LayoutContainer)currentPersist);
+					IPersist currentPersist = selection.getPersist();
+					while (currentPersist != null && !(currentPersist instanceof LayoutContainer))
+					{
+						currentPersist = currentPersist.getParent();
+					}
+					if (currentPersist instanceof LayoutContainer)
+					{
+						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomIn((LayoutContainer)currentPersist);
+					}
 				}
 				return null;
 			}
