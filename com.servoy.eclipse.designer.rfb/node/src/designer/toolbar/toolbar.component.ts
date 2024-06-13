@@ -47,11 +47,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     items: Map<TOOLBAR_CATEGORIES, ToolbarItem[]> = new Map();
 
     btnPlaceField: ToolbarItem;
-    btnPlaceImage: ToolbarItem;
-    btnPlacePortal: ToolbarItem;
-    btnPlaceSplitPane: ToolbarItem;
-    btnPlaceTabPanel: ToolbarItem;
-    btnPlaceAccordion: ToolbarItem;
     btnHighlightWebcomponents: ToolbarItem;
     btnToggleDynamicGuides: ToolbarItem;
 
@@ -137,13 +132,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (!this.urlParser.isShowingContainer()) {
                 this.btnZoomOut.hide = true;
             }
-            if (this.urlParser.isHideDefault()) {
-                this.btnPlaceImage.hide = true;
-                this.btnPlacePortal.hide = true;
-                this.btnPlaceSplitPane.hide = true;
-                this.btnPlaceTabPanel.hide = true;
-                this.btnPlaceAccordion.hide = true;
-            }
 
             this.display = this.getCategoryItems(TOOLBAR_CATEGORIES.DISPLAY);
             this.ordering = this.getCategoryItems(TOOLBAR_CATEGORIES.ORDERING);
@@ -181,11 +169,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
         } else {
             this.btnPlaceField.hide = true;
-            this.btnPlaceImage.hide = true;
-            this.btnPlacePortal.hide = true;
-            this.btnPlaceSplitPane.hide = true;
-            this.btnPlaceTabPanel.hide = true;
-            this.btnPlaceAccordion.hide = true;
             this.btnTabSequence.hide = true;
             this.btnHideInheritedElements.hide = true;
 
@@ -285,51 +268,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             }
         );
 
-        this.btnPlaceImage = new ToolbarItem(
-            'Place Image Wizard',
-            'toolbar/icons/image_wizard.png',
-            true,
-            () => {
-                this.editorSession.openElementWizard('image');
-            }
-        );
-
-        this.btnPlacePortal = new ToolbarItem(
-            'Place Portal Wizard',
-            'toolbar/icons/portal_wizard.png',
-            true,
-            () => {
-                this.editorSession.openElementWizard('portal');
-            }
-        );
-
-        this.btnPlaceSplitPane = new ToolbarItem(
-            'Place SplitPane Wizard',
-            'toolbar/icons/split.png',
-            true,
-            () => {
-                this.editorSession.openElementWizard('splitpane');
-            }
-        );
-
-        this.btnPlaceTabPanel = new ToolbarItem(
-            'Place TabPanel Wizard',
-            'toolbar/icons/tabs.png',
-            true,
-            () => {
-                this.editorSession.openElementWizard('tabpanel');
-            }
-        );
-
-        this.btnPlaceAccordion = new ToolbarItem(
-            'Place Accordion Panel Wizard',
-            'toolbar/icons/accordion.png',
-            true,
-            () => {
-                this.editorSession.openElementWizard('accordion');
-            }
-        );
-
         this.btnHighlightWebcomponents = new ToolbarItem(
             'Highlight webcomponents',
             'toolbar/icons/highlight.png',
@@ -360,11 +298,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         }
 
         this.add(this.btnPlaceField, TOOLBAR_CATEGORIES.ELEMENTS);
-        this.add(this.btnPlaceImage, TOOLBAR_CATEGORIES.ELEMENTS);
-        this.add(this.btnPlacePortal, TOOLBAR_CATEGORIES.ELEMENTS);
-        this.add(this.btnPlaceSplitPane, TOOLBAR_CATEGORIES.ELEMENTS);
-        this.add(this.btnPlaceTabPanel, TOOLBAR_CATEGORIES.ELEMENTS);
-        this.add(this.btnPlaceAccordion, TOOLBAR_CATEGORIES.ELEMENTS);
         this.add(this.btnHighlightWebcomponents, TOOLBAR_CATEGORIES.ELEMENTS);
         if (this.urlParser.isAbsoluteFormLayout()) { 
             this.add(this.btnToggleDynamicGuides, TOOLBAR_CATEGORIES.ELEMENTS);
