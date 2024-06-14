@@ -24,12 +24,6 @@
 		</ng-container>
 	</div>
 
-	<div class="toolbar sizing" *ngIf="sizing && sizing.length > 0">
-		<ng-container *ngFor="let item of sizing">
-			<designer-toolbar-button  *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
-
 	<div class="toolbar zoom" *ngIf="zoom && zoom.length > 0">
 		<ng-container *ngFor="let item of zoom">
 			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>

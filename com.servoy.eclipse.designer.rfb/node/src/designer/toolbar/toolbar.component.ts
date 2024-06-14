@@ -15,7 +15,29 @@ export enum TOOLBAR_CONSTANTS {
     COMPONENTS_CSS_ICON = 'url(designer/assets/images/components_css.png)',
     PLACEMENT_GUIDE_CSS_ICON = 'url(designer/assets/images/snaptogrid.png)',
     NO_CSS_ICON = 'url(designer/assets/images/no_css.png)',
-    CHECK_ICON = 'url(designer/assets/images/check.png)'
+    CHECK_ICON = 'url(designer/assets/images/check.png)',
+    BRING_FORWARD = 'Bring forward',
+    SEND_BACKWARD = 'Send backward',
+    BRING_TO_FRONT = 'Bring to front',
+    SEND_TO_BACK = 'Send to back',
+    BRING_FORWARD_ICON = 'url(designer/assets/images/bring_forward.png)',
+    SEND_BACKWARD_ICON = 'url(designer/assets/images/send_backward.png)',
+    BRING_TO_FRONT_ICON = 'url(designer/assets/images/bring_to_front.png)',
+    SEND_TO_BACK_ICON = 'url(designer/assets/images/send_to_back.png)',
+    SAME_WIDTH = 'Same Width',
+    SAME_HEIGHT = 'Same Height',
+    ALIGN_LEFT = 'Align Left',
+    ALIGN_RIGHT = 'Align Right',
+    ALIGN_TOP = 'Align Top',
+    ALIGN_BOTTOM = 'Align Bottom',
+    ALIGN_CENTER = 'Align Center',
+    ALIGN_MIDDLE = 'Align Middle',
+    HORIZONTAL_SPACING = 'Horizontal Spacing',
+    HORIZONTAL_CENTERS = 'Horizontal Centers',
+    LEFTWARD = 'Leftward',
+    VERTICAL_SPACING = 'Vertical Spacing',
+    VERTICAL_CENTERS = 'Vertical Centers',
+    UPWARD = 'Upward'
 }
 
 export enum TOOLBAR_CATEGORIES {
@@ -62,31 +84,12 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     btnHideInheritedElements: ToolbarItem;
     btnVisualFeedbackOptions: ToolbarItem;
-
-    btnBringForward: ToolbarItem;
-    btnSendBackward: ToolbarItem;
-    btnBringToFront: ToolbarItem;
-    btnSendToBack: ToolbarItem;
-
+    btnOrderingActionsCSSForm: ToolbarItem;
+    btnAlignActions: ToolbarItem;
+    btnSpaceDistributionActions: ToolbarItem;
+    
     btnMoveUp: ToolbarItem;
     btnMoveDown: ToolbarItem;
-
-    btnSameWidth: ToolbarItem;
-    btnSameHeight: ToolbarItem;
-
-    btnLeftAlign: ToolbarItem;
-    btnRightAlign: ToolbarItem;
-    btnTopAlign: ToolbarItem;
-    btnBottomAlign: ToolbarItem;
-    btnCenterAlign: ToolbarItem;
-    btnMiddleAlign: ToolbarItem;
-
-    btnDistributeHorizontalSpacing: ToolbarItem;
-    btnDistributeHorizontalCenters: ToolbarItem;
-    btnDistributeLeftward: ToolbarItem;
-    btnDistributeVerticalSpacing: ToolbarItem;
-    btnDistributeVerticalCenters: ToolbarItem;
-    btnDistributeUpward: ToolbarItem;
 
     btnReload: ToolbarItem;
     btnToggleI18NValues: ToolbarItem;
@@ -99,7 +102,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     ordering: ToolbarItem[];
     alignment: ToolbarItem[];
     distribution: ToolbarItem[];
-    sizing: ToolbarItem[];
     zoom_level: ToolbarItem[];
     design_mode: ToolbarItem[];
     sticky: ToolbarItem[];
@@ -134,10 +136,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             }
 
             this.display = this.getCategoryItems(TOOLBAR_CATEGORIES.DISPLAY);
-            this.ordering = this.getCategoryItems(TOOLBAR_CATEGORIES.ORDERING);
-            this.alignment = this.getCategoryItems(TOOLBAR_CATEGORIES.ALIGNMENT);
-            this.distribution = this.getCategoryItems(TOOLBAR_CATEGORIES.DISTRIBUTION);
-            this.sizing = this.getCategoryItems(TOOLBAR_CATEGORIES.SIZING);
+            this.ordering = [this.btnOrderingActionsCSSForm];
+            this.alignment = [this.btnAlignActions];
+            this.distribution = [this.btnSpaceDistributionActions];
 
             const ShowSameSizeIndicatorPromise = this.editorSession.showSameSizeIndicator();
             void ShowSameSizeIndicatorPromise.then((result: boolean) => {
@@ -395,13 +396,17 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnTabSequence = new ToolbarItem(
             'Set tab sequence',
             'images/th_horizontal.png',
-            false,
+            true,
             () => {
-                this.editorSession.executeAction('setTabSequence');
+                const selection = this.editorSession.getSelection();
+                if (selection && selection.length > 1) {
+                    this.editorSession.executeAction('setTabSequence');
+                }
             }
         );
         this.btnTabSequence.disabledIcon = 'images/th_horizontal-disabled.png';
-
+        this.btnTabSequence.tooltip = 'Sets tab sequence (tabSeq property) on each selected component based on order of selection. There must be at least two selected components.';
+        
         this.btnZoomIn = new ToolbarItem(
             'Zoom in',
             'images/zoom_in.png',
@@ -479,19 +484,17 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnHideInheritedElements.state = false;
 
         this.btnVisualFeedbackOptions = new ToolbarItem(
-            'Visual feedback options',
-            null,
+            '',
+            'images/grid.png',
             true,
             null
         );
 
-        this.btnVisualFeedbackOptions.getIconStyle = (selection) => {
-            return { 'background-image': TOOLBAR_CONSTANTS.VISUAL_FEEDBACK_CSS_ICON };
-        };
+        this.btnVisualFeedbackOptions.tooltip = 'Visual feedback options';
 
         this.btnVisualFeedbackOptions.list = [
-            { 'text': TOOLBAR_CONSTANTS.ANCHOR_INDICATOR, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } },
-            { 'text': TOOLBAR_CONSTANTS.SAME_SIZE, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } }
+            { 'text': TOOLBAR_CONSTANTS.ANCHOR_INDICATOR, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON }, 'tooltip': 'Whether anchor indicator (hint image) is shown for a selected component.' },
+            { 'text': TOOLBAR_CONSTANTS.SAME_SIZE, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } , 'tooltip': 'Whether same width and same height indicators (hint images) are shown for a selected component and all components that match its width or height.'}
         ];
 
         this.btnVisualFeedbackOptions.onselection = (selection) => {
@@ -520,50 +523,38 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnHideInheritedElements, TOOLBAR_CATEGORIES.DISPLAY);
         this.add(this.btnVisualFeedbackOptions, TOOLBAR_CATEGORIES.DISPLAY);
 
-        this.btnBringForward = new ToolbarItem(
-            'Bring forward',
-            'images/bring_forward.png',
-            false,
-            () => {
-                this.editorSession.executeAction('z_order_bring_to_front_one_step');
-            }
-        );
-        this.btnBringForward.disabledIcon = 'images/bring_forward-disabled.png';
-
-        this.btnSendBackward = new ToolbarItem(
-            'Send backward',
-            'images/send_backward.png',
-            false,
-            () => {
-                this.editorSession.executeAction('z_order_send_to_back_one_step');
-            }
-        );
-        this.btnSendBackward.disabledIcon = 'images/send_backward-disabled.png';
-
-        this.btnBringToFront = new ToolbarItem(
-            'Bring to front',
-            'images/bring_to_front.png',
-            false,
-            () => {
-                this.editorSession.executeAction('z_order_bring_to_front');
-            }
-        );
-        this.btnBringToFront.disabledIcon = 'images/bring_to_front-disabled.png';
-
-        this.btnSendToBack = new ToolbarItem(
-            'Send to back',
+        this.btnOrderingActionsCSSForm = new ToolbarItem(
+            '',
             'images/send_to_back.png',
-            false,
-            () => {
-                this.editorSession.executeAction('z_order_send_to_back');
-            }
+            true,
+            null
         );
-        this.btnSendToBack.disabledIcon = 'images/send_to_back-disabled.png';
+        
+        this.btnOrderingActionsCSSForm.tooltip = 'Form Index (zIndex) ordering actions applied to selected element(s).If there is no selection or selected element doesn\'t have any overlapping neighbour components it doesn\'t do anything. It modifies the formIndex of selected element(s) and all the elements it has common space with.';
+        
+        this.btnOrderingActionsCSSForm.list = [
+            { 'text': TOOLBAR_CONSTANTS.BRING_FORWARD, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.BRING_FORWARD_ICON }, 'tooltip': 'Moves selected element(s) one step up in zIndex layers.' },
+            { 'text': TOOLBAR_CONSTANTS.SEND_BACKWARD, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.SEND_BACKWARD_ICON }, 'tooltip': 'Moves selected element(s) one step down in zIndex layers.' },
+            { 'text': TOOLBAR_CONSTANTS.BRING_TO_FRONT, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.BRING_TO_FRONT_ICON }, 'tooltip': 'Moves selected element(s) to top so it is always fully visible (top most zIndex layer)' },
+            { 'text': TOOLBAR_CONSTANTS.SEND_TO_BACK, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.SEND_TO_BACK_ICON }, 'tooltip': 'Moves selected element(s) to bottom so it is the least visible one (all the elements it intersects will be on top of it).' }
+        ];
 
-        this.add(this.btnBringForward, TOOLBAR_CATEGORIES.ORDERING);
-        this.add(this.btnSendBackward, TOOLBAR_CATEGORIES.ORDERING);
-        this.add(this.btnBringToFront, TOOLBAR_CATEGORIES.ORDERING);
-        this.add(this.btnSendToBack, TOOLBAR_CATEGORIES.ORDERING);
+        this.btnOrderingActionsCSSForm.onselection = (selection) => {
+            if (selection == TOOLBAR_CONSTANTS.BRING_FORWARD) {
+                 this.editorSession.executeAction('z_order_bring_to_front_one_step');
+            }
+            if (selection == TOOLBAR_CONSTANTS.SEND_BACKWARD) {
+                 this.editorSession.executeAction('z_order_send_to_back_one_step');
+            }
+            if (selection == TOOLBAR_CONSTANTS.BRING_TO_FRONT) {
+                 this.editorSession.executeAction('z_order_bring_to_front');
+            }
+            if (selection == TOOLBAR_CONSTANTS.SEND_TO_BACK) {
+                 this.editorSession.executeAction('z_order_send_to_back');
+            }
+            return selection;
+        }
+
 
         this.btnMoveUp = new ToolbarItem(
             'Move to left inside parent container',
@@ -589,34 +580,34 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnMoveDown, TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
 
 
-        this.btnSameWidth = new ToolbarItem(
-            'Same width',
-            'images/same_width.png',
-            false,
-            () => {
-                this.editorSession.sameSize(true);
-            }
-        );
-        this.btnSameWidth.disabledIcon = 'images/same_width-disabled.png';
-
-        this.btnSameHeight = new ToolbarItem(
-            'Same height',
-            'images/same_height.png',
-            false,
-            () => {
-                this.editorSession.sameSize(false);
-            }
-        );
-        this.btnSameHeight.disabledIcon = 'images/same_height-disabled.png';
-
-        this.add(this.btnSameWidth, TOOLBAR_CATEGORIES.SIZING);
-        this.add(this.btnSameHeight, TOOLBAR_CATEGORIES.SIZING);
-
-        this.btnLeftAlign = new ToolbarItem(
-            'Align Left',
+         this.btnAlignActions = new ToolbarItem(
+            '',
             'images/alignleft.png',
-            false,
-            () => {
+            true,
+            null
+        );
+        
+        this.btnAlignActions.tooltip = 'Align actions that will be applied to selected components. At least two components must be selected, otherwise will have no effect.';
+        
+        this.btnAlignActions.list = [
+            { 'text': TOOLBAR_CONSTANTS.ALIGN_LEFT, 'iconStyle': { 'background-image': 'url(designer/assets/images/alignleft.png)' }, 'tooltip': 'Changes left position of all selected components to be the same as the position of left most component.' },
+            { 'text': TOOLBAR_CONSTANTS.ALIGN_RIGHT, 'iconStyle': { 'background-image': 'url(designer/assets/images/alignright.png)' }, 'tooltip': 'Changes right position of all selected components to be the same as the position of right most.' },
+            { 'text': TOOLBAR_CONSTANTS.ALIGN_TOP, 'iconStyle': { 'background-image': 'url(designer/assets/images/aligntop.png)' }, 'tooltip': 'Changes top position of all selected components to be the same as the position of top most component.' },
+            { 'text': TOOLBAR_CONSTANTS.ALIGN_BOTTOM, 'iconStyle': { 'background-image': 'url(designer/assets/images/alignbottom.png)' }, 'tooltip': 'Changes bottom position of all selected components to be the same as the position of bottom most component.' },
+            { 'text': TOOLBAR_CONSTANTS.ALIGN_CENTER, 'iconStyle': { 'background-image': 'url(designer/assets/images/aligncenter.png)' }, 'tooltip': 'Changes left position of all selected components so all components are vertically centered compared to component that is first selected.' },
+            { 'text': TOOLBAR_CONSTANTS.ALIGN_MIDDLE, 'iconStyle': { 'background-image': 'url(designer/assets/images/alignmid.png)' }, 'tooltip': 'Changes top position of all selected components so all components are horizontally centered compared to component that is first selected.' },
+            { 'text': TOOLBAR_CONSTANTS.SAME_WIDTH, 'iconStyle': { 'background-image': 'url(designer/assets/images/same_width.png)' }, 'tooltip': 'Changes width of all selected components to be the same as the width of component that is first selected.' },
+            { 'text': TOOLBAR_CONSTANTS.SAME_HEIGHT, 'iconStyle': { 'background-image': 'url(designer/assets/images/same_height.png)' }, 'tooltip': 'Changes height of all selected components to be the same as the height of component that is first selected.' }
+        ];
+
+        this.btnAlignActions.onselection = (action) => {
+            if (action == TOOLBAR_CONSTANTS.SAME_WIDTH) {
+                 this.editorSession.sameSize(true);
+            }
+            if (action == TOOLBAR_CONSTANTS.SAME_HEIGHT) {
+                 this.editorSession.sameSize(false);
+            }
+            if (action == TOOLBAR_CONSTANTS.ALIGN_LEFT) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
                     const obj = {};
@@ -625,8 +616,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const nodeid = selection[i];
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
-							const elementRect = element.getBoundingClientRect();
-							this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
+                            const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (left == null) {
                                 left = elementRect.x;
                             } else if (left > elementRect.x) {
@@ -652,14 +643,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.updateSelection(); 
                 }
             }
-        );
-        this.btnLeftAlign.disabledIcon = 'images/alignleft-disabled.png';
-
-        this.btnRightAlign = new ToolbarItem(
-            'Align Right',
-            'images/alignright.png',
-            false,
-            () => {
+            if (action == TOOLBAR_CONSTANTS.ALIGN_RIGHT) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
                     const obj = {};
@@ -695,14 +679,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.updateSelection();   
                 }
             }
-        );
-        this.btnRightAlign.disabledIcon = 'images/alignright-disabled.png';
-
-        this.btnTopAlign = new ToolbarItem(
-            'Align Top',
-            'images/aligntop.png',
-            false,
-            () => {
+            if (action == TOOLBAR_CONSTANTS.ALIGN_TOP) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
                     const obj = {};
@@ -738,14 +715,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.updateSelection();   
                 }
             }
-        );
-        this.btnTopAlign.disabledIcon = 'images/aligntop-disabled.png';
-
-        this.btnBottomAlign = new ToolbarItem(
-            'Align Bottom',
-            'images/alignbottom.png',
-            false,
-            () => {
+            if (action == TOOLBAR_CONSTANTS.ALIGN_BOTTOM) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
                     const obj = {};
@@ -781,15 +751,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.updateSelection();   
                 }
             }
-        );
-        this.btnBottomAlign.disabledIcon = 'images/alignbottom-disabled.png';
-
-        this.btnCenterAlign = new ToolbarItem(
-            'Align Center',
-            'images/aligncenter.png',
-            false,
-            () => {
-                const selection = this.editorSession.getSelection();
+             if (action == TOOLBAR_CONSTANTS.ALIGN_CENTER) {
+                  const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let centerElementModel: DOMRect = null;
@@ -833,15 +796,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.updateSelection();   
                 }
             }
-        );
-        this.btnCenterAlign.disabledIcon = 'images/aligncenter-disabled.png';
-
-        this.btnMiddleAlign = new ToolbarItem(
-            'Align Middle',
-            'images/alignmid.png',
-            false,
-            () => {
-                const selection = this.editorSession.getSelection();
+            if (action == TOOLBAR_CONSTANTS.ALIGN_MIDDLE) {
+                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
                     const obj = {};
                     let centerElementModel: DOMRect = null;
@@ -885,89 +841,50 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.updateSelection();   
                 }
             }
-        );
-        this.btnMiddleAlign.disabledIcon = 'images/alignmid-disabled.png';
+            return action;
+        }
 
-        this.add(this.btnLeftAlign, TOOLBAR_CATEGORIES.ALIGNMENT);
-        this.add(this.btnRightAlign, TOOLBAR_CATEGORIES.ALIGNMENT);
-        this.add(this.btnTopAlign, TOOLBAR_CATEGORIES.ALIGNMENT);
-        this.add(this.btnBottomAlign, TOOLBAR_CATEGORIES.ALIGNMENT);
-        this.add(this.btnCenterAlign, TOOLBAR_CATEGORIES.ALIGNMENT);
-        this.add(this.btnMiddleAlign, TOOLBAR_CATEGORIES.ALIGNMENT);
-
-        this.btnDistributeHorizontalSpacing = new ToolbarItem(
-            'Horizontal Spacing',
-            'images/distribute_hspace.png',
-            false,
-            () => {
-                this.editorSession.executeAction('horizontal_spacing');
-                this.updateSelection();
-            }
-        );
-        this.btnDistributeHorizontalSpacing.disabledIcon = 'images/distribute_hspace-disabled.png';
-
-        this.btnDistributeHorizontalCenters = new ToolbarItem(
-            'Horizontal Centers',
+        this.btnSpaceDistributionActions = new ToolbarItem(
+            '',
             'images/distribute_hcenters.png',
-            false,
-            () => {
-                this.editorSession.executeAction('horizontal_centers');
-                this.updateSelection();
-            }
+            true,
+            null
         );
-        this.btnDistributeHorizontalCenters.disabledIcon = 'images/distribute_hcenters-disabled.png';
+        
+        this.btnSpaceDistributionActions.tooltip = 'Space distribution actions between selected components (horizontal or vertical space). At least three components must be selected, otherwise will have no effect.';
+        
+        this.btnSpaceDistributionActions.list = [
+            { 'text': TOOLBAR_CONSTANTS.HORIZONTAL_SPACING, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_hspace.png)' }, 'tooltip': 'Changes left position of all selected components so the in between horizontal space is distributed based on the horizontal position of selected elements.' },
+            { 'text': TOOLBAR_CONSTANTS.HORIZONTAL_CENTERS, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_hcenters.png)' }, 'tooltip': 'Changes left position of all selected components so the in between horizontal space is distributed based on the horizontal center of selected elements.' },
+            { 'text': TOOLBAR_CONSTANTS.LEFTWARD, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_leftward.png)' }, 'tooltip': 'Changes left position of all selected components so the in between horizontal space is distributed toward the left-most element of selected elements.' },
+            { 'text': TOOLBAR_CONSTANTS.VERTICAL_SPACING, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_vspace.png)' }, 'tooltip': 'Changes top position of all selected components so the in between vertical space is distributed based on the vertical position of selected elements.' },
+            { 'text': TOOLBAR_CONSTANTS.VERTICAL_CENTERS, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_vcenters.png)' }, 'tooltip': 'Changes top position of all selected components so the in between vertical space is distributed based on the vertical center of selected elements.' },
+            { 'text': TOOLBAR_CONSTANTS.UPWARD, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_upward.png)' }, 'tooltip': 'Changes top position of all selected components so the in between vertical space is distributed toward the top-most element of selected elements.' }
+        ];
 
-        this.btnDistributeLeftward = new ToolbarItem(
-            'Leftward',
-            'images/distribute_leftward.png',
-            false,
-            () => {
-                this.editorSession.executeAction('horizontal_pack');
-                this.updateSelection();
+        this.btnSpaceDistributionActions.onselection = (action) => {
+            if (action == TOOLBAR_CONSTANTS.HORIZONTAL_SPACING) {
+                 this.editorSession.executeAction('horizontal_spacing');
             }
-        );
-        this.btnDistributeLeftward.disabledIcon = 'images/distribute_leftward-disabled.png';
-
-        this.btnDistributeVerticalSpacing = new ToolbarItem(
-            'Vertical Spacing',
-            'images/distribute_vspace.png',
-            false,
-            () => {
+            if (action == TOOLBAR_CONSTANTS.HORIZONTAL_CENTERS) {
+                 this.editorSession.executeAction('horizontal_centers');
+            }
+            if (action == TOOLBAR_CONSTANTS.LEFTWARD) {
+                  this.editorSession.executeAction('horizontal_pack');
+            }
+            if (action == TOOLBAR_CONSTANTS.VERTICAL_SPACING) {
                 this.editorSession.executeAction('vertical_spacing');
-                this.updateSelection();
             }
-        );
-        this.btnDistributeVerticalSpacing.disabledIcon = 'images/distribute_vspace-disabled.png';
-
-        this.btnDistributeVerticalCenters = new ToolbarItem(
-            'Vertical Centers',
-            'images/distribute_vcenters.png',
-            false,
-            () => {
-                this.editorSession.executeAction('vertical_centers');
-                this.updateSelection();
+            if (action == TOOLBAR_CONSTANTS.VERTICAL_CENTERS) {
+                 this.editorSession.executeAction('vertical_centers');
             }
-        );
-        this.btnDistributeVerticalCenters.disabledIcon = 'images/distribute_vcenters-disabled.png';
-
-        this.btnDistributeUpward = new ToolbarItem(
-            'Upward',
-            'images/distribute_upward.png',
-            false,
-            () => {
-                this.editorSession.executeAction('vertical_pack');
-                this.updateSelection();
+            if (action == TOOLBAR_CONSTANTS.UPWARD) {
+                 this.editorSession.executeAction('vertical_pack');
             }
-        );
-        this.btnDistributeUpward.disabledIcon = 'images/distribute_upward-disabled.png';
-
-        this.add(this.btnDistributeHorizontalSpacing, TOOLBAR_CATEGORIES.DISTRIBUTION);
-        this.add(this.btnDistributeHorizontalCenters, TOOLBAR_CATEGORIES.DISTRIBUTION);
-        this.add(this.btnDistributeLeftward, TOOLBAR_CATEGORIES.DISTRIBUTION);
-        this.add(this.btnDistributeVerticalSpacing, TOOLBAR_CATEGORIES.DISTRIBUTION);
-        this.add(this.btnDistributeVerticalCenters, TOOLBAR_CATEGORIES.DISTRIBUTION);
-        this.add(this.btnDistributeUpward, TOOLBAR_CATEGORIES.DISTRIBUTION);
-
+            this.updateSelection();
+            return action;
+        }
+        
         this.btnReload = new ToolbarItem(
             'Reload designer (use when component changes must be reflected)',
             'images/reload.png',
@@ -1073,28 +990,29 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     }
 
     selectionChanged(selection: Array<string>): void {
-        this.btnTabSequence.enabled = selection.length > 1;
-        this.btnSameWidth.enabled = selection.length > 1;
-        this.btnSameHeight.enabled = selection.length > 1;
+        // do we need to enable/disable the actions ? maybe just keep them always enabled
+        //this.btnTabSequence.enabled = selection.length > 1;
+        //this.btnSameWidth.enabled = selection.length > 1;
+        //this.btnSameHeight.enabled = selection.length > 1;
         this.btnZoomOut.enabled = this.urlParser.isShowingContainer() != null;
         if (this.urlParser.isAbsoluteFormLayout()) {
-            this.btnDistributeHorizontalSpacing.enabled = selection.length > 2;
-            this.btnDistributeHorizontalCenters.enabled = selection.length > 2;
-            this.btnDistributeLeftward.enabled = selection.length > 2;
-            this.btnDistributeVerticalSpacing.enabled = selection.length > 2;
-            this.btnDistributeVerticalCenters.enabled = selection.length > 2;
-            this.btnDistributeUpward.enabled = selection.length > 2;
+            //this.btnDistributeHorizontalSpacing.enabled = selection.length > 2;
+           // this.btnDistributeHorizontalCenters.enabled = selection.length > 2;
+            //this.btnDistributeLeftward.enabled = selection.length > 2;
+            //this.btnDistributeVerticalSpacing.enabled = selection.length > 2;
+            //this.btnDistributeVerticalCenters.enabled = selection.length > 2;
+            //this.btnDistributeUpward.enabled = selection.length > 2;
 
-            this.btnLeftAlign.enabled = selection.length > 1;
-            this.btnRightAlign.enabled = selection.length > 1;
-            this.btnTopAlign.enabled = selection.length > 1;
-            this.btnBottomAlign.enabled = selection.length > 1;
-            this.btnCenterAlign.enabled = selection.length > 1;
-            this.btnMiddleAlign.enabled = selection.length > 1;
-            this.btnBringForward.enabled = selection.length > 0;
-            this.btnSendBackward.enabled = selection.length > 0;
-            this.btnBringToFront.enabled = selection.length > 0;
-            this.btnSendToBack.enabled = selection.length > 0;
+            //this.btnLeftAlign.enabled = selection.length > 1;
+            //this.btnRightAlign.enabled = selection.length > 1;
+           // this.btnTopAlign.enabled = selection.length > 1;
+           // this.btnBottomAlign.enabled = selection.length > 1;
+            //this.btnCenterAlign.enabled = selection.length > 1;
+            //this.btnMiddleAlign.enabled = selection.length > 1;
+            //this.btnBringForward.enabled = selection.length > 0;
+            //this.btnSendBackward.enabled = selection.length > 0;
+            //this.btnBringToFront.enabled = selection.length > 0;
+            //this.btnSendToBack.enabled = selection.length > 0;
         }
         else {
             this.btnMoveUp.enabled = selection.length == 1;
@@ -1191,7 +1109,7 @@ export class ToolbarItem {
     style: string;
     disabledIcon: string;
     faIcon: string;
-    list: Array<{ text: string; iconStyle?: { 'background-image': string } }>;
+    list: Array<{ text: string; iconStyle?: { 'background-image': string }; tooltip?: string}>;
     getIconStyle: (text: string) => object;
     onselection: (text: string) => string;
     initialValue: number;
