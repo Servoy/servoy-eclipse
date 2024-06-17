@@ -104,8 +104,10 @@ export class InlineEditComponent implements AfterViewInit {
         if (!this.keyupListener) {
             this.keyupListener = this.renderer.listen(this.elementRef.nativeElement, 'keyup', (event: KeyboardEvent) => {
                 if (event.key === 'Escape') {
+                    this.elementRef.nativeElement.textContent = this.propertyValue;
                     this.showDirectEdit = false;
                     this.editorSession.setInlineEditMode(false);
+                    
                 }
                 if ( event.key == 'Delete') {
                     event.stopPropagation();
