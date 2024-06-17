@@ -300,6 +300,12 @@ export class WindowService {
             this.instances[name].setSize( size );
         }
     }
+	
+	public requestFullscreen(name: string ){
+		if ( this.instances[name] ) {
+			this.instances[name].requestFullscreen();
+		}
+	}
 
     public getSize(name: string ) {
         if ( this.instances[name] && this.instances[name].bsWindowInstance ) {
@@ -465,6 +471,7 @@ export class WindowService {
                         this.setInitialBounds(window.name, window.initialBounds);
                         this.setStoreBounds(window.name, window.storeBounds);
                         this.setSize(window.name, window.size);
+						this.requestFullscreen(window.name);
                         this.setLocation(window.name, window.location);
                         this.setOpacity(window.name, window.opacity);
                         this.setTransparent(window.name, window.transparent);
@@ -542,6 +549,17 @@ export class SvyWindow {
         if (this.storeBounds) this.windowService.localStorageService.set(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.size', this.size);
     }
+	
+	requestFullscreen() {
+		const doc = document.documentElement as IHTMLElement;
+		if (doc.requestFullscreen) {
+			doc.requestFullscreen().catch(err => console.log(err));
+		} else if (doc.webkitRequestFullscreen) { /* Safari */
+			doc.webkitRequestFullscreen().catch(err => console.log(err));
+		} else if (doc.msRequestFullscreen) { /* IE11 */
+			doc.msRequestFullscreen().catch(err => console.log(err));
+		}
+	}
 
     getSize() {
         return this.size;
@@ -567,4 +585,9 @@ export class SvyWindow {
         this.windowService.localStorageService.remove(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.size');
     }
+}
+
+interface IHTMLElement extends HTMLElement {
+	webkitRequestFullscreen?: () => Promise<void>;
+	msRequestFullscreen?: () => Promise<void>;
 }
