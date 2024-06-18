@@ -525,7 +525,7 @@ export class BSWindow {
         for (const key of Object.keys(childNodesBody)) {
             if (childNodesBody[key] instanceof Element) {
                 const node = childNodesBody[key] as Element;
-                node.classList.add(cls);
+                node.classList.remove(cls);
             }
         }
     }
