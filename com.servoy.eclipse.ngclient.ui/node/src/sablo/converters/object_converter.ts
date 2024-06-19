@@ -44,19 +44,21 @@ export class ObjectType implements IType<any> {
 				retVal[ConverterService.VALUE_KEY] = this.converterService.convertFromClientToServer(newClientData,
 				        		 dateType , oldClientData, propertyContext)[0];
 			}
-		}
-
-		/* TODO if needed (like if we want dates in nested objects/arrays of prop. type 'object' to also be sent properly to server): the code
-		     below is not supported by server-side code currently (JSONObject / JSONArray that it will become on server are not currently converted to java maps/lists in 'object' type)
-		    else if (newClientData instanceof Object) {
+		} else if (newClientData instanceof Object) {
+			let isChanged = false;
+			let newRetVal = {};
 			for (const i in newClientData) { // works for both arrays (indexes) and objects (keys) in JS
 				const oldEl = newClientData[i];
-				const newEl = this.fromClientToServer(oldEl, oldClientData ? oldClientData[i] : undefined, scope, propertyContext);
-				if (oldEl !== newEl) try { newClientData[i] = newEl; } catch (e) {} // just to not re-assign it if not needed as the
-				       // very broad "Object" detection above can be anything (even with restricted access to js members) not just simple
-				       // objects or arrays; in which case child els/props won't change most likely
+				const newEl = this.fromClientToServer(oldEl, oldClientData ? oldClientData[i] : undefined, propertyContext);
+				if (oldEl !== newEl[0]) {
+					isChanged = true;
+					newRetVal[i] = newEl[0];
+				} else {
+					newRetVal[i] = oldEl;
+				}
 			}
-		}*/
+			if(isChanged) retVal = newRetVal;
+		}
 
 		return [retVal, newClientData];
 	}
