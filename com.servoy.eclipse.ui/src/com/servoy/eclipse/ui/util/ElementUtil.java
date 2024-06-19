@@ -71,6 +71,7 @@ import com.servoy.j2db.documentation.persistence.docs.DocsTextField;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -355,7 +356,8 @@ public class ElementUtil
 		{
 			// override does not exist yet, create it
 			ISupportChilds parent = (Form)context;
-			if (!((Form)ancestorForm).isResponsiveLayout() && !(parentPersist.getParent() instanceof Form))
+			if (!((Form)ancestorForm).isResponsiveLayout() && !(parentPersist.getParent() instanceof Form) &&
+				!(parentPersist.getParent() instanceof CSSPositionLayoutContainer))
 			{
 				parent = null;
 				parent = (ISupportChilds)context.acceptVisitor(o -> {
