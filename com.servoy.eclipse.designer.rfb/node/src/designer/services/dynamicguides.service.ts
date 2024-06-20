@@ -31,6 +31,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	initialPoint: { x: number; y: number; };
 	initialRectangle: DOMRect;
 	formBounds: DOMRect;
+	statusText: string;
 
     constructor(private editorContentService: EditorContentService, protected readonly editorSession: EditorSessionService) {
         this.editorSession.addDynamicGuidesChangedListener(this);
@@ -91,11 +92,25 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 
     onMouseUp(): void {
        this.clear();
+	   this.editorSession.setStatusBarText('');
     }
 
     private onMouseMove(event: MouseEvent): void {
-      if (!this.guidesEnabled || this.editorSession.getSelection()?.length !==1 || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
-
+	  if (this.editorSession.getSelection()?.length !==1 || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
+	  let guidesEnabled = this.guidesEnabled;
+	  this.statusText = '';
+	  if (event.altKey) {
+		guidesEnabled = !guidesEnabled;
+		this.statusText = 'Release the ALT key to ' + (guidesEnabled ? 'hide ':'show ') + ' dynamic guides';
+	  }
+	  else {
+		this.statusText = 'Press the ALT key to ' + (this.guidesEnabled ? 'disable ':'enable ') + ' snapping to guides';
+	  }
+	  this.editorSession.setStatusBarText(this.statusText);
+	  if (!guidesEnabled) {
+		if (this.properties) this.snapDataListener.next(null);
+		return;
+	  } 
       let point = this.adjustPoint(event.pageX, event.pageY);
       if (this.leftPos.size == 0) this.init(point);
       this.computeGuides(event, point);
