@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.rmi.RemoteException;
 import java.sql.Types;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,6 +53,7 @@ import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
+import org.eclipse.dltk.javascript.typeinfo.JSDocTypeParser;
 import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
@@ -5261,7 +5263,24 @@ public class TypeCreator extends TypeCache
 						MethodArgument returnTypeArgument = method.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
 						if (returnTypeArgument != null)
 						{
-							m.setType(getTypeRef(context, returnTypeArgument.getType().getName()));
+							String typeName = returnTypeArgument.getType().getName();
+							if (typeName.startsWith("{"))
+							{
+								// we must create the org.eclipse.dltk.javascript.typeinfo.model.RecordType here
+								try
+								{
+									JSDocTypeParser typeParser = new JSDocTypeParser();
+									m.setType(typeParser.parse(typeName));
+								}
+								catch (ParseException e)
+								{
+									ServoyLog.logError(e);
+								}
+							}
+							else
+							{
+								m.setType(getTypeRef(context, typeName));
+							}
 						}
 						// use this to suppress hides predefined identifier warning, see todo's in ElementResolver
 						m.setHideAllowed(true);
