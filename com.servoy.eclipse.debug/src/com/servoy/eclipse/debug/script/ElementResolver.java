@@ -177,15 +177,15 @@ public class ElementResolver implements IElementResolver
 				Form form = getForm(context);
 				if (form != null)
 				{
-					if (!form.isResponsiveLayout())
+					Form formToUse = fs.getFlattenedForm(form);
+					if (!form.isResponsiveLayout() && !formToUse.containsResponsiveLayout())
 					{
 						typeNames.remove("containers");
 					}
 					typeNames.add(ScriptVariable.GLOBAL_SCOPE);
-					Form formToUse = form;
+
 					if (form.getExtendsID() > 0)
 					{
-						formToUse = fs.getFlattenedForm(form);
 						typeNames.add("_super");
 					}
 					try

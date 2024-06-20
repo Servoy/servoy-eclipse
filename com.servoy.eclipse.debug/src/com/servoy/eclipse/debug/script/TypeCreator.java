@@ -3327,7 +3327,7 @@ public class TypeCreator extends TypeCache
 
 			clone = TypeCreator.clone(getMember("containers", baseType), getTypeRef(context, "RuntimeContainers<" + config + '>'));
 			overwrittenMembers.add(clone);
-			if (form.isResponsiveLayout())
+			if (form.isResponsiveLayout() || formToUse.containsResponsiveLayout())
 			{
 				clone.setVisible(!PersistEncapsulation.hideContainers(formToUse));
 			}
@@ -3375,7 +3375,7 @@ public class TypeCreator extends TypeCache
 			Form form = fs.getForm(config);
 			if (form == null) return type;
 			Form ff = fs.getFlattenedForm(form);
-			if (ff == null || !ff.isResponsiveLayout())
+			if (ff == null || (!ff.isResponsiveLayout() && !ff.containsResponsiveLayout()))
 			{
 				return type;
 			}
