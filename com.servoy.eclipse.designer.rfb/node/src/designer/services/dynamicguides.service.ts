@@ -31,7 +31,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	initialPoint: { x: number; y: number; };
 	initialRectangle: DOMRect;
 	formBounds: DOMRect;
-	statusText: string;
+	snapToEndEnabled: boolean = true;
 
     constructor(private editorContentService: EditorContentService, protected readonly editorSession: EditorSessionService) {
         this.editorSession.addDynamicGuidesChangedListener(this);
@@ -98,21 +98,23 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     private onMouseMove(event: MouseEvent): void {
 	  if (this.editorSession.getSelection()?.length !==1 || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
 	  let guidesEnabled = this.guidesEnabled;
-	  this.statusText = '';
+	  let statusText = '';
 	  if (event.altKey) {
 		guidesEnabled = !guidesEnabled;
-		this.statusText = 'Release the ALT key to ' + (guidesEnabled ? 'hide ':'show ') + ' dynamic guides';
+		statusText = 'Release the ALT key to ' + (guidesEnabled ? 'hide ':'show ') + ' dynamic guides';
 	  }
 	  else {
-		this.statusText = 'Press the ALT key to ' + (this.guidesEnabled ? 'disable ':'enable ') + ' snapping to guides';
+		statusText = 'Press the ALT key to ' + (this.guidesEnabled ? 'disable ':'enable ') + ' snapping to guides';
 	  }
-	  this.editorSession.setStatusBarText(this.statusText);
+	  this.snapToEndEnabled = !event.shiftKey;
+	  this.editorSession.setStatusBarText(statusText);
 	  if (!guidesEnabled) {
 		if (this.properties) this.snapDataListener.next(null);
 		return;
 	  } 
       let point = this.adjustPoint(event.pageX, event.pageY);
       if (this.leftPos.size == 0) this.init(point);
+	  this.previousEvent = event;
       this.computeGuides(event, point);
     }
 
@@ -224,7 +226,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	}
 
 	shouldSnapToSize(uuid: string, resizing?: string, value?: number, property?: string): boolean {
-		if (!uuid) return false; //no snap target
+		if (!uuid || !this.snapToEndEnabled) return false; //no snap target or snap to end disabled
 		if (resizing) return true;
 		const targetRect = this.rectangles[this.uuids.indexOf(uuid)];
 		if (value && (property === 'width' && value > targetRect.width || property === 'height' && value > targetRect.height)) {
@@ -233,17 +235,21 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		}
 		const targetType = this.types.get(uuid);
 		const componentType = this.getDraggedComponentType();
+		let result = false;
 		if (targetType === componentType || this.getDraggedElementCategorySet(componentType)?.indexOf(targetType) >= 0) {
 			//the dragged component should not become too small unless the target is also very small
-			return property === 'width' && (value >= 80 || targetRect.width < 80) ||
+			result = property === 'width' && (value >= 80 || targetRect.width < 80) ||
 			property === 'height' && (value >= 30 || targetRect.height < 30);
 		}
 		else if (value && this.initialRectangle) {
 			//if the dragged component is not in the same category, 
 			//use the size hints but make sure is not smaller than the initial size
-			return this.initialRectangle[property] < value;
+			result = this.initialRectangle[property] < value;
 		}
-		return false;
+		if (result) {
+			this.editorSession.setStatusBarText('Press SHIFT to disable snap to end size.');
+		}
+		return result;
 	}
 
 	computeGuides(event: MouseEvent, point: { x: number, y: number }) {
@@ -306,7 +312,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 			const overlapsX = rectangles.filter(r => this.isOverlap(rect, r, 'x'));
 			const overlapsY = rectangles.filter(r => this.isOverlap(rect, r, 'y'));
-			if (draggedItem) {
+			if (draggedItem && this.snapToEndEnabled) {
 				this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
 				rect = new DOMRect(properties.left, properties.top, properties.width? properties.width : rect.width, properties.height ? properties.height: rect.height);
 			}
