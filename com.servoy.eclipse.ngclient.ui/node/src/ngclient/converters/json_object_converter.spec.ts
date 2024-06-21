@@ -40,7 +40,8 @@ describe('JSONObjectConverter', () => {
         TestBed.configureTestingModule({
             providers: [ConverterService, LoggerFactory, WindowRefService, SpecTypesService]
         });
-        converterService = TestBed.inject(ConverterService);        typesRegistry = TestBed.inject(TypesRegistry);
+        converterService = TestBed.inject(ConverterService);
+        typesRegistry = TestBed.inject(TypesRegistry);
         loggerFactory = TestBed.inject(LoggerFactory);
         specTypesService = TestBed.inject(SpecTypesService);
 
@@ -146,7 +147,7 @@ describe('JSONObjectConverter', () => {
     const createSimpleCustomObjectWithUntypedAndSpecificPTSOnSubprops = (): ICOTFullValueFromServer => {
         const subProp = () => ({ _T: ObjectType.TYPE_NAME, _V: {
                 x: { _T: ObjectType.TYPE_NAME, _V:
-                       ['bla', { _T: DateType.TYPE_NAME_SVY, _V: '2007-12-03T' } ]
+                       ['bla', { _T: DateType.TYPE_NAME_SVY, _V: '2007-12-03T00:00:00' } ]
                    },  // this is how ObjectPropertyType sends it JSON from server if it detects nested special types such as Date,
                 y: 8
             }
