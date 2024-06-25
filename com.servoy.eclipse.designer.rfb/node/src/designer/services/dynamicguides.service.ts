@@ -106,7 +106,8 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	  else {
 		statusText = 'Press the ALT key to ' + (this.guidesEnabled ? 'disable ':'enable ') + ' snapping to guides';
 	  }
-	  this.snapToEndEnabled = !event.shiftKey;
+	  
+this.snapToEndEnabled = !event.shiftKey;
 	  this.editorSession.setStatusBarText(statusText);
 	  if (!guidesEnabled) {
 		if (this.properties) this.snapDataListener.next(null);
@@ -114,7 +115,6 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	  } 
       let point = this.adjustPoint(event.pageX, event.pageY);
       if (this.leftPos.size == 0) this.init(point);
-	  this.previousEvent = event;
       this.computeGuides(event, point);
     }
 
