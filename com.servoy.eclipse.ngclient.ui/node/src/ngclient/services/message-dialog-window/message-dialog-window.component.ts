@@ -11,6 +11,7 @@ export class MessageDialogWindowComponent {
   @Input() styleClass: string;
   @Input() values: string[];
   @Input() buttonsText: string[]
+  @Input() inputType: string;
 
   @ViewChild("inputfield") inputfield: ElementRef;
   @ViewChild("buttons") buttons: ElementRef;
@@ -67,5 +68,9 @@ export class MessageDialogWindowComponent {
       this.retValue = value;
     }    
     this.onCloseCallback(this.retValue);
+  }
+
+  getType(): string {
+    return this.inputType ? this.inputType : 'text';
   }
 }

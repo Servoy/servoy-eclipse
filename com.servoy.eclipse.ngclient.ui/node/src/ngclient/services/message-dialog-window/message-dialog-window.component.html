@@ -3,7 +3,7 @@
 	<div class="window-body">
     <span [innerHTML]='message'></span>
     <form *ngIf="styleClass==='type-input' || styleClass === 'type-select'">
-      <input #inputfield class="input-width form-control"  *ngIf="styleClass==='type-input'" [(ngModel)]="retValue" [ngModelOptions]="{standalone: true}">
+      <input [type]="getType()" #inputfield class="input-width form-control"  *ngIf="styleClass==='type-input'" [(ngModel)]="retValue" [ngModelOptions]="{standalone: true}">
       <select #inputfield class="input-width form-select" *ngIf="styleClass==='type-select'" [(ngModel)]="retValue" [ngModelOptions]="{standalone: true}">
         <option *ngFor="let myValue of values" [value]="myValue">{{ myValue }}</option>
       </select>
