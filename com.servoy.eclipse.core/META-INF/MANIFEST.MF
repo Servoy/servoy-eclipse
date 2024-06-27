@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Core Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.core;singleton:=true
-Bundle-Version: 2024.6.0.3981_rc2
+Bundle-Version: 2024.6.0.3982
 Bundle-Activator: com.servoy.eclipse.core.Activator
 Bundle-Vendor: Servoy
 Bundle-Localization: plugin
