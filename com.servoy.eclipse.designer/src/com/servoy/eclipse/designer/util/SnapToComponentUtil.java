@@ -114,8 +114,10 @@ public class SnapToComponentUtil
 
 		if (obj.has("endWidth") || obj.has("endHeight"))
 		{
-			handleEndSize(newPosition, obj, componentParent, form, "endWidth", "left", "right", "width");
-			handleEndSize(newPosition, obj, componentParent, form, "endHeight", "top", "bottom", "height");
+			CSSValue startX = new CSSValue(properties.optInt("x", 0) + "px", componentParent.getSize().width, false);
+			CSSValue startY = new CSSValue(properties.optInt("y", 0) + "px", componentParent.getSize().height, false);
+			handleEndSize(newPosition, obj, componentParent, form, "endWidth", "left", "right", "width", startX);
+			handleEndSize(newPosition, obj, componentParent, form, "endHeight", "top", "bottom", "height", startY);
 		}
 
 		return newPosition;
@@ -316,23 +318,40 @@ public class SnapToComponentUtil
 
 
 	private static void handleEndSize(CSSPosition newPosition, JSONObject obj, AbstractContainer componentParent, Form form, String key, String start,
-		String end, String dimension)
+		String end, String dimension, CSSValue startX)
 	{
 		if (obj.has(key))
 		{
 			JSONObject jsonObject = obj.getJSONObject(key);
 			ISupportCSSPosition target = (ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, jsonObject.optString("uuid"));
 			AbstractContainer parent = CSSPositionUtils.getParentContainer(target);
-			snapToEndSize(newPosition, componentParent.getSize(), target.getCssPosition(), parent.getSize(), start, end, dimension);
+			ISupportCSSPosition sibling = jsonObject.has(start)
+				? (ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, jsonObject.getString(start))
+				: null;
+			AbstractContainer siblingParent = CSSPositionUtils.getParentContainer(sibling);
+			snapToEndSize(newPosition, componentParent.getSize(), target.getCssPosition(), parent.getSize(), sibling != null ? sibling.getCssPosition() : null,
+				siblingParent != null ? siblingParent.getSize() : null, start, end, dimension, startX);
 		}
 	}
 
 	public static void snapToEndSize(CSSPosition newPosition, java.awt.Dimension parentSize, CSSPosition targetCssPosition,
-		java.awt.Dimension targetParentSize, String lowerProperty, String higherProperty, String sizeProperty)
+		java.awt.Dimension targetParentSize, CSSPosition siblingCssPosition,
+		java.awt.Dimension siblingParentSize, String lowerProperty, String higherProperty, String sizeProperty, CSSValue start)
 	{
 		CSSValue higherPropertyValue = getCssValue(targetCssPosition, higherProperty, targetParentSize);
 		CSSValue lowerPropertyValue = getCssValue(targetCssPosition, lowerProperty, targetParentSize);
 		CSSValue sourceLowerPropertyValue = getCssValue(newPosition, lowerProperty, parentSize);
+		if (siblingCssPosition != null && sourceLowerPropertyValue.isSet())
+		{
+			CSSValue siblingHigherPropertyValue = getOrComputeValue(siblingCssPosition, higherProperty, siblingParentSize);
+			if (siblingHigherPropertyValue.getPercentage() > 0)
+			{
+				//adjust the sourceLowerPropertyValue if the sibling is using %
+				CSSValue space = start.minus(siblingHigherPropertyValue);
+				sourceLowerPropertyValue = siblingHigherPropertyValue.plus(space);
+				setCssValue(newPosition, lowerProperty, sourceLowerPropertyValue);
+			}
+		}
 		CSSValue sourceSizePropertyValue = getCssValue(newPosition, sizeProperty, parentSize);
 		if (higherPropertyValue.isSet())
 		{
@@ -364,6 +383,18 @@ public class SnapToComponentUtil
 				CSSValue size = computedHigherPropertyValue.minus(sourceLowerPropertyValue);
 				setCssValue(newPosition, sizeProperty, size);
 				setCssValue(newPosition, higherProperty, CSSValue.NOT_SET);
+			}
+		}
+		if (siblingCssPosition != null && sourceSizePropertyValue.isSet() && !sourceLowerPropertyValue.isSet())
+		{
+			CSSValue siblingHigherPropertyValue = getOrComputeValue(siblingCssPosition, higherProperty, siblingParentSize);
+			if (siblingHigherPropertyValue.getPercentage() > 0)
+			{
+				//adjust the sourceSizePropertyValue if the sibling is using %
+				CSSValue space = start.minus(siblingHigherPropertyValue);
+				sourceLowerPropertyValue = siblingHigherPropertyValue.plus(space);
+				CSSValue size = getCssValue(newPosition, higherProperty, parentSize).minus(sourceLowerPropertyValue);
+				setCssValue(newPosition, sizeProperty, size);
 			}
 		}
 	}
