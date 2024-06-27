@@ -94,6 +94,10 @@ public class SetPropertiesHandler implements IServerService
 										propertyName, properties.opt(propertyName)));
 								}
 							}
+							if (persist instanceof WebFormComponentChildType)
+							{
+								persist = ((WebFormComponentChildType)persist).getElement();
+							}
 							if (persist instanceof ISupportCSSPosition && CSSPositionUtils.useCSSPosition(persist) &&
 								(properties.has("x") || properties.has("y") ||
 									properties.has("width") || properties.has("height")))

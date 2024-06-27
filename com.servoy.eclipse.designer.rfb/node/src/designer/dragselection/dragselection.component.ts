@@ -134,12 +134,6 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
           let i = 0;
           for (const nodeId of elementInfos.keys()) {
               const elementInfo = elementInfos.get(nodeId);
-              const parentFC = elementInfo.element.closest('.svy-formcomponent');
-              if (parentFC && !elementInfo.element.classList.contains('svy-formcomponent')) {
-				const parentRect = parentFC.getBoundingClientRect();
-				elementInfo.x = elementInfo.x - parentRect.x;
-				elementInfo.y = elementInfo.y - parentRect.y;
-              }
               const id = (event.ctrlKey || event.metaKey) ? i++ : nodeId;
               changes[id] = {
                   x: Math.round(elementInfo.x),
@@ -282,32 +276,33 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             if (elementInfo.y < 0) elementInfo.y = 0;        
             if (minY != undefined && elementInfo.y < minY) elementInfo.y = minY;
             elementInfo.element.style.position = 'absolute';
+			const computedStyle = window.getComputedStyle(elementInfo.element);
             if (elementInfo.element.style.top.length) {
-				elementInfo.element.style.top = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
+				elementInfo.element.style.top = (parseFloat(computedStyle.top.replace('px', '')) || 0)  + changeY + 'px';
 				if (parseFloat(elementInfo.element.style.top.replace('px', '')) < 0) {
 					elementInfo.element.style.top = '0px';
 				}
 			}
             if (elementInfo.element.style.left.length) {
-				elementInfo.element.style.left = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
+				elementInfo.element.style.left = (parseFloat(computedStyle.left.replace('px', '')) || 0)  + changeX + 'px';
 				if (parseFloat(elementInfo.element.style.left.replace('px', '')) < 0) {
 					elementInfo.element.style.left = '0px';
 				}
 			}
             if (elementInfo.element.style.right.length) {
-				elementInfo.element.style.right = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.right, 'x').replace('px', ''))|| 0)  - changeX + 'px';
+				elementInfo.element.style.right = (parseFloat(computedStyle.right.replace('px', '')) || 0)  - changeX + 'px';
 			}
 			if (elementInfo.element.style.bottom.length) {
-				elementInfo.element.style.bottom = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
+				elementInfo.element.style.bottom = (parseFloat(computedStyle.bottom.replace('px', '')) || 0)  - changeY + 'px';
 			}
 			if (!elementInfo.element.style.left.length && !elementInfo.element.style.right.length) {
-				elementInfo.element.style.left = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
+				elementInfo.element.style.left = (parseFloat(computedStyle.left.replace('px', '')) || 0)  + changeX + 'px';
 				if (parseFloat(elementInfo.element.style.left.replace('px', '')) < 0) {
 					elementInfo.element.style.left = '0px';
 				}
 			}
 			if (!elementInfo.element.style.top.length && !elementInfo.element.style.bottom.length) {
-				elementInfo.element.style.top = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
+				elementInfo.element.style.top = (parseFloat(computedStyle.top.replace('px', '')) || 0)  + changeY + 'px';
 				if (parseFloat(elementInfo.element.style.top.replace('px', '')) < 0) {
 					elementInfo.element.style.top = '0px';
 				}

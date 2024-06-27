@@ -24,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionUtils;
@@ -71,8 +72,7 @@ public class SnapToComponentUtil
 		for (String property : obj.keySet())
 		{
 			JSONObject jsonObject = obj.getJSONObject(property);
-			ISupportCSSPosition target = jsonObject.optString("uuid") != null ? ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid"))) : null;
+			ISupportCSSPosition target = getTarget(form, jsonObject.optString("uuid"));
 			AbstractContainer targetParent = target != null ? CSSPositionUtils.getParentContainer(target) : null;
 
 			switch (property)
@@ -181,9 +181,9 @@ public class SnapToComponentUtil
 		String lowerProperty, String higherProperty, String sizeProperty)
 	{
 		JSONArray uuids = obj.getJSONArray("targets");
-		ISupportCSSPosition target1 = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, uuids.getString(0)));
+		ISupportCSSPosition target1 = getTarget(form, uuids.getString(0));
 		AbstractContainer parent1 = target1 != null ? CSSPositionUtils.getParentContainer(target1) : null;
-		ISupportCSSPosition target2 = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, uuids.getString(1)));
+		ISupportCSSPosition target2 = getTarget(form, uuids.getString(1));
 		AbstractContainer parent2 = target1 != null ? CSSPositionUtils.getParentContainer(target2) : null;
 		CSSPosition pos1 = target1.getCssPosition();
 		CSSPosition pos2 = target2.getCssPosition();
@@ -321,10 +321,10 @@ public class SnapToComponentUtil
 		if (obj.has(key))
 		{
 			JSONObject jsonObject = obj.getJSONObject(key);
-			ISupportCSSPosition target = (ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, jsonObject.optString("uuid"));
+			ISupportCSSPosition target = getTarget(form, jsonObject.optString("uuid"));
 			AbstractContainer parent = CSSPositionUtils.getParentContainer(target);
 			ISupportCSSPosition sibling = jsonObject.has(start)
-				? (ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, jsonObject.getString(start))
+				? getTarget(form, jsonObject.getString(start))
 				: null;
 			AbstractContainer siblingParent = CSSPositionUtils.getParentContainer(sibling);
 			snapToEndSize(newPosition, componentParent.getSize(), target.getCssPosition(), parent.getSize(), sibling != null ? sibling.getCssPosition() : null,
@@ -680,5 +680,18 @@ public class SnapToComponentUtil
 				return value.minus(oppositePropertyValue);
 		}
 		return CSSValue.NOT_SET;
+	}
+
+	private static ISupportCSSPosition getTarget(Form form, String uuid)
+	{
+		if (PersistFinder.INSTANCE.searchForPersist(form, uuid) instanceof ISupportCSSPosition)
+		{
+			return (ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, uuid);
+		}
+		else if (PersistFinder.INSTANCE.searchForPersist(form, uuid) instanceof WebFormComponentChildType)
+		{
+			return ((WebFormComponentChildType)PersistFinder.INSTANCE.searchForPersist(form, uuid)).getElement();
+		}
+		return null;
 	}
 }
