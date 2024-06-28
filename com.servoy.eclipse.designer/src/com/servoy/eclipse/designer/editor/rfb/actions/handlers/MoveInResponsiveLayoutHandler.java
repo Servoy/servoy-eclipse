@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import static com.servoy.eclipse.ui.util.ElementUtil.getOverridePersist;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -28,7 +30,6 @@ import org.sablo.websocket.IServerService;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IChildWebObject;
@@ -99,10 +100,11 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 
 						try
 						{
-							if (!persist.getParent().equals(parent) && (((ISupportExtendsID)persist).getExtendsID() > 0 ||
-								!persist.equals(ElementUtil.getOverridePersist(PersistContext.create(persist, editorPart.getForm())))))
+							if (!persist.getParent().equals(parent) &&
+								(persist instanceof ISupportExtendsID supportExtendsID && supportExtendsID.getExtendsID() > 0) ||
+								!persist.equals(getOverridePersist(PersistContext.create(persist, editorPart.getForm()))))
 							{
-								//do not allow changing the parent for inherited elements
+								// do not allow changing the parent for inherited elements
 								continue;
 							}
 						}
