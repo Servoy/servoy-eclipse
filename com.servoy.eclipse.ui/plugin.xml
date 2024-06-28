@@ -779,6 +779,11 @@
 			replace="M4+M2+Z"
 			platforms="cocoa,carbon">
 		</sequenceModifier>	
+		<sequenceModifier
+		   find="M2+M3+K"
+		   replace="M1+M2+K"
+		   platforms="cocoa,carbon">
+		</sequenceModifier> 
         <key
               commandId="com.servoy.eclipse.ui.search"
               schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
