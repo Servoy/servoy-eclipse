@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Bundle;
 
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -208,6 +209,13 @@ public class NodeFolderCreatorJob extends Job
 					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageCopyJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
+
+
+					File favicon = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "server/webapps/ROOT/favicon.ico");
+					if (favicon.exists())
+					{
+						FileUtils.copyFile(favicon, new File(nodeFolder, "src/favicon.ico"));
+					}
 
 					executeNpmInstall = true;
 				}

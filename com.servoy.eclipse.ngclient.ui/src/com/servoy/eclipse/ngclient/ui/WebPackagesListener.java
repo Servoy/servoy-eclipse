@@ -1435,7 +1435,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			File distFolder = new File(distributionSource, "dist/app/browser");
 			if (distFolder.exists())
 			{
-				FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));
+				FileUtils.copyDirectory(distFolder, model.getExportLocation(),
+					(path) -> !(path.getName().equals("index.html") || path.getName().equals("favicon.ico")));
 
 				FileUtils.copyFile(new File(distFolder, "index.html"), new File(model.getExportLocation(), "WEB-INF/angular-index.html"));
 			}
