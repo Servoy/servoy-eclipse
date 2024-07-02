@@ -39,6 +39,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     private glasspane: HTMLElement;
     private ghostsBottom = 0;
     private lastMouseY = 0;
+    private frameRect: DOMRect;
 
     constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, private editorContentService: EditorContentService) {
@@ -159,10 +160,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 if (this.editorContentService.getContentElement(ghostContainer.uuid)?.parentElement?.parentElement?.classList.contains('maxLevelDesign')) {
                     ghostContainer.style.display = 'none';
                 }
-                
+
                 const filterGhostParts = ghostContainer.ghosts.filter(ghost => ghost.type == GHOST_TYPES.GHOST_TYPE_PART);
-				const onlyBodyPart =  filterGhostParts.length === 1 && filterGhostParts[0].text.toLowerCase() === "body";
-				
+                const onlyBodyPart = filterGhostParts.length === 1 && filterGhostParts[0].text.toLowerCase() === "body";
+
                 for (const ghost of ghostContainer.ghosts) {
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_GROUP) {
                         ghostContainer.style.display = 'none';
@@ -181,8 +182,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                             overflow: 'visible'
                         };
                         if (onlyBodyPart) {
-							style['visibility'] = 'hidden';
-						}
+                            style['visibility'] = 'hidden';
+                        }
                         ghost.hrstyle = {
                             marginTop: '-1px',
                             borderTop: '1px dashed #000',
@@ -263,13 +264,12 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             if (event.button == 2 && selection.indexOf(ghost.uuid) >= 0) {
                 //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
                 this.editorSession.getState().ghosthandle = true;
-                return;    
+                return;
             }
-            else
-            {
-                this.editorSession.setSelection([ghost.uuid]); 
+            else {
+                this.editorSession.setSelection([ghost.uuid]);
             }
-           
+
         }
         if (event.button == 0) {
             this.editorSession.getState().dragging = true;
@@ -288,7 +288,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.draggingClone = (event.currentTarget as Element).cloneNode(true) as Element;
                 this.renderer.setStyle(this.draggingClone, 'background', '#ffbb37');
             }
-
+            if (this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                this.frameRect = this.editorContentService.getContent().getBoundingClientRect()
+            }
             if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
                 this.draggingGhostComponent = this.editorContentService.querySelector('[svy-id="' + this.draggingGhost.uuid + '"]');
                 const containerHeight = parseInt(ghostContainer.style.height.replace('px', ''));
@@ -417,6 +419,15 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
                 this.renderer.setStyle(this.draggingGhostComponent, 'left', (event.pageX - this.containerLeftOffset - this.leftOffsetRelativeToSelectedGhost) + 'px');
                 this.renderer.setStyle(this.draggingGhostComponent, 'top', (event.pageY - this.containerTopOffset - this.topOffsetRelativeToSelectedGhost) + 'px');
+
+                if (this.frameRect) {
+                    if (this.frameRect.left <= event.pageX && this.frameRect.right >= event.pageX && this.frameRect.top <= event.pageY && this.frameRect.bottom >= event.pageY) {
+                        this.draggingGhostComponent.style.visibility = 'hidden';
+                    }
+                    else {
+                        this.draggingGhostComponent.style.visibility = 'visible';
+                    }
+                }
             }
             if (this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_PART) {
                 let step = event.pageY - this.lastMouseY;
