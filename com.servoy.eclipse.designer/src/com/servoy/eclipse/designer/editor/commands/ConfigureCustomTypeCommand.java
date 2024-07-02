@@ -121,7 +121,7 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 							if (wizardProperties.size() > 0)
 							{
 								// feed this wizardProperties into the wizard
-								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(activeEditor.getForm());
 								ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
 									.getDataSource(flattenedSolution.getFlattenedForm(activeEditor.getForm()).getDataSource());
 
