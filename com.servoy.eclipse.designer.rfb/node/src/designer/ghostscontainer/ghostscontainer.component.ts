@@ -25,6 +25,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     draggingGhost: Ghost;
     draggingInGhostContainer: GhostContainer;
     draggingClone: Element;
+    draggingGhostComponents: Array<DraggingGhostInfo>;
 
     draggingGhostComponent: HTMLElement;
     formWidth: number;
@@ -226,7 +227,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                         else if (ghost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
                             style['background'] = '#ffbb37';
                         }
-                        else if (ghost.type != GHOST_TYPES.GHOST_TYPE_GROUP) {
+                        else {
                             style['background'] = '#e4844a';
                         }
                         this.ghostsBottom = Math.max(this.ghostsBottom, ghost.location.y + yOffset + ghost.size.height);
@@ -249,7 +250,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     onMouseDown(event: MouseEvent, ghost: Ghost, ghostContainer: GhostContainer) {
-        const selection = this.editorSession.getSelection();
+        let selection = this.editorSession.getSelection();
         if (event.ctrlKey || event.metaKey) {
             const index = selection.indexOf(ghost.uuid);
             if (index >= 0) {
@@ -266,7 +267,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.editorSession.getState().ghosthandle = true;
                 return;
             }
-            else {
+            else if (this.editorSession.getSelection().indexOf(ghost.uuid) == -1 || ghost.type != GHOST_TYPES.GHOST_TYPE_COMPONENT) {
                 this.editorSession.setSelection([ghost.uuid]);
             }
 
@@ -289,7 +290,21 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.renderer.setStyle(this.draggingClone, 'background', '#ffbb37');
             }
             if (this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
-                this.frameRect = this.editorContentService.getContent().getBoundingClientRect()
+                this.frameRect = this.editorContentService.getContent().getBoundingClientRect();
+                selection = this.editorSession.getSelection();
+                this.draggingGhostComponents = new Array<DraggingGhostInfo>();
+                if (selection && selection.length > 1) {
+                    for (let i = 0; i < selection.length; i++) {
+                        const node = this.editorContentService.querySelector('[svy-id="' + selection[i] + '"]');
+                        if (node) {
+                            for (const ghost of ghostContainer.ghosts) {
+                                if (this.draggingGhost != ghost && ghost.uuid == selection[i] && ghost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                                    this.draggingGhostComponents.push(new DraggingGhostInfo(ghost, node));
+                                }
+                            }
+                        }
+                    }
+                }
             }
             if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
                 this.draggingGhostComponent = this.editorContentService.querySelector('[svy-id="' + this.draggingGhost.uuid + '"]');
@@ -326,6 +341,12 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
                     const obj = {};
                     obj[this.draggingGhost.uuid] = { 'x': event.pageX - this.editorContentService.getLeftPositionIframe() - this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - this.editorContentService.getTopPositionIframe() - this.topOffsetRelativeToSelectedGhost };
+                    if (this.draggingGhostComponents) {
+                        for (const draggingInfo of this.draggingGhostComponents) {
+                            obj[draggingInfo.ghost.uuid] = { 'x': event.pageX - this.mousedownpoint.x + draggingInfo.originalLeft - this.containerLeftOffset, 
+                                                             'y': event.pageY - this.mousedownpoint.y + draggingInfo.originalTop - this.containerTopOffset };
+                        }
+                    }
                     this.editorSession.sendChanges(obj);
                     this.renderGhosts();
                 }
@@ -361,6 +382,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         this.draggingGhost = null;
         this.draggingInGhostContainer = null;
         this.draggingGhostComponent = null;
+        this.draggingGhostComponents = null;
         this.renderGhosts();
     }
 
@@ -419,13 +441,22 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
                 this.renderer.setStyle(this.draggingGhostComponent, 'left', (event.pageX - this.containerLeftOffset - this.leftOffsetRelativeToSelectedGhost) + 'px');
                 this.renderer.setStyle(this.draggingGhostComponent, 'top', (event.pageY - this.containerTopOffset - this.topOffsetRelativeToSelectedGhost) + 'px');
-
-                if (this.frameRect) {
-                    if (this.frameRect.left <= event.pageX && this.frameRect.right >= event.pageX && this.frameRect.top <= event.pageY && this.frameRect.bottom >= event.pageY) {
-                        this.draggingGhostComponent.style.visibility = 'hidden';
+                if (this.draggingGhostComponents) {
+                    for (const draggingInfo of this.draggingGhostComponents) {
+                        this.renderer.setStyle(draggingInfo.ghostComponent, 'left', (event.pageX - this.mousedownpoint.x + draggingInfo.originalLeft - this.containerLeftOffset) + 'px');
+                        this.renderer.setStyle(draggingInfo.ghostComponent, 'top', (event.pageY - this.mousedownpoint.y + draggingInfo.originalTop - this.containerTopOffset) + 'px');
                     }
-                    else {
-                        this.draggingGhostComponent.style.visibility = 'visible';
+                }
+                if (this.frameRect) {
+                    let visibilityStyle = 'visible';
+                    if (this.frameRect.left <= event.pageX && this.frameRect.right >= event.pageX && this.frameRect.top <= event.pageY && this.frameRect.bottom >= event.pageY) {
+                        visibilityStyle = 'hidden';
+                    }
+                    this.draggingGhostComponent.style.visibility = visibilityStyle;
+                    if (this.draggingGhostComponents) {
+                        for (const draggingInfo of this.draggingGhostComponents) {
+                            draggingInfo.ghostComponent.style.visibility = visibilityStyle;
+                        }
                     }
                 }
             }
@@ -507,7 +538,7 @@ class GhostContainer {
 class Ghost {
     uuid: string;
     text: string;
-    type: string;
+    type: GHOST_TYPES;
     class: string;
     propertyType: string;
     style: { left?: string, top?: string; right?: string; width?: string; height?: string };
@@ -523,4 +554,20 @@ export enum GHOST_TYPES {
     GHOST_TYPE_FORM = 'form',
     GHOST_TYPE_INVISIBLE = 'invisible',
     GHOST_TYPE_GROUP = 'group'
+}
+
+class DraggingGhostInfo {
+
+    ghost: Ghost;
+    ghostComponent: HTMLElement;
+    originalLeft: number;
+    originalTop: number;
+
+    constructor(ghost: Ghost, ghostComponent: HTMLElement) {
+        this.ghost = ghost;
+        this.ghostComponent = ghostComponent;
+        const parentRect = ghostComponent.getBoundingClientRect();
+        this.originalLeft = parentRect.left;
+        this.originalTop = parentRect.top;
+    }
 }
