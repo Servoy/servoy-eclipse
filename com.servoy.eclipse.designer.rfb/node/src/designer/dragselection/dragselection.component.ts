@@ -1,9 +1,7 @@
-import { HttpClient } from '@angular/common/http';
-
 import { Component, OnInit, Renderer2, OnDestroy } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
-import { ElementInfo } from 'src/designer/directives/resizeknob.directive';
+import { ElementInfo } from '../directives/resizeknob.directive';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
