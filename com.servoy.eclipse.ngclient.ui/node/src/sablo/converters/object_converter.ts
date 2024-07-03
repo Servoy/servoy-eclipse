@@ -44,7 +44,7 @@ export class ObjectType implements IType<any> {
 				retVal[ConverterService.VALUE_KEY] = this.converterService.convertFromClientToServer(newClientData,
 				        		 dateType , oldClientData, propertyContext)[0];
 			}
-		} else if (newClientData instanceof Object) {
+		} else if (typeof newClientData === 'object' && !(newClientData instanceof Event)) {
 			let isChanged = false;
 			let newRetVal = {};
 			for (const i in newClientData) { // works for both arrays (indexes) and objects (keys) in JS
