@@ -128,12 +128,14 @@ export class FormattingService {
             servoyFormat = this.convertFormat(servoyFormat);
             let d = DateTime.fromFormat(data, servoyFormat, { locale: this.servoyService.getLocale() }).toJSDate();
             if (isNaN(d.getTime()) && useHeuristics) {
-                for (var newFormat of this.getHeuristicFormats(servoyFormat)) {
+				const possibleDates: Array<Date> = [];
+                for (const newFormat of this.getHeuristicFormats(servoyFormat, data)) {
                     d = DateTime.fromFormat(data, newFormat, { locale: this.servoyService.getLocale() }).toJSDate();
                     if (!isNaN(d.getTime())) {
-                        break;
+                        possibleDates.push(d);
                     }
                 }
+				d = this.findClosestDate(possibleDates, new Date());
             }
             // if format has not year/month/day use the one from the current model value
             // because luxon will just use current date
@@ -154,6 +156,14 @@ export class FormattingService {
         }
         return data;
     }
+	
+	private findClosestDate(dateArray: Array<Date>, date: Date): Date {
+		if (dateArray.length === 1) return dateArray[0];
+		const currentDateTime = date.getTime();
+		const dateArrayConverted = dateArray.map(date => date.getTime()).map(time => Math.abs(currentDateTime - time));
+		const index = dateArrayConverted.indexOf(Math.min(...dateArrayConverted));
+		return dateArray[index];
+	}
 
     private addToFormats(formats: Array<string>,formatLetters: Array<string>, newChar: string, isSeparator: boolean) {
         const size = formats.length;
@@ -185,8 +195,8 @@ export class FormattingService {
         }
     }
 
-    private containsAllLetters(newFormat: String, formatLetters: Array<string>): boolean{
-        for (let formatLetter of  formatLetters){
+    private containsAllLetters(newFormat: string, formatLetters: Array<string>): boolean{
+        for (const formatLetter of  formatLetters){
             if (newFormat.indexOf(formatLetter) < 0){
                 return false;
             }
@@ -194,28 +204,35 @@ export class FormattingService {
         return true;
     }
     
-    private getHeuristicFormats(servoyFormat: string): Array<string> {
+    private getHeuristicFormats(servoyFormat: string, input?: string): Array<string> {
         const formats = new Array<string>();
         const formatLetters = new Array<string>();
-        let separator;
         if (servoyFormat) {
             for (let index = 0; index < servoyFormat.length; index++) {
                 const currentChar = servoyFormat.charAt(index);
                 if (currentChar.match(/[a-zA-Z]/)) {
                     this.addToFormats(formats,formatLetters, currentChar, false);
-                }
-                else if (!separator || separator == currentChar) {
-                    separator = currentChar;
+                } else {
                     this.addToFormats(formats,formatLetters, currentChar, true);
-                }
-                else {
-                    // another separator?
-                    break;
                 }
             }
         }
+		if (input) {
+			return formats.filter(format => format.length === input.length && this.compareInputWithFormat(input, format));
+		} 
         return formats;
     }
+	
+	private compareInputWithFormat(input: string, format: string): boolean {
+		for (let i = 0; i < input.length; i ++) {
+			const inputChar = input[i];
+			const formatChar = format[i];
+			if ((!inputChar.match(/[0-9]/) || !formatChar.match(/[a-zA-Z]/)) && inputChar !== formatChar) {
+				return false;
+			}
+		}
+		return true;
+	}
 
     private unformatNumbers(data: any, format: string) { // todo throw error when not coresponding to format (reimplement with state machine)
         if (data === '') return data;
