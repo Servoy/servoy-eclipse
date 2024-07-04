@@ -136,13 +136,15 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 	public SynchronizeDBIWithDBWizard()
 	{
-		setWindowTitle("Synchronize DB tables with DB information");
+		setWindowTitle(
+			"Servoy stores table information in special DBI files located in resources project. This wizard helps you synchronize the file structure and database structure for each table.");
 		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_dbi.png"));
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		setNeedsProgressMonitor(true);
+		setForcePreviousAndNextButtons(true);
 		activePage = (workbench != null && workbench.getActiveWorkbenchWindow() != null) ? workbench.getActiveWorkbenchWindow().getActivePage() : null;
 
 		servers.clear();
@@ -243,73 +245,6 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			Object firstSelectedElement = selection.getFirstElement();
 			selectedTableName = firstSelectedElement instanceof UserNode && ((UserNode)firstSelectedElement).getRealObject() instanceof TableWrapper
 				? ((TableWrapper)((UserNode)firstSelectedElement).getRealObject()).getTableName() : null;
-
-			// find differences between the DB table lists and the .dbi files
-			List<Pair<IServerInternal, String>> foundMissingTables = getMissingTables(servers, dmm);
-			List<Pair<IServerInternal, String>> foundSupplementalTables = getSupplementalTables(servers, dmm);
-
-			if (foundMissingTables.size() > 0 || foundSupplementalTables.size() > 0)
-			{
-				errorPage = null;
-
-				Comparator<Pair<IServerInternal, String>> comparator = new Comparator<Pair<IServerInternal, String>>()
-				{
-
-					public int compare(Pair<IServerInternal, String> o1, Pair<IServerInternal, String> o2)
-					{
-						if (o1 == null && o2 == null) return 0;
-						if (o1 == null) return -1;
-						if (o2 == null) return 1;
-
-						int result = o1.getLeft().getName().compareToIgnoreCase(o2.getLeft().getName());
-						if (result == 0)
-						{
-							result = o1.getRight().compareToIgnoreCase(o2.getRight());
-						}
-						return result;
-
-					}
-				};
-
-				Image serverImage = Activator.getDefault().loadImageFromBundle("server.png");
-				Image tableImage = Activator.getDefault().loadImageFromBundle("portal.png");
-				Image viewImage = Activator.getDefault().loadImageFromBundle("view.png");
-
-				if (foundMissingTables.size() > 0)
-				{
-					page1 = new SplitInThreeWizardPage<IServerInternal, String>("Missing tables",
-						"Database information files (.dbi from resources project) can point to tables that do not exist in the database.\nYou can choose to create those tables according to the information or delete the unwanted information files.",
-						"Skip", "Create table", "Delete .dbi", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
-						foundMissingTables, comparator, serverImage, tableImage, viewImage, "com.servoy.eclipse.ui.synchronizedbi_missingtables");
-				}
-				else
-				{
-					page1 = null;
-				}
-				if (foundSupplementalTables.size() > 0)
-				{
-					page2 = new SplitInThreeWizardPage<IServerInternal, String>("Missing database information files",
-						"Tables in the database can lack an associated database information file (.dbi in the resources project).\nYou can choose to create the database information file or delete the table from the database.",
-						"Skip", "Create .dbi", "Delete table", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
-						foundSupplementalTables, comparator, serverImage, tableImage, viewImage, "com.servoy.eclipse.ui.synchronizedbi_missingdbi");
-				}
-				else
-				{
-					page2 = null;
-				}
-			}
-			else
-			{
-				page1 = null;
-				page2 = null;
-			}
-
-			// page3 offers to read/load all available database information in the inspected servers
-			// so that the error markers that show differences in table columns will be created
-			page3 = new CheckBoxWizardPage("Synchronize at column level",
-				"For tables that exist in the database and also have a database information file in the resources project,\ncolumn information can differ.",
-				"Column differences between the DB and the DB information files are only noticed when the DB information files are read.\nAs the files are read only when needed, you might want to trigger a load in order to see the differences\nin the 'Problems' view.",
-				"Read/check existing DB information files for existing tables", true);
 		}
 	}
 
@@ -415,19 +350,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		else
 		{
 			initialChoicePage = new InitialChoiceWizardPage();
+			initialChoicePage.setPageComplete(false);
 			addPage(initialChoicePage);
-		}
-		if (page1 != null)
-		{
-			addPage(page1);
-		}
-		if (page2 != null)
-		{
-			addPage(page2);
-		}
-		if (page3 != null)
-		{
-			addPage(page3);
 		}
 	}
 
@@ -503,7 +427,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 										monitor.done();
 									}
 								}
-								if (initialChoicePage.reloadTables())
+								if (initialChoicePage.reloadTables() && !initialChoicePage.isSynchronizeDBI())
 								{
 									monitor.beginTask("Reloading tables from database", IProgressMonitor.UNKNOWN);
 									if (servers != null)
@@ -834,7 +758,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 	}
 
-	public static class InitialChoiceWizardPage extends WizardPage
+	public class InitialChoiceWizardPage extends WizardPage
 	{
 		private boolean reloadTables = false;
 		private boolean synchronizeDBI = true;
@@ -857,43 +781,11 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			layout.marginHeight = layout.marginWidth = 5;
 			topLevel.setLayout(layout);
 
-			Label infoLabel = new Label(topLevel, SWT.WRAP);
-			infoLabel.setText("Synchronize DBI files with database structure");
+			Label infoLabel2 = new Label(topLevel, SWT.WRAP);
+			infoLabel2.setText("Reload tables from database structure");
 			FormData data = new FormData();
 			data.left = new FormAttachment(0, 0);
 			data.top = new FormAttachment(0, 0);
-			data.right = new FormAttachment(100, 0);
-			infoLabel.setLayoutData(data);
-
-			FontDescriptor descriptor = FontDescriptor.createFrom(infoLabel.getFont()).setStyle(SWT.BOLD);
-			Font font = descriptor.createFont(infoLabel.getDisplay());
-			infoLabel.setFont(font);
-			infoLabel.addDisposeListener((e) -> descriptor.destroyFont(font));
-
-			Button checkBox = new Button(topLevel, SWT.CHECK | SWT.WRAP);
-			checkBox.setSelection(true);
-			checkBox.setText(
-				"Servoy stores table information in special DBI files located in resources project. This wizard helps you synchronize the file structure and database structure for each table.");
-			data = new FormData();
-			data.left = new FormAttachment(0, 20);
-			data.top = new FormAttachment(infoLabel, 20);
-			data.right = new FormAttachment(100, 0);
-			checkBox.setLayoutData(data);
-			checkBox.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					synchronizeDBI = checkBox.getSelection();
-					InitialChoiceWizardPage.this.getContainer().updateButtons();
-				}
-			});
-
-			Label infoLabel2 = new Label(topLevel, SWT.WRAP);
-			infoLabel2.setText("Reload tables from database structure");
-			data = new FormData();
-			data.left = new FormAttachment(0, 0);
-			data.top = new FormAttachment(checkBox, 50);
 			data.right = new FormAttachment(100, 0);
 			infoLabel2.setLayoutData(data);
 
@@ -905,7 +797,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			final Button checkBox2 = new Button(topLevel, SWT.CHECK | SWT.WRAP);
 			checkBox2.setSelection(false);
 			checkBox2.setText(
-				"In case database changes were done outside Servoy you should reload the tables in memory so that Servoy contains the latest information.");
+				"Reload database changes (in case changes were done outside Servoy you should reload the tables in memory so that Servoy contains the latest information)");
 			data = new FormData();
 			data.left = new FormAttachment(0, 20);
 			data.top = new FormAttachment(infoLabel2, 20);
@@ -917,8 +809,45 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 				public void widgetSelected(SelectionEvent e)
 				{
 					reloadTables = checkBox2.getSelection();
+					setPageComplete(reloadTables && !synchronizeDBI);
+					InitialChoiceWizardPage.this.getContainer().updateButtons();
 				}
 			});
+
+			Label infoLabel = new Label(topLevel, SWT.WRAP);
+			infoLabel.setText("Synchronize DBI files with database structure");
+			data = new FormData();
+			data.left = new FormAttachment(0, 0);
+			data.top = new FormAttachment(checkBox2, 50);
+			data.right = new FormAttachment(100, 0);
+			infoLabel.setLayoutData(data);
+
+			FontDescriptor descriptor = FontDescriptor.createFrom(infoLabel.getFont()).setStyle(SWT.BOLD);
+			Font font = descriptor.createFont(infoLabel.getDisplay());
+			infoLabel.setFont(font);
+			infoLabel.addDisposeListener((e) -> descriptor.destroyFont(font));
+
+			Button checkBox = new Button(topLevel, SWT.CHECK | SWT.WRAP);
+			checkBox.setSelection(true);
+			checkBox.setText(
+				"Synchronize DB tables with DB local files information");
+			data = new FormData();
+			data.left = new FormAttachment(0, 20);
+			data.top = new FormAttachment(infoLabel, 20);
+			data.right = new FormAttachment(100, 0);
+			checkBox.setLayoutData(data);
+			checkBox.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					synchronizeDBI = checkBox.getSelection();
+					setPageComplete(reloadTables && !synchronizeDBI);
+					InitialChoiceWizardPage.this.getContainer().updateButtons();
+				}
+			});
+
+
 		}
 
 		public boolean reloadTables()
@@ -931,11 +860,136 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			return synchronizeDBI;
 		}
 
+
+		@Override
+		public boolean canFlipToNextPage()
+		{
+			if (synchronizeDBI)
+			{
+				return true;
+			}
+			return false;
+		}
+
 		@Override
 		public IWizardPage getNextPage()
 		{
 			if (synchronizeDBI)
+			{
+				IRunnableWithProgress job = new IRunnableWithProgress()
+				{
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+					{
+						if (reloadTables)
+						{
+							monitor.beginTask("Reloading tables from database", IProgressMonitor.UNKNOWN);
+							if (servers != null)
+							{
+								for (IServerInternal server : servers)
+								{
+									try
+									{
+										server.reloadTables();
+									}
+									catch (RepositoryException e)
+									{
+										Debug.error(e);
+									}
+								}
+							}
+						}
+						monitor.beginTask("Calculating differences between Database and local files information", IProgressMonitor.UNKNOWN);
+						// find differences between the DB table lists and the .dbi files
+						List<Pair<IServerInternal, String>> foundMissingTables = getMissingTables(servers, dmm);
+						List<Pair<IServerInternal, String>> foundSupplementalTables = getSupplementalTables(servers, dmm);
+
+						if (foundMissingTables.size() > 0 || foundSupplementalTables.size() > 0)
+						{
+							errorPage = null;
+
+							Comparator<Pair<IServerInternal, String>> comparator = new Comparator<Pair<IServerInternal, String>>()
+							{
+
+								public int compare(Pair<IServerInternal, String> o1, Pair<IServerInternal, String> o2)
+								{
+									if (o1 == null && o2 == null) return 0;
+									if (o1 == null) return -1;
+									if (o2 == null) return 1;
+
+									int result = o1.getLeft().getName().compareToIgnoreCase(o2.getLeft().getName());
+									if (result == 0)
+									{
+										result = o1.getRight().compareToIgnoreCase(o2.getRight());
+									}
+									return result;
+
+								}
+							};
+
+							Image serverImage = Activator.getDefault().loadImageFromBundle("server.png");
+							Image tableImage = Activator.getDefault().loadImageFromBundle("portal.png");
+							Image viewImage = Activator.getDefault().loadImageFromBundle("view.png");
+
+							if (foundMissingTables.size() > 0)
+							{
+								page1 = new SplitInThreeWizardPage<IServerInternal, String>("Missing tables",
+									"Database information files (.dbi from resources project) can point to tables that do not exist in the database.\nYou can choose to create those tables according to the information or delete the unwanted information files.",
+									"Skip", "Create table", "Delete .dbi", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
+									foundMissingTables, comparator, serverImage, tableImage, viewImage, "com.servoy.eclipse.ui.synchronizedbi_missingtables");
+							}
+							else
+							{
+								page1 = null;
+							}
+							if (foundSupplementalTables.size() > 0)
+							{
+								page2 = new SplitInThreeWizardPage<IServerInternal, String>("Missing database information files",
+									"Tables in the database can lack an associated database information file (.dbi in the resources project).\nYou can choose to create the database information file or delete the table from the database.",
+									"Skip", "Create .dbi", "Delete table", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
+									foundSupplementalTables, comparator, serverImage, tableImage, viewImage, "com.servoy.eclipse.ui.synchronizedbi_missingdbi");
+							}
+							else
+							{
+								page2 = null;
+							}
+						}
+						else
+						{
+							page1 = null;
+							page2 = null;
+						}
+
+						// page3 offers to read/load all available database information in the inspected servers
+						// so that the error markers that show differences in table columns will be created
+						page3 = new CheckBoxWizardPage("Synchronize at column level",
+							"For tables that exist in the database and also have a database information file in the resources project,\ncolumn information can differ.",
+							"Column differences between the DB and the DB information files are only noticed when the DB information files are read.\nAs the files are read only when needed, you might want to trigger a load in order to see the differences\nin the 'Problems' view.",
+							"Read/check existing DB information files for existing tables", true);
+						if (page1 != null)
+						{
+							addPage(page1);
+						}
+						if (page2 != null)
+						{
+							addPage(page2);
+						}
+						if (page3 != null)
+						{
+							addPage(page3);
+						}
+						setPageComplete(true);
+					}
+				};
+				try
+				{
+					getContainer().run(false, false, job);
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
 				return super.getNextPage();
+			}
 			return null;
 		}
 
