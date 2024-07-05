@@ -1031,30 +1031,50 @@ public class DataModelManager implements IServerInfoManager
 
 	public IFile getDBIFile(String serverName, String tableName)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getDBIFileName(tableName));
 		return resourceProject.getFile(path);
 	}
 
 	public IFile getSecurityFile(String serverName, String tableName)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getSecurityFileName(tableName));
 		return resourceProject.getFile(path);
 	}
 
 	public IFile getServerDBIFile(String serverName)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(getRelativeServerPath(serverName) + COLUMN_INFO_FILE_EXTENSION_WITH_DOT);
 		return resourceProject.getFile(path);
 	}
 
 	public IFile getSecurityFile()
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(SECURITY_DIRECTORY + IPath.SEPARATOR + SECURITY_FILENAME);
 		return resourceProject.getFile(path);
 	}
 
 	public IFile getMetaDataFile(String dataSource)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		String[] stn = DataSourceUtilsBase.getDBServernameTablename(dataSource);
 		if (stn == null)
 		{
@@ -1066,6 +1086,10 @@ public class DataModelManager implements IServerInfoManager
 
 	public IFolder getServerInformationFolder(String serverName)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(getRelativeServerPath(serverName));
 		return resourceProject.getFolder(path);
 	}
@@ -1148,7 +1172,7 @@ public class DataModelManager implements IServerInfoManager
 		{
 			public void run()
 			{
-				if (resource.exists())
+				if (resource != null && resource.exists())
 				{
 					// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
 					// the project might have disappeared before this job was started... (delete)
@@ -1346,7 +1370,7 @@ public class DataModelManager implements IServerInfoManager
 		for (String key : keys)
 		{
 			Long id = missingDbiFileMarkerIds.remove(key);
-			if (id != null)
+			if (resourceProject != null && id != null)
 			{
 				IMarker marker = resourceProject.findMarker(id.longValue());
 				if (marker != null)
@@ -1365,24 +1389,22 @@ public class DataModelManager implements IServerInfoManager
 	{
 		differences.removeDifferences(serverName);
 		final IFolder folder = getServerInformationFolder(serverName);
-		updateProblemMarkers(new Runnable()
-		{
-			public void run()
+
+		updateProblemMarkers(() -> {
+			try
 			{
-				try
+				if (folder != null && folder.exists() &&
+					folder.findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, false, IResource.DEPTH_INFINITE).length > 0)
 				{
-					if (folder.exists() && folder.findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, false, IResource.DEPTH_INFINITE).length > 0)
-					{
-						// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
-						// the project might have disappeared before this job was started... (delete)
-						ServoyBuilder.deleteMarkers(folder, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
-					}
-					deleteMissingDBIFileMarkerIfNeeded(serverName, null);
+					// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
+					// the project might have disappeared before this job was started... (delete)
+					ServoyBuilder.deleteMarkers(folder, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError(e);
-				}
+				deleteMissingDBIFileMarkerIfNeeded(serverName, null);
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
 			}
 		});
 	}
@@ -1391,18 +1413,14 @@ public class DataModelManager implements IServerInfoManager
 	private void clearProblemMarkers(boolean clearAlsoDifferences)
 	{
 		if (clearAlsoDifferences) differences.removeAllDifferences();
-		updateProblemMarkers(new Runnable()
-		{
-			public void run()
+		updateProblemMarkers(() -> {
+			if (resourceProject != null && resourceProject.exists())
 			{
-				if (resourceProject.exists())
-				{
-					// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
-					// the project might have disappeared before this job was started... (delete)
-					ServoyBuilder.deleteMarkers(resourceProject, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
-				}
-				missingDbiFileMarkerIds.clear();
+				// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
+				// the project might have disappeared before this job was started... (delete)
+				ServoyBuilder.deleteMarkers(resourceProject, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 			}
+			missingDbiFileMarkerIds.clear();
 		});
 	}
 
