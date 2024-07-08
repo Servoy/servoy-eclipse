@@ -349,22 +349,55 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		}
 	}
 
+//	private void runNgDesktop(IProgressMonitor monitor)
+//	{
+//		//Now try opening servoyNGDesktop app.
+//		try
+//		{
+//			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
+//			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + File.separator + NGDESKTOP_APP_NAME + extension;
+//			monitor.beginTask("Open NGDesktop", 3);
+//			String[] cmdArgs = Utils.isAppleMacOS() ? new String[] { "/usr/bin/open", command } : new String[] { command };
+//			Runtime.getRuntime().exec(cmdArgs);
+//		}
+//		catch (IOException e)
+//		{
+//			ServoyLog.logError("Cannot find servoy NGDesktop executable", e);
+//		}
+//	}
+
 	private void runNgDesktop(IProgressMonitor monitor)
 	{
-		//Now try opening servoyNGDesktop app.
+		// Now try opening servoyNGDesktop app.
 		try
 		{
 			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
 			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + File.separator + NGDESKTOP_APP_NAME + extension;
 			monitor.beginTask("Open NGDesktop", 3);
-			String[] cmdArgs = Utils.isAppleMacOS() ? new String[] { "/usr/bin/open", command } : new String[] { command };
-			Runtime.getRuntime().exec(cmdArgs);
+
+			ProcessBuilder builder = new ProcessBuilder();
+			if (Utils.isAppleMacOS())
+			{
+				builder.command("/usr/bin/open", command);
+			}
+			else
+			{
+				builder.command(command);
+			}
+
+			builder.directory(new File(System.getProperty("user.dir"))); // set the working directory if necessary
+			builder.redirectErrorStream(true); // redirect error stream to the output stream
+			Process process = builder.start(); // start the process
+
+			process.waitFor(); //prevent multiples process launch
+
 		}
-		catch (IOException e)
+		catch (IOException | InterruptedException e)
 		{
 			ServoyLog.logError("Cannot find servoy NGDesktop executable", e);
 		}
 	}
+
 
 	public String getStartTitle()
 	{
