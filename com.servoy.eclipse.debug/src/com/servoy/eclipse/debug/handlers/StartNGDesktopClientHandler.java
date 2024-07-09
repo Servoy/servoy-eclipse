@@ -385,14 +385,12 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				builder.command(command);
 			}
 
-			builder.directory(new File(System.getProperty("user.dir"))); // set the working directory if necessary
-			builder.redirectErrorStream(true); // redirect error stream to the output stream
-			Process process = builder.start(); // start the process
-
-			process.waitFor(); //prevent multiples process launch
+			builder.directory(new File(System.getProperty("user.dir")));
+			builder.redirectErrorStream(true); // redirect errors to the output stream
+			builder.start();
 
 		}
-		catch (IOException | InterruptedException e)
+		catch (IOException e)
 		{
 			ServoyLog.logError("Cannot find servoy NGDesktop executable", e);
 		}
