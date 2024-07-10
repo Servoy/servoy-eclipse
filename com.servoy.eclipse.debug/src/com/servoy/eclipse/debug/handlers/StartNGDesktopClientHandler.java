@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -88,6 +89,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	protected static String NGDESKTOP_PREFIX = NGDESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
 
 	protected static final int BUFFER_SIZE = 16 * 1024;
+
+	private final AtomicReference<Process> ngdesktopProcess = new AtomicReference<>(null);
 
 	static
 	{
@@ -349,28 +352,28 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		}
 	}
 
-//	private void runNgDesktop(IProgressMonitor monitor)
-//	{
-//		//Now try opening servoyNGDesktop app.
-//		try
-//		{
-//			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
-//			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + File.separator + NGDESKTOP_APP_NAME + extension;
-//			monitor.beginTask("Open NGDesktop", 3);
-//			String[] cmdArgs = Utils.isAppleMacOS() ? new String[] { "/usr/bin/open", command } : new String[] { command };
-//			Runtime.getRuntime().exec(cmdArgs);
-//		}
-//		catch (IOException e)
-//		{
-//			ServoyLog.logError("Cannot find servoy NGDesktop executable", e);
-//		}
-//	}
-
 	private void runNgDesktop(IProgressMonitor monitor)
 	{
 		// Now try opening servoyNGDesktop app.
 		try
 		{
+			Process existingProcess = ngdesktopProcess.get();
+			if (existingProcess != null)
+			{
+				try
+				{
+					existingProcess.exitValue(); // Throws exception if still running
+					ngdesktopProcess.compareAndSet(existingProcess, null); // Process ended, reset it
+				}
+				catch (IllegalThreadStateException ex)
+				{
+					// Process is still running
+					ServoyLog.logInfo("NGDesktop is already running.");
+					return;
+				}
+			}
+
+
 			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
 			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + File.separator + NGDESKTOP_APP_NAME + extension;
 			monitor.beginTask("Open NGDesktop", 3);
@@ -385,11 +388,11 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				builder.command(command);
 			}
 
-			builder.directory(new File(System.getProperty("user.dir"))); // set the working directory if necessary
+			builder.directory(new File(System.getProperty("user.dir")));
 			builder.redirectErrorStream(true); // redirect error stream to the output stream
-			Process process = builder.start(); // start the process
+			Process process = builder.start();
 
-			process.waitFor(); //prevent multiples process launch
+			process.waitFor();
 
 		}
 		catch (IOException | InterruptedException e)
