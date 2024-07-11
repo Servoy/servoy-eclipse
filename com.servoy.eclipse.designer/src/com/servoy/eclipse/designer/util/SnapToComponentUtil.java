@@ -698,13 +698,14 @@ public class SnapToComponentUtil
 
 	private static ISupportCSSPosition getTarget(Form form, String uuid)
 	{
-		if (PersistFinder.INSTANCE.searchForPersist(form, uuid) instanceof ISupportCSSPosition)
+		IPersist persist = PersistFinder.INSTANCE.searchForPersist(form, uuid);
+		if (persist instanceof ISupportCSSPosition)
 		{
-			return (ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, uuid);
+			return (ISupportCSSPosition)persist;
 		}
-		else if (PersistFinder.INSTANCE.searchForPersist(form, uuid) instanceof WebFormComponentChildType)
+		else if (persist instanceof WebFormComponentChildType)
 		{
-			return ((WebFormComponentChildType)PersistFinder.INSTANCE.searchForPersist(form, uuid)).getElement();
+			return ((WebFormComponentChildType)persist).getElement();
 		}
 		return null;
 	}
