@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
 
 import com.servoy.j2db.IDebugJ2DBClient;
-import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.debug.DebugNGClient;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 
@@ -84,7 +83,6 @@ class ClientsLabelProvider implements ILabelProvider
 	public String getText(Object element)
 	{
 		if (element instanceof IDebugJ2DBClient) return Messages.ScriptingConsole_smartClientName;
-		if (element instanceof IDebugWebClient) return Messages.ScriptingConsole_webClientName;
 		if (element instanceof IDebugHeadlessClient) return Messages.ScriptingConsole_headlessClientName;
 		if (element instanceof DebugNGClient) return Messages.ScriptingConsole_ngClientName;
 		return null;

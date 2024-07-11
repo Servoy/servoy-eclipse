@@ -25,7 +25,6 @@ import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
 
 import com.servoy.j2db.IDebugClient;
-import com.servoy.j2db.debug.DebugWebClient;
 
 /**
  * @author jcompagner
@@ -42,7 +41,7 @@ public class CommandHandler implements ICommandHandler
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.debug.scriptingconsole.ICommandHandler#handleCommand(java.lang.String)
 	 */
 	public IScriptExecResult handleCommand(final String userInput) throws IOException
@@ -52,48 +51,40 @@ public class CommandHandler implements ICommandHandler
 		{
 			final IDebugClient state = selectedClient;
 			final Object[] retVal = new Object[1];
-			if (state instanceof DebugWebClient) ((DebugWebClient)state).addEventDispatchThread();
-			try
+			state.invokeAndWait(new Runnable()
 			{
-				state.invokeAndWait(new Runnable()
+				public void run()
 				{
-					public void run()
+					Object eval = null;
+					Context cx = Context.enter();
+					try
 					{
-						Object eval = null;
-						Context cx = Context.enter();
-						try
+						Scriptable scope = ScriptConsole.getScope(state, true);
+						eval = cx.evaluateString(scope, userInput, "internal_anon", 1, null);
+						if (eval instanceof Wrapper)
 						{
-							Scriptable scope = ScriptConsole.getScope(state, true);
-							eval = cx.evaluateString(scope, userInput, "internal_anon", 1, null);
-							if (eval instanceof Wrapper)
-							{
-								eval = ((Wrapper)eval).unwrap();
-							}
-							if (eval == Scriptable.NOT_FOUND || eval == Undefined.instance)
-							{
-								eval = null;
-							}
+							eval = ((Wrapper)eval).unwrap();
+						}
+						if (eval == Scriptable.NOT_FOUND || eval == Undefined.instance)
+						{
+							eval = null;
+						}
 
-							StringBuilder stringBuilder = provider.getSelectedClientScript();
-							stringBuilder.append(userInput);
-							stringBuilder.append('\n');
-						}
-						catch (Exception ex)
-						{
-							eval = ex;
-						}
-						finally
-						{
-							Context.exit();
-						}
-						retVal[0] = eval;
+						StringBuilder stringBuilder = provider.getSelectedClientScript();
+						stringBuilder.append(userInput);
+						stringBuilder.append('\n');
 					}
-				});
-			}
-			finally
-			{
-				if (state instanceof DebugWebClient) ((DebugWebClient)state).removeEventDispatchThread();
-			}
+					catch (Exception ex)
+					{
+						eval = ex;
+					}
+					finally
+					{
+						Context.exit();
+					}
+					retVal[0] = eval;
+				}
+			});
 			return new ScriptResult(retVal[0]);
 		}
 		return null;

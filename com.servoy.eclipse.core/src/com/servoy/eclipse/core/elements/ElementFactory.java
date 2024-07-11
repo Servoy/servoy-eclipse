@@ -61,6 +61,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
+import com.servoy.j2db.ISupportNavigator;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.debug.DebugUtils;
@@ -112,7 +113,6 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.server.headlessclient.dataui.WebDefaultRecordNavigator;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -1182,7 +1182,7 @@ public class ElementFactory
 		int navigatorID = form.getNavigatorID();
 		if (navigatorID == Form.NAVIGATOR_DEFAULT && form.getView() != FormController.TABLE_VIEW && form.getView() != FormController.LOCKED_TABLE_VIEW)
 		{
-			navigatorSize = new Dimension(WebDefaultRecordNavigator.DEFAULT_WIDTH, WebDefaultRecordNavigator.DEFAULT_HEIGHT_WEB);
+			navigatorSize = new Dimension(ISupportNavigator.DEFAULT_NAVIGATOR_WIDTH, 160);
 		}
 		else if (navigatorID != Form.NAVIGATOR_NONE)
 		{

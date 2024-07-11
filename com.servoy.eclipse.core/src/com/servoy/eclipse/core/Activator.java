@@ -40,9 +40,6 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.wicket.Request;
-import org.apache.wicket.Response;
-import org.apache.wicket.Session;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -121,14 +118,12 @@ import com.servoy.j2db.IBrowserLauncher;
 import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
-import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugUtils;
-import com.servoy.j2db.debug.DebugWebClientSession;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -147,7 +142,6 @@ import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
-import com.servoy.j2db.server.shared.IWebClientSessionFactory;
 import com.servoy.j2db.server.starter.IServerStarter;
 import com.servoy.j2db.util.CompositeIterable;
 import com.servoy.j2db.util.Debug;
@@ -706,14 +700,6 @@ public class Activator extends Plugin
 		getDebugClientHandler().showInDebugClients(form);
 	}
 
-	/**
-	 * @return
-	 */
-	public IDebugWebClient getDebugWebClient()
-	{
-		return getDebugClientHandler().getDebugWebClient();
-	}
-
 	public IDebugClient getDebugNGClient()
 	{
 		return getDebugClientHandler().getDebugNGClient();
@@ -1149,13 +1135,6 @@ public class Activator extends Plugin
 				public IUserManager createUserManager(IDataServer dataServer)
 				{
 					return new SwitchableEclipseUserManager();
-				}
-			});
-			ss.setWebClientSessionFactory(new IWebClientSessionFactory()
-			{
-				public Session newSession(Request request, Response response)
-				{
-					return new DebugWebClientSession(request);
 				}
 			});
 			ss.start(true);
