@@ -21,7 +21,7 @@ import { AgGridAngular } from '@ag-grid-community/angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
 
-const AGGRID_CACHE_BLOCK_SIZE = 10;
+const AGGRID_CACHE_BLOCK_SIZE = 50;
 const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
 
 @Component({
@@ -254,7 +254,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
                 infiniteInitialRowCount: AGGRID_CACHE_BLOCK_SIZE,
                 //maxBlocksInCache: AGGRID_MAX_BLOCKS_IN_CACHE,
-                getRowHeight: (params) => this.getRowHeight(),
+                rowHeight: this.getRowHeight(),
                 navigateToNextCell: (params: any) => {
                     const previousCell = params.previousCellPosition;
                     const suggestedNextCell = params.nextCellPosition;
@@ -278,6 +278,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         default:
                             return previousCell;
                     }
+                },
+                onFirstDataRendered: (params: any) => {
+                    this.scrollToSelection();
                 }
             };
         }
@@ -380,6 +383,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 if (event.requestInfos && event.requestInfos.includes('AGGridDatasourceGetRows')) {
                     return;
                 }
+                if (event.serverFoundsetSizeChanged ) {
+                    this.agGrid.api.setRowCount(event.serverFoundsetSizeChanged.newValue);
+                }
                 if (event.viewportRowsUpdated) {
                     // copy the viewport data over to the cell
                     // TODO this only is working for "updates", what happens with deletes or inserts?
@@ -390,11 +396,24 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     });
                     if (insertOrDeletes) this.agGrid.api.refreshServerSide({ purge: true });
                     else this.agGrid.api.refreshCells();
-                } else if (event.viewportRowsUpdated || event.viewportRowsCompletelyChanged || event.fullValueChanged) {
+                } else if (event.viewportRowsCompletelyChanged || event.fullValueChanged) {
                     this.agGrid.api.refreshServerSide({ purge: true });
+                }
+                if(event.selectedRowIndexesChanged) {
+                    this.scrollToSelection();
                 }
             });
         }
+    }
+
+    private scrollToSelection() {
+        if(this.foundset.selectedRowIndexes.length) {
+            const rowCount = this.agGrid.api['serverSideRowModel'].getRowCount();
+            if(this.foundset.selectedRowIndexes[0] > rowCount - AGGRID_CACHE_BLOCK_SIZE) {
+                this.agGrid.api['serverSideRowModel'].setRowCount(Math.min(this.foundset.selectedRowIndexes[0] + AGGRID_CACHE_BLOCK_SIZE, this.foundset.serverSize));
+            }
+            this.agGrid.api.ensureIndexVisible(this.foundset.selectedRowIndexes[0]);
+        }        
     }
 
     ngAfterViewInit() {
