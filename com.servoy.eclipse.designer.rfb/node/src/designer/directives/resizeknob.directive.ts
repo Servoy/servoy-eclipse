@@ -33,6 +33,45 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
         this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
         this.leftContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
+
+        //set initial glasspane size
+        this.setGlasspaneSize();
+    }
+
+    private setGlasspaneSize(): void {
+        // Get all component elements
+        const componentElements = this.editorContentService.getAllContentElements();
+        let maxWidth = 0;
+        let maxHeight = 0;
+    
+        // Calculate maximum dimensions based on components
+        componentElements.forEach(element => {
+            const componentRect = element.getBoundingClientRect();
+            maxWidth = Math.max(maxWidth, componentRect.left + componentRect.width);
+            maxHeight = Math.max(maxHeight, componentRect.top + componentRect.height);
+        });
+    
+        // Get visible dimensions of the designer
+        const contentArea = this.editorContentService.getContentArea();
+        const visibleWidth = contentArea.clientWidth;
+        const visibleHeight = contentArea.clientHeight;
+    
+        // Get dimensions from the content form
+        const contentForm = this.editorContentService.getContentForm();
+        const formRect = contentForm.getBoundingClientRect();
+        const formWidth = formRect.width;
+        const formHeight = formRect.height;
+    
+        // Determine the greater dimensions
+        const finalWidth = Math.max(maxWidth, visibleWidth, formWidth) + 100;
+        const finalHeight = Math.max(maxHeight, visibleHeight, formHeight) + 100;
+    
+        // Set the glasspane size to cover all components, visible area, and content form
+        const glasspane = this.editorContentService.getGlassPane();
+        if (glasspane) {
+            glasspane.style.width = `${finalWidth}px`;
+            glasspane.style.height = `${finalHeight}px`;
+        }
     }
 
     ngAfterViewInit(): void {
