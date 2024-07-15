@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="2022.3.9.3751_LTS"
+      version="2022.3.10.3752_LTS"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -68,7 +68,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="com.servoy.css.core"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <includes
          id="org.eclipse.dltk.core.servoy"
@@ -137,103 +137,103 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.core"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.debug"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.designer"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.ui"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.jsunit"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.profiler"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="j2db_documentation"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="j2db_tunnel"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="j2db_runtime"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="j2db_log4j"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="j2db_server"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="servoy_debug"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="servoy_headless_client"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="servoy_shared"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="servoy_smart_client"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.model"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="servoy_base"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="org.apache.tomcat"
@@ -241,11 +241,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="sablo"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="servoy_ngclient"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="javax.websocket"
@@ -309,15 +309,15 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.designer.wpm"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.notification"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="org.apache.logging.log4j.api"
@@ -369,7 +369,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.ngclient.ui"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
@@ -394,11 +394,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.ngclient"
-         version="2022.3.9.3751_LTS"/>
+         version="2022.3.10.3752_LTS"/>
 
    <plugin
          id="com.servoy.eclipse.jre.linux.x86_64"
