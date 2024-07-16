@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -94,12 +95,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends AbstractUIPlugin
 {
-	/**
-	 *
-	 */
-	public static final String TUTORIALS_URL = System.getProperty("servoy.tutorial.url") == null
-		? "https://tutorials.servoy.com/solutions/content/index.html?servoyVersion=" + ClientVersion.getPureVersion() + "&loginToken="
-		: System.getProperty("servoy.tutorial.url");
+	public static final String CLOUD_BASE_URL = System.getProperty("servoy.cloud_base.url", "https://admin.servoy-cloud.eu");
+	public static final String TUTORIALS_URL = CLOUD_BASE_URL + "/solution/developerWelcome?servoyVersion=" + ClientVersion.getPureVersion() + "&loginToken=";
 
 	/**
 	 * The PLUGIN_ID for com.servoy.eclipse.ui.
@@ -257,7 +254,8 @@ public class Activator extends AbstractUIPlugin
 												for (String packageName : packagesNeeded)
 												{
 													packagesFinal.add(packagesHelp.contains(packageName)
-														? (packageName + " (existing source package project will be used; checking this will download the wpm package)")
+														? (packageName +
+															" (existing source package project will be used; checking this will download the wpm package)")
 														: packageName);
 												}
 											}
@@ -380,6 +378,7 @@ public class Activator extends AbstractUIPlugin
 				{
 					activeShell = (Shell)activeShell.getParent();
 				}
+				boolean emptyWorkspace = false;
 				//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
 				String username = null;
 				try
@@ -399,7 +398,7 @@ public class Activator extends AbstractUIPlugin
 					if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
 					{
 						BrowserDialog dialog = new BrowserDialog(activeShell,
-							TUTORIALS_URL + loginToken, true, true);
+							TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, true);
 						dialog.open(true);
 					}
 				}

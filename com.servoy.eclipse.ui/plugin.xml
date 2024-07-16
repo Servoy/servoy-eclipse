@@ -31,13 +31,6 @@
             id="com.servoy.eclipse.ui.views.FavoritesView"
             name="Favorites">
       </view>
-       <view
-            category="com.servoy.eclipse.ui"
-            class="com.servoy.eclipse.ui.views.TutorialView"
-            icon="icons/servoy-tutorials.png"
-            id="com.servoy.eclipse.ui.views.TutorialView"
-            name="Tutorial step by step">
-      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -629,15 +622,6 @@
             label="StartPage"
             visible="true">
          <action
-               class="com.servoy.eclipse.ui.actions.OpenTutorialsView"
-               icon="icons/servoy-tutorials.png"
-               id="com.servoy.eclipse.ui.openStartPage"
-               label="Servoy Step By Step Tutorial"
-               menubarPath="help/updates"
-               style="push"
-               tooltip="Servoy Step By Step Tutorial">
-         </action>
-         <action
                class="com.servoy.eclipse.ui.actions.OpenStartPage"
                id="com.servoy.eclipse.ui.openStartPage"
                label="Servoy First Start Guide"
@@ -646,7 +630,17 @@
                style="push"
                tooltip="Open First Start Guide">
          </action>
-      </actionSet>
+          <action
+               class="com.servoy.eclipse.ui.actions.OpenUrlAction"
+               definitionId="com.servoy.eclipse.ui.OpenTutorialAction"
+               icon="icons/servoy-tutorials.png"
+               id="com.servoy.eclipse.ui.openTutorial"
+               label="Servoy Step By Step Tutorial"
+               menubarPath="help/updates"
+               style="push"
+               tooltip="Servoy Step By Step Tutorial">
+         </action>
+         </actionSet>
         <!-- main concepts page, disabled for now
       <actionSet
             id="com.servoy.eclipse.ui.MainConceptsPage"
