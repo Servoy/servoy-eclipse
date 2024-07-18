@@ -439,6 +439,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.aibridge"
-         version="2023.9.0.3900_rc"/>
+         version="2024.3.2.3945"/>
 
 </feature>
