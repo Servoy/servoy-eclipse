@@ -17,10 +17,14 @@
 
 package com.servoy.eclipse.core;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -60,11 +64,14 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.query.ColumnType;
@@ -157,16 +164,74 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 
 						}
 					}
+					Collection<String> solutionModelScopes = solutionCopy.getScopeNames();
+					List<IPersist> clones = new ArrayList<IPersist>();
+					if (solutionModelScopes != null)
+					{
+						// make sure sm solution has all variables and methods
+						Solution mainSolution = state.getFlattenedSolution().getSolution();
+						for (String scopeName : solutionModelScopes)
+						{
+							Iterator<ScriptMethod> it = mainSolution.getScriptMethods(scopeName, false);
+							while (it.hasNext())
+							{
+								ScriptMethod sm = it.next();
+								clones.add(sm.clonePersist(solutionCopy));
+							}
+							Iterator<ScriptVariable> it2 = mainSolution.getScriptVariables(scopeName, false);
+							while (it2.hasNext())
+							{
+								ScriptVariable sv = it2.next();
+								clones.add(sv.clonePersist(solutionCopy));
+							}
+						}
+					}
 					eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 					eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(solutionCopy));
+					List<String> scriptPaths = new ArrayList<String>();
 					for (IPersist persist : objectsToSave)
 					{
 						checkParent(persist);
-						SolutionSerializer.writePersist(persist, wfa, ApplicationServerRegistry.get().getDeveloperRepository(), true, false, true);
+						if (persist instanceof IScriptElement && persist.getParent() == solutionCopy)
+						{
+							String path = SolutionSerializer.getScriptPath(persist, false);
+							if (!scriptPaths.contains(path))
+							{
+								scriptPaths.add(path);
+							}
+						}
+						else
+						{
+							SolutionSerializer.writePersist(persist, wfa, ApplicationServerRegistry.get().getDeveloperRepository(), true, false, true);
+						}
 						if (persist instanceof AbstractBase)
 						{
 							((AbstractBase)persist).setParent(solutionCopy);
 						}
+					}
+					for (String scriptPath : scriptPaths)
+					{
+						IFileAccess fileAccess = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+						String content = SolutionSerializer.generateScriptFile(solutionCopy, scriptPath, eclipseRepository, null);
+						OutputStream fos = null;
+						try
+						{
+							fos = fileAccess.getOutputStream(scriptPath);
+							fos.write(content.getBytes("UTF8"));
+						}
+						catch (IOException e)
+						{
+							ServoyLog.logError(e);
+						}
+						finally
+						{
+							Utils.closeOutputStream(fos);
+						}
+
+					}
+					for (IPersist clone : clones)
+					{
+						solutionCopy.removeChild(clone);
 					}
 				}
 				catch (RepositoryException | SQLException e)

@@ -24,6 +24,7 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dltk.javascript.parser.JavascriptParserPreferences;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -60,6 +61,24 @@ public class Activator extends Plugin
 	{
 		super.start(context);
 		plugin = this;
+
+		setUseES6();
+	}
+
+	public void setUseES6()
+	{
+		String value = System.getProperty("servoy.useES6");
+		if (value == null)
+		{
+			value = System.getenv("servoy.useES6");
+		}
+		if (value != null)
+		{
+			Boolean useEs6 = "".equals(value) ? Boolean.TRUE : Boolean.valueOf(value);
+			JavascriptParserPreferences preferences = new JavascriptParserPreferences();
+			preferences.useES6Parser(useEs6.booleanValue());
+			preferences.save();
+		}
 	}
 
 	@Override

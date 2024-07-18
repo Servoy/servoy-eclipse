@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.IPreExecuteCommand;
 import com.servoy.eclipse.ui.util.ISupportDefaultValueEditor;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
@@ -166,7 +167,7 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 				{
 					public void run()
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not set property value", errorMessage);
+						MessageDialog.openError(UIUtils.getActiveShell(), "Could not set property value", errorMessage);
 					}
 				});
 			}

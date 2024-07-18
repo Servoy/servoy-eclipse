@@ -44,6 +44,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.json.JSONArray;
@@ -109,8 +110,8 @@ public class DesignerFilter implements Filter
 		{
 			HttpServletRequest request = (HttpServletRequest)servletRequest;
 			String uri = request.getRequestURI();
-			String layoutType = request.getParameter("layout");
-			String formName = request.getParameter("formName");
+			String layoutType = StringEscapeUtils.escapeHtml4(request.getParameter("layout"));
+			String formName = StringEscapeUtils.escapeHtml4(request.getParameter("formName"));
 			if (uri != null && uri.endsWith("palette"))
 			{
 				SpecProviderState specProvider = WebComponentSpecProvider.getSpecProviderState();

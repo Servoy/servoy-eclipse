@@ -112,18 +112,22 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 
     pushUpdate() {
         if (!this.dataProviderID && !this.isEditable()){
-           const allowEmptyValue = this.valuelistID[0]?.displayValue === '' && this.valuelistID[0]?.realValue === null;
-           if(!allowEmptyValue) {
-               if (this.valuelistID[0]?.displayValue && this.valuelistID[0]?.realValue && this.elementRef.nativeElement.value === this.valuelistID[0]?.displayValue) {
-                    this.dataProviderID = this.valuelistID[0]?.realValue;
-                    this.currentValue = this.dataProviderID;
-               } else {
-				  this.dataProviderID = this.currentValue;
-			   }
-               return;
-           }
-        }
-        this.currentValue = this.dataProviderID;
+			if (this.valuelistID) {
+				const allowEmptyValue = this.valuelistID[0]?.displayValue === '' && this.valuelistID[0]?.realValue === null;
+				if(!allowEmptyValue) {
+					if (this.valuelistID[0]?.displayValue && this.valuelistID[0]?.realValue && this.elementRef.nativeElement.value === this.valuelistID[0]?.displayValue) {
+						this.dataProviderID = this.valuelistID[0]?.realValue;
+						this.currentValue = this.dataProviderID;
+					} else {
+						this.dataProviderID = this.currentValue;
+					}
+					return;
+				}
+			} else {
+				this.dataProviderID = this.elementRef.nativeElement.value;
+			}
+		}
+		this.currentValue = this.dataProviderID;
         super.pushUpdate();
     }
 
@@ -141,7 +145,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
     inputFormatter = (result: any) => {
         if (result === null) return '';
         if (result.displayValue !== undefined) result = result.displayValue;
-        else if (this.valuelistID.hasRealValues()) {
+        else if (this.valuelistID?.hasRealValues()) {
             // on purpose test with == so that "2" equals to 2
             // eslint-disable-next-line eqeqeq
             const value = this.valuelistID.find((item) => {
@@ -156,7 +160,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
             if (value) {
                 result = value.displayValue;
             } else {
-                const display = this.realToDisplay.get(result);
+                let display = this.realToDisplay.get(result);
                 if ( display === null || display === undefined ) {
                     this.valuelistID.getDisplayValue( result ).subscribe( val => {
                         if ( val ) {
@@ -164,7 +168,9 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
                             this.instance.writeValue( result );
                         }
                     } );
-                    return '';
+                    display = this.realToDisplay.get(result); // in case the getDisplayValue above runs sync, before this return happen (uses of() not from())
+                    if (display === null || display === undefined) return '';
+                    else result = display;
                 } else {
                     result = display;
                 }

@@ -50,12 +50,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -68,6 +71,7 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -239,7 +243,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot create new solution", e.getMessage());
+							MessageDialog.openError(UIUtils.getActiveShell(), "Cannot create new solution", e.getMessage());
 						}
 					});
 				}
@@ -251,8 +255,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				{
 					Media defaultTheme = addMediaFile(solution, ThemeResourceLoader.getDefaultSolutionLess(), solution.getName() + ".less");
 					addMediaFile(solution, ThemeResourceLoader.getCustomProperties(), ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
-					addMediaFile(solution, ThemeResourceLoader.getDefaultNG2SolutionLess(), solution.getName() + "_ng2.less");
-					addMediaFile(solution, ThemeResourceLoader.getNG2CustomProperties(), ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
 					addMediaFile(solution, ThemeResourceLoader.getVariantsFile(), ThemeResourceLoader.VARIANTS_JSON);
 
 					solution.setStyleSheetID(defaultTheme.getID());
@@ -816,6 +818,28 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		}
 		return super.performCancel();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.jface.wizard.Wizard#setContainer(org.eclipse.jface.wizard.IWizardContainer)
+	 */
+	@Override
+	public void setContainer(IWizardContainer wizardContainer)
+	{
+		if (wizardContainer != null && wizardContainer.getShell() != null)
+		{
+			wizardContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		}
+		super.setContainer(wizardContainer);
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	protected ServerConfig getValidServerConfig()

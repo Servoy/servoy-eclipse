@@ -5,7 +5,6 @@ import { URLParserService } from '../services/urlparser.service';
 
 @Injectable()
 export class EditorContentService {
-
     private frameElement: HTMLIFrameElement;
     private contentAreaElement: HTMLElement;
     private contentElement: HTMLElement;
@@ -55,6 +54,11 @@ export class EditorContentService {
     getContentForm(): HTMLElement {
         this.initIFrame();
         return this.frameElement.contentWindow.document.querySelector('.svy-form');
+    }
+
+    getContentElementsFromPoint(point: { x: number; y: number; }): Element[] {
+        this.initIFrame();
+        return Array.from(this.frameElement.contentWindow.document.elementsFromPoint(point.x, point.y));
     }
 
     getTopPositionIframe(variants?: boolean): number {
@@ -160,6 +164,20 @@ export class EditorContentService {
         this.initAdjustments();
         return this.leftAdjust;
     }
+    
+    getValueInPixel(value: string, axis: string) {
+		if (value.includes('%')) {
+			const percentage = parseInt(value.replace('%',''));
+			if (axis === 'x') {
+				const width = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().width; 
+				return `${Math.round(percentage / 100 * width)}`;
+			} else {
+				const height = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().height; 
+				return `${Math.round(percentage / 100 * height)}`;
+			}
+		}
+		return value;
+	}
     
    private initIFrame(variants?: boolean) {
         if (variants) {

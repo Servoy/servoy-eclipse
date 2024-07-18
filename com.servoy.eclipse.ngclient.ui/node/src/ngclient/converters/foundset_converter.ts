@@ -1,4 +1,4 @@
-import { ConverterService, IChangeAwareValue } from '../../sablo/converter.service';
+import { ConverterService, IChangeAwareValue, IUIDestroyAwareValue } from '../../sablo/converter.service';
 import { IType, IPropertyContext } from '../../sablo/types_registry';
 import { Deferred, LoggerService, LoggerFactory, RequestInfoPromise, IFoundset, ViewPort, FoundsetChangeEvent, FoundsetChangeListener,
     IFoundsetFieldsOnly} from '@servoy/public';
@@ -159,7 +159,7 @@ export class FoundsetType implements IType<FoundsetValue> {
                 let oldValueShallowCopy: FoundsetFieldsOnly;
 
                 if (!newValue /* newValue is now already currentValue, see code above, so we are checking current value here */) {
-                    newValue = new FoundsetValue(propertyContext, this.sabloDeferHelper, this.viewportService, this.log);
+                    newValue = new FoundsetValue(propertyContext, this.sabloDeferHelper, this.viewportService, this.log, this.sabloService);
                     internalState = newValue.getInternalState();
                 } else {
                     // reuse old value; but make a shallow copy of the old value to give as oldValue to the listener
@@ -241,7 +241,7 @@ export class FoundsetType implements IType<FoundsetValue> {
 
 }
 
-export class FoundsetValue implements IChangeAwareValue, IFoundset {
+export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAwareValue {
 
     /**
      * An identifier that allows you to use this foundset via the 'foundsetRef' and
@@ -315,8 +315,8 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset {
     private __internalState: FoundsetTypeInternalState;
 
     constructor(propertyContext: IPropertyContext, sabloDeferHelper: SabloDeferHelper,
-            viewportService: ViewportService, private log: LoggerService) {
-        this.__internalState = new FoundsetTypeInternalState(propertyContext, log, sabloDeferHelper, viewportService);
+            viewportService: ViewportService, private log: LoggerService, protected sabloService: SabloService) {
+        this.__internalState = new FoundsetTypeInternalState(propertyContext, log, sabloDeferHelper, viewportService, sabloService);
     }
 
     // PUBLIC API to components follows; make it 'smart'
@@ -407,7 +407,9 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset {
         this.__internalState.requests.push(req);
         this.__internalState.notifyChangeListener();
 
-        return this.__internalState.selectionUpdateDefer.promise;
+        return this.__internalState.selectionUpdateDefer.promise.finally(() => {
+            delete this.__internalState.selectionUpdateDefer;
+        })
     }
     
     /**
@@ -420,7 +422,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset {
     public columnDataChangedByRowId(rowID: string, columnName: string, newValue: any, oldValue: any): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * columnDataChangedByRowId requested with ("' + rowID + '", ' + columnName + ', ' + newValue)));
         return this.__internalState.viewportService.sendCellChangeToServerBasedOnRowId(this.viewPort.rows, this.__internalState, this.__internalState, rowID, columnName,
-                                        this.__internalState.propertyContextCreator, undefined, newValue, oldValue);
+                                        this.__internalState.propertyContextCreator, newValue, oldValue);
     }
 
     public columnDataChanged(rowIndex: number, columnName: string, newValue: any, oldValue?: any): RequestInfoPromise<any> {
@@ -459,6 +461,10 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset {
         return this.__internalState;
     }
 
+    uiDestroyed(): void{
+        this.__internalState.sabloDeferHelper.cancelAll(this.getInternalState());
+        delete this.__internalState.selectionUpdateDefer;
+    }
 }
 
 class FoundsetTypeInternalState extends FoundsetViewportState implements IDeferedState {
@@ -470,8 +476,9 @@ class FoundsetTypeInternalState extends FoundsetViewportState implements IDefere
 
     unwatchSelection: () => void;
 
-    constructor(propertyContext: IPropertyContext, log: LoggerService, public readonly sabloDeferHelper: SabloDeferHelper, public readonly viewportService: ViewportService) {
-        super(undefined, log);
+    constructor(propertyContext: IPropertyContext, log: LoggerService, public readonly sabloDeferHelper: SabloDeferHelper, public readonly viewportService: ViewportService,
+        protected sabloService: SabloService) {
+        super(undefined, log, sabloService);
 
         this.propertyContextCreator = {
             // currently foundset prop columns always have foundset prop's pushToServer so only one property context needed

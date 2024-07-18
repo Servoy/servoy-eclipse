@@ -25,7 +25,7 @@ class SwingModifiers {
 @Injectable({
     providedIn: 'root'
 })
-export class ConverterService {
+export class ConverterService<T> {
 
     public static CONVERSION_CL_SIDE_TYPE_KEY = '_T';
     public static VALUE_KEY = '_V';
@@ -59,17 +59,17 @@ export class ConverterService {
         return fulllist;
     }
 
-    public convertFromServerToClient(serverSentData: any,
-            typeOfData: IType<any>,
-            currentClientData: any,
+    public convertFromServerToClient(serverSentData: unknown,
+            typeOfData: IType<unknown>,
+            currentClientData: unknown,
             /* some types decide at runtime the type needed on client - for example dataprovider type could send date, and we will store that info here: */
-            dynamicPropertyTypesHolder: { [nameOrIndex: string]: IType<any> },
+            dynamicPropertyTypesHolder: { [nameOrIndex: string]: IType<unknown> },
             keyForDynamicTypes: string,
-            propertyContext: IPropertyContext): any {
+            propertyContext: IPropertyContext): T {
 
-        let convertedData = serverSentData;
+        let convertedData: T = serverSentData as T;
         if (typeOfData) {
-            convertedData = typeOfData.fromServerToClient(serverSentData, currentClientData, propertyContext);
+            convertedData = typeOfData.fromServerToClient(serverSentData, currentClientData, propertyContext) as T;
 
             // if no dynamic type, remove any previously stored dynamic type for this value
             if (dynamicPropertyTypesHolder && keyForDynamicTypes) delete dynamicPropertyTypesHolder[keyForDynamicTypes];
@@ -284,6 +284,14 @@ export interface IChangeAwareValue {
 
     /** do not call this methods from component/service impls.; this state is meant to be used only by the property type impl. */
     getInternalState(): ChangeAwareState;
+}
+
+export const instanceOfUIDestroyAwareValue = (obj: any): obj is IUIDestroyAwareValue =>
+    obj != null && obj.uiDestroyed instanceof Function;
+
+export interface IUIDestroyAwareValue {
+
+    uiDestroyed(): void;
 }
 
 export interface CASBackup {

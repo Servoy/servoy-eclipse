@@ -37,6 +37,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -103,7 +104,7 @@ final public class ExportSolutionJob extends WorkspaceJob
 				{
 					public void run()
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution exported with errors",
+						MessageDialog.openError(UIUtils.getActiveShell(), "Solution exported with errors",
 							"Solution has been exported with errors. This may prevent the solution from functioning well.\nOnly minimal database info has been exported.");
 					}
 				});
@@ -188,7 +189,7 @@ final public class ExportSolutionJob extends WorkspaceJob
 				if (ex.getCause() != null) message = ex.getCause().getMessage();
 				else message = ex.getMessage();
 				if (message == null) message = ex.toString();
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Failed to export the active solution",
+				MessageDialog.openError(UIUtils.getActiveShell(), "Failed to export the active solution",
 					extraMsg == null ? message : (extraMsg + '\n' + message));
 			}
 		});

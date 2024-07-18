@@ -114,8 +114,6 @@ public class DesignerPreferences
 	//public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
 	public static final String USE_CONTEXT_MENU_TUTORIALS = "useContextMenuTutorials";
 	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
-	public static final String LAUNCH_NG2 = "launchNG2";
-	public static final String NG2_DESIGNER = "ng2Designer";
 	public static final String FORUM_NOTIFICATIONS = "forumNotifications";
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
@@ -179,10 +177,14 @@ public class DesignerPreferences
 
 	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_NATIVE;
 
-	public static final boolean LAUNCH_NG2_DEFAULT = true;
-	public static final boolean NG2_DESIGNER_DEFAULT = true;
 	public static final boolean FORUM_NOTIFICATIONS_DEFAULT = true;
 
+	public static final String TITANIUM_ALIGNMENT_THRESHOLD_SETTING = "titanium_alignmentThreshold";
+	public static final int TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT = 20;
+	public static final String TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_SETTING = "titanium_snapToDistanceThreshold";
+	public static final int TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_DEFAULT = 10;
+	public static final String TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_SETTING = "titanium_snapTosSizeThreshold";
+	public static final int TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_DEFAULT = 10;
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -922,26 +924,6 @@ public class DesignerPreferences
 		return ARRAY_UTF8_TYPE_DEFAULT;
 	}
 
-	public boolean launchNG2()
-	{
-		return getProperty(LAUNCH_NG2, LAUNCH_NG2_DEFAULT);
-	}
-
-	public void setLaunchNG2(boolean launchNG2)
-	{
-		setProperty(LAUNCH_NG2, launchNG2);
-	}
-
-	public boolean showNG2Designer()
-	{
-		return getProperty(NG2_DESIGNER, NG2_DESIGNER_DEFAULT);
-	}
-
-	public void setShowNG2Designer(boolean showNG2)
-	{
-		setProperty(NG2_DESIGNER, showNG2);
-	}
-
 	public boolean showForumNotifications()
 	{
 		return getProperty(FORUM_NOTIFICATIONS, FORUM_NOTIFICATIONS_DEFAULT);
@@ -950,5 +932,35 @@ public class DesignerPreferences
 	public void setShowForumNotifications(boolean showForumNotifications)
 	{
 		setProperty(FORUM_NOTIFICATIONS, showForumNotifications);
+	}
+
+	public void setTitaniumAlignmentThreshold(int snapThreshold)
+	{
+		setProperty(TITANIUM_ALIGNMENT_THRESHOLD_SETTING, snapThreshold);
+	}
+
+	public int getTitaniumAlignmentThreshold()
+	{
+		return getProperty(TITANIUM_ALIGNMENT_THRESHOLD_SETTING, TITANIUM_ALIGNMENT_THRESHOLD_DEFAULT);
+	}
+
+	public void setTitaniumSnapEqualDistanceThreshold(int snapThreshold)
+	{
+		setProperty(TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_SETTING, snapThreshold);
+	}
+
+	public int getTitaniumSnapEqualDistanceThreshold()
+	{
+		return getProperty(TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_SETTING, TITANIUM_SNAP_EQUAL_DISTANCE_THRESHOLD_DEFAULT);
+	}
+
+	public void setTitaniumSnapEqualSizeThreshold(int snapThreshold)
+	{
+		setProperty(TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_SETTING, snapThreshold);
+	}
+
+	public int getTitaniumSnapEqualSizeThreshold()
+	{
+		return getProperty(TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_SETTING, TITANIUM_SNAP_EQUAL_SIZE_THRESHOLD_DEFAULT);
 	}
 }

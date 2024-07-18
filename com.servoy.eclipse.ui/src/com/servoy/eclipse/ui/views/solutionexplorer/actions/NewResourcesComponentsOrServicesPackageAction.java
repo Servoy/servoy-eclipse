@@ -58,6 +58,7 @@ import org.sablo.specification.WebServiceSpecProvider;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -96,7 +97,7 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 		final IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 			(String)node.getRealObject());
 
-		MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), getText(), null, null, MessageDialog.CONFIRM,
+		MessageDialog dialog = new MessageDialog(UIUtils.getActiveShell(), getText(), null, null, MessageDialog.CONFIRM,
 			new String[] { "OK", "Cancel" }, 0)
 		{
 			private Text packName;

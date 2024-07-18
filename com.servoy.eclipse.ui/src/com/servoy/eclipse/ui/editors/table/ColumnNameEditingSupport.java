@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
@@ -95,7 +96,7 @@ public class ColumnNameEditingSupport extends EditingSupport
 				{
 					public void run()
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(),
+						MessageDialog.openError(UIUtils.getActiveShell(),
 							"Error setting " + (realName ? "name" : "dataproviderID") + " on the column", e.getMessage());
 						tableViewer.editElement(element, (realName ? ColumnComposite.CI_NAME : ColumnComposite.CI_DATAPROVIDER_ID));
 						editor.setValue((realName ? ((Column)element).getName() : ((Column)element).getDataProviderID()));

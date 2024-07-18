@@ -1,15 +1,19 @@
 package com.servoy.eclipse.designer.editor.commands;
 
+import static java.util.Arrays.asList;
+
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -22,6 +26,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,8 +60,10 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -64,14 +71,17 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 
@@ -198,10 +208,11 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									if (persistContext.getPersist() instanceof IBasicWebComponent)
 									{
 										IBasicWebComponent parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(persistContext);
-										finalPersist[0] = addCustomType(parentBean,
+										WebCustomType customType = addCustomType(parentBean,
 											event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null,
 											-1, null);
-										;
+										finalPersist[0] = customType;
+										showDataproviderDialog(customType.getPropertyDescription().getProperties(), customType, activeEditor);
 									}
 								}
 								else if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec") != null)
@@ -257,25 +268,26 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										componentName = baseName + "_" + i;
 										i++;
 									}
-									finalPersist[0] = parentPersist.createNewWebComponent(componentName, spec.getName());
+									WebComponent webComponent = parentPersist.createNewWebComponent(componentName, spec.getName());
+									finalPersist[0] = webComponent;
 
 									if (parentPersist instanceof LayoutContainer || activeEditor.getForm().isResponsiveLayout())
 									{
 										int maxLocation = 0;
-										ISupportChilds parent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(finalPersist[0]),
+										ISupportChilds parent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(webComponent),
 											activeEditor.getForm(), parentPersist);
 										Iterator<IPersist> it = parent.getAllObjects();
 										while (it.hasNext())
 										{
 											IPersist currentPersist = it.next();
-											if (currentPersist != finalPersist[0] && currentPersist instanceof ISupportBounds)
+											if (currentPersist != webComponent && currentPersist instanceof ISupportBounds)
 											{
 												Point location = ((ISupportBounds)currentPersist).getLocation();
 												if (location.x > maxLocation) maxLocation = location.x;
 												if (location.y > maxLocation) maxLocation = location.y;
 											}
 										}
-										((WebComponent)finalPersist[0]).setLocation(new Point(maxLocation + 1, maxLocation + 1));
+										webComponent.setLocation(new Point(maxLocation + 1, maxLocation + 1));
 									}
 									Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
 									for (String string : allPropertiesNames)
@@ -286,15 +298,17 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 											if (property.getInitialValue() != null)
 											{
 												Object initialValue = property.getInitialValue();
-												if (initialValue != null) ((WebComponent)finalPersist[0]).setProperty(string, initialValue);
+												if (initialValue != null)
+													webComponent.setProperty(string, ServoyJSONObject.deepCloneJSONArrayOrObj(initialValue));
 											}
 											if ("autoshow".equals(property.getTag("wizard")))
 											{
-												CreateComponentHandler.autoshowWizard(parentPersist, spec, ((WebComponent)finalPersist[0]), property,
+												CreateComponentHandler.autoshowWizard(parentPersist, spec, webComponent, property,
 													activeEditor, id);
 											}
 										}
 									}
+									AddContainerCommand.showDataproviderDialog(spec.getProperties(), webComponent, activeEditor);
 								}
 								if (finalPersist[0] != null)
 								{
@@ -338,7 +352,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								{
 									((IDeveloperRepository)finalPersist[0].getRootObject().getRepository()).deleteObject(finalPersist[0]);
 									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
-										Arrays.asList(new IPersist[] { finalPersist[0] }));
+										asList(new IPersist[] { finalPersist[0] }));
 								}
 							}
 							catch (RepositoryException e)
@@ -494,27 +508,136 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		return i;
 	}
 
+	/**
+	 * @param activeEditor
+	 * @param customType
+	 */
+	public static void showDataproviderDialog(Map<String, PropertyDescription> properties, AbstractBase webComponent, BaseVisualFormEditor activeEditor)
+	{
+		boolean showDialog = true;
+		List<Entry<String, PropertyDescription>> dataproviderProperties = properties.entrySet().stream()
+			.filter(entry -> entry.getValue().getType().getName().equals(DataproviderPropertyType.TYPE_NAME) && (entry.getValue().getTag("wizard") != null &&
+				(entry.getValue().getTag("wizard").toString().equals("true") || entry.getValue().getTag("wizard").equals("1"))))
+			.collect(Collectors.toList());
+
+		ISupportChilds wc = webComponent.getParent();
+		while (wc != null && !(wc instanceof Form))
+		{
+			wc = wc.getParent();
+		}
+		if (wc instanceof Form frm)
+		{
+			boolean isFC = frm.isFormComponent().booleanValue();
+			boolean hasDB = frm.getDataSource() == null ? false : true;
+			if (isFC && !hasDB)
+			{
+				showDialog = false;
+			}
+		}
+
+		if (showDialog)
+		{
+			if (dataproviderProperties.size() == 1)
+			{
+				Entry<String, PropertyDescription> entry = dataproviderProperties.get(0);
+				CreateComponentHandler.autoShowDataProviderSelection(entry.getValue(), activeEditor.getForm(), webComponent,
+					entry.getKey());
+			}
+			else if (dataproviderProperties.size() > 1)
+			{
+				List<String> collect = dataproviderProperties.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
+				ElementListSelectionDialog dialog = new ElementListSelectionDialog(activeEditor.getEditorSite().getShell(),
+					new LabelProvider()
+					{
+						@Override
+						public String getText(Object element)
+						{
+							String txt = super.getText(element);
+							if (txt.endsWith("ID")) txt = txt.substring(0, txt.length() - 2);
+							return txt;
+						}
+					});
+				dialog.setMultipleSelection(true);
+				dialog.setMessage("Select the dataprovider properties that you want to configure");
+				dialog.setElements(collect.toArray());
+				List<String> dataproviderNames = collect.stream().filter(property -> property.toLowerCase().startsWith("dataprovider"))
+					.collect(Collectors.toList());
+				if (dataproviderNames.size() > 0)
+				{
+					// this is a bit hard coded to at least select the one that is called dataprovider as the main selection.
+					dialog.setInitialSelections(dataproviderNames.toArray());
+				}
+				dialog.setTitle("Dataprovider properties configuration");
+				try
+				{
+					if (dialog.open() == Window.OK)
+					{
+						asList(dialog.getResult()).forEach(property -> {
+							PropertyDescription propertyDescription = properties.get(property);
+							CreateComponentHandler.autoShowDataProviderSelection(propertyDescription, activeEditor.getForm(), webComponent, (String)property);
+						});
+					}
+				}
+				catch (Exception e)
+				{
+					// happens sometimes when active window is not found (only while debugging?)
+					ServoyLog.logError(e);
+				}
+			}
+		}
+	}
+
 	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex, WebCustomType template)
 	{
+		return addCustomType(WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentBean.getTypeName()),
+			parentBean, propertyName, compName, arrayIndex, template);
+	}
+
+	public static WebCustomType addCustomType(WebObjectSpecification componentSpec, IBasicWebObject parentWebObject, String propertyName, String compName,
+		int arrayIndex, WebCustomType template)
+	{
 		int index = arrayIndex;
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentBean.getTypeName());
-		boolean isArray = spec.isArrayReturnType(propertyName);
-		PropertyDescription targetPD = spec.getProperty(propertyName);
+
+		boolean isArray;
+		PropertyDescription targetPD;
+		if (parentWebObject instanceof IBasicWebComponent)
+		{
+			// For a component we get the property from the spec
+			isArray = componentSpec.isArrayReturnType(propertyName);
+			targetPD = componentSpec.getProperty(propertyName);
+		}
+		else
+		{
+			// for a nested child we get the property from its type
+			ICustomType< ? > customType = componentSpec.getDeclaredCustomObjectTypes().get(parentWebObject.getTypeName());
+			if (customType != null)
+			{
+				PropertyDescription customTypePD = customType.getCustomJSONTypeDefinition();
+				isArray = customTypePD.isArrayReturnType(propertyName);
+				targetPD = customTypePD.getProperty(propertyName);
+			}
+			else
+			{
+				return null;
+			}
+		}
+
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());
 		IChildWebObject[] arrayValue = null;
 		if (isArray)
 		{
 			targetPD = ((ICustomType< ? >)targetPD.getType()).getCustomJSONTypeDefinition();
-			if (parentBean instanceof WebComponent)
+			var value = parentWebObject.getProperty(propertyName);
+			if (value instanceof IChildWebObject[])
 			{
-				arrayValue = (IChildWebObject[])((WebComponent)parentBean).getProperty(propertyName);
+				arrayValue = (IChildWebObject[])value;
 			}
 			if (index == -1) index = arrayValue != null ? arrayValue.length : 0;
 		}
-		if (parentBean instanceof WebComponent)
+		if (parentWebObject instanceof ISupportsIndexedChildren)
 		{
-			WebComponent parentWebComponent = (WebComponent)parentBean;
-			WebCustomType customType = WebCustomType.createNewInstance(parentWebComponent, targetPD, propertyName, index, true);
+			ISupportsIndexedChildren parentSupportsChildren = (ISupportsIndexedChildren)parentWebObject;
+			WebCustomType customType = WebCustomType.createNewInstance(parentWebObject, targetPD, propertyName, index, true);
 			customType.setName(compName);
 			customType.setTypeName(typeName);
 
@@ -528,47 +651,46 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						Object propValue = template.getProperty(string);
 
-						if ("id".equals(string))
+						if (property.getTag("wizard") != null && property.getTag("wizard") instanceof JSONObject &&
+							((JSONObject)property.getTag("wizard")).has("unique") && ((JSONObject)property.getTag("wizard")).get("unique").equals(true))
 						{
-							propValue = createUniqueID(arrayValue, propValue.toString());
+							propValue = createUniqueID(property, arrayValue, propValue.toString());
 						}
 
 						customType.setProperty(string, propValue);
 					}
-					else
-						if (property != null && property.getInitialValue() != null)
+					else if (property != null && property.getInitialValue() != null)
 					{
 						Object initialValue = property.getInitialValue();
-						if (initialValue != null) customType.setProperty(string, initialValue);
+						if (initialValue != null) customType.setProperty(string, ServoyJSONObject.deepCloneJSONArrayOrObj(initialValue));
 					}
 				}
 			}
 
-			parentWebComponent.insertChild(customType); // if it is array it will make use of index given above in WebCustomType.createNewInstance(...) when inserting; otherwise it's a simple set to some property name anyway
-
+			parentSupportsChildren.insertChild(customType); // if it is array it will make use of index given above in WebCustomType.createNewInstance(...) when inserting; otherwise it's a simple set to some property name anyway
 			return customType;
 		}
 		return null;
 	}
 
-	private static String createUniqueID(IChildWebObject[] columns, String id)
+	private static String createUniqueID(PropertyDescription pd, IChildWebObject[] columns, String value)
 	{
-		String newID = id;
-		if (newID != null)
+		String newValue = value;
+		if (newValue != null)
 		{
 			List<String> columnsID = new ArrayList<String>();
 			for (IChildWebObject column : columns)
 			{
-				if (column.getJson().has("id"))
+				if (column.getJson().has(pd.getName()))
 				{
-					columnsID.add(column.getJson().getString("id"));
+					columnsID.add(column.getJson().getString(pd.getName()));
 				}
 			}
 			for (int i = 0; i < 100; i++)
 			{
-				if (columnsID.contains(newID))
+				if (columnsID.contains(newValue))
 				{
-					newID = generateID(id, i + 1);
+					newValue = generateID(value, i + 1);
 				}
 				else
 				{
@@ -576,13 +698,13 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				}
 			}
 		}
-		return newID;
+		return newValue;
 	}
 
-	private static String generateID(String id, int n)
+	private static String generateID(String value, int n)
 	{
-		StringBuffer sb = new StringBuffer(id.length() + n);
-		sb.append(id);
+		StringBuffer sb = new StringBuffer(value.length() + n);
+		sb.append(value);
 		for (int i = 0; i < n; i++)
 		{
 			sb.append("_c");

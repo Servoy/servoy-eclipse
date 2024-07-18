@@ -315,6 +315,7 @@ public class SimpleUserNode implements IAdaptable
 		}
 		if (toolTip != null)
 		{
+			if (toolTip.startsWith("<")) return toolTip;
 			return "<pre>" + toolTip + "</pre>";
 		}
 		return developerFeedback.getCode();

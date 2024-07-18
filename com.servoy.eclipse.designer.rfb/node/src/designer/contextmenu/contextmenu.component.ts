@@ -3,6 +3,7 @@ import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
 import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from '../services/urlparser.service';
+import { WindowRefService } from '@servoy/public';
 
 export enum SHORTCUT_IDS {
     SET_TAB_SEQUENCE_ID = 'com.servoy.eclipse.designer.rfb.settabseq',
@@ -35,7 +36,7 @@ export class ContextMenuComponent implements OnInit {
     selectionAnchor = 0;
 
     constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService,
-        protected urlParser: URLParserService) {
+        protected urlParser: URLParserService,  private windowRef: WindowRefService,) {
     }
 
     ngOnInit(): void {
@@ -43,6 +44,9 @@ export class ContextMenuComponent implements OnInit {
             void this.editorSession.getSuperForms().then((superForms: Array<string>) => {
                 this.setup(shortcuts, superForms);
             });
+        });
+        this.windowRef.nativeWindow.addEventListener('contextmenu', (event: MouseEvent) => {
+            event.preventDefault();
         });
     }
 
@@ -220,6 +224,16 @@ export class ContextMenuComponent implements OnInit {
             const submenu = this.editorContentService.querySelector('.dropdown-submenu:hover');
             if (submenu) {
                 const menu: HTMLElement = submenu.querySelector('.dropdown-menu');
+                const ctxmenu: HTMLElement = submenu.closest('#contextMenu');
+                if (menu.clientHeight > 200 && (window.innerHeight - ctxmenu.getBoundingClientRect().top - menu.clientHeight) <= 100) {
+					if (ctxmenu.getBoundingClientRect().top > menu.clientHeight) {
+						menu.style.top = (-ctxmenu.getBoundingClientRect().top + menu.clientHeight - submenu.clientHeight) + 'px';
+					} else {
+						menu.style.top = -ctxmenu.getBoundingClientRect().top + 'px';
+					}
+				} else {
+					menu.style.top = '';
+				}	
                 //the submenu can only be displayed on the right or left side of the contextmenu
                 if (this.element.nativeElement.offsetWidth + this.getElementOffset(this.element.nativeElement).left + menu.offsetWidth > viewport.right) {
                     //+5 to make it overlap the menu a bit

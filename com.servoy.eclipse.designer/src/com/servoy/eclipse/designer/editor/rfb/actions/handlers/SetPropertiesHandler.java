@@ -31,6 +31,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
@@ -86,7 +87,7 @@ public class SetPropertiesHandler implements IServerService
 							while (it.hasNext())
 							{
 								String propertyName = (String)it.next();
-								if (!Arrays.asList("x", "y", "width", "height").contains(propertyName))
+								if (!Arrays.asList("x", "y", "width", "height", "move").contains(propertyName))
 								{
 									cc.add(new SetPropertyCommand("propertyName", PersistPropertySource.createPersistPropertySource(context, false),
 										propertyName, properties.opt(propertyName)));
@@ -99,11 +100,22 @@ public class SetPropertiesHandler implements IServerService
 								Point oldLocation = CSSPositionUtils.getLocation((ISupportCSSPosition)persist);
 								Dimension oldSize = CSSPositionUtils.getSize((ISupportCSSPosition)persist);
 								// we need to calculate the new cssposition
+								CSSPosition newPosition = null;
+//								if (properties.has("cssPos"))
+//								{
+//									newPosition = DesignerUtil.cssPositionFromJSON(editorPart, persist, properties,
+//										properties.has("width") && properties.has("height"));
+//								}
+//								else
+//								{
+								newPosition = CSSPositionUtils.adjustCSSPosition((ISupportCSSPosition)persist,
+									properties.optInt("x", oldLocation.x), properties.optInt("y", oldLocation.y),
+									properties.optInt("width", oldSize.width),
+									properties.optInt("height", oldSize.height), properties.optBoolean("move", false));
+//								}
 								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
 									StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName(),
-									CSSPositionUtils.adjustCSSPosition((ISupportCSSPosition)persist,
-										properties.optInt("x", oldLocation.x), properties.optInt("y", oldLocation.y), properties.optInt("width", oldSize.width),
-										properties.optInt("height", oldSize.height))));
+									newPosition));
 							}
 							else
 							{

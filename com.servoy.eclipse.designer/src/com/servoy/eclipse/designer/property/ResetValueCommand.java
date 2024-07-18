@@ -107,14 +107,19 @@ public class ResetValueCommand extends Command
 	@Override
 	public void redo()
 	{
-		if (propertySheetEntry != null && target instanceof ComplexPropertySourceWithStandardReset< ? >)
+		Object restValue;
+		if (target instanceof ComplexPropertySourceWithStandardReset< ? >)
 		{
-			Object restValue = ((ComplexPropertySourceWithStandardReset< ? >)target).resetComplexPropertyValue(propertyName);
-			propertySheetEntry.setValue(restValue);
+			restValue = ((ComplexPropertySourceWithStandardReset< ? >)target).resetComplexPropertyValue(propertyName);
 		}
 		else
 		{
 			target.resetPropertyValue(propertyName);
+			restValue = target.getPropertyValue(propertyName);
+		}
+		if (propertySheetEntry != null)
+		{
+			propertySheetEntry.setValue(restValue);
 		}
 	}
 

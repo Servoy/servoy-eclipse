@@ -385,6 +385,10 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 											{
 												argumentType = "number";
 											}
+											if ("record".equals(argumentType))
+											{
+												argumentType = "JSRecord";
+											}
 											if (spec.getDeclaredCustomObjectTypes().containsKey(argumentType))
 											{
 												argumentType = "CustomType<" + spec.getName() + "." + argumentType + ">";

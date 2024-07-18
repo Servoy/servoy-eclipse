@@ -7,7 +7,12 @@
       "jasmine",
       "node",
       "electron"
-    ]
+    ],
+    "paths": {
+        "@servoy/public": [
+            "../projects/servoy-public/src/public-api"
+        ]
+    }
   },
   "files": [
     "test.ts",

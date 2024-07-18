@@ -16,10 +16,14 @@ import { SabloService } from '../sablo/sablo.service';
 import { PopupFormService } from '../ngclient/services/popupform.service';
 
 class TestDeferred implements IDeferred<any> {
-  promise: Promise<any>;
-  reject(reason: any) {
+  promise: Promise<any> = {
+      then: (_value) => null, catch: (_err) => null,
+      finally:() => null,
+      [Symbol.toStringTag]: ''
+  };
+  reject(_reason: any) {
   }
-  resolve(value: any) {
+  resolve(_value: any) {
   }
 }
 
@@ -34,7 +38,7 @@ class TestSabloDeferHelper extends SabloDeferHelper {
 @Injectable()
 export class TestWebsocketService extends WebsocketService {
   constructor(private _windowRef: WindowRefService,
-        private _converterService: ConverterService,
+        private _converterService: ConverterService<unknown>,
         private _logFactory: LoggerFactory,
         private _loadingIndicatorService: LoadingIndicatorService,
         private _ngZone: NgZone) {
@@ -51,9 +55,8 @@ export class TestWebsocketService extends WebsocketService {
 
 @Injectable()
 export class TestSabloService extends SabloService {
-        constructor(private wService: WebsocketService, sessionStorage: SessionStorageService, converterService: ConverterService,
-         windowRefService: WindowRefService, logFactory: LoggerFactory) {
-            super(wService, sessionStorage, converterService, windowRefService, logFactory);
+        constructor(private wService: WebsocketService, sessionStorage: SessionStorageService,windowRefService: WindowRefService, logFactory: LoggerFactory) {
+            super(wService, sessionStorage,windowRefService, logFactory);
              sessionStorage.remove('svy_session_lock');
         }
 }

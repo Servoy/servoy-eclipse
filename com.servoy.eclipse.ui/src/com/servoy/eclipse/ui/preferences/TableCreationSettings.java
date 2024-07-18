@@ -84,7 +84,7 @@ public class TableCreationSettings extends PreferencePage implements IWorkbenchP
 		primaryKeySequenceTypeCombo.setContentProvider(new ArrayContentProvider());
 		primaryKeySequenceTypeCombo.setLabelProvider(new LabelProvider());
 		primaryKeySequenceTypeCombo.setInput(
-			new ObjectWrapper[] { new ObjectWrapper("Servoy Sequence", new Integer(ColumnInfo.SERVOY_SEQUENCE)), new ObjectWrapper("Database Sequence",
+			new ObjectWrapper[] { new ObjectWrapper("Database Sequence",
 				new Integer(ColumnInfo.DATABASE_SEQUENCE)), new ObjectWrapper("Database Identity",
 					new Integer(ColumnInfo.DATABASE_IDENTITY)), new ObjectWrapper("UUID Generator", new Integer(ColumnInfo.UUID_GENERATOR)) });
 		primaryKeySequenceTypeCombo.addSelectionChangedListener((event) -> {

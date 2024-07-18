@@ -123,6 +123,9 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 				}
 			});
 			
+			$contextmenu.add({
+				text: "Add",
+			});
 			
 			if (editorScope.isAbsoluteFormLayout()){
         			// sizing
@@ -417,13 +420,6 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			);
 			}
 			else {//this is an Responsive Layout 
-				$contextmenu.add(
-						{
-							text: "Add",
-							//					subMenu: $contextmenu.getAddActions(),
-						}
-				);
-
 				$contextmenu.add(
 						{
 							text: "Zoom in",

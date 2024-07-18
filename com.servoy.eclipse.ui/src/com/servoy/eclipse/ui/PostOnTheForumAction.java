@@ -59,6 +59,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.util.HtmlUtils;
@@ -116,7 +117,7 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 				String content = EntityUtils.toString(response.getEntity());
 				if (response.getCode() == HttpStatus.SC_OK && content.contains("viewtopic.php"))
 				{
-					MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Thank you for posting", null,
+					MessageDialog dialog = new MessageDialog(UIUtils.getActiveShell(), "Thank you for posting", null,
 						"You can view your post on the Servoy forum.", MessageDialog.CONFIRM,
 						new String[] { "View post", "Close" }, 0);
 					dialog.setBlockOnOpen(true);

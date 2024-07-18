@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,6 +81,8 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 		{
 			ServoyLog.logError(e);
 		}
+		// do not modify original state, needed for redo
+		Set<Object> previousItemsUUIDSCopy = previousItemsUUIDS != null ? new HashSet<>(previousItemsUUIDS) : new HashSet<>();
 
 		for (int i = 0; i < result.size(); i++)
 		{
@@ -98,16 +101,17 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 			else
 			{
 				customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
-				previousItemsUUIDS.remove(uuid); //it was updated, remove it from the set
+				previousItemsUUIDSCopy.remove(uuid); //it was updated, remove it from the set
 			}
-			row.remove("svyUUID");
-			row.forEach((key, value) -> customType.setProperty(key, value));
+			row.forEach((key, value) -> {
+				if (!"svyUUID".equals(key)) customType.setProperty(key, value);
+			});
 		}
 
-		if (!previousItemsUUIDS.isEmpty())
+		if (!previousItemsUUIDSCopy.isEmpty())
 		{
 			//didn't get an update for some items, which means they are deleted
-			for (Object uuid : previousItemsUUIDS)
+			for (Object uuid : previousItemsUUIDSCopy)
 			{
 				WebCustomType customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
 				webComponent.removeChild(customType);

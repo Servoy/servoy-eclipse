@@ -152,7 +152,7 @@ public class SaveAsTemplateAction extends SelectionAction
 	@Override
 	public void run()
 	{
-		Pair<String, Boolean> result = askForTemplateName(Display.getDefault().getActiveShell(), groupTemplateElements);
+		Pair<String, Boolean> result = askForTemplateName(UIUtils.getActiveShell(), groupTemplateElements);
 		String templateName = result.getLeft();
 		groupTemplateElements = result.getRight().booleanValue();
 

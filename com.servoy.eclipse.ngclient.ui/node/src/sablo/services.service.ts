@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ConverterService, instanceOfChangeAwareValue, ChangeListenerFunction } from './converter.service';
 import { LoggerService, LoggerFactory, RequestInfoPromise } from '@servoy/public';
 import { TypesRegistry, IType, IWebObjectSpecification, IPropertyContextCreator, PushToServerUtils, PushToServerEnum } from '../sablo/types_registry';
-import { WebsocketService } from '../sablo/websocket.service';
+import { WebsocketService,wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 
 @Injectable({
@@ -15,9 +15,9 @@ export class ServicesService {
     private log: LoggerService;
     private serviceDynamicClientSideTypes = {}; // it stores property types that are dynamic (can change at runtime)
 
-    constructor( private converterService: ConverterService,
+    constructor( private converterService: ConverterService<unknown>,
                     private readonly typesRegistry: TypesRegistry,
-                    private websocketService: WebsocketService,
+                    websocketService: WebsocketService,
                     private sabloService: SabloService,
                     logFactory: LoggerFactory ) {
         this.log = logFactory.getLogger('ServicesService');
@@ -185,9 +185,9 @@ export class ServicesService {
         // convert return value as needed
         const promise = this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: serviceName, methodName, args });
         
-        return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
+        return wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
                                 undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
-                    // in case of a reject/errorCallback we just let it propagete to caller;
+                    // in case of a reject/errorCallback we just let it propagate to caller;
     }
 
     private setChangeListenerIfSmartProperty(propertyValue: any, serviceName: string, propertyName: string): void {

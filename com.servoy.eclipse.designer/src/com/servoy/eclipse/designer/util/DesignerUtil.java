@@ -51,6 +51,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.outline.FormOutlineContentProvider;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
@@ -61,12 +62,15 @@ import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.ISupportCSSPosition;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
@@ -430,8 +434,8 @@ public class DesignerUtil
 	public static Set<String> findTopContainers(boolean skipTemplate)
 	{
 		Set<String> topContainers = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values().stream().flatMap(
-			pack -> pack.getSpecifications().values().stream().filter(WebLayoutSpecification::isTopContainer).map(
-				layoutSpec -> pack.getPackageName() + "." + layoutSpec.getName()))
+			pack -> pack.getSpecifications().values().stream().filter(WebLayoutSpecification::isTopContainer)
+				.filter(layoutSpec -> !layoutSpec.isDeprecated()).map(layoutSpec -> pack.getPackageName() + "." + layoutSpec.getName()))
 			.collect(
 				Collectors.toCollection(() -> !skipTemplate ? new TreeSet<>(comparator) : new HashSet<String>()));
 		if (!skipTemplate && hasResponsiveLayoutTemplates(null, null))
@@ -677,4 +681,305 @@ public class DesignerUtil
 		return false;
 	}
 
+	public static CSSPosition cssPositionFromJSON(BaseVisualFormEditor editorPart, IPersist persist, JSONObject properties)
+	{
+		return cssPositionFromJSON(editorPart, persist, properties, false);
+	}
+
+	public static CSSPosition cssPositionFromJSON(BaseVisualFormEditor editorPart, IPersist persist, JSONObject properties, boolean isResize)
+	{
+		CSSPosition newPosition;
+		JSONObject obj = properties.getJSONObject("cssPos");
+		CSSPosition position = ((ISupportCSSPosition)persist).getCssPosition();
+		if (position == null)
+		{
+			newPosition = new CSSPosition(properties.optString("y", "0"), "-1", "-1", properties.optString("y", "0"),
+				properties.optString("width", "0"), properties.optString("height", "0"));
+		}
+		else
+		{
+			newPosition = new CSSPosition(properties.optString("y", position.top), position.right, position.bottom, properties.optString("x", position.left),
+				properties.optString("width", position.width),
+				properties.optString("height", position.height));
+		}
+		if (obj.has("left"))
+		{
+			JSONObject jsonObject = obj.getJSONObject("left");
+			ISupportCSSPosition left = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				jsonObject.optString("uuid")));
+			if (left != null)
+			{
+				String value = getCssValue(left.getCssPosition(), jsonObject.optString("prop", "left"));
+				if (CSSPositionUtils.isSet(value))
+				{
+					newPosition.left = value;
+					if (CSSPositionUtils.isSet(newPosition.right)) newPosition.right = "-1";
+				}
+				else if ("right".equals(jsonObject.optString("prop")))
+				{
+					newPosition.left = CSSPositionUtils.getPixelsValue(left.getCssPosition().left) +
+						CSSPositionUtils.getPixelsValue(left.getCssPosition().width) + "";
+					if (CSSPositionUtils.isSet(newPosition.right)) newPosition.right = "-1";
+				}
+				else if (CSSPositionUtils.isSet(left.getCssPosition().right) && CSSPositionUtils.isSet(left.getCssPosition().width))
+				{
+					int l = CSSPositionUtils.getPixelsValue(left.getCssPosition().right) - CSSPositionUtils.getPixelsValue(left.getCssPosition().width);
+					if (position == null || CSSPositionUtils.isSet(position.right))
+					{
+						newPosition.left = l + "";
+					}
+					else if (isResize)
+					{
+						int w = CSSPositionUtils.getPixelsValue(position.right) - l;
+						if (w > 0)
+						{
+							newPosition.width = w + "";
+						}
+					}
+				}
+			}
+		}
+		else if (obj.has("right"))
+		{
+			JSONObject jsonObject = obj.getJSONObject("right");
+			ISupportCSSPosition right = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				jsonObject.optString("uuid")));
+			if (right != null)
+			{
+				String value = getCssValue(right.getCssPosition(), jsonObject.optString("prop", "right"));
+				if (CSSPositionUtils.isSet(value))
+				{
+					if (isResize)
+					{
+						int w = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(position.left);
+						if (w > 0)
+						{
+							newPosition.width = w + "";
+						}
+					}
+					else
+					{
+						newPosition.right = value;
+						//if (CSSPositionUtils.isSet(newPosition.left)) newPosition.left = "-1";
+					}
+				}
+//				else if ("left".equals(jsonObject.optString("prop")))
+//				{
+//					newPosition.right = CSSPositionUtils.getPixelsValue(right.getCssPosition().right) -
+//						CSSPositionUtils.getPixelsValue(right.getCssPosition().width) + "";
+//				}
+				else if (CSSPositionUtils.isSet(right.getCssPosition().left) && CSSPositionUtils.isSet(right.getCssPosition().width))
+				{
+					AbstractContainer parent = CSSPositionUtils.getParentContainer(right);
+					java.awt.Dimension containerSize = parent.getSize();
+					int r = containerSize.width - CSSPositionUtils.getPixelsValue(right.getCssPosition().left) -
+						CSSPositionUtils.getPixelsValue(right.getCssPosition().width);
+					if (isResize)
+					{
+						newPosition.width = containerSize.width - r - CSSPositionUtils.getPixelsValue(position.left) + "";
+					}
+					else
+					{
+						newPosition.right = r + "";
+					}
+				}
+			}
+		}
+		else if (obj.has("middleH"))
+		{
+			JSONObject jsonObject = obj.getJSONObject("middleH");
+			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				jsonObject.optString("uuid")));
+			if (middle != null)
+			{
+				CSSPosition midCssPosition = middle.getCssPosition();
+				int mid = -1;
+				if (CSSPositionUtils.isSet(midCssPosition.left) && CSSPositionUtils.isSet(midCssPosition.width))
+				{
+					mid = CSSPositionUtils.getPixelsValue(midCssPosition.left) + CSSPositionUtils.getPixelsValue(midCssPosition.width) / 2;
+				}
+				else if (CSSPositionUtils.isSet(midCssPosition.right) && CSSPositionUtils.isSet(midCssPosition.width))
+				{
+					mid = CSSPositionUtils.getPixelsValue(midCssPosition.right) - CSSPositionUtils.getPixelsValue(midCssPosition.width) / 2;
+				}
+				else
+				{
+					mid = (CSSPositionUtils.getPixelsValue(midCssPosition.left) + CSSPositionUtils.getPixelsValue(midCssPosition.right)) / 2;
+				}
+
+				if (CSSPositionUtils.isSet(newPosition.width))
+				{
+					if (CSSPositionUtils.isSet(newPosition.left))
+					{
+						newPosition.left = (mid - CSSPositionUtils.getPixelsValue(newPosition.width) / 2) + "";
+					}
+					if (CSSPositionUtils.isSet(newPosition.right))
+					{
+						newPosition.right = (mid + CSSPositionUtils.getPixelsValue(newPosition.width) / 2) + "";
+					}
+				}
+				else
+				{
+					newPosition.left = (mid - CSSPositionUtils.getPixelsValue(newPosition.width) / 2) + "";
+					newPosition.right = (mid + CSSPositionUtils.getPixelsValue(newPosition.width) / 2) + "";
+				}
+			}
+		}
+
+		if (obj.has("top"))
+		{
+			JSONObject jsonObject = obj.getJSONObject("top");
+			ISupportCSSPosition top = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				jsonObject.optString("uuid")));
+			if (top != null)
+			{
+				String value = getCssValue(top.getCssPosition(), jsonObject.optString("prop", "top"));
+				if (CSSPositionUtils.isSet(value))
+				{
+					newPosition.top = value;
+					if (CSSPositionUtils.isSet(newPosition.bottom)) newPosition.bottom = "-1";
+				}
+				else if ("bottom".equals(jsonObject.optString("prop")))
+				{
+					newPosition.top = CSSPositionUtils.getPixelsValue(top.getCssPosition().top) +
+						CSSPositionUtils.getPixelsValue(top.getCssPosition().height) + "";
+					if (CSSPositionUtils.isSet(newPosition.bottom)) newPosition.bottom = "-1";
+				}
+				else if (CSSPositionUtils.isSet(top.getCssPosition().bottom) && CSSPositionUtils.isSet(top.getCssPosition().height))
+				{
+					int t = CSSPositionUtils.getPixelsValue(top.getCssPosition().bottom) - CSSPositionUtils.getPixelsValue(top.getCssPosition().height);
+					if (position == null || CSSPositionUtils.isSet(position.bottom))
+					{
+						newPosition.top = t + "";
+					}
+					else if (isResize)
+					{
+						int h = CSSPositionUtils.getPixelsValue(position.bottom) - t;
+						if (h > 0)
+						{
+							newPosition.height = h + "";
+						}
+					}
+				}
+			}
+		}
+		else if (obj.has("bottom"))
+		{
+			JSONObject jsonObject = obj.getJSONObject("bottom");
+			ISupportCSSPosition bottom = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				jsonObject.optString("uuid")));
+			if (bottom != null)
+			{
+				String value = getCssValue(bottom.getCssPosition(), jsonObject.optString("prop", "bottom"));
+				if (CSSPositionUtils.isSet(value))
+				{
+					if (isResize)
+					{
+						newPosition.height = CSSPositionUtils.getPixelsValue(value) - CSSPositionUtils.getPixelsValue(position.top) + "";
+					}
+					else
+					{
+						newPosition.bottom = value;
+						//if (CSSPositionUtils.isSet(newPosition.top)) newPosition.top = "-1";
+					}
+				}
+//				else if ("top".equals(jsonObject.optString("prop")))
+//				{
+//					newPosition.bottom = CSSPositionUtils.getPixelsValue(bottom.getCssPosition().bottom) -
+//						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height) + "";
+//				}
+				else if (CSSPositionUtils.isSet(bottom.getCssPosition().top) && CSSPositionUtils.isSet(bottom.getCssPosition().height))
+				{
+					AbstractContainer parent = CSSPositionUtils.getParentContainer(bottom);
+					java.awt.Dimension containerSize = parent.getSize();
+					int b = containerSize.height - CSSPositionUtils.getPixelsValue(bottom.getCssPosition().top) -
+						CSSPositionUtils.getPixelsValue(bottom.getCssPosition().height);
+					if (isResize)
+					{
+						int h = containerSize.height - b - CSSPositionUtils.getPixelsValue(position.top);
+						if (h > 0)
+						{
+							newPosition.height = h + "";
+						}
+					}
+					else
+					{
+						newPosition.bottom = b + "";
+					}
+				}
+			}
+		}
+		else if (obj.has("middleV"))
+		{
+			JSONObject jsonObject = obj.getJSONObject("middleV");
+			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(editorPart,
+				jsonObject.optString("uuid")));
+			if (middle != null)
+			{
+				CSSPosition midCssPosition = middle.getCssPosition();
+				int mid = -1;
+				if (CSSPositionUtils.isSet(midCssPosition.top) && CSSPositionUtils.isSet(midCssPosition.height))
+				{
+					mid = CSSPositionUtils.getPixelsValue(midCssPosition.top) + CSSPositionUtils.getPixelsValue(midCssPosition.height) / 2;
+				}
+				else if (CSSPositionUtils.isSet(midCssPosition.bottom) && CSSPositionUtils.isSet(midCssPosition.height))
+				{
+					mid = CSSPositionUtils.getPixelsValue(midCssPosition.bottom) - CSSPositionUtils.getPixelsValue(midCssPosition.height) / 2;
+				}
+				else
+				{
+					mid = (CSSPositionUtils.getPixelsValue(midCssPosition.top) + CSSPositionUtils.getPixelsValue(midCssPosition.height)) / 2;
+				}
+
+				if (CSSPositionUtils.isSet(newPosition.height))
+				{
+					if (CSSPositionUtils.isSet(newPosition.top))
+					{
+						newPosition.top = (mid - CSSPositionUtils.getPixelsValue(newPosition.height) / 2) + "";
+					}
+					if (CSSPositionUtils.isSet(newPosition.bottom))
+					{
+						newPosition.bottom = (mid + CSSPositionUtils.getPixelsValue(newPosition.height) / 2) + "";
+					}
+				}
+				else
+				{
+					newPosition.top = (mid - CSSPositionUtils.getPixelsValue(newPosition.height) / 2) + "";
+					newPosition.bottom = (mid + CSSPositionUtils.getPixelsValue(newPosition.height) / 2) + "";
+				}
+			}
+		}
+
+		//make sure we have a valid css pos object
+		//in case both properties are set and it's a resize then we keep the width/height and the new property
+		//else we remove the width/height
+		/*
+		 * if (CSSPositionUtils.isSet(newPosition.left) && CSSPositionUtils.isSet(newPosition.right) && CSSPositionUtils.isSet(newPosition.width)) { if
+		 * (isResize) { if (properties.getJSONObject("cssPos").has("right")) { newPosition.left = "-1"; } else { newPosition.right = "-1"; } } else {
+		 * newPosition.width = "-1"; } }
+		 *
+		 * if (CSSPositionUtils.isSet(newPosition.top) && CSSPositionUtils.isSet(newPosition.bottom) && CSSPositionUtils.isSet(newPosition.height)) { if
+		 * (isResize) { if (properties.getJSONObject("cssPos").has("bottom")) { newPosition.top = "-1"; } else { newPosition.bottom = "-1"; } } else {
+		 * newPosition.height = "-1"; } }
+		 */
+		return newPosition;
+	}
+
+	private static String getCssValue(CSSPosition position, String property)
+	{
+		if (position == null) return "-1";
+		switch (property)
+		{
+			case "left" :
+				return position.left;
+			case "right" :
+				return position.right;
+			case "top" :
+				return position.top;
+			case "bottom" :
+				return position.bottom;
+			default :
+				return "-1";
+		}
+	}
 }

@@ -35,6 +35,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.DebugStarter;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
@@ -138,7 +139,7 @@ public abstract class StartDebugHandler extends AbstractHandler implements IHand
 			{
 				public void run()
 				{
-					LAUNCH = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Errors in project",
+					LAUNCH = MessageDialog.openConfirm(UIUtils.getActiveShell(), "Errors in project",
 						"There are errors/warnings in project. Are you sure you want to launch?");
 				}
 			});
@@ -171,7 +172,7 @@ public abstract class StartDebugHandler extends AbstractHandler implements IHand
 		{
 			public void run()
 			{
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot start client", message);
+				MessageDialog.openError(UIUtils.getActiveShell(), "Cannot start client", message);
 			}
 		});
 	}

@@ -32,11 +32,11 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.EditorUtil.SaveDirtyEditorsOutputEnum;
@@ -78,7 +78,7 @@ public class OpenWizardAction extends Action
 	{
 		try
 		{
-			if (SaveDirtyEditorsOutputEnum.CANCELED == EditorUtil.saveDirtyEditors(Display.getCurrent().getActiveShell(), true)) return;
+			if (SaveDirtyEditorsOutputEnum.CANCELED == EditorUtil.saveDirtyEditors(UIUtils.getActiveShell(), true)) return;
 			final IWorkbenchWizard wizard = wizardClass.newInstance();
 
 			IStructuredSelection selection = StructuredSelection.EMPTY;
@@ -90,7 +90,7 @@ public class OpenWizardAction extends Action
 			wizard.init(PlatformUI.getWorkbench(), selection);
 			initWizard(wizard);
 			// Instantiates the wizard container with the wizard and opens it
-			WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard)
+			WizardDialog dialog = new WizardDialog(UIUtils.getActiveShell(), wizard)
 			{
 				private Button restoreDefault = null;
 				private Button copyWarToCmd = null;

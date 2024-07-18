@@ -139,7 +139,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
     /**
      * sub classes can return a different native child then the default main element.
      */
-    public getNativeChild(): any {
+    public getNativeChild(): HTMLElement {
         return this.elementRef.nativeElement;
     }
 

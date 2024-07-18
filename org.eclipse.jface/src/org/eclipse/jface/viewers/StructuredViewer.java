@@ -723,7 +723,7 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 	 * methods on this viewer.
 	 * <p>
 	 * This method was introduced to support multiple equal elements in a viewer
-	 * (@see {@link AbstractTreeViewer}). Multiple equal elements are only
+	 * (see {@link AbstractTreeViewer}). Multiple equal elements are only
 	 * supported if the element map is enabled by calling
 	 * {@link #setUseHashlookup(boolean)} and passing <code>true</code>.
 	 * </p>
@@ -852,8 +852,7 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 			return result;
 		}
 		if (filters != null) {
-			for (Object element : filters) {
-				ViewerFilter f = (ViewerFilter) element;
+			for (ViewerFilter f : filters) {
 				Object[] filteredResult = f.filter(this, parent, result);
 				if (associateListener != null && filteredResult.length != result.length) {
 					notifyFilteredOut(result, filteredResult);
@@ -1415,7 +1414,17 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 
 	@Override
 	public void refresh() {
-		refresh(getRoot());
+		Control control = getControl();
+		if (control != null) {
+			control.setRedraw(false);
+		}
+		try {
+			refresh(getRoot());
+		} finally {
+			if (control != null) {
+				control.setRedraw(true);
+			}
+		}
 	}
 
 	/**

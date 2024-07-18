@@ -18,7 +18,9 @@
 package com.servoy.eclipse.ui.property.types;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.property.ICustomType;
 
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
@@ -32,10 +34,15 @@ public class CustomArrayTypePropertyDescriptorFactory implements ITypePropertyDe
 {
 
 	@Override
-	public IPropertyDescriptor createPropertyDescriptor(Object id, String displayName, FlattenedSolution flattenedEditingSolution,
-		PersistContext persistContext, PropertyDescription propertyDescription)
+	public IPropertyDescriptor createPropertyDescriptor(Object id, IPropertySource persistPropertySource, String displayName,
+		FlattenedSolution flattenedEditingSolution, PersistContext persistContext, PropertyDescription propertyDescription)
 	{
-		return new CustomArrayTypePropertyController(id, displayName, persistContext, propertyDescription);
+		if (propertyDescription.getType() instanceof ICustomType< ? > &&
+			((ICustomType< ? >)propertyDescription.getType()).getCustomJSONTypeDefinition().getType().isPrimitive())
+		{
+			return new PrimitiveArrayTypePropertyController(id, displayName, persistContext, propertyDescription);
+		}
+		return new CustomArrayTypePropertyController(id, displayName, persistPropertySource, persistContext, propertyDescription);
 	}
 
 }

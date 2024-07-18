@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="com.servoy.eclipse.cloud.commands.category"
+            name="Publish Category">
+      </category>
+      <command
+            categoryId="com.servoy.eclipse.cloud.commands.category"
+            id="com.servoy.eclipse.cloud.commands.publishCommand"
+            name="Publish Command">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.servoy.eclipse.cloud.PublishHandler"
+            commandId="com.servoy.eclipse.cloud.commands.publishCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="com.servoy.eclipse.cloud.toolbars.publishToolbar">
+            <command
+                  commandId="com.servoy.eclipse.cloud.commands.publishCommand"
+                  icon="icons/publish.png"
+                  id="com.servoy.eclipse.cloud.toolbars.publishCommand"
+                  tooltip="Publish to Servoy Cloud">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+
+</plugin>

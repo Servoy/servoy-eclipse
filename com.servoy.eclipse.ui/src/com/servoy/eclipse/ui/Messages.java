@@ -27,7 +27,6 @@ public class Messages extends NLS
 {
 	private static final String BUNDLE_NAME = "com.servoy.eclipse.ui.messages";
 
-
 	public static String MoveTextAction_moveCode;
 	public static String MoveTextAction_moveSample;
 	public static String RefreshAction_refresh;
@@ -148,6 +147,7 @@ public class Messages extends NLS
 	public static String TreeStrings_SolutionModel;
 	public static String TreeStrings_i18n;
 	public static String TreeStrings_JSLib;
+	public static String TreeStrings_APIExplorer;
 	public static String TreeStrings_Math;
 	public static String TreeStrings_JSON;
 	public static String TreeStrings_Media;
@@ -172,6 +172,7 @@ public class Messages extends NLS
 	public static String TreeStrings_ImportHookTooltip;
 	public static String TreeStrings_Templates;
 	public static String TreeStrings_Utils;
+	public static String TreeStrings_ClientUtils;
 	public static String TreeStrings_JSUnit;
 	public static String TreeStrings_ValueLists;
 	public static String TreeStrings_variables;
@@ -277,7 +278,6 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_solutionElementNameInvalidIdentifier;
 	public static String ErrorWarningPreferencePage_solutionPropertyFormCannotBeInstantiated;
 	public static String ErrorWarningPreferencePage_solutionPropertyTargetNotFound;
-	public static String ErrorWarningPreferencePage_constantsUsed;
 	public static String ErrorWarningPreferencePage_solutionUsedAsWebServiceMustAuthenticateProblem;
 	public static String ErrorWarningPreferencePage_errorMissingProjectReference;
 	public static String ErrorWarningPreferencePage_styleNotFound;
@@ -295,6 +295,17 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_deprecatedSpecUsageProblem;
 	public static String ErrorWarningPreferencePage_methodNoReturn;
 	public static String EditComponentVariantsAction_editVariants;
+	public static String Cloud_publishToCloud;
+
+	public static String labelInherited(String label)
+	{
+		return (label != null ? label : "") + " (" + LabelInherited + ')';
+	}
+
+	public static String labelOverride(String label)
+	{
+		return (label != null ? label : "") + " (" + LabelOverride + ')';
+	}
 
 	static
 	{

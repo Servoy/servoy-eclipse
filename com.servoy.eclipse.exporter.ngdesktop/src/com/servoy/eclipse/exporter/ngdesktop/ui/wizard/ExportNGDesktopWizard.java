@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -86,6 +87,15 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		//CSSSWTConstants.CSS_ID_KEY
+		pageContainer.getShell().setData("org.eclipse.e4.ui.css.id", "svydialog");
+		super.createPageControls(pageContainer);
+	}
+
 
 	@Override
 	public boolean performFinish()

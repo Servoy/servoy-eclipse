@@ -20,6 +20,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -105,6 +106,7 @@ public class I18NEditor extends EditorPart
 		ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
+		myScrolledComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
 
 		Composite container = new Composite(myScrolledComposite, SWT.NONE);
 

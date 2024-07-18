@@ -90,7 +90,7 @@ public class VisualFormEditorSecurityPage extends Composite
 		btnNORights = new Button(this, SWT.CHECK);
 		btnNORights.setText("No rights unless explicitly specified");
 		btnNORights.setToolTipText(
-			"When this is checked, all groups will have by default no right to view/access the data of any element, unless it is specified by editor. If unchecked, by default all rights are available.");
+			"When this is checked, all permissions will have by default no right to view/access the data of any element, unless it is specified by editor. If unchecked, by default all rights are available.");
 		btnNORights.setSelection(formEditor.getForm().getImplicitSecurityNoRights());
 		btnNORights.addSelectionListener(new SelectionListener()
 		{
@@ -121,7 +121,7 @@ public class VisualFormEditorSecurityPage extends Composite
 
 		Button btnToggleAccessible = new Button(this, SWT.NONE);
 		btnToggleAccessible.setText("Toggle Accessible");
-		btnToggleAccessible.setToolTipText("Toggle accessible value for all elements in the form of selected group.");
+		btnToggleAccessible.setToolTipText("Toggle accessible value for all elements in the form of selected permission.");
 		btnToggleAccessible.addSelectionListener(new SelectionListener()
 		{
 
@@ -146,7 +146,7 @@ public class VisualFormEditorSecurityPage extends Composite
 
 		Button btnToggleViewable = new Button(this, SWT.NONE);
 		btnToggleViewable.setText("Toggle Viewable");
-		btnToggleViewable.setToolTipText("Toggle viewable value for all elements in the form of selected group.");
+		btnToggleViewable.setToolTipText("Toggle viewable value for all elements in the form of selected permission.");
 		btnToggleViewable.addSelectionListener(new SelectionListener()
 		{
 
@@ -200,7 +200,7 @@ public class VisualFormEditorSecurityPage extends Composite
 		});
 
 		TableColumn nameColumn = new TableColumn(groupViewer.getTable(), SWT.LEFT, CI_NAME);
-		nameColumn.setText("Group");
+		nameColumn.setText("Permission");
 		layout.setColumnData(nameColumn, new ColumnWeightData(20, 50, true));
 		tableContainer.setLayout(layout);
 

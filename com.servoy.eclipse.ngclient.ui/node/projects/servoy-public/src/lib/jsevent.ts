@@ -7,7 +7,7 @@ export class JSEvent {
     public x?: number;
     public y?: number;
     public timestamp: number;
-    public data? : any;
+    public data? : unknown;
 }
 
 export interface EventLike {

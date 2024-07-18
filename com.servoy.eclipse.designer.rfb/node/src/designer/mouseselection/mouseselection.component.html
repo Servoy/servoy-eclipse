@@ -1,4 +1,4 @@
- <div #selected class="decorationOverlay" *ngFor="let node of nodes" [ngStyle]="node.style" [id]="node.svyid" [hidden]="editorSession.getState().dragging">
+ <div #selected class="decorationOverlay" *ngFor="let node of nodes" [ngStyle]="node.style" [style.visibility]="checkIfNodeIsVisible(node) ? 'unset' : 'hidden'" [id]="node.svyid" [hidden]="editorSession.getState().dragging">
     <div class="knob t l decorator {{node.isResizable.t && node.isResizable.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'tl',direction:'se',top:1,left:1,width:-1,height:-1}"></div>
     <div class="knob t decorator {{node.isResizable.t ? '': 'hidden'}}" [resizeKnob]="{node, position:'t',direction:'s',top:1,left:0,width:0,height:-1}"></div>
     <div class="knob t r decorator {{node.isResizable.t && node.isResizable.r ? '': 'hidden'}}" [resizeKnob]="{node, position:'tr',direction:'ne',top:1,left:0,width:1,height:-1}"></div>
@@ -8,7 +8,7 @@
     <div class="knob b l decorator {{node.isResizable.b && node.isResizable.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'bl',direction:'ne',top:0,left:1,width:-1,height:1}"></div>
     <div class="knob l decorator {{node.isResizable.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'l',direction:'e',top:0,left:1,width:-1,height:0}"></div>
     
-    <div class="menubar" *ngIf="nodes.length == 1 && node.isContainer && !node.maxLevelDesign">
+    <div class="menubar" *ngIf="nodes.length == 1 && node.isContainer && !node.maxLevelDesign && checkIfNodeIsVisible(node)">
         <span class="containerAction" (mousedown)="insertACopyAction($event, node, true)" style="background-image: url('designer/assets/images/insert_before.png')" title="Insert a {{node.containerName}} before"></span>
         <span class="containerAction" (mousedown)="insertACopyAction($event, node, false)" style="background-image: url('designer/assets/images/insert_after.png')" title="Insert a {{node.containerName}} after"></span>
         <span class="containerAction" (mousedown)="copyAction($event)" style="background-image: url('designer/assets/images/copy_edit.png')" title="Copy"></span>
@@ -42,7 +42,10 @@
      </div>
      <div class="menubar" *ngIf="nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length == 1">
      	<span class="containerAction" (mousedown)="openWizardAction($event, node.autowizardProperties[0])" style="margin-left:3px; margin-right: 10px;background-color: #E9720B;background-image: url('designer/assets/images/configure_in_menu.png')" title="Configure {{node.autowizardProperties[0]}}"></span>
-     </div>   
+     </div>  
+     <div class="menubar" style="top: -19px; float: left;" *ngIf="nodes.length == 1 && node.isFCorLFC">
+     	<span class="containerAction" (mousedown)="updateMoveFCorLFC()" style="margin-left: 3px; margin-right: 10px; background-color: #0099FF; background-image: url('designer/assets/images/move_component.png')" title="Move component"></span>
+     </div> 
      <div class="menubar" style="margin-top: -13px;" *ngIf="nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length > 1" [positionMenu]="node">
         <span #menuOpen (mouseenter)="onEnter($event)">
         	<i class="fas fa-gear fa-sm" style="color: #E9720B;"></i>

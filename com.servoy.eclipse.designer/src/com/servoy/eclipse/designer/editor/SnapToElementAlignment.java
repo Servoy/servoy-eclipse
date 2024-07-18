@@ -45,7 +45,7 @@ import com.servoy.j2db.persistence.Part;
 
 /**
  * Snap elements according to alignment with other elements or container borders.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -151,7 +151,7 @@ public class SnapToElementAlignment extends SnapToHelper
 
 	protected ElementAlignmentItem[] getElementAlignmentForMoveOrResize(ChangeBoundsRequest request, int snapOrientation, boolean singleAlignmentPerDimension)
 	{
-		List<EditPart> editParts = request.getEditParts();
+		List< ? extends EditPart> editParts = request.getEditParts();
 		if (editParts.size() == 0)
 		{
 			return null;
@@ -194,7 +194,8 @@ public class SnapToElementAlignment extends SnapToHelper
 		return getElementAlignment(new Rectangle(loc, baseRect.getSize()), snapOrientation, null, singleAlignmentPerDimension);
 	}
 
-	protected ElementAlignmentItem[] getElementAlignment(Rectangle rect, int snapOrientation, List<EditPart> skipEditparts, boolean singleAlignmentPerDimension)
+	protected ElementAlignmentItem[] getElementAlignment(Rectangle rect, int snapOrientation, List< ? extends EditPart> skipEditparts,
+		boolean singleAlignmentPerDimension)
 	{
 		if (snapOrientation == 0)
 		{
@@ -347,7 +348,8 @@ public class SnapToElementAlignment extends SnapToHelper
 
 				// align left
 				west = getSideAlignmentItem(ElementAlignmentItem.ALIGN_TYPE_SIDE, ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, childBounds.x,
-					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height), (anchors & IAnchorConstants.WEST) != 0);
+					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height),
+					(anchors & IAnchorConstants.WEST) != 0);
 				// distance to right-left
 				west = getDistanceAlignmentItem(ElementAlignmentItem.ALIGN_DIRECTION_WEST, west, rect.x, childBounds.x + childBounds.width,
 					Math.min(rect.y, childBounds.y), Math.max(rect.y + rect.height, childBounds.y + childBounds.height), false,

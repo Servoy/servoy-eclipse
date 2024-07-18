@@ -1,7 +1,6 @@
-import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { EditorSessionService, ISupportAutoscroll } from './services/editorsession.service';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { EditorSessionService } from './services/editorsession.service';
 import { URLParserService } from 'src/designer/services/urlparser.service';
-import { EditorContentService } from './services/editorcontent.service';
 
 @Component({
     selector: 'app-designer',
@@ -14,8 +13,7 @@ export class DesignerComponent implements OnInit {
 
     constructor(public readonly editorSession: EditorSessionService, 
                 public urlParser: URLParserService, 
-                protected readonly renderer: Renderer2, 
-                private editorContentService: EditorContentService) {
+                protected readonly renderer: Renderer2) {
     }
 
     ngOnInit() {

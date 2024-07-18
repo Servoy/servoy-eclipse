@@ -361,7 +361,7 @@ public class FormElementDeleteCommand extends Command
 				ISupportChilds parent = (ISupportChilds)p;
 				for (IPersist child : Utils.iterate(parent.getAllObjects()))
 				{
-					if (child instanceof ISupportExtendsID && !PersistHelper.isOverrideElement((ISupportExtendsID)child))
+					if (child instanceof ISupportExtendsID && !PersistHelper.isOverrideElement(child))
 					{ // is is an extra child element compared to its super child elements
 						if (!overriding.contains(child)) overriding.add(child);
 					}

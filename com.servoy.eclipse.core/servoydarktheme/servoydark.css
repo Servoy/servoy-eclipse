@@ -12,7 +12,6 @@ ExpandBar {
 
 * {
 	background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
-	color:  '#org-eclipse-ui-workbench-DARK_FOREGROUND';
 }
 
 Table, Tree {
@@ -39,9 +38,12 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 	text-align: center;
 }
 
-.svyNatTable:select {
-    painter-resolution: true;
-	cell-background-color:  #e7f1ff;
+.svyNatTable > .delete {
+	cell-background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
+}
+
+.svyNatTable :select {
+	cell-background-color: '#org-eclipse-ui-workbench-ACTIVE_TAB_OUTLINE_COLOR';
 }
 
 .svyNatTable > .COLUMN_HEADER {
@@ -65,4 +67,12 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 
 ToolItem {
 	background-color: unset;
+}
+
+Button, Tree[style~='SWT.CHECK'], Tree[style~='SWT.RADIO'] {
+	background-color: #2f2f1f; 
+}
+
+Button[style~='SWT.RADIO'], Button[style~='SWT.CHECK'] {
+	background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
 }

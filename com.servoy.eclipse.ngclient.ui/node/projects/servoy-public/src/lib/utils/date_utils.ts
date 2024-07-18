@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon';
 
+let fixedFirstDayOfWeek: number = null;
+
 /**
  * Returns a zero-based index for first day of the week, as used by the specified locale
  * e.g. Sunday (returns 0), or Monday (returns 1)
@@ -8,8 +10,10 @@ import { DateTime } from 'luxon';
  * @returns
  */
 export  const getFirstDayOfWeek = (locale: string): number  => {
+    if (fixedFirstDayOfWeek !== null) return fixedFirstDayOfWeek;
+    
     // from http://www.unicode.org/cldr/data/common/supplemental/supplementalData.xml:supplementalData/weekData/firstDay
-    const firstDay = {/*default is 1=Monday*/
+    const firstDay: {[property:string]: number} = {/*default is 1=Monday*/
         bd: 5,
         mv: 5,
         ae: 6,
@@ -108,3 +112,7 @@ export const floorToWeek = (date: DateTime): DateTime => {
     const dayAdjust =  day >= fd ? -day + fd : -day + fd - 7;
     return date.plus({days: dayAdjust});
 };
+
+export  const setFirstDayOfWeek = (value: number): void=> {
+    fixedFirstDayOfWeek = value;
+}

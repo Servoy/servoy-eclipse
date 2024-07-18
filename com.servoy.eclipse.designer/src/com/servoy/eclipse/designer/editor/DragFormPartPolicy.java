@@ -45,9 +45,9 @@ import com.servoy.j2db.util.Debug;
 
 /**
  * Edit policy for dragging the part in form designer.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class DragFormPartPolicy extends ResizableEditPolicy
 {
@@ -184,7 +184,7 @@ public class DragFormPartPolicy extends ResizableEditPolicy
 		ChangeBoundsRequest resizeRequest = new ChangeBoundsRequest(RequestConstants.REQ_RESIZE);
 		resizeRequest.setSizeDelta(new Dimension(0, moveDelta));
 
-		List<EditPart> siblings = getHost().getParent().getChildren();
+		List< ? extends EditPart> siblings = getHost().getParent().getChildren();
 		for (EditPart sibling : siblings)
 		{
 			Object model = sibling.getModel();

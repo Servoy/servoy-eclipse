@@ -206,7 +206,7 @@ public abstract class BasePersistGraphicalEditPart extends BaseGraphicalEditPart
 				{
 					// shift-select: select all edit parts inbetween the current selection and the source edit part
 					EditPartViewer viewer = getCurrentViewer();
-					List<EditPart> editParts = viewer.getContents().getChildren();
+					List< ? extends EditPart> editParts = viewer.getContents().getChildren();
 					// get the bounding box of all currently selected edit parts
 					Rectangle selectedRectangle = null;
 					for (EditPart editpart : editParts)

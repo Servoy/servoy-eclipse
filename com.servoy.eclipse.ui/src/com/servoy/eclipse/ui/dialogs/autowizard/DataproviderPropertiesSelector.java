@@ -114,8 +114,8 @@ public class DataproviderPropertiesSelector
 		};
 
 		dataSourceViewer.setContentProvider(FoundsetPropertyEditor.getFoundsetContentProvider(persistContext));
-		dataSourceViewer.setLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(null, converter));
-		dataSourceViewer.setTextLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext.getContext(), converter));
+		dataSourceViewer.setLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(null, converter, null));
+		dataSourceViewer.setTextLabelProvider(FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext, converter, null));
 
 		Form frm = persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
 		ITable formTable = frm != null && frm.getDataSource() != null
@@ -196,7 +196,7 @@ public class DataproviderPropertiesSelector
 					WebComponent component = (WebComponent)persist;
 					String fsProperty = ((FoundsetLinkedConfig)dataproviderProperties.get(0).getConfig()).getForFoundsetName();
 
-					JSONObject value = converter.convertFromChooserValueToJSONValue(tw, null);
+					JSONObject value = converter.convertFromChooserValueToJSONValue(selection.getFirstElement(), null);
 					component.setProperty(fsProperty, value);
 				}
 				dataSourceViewer.setValid(true);

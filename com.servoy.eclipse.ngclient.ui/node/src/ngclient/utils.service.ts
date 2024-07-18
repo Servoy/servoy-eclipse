@@ -9,8 +9,9 @@ import { FormService } from './form.service';
 export class SvyUtilsService {
     private log: LoggerService;
     private doc: Document;
+    private formService: FormService;
 
-    constructor(private formService: FormService, @Inject(DOCUMENT) _doc: any, logFactory: LoggerFactory) {
+    constructor(@Inject(DOCUMENT) _doc: any, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SvyUtilsService');
         this.doc = _doc;
     }
@@ -67,7 +68,7 @@ export class SvyUtilsService {
         jsEvent.y = event['pageY'];
         jsEvent.formName = form;
         for (const chain of targetElNameChain) {
-            if (this.formService.getFormCacheByName(form).getComponent(chain)) {
+            if (!this.formService || this.formService.getFormCacheByName(form).getComponent(chain)) {
                 jsEvent['elementName'] = chain;
                 break;
             }
@@ -121,5 +122,9 @@ export class SvyUtilsService {
 
     public getMainBody() {
         return this.doc.getElementById('mainBody');
+    }
+    
+    public setFormService(formService: FormService){
+        this.formService = formService;
     }
 }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Designer Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.designer; singleton:=true
-Bundle-Version: 2023.3.8.3850_LTS
+Bundle-Version: 2024.3.2.3945
 Bundle-ClassPath: .
 Bundle-Activator: com.servoy.eclipse.designer.Activator
 Bundle-Vendor: Servoy
@@ -30,7 +30,6 @@ Require-Bundle: org.eclipse.core.databinding,
  com.servoy.eclipse.designer.rfb,
  org.maven.ide.eclipse.grouplayout,
  javax.websocket,
- org.apache.commons.commons-text,
  servoy_headless_client,
  org.eclipse.ui.browser,
  org.eclipse.dltk.javascript.rhino,
@@ -41,4 +40,5 @@ Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.resource,or
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.designer
 Import-Package: com.servoy.eclipse.ngclient.ui,
- javax.servlet.http;version="[4.0.0,5.0.0)"
+ javax.servlet.http;version="[4.0.0,5.0.0)",
+ org.apache.commons.text;version="1.11.0"

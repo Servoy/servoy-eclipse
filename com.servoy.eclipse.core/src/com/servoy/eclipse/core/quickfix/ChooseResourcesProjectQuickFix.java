@@ -40,7 +40,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 /**
  * This class is able to quick-fix multiple/no resources problems markers by letting the user choose the one resources project to remain referenced to the
  * servoy solution project.
- * 
+ *
  * @author acostescu
  */
 // TODO I think this whole class is obsolete; it could be removed as ChangeResourcesProjectQuickFix should provide (or could be made to provide) the same functionality
@@ -52,7 +52,7 @@ public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolutio
 
 	/**
 	 * Creates a new quick fix for referenced resources projects.
-	 * 
+	 *
 	 * @param quickFixString the string that will appear in the quick fix list.
 	 * @param dialogText a string describing what the problem is and what the quick fix will do.
 	 */
@@ -96,7 +96,7 @@ public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolutio
 				{
 					public void run()
 					{
-						int selectedProject = UIUtils.showOptionDialog(Display.getCurrent().getActiveShell(), "Select Servoy Resources Project", "Solution \"" +
+						int selectedProject = UIUtils.showOptionDialog(UIUtils.getActiveShell(), "Select Servoy Resources Project", "Solution \"" +
 							servoyProject.getName() + "\" " + dialogText, tmpList, 0);
 
 						if (selectedProject >= 0)
@@ -113,7 +113,7 @@ public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolutio
 				{
 					public void run()
 					{
-						InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(), "Create & use new Servoy Resources Project",
+						InputDialog dialog = new InputDialog(UIUtils.getActiveShell(), "Create & use new Servoy Resources Project",
 							"No Servoy Resources Projects were found in the workspace.\nA new one will be created and used. Please specify it's name:",
 							"resources", new IInputValidator()
 							{
@@ -127,17 +127,17 @@ public abstract class ChooseResourcesProjectQuickFix implements IMarkerResolutio
 										error = "Please give a name for the new resource project";
 									}
 									else if (ServoyModel.getWorkspace().getRoot().getProject(resourcesProjectName).exists())
-									{
-										error = "A project with the given name already exists in the workspace";
-									}
+								{
+									error = "A project with the given name already exists in the workspace";
+								}
 									else
+								{
+									IStatus validationResult = ServoyModel.getWorkspace().validateName(resourcesProjectName, IResource.PROJECT);
+									if (!validationResult.isOK())
 									{
-										IStatus validationResult = ServoyModel.getWorkspace().validateName(resourcesProjectName, IResource.PROJECT);
-										if (!validationResult.isOK())
-										{
-											error = "The name of the resource project to be created is not valid: " + validationResult.getMessage();
-										}
+										error = "The name of the resource project to be created is not valid: " + validationResult.getMessage();
 									}
+								}
 									return error;
 								}
 

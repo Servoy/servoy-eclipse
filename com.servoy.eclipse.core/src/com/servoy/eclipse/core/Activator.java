@@ -290,7 +290,7 @@ public class Activator extends Plugin
 			public void windowOpened(IWorkbenchWindow window)
 			{
 				/* Remove redundant activities to reduce UI clutter. */
-				String[] activityIds = { "com.servoy.eclipse.activities.javaDevelopment", "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
+				String[] activityIds = { "org.eclipse.team.cvs", "org.eclipse.antDevelopment", "org.eclipse.javaDevelopment", "org.eclipse.plugInDevelopment", "com.servoy.eclipse.activities.html", "com.servoy.eclipse.activities.xml", "com.servoy.eclipse.activities.dltk", "com.servoy.eclipse.activities.edit", "org.eclipse.equinox.p2.ui.sdk.classicUpdate" };
 				IWorkbenchActivitySupport was = PlatformUI.getWorkbench().getActivitySupport();
 				IActivityManager wasAM = was.getActivityManager();
 				List<String> activitiesToDisable = Arrays.asList(activityIds);
@@ -346,8 +346,7 @@ public class Activator extends Plugin
 					}
 				});
 
-				if (!ss.getApplicationServer().hasDeveloperLicense() ||
-					Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
+				if (Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 				{
 					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
 					{
@@ -1316,7 +1315,7 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					ServoyMessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!",
+					ServoyMessageDialog.openError(UIUtils.getActiveShell(), "No Servoy ApplicationServer found!",
 						"No application server found at: " + appServerDir + "\nPlease make sure that you installed Servoy Developer correctly");
 				}
 			});
@@ -1338,7 +1337,7 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								ServoyMessageDialog.openError(Display.getDefault().getActiveShell(), "Servoy ApplicationServer version check",
+								ServoyMessageDialog.openError(UIUtils.getActiveShell(), "Servoy ApplicationServer version check",
 									"Application Server version (" + version + ") is higher than the developers (" + ClientVersion.getReleaseNumber() +
 										") \nPlease upgrade the developer Help->Check for updates");
 							}
@@ -1350,7 +1349,7 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								boolean upgrade = ServoyMessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+								boolean upgrade = ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
 									"Servoy ApplicationServer version should be upgraded", "The ApplicationServers version (" + version +
 										") is lower than Developer's version (" + ClientVersion.getReleaseNumber() + ")\n Upgrade the ApplicationServer?");
 
@@ -1407,7 +1406,7 @@ public class Activator extends Plugin
 													{
 														public void run()
 														{
-															if (ServoyMessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+															if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
 																"ApplicationServer updated",
 																"It is recommended you restart the workbench for the changes to take effect. Would you like to restart now?"))
 															{

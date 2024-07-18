@@ -40,7 +40,9 @@ import org.osgi.service.prefs.Preferences;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.ServoyMessageDialog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.MessageAndCheckBoxDialog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 
 /**
@@ -48,9 +50,13 @@ import com.servoy.eclipse.ui.tweaks.IconPreferences;
  */
 public class EclipseCSSThemeListener
 {
-	private static final String ECLIPSE_DARK_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_dark";
 	private static final String ECLIPSE_CSS_SWT_THEME = "org.eclipse.e4.ui.css.swt.theme";
 	private static final String SCRIPT_EDITOR_PLUGIN_ID = "org.eclipse.dltk.javascript.ui";
+	private static final String CSS_EDITOR_PLUGIN_ID = "org.eclipse.wst.css.ui";
+	private static final String JSON_EDITOR_PLUGIN_ID = "org.sweetlemonade.eclipse.json";
+	private static final String XML_EDITOR_PLUGIN_ID = "org.eclipse.wst.xml.ui";
+	private static final String HTML_EDITOR_PLUGIN_ID = "org.eclipse.wst.html.ui";
+	private static final String SQL_EDITOR_PLUGIN_ID = "net.sourceforge.sqlexplorer";
 
 	private static EclipseCSSThemeListener instance;
 	private IPreferenceChangeListener themeChangedListener;
@@ -85,16 +91,16 @@ public class EclipseCSSThemeListener
 					if (it != null)
 					{
 						String label = it.getLabel();
-						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
-							!ECLIPSE_DARK_THEME_ID.equals(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
+						if (UIUtils.isDarkTheme(it.getId()) && !IconPreferences.getInstance().getUseDarkThemeIcons() ||
+							!UIUtils.isDarkTheme(it.getId()) && IconPreferences.getInstance().getUseDarkThemeIcons())
 						{
-							IconPreferences.getInstance().setUseDarkThemeIcons(ECLIPSE_DARK_THEME_ID.equals(it.getId()));
+							IconPreferences.getInstance().setUseDarkThemeIcons(UIUtils.isDarkTheme(it.getId()));
 							IconPreferences.getInstance().save(true);
 							ServoyModelManager.getServoyModelManager().getServoyModel()
 								.addDoneListener(() -> {
-									if (checkOverwriteThemePreferences(it.getId().equals(ECLIPSE_DARK_THEME_ID)))
+									if (checkOverwriteThemePreferences(UIUtils.isDarkTheme(it.getId())))
 									{
-										MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(Display.getCurrent().getActiveShell(),
+										MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(UIUtils.getActiveShell(),
 											label + " theme was detected", null,
 											"It is strongly recommended to restart the developer for the " + label +
 												" theme preferences to be applied. Would you like to restart now?",
@@ -114,7 +120,7 @@ public class EclipseCSSThemeListener
 									else
 									{
 										setThemePreferences(it.getId()); //if nothing is overwritten, just import preferences
-										if (ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+										if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
 											label + " theme was detected",
 											"It is strongly recommended to restart the developer for the " + label +
 												" theme preferences to be applied. Would you like to restart now?"))
@@ -131,7 +137,7 @@ public class EclipseCSSThemeListener
 						IconPreferences.getInstance().save(true);
 						ServoyModelManager.getServoyModelManager().getServoyModel()
 							.addDoneListener(() -> {
-								if (ServoyMessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+								if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(),
 									"Theming is disabled",
 									"It is strongly recommended to restart the developer for the theming preferences to be applied. Would you like to restart now?"))
 								{
@@ -153,12 +159,12 @@ public class EclipseCSSThemeListener
 			{
 				String themeid = (String)event.getNewValue();
 				IconPreferences iconPreferences = IconPreferences.getInstance();
-				iconPreferences.setUseDarkThemeIcons(themeid.equals(ECLIPSE_DARK_THEME_ID));
+				iconPreferences.setUseDarkThemeIcons(UIUtils.isDarkTheme(themeid));
 				iconPreferences.save();
-				if (checkOverwriteThemePreferences(themeid.equals(ECLIPSE_DARK_THEME_ID)))
+				if (checkOverwriteThemePreferences(UIUtils.isDarkTheme(themeid)))
 				{
 					Display.getDefault().asyncExec(() -> {
-						if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
+						if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(),
 							"Import theme preferences",
 							"Would you like to apply script editor preferences for the selected theme? It might overwrite exising values."))
 						{
@@ -182,29 +188,46 @@ public class EclipseCSSThemeListener
 			IPreferencesService preferencesService = Platform.getPreferencesService();
 			IExportedPreferences prefs = preferencesService
 				.readPreferences(is);
-			if (ECLIPSE_DARK_THEME_ID.equals(themeID))
+			if (UIUtils.isDarkTheme(themeID))
 			{
 				IStatus status = preferencesService.applyPreferences(prefs);
 				if (!status.isOK())
 				{
-					org.eclipse.jface.dialogs.MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Could not import theme preferences",
+					org.eclipse.jface.dialogs.MessageDialog.openWarning(UIUtils.getActiveShell(), "Could not import theme preferences",
 						"Please check the Servoy wiki and import the theme preferences manually.\n" +
 							status.getMessage());
 				}
 			}
 			else
 			{
-				IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(SCRIPT_EDITOR_PLUGIN_ID);
-				for (String pref : prefs.node("instance").node(SCRIPT_EDITOR_PLUGIN_ID).keys())
-				{
-					preferences.remove(pref);
-				}
-				preferences.flush();
+				resetPreferencesToDefault(SCRIPT_EDITOR_PLUGIN_ID, prefs);
+				resetPreferencesToDefault(CSS_EDITOR_PLUGIN_ID, prefs);
+				resetPreferencesToDefault(JSON_EDITOR_PLUGIN_ID, prefs);
+				resetPreferencesToDefault(XML_EDITOR_PLUGIN_ID, prefs);
+				resetPreferencesToDefault(HTML_EDITOR_PLUGIN_ID, prefs);
+				resetPreferencesToDefault(SQL_EDITOR_PLUGIN_ID, prefs);
 			}
 		}
 		catch (Exception e)
 		{
 			Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
+		}
+	}
+
+	private void resetPreferencesToDefault(String pluginID, IExportedPreferences prefs)
+	{
+		try
+		{
+			IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(pluginID);
+			for (String pref : prefs.node("instance").node(pluginID).keys())
+			{
+				preferences.remove(pref);
+			}
+			preferences.flush();
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
 		}
 	}
 
@@ -247,31 +270,5 @@ public class EclipseCSSThemeListener
 		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).removePreferenceChangeListener(themeChangedListener);
 	}
 
-	public static boolean isDarkThemeSelected()
-	{
-		boolean IS_DARK_THEME = false;
-		BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
-		ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
-		if (serviceReference != null)
-		{
-			IThemeManager manager = ctx.getService(serviceReference);
-			if (manager != null)
-			{
-				Display d = Display.getDefault();
-				IThemeEngine engine = manager.getEngineForDisplay(d);
-				if (engine != null)
-				{
-					ITheme it = engine.getActiveTheme();
-					if (it != null)
-					{
-						if (ECLIPSE_DARK_THEME_ID.equals(it.getId()))
-						{
-							IS_DARK_THEME = true;
-						}
-					}
-				}
-			}
-		}
-		return IS_DARK_THEME;
-	}
+
 }

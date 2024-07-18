@@ -53,6 +53,7 @@ public class DataProviderCellEditor extends DialogCellEditor
 	private final DataProviderOptions input;
 	private final DataProviderConverter converter;
 	private final ITable table;
+	private final String title;
 
 	/**
 	 * Creates a new dataprovider cell editor parented under the given control.
@@ -67,7 +68,7 @@ public class DataProviderCellEditor extends DialogCellEditor
 	 * @param converter
 	 */
 	public DataProviderCellEditor(Composite parent, ILabelProvider labelProvider, IValueEditor<Object> valueEditor, Form form,
-		FlattenedSolution flattenedSolution, boolean readOnly, DataProviderOptions input, DataProviderConverter converter, ITable table)
+		FlattenedSolution flattenedSolution, boolean readOnly, DataProviderOptions input, DataProviderConverter converter, ITable table, String... title)
 	{
 		super(parent, labelProvider, valueEditor, readOnly, SWT.NONE);
 		this.form = form instanceof FlattenedForm ? flattenedSolution.getForm(form.getID()) : form;
@@ -75,6 +76,7 @@ public class DataProviderCellEditor extends DialogCellEditor
 		this.input = input;
 		this.converter = converter;
 		this.table = table;
+		this.title = title.length > 0 ? title[0] : "Select Data Provider";
 	}
 
 	@Override
@@ -83,7 +85,7 @@ public class DataProviderCellEditor extends DialogCellEditor
 		DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), PersistContext.create(form), flattenedSolution,
 			table != null ? table
 				: ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(flattenedSolution.getFlattenedForm(form).getDataSource()),
-			input, getSelection(), SWT.NONE, "Select Data Provider");
+			input, getSelection(), SWT.NONE, title);
 		dialog.open();
 
 		if (dialog.getReturnCode() != Window.CANCEL)

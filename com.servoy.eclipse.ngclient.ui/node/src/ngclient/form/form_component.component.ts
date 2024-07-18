@@ -22,8 +22,8 @@ import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_re
  */
 export abstract class AbstractFormComponent {
 
-    _containers: { added: any; removed: any };
-    _cssstyles: { [x: string]: any };
+    _containers: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } };
+    _cssstyles: { [container: string]: { [classname: string]: string } };
     protected componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
 
     constructor(protected renderer: Renderer2) {
@@ -34,7 +34,7 @@ export abstract class AbstractFormComponent {
     }
 
     @Input()
-    set containers(containers: { added: any; removed: any }) {
+    set containers(containers: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } }) {
         if (!containers) return;
         for (const containername of Object.keys(containers.added)) {
             const container = this.getContainerByName(containername);
@@ -78,12 +78,12 @@ export abstract class AbstractFormComponent {
     }
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
-    get cssStyles() {
+    get cssstyles() {
         return this._cssstyles;
     }
 
     @Input()
-    set cssStyles(cssStyles: { [x: string]: any }) {
+    set cssstyles(cssStyles: { [container: string]: { [classname: string]: string } }) {
         if (!cssStyles) return;
         this._cssstyles = cssStyles;
         for (const containername of Object.keys(cssStyles)) {
@@ -213,15 +213,15 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     constructor(private formservice: FormService, private sabloService: SabloService,
                 private servoyService: ServoyService, logFactory: LoggerFactory,
                 private changeHandler: ChangeDetectorRef,
-                private el: ElementRef, protected renderer: Renderer2,
-                private converterService: ConverterService,
+                private el: ElementRef<Element>, protected renderer: Renderer2,
+                private converterService: ConverterService<unknown>,
                 @Inject(DOCUMENT) private document: Document) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
     }
 
     public static doCallApiOnComponent(comp: ServoyBaseComponent<any>, componentSpec: IWebObjectSpecification, apiName: string, args: any[],
-                        converterService: ConverterService, log: LoggerService): Promise<any> {
+                        converterService: ConverterService<unknown>, log: LoggerService): Promise<any> {
         const callSpec = componentSpec?.getApiFunction(apiName);
 
         // convert args
@@ -262,7 +262,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             if (changes.name.previousValue) this.formservice.destroy(changes.name.previousValue);
             // really make sure all form state is reverted to default for this new name
             this.formCache = this.formservice.getFormCache(this);
-            const styleClasses: string = this.formCache.getComponent('').model.styleClass;
+            const styleClasses: string = this.formCache.getComponent('').model.styleClass as string;
             if (styleClasses)
                 this.formClasses = styleClasses.split(' ');
             else
@@ -340,12 +340,11 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             this.absolutFormPosition['backgroundColor'] = 'transparent';
         }
 
-        if (formData.model.addMinSize) {
-            if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null) {
-                // see svyFormstyle from ng1
-                this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
-                this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
-            }
+        // add a min size if needed and if this is not the main form to avoid scrollbars there.
+        if (this.el.nativeElement.parentElement?.closest('svy-form') != null) {
+            // see svyFormstyle from ng1
+            if (formData.model.useMinWidth) this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
+            if (formData.model.useMinHeight) this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
         }
         return this.absolutFormPosition;
     }

@@ -47,7 +47,7 @@ import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.Script;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.json.JSONObject;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -239,8 +239,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 				is.close();
 				if (source != null)
 				{
-					JavaScriptParser parser = new JavaScriptParser();
-					Script script = parser.parse(source, null);
+					Script script = JavaScriptParserUtil.parse(source, null);
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
 					{
 
@@ -730,7 +729,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			String password = sc.getPassword();
 			try
 			{
-				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), password != null ? password : "");
+				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(password != null ? password : "");
 			}
 			catch (Exception e)
 			{
@@ -816,7 +815,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			try
 			{
 				properties.setProperty("license." + i + ".code",
-					IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), license.getCode()));
+					IWarExportModel.enc_prefix + SecuritySupport.encrypt(license.getCode()));
 			}
 			catch (Exception e)
 			{

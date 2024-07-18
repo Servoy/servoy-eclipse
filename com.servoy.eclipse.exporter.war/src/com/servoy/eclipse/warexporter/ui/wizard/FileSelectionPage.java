@@ -371,7 +371,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 
 		new Label(horizontalComposite, SWT.NONE);
 		createNoneExistingUsersButton = new Button(horizontalComposite, SWT.CHECK);
-		createNoneExistingUsersButton.setText("Create nonexisting users and add existing users to groups specified in import");
+		createNoneExistingUsersButton.setText("Create nonexisting users and give existing users the permissions specified in import");
 		createNoneExistingUsersButton.setSelection(exportModel.getImportUserPolicy() == IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G);
 		createNoneExistingUsersButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -407,7 +407,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		new Label(horizontalComposite, SWT.NONE);
 		new Label(horizontalComposite, SWT.NONE);
 		addUsersToAdminGroupButton = new Button(horizontalComposite, SWT.CHECK);
-		addUsersToAdminGroupButton.setText("Allow users to be added to the Administrators group");
+		addUsersToAdminGroupButton.setText("Allow users to be added to the Administrators permission");
 		addUsersToAdminGroupButton.setSelection(exportModel.isAddUsersToAdminGroup());
 		addUsersToAdminGroupButton.addSelectionListener(new SelectionAdapter()
 		{

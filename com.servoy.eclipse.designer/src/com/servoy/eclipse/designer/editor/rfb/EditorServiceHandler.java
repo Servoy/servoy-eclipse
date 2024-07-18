@@ -61,7 +61,6 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetPropertiesHand
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetSelectionHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SpacingCentersPack;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.StyleVariantsHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositioner;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
@@ -119,10 +118,6 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("z_order_send_to_back_one_step", new ZOrderCommand(editorPart, selectionProvider, "z_order_send_to_back_one_step"));
 		configuredHandlers.put("z_order_bring_to_front", new ZOrderCommand(editorPart, selectionProvider, "z_order_bring_to_front"));
 		configuredHandlers.put("z_order_send_to_back", new ZOrderCommand(editorPart, selectionProvider, "z_order_send_to_back"));
-
-		configuredHandlers.put("addStyleVariantFor", new StyleVariantsHandler());
-		configuredHandlers.put("editStyleVariantsFor", new StyleVariantsHandler());
-		configuredHandlers.put("getStyleVariantsFor", new StyleVariantsHandler());
 
 		configuredHandlers.put("horizontal_spacing", new SpacingCentersPack(editorPart, selectionProvider));
 		configuredHandlers.put("vertical_spacing", new SpacingCentersPack(editorPart, selectionProvider));
@@ -333,6 +328,12 @@ public class EditorServiceHandler implements IServerService
 						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER)
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER))
 							: Boolean.TRUE;
+					}
+					if (args.has("showDynamicGuides"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_DYNAMIC_GUIDES_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_DYNAMIC_GUIDES_IN_ANGULAR_DESIGNER))
+							: Boolean.FALSE;
 					}
 					if (args.has("sameSizeIndicator"))
 					{
@@ -564,6 +565,20 @@ public class EditorServiceHandler implements IServerService
 				String category = args.getString("variantCategory");
 				JSONArray variants = fl.getVariantsHandler().getVariantsForCategory(category);
 				return variants;
+			}
+		});
+
+		configuredHandlers.put("getSnapThresholds", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				JSONObject settings = new JSONObject();
+				DesignerPreferences designerPreferences = new DesignerPreferences();
+				settings.put("alignment", Integer.valueOf(designerPreferences.getTitaniumAlignmentThreshold()));
+				settings.put("distance", Integer.valueOf(designerPreferences.getTitaniumSnapEqualDistanceThreshold()));
+				settings.put("size", Integer.valueOf(designerPreferences.getTitaniumSnapEqualSizeThreshold()));
+				return settings;
 			}
 		});
 	}

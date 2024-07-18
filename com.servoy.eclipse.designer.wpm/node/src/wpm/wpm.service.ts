@@ -244,28 +244,28 @@ export class WpmService {
   }
 
   versionCompare(v1: string, v2: string): number {
-    const av1 = v1.split('.');
-    const av2 = v2.split('.');
+	const av1 = v1.split('.');
+	const av2 = v2.split('.');
 
     const sizeDiff = av2.length - av1.length;
-    if(sizeDiff) {
-      for(let i = 0; i < Math.abs(sizeDiff); i++) {
-        if(sizeDiff > 0) av1.push('0')
-        else av2.push('0');
-      }
-    }
+    if (sizeDiff) {
+		for (let i = 0; i < Math.abs(sizeDiff); i++) {
+			if (sizeDiff > 0) av1.push('0');
+			else av2.push('0');
+		}
+	}
 
-    for(let i = 0; i < av1.length; i++) {
-      const ival1 = parseInt(av1[i]);
-      const ival2 = parseInt(av2[i]);
-      if(!isNaN(ival1) &&  !isNaN(ival2)) {
-        if(ival1 != ival2) return ival1 - ival2;
-      }
-      else if(av1[i] < av2[i]) return -1;
-      else if(av1[i] > av2[i]) return 1;
-    }
+	for (let i = 0; i < av1.length; i++) {
+		if (!isNaN(Number(av1[i])) && !isNaN(Number(av2[i]))) {
+			const ival1 = parseInt(av1[i]);
+			const ival2 = parseInt(av2[i]);
+			if (ival1 != ival2) return ival1 - ival2;
+		}
+		else if (av1[i] < av2[i]) return -1;
+		else if (av1[i] > av2[i]) return 1;
+	}
 
-    return 0;
+	return 0;
   }
   
   isDarkTheme(): boolean {

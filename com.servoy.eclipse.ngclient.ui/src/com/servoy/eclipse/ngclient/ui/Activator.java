@@ -3,10 +3,12 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
@@ -59,7 +61,7 @@ public class Activator extends Plugin
 		String targetFolder = getSystemOrEvironmentProperty("servoy.ng2.target.folder");
 		if (targetFolder != null)
 		{
-			this.mainTargetFolder = new File(targetFolder);
+			this.mainTargetFolder = new File(targetFolder).getCanonicalFile();
 		}
 		else
 		{
@@ -113,7 +115,7 @@ public class Activator extends Plugin
 		{
 			value = System.getenv(propertyName);
 		}
-		return value;
+		return value != null ? Paths.get(StringEscapeUtils.escapeJava(value)).normalize().toString() : null;
 	}
 
 	public void extractNode()

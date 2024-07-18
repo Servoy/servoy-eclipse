@@ -108,7 +108,7 @@ export class FoundsetLinkedValue extends Array<any> implements IChangeAwareValue
 
         this.__internalState.viewportService.sendCellChangeToServerBasedOnRowId(this, this.__internalState, undefined,
                 this.__internalState.forFoundset().viewPort.rows[index]._svyRowId, undefined,
-                this.__internalState.getPropertyContextCreatorForRow(), undefined, newValue, oldValue);
+                this.__internalState.getPropertyContextCreatorForRow(), newValue, oldValue);
     }
 
 }
@@ -120,8 +120,8 @@ class FSLinkedInternalState extends FoundsetViewportState {
     private singleValueState: SingleValueState = undefined;
 
     constructor(private foundsetLinkedValue: FoundsetLinkedValue, propertyContext: IPropertyContext, forFoundset: () => IFoundset, log: LoggerService,
-                    public viewportService: ViewportService, private sabloService: SabloService) {
-        super(forFoundset, log);
+                    public viewportService: ViewportService, protected sabloService: SabloService) {
+        super(forFoundset, log, sabloService);
 
         this.propertyContextCreatorForRow = {
                // currently foundset prop columns always have foundset prop's pushToServer so only one property context needed;
@@ -249,13 +249,14 @@ class SingleValueState {
                         this.checkFoundsetSizeAndRegenerateIfNeeded();
                     }
                 });
-
-                // if both foundset and foundset linked come in the same json from server, it might
-                // happen that the foundset linked fromServerToClient is done before the foundset one - so the foundset prop. might not yet be available
-                // or not updated (so the single value viewport is not populated in that case because we do not know the size); in that case we need to
-                // regenerateWholeViewportDueToSizeChange once when addIncomingMessageHandlingDoneTask starts executing (then all props. from that data burst are processed)        const foundsetPropValue = iS.forFoundset();
-                this.checkFoundsetSizeAndRegenerateIfNeeded();
             }
+
+            // if both foundset and foundset linked come in the same json from server, it might
+            // happen that the foundset linked fromServerToClient is done before the foundset one - so the foundset prop. might not yet be available
+            // or not updated (so the single value viewport is not populated in that case because we do not know the size); in that case we need to
+            // regenerateWholeViewportDueToSizeChange once when addIncomingMessageHandlingDoneTask starts executing (then all props. from that data burst are processed)
+            // ALSO, if fs is null (but change was applied after current property) we need to generate an empty array so that it doesn't remain with an obsolete single-value foundset size
+            this.checkFoundsetSizeAndRegenerateIfNeeded();
         });
     }
     

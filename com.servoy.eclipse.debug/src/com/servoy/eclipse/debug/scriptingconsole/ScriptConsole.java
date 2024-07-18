@@ -63,6 +63,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.ClientState;
 import com.servoy.j2db.IDebugClient;
@@ -100,7 +101,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.TextConsole#dispose()
 	 */
 	@Override
@@ -111,7 +112,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.TextConsole#getPartitioner()
 	 */
 	@Override
@@ -122,7 +123,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.TextConsole#clearConsole()
 	 */
 	@Override
@@ -138,7 +139,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.TextConsole#createPage(org.eclipse.ui.console.IConsoleView)
 	 */
 	@Override
@@ -265,7 +266,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.console.TextConsolePage#createControl(org.eclipse.swt.widgets.Composite)
 		 */
 		@Override
@@ -289,13 +290,16 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 					else selectedClient = null;
 
 					text.setEditable(selectedClient != null);
-					if (selectedClient != null)
+					if (!UIUtils.isDarkThemeSelected(false))
 					{
-						text.getTextWidget().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-					}
-					else
-					{
-						text.getTextWidget().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+						if (selectedClient != null)
+						{
+							text.getTextWidget().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+						}
+						else
+						{
+							text.getTextWidget().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+						}
 					}
 
 				}
@@ -308,14 +312,14 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.console.TextConsolePage#dispose()
 		 */
 		@Override
 		public void dispose()
 		{
 			super.dispose();
-			IHandlerService handlerService = (IHandlerService)getSite().getService(IHandlerService.class);
+			IHandlerService handlerService = getSite().getService(IHandlerService.class);
 			handlerService.deactivateHandler(activateHandler);
 			proposalsHandler.dispose();
 			testClientsJob.cancel();
@@ -323,7 +327,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.console.TextConsolePage#getControl()
 		 */
 		@Override
@@ -334,7 +338,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.ui.console.TextConsolePage#createViewer(org.eclipse.swt.widgets.Composite)
 		 */
 		@Override
@@ -368,7 +372,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 			text.configure(cfg);
 			if (memento != null) text.restoreState(memento);
 
-			IHandlerService handlerService = (IHandlerService)getSite().getService(IHandlerService.class);
+			IHandlerService handlerService = getSite().getService(IHandlerService.class);
 			proposalsAction = new TextViewerAction(text, ISourceViewer.CONTENTASSIST_PROPOSALS);
 			proposalsAction.setEnabled(true);
 			proposalsAction.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
@@ -412,7 +416,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 			 */
 			@Override
@@ -463,7 +467,7 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.eclipse.core.runtime.jobs.Job#canceling()
 			 */
 			@Override

@@ -88,18 +88,30 @@ export class KeyboardLayoutDirective {
 						if (isResize) {
 							if (elementInfo.width + changeW > 0) elementInfo.width = elementInfo.width + changeW;
 							if (elementInfo.height + changeH > 0) elementInfo.height = elementInfo.height + changeH;
+							element.style.width = elementInfo.width + 'px';
+							element.style.height = elementInfo.height + 'px';
 						} else {
 							if (elementInfo.y + changeY > -1) elementInfo.y = elementInfo.y + changeY;
 							if (elementInfo.x + changeX > -1) elementInfo.x = elementInfo.x + changeX;
+							if (elementInfo.element.style.left.length) {
+								element.style.left = elementInfo.x + 'px';
+							}
+							if (elementInfo.element.style.top.length) {
+								element.style.top = elementInfo.y + 'px';
+							}
+							if (elementInfo.element.style.right.length) {
+								elementInfo.element.style.right = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.right, 'x').replace('px', ''))|| 0)  - changeX + 'px';
+							}
+							if (elementInfo.element.style.bottom.length) {
+								elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
+							}
+							if (!elementInfo.element.style.left.length && !elementInfo.element.style.right.length) {
+								element.style.left = elementInfo.x + 'px';
+							}
+							if (!elementInfo.element.style.top.length && !elementInfo.element.style.bottom.length) {
+								element.style.top = elementInfo.y + 'px';
+							}
 						}
-                        const changes = {}; 
-                        changes[node] = {
-                            x: elementInfo.x,
-                            y: elementInfo.y,
-                            width: elementInfo.width,
-                            height: elementInfo.height
-                        }
-                        this.editorSession.sendChanges(changes);
                     }
                     else if (!isResize) {
 						// var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
@@ -139,7 +151,8 @@ export class KeyboardLayoutDirective {
                         x : elementInfo.x,
                         y : elementInfo.y,
                         width : elementInfo.width,
-                        height : elementInfo.height
+                        height : elementInfo.height,
+                        move: !event.shiftKey
                     }
                 } else {
                     // var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
@@ -151,7 +164,7 @@ export class KeyboardLayoutDirective {
                 }
             }
         }
-        if (this.isSendChanges) {
+        if (this.isSendChanges && Object.keys(changes).length) {
             this.editorSession.sendChanges(changes);
         } else {
             if (event.keyCode > 36 && event.keyCode < 41) {

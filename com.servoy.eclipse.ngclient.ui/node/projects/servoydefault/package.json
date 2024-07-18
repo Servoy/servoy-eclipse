@@ -1,20 +1,20 @@
 {
   "name": "@servoy/servoydefault",
-  "version": "2023.3.0",
+  "version": "2024.3.0",
   "peerDependencies": {
-    "@angular/common": "^15",
-    "@angular/core": "^15",
+    "@angular/common": "^17",
+    "@angular/core": "^17",
     "@servoy/public": "*"
   },
   "dependencies": {
-    "@angular/cdk": "<16",
-    "@eonasdan/tempus-dominus": "<6.5.0",
-    "@ng-bootstrap/ng-bootstrap": "<15",
+    "@angular/cdk": "^17",
+    "@eonasdan/tempus-dominus": "^6.9.5",
+    "@ng-bootstrap/ng-bootstrap": "^16",
     "@popperjs/core": "<3",
     "@tinymce/tinymce-angular": "<8",
     "bootstrap": "<6",
     "tinymce": "^6",
-    "tinymce-i18n": ">=22",
+    "tinymce-i18n": ">=24",
     "tslib": "*"
   },
   "license": "MIT",

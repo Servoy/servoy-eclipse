@@ -104,6 +104,7 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -677,26 +678,9 @@ public class EditorUtil
 		}
 	}
 
-	public static void openComponentVariantsEditor(String deepLinkArgs)
+	public static void openThemeEditor(final IMediaProvider project)
 	{
-		try
-		{
-			//PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new ComponentVariantsEditorInput(deepLinkArgs),
-			//	"com.servoy.eclipse..designer.editor.componentvariantseditor");
-			IFile variants = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
-				.getFile(new Path("medias/variants.less"));
-			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("variants.less");
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(variants), desc.getId(), true);
-		}
-		catch (PartInitException e)
-		{
-			Debug.log(e);
-		}
-	}
-
-	public static void openThemeEditor(final Solution project)
-	{
-		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
+		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
 		Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
 		Path path = new Path(pathPair.getLeft() + pathPair.getRight());
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
@@ -705,7 +689,7 @@ public class EditorUtil
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
 			{
-				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_NG2_LESS);
+				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
 				activePage.openEditor(PropertiesLessEditorInput.createFromFileEditorInput(new FileEditorInput(file)), desc.getId(),
 					true);
 			}

@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseFormGraphicalRootEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.editors.IDialogDirectCellEditor;
@@ -203,7 +204,7 @@ public class PropertyDirectEditManager extends DirectEditManager
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not set property value", errorMessage);
+					MessageDialog.openError(UIUtils.getActiveShell(), "Could not set property value", errorMessage);
 				}
 			});
 		}

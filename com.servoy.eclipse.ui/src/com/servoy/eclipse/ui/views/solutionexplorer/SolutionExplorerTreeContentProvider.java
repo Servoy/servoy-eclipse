@@ -16,11 +16,15 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
+import static com.servoy.j2db.util.PersistHelper.isOverrideElement;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -150,6 +154,7 @@ import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
@@ -230,6 +235,10 @@ public class SolutionExplorerTreeContentProvider
 
 	private final PlatformSimpleUserNode i18n;
 
+	private final PlatformSimpleUserNode apiexplorer;
+
+	private final PlatformSimpleUserNode[] apiexplorerNodes;
+
 	private final PlatformSimpleUserNode[] scriptingNodes;
 
 	private final PlatformSimpleUserNode[] resourceNodes;
@@ -272,7 +281,11 @@ public class SolutionExplorerTreeContentProvider
 		view = v;
 		invisibleRootNode = new PlatformSimpleUserNode("root", UserNodeType.ARRAY);
 
-		PlatformSimpleUserNode jslib = createTypeNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, JSLib.class, invisibleRootNode);
+		apiexplorer = new PlatformSimpleUserNode(Messages.TreeStrings_APIExplorer, UserNodeType.APIEXPLORER, null,
+			uiActivator.loadImageFromBundle("api_explorer.png"));
+		apiexplorer.parent = invisibleRootNode;
+
+		PlatformSimpleUserNode jslib = createTypeNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, JSLib.class, apiexplorer);
 
 		jslib.children = new PlatformSimpleUserNode[] { //
 			createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib), //
@@ -295,10 +308,20 @@ public class SolutionExplorerTreeContentProvider
 			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
 				jslib) };
 
-		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
+		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, apiexplorer);
 
-		addReturnTypeNodesPlaceHolder(application, Utils.arrayJoin(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes(),
-			new ServoyException(0).getAllReturnedTypes()));
+		Class< ? >[] allJSApplicationTypes = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
+		List<Class< ? >> list = new ArrayList<Class< ? >>();
+		for (Class< ? > cl : allJSApplicationTypes)
+		{
+			if (!(cl.toString().contains("APP_NG_PROPERTY") || cl.toString().contains("APP_UI_PROPERTY")))
+			{
+				list.add(cl);
+			}
+		}
+		Class< ? >[] arr = new Class< ? >[list.size()];
+		arr = list.toArray(arr);
+		addReturnTypeNodesPlaceHolder(application, Utils.arrayJoin(arr, new ServoyException(0).getAllReturnedTypes()));
 
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png"));
 		resources.parent = invisibleRootNode;
@@ -345,30 +368,32 @@ public class SolutionExplorerTreeContentProvider
 			uiActivator.loadImageFromBundle("all_packages.png"));
 		allWebPackagesNode.parent = invisibleRootNode;
 
-		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, invisibleRootNode);
+		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, apiexplorer);
 		addReturnTypeNodesPlaceHolder(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 
-		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, invisibleRootNode);
+		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, apiexplorer);
 
-		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, invisibleRootNode);
+		PlatformSimpleUserNode clientutils = createTypeNode(Messages.TreeStrings_ClientUtils, UserNodeType.CLIENT_UTILS, JSClientUtils.class, apiexplorer);
 
-		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, invisibleRootNode);
+		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, apiexplorer);
+
+		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, apiexplorer);
 
 		addReturnTypeNodesPlaceHolder(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
-		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, invisibleRootNode);
+		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, apiexplorer);
 
-		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, invisibleRootNode);
+		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, apiexplorer);
 		addReturnTypeNodesPlaceHolder(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
 
-		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, invisibleRootNode);
+		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, apiexplorer);
 		addReturnTypeNodesPlaceHolder(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.png"));
 		servers.parent = resources;
 
 		plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null, uiActivator.loadImageFromBundle("plugins.png"));
-		plugins.parent = invisibleRootNode;
+		plugins.parent = apiexplorer;
 
 
 		List<PlatformSimpleUserNode> resourcesChildren = new ArrayList<PlatformSimpleUserNode>();
@@ -396,26 +421,37 @@ public class SolutionExplorerTreeContentProvider
 
 		List<PlatformSimpleUserNode> rootChildren = new ArrayList<PlatformSimpleUserNode>();
 
+		List<PlatformSimpleUserNode> apiexplorerChildren = new ArrayList<PlatformSimpleUserNode>();
+
 		rootChildren.add(resources);
 		if (hasChildren(allWebPackagesNode)) rootChildren.add(allWebPackagesNode);
 		rootChildren.add(allSolutionsNode);
 		rootChildren.add(activeSolutionNode);
-		rootChildren.add(jslib);
-		rootChildren.add(application);
-		rootChildren.add(solutionModel);
-		rootChildren.add(databaseManager);
-		rootChildren.add(utils);
-		rootChildren.add(history);
-		rootChildren.add(security);
-		rootChildren.add(i18n);
-		rootChildren.add(jsunit);
-		rootChildren.add(plugins);
+
+		apiexplorerChildren.add(jslib);
+		apiexplorerChildren.add(application);
+		apiexplorerChildren.add(solutionModel);
+		apiexplorerChildren.add(databaseManager);
+		apiexplorerChildren.add(clientutils);
+		apiexplorerChildren.add(utils);
+		apiexplorerChildren.add(history);
+		apiexplorerChildren.add(security);
+		apiexplorerChildren.add(i18n);
+		apiexplorerChildren.add(jsunit);
+		apiexplorerChildren.add(plugins);
+
+		apiexplorer.children = apiexplorerChildren.toArray(new PlatformSimpleUserNode[0]);
+
+		rootChildren.add(apiexplorer);
 
 		invisibleRootNode.children = rootChildren.toArray(new PlatformSimpleUserNode[0]);// new PlatformSimpleUserNode[] { resources, allWebPackagesNode, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
 
-		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /*
-																																			 * exceptions ,
-																																			 */jsunit, plugins };
+		apiexplorerNodes = new PlatformSimpleUserNode[] { apiexplorer };
+
+		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, clientutils, utils, history, security, i18n, /*
+																																							 * exceptions
+																																							 * ,
+																																							 */jsunit, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
 
 		Job job = Job.create("Background loading of database connections", (ICoreRunnable)monitor -> {
@@ -516,7 +552,7 @@ public class SolutionExplorerTreeContentProvider
 		activeSolutionNode = null;
 		allSolutionsNode = null;
 
-		loadedJavaPluginNodes.clear();
+		if (loadedJavaPluginNodes != null) loadedJavaPluginNodes.clear();
 		// dispose the (plugin) images that were allocated in SWT after conversion from Swing
 		for (Image i : pluginImages)
 		{
@@ -539,6 +575,11 @@ public class SolutionExplorerTreeContentProvider
 		activeSolutionNode.children = null;
 		allSolutionsNode.children = null;
 		servers.children = null;
+	}
+
+	public void setAPIExplorerNodesEnabled(boolean isEnabled)
+	{
+		setNodesEnabled(apiexplorerNodes, isEnabled);
 	}
 
 	public void setScriptingNodesEnabled(boolean isEnabled)
@@ -2166,8 +2207,6 @@ public class SolutionExplorerTreeContentProvider
 						}
 						if (scriptObject != null)
 						{
-
-
 							PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, null,
 								scriptObject.getClass())
 							{
@@ -2179,7 +2218,31 @@ public class SolutionExplorerTreeContentProvider
 									{
 										if (plugin instanceof IIconProvider && ((IIconProvider)plugin).getIconUrl() != null)
 										{
-											image = ImageDescriptor.createFromURL(((IIconProvider)plugin).getIconUrl()).createImage();
+											URL urlLightTheme = ((IIconProvider)plugin).getIconUrl();
+
+											boolean darkTheme = UIUtils.isDarkThemeSelected(true);
+											if (darkTheme)
+											{
+												URL urlDarkTheme = null;
+												String urlString = urlLightTheme.toString();
+												urlString = UIUtils.replaceLast(urlString, ".", "_dark.");
+												try
+												{
+													urlDarkTheme = new URL(urlString);
+												}
+												catch (MalformedURLException e)
+												{
+												}
+												if (urlDarkTheme != null && ImageDescriptor.createFromURL(urlDarkTheme).getImageData(100) != null)
+												{
+													image = ImageDescriptor.createFromURL(urlDarkTheme).createImage();
+												} // else use light theme/single plugin icon here as well
+											}
+
+											if (image == null)
+											{
+												image = ImageDescriptor.createFromURL(urlLightTheme).createImage();
+											}
 										}
 										else
 										{
@@ -2245,6 +2308,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			try
 			{
+				boolean darkTheme = UIUtils.isDarkThemeSelected(true);
 				if (!"file".equals(spec.getSpecURL().getProtocol()))
 				{
 					SpecProviderState specProvider = isService ? getServicesSpecProviderState() : getComponentsSpecProviderState();
@@ -2256,6 +2320,14 @@ public class SolutionExplorerTreeContentProvider
 						return null;
 					}
 
+					if (darkTheme)
+					{
+						String darkIconPath = UIUtils.replaceLast(iconPath, ".", "-dark.");
+						if (reader.getUrlForPath(darkIconPath) != null)
+						{
+							iconPath = darkIconPath;
+						}
+					}
 					IPath path = new Path(reader.getUrlForPath(iconPath).toURI().toString());
 					icon = imageCache.get(path);
 					if (icon == null)
@@ -2281,7 +2353,16 @@ public class SolutionExplorerTreeContentProvider
 					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(spec.getPackageName());
 					if (project != null)
 					{
-						icon = loadImageFromProject(project, spec.getIcon().replaceFirst(spec.getPackageName(), ""));
+						String iconPath = spec.getIcon().replaceFirst(spec.getPackageName(), "");
+						if (darkTheme)
+						{
+							iconPath = UIUtils.replaceLast(iconPath, ".", "-dark.");
+						}
+						icon = loadImageFromProject(project, iconPath);
+						if (darkTheme && icon == null)
+						{
+							icon = loadImageFromProject(project, spec.getIcon().replaceFirst(spec.getPackageName(), ""));
+						}
 					}
 					else
 					{
@@ -2588,10 +2669,16 @@ public class SolutionExplorerTreeContentProvider
 			{
 				for (String workingSet : workingSets)
 				{
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, null, solution,
-						uiActivator.loadImageFromBundle("servoy_workingset.png"));
-					nodes.add(node);
-					node.parent = formsNode;
+					if (!referenceForms ||
+						(referenceForms && (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null &&
+							ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().hasPersistsInServoyWorkingSets(workingSet,
+								new String[] { solution.getName() }, true))))
+					{
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, null, solution,
+							uiActivator.loadImageFromBundle("servoy_workingset.png"));
+						nodes.add(node);
+						node.parent = formsNode;
+					}
 				}
 			}
 		}
@@ -2618,7 +2705,7 @@ public class SolutionExplorerTreeContentProvider
 		// no scripting for form references
 		if (f.isFormComponent()) return;
 
-		List<PlatformSimpleUserNode> node = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> node = new ArrayList<>();
 		PlatformSimpleUserNode functionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_controller, UserNodeType.FORM_CONTROLLER, f,
 			uiActivator.loadImageFromBundle("controller.png"));
 		functionsNode.parent = formNode;
@@ -2729,7 +2816,7 @@ public class SolutionExplorerTreeContentProvider
 	private void addFormElementsChildren(PlatformSimpleUserNode elementsNode)
 	{
 		Form form = (Form)elementsNode.getRealObject();
-		addFormElementsChildren(elementsNode, new HashSet<Form>(), form, form);
+		addFormElementsChildren(elementsNode, new HashSet<>(), form, form);
 	}
 
 	private void addFormElementsChildren(PlatformSimpleUserNode elementsNode, Set<Form> inspectedForms, Form originalForm, Form ancestorForm)
@@ -2760,7 +2847,7 @@ public class SolutionExplorerTreeContentProvider
 				ServoyLog.logWarning("Parent of extended form " + ancestorForm.getName() + " not found", null);
 			}
 		}
-		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
+		List<PlatformSimpleUserNode> elements = new SortedList<>(StringComparator.INSTANCE);
 
 		// get all objects ordered alphabetically by name
 		List<IFormElement> formElements = ancestorForm.getFlattenedObjects(NameComparator.INSTANCE);
@@ -2775,7 +2862,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			PlatformSimpleUserNode parentNode = elementsNode;
 			// TODO: fix multiple anonymous groups (use proper content providers and label providers)
-			if (element.getGroupID() != null & !mobile)
+			if (element.getGroupID() != null && !mobile)
 			{
 				String groupName = FormElementGroup.getName(element.getGroupID());
 				String groupLabel = groupName == null ? Messages.LabelAnonymous : groupName;
@@ -2800,7 +2887,8 @@ public class SolutionExplorerTreeContentProvider
 				}
 				parentNode = node; // this field comes under the group node
 			}
-			if (element.getName() != null && element.getName().trim().length() > 0)
+			// Do not show override elements here, they will be shown on the super-form in the tree
+			if (!isOverrideElement(element) && element.getName() != null && element.getName().trim().length() > 0)
 			{
 				if (element instanceof Bean)
 				{
@@ -2825,12 +2913,32 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else
 					{
-						model = element;
+						// If the element was extended on the original form, use that one as model
+						model = originalForm.searchForExtendsId(element.getID()).orElse(element);
 					}
 
-					node = new PlatformSimpleUserNode(element.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { model, null }, originalForm,
+					String displayName = element.getName();
+					if (isOverrideElement(model))
+					{
+						displayName = Messages.labelOverride(displayName);
+					}
+
+					node = new PlatformSimpleUserNode(displayName, UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { model, null }, originalForm,
 						uiActivator.loadImageFromBundle("element.png"));
-					node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null));
+
+					WebObjectSpecification spec = null;
+					if (model instanceof IFormElement)
+					{
+						String webComponentClassName = FormTemplateGenerator.getComponentTypeName((IFormElement)model);
+						spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponentClassName);
+						if (spec != null)
+						{
+							SolutionExplorerListContentProvider.extractApiDocs(spec); // so that we have the main description of the component available in spec
+						}
+					}
+					node.setDeveloperFeedback(
+						new SimpleDeveloperFeedback("elements." + element.getName() + ".", null,
+							spec != null ? "<p>" + spec.getDocumentation() + "</p>" : null));
 				}
 				elements.add(node);
 				node.parent = parentNode;
@@ -2994,11 +3102,6 @@ public class SolutionExplorerTreeContentProvider
 		return node;
 	}
 
-//	public static boolean isWebcomponentBean(IPersist persist)
-//	{
-//		return persist instanceof Bean && ((Bean)persist).getBeanClassName() != null && ((Bean)persist).getBeanClassName().indexOf(':') > 0;
-//	}
-
 	private void addGlobalRelationsNodeChildren(PlatformSimpleUserNode globalRelations)
 	{
 		Pair<Solution, String> solutionAndScope = (Pair<Solution, String>)globalRelations.getRealObject();
@@ -3116,7 +3219,7 @@ public class SolutionExplorerTreeContentProvider
 							if (!solutionsRefreshedForRelations.contains(s.getName()))
 							{
 								// refresh global relations node - if possible
-								node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Scopes);
+								node = findChildNode(node, Messages.TreeStrings_Scopes);
 								if (node != null)
 								{
 									String[] scopeNames = ((Solution)root).getRuntimeProperty(Solution.SCOPE_NAMES);
@@ -3125,10 +3228,10 @@ public class SolutionExplorerTreeContentProvider
 										PlatformSimpleUserNode scopeNode = null;
 										for (String scopeName : scopeNames)
 										{
-											scopeNode = (PlatformSimpleUserNode)findChildNode(node, scopeName);
+											scopeNode = findChildNode(node, scopeName);
 											if (scopeNode != null)
 											{
-												scopeNode = (PlatformSimpleUserNode)findChildNode(scopeNode, Messages.TreeStrings_relations);
+												scopeNode = findChildNode(scopeNode, Messages.TreeStrings_relations);
 											}
 											if (scopeNode != null)
 											{
@@ -3142,7 +3245,7 @@ public class SolutionExplorerTreeContentProvider
 							if (!solutionsRefreshedForRelations.contains(s.getName()))
 							{
 								// refresh all affected form relation nodes
-								node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Forms);
+								node = findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Forms);
 								if (node != null && node.children != null)
 								{
 									PlatformSimpleUserNode relationsNode;
@@ -3152,7 +3255,7 @@ public class SolutionExplorerTreeContentProvider
 										form = (Form)node.children[i].getRealObject();
 										if (form.getDataSource() != null)
 										{
-											relationsNode = (PlatformSimpleUserNode)findChildNode(node.children[i], Messages.TreeStrings_relations);
+											relationsNode = findChildNode(node.children[i], Messages.TreeStrings_relations);
 											if (relationsNode != null)
 											{
 												addFormRelationsNodeChildren(relationsNode);
@@ -3165,7 +3268,7 @@ public class SolutionExplorerTreeContentProvider
 								// solution node
 								if (solutionOfCalculation != null)
 								{
-									node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
+									node = findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
 									if (node != null && tableOfCalculation.equals(
 										ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Relation)persist).getPrimaryDataSource())))
 									{
@@ -3182,12 +3285,12 @@ public class SolutionExplorerTreeContentProvider
 							if (persists.containsKey(s)) continue;
 							boolean formAsComponent = ((Form)persist).isFormComponent().booleanValue();
 
-							if (formAsComponent) node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_FormComponents);
-							else node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							if (formAsComponent) node = findChildNode(node, Messages.TreeStrings_FormComponents);
+							else node = findChildNode(node, Messages.TreeStrings_Forms);
 
 							if (node != null)
 							{
-								PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
+								PlatformSimpleUserNode formNode = findChildNode(node, ((Form)persist).getName());
 								if (formNode == null)
 								{
 									if (!refreshedFormsNode)
@@ -3226,9 +3329,9 @@ public class SolutionExplorerTreeContentProvider
 							// refresh the in mem datasource tree.
 							if (DataSourceUtils.getInmemDataSourceName(((TableNode)persist).getDataSource()) != null)
 							{
-								PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node,
+								PlatformSimpleUserNode solutionChildNode = findChildNode(node,
 									Messages.TreeStrings_SolutionDataSources);
-								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_InMemory);
+								PlatformSimpleUserNode inMemNode = findChildNode(solutionChildNode, Messages.TreeStrings_InMemory);
 								if (inMemNode != null)
 								{
 									view.refreshTreeNodeFromModel(inMemNode, true);
@@ -3236,9 +3339,9 @@ public class SolutionExplorerTreeContentProvider
 							}
 							else if (DataSourceUtils.getViewDataSourceName(((TableNode)persist).getDataSource()) != null)
 							{
-								PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node,
+								PlatformSimpleUserNode solutionChildNode = findChildNode(node,
 									Messages.TreeStrings_SolutionDataSources);
-								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_ViewFoundsets);
+								PlatformSimpleUserNode inMemNode = findChildNode(solutionChildNode, Messages.TreeStrings_ViewFoundsets);
 								if (inMemNode != null)
 								{
 									view.refreshTreeNodeFromModel(inMemNode, true);
@@ -3248,19 +3351,19 @@ public class SolutionExplorerTreeContentProvider
 						}
 						else if (persist instanceof Solution)
 						{
-							PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							PlatformSimpleUserNode solutionChildNode = findChildNode(node, Messages.TreeStrings_Forms);
 							if (solutionChildNode != null)
 							{
 								addFormsNodeChildren(solutionChildNode, false);
 								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
-							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_FormComponents);
+							solutionChildNode = findChildNode(node, Messages.TreeStrings_FormComponents);
 							if (solutionChildNode != null)
 							{
 								addFormsNodeChildren(solutionChildNode, true);
 								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
-							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
+							solutionChildNode = findChildNode(node, Messages.TreeStrings_Media);
 							if (solutionChildNode != null)
 							{
 								addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
@@ -3301,15 +3404,15 @@ public class SolutionExplorerTreeContentProvider
 			if (node != null)
 			{
 				// find the elements node and refresh it
-				node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+				node = findChildNode(node, Messages.TreeStrings_Forms);
 				if (node != null)
 				{
-					node = (PlatformSimpleUserNode)findChildNode(node, form.getName());
+					node = findChildNode(node, form.getName());
 					if (node != null)
 					{
 						if (set.stream().anyMatch(cls -> IFormElement.class.isAssignableFrom(cls)))
 						{
-							PlatformSimpleUserNode elements = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_elements);
+							PlatformSimpleUserNode elements = findChildNode(node, Messages.TreeStrings_elements);
 							if (elements != null)
 							{
 								addFormElementsChildren(elements);
@@ -3318,7 +3421,7 @@ public class SolutionExplorerTreeContentProvider
 						}
 						if (set.contains(LayoutContainer.class))
 						{
-							PlatformSimpleUserNode containers = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_containers);
+							PlatformSimpleUserNode containers = findChildNode(node, Messages.TreeStrings_containers);
 							if (containers != null)
 							{
 								addFormContainersChildren(containers);
@@ -3331,9 +3434,8 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
-	public SimpleUserNode findChildNode(SimpleUserNode node, String name)
+	public <T extends SimpleUserNode> T findChildNode(SimpleUserNode node, String name)
 	{
-		SimpleUserNode result = null;
 		if (node != null && node.children != null)
 		{
 			for (int i = node.children.length - 1; i >= 0; i--)
@@ -3341,12 +3443,11 @@ public class SolutionExplorerTreeContentProvider
 				String nodeName = node.children[i].getName();
 				if (nodeName != null && nodeName.equals(name))
 				{
-					result = node.children[i];
-					break;
+					return (T)node.children[i];
 				}
 			}
 		}
-		return result;
+		return null;
 	}
 
 	/**
@@ -3406,7 +3507,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			return activeSolutionNode;
 		}
-		return (PlatformSimpleUserNode)findChildNode(modulesOfActiveSolution, solutionName);
+		return findChildNode(modulesOfActiveSolution, solutionName);
 	}
 
 	/**
@@ -3594,7 +3695,7 @@ public class SolutionExplorerTreeContentProvider
 
 	public void refreshServerViewsNode(IServerInternal server)
 	{
-		PlatformSimpleUserNode node = (PlatformSimpleUserNode)findChildNode(servers, server.getName());
+		PlatformSimpleUserNode node = findChildNode(servers, server.getName());
 		if (node != null)
 		{
 			handleServerNode(server, node);
@@ -3604,7 +3705,7 @@ public class SolutionExplorerTreeContentProvider
 
 	public void refreshTable(ITable table)
 	{
-		PlatformSimpleUserNode serverNode = (PlatformSimpleUserNode)findChildNode(servers, table.getServerName());
+		PlatformSimpleUserNode serverNode = findChildNode(servers, table.getServerName());
 		if (serverNode != null)
 		{
 			SimpleUserNode tableNode = findChildNode(serverNode, table.getName());

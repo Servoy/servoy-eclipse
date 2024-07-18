@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -176,6 +177,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 			addPage(newFormWizardPage);
 			if (dataProviderWizardPage != null) addPage(dataProviderWizardPage);
 		}
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -1055,7 +1063,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				IDialogSettings settings = getDialogSettings();
 				String datasource = settings.get("datasource");
-				if (!Utils.stringIsEmpty(datasource) && dataSourceViewer.getSelection().isEmpty())
+				if (!Utils.stringIsEmpty(datasource) && dataSourceViewer.getSelection().isEmpty() && !(this.getWizard() instanceof NewFormComponentWizard))
 				{
 					dataSourceViewer.setSelection(new StructuredSelection(DataSourceWrapperFactory.getWrapper(datasource)));
 				}

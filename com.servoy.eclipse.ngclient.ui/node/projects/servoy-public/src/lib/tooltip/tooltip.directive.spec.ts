@@ -6,7 +6,7 @@ import {By} from '@angular/platform-browser';
 import { WindowRefService } from '../services/windowref.service';
 import { ServoyPublicServiceTestingImpl } from '../testing/publictesting.module';
 import { ServoyPublicService } from '../services/servoy_public.service';
-const mouseEnter: Event = new Event('mouseenter');
+const mouseEnter: Event = new Event('pointerenter');
 
 @Component({
   template: '<input  type="text" [svyTooltip]="textTooltip">',

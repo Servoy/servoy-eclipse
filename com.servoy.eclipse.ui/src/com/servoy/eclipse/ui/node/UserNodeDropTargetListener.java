@@ -185,7 +185,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Could not import media files: " + e.getMessage());
+								MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Could not import media files: " + e.getMessage());
 								ServoyLog.logError("Could not import media files", e);
 							}
 						});
@@ -381,7 +381,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 											{
 												public void run()
 												{
-													MessageDialog.openError(Display.getDefault().getActiveShell(), "Error",
+													MessageDialog.openError(UIUtils.getActiveShell(), "Error",
 														"Could not copy/move media : " + ex.getMessage());
 													ServoyLog.logError("Could not copy/move media", ex);
 												}

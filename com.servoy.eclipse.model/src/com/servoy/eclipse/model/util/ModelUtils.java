@@ -139,7 +139,7 @@ public class ModelUtils
 	 * @param lookupName
 	 */
 	public static Pair<String[], String> getStyleClasses(FlattenedSolution flattenedSolution, Form form, IPersist persist, String styleClassProperty,
-		String lookupName)
+		String lookupName, boolean ng2Mode)
 	{
 		if (flattenedSolution == null || form == null)
 		{
@@ -201,6 +201,22 @@ public class ModelUtils
 				Media media = flattenedSolution.getMedia(styleSheet);
 				if (media != null)
 				{
+					String lessStyleSheet = media.getName();
+					if (ng2Mode)
+					{
+
+						int index = lessStyleSheet.indexOf(".less");
+						if (index > 0)
+						{
+							String ng2Filename = lessStyleSheet.substring(0, index) + "_ng2.less";
+							Media media2 = flattenedSolution.getMedia(ng2Filename);
+							if (media2 != null)
+							{
+								media = media2;
+							}
+						}
+					}
+
 					List<String> styleNames = null;
 					Pair<Long, List<String>> pair = cachedStyleNames.get(media.getName());
 					if (pair != null)
@@ -219,7 +235,7 @@ public class ModelUtils
 							// we only use the css3 styling (getStyleNames() so that we can give a boolean to ignore/don't create the rest
 							IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName(), true);
 							styleNames = ss.getStyleNames();
-							cachedStyleNames.put(styleSheet, new Pair<Long, List<String>>(Long.valueOf(media.getLastModifiedTime()), styleNames));
+							cachedStyleNames.put(media.getName(), new Pair<Long, List<String>>(Long.valueOf(media.getLastModifiedTime()), styleNames));
 						}
 						for (String cssSelector : styleNames)
 						{

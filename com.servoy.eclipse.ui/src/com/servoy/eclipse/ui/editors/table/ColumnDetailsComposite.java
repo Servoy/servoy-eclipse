@@ -38,7 +38,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -48,6 +47,7 @@ import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -100,8 +100,8 @@ public class ColumnDetailsComposite extends Composite
 	private final Text titleText;
 	private final Text descriptionText;
 	private final Button suggestForeignTypeButton;
-	private final CCombo sortIgnoringcaseCombo;
-	private final CCombo sortNullprecedenceCombo;
+	private final Combo sortIgnoringcaseCombo;
+	private final Combo sortNullprecedenceCombo;
 	private final Button excludedCheckBox;
 	private final Button uuidCheckBox;
 	private final Button tenantCheckBox;
@@ -439,9 +439,9 @@ public class ColumnDetailsComposite extends Composite
 		setLayout(groupLayout);
 	}
 
-	private static CCombo combo(Composite parent, Object... values)
+	private static Combo combo(Composite parent, Object... values)
 	{
-		CCombo combo = new CCombo(parent, SWT.BORDER | SWT.READ_ONLY);
+		Combo combo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
 		combo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 		stream(values).map(String::valueOf).forEach(combo::add);
 		return combo;

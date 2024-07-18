@@ -6,7 +6,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
 
     public static readonly TYPE_NAME = 'formcomponent';
 
-    constructor(private converterService: ConverterService, private typesRegistry: TypesRegistry) {
+    constructor(private converterService: ConverterService<unknown>, private typesRegistry: TypesRegistry) {
     }
 
     fromServerToClient(serverSentData: any, currentClientData: FormComponentValue, propertyContext: IPropertyContext): FormComponentValue {
@@ -31,7 +31,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
                 formComponentPropertyValue.childElements[idx] = childCompElem = this.converterService.convertFromServerToClient(serverSentData.childElements[idx],
                         this.typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
                         currentClientData && currentClientData.childElements ? currentClientData.childElements[idx] : undefined,
-                        undefined, undefined, propertyContext);
+                        undefined, undefined, propertyContext) as ChildComponentPropertyValue;
 
                 if (instanceOfChangeAwareValue(childCompElem)) {
                     childCompElem.getInternalState().setChangeListener((doNotPush?: boolean) => {

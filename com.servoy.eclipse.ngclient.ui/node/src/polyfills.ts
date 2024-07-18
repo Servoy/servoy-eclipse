@@ -62,3 +62,6 @@ import 'zone.js';  // Included with Angular CLI.
 
 
 (window as any).ICAL = {};
+
+//workaround for https://github.com/valor-software/ng2-dragula/issues/849
+(window as any).global = window;

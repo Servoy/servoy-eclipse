@@ -35,6 +35,7 @@ export class BSWindow {
     offset: any;
     window_info: any;
 
+    onClose: () => void;
     mouseDownListenerElement: any;
     mouseDownListenerHandle: any;
 
@@ -146,9 +147,8 @@ export class BSWindow {
 
     setSize(size: { width: number; height: number }) {
         const winBody = this.element.querySelector(this.options.selectors.body);
-        this.renderer.setStyle(winBody, 'min-width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
-        this.renderer.setStyle(winBody, 'min-height', size.height + 'px');
-        this.renderer.setStyle(winBody, 'height', '1px');
+        this.renderer.setStyle(winBody, 'width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
+        this.renderer.setStyle(winBody, 'height', size.height + 'px');
     }
 
     centerWindow() {
@@ -169,7 +169,7 @@ export class BSWindow {
     close() {
         const _this = this;
         if (this.options.window_manager && this.options.window_manager.modalStack.length === 1 && this.options.isModal) {
-            const backdropModals = this.doc.getElementsByClassName('.modal-backdrop');
+            const backdropModals = this.doc.getElementsByClassName('modal-backdrop');
             while (backdropModals[0]) {
                 backdropModals[0].parentNode.removeChild(backdropModals[0]);
             }
@@ -183,6 +183,9 @@ export class BSWindow {
             }
         } else if (this.options.window_manager && this.options.window_manager.windows.length > 0) {
             this.options.window_manager.setNextFocused();
+        }
+        if (this.onClose){
+            this.onClose();
         }
         _this.element.remove();
         if (this.windowTab) {

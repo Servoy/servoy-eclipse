@@ -30,6 +30,7 @@ import org.eclipse.ui.views.properties.IPropertySource2;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.IPreExecuteCommand;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -114,8 +115,18 @@ public class SetValueCommand extends Command implements IPreExecuteCommand
 	@Override
 	public void undo()
 	{
-		if (resetOnUndo) target.resetPropertyValue(propertyId);
-		else target.setPropertyValue(propertyId, undoValue);
+		if (resetOnUndo)
+		{
+			target.resetPropertyValue(propertyId);
+			return;
+		}
+
+		if (target instanceof ISetterAwarePropertySource && ((ISetterAwarePropertySource)target).undoSetProperty(propertyId))
+		{
+			return;
+		}
+
+		target.setPropertyValue(propertyId, undoValue);
 	}
 
 	@Override

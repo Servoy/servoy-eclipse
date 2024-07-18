@@ -26,12 +26,12 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -54,13 +54,13 @@ public class OptionsComposite extends Group
 {
 	private final Text initalSort;
 	private DataBindingContext m_bindingContext;
-	private final CCombo joinCombo;
+	private final Combo joinCombo;
 	private final Button allowCreationOfButton;
 	private final Button allowParentDeleteButton;
 	private final Button deleteRelatedRecordsButton;
 	private RelationEditor relationEditor;
 	private final Text deprecated;
-	private final CCombo encapsulation;
+	private final Combo encapsulation;
 	private final Text commentText;
 
 	/**
@@ -88,7 +88,7 @@ public class OptionsComposite extends Group
 		joinTypeLabel = new Label(this, SWT.NONE);
 		joinTypeLabel.setText("Join type");
 
-		joinCombo = new CCombo(this, SWT.READ_ONLY | SWT.BORDER);
+		joinCombo = new Combo(this, SWT.READ_ONLY | SWT.BORDER);
 		joinCombo.setItems(new String[] { ISQLJoin.JOIN_TYPES_NAMES[IQueryConstants.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[IQueryConstants.LEFT_OUTER_JOIN] });
 
 		Label initialSortLabel;
@@ -134,7 +134,7 @@ public class OptionsComposite extends Group
 		Label encapsulationLabel;
 		encapsulationLabel = new Label(this, SWT.NONE);
 		encapsulationLabel.setText("Encapsulation");
-		encapsulation = new CCombo(this, SWT.READ_ONLY | SWT.BORDER);
+		encapsulation = new Combo(this, SWT.READ_ONLY | SWT.BORDER);
 		encapsulation.setItems(new String[] { Messages.Public, Messages.HideInScriptingModuleScope, Messages.ModuleScope });
 
 		Label commentLabel;

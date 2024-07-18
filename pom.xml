@@ -3,14 +3,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<prerequisites>
-		<maven>3.8.6</maven>
+		<maven>3.9.0</maven>
 	</prerequisites>
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2023.3.8.3850_LTS</version>
+	<version>2024.3.2.3945</version>
 	<properties>
-		<tycho.version>2.7.5</tycho.version>
+		<tycho.version>4.0.5</tycho.version>
 		<rhino.version>1.7.14.s7</rhino.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
@@ -34,7 +34,12 @@
         </repository>        
     </repositories>
 -->
-
+    <pluginRepositories>
+        <pluginRepository>
+            <id>tycho-snapshots </id>
+            <url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
 	<build>
 		<plugins>
 			<plugin>
@@ -67,7 +72,6 @@
 						</artifact>
 					</target>
 					<pomDependencies>consider</pomDependencies>
-					<resolver>p2</resolver>
 					<environments>
 						<environment>
 							<os>win32</os>
@@ -327,6 +331,7 @@
 			<id>target</id>
 			<modules>
 				<module>launch_targets</module>
+				<module>org.eclipse.jface</module>
 			</modules>
 		</profile>
 		<profile>
@@ -378,11 +383,14 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
+                <module>org.eclipse.jface</module>
 				<module>launch_targets</module>
 				<module>com.servoy.css.core</module>
 				<module>com.servoy.eclipse.model</module>
 				<module>com.servoy.eclipse.model.exporter.mobile</module>
 				<module>com.servoy.eclipse.core</module>
+				<module>com.servoy.eclipse.cloud</module>
+				<module>com.servoy.eclipse.aibridge</module>
 				<module>com.servoy.eclipse.ui</module>
 				<module>com.servoy.eclipse.ngclient</module>
 				<module>com.servoy.eclipse.debug</module>
@@ -399,7 +407,6 @@
 				<module>com.servoy.eclipse.profiler</module>
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
-				<module>org.eclipse.jface</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
 			</modules>

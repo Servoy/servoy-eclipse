@@ -1,4 +1,4 @@
-import { IChangeAwareValue, ChangeAwareState } from '../../sablo/converter.service';
+import { IChangeAwareValue, ChangeAwareState, IUIDestroyAwareValue } from '../../sablo/converter.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
 import { Deferred, IValuelist } from '@servoy/public';
 import { Observable, of, from } from 'rxjs';
@@ -121,7 +121,7 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
 
 }
 
-export class Valuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist, IChangeAwareValue {
+export class Valuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist, IChangeAwareValue, IUIDestroyAwareValue {
 
     constructor(private sabloDeferHelper: SabloDeferHelper, private realValueIsDate: boolean,
         private internalState: ValuelistState, values?: Array<{ displayValue: string; realValue: any }>) {
@@ -141,6 +141,11 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
      */
     getInternalState(): ValuelistState {
         return this.internalState;
+    }
+
+    uiDestroyed(): void{
+        this.sabloDeferHelper.cancelAll(this.getInternalState());
+        this.internalState.realToDisplayCache.clear();
     }
 
     filterList(filterString: string): Observable<any> {
@@ -177,6 +182,8 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
                 this.internalState.realToDisplayCache[key] = this.internalState.deferred[this.internalState.diplayValueReq.id].defer.promise.then((val) => {
                     this.internalState.realToDisplayCache[key] = val;
                     return val;
+                }).catch(() => {
+                     delete this.internalState.realToDisplayCache[key];
                 });
 
                 this.internalState.notifyChangeListener();

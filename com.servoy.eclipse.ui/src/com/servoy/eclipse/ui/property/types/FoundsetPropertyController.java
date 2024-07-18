@@ -111,7 +111,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 	{
 		if (labelProvider == null)
 		{
-			labelProvider = FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext.getContext(), designToChooserConverter);
+			labelProvider = FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext, designToChooserConverter, getId().toString());
 		}
 
 		return labelProvider;
@@ -148,7 +148,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		return new FoundsetPropertyEditor(parent, persistContext, formTable, null /* foreignTable */, isReadOnly(), designToChooserConverter);
+		return new FoundsetPropertyEditor(parent, persistContext, formTable, null /* foreignTable */, isReadOnly(), designToChooserConverter,
+			getId().toString());
 	}
 
 	static class FoundsetPropertySource extends ComplexPropertySourceWithStandardReset<JSONObject>
@@ -239,7 +240,6 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			{
 				propertyDescriptors.add(new JSONArrayTypePropertyController(DATAPROVIDERS, DATAPROVIDERS)
 				{
-
 					@Override
 					protected Object getNewElementInitialValue()
 					{
@@ -257,13 +257,6 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					{
 						return new JSONArrayPropertySource(complexP)
 						{
-
-							@Override
-							protected Object getElementValue(int idx)
-							{
-								return defaultGetProperty(getIdFromIndex(idx));
-							}
-
 							@Override
 							protected void addChildPropertyDescriptors(Object arrayV)
 							{
@@ -272,7 +265,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 								for (int i = 0; i < arrayValue.length(); i++)
 								{
-									createdPDs.add(addButtonsToPD(createDataproviderPropertyDescriptor(getIdFromIndex(i), DP_PREFIX + i), i));
+									IPropertyDescriptor propertyDescriptor = createDataproviderPropertyDescriptor(getIdFromIndex(i), DP_PREFIX + i);
+									createdPDs.add(new JSONArrayItemPropertyDescriptorWrapper(propertyDescriptor, i, this));
 								}
 								elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
 							}
@@ -281,18 +275,6 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 							protected Object getDefaultElementProperty(Object id)
 							{
 								return JSONObject.NULL;
-							}
-
-							@Override
-							protected void defaultElementWasSet(Object newMainValue)
-							{
-								// nothing to do here
-							}
-
-							@Override
-							protected ArrayPropertyChildId getIdFromIndex(int idx)
-							{
-								return new ArrayPropertyChildId(getId(), idx);
 							}
 						};
 					}
@@ -356,20 +338,20 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 
 			final DataProviderConverter converter = new DataProviderConverter(flattenedSolution, persistContext.getPersist(), baseTable);
-//			DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
-//			showPrefix.setConverter(converter);
-			DataProviderLabelProvider hidePrefix = new DataProviderLabelProvider(true);
-			hidePrefix.setConverter(converter);
+			DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
+			showPrefix.setConverter(converter);
+//			DataProviderLabelProvider hidePrefix = new DataProviderLabelProvider(true);
+//			hidePrefix.setConverter(converter);
 
 			final ITable baseTableFinal = baseTable;
-			final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(
-				new FormContextDelegateLabelProvider(hidePrefix, persistContext.getContext()));
-			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderHidePrefix,
+			final ILabelProvider labelProviderShowPrefix = new SolutionContextDelegateLabelProvider(
+				new FormContextDelegateLabelProvider(showPrefix, persistContext.getContext()));
+			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderShowPrefix,
 				new ICellEditorFactory()
 				{
 					public CellEditor createPropertyEditor(Composite parent)
 					{
-						return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter),
+						return new DataProviderCellEditor(parent, labelProviderShowPrefix, new DataProviderValueEditor(converter),
 							flattenedSolution.getFlattenedForm(persistContext.getPersist()), flattenedSolution, readOnly, options, converter, baseTableFinal);
 					}
 				});

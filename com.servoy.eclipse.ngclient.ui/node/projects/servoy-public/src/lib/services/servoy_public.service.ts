@@ -19,10 +19,12 @@ export abstract class ServoyPublicService {
      * Let the system op the file dialog, this is used by the {@link UploadDirective}
      */
     public abstract showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void;
+
+    public abstract showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<string>;
     /**
      * This created the correct {@link JSEvent} object that is used for handler calls to the server, tries to fill in as much as it can.
      */
-    public abstract createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent;
+    public abstract createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: unknown): JSEvent;
     /**
      * Returns the current locale string the client is in.
      */
@@ -35,13 +37,13 @@ export abstract class ServoyPublicService {
      * Internal api, directives can use this to call server side registered services. (this is internal Servoy services).
      * Do not try to use this instead of callServiceServerSideApi() - which has to be used for calling server side JS scripting of custom services from packages.
      */
-    public abstract callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T>;
+    public abstract callService<T>(serviceName: string, methodName: string, argsObject: unknown, async?: boolean): Promise<T>;
     /**
      * Get the i18n messages for the given keys.
      *
      * @deprecated use listenForI18NMessages(...keys: string[]):I18NListener
      */
-    public abstract getI18NMessages(...keys: string[]): Promise<any>;
+    public abstract getI18NMessages(...keys: string[]): Promise<unknown>;
     /**
      * Get and listen for i18n message keys, this will call I18NListener.messages() for with an object of key value pairs for all the keys given for the current locale.
      * It will also call that same method again if the locale changed in the client with the updated values.
@@ -51,11 +53,11 @@ export abstract class ServoyPublicService {
     /**
      * Use this to call a script at the server that was given to use by a function spec property.
      */
-    public abstract executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T>;
+    public abstract executeInlineScript<T>(formname: string, script: string, params: unknown[]): Promise<T>;
     /**
      * Services can use this to call there own server side api
      */
-    public abstract callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T>;
+    public abstract callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<unknown>): Promise<T>;
     /**
      * Returns an upload url that can be used to push binary data to the given form/component/property combination. (MediaUpload component)
      */
@@ -80,7 +82,7 @@ export abstract class ServoyPublicService {
      * Services should use this function to push there changed model data to the server so the data is accesable in a servoy solution or stored for a browser refresh.
      * @deprecated please use the version of this method that also gives the oldPropertyValue as an argument - sendServiceChangeToServer
      */
-    public abstract sendServiceChanges(serviceName: string, propertyName: string, propertyValue: any): void;
+    public abstract sendServiceChanges(serviceName: string, propertyName: string, propertyValue: unknown): void;
     /**
      * Services should use this function to push there changed model data to the server (when needed),
      * so the data is accesable in a servoy solution or stored for a browser refresh.
@@ -90,7 +92,7 @@ export abstract class ServoyPublicService {
      * @param oldPropertValue the value that this property used to have before (or has if you did not change the reference - in this case it should be the same as „propertyValue”);
      *                        this value is used in case of smart types (custom array/custom objects) in order to detect if it's a full change by reference for example
      */
-    public abstract sendServiceChangeToServer(serviceName: string, propertyName: string, propertyValue: any, oldPropertyValue: any): void;
+    public abstract sendServiceChangeToServer(serviceName: string, propertyName: string, propertyValue: unknown, oldPropertyValue: unknown): void;
     /**
      * show a form popup {@link PopupForm}
      */
@@ -105,6 +107,11 @@ export abstract class ServoyPublicService {
      * @internal
      */
     public abstract setFormStyleClasses(styleclasses: {property: string}): void;
+
+    /**
+     * Returns the value of the testing mode flag (servoy.ngclient.testingMode) from the admin page
+     */
+    public abstract isInTestingMode(): boolean;
 }
 
 /** 

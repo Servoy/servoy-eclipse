@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.handlers.StartClientHandler;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchUtils;
@@ -80,7 +81,7 @@ public class StartMobileClientHandler extends StartClientHandler implements IHan
 						{
 							public void run()
 							{
-								DebugUITools.openLaunchConfigurationDialogOnGroup(Display.getDefault().getActiveShell(), new StructuredSelection(), groupId);
+								DebugUITools.openLaunchConfigurationDialogOnGroup(UIUtils.getActiveShell(), new StructuredSelection(), groupId);
 							}
 						});
 					}

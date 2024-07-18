@@ -46,7 +46,7 @@ export class PopupFormService {
                 if (jsEvent) {
                     jsEvent.formName = this.formPopupComponent.instance.popup.onClose.formname;
                 }
-                this.servoyService.executeInlineScript(this.formPopupComponent.instance.popup.onClose.formname, this.formPopupComponent.instance.popup.onClose.script, [jsEvent]);
+                this.servicesService.callServiceServerSideApi('window', 'formPopupClosed',  [jsEvent]);
             }
         }
 

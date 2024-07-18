@@ -14,7 +14,7 @@ export class CustomArrayTypeFactory implements ITypeFactory<CustomArrayValue<any
     private logger: LoggerService;
 
     constructor(private readonly typesRegistry: ITypesRegistryForTypeFactories,
-            private readonly converterService: ConverterService, logFactory: LoggerFactory) {
+            private readonly converterService: ConverterService<unknown>, logFactory: LoggerFactory) {
         this.logger = logFactory.getLogger('ArrayConverter');
     }
 
@@ -54,7 +54,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
 
     constructor(private readonly staticElementType: IType<any>,
                 private readonly pushToServerForElements: PushToServerEnum,
-                private converterService: ConverterService,
+                private converterService: ConverterService<T>,
                 private logger: LoggerService) {
     }
 
@@ -87,7 +87,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                         let elem = newValue[c];
 
                         newValue[c] = elem = this.converterService.convertFromServerToClient(elem, this.staticElementType, currentClientValue ? currentClientValue[c] : undefined,
-                                internalState.dynamicPropertyTypesHolder, '' + c, elemPropertyContext);
+                                internalState.dynamicPropertyTypesHolder, '' + c, elemPropertyContext) as T;
 
                         if (instanceOfChangeAwareValue(elem)) {
                             // child is able to handle it's own change mechanism
@@ -129,7 +129,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
 
                                 // apply the conversions, update value and kept conversion info for changed indexes
                                 currentClientValue[i] = this.converterService.convertFromServerToClient(changedData[relIdx], this.staticElementType,
-                                                            currentClientValue[i], internalState.dynamicPropertyTypesHolder, '' + i, elemPropertyContext);
+                                                            currentClientValue[i], internalState.dynamicPropertyTypesHolder, '' + i, elemPropertyContext) as T;
 
                                 const val = currentClientValue[i];
                                 if (instanceOfChangeAwareValue(val)) {
@@ -151,7 +151,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                             // apply conversions
                             for (let i = numberOfInsertedRows - 1; i >= 0 ; i--) {
                                 const addedRow = this.converterService.convertFromServerToClient(insertedData[i], this.staticElementType, undefined,
-                                                internalState.dynamicPropertyTypesHolder, '' + (startIndex + i), elemPropertyContext);
+                                                internalState.dynamicPropertyTypesHolder, '' + (startIndex + i), elemPropertyContext) as T;
                                 currentClientValue.splice(startIndex, 0, addedRow);
                             }
 

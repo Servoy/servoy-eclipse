@@ -231,24 +231,31 @@ export enum PushToServerEnum {
      */
     REJECT = 0,
 
-    /** Allow changes to be sent to server for this property (manually triggered by component/service code). */
+    /**
+     * Allow changes to be sent to server for this property (manually triggered by component/service code/directives that use that prop.).
+     * Manual triggering can be done using .emit(value) on the component @ Output (and in case of services via ServoyPublicService.sendServiceChanges()) of the root property that is/contains the changed value (even if it intends to send a subprop/element of the root property that only has ALLOW pushToServer).
+     * Before using .emit(...)/.sendServiceChanges(...), in the rare cases where you use an 'object' type in the .spec file for elements of custom arrays or sub-properties of typed custom objects, and the content of that value is a nested JSON, in order for the custom objects type/custom array type to 'see' the changes nested inside the JSON of the plain 'object' value, you can use either ICustomObjectValue.markSubPropertyAsHavingDeepChanges(subPropertyName: string) or ICustomArrayValue.markElementAsHavingDeepChanges(index: number).
+     */
     ALLOW = 1,
 
     /**
-     * Client code will try to automatically react when components/services change by reference the values marked with SHALLOW push-to-server.
-     * These new values will normally automatically be sent to server.
+     * Client code will automatically react when components/services change by reference the values inside nested custom objects/arrays/... marked with SHALLOW push-to-server.
+     * These new values will automatically be sent to server. But it does not work for root properties that change by ref.
+     * Root property change-by-ref in Titanium always needs .emit(value) to be called on the @ Output (and in case of services via ServoyPublicService.sendServiceChanges()) of that property. (because only that emit will actually update that ref. in the sablo model of the component/service, otherwise it's just a variable change by ref. inside the component/service itself)
+     * Changes nested inside untyped nested JSON values ('object' in .spec) need to be triggered manually as well, as they are not changes-by ref of that 'object' value; see description from 'allow'.
      *
-     * This is done using Proxy client side objects that 'wrap' the models/objects/arrays that keep those values in them.
+     * Impl detail: This is done using Proxy client side objects that 'wrap' custom objects/arrays/... . But that won't work for root properties, as those are just @ Input vars inside the component/service, so a Proxy inside the sablo component/service value would not detect that.
      */
     SHALLOW = 2,
 
     /**
-     * NG2 does not have deep watches (to detect nested changes in plain 'object' typed-in-spec JSON values); it can only handle automatically SHALLOW
+     * NG2/Titanium does not have deep watches (to detect nested changes in plain 'object' typed-in-spec JSON values); it can only handle automatically SHALLOW to a limited extent.
      * (see doc from SHALLOW) through proxies and it will do the same for DEEP.
-     * Changes inside untyped nested JSON values ('object' in spec) need to be triggered by component/service code using one of:
-     * - emit(value) on component outputs for root properties (even if it intends to send a subprop/element of the root property that only has ALLOW pushToServer)
-     * - ICustomObjectValue.markSubPropertyAsHavingDeepChanges(subPropertyName: string) if the deep untyped JSON that has changes is inside a custom object from spec
-     * - ICustomArrayValue.markElementAsHavingDeepChanges(index: number) if the deep untyped JSON that has changes is inside a custom array from spec
+     * 
+     * Changes nested inside untyped nested JSON values ('object' in spec) need to be triggered by component/service client-side code manually using one of:
+     * - emit(value) on the component @ Output (and in case of services via ServoyPublicService.sendServiceChanges()) of the root property that is/contains the changed values (even if it intends to send a subprop/element of the root property that only has ALLOW pushToServer)
+     * - ICustomObjectValue.markSubPropertyAsHavingDeepChanges(subPropertyName: string) if the deep untyped JSON that has changes is a subproperty of a typed custom object from .spec
+     * - ICustomArrayValue.markElementAsHavingDeepChanges(index: number) if the deep untyped JSON that has changes is and element of a custom array from .spec
      */
     DEEP = 3
 

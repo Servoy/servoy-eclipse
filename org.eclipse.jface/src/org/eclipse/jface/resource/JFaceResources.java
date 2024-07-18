@@ -21,11 +21,10 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.PopupDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -33,6 +32,7 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -199,7 +199,7 @@ public class JFaceResources {
 	 * 300 is big enough to cache common images of eclipse IDE, and small enough to
 	 * not blow OS.
 	 */
-	private static final int cacheSize = Integer.getInteger("org.eclipse.jface.resource.cacheSize", 300).intValue(); //$NON-NLS-1$
+	private static final int CACHE_SIZE = Integer.getInteger("org.eclipse.jface.resource.cacheSize", 300).intValue(); //$NON-NLS-1$
 
 	/**
 	 * Returns the global resource manager for the given display
@@ -214,20 +214,18 @@ public class JFaceResources {
 		ResourceManager reg = registries.get(toQuery);
 
 		if (reg == null) {
-			final ResourceManager mgr;
-			if (cacheSize == 0) {
-				mgr = new DeviceResourceManager(toQuery);
+			if (CACHE_SIZE == 0) {
+				reg = new DeviceResourceManager(toQuery);
 			} else {
-				mgr = new LazyResourceManager(cacheSize, new DeviceResourceManager(toQuery));
+				reg = new LazyResourceManager(CACHE_SIZE, new DeviceResourceManager(toQuery));
 			}
-			reg = mgr;
-			registries.put(toQuery, mgr);
+			registries.put(toQuery, reg);
+			final ResourceManager mgr = reg;
 			toQuery.disposeExec(() -> {
 				mgr.dispose();
 				registries.remove(toQuery);
 			});
 		}
-
 		return reg;
 	}
 
@@ -482,17 +480,15 @@ public class JFaceResources {
 	private static final void declareImage(Object bundle, String key, String path, Class<?> fallback,
 			String fallbackPath) {
 
-		Supplier<URL> supplier = () -> {
+		imageRegistry.put(key, ImageDescriptor.createFromURLSupplier(false, () -> {
 			if (bundle != null) {
-				URL url = FileLocator.find((Bundle) bundle, new Path(path), null);
-				if (url != null)
+				URL url = FileLocator.find((Bundle) bundle, IPath.fromOSString(path), null);
+				if (url != null) {
 					return url;
+				}
 			}
-			URL url = fallback.getResource(fallbackPath);
-			return url;
-		};
-
-		imageRegistry.put(key, ImageDescriptor.createFromURLSupplier(false, supplier));
+			return fallback.getResource(fallbackPath);
+		}));
 	}
 
 	/**
@@ -588,6 +584,25 @@ public class JFaceResources {
 		fontRegistry = registry;
 	}
 
+
+	/**
+	 * Creates a local registry that wraps the ResourceManager for the current
+	 * display. Anything allocated by this registry will be automatically cleaned up
+	 * with the given control is disposed. Note that registries created in this way
+	 * should not be used to allocate any resource that must outlive the given
+	 * control.
+	 *
+	 * shortcut for
+	 * <code>LocalResourceManager(JFaceResources.getResources(), owner)</code>
+	 *
+	 * @param owner control whose disposal will trigger cleanup of everything in the
+	 *              registry.
+	 * @return LocalResourceManager
+	 * @since 3.32
+	 */
+	static public LocalResourceManager managerFor(Control owner) {
+		return new LocalResourceManager(getResources(), owner);
+	}
 	/**
 	 * Declare a private constructor to block instantiation.
 	 */

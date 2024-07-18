@@ -33,7 +33,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.jsunit.scriptunit.JSUnitTestingEngine;
-import com.servoy.eclipse.jsunit.smart.RunSmartClientTests;
+import com.servoy.eclipse.jsunit.smart.RunClientTests;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.test.TestTarget;
@@ -108,7 +108,7 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	{
 		TestTarget testTarget = prepareForLaunch(configuration, launch);
 
-		new RunSmartClientTests(testTarget, launch, monitor, !"run".equals(mode)).run();
+		new RunClientTests(testTarget, launch, monitor, !"run".equals(mode)).run();
 	}
 
 	public static void prepareLaunchConfigForTesting(ILaunchConfigurationWorkingCopy workingCopy)

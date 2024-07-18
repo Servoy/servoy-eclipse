@@ -38,7 +38,7 @@ describe('WebsocketService', () => {
   }));
   it('should be make a connection', inject([WebsocketService], fakeAsync((service: WebsocketService) => {
       windowRef.nativeWindow = { location: {protocol: 'http', host: 'localhost', pathname: '/'}};
-     const session = service.connect({}, {}, {}, null);
+     const session = service.connect('', [], {}, null);
     flush(2);
      expect( session.isConnected()).toBeTruthy();
      discardPeriodicTasks();

@@ -52,8 +52,11 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.MediaContentProvider;
@@ -84,6 +87,29 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 		boolean includeNone, com.servoy.eclipse.ui.property.MediaPropertyController.MediaPropertyControllerConfig config)
 	{
 		super(id, displayName, persistContext, flattenedEditingSolution, includeNone, config);
+	}
+
+	@Override
+	protected void openMediaViewer(MediaNode value)
+	{
+		Media media = value.getMedia();
+		boolean ng2Mode = new Ng2DesignerPreferences().showNG2Designer();
+
+		if (ng2Mode)
+		{
+			String styleSheet = media.getName();
+			int index = styleSheet.indexOf(".less");
+			if (index > 0)
+			{
+				String ng2Filename = styleSheet.substring(0, index) + "_ng2.less";
+				Media media2 = ModelUtils.getEditingFlattenedSolution(media.getParent()).getMedia(ng2Filename);
+				if (media2 != null)
+				{
+					media = media2;
+				}
+			}
+		}
+		EditorUtil.openMediaViewer(media);
 	}
 
 
@@ -130,7 +156,7 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 					}
 					wizard.init(PlatformUI.getWorkbench(), selection);
 
-					WizardDialog dlg = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+					WizardDialog dlg = new WizardDialog(UIUtils.getActiveShell(), wizard);
 					if (wizard instanceof IPageChangedListener)
 					{
 						dlg.addPageChangedListener((IPageChangedListener)wizard);

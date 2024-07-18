@@ -96,6 +96,9 @@
                 "max": {
                     "type": "number"
                 },
+                "config": {
+                    "type": "string"
+                },
                 "lazyLoading": {
                     "type": "boolean"
                 },
@@ -406,6 +409,9 @@
                                 "max": {
                                     "type": "number"
                                 },
+                                "config": {
+                                    "type": "string"
+                                },
                                 "lazyLoading": {
                                     "type": "boolean"
                                 },
@@ -588,6 +594,10 @@
 									},
 									"optional": {
 										"type": "boolean"
+                                    },
+                                    "doc": {
+                                        "description": "the description of the parameter",
+                                        "type": "string"
                                     }
 								},
 							"required": ["name","type"],
@@ -677,6 +687,10 @@
 											}
 										]
 									},
+									"doc": {
+                                        "description": "the description of the parameter",
+                                        "type": "string"
+                                    },
 									"optional": {
 										"type": "boolean"
 									}
@@ -708,7 +722,11 @@
 						"allowaccess": {
 							"description": "Comma separated list of properties for which blocking is ignored, like 'visible'.",
 							"type": "string"
-						}						
+						},
+						"doc": {
+                            "type": "string",
+                            "description": "Api documentation description (internal only)."
+                        }						
 					},
 					"additionalProperties": false
 				}
@@ -828,6 +846,9 @@
                                         },
                                         "max": {
                                             "type": "number"
+                                        },
+                                        "config": {
+                                            "type": "string"
                                         },
                                         "lazyLoading": {
                                             "type": "boolean"

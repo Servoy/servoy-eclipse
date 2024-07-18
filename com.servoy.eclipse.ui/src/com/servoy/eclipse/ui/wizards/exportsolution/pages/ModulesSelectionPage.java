@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -38,7 +37,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -53,7 +51,7 @@ import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
-import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
@@ -272,7 +270,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		Label versionLabel = new Label(composite, SWT.NONE);
 		versionLabel.setText("Version");
 		versionLabel.setFont(font);
-		versionLabel.setLayoutData(gd);
+		//versionLabel.setLayoutData(gd);
 		new Label(composite, SWT.NONE);
 
 		Image warn = Activator.getDefault().loadImageFromBundle("warning.png");
@@ -345,29 +343,13 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		return v;
 	}
 
-	protected boolean setSolutionVersion(final IDeveloperServoyModel servoyModel, String module, String version, boolean displayError)
+	protected void setSolutionVersion(final IDeveloperServoyModel servoyModel, String module, String version, boolean displayError)
 	{
 		Solution solution = servoyModel.getServoyProject(module).getEditingSolution();
-		if (version.trim().equals(solution.getVersion())) return false;
+		if (version.trim().equals(solution.getVersion())) return;
 		solution.setVersion(version.trim());
-		try
-		{
-			repository.updateRootObject(solution);
-			if (isCurrentPage()) getWizard().getContainer().updateButtons();
-		}
-		catch (RepositoryException ex)
-		{
-			Debug.error(ex);
-			if (displayError)
-			{
-				Display.getDefault().syncExec(() -> {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot set the version for module '" + module + "'.",
-						ex.getMessage());
-				});
-			}
-			return false;
-		}
-		return true;
+		repository.updateNodesInWorkspace(new IPersist[] { solution }, false);
+		if (isCurrentPage()) getWizard().getContainer().updateButtons();
 	}
 
 	protected String getSPMVersion(ServoyProject solutionProject)

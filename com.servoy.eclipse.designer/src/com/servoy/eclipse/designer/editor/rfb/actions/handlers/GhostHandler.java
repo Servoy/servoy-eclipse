@@ -108,6 +108,68 @@ public class GhostHandler implements IServerService
 		writer.object();
 		writer.key("ghostContainers");
 		writer.array();
+
+		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
+		Map<String, FormElementGroup> groups = new HashMap<>();
+		Form form = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
+		int formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
+		Iterator<IPersist> it = form.getAllObjects();
+		while (it.hasNext())
+		{
+			IPersist persist = it.next();
+			if (persist instanceof IFormElement && !PersistHelper.isOverrideOrphanElement((IFormElement)persist))
+			{
+				IFormElement fe = (IFormElement)persist;
+				Point location = CSSPositionUtils.getLocation(fe);
+				if (!editorPart.getForm().isResponsiveLayout() && ((location.x > editorPart.getForm().getWidth()) || (location.y > formHeight)))
+				{
+					outsideElements.add(fe);
+				}
+				if (fe.getGroupID() != null)
+				{
+					String groupID = fe.getGroupID();
+					if (!groups.containsKey(groupID))
+						groups.put(groupID, new FormElementGroup(groupID, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm()));
+				}
+			}
+		}
+		if (outsideElements.size() > 0 || groups.size() > 0)
+		{
+			writer.object();
+			writer.key("style");
+			{
+				writer.object();
+				writer.key("left").value(0);
+				writer.key("top").value(0);
+				writer.endObject();
+			}
+			writer.key("ghosts");
+			writer.array();
+			printGhostFormElements(writer, outsideElements.iterator(), GHOST_TYPE_COMPONENT);
+
+			for (FormElementGroup group : groups.values())
+			{
+				writer.object();
+				writer.key("uuid").value(group.getGroupID());
+				writer.key("type").value(GHOST_TYPE_GROUP);
+				Rectangle rectangle = group.getBounds();
+				writer.key("location");
+				writer.object();
+				writer.key("x").value(rectangle.getX());
+				writer.key("y").value(rectangle.getY());
+				writer.endObject();
+				writer.key("size");
+				writer.object();
+				writer.key("width").value(rectangle.getWidth());
+				writer.key("height").value(rectangle.getHeight());
+				writer.endObject();
+				writer.endObject();
+			}
+
+			writer.endArray();
+			writer.endObject();
+		}
+
 		ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).acceptVisitor(new IPersistVisitor()
 		{
 			private Point getGhostContainerLocation(IBasicWebComponent bean, ArrayList<IBasicWebComponent> parentFormComponentPath)
@@ -461,7 +523,7 @@ public class GhostHandler implements IServerService
 				else if (o instanceof Form)
 				{
 					Form f = ModelUtils.getEditingFlattenedSolution(o).getFlattenedForm(o);
-					if (!((Form)o).isResponsiveLayout()) // absolute layout
+					if (!((Form)o).isResponsiveLayout() && ((Form)o).getParts().hasNext()) // absolute layout
 					{
 						writePartGhosts(writer, f);
 					}
@@ -662,66 +724,6 @@ public class GhostHandler implements IServerService
 				}
 			}
 		});
-		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
-		Map<String, FormElementGroup> groups = new HashMap<>();
-		Form form = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
-		int formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
-		Iterator<IPersist> it = form.getAllObjects();
-		while (it.hasNext())
-		{
-			IPersist persist = it.next();
-			if (persist instanceof IFormElement && !PersistHelper.isOverrideOrphanElement((IFormElement)persist))
-			{
-				IFormElement fe = (IFormElement)persist;
-				Point location = CSSPositionUtils.getLocation(fe);
-				if (!editorPart.getForm().isResponsiveLayout() && ((location.x > editorPart.getForm().getWidth()) || (location.y > formHeight)))
-				{
-					outsideElements.add(fe);
-				}
-				if (fe.getGroupID() != null)
-				{
-					String groupID = fe.getGroupID();
-					if (!groups.containsKey(groupID))
-						groups.put(groupID, new FormElementGroup(groupID, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm()));
-				}
-			}
-		}
-		if (outsideElements.size() > 0 || groups.size() > 0)
-		{
-			writer.object();
-			writer.key("style");
-			{
-				writer.object();
-				writer.key("left").value(0);
-				writer.key("top").value(0);
-				writer.endObject();
-			}
-			writer.key("ghosts");
-			writer.array();
-			printGhostFormElements(writer, outsideElements.iterator(), GHOST_TYPE_COMPONENT);
-
-			for (FormElementGroup group : groups.values())
-			{
-				writer.object();
-				writer.key("uuid").value(group.getGroupID());
-				writer.key("type").value(GHOST_TYPE_GROUP);
-				Rectangle rectangle = group.getBounds();
-				writer.key("location");
-				writer.object();
-				writer.key("x").value(rectangle.getX());
-				writer.key("y").value(rectangle.getY());
-				writer.endObject();
-				writer.key("size");
-				writer.object();
-				writer.key("width").value(rectangle.getWidth());
-				writer.key("height").value(rectangle.getHeight());
-				writer.endObject();
-				writer.endObject();
-			}
-
-			writer.endArray();
-			writer.endObject();
-		}
 		writer.endArray();
 		writer.endObject();
 		return new JSONObject(stringWriter.getBuffer().toString());

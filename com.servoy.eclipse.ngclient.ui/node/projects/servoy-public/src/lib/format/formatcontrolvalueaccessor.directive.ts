@@ -49,7 +49,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private static DATETIMEFORMAT: Format = {display:'yyyy-MM-dd\'T\'HH:mm:ss', type:'DATETIME'} as Format;
     private static DATEFORMAT: Format = {display:'yyyy-MM-dd', type:'DATETIME'} as Format;
     private static MONTHFORMAT: Format = {display:'yyyy-MM', type:'DATETIME'} as Format;
-    private static WEEKFORMAT: Format = {display:'YYYY-[W]WW', type:'DATETIME'} as Format;
+    private static WEEKFORMAT: Format = {display:'YYYY-\'W\'WW', type:'DATETIME'} as Format;
     private static TIMEFORMAT: Format = {display:'HH:mm', type:'DATETIME'} as Format;
     private static BROWSERNUMBERFORMAT = new NumberParser();
 
@@ -70,9 +70,10 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         this.log = logFactory.getLogger('formatdirective');
     }
 
-    @HostListener('blur', []) touched() {
+    @HostListener('blur', ['$event.target.value']) touched(value: any) {
         this.onTouchedCallback();
         this.hasFocus = false;
+        this.dateInputChange(value);
         const inputType = this.getType();
         if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
             this.writeValue(this.realValue);
@@ -85,16 +86,20 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             this.writeValue(this.realValue);
         }
     }
+    
+    @HostListener('keydown', ['$event']) keyDown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			this.dateInputChange((event.target as HTMLInputElement).value);
+		}
+	}
 
     @HostListener('change', ['$event.target.value']) input(value: any) {
         let data = value;
         const inputType = this.getType();
         if (inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week') {
-             const luxonDate = DateTime.fromISO(data);
-             if (luxonDate.isValid)
-                data = luxonDate.toJSDate();
-            else data = null;
-        } else if (inputType === 'number') {
+			return;
+		}
+        else if (inputType === 'number') {
              data = FormatDirective.BROWSERNUMBERFORMAT.parse(value);
         } else if (inputType === 'email') {
              data = value;
@@ -131,9 +136,26 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
                 }
             }
         }
-        this.realValue = data;
-        this.onChangeCallback(data);
+        this.setRealValue(data);
     }
+    
+    dateInputChange(value: any) {
+		let data = value;
+        const inputType = this.getType();
+		if (inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week') {
+			const luxonDate = DateTime.fromISO(data);
+			if (luxonDate.isValid)
+				data = luxonDate.toJSDate();
+			else data = null;
+			
+			this.setRealValue(data);
+        }
+	}
+	
+	setRealValue(value: any) {
+		this.realValue = value;
+        this.onChangeCallback(value);
+	}
 
     onChangeCallback = (_: any) => { };
     onTouchedCallback = () => { };

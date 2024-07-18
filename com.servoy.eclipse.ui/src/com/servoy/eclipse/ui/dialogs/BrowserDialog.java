@@ -84,7 +84,7 @@ public class BrowserDialog extends Dialog
 	private String url;
 	private IBrowser browser;
 	private Shell shell;
-	private boolean showSkipNextTime;
+	private final boolean showSkipNextTime;
 	private static final int MIN_WIDTH = 900;
 	private static final int MIN_HEIGHT = 600;
 
@@ -130,10 +130,6 @@ public class BrowserDialog extends Dialog
 		Shell parent = getParent();
 		shell = new Shell(parent, SWT.DIALOG_TRIM | getStyle());
 		shell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
-		{
-			this.showSkipNextTime = false;
-		}
 
 		if (showSkipNextTime)
 		{
@@ -410,7 +406,7 @@ public class BrowserDialog extends Dialog
 				boolean[] overwrite = new boolean[] { false };
 				Display.getDefault().syncExec(() -> {
 
-					overwrite[0] = UIUtils.askConfirmation(Display.getDefault().getActiveShell(),
+					overwrite[0] = UIUtils.askConfirmation(UIUtils.getActiveShell(),
 						"Sample already exists in the workspace",
 						"Do you want to fully overwrite the installed sample again?");
 				});

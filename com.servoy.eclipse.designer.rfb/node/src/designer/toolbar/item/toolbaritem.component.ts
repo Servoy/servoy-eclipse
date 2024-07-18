@@ -8,6 +8,7 @@ export class ToolbarItemComponent {
     onselection(selection: string) {
         const text = this.item.onselection(selection);
         if(text) this.item.text = text;
+        return false;
     }
 
     isDisabled(): boolean {

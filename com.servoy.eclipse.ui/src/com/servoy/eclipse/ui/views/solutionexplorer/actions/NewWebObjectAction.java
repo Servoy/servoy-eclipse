@@ -154,6 +154,8 @@ public class NewWebObjectAction extends Action
 			// IMPORTANT: this should always stay in sync with WebObjectSpecification.scriptifyNameIfNeeded()
 			String moduleName = packageRoot.getName() + componentOrServiceName.substring(0, 1).toUpperCase() + componentOrServiceName.substring(1);
 
+			String fullName = "";
+
 			folder.create(IResource.FORCE, true, new NullProgressMonitor());
 			Bundle bundle = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle();
 			if (elementType.equals(IPackageReader.WEB_COMPONENT))
@@ -164,6 +166,14 @@ public class NewWebObjectAction extends Action
 			}
 			if (!elementType.equals(IPackageReader.WEB_LAYOUT))
 			{
+				if (elementType.equals(IPackageReader.WEB_SERVICE))
+				{
+					fullName = componentOrServiceName;
+				}
+				else
+				{
+					fullName = packageRoot.getName() + "-" + getDashedName(componentOrServiceName);
+				}
 				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".js")
 					.openStream();
 				String text = IOUtils.toString(in, "UTF-8");
@@ -177,13 +187,14 @@ public class NewWebObjectAction extends Action
 				text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
 				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName); // IMPORTANT service name from service.spec template should always be built of packagename dash name so that WebObjectSpecification.scriptifyNameIfNeeded() can get the "moduleName" or scripting name out of that
-				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentOrServiceName));
+				text = text.replaceAll("\\$\\{FULLNAME\\}", fullName);
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
 				createFile(componentOrServiceName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 				in.close();
 			}
 			else
 			{
+				fullName = getDashedName(componentOrServiceName);
 				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".json")
 					.openStream();
 				String text = IOUtils.toString(in, "UTF-8");
@@ -194,8 +205,7 @@ public class NewWebObjectAction extends Action
 				text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
 				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
-				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentOrServiceName));
-				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
+				text = text.replaceAll("\\$\\{FULLNAME\\}", fullName);
 				createFile(componentOrServiceName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 				in.close();
 			}
@@ -280,8 +290,7 @@ public class NewWebObjectAction extends Action
 				bundleContent = bundleContent.replaceAll(PACKAGE_NAME_TAG, packageRoot.getName());
 				bundleContent = bundleContent.replaceAll(COMPONENT_NAME_TAG, componentOrServiceName);
 				bundleContent = bundleContent.replaceAll(COMPONENT_DASH_NAME_TAG, getDashedName(componentOrServiceName));
-				bundleContent = bundleContent.replaceAll(COMPONENT_CLASSNAME_TAG,
-					className);
+				bundleContent = bundleContent.replaceAll(COMPONENT_CLASSNAME_TAG, className);
 				FileUtils.writeStringToFile(new File(compDirectory, componentOrServiceName + ".ts"), bundleContent, charset);
 
 				url = bundle.getEntry("/component-templates/component.spec.ts");

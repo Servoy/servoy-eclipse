@@ -18,7 +18,6 @@
 package com.servoy.eclipse.ui.wizards.exportsolution.pages;
 
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -28,7 +27,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -46,10 +44,9 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
-import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -302,23 +299,11 @@ public class ExportOptionsPage extends WizardPage implements Listener
 	protected void setMainSolutionVersion(Text mainSolutionVersion, EclipseRepository repository, Label warnLabel, Solution editingSolution)
 	{
 		if (mainSolutionVersion.getText().trim().equals(editingSolution.getVersion())) return;
-		try
-		{
-			editingSolution.setVersion(mainSolutionVersion.getText());
-			repository.updateRootObject(editingSolution);
-			warnLabel.setVisible(Utils.stringIsEmpty(mainSolutionVersion.getText()));
-			if (isCurrentPage()) getWizard().getContainer().updateButtons();
-			PersistPropertySource.refreshPropertiesView();
-		}
-		catch (RepositoryException ex)
-		{
-			Debug.error(ex);
-			Display.getDefault().syncExec(() -> {
-				MessageDialog.openError(Display.getDefault().getActiveShell(),
-					"Cannot set the version for solution '" + exportSolutionWizard.getActiveSolution().getName() + "'.",
-					ex.getMessage());
-			});
-		}
+		editingSolution.setVersion(mainSolutionVersion.getText());
+		repository.updateNodesInWorkspace(new IPersist[] { editingSolution }, false);
+		warnLabel.setVisible(Utils.stringIsEmpty(mainSolutionVersion.getText()));
+		if (isCurrentPage()) getWizard().getContainer().updateButtons();
+		PersistPropertySource.refreshPropertiesView();
 	}
 
 	private void applyNrOfExportedSampleDataSpinnerValue()

@@ -3,15 +3,17 @@ import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISuppor
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
-import { EditorContentService } from '../services/editorcontent.service';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 import { WindowRefService } from '@servoy/public';
+import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'designer-palette',
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css']
 })
-export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette{
+export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette {
 
     public searchText: string;
     public activeIds: Array<string>;
@@ -20,10 +22,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     canDrop: { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean };
     draggedVariant: DraggedVariant = {};
     isDraggedVariant = false;
+    snapData: SnapData;
+    subscription: Subscription;
 
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, 
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
-        private windowRef: WindowRefService) {
+        private windowRef: WindowRefService,  private guidesService: DynamicGuidesService) {
         
         this.editorSession.setPaletteRefresher(this);
         this.refreshPalette();
@@ -42,6 +46,15 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         });
         this.editorContentService.getBodyElement().addEventListener('mouseup', this.onMouseUp);
         this.editorContentService.getBodyElement().addEventListener('mousemove', this.onMouseMove);
+
+        //TODO check url
+        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
+            this.snap(value);
+        })
+    }
+
+    ngOnDestroy(): void {
+        if (this.subscription !== undefined) this.subscription.unsubscribe();
     }
 
     openPackageManager() {
@@ -85,7 +98,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         } //else a very narrow margin (cca. 1 px) of this component was clicked and popup will be wrongly positioned
     }
 
-    onVariantMouseDown(pageX: number, pageY: number, model: { [property: string]: any }) {
+    onVariantMouseDown(pageX: number, pageY: number, model: { [property: string]: unknown }) {
         this.isDraggedVariant = true;
         this.draggedVariant.variant = model._variantName as string;
         this.draggedVariant.size = model.size as { width: number; height: number };
@@ -108,6 +121,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.dragItem.componentType = this.draggedVariant.type;
         this.dragItem.layoutName = null;
         this.dragItem.attributes = null;
+        this.dragItem.model = model;
 
         this.canDrop = { dropAllowed: false };
         this.editorSession.getState().dragging = true;
@@ -131,14 +145,18 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: any }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
+    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: unknown }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
         if ( event.target && (event.target as Element).getAttribute('name') === 'variants' ) {
             return; // it has a separate handler
         }
         event.stopPropagation(); 
         this.editorSession.variantsTrigger.emit({show: false});
 
-        this.dragItem.paletteItemBeingDragged = (event.target as HTMLElement).cloneNode(true) as Element;
+		let target = event.target as HTMLElement;
+		if (target.localName === 'designer-variantscontent') {
+			target = target.closest('li');
+		}
+        this.dragItem.paletteItemBeingDragged = target.cloneNode(true) as Element;
         Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
             if (child.tagName === 'DESIGNER-VARIANTSCONTENT') {
                 this.dragItem.paletteItemBeingDragged.removeChild(child);
@@ -159,6 +177,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.dragItem.componentType = componentType;
         this.dragItem.layoutName = layoutName;
         this.dragItem.attributes = attributes;
+        this.dragItem.model = model;
 
         this.canDrop = { dropAllowed: false };
         if (!ghost) {
@@ -181,8 +200,25 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             component.name = this.dragItem.elementName;
             component.packageName = this.dragItem.packageName;
 
-            component.x = event.pageX;
-            component.y = event.pageY;
+            if (this.snapData) {
+                component.x = this.snapData.left;
+                component.y = this.snapData.top;
+                if (this.snapData.width) {
+                    component.w = this.snapData.width;
+                }
+                if (this.snapData.height) {
+                    component.h = this.snapData.height;
+                }
+                component.cssPos = this.snapData.cssPosition;
+                this.snapData = null;
+            }
+            else {
+                component.x = event.pageX;
+                component.y = event.pageY;
+                // do we also need to set size here ?
+                component.x = component.x - this.editorContentService.getLeftPositionIframe();
+                component.y = component.y - this.editorContentService.getTopPositionIframe();
+            }
                     
             if (this.isDraggedVariant) {
                 component.w = this.draggedVariant.size.width;
@@ -192,17 +228,14 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     component.variant = this.draggedVariant.variant;
                 }
                 this.isDraggedVariant = false;
-            }
-
-            // do we also need to set size here ?
-            component.x = component.x - this.editorContentService.getLeftPositionIframe();
-            component.y = component.y - this.editorContentService.getTopPositionIframe();
-
-            
+            }            
 
             if (this.urlParser.isAbsoluteFormLayout()) {
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
                     component.dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
+                }
+                if (this.canDrop.beforeChild) {
+                    component.rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
                 }
             }
             else {
@@ -258,11 +291,13 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
     }
 
-    onMouseMove = (event: MouseEvent) => {
+    onMouseMove = (event: MouseEvent) => {  
         if (event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
         }
+
+        if (this.snapData)  return;
 
         if (this.dragItem.paletteItemBeingDragged) {
            
@@ -272,7 +307,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', event.pageX - this.editorContentService.getLeftPositionIframe() + 'px');
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.editorContentService.getTopPositionIframe() + 'px');
 
-                this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + "." + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
+                this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
                 if (!this.canDrop.dropAllowed) {
                     this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
                 }
@@ -293,9 +328,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     {
                         // hide the dragged item and rely on inserted item at specific parent 
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
+                        this.renderer.removeClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
                     } else 
                     {
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
+                        this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
                     }
                 }
             }
@@ -394,8 +431,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                                 }
                                 packages[i].components[j].components = newPropertyValues;
                             }
-                            else {
+                            else if (packages[i].components[j].name != 'servoycore-listformcomponent'){
+                                // added autowizard for list form component 
                                 packages[i].components[j].components = propertyValues;
+                            }
+                            else{
+                                packages[i].components[j].properties = null;
                             }
                         }
                     }
@@ -403,6 +444,32 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             }
             this.editorSession.getState().packages = packages;
         });
+    }
+
+    snap(data: SnapData) {
+        if (this.editorSession.getState().dragging) {
+            this.snapData = data;
+            if (this.snapData?.top && this.snapData?.left) {
+                if (this.dragItem && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
+                    this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
+                }
+                if (this.dragItem.contentItemBeingDragged) {
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData?.left + 'px');
+                    if (this.snapData?.width) { 
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
+                    }
+                    if (this.snapData?.height) {
+                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
+                    }
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData?.top + 'px');
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
+                    this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
+                }
+            }
+        }
+        else {
+            this.snapData = null;
+        }
     }
 }
 
@@ -462,6 +529,7 @@ export class DragItem {
     topContainer?: boolean = false;
     layoutName?: string;
     attributes?: { [property: string]: string };
+    model?: { [property: string]: unknown };
 }
 
 export class DraggedVariant {

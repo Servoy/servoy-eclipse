@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.search.internal.ui.text.NavigatorDragAdapter;
 import org.eclipse.search.ui.IContextMenuConstants;
 import org.eclipse.search.ui.ISearchResultPage;
 import org.eclipse.search.ui.ISearchResultViewPart;
@@ -49,7 +50,6 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.IPageSite;
@@ -57,13 +57,12 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
-import org.eclipse.ui.views.navigator.NavigatorDragAdapter;
 
 import com.ibm.icu.text.MessageFormat;
 
 /**
  * The {@link ISearchResultPage} for displaying the file based search results.
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -81,7 +80,7 @@ public class FileSearchPage extends AbstractTextSearchViewPage implements IAdapt
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.ViewerComparator#category(java.lang.Object)
 		 */
 		@Override
@@ -131,7 +130,7 @@ public class FileSearchPage extends AbstractTextSearchViewPage implements IAdapt
 	private final SortAction fSortByPathAction;
 
 
-	private static final String[] SHOW_IN_TARGETS = new String[] { IPageLayout.ID_RES_NAV };
+	private static final String[] SHOW_IN_TARGETS = new String[0]; // { IPageLayout.ID_RES_NAV };
 	private static final IShowInTargetList SHOW_IN_TARGET_LIST = new IShowInTargetList()
 	{
 		public String[] getShowInTargetIds()

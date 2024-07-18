@@ -37,8 +37,6 @@ import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ExpandEvent;
-import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -54,15 +52,19 @@ import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.events.IExpansionListener;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.CachingChildrenComposite;
 import com.servoy.eclipse.ui.editors.less.LessPropertyEntry.LessPropertyType;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 
 /**
@@ -76,32 +78,17 @@ public class LessPropertiesComposite extends Composite
 	{
 		private final String categoryName;
 
-		public ExpandableLessPropertiesComposite(ExpandBar parent, PropertiesLessEditorInput propertiesLessEditorInput, Font font, String categoryName)
+		public ExpandableLessPropertiesComposite(Composite parent, PropertiesLessEditorInput propertiesLessEditorInput, Font font, String categoryName)
 		{
 			super(parent, SWT.NONE);
 			this.categoryName = categoryName;
 			GridLayout layout = new GridLayout(3, false);
 			layout.marginRight = 5;
 			setLayout(layout);
-			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 			for (LessPropertyEntry property : propertiesLessEditorInput.getProperties(categoryName))
 			{
 				addPropertyEntry(this, font, propertiesLessEditorInput, property);
-			}
-			this.pack();
-		}
-
-		public void refresh()
-		{
-			int i = 0;
-			LessPropertyEntry[] properties = ((PropertiesLessEditorInput)editor.getEditorInput()).getProperties(categoryName);
-			for (Control c : getChildren())
-			{
-				if (c instanceof Text)
-				{
-					Text text = (Text)c;
-					text.setText(properties[i++].getValue());
-				}
 			}
 		}
 	}
@@ -229,7 +216,7 @@ public class LessPropertiesComposite extends Composite
 			RowLayout rowLayout = new RowLayout();
 			rowLayout.spacing = 8;
 			comp.setLayout(rowLayout);
-			comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+			comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 			PropertiesLessEditorInput propertiesLessEditorInput = (PropertiesLessEditorInput)editor.getEditorInput();
 
@@ -263,45 +250,53 @@ public class LessPropertiesComposite extends Composite
 					setThemeVersion();
 				}
 			});
+			tiCheck.setVisible(false);
 			categoryComposites = new ArrayList<ExpandableLessPropertiesComposite>();
 			for (String categoryName : propertiesLessEditorInput.getCategories())
 			{
-				ExpandBar expandBar = new ExpandBar(area, SWT.NONE);
-				expandBar.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
-				expandBar.setFont(boldFont);
-				expandBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-				ExpandableLessPropertiesComposite expandComposite = new ExpandableLessPropertiesComposite(expandBar, propertiesLessEditorInput, boldFont,
+				ExpandableComposite excomposite = new ExpandableComposite(area, SWT.NONE,
+					ExpandableComposite.TWISTIE);
+				excomposite.setText(categoryName + " Properties");
+				excomposite.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
+				excomposite.setFont(boldFont);
+				excomposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+				excomposite.setExpanded(categoryComposites.size() == 0);
+				if (IconPreferences.getInstance().getUseDarkThemeIcons())
+				{
+					Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+						.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
+					if (darkFGColor != null)
+					{
+						excomposite.setTitleBarForeground(darkFGColor);
+						excomposite.setActiveToggleColor(darkFGColor);
+					}
+				}
+
+				ExpandableLessPropertiesComposite expandComposite = new ExpandableLessPropertiesComposite(excomposite, propertiesLessEditorInput, boldFont,
 					categoryName);
 				categoryComposites.add(expandComposite);
 				expandComposite.setData(SWT_CSS_ID_KEY, SVY_BACKGROUND);
-				ExpandItem collapsableItem = new ExpandItem(expandBar, SWT.NONE, 0);
-				collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-				collapsableItem.setControl(expandComposite);
-				collapsableItem.setText(categoryName + " Properties");
-				collapsableItem.setExpanded(categoryComposites.size() == 1);//expand the first one by default
-				expandBar.addExpandListener(new ExpandListener()
+
+				ImageHyperlink image = new ImageHyperlink(excomposite, SWT.None);
+				image.setImage(uiActivator.loadImageFromBundle(excomposite.isExpanded() ? "collapse_tree.png" : "expandall.png"));
+				excomposite.setClient(expandComposite);
+				excomposite.setTextClient(image);
+
+				excomposite.addExpansionListener(new IExpansionListener()
 				{
-					public void itemExpanded(ExpandEvent e)
+					@Override
+					public void expansionStateChanging(ExpansionEvent e)
 					{
-						collapsableItem.setImage(uiActivator.loadImageFromBundle("collapse_tree.png"));
-						Display.getCurrent().asyncExec(() -> {
-							collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-							sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-							sc.layout(true, true);
-						});
+
 					}
 
-					public void itemCollapsed(ExpandEvent e)
+					@Override
+					public void expansionStateChanged(ExpansionEvent e)
 					{
-						collapsableItem.setImage(uiActivator.loadImageFromBundle("expandall.png"));
-						Display.getCurrent().asyncExec(() -> {
-							collapsableItem.setHeight(0);
-							sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-							sc.layout(true, true);
-						});
+						image.setImage(uiActivator.loadImageFromBundle(e.getState() ? "collapse_tree.png" : "expandall.png"));
 					}
+
 				});
-				collapsableItem.setImage(uiActivator.loadImageFromBundle(collapsableItem.getExpanded() ? "collapse_tree.png" : "expandall.png"));
 			}
 		}
 		catch (Exception e)
@@ -456,32 +451,32 @@ public class LessPropertiesComposite extends Composite
 	 */
 	private void setChanged(LessPropertyEntry property, Label label, Color normalBg)
 	{
+		String tooltip = null;
 		if (property.getStoredDefault() != null && !property.getStoredDefault().equals(property.getDefaultValue()))
 		{
 			label.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
-			label.setToolTipText("Default value changed from: " + property.getStoredDefault() + " to " + property.getDefaultValue() +
-				", right click to to update the default value or change the value itself");
+			tooltip = "Default value changed from: " + property.getStoredDefault() + " to " + property.getDefaultValue() +
+				", right click to to update the default value or change the value itself";
 		}
 		else if (property.getDefaultValue() != null && !property.getDefaultValue().equals(property.getValue()))
 		{
 			label.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
-			label.setToolTipText("Value overwrites default value: " + property.getDefaultValue() + ", right click to reset");
+			tooltip = "Value overwrites default value: " + property.getDefaultValue() + ", right click to reset";
 		}
 		else
 		{
 			label.setForeground(normalBg);
-			label.setToolTipText(null);
 		}
+		if (property.getDescription() != null)
+		{
+			tooltip = property.getDescription() + (tooltip != null ? "\n" + tooltip : "");
+		}
+		label.setToolTipText(tooltip);
 	}
 
 
 	public Control getControl()
 	{
 		return sc;
-	}
-
-	public void refresh()
-	{
-		categoryComposites.forEach(c -> c.refresh());
 	}
 }

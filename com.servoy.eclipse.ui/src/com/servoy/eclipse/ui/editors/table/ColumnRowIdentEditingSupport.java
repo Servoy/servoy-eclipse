@@ -20,11 +20,11 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ITable;
@@ -87,7 +87,7 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 			}
 			if (type != 0 && pi.getAllowNull())
 			{
-				MessageBox dialog = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_WARNING | SWT.OK);
+				MessageBox dialog = new MessageBox(UIUtils.getActiveShell(), SWT.ICON_WARNING | SWT.OK);
 				dialog.setText("Warning");
 				dialog.setMessage(
 					"Row identifiers should always be not null. \nIf you really need this column to be a row identifier you should make sure the contents of this column is always not null ");

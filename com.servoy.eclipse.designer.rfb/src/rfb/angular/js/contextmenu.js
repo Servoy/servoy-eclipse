@@ -69,9 +69,9 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 				var i;
 				for (i = 0; i < $scope.actions.length; i++){
 					if ($scope.actions[i].text === "Add") {
-						var allowedChildren = selection.getAttribute("svy-types") != null ? [] : $allowedChildren.get(selection.getAttribute("svy-layoutname"));
+						var allowedChildren = (selection.getAttribute("svy-types") != null || (selection.getAttribute("svy-layoutname") == null && $scope.isAbsoluteFormLayout())) ? [] : $allowedChildren.get(selection.getAttribute("svy-layoutname"));
 						var types = selection.getAttribute("svy-types");
-						if (allowedChildren || types){
+						if (allowedChildren.length > 0 || (types && types.length > 2)){
 							$scope.actions[i].getItemClass = function() { return "dropdown-submenu"};
 							$scope.actions[i].subMenu = [];
 							var typesArray = allowedChildren ? allowedChildren : [];
@@ -90,7 +90,7 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 							for (k = 0; k < typesArray.length; k++){
 								var addAction = function (k, typesStartIdx) {//save the k in a closure
 									$scope.actions[i].subMenu.push({
-										text: k < typesStartIdx ? getDisplayName(typesArray[k]) : typesArray[k].type + ' for ' + typesArray[k].property,
+										text: k < typesStartIdx ? getDisplayName(typesArray[k]) : typesArray[k].type + ' -> ' + typesArray[k].property,
 												execute: function()
 												{
 													$("#contextMenu").hide();
@@ -165,7 +165,16 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 						var submenu = $(".dropdown-submenu:hover");
 					    if (submenu[0]) {
 					    	var menu = $(submenu[0]).find(".dropdown-menu");
-						    var ctxmenu = $("#contextMenu");		
+						    var ctxmenu = $("#contextMenu");
+						    if (menu.height() > 200 && (win.height() - ctxmenu.offset().top - menu.height()) <= 100) {
+								if (ctxmenu.offset().top > menu.height()) {
+									menu.css({ top: -ctxmenu.offset().top + menu.height() });
+								} else {
+									menu.css({ top: -ctxmenu.offset().top });
+								}
+							} else {
+								menu.css({ top: "" });
+							}
 						    //the submenu can only be displayed on the right or left side of the contextmenu
 						    if (ctxmenu.outerWidth() + ctxmenu.offset().left + menu.outerWidth() > viewport.right) {
 						    	//+5 to make it overlap the menu a bit

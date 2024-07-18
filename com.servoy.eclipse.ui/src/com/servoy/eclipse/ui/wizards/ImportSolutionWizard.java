@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -138,6 +139,13 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	public void addPages()
 	{
 		addPage(page);
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	public static String initialPath = getInitialImportPath();
@@ -368,7 +376,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot create server '" + name + "'",
+								MessageDialog.openError(UIUtils.getActiveShell(), "Cannot create server '" + name + "'",
 									"An unexpected error occured while creating new server, please create the server manually.");
 							}
 						});

@@ -49,7 +49,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Edit policy for adding/deleting components in mobile form editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -80,7 +80,7 @@ public class MobileFormXYLayoutEditPolicy extends XYLayoutEditPolicy
 
 				if (model instanceof Part) // parts have subeditpart in editor, but these are not subitems in persist model, so call delete on actual part elements
 				{
-					List<EditPart> partEditParts = childEditPart.getChildren();
+					List< ? extends EditPart> partEditParts = childEditPart.getChildren();
 					if (partEditParts.size() > 0)
 					{
 						GroupRequest deleteReq = new GroupRequest(RequestConstants.REQ_DELETE);

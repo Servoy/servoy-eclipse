@@ -146,6 +146,7 @@ public final class EclipseDatabaseUtils
 				{
 					if (o1.creationOrderIndex < o2.creationOrderIndex) return -1;
 					else if (o1.creationOrderIndex > o2.creationOrderIndex) return 1;
+					else if (o1.creationOrderIndex == o2.creationOrderIndex) return o1.name.compareTo(o2.name);
 					else return 0;
 				}
 			});

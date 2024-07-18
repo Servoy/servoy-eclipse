@@ -18,9 +18,12 @@
 package com.servoy.eclipse.ui.dialogs.autowizard.nattable;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer.MoveDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.IStyle;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
@@ -70,13 +73,10 @@ public class NatTextDialogControl extends Composite
 		this.control.setForeground(this.cellStyle.getAttributeValue(CellStyleAttributes.FOREGROUND_COLOR));
 		this.control.setFont(this.cellStyle.getAttributeValue(CellStyleAttributes.FONT));
 
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		this.control.setLayoutData(gridData);
-		gridData = new GridData(SWT.RIGHT, SWT.CENTER, false, true);
-
+		this.control.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		Button button = new Button(this, SWT.PUSH);
 		button.setImage(iconImage);
-		button.setLayoutData(gridData);
+		button.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, true));
 		button.setToolTipText(title);
 		button.addMouseListener(new MouseAdapter()
 		{
@@ -84,6 +84,44 @@ public class NatTextDialogControl extends Composite
 			public void mouseDown(MouseEvent e)
 			{
 				dialogOpener.openDialog(getShell(), getValue());
+			}
+		});
+		button.addKeyListener(new KeyListener()
+		{
+			@Override
+			public void keyReleased(KeyEvent e)
+			{
+				switch (e.keyCode)
+				{
+					case SWT.SPACE :
+					case SWT.CR :
+						dialogOpener.openDialog(getShell(), getValue());
+						break;
+					case SWT.ARROW_LEFT :
+						if (control instanceof Text)
+						{
+							((Text)control).setSelection(getValue().length());
+							control.setFocus();
+						}
+						break;
+					case SWT.ARROW_UP :
+						dialogOpener.commit(MoveDirectionEnum.UP, true);
+						break;
+					case SWT.ARROW_DOWN :
+						dialogOpener.commit(MoveDirectionEnum.DOWN, true);
+						break;
+					case SWT.TAB :
+					case SWT.ARROW_RIGHT :
+						dialogOpener.commit(MoveDirectionEnum.RIGHT, true);
+						break;
+					case SWT.ESC :
+						dialogOpener.close();
+				}
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
 			}
 		});
 	}
@@ -103,5 +141,10 @@ public class NatTextDialogControl extends Composite
 		{
 			((Label)control).setText(labelProvider.getText(value));
 		}
+	}
+
+	public Object getControl()
+	{
+		return control;
 	}
 }

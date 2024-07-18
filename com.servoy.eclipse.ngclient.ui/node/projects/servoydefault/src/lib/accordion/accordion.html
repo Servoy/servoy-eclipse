@@ -1,14 +1,14 @@
-<ngb-accordion [activeIds]="getSelectedTabId()" (panelChange)="onTabChange($event)"  class="svy-accordion"  [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq" [sabloTabseqConfig]="{container: true, reservedGap: 50}">
-    <ngb-panel *ngFor="let tab of tabs;let i = index" [disabled]="tab.disabled || !tab.containsFormId" [id]="tab._id">
-      <ng-template ngbPanelHeader>
-            <button ngbPanelToggle class="accordion-button" (click)="tabClicked(tab, i , $event)">
+<div ngbAccordion [closeOthers]="true" #element class="svy-accordion"  [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq" [sabloTabseqConfig]="{container: true, reservedGap: 50}">
+    <div ngbAccordionItem *ngFor="let tab of tabs;let i = index" [disabled]="tab.disabled || !tab.containsFormId" [id]="tab._id" [collapsed]="getSelectedTabId() !== tab._id">
+      <div ngbAccordionHeader>
+            <button ngbAccordionButton class="accordion-button" (click)="tabClicked(tab, i , $event)">
                 <span [innerHTML]='tab?.text'></span>
             </button>
-      </ng-template>
-      <ng-template ngbPanelContent>
-      	<div #element style="position: relative;overflow: auto;top: 0px;bottom: 0px;left: 0px;right: 0px;" [style.height.px]="panelHeight">
+      </div>
+      <div ngbAccordionCollapse>
+      	<div  ngbAccordionBody style="position: relative;overflow: auto;top: 0px;bottom: 0px;left: 0px;right: 0px;" [style.height.px]="panelHeight">
       		<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}"></ng-template>
       	</div>
-      </ng-template>
-    </ngb-panel>
-</ngb-accordion>
+      </div>
+    </div>
+</div>

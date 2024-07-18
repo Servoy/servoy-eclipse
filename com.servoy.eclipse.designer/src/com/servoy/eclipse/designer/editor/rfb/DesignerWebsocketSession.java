@@ -60,8 +60,8 @@ import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -134,7 +134,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (int i = 0; i < styleSheets.size(); i++)
 			{
 				String stylesheetName = styleSheets.get(i);
-				if (new DesignerPreferences().showNG2Designer())
+				if (new Ng2DesignerPreferences().showNG2Designer())
 				{
 					int lastPoint = stylesheetName.lastIndexOf('.');
 					String ng2StylesheetName = stylesheetName.substring(0, lastPoint) + "_ng2" + stylesheetName.substring(lastPoint);
@@ -245,7 +245,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.key("solutionProperties");
 					writer.object();
 					writer.key("styleSheets");
-					writer.value(getSolutionStyleSheets(fs));
+					writer.value(getSolutionStyleSheets(ServoyModelFinder.getServoyModel().getFlattenedSolution()));
 					writer.endObject();
 					generateParts(flattenedForm, context, writer, wrapper.getParts());
 					writer.endObject();
@@ -341,7 +341,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			case "getStyleSheets" :
 			{
-				return getDesignerStyleSheets(fs);
+				return getDesignerStyleSheets(ServoyModelFinder.getServoyModel().getFlattenedSolution());
 			}
 		}
 		return null;
@@ -394,12 +394,13 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	 *
 	 * @return ghost
 	 */
-	private boolean checkLayoutHierarchyRecursively(IPersist persist, List<LayoutContainer> containers, Set<IFormElement> components,
+	private boolean checkLayoutHierarchyRecursively(IPersist persist, Map<IPersist, List<LayoutContainer>> persistContainers, Set<IFormElement> components,
 		Set<IFormElement> compAttributes, Set<IFormElement> deletedComponents, boolean formComponentChild, Set<IFormElement> refreshTemplate,
 		Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, boolean renderGhosts, FlattenedSolution fs,
 		Map<String, String> childParentMap, boolean skipComponents)
 	{
 		boolean ghost = false;
+		List<LayoutContainer> containers = persistContainers.get(persist);
 		if (persist instanceof LayoutContainer && !containers.contains(persist))
 		{
 			containers.add((LayoutContainer)persist);
@@ -408,7 +409,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				if (element != null)
 				{
-					boolean auxGhost = checkLayoutHierarchyRecursively(element, containers, components, compAttributes, deletedComponents, formComponentChild,
+					persistContainers.put(element, containers);
+					boolean auxGhost = checkLayoutHierarchyRecursively(element, persistContainers, components, compAttributes, deletedComponents,
+						formComponentChild,
 						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, childParentMap, skipComponents);
 					if (auxGhost) ghost = auxGhost;
 				}
@@ -418,7 +421,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		if (!skipComponents && persist instanceof IFormElement && !components.contains(persist) && !compAttributes.contains(persist))
 		{
 			ghost = parseIFormElement((IFormElement)persist, components, compAttributes, deletedComponents, formComponentChild, refreshTemplate,
-				updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, containers, childParentMap);
+				updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, persistContainers, childParentMap);
 			return ghost;
 		}
 		return false;
@@ -430,7 +433,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	 */
 	private boolean parseIFormElement(IFormElement persist, Set<IFormElement> baseComponents, Set<IFormElement> compAttributes,
 		Set<IFormElement> deletedComponents, boolean formComponentChild, Set<IFormElement> refreshTemplate, Set<String> updatedFormComponentsDesignId,
-		Set<IFormElement> formComponentsComponents, boolean renderGhosts, FlattenedSolution fs, List<LayoutContainer> containers,
+		Set<IFormElement> formComponentsComponents, boolean renderGhosts, FlattenedSolution fs, Map<IPersist, List<LayoutContainer>> formContainers,
 		Map<String, String> childParentMap)
 	{
 		boolean ghost = renderGhosts;
@@ -494,7 +497,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				ghost = true;
 			}
 			boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
-				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>(), containers, childParentMap);
+				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>(), formContainers, childParentMap);
 			if (fcGhosts) ghost = fcGhosts;
 		}
 		else
@@ -535,12 +538,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Map<String, String> childParentMap = new HashMap<String, String>();
 		Set<Part> parts = new HashSet<>();
 		List<LayoutContainer> containers = new ArrayList<>();
+		Map<IPersist, List<LayoutContainer>> formComponentContainers = new HashMap<>();
 		Set<IFormElement> compAttributes = new HashSet<>();
 		boolean renderGhosts = editor.isRenderGhosts();
 		editor.setRenderGhosts(false);
 		AbstractContainer showedContainer = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
 		for (IPersist persist : persists)
 		{
+			formComponentContainers.put(persist, containers);
 			boolean formComponentChild = false;
 			if (persist instanceof WebFormComponentChildType)
 			{
@@ -558,7 +563,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				boolean newRenderGhosts = parseIFormElement((IFormElement)persist, baseComponents, compAttributes, deletedComponents, formComponentChild,
 					refreshTemplate,
-					updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, containers, childParentMap);
+					updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, formComponentContainers, childParentMap);
 				renderGhosts = renderGhosts || newRenderGhosts;
 			}
 			else if (persist instanceof Part)
@@ -574,7 +579,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
-					boolean newRenderGhosts = checkLayoutHierarchyRecursively(persist, containers, baseComponents, compAttributes, deletedComponents,
+					boolean newRenderGhosts = checkLayoutHierarchyRecursively(persist, formComponentContainers, baseComponents,
+						compAttributes, deletedComponents,
 						formComponentChild,
 						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, childParentMap, false);
 					renderGhosts = renderGhosts || newRenderGhosts;
@@ -606,6 +612,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					else parent = parent.getParent();
 				}
 			}
+
 		}
 
 		if (formComponentsComponents.size() > 0)
@@ -754,6 +761,30 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			writer.endArray();
 
 		}
+
+		writer.key("formComponentContainers");
+		writer.object();
+		formComponentContainers.entrySet().forEach(entry -> {
+			if (entry.getValue() != containers && entry.getKey() instanceof IFormElement fe)
+			{
+				FormElement formElement = FormElementHelper.INSTANCE.getFormElement(fe, fs, null, true);
+				String fcID = formElement.getName(formElement.getDesignId() != null ? formElement.getDesignId() : formElement.getName());
+				if (updatedFormComponentsDesignId.contains(fcID))
+				{
+					writer.key(formElement.getDesignId() != null ? formElement.getDesignId() : formElement.getName());
+					writer.array();
+					for (LayoutContainer container : entry.getValue())
+					{
+						writer.object();
+						ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, form, true);
+						writer.endObject();
+						if (!containers.contains(container)) containers.add(container);
+					}
+					writer.endArray();
+				}
+			}
+		});
+		writer.endObject();
 		if (deletedLayoutContainers.size() > 0)
 		{
 			writer.key("deletedContainers");
@@ -846,7 +877,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	}
 
 	private boolean checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
-		FlattenedSolution fs, HashSet<String> forms, List<LayoutContainer> containers, Map<String, String> childParentMap)
+		FlattenedSolution fs, HashSet<String> forms, Map<IPersist, List<LayoutContainer>> formContainers, Map<String, String> childParentMap)
 	{
 		boolean ghost = false;
 		WebObjectSpecification spec = formElement.getWebComponentSpec();
@@ -865,6 +896,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						Debug.error("recursive reference found between (List)FormComponents: " + forms);
 						continue;
 					}
+					// this is a form container so give it is own list
+					ArrayList<LayoutContainer> value = new ArrayList<LayoutContainer>();
+					formContainers.put(formElement.getPersistIfAvailable(), value);
 					updatedFormComponentsDesignId.add(
 						formElement.getName(formElement.getDesignId() != null ? formElement.getDesignId() : formElement.getName()));
 					FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formElement, pd, (JSONObject)propertyValue, frm, fs);
@@ -876,22 +910,22 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						{
 							ghost = true;
 						}
-						boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms, containers,
+						formContainers.put(element.getPersistIfAvailable(), value);
+						boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms, formContainers,
 							childParentMap);
 						if (fcGhosts) ghost = fcGhosts;
 					}
 					if (frm.isResponsiveLayout() || frm.containsResponsiveLayout())
 					{
-						Iterator<LayoutContainer> it = frm.getLayoutContainers();
-						if (!it.hasNext() || frm.containsResponsiveLayout())
-						{
-							it = frm.getFormLayoutContainers();
-						}
+						Iterator<LayoutContainer> it = frm.getAllLayoutContainers();
 						while (it.hasNext())
 						{
 							LayoutContainer container = it.next();
-							childParentMap.put(container.getUUID().toString(), formElement.getPersistIfAvailable().getUUID().toString());
-							boolean fcGhosts = checkLayoutHierarchyRecursively(container, containers, formComponentsComponents, formComponentsComponents,
+							formContainers.put(container, value);
+							childParentMap.put(formElement.getDesignId() + container.getUUID().toString(),
+								formElement.getPersistIfAvailable().getUUID().toString());
+							boolean fcGhosts = checkLayoutHierarchyRecursively(container, formContainers, formComponentsComponents,
+								formComponentsComponents,
 								formComponentsComponents,
 								isValid(), formComponentsComponents, updatedFormComponentsDesignId, formComponentsComponents, isValid(), fs, childParentMap,
 								true);
@@ -1077,6 +1111,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	protected IWindow createWindow(int windowNr, String windowName)
 	{
 		return new DesignerBaseWindow(this, windowNr, windowName);
+	}
+
+	@Override
+	public String getLogInformation()
+	{
+		return "";
 	}
 
 }

@@ -116,7 +116,7 @@ public class I18NWriteToDBAction extends Action
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Error",
+								MessageDialog.openError(UIUtils.getActiveShell(), "Error",
 									"Cannot write I18N to database : " + i18nDatasource + ".\n" + ex.getMessage());
 							}
 						});

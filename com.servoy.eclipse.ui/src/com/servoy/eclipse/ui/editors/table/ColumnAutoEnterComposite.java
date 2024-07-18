@@ -42,7 +42,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionEvent;
@@ -52,9 +51,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.base.persistence.IBaseColumn;
@@ -102,9 +101,9 @@ import com.servoy.j2db.util.SortedList;
 public class ColumnAutoEnterComposite extends Composite implements SelectionListener
 {
 	private DataBindingContext bindingContext;
-	private final CCombo systemValueCombo;
+	private final Combo systemValueCombo;
 	private final Text customValueText;
-	private final CCombo sequenceCombo;
+	private final Combo sequenceCombo;
 	private final Button systemValueButton;
 	private final Button customValueButton;
 	private final Button databaseDefaultButton;
@@ -137,7 +136,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		systemValueButton = new Button(this, SWT.RADIO);
 		systemValueButton.setText("System Value");
 		systemValueButton.addSelectionListener(this);
-		systemValueCombo = new CCombo(this, SWT.READ_ONLY | SWT.BORDER);
+		systemValueCombo = new Combo(this, SWT.READ_ONLY | SWT.BORDER);
 		systemValueCombo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 		systemValueCombo.addSelectionListener(this);
 
@@ -162,7 +161,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		sequenceButton.setText("Sequence");
 		sequenceButton.addSelectionListener(this);
 
-		sequenceCombo = new CCombo(this, SWT.READ_ONLY | SWT.BORDER);
+		sequenceCombo = new Combo(this, SWT.READ_ONLY | SWT.BORDER);
 		sequenceCombo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 		sequenceCombo.addSelectionListener(this);
 
@@ -870,7 +869,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			if (typeMismatch)
 			{
 				String msg = "Type mismatch";
-				MessageDialog.openError(Display.getCurrent().getActiveShell(), "Wrong type", msg);
+				MessageDialog.openError(UIUtils.getActiveShell(), "Wrong type", msg);
 				return ValidationStatus.error(msg);
 			}
 

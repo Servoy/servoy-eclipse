@@ -20,13 +20,14 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
+import org.eclipse.dltk.javascript.ui.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -37,9 +38,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.editors.table.ColumnComposite;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.util.Utils;
 
@@ -73,6 +74,7 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 
 		comp.setLayout(l);
 		final Browser browser = new Browser(comp, SWT.BORDER);
+		browser.setJavascriptEnabled(false);
 		if (hideIfMouseOnRightSide) browser.addListener(SWT.MouseMove, new Listener()
 		{
 
@@ -116,16 +118,20 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 		String fgColor = null;
 		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
-			// TODO handle dark theme fg/bg colors here better? Take them from Eclipse UI instead?
-			RGB backgroundColorRGB = ColumnComposite.getServoyGrayBackground().getRGB();
+			Color darkBGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+				.get("org.eclipse.ui.workbench.DARK_BACKGROUND");
+			RGB backgroundColorRGB = darkBGColor != null ? darkBGColor.getRGB() : new RGB(31, 31, 31);
 			bgColor = "rgb(" + backgroundColorRGB.red + "," + backgroundColorRGB.green + "," + backgroundColorRGB.blue + ")";
-			fgColor = "lightgray";
+			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+				.get("org.eclipse.ui.workbench.DARK_FOREGROUND");
+			RGB foregroundColorRGB = darkFGColor != null ? darkFGColor.getRGB() : new RGB(204, 204, 204);
+			fgColor = "rgb(" + foregroundColorRGB.red + "," + foregroundColorRGB.green + "," + foregroundColorRGB.blue + ")";
 		}
 
 		browser.setText("<html><body style='background-color:" + bgColor + ";" + (fgColor != null ? "color:" + fgColor + ";" : "") + "font-family:\"" +
 			f.getFontData()[0].getName() + "\";font-size:" + pxHeight +
 			"px;font-weight:normal'>" + text + "</body></html>");
-		GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n") || text.contains("<li>"))
+		GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n") || text.contains("<li>") || text.contains("<p>"))
 			? new GridData(preferredWidthIfMultipleLines, preferredHeightIfMultipleLines)
 			: new GridData(preferredWidthIfSingleLine, preferredHeightIfSingleLine);
 		data.horizontalAlignment = GridData.FILL;

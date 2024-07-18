@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Command to reorder elements in mobile form content
- * 
+ *
  * @author rgansevles
  *
  */
@@ -55,7 +55,7 @@ public class ReorderContentElementsCommand extends BaseRestorableCommand
 	public void execute()
 	{
 		// save state of all other edit parts, reordering may update model of other editparts via SetBoundsToSupportBoundsFigureListener
-		List<EditPart> children = editPart.getParent().getChildren();
+		List< ? extends EditPart> children = editPart.getParent().getChildren();
 		for (EditPart ep : children)
 		{
 			saveState(ep.getModel());
@@ -66,7 +66,7 @@ public class ReorderContentElementsCommand extends BaseRestorableCommand
 			// set property later because an invalidate of figure causes location via layout manager to be reset to previous
 			public void run()
 			{
-				((IPropertySource)editPart.getAdapter(IPropertySource.class)).setPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(),
+				editPart.getAdapter(IPropertySource.class).setPropertyValue(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(),
 					new Point(editPart.getFigure().getBounds().x, rectangle.y));
 			}
 		});

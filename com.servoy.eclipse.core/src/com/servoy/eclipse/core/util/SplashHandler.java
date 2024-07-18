@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.core.util;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
@@ -24,46 +23,33 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.splash.BasicSplashHandler;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
-import com.servoy.eclipse.core.Activator;
 import com.servoy.j2db.ClientVersion;
-import com.servoy.j2db.server.starter.ILicenseManager;
 import com.servoy.j2db.util.Utils;
 
 public class SplashHandler extends BasicSplashHandler
 {
-	static IProgressMonitor progressMonitor;
-
 	@Override
 	public void init(final Shell splash)
 	{
-		java.awt.Toolkit.getDefaultToolkit(); // initialize toolkit here to prevent deadlock on the mac
-		try
+		String osName = System.getProperty("os.name").toLowerCase();
+		if (osName.contains("mac"))
 		{
-			new Thread(new Runnable()
-			{
-				public void run()
-				{
-//					ServoyModel.startAppServer();
-					if (!splash.isDisposed()) splash.getDisplay().wake();
-				}
+			super.init(splash);
+//			getContent(); // ensure creation of the progress
+//			showBackground(splash);
 
-			}).start();
 		}
-		catch (Exception e)
+		else
 		{
-			e.printStackTrace();
+			setProgressRect(new Rectangle(0, 605, 600, 20));
+			super.init(splash);
+			getContent(); // ensure creation of the progress
+			showBackground(splash);
 		}
-		setProgressRect(new Rectangle(0, 400, 400, 15));
-		super.init(splash);
-		progressMonitor = getBundleProgressMonitor();
-		getContent(); // ensure creation of the progress
-		showBackground(splash, true);
 	}
 
-	private void showBackground(final Shell splash, boolean doGetRegisterString)
+	private void showBackground(final Shell splash)
 	{
 		if (splash.isDisposed()) return;
 
@@ -73,61 +59,29 @@ public class SplashHandler extends BasicSplashHandler
 			GC gc = new GC(background);
 			// size is very different on the three os
 			String osName = System.getProperty("os.name").toLowerCase();
-			if (osName.contains("windows")) gc.setFont(new Font(null, "SansSerif", 8, SWT.NORMAL));
-			else if (osName.contains("mac")) gc.setFont(new Font(null, "SansSerif", 9, SWT.NORMAL));
-			else if (osName.contains("linux")) gc.setFont(new Font(null, "SansSerif", 8, SWT.NORMAL));
+			if (osName.contains("windows")) gc.setFont(new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
+			else if (osName.contains("mac")) gc.setFont(new Font(splash.getDisplay(), "SansSerif", 9, SWT.NORMAL));
+			else if (osName.contains("linux")) gc.setFont(new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
 
-			StringBuffer text = getSplashText(doGetRegisterString);
-			gc.drawText(text.toString(), 10, 320);
+			StringBuffer text = getSplashText();
+			gc.drawText(text.toString(), 10, 540, true);
 			gc.getFont().dispose();
 			gc.dispose();
 
-//			if (!doGetRegisterString)
-//			{
-//				splash.getDisplay().asyncExec(new Runnable()
-//				{
-//					public void run()
-//					{
-//						SplashHandler.this.showBackground(splash, true);
-//					}
-//				});
-//			}
+
 		}
 	}
 
-	private StringBuffer getSplashText(boolean doGetRegisterString)
+	private StringBuffer getSplashText()
 	{
 		StringBuffer text = new StringBuffer();
-		text.append("Version " + ClientVersion.getVersion());
-		text.append("\n");
+		text.append("Version ");
+		text.append(ClientVersion.getVersion());
+		text.append(" (");
+		text.append(ClientVersion.getBuildDate());
+		text.append(")\n");
 		text.append("This program is protected by international\ncopyright laws as described in Help About");
 		text.append("\nCopyright \u00A9 Servoy BV 1997 - " + Utils.formatTime(System.currentTimeMillis(), "yyyy"));
-
-		if (doGetRegisterString)
-		{
-//			//ugly near busy wait loop
-//			try
-//			{
-//				int count = 0;
-//				while (ApplicationServerSingleton.get() == null)
-//				{
-//					Thread.sleep(200);
-//					count++;
-//					if (count > 50) break;
-//				}
-//			}
-//			catch (InterruptedException e)
-//			{
-//				//ignore
-//			}
-
-			BundleContext context = Activator.getBundleContext();
-			ServiceReference<ILicenseManager> ref = context.getServiceReference(ILicenseManager.class);
-			ILicenseManager lm = context.getService(ref);
-			String regText = lm.getDeveloperRegistrationText();
-			text.append("\n");
-			text.append(regText);
-		}
 		return text;
 	}
 }

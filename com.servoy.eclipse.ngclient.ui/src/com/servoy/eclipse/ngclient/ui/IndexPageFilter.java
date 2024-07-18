@@ -21,6 +21,8 @@ import static com.servoy.j2db.server.ngclient.AngularIndexPageWriter.addcontentS
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -37,7 +39,10 @@ import org.apache.commons.io.FileUtils;
 import org.sablo.security.ContentSecurityPolicyConfig;
 
 import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
+import com.servoy.j2db.server.ngclient.NGLocalesFilter;
+import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
 import com.servoy.j2db.util.MimeTypes;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -52,6 +57,7 @@ public class IndexPageFilter implements Filter
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException
 	{
+		StatelessLoginHandler.init();
 	}
 
 	@Override
@@ -61,7 +67,6 @@ public class IndexPageFilter implements Filter
 		HttpServletResponse response = (HttpServletResponse)servletResponse;
 		request.getSession();
 		String requestURI = request.getRequestURI();
-
 		if (requestURI.toLowerCase().endsWith("/index.html") &&
 			(requestURI.toLowerCase().contains("rfb/angular2") || requestURI.toLowerCase().contains("/solution/")) && WebPackagesListener.isBuildRunning())
 		{
@@ -78,21 +83,36 @@ public class IndexPageFilter implements Filter
 		File projectFolder = Activator.getInstance().getSolutionProjectFolder();
 		if (projectFolder != null)
 		{
-			distFolder = new File(projectFolder, "dist/app");
+			distFolder = new File(projectFolder, "dist/app/browser");
 			indexFile = new File(distFolder, "index.html");
 		}
-		String solutionName = getSolutionNameFromURI(requestURI);
+		String solutionName = getSolutionNameFromURI(Paths.get(requestURI).normalize());
 		if (indexFile != null && indexFile.exists())
 		{
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
 					requestURI.toLowerCase().endsWith("/index.html")))
 			{
+				Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
+				if (showLogin.getLeft().booleanValue())
+				{
+					StatelessLoginHandler.writeLoginPage(request, response, solutionName);
+					return;
+				}
+				if (showLogin.getRight() != null)
+				{
+					((HttpServletRequest)servletRequest).getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
+				}
+
 				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
 
 				ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(request, response, false); // for NG2 remove the unsafe-eval
 				AngularIndexPageWriter.writeIndexPage(indexHtml, request, response, solutionName,
 					contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
+				return;
+			}
+			else if (solutionName != null && StatelessLoginHandler.handlePossibleCloudRequest(request, response, solutionName))
+			{
 				return;
 			}
 			else if (solutionName != null && requestURI.toLowerCase().endsWith("/startup.js"))
@@ -106,14 +126,27 @@ public class IndexPageFilter implements Filter
 			}
 			else
 			{
-				File file = new File(distFolder, requestURI);
-				if (file.exists() && !file.isDirectory() & !file.getName().equals("favicon.ico"))
+				String normalize = Paths.get(requestURI).normalize().toString();
+				File file = new File(distFolder, normalize);
+				String localeId = request.getParameter("localeid");
+				if (requestURI.startsWith("/locales/") && localeId != null && !file.exists())
+				{
+					//this code is a bit of copy of the NGLocalesFilter that bases it on servlet resources
+					String[] locales = NGLocalesFilter.generateLocaleIds(localeId);
+					for (String locale : locales)
+					{
+						file = new File(distFolder, normalize.replace(localeId, locale));
+						if (file.exists()) break;
+					}
+				}
+				if (file.exists() && !file.isDirectory() && !file.getName().equals("favicon.ico"))
 				{
 					String contentType = MimeTypes.guessContentTypeFromName(requestURI);
 					if (contentType != null) servletResponse.setContentType(contentType);
 					FileUtils.copyFile(file, servletResponse.getOutputStream());
 					return;
 				}
+
 			}
 		}
 		else if (solutionName != null)
@@ -124,7 +157,6 @@ public class IndexPageFilter implements Filter
 			response.setContentType("text/html");
 			response.setContentLengthLong(indexHtml.length());
 			response.getWriter().write(indexHtml);
-
 			return;
 		}
 		chain.doFilter(servletRequest, servletResponse);
@@ -135,20 +167,16 @@ public class IndexPageFilter implements Filter
 	{
 	}
 
-	private String getSolutionNameFromURI(String uri)
+	private String getSolutionNameFromURI(Path path)
 	{
-		if (uri.startsWith("/designer"))
+		Path p = path;
+		if (p.startsWith("/designer"))
 		{
-			uri = uri.substring(9);
+			p = Paths.get(path.toString().substring(9));
 		}
-		if (uri.startsWith(SOLUTIONS_PATH))
+		if (p.startsWith(SOLUTIONS_PATH))
 		{
-			int solutionEndIndex = uri.indexOf("/", SOLUTIONS_PATH.length() + 1);
-			if (solutionEndIndex == -1) solutionEndIndex = uri.length();
-			String possibleSolutionName = uri.substring(SOLUTIONS_PATH.length(), solutionEndIndex);
-			// skip all names that have a . in them
-			if (possibleSolutionName.contains(".")) return null;
-			return possibleSolutionName;
+			return p.getName(1).toString();
 		}
 		return null;
 	}

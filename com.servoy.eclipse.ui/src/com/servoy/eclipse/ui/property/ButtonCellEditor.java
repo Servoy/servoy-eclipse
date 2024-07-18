@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Control;
  */
 public abstract class ButtonCellEditor extends CellEditor
 {
-
 	protected Object oldValue;
 	protected Button button;
 
@@ -72,17 +71,9 @@ public abstract class ButtonCellEditor extends CellEditor
 			@Override
 			public void mouseUp(MouseEvent e)
 			{
-				Object newValue = getValueToSetOnClick(oldValue);
-
-				if (newValue != oldValue)
-				{
-					doSetValue(newValue);
-					markDirty();
-					fireApplyEditorValue();
-				}
+				buttonClicked();
 			}
 		});
-		initButtonWidget(button);
 		updateButtonState(button, oldValue);
 
 		setValueValid(true);
@@ -115,18 +106,16 @@ public abstract class ButtonCellEditor extends CellEditor
 
 	/**
 	 * Triggered when the button is clicked. You can do anything you'd like here.
-	 * If you return oldValue then the returned value will not be set to the property. Else the returned value will be set
-	 *
-	 * @return
 	 */
-	protected abstract Object getValueToSetOnClick(Object oldPropertyValue);
+	protected abstract void buttonClicked();
 
-	/**
-	 * Can be overridden when needed.
-	 */
-	protected void initButtonWidget(Button buttonWidget)
+	public void applyValue(Object newValue)
 	{
-		// in case someone needs to override
+		if (newValue != doGetValue())
+		{
+			doSetValue(newValue);
+			markDirty();
+			fireApplyEditorValue();
+		}
 	}
-
 }

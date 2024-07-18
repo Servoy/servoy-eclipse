@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, OnInit, SimpleChanges, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { ServoyDefaultBaseChoice } from '../basechoice';
 import { FormattingService, PropertyUtils } from '@servoy/public';
 import { DOCUMENT } from '@angular/common';
@@ -14,6 +14,20 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
     value: any;
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
         super(renderer, cdRef, formattingService, doc);
+    }
+    
+    svyOnChanges(changes: SimpleChanges) {
+		for (const property of Object.keys(changes)) {
+            switch (property) {
+                case 'scrollbars':
+					this.elementRef.nativeElement.classList.remove('horizontaldirection');
+                    if (changes.scrollbars.currentValue === 36) {
+						this.elementRef.nativeElement.classList.add('horizontaldirection');
+					}
+                    break;
+            }
+        }
+		super.svyOnChanges(changes);
     }
 
     getFocusElement(): HTMLElement {

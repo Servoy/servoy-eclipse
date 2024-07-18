@@ -17,7 +17,7 @@ import { ServoyService } from '../servoy.service';
 
 describe('ComponentConverter', () => {
 
-    let converterService: ConverterService;
+    let converterService: ConverterService<any>;
     let typesRegistry: TypesRegistry;
     let loggerFactory: LoggerFactory;
     let sabloService: SabloService;
@@ -183,12 +183,13 @@ describe('ComponentConverter', () => {
         });
         expect(getAndClearNotified()).toEqual(false);
 
-        // FIXME actually the line below should not be sent to server automatically right?
+        // the line below should send changes to server automatically
         // it's still a root prop of a component that generally needs an emit to be called; and an emit would be called by a component and then
         // for example list form component (or however uses the child 'component' property type) would call ChildComponentPropertyValue.sendChanges that handles
         // the property value assignment + the send to server; so no need to send it automatically 
-        // see the fixme comment in viewport.service.ts hasPushToServerForNestedCellsInRowsGreaterOrEqualTo(...)  
-        // comp.modelViewport[1].recDepProp = 101010;
+        // comment in viewport.service.ts needsRowProxies(...)
+        comp.modelViewport[1].recDepProp = 101011;
+        expect(getAndClearNotified()).toEqual(false);
 
         comp.sendChanges("recDepProp", 101010, 10255, "5.ANATR;_1", false);
         expect(getAndClearNotified()).toEqual(true);

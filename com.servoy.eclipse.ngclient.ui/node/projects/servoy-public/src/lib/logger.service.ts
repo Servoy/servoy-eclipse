@@ -22,7 +22,7 @@ declare global {
     interface Window { svyLogConfiguration: LogConfiguration; logFactory: LoggerFactory; logLevels: {[property: string]: LogLevel}; console: Console }
 }
 
-const noop = (): any => undefined;
+const noop = (): unknown => undefined;
 
 export class LoggerService {
     private console: Console;
@@ -38,46 +38,46 @@ export class LoggerService {
         }
     }
 
-    get spam() {
+    get spam(): (...data: unknown[])=> void {
         if ( this.svyLogConfiguration.level >= LogLevel.SPAM ) {
             this.enabled = true;
-            return this.console.debug.bind(this.console, this.getTime() + ' SPAM ' + this.className + ' - ');
+            return this.console.debug.bind(this.console, this.getTime() + ' SPAM ' + this.className + ' - ') as (...data: unknown[])=> void;
         }
         this.enabled = false;
         return noop;
     }
 
-    get debug() {
+    get debug(): (...data: unknown[])=> void {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.DEBUG ) {
             this.enabled = true;
-            return this.console.debug.bind(this.console, this.getTime() + ' DEBUG ' + this.className + ' - ');
+            return this.console.debug.bind(this.console, this.getTime() + ' DEBUG ' + this.className + ' - ') as (...data: unknown[])=> void;
         }
         this.enabled = false;
         return noop;
     }
 
-    get info() {
+    get info(): (...data: unknown[])=> void {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.INFO ) {
             this.enabled = true;
-            return this.console.info.bind(this.console, this.getTime() + ' INFO ' + this.className + ' - ');
+            return this.console.info.bind(this.console, this.getTime() + ' INFO ' + this.className + ' - ') as (...data: unknown[])=> void;
         }
         this.enabled = false;
         return noop;
     }
 
-    get warn() {
+    get warn(): (...data: unknown[])=> void {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.WARN ) {
             this.enabled = true;
-            return this.console.warn.bind(this.console, this.getTime() + ' WARN ' + this.className + ' - ');
+            return this.console.warn.bind(this.console, this.getTime() + ' WARN ' + this.className + ' - ') as (...data: unknown[])=> void;
         }
         this.enabled = false;
         return noop;
     }
 
-    get error() {
+    get error():(...data: unknown[])=> void {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.ERROR ) {
             this.enabled = true;
-            return this.console.error.bind(this.console, this.getTime() + ' ERROR ' + this.className + ' - ');
+            return this.console.error.bind(this.console, this.getTime() + ' ERROR ' + this.className + ' - ') as (...data: unknown[])=> void;
         }
         this.enabled = false;
         return noop;
@@ -106,7 +106,7 @@ export class LoggerService {
 })
 export class LoggerFactory {
 
-    private instances: any = {};
+    private instances: {[k: string]: LoggerService} = {};
     private defaultLogConfiguration: LogConfiguration;
 
     constructor(private windowRefService: WindowRefService ) {
@@ -119,7 +119,7 @@ export class LoggerFactory {
         }
     }
 
-    public getLogger(cls: any): LoggerService {
+    public getLogger(cls: string): LoggerService {
         if (this.instances[cls] === undefined) {
             this.instances[cls] = new LoggerService(this.windowRefService, new LogConfiguration(this.defaultLogConfiguration.isDebugMode, this.defaultLogConfiguration.level), cls);
         }

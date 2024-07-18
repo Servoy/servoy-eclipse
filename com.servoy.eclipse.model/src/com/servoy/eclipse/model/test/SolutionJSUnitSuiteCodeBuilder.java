@@ -478,7 +478,7 @@ public class SolutionJSUnitSuiteCodeBuilder
 		error.append(INVALID_APP_SUITE);
 		error.append("_testSystemInitFailed() { this.fail(");
 
-		error.append(NativeJSON.stringify(null, new NativeObject(), msg, null, 0));
+		error.append(NativeJSON.stringify(Context.getCurrentContext(), new NativeObject(), msg, null, 0));
 
 		error.append("); }\n");
 		error.append(INVALID_APP_SUITE);

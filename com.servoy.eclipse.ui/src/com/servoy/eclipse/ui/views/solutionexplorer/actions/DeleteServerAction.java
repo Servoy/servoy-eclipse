@@ -23,9 +23,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -71,7 +71,7 @@ public class DeleteServerAction extends Action implements ISelectionChangedListe
 			catch (Exception e)
 			{
 				ServoyLog.logError(e);
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Server delete", "Cannot delete server: " + e.getMessage());
+				MessageDialog.openInformation(UIUtils.getActiveShell(), "Server delete", "Cannot delete server: " + e.getMessage());
 			}
 		}
 	}

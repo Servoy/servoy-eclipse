@@ -42,8 +42,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -74,10 +72,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * PropertySheetPage with additional Servoy features.
- *
- * @author acostescu
  */
-
 public class ModifiedPropertySheetPage extends PropertySheetPage implements IPropertySheetEntryListener
 {
 	private Composite composite;
@@ -310,31 +305,6 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					}
 				});
 			}
-
-			final Listener labelListener = new Listener()
-			{
-				public void handleEvent(Event event)
-				{
-					Label label = (Label)event.widget;
-					Shell shell = label.getShell();
-					switch (event.type)
-					{
-						case SWT.MouseDown :
-							Event e = new Event();
-							e.item = (TreeItem)label.getData("_TREEITEM");
-							// set the selection as if
-							// the mouse down event went through to the tree
-							tree.setSelection(new TreeItem[] { (TreeItem)e.item });
-							tree.notifyListeners(SWT.Selection, e);
-							shell.dispose();
-							tree.setFocus();
-							break;
-						case SWT.MouseExit :
-							shell.dispose();
-							break;
-					}
-				}
-			};
 
 			tree.addTraverseListener(e -> {
 

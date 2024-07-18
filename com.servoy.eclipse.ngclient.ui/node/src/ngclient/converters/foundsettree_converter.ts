@@ -1,4 +1,4 @@
-import { IChangeAwareValue, ChangeAwareState } from '../../sablo/converter.service';
+import { IChangeAwareValue, ChangeAwareState, IUIDestroyAwareValue } from '../../sablo/converter.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
 import { Deferred, IFoundsetTree } from '@servoy/public';
 import { IType, IPropertyContext } from '../../sablo/types_registry';
@@ -107,7 +107,7 @@ class FoundsetTreeState extends ChangeAwareState implements IDeferedState {
 
 }
 
-export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAwareValue {
+export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAwareValue, IUIDestroyAwareValue {
 
     constructor(private sabloDeferHelper: SabloDeferHelper,
         private internalState: FoundsetTreeState, values?: Array<any>) {
@@ -123,6 +123,10 @@ export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAw
      */
     getInternalState(): FoundsetTreeState {
         return this.internalState;
+    }
+
+    uiDestroyed(): void{
+        this.sabloDeferHelper.cancelAll(this.getInternalState());
     }
 
     getChildren(parentID: string, level: number): Promise<any> {

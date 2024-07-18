@@ -53,6 +53,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     btnPlaceTabPanel: ToolbarItem;
     btnPlaceAccordion: ToolbarItem;
     btnHighlightWebcomponents: ToolbarItem;
+    btnToggleDynamicGuides: ToolbarItem;
 
     btnToggleShowData: ToolbarItem;
     btnToggleDesignMode: ToolbarItem;
@@ -172,6 +173,12 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
                 }
                 this.editorSession.setAnchoringIndicator(result);
+            });
+
+            const guidesPromise = this.editorSession.isShowDynamicGuides();
+            void guidesPromise.then((result: boolean) => {
+                this.btnToggleDynamicGuides.state = result;
+                this.editorSession.fireShowDynamicGuidesChangedListeners(result);
             });
 
         } else {
@@ -339,6 +346,21 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         );
         this.btnHighlightWebcomponents.state = true;
 
+        if (this.urlParser.isAbsoluteFormLayout()) {
+            this.btnToggleDynamicGuides = new ToolbarItem(
+                'Toggle Dynamic Guides',
+                'toolbar/icons/dynamicGuides.png',
+                true,
+                () => {
+                    const promise = this.editorSession.toggleShowDynamicGuides();
+                    void promise.then((result: boolean) => {
+                        this.btnToggleDynamicGuides.state = result;
+                        this.editorSession.fireShowDynamicGuidesChangedListeners(result);
+                    })
+                }
+            );
+        }
+
         this.add(this.btnPlaceField, TOOLBAR_CATEGORIES.ELEMENTS);
         this.add(this.btnPlaceImage, TOOLBAR_CATEGORIES.ELEMENTS);
         this.add(this.btnPlacePortal, TOOLBAR_CATEGORIES.ELEMENTS);
@@ -346,6 +368,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.add(this.btnPlaceTabPanel, TOOLBAR_CATEGORIES.ELEMENTS);
         this.add(this.btnPlaceAccordion, TOOLBAR_CATEGORIES.ELEMENTS);
         this.add(this.btnHighlightWebcomponents, TOOLBAR_CATEGORIES.ELEMENTS);
+        if (this.urlParser.isAbsoluteFormLayout()) { 
+            this.add(this.btnToggleDynamicGuides, TOOLBAR_CATEGORIES.ELEMENTS);
+        }
 
 
         this.btnToggleShowData = new ToolbarItem(
@@ -516,7 +541,6 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
                 this.applyHideInherited(this.btnHideInheritedElements.state);
                 this.editorSession.executeAction('toggleHideInherited');
-                this.editorSession.setSelection([]);
             }
         );
         this.btnHideInheritedElements.disabledIcon = 'images/hide_inherited-disabled.png';
@@ -689,7 +713,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const nodeid = selection[i];
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
-                            const elementRect = element.getBoundingClientRect();
+							const elementRect = element.getBoundingClientRect();
+							this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (left == null) {
                                 left = elementRect.x;
                             } else if (left > elementRect.x) {
@@ -702,6 +727,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (elementRect.x != left) {
                                 obj[nodeid] = {
                                     x: left,
@@ -731,6 +757,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (right == null) {
                                 right = elementRect.x + elementRect.width;
                             } else if (right < (elementRect.x + elementRect.width)) {
@@ -743,6 +770,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if ((elementRect.x + elementRect.width) != right) {
                                 obj[nodeid] = {
                                     x: (right - elementRect.width),
@@ -772,6 +800,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (top == null) {
                                 top = elementRect.y;
                             } else if (top > elementRect.y) {
@@ -784,6 +813,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (elementRect.y != top) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
@@ -813,6 +843,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (bottom == null) {
                                 bottom = elementRect.y + elementRect.height;
                             } else if (bottom < (elementRect.y + elementRect.height)) {
@@ -825,6 +856,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if ((elementRect.y + elementRect.height) != bottom) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
@@ -855,6 +887,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (sortedSelection.length == 0) {
                                 sortedSelection[0] = elementRect;
                             } else {
@@ -875,6 +908,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
                                 obj[nodeid] = {
                                     x: (centerElementModel.x + centerElementModel.width / 2 - elementRect.width / 2),
@@ -905,6 +939,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if (sortedSelection.length == 0) {
                                 sortedSelection[0] = elementRect;
                             } else {
@@ -925,6 +960,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
+                            this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
                             if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
@@ -1168,6 +1204,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     applyHideInherited(hideInherited: boolean) {
         this.editorContentService.executeOnlyAfterInit(() => {
+            
+            this.updateSelection(hideInherited); //this is removing selection for hidden element
+
             const elements = this.editorContentService.querySelectorAllInContent('.inherited_element').concat(Array.from(this.editorContentService.querySelectorAll('.inherited_element')));
             elements.forEach((node) => {
                 if (hideInherited) {
@@ -1175,13 +1214,72 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
                 else {
                     this.renderer.setStyle(node, 'visibility', 'visible');
+                    //if there is only one eleent in the current selection we must trigger a redraw decorators
+                    const selection = this.editorSession.getSelection();
+                    if (selection.length === 1) {
+                        this.editorSession.updateSelection(selection, true);
+                    }
                 }
             });
+            
+            this.updateSameSizeIndicator(hideInherited);
         });
     }
+
+    updateSameSizeIndicator(hideInherited: boolean) {
+        if (hideInherited) {
+            const initialSelection = this.editorSession.getSelection(); //note: in this context the hidden elements are no longer returned
+            const elements = this.editorContentService.getAllContentElements(); //return all elements having an svy-id
+            const filteredSvyIds: string[] = [];
     
-    updateSelection(){
-		setTimeout(()=>{this.editorSession.setSelection(this.editorSession.getSelection());}, 100);
+            elements.forEach((element) => {
+                let wrapper = element.parentElement;
+                while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
+                    wrapper = wrapper.parentElement;
+                }
+    
+                if (!(wrapper && wrapper.classList.contains('inherited_element'))) {
+                    filteredSvyIds.push(element.getAttribute('svy-id'));
+                }
+            });
+            this.editorSession.updateSelection(filteredSvyIds, true); //this is changing also the initial selection so we need to restore
+            this.editorSession.setSelection(initialSelection);
+        }
+    }
+
+    updateSelection(hideInherited?: boolean){
+        if (hideInherited === undefined) {
+           setTimeout(()=>{this.editorSession.setSelection(this.editorSession.getSelection());}, 100);
+        } else if (hideInherited) {
+            const selection = this.editorSession.getSelection();
+            const filteredSelection: string[] = [];
+        
+            selection.forEach((selectionId) => {
+              let wrapper = this.editorContentService.getContentElement(selectionId);
+        
+              while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
+                wrapper = wrapper.parentElement;
+              }
+        
+              if (!(wrapper && wrapper.classList.contains('inherited_element'))) {
+                filteredSelection.push(selectionId);
+              }
+            });
+            this.editorSession.setSelection(filteredSelection);
+          }
+	}
+	
+	updateElementPositionUsingParentPosition(element: HTMLElement, elementRect: DOMRect, posX: boolean, posY: boolean) {
+		const parentFC = element.closest('.svy-formcomponent');
+		if (parentFC && !element.classList.contains('svy-formcomponent')) {
+			const parentRect = parentFC.getBoundingClientRect();
+			if (posX) {
+				elementRect.x = elementRect.x - parentRect.x;
+			}
+			if (posY) {
+				elementRect.y = elementRect.y - parentRect.y;
+			}
+		}
 	}
 
 }

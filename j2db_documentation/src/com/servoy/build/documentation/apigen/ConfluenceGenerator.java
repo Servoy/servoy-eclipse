@@ -38,6 +38,7 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.SortedSet;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -56,7 +57,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.apache.wicket.util.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mozilla.javascript.Function;
@@ -160,7 +160,6 @@ public class ConfluenceGenerator
 	}
 
 	public ConfluenceGenerator(String parentName, HashMap<String, String> qualifiedToName, HashMap<String, String> returnTypesToParentName)
-		throws ClientProtocolException, IOException
 	{
 		this.qualifiedToName = qualifiedToName;
 		this.returnTypesToParentName = returnTypesToParentName;
@@ -420,17 +419,19 @@ public class ConfluenceGenerator
 	/**
 	 * @param returnTypesToParentName2
 	 */
-	private static void fillStaticParents(HashMap<String, String> returnTypesToParentName)
+	static void fillStaticParents(HashMap<String, String> returnTypesToParentName)
 	{
 		// TODO Auto-generated method stub
 
-		returnTypesToParentName.put("controller", "RuntimeForm");
 		returnTypesToParentName.put("DataException", "ServoyException");
 //		JSColumnObject");
 //		JSServer");
 //		JSTableObject");
 		returnTypesToParentName.put("RuntimeForm", "Forms");
+		returnTypesToParentName.put("RuntimeContainer", "RuntimeForm");
+		returnTypesToParentName.put("containers", "RuntimeForm");
 		returnTypesToParentName.put("elements", "RuntimeForm");
+		returnTypesToParentName.put("controller", "RuntimeForm");
 
 		returnTypesToParentName.put("RuntimeAccordionPanel", "elements");
 		returnTypesToParentName.put("RuntimeDataLabel", "elements");
@@ -459,6 +460,7 @@ public class ConfluenceGenerator
 		returnTypesToParentName.put("RuntimeSpinner", "elements");
 		returnTypesToParentName.put("RuntimeTextArea", "elements");
 		returnTypesToParentName.put("RuntimeTextField", "elements");
+		returnTypesToParentName.put("RuntimeWebComponent", "elements");
 
 
 		returnTypesToParentName.put("Calendar", "Form");
@@ -468,6 +470,25 @@ public class ConfluenceGenerator
 		returnTypesToParentName.put("InsetList", "Form");
 		returnTypesToParentName.put("Layout Container", "Form");
 		returnTypesToParentName.put("ListForm", "Form");
+		returnTypesToParentName.put("Bean", "Form");
+		returnTypesToParentName.put("Button", "Form");
+		returnTypesToParentName.put("CheckBoxes", "Form");
+		returnTypesToParentName.put("ComboBox", "Form");
+		returnTypesToParentName.put("Image", "Form");
+		returnTypesToParentName.put("Label", "Form");
+		returnTypesToParentName.put("Part", "Form");
+		returnTypesToParentName.put("Password", "Form");
+		returnTypesToParentName.put("Portal", "Form");
+		returnTypesToParentName.put("RadioButtons", "Form");
+		returnTypesToParentName.put("Rectangle", "Form");
+		returnTypesToParentName.put("TabPanel", "Form");
+		returnTypesToParentName.put("Tab", "Form");
+		returnTypesToParentName.put("Table", "Form");
+		returnTypesToParentName.put("TextArea", "Form");
+		returnTypesToParentName.put("TextField", "Form");
+
+		returnTypesToParentName.put("RelationItem", "Relation");
+
 
 	}
 
@@ -506,7 +527,7 @@ public class ConfluenceGenerator
 	 * @param clientSupport
 	 * @return
 	 */
-	private List<String> getSupportedClientsList(ClientSupport clientSupport)
+	public static List<String> getSupportedClientsList(ClientSupport clientSupport)
 	{
 		List<String> support = new ArrayList<>();
 		if (clientSupport.hasSupport(ClientSupport.sc))
@@ -580,7 +601,7 @@ public class ConfluenceGenerator
 			for (IFunctionDocumentation fd : functions)
 			{
 				if (fd.isDeprecated()) continue;
-				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, this);
+				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, this::getPublicName, cls, false);
 				start = start.e(MCR).a(NM, "tr").e(RTB).e(MCR).a(NM, "td").e(RTB);
 				if ("void".equals(ftm.getReturnType()) || ftm.getReturnType() == null)
 				{
@@ -591,7 +612,7 @@ public class ConfluenceGenerator
 					start = start.e(LNK).e(PG).a(CT, ftm.getReturnType()).up(4);
 				}
 
-				String functionName = getFullFunctionName(fd, cls);
+				String functionName = ftm.getFullFunctionName();
 				start = start.e(MCR).a(NM, "td").e(RTB).e(LNK).a(ANC, functionName).e(PTLB).cdata(functionName).up(4).e(MCR).a(NM, "td").e(RTB).t(
 					ftm.getSummary()).up(4);
 			}
@@ -600,40 +621,6 @@ public class ConfluenceGenerator
 		return this;
 	}
 
-	/**
-	 * @param fd
-	 * @return
-	 */
-	private String getFullFunctionName(IFunctionDocumentation fd, Class cls)
-	{
-		String functionName = fd.getMainName();
-		if (fd.getType() == IFunctionDocumentation.TYPE_FUNCTION || fd.getType() == IFunctionDocumentation.TYPE_EVENT)
-		{
-			StringBuilder sb = new StringBuilder(functionName);
-			sb.append("(");
-			if (fd.getArguments().size() == 0 && fd.getArgumentsTypes() != null && fd.getArgumentsTypes().length > 0)
-			{
-				System.err.println("missing parameter notation of: " + fd.getFullSignature() + " of " + cls);
-				for (Class< ? > paramName : fd.getArgumentsTypes())
-				{
-					sb.append(paramName.getSimpleName());
-					sb.append(", ");
-				}
-			}
-			else
-			{
-				for (String paramName : fd.getArguments().keySet())
-				{
-					sb.append(paramName);
-					sb.append(", ");
-				}
-			}
-			if (sb.charAt(sb.length() - 2) == ',') sb.setLength(sb.length() - 2);
-			sb.append(")");
-			functionName = sb.toString();
-		}
-		return functionName;
-	}
 
 	public ConfluenceGenerator detailsTable(String name, String id, List<IFunctionDocumentation> functions, Class cls)
 	{
@@ -649,9 +636,9 @@ public class ConfluenceGenerator
 			for (IFunctionDocumentation fd : functions)
 			{
 				if (fd.isDeprecated()) continue;
-				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, this);
+				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, this::getPublicName, cls, false);
 				start = start.e(MCR).a(NM, "tbody").e(PRM).a(NM, "id").t(fd.getMainName()).up().e(RTB).e(MCR).a(NM, "tr").e(PRM).a(NM, "id").t("name").up().e(
-					RTB).e(MCR).a(NM, "td").e(RTB).e("h4").t(getFullFunctionName(fd, cls)).up(5).e(MCR).a(NM, "tr").e(PRM).a(NM, "id").t("des").up().e(RTB).e(
+					RTB).e(MCR).a(NM, "td").e(RTB).e("h4").t(ftm.getFullFunctionName()).up(5).e(MCR).a(NM, "tr").e(PRM).a(NM, "id").t("des").up().e(RTB).e(
 						MCR)
 					.a(NM, "td").e(RTB).e(MCR).a(NM, "div").e(PRM).a(NM, "class").t("sIndent").up().e(RTB).e("pre").t(ftm.getDescription()).up(7);
 
@@ -888,30 +875,30 @@ public class ConfluenceGenerator
 
 	}
 
-	private static List<IFunctionDocumentation> getEvents(SortedSet<IFunctionDocumentation> functions)
+	static List<IFunctionDocumentation> getEvents(SortedSet<IFunctionDocumentation> functions)
 	{
 		return getFilteredList(IFunctionDocumentation.TYPE_EVENT, functions);
 	}
 
 
-	private static List<IFunctionDocumentation> getCommands(SortedSet<IFunctionDocumentation> functions)
+	static List<IFunctionDocumentation> getCommands(SortedSet<IFunctionDocumentation> functions)
 	{
 		return getFilteredList(IFunctionDocumentation.TYPE_COMMAND, functions);
 	}
 
 
-	private static List<IFunctionDocumentation> getProperties(SortedSet<IFunctionDocumentation> functions)
+	static List<IFunctionDocumentation> getProperties(SortedSet<IFunctionDocumentation> functions)
 	{
 		return getFilteredList(IFunctionDocumentation.TYPE_PROPERTY, functions);
 	}
 
 
-	private static List<IFunctionDocumentation> getConstants(SortedSet<IFunctionDocumentation> functions)
+	static List<IFunctionDocumentation> getConstants(SortedSet<IFunctionDocumentation> functions)
 	{
 		return getFilteredList(IFunctionDocumentation.TYPE_CONSTANT, functions);
 	}
 
-	private static List<IFunctionDocumentation> getMethods(SortedSet<IFunctionDocumentation> functions)
+	static List<IFunctionDocumentation> getMethods(SortedSet<IFunctionDocumentation> functions)
 	{
 		return getFilteredList(IFunctionDocumentation.TYPE_FUNCTION, functions);
 	}

@@ -33,6 +33,8 @@ import org.eclipse.gef.commands.CommandStackEventListener;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Display;
@@ -46,6 +48,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.ide.IGotoMarker;
+import org.eclipse.ui.internal.e4.compatibility.SelectionService;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
@@ -62,6 +65,7 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -69,6 +73,7 @@ import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Field;
@@ -142,7 +147,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		// Check input.
 		if (!(input instanceof PersistEditorInput))
 		{
-			throw new PartInitException(getClass().getName() + " does not support input " + input.getClass() + " of " + input);
+			throw new PartInitException(getClass().getName() + " does not support input " + (input != null ? input.getClass() : null) + " of " + input);
 		}
 
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -625,6 +630,35 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 							form_refresh = true;
 						}
 					}
+
+					IStructuredSelection currentSelection = (IStructuredSelection)graphicaleditor.getSite().getSelectionProvider().getSelection();
+					boolean selectionWasOverriden = false;
+					if (currentSelection.size() > 0)
+					{
+						Object[] arrSelections = currentSelection.toArray();
+						for (int i = 0; i < arrSelections.length; i++)
+						{
+							if (changed instanceof ISupportExtendsID && arrSelections[i] instanceof PersistContext &&
+								PersistHelper.getSuperPersist((ISupportExtendsID)changed) == ((PersistContext)arrSelections[i]).getPersist())
+							{
+								selectionWasOverriden = true;
+								arrSelections[i] = PersistContext.create(changed, ((PersistContext)arrSelections[i]).getContext());
+							}
+						}
+
+						if (selectionWasOverriden)
+						{
+							// set the correct selection on form editor and outline page when override the persist for the first time
+							Display.getCurrent().asyncExec(new Runnable()
+							{
+								public void run()
+								{
+									graphicaleditor.getSite().getSelectionProvider().setSelection(new StructuredSelection(arrSelections));
+									((SelectionService)getSite().getWorkbenchWindow().getSelectionService()).notifyListeners(BaseVisualFormEditor.this);
+								}
+							});
+						}
+					}
 				}
 				catch (RuntimeException e)
 				{
@@ -717,6 +751,9 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					}
 					if ((frm == formRef || FlattenedForm.hasFormInHierarchy(frm, formRef) || hasFormReference(fs, frm, formRef, recursionCheck)))
 					{
+						// only test for nested recursion, when going up the tree again this one can be removed
+						// because a sibling with the same FC will result in a warning.
+						recursionCheck.remove(frm.getName());
 						return true;
 					}
 					recursionCheck.remove(frm.getName());
@@ -827,7 +864,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		{
 			if (isDirty())
 			{
-				if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Save form", getTitle() + " has been modified. Save changes?"))
+				if (!MessageDialog.openQuestion(UIUtils.getActiveShell(), "Save form", getTitle() + " has been modified. Save changes?"))
 				{
 					return;
 				}

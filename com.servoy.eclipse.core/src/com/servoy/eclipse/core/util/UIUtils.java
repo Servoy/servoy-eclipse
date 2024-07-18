@@ -41,6 +41,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.ui.css.swt.theme.ITheme;
+import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
+import org.eclipse.e4.ui.css.swt.theme.IThemeManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -77,7 +80,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourceProjectChoiceDialog;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
@@ -95,6 +101,9 @@ import com.servoy.j2db.util.ImageLoader;
  */
 public class UIUtils
 {
+	public static final String ECLIPSE_DARK_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_dark";
+	public static final String SERVOY_DARK_THEME_ID = "com.servoy.eclipse.core.servoydarktheme";
+
 	private static ImageDescriptor errorImageDescriptor;
 
 	public static abstract class ExtendedInputDialog<T> extends InputDialog
@@ -948,7 +957,7 @@ public class UIUtils
 
 	/**
 	 * Tries to get the active shell. If this is a thread with an associated Display, then that display is used to get the active shell. If not,
-	 * Display.getDefault().getActiveShell() is used, but called from the UI thread so as not to cause an exception.
+	 * UIUtils.getActiveShell() is used, but called from the UI thread so as not to cause an exception.
 	 *
 	 * @return the found active shell (if any).
 	 */
@@ -1130,6 +1139,56 @@ public class UIUtils
 			j.setSystem(true);
 			j.setUser(false);
 			j.schedule();
+		}
+	}
+
+	public static boolean isDarkThemeSelected(boolean eclipseDarkTheme)
+	{
+		boolean IS_DARK_THEME = false;
+		BundleContext ctx = Activator.getDefault().getBundle().getBundleContext();
+		ServiceReference<IThemeManager> serviceReference = ctx.getServiceReference(IThemeManager.class);
+		if (serviceReference != null)
+		{
+			IThemeManager manager = ctx.getService(serviceReference);
+			if (manager != null)
+			{
+				Display d = Display.getDefault();
+				IThemeEngine engine = manager.getEngineForDisplay(d);
+				if (engine != null)
+				{
+					ITheme it = engine.getActiveTheme();
+					if (it != null)
+					{
+						if (eclipseDarkTheme && ECLIPSE_DARK_THEME_ID.equals(it.getId()))
+						{
+							IS_DARK_THEME = true;
+						}
+						if (!eclipseDarkTheme && isDarkTheme(it.getId()))
+						{
+							IS_DARK_THEME = true;
+						}
+					}
+				}
+			}
+		}
+		return IS_DARK_THEME;
+	}
+
+	public static boolean isDarkTheme(String id)
+	{
+		return ECLIPSE_DARK_THEME_ID.equals(id) || SERVOY_DARK_THEME_ID.equals(id);
+	}
+
+	public static String replaceLast(String string, String toReplace, String replacement)
+	{
+		int pos = string.lastIndexOf(toReplace);
+		if (pos > -1)
+		{
+			return string.substring(0, pos) + replacement + string.substring(pos + toReplace.length());
+		}
+		else
+		{
+			return string;
 		}
 	}
 

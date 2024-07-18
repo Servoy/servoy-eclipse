@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
+import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -331,9 +332,13 @@ public class Activator extends AbstractUIPlugin
 		});
 
 		ServoyModelManager.getServoyModelManager().getServoyModel()
-			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
-
-		EclipseCSSThemeListener.getInstance().initThemeListener();
+			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> {
+				EclipseCSSThemeListener.getInstance().initThemeListener();
+				if (!PlatformUI.getWorkbench().isClosing())
+				{
+					showLoginAndStart();
+				}
+			}));
 	}
 
 
@@ -378,7 +383,7 @@ public class Activator extends AbstractUIPlugin
 				{
 					activeShell = (Shell)activeShell.getParent();
 				}
-				boolean emptyWorkspace = false;
+				boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
 				//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
 				String username = null;
 				try
@@ -394,14 +399,25 @@ public class Activator extends AbstractUIPlugin
 				String loginToken = new ServoyLoginDialog(activeShell).doLogin();
 				if (loginToken != null)
 				{
-					// only show if first login or is not disabled from preferences
-					if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
+					ISecurePreferences node = SecurePreferencesFactory.getDefault().node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
+					try
 					{
-						BrowserDialog dialog = new BrowserDialog(activeShell,
-							TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, true);
-						dialog.open(true);
+						com.servoy.eclipse.cloud.Activator.getDefault().checkoutFromCloud(loginToken, node.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null),
+							node.get(ServoyLoginDialog.SERVOY_LOGIN_PASSWORD, null));
+					}
+					catch (StorageException e)
+					{
+						ServoyLog.logError(e);
 					}
 				}
+				// only show if first login or is not disabled from preferences
+				if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
+				{
+					BrowserDialog dialog = new BrowserDialog(activeShell,
+						TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, true);
+					dialog.open(true);
+				}
+
 			}
 		};
 		Display.getDefault().asyncExec(runnable);

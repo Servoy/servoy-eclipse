@@ -2,7 +2,11 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
+<<<<<<< HEAD
       version="2023.3.8.3850_LTS"
+=======
+      version="2024.3.2.3945"
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -11,7 +15,7 @@
    </description>
 
    <copyright url="http://download.servoy.com/developer/copyright.html">
-      Copyright © 1997-2023 Servoy BV. All rights reserved.
+      Copyright © 1997-2024 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 This computer program is protected by copyright law and international
 treaties.
@@ -63,70 +67,78 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <url>
       <update label="Servoy Update Site" url="https://download.servoy.com/developer/latest/"/>
-      <discovery label="Servoy Update Site" url="http://download.servoy.com/developer/8xx_updates"/>
+      <discovery label="Servoy Update Site" url="http://download.servoy.com/developer/latest"/>
    </url>
 
    <includes
          id="com.servoy.css.core"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <includes
          id="org.eclipse.dltk.core.servoy"
-         version="5.1.1.202302131538"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.dltk.javascript.servoy"
-         version="5.1.1.202302231624"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.draw2d"
-         version="3.10.100.201606061308"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.gef"
-         version="3.11.0.201606061308"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.egit"
-         version="6.4.0.202211300538-r"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.jgit"
-         version="6.4.0.202211300538-r"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.jgit.http.apache"
-         version="6.4.0.202211300538-r"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.jgit.lfs"
-         version="6.4.0.202211300538-r"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.jgit.ssh.apache"
-         version="6.4.0.202211300538-r"/>
+         version="0.0.0"/>
 
    <includes
          id="com.equo.chromium.cef.feature"
-         version="95.0.10"
+         version="0.0.0"
          arch="x86_64"/>
 
    <includes
          id="com.equo.chromium.feature"
-         version="95.0.10"
+         version="0.0.0"
          arch="x86_64"/>
 
    <includes
          id="com.equo.chromium.cef.arm.feature"
-         version="95.0.10"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.tm4e.feature"
-         version="0.5.2.202211261320"/>
+         version="0.0.0"/>
 
    <includes
          id="org.eclipse.tm4e.language_pack.feature"
-         version="0.1.1.202210101209"/>
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.epp.mpc"
+         version="0.0.0"/>
 
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
@@ -143,27 +155,51 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.core"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.debug"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.designer"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.ui"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.jsunit"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.profiler"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
@@ -171,87 +207,167 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="j2db_documentation"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="j2db_tunnel"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="j2db_runtime"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="j2db_log4j"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="j2db_server"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="servoy_debug"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="servoy_headless_client"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="servoy_shared"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="servoy_smart_client"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.model"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="servoy_base"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="org.apache.tomcat"
-         version="9.0.69"/>
+         version="9.0.86"/>
 
    <plugin
          id="sablo"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="servoy_ngclient"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="javax.websocket"
@@ -266,12 +382,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="1.4.20"/>
 
    <plugin
-         id="org.jsoup"
-         version="1.15.3"/>
-
-   <plugin
          id="org.freemarker.freemarker"
-         version="2.3.31.stable"/>
+         version="2.3.32.stable"/>
 
    <plugin
          id="org.apache.james.apache-mime4j"
@@ -282,16 +394,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="1.14.0.v20221112-0806"/>
 
    <plugin
-         id="org.apache.httpcomponents.core5.httpcore5"
-         version="5.1.4.v20221013-1742"/>
-
-   <plugin
-         id="org.apache.httpcomponents.client5.httpclient5"
-         version="5.1.3.v20221013-1742"/>
-
-   <plugin
          id="org.eclipse.equinox.concurrent"
-         version="1.2.100.v20211021-1418"/>
+         version="1.2.200.v20231103-0833"/>
 
    <plugin
          id="sj.jsonschemavalidation"
@@ -303,27 +407,39 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.designer.wpm"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.notification"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="org.apache.logging.log4j.api"
-         version="2.19.0"/>
+         version="2.22.1"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
-         version="2.19.0"/>
+         version="2.22.1"/>
 
    <plugin
          id="org.apache.logging.log4j.jcl"
-         version="2.19.0"/>
+         version="2.22.0"/>
 
    <plugin
          id="javax.transaction"
@@ -334,87 +450,95 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="1.0.5"/>
 
    <plugin
-         id="org.apache.commons.lang3"
-         version="3.12.0"/>
-
-   <plugin
          id="org.apache.commons.commons-collections4"
          version="4.4.0"/>
 
    <plugin
-         id="org.apache.commons.commons-dbcp2"
-         version="2.9.0"/>
-
-   <plugin
          id="org.apache.commons.commons-pool2"
-         version="2.11.1"/>
+         version="2.12.0"/>
 
    <plugin
          id="com.google.guava"
-         version="31.1.0.jre"/>
+         version="32.1.3.jre"/>
+
+   <plugin
+         id="org.hibernate.orm.core"
+         version="5.6.15.Servoy3"/>
+
+   <plugin
+         id="jaxb-api"
+         version="2.3.1"/>
+
+   <plugin
+         id="com.fasterxml.classmate"
+         version="1.7.0"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
-         version="1.3.6"/>
-
-   <plugin
-         id="org.apache.aries.util"
-         version="1.1.3"/>
+         version="1.3.7"/>
 
    <plugin
          id="com.servoy.eclipse.ngclient.ui"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
          os="linux"
          ws="gtk"
          arch="x86_64"
-         version="18.19.0"/>
+         version="20.11.1"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
          os="macosx"
          ws="cocoa"
          arch="x86_64"
-         version="18.19.0"/>
+         version="20.11.1"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.win32.win32.x86_64"
          os="win32"
          ws="win32"
          arch="x86_64"
-         version="18.19.0"/>
+         version="20.11.1"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.ngclient"
+<<<<<<< HEAD
          version="2023.3.8.3850_LTS"/>
+=======
+         version="2024.3.2.3945"/>
+>>>>>>> 8682eded40967ce14d246a8e0b2e16ec1dd87492
 
    <plugin
          id="com.servoy.eclipse.jre.linux.x86_64"
          os="linux"
          arch="x86_64"
-         version="17.0.9"/>
+         version="21.0.1"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
          os="win32"
          arch="x86_64"
-         version="17.0.9"/>
+         version="21.0.1"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
          os="macosx"
          arch="x86_64"
-         version="17.0.9"/>
-
-   <plugin
-         id="jakarta.servlet-api"
-         version="4.0.0"/>
+         version="21.0.1"/>
 
    <plugin
          id="javax.persistence-api"
@@ -424,14 +548,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.jre.macosx.aarch64"
          os="macosx"
          arch="aarch64"
-         version="17.0.9"/>
+         version="21.0.1"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"
          os="macosx"
          ws="cocoa"
          arch="aarch64"
-         version="18.19.0"/>
+         version="20.11.1"/>
 
    <plugin
          id="com.sun.activation.jakarta.activation"
@@ -442,15 +566,23 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="1.6.7"/>
 
    <plugin
-         id="org.slf4j.api"
-         version="2.0.6"/>
-
-   <plugin
-         id="org.apache.logging.log4j.slf4j2-impl"
-         version="2.19.0"/>
-
-   <plugin
          id="slf4j.api"
-         version="1.7.36"/>
+         version="2.0.9"/>
+
+   <plugin
+         id="com.servoy.eclipse.cloud"
+         version="2024.3.2.3945"/>
+
+   <plugin
+         id="org.hibernate.common.hibernate-commons-annotations"
+         version="5.1.2.Final"/>
+
+   <plugin
+         id="com.servoy.eclipse.aibridge"
+         version="2023.9.0.3900_rc"/>
+
+   <plugin
+         id="org.apache.logging.log4j.slf4j2.impl"
+         version="2.22.1"/>
 
 </feature>

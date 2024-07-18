@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
 const MILLSIGN = '\u2030';
+const SVY_FORMAT_DECIMAL_CHAR = '.';
 
 /**
   * Class reflecting a Format object coming from the server (format spec property)
@@ -39,7 +40,7 @@ export class FormattingService {
      */
     public format(data: any, format: Format, useEditFormat: boolean): string {
         if ((!format) || (!format.type) || ((typeof data === 'number') && isNaN(data))) {
-            if (!format && ((format.type === 'NUMBER') || (format.type === 'INTEGER')) && (typeof data === 'number') && !isNaN(data)) {
+            if (!format && (typeof data === 'number') && !isNaN(data)) {
                 // make sure is always returned with correct type, otherwise compare will not work well
                 return data.toString();
             }
@@ -109,14 +110,14 @@ export class FormattingService {
     /**
      * calls the { @link #unformat} function for unformatting/parsing the data given
      */
-    public parse(data: any, format: Format, useEditFormat: boolean, currentValue?: any): any {
-        return this.unformat(data, (useEditFormat && format.edit && !format.isMask) ? format.edit : format.display, format.type, currentValue);
+    public parse(data: any, format: Format, useEditFormat: boolean, currentValue?: any, useHeuristics?: boolean): any {
+        return this.unformat(data, (useEditFormat && format.edit && !format.isMask) ? format.edit : format.display, format.type, currentValue, useHeuristics);
     }
 
     /**
      * unformats/parse the give data according to the given format and type 
      */
-    public unformat(data: any, servoyFormat: string, type: string, currentValue?: any) {
+    public unformat(data: any, servoyFormat: string, type: string, currentValue?: any, useHeuristics?: boolean) {
         if ((!servoyFormat) || (!type) || (!data && data !== 0)) return data;
         if ((type === 'NUMBER') || (type === 'INTEGER')) {
             return this.unformatNumbers(data, servoyFormat);
@@ -125,7 +126,15 @@ export class FormattingService {
         } else if (type === 'DATETIME') {
             if ('' === data) return null;
             servoyFormat = this.convertFormat(servoyFormat);
-            const d = DateTime.fromFormat(data, servoyFormat, { locale: this.servoyService.getLocale() }).toJSDate();
+            let d = DateTime.fromFormat(data, servoyFormat, { locale: this.servoyService.getLocale() }).toJSDate();
+            if (isNaN(d.getTime()) && useHeuristics) {
+                for (var newFormat of this.getHeuristicFormats(servoyFormat)) {
+                    d = DateTime.fromFormat(data, newFormat, { locale: this.servoyService.getLocale() }).toJSDate();
+                    if (!isNaN(d.getTime())) {
+                        break;
+                    }
+                }
+            }
             // if format has not year/month/day use the one from the current model value
             // because luxon will just use current date
             if (currentValue && !isNaN(currentValue.getTime())) {
@@ -144,6 +153,68 @@ export class FormattingService {
             return d;
         }
         return data;
+    }
+
+    private addToFormats(formats: Array<string>,formatLetters: Array<string>, newChar: string, isSeparator: boolean) {
+        const size = formats.length;
+        if (size == 0) {
+            formats.push(newChar);
+        } else {
+            const formatsCopy = Array.from(formats);
+            if (newChar.match(/[a-zA-Z]/) && formatLetters.indexOf(newChar) == -1) {
+                formatLetters.push(newChar);
+            }
+            for (let i = 0; i < formatsCopy.length; i++) {
+                const newFormat = formatsCopy[i] + newChar;
+                if (isSeparator && formatsCopy[i].lastIndexOf(newChar) == formatsCopy[i].length - 1)
+                    continue;
+                if (formats.indexOf(newFormat) == -1) {
+                    if (!this.containsAllLetters(newFormat,formatLetters )) 
+                        continue;
+                    let insertIndex = -1;
+                    if (newChar.match(/[a-zA-Z]/) && newFormat.indexOf(newChar) < newFormat.length - 1){
+                        insertIndex = formats.indexOf(formatsCopy[i]);
+                    }
+                    if (insertIndex>= 0){
+                        formats.splice(insertIndex, 0 , newFormat);
+                    }else{
+                        formats.push(newFormat);
+                    }
+                }
+            }
+        }
+    }
+
+    private containsAllLetters(newFormat: String, formatLetters: Array<string>): boolean{
+        for (let formatLetter of  formatLetters){
+            if (newFormat.indexOf(formatLetter) < 0){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private getHeuristicFormats(servoyFormat: string): Array<string> {
+        const formats = new Array<string>();
+        const formatLetters = new Array<string>();
+        let separator;
+        if (servoyFormat) {
+            for (let index = 0; index < servoyFormat.length; index++) {
+                const currentChar = servoyFormat.charAt(index);
+                if (currentChar.match(/[a-zA-Z]/)) {
+                    this.addToFormats(formats,formatLetters, currentChar, false);
+                }
+                else if (!separator || separator == currentChar) {
+                    separator = currentChar;
+                    this.addToFormats(formats,formatLetters, currentChar, true);
+                }
+                else {
+                    // another separator?
+                    break;
+                }
+            }
+        }
+        return formats;
     }
 
     private unformatNumbers(data: any, format: string) { // todo throw error when not coresponding to format (reimplement with state machine)
@@ -204,23 +275,23 @@ export class FormattingService {
 
         const keychar = String.fromCharCode(key);
         if (this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) && vSvyFormat !== null) {
-			const value = vElement.value;
-			if (value.includes(decimalChar) && window.getSelection().toString() !== value) {
-				const allowToConcat = value.indexOf(decimalChar);
-				if (e.target.selectionStart <= allowToConcat) {
-					return true;
-				}
-				if (vSvyFormat.edit) {
-					const maxDecimals = vSvyFormat.edit.split(decimalChar)[1].length;
-					if (value.split(decimalChar)[1].length >= maxDecimals) {
-						return false;
-					}
-				}
-			}
-			return true;
-		} else {
-			return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
-		}
+            const value = vElement.value;
+            if (value.includes(decimalChar) && window.getSelection().toString() !== value) {
+                const allowToConcat = value.indexOf(decimalChar);
+                if (e.target.selectionStart <= allowToConcat) {
+                    return true;
+                }
+                if (vSvyFormat.edit) {
+                    const maxDecimals = vSvyFormat.edit.split(SVY_FORMAT_DECIMAL_CHAR)[1].length;
+                    if (value.split(decimalChar)[1].length >= maxDecimals) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } else {
+            return this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength);
+        }
     }
 
     private numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
@@ -242,7 +313,7 @@ export class FormattingService {
             if (counter > mlength) return false;
         }
 
-		if ((('-0123456789').indexOf(keychar) > -1)) {
+        if ((('-0123456789').indexOf(keychar) > -1)) {
             return true;
         } else if (decimal && (keychar === decimalChar)) {
             return true;
@@ -490,8 +561,8 @@ export class FormattingService {
     private formatDate(data, dateFormat: string): string {
         if (!(data instanceof Date)) return data;
         // single quote escape workaround until https://github.com/moment/luxon/issues/649 is fixed
-        dateFormat = this.convertFormat(dateFormat).replace("''","'svy_quote'");
-        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat).replace('svy_quote',"'");
+        dateFormat = this.convertFormat(dateFormat).replace("''", "'svy_quote'");
+        const formatted = DateTime.fromJSDate(data).setLocale(this.servoyService.getLocale()).toFormat(dateFormat).replace('svy_quote', "'");
         return formatted.trim ? formatted.trim() : formatted;
     }
 

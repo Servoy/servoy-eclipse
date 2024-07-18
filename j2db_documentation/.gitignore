@@ -5,3 +5,11 @@
 /${buildDirectory}
 /@dot
 /target/
+/ng_generated/
+/generated/
+/components/
+/service/
+/stored_pinecone_id_to_str.sobj
+/stored_all_unembedded_pinecone_items.sobj
+/stored_doc_fine_tuning_items.jsonl
+/stored_all_unembedded_pinecone_items.sobj.txt

@@ -26,11 +26,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
@@ -129,7 +129,7 @@ public abstract class TableDifferenceQuickFix extends WorkbenchMarkerResolution 
 							Exception e = TableDifferenceQuickFix.this.retrieveException(true);
 							if (e != null)
 							{
-								MessageDialog.openError(Display.getCurrent().getActiveShell(), "Error", "Quick fix failed: " + e.getMessage());
+								MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Quick fix failed: " + e.getMessage());
 								break;
 							}
 						}

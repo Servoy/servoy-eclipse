@@ -29,9 +29,9 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * when values are changed, do this via the editor that handles the persist. Open the editor when it is not already open.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class RetargetToEditorPersistProperties implements IPropertySource, IAdaptable, IDelegate<IModelSavePropertySource>
 {
@@ -98,26 +98,35 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 
 	/**
 	 * Update the property value via the editor.
-	 * 
+	 *
 	 * @param set
 	 * @param id
 	 * @param value
 	 */
 	protected void updateProperty(boolean set, Object id, Object value)
 	{
-		Object model = persistProperties.getSaveModel();
+		Object editorModel;
+		if (persistProperties instanceof PersistPropertySource)
+		{
+			PersistContext persistContext = ((PersistPropertySource)persistProperties).getPersistContext();
+			editorModel = persistContext.getContext();
+		}
+		else
+		{
+			editorModel = persistProperties.getSaveModel();
+		}
 
 		// find the editor of this persist and change the value in the editor
-		IEditorPart editor = EditorUtil.openPersistEditor(model, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
+		IEditorPart editor = EditorUtil.openPersistEditor(editorModel, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
 		if (editor == null)
 		{
 			return;
 		}
 
-		IPropertySourceProvider propertySourceProvider = (IPropertySourceProvider)editor.getAdapter(IPropertySourceProvider.class);
+		IPropertySourceProvider propertySourceProvider = editor.getAdapter(IPropertySourceProvider.class);
 		if (propertySourceProvider != null)
 		{
-			IPropertySource propertySource = propertySourceProvider.getPropertySource(model);
+			IPropertySource propertySource = propertySourceProvider.getPropertySource(persistProperties.getSaveModel());
 			if (propertySource != null)
 			{
 				if (set)

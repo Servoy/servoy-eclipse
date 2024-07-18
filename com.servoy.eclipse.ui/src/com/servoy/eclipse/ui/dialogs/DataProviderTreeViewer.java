@@ -40,11 +40,16 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TreeItem;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -370,10 +375,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							else
 							{
 								children = new ArrayList<Object>(calcs.size() + 10);
-								Iterator<ScriptCalculation> iterator = calcs.iterator();
-								while (iterator.hasNext())
+								for (ScriptCalculation calc : calcs)
 								{
-									children.add(new ColumnWrapper(iterator.next(), nodeWrapper.relations));
+									children.add(new ColumnWrapper(calc, nodeWrapper.relations));
 								}
 							}
 						}
@@ -401,12 +405,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					flattenedSolution != null)
 				{
 					Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
-					Iterator<Pair<String, IRootObject>> it = scopes.iterator();
-
 					SortedList<ScopeWithContext> scopesList = new SortedList<ScopeWithContext>(ScopeWithContext.SCOPE_COMPARATOR);
-					while (it.hasNext())
+					for (Pair<String, IRootObject> sc : scopes)
 					{
-						Pair<String, IRootObject> sc = it.next();
 						scopesList.add(new ScopeWithContext(sc.getLeft(), sc.getRight()));
 					}
 					children = new ArrayList<Object>();
@@ -470,11 +471,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							{
 								if (children == null) children = new ArrayList<Object>(list.size() + 10);
 								else children.ensureCapacity(children.size() + list.size() + 10);
-								Iterator<AggregateVariable> aggs = list.iterator();
-
-								while (aggs.hasNext())
+								for (AggregateVariable element : list)
 								{
-									children.add(new ColumnWrapper(aggs.next(), nodeWrapper.relations));
+									children.add(new ColumnWrapper(element, nodeWrapper.relations));
 								}
 							}
 						}
@@ -533,11 +532,9 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 							{
 								if (children == null) children = new ArrayList<Object>(tableRelations.size());
 								else children.ensureCapacity(children.size() + tableRelations.size());
-								Iterator<Relation> relations = tableRelations.iterator();
 								RelationList relChain = ((DataProviderNodeWrapper)parentElement).relations;
-								while (relations.hasNext())
+								for (Relation rel : tableRelations)
 								{
-									Relation rel = relations.next();
 									if (relChain.contains(rel) && (rel.isExactPKRef(flattenedSolution) || rel.isParentRef())) continue;
 									children.add(new DataProviderNodeWrapper(RELATIONS, new RelationList(relChain, rel)));
 								}
@@ -1044,6 +1041,29 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				else if (previousElems != null)
 				{
 					((TreeViewer)event.getSource()).update(previousElems.toArray(), null);
+				}
+
+				if (UIUtils.isDarkThemeSelected(true))
+				{
+					((TreeViewer)event.getSource()).getTree().addListener(SWT.EraseItem, evt -> {
+						evt.detail &= ~SWT.HOT;
+						if ((evt.detail & SWT.SELECTED) == 0) return; /// item not selected
+
+						TreeItem item = (TreeItem)evt.item;
+						int clientWidth = item.getBounds().width;
+
+						GC gc = evt.gc;
+						Color oldForeground = gc.getForeground();
+						Color oldBackground = gc.getBackground();
+
+						gc.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+						gc.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+						gc.fillRectangle(item.getBounds().x, evt.y, clientWidth, evt.height);
+
+						gc.setForeground(oldForeground);
+						gc.setBackground(oldBackground);
+						evt.detail &= ~SWT.SELECTED;
+					});
 				}
 			}
 		}

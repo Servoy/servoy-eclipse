@@ -1,6 +1,5 @@
 import { IComponentCache, IFormCache } from '@servoy/public';
-import { IType, TypesRegistry, PushToServerEnum } from '../sablo/types_registry';
-import { SubpropertyChangeByReferenceHandler, IParentAccessForSubpropertyChanges } from '../sablo/converter.service';
+import { IType, TypesRegistry } from '../sablo/types_registry';
 
 export class FormSettings {
     public name: string;
@@ -11,9 +10,9 @@ export class FormSettings {
 export class FormCache implements IFormCache {
     public navigatorForm: FormSettings;
     public size: Dimension;
-    public partComponentsCache: Array<ComponentCache | StructureCache>;
+    public partComponentsCache: Array<ComponentCache | StructureCache | FormComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
-    public formComponents: Array<FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
+    public formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
     public componentCache: Map<string, ComponentCache>;
 
     private _mainStructure: StructureCache;
@@ -24,9 +23,9 @@ export class FormCache implements IFormCache {
         this.size = size;
         this.responsive = responsive;
         this.componentCache = new Map();
-        this.partComponentsCache = new Array();
+        this.partComponentsCache = [];
         this._parts = [];
-        this.formComponents = [];
+        this.formComponents = new Map();
         this.layoutContainersCache = new Map();
     }
 
@@ -47,9 +46,12 @@ export class FormCache implements IFormCache {
     }
 
 
-    public add(comp: ComponentCache | StructureCache, parent?: StructureCache | FormComponentCache | PartCache) {
-        if (comp instanceof ComponentCache)
+    public add(comp: ComponentCache | StructureCache | FormComponentCache, parent?: StructureCache | FormComponentCache | PartCache) {
+        if (comp instanceof FormComponentCache){
+             this.addFormComponent(comp);
+        } else if (comp instanceof ComponentCache){    
             this.componentCache.set(comp.name, comp);
+        }
         if (parent != null) {
             parent.addChild(comp);
         }
@@ -68,14 +70,16 @@ export class FormCache implements IFormCache {
         this._parts.push(part);
     }
 
-    public addFormComponent(formComponent: FormComponentCache) {
-        const index = this.formComponents.findIndex( elem => elem.name == formComponent.name);
-        if (index == -1) this.formComponents.push(formComponent);
-        else this.formComponents[index] = formComponent;
+    public getPart(name: string): PartCache{
+         return this._parts.find(elem => elem.name == name);
     }
-
+    
+    public addFormComponent(formComponent: FormComponentCache) {
+        this.formComponents.set(formComponent.name, formComponent);
+    }
+    
     public getFormComponent(name: string): FormComponentCache {
-        return this.formComponents.find(elem => elem.name == name);
+        return this.formComponents.get(name);
     }
 
     public getComponent(name: string): ComponentCache {
@@ -86,30 +90,35 @@ export class FormCache implements IFormCache {
     public getLayoutContainer(id: string): StructureCache {
         return this.layoutContainersCache.get(id);
     }
+    
+    public getLayoutContainerByFCName(name: string): StructureCache {
+		const arrHelp = Array.from(this.layoutContainersCache).filter(cont => {
+			if (cont[1].items.length) {
+				return cont[1].items.map(item => {
+					if (item instanceof FormComponentCache) {
+						return item.name;
+					}
+					return '';
+				}).includes(name);
+			}
+			return false;
+		});
+        return arrHelp.length === 1 ? arrHelp[0][1] : undefined;
+    }
 
     public removeComponent(name: string) {
-        const comp = this.componentCache.get(name);
+        this.removeComponentFromCache(this.componentCache.get(name));
         this.componentCache.delete(name);
-        if (comp){
-            const index = this.partComponentsCache.indexOf(comp);
-            if (index !== -1) this.partComponentsCache.splice(index,1);
-        }
     }
 
     public removeLayoutContainer(id: string) {
-        const layout = this.layoutContainersCache.get(id);
+        this.removeComponentFromCache(this.layoutContainersCache.get(id));
         this.layoutContainersCache.delete(id);
-        if (layout) {
-            const index = this.partComponentsCache.indexOf(layout);
-            if (index !== -1) this.partComponentsCache.splice(index,1);
-        }
     }
 
     public removeFormComponent(name: string) {
-        const index = this.formComponents.findIndex( elem => elem.name == name);
-        if (index > -1) {
-            this.formComponents.splice(index, 1);
-        }
+        this.removeComponentFromCache(this.formComponents.get(name));
+        this.formComponents.delete(name);
     }
 
     public getComponentSpecification(componentName: string) {
@@ -127,7 +136,14 @@ export class FormCache implements IFormCache {
 
         return type;
     }
-
+    
+    private removeComponentFromCache(comp: ComponentCache | StructureCache | FormComponentCache){
+        if (comp){
+            const index = this.partComponentsCache.indexOf(comp);
+            if (index !== -1) this.partComponentsCache.splice(index,1);
+        }
+    }
+    
     private findComponents(structure: StructureCache | FormComponentCache) {
         structure.items.forEach(item => {
             if (item instanceof StructureCache || item instanceof FormComponentCache) {
@@ -153,28 +169,23 @@ export interface IFormComponent extends IApiExecutor {
     formCacheChanged(cache: FormCache): void;
 
     // called when a model property is updated for the given compponent, but the value itself didn't change (only nested)
-    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]): void;
+    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: unknown}[]): void;
 
     updateFormStyleClasses(ngutilsstyleclasses: string): void;
 }
 
 export interface IApiExecutor {
-    callApi(componentName: string, apiName: string, args: Array<any>, path?: string[]): any;
+    callApi(componentName: string, apiName: string, args: Array<unknown>, path?: string[]): unknown;
 }
 
-export const instanceOfApiExecutor = (obj: any): obj is IApiExecutor =>
-    obj != null && (obj).callApi instanceof Function;
+export const instanceOfApiExecutor = (obj: unknown): obj is IApiExecutor =>
+    obj != null && (obj as IApiExecutor).callApi instanceof Function;
 
-export const instanceOfFormComponent = (obj: any): obj is IFormComponent =>
-    obj != null && (obj).detectChanges instanceof Function;
+export const instanceOfFormComponent = (obj: unknown): obj is IFormComponent =>
+    obj != null && (obj as IFormComponent).detectChanges instanceof Function;
 
 /** More (but internal not servoy public) impl. for IComponentCache implementors. */
 export class ComponentCache implements IComponentCache {
-
-//    private static NO_PUSH_PARENT_ACCESS_FOR_DESIGNER = {
-//        shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => true,
-//        changeNeedsToBePushedToServer: (_key: number | string, _oldValue: any, _doNotPushNow?: boolean) => {}
-//    };
 
     /**
      * The dynamic client side types of a component's properties (never null, can be an empty obj). These are client side types sent from server that are
@@ -183,27 +194,29 @@ export class ComponentCache implements IComponentCache {
      * Call FormCache.getClientSideType(componentName, propertyName) instead if you want a combination of static client-side-type from it's spec and dynamic client
      * side type for a component's property when converting data to be sent to server.
      */
-    public readonly dynamicClientSideTypes: Record<string, IType<any>> = {};
-    public readonly model: { [property: string]: any };
+    public readonly dynamicClientSideTypes: Record<string, IType<unknown>> = {};
+    public readonly model: { [property: string]: unknown,
+                                containedForm?: {
+                                    absoluteLayout?: boolean,
+                                },
+                                styleClass?: string,
+                                size?: {width: number, height: number},
+                                containers?: {  added: { [container: string]: string[] }; removed: { [container: string]: string[] } }, 
+                                cssstyles?: { [container: string]: { [classname: string]: string } } };
 
     /** this is used as #ref inside form_component.component.ts and it has camel-case instead of dashes */
     public readonly type: string;
 
     public parent: StructureCache;
 
-//    private readonly subPropertyChangeByReferenceHandler: SubpropertyChangeByReferenceHandler;
-
     constructor(public readonly name: string,
         public readonly specName: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
         elType: string, // can be undefined in which case specName is used (this will only be defined in case of default tabless/accordion)
         public readonly handlers: Array<string>,
         public layout: { [property: string]: string },
-        public readonly typesRegistry: TypesRegistry,
-        /*parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>*/) {
+        public readonly typesRegistry: TypesRegistry) {
             this.type = ComponentCache.convertToJSName(elType ? elType : specName);
-            this.model = this.createModel();
-//            this.subPropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler(
-//                parentAccessForSubpropertyChanges ? parentAccessForSubpropertyChanges : ComponentCache.NO_PUSH_PARENT_ACCESS_FOR_DESIGNER);
+            this.model = {};
     }
 
     private static convertToJSName(webObjectSpecName: string) {
@@ -224,7 +237,7 @@ export class ComponentCache implements IComponentCache {
         return webObjectSpecName;
     }
 
-    initForDesigner(initialModelProperties: { [property: string]: any }): ComponentCache {
+    initForDesigner(initialModelProperties: { [property: string]: unknown }): ComponentCache {
         // set initial model contents
         for (const key of Object.keys(initialModelProperties)) {
             this.model[key] = initialModelProperties[key];
@@ -232,7 +245,8 @@ export class ComponentCache implements IComponentCache {
         return this;
     }
 
-    sendChanges(_propertyName: string, _newValue: any, _oldValue: any, _rowId?: string, _isDataprovider?: boolean) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    sendChanges(_propertyName: string, _newValue: unknown, _oldValue: unknown, _rowId?: string, _isDataprovider?: boolean) {
         // empty method with no impl for the designer (for example in LFC when the components are plain ComponentCache objects not the Subcass.)
     }
 
@@ -240,77 +254,11 @@ export class ComponentCache implements IComponentCache {
         return 'ComponentCache(' + this.name + ', '+ this.type + ')';
     }
 
-    private createModel(): { [property: string]: any } {
-        // if object & elements have SHALLOW or DEEP (which in ng2 does the same as SHALLOW) pushToServer, add a Proxy obj to intercept client side changes to array and send them to server
-        let modelOfComponent: { [property: string]: any };
-
-//        if (this.hasSubPropsWithShallowOrDeep()) {
-//            // hmm the proxy itself might not be needed for actual push to server when the values change by reference because
-//            // the component normally emits those via it's @Output and FormComponent.datachange(...) will send them to server
-//            // BUT we use it to also handle the scenario where a change-aware value (object / array) is changed by reference and we need to set it's setChangeListener(...)
-
-//            // I think we can remove this proxy completely as FormComponent.datachange(...) treats the setChangeListener(...) as well and we now just create it for > ALLOW? ALLOW/REJECT props might be smart too right?
-//            // the initial intent of this proxy was to automatically handle shallow/deep on component models, but those are not set in the model object unless an .emit() happens on them so a proxy is not needed I think
-//            modelOfComponent = new Proxy({}, this.getProxyHandler());
-/*        } else */modelOfComponent = {};
-
-        return modelOfComponent;
-    }
-
-//    private hasSubPropsWithShallowOrDeep(): boolean {
-//        const componentSpec = this.typesRegistry.getComponentSpecification(this.specName);
-//        if (componentSpec && componentSpec.getPropertyDescriptions()) for (const propertyDescription of Object.values(componentSpec.getPropertyDescriptions())) {
-//            if (propertyDescription.getPropertyPushToServer() > PushToServerEnum.ALLOW) return true;
-//        }
-//        return false;
-//    }
-
-//    /**
-//     * Handler for the Proxy object that will detect reference changes in the component model where it is needed
-//     */
-//    private getProxyHandler() {
-//        return {
-//            set: (underlyingModelObject: { [property: string]: any }, prop: any, v: any, receiver: any) => {
-//                // we are only interested in set operations on the actual proxied object here, not on other objects that might use the proxied object as a prototype
-//                // so if a set comes from example for a component property types's ModelInSpecificRow (so a foundset linked component), we want to set it on that object (receiver),
-//                // not end up calling subPropertyChangeByReferenceHandler which will set it on the underlyingModelObject
-//                if (underlyingModelObject !== receiver) return Reflect.set(underlyingModelObject, prop, v, receiver);
-//
-//                if (this.subPropertyChangeByReferenceHandler.parentAccess.shouldIgnoreChangesBecauseFromOrToServerIsInProgress())
-//                    return Reflect.set(underlyingModelObject, prop, v, receiver);
-//
-//                const propertyDescription = this.typesRegistry.getComponentSpecification(this.specName)?.getPropertyDescription(prop);
-//                const pushToServer = propertyDescription ? propertyDescription.getPropertyPushToServer() : PushToServerEnum.REJECT;
-//
-//                if (pushToServer > PushToServerEnum.ALLOW) {
-//                    // we give to setPropertyAndHandleChanges(...) here also doNotPushNow arg === true, so that it does not auto-push;
-//                    // push normally executes afterwards due to the @Output emitter of that prop. from the component which calls FormComponent.datachange()
-//                    this.subPropertyChangeByReferenceHandler.setPropertyAndHandleChanges(underlyingModelObject, prop, v, true); // 1 element has changed by ref
-//                    return true;
-//                } else return Reflect.set(underlyingModelObject, prop, v, receiver);
-//            },
-//
-//            deleteProperty: (underlyingModelObject: { [property: string]: any }, prop: any) => {
-//                if (this.subPropertyChangeByReferenceHandler.parentAccess.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.deleteProperty(underlyingModelObject, prop);
-//
-//                const propertyDescription = this.typesRegistry.getComponentSpecification(this.specName)?.getPropertyDescription(prop);
-//                const pushToServer = propertyDescription ? propertyDescription.getPropertyPushToServer() : PushToServerEnum.REJECT;
-//
-//                if (pushToServer > PushToServerEnum.ALLOW) {
-//                    // we give to setPropertyAndHandleChanges(...) here also doNotPushNow arg === true, so that it does not auto-push;
-//                    // push normally executes afterwards due to the @Output emitter of that prop. from the component which calls FormComponent.datachange()
-//                    this.subPropertyChangeByReferenceHandler.setPropertyAndHandleChanges(underlyingModelObject, prop, undefined, true); // 1 element deleted
-//                    return true;
-//                } else return Reflect.deleteProperty(underlyingModelObject, prop);
-//            }
-//        };
-//    }
-
 }
 
 export class StructureCache {
     public parent: StructureCache;
-    public model:  { [property: string]: any } = {};
+    public model:  { [property: string]: unknown } = {};
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
         public readonly id?: string, public readonly cssPositionContainer?: boolean, public layout?: { [property: string]: string }) {
@@ -326,7 +274,7 @@ export class StructureCache {
         }
         if (child instanceof StructureCache) {
             child.parent = this;
-            return child as StructureCache;
+            return child;
         }
         if (child instanceof ComponentCache) {
             child.parent = this;
@@ -362,8 +310,9 @@ export class StructureCache {
 
 /** This is a cache that represents a form part (body/header/etc.). */
 export class PartCache {
-    constructor(public readonly classes: Array<string>,
-        public readonly layout: { [property: string]: string },
+    constructor(public readonly name: string,
+        public readonly classes: Array<string>,
+        public layout: { [property: string]: string },
         public readonly items?: Array<ComponentCache | FormComponentCache | StructureCache>) {
         if (!this.items) this.items = [];
     }
@@ -391,9 +340,8 @@ export class FormComponentCache extends ComponentCache {
         layout: { [property: string]: string },
         public readonly formComponentProperties: FormComponentProperties,
         public readonly hasFoundset: boolean,
-        typesRegistry: TypesRegistry,
-        /*parentAccessForSubpropertyChanges: IParentAccessForSubpropertyChanges<number | string>*/) {
-            super(name, specName, elType, handlers, layout, typesRegistry/*, parentAccessForSubpropertyChanges*/);
+        typesRegistry: TypesRegistry) {
+            super(name, specName, elType, handlers, layout, typesRegistry);
     }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache) {
@@ -412,7 +360,7 @@ export class FormComponentCache extends ComponentCache {
         }
     }
 
-    initForDesigner(initialModelProperties: { [property: string]: any }): FormComponentCache {
+    initForDesigner(initialModelProperties: { [property: string]: unknown }): FormComponentCache {
         super.initForDesigner(initialModelProperties);
         return this;
     }
@@ -426,7 +374,23 @@ export class FormComponentProperties {
     }
 }
 
+
 export class Dimension {
     public width: number;
     public height: number;
 }
+
+export interface Position {
+    x: number;
+    y: number;
+}
+
+export interface CSSPosition {
+    top: string;
+    left: string;
+    bottom: string;
+    right: string;
+    width: string;
+    height: string;
+}
+

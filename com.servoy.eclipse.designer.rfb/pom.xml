@@ -3,20 +3,23 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
+    <prerequisites>
+        <maven>3.9.0</maven>
+    </prerequisites>
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2023.3.8.3850_LTS</version>
+		<version>2024.3.2.3945</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.designer.rfb</artifactId>
-	<version>2023.3.8.3850_LTS</version>
+	<version>2024.3.2.3945</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.12.0</version>
+				<version>1.15.0</version>
 				<configuration>
 				  <workingDirectory>node</workingDirectory>
 				</configuration>
@@ -31,7 +34,7 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
-							<nodeVersion>v18.17.0</nodeVersion>
+							<nodeVersion>v20.11.1</nodeVersion>
 						</configuration>
 					</execution>
 

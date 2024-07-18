@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand.CreateComponentOptions;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -70,7 +71,8 @@ public class CreateComponentsHandler extends CreateComponentHandler
 								newPersists = new ArrayList<IPersist>();
 								for (int i = 0; i < components.length(); i++)
 								{
-									IPersist[] persist = createComponent(components.getJSONObject(i), changedPersists);
+									IPersist[] persist = CreateComponentCommand.createComponent(editorPart, CreateComponentOptions.fromJson(components.getJSONObject(i)),
+										changedPersists);
 									for (IPersist iPersist : persist)
 									{
 										if (persist != null)

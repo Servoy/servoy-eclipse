@@ -39,7 +39,6 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
@@ -48,6 +47,7 @@ import org.sablo.specification.Package.DirPackageReader;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -226,7 +226,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 						if (modulesNGPackageProjectIte.hasNext()) modulesNGPackageProjectsAsString.append(", ");
 					}
 				}
-				if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Cannot export referenced package projects",
+				if (!MessageDialog.openQuestion(UIUtils.getActiveShell(), "Cannot export referenced package projects",
 					"The following solutions have referenced package projects that cannot be exported:" + modulesNGPackageProjectsAsString +
 						"\n\nDo you want to continue by skiping exporting the referenced package projects?"))
 				{
@@ -264,7 +264,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		dialogSettings.put(DEPLOY_USERNAME, deployUsername);
 		try
 		{
-			dialogSettings.put(DEPLOY_PASSWORD, SecuritySupport.encrypt(Settings.getInstance(), deployPassword));
+			dialogSettings.put(DEPLOY_PASSWORD, SecuritySupport.encrypt(deployPassword));
 		}
 		catch (Exception ex)
 		{
@@ -366,7 +366,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		}
 		try
 		{
-			deployPassword = SecuritySupport.decrypt(Settings.getInstance(), dialogSettings.get(DEPLOY_PASSWORD));
+			deployPassword = SecuritySupport.decrypt(dialogSettings.get(DEPLOY_PASSWORD));
 		}
 		catch (Exception ex)
 		{

@@ -11,6 +11,7 @@ export class BSWindowManager {
     options: any;
     windows: Array<BSWindow>;
     modalStack: Array<BSWindow>;
+    modalBackdropRemoverTimeout: any;
 
     private renderer: Renderer2;
 
@@ -163,6 +164,10 @@ export class BSWindowManager {
     addModal(windowObj: BSWindow) {
         /*PRIVATE FUNCTION*/
         if(this.modalStack.length  === 0) {
+            if(this.modalBackdropRemoverTimeout) {
+                clearTimeout(this.modalBackdropRemoverTimeout);
+                this.modalBackdropRemoverTimeout = null;
+            }
             this.utils.getMainBody().appendChild(windowObj.options.modalBackdrop);
             setTimeout(() => {
                 const backdrop = this.doc.getElementsByClassName('modal-backdrop');
@@ -185,7 +190,12 @@ export class BSWindowManager {
                     Array.from(backdrop).forEach((el) => {
                          this.renderer.removeClass(el, 'in');
                      });
-                    setTimeout(() => {
+                    if(this.modalBackdropRemoverTimeout) {
+                        clearTimeout(this.modalBackdropRemoverTimeout);
+                        this.modalBackdropRemoverTimeout = null;
+                    }
+                    this.modalBackdropRemoverTimeout = setTimeout(() => {
+                        this.modalBackdropRemoverTimeout = null;
                         Array.from(backdrop).forEach((el) => {
                             el.remove();
                         });

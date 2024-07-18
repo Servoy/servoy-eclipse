@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -90,6 +91,13 @@ public class NewRelationWizard extends Wizard implements INewWizard
 			// add pages to this wizard
 			addPage(relationPage);
 		}
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	@Override

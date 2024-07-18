@@ -97,6 +97,11 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         throw new Error('Method not implemented.');
     }
 
+    public showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<string> {
+        throw new Error('Method not implemented.');   
+    }
+
+
     public getLocaleNumberSymbol(symbol: NumberSymbol): string {
         if (this.localeNumberSymbol) return this.localeNumberSymbol;
         return super.getLocaleNumberSymbol(symbol);
@@ -116,6 +121,10 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public cancelFormPopup(_disableClearPopupFormCallToServer: boolean): void {}
 
     public setFormStyleClasses(_styleclasses: {property: string}): void {}
+
+    public isInTestingMode(): boolean {
+        return false;
+    }
 }
 @NgModule({
     declarations: [

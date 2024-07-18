@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
 
 import { ServoyDefaultAccordion } from './accordion';
 import { ServoyPublicTestingModule, WindowRefService, ServoyApi } from '@servoy/public'
@@ -69,6 +69,8 @@ describe('ServoyDefaultAccordion', () => {
         component.svyOnChanges({ 'tabIndex': new SimpleChange(2, 1, false) });
         tick();
         expect(component.onChangeMethodID).toHaveBeenCalledTimes(2);
+        discardPeriodicTasks()
+        console.log("test")
     }));
     
      it('should handle tabs edit', async () => {

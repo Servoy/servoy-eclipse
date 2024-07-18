@@ -39,7 +39,9 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -163,8 +165,14 @@ public class WarExporter
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"org.apache.commons.lang3_*.jar", "org.apache.commons.commons-text_*.jar", "de.inetsoftware.jlessc_*.jar", //
-		"org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar" };
+		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
+		"de.inetsoftware.jlessc_*.jar", "org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", //
+		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
+		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
+		"wrapped.org.apache.httpcomponents.core5.httpcore5_*.jar", "wrapped.org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
+		"wrapped.org.apache.httpcomponents.client5.httpclient5_*.jar" };
+
+	private static final Set<String> HTTP_PLUGIN_FILES = Set.of("httpclient5.jar", "httpcore5-h2.jar", "httpcore5.jar");
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
@@ -344,8 +352,7 @@ public class WarExporter
 			File pluginsDir = new File(tmpWarDir, "plugins");
 			try
 			{
-				Files.walk(pluginsDir.toPath()).map(path -> path.toFile()).filter(file -> file.isFile() && !file.getName().toLowerCase().endsWith(".jnlp") &&
-					!file.getName().toLowerCase().equals("plugins.properties"))
+				Files.walk(pluginsDir.toPath()).map(path -> path.toFile()).filter(this::filterPluginFile)
 					.forEach(file -> {
 						File targetFile = new File(targetLibDir, file.getName());
 						if (targetFile.exists())
@@ -388,15 +395,25 @@ public class WarExporter
 		monitor.done();
 	}
 
+	/**
+	 * @return
+	 */
+	protected boolean filterPluginFile(File file)
+	{
+		String name = file.getName().toLowerCase();
+		return file.isFile() && !name.endsWith(".jnlp") && !name.equals("plugins.properties") && !HTTP_PLUGIN_FILES.contains(name);
+	}
+
 	private void checkDuplicateJars(File tmpWarDir) throws ExportException
 	{
 		Map<String, TreeMap<String, List<File>>> dependenciesVersions = new HashMap<>();
+		TreeMap<String, List<File>> possibleDuplicates = new TreeMap<>();
 		Set<File> libs;
 		try
 		{
 			libs = Files.walk(tmpWarDir.toPath()).filter(path -> path.toString().endsWith(".jar"))//
 				.map(path -> path.toFile()).collect(Collectors.toSet());
-			libs.forEach(jar -> checkDuplicateJar(jar, dependenciesVersions));
+			libs.forEach(jar -> checkDuplicateJar(jar, dependenciesVersions, possibleDuplicates));
 		}
 		catch (IOException e)
 		{
@@ -434,6 +451,8 @@ public class WarExporter
 						//keep the one in the lib folder, doesn't matter if it's older
 						latestJarPath = getRelativePath(tmpWarDir, lib.get());
 						latestJar = lib.get();
+						String name = latestJar.getName().substring(0, latestJar.getName().indexOf(".jar")).replaceAll("-|_|\\d|\\.", "");
+						possibleDuplicates.get(name).add(latestJar);
 					}
 
 					for (String version : dependenciesVersions.get(jar).keySet())
@@ -476,6 +495,8 @@ public class WarExporter
 									latest +
 									") is already present in '" + latestJarPath + "'. \n");
 							}
+							String name = file.getName().substring(0, file.getName().indexOf(".jar")).replaceAll("-|_|\\d|\\.", "");
+							possibleDuplicates.get(name).remove(file);
 							File parent = file.getParentFile();
 							file.delete();
 							if (parent.list().length == 0)
@@ -509,6 +530,26 @@ public class WarExporter
 			messageBuilder.append(
 				"\n If you are not using the latest versions of the exported plugins, an upgrade might fix the warnings. Otherwise, no action is required.");
 			userChannel.displayWarningMessage("Plugin dependencies problem", messageBuilder.toString(), true);
+		}
+
+		if (!possibleDuplicates.isEmpty())
+		{
+			Optional<List<File>> moreJars = possibleDuplicates.values().stream().filter(jars -> jars.size() > 1).findAny();
+			if (!moreJars.isPresent()) return;
+			messageBuilder = new StringBuilder(
+				"The following jars have similar file names so they are possible duplicates, which means the war deployment could fail if the wrong jar is used. \n" +
+					"They cannot be checked automatically because some don't provide the bundle symbolic name in the manifest, or it is not exactly the same. \nPlease check and delete the duplicate jars manually.\n\n");
+			for (List<File> jars : possibleDuplicates.values())
+			{
+				if (jars.size() > 1)
+				{
+					String message = jars.stream().map(file -> getRelativePath(tmpWarDir, file))//
+						.collect(Collectors.joining(", "));
+					message = message.substring(0, message.lastIndexOf(",")) + message.substring(message.lastIndexOf(",")).replace(",", " and");
+					messageBuilder.append("- " + message + "\n");
+				}
+			}
+			userChannel.displayWarningMessage("Possible duplicate jars", messageBuilder.toString(), true);
 		}
 	}
 
@@ -1101,11 +1142,10 @@ public class WarExporter
 				JarEntry je = enu.nextElement();
 				if (excludedResourcesByName != null && excludedResourcesByName.stream().anyMatch(item -> je.getName().startsWith(item))) continue;
 				if (specFilesOnly && !je.getName().endsWith(".spec") && !je.getName().endsWith("MANIFEST.MF") && !je.getName().endsWith(".json")) continue;
-				File fl = new File(destdir, je.getName());
+				File fl = Paths.get(destdir, je.getName()).normalize().toFile();
 				if (!fl.exists())
 				{
 					fl.getParentFile().mkdirs();
-					fl = new File(destdir, je.getName());
 				}
 				if (je.isDirectory())
 				{
@@ -1317,7 +1357,7 @@ public class WarExporter
 				File adminProperties = new File(tmpWarDir, "WEB-INF/admin.properties");
 				Properties prop = new Properties();
 				prop.setProperty("defaultAdminUser", exportModel.getDefaultAdminUser());
-				prop.setProperty("defaultAdminPassword", SecuritySupport.encrypt(Settings.getInstance(), exportModel.getDefaultAdminPassword()));
+				prop.setProperty("defaultAdminPassword", SecuritySupport.encrypt(exportModel.getDefaultAdminPassword()));
 				if (exportModel.isUseAsRealAdminUser())
 				{
 					prop.setProperty("useAsRealAdminUser", "true");
@@ -1860,7 +1900,7 @@ public class WarExporter
 					{
 						try
 						{
-							String password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), properties.getProperty(key, ""));
+							String password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(properties.getProperty(key, ""));
 							properties.put(k, password);
 						}
 						catch (Exception e)
@@ -1893,7 +1933,7 @@ public class WarExporter
 				try
 				{
 					Cipher cipher = Cipher.getInstance("DESede"); //$NON-NLS-1$
-					cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey(null));
+					cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey());
 					desCipher = cipher;
 				}
 				catch (Exception e)
@@ -2065,7 +2105,7 @@ public class WarExporter
 		}
 	}
 
-	private void checkDuplicateJar(File jarFile, Map<String, TreeMap<String, List<File>>> dependenciesVersions)
+	private void checkDuplicateJar(File jarFile, Map<String, TreeMap<String, List<File>>> dependenciesVersions, TreeMap<String, List<File>> allJars)
 	{
 		String jarName = null;
 		String version = null;
@@ -2104,6 +2144,13 @@ public class WarExporter
 		{
 			dependenciesVersions.put(jarName, new TreeMap<>(VersionComparator.INSTANCE));
 		}
+		String name = jarFile.getName().substring(0, jarFile.getName().indexOf(".jar")).replaceAll("-|_|\\d|\\.", "");
+		if (!allJars.containsKey(name))
+		{
+			allJars.put(name, new ArrayList<>());
+		}
+		if (jarFile.getPath().contains("plugins"))
+			allJars.get(name).add(jarFile);
 
 		TreeMap<String, List<File>> vFiles = dependenciesVersions.get(jarName);
 		if (!vFiles.containsKey(version))
@@ -2438,6 +2485,8 @@ public class WarExporter
 		properties.put("isOverwriteDeployedDBServerProperties", String.valueOf(exportModel.isOverwriteDeployedDBServerProperties()));
 		properties.put("isOverwriteDeployedServoyProperties", String.valueOf(exportModel.isOverwriteDeployedServoyProperties()));
 		properties.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
+		properties.setProperty("serverBuildDate", String.valueOf(System.currentTimeMillis()));
+		properties.setProperty("zoneId", ZoneId.systemDefault().getId());
 		try (FileOutputStream fos = new FileOutputStream(deployPropertiesFile))
 		{
 			properties.store(fos, "");

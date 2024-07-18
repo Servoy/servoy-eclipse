@@ -66,6 +66,10 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         this.applicationService.showFileOpenDialog(title, multiselect, acceptFilter, url);
     }
 
+    showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<string> {
+        return this.applicationService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, buttonsText);
+    }
+
     generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
         return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName, tus);
     }
@@ -109,4 +113,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         this.formService.setFormStyleClasses(styleclasses);
     }
 
+    public isInTestingMode(): boolean {
+        return this.getUIProperty('servoy.ngclient.testingMode');
+    }
 }

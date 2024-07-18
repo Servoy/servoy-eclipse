@@ -48,7 +48,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * PersistPropertySource to filter out properties not used in mobile solutions.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -58,8 +58,10 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		"displayType",
 		RepositoryHelper.getDisplayName("displayType", Field.class),
 		new ComboboxPropertyModel<Integer>(
-			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.PASSWORD) },
-			new String[] { "TEXT_FIELD", "TEXT_AREA", "CALENDAR", "COMBOBOX", "RADIOS", "CHECKS", "PASSWORD" }), Messages.LabelUnresolved);
+			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.CALENDAR), Integer
+				.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.PASSWORD) },
+			new String[] { "TEXT_FIELD", "TEXT_AREA", "CALENDAR", "COMBOBOX", "RADIOS", "CHECKS", "PASSWORD" }),
+		Messages.LabelUnresolved);
 
 
 	/**
@@ -93,7 +95,8 @@ public class MobilePersistPropertySource extends PersistPropertySource
 				dataproviderType == IColumnTypeConstants.DATETIME)
 			{
 				return persist instanceof GraphicalComponent ||
-					(persist instanceof Field && ((((Field)persist).getDisplayType() == IFieldConstants.TEXT_FIELD) || ((Field)persist).getDisplayType() == IFieldConstants.CALENDAR));
+					(persist instanceof Field &&
+						((((Field)persist).getDisplayType() == IFieldConstants.TEXT_FIELD) || ((Field)persist).getDisplayType() == IFieldConstants.CALENDAR));
 			}
 			return false;
 		}
@@ -133,8 +136,9 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		}
 
 		if ((StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) ||
-			StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) || StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(
-			propertyDescriptor.propertyDescriptor.getName())) &&
+			StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) ||
+			StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(
+				propertyDescriptor.propertyDescriptor.getName())) &&
 			getPersist() instanceof GraphicalComponent &&
 			Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) &&
 			getContext() instanceof Form)
@@ -145,7 +149,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 		return RepositoryHelper.hideForMobileProperties(propertyDescriptor.propertyDescriptor.getName(), getPersist().getClass(),
 			(getPersist() instanceof Field) ? ((Field)getPersist()).getDisplayType() : 0, isButton(getPersist())) ||
 
-		super.hideForProperties(propertyDescriptor);
+			super.hideForProperties(propertyDescriptor);
 	}
 
 	private boolean isInternalProperty(String propertyDescriptor)
@@ -166,7 +170,7 @@ public class MobilePersistPropertySource extends PersistPropertySource
 	}
 
 	@Override
-	protected IPropertyHandler[] getPseudoProperties(Class< ? > clazz)
+	protected IPropertyHandler[] getPseudoProperties(Class< ? > clazz, PersistContext context)
 	{
 		if (GraphicalComponent.class == clazz && isButton(getPersist()))
 		{

@@ -46,7 +46,7 @@ import com.servoy.j2db.persistence.Tab;
 
 /**
  * Selection tool in form designer, handles keyboard-arrow actions, optionally with shift/control.
- * 
+ *
  * @author rgansevles
  */
 
@@ -125,7 +125,7 @@ public class FormSelectionTool extends PanningSelectionTool
 	 * shift key held: resize
 	 * <p>
 	 * control key held: magnitude 10
-	 * 
+	 *
 	 * @param e event
 	 * @return applicability
 	 */
@@ -186,7 +186,7 @@ public class FormSelectionTool extends PanningSelectionTool
 		request.setSizeDelta(new Dimension(width, height));
 
 		// check the selected edit parts if they understand the request.
-		List<EditPart> selectedEditParts = viewer.getSelectedEditParts();
+		List< ? extends EditPart> selectedEditParts = viewer.getSelectedEditParts();
 		List<EditPart> applicableEditParts = new ArrayList<EditPart>(selectedEditParts.size());
 		for (EditPart editPart : selectedEditParts)
 		{
@@ -215,11 +215,11 @@ public class FormSelectionTool extends PanningSelectionTool
 		return true;
 	}
 
-	/**  
+	/**
 	 * Traverse selected elements according to tab sequence.
 	 * <p>
 	 * shift key held: traverse backward
-	 * 
+	 *
 	 * @param e event
 	 * @return applicability
 	 */
@@ -244,7 +244,9 @@ public class FormSelectionTool extends PanningSelectionTool
 			return false;
 		}
 
-		ISupportTabSeq next = findNextField(field, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getTabSeqElementsByTabOrder(), (e.stateMask & SWT.SHIFT) == 0);
+		ISupportTabSeq next = findNextField(field,
+			ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getTabSeqElementsByTabOrder(),
+			(e.stateMask & SWT.SHIFT) == 0);
 		if (next == null)
 		{
 			return false;

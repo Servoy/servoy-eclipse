@@ -19,11 +19,15 @@ package com.servoy.eclipse.ui.property;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.PropertyDescriptionBuilder;
+import org.sablo.specification.ValuesConfig;
+import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.j2db.documentation.ClientSupport;
@@ -34,6 +38,7 @@ import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.Solution.AUTHENTICATOR_TYPE;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -49,6 +54,14 @@ public class PseudoPropertyHandler implements IPropertyHandler
 		new LoginSolutionPropertyController("loginSolutionName", RepositoryHelper.getDisplayName("loginSolutionName", Solution.class))).build();
 	public static final PropertyDescription SOLUTION_VERSION_DESCRIPTION = new PropertyDescriptionBuilder().withName("version").withConfig(
 		new VersionPropertyController("version", RepositoryHelper.getDisplayName("version", Solution.class))).build();
+
+	public static final PropertyDescription AUTHENTICATOR_VALUES = new PropertyDescriptionBuilder().withName("authenticator").withType(
+		ValuesPropertyType.INSTANCE).withConfig(
+			new ValuesConfig().setValues(Solution.AUTHENTICATOR_TYPE.values(),
+				Stream.of(Solution.AUTHENTICATOR_TYPE.values())
+					.map(Enum::name)
+					.collect(Collectors.toList()).toArray(new String[0])))
+		.build();
 
 
 	// null type: use property controller internally
@@ -289,11 +302,14 @@ public class PseudoPropertyHandler implements IPropertyHandler
 	@Override
 	public PropertyDescription getPropertyDescription(Object obj, IPropertySource propertySource, PersistContext persistContext)
 	{
+		if (name.equals("authenticator"))
+		{
+			return AUTHENTICATOR_VALUES;
+		}
 		if (name.equals("loginSolutionName"))
 		{
 			return LOGIN_SOLUTION_DESCRIPTION;
 		}
-
 		if (name.equals("version"))
 		{
 			return SOLUTION_VERSION_DESCRIPTION;
@@ -315,14 +331,20 @@ public class PseudoPropertyHandler implements IPropertyHandler
 	@Override
 	public Object getValue(Object obj, PersistContext persistContext)
 	{
-		// is handled in property controllers
+		if (name.equals("authenticator") && obj instanceof Solution sol)
+		{
+			return sol.getAuthenticator();
+		}
 		return null;
 	}
 
 	@Override
 	public void setValue(Object obj, Object value, PersistContext persistContext)
 	{
-		// is handled in property controllers
+		if (name.equals("authenticator") && obj instanceof Solution sol)
+		{
+			sol.setAuthenticator((AUTHENTICATOR_TYPE)value);
+		}
 	}
 
 	@Override

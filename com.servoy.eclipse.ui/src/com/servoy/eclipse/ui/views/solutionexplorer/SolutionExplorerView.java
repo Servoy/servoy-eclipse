@@ -197,6 +197,7 @@ import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
+import com.servoy.eclipse.ui.actions.PublishToCloudAction;
 import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -272,6 +273,7 @@ public class SolutionExplorerView extends ViewPart
 {
 
 	private final Color yellow = new Color(null, 255, 255, 0);
+	private final Color DARK_MODE_HIGHLIGHT = new Color(null, 49, 108, 155);
 	private final Color light_grey = new Color(null, 120, 120, 120);
 
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.SolutionExplorerView";
@@ -400,6 +402,8 @@ public class SolutionExplorerView extends ViewPart
 	private ChangeResourcesProjectAction changeResourcesProjectAction;
 	private RemoveSolutionProtectionAction removeSolutionProtectionAction;
 
+	private PublishToCloudAction publishToCloudAction;
+
 	private DuplicatePersistAction duplicateFormAction;
 	private MovePersistAction moveFormAction;
 
@@ -414,8 +418,6 @@ public class SolutionExplorerView extends ViewPart
 	private RefreshAction fRefreshAction;
 
 	private EditVariableAction editVariableAction;
-
-	private EditComponentVariantsAction editComponentVariantsAction;
 
 	private DebugMethodAction debugMethodAction;
 
@@ -500,6 +502,8 @@ public class SolutionExplorerView extends ViewPart
 	private RenameMediaFolderAction renameMediaFolderAction;
 	private CreateMediaFolderAction createMediaFolderAction;
 	private CreateMediaFileAction createMediaFileAction;
+
+	private CreateMediaFileAction createMediaLoginPageAction;
 	private CreateMediaFileAction createMediaWebAppManifestAction;
 	private CreateMediaFileAction createMediaHeadIndexContributionsAction;
 
@@ -793,7 +797,14 @@ public class SolutionExplorerView extends ViewPart
 							IPersist persist = activeEditorPersistListener.getActiveEditorPersist();
 							if (persist != null && ((IPersist)real).getUUID().equals(persist.getUUID()))
 							{
-								return yellow;// Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND);
+								if (UIUtils.isDarkThemeSelected(false))
+								{
+									return DARK_MODE_HIGHLIGHT;
+								}
+								else
+								{
+									return yellow;// Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND);
+								}
 							}
 						}
 					}
@@ -943,6 +954,11 @@ public class SolutionExplorerView extends ViewPart
 						tree.setExpandedState(activeProjectNode, true);
 					}
 				}
+
+				// expand the API Explorer node after startup
+				tree.setExpandedState(rootNodes[rootNodes.length - 1], true);
+
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setAPIExplorerNodesEnabled(servoyProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(servoyProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(servoyProject != null);
 
@@ -1813,12 +1829,12 @@ public class SolutionExplorerView extends ViewPart
 							PlatformSimpleUserNode solutionNode = cp.getSolutionNode(solutionName);
 							if (solutionNode != null)
 							{
-								PlatformSimpleUserNode formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
+								PlatformSimpleUserNode formsNode = cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
 								if (formsNode != null)
 								{
 									cp.refreshFormsNode(formsNode, false);
 								}
-								PlatformSimpleUserNode formComponentsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode,
+								PlatformSimpleUserNode formComponentsNode = cp.findChildNode(solutionNode,
 									Messages.TreeStrings_FormComponents);
 								if (formComponentsNode != null)
 								{
@@ -2066,6 +2082,7 @@ public class SolutionExplorerView extends ViewPart
 						j.schedule();
 					}
 				}
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setAPIExplorerNodesEnabled(activeProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(activeProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(activeProject != null);
 			}
@@ -2674,8 +2691,13 @@ public class SolutionExplorerView extends ViewPart
 
 		if (createMediaFolderAction.isEnabled()) manager.add(createMediaFolderAction);
 		if (createMediaFileAction.isEnabled()) manager.add(createMediaFileAction);
-		if (createMediaWebAppManifestAction.isEnabled()) manager.add(createMediaWebAppManifestAction);
-		if (createMediaHeadIndexContributionsAction.isEnabled()) manager.add(createMediaHeadIndexContributionsAction);
+		if (createMediaWebAppManifestAction.isEnabled() || createMediaHeadIndexContributionsAction.isEnabled())
+		{
+			manager.add(new Separator());
+			if (createMediaLoginPageAction.isEnabled()) manager.add(createMediaLoginPageAction);
+			if (createMediaWebAppManifestAction.isEnabled()) manager.add(createMediaWebAppManifestAction);
+			if (createMediaHeadIndexContributionsAction.isEnabled()) manager.add(createMediaHeadIndexContributionsAction);
+		}
 		if (renameMediaFolderAction.isEnabled()) manager.add(renameMediaFolderAction);
 
 		manager.add(new Separator());
@@ -2690,6 +2712,8 @@ public class SolutionExplorerView extends ViewPart
 		if (removeSolutionProtectionAction.isEnabled()) manager.add(removeSolutionProtectionAction);
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
 		if (configureLessTheme.isEnabled()) manager.add(configureLessTheme);
+
+		manager.add(publishToCloudAction);
 
 		if (copyTable.isEnabled()) manager.add(copyTable);
 		if (hideUnhideTablesAction.isEnabled()) manager.add(hideUnhideTablesAction);
@@ -2783,7 +2807,9 @@ public class SolutionExplorerView extends ViewPart
 		if (importComponentInSolution.isEnabled()) manager.add(importComponentInSolution);
 
 		// Other plug-ins can contribute their actions here
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		if (selectedTreeNode.getAdapter(org.eclipse.core.resources.IResource.class) != null ||
+			selectedTreeNode.getType() == UserNodeType.ALL_WEB_PACKAGE_PROJECTS)
+			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.COMPONENT && addComponentIcon.isEnabled())
 		{
@@ -2792,12 +2818,16 @@ public class SolutionExplorerView extends ViewPart
 		}
 
 		manager.add(new Separator());
+
 		manager.add(cutAction);
 		manager.add(copyAction);
 		manager.add(pasteAction);
 
-		manager.add(new Separator());
-		if (searchTreeAction.isEnabled()) manager.add(searchTreeAction);
+		if (searchTreeAction.isEnabled())
+		{
+			manager.add(new Separator());
+			manager.add(searchTreeAction);
+		}
 		if (treeContextMenuTreeHandlingEnabled)
 		{
 			manager.add(new Separator());
@@ -2830,7 +2860,13 @@ public class SolutionExplorerView extends ViewPart
 		}
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
+		{
+			manager.add(new Separator());
 			manager.add(new CopySourceFolderAction());
+		}
+		// there is a validate menu added for stuff with a resource
+		if (selectedTreeNode.getAdapter(org.eclipse.core.resources.IResource.class) != null)
+			manager.add(new Separator());
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)
@@ -2860,7 +2896,6 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(submenu);
 		}
 		if (editVariableAction.isEnabled()) manager.add(editVariableAction);
-		if (editComponentVariantsAction.isEnabled()) manager.add(editComponentVariantsAction);
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		if (searchListAction.isEnabled()) manager.add(searchListAction);
@@ -3061,6 +3096,7 @@ public class SolutionExplorerView extends ViewPart
 		hideUnhideTablesAction = new HideUnhideTablesAction();
 		synchronizeTableDataAction = new SynchronizeTableDataAction(shell);
 		loadRelationsAction = new LoadRelationsAction(this);
+		publishToCloudAction = new PublishToCloudAction(shell);
 
 		newActionInTreePrimary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");
@@ -3129,6 +3165,7 @@ public class SolutionExplorerView extends ViewPart
 		renameMediaAction = new RenameMediaAction(this);
 		createMediaFolderAction = new CreateMediaFolderAction(this);
 		createMediaFileAction = new CreateMediaFileAction(this);
+		createMediaLoginPageAction = new CreateMediaLoginPage(this);
 		createMediaWebAppManifestAction = new CreateMediaWebAppManifest(this);
 		createMediaHeadIndexContributionsAction = new CreateMediaHeadIndexContributions(this);
 		renameMediaFolderAction = new RenameMediaFolderAction(this);
@@ -3201,6 +3238,9 @@ public class SolutionExplorerView extends ViewPart
 		createActionInTree.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newServicesPackageProjectAction);
 		createActionInTree.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newServicesPackageProjectAction);
 		createActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newFolderInWebFolderAction);
+		createActionInTree.registerAction(UserNodeType.COMPONENT, newComponentResource);
+		createActionInTree.registerAction(UserNodeType.SERVICE, newComponentResource);
+		createActionInTree.registerAction(UserNodeType.LAYOUT, newComponentResource);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -3235,6 +3275,8 @@ public class SolutionExplorerView extends ViewPart
 		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTableAction);
 		newActionInListPrimary.registerAction(UserNodeType.LAYOUT, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newComponentResource);
+		newActionInListPrimary.registerAction(UserNodeType.COMPONENT, newComponentResource);
+		newActionInListPrimary.registerAction(UserNodeType.SERVICE, newComponentResource);
 
 		newActionInListPrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInListPrimary.registerAction(UserNodeType.ALL_RELATIONS, newRelation);
@@ -3328,7 +3370,6 @@ public class SolutionExplorerView extends ViewPart
 
 		copyTable = new CopyTableAction(shell);
 		editVariableAction = new EditVariableAction(this);
-		editComponentVariantsAction = new EditComponentVariantsAction(this);
 
 		debugMethodAction = new DebugMethodAction(this);
 
@@ -3358,7 +3399,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("delete.png"), "Delete");
 		IAction deleteForm = new DeletePersistAction(UserNodeType.FORM, "Delete form");
 		deleteRelation = new DeletePersistAction(UserNodeType.RELATION, "Delete relation");
-		IAction deleteSolution = new DeleteSolutionAction(shell);
+		IAction deleteSolution = new DeleteSolutionAction(getSite());
 		IAction deleteServer = new DeleteServerAction(this);
 		deleteActionInTree.registerAction(UserNodeType.FORM, deleteForm);
 		deleteActionInTree.registerAction(UserNodeType.RELATION, deleteRelation);
@@ -3418,7 +3459,6 @@ public class SolutionExplorerView extends ViewPart
 		addListSelectionChangedListener(openAction);
 		addListSelectionChangedListener(openWithAction);
 		addListSelectionChangedListener(editVariableAction);
-		addListSelectionChangedListener(editComponentVariantsAction);
 		addListSelectionChangedListener(debugMethodAction);
 		addListSelectionChangedListener(newActionInListSecondary);
 		addListSelectionChangedListener(renameMediaAction);
@@ -3477,11 +3517,13 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(addFormsToWorkingSet);
 		addTreeSelectionChangedListener(expandNodeAction);
 		addTreeSelectionChangedListener(configureLessTheme);
+		addTreeSelectionChangedListener(publishToCloudAction);
 
 		addTreeSelectionChangedListener(addComponentIcon);
 
 		addTreeSelectionChangedListener(createMediaFolderAction);
 		addTreeSelectionChangedListener(createMediaFileAction);
+		addTreeSelectionChangedListener(createMediaLoginPageAction);
 		addTreeSelectionChangedListener(createMediaWebAppManifestAction);
 		addTreeSelectionChangedListener(createMediaHeadIndexContributionsAction);
 		addTreeSelectionChangedListener(renameMediaFolderAction);
@@ -3705,6 +3747,7 @@ public class SolutionExplorerView extends ViewPart
 		if (clientSupportViewerFilter != null) clientSupportViewerFilter = null;
 
 		yellow.dispose();
+		DARK_MODE_HIGHLIGHT.dispose();
 
 		labelProvider.dispose();
 		if (decoratingLabelProvider != null) decoratingLabelProvider.removeListener(labelProviderListener);

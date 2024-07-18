@@ -9,8 +9,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.EclipseCSSThemeListener;
 import com.servoy.eclipse.ui.browser.BrowserFactory;
 import com.servoy.eclipse.ui.browser.IBrowser;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -53,7 +53,7 @@ public class WebPackageManager extends EditorPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		boolean darkTheme = EclipseCSSThemeListener.isDarkThemeSelected();
+		boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";
 		if (getEditorInput() instanceof WebPackageManagerEditorInput)
 		{

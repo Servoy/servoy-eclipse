@@ -27,6 +27,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -286,9 +288,9 @@ public class ResourceProvider implements Filter
 		String pathInfo = ((HttpServletRequest)request).getRequestURI();
 		if (pathInfo != null && !pathInfo.equals("/"))
 		{
-
 			URL url = null;
-			if (pathInfo.startsWith("/templates/"))
+			Path normalizedPath = Paths.get(pathInfo).normalize();
+			if (normalizedPath.startsWith("/templates/"))
 			{
 				File templateFile = new File(templatesDir, pathInfo.substring("/templates/".length()));
 				if (templateFile.exists())
@@ -296,7 +298,7 @@ public class ResourceProvider implements Filter
 					url = templateFile.toURI().toURL();
 				}
 			}
-			if (url == null) url = computeURL(pathInfo, Activator.getNClientBundle());
+			if (url == null) url = computeURL(normalizedPath.toString().replace('\\', '/'), Activator.getNClientBundle());
 
 			if (url != null)
 			{

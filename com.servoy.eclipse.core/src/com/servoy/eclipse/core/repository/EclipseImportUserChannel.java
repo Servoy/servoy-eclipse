@@ -686,7 +686,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		{
 
 			updateUsers = new Button(parent, SWT.RADIO);
-			updateUsers.setText("Create nonexisting users and add existing users to groups specified in import");
+			updateUsers.setText("Create nonexisting users and give existing users the permissions specified in import");
 			updateUsers.setSelection(true);
 			updateUsers.addSelectionListener(this);
 
@@ -694,7 +694,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			overwriteUsers.setText("Overwrite existing users completely (USE WITH CARE)");
 			overwriteUsers.addSelectionListener(this);
 			addUsersToAdminGroupButton = new Button(parent, SWT.CHECK);
-			addUsersToAdminGroupButton.setText("Allow users to be added to the " + IRepository.ADMIN_GROUP + " group");
+			addUsersToAdminGroupButton.setText("Allow users to be added to the " + IRepository.ADMIN_GROUP + " permission");
 			addUsersToAdminGroupButton.addSelectionListener(this);
 
 			GridData gridData = new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
@@ -814,12 +814,12 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			{
 				if (scrollableDialog)
 				{
-					UIUtils.showScrollableDialog(Display.getDefault().getActiveShell(), IMessageProvider.WARNING, "War export", title,
+					UIUtils.showScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.WARNING, "War export", title,
 						message);
 				}
 				else
 				{
-					MessageDialog.openWarning(Display.getDefault().getActiveShell(), title,
+					MessageDialog.openWarning(UIUtils.getActiveShell(), title,
 						message);
 				}
 			}

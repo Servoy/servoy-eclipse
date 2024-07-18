@@ -378,6 +378,124 @@ describe('FormattingService', () => {
         expect(service.unformat('1.0490e+1', '00.00E00', 'NUMBER')).toEqual(10.49); // TODO shouldn't this also be in dutch notation??
     });
 
+     it('should corectly unformat dates',  () => {
+          let date: Date = service.unformat('01-02-2018', 'dd-MM-yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2018);
+          expect(date.getMonth()).toBe(1);
+          expect(date.getDate()).toBe(1);
+          
+          date = service.unformat('10/11/2023', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2023);
+          expect(date.getMonth()).toBe(10);
+          expect(date.getDate()).toBe(10);
+          
+          date = service.unformat('11/10/2023', 'MM/dd/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2023);
+          expect(date.getMonth()).toBe(10);
+          expect(date.getDate()).toBe(10);
+          
+          const today = new Date();
+          date = service.unformat('1', 'dd-MM-yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(today.getMonth());
+          expect(date.getDate()).toBe(1);
+          
+          date = service.unformat('15', 'dd-MM-yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(today.getMonth());
+          expect(date.getDate()).toBe(15);
+          
+          date = service.unformat('11-', 'dd-MM-yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(today.getMonth());
+          expect(date.getDate()).toBe(11);
+          
+          date = service.unformat('112', 'dd-MM-yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(1);
+          expect(date.getDate()).toBe(11);
+          
+          date = service.unformat('1112', 'dd-MM-yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(11);
+          expect(date.getDate()).toBe(11);
+          
+          date = service.unformat('1112-', 'dd-MM-yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(11);
+          expect(date.getDate()).toBe(11);
+          
+          date = service.unformat('11122011', 'dd-MM-yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2011);
+          expect(date.getMonth()).toBe(11);
+          expect(date.getDate()).toBe(11);
+          
+           date = service.unformat('11122011', 'dd MM yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2011);
+          expect(date.getMonth()).toBe(11);
+          expect(date.getDate()).toBe(11);
+          
+          date = service.unformat('11122015', 'MM/dd/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2015);
+          expect(date.getMonth()).toBe(10);
+          expect(date.getDate()).toBe(12);
+          
+          date = service.unformat('2/3', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(2);
+          
+          date = service.unformat('12/3', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(12);
+          
+          date = service.unformat('2/11', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(today.getFullYear());
+          expect(date.getMonth()).toBe(10);
+          expect(date.getDate()).toBe(2);
+          
+          date = service.unformat('2/3/24', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2024);
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(2);
+          
+          date = service.unformat('2/3/2024', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2024);
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(2);
+          
+          date = service.unformat('020323', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2023);
+          expect(date.getMonth()).toBe(2);
+          expect(date.getDate()).toBe(2);
+          
+          date = service.unformat('110123', 'dd/MM/yyyy', 'DATETIME', null, true);
+          expect(date).toBeDefined();
+          expect(date.getFullYear()).toBe(2023);
+          expect(date.getMonth()).toBe(0);
+          expect(date.getDate()).toBe(11);
+          
+      });
+  
      it('should corectly format dates', () => {
         numbro.setLanguage('en-GB');
         const MILLSIGN = '\u2030'; //�

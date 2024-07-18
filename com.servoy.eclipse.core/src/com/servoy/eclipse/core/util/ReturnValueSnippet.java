@@ -20,6 +20,8 @@ package com.servoy.eclipse.core.util;
  * A Runnable for sync but only-when-needed-later execution that returns a value.
  * Similar to passing functions in javascript :).
  *
+ * This is actually the same a the java Function interface
+ *
  * @author acostescu
  */
 public interface ReturnValueSnippet<T, P>
@@ -29,6 +31,6 @@ public interface ReturnValueSnippet<T, P>
 	 *
 	 * @return the return value.
 	 */
-	public T run(@SuppressWarnings("unchecked") P... args);
+	public T run(P arg);
 
 }

@@ -86,7 +86,7 @@ import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectFunctionDefinition;
+import org.sablo.specification.WebObjectApiFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.CustomJSONArrayType;
@@ -99,6 +99,7 @@ import org.sablo.specification.property.types.DoublePropertyType;
 import org.sablo.specification.property.types.FloatPropertyType;
 import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
+import org.sablo.specification.property.types.SecureStringPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
@@ -175,6 +176,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
@@ -182,6 +184,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.LiteralDataprovider;
+import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
@@ -193,14 +196,17 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.querybuilder.impl.QBAggregate;
+import com.servoy.j2db.querybuilder.impl.QBAggregates;
 import com.servoy.j2db.querybuilder.impl.QBColumn;
 import com.servoy.j2db.querybuilder.impl.QBColumns;
 import com.servoy.j2db.querybuilder.impl.QBCondition;
@@ -231,6 +237,7 @@ import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSDimension;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSPoint;
@@ -250,6 +257,7 @@ import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ModifiablePropertyType;
+import com.servoy.j2db.server.ngclient.property.types.RecordPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RuntimeComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -425,6 +433,7 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType(JSI18N.class);
 		addAnonymousClassType(HistoryProvider.class);
 		addAnonymousClassType(JSUtils.class);
+		addAnonymousClassType(JSClientUtils.class);
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
 		addAnonymousClassType(JSSolutionModel.class);
 		addAnonymousClassType(JSDatabaseManager.class);
@@ -480,6 +489,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBParameters.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBAggregates.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
 		addScopeType(ViewDataSource.class.getSimpleName(), new ViewDataSourceCreator());
 		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class)
@@ -1246,8 +1256,8 @@ public class TypeCreator extends TypeCache
 				members.add(property);
 			}
 		}
-		Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
-		for (WebObjectFunctionDefinition api : apis.values())
+		Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
+		for (WebObjectApiFunctionDefinition api : apis.values())
 		{
 			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName(api.getName());
@@ -1277,13 +1287,12 @@ public class TypeCreator extends TypeCache
 				}
 				else
 				{
-					returnType = getTypeRef(null, pd.getType().getName());
+					returnType = getTypeRef(null, ("object".equals(pd.getType().getName())) ? "Object" : pd.getType().getName());
 				}
-
-				if (PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
-				{
-					returnType = TypeUtil.arrayOf(returnType);
-				}
+			}
+			if (api.getReturnType() != null && PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
+			{
+				returnType = TypeUtil.arrayOf(returnType);
 			}
 			method.setType(returnType);
 			EList<Parameter> parameters = method.getParameters();
@@ -1393,7 +1402,8 @@ public class TypeCreator extends TypeCache
 		if (type == BooleanPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.BOOLEAN);
 		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE)
 			return getTypeRef(context, ITypeNames.NUMBER);
-		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == ModifiablePropertyType.INSTANCE ||
+		if (type == SecureStringPropertyType.INSTANCE || type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE ||
+			type == ModifiablePropertyType.INSTANCE ||
 			type == TagStringPropertyType.INSTANCE ||
 			type == TitleStringPropertyType.NG_INSTANCE) return getTypeRef(context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
@@ -1464,6 +1474,10 @@ public class TypeCreator extends TypeCache
 				}
 			}
 			return TypeUtil.ref(recordType);
+		}
+		if (RecordPropertyType.TYPE_NAME.equals(type.getName()))
+		{
+			return getTypeRef(context, Record.JS_RECORD);
 		}
 		return null;
 	}
@@ -2140,7 +2154,15 @@ public class TypeCreator extends TypeCache
 		}
 		else if (type.getMetaType() == null || type.getMetaType() == DefaultMetaType.DEFAULT)
 		{
-			type.setMetaType(staticMetaType);
+			if (Record.JS_RECORD.equals(type.getName()) || FoundSet.JS_FOUNDSET.equals(type.getName()))
+			{
+				// there should be no difference between typed record/foundset and plain one; so always use the dynamic type
+				type.setMetaType(ServoyDynamicMetaType.META_TYPE);
+			}
+			else
+			{
+				type.setMetaType(staticMetaType);
+			}
 //			staticTypes.add(type.getName());
 		}
 //		else
@@ -2541,7 +2563,7 @@ public class TypeCreator extends TypeCache
 	 * @param recordType
 	 * @return
 	 */
-	private static Type getRecordType(String type)
+	public static Type getRecordType(String type)
 	{
 		String recordType = type;
 		if (recordType.startsWith("{") && recordType.endsWith("}"))
@@ -3443,6 +3465,7 @@ public class TypeCreator extends TypeCache
 		addClass(QBParameter.class);
 		addClass(QBParameters.class);
 		addClass(QBFunctions.class);
+		addClass(QBAggregates.class);
 	}
 
 	private static void addClass(Class< ? > clazz)
@@ -3599,6 +3622,11 @@ public class TypeCreator extends TypeCache
 			while (dataproviders.hasNext())
 			{
 				IDataProvider provider = dataproviders.next();
+				if (provider.hasFlag(IBaseColumn.EXCLUDED_COLUMN))
+				{
+					continue;
+				}
+
 				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 				property.setName(provider.getDataProviderID());
 				property.setAttribute(RESOURCE, provider);
@@ -4811,7 +4839,6 @@ public class TypeCreator extends TypeCache
 			String name = typeNames.get(cls.getSimpleName());
 			if (name == null)
 			{
-				Debug.log("no element name found for " + cls.getSimpleName()); // TODO make trace, this will always be hit by beans.
 				name = cls.getSimpleName();
 				addAnonymousClassType(name, cls);
 			}
@@ -5251,6 +5278,52 @@ public class TypeCreator extends TypeCache
 			{
 				type.setDescription("<b>Based on a table that is marked as HIDDEN in developer</b>");
 				type.setDeprecated(true);
+			}
+			Iterator<TableNode> tableNodes = fs.getTableNodes(table);
+			while (tableNodes.hasNext())
+			{
+				TableNode tableNode = tableNodes.next();
+				if (tableNode != null)
+				{
+					Iterator<ScriptMethod> it2 = tableNode.getFoundsetMethods(true);
+					while (it2.hasNext())
+					{
+						ScriptMethod method = it2.next();
+						org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
+						m.setName(method.getName());
+						m.setAttribute(RESOURCE, method);
+						String comment = method.getRuntimeProperty(IScriptProvider.COMMENT);
+						if (comment != null)
+						{
+							m.setDescription(SolutionExplorerListContentProvider.getParsedComment(comment, STANDARD_ELEMENT_NAME, false));
+						}
+						MethodArgument returnTypeArgument = method.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
+						if (returnTypeArgument != null)
+						{
+							m.setType(getTypeRef(context, returnTypeArgument.getType().getName()));
+						}
+						// use this to suppress hides predefined identifier warning, see todo's in ElementResolver
+						m.setHideAllowed(true);
+						EList<Parameter> parameters = m.getParameters();
+						MethodArgument[] methodParams = method.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+						if (methodParams != null && methodParams.length > 0)
+						{
+							for (MethodArgument methodParam : methodParams)
+							{
+								Parameter parameter = TypeInfoModelFactory.eINSTANCE.createParameter();
+								parameter.setName(methodParam.getName());
+								parameter.setType(getTypeRef(context, methodParam.getType().getName()));
+								if (methodParam.isOptional()) parameter.setKind(ParameterKind.OPTIONAL);
+								parameters.add(parameter);
+							}
+						}
+						if (method.isDeprecated())
+						{
+							m.setDeprecated(true);
+						}
+						type.getMembers().add(m);
+					}
+				}
 			}
 		}
 

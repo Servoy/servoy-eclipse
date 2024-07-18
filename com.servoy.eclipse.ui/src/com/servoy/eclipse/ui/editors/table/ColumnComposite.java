@@ -773,6 +773,24 @@ public class ColumnComposite extends Composite
 					validType = false;
 				}
 
+				if (element == ColumnInfo.SERVOY_SEQUENCE)
+				{
+					validType = false;
+					List<Column> pkColumns = table.getRowIdentColumns();
+					if (pkColumns != null && pkColumns.size() > 0)
+					{
+						for (Column column : pkColumns)
+						{
+							if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.SEQUENCE_AUTO_ENTER &&
+								column.getColumnInfo().getAutoEnterSubType() == ColumnInfo.SERVOY_SEQUENCE)
+							{
+								// only show if already set
+								validType = true;
+								break;
+							}
+						}
+					}
+				}
 				if (validType)
 				{
 					seqType.add(ColumnInfo.getSeqDisplayTypeString(element));

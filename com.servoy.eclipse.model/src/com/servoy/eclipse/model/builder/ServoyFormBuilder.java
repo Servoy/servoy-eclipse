@@ -41,12 +41,15 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.property.CustomJSONPropertyType;
 import org.sablo.specification.property.ICustomType;
+import org.sablo.specification.property.types.FunctionPropertyType;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.persistence.IMobileProperties;
@@ -56,6 +59,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -121,8 +125,11 @@ import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.ValueListConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
+import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
+import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.VariantPropertyType;
@@ -301,7 +308,7 @@ public class ServoyFormBuilder
 					throw new RuntimeException(e);
 				}
 
-				addWebComponentMissingHandlers(markerResource, fs, o, form, form.getDataSource());
+				addWebComponentMissingReferences(markerResource, fs, o, form, form.getDataSource());
 
 				if (((AbstractBase)o).getRuntimeProperty(
 					SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
@@ -407,7 +414,7 @@ public class ServoyFormBuilder
 								{
 									checkDataProviders(markerResource, servoyProject, element.getPersistIfAvailable(), context, datasource,
 										fs);
-									addWebComponentMissingHandlers(markerResource, fs, element.getPersistIfAvailable(), form, datasource);
+									addWebComponentMissingReferences(markerResource, fs, element.getPersistIfAvailable(), form, datasource);
 								}
 							}
 						}
@@ -1482,8 +1489,10 @@ public class ServoyFormBuilder
 							else if (o instanceof Part) styleClass = ((Part)o).getStyleClass();
 							if (styleClass != null)
 							{
+								Ng2DesignerPreferences prefs = new Ng2DesignerPreferences();
 								List<String> styleClasses = Arrays.asList(ModelUtils.getStyleClasses(fs, form, o,
-									StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o)).getLeft());
+									StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o), prefs.showNG2Designer())
+									.getLeft());
 								if (!styleClasses.contains(styleClass))
 								{
 									ServoyMarker mk = MarkerMessages.StyleFormClassNotFound.fill(styleClass, form.getName());
@@ -1552,7 +1561,7 @@ public class ServoyFormBuilder
 		});
 	}
 
-	public static void addWebComponentMissingHandlers(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o, Form form, String datasource)
+	public static void addWebComponentMissingReferences(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o, Form form, String datasource)
 	{
 		if (o instanceof WebComponent)
 		{
@@ -1653,6 +1662,140 @@ public class ServoyFormBuilder
 					}
 				}
 
+			}
+			if (spec != null)
+			{
+				addWebComponentMissingReferences((WebComponent)o, spec, ((WebComponent)o).getFlattenedJson(), flattenedSolution, form, markerResource);
+			}
+		}
+	}
+
+	private static void addWebComponentMissingReferences(WebComponent wc, PropertyDescription spec, JSONObject json, FlattenedSolution flattenedSolution,
+		Form form, IResource markerResource)
+	{
+		if (spec != null && json != null)
+		{
+			Map<String, PropertyDescription> properties = spec.getProperties();
+			if (properties != null)
+			{
+				for (PropertyDescription pd : properties.values())
+				{
+					Object value = json.opt(pd.getName());
+					if (value != null && !"".equals(value) && value != JSONObject.NULL)
+					{
+						if (pd.getType() instanceof MediaPropertyType)
+						{
+							Media media = flattenedSolution.getMedia(value.toString());
+							if (media != null)
+							{
+								BuilderDependencies.getInstance().addDependency(form, media);
+							}
+							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof ValueListPropertyType)
+						{
+							ValueList vl = flattenedSolution.getValueList(value.toString());
+							if (vl != null)
+							{
+								BuilderDependencies.getInstance().addDependency(form, vl);
+							}
+							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof FunctionPropertyType)
+						{
+							ScriptMethod scriptMethod = null;
+							int methodId = Utils.getAsInteger(value);
+							if (methodId > 0)
+							{
+								scriptMethod = flattenedSolution.getScriptMethod(methodId);
+							}
+							else if (value instanceof String)
+							{
+								scriptMethod = flattenedSolution.getScriptMethod((String)value);
+							}
+							if (scriptMethod == null)
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof RelationPropertyType)
+						{
+							Relation[] relations = flattenedSolution.getRelationSequence(value.toString());
+							if (relations != null)
+							{
+								for (Relation relationObj : relations)
+								{
+									if (relationObj != null)
+									{
+										BuilderDependencies.getInstance().addDependency(form, relationObj);
+									}
+								}
+							}
+							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof FormPropertyType)
+						{
+							Form frm = flattenedSolution.getForm(value.toString());
+							if (frm != null)
+							{
+								BuilderDependencies.getInstance().addDependency(form, frm);
+							}
+							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof CustomJSONPropertyType< ? >)
+						{
+							if (value instanceof JSONObject)
+							{
+								addWebComponentMissingReferences(wc, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), (JSONObject)value,
+									flattenedSolution, form, markerResource);
+							}
+							else if (value instanceof JSONArray)
+							{
+								JSONArray arr = ((JSONArray)value);
+								for (int i = 0; i < arr.length(); i++)
+								{
+									if (arr.get(i) instanceof JSONObject)
+									{
+										addWebComponentMissingReferences(wc, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(),
+											(JSONObject)arr.get(i), flattenedSolution, form, markerResource);
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -2173,7 +2316,7 @@ public class ServoyFormBuilder
 					{
 						Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
 						if (relations != null && !relations[0].isGlobal() &&
-							!parentForm.getDataSource().equals(relations[0].getPrimaryDataSource()))
+							!Utils.equalObjects(datasource != null ? datasource : parentForm.getDataSource(), relations[0].getPrimaryDataSource()))
 						{
 							ServoyMarker mk;
 							if (elementName == null)
@@ -2447,6 +2590,7 @@ public class ServoyFormBuilder
 				markerResource.deleteMarkers(ServoyBuilder.LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.MEDIA_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.MISSING_SPEC, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.MISSING_PROPERTY_FROM_SPEC, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_SPEC, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.OBSOLETE_ELEMENT, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);

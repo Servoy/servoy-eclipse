@@ -54,11 +54,15 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.property.CustomJSONPropertyType;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -100,6 +104,7 @@ import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
@@ -266,7 +271,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = _PREFIX + ".formWithDatasourceInLoginSolution";
 	public static final String MULTIPLE_METHODS_ON_SAME_ELEMENT = _PREFIX + ".multipleMethodsInfo";
 	public static final String UNRESOLVED_RELATION_UUID = _PREFIX + ".unresolvedRelationUuid";
-	public static final String CONSTANTS_USED_MARKER_TYPE = _PREFIX + ".constantsUsed";
+	public static final String CONSTANTS_USED_MARKER_TYPE = _PREFIX + ".constantsUsed"; // removed marker type, kept only for removal
 	public static final String MISSING_DRIVER = _PREFIX + ".missingDriver";
 	public static final String OBSOLETE_ELEMENT = _PREFIX + ".obsoleteElement";
 	public static final String HIDDEN_TABLE_STILL_IN_USE = _PREFIX + ".hiddenTableInUse";
@@ -286,6 +291,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String MISSING_PROJECT_REFERENCE = _PREFIX + ".missingProjectReference";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
+	public static final String MISSING_PROPERTY_FROM_SPEC = _PREFIX + ".missingPropetyFromSpec";
 	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
 	public static final String WRONG_OVERRIDE_PARENT = _PREFIX + ".wrongOverridePosition";
 	public static final String INVALID_TABLE_NO_PRIMARY_KEY_TYPE = _PREFIX + ".invalidTableNoPrimaryKey";
@@ -501,6 +507,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> MISSING_PROPERTY_FROM_SPECIFICATION = new Pair<String, ProblemSeverity>("missingPropetyFromSpec",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> DEPRECATED_HANDLER = new Pair<String, ProblemSeverity>("deprecatedHandler", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> PARAMETERS_MISMATCH_SEVERITY = new Pair<String, ProblemSeverity>("parametersMismatch",
 		ProblemSeverity.WARNING);
@@ -572,7 +580,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> SERVER_NOT_ACCESSIBLE_FIRST_OCCURENCE = new Pair<String, ProblemSeverity>(
 		"serverNotAccessibleFirstOccurence", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> CONSTANTS_USED = new Pair<String, ProblemSeverity>("constantsUsed", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM = new Pair<String, ProblemSeverity>(
 		"solutionUsedAsWebServiceMustAuthenticateProblem", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> SOLUTION_WITH_HIGHER_FILE_VERSION = new Pair<String, ProblemSeverity>("solutionWithHigherFileVersion",
@@ -895,6 +902,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
 					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
+					deleteMarkers(module.getProject(), MISSING_PROPERTY_FROM_SPEC);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
@@ -960,6 +968,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						ServoyLog.logError(e);
 					}
 				}
+			}
+			else
+			{
+				checkMissingProperties((JSONObject)((WebComponent)o).getOwnProperty(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName()), spec, o, project,
+					"");
 			}
 		}
 		if (o instanceof LayoutContainer && ((LayoutContainer)o).getPackageName() != null && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
@@ -1623,6 +1636,83 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
+	private static void checkMissingProperties(JSONObject json, PropertyDescription description, IPersist o, IProject project, String currentPath)
+	{
+		if (json != null)
+		{
+			for (String key : json.keySet())
+			{
+				if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_VISIBLE.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_COMMENT.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(key) ||
+					IChildWebObject.UUID_KEY.equals(key))
+				{
+					continue;
+				}
+				PropertyDescription pd = description.getProperty(key);
+				if (pd == null)
+				{
+					if ((description instanceof WebObjectSpecification) && ((WebObjectSpecification)description).getHandler(key) != null)
+						continue;
+					addMissingPropertyFromSpecMarker(o, project, key, currentPath != null && currentPath.length() == 0 ? key : currentPath + "." + key);
+				}
+				else if (pd.getType() instanceof CustomJSONPropertyType< ? >)
+				{
+					Object value = json.opt(key);
+					if (value instanceof JSONObject)
+					{
+						checkMissingProperties((JSONObject)value, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), o, project,
+							currentPath != null && currentPath.length() == 0 ? key : currentPath + "." + key);
+					}
+					else if (value instanceof JSONArray)
+					{
+						JSONArray arr = ((JSONArray)value);
+						for (int i = 0; i < arr.length(); i++)
+						{
+							if (arr.get(i) instanceof JSONObject)
+							{
+								checkMissingProperties((JSONObject)arr.get(i), ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), o,
+									project,
+									currentPath != null && currentPath.length() == 0 ? key + "_arrindex" + i : currentPath + "." + key + "_arrindex" + i);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static void addMissingPropertyFromSpecMarker(IPersist persist, IProject project,
+		String propertyName, String propertyPath)
+	{
+		Form form = (Form)persist.getAncestor(IRepository.FORMS);
+		ServoyMarker mk = MarkerMessages.MissingPropertyFromSpecification.fill(((WebComponent)persist).getName(), form.getName(),
+			propertyName);
+		IMarker marker = addMarker(ServoyBuilderUtils.getPersistResource(form), mk.getType(), mk.getText(), -1, MISSING_PROPERTY_FROM_SPECIFICATION,
+			IMarker.PRIORITY_NORMAL,
+			null, persist);
+		if (marker != null)
+		{
+			try
+			{
+				marker.setAttribute("Uuid", persist.getUUID().toString());
+				marker.setAttribute("SolutionName", project.getName());
+				marker.setAttribute("PropertyName", propertyPath);
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+	}
+
 	private void addMissingServer(IPersist persist, Map<String, IPersist> missingServers, List<String> goodServers)
 	{
 		String serverName = null;
@@ -1766,8 +1856,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_SPEC);
 		deleteMarkers(project, METHOD_OVERRIDE);
 		deleteMarkers(project, DEPRECATED_SPEC);
+		deleteMarkers(project, MISSING_PROPERTY_FROM_SPEC);
 		deleteMarkers(project, PARAMETERS_MISMATCH);
 		deleteMarkers(project, NAMED_FOUNDSET_DATASOURCE);
+		deleteMarkers(project, CONSTANTS_USED_MARKER_TYPE);
 		try
 		{
 			if (project.getReferencedProjects() != null)
@@ -3209,13 +3301,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 				if (persist instanceof IFormElement)
 				{
-					IPersist parent = persist;
-					while (parent != null)
-					{
-						parent = parent.getParent();
-						if (parent instanceof Form) break;
-					}
-					if (parent instanceof Form && ((Form)parent).isFormComponent())
+					Form parent = persist.getAncestor(Form.class);
+					if (parent != null && parent.isFormComponent())
 					{
 						String name = ((IFormElement)persist).getName();
 						if (name != null)

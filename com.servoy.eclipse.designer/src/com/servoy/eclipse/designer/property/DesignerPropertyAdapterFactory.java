@@ -166,6 +166,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					!(realObject instanceof StringResource)) // solution is shown under ServoyProject nodes
 				{
 					persist = (IPersist)realObject;
+					context = userNode.getForm();
 				}
 				if (persist instanceof IScriptElement || persist instanceof Media)
 				{

@@ -16,18 +16,25 @@
  */
 package com.servoy.eclipse.ui.labelproviders;
 
+import java.util.Map;
+
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
+import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebObjectImpl;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 
 /**
  * Label provider for value lists.
@@ -38,11 +45,14 @@ import com.servoy.j2db.persistence.ValueList;
 public class ValuelistLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider, IDeprecationProvider
 {
 	public static final int VALUELIST_NONE = 0;
+	public static final int VALUELIST_SPECIAL = Integer.MAX_VALUE;
 	private final FlattenedSolution flattenedSolution;
+	private final IPersist persist;
 
-	public ValuelistLabelProvider(FlattenedSolution flattenedSolution)
+	public ValuelistLabelProvider(FlattenedSolution flattenedSolution, IPersist persist)
 	{
 		this.flattenedSolution = flattenedSolution;
+		this.persist = persist;
 	}
 
 	@Override
@@ -52,8 +62,30 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 
 		int vlmId = ((Integer)value).intValue();
 
-		if (vlmId == VALUELIST_NONE)
+		if (vlmId == VALUELIST_NONE || vlmId == VALUELIST_SPECIAL)
 		{
+			PropertyDescription specPD = null;
+			if (persist instanceof IChildWebObject) specPD = ((IChildWebObject)persist).getPropertyDescription();
+			if (persist instanceof WebComponent && ((WebComponent)persist).getImplementation() instanceof WebObjectImpl)
+				specPD = ((WebObjectImpl)(((WebComponent)persist).getImplementation())).getPropertyDescription();
+			if (specPD != null)
+			{
+				Map<String, PropertyDescription> allProperties = specPD.getProperties();
+				for (var entry : allProperties.entrySet())
+				{
+					PropertyDescription propDescription = specPD.getProperty(entry.getKey());
+					if (propDescription != null)
+					{
+						if (propDescription.getType() instanceof ValueListPropertyType)
+						{
+							if (propDescription.hasDefault() && !WebObjectImpl.isPersistMappedProperty(propDescription))
+							{
+								return propDescription.getDefaultValue().toString();
+							}
+						}
+					}
+				}
+			}
 			return Messages.LabelNone;
 		}
 

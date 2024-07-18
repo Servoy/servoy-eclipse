@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, HostBinding, ElementRef, HostListener, OnDestroy, ChangeDetectorRef, SimpleChanges, OnChanges } from '@angular/core';
+import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, ChangeDetectorRef, SimpleChanges, OnChanges } from '@angular/core';
 
 @Directive({
     selector: '[sabloTabseq]'
@@ -6,8 +6,7 @@ import { Directive, Input, OnInit, HostBinding, ElementRef, HostListener, OnDest
 export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
     @Input('sabloTabseq') designTabSeq: number;
-    @Input('sabloTabseqConfig') config: any;
-    @HostBinding('attr.tabindex') tabindex: number;
+    @Input('sabloTabseqConfig') config: SabloTabseqConfig;
 
     designChildIndexToArrayPosition = {};
     designChildTabSeq = []; // contains ordered numbers that will be keys in 'runtimeChildIndexes'; can have duplicates
@@ -254,8 +253,7 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
             this.config.tabSeqSetter.setTabIndex(tabindex);
         }
         else {
-            this.tabindex = tabindex;
-            this.cdRef.detectChanges();
+            this._elemRef.nativeElement.setAttribute("tabindex", tabindex);
         }
     }
 
@@ -273,4 +271,30 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
             this.trigger(this._elemRef.nativeElement.parentNode, 'unregisterCSTS', [this.designTabSeq, this.runtimeIndex]);
         }
     }
+}
+
+export interface SabloTabseqConfig {
+    /** If this is the top-most tabSeq container. */
+    root?: boolean;
+
+    /** If this is a tabSeq container.
+     *  Child DOM elements of this element are considered to be traversed by tab sequence at the 'design' tab index value of this container.
+     *  So at runtime all child DOM elements of this element will get a tabIndex value that sets them between the parent element's siblings,
+     *  according to the 'design' tab index value of the parent and it's siblings.
+     */
+    container?: boolean;
+
+    /** Tells sablo-tabseq that it should 'reserve' a number of tabIndexes for that container on top of the ones it currently needs.
+     *  That can help later on, if more elements are added to that container and it needs more tabIndexes assigned - it can just use them
+     *  without recalculating the tabIndexes of the parents (so less calculations to be done in the browser) - at least for a while,
+     *  until it runs out of reserved indexes.
+     */
+    reservedGap?: number;
+
+
+    /**
+     * By default 'tabindex' is added to the element of the 'sabloTabseq' directive. Using this helper function, that is called when
+     * the 'tabindex' is about to be set, it is possible to add the 'tabindex' on a different (nested) element.
+     */
+    tabSeqSetter?: {setTabIndex: (index: number)=>void};
 }

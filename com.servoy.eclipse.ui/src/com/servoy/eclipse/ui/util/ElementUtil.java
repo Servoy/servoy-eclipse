@@ -305,28 +305,30 @@ public class ElementUtil
 		if (persist instanceof IChildWebObject)
 		{
 			webObject = (IChildWebObject)persist;
-			persist = webObject.getParent();
+			ISupportChilds parent = persist.getParent();
+			if (parent instanceof IChildWebObject)
+			{
+				// Nested web objects
+				parent = (ISupportChilds)getOverridePersist(PersistContext.create(parent, persistContext.getContext()));
+				return getWebObjectChild(parent, webObject);
+			}
+
+			persist = parent;
 		}
 		else if (persist instanceof IParentOverridable)
 		{
 			childOfParent = (IParentOverridable)persist;
 			persist = childOfParent.getParentToOverride();
 		}
-		while (PersistHelper.getSuperPersist((ISupportExtendsID)persist) != null)
-		{
-			persist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
-		}
-		final IPersist parentPersist = persist;
-		IPersist newPersist = (IPersist)context.acceptVisitor(new IPersistVisitor()
-		{
-			public Object visit(IPersist o)
+
+		persist = PersistHelper.getBasePersist((ISupportExtendsID)persist);
+		IPersist parentPersist = persist;
+		IPersist newPersist = (IPersist)context.acceptVisitor(o -> {
+			if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getID())
 			{
-				if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getID())
-				{
-					return o;
-				}
-				return CONTINUE_TRAVERSAL;
+				return o;
 			}
+			return IPersistVisitor.CONTINUE_TRAVERSAL;
 		});
 
 		if (newPersist == null)
@@ -336,16 +338,12 @@ public class ElementUtil
 			if (!((Form)ancestorForm).isResponsiveLayout() && !(parentPersist.getParent() instanceof Form))
 			{
 				parent = null;
-				parent = (ISupportChilds)context.acceptVisitor(new IPersistVisitor()
-				{
-					public Object visit(IPersist o)
+				parent = (ISupportChilds)context.acceptVisitor(o -> {
+					if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getParent().getID())
 					{
-						if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getParent().getID())
-						{
-							return o;
-						}
-						return CONTINUE_TRAVERSAL;
+						return o;
 					}
+					return IPersistVisitor.CONTINUE_TRAVERSAL;
 				});
 
 				if (parent == null)
@@ -371,20 +369,7 @@ public class ElementUtil
 		}
 		if (webObject != null)
 		{
-			Object newWebObject = ((AbstractBase)newPersist).getProperty(webObject.getJsonKey());
-			if (newWebObject instanceof IChildWebObject)
-			{
-				return (IChildWebObject)newWebObject;
-			}
-			else if (newWebObject instanceof Object[])
-			{
-				return (IPersist)((Object[])newWebObject)[webObject.getIndex()];
-			}
-			else
-			{
-				ServoyLog.logError("Cannot find the override custom type in: " + newWebObject, null);
-				return webObject;
-			}
+			return getWebObjectChild(newPersist, webObject);
 		}
 		if (childOfParent != null)
 		{
@@ -393,6 +378,21 @@ public class ElementUtil
 		return newPersist;
 	}
 
+	private static IPersist getWebObjectChild(IPersist parent, IChildWebObject webObject)
+	{
+		Object newWebObject = ((AbstractBase)parent).getProperty(webObject.getJsonKey());
+		if (newWebObject instanceof IChildWebObject)
+		{
+			return (IChildWebObject)newWebObject;
+		}
+		if (newWebObject instanceof Object[])
+		{
+			return (IPersist)((Object[])newWebObject)[webObject.getIndex()];
+		}
+
+		ServoyLog.logError("Cannot find the override custom type in: " + newWebObject, null);
+		return webObject;
+	}
 
 	private static Map<String, WeakReference<Class< ? >>> beanClassCache = new ConcurrentHashMap<String, WeakReference<Class< ? >>>();
 

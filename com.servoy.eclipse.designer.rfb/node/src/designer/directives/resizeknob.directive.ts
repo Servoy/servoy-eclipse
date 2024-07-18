@@ -1,12 +1,14 @@
-import { Directive, HostListener, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Directive, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
-import { EditorContentService } from '../services/editorcontent.service';
+import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
+import { Subscription } from 'rxjs';
 
 @Directive({
     selector: '[resizeKnob]'
 })
-export class ResizeKnobDirective implements OnInit {
+export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
     @Input('resizeKnob') resizeInfo: ResizeInfo;
 
@@ -14,21 +16,56 @@ export class ResizeKnobDirective implements OnInit {
     initialElementInfo: Map<string, ElementInfo>;
     currentElementInfo: Map<string, ElementInfo>;
 
-    contentAreaMouseMove:  (event: MouseEvent) => void;;
+    contentAreaMouseMove:  (event: MouseEvent) => void;
     contentAreaMouseUp: (event: MouseEvent) => void;
     contentAreaMouseLeave: (event: MouseEvent) => void;
     contentAreaKeyDown: (event: KeyboardEvent) => void;
 
     topContentAreaAdjust: number;
     leftContentAreaAdjust: number;
+    snapData: SnapData;
+    subscription: Subscription;
 
-    constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService) {
+    constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService, private guidesService: DynamicGuidesService) {
     }
 
     ngOnInit(): void {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
         this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
         this.leftContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
+    }
+
+    ngAfterViewInit(): void {
+        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
+            this.snap(value);
+        })
+    }
+
+    snap( data: SnapData): void {
+        if (this.currentElementInfo && this.editorSession.getState().resizing) {
+            this.snapData = data;
+            if (this.initialElementInfo.size == 1 && (this.snapData?.width || this.snapData?.height)) {
+                const elementInfo = this.initialElementInfo.values().next().value;
+                elementInfo.element.style.position = 'absolute';
+                
+                if (this.snapData.width) {
+                    elementInfo.x = this.snapData.left;
+                    elementInfo.element.style.left = this.snapData.left + 'px';
+                    this.resizeInfo.node.style.left = this.snapData.left + this.leftContentAreaAdjust + 'px';
+                    this.resizeInfo.node.style.width = elementInfo.element.style.width = this.snapData.width + 'px';
+                }
+                if (this.snapData.height) {
+                    elementInfo.y = this.snapData.top;
+                    elementInfo.element.style.top = this.snapData.top + 'px';
+                    this.resizeInfo.node.style.top = this.snapData.top + this.topContentAreaAdjust + 'px';
+                    this.resizeInfo.node.style.height = elementInfo.element.style.height = this.snapData.height + 'px';
+                }
+            }
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.subscription.unsubscribe();
     }
 
     @HostListener('mousedown', ['$event'])
@@ -44,6 +81,7 @@ export class ResizeKnobDirective implements OnInit {
             };
 
             this.cleanResizeState();
+            this.editorSession.getState().resizing = true;
 
             const selection = this.editorSession.getSelection();
             if (selection && selection.length > 0) {
@@ -112,6 +150,7 @@ export class ResizeKnobDirective implements OnInit {
         this.editorContentService.getContentArea().removeEventListener('mouseup', this.contentAreaMouseUp);
         this.editorContentService.getContentArea().removeEventListener('mouseleave', this.contentAreaMouseLeave);
         this.editorContentService.getContentArea().removeEventListener('keydown', this.contentAreaKeyDown);
+        this.editorSession.getState().resizing = false;
     }
 
     private setCursorStyle(style: string) {
@@ -119,7 +158,7 @@ export class ResizeKnobDirective implements OnInit {
     }
 
     private resizeSelection(event: MouseEvent) {
-        if(this.currentElementInfo) {
+        if(this.currentElementInfo && !this.snapData?.width && !this.snapData?.height) {
             let deltaX = event.clientX - this.lastresizeStartPosition.x;
             let deltaY = event.clientY - this.lastresizeStartPosition.y;
 
@@ -161,11 +200,23 @@ export class ResizeKnobDirective implements OnInit {
             const changes = {};
             for(const nodeId of elementInfos.keys()) {
                 const elementInfo = elementInfos.get(nodeId);
-                changes[nodeId] = {
-                    x: elementInfo.x,
-                    y: elementInfo.y,
-                    width: elementInfo.width,
-                    height: elementInfo.height
+                if (this.snapData && elementInfos.size == 1) {
+                    changes[nodeId] = {
+                        x: this.snapData?.width ? this.snapData?.left : elementInfo.x,
+                        y: this.snapData?.height ? this.snapData?.top : elementInfo.y,
+                        width: this.snapData?.width ? this.snapData?.width : elementInfo.width,
+                        height: this.snapData?.height ? this.snapData?.height : elementInfo.height,
+                        cssPos: this.snapData.cssPosition //TODO remove?
+                    }
+                }
+                else {
+                    changes[nodeId] = {
+                        x: elementInfo.x,
+                        y: elementInfo.y,
+                        width: elementInfo.width,
+                        height: elementInfo.height,
+                        move: false
+                    }
                 }
             }
             this.editorSession.sendChanges(changes);
@@ -178,12 +229,12 @@ export class ElementInfo {
     x:number;
     y:number;
     width:number;
-    height:number
+    height:number;
 
     constructor(public element: HTMLElement) {
-        const elementRect = element.getBoundingClientRect();
-        this.x = elementRect.x
-        this.y = elementRect.y;
+        const elementRect = element.getBoundingClientRect();      
+        this.x = element.offsetLeft;
+        this.y = element.offsetTop;
         this.width = elementRect.width
         this.height = elementRect.height;
     }

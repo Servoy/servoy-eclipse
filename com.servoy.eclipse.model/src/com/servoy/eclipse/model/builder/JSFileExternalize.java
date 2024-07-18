@@ -31,10 +31,10 @@ import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.IVariableStatement;
 import org.eclipse.dltk.javascript.ast.JSNode;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
-import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.parser.Reporter;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -137,7 +137,7 @@ public class JSFileExternalize extends JSFileBuildParticipantFactory
 					@Override
 					public void endvisitGeneral(ASTNode node) throws Exception
 					{
-						if (node instanceof FunctionStatement || node instanceof VariableStatement)
+						if (node instanceof FunctionStatement || node instanceof IVariableStatement)
 						{
 							numberOfWarningsPerBlock = 0;
 						}

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+			<dynamic
+				id="com.servoy.eclipse.aibridge.dynamicMenu"
+				class="com.servoy.eclipse.aibridge.AiBridgeMenu">
+			</dynamic>
+		</menuContribution>
+	</extension>
+
+	<extension
+		point="org.eclipse.ui.handlers">
+		<handler
+			class="com.servoy.eclipse.aibridge.AiBridgeHandler"
+			commandId="com.servoy.eclipse.aibridge.explain_command">
+		</handler>
+		<handler
+			class="com.servoy.eclipse.aibridge.AiBridgeHandler"
+			commandId="com.servoy.eclipse.aibridge.add_inline_comments">
+		</handler>
+		<handler
+			class="com.servoy.eclipse.aibridge.AiBridgeHandler"
+			commandId="com.servoy.eclipse.aibridge.debug">
+		</handler>
+	</extension>
+
+	<extension
+		point="org.eclipse.ui.commands">
+		<category
+			id="com.servoy.eclipse.aibridge.commands.aibridge"
+			name="Ai Bridge Category">
+		</category>
+		<command
+        category="com.servoy.eclipse.aibridge.commands.aibridge"
+        categoryId="com.servoy.eclipse.aibridge.commands.aibridge"
+        id="com.servoy.eclipse.aibridge.explain_command"
+        name="Explain selection">
+		</command>
+		<command
+			category="com.servoy.eclipse.aibridge.commands.aibridge"
+			categoryId="com.servoy.eclipse.aibridge.commands.aibridge"
+			id="com.servoy.eclipse.aibridge.add_inline_comments"
+			name="Add inline comments">
+		</command>
+		<command
+			category="com.servoy.eclipse.aibridge.commands.aibridge"
+			categoryId="com.servoy.eclipse.aibridge.commands.aibridge"
+			id="com.servoy.eclipse.aibridge.debug"
+			name="Debug">
+		</command>
+	</extension>
+
+	<extension
+		point="org.eclipse.ui.views">
+		<view
+			category="com.servoy.eclipse.ui"
+			categoryId="com.servoy.eclipse.ui"
+			class="com.servoy.eclipse.aibridge.AiBridgeView"
+			icon="icons/aibridge.png"
+			id="com.servoy.eclipse.aibridge.aibridgeview"
+			name="Servoy AI"
+			allowMultiple="false"
+			restorable="true">
+		</view>
+	</extension>
+	<extension
+		point="org.eclipse.ui.editors">
+		<editor
+			name="Servoy AI"
+			extensions="*"
+			icon="icons/vsplit.png"
+			class="com.servoy.eclipse.aibridge.editors.DualEditor"
+			id="com.servoy.eclipse.aibridge.dualeditor">
+		</editor>
+		
+	</extension>
+ <extension
+       point="org.eclipse.ui.startup">
+    <startup
+          class="com.servoy.eclipse.aibridge.AiBridgeStartup">
+    </startup>
+ </extension>
+</plugin>

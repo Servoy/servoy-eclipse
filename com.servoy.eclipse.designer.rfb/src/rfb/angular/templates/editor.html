@@ -27,7 +27,7 @@
 						<decorator></decorator>
 						<div class="ghostcontainer {{container.class}}" ng-repeat="container in ghosts.ghostContainers" ng-style="getGhostContainerStyle(container)" style="display:none">
 							<div class="ghostContainerPropName">property '{{container.propertyName}}'</div>
-							<div class="ghost label {{ghost.class}}" ng-repeat="ghost in container.ghosts track by $index" ng-style="getGhostStyle(ghost)" svy-id="{{ghost.uuid}}" svy-types="[{{ghost.propertyType}}]" ng-dblclick="openContainedForm(ghost)">
+							<div class="ghost label {{ghost.class}}" ng-repeat="ghost in container.ghosts track by $index" ng-style="getGhostStyle(ghost, container)" svy-id="{{ghost.uuid}}" svy-types="[{{ghost.propertyType}}]" ng-dblclick="openContainedForm(ghost)">
 								<hr ng-style="getGhostHRStyle(ghost)">{{ghost.text}}&nbsp;
 							</div>
 						</div>

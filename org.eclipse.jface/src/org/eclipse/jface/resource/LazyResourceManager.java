@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Joerg Kubitz and others.
+ * Copyright (c) 2021, 2023 Joerg Kubitz and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,19 +17,21 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.pde.api.tools.annotations.NoReference;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 
 /**
  * A LRU based ResourceManager Wrapper. Not to be used by clients.
  */
+@NoReference
 public class LazyResourceManager extends ResourceManager {
 	/**
 	 * This LRU Map only holds the DeviceResourceDescriptors which are not
 	 * referenced otherwise anymore. The Resources itself are only cached by the
 	 * parent ResourceManager.
 	 */
-	private static class LruMap extends LinkedHashMap<DeviceResourceDescriptor, ResourceManager> {
+	private static class LruMap extends LinkedHashMap<DeviceResourceDescriptor<?>, ResourceManager> {
 		private static final long serialVersionUID = 1L;
 		int cacheSize;
 
@@ -39,7 +41,7 @@ public class LazyResourceManager extends ResourceManager {
 		}
 
 		@Override
-		protected boolean removeEldestEntry(java.util.Map.Entry<DeviceResourceDescriptor, ResourceManager> eldest) {
+		protected boolean removeEldestEntry(java.util.Map.Entry<DeviceResourceDescriptor<?>, ResourceManager> eldest) {
 			boolean remove = size() > cacheSize;
 			if (remove) {
 				// destroy resource which was not used recently:
@@ -51,7 +53,7 @@ public class LazyResourceManager extends ResourceManager {
 
 	private final ResourceManager parent;
 	private final LruMap unreferenced;
-	private final Map<DeviceResourceDescriptor, Integer> refCount;
+	private final Map<DeviceResourceDescriptor<?>, Integer> refCount;
 
 	/**
 	 * @param cacheSize the lru cache size
@@ -72,7 +74,7 @@ public class LazyResourceManager extends ResourceManager {
 	 * @param descriptor
 	 * @return if a resource based on this descriptor should be cached.
 	 */
-	private boolean shouldBeCached(DeviceResourceDescriptor descriptor) {
+	private boolean shouldBeCached(DeviceResourceDescriptor<?> descriptor) {
 		return descriptor != null && descriptor.shouldBeCached();
 	}
 
@@ -81,20 +83,13 @@ public class LazyResourceManager extends ResourceManager {
 		return parent.getDefaultImage();
 	}
 
-	private static Integer createOrIncrease(@SuppressWarnings("unused") DeviceResourceDescriptor key, Integer refs) {
-		return Integer.valueOf(refs == null ? 1 : refs.intValue() + 1);
-	}
-
-	private static Integer decreaseOrRemove(@SuppressWarnings("unused") DeviceResourceDescriptor key, Integer refs) {
-		return refs.intValue() == 1 ? null : Integer.valueOf(refs.intValue() - 1);
-
-	}
 	@Override
-	public Object create(DeviceResourceDescriptor descriptor) {
+	public <R> R create(DeviceResourceDescriptor<R> descriptor) {
 		if (!shouldBeCached(descriptor)) {
 			return parent.create(descriptor);
 		}
-		int updatedRefs = refCount.compute(descriptor, LazyResourceManager::createOrIncrease).intValue();
+		@SuppressWarnings("boxing")
+		int updatedRefs = refCount.compute(descriptor, (k, refs) -> refs == null ? 1 : refs + 1);
 		if (updatedRefs == 1) {
 			ResourceManager cached = unreferenced.remove(descriptor);
 			if (cached == null) {
@@ -108,12 +103,13 @@ public class LazyResourceManager extends ResourceManager {
 	}
 
 	@Override
-	public void destroy(DeviceResourceDescriptor descriptor) {
+	public <R> void destroy(DeviceResourceDescriptor<R> descriptor) {
 		if (!shouldBeCached(descriptor)) {
 			parent.destroy(descriptor);
 			return;
 		}
-		Integer refsLeft = refCount.computeIfPresent(descriptor, LazyResourceManager::decreaseOrRemove);
+		@SuppressWarnings("boxing")
+		Integer refsLeft = refCount.computeIfPresent(descriptor, (k, refs) -> refs == 1 ? null : (refs - 1));
 		if (refsLeft == null) {
 			// defer destroy:
 			ResourceManager old = unreferenced.put(descriptor, parent);
@@ -122,7 +118,7 @@ public class LazyResourceManager extends ResourceManager {
 	}
 
 	@Override
-	public Object find(DeviceResourceDescriptor descriptor) {
+	public <R> R find(DeviceResourceDescriptor<R> descriptor) {
 		if (!shouldBeCached(descriptor)) {
 			return parent.find(descriptor);
 		}

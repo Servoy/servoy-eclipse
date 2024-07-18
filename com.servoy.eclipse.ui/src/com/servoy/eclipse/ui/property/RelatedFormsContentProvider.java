@@ -72,11 +72,19 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 
 	private final Form rootForm;
 	private final FlattenedSolution flattenedSolution;
+	private boolean onlyFormComponents = false;
 
 	public RelatedFormsContentProvider(Form rootForm)
 	{
 		this.rootForm = rootForm;
 		this.flattenedSolution = ModelUtils.getEditingFlattenedSolution(rootForm);
+	}
+
+	public RelatedFormsContentProvider(Form rootForm, boolean onlyFormComponents)
+	{
+		this.rootForm = rootForm;
+		this.flattenedSolution = ModelUtils.getEditingFlattenedSolution(rootForm);
+		this.onlyFormComponents = onlyFormComponents;
 	}
 
 	public RelatedFormsContentProvider(Form rootForm, FlattenedSolution fs)
@@ -189,20 +197,18 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 
 				// add forms for this relation
 
-				Iterator<Form> forms = getFormsOfTable(lastRelation.getForeignDataSource()).iterator();
-				while (forms.hasNext())
+				for (Form form : getFormsOfTable(lastRelation.getForeignDataSource()))
 				{
-					Form form = forms.next();
-					if (!PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution()) && !form.isFormComponent().booleanValue())
+					if (!PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution()) &&
+						((this.onlyFormComponents && form.isFormComponent().booleanValue()) ||
+							(!this.onlyFormComponents && !form.isFormComponent().booleanValue())))
 						children.add(new RelatedForm(rf.relations, form));
 				}
 
-				// add relations 1 level deeper
-				Iterator<Relation> relations = getRelations(
-					ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(lastRelation.getForeignDataSource())).iterator();
-				while (relations.hasNext())
+				for (Relation element : getRelations(
+					ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(lastRelation.getForeignDataSource())))
 				{
-					children.add(new RelatedForm(Utils.arrayAdd(rf.relations, relations.next(), true), null));
+					children.add(new RelatedForm(Utils.arrayAdd(rf.relations, element, true), null));
 				}
 
 				return children.toArray();
@@ -217,8 +223,11 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution()) || form.isFormComponent().booleanValue())
+					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution()))
 						continue; //is rootForm accessible via self ref relation
+					if ((this.onlyFormComponents && !form.isFormComponent().booleanValue()) ||
+						(!this.onlyFormComponents && form.isFormComponent().booleanValue()))
+						continue;
 					ITable table = dsm.getDataSource(form.getDataSource());
 					if (table == null)
 					{
@@ -247,8 +256,11 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution()) || form.isFormComponent().booleanValue())
+					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution()))
 						continue; //is rootForm accessible via self ref relation
+					if ((this.onlyFormComponents && !form.isFormComponent().booleanValue()) ||
+						(!this.onlyFormComponents && form.isFormComponent().booleanValue()))
+						continue;
 					if (dsm.getDataSource(form.getDataSource()) == parentElement || (form.getDataSource() == null && Messages.LabelNoTable == parentElement))
 					{
 						children.add(new RelatedForm(null, form));

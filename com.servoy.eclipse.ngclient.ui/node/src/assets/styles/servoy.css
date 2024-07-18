@@ -404,6 +404,8 @@ fieldset[disabled] .btn-default:focus,
 .btn-default.disabled.focus,
 .btn-default[disabled].focus,
 fieldset[disabled] .btn-default.focus {
+  cursor: unset;
+  color: unset;
   background-color: #fff;
   border-color: #ccc;
 }
@@ -443,14 +445,6 @@ fieldset[disabled] .btn-default.focus {
 .svy-wrapper > * > .svy-container > .tabcontainer > svy-form >.svy-respform {
     height: 100%;
 }
-
-.variants_container > .variant_item {
-    display: flex;
-} 
-
-.variants_container > .variant_item > * {
-    display: flex;
-} 
 
 /*
  The DragResize object name is automatically applied to all generated

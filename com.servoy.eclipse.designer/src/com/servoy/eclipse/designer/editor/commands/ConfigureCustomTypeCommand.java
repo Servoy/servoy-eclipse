@@ -42,12 +42,15 @@ import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.IPropertyType;
 
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetCustomArrayPropertiesCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.autowizard.FormComponentTreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
@@ -56,6 +59,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 
 /**
  * @author emera
@@ -85,72 +90,95 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 			{
 				if ("autoshow".equals(property.getTag("wizard")))
 				{
-					// prop type should be an array of a custom type..
-					IPropertyType< ? > propType = property.getType();
-					if (propType instanceof CustomJSONArrayType< ? , ? >)
+					if (property.getType() == FormComponentPropertyType.INSTANCE && property.getConfig() instanceof ComponentTypeConfig &&
+						((ComponentTypeConfig)property.getConfig()).forFoundset != null)
 					{
-
-						CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
-							.getCustomJSONTypeDefinition().getType();
-						PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
-						Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
-						if (wizardProperties.size() > 0)
-						{
-							// feed this wizardProperties into the wizard
-							System.err.println(wizardProperties);
-							Display current = Display.getCurrent();
-							if (current == null) current = Display.getDefault();
-
-							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-							ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
-								.getDataSource(flattenedSolution.getFlattenedForm(activeEditor.getForm()).getDataSource());
-
-							List<Map<String, Object>> input = new ArrayList<>();
-							Object prop = webComponent.getProperty(propertyName);
-							Set<Object> previousColumns = new HashSet<>();
-							if (prop instanceof IChildWebObject[])
-							{
-								IChildWebObject[] arr = (IChildWebObject[])prop;
-								for (IChildWebObject obj : arr)
-								{
-									if (obj instanceof WebCustomType)
+						// list form component
+						Display.getDefault().asyncExec(() -> {
+							activeEditor.getCommandStack()
+								.execute(
+									new BaseRestorableCommand("createComponent")
 									{
-										WebCustomType wct = (WebCustomType)obj;
-										JSONObject object = (JSONObject)wct.getPropertiesMap().get("json");
-										Map<String, Object> map = getAsMap(object);
-										previousColumns.add(object.get("svyUUID"));
-										input.add(map);
-									}
-								}
-							}
-
-							PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(current.getActiveShell(),
-								persistContext,
-								flattenedSolution, property).withTable(table).withProperties(wizardProperties).withInput(input);
-							if (dialogConfigurator.open() != Window.OK) return null;
-							List<Map<String, Object>> newProperties = dialogConfigurator.getResult();
-
-							final PersistContext ctx = persistContext;
-							final String _propertyName = propertyName;
-							Display.getDefault().asyncExec(() -> {
-								activeEditor.getCommandStack()
-									.execute(
-										new SetCustomArrayPropertiesCommand(_propertyName, ctx, newProperties, previousColumns, activeEditor));
-							});
-						}
-						else
-						{
-							ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
-								"\nhas no wizard properties\n" + propType, null);
-						}
+										@Override
+										public void execute()
+										{
+											FormComponentTreeSelectDialog.selectFormComponent(webComponent, activeEditor.getForm());
+										}
+									});
+						});
 					}
 					else
 					{
-						ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
-							" that is not an custom array type " + propType, null);
-					}
+						// prop type should be an array of a custom type..
+						IPropertyType< ? > propType = property.getType();
+						if (propType instanceof CustomJSONArrayType< ? , ? >)
+						{
 
+							CustomJSONObjectType< ? , ? > customObjectType = (CustomJSONObjectType< ? , ? >)((CustomJSONArrayType< ? , ? >)propType)
+								.getCustomJSONTypeDefinition().getType();
+							PropertyDescription customObjectDefinition = customObjectType.getCustomJSONTypeDefinition();
+							Collection<PropertyDescription> wizardProperties = customObjectDefinition.getTaggedProperties("wizard");
+							if (wizardProperties.size() > 0)
+							{
+								// feed this wizardProperties into the wizard
+								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+								ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
+									.getDataSource(flattenedSolution.getFlattenedForm(activeEditor.getForm()).getDataSource());
+
+								List<Map<String, Object>> input = new ArrayList<>();
+								List<Map<String, Object>> originalInput = new ArrayList<>();
+								Object prop = webComponent.getProperty(propertyName);
+								Set<Object> previousColumns = new HashSet<>();
+								if (prop instanceof IChildWebObject[])
+								{
+									IChildWebObject[] arr = (IChildWebObject[])prop;
+									for (IChildWebObject obj : arr)
+									{
+										if (obj instanceof WebCustomType)
+										{
+											WebCustomType wct = (WebCustomType)obj;
+											JSONObject object = wct.getFlattenedJson();
+											Map<String, Object> map = getAsMap(object);
+											previousColumns.add(object.get("svyUUID"));
+											input.add(map);
+											Map<String, Object> originalMap = new HashMap<String, Object>();
+											map.forEach((key, value) -> originalMap.put(key, value));
+											originalInput.add(originalMap);
+										}
+									}
+								}
+
+								PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(UIUtils.getActiveShell(),
+									persistContext,
+									flattenedSolution, property).withTable(table).withProperties(wizardProperties).withInput(input);
+								if (dialogConfigurator.open() != Window.OK) return null;
+								List<Map<String, Object>> newProperties = dialogConfigurator.getResult();
+
+								if (!newProperties.equals(originalInput))
+								{
+									final PersistContext ctx = persistContext;
+									final String _propertyName = propertyName;
+									Display.getDefault().asyncExec(() -> {
+										activeEditor.getCommandStack()
+											.execute(
+												new SetCustomArrayPropertiesCommand(_propertyName, ctx, newProperties, previousColumns, activeEditor));
+									});
+								}
+							}
+							else
+							{
+								ServoyLog.logWarning("auto show wizard property " + property + " of custom type " + customObjectType +
+									"\nhas no wizard properties\n" + propType, null);
+							}
+						}
+						else
+						{
+							ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
+								" that is not an custom array type " + propType, null);
+						}
+					}
 				}
+
 			}
 		}
 		return null;

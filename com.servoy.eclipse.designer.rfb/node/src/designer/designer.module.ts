@@ -35,8 +35,10 @@ import { DragselectionComponent } from './dragselection/dragselection.component'
 import { DragselectionResponsiveComponent } from './dragselection-responsive/dragselection-responsive.component';
 import { InlineEditComponent } from './inlinedit/inlineedit.component';
 import { KeyboardLayoutDirective } from './directives/keyboardlayout.directive';
-import { VariantsContentComponent } from './variantscontent/variantscontent.component'
-import { VariantsPreviewComponent } from './variantspreview/variantspreview.component'
+import { VariantsContentComponent } from './variantscontent/variantscontent.component';
+import { VariantsPreviewComponent } from './variantspreview/variantspreview.component';
+import { DynamicGuidesComponent } from './dynamicguides/dynamicguides.component';
+import { DynamicGuidesService } from './services/dynamicguides.service';
 
 @NgModule({
   declarations: [
@@ -67,7 +69,8 @@ import { VariantsPreviewComponent } from './variantspreview/variantspreview.comp
     InlineEditComponent,
     VariantsContentComponent,
     VariantsPreviewComponent,
-    AutoscrollComponent
+    AutoscrollComponent,
+    DynamicGuidesComponent
   ],
   imports: [
     BrowserModule,
@@ -77,7 +80,7 @@ import { VariantsPreviewComponent } from './variantspreview/variantspreview.comp
     NgbModule,
     DragDropModule
   ],
-  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService],
+  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService, DynamicGuidesService],
   bootstrap: [DesignerComponent]
 })
 export class DesignerModule { }

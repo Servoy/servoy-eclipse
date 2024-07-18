@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.property.types;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -35,7 +36,8 @@ public interface ITypePropertyDescriptorFactory
 	/**
 	 * Creates a property descriptor for the property described by the arguments
 	 */
-	IPropertyDescriptor createPropertyDescriptor(Object id, String displayName, FlattenedSolution flattenedEditingSolution, PersistContext persistContext,
+	IPropertyDescriptor createPropertyDescriptor(Object id, IPropertySource persistPropertySource, String displayName,
+		FlattenedSolution flattenedEditingSolution, PersistContext persistContext,
 		PropertyDescription propertyDescription);
 
 }

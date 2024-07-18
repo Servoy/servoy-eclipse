@@ -377,10 +377,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return ghostContainer.style;
 			}
 
-			$scope.getGhostStyle = function(ghost) {
+			$scope.getGhostStyle = function(ghost, container) {
 				var style;
 				
 				if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) { // parts
+					var filterGhostParts = container.ghosts.filter(ghost => ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART);
+					var onlyBodyPart =  filterGhostParts.length === 1 && filterGhostParts[0].text.toLowerCase() === "body";
 					style = {
 						background: "#d0d0d0",
 						top: ghost.location.y + "px",
@@ -392,6 +394,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						cursor: "s-resize",
 						overflow: "visible"
 					};
+					if (onlyBodyPart) {
+						style['visibility'] = "hidden";
+					}
 				} else if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) { // the form
 					style = {
 						left: 0,

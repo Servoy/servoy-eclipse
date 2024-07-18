@@ -660,6 +660,21 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	{
 		if (parent == null)
 		{
+//			Object value0 = getValues()[0];
+//			if (value0 instanceof PersistContext && ((PersistContext)value0).getContext() instanceof Form) {
+//				PersistContext pc = (PersistContext)value0;
+//				Form form = (Form)pc.getContext();
+//				form.getChild(pc.getPersist().getUUID());
+//
+//
+//
+//				IPersist p = pc.getPersist().getAncestor(pc.getContext().getClass());
+//					if (p != null) {
+//						setValues(value0)
+//					}
+//
+//			}
+
 			refreshChildEntries();
 		}
 		else

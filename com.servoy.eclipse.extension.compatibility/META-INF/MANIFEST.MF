@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Extension Compatibility
 Bundle-SymbolicName: com.servoy.eclipse.extension.compatibility;singleton:=true
-Bundle-Version: 2023.3.8.3850_LTS
+Bundle-Version: 2024.3.2.3945
 Bundle-Vendor: Servoy
 Require-Bundle: servoy_shared,
  servoy_smart_client,
@@ -14,8 +14,6 @@ Require-Bundle: servoy_shared,
  org.apache.logging.log4j.api,
  org.apache.logging.log4j.core,
  org.apache.commons.logging,
- org.apache.httpcomponents.client5.httpclient5,
- org.apache.httpcomponents.core5.httpcore5,
  org.apache.commons.commons-pool2,
  j2db_server,
  org.apache.commons.codec,
@@ -23,10 +21,17 @@ Require-Bundle: servoy_shared,
  sablo,
  javax.websocket,
  org.apache.commons.commons-fileupload,
- org.apache.httpcomponents.core5.httpcore5-h2,
  org.apache.commons.commons-io;bundle-version="2.8.0",
  com.sun.mail.jakarta.mail,
- com.sun.activation.jakarta.activation
+ com.sun.activation.jakarta.activation,
+ com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.14.2",
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.14.2",
+ com.fasterxml.jackson.core.jackson-databind;bundle-version="2.14.2",
+ wrapped.com.auth0.java-jwt;bundle-version="4.2.2",
+ wrapped.org.apache.httpcomponents.client5.httpclient5;bundle-version="5.2.1",
+ wrapped.org.apache.httpcomponents.core5.httpcore5;bundle-version="5.2.3",
+ wrapped.org.apache.httpcomponents.core5.httpcore5-h2;bundle-version="5.2.3",
+ org.apache.commons.commons-compress;bundle-version="1.25.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

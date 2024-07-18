@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2023.3.8.3850_LTS" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
-
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2024.3.2.3945" type="features" includeLaunchers="true" autoIncludeRequirements="true">
    <aboutInfo>
       <image path="icons/installer_image.png"/>
       <text>
@@ -19,10 +18,13 @@
 -Xmx2G
 --add-modules=ALL-SYSTEM
 --add-exports java.desktop/sun.java2d=ALL-UNNAMED
+-Dp2.trustedAuthorities=https://download.servoy.com,https://developer.servoy.com,https://download.eclipse.org
       </vmArgs>
-      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED
+      <vmArgsLin>-Dchromium.suspend_threads=false
+      </vmArgsLin>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED -Dchromium.suspend_threads=false -Dsun.java2d.metal=false
       </vmArgsMac>
-      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED -Dchromium.args=--disable-gpu-compositing
+      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED -Dchromium.args=--disable-gpu-compositing;--force-light-mode
       </vmArgsWin>
    </launcherArgs>
 
@@ -91,7 +93,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="2023.3.8.3850_LTS"/>
+      <feature id="com.servoy.eclipse.feature" version="2024.3.2.3945"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -124,9 +126,13 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
       <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="4" />
-      <plugin id="org.slf4j.api" autoStart="true" startLevel="0" />
+      <plugin id="slf4j.api" autoStart="true" startLevel="0" />
       <property name="osgi.instance.area.default" value="@user.home/servoy_workspace" />
    </configurations>
+
+   <repositories>
+      <repository location="http://download.servoy.com/developer/latest/" name="" enabled="true" />
+   </repositories>
 
    <preferencesInfo>
       <targetfile overwrite="false"/>

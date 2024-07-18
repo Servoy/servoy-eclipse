@@ -1,9 +1,9 @@
 {
   "name": "@servoy/window",
-  "version": "2023.3.0",
+  "version": "2024.3.0",
   "peerDependencies": {
-    "@angular/common": "^15",
-    "@angular/core": "^15",
+    "@angular/common": "^17",
+    "@angular/core": "^17",
     "@servoy/public": "*"
   },
   "dependencies": {

@@ -54,6 +54,8 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.console.TextConsoleViewer;
 
+import com.servoy.eclipse.core.util.UIUtils;
+
 public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptConsoleViewer
 {
 	private static final String TEXT_SETTING = "TEXT";
@@ -290,13 +292,32 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 				for (Object element : viewerList)
 				{
 					viewer = (ScriptConsoleViewer)element;
-					if (isInput == true)
+					boolean isDarkTheme = UIUtils.isDarkThemeSelected(false);
+					if (isDarkTheme)
 					{
-						addToPartitioner(viewer, new StyleRange(tokenStart, token.length(), AnsiColorHelper.COLOR_BLACK, null, SWT.BOLD));
+						if (isInput == true)
+						{
+							addToPartitioner(viewer, new StyleRange(tokenStart, token.length(), AnsiColorHelper.COLOR_WHITE, null, SWT.BOLD));
+						}
+						else if (isError)
+						{
+							addToPartitioner(viewer, new StyleRange(tokenStart, token.length(), AnsiColorHelper.COLOR_RED, null, SWT.BOLD));
+						}
+						else
+						{
+							addToPartitioner(viewer, new StyleRange(tokenStart, token.length(), AnsiColorHelper.COLOR_CYAN, null, SWT.BOLD));
+						}
 					}
 					else
 					{
-						addToPartitioner(viewer, ansiHelper.resolveStyleRange(tokenStart, token.length(), isError));
+						if (isInput == true)
+						{
+							addToPartitioner(viewer, new StyleRange(tokenStart, token.length(), AnsiColorHelper.COLOR_BLACK, null, SWT.BOLD));
+						}
+						else
+						{
+							addToPartitioner(viewer, ansiHelper.resolveStyleRange(tokenStart, token.length(), isError));
+						}
 					}
 				}
 
@@ -707,7 +728,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.text.source.SourceViewer#setDocument(org.eclipse.jface.text.IDocument)
 	 */
 	@Override
@@ -770,7 +791,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements IScriptCon
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.text.source.SourceViewer#configure(org.eclipse.jface.text.source.SourceViewerConfiguration)
 	 */
 	@Override

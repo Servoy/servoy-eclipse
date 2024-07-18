@@ -21,10 +21,10 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
@@ -69,7 +69,7 @@ public class RenamePersistQuickFix implements IMarkerResolution
 					final IPersist persist = servoyProject.getEditingPersist(id);
 					if (persist instanceof ISupportUpdateableName || persist instanceof Media)
 					{
-						InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(), "Rename element", "Input a new name for element '" +
+						InputDialog dialog = new InputDialog(UIUtils.getActiveShell(), "Rename element", "Input a new name for element '" +
 							((ISupportName)persist).getName() + "' from solution '" + servoyProject.getSolution().getName() + "'.",
 							((ISupportName)persist).getName(), new IInputValidator()
 							{
@@ -115,7 +115,7 @@ public class RenamePersistQuickFix implements IMarkerResolution
 						}
 						catch (RepositoryException e)
 						{
-							MessageDialog.openError(Display.getCurrent().getActiveShell(), "Wrong name", e.getMessage());
+							MessageDialog.openError(UIUtils.getActiveShell(), "Wrong name", e.getMessage());
 							return;
 						}
 						servoyProject.saveEditingSolutionNodes(new IPersist[] { persist }, (persist instanceof Media) ? true : false);

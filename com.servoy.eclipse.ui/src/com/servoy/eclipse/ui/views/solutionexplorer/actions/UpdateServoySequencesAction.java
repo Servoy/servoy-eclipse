@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import static com.servoy.j2db.util.Utils.iterate;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,15 +41,17 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 
 public class UpdateServoySequencesAction extends Action implements ISelectionChangedListener
 {
-
 	public List<IServerInternal> selectedServers = null;
 
 	public UpdateServoySequencesAction()
@@ -95,7 +99,7 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 		}
 		if (selection != null)
 		{
-			selectedServers = new ArrayList<IServerInternal>();
+			selectedServers = new ArrayList<>();
 			if (selection.size() == 1)
 			{
 				// is "Servers node" selected?
@@ -126,7 +130,39 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 				}
 			}
 		}
-		setEnabled(selectedServers != null);
+		boolean showLegacyAction = false;
+		if (selectedServers != null)
+		{
+			for (IServerInternal server : selectedServers)
+			{
+				try
+				{
+					outer : for (String tableName : server.getTableAndViewNames(true))
+					{
+						// Do not use uninitialized tables, it may block the UI
+						ITable table = server.isTableLoaded(tableName) ? server.getTable(tableName) : null;
+						if (table != null)
+						{
+							for (Column column : iterate(table.getRowIdentColumns()))
+							{
+								if (column.getColumnInfo() != null && column.getColumnInfo().getAutoEnterType() == ColumnInfo.SEQUENCE_AUTO_ENTER &&
+									column.getColumnInfo().getAutoEnterSubType() == ColumnInfo.SERVOY_SEQUENCE)
+								{
+									// only show if already set
+									showLegacyAction = true;
+									break outer;
+								}
+							}
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+		setEnabled(selectedServers != null && showLegacyAction);
 	}
 
 	@Override
@@ -157,10 +193,8 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 						}
 						if (tables != null)
 						{
-							Iterator<String> iterator = tables.iterator();
-							while (iterator.hasNext())
+							for (String tableName : tables)
 							{
-								String tableName = iterator.next();
 								try
 								{
 									ITable table = server.getTable(tableName);
@@ -184,7 +218,7 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 				{
 					public void run()
 					{
-						MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Update servoy sequences", null, null,
+						MessageDialog dialog = new MessageDialog(UIUtils.getActiveShell(), "Update servoy sequences", null, null,
 							MessageDialog.NONE, new String[] { "OK" }, 0)
 						{
 							@Override

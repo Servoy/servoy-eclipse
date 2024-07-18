@@ -36,18 +36,13 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.ast.ASTNode;
@@ -63,6 +58,7 @@ import org.eclipse.dltk.javascript.ast.ConstStatement;
 import org.eclipse.dltk.javascript.ast.DecimalLiteral;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.IVariableStatement;
 import org.eclipse.dltk.javascript.ast.Identifier;
 import org.eclipse.dltk.javascript.ast.NewExpression;
 import org.eclipse.dltk.javascript.ast.NullExpression;
@@ -72,9 +68,10 @@ import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.UnaryOperation;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
-import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.javascript.ast.v4.Keywords;
+import org.eclipse.dltk.javascript.ast.v4.LetStatement;
+import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTag;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTags;
 import org.eclipse.dltk.javascript.parser.jsdoc.SimpleJSDocParser;
@@ -84,7 +81,6 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
-import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.ICalculationTypeInferencer;
 import com.servoy.eclipse.model.extensions.ICalculationTypeInferencerProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -140,6 +136,7 @@ public class SolutionDeserializer
 	static final String LINE_NUMBER_OFFSET_JSON_ATTRIBUTE = "lineNumberOffset";
 	static final String EXTRA_DOC_COMMENTS = "EXTRA_DOC_COMMENTS";
 	static final String COMMENT_JSON_ATTRIBUTE = "comment";
+	static final String DECL_KEYWORD = "keyword";
 	private static final String CHANGED_JSON_ATTRIBUTE = "changed";
 
 	public static final RuntimeProperty<Boolean> POSSIBLE_DUPLICATE_UUID = new RuntimeProperty<Boolean>()
@@ -458,6 +455,10 @@ public class SolutionDeserializer
 					if (f != null && errorKeeper != null) errorKeeper.addError(f, e.getMessage());
 					ServoyLog.logError("Invalid JSON syntax in file " + f, e);
 				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Error reading file " + f, e);
+				}
 			}
 
 			Set<UUID> saved = new HashSet<UUID>();
@@ -497,62 +498,70 @@ public class SolutionDeserializer
 				childrenJSObjectMapEntry = element;
 				jsFile = childrenJSObjectMapEntry.getKey();
 				String jsFileName = jsFile.getName();
-				if (jsFileName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+				try
 				{
-					Pair<File, ISupportChilds> tmp = getJSONFileFromJS(jsFile, jsFileName, parent);
-					jsonFile = tmp.getLeft();
-					if (jsonFile == null)
+					if (jsFileName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 					{
-						errorKeeper.addError(jsFile, "Unrecognized javascript file name '" + jsFile.getName() + "'.");
-						continue;
-					}
-					ISupportChilds scriptParent = tmp.getRight();
-					if (scriptParent == null) // scriptParent may have been created when jsonfile does not exist
-					{
-						scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
-					}
-					if (scriptParent != null)
-					{
-						List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
-						if (!readAll)
+						Pair<File, ISupportChilds> tmp = getJSONFileFromJS(jsFile, jsFileName, parent);
+						jsonFile = tmp.getLeft();
+						if (jsonFile == null)
 						{
-							testDuplicates(jsFile, scriptParent, childrenJSObjects);
+							errorKeeper.addError(jsFile, "Unrecognized javascript file name '" + jsFile.getName() + "'.");
+							continue;
 						}
-						if (childrenJSObjects != null)
+						ISupportChilds scriptParent = tmp.getRight();
+						if (scriptParent == null) // scriptParent may have been created when jsonfile does not exist
 						{
-							scriptFiles.add(jsFile);
-							for (JSONObject object : childrenJSObjects)
+							scriptParent = (ISupportChilds)persistFileMap.get(jsonFile);
+						}
+						if (scriptParent != null)
+						{
+							List<JSONObject> childrenJSObjects = childrenJSObjectMapEntry.getValue();
+							if (!readAll)
 							{
-								setMissingTypeOnScriptObject(object, scriptParent, jsFile);
-								IPersist persist = null;
-								try
+								testDuplicates(jsFile, scriptParent, childrenJSObjects);
+							}
+							if (childrenJSObjects != null)
+							{
+								scriptFiles.add(jsFile);
+								for (JSONObject object : childrenJSObjects)
 								{
-									persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
-										useFilesForDirtyMark, shouldReset, testExisting);
+									setMissingTypeOnScriptObject(object, scriptParent, jsFile);
+									IPersist persist = null;
+									try
+									{
+										persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
+											useFilesForDirtyMark, shouldReset, testExisting);
+									}
+									catch (JSONException e)
+									{
+										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
+									}
+									catch (RepositoryException e)
+									{
+										ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
+									}
+									if (persist != null)
+									{
+										saved.add(persist.getUUID());
+									}
 								}
-								catch (JSONException e)
+								if (jsFile != null)
 								{
-									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
-								}
-								catch (RepositoryException e)
-								{
-									ServoyLog.logError("Could not read json object from file " + jsFile + " -- skipping", e);
-								}
-								if (persist != null)
-								{
-									saved.add(persist.getUUID());
+									jsParentFileMap.put(jsFile, scriptParent);
 								}
 							}
-							if (jsFile != null)
-							{
-								jsParentFileMap.put(jsFile, scriptParent);
-							}
+						}
+						else
+						{
+							errorKeeper.addError(jsFile, "Invalid javascript file name '" + jsFile.getName() + "', doesn't have a corresponding object.");
 						}
 					}
-					else
-					{
-						errorKeeper.addError(jsFile, "Invalid javascript file name '" + jsFile.getName() + "', doesn't have a corresponding object.");
-					}
+				}
+				catch (Exception e)
+				{
+					errorKeeper.addError(jsFile, "Error reading file " + jsFile);
+					ServoyLog.logError("Error reading file " + jsFile, e);
 				}
 			}
 
@@ -1024,7 +1033,6 @@ public class SolutionDeserializer
 		try
 		{
 			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
-			JavaScriptParser parser = new JavaScriptParser();
 			final List<IProblem> problems = new ArrayList<IProblem>();
 			IProblemReporter reporter = new IProblemReporter()
 			{
@@ -1041,7 +1049,7 @@ public class SolutionDeserializer
 			Script script = null;
 			try
 			{
-				script = parser.parse(fileContent, reporter);
+				script = JavaScriptParserUtil.parse(fileContent, reporter);
 			}
 			catch (Throwable t)
 			{
@@ -1068,7 +1076,6 @@ public class SolutionDeserializer
 
 			List<VariableDeclaration> variables = new ArrayList<VariableDeclaration>();
 			List<FunctionStatement> functions = new ArrayList<FunctionStatement>();
-			final List<ConstStatement> constants = new ArrayList<ConstStatement>();
 			List<Statement> statements = script.getStatements();
 			List<Comment> comments = script.getComments();
 			Set<Comment> sortedComments = new TreeSet<Comment>(new Comparator<Comment>()
@@ -1085,11 +1092,11 @@ public class SolutionDeserializer
 				if (node instanceof VoidExpression)
 				{
 					Expression exp = ((VoidExpression)node).getExpression();
-					if (exp instanceof VariableStatement)
+					if (exp instanceof IVariableStatement)
 					{
 						Comment doc = exp.getDocumentation();
 						if (doc != null) sortedComments.remove(doc);
-						List<VariableDeclaration> vars = ((VariableStatement)exp).getVariables();
+						List<VariableDeclaration> vars = ((IVariableStatement)exp).getVariables();
 						for (VariableDeclaration var : vars)
 						{
 							doc = var.getDocumentation();
@@ -1116,51 +1123,9 @@ public class SolutionDeserializer
 						functions.add((FunctionStatement)exp);
 					}
 				}
-				else if (node instanceof ConstStatement)
-				{
-					constants.add((ConstStatement)node);
-				}
 			}
 
 			final IFile resource = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(Path.fromOSString(file.getAbsolutePath()));
-			if (resource != null) // resource can be null when the file is not in the workspace, like deserializing from STP temp dir
-			{
-				boolean runJob = constants.size() > 0;
-				if (!runJob && resource.exists() && resource.getProject().isOpen())
-				{
-					try
-					{
-						IMarker[] currentMarkers = resource.findMarkers(ServoyBuilder.CONSTANTS_USED_MARKER_TYPE, false, IResource.DEPTH_INFINITE);
-						runJob = currentMarkers != null ? currentMarkers.length > 0 : false;
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-				if (runJob)
-				{
-					WorkspaceJob job = new WorkspaceJob("constant variable marker checks")
-					{
-
-						@Override
-						public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-						{
-							ServoyBuilder.deleteMarkers(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE);
-
-							for (Statement consts : constants)
-							{
-								ServoyBuilder.addMarker(resource, ServoyBuilder.CONSTANTS_USED_MARKER_TYPE, "Constants are not supported", consts.sourceEnd(),
-									ServoyBuilder.CONSTANTS_USED, IMarker.PRIORITY_NORMAL, resource.getProjectRelativePath().toString());
-							}
-							return org.eclipse.core.runtime.Status.OK_STATUS;
-						}
-					};
-					job.setRule(resource);
-					job.setSystem(true);
-					job.schedule();
-				}
-			}
 
 			List<Line> lines = new ArrayList<Line>();
 			int counter = 0;
@@ -1182,9 +1147,9 @@ public class SolutionDeserializer
 			for (VariableDeclaration field : variables)
 			{
 				Comment comment = field.getDocumentation();
-				if (comment == null && field.getParent() instanceof VariableStatement)
+				if (comment == null && field.getParent() instanceof IVariableStatement)
 				{
-					comment = ((VariableStatement)field.getParent()).getDocumentation();
+					comment = ((IVariableStatement)field.getParent()).getDocumentation();
 				}
 
 				boolean newField = true;
@@ -1247,6 +1212,10 @@ public class SolutionDeserializer
 							}
 						}
 					}
+				}
+				if (field.getParent() instanceof ConstStatement || field.getParent() instanceof LetStatement)
+				{
+					json.put(DECL_KEYWORD, field.getParent() instanceof ConstStatement ? Keywords.CONST : Keywords.LET);
 				}
 
 				if (code != null)
@@ -1967,6 +1936,10 @@ public class SolutionDeserializer
 				else
 				{
 					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, null);
+				}
+				if (obj.has(DECL_KEYWORD))
+				{
+					((ScriptVariable)retval).setKeyword(obj.getString(DECL_KEYWORD));
 				}
 
 			}

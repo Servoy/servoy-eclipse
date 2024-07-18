@@ -210,7 +210,9 @@ public abstract class DialogCellEditor extends org.eclipse.jface.viewers.DialogC
 		}
 
 		Object newValue = openDialogBox(control);
-		if (newValue == null)
+		if (newValue == null ||
+			(doGetValue() != null &&
+				(doGetValue().equals(newValue) || doGetValue().equals(newValue.toString()))))
 		{
 			fireCancelEditor();
 		}
@@ -227,6 +229,7 @@ public abstract class DialogCellEditor extends org.eclipse.jface.viewers.DialogC
 				setErrorMessage(MessageFormat.format(getErrorMessage(), new Object[] { newValue.toString() }));
 			}
 			fireApplyEditorValue();
+			updateContents(newValue);
 		}
 	}
 

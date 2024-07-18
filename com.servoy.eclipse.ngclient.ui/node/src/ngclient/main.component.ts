@@ -8,6 +8,7 @@ import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading
 import { ServerDataService } from './services/serverdata.service';
 import { I18NProvider } from './services/i18n_provider.service';
 import { I18NListener, MainViewRefService } from '@servoy/public';
+import { WindowRefService } from '@servoy/public';
 
 @Component({
   selector: 'svy-main',
@@ -30,11 +31,13 @@ export class MainComponent implements OnInit, OnDestroy {
           allService: AllServiceService,
           serverData: ServerDataService,
           mainViewRefService: MainViewRefService,
-          viewContainerRef: ViewContainerRef) {
+          viewContainerRef: ViewContainerRef,
+          private windowRef: WindowRefService) {
     this.servoyService.connect();
     mainViewRefService.mainContainer = viewContainerRef;
     allService.init();
     serverData.init();
+    this.windowRef.nativeWindow['executeInlineScript'] = (formname, script, params) => this.servoyService.executeInlineScript(formname,script,params);
   }
 
   public get mainForm() {

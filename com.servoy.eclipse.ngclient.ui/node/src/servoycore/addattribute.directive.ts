@@ -62,8 +62,8 @@ export class AddAttributeDirective implements OnChanges {
     private restoreCss() {
         if ('attributes' in this.svyContainerStyle && this.svyContainerStyle.attributes.name.indexOf('.') > 0) {
             const name = this.svyContainerStyle.attributes.name.split('.')[1];
-            if (this.parent.cssStyles && this.parent.cssStyles[name]) {
-                const stylesMap = this.parent.cssStyles[name];
+            if (this.parent.cssstyles && this.parent.cssstyles[name]) {
+                const stylesMap = this.parent.cssstyles[name];
                 for (let k in stylesMap) {
                     this.renderer.setStyle(this.el.nativeElement, k, stylesMap[k]);
                 }

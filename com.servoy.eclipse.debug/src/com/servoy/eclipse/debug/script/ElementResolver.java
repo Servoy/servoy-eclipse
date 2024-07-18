@@ -95,6 +95,7 @@ public class ElementResolver implements IElementResolver
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_I18N, new SimpleNameTypeNameCreator("JSI18N"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_HISTORY, new SimpleNameTypeNameCreator("HistoryProvider"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_UTILS, new SimpleNameTypeNameCreator("JSUtils"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_CLIENTUTILS, new SimpleNameTypeNameCreator("JSClientUtils"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_JSUNIT, new SimpleNameTypeNameCreator("JSUnit"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, new SimpleNameTypeNameCreator("JSSolutionModel"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, new SimpleNameTypeNameCreator("JSDatabaseManager"));
@@ -487,6 +488,7 @@ public class ElementResolver implements IElementResolver
 						Type type = context.getType(FoundSet.JS_FOUNDSET + '<' + table.getDataSource() + '>');
 						if (type != null)
 						{
+							// TODO do we still need this code
 							members.addAll(TypeCreator.getMembers(name, type));
 						}
 					}
@@ -632,6 +634,7 @@ public class ElementResolver implements IElementResolver
 							Member member = new TypeMemberQuery(foundsetType).findMember(name);
 							if (member != null)
 							{
+								// TODO do we still need this code
 								members.add(member);
 							}
 						}

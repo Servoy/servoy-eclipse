@@ -231,10 +231,9 @@ public class DataModelManager implements IServerInfoManager
 	{
 		if (t == null || !t.getExistInDB()) return;
 		removeErrorMarker(t.getServerName(), t.getName());
-		Iterator<Column> it = t.getColumns().iterator();
-		while (it.hasNext())
+		for (Column element : t.getColumns())
 		{
-			it.next().removeColumnInfo();
+			element.removeColumnInfo();
 		}
 		IFile file = getDBIFile(t.getServerName(), t.getName());
 		if (file.exists())
@@ -291,10 +290,8 @@ public class DataModelManager implements IServerInfoManager
 			{
 				addMissingDBIMarker(t.getServerName(), t.getName(), false);
 			}
-			Iterator<Column> columns = t.getColumns().iterator();
-			while (columns.hasNext())
+			for (Column c : t.getColumns())
 			{
-				Column c = columns.next();
 				createNewColumnInfo(c, t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
 			}
 		}
@@ -426,10 +423,8 @@ public class DataModelManager implements IServerInfoManager
 		server.reloadServerInfo();
 		try
 		{
-			Iterator<String> tables = server.getTableAndViewNames(true).iterator();
-			while (tables.hasNext())
+			for (String tableName : server.getTableAndViewNames(true))
 			{
-				String tableName = tables.next();
 				if (server.isTableLoaded(tableName))
 				{
 					server.reloadTableColumnInfo(server.getTable(tableName));
@@ -778,10 +773,8 @@ public class DataModelManager implements IServerInfoManager
 			}
 		}
 
-		Iterator<Column> columns = t.getColumns().iterator();
-		while (columns.hasNext())
+		for (Column c : t.getColumns())
 		{
-			Column c = columns.next();
 			if (c.getColumnInfo() == null)
 			{
 				boolean colExists = false; //searching for keyword column name prefixed with '_' character
@@ -869,7 +862,8 @@ public class DataModelManager implements IServerInfoManager
 		while (it.hasNext())
 		{
 			Column column = it.next();
-			ColumnInfoDef cid = getColumnInfoDef(column, colNames.indexOf(column.getName()), onlyStoredColumns);
+			ColumnInfoDef cid = getColumnInfoDef(column, (DbiPreferences.DBI_SORT_BY_INDEX.equals(dbiSortingKey) ? colNames.indexOf(column.getName()) : -1),
+				onlyStoredColumns);
 			if (cid != null)
 			{
 				if (!tableInfo.columnInfoDefSet.contains(cid))
@@ -956,10 +950,8 @@ public class DataModelManager implements IServerInfoManager
 		if (Boolean.TRUE.equals(tableInfo.isMetaData)) tobj.put(TableDef.IS_META_DATA, true);
 
 		JSONArray carray = new ServoyJSONArray();
-		Iterator<ColumnInfoDef> it = tableInfo.columnInfoDefSet.iterator();
-		while (it.hasNext())
+		for (ColumnInfoDef cid : tableInfo.columnInfoDefSet)
 		{
-			ColumnInfoDef cid = it.next();
 			ServoyJSONObject obj = new ServoyJSONObject();
 			obj.put(SolutionSerializer.PROP_NAME, cid.name);
 			obj.put(ColumnInfoDef.DATA_TYPE, cid.columnType.getSqlType());

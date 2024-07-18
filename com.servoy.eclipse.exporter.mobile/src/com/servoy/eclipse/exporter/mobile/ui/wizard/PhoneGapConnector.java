@@ -21,6 +21,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -364,7 +365,7 @@ public class PhoneGapConnector
 
 			if (application.getIconPath() != null && !"".equals(application.getIconPath()))
 			{
-				File file = new File(application.getIconPath());
+				File file = Paths.get(application.getIconPath()).normalize().toFile();
 				if (file.exists() && file.isFile())
 				{
 					url = URL_PHONEGAP_CLOUD + "/" + appId + "/icon";

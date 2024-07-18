@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.dialogs.autowizard.nattable;
 
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer.MoveDirectionEnum;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -30,4 +31,8 @@ public interface IDialogOpener
 	DisplayConverter getDisplayConverter();
 
 	Object getCanonicalValue(Object value);
+
+	void close();
+
+	boolean commit(MoveDirectionEnum direction, boolean closeAfterCommit);
 }

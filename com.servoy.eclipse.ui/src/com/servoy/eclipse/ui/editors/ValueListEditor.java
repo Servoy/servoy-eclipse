@@ -68,6 +68,7 @@ import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
@@ -202,6 +203,7 @@ public class ValueListEditor extends PersistEditor
 	@Override
 	protected void init()
 	{
+		setTitleImage(Activator.loadImageDescriptorFromBundle("valuelist.png").createImage());
 		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
 
 		ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
@@ -209,7 +211,7 @@ public class ValueListEditor extends PersistEditor
 		myScrolledComposite.setExpandVertical(true);
 
 		valueListEditorComposite = new Composite(myScrolledComposite, SWT.NONE);
-		valueListEditorComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		myScrolledComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
 		Label nameLabel = new Label(valueListEditorComposite, SWT.NONE);
 		nameLabel.setText("Valuelist Name");
 
@@ -450,7 +452,7 @@ public class ValueListEditor extends PersistEditor
 			new ValuelistPropertyController.ValueListValueEditor(editingFlattenedSolution));
 		fallbackValuelist.setButtonText("Fallback Valuelist");
 		fallbackValuelist.setContentProvider(new FallbackValuelistContentProvider(editingFlattenedSolution, getValueList()));
-		fallbackValuelist.setLabelProvider(new ValuelistLabelProvider(editingFlattenedSolution));
+		fallbackValuelist.setLabelProvider(new ValuelistLabelProvider(editingFlattenedSolution, getPersist()));
 		fallbackValuelist.setTitleText("Select fallback valuelist");
 		fallbackValuelist.setInput(getValueList());
 		fallbackValuelist.setEditable(true);

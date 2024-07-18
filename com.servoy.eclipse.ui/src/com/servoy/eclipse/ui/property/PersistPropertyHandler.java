@@ -56,6 +56,7 @@ import com.servoy.base.query.IQueryConstants;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.XMLDesignDocsLoader;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -87,7 +88,6 @@ import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
@@ -587,12 +587,14 @@ public class PersistPropertyHandler extends BasePropertyHandler
 									List<IPersist> overridePersists = new ArrayList<IPersist>();
 									for (IPersist child : f.getAllObjectsAsList())
 									{
-										if (child instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)child))
+										if (PersistHelper.isOverrideElement(child))
+										{
 											overridePersists.add(child);
+										}
 									}
 									if (overridePersists.size() > 0)
 									{
-										if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete override elements",
+										if (MessageDialog.openConfirm(UIUtils.getActiveShell(), "Delete override elements",
 											"You are about to change the parent form, this will also delete all override elements (this action cannot be undone). Are you sure you want to proceed?"))
 										{
 											for (IPersist child : overridePersists)
@@ -1050,7 +1052,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			{
 				public void run()
 				{
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Orientation change",
+					MessageDialog.openInformation(UIUtils.getActiveShell(), "Orientation change",
 						"Running clients need to be restarted to make text orientation changes effective");
 				}
 			});

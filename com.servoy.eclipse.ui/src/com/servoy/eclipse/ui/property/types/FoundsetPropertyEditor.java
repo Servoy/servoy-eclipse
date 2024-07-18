@@ -57,6 +57,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -73,10 +75,10 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 	protected final FoundsetDesignToChooserConverter designToChooserConverter;
 
 	public FoundsetPropertyEditor(Composite parent, PersistContext persistContext, ITable primaryTableForRelation, final ITable foreignTableForRelation,
-		boolean isReadOnly, FoundsetDesignToChooserConverter designToChooserConverter)
+		boolean isReadOnly, FoundsetDesignToChooserConverter designToChooserConverter, String property)
 	{
 		super(parent, "Please select a foundset", getFoundsetContentProvider(persistContext),
-			getFoundsetLabelProvider(persistContext.getContext(), designToChooserConverter), new FoundsetValueEditor(persistContext.getContext()), isReadOnly,
+			getFoundsetLabelProvider(persistContext, designToChooserConverter, property), new FoundsetValueEditor(persistContext.getContext()), isReadOnly,
 			getFoundsetInputOptions(primaryTableForRelation, foreignTableForRelation), SWT.NONE, null, "selectFoundsetDialog");
 		setShowFilterMenu(true);
 
@@ -123,7 +125,8 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 		return foundsetContentProvider;
 	}
 
-	public static ILabelProvider getFoundsetLabelProvider(IPersist contextPersist, final FoundsetDesignToChooserConverter designToChooserConv)
+	public static ILabelProvider getFoundsetLabelProvider(PersistContext persistContext, final FoundsetDesignToChooserConverter designToChooserConv,
+		String property)
 	{
 		// @formatter:off
 		CombinedTreeLabelProvider foundsetChooserLabelProvider = new CombinedTreeLabelProvider(1,
@@ -134,9 +137,9 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 				new ILabelProvider[] { new RelationLabelProvider("", true, true), new DatasourceLabelProvider("", true, true) }) });
 
 		final SolutionContextDelegateLabelProvider withSolutionContextForChooser = new SolutionContextDelegateLabelProvider(foundsetChooserLabelProvider,
-			contextPersist);
+			persistContext != null? persistContext.getContext(): null);
 		final SolutionContextDelegateLabelProvider withSolutionContextForCell = new SolutionContextDelegateLabelProvider(foundsetCellLabelProvider,
-			contextPersist);
+			persistContext != null? persistContext.getContext(): null);
 		// @formatter:on
 
 		// this is a bit confusing as this label provider is used both in tree dialog and in properties view cell; but we don't have
@@ -153,8 +156,13 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 			@Override
 			public String getText(Object element)
 			{
-				if (element instanceof JSONObject) return withSolutionContextForCell.getText(designToChooserConv.convertJSONValueToChooserValue(element)); // properties view cell label provider
-				else return withSolutionContextForChooser.getText(element);
+				Object value = element;
+				if (value == null && persistContext != null && persistContext.getPersist() instanceof WebComponent wc && !wc.hasProperty(property))
+				{
+					value = ((WebObjectImpl)wc.getImplementation()).getPropertyDefaultValue(property);
+				}
+				if (value instanceof JSONObject) return withSolutionContextForCell.getText(designToChooserConv.convertJSONValueToChooserValue(value)); // properties view cell label provider
+				else return withSolutionContextForChooser.getText(value);
 			}
 		};
 

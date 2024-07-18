@@ -17,15 +17,11 @@
 
 package com.servoy.eclipse.exporter.ngdesktop.ui.wizard;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -47,14 +43,12 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
-import com.servoy.j2db.ClientVersion;
+import com.servoy.eclipse.ui.preferences.NGDesktopConfiguration;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -89,7 +83,6 @@ public class ExportPage extends WizardPage
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
-	private final String versionsUrl = "https://download.servoy.com/ngdesktop/2023.03.2/ngdesktop-versions-2023.03.txt";
 	private final String FIRST_VERSION_THAT_SUPPORTS_UPDATES = "2020.12";
 	private List<String> remoteVersions = new ArrayList<String>();
 
@@ -289,7 +282,7 @@ public class ExportPage extends WizardPage
 
 		srcVersionCombo = new Combo(versionGroup, SWT.READ_ONLY);
 		srcVersionCombo.setToolTipText("NG Desktop version");
-		remoteVersions = getAvailableVersions();
+		remoteVersions = NGDesktopConfiguration.getAvailableVersions();
 		srcVersionCombo.add("latest");
 
 		deprecatedLabel = new Label(versionGroup, SWT.NONE);
@@ -422,63 +415,6 @@ public class ExportPage extends WizardPage
 	private boolean isDeprecatedVersion()
 	{
 		return srcVersionCombo.getText().startsWith("*");
-	}
-
-	private List<String> getAvailableVersions()
-	{
-		try
-		{
-			final URL url = new URL(versionsUrl);
-			final StringBuffer sb = new StringBuffer();
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream())))
-			{
-				String line = null;
-				while ((line = br.readLine()) != null)
-					sb.append(line);
-				final JSONObject jsonObj = new JSONObject(sb.toString());
-				final JSONArray value = (JSONArray)jsonObj.get("versions");
-				if (value != null && value.length() > 0)
-				{
-					final List<String> result = new ArrayList<String>();
-					value.forEach((item) -> {
-						final String servoyVersion = ((JSONObject)item).getString("servoyVersion");
-						//servoyVersion is a string like 2023.03 or 2023.03.x (where x is a digit.
-						final String middleVersion = Integer.toString(ClientVersion.getMiddleVersion());
-						final String devVersion = ClientVersion.getMajorVersion() + "." + middleVersion;
-						//devVersion is a string like 2023.03 (so no minors)
-						//we need to compare only the base
-						if (SemVerComparator.compare(devVersion, getBaseVersion(servoyVersion)) < 0)
-							return;
-						final String status = ((JSONObject)item).getString("status");
-						String version = ((JSONObject)item).getString("ngDesktopVersion");
-						if ("deprecated".equals(status)) version = "* " + version;
-						result.add(version);
-					});
-					if (result.size() > 0)
-					{
-						result.sort(Comparator.naturalOrder());
-						return result;
-					}
-				}
-			}
-		}
-		catch (final IOException e)
-		{
-			ServoyLog.logError(e);
-		}
-		finally
-		{
-			if (remoteVersions.isEmpty())
-				remoteVersions.add(FIRST_VERSION_THAT_SUPPORTS_UPDATES);
-		}
-		return remoteVersions;
-	}
-
-	private String getBaseVersion(String version)
-	{
-		final String[] result = version.split("\\.");
-		if (result.length <= 2) return version;
-		return result[0] + "." + result[1];
 	}
 
 	private String getInitialImportPath()

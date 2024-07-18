@@ -111,5 +111,23 @@
     </bundle>	
     <bundle id='org.objectweb.asm.commons'>
         <category name="bundles" />
+    </bundle> 
+     <bundle id='org.antlr.antlr4-runtime'>
+        <category name="bundles" />
+    </bundle>   
+     <bundle id='org.hibernate.orm.core'>
+        <category name="bundles" />
+    </bundle>   
+     <bundle id='org.hibernate.common.hibernate-commons-annotations'>
+        <category name="bundles" />
+    </bundle>   
+     <bundle id='jaxb-api'>
+        <category name="bundles" />
+    </bundle>   
+     <bundle id='com.fasterxml.classmate'>
+        <category name="bundles" />
+    </bundle>   
+     <bundle id='org.jboss.jandex'>
+        <category name="bundles" />
     </bundle>   
 </site>

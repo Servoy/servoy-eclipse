@@ -20,10 +20,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     contentInit = false;
     topAdjust: number;
     leftAdjust: number;
-    contentRect: DOMRect;
     lassostarted = false;
     lastTimestamp: number;
-     
+    moveFCorLFC = false;
+
     mousedownpoint: Point;
     fieldLocation: Point;
     selectedRefSubscription: Subscription;
@@ -55,7 +55,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         this.editorContentService.executeOnlyAfterInit(() => {
             this.contentInit = true;
             this.calculateAdjustToMainRelativeLocation();
-            this.createNodes(this.editorSession.getSelection())
+            setTimeout(()=>{
+				this.createNodes(this.editorSession.getSelection());
+			}, 50);
         });
 
         this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
@@ -139,7 +141,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
                             containerName: layoutName,
-                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                            isFCorLFC: this.isSelectionFCorLFC()
                         })
                     }
                 });
@@ -152,9 +155,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private calculateAdjustToMainRelativeLocation() {
         if (!this.topAdjust) {
-            const content = this.editorContentService.getContentArea();
-            this.contentRect = content.getBoundingClientRect()
-            const computedStyle = window.getComputedStyle(content, null)
+            const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
             this.topAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
             this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''))
         }
@@ -162,23 +163,36 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseDown(event: MouseEvent) {
         this.fieldLocation = { x: event.pageX, y: event.pageY };
-        if (this.editorSession.getState().dragging) return;
-        const found = this.designerUtilsService.getNode(event);
+        if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
+        let found;
+        if (this.moveFCorLFC) {
+			found = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC();
+			this.moveFCorLFC = false;
+		} else {
+			found = this.designerUtilsService.getNode(event);
+		}
         if (found) {
             if (this.editorSession.getSelection().indexOf(found.getAttribute('svy-id')) !== -1) {
                 return;  //already selected
             }
             else if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
-                this.editorSession.setSelection([found.getAttribute('svy-id')], this);
+                //check for hidden
+                let wrapper = found.parentElement;
+                while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
+                    wrapper = wrapper.parentElement;
+                }
+                if (!wrapper || wrapper.style.visibility !== 'hidden') {
+                    this.editorSession.setSelection([found.getAttribute('svy-id')], this);
+                }
             }
         }
         else {
             //lasso select
             this.nodes = [];
             this.editorSession.setSelection([], this);
-
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - this.contentRect?.left + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - this.contentRect?.top + 'px');
+            const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left + 'px');
+            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top + 'px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
 
@@ -189,10 +203,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     private onMouseUp(event: MouseEvent) {
         if (this.fieldLocation && this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY) {
-            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - this.contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - this.contentRect?.top - this.topAdjust });
+            const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
+            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust });
         }
         this.fieldLocation = null;
-        if (this.editorSession.getState().dragging) return;
+        if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
         if (event.button == 2 && this.editorSession.getSelection().length > 1) {
             //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
             const node = this.designerUtilsService.getNode(event);
@@ -200,38 +215,42 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 return;
             }
         }
-        
+
         if (this.lassostarted && this.mousedownpoint.x != event.pageX && this.mousedownpoint.y != event.pageY) {
             const elements = this.editorContentService.getAllContentElements();
             const newNodes = new Array<SelectionNode>();
             const newSelection = new Array<string>();
             Array.from(elements).forEach((node) => {
-                const position = node.getBoundingClientRect();
-                this.designerUtilsService.adjustElementRect(node, position);
-                const iframeLeft = this.editorContentService.getLeftPositionIframe();
-                const iframeTop = this.editorContentService.getTopPositionIframe();
-                if (this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + iframeLeft, y: position.y + iframeTop }) ||
-                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + iframeLeft + position.width, y: position.y + iframeTop }) ||
-                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + iframeLeft, y: position.y + iframeTop + position.height }) ||
-                    this.rectangleContainsPoint({ x: event.pageX, y: event.pageY }, { x: this.mousedownpoint.x, y: this.mousedownpoint.y }, { x: position.x + iframeLeft + position.width, y: position.y + iframeTop + position.height })) {
-                    const layoutName = node.getAttribute('svy-layoutname');
-                    const newNode: SelectionNode = {
-                        style: {
-                            height: position.height + 'px',
-                            width: position.width + 'px',
-                            top: position.top + this.topAdjust + 'px',
-                            left: position.left + this.leftAdjust + 'px',
-                            display: 'block'
-                        } as CSSStyleDeclaration,
-                        svyid: node.getAttribute('svy-id'),
-                        isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
-                        isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
-                        maxLevelDesign: node.classList.contains('maxLevelDesign'),
-                        containerName: layoutName,
-                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
-                    };
-                    newNodes.push(newNode);
-                    newSelection.push(node.getAttribute('svy-id'))
+                let wrapper = node.parentElement;
+                while (wrapper && !wrapper.classList.contains('svy-wrapper')) wrapper = wrapper.parentElement;
+                if (!(wrapper && wrapper.style.visibility === 'hidden')) {
+                    const position = node.getBoundingClientRect();
+                    this.designerUtilsService.adjustElementRect(node, position);
+                    const iframeLeft = this.editorContentService.getLeftPositionIframe();
+                    const iframeTop = this.editorContentService.getTopPositionIframe();
+                    const rect1 = new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY, this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY - this.mousedownpoint.y))
+                    const rect2 = new DOMRect(position.x + iframeLeft, position.y + iframeTop, position.width, position.height);
+                    if (this.rectanglesIntersect(rect1, rect2)) {
+                        const layoutName = node.getAttribute('svy-layoutname');
+                        const newNode: SelectionNode = {
+                            style: {
+                                height: position.height + 'px',
+                                width: position.width + 'px',
+                                top: position.top + this.topAdjust + 'px',
+                                left: position.left + this.leftAdjust + 'px',
+                                display: 'block'
+                            } as CSSStyleDeclaration,
+                            svyid: node.getAttribute('svy-id'),
+                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
+                            maxLevelDesign: node.classList.contains('maxLevelDesign'),
+                            containerName: layoutName,
+                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                            isFCorLFC: this.isSelectionFCorLFC()
+                        };
+                        newNodes.push(newNode);
+                        newSelection.push(node.getAttribute('svy-id'))
+                    }
                 }
             });
             this.nodes = newNodes;
@@ -244,12 +263,15 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.calculateAdjustToMainRelativeLocation();
 
             const elements = this.editorContentService.getAllContentElements();
-            Array.from(elements).reverse().find((node) => {
+            const newNode = Array.from(elements).reverse().find((node) => {
                 const position = node.getBoundingClientRect();
                 this.designerUtilsService.adjustElementRect(node, position);
                 let addToSelection = false;
                 if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
-                    addToSelection = true;
+                    let wrapper = node.parentElement;
+                    while (wrapper && !wrapper.classList.contains('svy-wrapper')) wrapper = wrapper.parentElement;
+                    addToSelection = wrapper && wrapper.style.visibility === 'hidden' ? false : true;
+
                 }
                 else if (node['offsetParent'] !== null && parseInt(window.getComputedStyle(node, ':before').height) > 0) {
                     const computedStyle = window.getComputedStyle(node, ':before');
@@ -263,10 +285,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         addToSelection = true;
                     }
                 }
-
                 if (addToSelection) {
                     const id = node.getAttribute('svy-id');
                     let selection = this.editorSession.getSelection();
+                    if (selection && selection.length > 0 && event.shiftKey) return node;
                     const layoutName = node.getAttribute('svy-layoutname');
                     const newNode = {
                         style: {
@@ -281,7 +303,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
                         containerName: layoutName,
-                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'))
+                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                        isFCorLFC: this.isSelectionFCorLFC()
                     };
                     if (event.ctrlKey || event.metaKey) {
                         const index = selection.indexOf(id);
@@ -307,11 +330,57 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     return node;
                 }
             });
+            if (event.shiftKey && newNode) {
+                const selection = this.editorSession.getSelection();
+                if (selection && selection.length > 0) {
+                    const position1 = newNode.getBoundingClientRect();
+                    this.designerUtilsService.adjustElementRect(newNode, position1);
+
+                    const element = this.editorContentService.getContentElement(selection[0]);
+                    if (element) {
+                        const position2 = element.getBoundingClientRect();
+                        this.designerUtilsService.adjustElementRect(element, position2);
+                        const rect1 = new DOMRect(Math.min(position1.left, position2.left), Math.min(position1.top, position2.top), Math.abs(position1.left - position2.left), Math.abs(position1.top - position2.top))
+                        Array.from(elements).forEach((node) => {
+                            const position = node.getBoundingClientRect();
+                            this.designerUtilsService.adjustElementRect(node, position);
+                            if (this.rectanglesIntersect(rect1, position)) {
+                                const id = node.getAttribute('svy-id');
+                                const layoutName = node.getAttribute('svy-layoutname');
+                                const newNode = {
+                                    style: {
+                                        height: position.height + 'px',
+                                        width: position.width + 'px',
+                                        top: position.top + this.topAdjust + 'px',
+                                        left: position.left + this.leftAdjust + 'px',
+                                        display: 'block'
+                                    } as CSSStyleDeclaration,
+                                    isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                                    svyid: node.getAttribute('svy-id'),
+                                    isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
+                                    maxLevelDesign: node.classList.contains('maxLevelDesign'),
+                                    containerName: layoutName,
+                                    autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                                    isFCorLFC: this.isSelectionFCorLFC()
+                                };
+                                if (!selection.includes(id)) {
+                                    this.nodes.push(newNode);
+                                    selection.push(id);
+                                }
+                            }
+                        });
+                        this.editorSession.setSelection(selection, this);
+                        this.selectedRefSubscription = this.selectedRef.changes.subscribe(() => {
+                            this.applyWireframe();
+                        })
+                    }
+                }
+            }
         }
         this.lassostarted = false;
         this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'none');
         this.applyWireframe();
-        
+
         if (event.button == 0 && event.timeStamp - this.lastTimestamp < 350) {
             // dblclick event; is not triggered by event
             if (this.nodes && this.nodes.length > 0 && this.nodes[0].maxLevelDesign) {
@@ -345,15 +414,24 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             }
         }
     }
+    
+    public updateMoveFCorLFC() {
+		this.moveFCorLFC = true;
+	}
+    
+    private isSelectionFCorLFC() {
+		return this.designerUtilsService.getNodeBasedOnSelectionFCorLFC() != null;
+	}
 
     private onMouseMove(event: MouseEvent) {
         if (this.editorSession.getState().dragging) return;
         if (this.lassostarted) {
+            const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
             if (event.pageX < this.mousedownpoint.x) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - this.contentRect.left + 'px');
+                this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect.left + 'px');
             }
             if (event.pageY < this.mousedownpoint.y) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - this.contentRect.top + 'px');
+                this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect.top + 'px');
             }
             if (this.lassoRef.nativeElement.style.display === 'none') {
                 this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'block');
@@ -365,21 +443,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         }
     }
 
-    private rectangleContainsPoint(p1: Point, p2: Point, toCheck: Point): boolean {
-        if (p1.x > p2.x) {
-            const temp = p1.x;
-            p1.x = p2.x;
-            p2.x = temp;
-        }
-        if (p1.y > p2.y) {
-            const temp = p1.y;
-            p1.y = p2.y;
-            p2.y = temp;
-        }
-        if (p1.x <= toCheck.x && p2.x >= toCheck.x && p1.y <= toCheck.y && p2.y >= toCheck.y) {
-            return true;
-        }
-        return false;
+    private rectanglesIntersect(r1: DOMRect, r2: DOMRect): boolean {
+        return !(r2.left > r1.right ||
+            r2.right < r1.left ||
+            r2.top > r1.bottom ||
+            r2.bottom < r1.top);
     }
 
     deleteAction(event: MouseEvent) {
@@ -431,6 +499,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     onLeave(event: MouseEvent) {
         (event.srcElement as HTMLElement).style.display = 'none'
     }
+    
+    checkIfNodeIsVisible(node: SelectionNode) {
+		const position = this.editorContentService.getContentElement(node.svyid)?.getBoundingClientRect();
+		if (!position || (position.height === 0 && position.width === 0)) {
+			return false;
+		}
+		return true;
+	}
 
 }
 @Directive({
@@ -462,6 +538,7 @@ export class SelectionNode {
     maxLevelDesign: boolean;
     containerName: string;
     autowizardProperties?: string[];
+    isFCorLFC: boolean;
 }
 export class Point {
     x: number;

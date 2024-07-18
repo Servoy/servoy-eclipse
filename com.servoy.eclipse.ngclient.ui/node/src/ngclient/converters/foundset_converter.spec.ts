@@ -14,7 +14,7 @@ import { ObjectType } from '../../sablo/converters/object_converter';
 
 describe('FoundsetConverter', () => {
 
-    let converterService: ConverterService;
+    let converterService: ConverterService<FoundsetValue>
     let typesRegistry: TypesRegistry;
     let loggerFactory: LoggerFactory;
     let sabloService: SabloService;
@@ -40,7 +40,7 @@ describe('FoundsetConverter', () => {
         sabloDeferHelper = TestBed.inject(SabloDeferHelper);
         viewportService = TestBed.inject(ViewportService);
         loggerFactory = TestBed.inject(LoggerFactory);
-        converterService = TestBed.inject(ConverterService);
+        converterService = TestBed.inject(ConverterService) as ConverterService<FoundsetValue>;
         typesRegistry = TestBed.inject(TypesRegistry);
         typesRegistry.registerGlobalType(FoundsetType.TYPE_NAME, new FoundsetType(sabloService, sabloDeferHelper, viewportService, loggerFactory));
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, new DateType());

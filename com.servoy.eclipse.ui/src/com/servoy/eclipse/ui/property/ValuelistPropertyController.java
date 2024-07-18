@@ -24,19 +24,22 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.ValuelistContentProvider;
 import com.servoy.eclipse.ui.editors.AddPersistButtonComposite;
 import com.servoy.eclipse.ui.editors.IValueEditor;
-import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor.ListSelectControlFactory;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.wizards.NewValueListWizard;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Utils;
@@ -59,7 +62,8 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 		this.persistContext = persistContext;
 		this.includeNone = includeNone;
 		setLabelProvider(new SolutionContextDelegateLabelProvider(
-			new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())),
+			new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext()),
+				persistContext.getPersist()),
 			persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
@@ -67,9 +71,22 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-
+		Object defaultValue = null;
+		if (includeNone && persistContext.getPersist() instanceof IBasicWebObject wo)
+		{
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+				.getWebObjectSpecification(wo.getTypeName());
+			if (spec != null)
+			{
+				PropertyDescription property = spec.getProperty(getId().toString());
+				if (property.hasDefault())
+				{
+					defaultValue = property.getDefaultValue();
+				}
+			}
+		}
 		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-		return new ListSelectCellEditor(parent, "Select value list", new ValuelistContentProvider(flattenedEditingSolution, persistContext.getContext()),
+		return new ValuelistCellEditor<P>(parent, "Select value list", new ValuelistContentProvider(flattenedEditingSolution, persistContext.getContext()),
 			getLabelProvider(), new ValueListValueEditor(flattenedEditingSolution), isReadOnly(),
 			new ValuelistContentProvider.ValuelistListOptions(includeNone), SWT.NONE, new ListSelectControlFactory()
 			{
@@ -103,7 +120,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 						: persistContext.getPersist());
 					return buttons;
 				}
-			}, "valuelistDialog");
+			}, "valuelistDialog", defaultValue);
 	}
 
 	public static class ValueListValueEditor implements IValueEditor<Integer>
@@ -126,5 +143,4 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 				flattenedEditingSolution.getValueList(value.intValue()) != null;
 		}
 	}
-
 }

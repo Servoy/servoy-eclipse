@@ -1,0 +1,3 @@
+NG ${package_type} "${componentname}" (internal name "<#if service_scripting_name??>plugins.${service_scripting_name}<#else>${componentinternalname}</#if>") property "${propertyName}":<#if properties[propertyName].doc()??> ${properties[propertyName].doc()}</#if>
+    type: ${properties[propertyName].type()}<#if properties[propertyName].defaultValue()??>
+    default value: ${properties[propertyName].defaultValue()}</#if>

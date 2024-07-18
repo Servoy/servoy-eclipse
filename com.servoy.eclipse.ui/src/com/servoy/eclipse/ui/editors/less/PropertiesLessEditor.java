@@ -171,6 +171,5 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 	private void updatePropertiesFromTextEditor()
 	{
 		editorInput.reloadProperties(textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput()).get(), false);
-		propertiesComposite.refresh();
 	}
 }

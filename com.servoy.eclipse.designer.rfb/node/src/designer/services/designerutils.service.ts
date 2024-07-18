@@ -85,8 +85,8 @@ export class DesignerUtilsService {
                 dropTarget = this.editorContentService.getContentForm();
                 //droptarget is the form but has no svy-id
                 for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
-                    const node = dropTarget.childNodes[i];
-                    if (node instanceof Element && node.getAttribute('svy-id')) {
+                    const node = dropTarget.childNodes[i] as HTMLElement;
+                    if (node && node.nodeType === Node.ELEMENT_NODE && node.getAttribute('svy-id')) {
                         const clientRec = node.getBoundingClientRect();
                         const absolutePoint = //this.convertToAbsolutePoint(doc, 
                         {
@@ -152,11 +152,11 @@ export class DesignerUtilsService {
                     // we drop directly on the node, try to determine its position between children
                     let beforeNode: Element = null;
                     for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
-                        let node = dropTarget.childNodes[i];
-                        if (node instanceof Element && !node.getAttribute('svy-id')){
+                        let node = dropTarget.childNodes[i] as HTMLElement;
+                        if (node && node.nodeType === Node.ELEMENT_NODE && !node.getAttribute('svy-id')){
                             node = node.querySelector('[svy-id]');
                         }
-                        if (node instanceof Element && node.getAttribute('svy-id')) {
+                        if (node && node.nodeType === Node.ELEMENT_NODE && node.getAttribute('svy-id')) {
                             const clientRec = node.getBoundingClientRect();
                             const absolutePoint = this.convertToAbsolutePoint({
                                 x: clientRec.right,
@@ -269,6 +269,16 @@ export class DesignerUtilsService {
         });
         return found;
     }
+    
+    getNodeBasedOnSelectionFCorLFC() {
+		const elements = this.editorContentService.getAllContentElements();
+		const selectedNodeID = this.editorSession.getSelection().length === 1 && this.editorSession.getSelection()[0] || null;
+		if (elements.length && selectedNodeID) {
+			const node = elements.filter(item => item.getAttribute('svy-id') === selectedNodeID && (item.classList.contains('svy-formcomponent') || item.classList.contains('svy-listformcomponent')));
+			return node.length === 1 ? node[0] : null;
+		}
+		return null;
+	}
 
     isTopContainer(layoutName: string) {
         const packages = this.editorSession.getState().packages;
@@ -312,6 +322,7 @@ export class DesignerUtilsService {
     
      getNextElementSibling(element) : Element{
         // find the correct sibbling (the one which has the svy-id)
+        const originalElement = element;
         while ( element.parentElement && !element.parentElement.getAttribute('svy-id')){
             element = element.parentElement;
         }
@@ -319,6 +330,9 @@ export class DesignerUtilsService {
         if (sibbling && !sibbling.getAttribute('svy-id')){
             sibbling = sibbling.querySelector('[svy-id]');
         }
+        if (sibbling === null) {
+			sibbling = originalElement.nextElementSibling;
+		}
         return sibbling;
     }
 }

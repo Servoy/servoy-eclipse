@@ -3,23 +3,25 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-<parent>
+    <prerequisites>
+        <maven>3.9.0</maven>
+    </prerequisites>
+    <parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2023.3.8.3850_LTS</version>
+		<version>2024.3.2.3945</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.jre.macosx.x86_64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>17.0.9</version>
+	<version>21.0.1</version>
 	
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.3.2</version>
 				<configuration>
 					<filesets>
 						<fileset>
@@ -31,7 +33,7 @@
 			<plugin>
 				<groupId>com.googlecode.maven-download-plugin</groupId>
 				<artifactId>download-maven-plugin</artifactId>
-				 <version>1.6.7</version>
+				 <version>1.8.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -39,7 +41,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://developer.servoy.com/jre/jre170_9_osx_x64.zip</url>
+							<url>https://developer.servoy.com/jre/jre210_1_osx_x64.zip</url>
 							<outputFileName>jre.zip</outputFileName>
 							<unpack>true</unpack>
                             <outputDirectory>${basedir}/jre</outputDirectory>

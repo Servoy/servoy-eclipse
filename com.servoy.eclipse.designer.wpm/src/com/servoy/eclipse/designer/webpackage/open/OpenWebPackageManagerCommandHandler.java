@@ -8,13 +8,13 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.IMainConceptsPageAction;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -67,7 +67,7 @@ public class OpenWebPackageManagerCommandHandler extends AbstractHandler impleme
 		}
 		else
 		{
-			new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager", null,
+			new MessageDialog(UIUtils.getActiveShell(), "Servoy Package Manager", null,
 				"Servoy Package Manager does not work when there is no active solution set.", MessageDialog.INFORMATION,
 				new String[] { IDialogConstants.OK_LABEL }, 0).open();
 		}

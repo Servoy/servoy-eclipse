@@ -36,7 +36,6 @@ import java.util.Enumeration;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.file.DeletingPathVisitor;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -86,7 +85,7 @@ public class NodeFolderCreatorJob extends Job
 			{
 				try
 				{
-					Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletingPathVisitor.withLongCounters());
+					Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletePathVisitor.INSTANCE);
 				}
 				catch (IOException e)
 				{
@@ -101,22 +100,30 @@ public class NodeFolderCreatorJob extends Job
 				createFolder(nodeFolder);
 			}
 			boolean codeChanged = true;
-			boolean mainPackageJsonChanged = false;
 			File packageJsonFile = new File(nodeFolder.getParent(), "package.json");
+			File packageCopyJsonFile = new File(nodeFolder.getParent(), "package_copy.json");
 			Bundle bundle = Activator.getInstance().getBundle();
 			URL packageJsonUrl = bundle.getEntry("/node/package.json");
 			String bundleContent = Utils.getURLContent(packageJsonUrl);
-			if (packageJsonFile.exists() && !force && fullyGenerated.exists())
+			boolean mainPackageJsonChanged = false;
+			if (!force)
 			{
-				try
+				// if not already in force mode (then a clean is already done)
+				// then if the package_copy is not there or the last time (fullgenerated) is not there, then also force a rebuild.
+				mainPackageJsonChanged = !packageCopyJsonFile.exists() || !fullyGenerated.exists();
+				if (!mainPackageJsonChanged && packageCopyJsonFile.exists())
 				{
-					String fileContent = FileUtils.readFileToString(packageJsonFile, "UTF-8");
-					codeChanged = !fileContent.equals(bundleContent);
-					mainPackageJsonChanged = codeChanged;
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
+					// if it is not a forced rebuild, then check if the package_copy is still the same as the bundle content, if not then rebuild
+					try
+					{
+						String fileContent = FileUtils.readFileToString(packageCopyJsonFile, "UTF-8");
+						codeChanged = !fileContent.equals(bundleContent);
+						mainPackageJsonChanged = codeChanged;
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
 				}
 			}
 			File projectsFolder = new File(nodeFolder, "projects");
@@ -149,13 +156,13 @@ public class NodeFolderCreatorJob extends Job
 			}
 			if (codeChanged)
 			{
-				// delete the full parent dir because the main package json is changed
 				fullyGenerated.delete();
 				if (mainPackageJsonChanged)
 				{
+					// delete the full parent dir because the main package json is changed
 					try
 					{
-						Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletingPathVisitor.withLongCounters());
+						Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletePathVisitor.INSTANCE);
 					}
 					catch (IOException e)
 					{
@@ -169,7 +176,7 @@ public class NodeFolderCreatorJob extends Job
 					// delete only the source dirs, so we start clean
 					try
 					{
-						if (srcFolder.exists()) Files.walkFileTree(srcFolder.toPath(), DeletingPathVisitor.withLongCounters());
+						if (srcFolder.exists()) Files.walkFileTree(srcFolder.toPath(), DeletePathVisitor.INSTANCE);
 					}
 					catch (IOException e)
 					{
@@ -177,7 +184,7 @@ public class NodeFolderCreatorJob extends Job
 					}
 					try
 					{
-						if (projectsFolder.exists()) Files.walkFileTree(projectsFolder.toPath(), DeletingPathVisitor.withLongCounters());
+						if (projectsFolder.exists()) Files.walkFileTree(projectsFolder.toPath(), DeletePathVisitor.INSTANCE);
 					}
 					catch (IOException e)
 					{
@@ -197,6 +204,7 @@ public class NodeFolderCreatorJob extends Job
 				try
 				{
 					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageJsonFile);
+					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageCopyJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
 
 					executeNpmInstall = true;
@@ -222,6 +230,7 @@ public class NodeFolderCreatorJob extends Job
 			if (executeNpmInstall) try
 			{
 				// now do an npm install on the main, parent folder
+				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("uninstall", "@servoy/public")).runCommand(monitor);
 				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("install", "--legacy-peer-deps")).runCommand(monitor);
 				fullyGenerated.createNewFile();
 			}
@@ -391,7 +400,7 @@ public class NodeFolderCreatorJob extends Job
 										{
 											if (filename.toFile().exists())
 											{
-												Files.walkFileTree(target.toPath(), DeletingPathVisitor.withLongCounters());
+												Files.walkFileTree(target.toPath(), DeletePathVisitor.INSTANCE);
 											}
 										}
 										catch (IOException e)

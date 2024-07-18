@@ -61,7 +61,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
 
                 const elementRect = element.getBoundingClientRect();
 
-                const elements = this.editorContentService.getAllContentElements();
+                const elements = this.removeHiddenElements(this.editorContentService.getAllContentElements());
                 Array.from(elements).forEach(node => {
                     if (element != node && node.parentElement.closest('.svy-responsivecontainer') == null) {
                         const position = node.getBoundingClientRect();
@@ -84,6 +84,23 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             });
         }
         this.indicators = newindicators;
+    }
+
+    private removeHiddenElements(elements: Array<HTMLElement>) {
+        const filteredElements = elements.filter((element) => {
+            let wrapper = element.parentElement;
+            
+            while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
+              wrapper = wrapper.parentElement;
+            }
+            
+            if (wrapper && window.getComputedStyle(wrapper).getPropertyValue('visibility') === 'hidden') {
+              return false;
+            }
+      
+          return true;
+        });
+        return filteredElements;
     }
 
     private addSameSizeIndicator(newindicators: SameSizeIndicator[], elementRect: DOMRect, horizontal: boolean) {

@@ -1,17 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 
-import { Component, OnInit, Renderer2, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from 'src/designer/directives/resizeknob.directive';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
+import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'dragselection',
   templateUrl: './dragselection.component.html'
 })
-export class DragselectionComponent implements OnInit, ISupportAutoscroll {
+export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDestroy {
     frameRect: {x?:number; y?:number; top?:number; left?:number};
     leftContentAreaAdjust: number;
     topContentAreaAdjust: number;
@@ -24,6 +26,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
 
     glasspane: HTMLElement;
     contentArea: HTMLElement;
+    
+    scroll = {x: 0, y:0};
 
     autoscrollMargin = 100; //how many pixels we can drag beyong current margins
     autoscrollOffset = {x: 0, y: 0};
@@ -32,8 +36,10 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
     selectionRect = {top: 0, left: 0, width: 0, height: 0};
     mousedownpoint = {x: 0, y: 0};
     mouseOffset = {top: 0, left: 0}; //autoscroll limits will refer to this parameter
+    snapData: SnapData;
+    subscription: Subscription;
 
-  constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private readonly designerUtilsService: DesignerUtilsService, private editorContentService : EditorContentService) { }
+  constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private guidesService: DynamicGuidesService, private readonly designerUtilsService: DesignerUtilsService, private editorContentService : EditorContentService) { }
 
   ngOnInit(): void {
       this.contentArea = this.editorContentService.getContentArea();
@@ -41,6 +47,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
       this.contentArea.addEventListener('mouseup', (event) => this.onMouseUp(event));
       this.contentArea.addEventListener('mousemove', (event) => this.onMouseMove(event));
       this.contentArea.addEventListener('keyup', (event) => this.onKeyup(event));
+      this.contentArea.addEventListener('scrollend', (event) => this.scrollEnd(event));
       
       const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
       this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
@@ -50,7 +57,18 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
       this.selectionRect = {top: 0, left: 0, width: 0, height: 0};
       this.autoscrollOffset.x = 0;
       this.autoscrollOffset.y = 0;
+      
+      this.scroll.x = this.contentArea.scrollLeft;
+      this.scroll.y = this.contentArea.scrollTop;
+
+      this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
+          this.snap(value);
+      })
   }
+
+    ngOnDestroy(): void {
+        this.subscription.unsubscribe();
+    }
 
   private onKeyup(event: KeyboardEvent) {
     //if control is released during drag, the copy is deleted and the original element must be moved
@@ -64,13 +82,16 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
             this.selectionToDrag[i] = cloneInfo.element.getAttribute('cloneuuid');
             this.currentElementsInfo.set(this.selectionToDrag[i], new ElementInfo(node));
             this.renderer.removeChild(cloneInfo.element.parentElement, cloneInfo.element);
-               }
+        }
         this.dragCopy = false;
 	}
   }
   
   onMouseDown(event: MouseEvent) {
-      this.dragNode = this.designerUtilsService.getNode(event);
+	  this.dragNode = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC();
+      if (this.dragNode === null) {
+		  this.dragNode = this.designerUtilsService.getNode(event);
+	  }
       if (this.dragNode && this.dragNode.parentElement.closest('.svy-responsivecontainer')){
          // we are inside responsive container, let dragselection-responsive handle this
          this.dragNode = null;
@@ -104,6 +125,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
       this.currentElementsInfo = null;
       this.dragCopy = false;
       this.editorSession.unregisterAutoscroll(this);
+      this.snapData = null;
   }
 
   private sendChanges(elementInfos: Map<string, ElementInfo>, event: MouseEvent) {
@@ -112,11 +134,24 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
           let i = 0;
           for (const nodeId of elementInfos.keys()) {
               const elementInfo = elementInfos.get(nodeId);
+              const parentFC = elementInfo.element.closest('.svy-formcomponent');
+              if (parentFC && !elementInfo.element.classList.contains('svy-formcomponent')) {
+				const parentRect = parentFC.getBoundingClientRect();
+				elementInfo.x = elementInfo.x - parentRect.x;
+				elementInfo.y = elementInfo.y - parentRect.y;
+              }
               const id = (event.ctrlKey || event.metaKey) ? i++ : nodeId;
               changes[id] = {
-                  x: elementInfo.x,
-                  y: elementInfo.y
+                  x: Math.round(elementInfo.x),
+                  y: Math.round(elementInfo.y),
+                  move: true
               };
+              if (this.snapData && this.selectionToDrag.length == 1) {
+                  const cssPos = this.snapData.cssPosition;
+                  changes[id]['cssPos'] = cssPos;
+                  changes[id]['x'] = Math.round(this.snapData?.left);
+                  changes[id]['y'] = Math.round(this.snapData?.top);
+              }
 
               if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
                   changes[id].uuid = elementInfo.element.getAttribute('cloneuuid');
@@ -131,10 +166,11 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
             this.editorSession.sendChanges(changes);
         }
       }
+      this.snapData = null;
   }
   
     onMouseMove(event: MouseEvent) {
-          if (!this.dragStartEvent)  return;
+          if (!this.dragStartEvent || this.snapData)  return;
               if (!this.editorSession.getState().dragging) {
                   if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
                     this.editorSession.setDragging( true );
@@ -240,12 +276,55 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
         for (let i = 0; i < this.selectionToDrag.length; i++) {
             const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[i]);
             elementInfo.x = elementInfo.x + changeX;
+            if (elementInfo.x < 0) elementInfo.x = 0;
             if (minX != undefined && elementInfo.x < minX) elementInfo.x = minX;
             elementInfo.y = elementInfo.y + changeY;
+            if (elementInfo.y < 0) elementInfo.y = 0;        
             if (minY != undefined && elementInfo.y < minY) elementInfo.y = minY;
             elementInfo.element.style.position = 'absolute';
-            elementInfo.element.style.top = (parseInt(elementInfo.element.style.top.replace('px', '')) || 0)  + changeY + 'px';
-            elementInfo.element.style.left = (parseInt(elementInfo.element.style.left.replace('px', ''))|| 0)  + changeX + 'px';
+            if (elementInfo.element.style.top.length) {
+				elementInfo.element.style.top = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
+				if (parseFloat(elementInfo.element.style.top.replace('px', '')) < 0) {
+					elementInfo.element.style.top = '0px';
+				}
+			}
+            if (elementInfo.element.style.left.length) {
+				elementInfo.element.style.left = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
+				if (parseFloat(elementInfo.element.style.left.replace('px', '')) < 0) {
+					elementInfo.element.style.left = '0px';
+				}
+			}
+            if (elementInfo.element.style.right.length) {
+				elementInfo.element.style.right = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.right, 'x').replace('px', ''))|| 0)  - changeX + 'px';
+			}
+			if (elementInfo.element.style.bottom.length) {
+				elementInfo.element.style.bottom = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
+			}
+			if (!elementInfo.element.style.left.length && !elementInfo.element.style.right.length) {
+				elementInfo.element.style.left = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.left, 'x').replace('px', ''))|| 0)  + changeX + 'px';
+				if (parseFloat(elementInfo.element.style.left.replace('px', '')) < 0) {
+					elementInfo.element.style.left = '0px';
+				}
+			}
+			if (!elementInfo.element.style.top.length && !elementInfo.element.style.bottom.length) {
+				elementInfo.element.style.top = (parseFloat(this.editorContentService.getValueInPixel(elementInfo.element.style.top, 'y').replace('px', '')) || 0)  + changeY + 'px';
+				if (parseFloat(elementInfo.element.style.top.replace('px', '')) < 0) {
+					elementInfo.element.style.top = '0px';
+				}
+			}
+        }
+    }
+
+    snap(data: SnapData) {
+        if (this.selectionToDrag) {
+                this.snapData = data;
+                if (this.snapData?.top && this.snapData?.left && this.selectionToDrag.length == 1) {
+                    const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[0]);
+                    const changeX = this.snapData.left - elementInfo.x;
+                    const changeY = this.snapData.top - elementInfo.y;
+                    this.updateLocation(changeX, changeY);
+                    this.dragStartEvent = this.snapData.event;
+                }
         }
     }
 
@@ -347,15 +426,41 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
         if ((this.selectionRect.top + this.mouseOffset.top) > (Math.max(this.glasspane.offsetHeight, this.minimumMargins.bottom) - this.containerOffset)) {
              this.glasspane.style.height = this.glasspane.offsetHeight + changeY + 'px';
              this.autoscrollOffset.y += changeY;
-         } 
+        } 
 
         if ((this.selectionRect.left + this.mouseOffset.left) > Math.max(this.glasspane.offsetWidth, this.minimumMargins.right) - this.containerOffset) {
             this.glasspane.style.width = this.glasspane.offsetWidth + changeX + 'px';
             this.autoscrollOffset.x += changeX;
-        } 
+        }
 
-        this.updateLocation(changeX, changeY, 0, 0);
         this.contentArea.scrollTop += changeY; 
         this.contentArea.scrollLeft += changeX;
     }
+    
+    scrollEnd(event: Event) {
+		if (this.dragStartEvent) {
+			if (this.scroll.y != this.contentArea.scrollTop) {
+				if (this.contentArea.scrollTop > this.scroll.y) {
+					this.scroll.y = this.contentArea.scrollTop - this.scroll.y;
+				} else {
+					this.scroll.y = -(this.scroll.y - this.contentArea.scrollTop);
+				}
+			} else {
+				this.scroll.y = 0;
+			}
+			if (this.scroll.x != this.contentArea.scrollLeft) {
+				if (this.contentArea.scrollLeft > this.scroll.x) {
+					this.scroll.x = this.contentArea.scrollLeft - this.scroll.x;
+				} else {
+					this.scroll.x = -(this.scroll.x - this.contentArea.scrollLeft);
+				}
+			} else {
+				this.scroll.x = 0;
+			}
+			this.updateLocation(this.scroll.x, this.scroll.y);
+		}
+		
+		this.scroll.x = this.contentArea.scrollLeft;
+		this.scroll.y = this.contentArea.scrollTop;
+	}
 }

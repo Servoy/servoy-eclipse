@@ -23,11 +23,10 @@ import java.util.List;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ExpandEvent;
-import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -35,10 +34,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.events.IExpansionListener;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 /**
  * @author Diana
@@ -51,10 +51,9 @@ public class RadioButtonsDialog extends Dialog
 	private List<String> radioButtonsTexts = new ArrayList<String>();
 	private final String dialogTitle;
 	private Button selectedButton;
-	private ExpandItem collapsableItem;
 	private Composite topLevel;
 	private Composite expandComposite;
-	private ExpandBar expandBar;
+	private ExpandableComposite excomposite;
 	SelectionListener selectionListener;
 
 	/**
@@ -139,11 +138,22 @@ public class RadioButtonsDialog extends Dialog
 
 	public void addAdvancedSettings()
 	{
-		expandBar = new ExpandBar(topLevel, SWT.NONE);
-		expandBar.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-		expandBar.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE));
+		excomposite = new ExpandableComposite(topLevel, SWT.NONE,
+			ExpandableComposite.TWISTIE);
+		excomposite.setExpanded(false);
+		excomposite.setText(excomposite.isExpanded() ? "Hide advanced install database settings" : "Show advanced install database settings");
+		if (UIUtils.isDarkThemeSelected(false))
+		{
+			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+				.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
+			if (darkFGColor != null)
+			{
+				excomposite.setTitleBarForeground(darkFGColor);
+				excomposite.setActiveToggleColor(darkFGColor);
+			}
+		}
 
-		expandComposite = new Composite(expandBar, SWT.NONE);
+		expandComposite = new Composite(excomposite, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		expandComposite.setLayout(layout);
 
@@ -156,41 +166,30 @@ public class RadioButtonsDialog extends Dialog
 			radioButtons.add(radioButton);
 		}
 
-		collapsableItem = new ExpandItem(expandBar, SWT.NONE, 0);
-		collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-		collapsableItem.setControl(expandComposite);
-		expandBar.addExpandListener(new ExpandListener()
+		excomposite.setClient(expandComposite);
+
+		excomposite.addExpansionListener(new IExpansionListener()
 		{
-			public void itemExpanded(ExpandEvent e)
+
+			@Override
+			public void expansionStateChanging(ExpansionEvent e)
 			{
-				collapsableItem.setText("Hide advanced install database settings");
-				resizeDialog();
+
 			}
 
-			public void itemCollapsed(ExpandEvent e)
+			@Override
+			public void expansionStateChanged(ExpansionEvent e)
 			{
-				collapsableItem.setText("Show advanced install database settings");
+				excomposite.setText(excomposite.isExpanded() ? "Hide advanced install database settings" : "Show advanced install database settings");
 				resizeDialog();
+
 			}
+
 		});
-
-		collapsableItem.setExpanded(false);
-		if (collapsableItem.getExpanded())
-		{
-			Shell shell = getShell();
-			shell.getDisplay().asyncExec(() -> {
-				//center dialog vertically
-				Rectangle parentSize = shell.getParent().getBounds();
-				Rectangle bounds = shell.getBounds();
-				bounds.y = (parentSize.height - bounds.height) / 2 + parentSize.y;
-				shell.setBounds(bounds);
-			});
-		}
-		collapsableItem.setText(collapsableItem.getExpanded() ? "Hide advanced install database settings" : "Show advanced install database settings");
 
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
 		gridData.minimumWidth = 550; // needs to be wide
-		expandBar.setLayoutData(gridData);
+		excomposite.setLayoutData(gridData);
 
 	}
 
@@ -200,7 +199,7 @@ public class RadioButtonsDialog extends Dialog
 		shell.getDisplay().asyncExec(() -> {
 
 			Point preferredSize = shell.computeSize(shell.getSize().x, SWT.DEFAULT, true);
-			if (!collapsableItem.getExpanded())
+			if (!excomposite.isExpanded())
 			{
 				//if the help page is visible, we don't shrink
 				return;
@@ -208,12 +207,11 @@ public class RadioButtonsDialog extends Dialog
 
 			Rectangle bounds = shell.getBounds();
 			bounds.height = preferredSize.y;
-			if (collapsableItem.getExpanded())
-			{
-				//when it is expanded we center the dialog, because sometimes it shows right on top
-				Rectangle parentSize = shell.getParent().getBounds();
-				bounds.y = (parentSize.height - bounds.height) / 2 + parentSize.y;
-			}
+
+			//when it is expanded we center the dialog, because sometimes it shows right on top
+			Rectangle parentSize = shell.getParent().getBounds();
+			bounds.y = (parentSize.height - bounds.height) / 2 + parentSize.y;
+
 			shell.setBounds(bounds);
 			shell.layout(true, true);
 		});

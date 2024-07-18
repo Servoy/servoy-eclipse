@@ -330,11 +330,13 @@ export class NGUtilsService {
 	*/
     public printDocument(url: string) {
 		const objFra = document.createElement('iframe');   
-	    objFra.style.visibility = 'hidden';    
-	    objFra.src = url;                      
-	    document.body.appendChild(objFra);  
-	    objFra.contentWindow.focus();      
-	    objFra.contentWindow.print();
+        objFra.style.visibility = 'hidden';
+        document.body.appendChild(objFra);
+        objFra.onload = () => {
+                objFra.contentWindow.focus();
+                objFra.contentWindow.print();
+        };    
+        objFra.src = url;                      
 	}
 
     /**
@@ -343,11 +345,11 @@ export class NGUtilsService {
     * @param component the component to retrieve location for.
     * @return the location of the component.
     */
-    public getAbsoluteLocation(component: string): {x: number;y: number} {
+    public getAbsoluteLocation(component: string): { x: number; y: number } {
         const el = this.document.getElementById(component);
-        if (el){
-           const rect = el.getBoundingClientRect();
-           return { x: rect.left + this.windowRef.nativeWindow.scrollX, y: rect.top + this.windowRef.nativeWindow.scrollY };
+        if (el) {
+            const rect = el.getBoundingClientRect();
+            return { x: rect.left + this.windowRef.nativeWindow.scrollX, y: rect.top + this.windowRef.nativeWindow.scrollY };
         }
         return null;
     }
@@ -381,7 +383,7 @@ export class NGUtilsService {
         this.platformLocation.onPopState(() => {
             if (this._backActionCB) {
                 if (this.platformLocation.hash) {
-                    this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script, [this.platformLocation.hash]);
+                    this._backActionCB(this.platformLocation.hash);
                 } else if (this.platformLocation.href.endsWith('/index.html')) {
                     this.platformLocation.forward(); // if the back button is registered then don't allow to move back, go to the first page again.
                 }
@@ -410,6 +412,30 @@ export class NGUtilsService {
         } else {
             console.log('cannot find anchor element ' + anchorSelector);
         }
+    }
+    
+    /**
+     * Move the scrollbar to top position of the given selector.
+     * The target selector can be a Servoy Form, Layout Container or element in a responsive form or any element in a form.
+     * You can use styleClass as selector.
+     * For example: you can add 'scroll-element' to an element of the form.
+     * Examples of usage:
+     * - plugins.ngclientutils.scrollToTop(".toScroll-To");
+
+     * @param selector {string} the selector to which the scrollbar should be moved to top.
+     */
+    public scrollToTop(selector: string) {
+        // find container
+        const container = this.document.querySelector(selector);
+        
+        // validate elements found
+        if (!container) {
+			console.warn(`cannot find container ${selector}`);
+			return;
+		}
+        
+        // move scrolling to top position
+        window.scrollTo({top: container.getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
     }
 
     /**
@@ -446,6 +472,13 @@ export class NGUtilsService {
         for (let i = 0; i < nodeList.length; i++) {
             nodeList[i].classList.remove(className);
         }
+    }
+
+    /**
+    * This method removes the arguments from the client url. This is used for bookmark url to be correct or for back button behavior.
+    */
+    public removeArguments() {
+        this.windowRef.nativeWindow.history.replaceState({}, '', this.windowRef.nativeWindow.location.pathname + this.windowRef.nativeWindow.location.hash);
     }
 
     private beforeUnload(e: any) {

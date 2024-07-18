@@ -46,10 +46,7 @@ import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ExpandEvent;
-import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
@@ -57,13 +54,13 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -79,7 +76,9 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.forms.HyperlinkSettings;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormText;
+import org.eclipse.ui.forms.widgets.ImageHyperlink;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IShowInSource;
@@ -92,10 +91,10 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.eclipse.ui.util.ExpandBarWidthAware;
 import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
 import com.servoy.eclipse.ui.util.WrappingControl;
 import com.servoy.eclipse.ui.util.XLControl;
@@ -128,7 +127,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private Button logServerButton;
 	private Button proceduresButton;
 	private Button sortIgnoreCaseButton;
-	private CCombo sortNullprecedenceField;
+	private Combo sortNullprecedenceField;
 	private Button clientOnlyConnectionsButton;
 	private Button prefixTablesButton;
 	private Button createLogTableButton;
@@ -137,16 +136,16 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private Button saveButton;
 	private Button testConnectionButton;
 	private Text validationQueryField;
-	private CCombo validationTypeField;
+	private Combo validationTypeField;
 	private Text maxPreparedStatementsIdleField;
 	private Text maxIdleField;
 	private Text logTableName;
 	private Text maxActiveField;
 	private Text idleTimoutField;
-	private CCombo dataModel_cloneFromField;
-	private CCombo schemaField;
-	private CCombo catalogField;
-	private CCombo driverField;
+	private Combo dataModel_cloneFromField;
+	private Combo schemaField;
+	private Combo catalogField;
+	private Combo driverField;
 	private Text urlField;
 	private Text passwordField;
 	private Text userNameField;
@@ -165,7 +164,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private IServerConfigListener logServerListener = null;
 
 	private Composite mainComposite;
-	private ExpandItem collapsableItem;
 	private ScrolledComposite myScrolledComposite;
 	private Composite advancedSettingsComposite;
 
@@ -185,8 +183,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		myScrolledComposite.setShowFocusedControl(true);
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
-
-		Label mainSeparator = separator(parent);
 
 		Composite bottomComposite = new Composite(parent, SWT.NONE);
 
@@ -367,22 +363,29 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		Composite advancedSettingsCollapserComposite = new Composite(mainComposite, SWT.NONE);
 
-		Label separator1 = separator(advancedSettingsCollapserComposite);
-		ExpandBarWidthAware expandBarWrapper = new ExpandBarWidthAware(advancedSettingsCollapserComposite, SWT.NONE, SWT.NONE);
-		ExpandBar advancedSettingsCollapser = expandBarWrapper.getWrappedControl();
-		Label separator2 = separator(advancedSettingsCollapserComposite);
+		ExpandableComposite excomposite = new ExpandableComposite(advancedSettingsCollapserComposite, SWT.NONE,
+			ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
+		excomposite.setText("Advanced server settings");
+		excomposite.setExpanded(false);
+		excomposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		excomposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		if (IconPreferences.getInstance().getUseDarkThemeIcons())
+		{
+			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
+				.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
+			if (darkFGColor != null)
+			{
+				excomposite.setTitleBarForeground(darkFGColor);
+				excomposite.setActiveToggleColor(darkFGColor);
+			}
+		}
 
-		collapsableItem = new ExpandItem(advancedSettingsCollapser, SWT.NONE, 0);
-		collapsableItem.setText("Show advanced server settings");
-
-		advancedSettingsCollapser.setBackground(display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-		advancedSettingsCollapser.setForeground(display.getSystemColor(SWT.COLOR_DARK_BLUE));
-
-		advancedSettingsComposite = new Composite(advancedSettingsCollapser, SWT.NONE);
+		advancedSettingsComposite = new Composite(excomposite, SWT.NONE);
 		advancedSettingsComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
-		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("advanced_serverproperties.png"));
-		collapsableItem.setControl(advancedSettingsComposite);
-
+		ImageHyperlink image = new ImageHyperlink(excomposite, SWT.None);
+		image.setImage(Activator.getDefault().loadImageFromBundle("advanced_serverproperties.png"));
+		excomposite.setClient(advancedSettingsComposite);
+		excomposite.setTextClient(image);
 		Label urlLabel = label(advancedSettingsComposite, "URL", ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
 		urlField = text(advancedSettingsComposite, ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
 
@@ -442,8 +445,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		toolTip = "All Servoy generated SQL statements are in the form of Prepared statements, to increase the performance of statement execution.\nThis setting determines how many prepared statements are kept in cache.";
 		Label maxPreparedStatementsIdleLabel = label(advancedSettingsComposite, "Max Idle Prepared Statements", toolTip);
 		maxPreparedStatementsIdleField = text(advancedSettingsComposite, toolTip);
-
-		Label separator3 = separator(advancedSettingsComposite);
 
 		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" + "\"" +
 			getConnectionValidationTypeAsString(CONNECTION_EXCEPTION_VALIDATION) +
@@ -614,8 +615,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		});
 
 
-		Label separator4 = separator(advancedSettingsComposite);
-
 		toolTip = "Enabling this will enable querying for stored procedures on the database and exposing that under datasources.sp.servername";
 		label(advancedSettingsComposite, "Enable procedures", toolTip);
 		proceduresButton = checkbox(advancedSettingsComposite, toolTip);
@@ -655,9 +654,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		myScrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		tmpGD = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
-		tmpGD.verticalIndent = 10;
-		mainSeparator.setLayoutData(tmpGD);
 
 		bottomComposite.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 
@@ -718,11 +714,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		advancedSettingsCollapserComposite.setLayout(gridLayout);
 
 		advancedSettingsCollapserComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
-		expandBarWrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		separator1.setLayoutData(separatorGd());
-		separator2.setLayoutData(separatorGd());
-		separator3.setLayoutData(separatorGd());
-		separator4.setLayoutData(separatorGd());
 
 		gridLayout = new GridLayout(4, false);
 		gridLayout.marginRight = 0;
@@ -816,29 +807,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 				flagModified();
 			}
 		});
-
-
-		collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-
 		myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
-		final RelayoutWhenExpandBarPreferredHeightChanges r = new RelayoutWhenExpandBarPreferredHeightChanges();
-		advancedSettingsCollapser.addExpandListener(new ExpandListener()
-		{
-
-			public void itemExpanded(ExpandEvent e)
-			{
-				collapsableItem.setText("Hide advanced server settings");
-				runLaterInDisplayThread(getDisplay(parent), 0, r);
-			}
-
-			public void itemCollapsed(ExpandEvent e)
-			{
-				collapsableItem.setText("Show advanced server settings");
-				runLaterInDisplayThread(getDisplay(parent), 0, r);
-			}
-
-		});
 	}
 
 	private static Label label(Composite parent, String text, String toolTip)
@@ -864,23 +834,18 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		return checkbox;
 	}
 
-	private static CCombo dropdown(Composite parent, String toolTip, String... items)
+	private static Combo dropdown(Composite parent, String toolTip, String... items)
 	{
 		return dropdown(parent, SWT.NONE, toolTip, items);
 	}
 
-	private static CCombo dropdown(Composite parent, int style, String toolTip, String... items)
+	private static Combo dropdown(Composite parent, int style, String toolTip, String... items)
 	{
-		CCombo combo = new CCombo(parent, SWT.BORDER | style);
+		Combo combo = new Combo(parent, SWT.BORDER | style);
 		combo.setToolTipText(toolTip);
 		combo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 		stream(items).forEach(combo::add);
 		return combo;
-	}
-
-	private static Label separator(Composite parent)
-	{
-		return new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 	}
 
 	/**
@@ -921,56 +886,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		else display.timerExec(afterMillis, r);
 	}
 
-	/**
-	 * This would not normally be needed but there is a bug in Ubuntu native SWT implementation that once the expand bar expands an item,
-	 * the expand bar still computes default size ignoring the extended size of the composite - but at some point in time it will see the newly expanded item contents
-	 * as well in native code and compute preferred size correctly. But I didn't find a trigger for when that happens - tried show/hide event of item contents, resize (which partially worked but only when
-	 * it needed scrollbars somewhere in the parent hierarchy), tried wrapping the contents of the item inside a wrapper composite and manually showing and hiding that to generare resizes but with no luck.<br/><br/>
-	 *
-	 * So now we simply wait for the native GTK-SWT code to be aware of the new contents after an expand/collapse and then we update the layout of the editor.<br/><br/>
-	 *
-	 * If it weren't for that bug, a simple asyncExec with relayout on expand/collapse would have been enough (it worked like that on Windows).
-	 */
-	protected class RelayoutWhenExpandBarPreferredHeightChanges implements Runnable
-	{
-
-		protected final static int MAX_DELAYED_ATTEMPTS = 100;
-		protected final static int WAIT_TIME_BETWEEN_ATTEMPTS_MS = 50;
-
-		protected int oldMainCompositePreferredHeight;
-		protected int attemptNo = 0;
-
-		/**
-		 * See class description.
-		 */
-		public RelayoutWhenExpandBarPreferredHeightChanges()
-		{
-			oldMainCompositePreferredHeight = mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		}
-
-		@Override
-		public void run()
-		{
-			int newPreferredHeight = mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-			if ((newPreferredHeight != oldMainCompositePreferredHeight) || (attemptNo == MAX_DELAYED_ATTEMPTS))
-			{
-				oldMainCompositePreferredHeight = newPreferredHeight;
-				attemptNo = 0;
-				relayout();
-			}
-			else
-			{
-				attemptNo += 1;
-				// wait until it changes preferred size to refresh layout
-				runLaterInDisplayThread(getDisplay(parentControl), WAIT_TIME_BETWEEN_ATTEMPTS_MS, this);
-			}
-		}
-
-	}
-
 	protected void relayout()
 	{
-		collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		parentControl.layout(true, true);
 	}
@@ -998,13 +915,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private static GridData fourColumns()
 	{
 		return new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
-	}
-
-	private static GridData separatorGd()
-	{
-		GridData gd = fourColumns();
-		gd.verticalAlignment = 10;
-		return gd;
 	}
 
 	private static GridData width(GridData gd)

@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.file.DeletingPathVisitor;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -81,6 +80,7 @@ import com.servoy.eclipse.model.ING2WarExportModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.IEditorRefresh;
+import com.servoy.eclipse.model.util.SerialRule;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
@@ -143,6 +143,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					"---- Starting Titanium NGClient solution/dependencies source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				// modules and css of the components those are based on the Packages itself
 				CssLibSet cssLibs = new CssLibSet();
+				boolean hasFontAwesomePro = false;
 				Set<String> packageToInstall = new HashSet<>();
 				Set<String> assetsToAdd = new HashSet<>();
 				Map<String, Pair<WebLayoutSpecification, String>> structureTagNames = new HashMap<>();
@@ -161,6 +162,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (libs != null)
 					{
 						cssLibs.addAll(libs);
+						if ("@servoy/fontawesomepro".equals(webObjectSpecification.getNG2Config().getPackageName()))
+						{
+							hasFontAwesomePro = true;
+						}
 					}
 					List<String> assets = webObjectSpecification.getNG2Config().getAssets().getAssetsList();
 					if (assets != null)
@@ -248,7 +253,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				boolean sourceChanged = false;
 				if (ng2Services.size() > 0 || componentPackageSpecToReader.size() > 0)
 				{
-					File distIndexFile = new File(projectFolder, "dist/app/index.html");
+					File distIndexFile = new File(projectFolder, "dist/app/browser/index.html");
 					sourceChanged = !distIndexFile.exists();
 					if (sourceChanged)
 					{
@@ -498,7 +503,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						JSONArray styles = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
 							.getJSONObject("options").getJSONArray("styles");
 						boolean[] stylesChanged = new boolean[] { false };
-						if (cssLibs.size() + 1 != styles.length())
+						if (!hasFontAwesomePro && cssLibs.size() + 2 != styles.length())
 						{
 							stylesChanged[0] = true;
 						}
@@ -530,6 +535,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							{
 								styles.remove(0);
 							}
+							if (!hasFontAwesomePro) styles.put("@fortawesome/fontawesome-free/css/all.css");
 							for (CssLib style : cssLibs)
 							{
 								styles.put(style.getUrl().replace("~", "./node_modules/"));
@@ -614,12 +620,30 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 						});
 					}
-					// first exeuted npm install with all the packages.
+					// fist create the servoy/public dist if needed
+					String location = Activator.getInstance().getBundle().getLocation();
+					int fromSourceIndex = location.indexOf("file:/");
+					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists())
+					{
+						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
+							Arrays.asList("run", "build_lib_debug_nowatch"));
+						try
+						{
+							npmCommand.runCommand(monitor);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+
+					// exeuted npm install with all the packages.
 					// only execute this if a source is changed (should always happens the first time)
 					// or if there are really packages to install.
 					List<String> command = new ArrayList<>();
 					command.add("install");
 					packageToInstall.forEach(packageName -> command.add(packageName));
+					command.add("./dist-public/"); // also add the public api
 					command.add("--legacy-peer-deps");
 					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
 					try
@@ -691,7 +715,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									// this is already the package (root of node modules, like rxjs)
 									try
 									{
-										Files.walkFileTree(file.toPath(), DeletingPathVisitor.withLongCounters());
+										Files.walkFileTree(file.toPath(), DeletePathVisitor.INSTANCE);
 									}
 									catch (IOException e)
 									{
@@ -708,7 +732,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										{
 											try
 											{
-												Files.walkFileTree(nested.toPath(), DeletingPathVisitor.withLongCounters());
+												Files.walkFileTree(nested.toPath(), DeletePathVisitor.INSTANCE);
 											}
 											catch (IOException e)
 											{
@@ -796,7 +820,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				template.append("  let-state=\"state\" >\n<");
 				template.append(pair.getRight());
 				pair.getLeft().getDirectives().forEach(directive -> template.append(' ').append(directive));
-				template.append(" [svyContainerStyle]=\"state\" class=\"svy-layoutcontainer\">\n");
+				template.append(
+					" [svyContainerStyle]=\"state\" [svyContainerClasses]=\"state.classes\" [svyContainerAttributes]=\"state.attributes\"  class=\"svy-layoutcontainer\">\n");
 				template.append(
 					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getTemplate(item)\" [ngTemplateOutletContext]=\"{ state:item, callback:this}\"></ng-template>\n</");
 				template.append(pair.getRight());
@@ -807,7 +832,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				templateLFC.append("  let-state=\"state\" let-row=\"row\" let-i=\"i\">\n<");
 				templateLFC.append(pair.getRight());
 				pair.getLeft().getDirectives().forEach(directive -> templateLFC.append(' ').append(directive));
-				templateLFC.append(" [svyContainerStyle]=\"state\" class=\"svy-layoutcontainer\">\n");
+				templateLFC.append(
+					" [svyContainerStyle]=\"state\" [svyContainerClasses]=\"state.classes\" [svyContainerAttributes]=\"state.attributes\"  class=\"svy-layoutcontainer\">\n");
 				templateLFC.append(
 					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getRowItemTemplate(item)\" [ngTemplateOutletContext]=\"{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}\"></ng-template>\n</");
 				templateLFC.append(pair.getRight());
@@ -926,6 +952,13 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									File packagesFolder = new File(projectFolder, "packages");
 									File packageFolder = new File(packagesFolder, packageName);
 
+									// quicly check tsconfig.json to get rid of warnings
+									File tsconfig = new File(packagesFolder, "tsconfig.json");
+									if (!tsconfig.exists())
+									{
+										FileUtils.copyFile(new File(projectFolder, "tsconfig.json"), tsconfig);
+									}
+
 									JSONObject sourcePathJson = null;
 									String sourcePathContents = FileUtils.readFileToString(sourcePath.getLocation().toFile(), "UTF8");
 									sourcePathJson = new JSONObject(sourcePathContents);
@@ -971,13 +1004,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									{
 										DirectorySync directorySync = WebPackagesListener.watchCreated.get(packageFolder);
 										if (directorySync != null) directorySync.destroy();
-										try
+										if (packageFolder.exists())
 										{
-											Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
-										}
-										catch (IOException e)
-										{
-											Debug.error(e);
+											try
+											{
+												Files.walkFileTree(packageFolder.toPath(), DeletePathVisitor.INSTANCE);
+											}
+											catch (IOException e)
+											{
+												Debug.error(e);
+											}
 										}
 
 										File srcDir = file.getLocation().toFile();
@@ -1059,7 +1095,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							{
 								try
 								{
-									Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+									Files.walkFileTree(packageFolder.toPath(), DeletePathVisitor.INSTANCE);
 								}
 								catch (IOException e)
 								{
@@ -1095,7 +1131,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							{
 								try
 								{
-									Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+									Files.walkFileTree(packageFolder.toPath(), DeletePathVisitor.INSTANCE);
 								}
 								catch (IOException e)
 								{
@@ -1110,7 +1146,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							try
 							{
 								// this could happen if we deleted the war file but undeploy failed once
-								Files.walkFileTree(packageFolder.toPath(), DeletingPathVisitor.withLongCounters());
+								Files.walkFileTree(packageFolder.toPath(), DeletePathVisitor.INSTANCE);
 							}
 							catch (IOException io)
 							{
@@ -1181,6 +1217,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	private static final AtomicBoolean cleanInstall = new AtomicBoolean(false);
 
 	private static final ConcurrentMap<File, DirectorySync> watchCreated = new ConcurrentHashMap<>();
+	private static final SerialRule serialRule = SerialRule.getNewSerialRule();
 
 	public WebPackagesListener()
 	{
@@ -1213,6 +1250,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				checkPackages(false);
 			}
 		});
+		job.setRule(serialRule);
 		job.schedule();
 	}
 
@@ -1297,7 +1335,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			// create the production build
 			new PackageCheckerJob("production_build", distributionSource, model.getModel()).run(model.getProgressMonitor());
 			// copy the production build
-			File distFolder = new File(distributionSource, "dist/app");
+			File distFolder = new File(distributionSource, "dist/app/browser");
 			if (distFolder.exists())
 			{
 				FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));

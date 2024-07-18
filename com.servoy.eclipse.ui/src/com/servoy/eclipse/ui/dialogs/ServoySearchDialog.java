@@ -32,6 +32,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -42,6 +43,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
@@ -50,7 +53,9 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
 import com.servoy.j2db.FlattenedSolution;
@@ -231,12 +236,40 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	private class OpenInFormEditorAction extends OpenFormEditorAction
 	{
 		/**
-		 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenInFormEditorAction#run()
+		 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction#run()
 		 */
 		@Override
 		public void run()
 		{
 			super.run();
+			getShell().close();
+		}
+	}
+
+	private class OpenFormHierarchyAction extends OpenInFormEditorAction
+	{
+		public OpenFormHierarchyAction()
+		{
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("form_hierarchy.png"));
+			setText("Open Form Hierarchy");
+			setToolTipText(getText());
+		}
+
+		@Override
+		public void run()
+		{
+			try
+			{
+				IStructuredSelection select = this.selection;
+				FormHierarchyView view = (FormHierarchyView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(FormHierarchyView.ID);
+				IPersist persist = select.getFirstElement() instanceof PersistContext ? ((PersistContext)select.getFirstElement()).getPersist()
+					: (IPersist)select.getFirstElement();
+				view.open(persist);
+			}
+			catch (PartInitException e)
+			{
+				e.printStackTrace();
+			}
 			getShell().close();
 		}
 	}
@@ -329,6 +362,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	private final CheckUncheckAction checkUncheckAllAction;
 	private final OpenInScriptEditorAction showEditWithScriptEditor;
 	private final OpenInFormEditorAction showEditWithFormEditor;
+	private final OpenFormHierarchyAction showEditWithFormHierarchy;
 
 	private boolean isAltKeyPressed;
 	private SelectionListener okButtonSelectionListener;
@@ -355,6 +389,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		checkUncheckAllAction = new CheckUncheckAction();
 		showEditWithScriptEditor = new OpenInScriptEditorAction();
 		showEditWithFormEditor = new OpenInFormEditorAction();
+		showEditWithFormHierarchy = new OpenFormHierarchyAction();
 
 		setSelectionHistory(new SelectionHistory()
 		{
@@ -524,11 +559,12 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 
 		if (this.getSelectedItems().getFirstElement() instanceof Form)
 		{
-
+			menuManager.add(showEditWithFormHierarchy);
 			menuManager.add(showEditWithScriptEditor);
 			menuManager.add(showEditWithFormEditor);
 
 			super.fillContextMenu(menuManager);
+			showEditWithFormHierarchy.setSelection(getSelectedItems());
 			showEditWithScriptEditor.setSelection(getSelectedItems());
 			showEditWithFormEditor.setSelection(getSelectedItems());
 		}
@@ -750,6 +786,14 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 						contentProvider.add(new Table(DataSourceUtils.createInmemDataSource(tableName)), itemsFilter);
 					}
 				}
+				tables = servoyProject.getViewFoundsetsServer().getTableNames(false);
+				if (tables != null)
+				{
+					for (String tableName : tables)
+					{
+						contentProvider.add(new Table(DataSourceUtils.createViewDataSource(tableName)), itemsFilter);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -824,6 +868,10 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				if (server.equals(IServer.INMEM_SERVER))
 				{
 					name = table + " - InMemory Server";
+				}
+				else if (server.equals(IServer.VIEW_SERVER))
+				{
+					name = table + " - VIEW Server";
 				}
 				else name = table + " - " + server;
 			}

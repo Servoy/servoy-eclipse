@@ -48,7 +48,7 @@ import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.SingleLineComment;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.TreeColumnLayout;
@@ -1057,7 +1057,6 @@ public class I18NExternalizeDialog extends HelpDialog
 			try
 			{
 				String jsContent = workspaceFileAccess.getUTF8Contents(jsPath);
-				JavaScriptParser parser = new JavaScriptParser();
 				final ArrayList<IProblem> problems = new ArrayList<IProblem>();
 				IProblemReporter reporter = new IProblemReporter()
 				{
@@ -1070,7 +1069,7 @@ public class I18NExternalizeDialog extends HelpDialog
 					}
 				};
 
-				Script script = parser.parse(jsContent, reporter);
+				Script script = JavaScriptParserUtil.parse(jsContent, reporter);
 				if (problems.size() == 0 && script != null)
 				{
 					final HashMap<Integer, Pair<ASTNode, STATE>> startIdxNodeMap = new HashMap<Integer, Pair<ASTNode, STATE>>();
@@ -1156,7 +1155,6 @@ public class I18NExternalizeDialog extends HelpDialog
 
 	private String removeNONNLSComments(String jsContent)
 	{
-		JavaScriptParser parser = new JavaScriptParser();
 		final ArrayList<IProblem> problems = new ArrayList<IProblem>();
 		IProblemReporter reporter = new IProblemReporter()
 		{
@@ -1175,7 +1173,7 @@ public class I18NExternalizeDialog extends HelpDialog
 			}
 		};
 
-		Script script = parser.parse(jsContent, reporter);
+		Script script = JavaScriptParserUtil.parse(jsContent, reporter);
 		if (problems.size() == 0 && script != null)
 		{
 			String commentTxt;

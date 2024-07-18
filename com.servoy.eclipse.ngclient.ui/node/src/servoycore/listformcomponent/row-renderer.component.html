@@ -1,12 +1,12 @@
 <div *ngIf="lfc.containedForm.absoluteLayout">
-    <div tabindex="-1" (click)="lfc.onRowClick(row, $event)" *ngFor="let row of foundsetRows; let i = index" [class]="lfc.getRowClasses(getFoundsetRowIndex(i))" [ngStyle]="{'height.px': lfc.getRowHeight(), 'width' : lfc.getRowWidth()}" style="display:inline-block; position: relative">
+    <div tabindex="-1" (click)="lfc.onRowClick(row, $event)" *ngFor="let row of foundsetRows; let i = index" [class]="lfc.getRowClasses(getFoundsetRowIndex(i))" [ngStyle]="{'height.px': lfc.getRowHeight(), 'width' : lfc.getRowWidth()}" style="display:block; position: relative; float: left; white-space: normal;">
         <div *ngFor="let item of lfc.cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item['layout']" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
             <ng-template [ngTemplateOutlet]="lfc.getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:lfc.getRowItemState(item, row, getFoundsetRowIndex(i)), callback:lfc, row:row, i:getFoundsetRowIndex(i) }"></ng-template>  <!-- component  -->
         </div>
     </div>
 </div>
 <div *ngIf="!lfc.containedForm.absoluteLayout">
-    <div tabindex="-1" (click)="lfc.onRowClick(row, $event)" *ngFor="let row of foundsetRows; let i = index" [class]="lfc.getRowClasses(getFoundsetRowIndex(i))" [ngStyle]="{'width' : lfc.getRowWidth()}" style="display:inline-block">
+    <div tabindex="-1" (click)="lfc.onRowClick(row, $event)" *ngFor="let row of foundsetRows; let i = index" [class]="lfc.getRowClasses(getFoundsetRowIndex(i))" [ngStyle]="{'width' : lfc.getRowWidth()}" style="float: left; white-space: normal;">
         <ng-template *ngFor="let item of lfc.cache.items" [ngTemplateOutlet]="lfc.getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: lfc.getRowItemState(item, row, getFoundsetRowIndex(i)), callback:lfc, row:row, i:getFoundsetRowIndex(i)}"></ng-template>  <!-- component or responsive div  -->
     </div>
 </div>

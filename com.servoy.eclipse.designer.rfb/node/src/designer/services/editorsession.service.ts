@@ -18,6 +18,7 @@ export class EditorSessionService implements ServiceProvider {
     private selection = new Array<string>();
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
+    private dynamicGuidesChangedListeners = new Array<IShowDynamicGuidesChangedListener>();
     public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
@@ -256,6 +257,14 @@ export class EditorSessionService implements ServiceProvider {
         this.highlightChangedListeners.forEach(listener => listener.highlightChanged(showHighlight));
     }
 
+    addDynamicGuidesChangedListener(listener: IShowDynamicGuidesChangedListener): void {
+        this.dynamicGuidesChangedListeners.push(listener);
+    }
+
+    fireShowDynamicGuidesChangedListeners(result: boolean) {
+        this.dynamicGuidesChangedListeners.forEach(listener => listener.showDynamicGuidesChanged(result));
+    }
+
     getSelection(): Array<string> {
         return this.selection;
     }
@@ -305,6 +314,18 @@ export class EditorSessionService implements ServiceProvider {
     isShowHighlight() {
         return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
             'showHighlight': true
+        }, false)
+    }
+
+    toggleShowDynamicGuides() {
+        return this.wsSession.callService<boolean>('formeditor', 'toggleShow', {
+            'show': 'showDynamicGuidesInDesigner'
+        }, false);
+    }
+
+    isShowDynamicGuides() {
+        return this.wsSession.callService<boolean>('formeditor', 'getBooleanState', {
+            'showDynamicGuides': true
         }, false)
     }
 
@@ -480,6 +501,10 @@ export class EditorSessionService implements ServiceProvider {
     isAbsoluteFormLayout(): boolean {
         return this.urlParser.isAbsoluteFormLayout();
     }
+
+    getSnapThreshold() {
+        return this.wsSession.callService<object>('formeditor', 'getSnapThresholds', false);
+    }
 }
 
 export interface ISelectionChangedListener {
@@ -489,9 +514,11 @@ export interface ISelectionChangedListener {
 }
 
 export interface IShowHighlightChangedListener {
-
     highlightChanged(showHighlight: boolean): void;
+}
 
+export interface IShowDynamicGuidesChangedListener {
+    showDynamicGuidesChanged(result: boolean): void;
 }
 
 class State {
@@ -503,6 +530,8 @@ class State {
     statusText: string;
     maxLevel: number;
     dragging = false;
+    resizing = false;
+    ghosthandle = false;
     pointerEvents = 'none';
     packages: Array<Package>;
     drop_highlight: string;
@@ -539,6 +568,7 @@ export class PaletteComp {
     children?: [{ [property: string]: string }];
     rightSibling?: string;
     variant?: string;
+    cssPos?: { property: string };
 }
 
 export class Package {

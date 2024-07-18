@@ -348,7 +348,7 @@
             default="true"
             icon="icons/security.png"
             id="com.servoy.eclipse.ui.editors.SecurityEditor"
-            name="User/Group Editor">
+            name="User/Permissions Editor">
          <contentTypeBinding
                contentTypeId="com.servoy.eclipse.core.resource.security">
          </contentTypeBinding>
@@ -374,7 +374,7 @@
        <editor
              class="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              default="true"
-             filenames="custom_servoy_theme_properties.less, custom_servoy_theme_properties_ng2.less"
+             filenames="custom_servoy_theme_properties.less"
              icon="icons/theme_properties.png"
              id="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              matchingStrategy="com.servoy.eclipse.ui.editors.less.PropertiesLessMatchingStrategy"
@@ -640,7 +640,7 @@
                style="push"
                tooltip="Servoy Step By Step Tutorial">
          </action>
-         </actionSet>
+      </actionSet>
         <!-- main concepts page, disabled for now
       <actionSet
             id="com.servoy.eclipse.ui.MainConceptsPage"
@@ -671,6 +671,10 @@
         <markerResolutionGenerator
               class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
               markerType="com.servoy.eclipse.core.unresolvedRelationUuid">
+        </markerResolutionGenerator>
+        <markerResolutionGenerator
+              class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+              markerType="com.servoy.eclipse.core.missingPropetyFromSpec">
         </markerResolutionGenerator>
         <markerResolutionGenerator
               class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
@@ -735,7 +739,7 @@
       	<markerResolutionGenerator
             class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.deprecatedSpec">
-      	</markerResolutionGenerator>      
+      	</markerResolutionGenerator>
      </extension>
      <extension
            point="org.eclipse.ui.commands">

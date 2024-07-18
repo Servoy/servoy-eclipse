@@ -7,7 +7,7 @@
       		</a>
       		<ul class="dropdown-menu" ng-show="action.subMenu != undefined" style="min-width:100%">
       			 <li ng-repeat="subaction in action.subMenu" ng-class="subaction.getItemClass()">
-		      		<a tabindex="-1" href="#" ng-click="subaction.execute()" style="min-width:100%;margin-left:10px;height:24px;background-repeat:no-repeat;background-position:left center;" ng-style="subaction.getIconStyle()">
+		      		<a tabindex="-1" href="#" ng-click="subaction.execute()" style="margin-left:10px;height:24px;background-repeat:no-repeat;background-position:left center;" ng-style="subaction.getIconStyle()">
 		      			<span style="float:left">{{subaction.text}}</span>
 		      			<span style="float:right;" ng-show="subaction.shortcut != undefined" class="actionshortcut">{{subaction.shortcut}}</span>
 		      		</a>

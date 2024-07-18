@@ -26,11 +26,11 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.NGClientStarter;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.Solution;
@@ -87,7 +87,7 @@ public class StartNGClientHandler extends StartWebClientHandler implements NGCli
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+							MessageDialog.openError(UIUtils.getActiveShell(), "Solution type problem",
 								"Cant open this solution type in this client");
 						}
 					});
@@ -97,12 +97,8 @@ public class StartNGClientHandler extends StartWebClientHandler implements NGCli
 				if (testAndStartDebugger())
 				{
 					monitor.worked(3);
-					final String solution_path = (new DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/";
+					final String solution_path = (new Ng2DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/";
 					final IDebugClient debugNGClient = Activator.getDefault().getDebugNGClient();
-					if (debugNGClient != null && debugNGClient.getFlattenedSolution().getDebugListener() == null)
-					{
-						debugNGClient.getFlattenedSolution().registerDebugListener(new FlattenedSolutionDebugListener());
-					}
 					if (debugNGClient != null && debugNGClient.getSolution() != null)
 					{
 						debugNGClient.shutDown(true);
@@ -120,7 +116,7 @@ public class StartNGClientHandler extends StartWebClientHandler implements NGCli
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Cant open external browser", e.getLocalizedMessage());
+								MessageDialog.openError(UIUtils.getActiveShell(), "Cant open external browser", e.getLocalizedMessage());
 							}
 						});
 					}

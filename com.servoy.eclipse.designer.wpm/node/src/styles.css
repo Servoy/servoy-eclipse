@@ -59,8 +59,9 @@ body {
 }
 
 mat-select.repository {
-  width: unset;
+  min-width: 150px;
   padding-top: 10px;
+  right: 10px;
 }
 
 mat-select.repository .mat-mdc-select-value-text {
@@ -74,15 +75,19 @@ mat-select.repository .mat-mdc-select-arrow {
 
 .mdc-text-field--filled:not(.mdc-text-field--disabled)
 {
-    background-color: unset;;
+    background-color: unset;
 }
 
 .mat-mdc-select-value, .mat-mdc-select-disabled .mat-mdc-select-value {
-    color: unset;;
+    color: unset;
 }
 /* workaround for IE, see: https://github.com/angular/material2/issues/11609 */
 .cdk-overlay-pane {
   display: block;
+}
+
+.mdc-tab:hover .mdc-tab__text-label{
+    color: var(--mdc-tab-indicator-active-indicator-color) !important;
 }
 
 
@@ -91,10 +96,21 @@ html, body {
     height: 100%;
 }
 
-.dark .content {
+.dark .content, .dark .mat-mdc-dialog-content.mdc-dialog__content, .dark .mat-mdc-dialog-title.mdc-dialog__title, .dark .mat-mdc-dialog-actions.mdc-dialog__actions {
     background: #262626;
     color: #ffffff;
-    height: 100%;
+}
+
+.dark .content {
+	 height: 100%;
+}
+
+.dark .mat-mdc-button:not(:disabled) {
+	color: #ffffff;
+}
+
+.dark .mdc-checkbox__background  {
+	border-color: #ffffff !important;
 }
 
 .dark .mat-mdc-select-value, 
@@ -103,6 +119,10 @@ html, body {
 .dark .mdc-list-item__primary-text,
 .dark .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
     color: #ffffff;
+}
+
+.dark .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+    background-color: unset;
 }
 
 .dark .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before  {
@@ -139,4 +159,12 @@ html, body {
 
 .dark .column-fitwidth {
     height: 80px;
+}
+
+.dark .mdc-text-field--filled:not(.mdc-text-field--disabled):hover .mdc-line-ripple:before {
+    border-bottom-color: var(--mdc-tab-indicator-active-indicator-color) !important;
+}
+
+.dark .mdc-icon-button:hover {
+    background-color: var(--mdc-tab-indicator-active-indicator-color);
 }

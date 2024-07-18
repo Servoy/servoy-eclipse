@@ -96,7 +96,7 @@ public class PDPropertySource extends PersistPropertySource
 		// if it's a layout container and the property's descriptor is based on a LayoutContainerPropertyHandler
 		// we have to reset the attribute, not the property (those work with attributes)
 		if (propertyDescriptor.propertyDescriptor instanceof LayoutContainerPropertyHandler)
-			((LayoutContainer)persist).putAttribute((String)id, null);
+			((LayoutContainer)persist).clearAttribute((String)id);
 		else super.clearAbstractBaseProperty(propertyDescriptor, id, persist);
 	}
 

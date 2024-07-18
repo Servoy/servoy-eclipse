@@ -57,6 +57,7 @@ import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.server.ngclient.property.types.ClientFunctionPropertyType;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -80,13 +81,21 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		}
 	};
 	private final boolean addDialogCellEditor;
+	private final JSONObject valueTypes;
 
 	public MapEntriesPropertyController(Object id, String displayName, Map<String, PropertyDescription> map, boolean addDialogCellEditor)
+	{
+		this(id, displayName, map, addDialogCellEditor, null);
+	}
+
+	public MapEntriesPropertyController(Object id, String displayName, Map<String, PropertyDescription> map, boolean addDialogCellEditor,
+		JSONObject valueTypes)
 	{
 		super(id, displayName);
 		setLabelProvider(CLICK_TO_ADD);
 		this.attributesMap = map;
 		this.addDialogCellEditor = addDialogCellEditor;
+		this.valueTypes = valueTypes;
 	}
 
 	@Override
@@ -258,8 +267,15 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 				{
 					map = new HashMap<String, Object>();
 				}
-				String value = toJSExpression(v);
-
+				String value;
+				if (v instanceof String && valueTypes != null && ClientFunctionPropertyType.CLIENT_FUNCTION_TYPE_NAME.equals(valueTypes.optString((String)id)))
+				{
+					value = v.toString();
+				}
+				else
+				{
+					value = toJSExpression(v);
+				}
 				map.put((String)id, value);
 			}
 			return map.size() == 0 ? null : map;
@@ -308,7 +324,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 
 		public boolean isOverriden(String mapKey)
 		{
-			if (p instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)p))
+			if (PersistHelper.isOverrideElement(p))
 			{
 				Map<String, ? > attributes = getPersistMap(p);
 				if (attributes != null && attributes.containsKey(mapKey))
@@ -351,7 +367,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 					String labelText = (String)element;
 					if (isOverriden(mapKey))
 					{
-						labelText = (labelText != null ? labelText : "") + " (" + Messages.LabelOverride + ')';
+						return Messages.labelOverride(labelText);
 					}
 					return labelText;
 				}
@@ -455,7 +471,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 					{
 						Shell shell = new Shell(parent.getDisplay());
 						InputDialog dialog = new InputDialog(shell, "Edit JSON",
-							"JSON Editor", new JSONObject(value).toString(), new IInputValidator()
+							"JSON Editor", new JSONObject(value).toString(3), new IInputValidator()
 							{
 
 								@Override

@@ -31,6 +31,7 @@ import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfigurat
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.ListDataProvider;
 import org.eclipse.nebula.widgets.nattable.edit.command.EditCellCommandHandler;
+import org.eclipse.nebula.widgets.nattable.edit.command.EditSelectionCommandHandler;
 import org.eclipse.nebula.widgets.nattable.edit.config.DefaultEditBindings;
 import org.eclipse.nebula.widgets.nattable.edit.event.InlineCellEditEventHandler;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
@@ -45,6 +46,7 @@ import org.eclipse.nebula.widgets.nattable.layer.cell.AggregateConfigLabelAccumu
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnOverrideLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
+import org.eclipse.nebula.widgets.nattable.selection.config.DefaultSelectionLayerConfiguration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.json.JSONObject;
@@ -111,7 +113,7 @@ public class AutoWizardPropertiesComposite
 			colHeaderDataProvider, bodyLayer);
 		CompositeLayer composeLayer = new CompositeLayer(1, 2);
 		composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 0);
-		composeLayer.setChildLayer(GridRegion.BODY, bodyLayer, 0, 1);
+		composeLayer.setChildLayer(GridRegion.BODY, bodyLayer.getSelectionLayer(), 0, 1);
 		natTable = new NatTable(parent, SWT.NONE, composeLayer, false);
 		ConfigRegistry configRegistry = new ConfigRegistry();
 		natTable.setConfigRegistry(configRegistry);
@@ -121,7 +123,7 @@ public class AutoWizardPropertiesComposite
 		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.setLayerPainter(new HorizontalGridLineCellLayerPainter());
 
-		LinkClickConfiguration linkClickConfiguration = new LinkClickConfiguration();
+		LinkClickConfiguration linkClickConfiguration = new LinkClickConfiguration(bodyLayer.getSelectionLayer());
 		PainterConfiguration painterConfiguration = new PainterConfiguration(propertiesConfigurator, linkClickConfiguration, bodyDataProvider, persistContext,
 			flattenedSolution);
 		natTable.addConfiguration(painterConfiguration);
@@ -134,6 +136,7 @@ public class AutoWizardPropertiesComposite
 			{
 				layer.registerCommandHandler(new EditCellCommandHandler());
 				layer.registerEventHandler(new InlineCellEditEventHandler(layer));
+				layer.registerCommandHandler(new EditSelectionCommandHandler(bodyLayer.getSelectionLayer()));
 			}
 		});
 		composeLayer.addConfiguration(new DefaultEditBindings());
@@ -258,6 +261,7 @@ public class AutoWizardPropertiesComposite
 			bodyDataLayer.setConfigLabelAccumulator(accumulator);
 
 			this.selectionLayer = new SelectionLayer(bodyDataLayer);
+			selectionLayer.addConfiguration(new DefaultSelectionLayerConfiguration());
 			setUnderlyingLayer(bodyDataLayer);
 		}
 

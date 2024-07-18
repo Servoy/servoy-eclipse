@@ -14,7 +14,7 @@ import { CustomArrayType, CustomArrayTypeFactory, ICATFullArrayToServer, ICATGra
 
 describe('JSONObjectConverter', () => {
 
-    let converterService: ConverterService;
+    let converterService: ConverterService<unknown>;
     let typesRegistry: TypesRegistry;
     let loggerFactory: LoggerFactory;
     let specTypesService: SpecTypesService;
@@ -193,7 +193,7 @@ describe('JSONObjectConverter', () => {
         expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
 
         tab = converterService.convertFromServerToClient({ u: [{ k: 'myvalue', v: 'test2' }], vEr: 1 } as ICOTGranularUpdatesFromServer,
-               oneTabType , tab, undefined, undefined, getParentPropertyContext(oneTabPushToServer));
+               oneTabType , tab, undefined, undefined, getParentPropertyContext(oneTabPushToServer)) as Tab;
         tabAsSeenInternally = val as IChangeAwareValue;
 
         expect(tab.myvalue).toBe('test2', 'myvalue should be test2');
@@ -528,7 +528,7 @@ describe('JSONObjectConverter', () => {
         expect(changesGranular.u[0].v.u[1].k).toBe('myvalue');
         expect(changesGranular.u[0].v.u[1].v).toBe('test2');
 
-        let changesNoOp: ICOTNoOpToServer = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder, getParentPropertyContext(tabHolderPushToServer))[0];
+        let changesNoOp: ICOTNoOpToServer = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder, getParentPropertyContext(tabHolderPushToServer))[0] as ICOTNoOpToServer;
         expect(changesNoOp.n).toBe(true, 'should have no changes now');
 
         const oldTabHolder = tabHolder;
@@ -547,7 +547,7 @@ describe('JSONObjectConverter', () => {
                     }],
                     vEr: 1
                 } as ICOTGranularUpdatesFromServer,
-               tabHolderType , tabHolder, undefined, undefined, getParentPropertyContext(tabHolderPushToServer));
+               tabHolderType , tabHolder, undefined, undefined, getParentPropertyContext(tabHolderPushToServer)) as TabHolder;
         tabHolderSeenInternally = (tabHolder as any) as IChangeAwareValue;
         expect(tabHolder).toBe(oldTabHolder, 'Reference should not be changed; it is a granular update');
         expect(tabHolder.tab2).toBe(oldTab2, 'Reference should not be changed; it is a granular update');
@@ -627,7 +627,7 @@ describe('JSONObjectConverter', () => {
         const tabHolder: TabHolder = converterService.convertFromServerToClient({
             v: { id: 'test', tab2: createTabJSON() },
             vEr: 1
-        } as ICOTFullValueFromServer, tabHolderType , undefined, undefined, undefined, getParentPropertyContext(tabHolderPushToServer));
+        } as ICOTFullValueFromServer, tabHolderType , undefined, undefined, undefined, getParentPropertyContext(tabHolderPushToServer)) as TabHolder;
         const tabHolderAsSeenInternally = (tabHolder as any) as IChangeAwareValue;
         tabHolderAsSeenInternally.getInternalState().setChangeListener(() => {});
         const tab2AsSeenInternally = (tabHolder.tab2 as any) as IChangeAwareValue;
@@ -719,7 +719,7 @@ describe('JSONObjectConverter', () => {
 
     it( 'test deep change in a custom object\'s "object" subprop. with various PTS pe subprop', () => {
         const val: DumbSubpropsWithVariousPTS = converterService.convertFromServerToClient(createSimpleCustomObjectWithUntypedAndSpecificPTSOnSubprops(),
-               untypedObjectALLOWWithVariousSubpropPTSType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectALLOWWithVariousSubpropPTSPushToServer));
+               untypedObjectALLOWWithVariousSubpropPTSType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectALLOWWithVariousSubpropPTSPushToServer)) as DumbSubpropsWithVariousPTS;
 
 //        subProp = { x: ['bla', someDate], y: 8 }
 //        { rejectSubprop: subProp(), allowSubprop: subProp(), shallowSubprop: subProp(), deepSubprop: subProp() }
@@ -809,7 +809,7 @@ describe('JSONObjectConverter', () => {
 
     it( 'test deep change in a custom object with REJECT "object" subprops', () => {
         const val: DumbSubpropsWithInheritedPTS = converterService.convertFromServerToClient(createSimpleCustomObjectWithUntypedSubprops(),
-               untypedObjectWithREJECTOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithREJECTOnSubpropPushToServer));
+               untypedObjectWithREJECTOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithREJECTOnSubpropPushToServer)) as DumbSubpropsWithInheritedPTS;
 
         expect(val.a).toBe('test1');
         expect(val.b.test2).toBe(1);
@@ -858,7 +858,7 @@ describe('JSONObjectConverter', () => {
 
     it( 'test deep change in a custom object with ALLOW "object" subprops', () => {
         const val: DumbSubpropsWithInheritedPTS = converterService.convertFromServerToClient(createSimpleCustomObjectWithUntypedSubprops(),
-               untypedObjectWithALLOWOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithALLOWOnSubpropPushToServer));
+               untypedObjectWithALLOWOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithALLOWOnSubpropPushToServer)) as DumbSubpropsWithInheritedPTS;
 
         const valSeenInternally = (val as any) as IChangeAwareValue;
 
@@ -915,7 +915,7 @@ describe('JSONObjectConverter', () => {
 
     it( 'test deep change in a custom object with SHALLOW "object" subprops', () => {
         const val: DumbSubpropsWithInheritedPTS = converterService.convertFromServerToClient(createSimpleCustomObjectWithUntypedSubprops(),
-               untypedObjectWithSHALLOWOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithSHALLOWOnSubpropPushToServer));
+               untypedObjectWithSHALLOWOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithSHALLOWOnSubpropPushToServer)) as DumbSubpropsWithInheritedPTS;
 
         const valSeenInternally = (val as any) as IChangeAwareValue;
 
@@ -971,7 +971,7 @@ describe('JSONObjectConverter', () => {
 
     it( 'test deep change in a custom object with DEEP "object" subprops', () => {
         const val: DumbSubpropsWithInheritedPTS = converterService.convertFromServerToClient(createSimpleCustomObjectWithUntypedSubprops(),
-               untypedObjectWithDEEPOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithDEEPOnSubpropPushToServer));
+               untypedObjectWithDEEPOnSubpropType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectWithDEEPOnSubpropPushToServer)) as DumbSubpropsWithInheritedPTS;
 
         const valSeenInternally = (val as any) as IChangeAwareValue;
 
@@ -1174,7 +1174,7 @@ describe('JSONObjectConverter', () => {
 
         // received as return value from a server side api call
         const childArray = converterService.convertFromServerToClient({ v: [ createTabJSON() ], vEr: 1},
-               tabArrayType , undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
+               tabArrayType , undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES) as Tab[];
         
         expect(((childArray as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeFalse();
         expect(((childArray[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();

@@ -37,9 +37,9 @@ import org.eclipse.swt.widgets.Listener;
 
 /**
  * Added IPostSelectionProvider to existing ScrollingGraphicalViewer. Needed for some selection listeners (for instance history view).
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class ModifiedScrollingGraphicalViewer extends ScrollingGraphicalViewer implements IPostSelectionProvider
 {
@@ -103,7 +103,7 @@ public class ModifiedScrollingGraphicalViewer extends ScrollingGraphicalViewer i
 	public EditPart findObjectAtExcluding(Point pt, Collection exclude, final Conditional condition)
 	{
 		GraphicalEditPart selectedEditPart = null;
-		List<EditPart> selectedEditParts = getSelectedEditParts();
+		List< ? extends EditPart> selectedEditParts = getSelectedEditParts();
 		for (EditPart editPart : selectedEditParts)
 		{
 			if (editPart instanceof GraphicalEditPart)

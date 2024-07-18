@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { FormService } from '../ngclient/form.service';
+import { FormService, ServerElement } from '../ngclient/form.service';
 import { IDesignFormComponent } from './servoydesigner.component';
-import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties, FormCache } from '../ngclient/types';
+import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties, FormCache, CSSPosition, Position, PartCache } from '../ngclient/types';
 import { ConverterService } from '../sablo/converter.service';
 import { IComponentCache } from '@servoy/public';
 import { TypesRegistry, IWebObjectSpecification, RootPropertyContextCreator } from '../sablo/types_registry';
@@ -10,7 +10,7 @@ import { TypesRegistry, IWebObjectSpecification, RootPropertyContextCreator } fr
 export class EditorContentService {
     designFormCallback: IDesignFormComponent;
 
-    constructor(private formService: FormService, protected converterService: ConverterService, private typesRegistry: TypesRegistry) {
+    constructor(private formService: FormService, protected converterService: ConverterService<unknown>, private typesRegistry: TypesRegistry) {
 
     }
 
@@ -40,14 +40,20 @@ export class EditorContentService {
                             formCache.removeComponent(item.name);
                         else if (item instanceof StructureCache) {
                             formCache.removeLayoutContainer(item.id);
-                           	this.removeChildrenRecursively(item, formCache);
+                            this.removeChildrenRecursively(item, formCache);
                         }
                     });
                     const parentUUID = data.childParentMap[fc.name] ? data.childParentMap[fc.name].uuid : undefined;
                     if (parentUUID) {
                         const parent = formCache.getLayoutContainer(parentUUID);
                         if (parent) {
-                            parent.removeChild(fc);
+							if (!parent.removeChild(fc)) {
+								const parent = formCache.getLayoutContainerByFCName(fc.name);
+								if (parent) {
+									parent.removeChild(fc);
+								}
+							}
+                            
                         }
                     }
                 }
@@ -172,7 +178,7 @@ export class EditorContentService {
                         this.fillLayout(elem, formCache, layout);
                         const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
                         const fcc = new FormComponentCache(elem.name, elem.specName, undefined, elem.handlers, elem.responsive, elem.position,
-                            formComponentProperties, elem.model.foundset, this.typesRegistry/*, undefined*/).initForDesigner(elem.model);
+                            formComponentProperties, elem.model.foundset, this.typesRegistry).initForDesigner(elem.model);
                         formCache.addFormComponent(fcc);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
                         if (parentUUID) {
@@ -184,9 +190,25 @@ export class EditorContentService {
                                     reorderLayoutContainers.push(parent);
                                 }
                             }
+                        } else if (formCache.absolute) {
+                            formCache.partComponentsCache.push(fcc);
                         }
+                        const containers = data?.formComponentContainers?.[elem.name];
+                        containers?.forEach((elem) => {
+                            const container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
+                            formCache.addLayoutContainer(container);
+                            const parentUUID = data.childParentMap[container.id] ? data.childParentMap[container.id].uuid : undefined;
+                            if (parentUUID) {
+                               const parent = this.findStructureCache(fcc.items, parentUUID);
+                               if (parent) parent.addChild(container);
+                            }
+                            else {
+                                // parent is null so it is the child of the fcc directly.
+                                fcc.addChild(container);
+                            }
+                        });
                     } else {
-                        const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry/*, undefined*/).initForDesigner(elem.model);
+                        const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry).initForDesigner(elem.model);
                         formCache.add(comp);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
                         if (parentUUID) {
@@ -229,7 +251,7 @@ export class EditorContentService {
                             data.formComponentsComponents?.forEach((child: string) => {
                                 if (child.lastIndexOf(fixedName + '$', 0) === 0) {
                                     const formComponentComponent = formCache.getComponent(child);
-                                    const container = formCache.getLayoutContainer(data.childParentMap[child].uuid);
+                                    const container = this.findStructureCache(formComponent.items,data.childParentMap[child].uuid); 
                                     if ((formComponent.responsive && container) || container) {
                                         formComponent.removeChild(formComponentComponent);
                                         container.removeChild(formComponentComponent);
@@ -255,12 +277,29 @@ export class EditorContentService {
             });
             refresh = true;
         }
-
+        
+        if (data.parts){
+            for (let name in data.parts) {
+                // string style suffix
+                const style = data.parts[name];
+                name = name.substring(0,name.length-5);
+                let partCache = formCache.getPart(name);
+                if (partCache){
+                    partCache.layout = JSON.parse(style);
+                    refresh = true;
+                }else{
+                    const part = new PartCache(name, null, JSON.parse(style));
+                    formCache.addPart(part);
+                }
+            }
+        }
+        
         if (data.deleted) {
             data.deleted.forEach((elem) => {
                 const comp = formCache.getComponent(elem);
                 if (comp) {
                     formCache.removeComponent(elem);
+                    formCache.removeFormComponent(elem);
                     if (!formCache.absolute) {
                         this.removeChildFromParentRecursively(comp, formCache.mainStructure);
                     } else if (comp.parent) {
@@ -321,7 +360,7 @@ export class EditorContentService {
         }
     }
 
-    updateComponentProperties(component: IComponentCache, elem: any): boolean {
+    updateComponentProperties(component: IComponentCache, elem: ServerElement): boolean {
         let redrawDecorators = false;
         component.layout = elem.position;
 
@@ -332,9 +371,8 @@ export class EditorContentService {
         for (const propName of Object.keys(elem.model)) {
             const value = this.converterService.convertFromServerToClient(elem.model[propName],
                 componentSpec?.getPropertyType(propName), component.model[propName],
-                componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName));
+                componentDynamicTypesHolder, propName, propertyContextCreator.withPushToServerFor(propName)) as (CSSPosition & Position);
             // as we are in designer here, we don't listen for any potential change aware values after conversions (see FormService.handleComponentModelConversionsAndChangeListeners(...))
-
             if (
                 (propName === 'size' && (component.model[propName].width !== value.width || component.model[propName].height !== value.height)) ||
                 (propName === 'location' && (component.model[propName].x !== value.x || component.model[propName].y !== value.y)) ||
@@ -377,6 +415,21 @@ export class EditorContentService {
 
     setDirty() {
 
+    }
+    
+    private findStructureCache(items: Array<StructureCache | ComponentCache | FormComponentCache>, id: string): StructureCache {
+        for(const item of items) {
+            if (item instanceof StructureCache) {
+                if ( item.id == id) {
+                    return item;
+                }
+                else {
+                    const child =  this.findStructureCache(item.items, id);
+                    if (child) return child;
+                }
+            }
+        }
+        return null;
     }
 
     private removeChildFromParentRecursively(child: ComponentCache | StructureCache | FormComponentCache, parent: StructureCache | FormComponentCache) {

@@ -1,60 +1,65 @@
 {
-    "root": true,
-    "ignorePatterns": [],
-    "overrides": [
-        {
-            "files": [
-                "*.ts"
+  "root": true,
+  "ignorePatterns": [],
+   "plugins": [
+    "only-warn",
+    "prefer-arrow",
+    "@stylistic/ts"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "parserOptions": {
+        "project": [
+          "tsconfig.json",
+          "e2e/tsconfig.json"
+        ],
+        "createDefaultProgram": true
+      },
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:@angular-eslint/recommended",
+        "plugin:@angular-eslint/template/process-inline-templates"
+      ],
+      "rules": {
+        "@stylistic/ts/quotes": ["warn", "single", { "avoidEscape": true }],
+        "@typescript-eslint/restrict-plus-operands": "off",
+        "@angular-eslint/component-selector": [
+          "warn",
+          {
+            "prefix": [
+              "app",
+              "wpm"
             ],
-            "parserOptions": {
-                "project": [
-                    "tsconfig.json",
-                    "e2e/tsconfig.json"
-                ],
-                "createDefaultProgram": true
-            },
-            "extends": [
-                "plugin:@angular-eslint/recommended",
-                "eslint:recommended",
-                "plugin:@typescript-eslint/recommended",
-                "plugin:@typescript-eslint/recommended-requiring-type-checking",
-                "plugin:@angular-eslint/template/process-inline-templates"
+            "style": "kebab-case",
+            "type": "element"
+          }
+        ],
+        "@angular-eslint/directive-selector": [
+          "warn",
+          {
+            "prefix": [
+              "app",
+              "wpm"
             ],
-            "rules": {
-                "quotes": [
-                    "warn",
-                    "single",
-                    {
-                        "avoidEscape": true
-                    }
-                ],
-                "@typescript-eslint/restrict-plus-operands": "off",
-                "@angular-eslint/component-selector": [
-                    "warn",
-                    {
-                        "prefix": ["app", "wpm"],
-                        "style": "kebab-case",
-                        "type": "element"
-                    }
-                ],
-                "@angular-eslint/directive-selector": [
-                    "warn",
-                    {
-                        "prefix": ["app", "wpm"],
-                        "style": "camelCase",
-                        "type": "attribute"
-                    }
-                ]
-            }
-        },
-        {
-            "files": [
-                "*.html"
-            ],
-            "extends": [
-                "plugin:@angular-eslint/template/recommended"
-            ],
-            "rules": {}
-        }
-    ]
+            "style": "camelCase",
+            "type": "attribute"
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "*.html"
+      ],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended"
+      ],
+      "rules": {}
+    }
+  ]
 }

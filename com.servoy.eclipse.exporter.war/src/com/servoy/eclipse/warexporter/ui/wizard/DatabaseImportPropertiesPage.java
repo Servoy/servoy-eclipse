@@ -194,7 +194,7 @@ public class DatabaseImportPropertiesPage extends WizardPage implements IRestore
 
 
 		overwriteGroupsButton = new Button(composite, SWT.CHECK);
-		overwriteGroupsButton.setText("Overwrite repository group security settings with import version");
+		overwriteGroupsButton.setText("Overwrite repository permission security settings with import version");
 		overwriteGroupsButton.setSelection(exportModel.isOverwriteGroups());
 		overwriteGroupsButton.addSelectionListener(new SelectionAdapter()
 		{

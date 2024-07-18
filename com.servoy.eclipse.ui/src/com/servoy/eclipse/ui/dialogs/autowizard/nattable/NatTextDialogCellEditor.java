@@ -17,13 +17,20 @@
 
 package com.servoy.eclipse.ui.dialogs.autowizard.nattable;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.editor.AbstractCellEditor;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer.MoveDirectionEnum;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * @author emera
@@ -77,6 +84,23 @@ public abstract class NatTextDialogCellEditor extends AbstractCellEditor impleme
 	public NatTextDialogControl createEditorControl(Composite parent)
 	{
 		NatTextDialogControl control = new NatTextDialogControl(parent, SWT.NONE, cellStyle, icon, title, this, labelProvider);
+		if (control.getControl() instanceof Text)
+		{
+			Text textControl = (Text)control.getControl();
+			textControl.addKeyListener(new KeyListener()
+			{
+				@Override
+				public void keyReleased(KeyEvent e)
+				{
+					_keyReleased(e, textControl);
+				}
+
+				@Override
+				public void keyPressed(KeyEvent e)
+				{
+				}
+			});
+		}
 		return control;
 	}
 
@@ -87,6 +111,39 @@ public abstract class NatTextDialogCellEditor extends AbstractCellEditor impleme
 		this.canonicalValue = originalCanonicalValue;
 		DisplayConverter converter = getDisplayConverter();
 		setEditorValue(converter != null ? converter.canonicalToDisplayValue(originalCanonicalValue) : originalCanonicalValue);
+		editor.setFocus();
 		return editor;
+	}
+
+	public void _keyReleased(KeyEvent e, Text textControl)
+	{
+		switch (e.keyCode)
+		{
+			case SWT.ARROW_DOWN :
+			case SWT.CR :
+			case SWT.KEYPAD_CR :
+				commit(MoveDirectionEnum.DOWN, true);
+				break;
+			case SWT.ARROW_UP :
+				commit(MoveDirectionEnum.UP, true);
+				break;
+			case SWT.ARROW_LEFT :
+				if (textControl.getText().length() == 0 || textControl.getCaretPosition() == 0)
+					commit(MoveDirectionEnum.LEFT, true);
+				break;
+			case SWT.ARROW_RIGHT :
+				if (textControl.getText().length() == 0 || textControl.getCaretPosition() == textControl.getText().length())
+					commit(MoveDirectionEnum.RIGHT, true);
+				break;
+			case SWT.ESC :
+				if (e.stateMask == 0) close();
+				break;
+		}
+	}
+
+	@Override
+	public boolean activateOnTraversal(IConfigRegistry configRegistry, List<String> configLabels)
+	{
+		return true;
 	}
 }

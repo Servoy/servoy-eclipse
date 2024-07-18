@@ -33,7 +33,7 @@
 	background-color: #FFFFFF;
 }
 
-ToolItem {
+ToolItem, FigureCanvas {
 	background-color: unset;
 }
 
@@ -67,15 +67,15 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 	min-height: 300px;
 	text-trim: false;
 	text-wrap: true;
+	
+	background-color: #FFFFFF;
+	cell-background-color: #FFFFFF;
+	painter-resolution: false;
 }
 
-.svyNatTable > .styleClass,  .svyNatTable > .headertext{
+.svyNatTable > .styleClass, .svyNatTable > .headerTitle {
+	painter-resolution: true;
 	text-align: center;
-}
-
-.svyNatTable:select {
-    painter-resolution: true;
-	cell-background-color:  #e7f1ff;
 }
 
 .svyNatTable > .COLUMN_HEADER {
@@ -90,12 +90,23 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
 }
 
 .svyNatTable > .COLUMN_0 {
+	painter-resolution: true;
 	padding-left: 5px;
 	text-align: left;
 }
 
-.svyNatTable > .containedForm, .svyNatTable > .relationName {
+.svyNatTable > .containedForm, .svyNatTable > .relationName, .svyNatTable > .text {
+	painter-resolution: true;
 	text-trim: false;
+}
+
+.svyNatTable > .delete {
+	cell-background-color: unset;
+}
+
+.svyNatTable :select {
+	cell-background-color:  #e7f1ff;
+	color: unset;
 }
 
 Button  {

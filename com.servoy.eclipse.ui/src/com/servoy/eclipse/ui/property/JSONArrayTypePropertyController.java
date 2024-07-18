@@ -17,11 +17,27 @@
 
 package com.servoy.eclipse.ui.property;
 
+import static com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayPropertySource.JSONArrayItemPropertyDescriptorWrapper.ArrayActions.DELETE_CURRENT_COMMAND_VALUE;
+import static com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayPropertySource.JSONArrayItemPropertyDescriptorWrapper.ArrayActions.INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+import static com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayPropertySource.JSONArrayItemPropertyDescriptorWrapper.ArrayActions.UNDO_DELETE_CURRENT_COMMAND_VALUE;
+import static com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayPropertySource.JSONArrayItemPropertyDescriptorWrapper.ArrayActions.UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import com.servoy.eclipse.core.util.ReturnValueSnippet;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
+import com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayPropertySource.JSONArrayItemPropertyDescriptorWrapper.ArrayActions;
+import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 
@@ -33,13 +49,14 @@ import com.servoy.j2db.util.ServoyJSONObject;
 // unfortunately here we can't use JSONArray in generics even if we would make ArrayTypePropertyController generic because the value can also be JSONObject.NULL which would give classcastexceptions...
 public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyController implements ICanHandleJSONNullValues
 {
-
 	private static IObjectTextConverter JSONARRAY_TEXT_CONVERTER = new JSONArrayTextConverter();
 
 	public JSONArrayTypePropertyController(Object id, String displayName)
 	{
 		super(id, displayName);
 	}
+
+	protected abstract Object getNewElementInitialValue();
 
 	protected abstract Object getValueForReset();
 
@@ -62,45 +79,271 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 	}
 
 	@Override
-	protected Object createEmptyPropertyValue()
+	protected void createNewElement(ButtonCellEditor cellEditor, Object oldValue)
 	{
-		ServoyJSONArray v = new ServoyJSONArray();
-		v.put(getNewElementInitialValue()); // for convenience; usually when ppl want to use an array property they also want to add elements to it... not just have an empty array
-		return v;
-	}
-
-	@Override
-	protected Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue)
-	{
-		return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldMainValue, i, elementValue);
+		// insert at position 0 an empty/null value
+		Object newValue = ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldValue, 0, getNewElementInitialValue());
+		cellEditor.applyValue(newValue);
 	}
 
 	public abstract class JSONArrayPropertySource extends ArrayPropertySource
 	{
+		public final class JSONArrayItemPropertyDescriptorWrapper extends ArrayItemPropertyDescriptorWrapper
+		{
+			enum ArrayActions
+			{
+				DELETE_CURRENT_COMMAND_VALUE,
+				UNDO_DELETE_CURRENT_COMMAND_VALUE,
+				INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE,
+				UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE
+			}
+
+			public JSONArrayItemPropertyDescriptorWrapper(IPropertyDescriptor basePD, int index, ArrayPropertySource arrayPropertySource)
+			{
+				super(basePD, index, arrayPropertySource);
+			}
+
+			@Override
+			protected IPropertyDescriptor getRootBasePD()
+			{
+				IPropertyDescriptor base = basePD;
+				while (base instanceof IDelegate)
+				{
+					Object delegate = ((IDelegate)base).getDelegate();
+					if (delegate instanceof IPropertyDescriptor)
+					{
+						base = (IPropertyDescriptor)delegate;
+					}
+					else
+					{
+						break;
+					}
+				}
+				return base;
+			}
+
+			@Override
+			public CellEditor createPropertyEditor(Composite parent)
+			{
+				ComposedCellEditor cellEditor = new ComposedCellEditor(false, false, 10);
+
+				// make sure our special values don't reach the real editor - as it could lead to exceptions (real editor doesn't expect such values)
+				cellEditor.setCellEditor1(new ConvertingCellEditor<Object, Object>(new ReturnValueSnippet<CellEditor, Composite>()
+				{
+					@Override
+					public CellEditor run(Composite arg)
+					{
+						return basePD.createPropertyEditor(arg);
+					}
+				}, new ICellEditorConverter<Object, Object>()
+				{
+
+					@Override
+					public Object convertValueToBaseEditor(Object outsideWorldValue)
+					{
+						return outsideWorldValue;
+					}
+
+					@Override
+					public Object convertValueFromBaseEditor(Object baseEditorValue)
+					{
+						return baseEditorValue;
+					}
+
+					@Override
+					public boolean allowSetToBaseEditor(Object outsideWorldValue)
+					{
+						return outsideWorldValue != DELETE_CURRENT_COMMAND_VALUE && outsideWorldValue != INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+					}
+
+				}));
+
+				cellEditor.setCellEditor2(new ComposedCellEditor(new ButtonSetValueCellEditor()
+				{
+
+					@Override
+					protected void updateButtonState(Button buttonWidget, Object value)
+					{
+						buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ELCL_REMOVE));
+						buttonWidget.setEnabled(true);
+						buttonWidget.setToolTipText("Remove this array item.");
+					}
+
+					@Override
+					protected Object getValueToSetOnClick(Object oldPropertyValue)
+					{
+						return DELETE_CURRENT_COMMAND_VALUE;
+					}
+
+				}, new ButtonSetValueCellEditor()
+				{
+
+					@Override
+					protected void updateButtonState(Button buttonWidget, Object value)
+					{
+						buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
+						buttonWidget.setEnabled(true);
+						buttonWidget.setToolTipText("Insert a new array item below.");
+					}
+
+					@Override
+					protected Object getValueToSetOnClick(Object oldPropertyValue)
+					{
+						return INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+					}
+
+				}, false, true, 0));
+
+				cellEditor.create(parent);
+
+				return cellEditor;
+			}
+
+			@Override
+			public String getCategory()
+			{
+				return getRootBasePD().getCategory();
+			}
+
+			@Override
+			public String getDescription()
+			{
+				return getRootBasePD().getDescription();
+			}
+
+			@Override
+			public String getDisplayName()
+			{
+				return getRootBasePD().getDisplayName();
+			}
+
+			@Override
+			public String[] getFilterFlags()
+			{
+				return getRootBasePD().getFilterFlags();
+			}
+
+			@Override
+			public Object getHelpContextIds()
+			{
+				return getRootBasePD().getHelpContextIds();
+			}
+
+			@Override
+			public Object getId()
+			{
+				return getRootBasePD().getId();
+			}
+
+			@Override
+			public ILabelProvider getLabelProvider()
+			{
+				return getRootBasePD().getLabelProvider();
+			}
+
+			@Override
+			public boolean isCompatibleWith(IPropertyDescriptor anotherProperty)
+			{
+				return getRootBasePD().isCompatibleWith(anotherProperty);
+			}
+
+			@Override
+			public void setProperty(ISetterAwarePropertySource propertySource, Object value)
+			{
+				IPropertyDescriptor basePDLocal = getRootBasePD();
+				if (basePDLocal instanceof IPropertySetter< ? , ? >) ((IPropertySetter)basePDLocal).setProperty(propertySource, value);
+				else propertySource.defaultSetProperty(getId(), value);
+			}
+
+			@Override
+			public Object getProperty(ISetterAwarePropertySource propertySource)
+			{
+				IPropertyDescriptor basePDLocal = getRootBasePD();
+				if (basePDLocal instanceof IPropertySetter< ? , ? >) return ((IPropertySetter)basePDLocal).getProperty(propertySource);
+				else return propertySource.defaultGetProperty(getId());
+			}
+
+			@Override
+			public boolean isPropertySet(ISetterAwarePropertySource propertySource)
+			{
+				IPropertyDescriptor basePDLocal = getRootBasePD();
+				if (basePDLocal instanceof IPropertySetter< ? , ? >) return ((IPropertySetter)basePDLocal).isPropertySet(propertySource);
+				else return propertySource.isPropertySet(getId());
+			}
+
+			@Override
+			public IPropertyConverter<Object, Object> getConverter()
+			{
+				return basePD instanceof IPropertyController< ? , ? > ? ((IPropertyController)basePD).getConverter() : null;
+			}
+
+			@Override
+			public boolean supportsReadonly()
+			{
+				return basePD instanceof IPropertyController< ? , ? > ? ((IPropertyController)basePD).supportsReadonly() : false;
+			}
+
+			@Override
+			public boolean isReadOnly()
+			{
+				return basePD instanceof IPropertyController< ? , ? > ? ((IPropertyController)basePD).isReadOnly() : false;
+			}
+
+			@Override
+			public void setReadonly(boolean readonly)
+			{
+				if (basePD instanceof IPropertyController< ? , ? >)
+				{
+					((IPropertyController)basePD).setReadonly(readonly);
+				}
+			}
+
+			@Override
+			public String getTooltipText()
+			{
+				if (basePD instanceof IProvidesTooltip) return ((IProvidesTooltip)basePD).getTooltipText();
+				else return null;
+			}
+
+			@Override
+			public Object getAdapter(Class adapter)
+			{
+				if (Comparable.class == adapter)
+				{
+					return Integer.valueOf(index);
+				}
+				return null;
+			}
+
+		}
+
+		private ArrayActions undoValue;
 
 		public JSONArrayPropertySource(ComplexProperty<Object> complexProperty)
 		{
 			super(complexProperty);
 		}
 
-		protected abstract void defaultElementWasSet(Object newMainValue);
+		@Override
+		protected Object getElementValue(int idx)
+		{
+			return PersistPropertySource.adjustPropertyValueToGet(getIdFromIndex(idx), getPropertyDescriptors()[idx], this);
+		}
 
 		protected abstract Object getDefaultElementProperty(Object id);
 
 		@Override
 		protected Object setComplexElementValueImpl(int idx, Object v)
 		{
-			defaultSetProperty(getIdFromIndex(idx), v);
+			PersistPropertySource.adjustPropertyValueAndSet(getIdFromIndex(idx), v, getPropertyDescriptors()[idx], this);
 			return getEditableValue();
 		}
 
-		@Override
-		protected ServoyJSONArray deleteElementAtIndex(final int idx)
+		protected Object deleteElementAtIndex(final int idx)
 		{
 			return ServoyJSONArray.removeIndexFromJSONArray((JSONArray)getEditableValue(), idx);
 		}
 
-		@Override
 		protected Object insertNewElementAfterIndex(int idx)
 		{
 			return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)getEditableValue(), idx + 1, getNewElementInitialValue());
@@ -114,8 +357,6 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 				Object newValue = getEditableValue();
 				Object val = ServoyJSONObject.adjustJavascriptNULLForOrgJSON(value);
 				((JSONArray)newValue).put(idx, val);
-
-				defaultElementWasSet(newValue);
 			}
 			catch (JSONException e)
 			{
@@ -167,6 +408,59 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 			defaultSetProperty(id, getDefaultElementProperty(id)); // if id would be of object or array type in which case we would need to create JSONObject or JSONArray, it shouldn't reach this code; it should be intercepted before this by the IPropertySetter method of the controller of those types; so we just use the default value here directly
 		}
 
+		/**
+		 * Handle undo, revert handling of the special values
+		 */
+		@Override
+		public boolean undoSetProperty(Object id)
+		{
+			if (undoValue != null)
+			{
+				setPropertyValue(id, undoValue);
+				return true;
+			}
+
+			return false;
+		}
+
+		@Override
+		public Object setComplexPropertyValue(Object id, Object v)
+		{
+			try
+			{
+				undoValue = null;
+				int idx = getIndexFromId((ArrayPropertyChildId)id);
+				if (v == DELETE_CURRENT_COMMAND_VALUE)
+				{
+					undoValue = UNDO_DELETE_CURRENT_COMMAND_VALUE;
+					return deleteElementAtIndex(idx);
+				}
+				if (v == INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE)
+				{
+					undoValue = UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+					return insertNewElementAfterIndex(idx);
+				}
+
+				// undo
+				if (v == UNDO_DELETE_CURRENT_COMMAND_VALUE)
+				{
+					undoValue = DELETE_CURRENT_COMMAND_VALUE;
+					return insertNewElementAfterIndex(idx - 1);
+				}
+
+				if (v == UNDO_INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE)
+				{
+					undoValue = INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+					return deleteElementAtIndex(idx + 1);
+				}
+			}
+			catch (NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+			}
+
+			return super.setComplexPropertyValue(id, v);
+		}
 	}
 
 	public static class JSONArrayTextConverter implements IObjectTextConverter

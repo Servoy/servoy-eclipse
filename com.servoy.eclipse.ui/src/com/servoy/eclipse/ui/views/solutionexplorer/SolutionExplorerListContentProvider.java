@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,15 +58,18 @@ import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.BinaryOperation;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.ConstStatement;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.IVariableStatement;
 import org.eclipse.dltk.javascript.ast.ObjectInitializer;
 import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.PropertyInitializer;
 import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.VariableStatement;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
-import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
+import org.eclipse.dltk.javascript.ast.v4.LetStatement;
+import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
+import org.eclipse.dltk.javascript.ui.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -82,10 +86,13 @@ import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectApiFunctionDefinition;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebObjectSpecification.SourceOfCodeExtractedDocs;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.types.StyleClassPropertyType;
+import org.sablo.util.TextUtils;
 
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -176,6 +183,7 @@ import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
@@ -544,6 +552,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.UTILS)
 			{
 				lm = getJSMethods(JSUtils.class, "utils", null, UserNodeType.UTIL_ITEM, null, null);
+			}
+			else if (type == UserNodeType.CLIENT_UTILS)
+			{
+				lm = getJSMethods(JSClientUtils.class, "clientutils", null, UserNodeType.CLIENT_UTIL_ITEM, null, null);
 			}
 			else if (type == UserNodeType.JSUNIT)
 			{
@@ -1769,42 +1781,64 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	}
 
 	/**
-	 * Extract the docs for angular client side apis.
-	 * @param readTextFile
+	 * Extract the docs for angular client side JS, server side JS or specific documentation only JS (this one has prio. if it's available).
 	 */
 	public static void extractApiDocs(WebObjectSpecification spec)
 	{
+		boolean titaniumIsUsed = Activator.getDefault().getDesignClient().getRuntimeProperties().containsKey("NG2");
+		if (spec.areDocsAlreadyExtractedFromCode(titaniumIsUsed)) return; // we rely here on the fact that, if a component is changed in a referenced package project, then the WebObjectSpecification will be a fresh new instance anyway - with areDocsAlreadyExtractedFromCode() false
+
 		URL docFileURL = spec.getDocFileURL();
+		SourceOfCodeExtractedDocs sourceOfCodeExtractedDocs;
 		if (docFileURL != null)
 		{
 			extractDocsFromJsFile(spec, docFileURL);
+			sourceOfCodeExtractedDocs = SourceOfCodeExtractedDocs.DEDICATED_DOC_SCRIPT_FILE;
 		}
-		else if (spec.getApiFunctions().size() > 0)
+		else
 		{
-			extractDocsFromJsFile(spec, spec.getDefinitionURL());
-			extractDocsFromJsFile(spec, spec.getServerScript(Activator.getDefault().getDesignClient().getRuntimeProperties().containsKey("NG2")));
+			if (spec.getApiFunctions().size() > 0)
+			{
+				extractDocsFromJsFile(spec, spec.getDefinitionURL());
+				extractDocsFromJsFile(spec, spec.getServerScript(titaniumIsUsed));
+			}
+			sourceOfCodeExtractedDocs = titaniumIsUsed ? SourceOfCodeExtractedDocs.TITANIUM_CLIENT_AND_SERVER_SIDE_SCRIPT
+				: SourceOfCodeExtractedDocs.NG1_CLIENT_AND_SERVER_SIDE_SCRIPT;
 		}
+		spec.setDocsWereExtractedFromCode(sourceOfCodeExtractedDocs);
 	}
 
 	private static void extractDocsFromJsFile(WebObjectSpecification spec, URL url)
 	{
 		if (spec != null && url != null)
 		{
-			final Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
+			final Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
 			final Map<String, PropertyDescription> properties = spec.getProperties();
 			try
 			{
 				URLConnection openConnection = url.openConnection();
 				openConnection.setUseCaches(false);
 				InputStream is = openConnection.getInputStream();
-				String source = IOUtils.toString(is);
+				String source = IOUtils.toString(is, Charset.defaultCharset());
 				is.close();
 				if (source != null)
 				{
-					JavaScriptParser parser = new JavaScriptParser();
-					Script script = parser.parse(source, null);
+					Script script = JavaScriptParserUtil.parse(source, null);
+
+					// see if it starts with an overall description of the component/service
+					List<Comment> comments = script.getComments();
+					if (comments.size() > 0)
+					{
+						Comment firstComment = comments.get(0);
+						// it has to be a stand-alone comment, not a comment of some method / variable
+						// and it has to be the first comment in the file (should we limit it to be the first thing in the file?)
+						if (!firstComment.isDocumentation())
+							spec.setDocumentation(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(firstComment.getText())));
+					}
+
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
 					{
+
 						@Override
 						public ASTNode visitBinaryOperation(BinaryOperation node)
 						{
@@ -1878,6 +1912,26 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						@Override
 						public ASTNode visitVariableStatement(VariableStatement node)
 						{
+							visitIVariableStatement(node);
+							return super.visitVariableStatement(node);
+						}
+
+						@Override
+						public ASTNode visitLetStatement(LetStatement node)
+						{
+							visitIVariableStatement(node);
+							return super.visitLetStatement(node);
+						}
+
+						@Override
+						public ASTNode visitConstDeclaration(ConstStatement node)
+						{
+							visitIVariableStatement(node);
+							return super.visitConstDeclaration(node);
+						}
+
+						private void visitIVariableStatement(IVariableStatement node)
+						{
 							if (node.getDocumentation() != null && node.getVariables().size() == 1)
 							{
 								PropertyDescription pd = properties.get(node.getVariables().get(0).getVariableName());
@@ -1886,7 +1940,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 									pd.setDocumentation(node.getDocumentation().getText());
 								}
 							}
-							return super.visitVariableStatement(node);
 						}
 					});
 				}
@@ -2341,8 +2394,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						propertiesIcon));
 				}
 			}
-			Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
-			for (final WebObjectFunctionDefinition api : apis.values())
+			Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
+			for (final WebObjectApiFunctionDefinition api : apis.values())
 			{
 				String name = api.getName();
 				String displayParams = "(";

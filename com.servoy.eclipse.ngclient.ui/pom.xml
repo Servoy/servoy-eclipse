@@ -4,13 +4,16 @@
 	xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
+    <prerequisites>
+        <maven>3.9.0</maven>
+    </prerequisites>
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2023.3.8.3850_LTS</version>
+		<version>2024.3.2.3945</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
-	<version>2023.3.8.3850_LTS</version>
+	<version>2024.3.2.3945</version>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
 		<test.script>test_headless</test.script>
@@ -31,7 +34,7 @@
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.12.0</version>
+				<version>1.15.0</version>
 				<executions>
 
 					<!-- 1. Install node and npm locally -->
@@ -43,10 +46,23 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<nodeVersion>v18.17.0</nodeVersion>
+							<nodeVersion>v20.11.1</nodeVersion>
 						</configuration>
 					</execution>
 
+                    <execution>
+                        <id>build servoy public</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node</workingDirectory>
+                            <skipTests>${maven.test.skip}</skipTests>
+                            <arguments>run build_lib</arguments>
+                        </configuration>
+                    </execution>
+                    
                     <execution>
                         <id>install node and npm (defaults)</id>
                         <phase>initialize</phase>
@@ -55,7 +71,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/servoydefault</workingDirectory>
-                            <nodeVersion>v18.17.0</nodeVersion>
+                            <nodeVersion>v20.11.1</nodeVersion>
                         </configuration>
                     </execution>
 
@@ -67,7 +83,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/dialogs</workingDirectory>
-                            <nodeVersion>v18.17.0</nodeVersion>
+                            <nodeVersion>v20.11.1</nodeVersion>
                         </configuration>
                     </execution>
 
@@ -79,7 +95,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/window</workingDirectory>
-                            <nodeVersion>v18.17.0</nodeVersion>
+                            <nodeVersion>v20.11.1</nodeVersion>
                         </configuration>
                     </execution>
 
@@ -150,7 +166,7 @@
 						<configuration>
 							<workingDirectory>node</workingDirectory>
 							<skipTests>${maven.test.skip}</skipTests>
-							<failOnError>true</failOnError>
+							<testFailureIgnore>false</testFailureIgnore>
 							<arguments>run ${test.script}</arguments>
 						</configuration>
 					</execution>

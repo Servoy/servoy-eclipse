@@ -19,10 +19,10 @@ package com.servoy.eclipse.core.quickfix;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMarkerResolution;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -53,7 +53,7 @@ public class DuplicateSiblingUuidQuickFix implements IMarkerResolution
 			JSONObject json_obj = SolutionDeserializer.getJSONObject(workspaceFileAccess.getUTF8Contents(relativePath));
 			json_obj.putOpt(SolutionSerializer.PROP_UUID, UUID.randomUUID());
 			workspaceFileAccess.setUTF8Contents(relativePath, json_obj.toString());
-			MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "UUID generated sucessfully",
+			MessageDialog.openInformation(UIUtils.getActiveShell(), "UUID generated sucessfully",
 				"Restart application in order for the change to be effective.");
 		}
 		catch (Exception e)

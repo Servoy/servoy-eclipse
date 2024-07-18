@@ -12,6 +12,7 @@ import { FormService } from '../../form.service';
   export class DialogWindowComponent {
 
     window: SvyWindow;
+    firstTimeFocus = true;
 
     constructor(private sabloService: SabloService, private formservice: FormService, @Inject(DOCUMENT) private doc: Document) {
     }
@@ -64,21 +65,49 @@ import { FormService } from '../../form.service';
     }
 
     firstElementFocused(event: Event) {
-      const tabIndex = parseInt(this.doc.getElementById('tabStop').getAttribute('tabindex'), 10);
-      const newTarget: any = this.doc.querySelector('[tabindex=\'' + ( tabIndex - 1 ) + '\']');
-      // if there is no focusable element in the window, then newTarget == e.target,
-      // do a check here to avoid focus cycling
-      if(event.target !== newTarget) {
-        newTarget.focus();
+      const firstTabIndex = parseInt(this.doc.getElementById('tabStart').getAttribute('tabindex'), 10);
+      const lastTabIndex = parseInt(this.doc.getElementById('tabStop').getAttribute('tabindex'), 10);
+      if (this.firstTimeFocus === true) {						
+        for(let i = firstTabIndex + 1; i < lastTabIndex; i++) {
+          const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
+          // if there is no focusable element in the window, then newTarget == e.target,
+          // do a check here to avoid focus cycling
+          if(this.isElementVisibleAndNotDisabled(newTarget) && (event.target != newTarget)) {
+            newTarget.focus();
+            this.firstTimeFocus = false;
+            break;
+          }
+        }
+      } else {
+        for(let i = lastTabIndex - 1; i > firstTabIndex; i--) {
+          const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
+          // if there is no focusable element in the window, then newTarget == e.target,
+          // do a check here to avoid focus cycling
+          if(this.isElementVisibleAndNotDisabled(newTarget) && (event.target != newTarget)) {
+            newTarget.focus();
+            this.firstTimeFocus = false;
+            break;
+          }
+        }
       }
     }
 
     lastElementFocused(event: Event) {
-      const newTarget: any = this.doc.querySelector('[tabindex=\'2\']');
-      // if there is no focusable element in the window, then newTarget == e.target,
-      // do a check here to avoid focus cycling
-      if(event.target !== newTarget) {
-        newTarget.focus();
+      const firstTabIndex = parseInt(this.doc.getElementById('tabStart').getAttribute('tabindex'), 10);
+      const lastTabIndex = parseInt(this.doc.getElementById('tabStop').getAttribute('tabindex'), 10);
+      for(let i = firstTabIndex + 1; i < lastTabIndex; i++) {
+        const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
+        // if there is no focusable element in the window, then newTarget == e.target,
+        // do a check here to avoid focus cycling
+        if(this.isElementVisibleAndNotDisabled(newTarget) && (event.target != newTarget)) {
+          newTarget.focus();
+          this.firstTimeFocus = false;
+          break;
+        }
       }
+    }
+
+    isElementVisibleAndNotDisabled(element): boolean {
+      return (element.offsetWidth > 0 || element.offsetHeight > 0) && !element.disabled;
     }
   }

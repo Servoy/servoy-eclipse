@@ -28,7 +28,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 import com.servoy.eclipse.debug.handlers.StartDebugHandler;
 import com.servoy.eclipse.jsunit.Activator;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.IDebugJ2DBClient;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.shared.IDebugHeadlessClient;
+import com.servoy.j2db.util.Debug;
 
 /**
  * @author jcompagner
@@ -69,13 +71,20 @@ public class StartJsUnitClientActionDelegate extends StartDebugHandler implement
 		return null;
 	}
 
-	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+	public void run(IProgressMonitor monitor)
 	{
 		if (testAndStartDebugger())
 		{
-			IDebugJ2DBClient jSUnitJ2DBClient = Activator.getDefault().getJSUnitJ2DBClient();
-			jSUnitJ2DBClient.show();
-			started = true;
+			IDebugHeadlessClient jsunitClient = Activator.getDefault().getJSUnitClient();
+			try
+			{
+				jsunitClient.loadDebugSolution();
+				started = true;
+			}
+			catch (RepositoryException e)
+			{
+				Debug.error(e);
+			}
 		}
 	}
 

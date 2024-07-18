@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -100,6 +101,13 @@ public class NewValueListWizard extends Wizard implements INewWizard
 			// add pages to this wizard
 			addPage(valuelistPage);
 		}
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer)
+	{
+		pageContainer.getShell().setData(CSSSWTConstants.CSS_ID_KEY, "svydialog");
+		super.createPageControls(pageContainer);
 	}
 
 	@Override

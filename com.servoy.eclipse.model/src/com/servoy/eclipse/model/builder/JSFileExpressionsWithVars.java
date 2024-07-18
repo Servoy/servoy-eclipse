@@ -28,10 +28,10 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.javascript.ast.Expression;
+import org.eclipse.dltk.javascript.ast.IVariableStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
-import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.Reporter;
 
@@ -52,7 +52,7 @@ public class JSFileExpressionsWithVars extends JSFileBuildParticipantFactory
 
 	class ExpressionsWithVarsParser extends JSFileBuildParticipant
 	{
-		private static final String ERROR_MESSAGE = "More then one variable declared in a line, this is not supported in Servoy, please define each variable in a separate line";
+		private static final String ERROR_MESSAGE = "More then one variable/constant declared in a line, this is not supported in Servoy, please define each variable/constant in a separate line";
 
 		/*
 		 * @see org.eclipse.dltk.core.builder.IBuildParticipant#build(org.eclipse.dltk.core.builder.IBuildContext)
@@ -78,9 +78,9 @@ public class JSFileExpressionsWithVars extends JSFileBuildParticipantFactory
 					if (node instanceof VoidExpression)
 					{
 						Expression exp = ((VoidExpression)node).getExpression();
-						if (exp instanceof VariableStatement)
+						if (exp instanceof IVariableStatement)
 						{
-							List<VariableDeclaration> vars = ((VariableStatement)exp).getVariables();
+							List<VariableDeclaration> vars = ((IVariableStatement)exp).getVariables();
 							if (vars.size() > 1)
 							{
 								reporter.reportProblem(JSFileExpressionWithVarsProblem.EXPRESSION_WITH_VARS, ERROR_MESSAGE, exp.sourceStart(), exp.sourceEnd());

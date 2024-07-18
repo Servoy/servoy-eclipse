@@ -397,7 +397,7 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 		boolean addedSameWidth = false;
 		boolean addedSameHeight = false;
 
-		List<EditPart> children = container.getChildren();
+		List< ? extends GraphicalEditPart> children = container.getChildren();
 		for (EditPart child : children)
 		{
 			if (child.getModel() instanceof Part || child == getHost() || !(child instanceof GraphicalEditPart) || child instanceof TabFormGraphicalEditPart)

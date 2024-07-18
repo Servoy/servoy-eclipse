@@ -30,9 +30,6 @@ import { TypesRegistry} from '../sablo/types_registry';
           <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-           <div *ngFor="let item of formCache.formComponents" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
-          </div>
           <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
                    <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
           </div>
@@ -54,7 +51,7 @@ import { TypesRegistry} from '../sablo/types_registry';
           </div>
       </ng-template>
       <ng-template  #cssPositionContainer  let-state="state" >
-          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
             <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
             </div>
@@ -161,9 +158,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         });
                     }
                 } else {
-                    this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, undefined, [], model, typesRegistry/*, undefined*/).initForDesigner(event.data.model);
+                    this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, undefined, [], model, typesRegistry).initForDesigner(event.data.model);
                     this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, undefined, [], model_inserted,
-                                                typesRegistry/*, undefined*/).initForDesigner(event.data.model); //TODO only in responsive
+                                                typesRegistry).initForDesigner(event.data.model); // TODO only in responsive
                 }
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
@@ -192,7 +189,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     variantAttributes['svy-id'] = variantId;
                     const layout = { width: variant.width + 'px', height: variant.height + 'px' };
 
-                    const variantElement = new ComponentCache(null, event.data.name, undefined, [], layout, typesRegistry/*, undefined*/);
+                    const variantElement = new ComponentCache(null, event.data.name, undefined, [], layout, typesRegistry);
                     variantElement.initForDesigner(JSON.parse(JSON.stringify(event.data.model).slice()));
 
                     const componentModel = variantElement.model;
@@ -249,13 +246,13 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;
                         this.insertedClone = new ComponentCache(this.insertedClone.name + 'clone', this.insertedClone.specName, this.insertedClone.type, this.insertedClone.handlers,
-                            this.insertedClone.layout, this.typesRegistry/*, undefined*/).initForDesigner(oldModel);
+                            this.insertedClone.layout, this.typesRegistry).initForDesigner(oldModel);
 
                         parent.addChild(this.insertedClone);
                     }
 
                     this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.specName, this.insertedClone.type, this.insertedClone.handlers, this.insertedClone.layout,
-                                                    this.typesRegistry/*, undefined*/).initForDesigner(oldModel);
+                                                    this.typesRegistry).initForDesigner(oldModel);
                 }
                 this.insertedCloneParent = this.insertedClone.parent;
                 this.designMode = this.showWireframe;
@@ -317,7 +314,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             this.detectChanges();
         });
     }
-
+    
+    
     sendVariantSizes() {
         const variants = this.document.getElementsByClassName('variant_item');
         if (!this.variantsLoaded || variants.length === 0) {
@@ -366,7 +364,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
         }
         if (selectedVariant) {
-            const model = Object.assign({}, selectedVariant.items[0].model);
+            const model = Object.assign({}, (selectedVariant.items[0] as ComponentCache).model);
             model.size.width = targetWidth;
             model.size.height = targetHeight;
             this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: selectedVariant.items[0].model}, '*');
@@ -501,7 +499,9 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     getNGClass(item: StructureCache): { [klass: string]: any } {
         const ngclass = {};
-        ngclass[item.attributes.designclass] = this.showWireframe;
+        if (!item.cssPositionContainer || item.getDepth() != 0) {
+        	ngclass[item.attributes.designclass] = this.showWireframe;
+        }
         ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
         const children = item.items.length;
         if (children > 0 && children < 10) {

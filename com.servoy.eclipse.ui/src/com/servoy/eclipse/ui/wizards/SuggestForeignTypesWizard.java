@@ -16,7 +16,8 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
-import java.rmi.RemoteException;
+import static com.servoy.eclipse.core.ServoyModelManager.getServoyModelManager;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -73,10 +74,10 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE.SharedImages;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.query.IBaseSQLCondition;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
@@ -152,7 +153,7 @@ public class SuggestForeignTypesWizard extends Wizard
 	public SuggestForeignTypesWizard(String serverName)
 	{
 		setWindowTitle("Suggest Foreign Types");
-		ServoyModelManager.getServoyModelManager().getServoyModel();
+		getServoyModelManager().getServoyModel();
 		server = ServoyModelFinder.getServoyModel().getDataSourceManager().getServer(serverName);
 		hasServer = true;
 	}
@@ -189,7 +190,7 @@ public class SuggestForeignTypesWizard extends Wizard
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Errors occured while saving the foreign type changes", answer);
+							MessageDialog.openError(UIUtils.getActiveShell(), "Errors occured while saving the foreign type changes", answer);
 						}
 					});
 					return Status.CANCEL_STATUS;
@@ -245,13 +246,13 @@ public class SuggestForeignTypesWizard extends Wizard
 			UIUtils.setDefaultVisibleItemCount(serversCombo);
 			serversCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-			ServoyModelManager.getServoyModelManager().getServoyModel();
+			getServoyModelManager().getServoyModel();
 			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 			if (serverNames != null && serverNames.length > 0)
 			{
 				serversCombo.setItems(serverNames);
 				serversCombo.select(0);
-				ServoyModelManager.getServoyModelManager().getServoyModel();
+				getServoyModelManager().getServoyModel();
 				server = ServoyModelFinder.getServoyModel().getDataSourceManager().getServer(serverNames[0]);
 
 				serversCombo.addSelectionListener(new SelectionAdapter()
@@ -606,12 +607,6 @@ public class SuggestForeignTypesWizard extends Wizard
 							monitor.done();
 							return Status.CANCEL_STATUS;
 						}
-						catch (RemoteException e)
-						{
-							ServoyLog.logWarning("Failed to compute foreign types.", e);
-							monitor.done();
-							return Status.CANCEL_STATUS;
-						}
 					}
 				};
 
@@ -628,9 +623,9 @@ public class SuggestForeignTypesWizard extends Wizard
 			}
 		}
 
-		private void matchForeignTypesToColumns(String[] tableNames, IProgressMonitor monitor) throws RepositoryException, RemoteException
+		private void matchForeignTypesToColumns(String[] tableNames, IProgressMonitor monitor) throws RepositoryException
 		{
-			FlattenedSolution sol = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+			FlattenedSolution solution = getServoyModelManager().getServoyModel().getFlattenedSolution();
 
 			for (String fkTableName : tableNames)
 			{
@@ -640,27 +635,27 @@ public class SuggestForeignTypesWizard extends Wizard
 
 				Map<String, Column> matchedFromRelations = new HashMap<String, Column>();
 
-				Iterator<Relation> relationsIterator = sol.getRelations(fkTable, false, true);
+				Iterator<Relation> relationsIterator = solution.getRelations(fkTable, false, true);
 				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 				while (relationsIterator.hasNext())
 				{
-					Relation rel = relationsIterator.next();
-					IServerInternal foreignServer = dsm.getServer(rel.getForeignDataSource());
-					IServerInternal primaryServer = dsm.getServer(rel.getPrimaryDataSource());
+					Relation relation = relationsIterator.next();
+					IServerInternal foreignServer = dsm.getServer(relation.getForeignDataSource());
+					IServerInternal primaryServer = dsm.getServer(relation.getPrimaryDataSource());
 					if (primaryServer != null && server.getName().equals(primaryServer.getName()) && foreignServer != null &&
 						server.getName().equals(foreignServer.getName()))
 					{
-						List<IPersist> allRelationItems = rel.getAllObjectsAsList();
+						List<IPersist> allRelationItems = relation.getAllObjectsAsList();
 						for (IPersist persist : allRelationItems)
 						{
 							RelationItem relItem = (RelationItem)persist;
 							if (relItem.getOperator() == IBaseSQLCondition.EQUALS_OPERATOR && !ScopesUtils.isVariableScope(relItem.getPrimaryDataProviderID()))
 							{
 								// Don't use self-referencing columns.
-								if (!(rel.getPrimaryTableName().equals(rel.getForeignTableName()) &&
+								if (!(relation.getPrimaryTableName().equals(relation.getForeignTableName()) &&
 									relItem.getPrimaryDataProviderID().equals(relItem.getForeignColumnName())))
 								{
-									Table pkTable = (Table)server.getTable(rel.getPrimaryTableName());
+									Table pkTable = (Table)server.getTable(relation.getPrimaryTableName());
 									Column pkCol = pkTable.getColumn(relItem.getPrimaryDataProviderID());
 									Column fkCol = fkTable.getColumn(relItem.getForeignColumnName());
 									if (fkCol != null && !fkCol.isDatabasePK() && pkTable != null && !pkTable.isMarkedAsHiddenInDeveloper() && pkCol != null &&
@@ -699,7 +694,7 @@ public class SuggestForeignTypesWizard extends Wizard
 					monitor.subTask("column '" + fkCol.getName() + "'");
 
 					// PKs don't need foreign type
-					if (!fkCol.isDatabasePK() && !matchedFromRelations.containsKey(fkCol.getName()))
+					if (!fkCol.hasFlag(IBaseColumn.EXCLUDED_COLUMN) && !fkCol.isDatabasePK() && !matchedFromRelations.containsKey(fkCol.getName()))
 					{
 						boolean matched = false;
 

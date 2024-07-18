@@ -48,7 +48,7 @@ import com.servoy.j2db.persistence.Solution;
 /**
  * This edit policy enables pasting to a form or tab panel.
  * Also handles cloning (ctl-select).
- * 
+ *
  * @author rgansevles
  */
 class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
@@ -81,7 +81,7 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 		}
 		if (RequestConstants.REQ_CLONE.equals(request.getType()) && request instanceof ChangeBoundsRequest)
 		{
-			List<EditPart> editParts = ((GroupRequest)request).getEditParts();
+			List< ? extends EditPart> editParts = ((GroupRequest)request).getEditParts();
 			List<IPersist> models = new ArrayList<IPersist>();
 			int minx = Integer.MAX_VALUE, miny = Integer.MAX_VALUE;
 			for (EditPart editPart : editParts)

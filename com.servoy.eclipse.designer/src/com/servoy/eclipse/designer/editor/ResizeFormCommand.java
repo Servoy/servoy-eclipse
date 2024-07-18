@@ -23,6 +23,7 @@ import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 
@@ -39,9 +40,9 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 /**
  * Command to resize a form in form editor.
  * Move/resize elements also when control is pressed.
- * 
+ *
  * @since 6.0
- * 
+ *
  * @author rgansevles
  *
  */
@@ -57,10 +58,10 @@ public class ResizeFormCommand extends Command
 	private final FormGraphicalEditPart formEditPart;
 
 	/**
-	 * @param formEditPart 
+	 * @param formEditPart
 	 * @param resizeDirection
 	 * @param sizeDelta
-	 * @param controlPressed 
+	 * @param controlPressed
 	 */
 	public ResizeFormCommand(FormGraphicalEditPart formEditPart, int resizeDirection, int delta, boolean controlPressed)
 	{
@@ -83,7 +84,7 @@ public class ResizeFormCommand extends Command
 				PROPERTY_WIDTH, new Integer(form.getWidth() + delta)));
 
 			// move/resize all right-anchored elements, when control is pressed
-			List<EditPart> children = formEditPart.getChildren();
+			List< ? extends GraphicalEditPart> children = formEditPart.getChildren();
 			for (EditPart editPart : children)
 			{
 				Object model = editPart.getModel();

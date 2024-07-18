@@ -60,11 +60,12 @@ import org.json.JSONObject;
 import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.NGDesktopConfiguration;
 import com.servoy.eclipse.ui.preferences.NgDesktopPreferences;
 import com.servoy.j2db.persistence.Solution;
@@ -217,7 +218,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	private boolean archiveUpdateNeeded() throws IOException
 	{
 		String versionFilename = NGDESKTOP_PREFIX + "-archive.version";
-		File currentVersionFile = new File(LOCAL_PATH + versionFilename);
+		File currentVersionFile = Paths.get(LOCAL_PATH + versionFilename).normalize().toFile();
 		if (!currentVersionFile.exists())
 			return true;
 		URL remoteVersionURL = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + versionFilename);
@@ -256,7 +257,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		{
 			public void run()
 			{
-				ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+				ProgressMonitorDialog dialog = new ProgressMonitorDialog(UIUtils.getActiveShell());
 				try
 				{
 					dialog.run(true, true, new DownloadNgDesktop(archiveUrl, savePath));
@@ -279,7 +280,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	private void downloadVersionFile() throws IOException
 	{
 		File versionFilename = new File(NGDESKTOP_PREFIX + "-archive.version");
-		File currentVersionFile = new File(LOCAL_PATH + versionFilename);
+		File currentVersionFile = Paths.get(LOCAL_PATH + versionFilename).normalize().toFile();
 		URL remoteVersionURL = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + versionFilename);
 		try (InputStream remoteStream = remoteVersionURL.openStream();
 			OutputStream localStream = new FileOutputStream(currentVersionFile))
@@ -293,7 +294,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	private void deleteVersionFile()
 	{//this will enforce a new download
-		File currentVersionFile = new File(LOCAL_PATH + NGDESKTOP_PREFIX + "-archive.version");
+		File currentVersionFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + "-archive.version").normalize().toFile();
 		if (currentVersionFile.exists())
 		{
 			currentVersionFile.delete();
@@ -330,12 +331,12 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	private void updateJsonFile(Solution solution)
 	{
 		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() +
-			((new DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/") + solution.getName() + "/index.html";
+			((new Ng2DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/") + solution.getName() + "/index.html";
 		String resourceStr = Utils.isAppleMacOS() ? "/" + NGDESKTOP_APP_NAME + ".app/Contents/Resources" : File.separator + "resources";
 		String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
 			File.separator + "servoy.json";
 
-		File configFile = new File(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + configLocation);// + fileUrl);
+		File configFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + configLocation).normalize().toFile();// + fileUrl);
 		JSONObject configObject = getJsonObj(configFile, solutionUrl);
 
 		try (FileWriter file = new FileWriter(configFile);
@@ -380,7 +381,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			{
 				public void run()
 				{
-					org.eclipse.jface.dialogs.MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+					org.eclipse.jface.dialogs.MessageDialog.openError(UIUtils.getActiveShell(), "Solution type problem",
 						"Cant open this solution type in this client");
 				}
 			});
@@ -455,7 +456,7 @@ class DownloadNgDesktop implements IRunnableWithProgress
 
 	private void deletePreviousNgDesktop() throws IOException
 	{
-		Path localPath = Paths.get(StartNGDesktopClientHandler.LOCAL_PATH);
+		Path localPath = Paths.get(StartNGDesktopClientHandler.LOCAL_PATH).normalize();
 		if (Files.exists(localPath, LinkOption.NOFOLLOW_LINKS)) //delete previous version
 		{
 			Files.walk(localPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);

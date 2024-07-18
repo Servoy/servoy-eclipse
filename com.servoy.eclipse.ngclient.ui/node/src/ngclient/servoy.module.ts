@@ -23,6 +23,8 @@ import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.se
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
 import {MainRoutingModule} from './main-routing.module';
 import { DeveloperService } from './developer.service';
+import { AlertWindowComponent} from './services/alert-window/alert-window.component';
+import { MessageDialogWindowComponent } from './services/message-dialog-window/message-dialog-window.component';
 
 @NgModule( {
     declarations: [
@@ -32,7 +34,9 @@ import { DeveloperService } from './developer.service';
         FileUploadWindowComponent,
         DialogWindowComponent,
         ServoyFormPopupComponent,
-        LoadingIndicatorComponent
+        LoadingIndicatorComponent,
+        AlertWindowComponent,
+        MessageDialogWindowComponent
     ],
     imports: [
         CommonModule,

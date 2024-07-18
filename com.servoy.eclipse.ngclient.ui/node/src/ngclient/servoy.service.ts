@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { WebsocketService } from '../sablo/websocket.service';
+import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service';
 import { PushToServerUtils, TypesRegistry } from '../sablo/types_registry';
@@ -21,10 +21,12 @@ import { FormcomponentType } from './converters/formcomponent_converter';
 import { ComponentType } from './converters/component_converter';
 import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
+import { SvyUtilsService } from './utils.service';
 import { ClientFunctionType } from './converters/clientfunction_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { UIBlockerService } from './services/ui_blocker.service';
 import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
+import { ServerFunctionType } from './converters/serverfunction_converter';
 
 class UIProperties {
     private uiProperties: { [property: string]: any};
@@ -84,10 +86,11 @@ export class ServoyService {
     constructor(private websocketService: WebsocketService,
         private sabloService: SabloService,
         private windowRefService: WindowRefService,
+        private utils: SvyUtilsService,
         private sessionStorageService: SessionStorageService,
         private localeService: LocaleService,
         private clientFunctionService: ClientFunctionService,
-        private converterService: ConverterService,
+        private converterService: ConverterService<unknown>,
         typesRegistry: TypesRegistry,
         sabloDeferHelper: SabloDeferHelper,
         logFactory: LoggerFactory,
@@ -99,8 +102,10 @@ export class ServoyService {
 
         typesRegistry.registerGlobalType(DatasetType.TYPE_NAME, new DatasetType(typesRegistry, converterService));
 
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, new CustomArrayTypeFactory(typesRegistry, converterService, logFactory));
-        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, logFactory));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomArrayTypeFactory.TYPE_FACTORY_NAME, 
+                                        new CustomArrayTypeFactory(typesRegistry, converterService, logFactory));
+        typesRegistry.getTypeFactoryRegistry().contributeTypeFactory(CustomObjectTypeFactory.TYPE_FACTORY_NAME, 
+                                        new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, logFactory));
 
         typesRegistry.registerGlobalType(ValuelistType.TYPE_NAME, new ValuelistType(sabloDeferHelper));
         typesRegistry.registerGlobalType(FoundsetTreeType.TYPE_NAME, new FoundsetTreeType(sabloDeferHelper));
@@ -112,6 +117,8 @@ export class ServoyService {
         typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, this.uiBlockerService));
 
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
+        typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this, this.utils));
+        typesRegistry.registerGlobalType(ServerFunctionType.NATIVE_FUNCTION_TYPE_NAME, new ServerFunctionType(this, this.utils));
     }
 
     public connect() {
@@ -187,7 +194,7 @@ export class ServoyService {
     public executeInlineScript<T>(formname: string, script: string, params: any[]): RequestInfoPromise<T> {
         const promise = this.sabloService.callService('formService', 'executeInlineScript', { formname, script, params }, false);
             
-        return this.websocketService.wrapPromiseToPropagateCustomRequestInfoInternal(promise,
+        return wrapPromiseToPropagateCustomRequestInfoInternal(promise,
                     promise.then((serviceCallResult) =>
                         this.converterService.convertFromServerToClient(serviceCallResult, undefined, undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
     }

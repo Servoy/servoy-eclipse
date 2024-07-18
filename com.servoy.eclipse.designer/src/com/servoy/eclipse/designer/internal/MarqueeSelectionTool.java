@@ -66,19 +66,19 @@ public class MarqueeSelectionTool extends AbstractTool
 
 	/**
 	 * This behaviour selects nodes completely encompassed by the marquee rectangle. This is the default behaviour for this tool.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final int BEHAVIOR_NODES_CONTAINED = new Integer(1).intValue();
 	/**
 	 * This behaviour selects connections that intersect the marquee rectangle.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final int BEHAVIOR_CONNECTIONS_TOUCHED = new Integer(2).intValue();
 	/**
 	 * This behaviour selects nodes completely encompassed by the marquee rectangle, and all connections between those nodes.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final int BEHAVIOR_NODES_AND_CONNECTIONS = new Integer(3).intValue();
@@ -139,7 +139,7 @@ public class MarqueeSelectionTool extends AbstractTool
 
 	private void calculateConnections(Collection newSelections, Collection deselections)
 	{
-		// determine the currently selected nodes minus the ones that are to be deselected 
+		// determine the currently selected nodes minus the ones that are to be deselected
 		Collection currentNodes = new HashSet();
 		if (getSelectionMode() != DEFAULT_MODE)
 		{ // everything is deselected in default mode
@@ -152,18 +152,18 @@ public class MarqueeSelectionTool extends AbstractTool
 		}
 		// add new connections to be selected to newSelections
 		Collection connections = new ArrayList();
-		for (Iterator nodes = newSelections.iterator(); nodes.hasNext();)
+		for (Object newSelection : newSelections)
 		{
-			GraphicalEditPart node = (GraphicalEditPart)nodes.next();
-			for (Iterator itr = node.getSourceConnections().iterator(); itr.hasNext();)
+			GraphicalEditPart node = (GraphicalEditPart)newSelection;
+			for (Object element : node.getSourceConnections())
 			{
-				ConnectionEditPart sourceConn = (ConnectionEditPart)itr.next();
+				ConnectionEditPart sourceConn = (ConnectionEditPart)element;
 				if (sourceConn.getSelected() == EditPart.SELECTED_NONE &&
 					(newSelections.contains(sourceConn.getTarget()) || currentNodes.contains(sourceConn.getTarget()))) connections.add(sourceConn);
 			}
-			for (Iterator itr = node.getTargetConnections().iterator(); itr.hasNext();)
+			for (Object element : node.getTargetConnections())
 			{
-				ConnectionEditPart targetConn = (ConnectionEditPart)itr.next();
+				ConnectionEditPart targetConn = (ConnectionEditPart)element;
 				if (targetConn.getSelected() == EditPart.SELECTED_NONE &&
 					(newSelections.contains(targetConn.getSource()) || currentNodes.contains(targetConn.getSource()))) connections.add(targetConn);
 			}
@@ -171,17 +171,17 @@ public class MarqueeSelectionTool extends AbstractTool
 		newSelections.addAll(connections);
 		// add currently selected connections that are to be deselected to deselections
 		connections = new HashSet();
-		for (Iterator nodes = deselections.iterator(); nodes.hasNext();)
+		for (Object deselection : deselections)
 		{
-			GraphicalEditPart node = (GraphicalEditPart)nodes.next();
-			for (Iterator itr = node.getSourceConnections().iterator(); itr.hasNext();)
+			GraphicalEditPart node = (GraphicalEditPart)deselection;
+			for (Object element : node.getSourceConnections())
 			{
-				ConnectionEditPart sourceConn = (ConnectionEditPart)itr.next();
+				ConnectionEditPart sourceConn = (ConnectionEditPart)element;
 				if (sourceConn.getSelected() != EditPart.SELECTED_NONE) connections.add(sourceConn);
 			}
-			for (Iterator itr = node.getTargetConnections().iterator(); itr.hasNext();)
+			for (Object element : node.getTargetConnections())
 			{
-				ConnectionEditPart targetConn = (ConnectionEditPart)itr.next();
+				ConnectionEditPart targetConn = (ConnectionEditPart)element;
 				if (targetConn.getSelected() != EditPart.SELECTED_NONE) connections.add(targetConn);
 			}
 		}
@@ -192,9 +192,9 @@ public class MarqueeSelectionTool extends AbstractTool
 	{
 		boolean marqueeSelectOuter = new DesignerPreferences().getMarqueeSelectOuter();
 		Rectangle marqueeRect = getMarqueeSelectionRectangle();
-		for (Iterator itr = getAllChildren().iterator(); itr.hasNext();)
+		for (Object element : getAllChildren())
 		{
-			GraphicalEditPart child = (GraphicalEditPart)itr.next();
+			GraphicalEditPart child = (GraphicalEditPart)element;
 			IFigure figure = child.getFigure();
 			if (!child.isSelectable() || child.getTargetEditPart(MARQUEE_REQUEST) != child
 //				|| !isFigureVisible(figure) // may be selected but scrolled out of the viewable area
@@ -274,9 +274,9 @@ public class MarqueeSelectionTool extends AbstractTool
 	private void getAllChildren(EditPart editPart, Set allChildren)
 	{
 		List children = editPart.getChildren();
-		for (int i = 0; i < children.size(); i++)
+		for (Object child2 : children)
 		{
-			GraphicalEditPart child = (GraphicalEditPart)children.get(i);
+			GraphicalEditPart child = (GraphicalEditPart)child2;
 			if (marqueeBehavior == BEHAVIOR_NODES_CONTAINED || marqueeBehavior == BEHAVIOR_NODES_AND_CONNECTIONS) allChildren.add(child);
 			if (marqueeBehavior == BEHAVIOR_CONNECTIONS_TOUCHED)
 			{
@@ -346,7 +346,7 @@ public class MarqueeSelectionTool extends AbstractTool
 		if (stateTransition(STATE_INITIAL, STATE_DRAG_IN_PROGRESS))
 		{
 			if (getCurrentInput().isModKeyDown(SWT.MOD1)) setSelectionMode(TOGGLE_MODE);
-			// else if (getCurrentInput().isShiftKeyDown()) setSelectionMode(APPEND_MODE); // shift-down was used to trigger marquee select in stead of editpart dragging 
+			// else if (getCurrentInput().isShiftKeyDown()) setSelectionMode(APPEND_MODE); // shift-down was used to trigger marquee select in stead of editpart dragging
 			else setSelectionMode(DEFAULT_MODE);
 		}
 		return true;
@@ -400,7 +400,7 @@ public class MarqueeSelectionTool extends AbstractTool
 
 	/**
 	 * This method is called when mouse or keyboard input is invalid and erases the feedback.
-	 * 
+	 *
 	 * @return <code>true</code>
 	 */
 	@Override
@@ -414,7 +414,7 @@ public class MarqueeSelectionTool extends AbstractTool
 	/**
 	 * Handles high-level processing of a key down event. KeyEvents are forwarded to the current viewer's {@link KeyHandler}, via
 	 * {@link KeyHandler#keyPressed(KeyEvent)}.
-	 * 
+	 *
 	 * @see AbstractTool#handleKeyDown(KeyEvent)
 	 */
 	@Override
@@ -445,7 +445,7 @@ public class MarqueeSelectionTool extends AbstractTool
 
 	/**
 	 * MarqueeSelectionTool is only interested in GraphicalViewers, not TreeViewers.
-	 * 
+	 *
 	 * @see org.eclipse.gef.tools.AbstractTool#isViewerImportant(org.eclipse.gef.EditPartViewer)
 	 */
 	@Override
@@ -457,7 +457,7 @@ public class MarqueeSelectionTool extends AbstractTool
 	private void performMarqueeSelect()
 	{
 		EditPartViewer viewer = getCurrentViewer();
-		// sort the selected edit parts, the ones closest to the current location to the end so that the 
+		// sort the selected edit parts, the ones closest to the current location to the end so that the
 		// order goes from start marquee select to the end
 		Collection<EditPart> newSelections = new TreeSet<EditPart>(new EditpartDistanceComparator(getLocation(), false));
 		Collection<EditPart> deselections = new HashSet<EditPart>();
@@ -473,7 +473,7 @@ public class MarqueeSelectionTool extends AbstractTool
 			// emulate shift-click of regular editpart drag tracker.
 
 			// shift-select: select all edit parts inbetween the current selection and the source edit part
-			List<EditPart> editParts = viewer.getContents().getChildren();
+			List< ? extends EditPart> editParts = viewer.getContents().getChildren();
 			// get the bounding box of all currently selected edit parts
 			Rectangle selectedRectangle = null;
 			for (EditPart editpart : editParts)
@@ -511,14 +511,15 @@ public class MarqueeSelectionTool extends AbstractTool
 
 	/**
 	 * Sets the type of parts that this tool will select. This method should only be invoked once: when the tool is being initialized.
-	 * 
+	 *
 	 * @param type {@link #BEHAVIOR_CONNECTIONS_TOUCHED} or {@link #BEHAVIOR_NODES_CONTAINED} or {@link #BEHAVIOR_NODES_AND_CONNECTIONS}
 	 * @since 3.1
 	 */
 	public void setMarqueeBehavior(int type)
 	{
-		if (type != BEHAVIOR_CONNECTIONS_TOUCHED && type != BEHAVIOR_NODES_CONTAINED && type != BEHAVIOR_NODES_AND_CONNECTIONS) throw new IllegalArgumentException(
-			"Invalid marquee behaviour specified.");
+		if (type != BEHAVIOR_CONNECTIONS_TOUCHED && type != BEHAVIOR_NODES_CONTAINED && type != BEHAVIOR_NODES_AND_CONNECTIONS)
+			throw new IllegalArgumentException(
+				"Invalid marquee behaviour specified.");
 		marqueeBehavior = type;
 	}
 
@@ -548,9 +549,9 @@ public class MarqueeSelectionTool extends AbstractTool
 
 	private void showTargetFeedback()
 	{
-		for (Iterator itr = selectedEditParts.iterator(); itr.hasNext();)
+		for (Object selectedEditPart : selectedEditParts)
 		{
-			EditPart editPart = (EditPart)itr.next();
+			EditPart editPart = (EditPart)selectedEditPart;
 			editPart.showTargetFeedback(getTargetRequest());
 		}
 	}

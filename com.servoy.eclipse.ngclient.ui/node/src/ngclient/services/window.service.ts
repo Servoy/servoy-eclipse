@@ -186,18 +186,29 @@ export class WindowService {
 
             instance.bsWindowInstance = this.bsWindowManager.createWindow(opt);
 
-            instance.bsWindowInstance.element.addEventListener('bswin.resize', (event: CustomEvent< { width: number; height: number }>) => {
+            const resizeListener = (event: CustomEvent< { width: number; height: number }>) => {
                 instance.onResize(event.detail);
-            });
-            instance.bsWindowInstance.element.addEventListener('bswin.move', (event: CustomEvent<{x: number; y: number}>) => {
+            };
+            
+            const moveListener = (event: CustomEvent<{x: number; y: number}>) => {
                 instance.onMove(event.detail);
-            });
-            instance.bsWindowInstance.element.addEventListener('bswin.active', (event: CustomEvent<boolean>) => {
+            };
+            
+            const activeListener = (event: CustomEvent<boolean>) => {
                 const customEvent = new CustomEvent(event.detail ? 'enableTabseq' : 'disableTabseq', {
                     bubbles: true
                 });
                 event.target.dispatchEvent(customEvent);
-            });
+            };
+            instance.bsWindowInstance.element.addEventListener('bswin.resize', resizeListener);
+            instance.bsWindowInstance.element.addEventListener('bswin.move', moveListener);
+            instance.bsWindowInstance.element.addEventListener('bswin.active', activeListener);
+            
+            instance.bsWindowInstance.onClose = () => {
+               instance.bsWindowInstance.element.removeEventListener('bswin.resize', resizeListener);
+               instance.bsWindowInstance.element.removeEventListener('bswin.move', moveListener);
+               instance.bsWindowInstance.element.removeEventListener('bswin.active', activeListener);
+            };
             (this.doc.getElementsByClassName('window-header').item(0) as HTMLElement).focus();
             instance.bsWindowInstance.setActive(true);
             // init the size of the dialog
@@ -361,7 +372,7 @@ export class WindowService {
         return { x: left, y: top };
     }
 
-    public switchForm(name: string, form: FormSettings, navigatorForm: FormSettings) {
+    public switchForm(name: string, form: FormSettings, navigatorForm: FormSettings, isLoginForm?: boolean) {
         const currentWindow = 'window' + this.windowCounter;
         const storedWindow = this.sessionStorageService.get(currentWindow);
         if (storedWindow && !storedWindow.switchForm) {
@@ -385,7 +396,7 @@ export class WindowService {
             if (this.servoyService.getSolutionSettings().windowName === name) { // main window form switch
                 this.servoyService.getSolutionSettings().mainForm = form;
                 this.servoyService.getSolutionSettings().navigatorForm = navigatorForm;
-                if (this.appService.getUIProperty('servoy.ngclient.formbased_browser_history') !== false) {
+                if (this.appService.getUIProperty('servoy.ngclient.formbased_browser_history') !== false && !isLoginForm) {
                     // this navigationId is angular router maybe in the future we need to have a look to just use that to set the navigation states to the forms.
                     const state = this.platformLocation.getState();
                     if (state && state['navigationId'])
@@ -410,6 +421,11 @@ export class WindowService {
 
     public destroyController(formName: string) {
         this.formService.destroyFormCache(formName);
+    }
+
+    public requireFormLoaded() {
+        // just empty method so no error will be given when called from the server.
+        // in ng1 this was for creating the hidden div.
     }
 
 
