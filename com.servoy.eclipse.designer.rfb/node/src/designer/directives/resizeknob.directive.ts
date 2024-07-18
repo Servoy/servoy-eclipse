@@ -241,10 +241,10 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
                 const elementInfo = elementInfos.get(nodeId);
                 if (this.snapData && elementInfos.size == 1) {
                     changes[nodeId] = {
-                        x: this.snapData?.width ? Math.round(this.snapData?.left) : elementInfo.x,
-                        y: this.snapData?.height ? Math.round(this.snapData?.top) : elementInfo.y,
-                        width: this.snapData?.width ? Math.round(this.snapData?.width) : elementInfo.width,
-                        height: this.snapData?.height ? Math.round(this.snapData?.height) : elementInfo.height,
+                        x: this.snapData?.width ? Math.round(this.snapData.left) : elementInfo.x,
+                        y: this.snapData?.height ? Math.round(this.snapData.top) : elementInfo.y,
+                        width: this.snapData?.width ? Math.round(this.snapData.width) : elementInfo.width,
+                        height: this.snapData?.height ? Math.round(this.snapData.height) : elementInfo.height,
                         cssPos: this.snapData.cssPosition
                     }
                 }
