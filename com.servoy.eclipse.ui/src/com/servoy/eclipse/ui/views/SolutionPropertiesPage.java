@@ -91,6 +91,13 @@ public class SolutionPropertiesPage extends PropertyPage
 	@Override
 	public boolean performOk()
 	{
+		//notify about any change of the solution properties
+		IWorkbenchPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
+		IPersist persist = getElement().getAdapter(IPersist.class);
+		if (persist instanceof Solution)
+		{
+			page.selectionChanged(part, new StructuredSelection(persist));
+		}
 		//refresh the properties sheet page
 		PersistPropertySource.refreshPropertiesView();
 		return true;
