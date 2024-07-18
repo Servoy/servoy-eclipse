@@ -100,7 +100,7 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 
 				redirectButton.setText("...");
 				redirectButton.setEnabled(false);
-				redirectButton.setToolTipText("Go on Servoy Cloud");
+				redirectButton.setToolTipText("Go to Servoy Cloud");
 
 				GroupLayout groupLayout = new GroupLayout(composite);
 				SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
