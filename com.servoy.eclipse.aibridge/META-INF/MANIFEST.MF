@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Servoy Cloud
+Bundle-Name: Servoy AI Bridge
 Bundle-SymbolicName: com.servoy.eclipse.aibridge;singleton:=true
 Bundle-Version: 2024.3.2.3945
 Export-Package: com.servoy.eclipse.aibridge
