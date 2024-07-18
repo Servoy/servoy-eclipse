@@ -96,9 +96,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends AbstractUIPlugin
 {
-	/**
-	 *
-	 */
 	public static final String CLOUD_BASE_URL = System.getProperty("servoy.cloud_base.url", "https://admin.servoy-cloud.eu");
 	public static final String TUTORIALS_URL = CLOUD_BASE_URL + "/solution/developerWelcome?servoyVersion=" + ClientVersion.getPureVersion() + "&loginToken=";
 
