@@ -82,6 +82,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaWebAppManifest;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -218,6 +219,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						//disable must authenticate for now, until we include login form generation, users creation
 						//solution.setMustAuthenticate(mustAuthenticate);
 						addDefaultThemeIfNeeded(repository, solution);
+						addDefaultWAMIfNeeded(repository, solution);
 					}
 					monitor.worked(1);
 
@@ -258,6 +260,16 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					addMediaFile(solution, ThemeResourceLoader.getVariantsFile(), ThemeResourceLoader.VARIANTS_JSON);
 
 					solution.setStyleSheetID(defaultTheme.getID());
+					repository.updateRootObject(solution);
+				}
+			}
+
+			private void addDefaultWAMIfNeeded(EclipseRepository repository, Solution solution) throws RepositoryException, IOException
+			{
+				if (configPage.shouldAddDefaultWAM())
+				{
+					addMediaFile(solution, CreateMediaWebAppManifest.createManifest(solution.getName()), CreateMediaWebAppManifest.FILE_NAME);
+					addMediaFile(solution, CreateMediaWebAppManifest.getIcon(), CreateMediaWebAppManifest.ICON_NAME);
 					repository.updateRootObject(solution);
 				}
 			}
@@ -632,6 +644,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 
 		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, configPage.shouldAddDefaultTheme());
+		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_WAM_SETTING, configPage.shouldAddDefaultWAM());
 	}
 
 	public static void importSolution(SolutionPackageInstallInfo packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,

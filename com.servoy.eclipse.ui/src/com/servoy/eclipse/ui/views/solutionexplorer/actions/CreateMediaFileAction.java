@@ -91,25 +91,23 @@ public class CreateMediaFileAction extends Action implements ISelectionChangedLi
 	public void run()
 	{
 		if (selectedFile == null) return;
-
-		String mediaFolder = null;
-		Object selectedFileRealObject = selectedFile.getRealObject();
-		if (selectedFileRealObject instanceof Solution)
-		{
-			solution = (Solution)selectedFileRealObject;
-			mediaFolder = "";
-		}
-		else if (selectedFileRealObject instanceof MediaNode)
-		{
-			IMediaProvider mp = ((MediaNode)selectedFileRealObject).getMediaProvider();
-			if (mp instanceof Solution)
-			{
-				solution = (Solution)mp;
-				mediaFolder = ((MediaNode)selectedFileRealObject).getPath();
-			}
-		}
+		solution = getSolution();
 		if (solution != null)
 		{
+			String mediaFolder = null;
+			Object selectedFileRealObject = selectedFile.getRealObject();
+			if (selectedFileRealObject instanceof Solution)
+			{
+				mediaFolder = "";
+			}
+			else if (selectedFileRealObject instanceof MediaNode)
+			{
+				IMediaProvider mp = ((MediaNode)selectedFileRealObject).getMediaProvider();
+				if (mp instanceof Solution)
+				{
+					mediaFolder = ((MediaNode)selectedFileRealObject).getPath();
+				}
+			}
 			final String pathString = solution.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaFolder;
 			String fileName = getFileName(pathString);
 			if (fileName != null)
@@ -140,6 +138,28 @@ public class CreateMediaFileAction extends Action implements ISelectionChangedLi
 				}
 			}
 		}
+	}
+
+	protected Solution getSolution()
+	{
+		Solution thisSolution = null;
+		if (selectedFile != null)
+		{
+			Object selectedFileRealObject = selectedFile.getRealObject();
+			if (selectedFileRealObject instanceof Solution)
+			{
+				thisSolution = (Solution)selectedFileRealObject;
+			}
+			else if (selectedFileRealObject instanceof MediaNode)
+			{
+				IMediaProvider mp = ((MediaNode)selectedFileRealObject).getMediaProvider();
+				if (mp instanceof Solution)
+				{
+					thisSolution = (Solution)mp;
+				}
+			}
+		}
+		return thisSolution;
 	}
 
 	protected String getFileName(final String pathString)
