@@ -107,6 +107,8 @@ public class VersionPropertyController extends PropertySetterController<String, 
 			protected void doSetValue(Object newValue)
 			{
 				this.value = "-none-".equals(((String)newValue).trim()) ? "" : ((String)newValue).trim();
+				markDirty();
+				fireApplyEditorValue();
 			}
 		};
 	}
