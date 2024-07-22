@@ -7,16 +7,16 @@
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/116.0.8/repository"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="116.0.8"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/124.0.1/repository"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="124.0.1"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/116.0.7.media/repository"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="116.0.7"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/124.0.1.media/repository"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="124.0.1"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/116.0.7-arm.media/repository"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="116.0.7"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/124.0.1-arm.media/repository"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="124.0.1"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="http://download.eclipse.org/nattable/releases/2.3.0/repository/"/>
@@ -70,19 +70,19 @@
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-annotations</artifactId>
-                    <version>2.17.1</version>
+                    <version>2.17.2</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
-                    <version>2.17.1</version>
+                    <version>2.17.2</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
-                    <version>2.17.1</version>
+                    <version>2.17.2</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -100,7 +100,7 @@
                 <dependency>
                     <groupId>com.knuddels</groupId>
                     <artifactId>jtokkit</artifactId>
-                    <version>1.0.0</version>
+                    <version>1.1.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -220,7 +220,7 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.14.16</version>
+                    <version>1.14.18</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -244,7 +244,7 @@
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-lang3</artifactId>
-                    <version>3.14.0</version>
+                    <version>3.15.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -347,7 +347,7 @@
                 <dependency>
                     <groupId>org.freemarker</groupId>
                     <artifactId>freemarker</artifactId>
-                    <version>2.3.32</version>
+                    <version>2.3.33</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -371,7 +371,7 @@
                 <dependency>
                     <groupId>org.jsoup</groupId>
                     <artifactId>jsoup</artifactId>
-                    <version>1.17.2</version>
+                    <version>1.18.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
