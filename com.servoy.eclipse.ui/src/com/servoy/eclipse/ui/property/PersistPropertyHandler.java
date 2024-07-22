@@ -314,6 +314,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				Boolean.valueOf(category == PropertyCategory.Commands)).build();
 		}
 
+		applyTooltipFromJavadocOrSpec(name, persistContext.getPersist(), false, null);
+
 		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip = null;
 		PropertyDescription builtSabloPD;
 
