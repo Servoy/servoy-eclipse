@@ -258,14 +258,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="1.1.0.201005260935"/>
 
    <plugin
-         id="xstream"
-         version="1.4.20"/>
-
-   <plugin
-         id="org.freemarker.freemarker"
-         version="2.3.32.stable"/>
-
-   <plugin
          id="org.apache.james.apache-mime4j"
          version="0.6.0"/>
 
@@ -330,20 +322,12 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="2.12.0"/>
 
    <plugin
-         id="com.google.guava"
-         version="33.0.0.jre"/>
-
-   <plugin
          id="org.hibernate.orm.core"
          version="5.6.15.Servoy3"/>
 
    <plugin
          id="jaxb-api"
          version="2.3.1"/>
-
-   <plugin
-         id="com.fasterxml.classmate"
-         version="1.7.0"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
