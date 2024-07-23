@@ -19,11 +19,6 @@
             <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="124.0.1"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2024.06"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202404251509"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202405281440"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="http://download.eclipse.org/nattable/releases/2.4.0/repository/"/>
             <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.4.0.202405230453"/>
             <unit id="org.eclipse.nebula.widgets.nattable.core.feature.source.feature.group" version="2.4.0.202405230453"/>
@@ -58,6 +53,11 @@
             <repository location="https://download.eclipse.org/tm4e/releases/0.12.0/"/>
             <unit id="org.eclipse.tm4e.feature.feature.group" version="0.12.0.202405210827"/>
             <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.12.0.202405210827"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2024.09"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202407231120"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202407231204"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
