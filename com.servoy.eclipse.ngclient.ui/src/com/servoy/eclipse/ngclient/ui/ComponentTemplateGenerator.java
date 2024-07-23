@@ -190,11 +190,14 @@ public class ComponentTemplateGenerator
 		});
 		for (WebObjectFunctionDefinition handler : handlers)
 		{
-			template.append(" [");
-			template.append(handler.getName());
-			template.append("]=\"callback.getHandler(state,'");
-			template.append(handler.getName());
-			template.append("')\"");
+			if (!handler.isPrivate())
+			{
+				template.append(" [");
+				template.append(handler.getName());
+				template.append("]=\"callback.getHandler(state,'");
+				template.append(handler.getName());
+				template.append("')\"");
+			}
 		}
 		template.append(" [servoyApi]=\"callback.getServoyApi(state)\"");
 		template.append(" [name]=\"state.name\" #cmp");
