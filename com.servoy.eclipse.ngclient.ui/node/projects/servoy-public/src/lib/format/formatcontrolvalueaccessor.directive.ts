@@ -196,8 +196,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             const data = this.formatService.format(value, FormatDirective.WEEKFORMAT, false);
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
         } else if (inputType === 'number') {
-            const data = value?new Intl.NumberFormat().format(value):'';
-            this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', value);
         } else if (inputType === 'email') {
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', value);
         } else if ((value !== null && value !== undefined) && this.format) {
