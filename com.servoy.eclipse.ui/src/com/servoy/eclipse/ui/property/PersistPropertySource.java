@@ -1998,7 +1998,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		final String styleLookupname, Form form)
 	{
 		Pair<String[], String> styleClassesInfo = ModelUtils.getStyleClasses(ModelUtils.getEditingFlattenedSolution(form), form, persist, String.valueOf(id),
-			styleLookupname, true);
+			styleLookupname);
 		String[] styleClasses = styleClassesInfo.getLeft();
 		String defaultValue = styleClassesInfo.getRight();
 

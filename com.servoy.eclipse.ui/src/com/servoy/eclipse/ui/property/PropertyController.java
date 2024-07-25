@@ -161,7 +161,7 @@ public class PropertyController<P, E> extends PropertyDescriptor implements IPro
 
 	/**
 	 * Set a comparator on the property descriptor that keeps the order as defined.
-	 * 
+	 *
 	 * @param descs
 	 * @return
 	 */
@@ -192,6 +192,13 @@ public class PropertyController<P, E> extends PropertyDescriptor implements IPro
 	protected void setSequence(int i)
 	{
 		sequence = i;
+	}
+
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [" + getDisplayName() + "]";
 	}
 
 }
