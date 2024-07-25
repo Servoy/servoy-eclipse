@@ -1489,7 +1489,7 @@ public class ServoyFormBuilder
 							if (styleClass != null)
 							{
 								List<String> styleClasses = Arrays.asList(ModelUtils.getStyleClasses(fs, form, o,
-									StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o), true)
+									StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o))
 									.getLeft());
 								if (!styleClasses.contains(styleClass))
 								{

@@ -139,7 +139,7 @@ public class ModelUtils
 	 * @param lookupName
 	 */
 	public static Pair<String[], String> getStyleClasses(FlattenedSolution flattenedSolution, Form form, IPersist persist, String styleClassProperty,
-		String lookupName, boolean ng2Mode)
+		String lookupName)
 	{
 		if (flattenedSolution == null || form == null)
 		{
