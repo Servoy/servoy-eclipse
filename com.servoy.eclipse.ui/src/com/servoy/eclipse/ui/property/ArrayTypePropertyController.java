@@ -514,6 +514,12 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			return null;
 		}
 
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + "basePD=" + basePD + ", index=" + index + ", source=" + arrayPropertySource;
+		}
+
 	}
 
 	@Override
