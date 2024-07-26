@@ -18,6 +18,7 @@ package com.servoy.eclipse.model.util;
 
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,6 +44,8 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
@@ -84,7 +87,8 @@ import com.servoy.j2db.util.Utils;
 
 public class ModelUtils
 {
-	private static final ConcurrentMap<List<String>, Pair<Long, String[]>> cachedCssClasses = new ConcurrentHashMap<>();
+	private static final Cache<List<String>, Pair<Long, String[]>> cachedCssClasses = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofMinutes(20))
+		.build();
 
 	public static final String ONLY_WHEN_UI_DISABLED_ATTRIBUTE_NAME = "whenUIDisabledStateIs";
 
@@ -183,15 +187,13 @@ public class ModelUtils
 		{
 			long lastModifiedTime = mediaStyleSheets.stream().map(name -> flattenedSolution.getMedia(name)).mapToLong(Media::getLastModifiedTime).max()
 				.orElse(0);
-			Pair<Long, String[]> pair = cachedCssClasses.get(mediaStyleSheets);
+			Pair<Long, String[]> pair = cachedCssClasses.getIfPresent(mediaStyleSheets);
 			if (pair != null && pair.getLeft().longValue() == lastModifiedTime)
 			{
 				css = pair.getRight();
 			}
 			else
 			{
-				// clear the cache if its a cache miss, could be that the numer of media files did change.
-				cachedCssClasses.clear();
 				Set<String> cssClasses = new TreeSet<>(StringComparator.INSTANCE);
 				for (String styleSheet : mediaStyleSheets)
 				{
@@ -241,7 +243,6 @@ public class ModelUtils
 									}
 								}
 							}
-							cssClasses.toArray(new String[0]);
 						}
 						catch (UnsupportedEncodingException ex)
 						{
