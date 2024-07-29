@@ -49,6 +49,13 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         if (this.onActionMethodID) this.onActionMethodID(new CustomEvent('click'));
     }
 
+    contextMenu(event) {
+        if (this.onRightClickMethodID) {
+            this.onRightClickMethodID(new CustomEvent('contextmenu'));
+            event.event.preventDefault();
+        }
+    }
+
     ngOnInit() {
         super.ngOnInit();
 
