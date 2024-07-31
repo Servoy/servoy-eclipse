@@ -26,7 +26,10 @@ import java.util.stream.Collectors;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.IPropertyType;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 
 /**
@@ -72,6 +75,7 @@ public class DeveloperUtils
 		IPropertyType< ? > iPropertyType = webCustomType.getPropertyDescription().getType();
 		if (iPropertyType instanceof NGCustomJSONObjectType)
 		{
+			FlattenedSolution fs = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
 			NGCustomJSONObjectType< ? , ? , ? > ngCustomJSONObjectType = (NGCustomJSONObjectType< ? , ? , ? >)iPropertyType;
 
 			ArrayList<PropertyDescription> captionSubProperties = new ArrayList<>();
@@ -120,6 +124,10 @@ public class DeveloperUtils
 				if (useAsCaption instanceof Boolean && ((Boolean)useAsCaption).booleanValue())
 				{
 					Object propertyValue = webCustomType.getProperty(captionPD.getName());
+					if (captionPD.getType() instanceof FormPropertyType && propertyValue != null)
+					{
+						propertyValue = fs.getForm(propertyValue.toString()).getName();
+					}
 					if (propertyValue != null)
 					{
 						caption = String.valueOf(propertyValue).trim();
