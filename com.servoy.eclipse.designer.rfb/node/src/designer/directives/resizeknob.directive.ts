@@ -202,6 +202,14 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
             let deltaY = event.clientY - this.lastresizeStartPosition.y;
 
             for(const elementInfo of this.currentElementInfo.values()) {
+				let parentX = 0;
+				let parentY = 0;
+				const parentFC = elementInfo.element.closest('.svy-formcomponent');
+				if (parentFC && !elementInfo.element.classList.contains('svy-formcomponent')) {
+					const parentRect = parentFC.getBoundingClientRect();
+					parentX = parentRect.x;
+					parentY = parentRect.y;
+				}
                 elementInfo.y = elementInfo.y + deltaY* this.resizeInfo.top;
                 if(elementInfo.y < 0) {
                     elementInfo.y = 0;
@@ -219,8 +227,8 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
                 elementInfo.element.style.top = elementInfo.y + 'px';
                 elementInfo.element.style.left =  elementInfo.x + 'px';
-                this.resizeInfo.node.style.top = elementInfo.y + this.topContentAreaAdjust + 'px';
-                this.resizeInfo.node.style.left = elementInfo.x + this.leftContentAreaAdjust + 'px';
+                this.resizeInfo.node.style.top = elementInfo.y + parentY + this.topContentAreaAdjust + 'px';
+                this.resizeInfo.node.style.left = elementInfo.x + parentX + this.leftContentAreaAdjust + 'px';
 
 
                 this.resizeInfo.node.style.width = elementInfo.element.style.width = elementInfo.width + 'px';
