@@ -22,7 +22,7 @@ import {URLParserService} from './services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { ToolbarButtonComponent } from './toolbar/item/toolbarbutton.component';
@@ -40,47 +40,40 @@ import { VariantsPreviewComponent } from './variantspreview/variantspreview.comp
 import { DynamicGuidesComponent } from './dynamicguides/dynamicguides.component';
 import { DynamicGuidesService } from './services/dynamicguides.service';
 
-@NgModule({
-  declarations: [
-    DesignerComponent,
-    ToolbarComponent,
-    ToolbarButtonComponent,
-    ToolbarSpinnerComponent,
-    ToolbarSwitchComponent,
-    StatusBarComponent,
-    SameSizeIndicatorComponent,
-    AnchoringIndicatorComponent,
-    PaletteComponent,
-    ResizerComponent,
-    ResizeEditorWidthComponent,
-    ResizeEditorHeightComponent,
-    ContextMenuComponent,
-    MouseSelectionComponent,
-    HighlightComponent,
-    GhostsContainerComponent,
-    EditorContentComponent,
-    SearchTextPipe,
-    SearchTextDeepPipe,
-    ResizeKnobDirective,
-    KeyboardLayoutDirective,
-    PositionMenuDirective,
-    DragselectionComponent,
-    DragselectionResponsiveComponent,
-    InlineEditComponent,
-    VariantsContentComponent,
-    VariantsPreviewComponent,
-    AutoscrollComponent,
-    DynamicGuidesComponent
-  ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    CommonModule,
-    HttpClientModule,
-    NgbModule,
-    DragDropModule
-  ],
-  providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService, DynamicGuidesService],
-  bootstrap: [DesignerComponent]
-})
+@NgModule({ declarations: [
+        DesignerComponent,
+        ToolbarComponent,
+        ToolbarButtonComponent,
+        ToolbarSpinnerComponent,
+        ToolbarSwitchComponent,
+        StatusBarComponent,
+        SameSizeIndicatorComponent,
+        AnchoringIndicatorComponent,
+        PaletteComponent,
+        ResizerComponent,
+        ResizeEditorWidthComponent,
+        ResizeEditorHeightComponent,
+        ContextMenuComponent,
+        MouseSelectionComponent,
+        HighlightComponent,
+        GhostsContainerComponent,
+        EditorContentComponent,
+        SearchTextPipe,
+        SearchTextDeepPipe,
+        ResizeKnobDirective,
+        KeyboardLayoutDirective,
+        PositionMenuDirective,
+        DragselectionComponent,
+        DragselectionResponsiveComponent,
+        InlineEditComponent,
+        VariantsContentComponent,
+        VariantsPreviewComponent,
+        AutoscrollComponent,
+        DynamicGuidesComponent
+    ],
+    bootstrap: [DesignerComponent], imports: [BrowserModule,
+        FormsModule,
+        CommonModule,
+        NgbModule,
+        DragDropModule], providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService, DynamicGuidesService, provideHttpClient(withInterceptorsFromDi())] })
 export class DesignerModule { }
