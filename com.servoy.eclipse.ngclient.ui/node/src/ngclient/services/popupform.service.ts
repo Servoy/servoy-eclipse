@@ -96,7 +96,6 @@ export class PopupFormService {
             this.formPopupComponent.instance.setPopupForm(popup);
             this.sequencePopup = false;
             setTimeout(() => {
-                console.log('showPopup @@ @@');
                 this.doc.body.addEventListener('mouseup', this.formPopupBodyListener);
             }, 300);
 
