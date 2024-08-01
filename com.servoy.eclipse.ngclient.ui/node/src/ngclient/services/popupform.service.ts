@@ -11,6 +11,10 @@ import { MainViewRefService, PopupForm } from '@servoy/public';
 export class PopupFormService {
 
     formPopupComponent: ComponentRef<ServoyFormPopupComponent>;
+    clickedComponentId: string;
+    x: number;
+    y: number;
+    sequencePopup: boolean; 
 
     constructor(private mainViewRefService: MainViewRefService,
         private formService: FormService,
@@ -77,21 +81,42 @@ export class PopupFormService {
 
     private showPopup(popup: PopupForm, counter?: number) {
 		if (this.formPopupComponent) return; // another popup is still visible
-        if (popup.component && !this.doc.getElementById(popup.component) && (!counter || counter < 10)) {
+        const docComponent = this.doc.getElementById(popup.component);
+        if ((popup.component && !docComponent && (!counter || counter < 10)) && (popup.component != this.clickedComponentId)) {
             setTimeout(() => {
-                const c = counter? counter++:1;
-                this.showPopup(popup, counter);
+                const c = counter? ++counter:1;
+                this.showPopup(popup, c);
             }, 50);
         } else {
+            this.sequencePopup = false;
+            if (popup.component == this.clickedComponentId) {
+                this.sequencePopup = true;
+            }
             this.formPopupComponent = this.mainViewRefService.mainContainer.createComponent(ServoyFormPopupComponent);
             this.formPopupComponent.instance.setPopupForm(popup);
+            this.sequencePopup = false;
             setTimeout(() => {
+                console.log('showPopup @@ @@');
                 this.doc.body.addEventListener('mouseup', this.formPopupBodyListener);
             }, 300);
+
         }
     }
 
+
     private formPopupBodyListener = (event: Event) => {
+
+        const target = event.target as HTMLElement;
+        if (target && target instanceof HTMLElement && target.id) {
+            // Store the ID of the clicked element
+            this.clickedComponentId = target.id;
+            this.x = this.formPopupComponent.instance._left;
+            this.y = this.formPopupComponent.instance._top;
+        } else {
+            // If no ID or target is not an HTMLElement
+            this.clickedComponentId = null;
+        }
+
         if (this.formPopupComponent && this.formPopupComponent.instance.popup.doNotCloseOnClickOutside) {
             return;
         }
