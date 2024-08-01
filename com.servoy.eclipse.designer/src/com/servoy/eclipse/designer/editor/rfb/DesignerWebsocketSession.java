@@ -80,6 +80,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.ChildrenJSONGenerator;
 import com.servoy.j2db.server.ngclient.FormElement;
@@ -579,7 +580,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						compAttributes, deletedComponents,
 						formComponentChild,
 						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, childParentMap, false);
-					renderGhosts = renderGhosts || newRenderGhosts;
+					renderGhosts = renderGhosts || newRenderGhosts || formHasGhosts(persist);
 				}
 				else
 				{
@@ -870,6 +871,40 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 		writer.endObject();
 		return writer.toString();
+	}
+
+	private boolean formHasGhosts(IPersist persist)
+	{
+		Form frm = null;
+		IPersist parent = persist.getParent();
+		while (parent != null && frm == null)
+		{
+			if (parent instanceof Form) frm = (Form)parent;
+			parent = parent.getParent();
+		}
+		if (frm == null) return false;
+
+		boolean hasGhost = false;
+		List<IFormElement> allElements = frm.getFlattenedFormElementsAndLayoutContainers()
+			.stream()
+			.filter(IFormElement.class::isInstance)
+			.map(IFormElement.class::cast)
+			.toList();
+		for (IFormElement element : allElements)
+		{
+			if (element instanceof WebComponent webComponent)
+			{
+				Iterator<IPersist> it = webComponent.getAllObjects();
+				while (it.hasNext() && !hasGhost)
+				{
+					IPersist child = it.next();
+					if (child instanceof WebCustomType) hasGhost = true;
+				}
+			}
+			if (hasGhost) break;
+		}
+
+		return hasGhost;
 	}
 
 	private boolean checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
