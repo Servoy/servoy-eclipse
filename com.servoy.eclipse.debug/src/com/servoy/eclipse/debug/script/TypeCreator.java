@@ -133,6 +133,7 @@ import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.MenuManager;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
@@ -239,6 +240,8 @@ import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSDimension;
 import com.servoy.j2db.scripting.JSI18N;
+import com.servoy.j2db.scripting.JSMenu;
+import com.servoy.j2db.scripting.JSMenuItem;
 import com.servoy.j2db.scripting.JSPoint;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
@@ -428,6 +431,7 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType(JSApplication.class);
 		addAnonymousClassType(JSI18N.class);
 		addAnonymousClassType(HistoryProvider.class);
+		addAnonymousClassType(MenuManager.class);
 		addAnonymousClassType(JSUtils.class);
 		addAnonymousClassType(JSClientUtils.class);
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
@@ -442,7 +446,8 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("point", JSPoint.class);
 		addAnonymousClassType("dimension", JSDimension.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
-
+		addAnonymousClassType(JSMenu.class);
+		addAnonymousClassType(JSMenuItem.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());

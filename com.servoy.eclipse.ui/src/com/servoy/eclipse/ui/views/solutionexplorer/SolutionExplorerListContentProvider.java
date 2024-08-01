@@ -129,6 +129,7 @@ import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.MenuManager;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
@@ -187,6 +188,8 @@ import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSI18N;
+import com.servoy.j2db.scripting.JSMenu;
+import com.servoy.j2db.scripting.JSMenuItem;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
@@ -594,6 +597,18 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.FORMS)
 			{
 				lm = TreeBuilder.docToNodes(Forms.class, this, UserNodeType.ARRAY, "forms.", null);
+			}
+			else if (type == UserNodeType.MENUS)
+			{
+				lm = getJSMethods(MenuManager.class, IExecutingEnviroment.TOPLEVEL_MENUS, null, UserNodeType.MENUS, null, null);
+			}
+			else if (type == UserNodeType.MENU)
+			{
+				lm = getJSMethods(JSMenu.class, IExecutingEnviroment.TOPLEVEL_MENUS, null, UserNodeType.MENU, null, null);
+			}
+			else if (type == UserNodeType.MENU_ITEM)
+			{
+				lm = getJSMethods(JSMenuItem.class, IExecutingEnviroment.TOPLEVEL_MENUS, null, UserNodeType.MENU_ITEM, null, null);
 			}
 			else if (type == UserNodeType.PLUGINS)
 			{

@@ -48,6 +48,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.IDataRendererFactory;
+import com.servoy.j2db.IMenuManager;
 import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.IModeManager;
 import com.servoy.j2db.ISmartClientApplication;
@@ -683,6 +684,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public IModeManager getModeManager()
 	{
 		return getClient().getModeManager();
+	}
+
+	@Override
+	public IMenuManager getMenuManager()
+	{
+		return getClient().getMenuManager();
 	}
 
 	public PageFormat getPageFormat()

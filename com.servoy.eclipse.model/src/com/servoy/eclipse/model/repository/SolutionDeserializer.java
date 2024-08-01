@@ -654,7 +654,8 @@ public class SolutionDeserializer
 			{
 				// main solution directory
 				return SolutionSerializer.FORMS_DIR.equals(subdir.getName()) || SolutionSerializer.RELATIONS_DIR.equals(subdir.getName()) ||
-					SolutionSerializer.VALUELISTS_DIR.equals(subdir.getName()) || SolutionSerializer.DATASOURCES_DIR_NAME.equals(subdir.getName());
+					SolutionSerializer.VALUELISTS_DIR.equals(subdir.getName()) || SolutionSerializer.DATASOURCES_DIR_NAME.equals(subdir.getName()) ||
+					SolutionSerializer.MENUS_DIR.equals(subdir.getName());
 			}
 			if (parentDir.getParentFile().equals(solutionDir) && SolutionSerializer.DATASOURCES_DIR_NAME.equals(parentDir.getName()))
 			{

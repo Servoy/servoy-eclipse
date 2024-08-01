@@ -127,6 +127,7 @@ import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -139,6 +140,8 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -938,6 +941,10 @@ public class SolutionExplorerTreeContentProvider
 					else if (type == UserNodeType.FORM || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORM))
 					{
 						addFormNodeChildren(un);
+					}
+					else if (type == UserNodeType.MENUS)
+					{
+						addMenusNodeChildren(un);
 					}
 					else if (type == UserNodeType.SERVERS)
 					{
@@ -1871,6 +1878,10 @@ public class SolutionExplorerTreeContentProvider
 				{
 					return hasChildren((IFolder)un.getRealObject());
 				}
+				else if (un.getType() == UserNodeType.MENUS)
+				{
+					return (((Solution)un.getRealObject()).getMenus(false).hasNext()) ? true : false;
+				}
 			}
 			else if (un.children.length > 0)
 			{
@@ -2012,6 +2023,42 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 		return false;
+	}
+
+	private void addMenusNodeChildren(PlatformSimpleUserNode menusNode)
+	{
+		Solution solution = (Solution)menusNode.getRealObject();
+		List<PlatformSimpleUserNode> menuNodes = new ArrayList<PlatformSimpleUserNode>();
+		Iterator<Menu> it = solution.getMenus(true);
+		while (it.hasNext())
+		{
+			Menu menu = it.next();
+
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), UserNodeType.MENU, "", "", menu,
+				uiActivator.loadImageFromBundle("column.png"));
+			menuNodes.add(node);
+			node.parent = menusNode;
+			addMenuItemsChildren(node, menu);
+		}
+		menusNode.children = menuNodes.toArray(new PlatformSimpleUserNode[menuNodes.size()]);
+	}
+
+	private void addMenuItemsChildren(PlatformSimpleUserNode parentNode, AbstractBase parentPersist)
+	{
+		List<PlatformSimpleUserNode> menuNodes = new ArrayList<PlatformSimpleUserNode>();
+		for (IPersist persist : parentPersist.getAllObjectsAsList())
+		{
+			if (persist instanceof MenuItem menuItem)
+			{
+				PlatformSimpleUserNode node = new PlatformSimpleUserNode(menuItem.getName(), UserNodeType.MENU_ITEM, "", "", menuItem,
+					uiActivator.loadImageFromBundle("class.png"));
+				menuNodes.add(node);
+				node.parent = parentNode;
+				addMenuItemsChildren(node, menuItem);
+			}
+
+		}
+		parentNode.children = menuNodes.toArray(new PlatformSimpleUserNode[menuNodes.size()]);
 	}
 
 	private void addServersNodeChildren(PlatformSimpleUserNode serversNode)
@@ -2536,6 +2583,11 @@ public class SolutionExplorerTreeContentProvider
 			PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
 				uiActivator.loadImageFromBundle("valuelists.png"));
 			valuelists.parent = projectNode;
+
+			PlatformSimpleUserNode menus = new PlatformSimpleUserNode(Messages.TreeStrings_Menus, UserNodeType.MENUS, solution,
+				uiActivator.loadImageFromBundle("column.png"));
+			menus.parent = projectNode;
+
 			PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
 				uiActivator.loadImageFromBundle("media.png"));
 			media.parent = projectNode;
@@ -2572,13 +2624,13 @@ public class SolutionExplorerTreeContentProvider
 
 				dataProvidersNode.parent = projectNode;
 				allRelations.parent = projectNode;
-				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, dataProvidersNode, forms, formReferences, allRelations, valuelists, media, solutionDataSources, solutionWebPackages };
+				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, dataProvidersNode, forms, formReferences, allRelations, valuelists, menus, media, solutionDataSources, solutionWebPackages };
 				forms.hide();
 				formReferences.hide();
 			}
 			else
 			{
-				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms, formReferences, allRelations, valuelists, media, solutionDataSources, solutionWebPackages };
+				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms, formReferences, allRelations, valuelists, menus, media, solutionDataSources, solutionWebPackages };
 				// solution's allRelations not allowed in login solutions
 				if (activeSolutionNode != null &&
 					((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
@@ -3404,6 +3456,12 @@ public class SolutionExplorerTreeContentProvider
 								addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
 								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
+						}
+						else if (persist instanceof Menu)
+						{
+							PlatformSimpleUserNode menusNode = findChildNode(node, Messages.TreeStrings_Menus);
+							addMenusNodeChildren(menusNode);
+							view.refreshTreeNodeFromModel(menusNode);
 						}
 					}
 				}

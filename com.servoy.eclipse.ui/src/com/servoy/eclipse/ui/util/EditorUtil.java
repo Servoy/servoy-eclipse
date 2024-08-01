@@ -116,6 +116,8 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -356,6 +358,44 @@ public class EditorUtil
 	 * @param resource
 	 * @return
 	 */
+	public static IEditorPart openMenuEditor(IPersist menu, boolean activate)
+	{
+		if (menu instanceof MenuItem)
+		{
+			menu = menu.getAncestor(IRepository.MENUS);
+		}
+		if (!(menu instanceof Menu))
+		{
+			return null;
+		}
+		Pair<String, String> formFilePath = SolutionSerializer.getFilePath(menu, false);
+		IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+		if (file == null || !file.exists()) return null;
+		try
+		{
+			IWorkbenchPage page = getActivePage();
+			if (page != null)
+			{
+				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+					Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.text"));
+				if (desc != null)
+				{
+					return page.openEditor(new FileEditorInput(file), desc.getId(), activate);
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		return null;
+	}
+
+	/**
+	 * Open file.
+	 * @param resource
+	 * @return
+	 */
 	public static IEditorPart openFileEditor(IFile resource)
 	{
 		if (resource == null) return null;
@@ -438,6 +478,10 @@ public class EditorUtil
 		if (persist instanceof Media)
 		{
 			return openMediaViewer((Media)persist, activate);
+		}
+		if (persist instanceof Menu || persist instanceof MenuItem)
+		{
+			return openMenuEditor(persist, activate);
 		}
 		if (persist instanceof IScriptProvider)
 		{

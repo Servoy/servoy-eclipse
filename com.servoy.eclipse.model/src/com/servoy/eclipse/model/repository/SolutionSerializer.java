@@ -79,6 +79,8 @@ import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Portal;
@@ -116,6 +118,7 @@ public class SolutionSerializer
 	public static final String FORMS_DIR = "forms";
 	public static final String WORKINGSETS_DIR = "workingsets";
 	public static final String VALUELISTS_DIR = "valuelists";
+	public static final String MENUS_DIR = "menus";
 	public static final String RELATIONS_DIR = "relations";
 	public static final String COMPONENTS_DIR_NAME = "components";
 	public static final String SERVICES_DIR_NAME = "services";
@@ -128,6 +131,7 @@ public class SolutionSerializer
 	public static final String FORM_FILE_EXTENSION = ".frm";
 	public static final String RELATION_FILE_EXTENSION = ".rel";
 	public static final String VALUELIST_FILE_EXTENSION = ".val";
+	public static final String MENU_FILE_EXTENSION = ".mnu";
 	public static final String TABLENODE_FILE_EXTENSION = ".tbl";
 	public static final String JS_FILE_EXTENSION_WITHOUT_DOT = "js";
 	public static final String JS_FILE_EXTENSION = '.' + JS_FILE_EXTENSION_WITHOUT_DOT;
@@ -143,7 +147,7 @@ public class SolutionSerializer
 	public static boolean isJSONFile(String fileName)
 	{
 		return fileName.endsWith(JSON_DEFAULT_FILE_EXTENSION) || fileName.endsWith(FORM_FILE_EXTENSION) || fileName.endsWith(RELATION_FILE_EXTENSION) ||
-			fileName.endsWith(VALUELIST_FILE_EXTENSION) || fileName.endsWith(TABLENODE_FILE_EXTENSION);
+			fileName.endsWith(VALUELIST_FILE_EXTENSION) || fileName.endsWith(TABLENODE_FILE_EXTENSION) || fileName.endsWith(MENU_FILE_EXTENSION);
 	}
 
 	private static Comparator<Object> PERSIST_COMPARATOR = new Comparator<Object>()
@@ -684,7 +688,8 @@ public class SolutionSerializer
 		}
 
 		return p instanceof Relation || p instanceof TableNode || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
-			p instanceof LayoutContainer; // can only return true for objects containing SolutionSerializer.PROP_ITEMS
+			p instanceof LayoutContainer || p instanceof Menu ||
+			p instanceof MenuItem; // can only return true for objects containing SolutionSerializer.PROP_ITEMS
 	}
 
 	/**
@@ -703,7 +708,8 @@ public class SolutionSerializer
 			}
 		}
 
-		return p instanceof Solution || p instanceof Relation || p instanceof TableNode || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
+		return p instanceof Solution || p instanceof Relation || p instanceof TableNode || p instanceof Menu ||
+			p instanceof MenuItem || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
 			p instanceof LayoutContainer;
 	}
 
@@ -712,7 +718,7 @@ public class SolutionSerializer
 	 */
 	public static boolean isCompositeItem(IPersist p)
 	{
-		return !(p instanceof Media || p instanceof IRootObject || p instanceof Relation || p instanceof ValueList || p instanceof Form ||
+		return !(p instanceof Media || p instanceof IRootObject || p instanceof Relation || p instanceof ValueList || p instanceof Menu || p instanceof Form ||
 			p instanceof TableNode || p instanceof IScriptElement);
 	}
 
@@ -1226,22 +1232,25 @@ public class SolutionSerializer
 			if (itemsArrayList.size() > 0)
 			{
 				ServoyJSONObject[] itemsArray = itemsArrayList.toArray(new ServoyJSONObject[itemsArrayList.size()]);
-				Arrays.sort(itemsArray, new Comparator<ServoyJSONObject>()
+				if (!(persist instanceof Menu) && !(persist instanceof MenuItem))
 				{
-					public int compare(ServoyJSONObject o1, ServoyJSONObject o2)
+					Arrays.sort(itemsArray, new Comparator<ServoyJSONObject>()
 					{
-						try
+						public int compare(ServoyJSONObject o1, ServoyJSONObject o2)
 						{
-							return ((String)o1.get(PROP_UUID)).compareTo((String)o2.get(PROP_UUID));
+							try
+							{
+								return ((String)o1.get(PROP_UUID)).compareTo((String)o2.get(PROP_UUID));
+							}
+							catch (JSONException ex)
+							{
+								ServoyLog.logWarning("Cannot compare json objects based on uuid", ex);
+								return 0;
+							}
 						}
-						catch (JSONException ex)
-						{
-							ServoyLog.logWarning("Cannot compare json objects based on uuid", ex);
-							return 0;
-						}
-					}
 
-				});
+					});
+				}
 				JSONArray items = new ServoyJSONArray();
 				for (ServoyJSONObject o : itemsArray)
 					items.put(o);
@@ -1332,6 +1341,11 @@ public class SolutionSerializer
 			return name + VALUELIST_FILE_EXTENSION;
 		}
 
+		if (persistTypeID == IRepository.MENUS)
+		{
+			return name + MENU_FILE_EXTENSION;
+		}
+
 		if (persistTypeID == IRepository.TABLENODES)
 		{
 			return name + TABLENODE_FILE_EXTENSION;
@@ -1381,6 +1395,10 @@ public class SolutionSerializer
 		else if (persist instanceof ValueList)
 		{
 			name = VALUELISTS_DIR;
+		}
+		else if (persist instanceof Menu)
+		{
+			name = MENUS_DIR;
 		}
 		else if (persist instanceof Form)
 		{

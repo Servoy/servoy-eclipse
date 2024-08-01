@@ -100,6 +100,7 @@ public class ScriptColorProvider
 		createKeyword(IExecutingEnviroment.TOPLEVEL_SCOPES);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_FORMS);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_HISTORY);
+		createKeyword(IExecutingEnviroment.TOPLEVEL_MENUS);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_PLUGINS);
 
 		createKeyword("null");

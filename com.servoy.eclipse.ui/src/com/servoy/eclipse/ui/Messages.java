@@ -132,7 +132,7 @@ public class Messages extends NLS
 	public static String TreeStrings_Date;
 	public static String TreeStrings_DBServers;
 	public static String TreeStrings_InMemory;
-	public static String TreeStrings_procedures;;
+	public static String TreeStrings_procedures;
 	public static String TreeStrings_elements;
 	public static String TreeStrings_containers;
 	public static String TreeStrings_Statements;
@@ -175,6 +175,7 @@ public class Messages extends NLS
 	public static String TreeStrings_ClientUtils;
 	public static String TreeStrings_JSUnit;
 	public static String TreeStrings_ValueLists;
+	public static String TreeStrings_Menus;
 	public static String TreeStrings_variables;
 	public static String TreeStrings_XMLMethods;
 	public static String TreeStrings_XMLListMethods;

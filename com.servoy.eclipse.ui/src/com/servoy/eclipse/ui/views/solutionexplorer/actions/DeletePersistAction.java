@@ -57,6 +57,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StringResource;
@@ -106,7 +107,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 					IPersist persist = (IPersist)node.getRealObject();
 					selected.add(persist);
 					// do not allow delete if object is not shown under its own parent (for instance module object)
-					if (persist.getParent() != null)
+					if (!(persist instanceof MenuItem) && persist.getParent() != null)
 					{
 						SimpleUserNode parentNode = node.getAncestorOfType(persist.getParent().getClass());
 						if (parentNode != null && parentNode.getRealObject() != null && !parentNode.getRealObject().equals(persist.getParent()))
@@ -173,7 +174,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 							IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
 
 							repository.deleteObject(editingNode);
-
+							if (editingNode instanceof MenuItem)
+							{
+								editingNode = editingNode.getAncestor(IRepository.MENUS);
+							}
 							servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
 						}
 					}
@@ -318,14 +322,11 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	private String buildMessageFromRelationsTable(Map<Integer, List<String>> map)
 	{
 		String message = "";
-		Iterator<Integer> keyEnumeration = map.keySet().iterator();
-
 		//retrieve the servoy model
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
-		while (keyEnumeration.hasNext())
+		for (Integer currentKey : map.keySet())
 		{
-			Integer currentKey = keyEnumeration.next();
 			List<String> childFormNames = map.get(currentKey);
 
 			String baseFormName = servoyModel.getFlattenedSolution().getForm(currentKey.intValue()).getName();
