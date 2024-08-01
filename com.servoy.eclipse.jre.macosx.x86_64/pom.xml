@@ -9,7 +9,7 @@
     <parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.6.0.3982</version>
+		<version>2024.6.1.3983</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.jre.macosx.x86_64</artifactId>
