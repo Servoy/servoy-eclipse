@@ -25,10 +25,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     snapData: SnapData;
     subscription: Subscription;
 
-    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService, 
-        protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, 
-        private windowRef: WindowRefService,  private guidesService: DynamicGuidesService) {
-        
+    constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
+        protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService,
+        private windowRef: WindowRefService, private guidesService: DynamicGuidesService) {
+
         this.editorSession.setPaletteRefresher(this);
         this.refreshPalette();
         this.windowRef.nativeWindow.addEventListener('message', (event) => {
@@ -36,7 +36,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             if (event.data.id === 'onVariantMouseDown') {
                 //element
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-                this.onVariantMouseDown(event.data.pageX , event.data.pageY, event.data.model);
+                this.onVariantMouseDown(event.data.pageX, event.data.pageY, event.data.model);
             }
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (event.data.id === 'onVariantMouseUp') {
@@ -49,16 +49,16 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.editorContentService.getBodyElement().addEventListener('keyup', (event: KeyboardEvent) => {
             if (event.keyCode == 27) {
                 // esc key, close menu
-                this.editorSession.variantsTrigger.emit({show: false});
+                this.editorSession.variantsTrigger.emit({ show: false });
             }
         });
     }
-    
-	ngAfterViewInit(): void {
+
+    ngAfterViewInit(): void {
         if (this.urlParser.isAbsoluteFormLayout()) {
-	        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
-	            this.snap(value);
-	        })
+            this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
+                this.snap(value);
+            })
         }
     }
 
@@ -75,10 +75,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onPaletteScroll() {
-        this.editorSession.variantsScroll.emit({scrollPos: this.editorContentService.getPallete().scrollTop});
+        this.editorSession.variantsScroll.emit({ scrollPos: this.editorContentService.getPallete().scrollTop });
     }
 
-    onVariantClick(event: MouseEvent, component: PaletteComp,packageName: string ) {   
+    onVariantClick(event: MouseEvent, component: PaletteComp, packageName: string) {
         this.draggedVariant.packageName = packageName;
         this.draggedVariant.name = component.name;
         this.draggedVariant.type = component.componentType;
@@ -92,18 +92,18 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
         if (this.draggedVariant.element.children) {//without this check I'll get a console exception of null children
             Array.from(this.draggedVariant.element.children).forEach((child) => {
-                if (child.tagName.toUpperCase() == 'UL' || child.nodeName.toUpperCase() == 'DESIGNER-VARIANTSCONTENT' ) {
+                if (child.tagName.toUpperCase() == 'UL' || child.nodeName.toUpperCase() == 'DESIGNER-VARIANTSCONTENT') {
                     this.draggedVariant.element.removeChild(child);
                 }
             });
         }
-       
+
         let variantBtn = this.editorContentService.getDocument().elementFromPoint(event.pageX, event.pageY) as HTMLButtonElement;
         if (variantBtn.tagName === 'I') { //clicked on the inner down arrow
             variantBtn = variantBtn.parentElement as HTMLButtonElement;
         }
         if (variantBtn.tagName === 'BUTTON') { //clicked on the inner or button
-            this.editorSession.variantsTrigger.emit({show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
+            this.editorSession.variantsTrigger.emit({ show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
         } //else a very narrow margin (cca. 1 px) of this component was clicked and popup will be wrongly positioned
     }
 
@@ -154,17 +154,17 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: unknown }, ghost: PaletteComp, propertyName?: string, propertyValue?: {[property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
-        if ( event.target && (event.target as Element).getAttribute('name') === 'variants' ) {
+    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: unknown }, ghost: PaletteComp, propertyName?: string, propertyValue?: { [property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
+        if (event.target && (event.target as Element).getAttribute('name') === 'variants') {
             return; // it has a separate handler
         }
-        event.stopPropagation(); 
-        this.editorSession.variantsTrigger.emit({show: false});
+        event.stopPropagation();
+        this.editorSession.variantsTrigger.emit({ show: false });
 
-		let target = event.target as HTMLElement;
-		if (target.localName === 'designer-variantscontent') {
-			target = target.closest('li');
-		}
+        let target = event.target as HTMLElement;
+        if (target.localName === 'designer-variantscontent') {
+            target = target.closest('li');
+        }
         this.dragItem.paletteItemBeingDragged = target.cloneNode(true) as Element;
         Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
             if (child.tagName === 'DESIGNER-VARIANTSCONTENT') {
@@ -199,7 +199,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     onMouseUp = (event: MouseEvent) => {
         if (this.dragItem.paletteItemBeingDragged) {
-            this.editorSession.setDragging( false );
+            this.editorSession.setDragging(false);
             this.editorContentService.getBodyElement().removeChild(this.dragItem.paletteItemBeingDragged);
             this.dragItem.paletteItemBeingDragged = null;
             this.dragItem.contentItemBeingDragged = null;
@@ -228,7 +228,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 component.x = component.x - this.editorContentService.getLeftPositionIframe();
                 component.y = component.y - this.editorContentService.getTopPositionIframe();
             }
-                    
+
             if (this.isDraggedVariant) {
                 component.w = this.draggedVariant.size.width;
                 component.h = this.draggedVariant.size.height;
@@ -237,7 +237,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     component.variant = this.draggedVariant.variant;
                 }
                 this.isDraggedVariant = false;
-            }            
+            }
 
             if (this.urlParser.isAbsoluteFormLayout()) {
                 if (this.canDrop.dropAllowed && this.canDrop.dropTarget) {
@@ -255,7 +255,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     if (this.canDrop.beforeChild) {
                         component.rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
                     }
-                } else if (!this.dragItem.ghost){
+                } else if (!this.dragItem.ghost) {
                     this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
                     this.editorSession.unregisterAutoscroll(this);
                     return;
@@ -295,20 +295,20 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         if (this.draggedVariant.element) {
             this.draggedVariant.element = null;
             this.draggedVariant.variant = null;
-            this.editorSession.variantsTrigger.emit({show: false});
+            this.editorSession.variantsTrigger.emit({ show: false });
         }
     }
 
-    onMouseMove = (event: MouseEvent) => {  
+    onMouseMove = (event: MouseEvent) => {
         if (event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
         }
 
-        if (this.snapData)  return;
+        if (this.snapData) return;
 
         if (this.dragItem.paletteItemBeingDragged) {
-           
+
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', event.pageX + 'px');
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
             if (this.dragItem.contentItemBeingDragged) {
@@ -332,13 +332,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                             insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
                         });
                     }
-                    if (this.canDrop.dropAllowed && (this.canDrop.dropTarget || !this.urlParser.isAbsoluteFormLayout() ))
-                    {
+                    if (this.canDrop.dropAllowed && (this.canDrop.dropTarget || !this.urlParser.isAbsoluteFormLayout())) {
                         // hide the dragged item and rely on inserted item at specific parent 
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
                         this.renderer.removeClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
-                    } else 
-                    {
+                    } else {
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
                         this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
                     }
@@ -357,7 +355,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     const x = event.pageX - this.editorContentService.getLeftPositionIframe();
                     const y = event.pageY - this.editorContentService.getTopPositionIframe();
                     const found = Array.from(elements).find((node) => {
-                        const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect()); 
+                        const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                         if (position.x <= x && position.x + position.width >= x && position.y <= y && position.y + position.height >= y) {
                             const types = node.getAttribute('svy-types');
                             if (types && types.split(',').indexOf(this.dragItem.ghost.type) >= 0) {
@@ -393,7 +391,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     getPackages(): Array<Package> {
         return this.editorSession.getState().packages;
     }
-    
+
     updateLocationCallback(changeX: number, changeY: number) {
         this.editorContentService.getContentArea().scrollTop += changeY;
         this.editorContentService.getContentArea().scrollLeft += changeX;
@@ -402,7 +400,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     getAutoscrollLockId(): string {
         return 'palette';
     }
-    
+
     refreshPalette(): void {
         let layoutType: string;
         if (this.urlParser.isAbsoluteFormLayout())
@@ -438,11 +436,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                                 }
                                 packages[i].components[j].components = newPropertyValues;
                             }
-                            else if (packages[i].components[j].name != 'servoycore-listformcomponent'){
+                            else if (packages[i].components[j].name != 'servoycore-listformcomponent') {
                                 // added autowizard for list form component 
                                 packages[i].components[j].components = propertyValues;
                             }
-                            else{
+                            else {
                                 packages[i].components[j].properties = null;
                             }
                         }
@@ -462,11 +460,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 }
                 if (this.dragItem.contentItemBeingDragged) {
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData.left + 'px');
-                    if (this.snapData?.width) { 
+                    if (this.snapData?.width) {
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
                     }
                     if (this.snapData?.height) {
-                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
+                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
                     }
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData.top + 'px');
                     this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
@@ -486,7 +484,10 @@ export class SearchTextPipe implements PipeTransform {
         let sortedItems = items;
         if (items && text)
             sortedItems = items.filter(item => {
-                return item && item.displayName && item.displayName.toLowerCase().indexOf(text.toLowerCase()) >= 0;
+                if (item && item.displayName) { 
+                    return text.toLowerCase().split(' ').find(searchText => item.displayName.toLowerCase().indexOf(searchText) >= 0) != undefined;
+                }
+                return false;
             });
         sortedItems.sort((item1, item2) => {
             return (item1.displayName < item2.displayName ? -1 : (item1.displayName > item2.displayName ? 1 : 0))
@@ -500,26 +501,26 @@ export class SearchTextDeepPipe implements PipeTransform {
     transform(items: Array<Package>, text: string): Array<Package> {
         if (items)
             return items.filter(item => {
-				if (!item.components || item.components.length == 0) return false;
+                if (!item.components || item.components.length == 0) return false;
                 if (!text) return true;
-                const compBool =  item.components.filter(component => {
-                    return component.displayName.toLowerCase().indexOf(text.toLowerCase()) >= 0;
+                const compBool = item.components.filter(component => {
+                    return text.toLowerCase().split(' ').find(searchText => component.displayName.toLowerCase().indexOf(searchText) >= 0) != undefined;
                 }).length > 0;
                 const catKeys = item.categories ? Object.keys(item.categories) : [];
                 let catBool = false;
                 if (catKeys.length > 0) {
-					for (const prop of catKeys){
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-						const catProp: Array<PaletteComp> = item.categories[prop];
-						catBool = catProp.filter(component => {
-							return component.displayName.toLowerCase().indexOf(text.toLowerCase()) >= 0;
-						}).length > 0;
-						if (catBool) {
-							break;
-						}
-					}
-				}
-				return (compBool || catBool);
+                    for (const prop of catKeys) {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                        const catProp: Array<PaletteComp> = item.categories[prop];
+                        catBool = catProp.filter(component => {
+                            return text.toLowerCase().split(' ').find(searchText => component.displayName.toLowerCase().indexOf(searchText) >= 0) != undefined;
+                        }).length > 0;
+                        if (catBool) {
+                            break;
+                        }
+                    }
+                }
+                return (compBool || catBool);
             });
         return items;
     }
