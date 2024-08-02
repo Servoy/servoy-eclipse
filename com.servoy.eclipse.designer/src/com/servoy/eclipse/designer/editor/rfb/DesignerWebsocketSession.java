@@ -561,7 +561,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				boolean newRenderGhosts = parseIFormElement((IFormElement)persist, baseComponents, compAttributes, deletedComponents, formComponentChild,
 					refreshTemplate,
 					updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, formComponentContainers, childParentMap);
-				renderGhosts = renderGhosts || newRenderGhosts;
+				renderGhosts = renderGhosts || newRenderGhosts || formHasGhosts(persist);
 			}
 			else if (persist instanceof Part)
 			{
