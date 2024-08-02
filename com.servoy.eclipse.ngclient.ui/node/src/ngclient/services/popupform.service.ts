@@ -106,13 +106,11 @@ export class PopupFormService {
     private formPopupBodyListener = (event: Event) => {
 
         const target = event.target as HTMLElement;
-        if (target && target instanceof HTMLElement && target.id) {
-            // Store the ID of the clicked element
+        if (target && target.id) {
             this.clickedComponentId = target.id;
             this.x = this.formPopupComponent.instance._left;
             this.y = this.formPopupComponent.instance._top;
         } else {
-            // If no ID or target is not an HTMLElement
             this.clickedComponentId = null;
         }
 
