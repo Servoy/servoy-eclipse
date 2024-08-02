@@ -67,7 +67,9 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
           </div>
 </ng-template>
 <ng-template  #formComponentResponsiveDiv  let-state="state" let-row="row" let-i="i">
+    <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" class="svy-formcomponent">
         <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
+    </div>
 </ng-template>
 <!-- structure template generate start -->
 <!-- structure template generate end -->
