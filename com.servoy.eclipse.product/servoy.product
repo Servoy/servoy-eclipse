@@ -2,6 +2,7 @@
 <?pde version="3.5"?>
 
 <product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2024.3.3.3946_LTS" type="features" includeLaunchers="true" autoIncludeRequirements="true">
+
    <aboutInfo>
       <image path="icons/installer_image.png"/>
       <text>
@@ -131,7 +132,12 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </configurations>
 
    <repositories>
-      <repository location="http://download.servoy.com/developer/latest/" name="" enabled="true" />
+      <repository location="https://download.servoy.com/developer/latest/" name="Servoy Latest Releases" enabled="false" />
+      <repository location="https://download.servoy.com/developer/lts" name="Servoy LTS Releases" enabled="true" />
+      <repository location="https://download.servoy.com/developer/latest/releasecandidate" name="Servoy Latest Release Candidates" enabled="false" />
+      <repository location="https://download.eclipse.org/eclipse/updates/4.30" name="Eclipse Release" enabled="true" />
+      <repository location="https://download.eclipse.org/releases/2023-12" name="Eclipse Updates" enabled="true" />
+      <repository location="https://developer.servoy.com/sqlexplorer/" name="SQLExplorer" enabled="true" />
    </repositories>
 
    <preferencesInfo>
