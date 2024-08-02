@@ -2271,6 +2271,8 @@ public class WarExporter
 	{
 		pluginFiles = new HashSet<File>();
 		List<String> pluginLocations = new ArrayList<String>();
+		pluginLocations.addAll(exportModel.getPluginLocations());
+
 		File eclipseParent = null;
 		File userDir = new File(System.getProperty("user.dir"));
 		if (System.getProperty("eclipse.home.location") != null)
@@ -2282,7 +2284,6 @@ public class WarExporter
 				pluginLocations.add(new File(eclipseParent, "/plugins").getAbsolutePath().toString());
 			}
 		}
-		pluginLocations.addAll(exportModel.getPluginLocations());
 
 		LinkedHashMap<File, String[]> dirListings = new LinkedHashMap<>();
 		pluginLocations.forEach(location -> {

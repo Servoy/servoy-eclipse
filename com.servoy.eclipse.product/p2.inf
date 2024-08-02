@@ -1,12 +1,3 @@
-instructions.configure=addRepository(type:0,name:Servoy Latest Releases,location:https${#58}//download.servoy.com/developer/latest,enabled:true);addRepository(type:1,name:Servoy Latest Releases,location:https${#58}//download.servoy.com/developer/latest,enabled:true);\
-addRepository(type:0,name:Servoy LTS Releases,location:https${#58}//download.servoy.com/developer/lts,enabled:false);addRepository(type:1,name:Servoy LTS Releases,location:https${#58}//download.servoy.com/developer/lts,enabled:false);\
-addRepository(type:0,name:SQLExplorer Updates,location:https${#58}//developer.servoy.com/sqlexplorer/);addRepository(type:1,name:SQLExplorer Updates,location:https${#58}//developer.servoy.com/sqlexplorer/);\
-addRepository(type:0,name:2023-09,location:https${#58}//download.eclipse.org/releases/2023-09);addRepository(type:1,name:Eclipse 2023-09,location:https${#58}//download.eclipse.org/releases/2023-09);\
-addRepository(type:0,name:The Eclipse Project Updates,location:https${#58}//download.eclipse.org/eclipse/updates/4.29);addRepository(type:1,name:The Eclipse Project Updates,location:https${#58}//download.eclipse.org/eclipse/updates/4.29);\
-addRepository(type:0,name:Subclipse Latest Update Site,location:https${#58}//subclipse.github.io/updates/);addRepository(type:1,name:Subclipse Latest Update Site,location:https${#58}//subclipse.github.io/updates/);\
-addRepository(type:0,name:Servoy Latest Releases (Release Candidates),location:https${#58}//download.servoy.com/developer/latest/releasecandidate,enabled:false);addRepository(type:1,name:Servoy Latest Releases (Release Candidates),location:https${#58}//download.servoy.com/developer/latest/releasecandidate,enabled:false);\
-addRepository(type:0,name:Servoy LTS Releases (Release Candidates),location:https${#58}//download.servoy.com/developer/lts/releasecandidate,enabled:false);addRepository(type:1,name:Servoy LTS Releases (Release Candidates),location:https${#58}//download.servoy.com/developer/lts/releasecandidate,enabled:false);
-
 #Adding description for the Servoy updates
 properties.0.name = org.eclipse.equinox.p2.description
 properties.0.value = Servoy 2024.9.0.4000_rc

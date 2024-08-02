@@ -802,6 +802,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					{
 						String whatToRun = warExportModel != null ? "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : "build"
 							: "build_debug_nowatch";
+						whatToRun = "build_debug_nowatch";
 						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("run", whatToRun));
 						try
 						{
