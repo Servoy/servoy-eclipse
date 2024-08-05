@@ -233,7 +233,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     const iframeTop = this.editorContentService.getTopPositionIframe();
                     const rect1 = new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY, this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY - this.mousedownpoint.y))
                     const rect2 = new DOMRect(position.x + iframeLeft, position.y + iframeTop, position.width, position.height);
-                    if (this.rectanglesIntersect(rect1, rect2)) {
+					const compFullInside = this.urlParser.isMarqueeSelectOuter();
+					if (this.rectanglesIntersect(rect1, rect2, compFullInside)) {
                         const layoutName = node.getAttribute('svy-layoutname');
                         const newNode: SelectionNode = {
                             style: {
@@ -342,7 +343,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         const rect1 = new DOMRect(Math.min(position1.left, position2.left), Math.min(position1.top, position2.top), Math.abs(position1.left - position2.left), Math.abs(position1.top - position2.top))
                         Array.from(elements).forEach((node) => {
                             const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
-                            if (this.rectanglesIntersect(rect1, position)) {
+                            if (this.rectanglesIntersect(rect1, position, false)) {
                                 const id = node.getAttribute('svy-id');
                                 const layoutName = node.getAttribute('svy-layoutname');
                                 const newNode = {
@@ -444,7 +445,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 		}
     }
 
-    private rectanglesIntersect(r1: DOMRect, r2: DOMRect): boolean {
+    private rectanglesIntersect(r1: DOMRect, r2: DOMRect, compFullInside: boolean): boolean {
+		if (compFullInside) {
+			return (r2.left >= r1.left && 
+				r2.right <= r1.right && 
+				r2.top >= r1.top && 
+				r2.bottom <= r1.bottom);
+		}
         return !(r2.left > r1.right ||
             r2.right < r1.left ||
             r2.top > r1.bottom ||
