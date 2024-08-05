@@ -42,14 +42,25 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.grouplayout.GroupLayout;
+import org.eclipse.swt.layout.BorderData;
+import org.eclipse.swt.layout.BorderLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
@@ -59,12 +70,10 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
-import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
@@ -200,8 +209,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
-		relationSelectorWizardPage = new RelationSelectorWizardPage("Load relations",
-			(IServerInternal)((SimpleUserNode)selection.getFirstElement()).getRealObject());
+		relationSelectorWizardPage = new RelationSelectorWizardPage("Load relations");
 	}
 
 	@Override
@@ -213,16 +221,15 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 	public class RelationSelectorWizardPage extends WizardPage
 	{
 		private TableViewer tableViewer;
-		private final IServerInternal server;
 
 		static final int CI_CREATE = 0;
 		static final int CI_NAME = 1;
 		static final int CI_SOLUTION = 2;
 
-		protected RelationSelectorWizardPage(String pageName, IServerInternal server)
+
+		protected RelationSelectorWizardPage(String pageName)
 		{
 			super(pageName);
-			this.server = server;
 			setTitle("Select relations to be created");
 			setDescription("");
 		}
@@ -235,7 +242,52 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 		public void createControl(Composite parent)
 		{
 			Composite composite = new Composite(parent, SWT.NONE);
+			Composite buttons = new Composite(composite, SWT.NONE);
+			buttons.setLayoutData(new BorderData(SWT.TOP));
+			buttons.setLayout(new GridLayout(3, false));
+
+			Button selectAll = new Button(buttons, SWT.PUSH);
+			selectAll.setText("Select All");
+			selectAll.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					getList().forEach(relation -> relation.setAdd(true));
+					tableViewer.refresh();
+				}
+			});
+
+			Button deSelectAll = new Button(buttons, SWT.PUSH);
+			deSelectAll.setText("Deselect All");
+			deSelectAll.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					getList().forEach(relation -> relation.setAdd(false));
+					tableViewer.refresh();
+				}
+			});
+			final Text filterText = new Text(buttons, SWT.BORDER);
+			GridData layoutData = new GridData();
+			layoutData.verticalAlignment = SWT.CENTER;
+			layoutData.horizontalAlignment = SWT.RIGHT;
+			layoutData.grabExcessHorizontalSpace = true;
+			layoutData.minimumWidth = 160;
+			filterText.setLayoutData(layoutData);
+
+			filterText.addKeyListener(new KeyAdapter()
+			{
+				@Override
+				public void keyReleased(KeyEvent e)
+				{
+					tableViewer.refresh();
+				}
+			});
+
 			Composite tableContainer = new Composite(composite, SWT.NONE);
+			tableContainer.setLayoutData(new BorderData(SWT.CENTER));
 			tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 			tableViewer.getTable().setLinesVisible(true);
 			tableViewer.getTable().setHeaderVisible(true);
@@ -262,18 +314,23 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 			layout.setColumnData(solutionColumn, new ColumnWeightData(10, 25, true));
 
 			tableViewer.setLabelProvider(new RelationSelectorLabelProvider());
-			ObservableListContentProvider relationViewContentProvider = new ObservableListContentProvider();
+			ObservableListContentProvider<RelationSelectorModel> relationViewContentProvider = new ObservableListContentProvider<>();
 			tableViewer.setContentProvider(relationViewContentProvider);
+			tableViewer.setFilters(new ViewerFilter()
+			{
+				@Override
+				public boolean select(Viewer viewer, Object parentElement, Object element)
+				{
+					String text = filterText.getText();
+					if (text.isBlank()) return true;
+					RelationSelectorModel model = (RelationSelectorModel)element;
+					return model.getRelationName().contains(text);
+				}
+			});
 			createInput();
 			setControl(composite);
 
-			final GroupLayout groupLayout = new GroupLayout(composite);
-			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING,
-					tableContainer, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE)).addContainerGap()));
-			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
-				groupLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 285, Short.MAX_VALUE).addContainerGap()));
-			composite.setLayout(groupLayout);
+			composite.setLayout(new BorderLayout());
 		}
 
 		private void createInput()
@@ -285,7 +342,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingSolution(), rdata.table, rdata.primaryColumns,
 					rdata.foreignColumns, rdata.defaultAdd));
 			}
-			tableViewer.setInput(new WritableList(relations, RelationSelectorModel.class));
+			tableViewer.setInput(new WritableList<RelationSelectorModel>(relations, RelationSelectorModel.class));
 		}
 	}
 
