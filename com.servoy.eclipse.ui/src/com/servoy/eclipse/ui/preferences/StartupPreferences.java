@@ -32,9 +32,12 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.util.Settings;
@@ -166,21 +169,35 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		settings.setProperty(SHUTDOWN_LAUNCHER_SETTING, shutdownLauncherText.getText());
 		settings.setProperty(RETRIES_SETTING, String.valueOf(retriesSpinner.getSelection()));
 
-		InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).put(com.servoy.eclipse.core.Activator.PROPERTIES_FILE_PATH_SETTING,
-			settingsFileText.getText());
-		try
-		{
-			InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).flush();
-		}
-		catch (BackingStoreException e)
-		{
-			ServoyLog.logError(e);
-		}
 
 		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, showErrorsConfirmation.getSelection());
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, showWarningsConfirmation.getSelection());
 		Settings.getInstance().setProperty(STARTUP_SHOW_START_PAGE, Boolean.valueOf(showStartPageCheck.getSelection()).toString());
+
+		String currentServoyProperties = InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).get(
+			com.servoy.eclipse.core.Activator.PROPERTIES_FILE_PATH_SETTING, "servoy.properties");
+		String newServoyProperties = settingsFileText.getText();
+		if (!Utils.equalObjects(currentServoyProperties, newServoyProperties))
+		{
+			InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).put(com.servoy.eclipse.core.Activator.PROPERTIES_FILE_PATH_SETTING,
+				newServoyProperties);
+			try
+			{
+				InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).flush();
+			}
+			catch (BackingStoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+
+			if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(), "servoy.properties preference changed",
+				"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
+			{
+				PlatformUI.getWorkbench().restart();
+			}
+		}
+
 		return true;
 	}
 
