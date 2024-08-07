@@ -91,7 +91,7 @@ export class ServoyFormPopupComponent {
     }
 
     getStyle() {
-        return { position: 'absolute', zIndex: 1050, left: this._left + 'px', top: this._top + 'px', width: this._width + 'px', height: this._height + 'px' };
+        return { position: 'absolute', zIndex: 1499, left: this._left + 'px', top: this._top + 'px', width: this._width + 'px', height: this._height + 'px' };
     }
 
     firstElementFocused(event: Event) {
