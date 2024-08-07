@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.awt.Point;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -492,6 +493,15 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			if (persist instanceof ChildWebComponent || persist.getParent() instanceof Portal)
 			{
 				ghost = true;
+			}
+			if (!form.isResponsiveLayout())
+			{
+				int formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
+				Point location = CSSPositionUtils.getLocation(persist);
+				if (((location.x > form.getWidth()) || (location.y > formHeight)))
+				{
+					ghost = true;
+				}
 			}
 			boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
 				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>(), formContainers, childParentMap);
