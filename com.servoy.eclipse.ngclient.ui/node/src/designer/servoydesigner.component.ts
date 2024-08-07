@@ -120,6 +120,11 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         // not sure how to fix that sometimes wrong calls come from server; for example when deleting a component from css position container
         if (width != 0 && height != 0) {
             this.windowRef.nativeWindow.parent.postMessage({ id: 'updateFormSize', width: width, height: height }, '*');
+			this.contentRefresh();
+			setTimeout(()=>{
+				this.renderGhosts();
+				this.redrawDecorators();
+			}, 200);
         }
     }
 
