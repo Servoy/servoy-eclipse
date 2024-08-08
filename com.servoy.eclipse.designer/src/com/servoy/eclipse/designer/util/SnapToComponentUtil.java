@@ -299,7 +299,7 @@ public class SnapToComponentUtil
 				{
 					//what should happen if the targets don't have the same anchoring?
 					setCssValue(newPosition, lowerProperty, h1.plus(dist));
-					setCssValue(newPosition, higherProperty, l2.minus(dist));
+					setCssValue(newPosition, higherProperty, l2.minus(dist).toHigherProperty());
 					setCssValue(newPosition, sizeProperty, CSSValue.NOT_SET);
 				}
 			}
