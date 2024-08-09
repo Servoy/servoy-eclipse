@@ -450,7 +450,7 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 
 		ObjectDocumentation objDoc = new ObjectDocumentation(category, qualifiedName, publicName, scriptingName, extendsFrom, null);
 
-		Node descriptionNode = objectElement.selectSingleNode("description");
+		Node descriptionNode = objectElement.element("description");
 		if (descriptionNode != null)
 		{
 			objDoc.setDescription(descriptionNode.getText());

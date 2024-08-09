@@ -100,7 +100,7 @@ public class CoreAndJavaPluginsInfoGenerator
 			{
 				if (fd.isDeprecated()) continue;
 				if (ngOnly && !fd.getClientSupport().hasSupport(ClientSupport.ng)) continue;
-				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly);
+				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly, null);
 				models.add(ftm);
 //			if ("void".equals(ftm.getReturnType()) || ftm.getReturnType() == null)
 //			{
