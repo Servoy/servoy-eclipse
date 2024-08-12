@@ -29,10 +29,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,6 +47,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -52,6 +57,7 @@ import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
+import org.sablo.util.TextUtils;
 
 import com.servoy.base.scripting.api.IJSController;
 import com.servoy.base.scripting.api.IJSDataSet;
@@ -62,7 +68,7 @@ import com.servoy.base.solutionmodel.IBaseSMField;
 import com.servoy.base.solutionmodel.IBaseSMForm;
 import com.servoy.base.solutionmodel.IBaseSMMethod;
 import com.servoy.build.documentation.DocumentationManager;
-import com.servoy.build.documentation.ObjectDocumentation;
+import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IRecord;
@@ -75,10 +81,12 @@ import com.servoy.j2db.querybuilder.IQueryBuilderCondition;
 import com.servoy.j2db.querybuilder.IQueryBuilderLogicalCondition;
 import com.servoy.j2db.scripting.FormScope;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
+import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.JSMap;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.solutionmodel.ISMPart;
+import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 import freemarker.cache.ClassTemplateLoader;
@@ -86,95 +94,95 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.utility.DeepUnwrap;
 
 /**
  * @author jcompagner
  */
 public class MarkdownGenerator
 {
+
+	private static final String EXTENDS_CLASS_SECTION_IN_TEMPLATE = "extends";
+	private static final String RETURN_TYPES_SECTION_IN_TEMPLATE = "returnTypes";
+
+	private static URLClassLoader targetInstallClassLoader;
+
 	private static Configuration cfg;
 	private static Template temp;
 
-	private static Map<String, String> defaultTypePath = new HashMap<>();
+	private static Map<String, String> specialTypePaths = new HashMap<>();
 	static
 	{
-		defaultTypePath.put("Boolean", "/js-lib");
-		defaultTypePath.put("String", "/js-lib");
-		defaultTypePath.put("Date", "/js-lib");
-		defaultTypePath.put("Number", "/js-lib");
-		defaultTypePath.put("Array", "/js-lib");
-		defaultTypePath.put("Object", "/js-lib");
-		defaultTypePath.put("Function", "/js-lib");
-		defaultTypePath.put("IterableValue", "/js-lib");
-		defaultTypePath.put("Iterator", "/js-lib");
-		defaultTypePath.put("JSON", "/js-lib");
-		defaultTypePath.put("JS Lib", "/js-lib");
-		defaultTypePath.put("Map", "/js-lib");
-		defaultTypePath.put("Math", "/js-lib");
-		defaultTypePath.put("Namespace", "/js-lib");
-		defaultTypePath.put("QName", "/js-lib");
-		defaultTypePath.put("RegExp", "/js-lib");
-		defaultTypePath.put("Set", "/js-lib");
-		defaultTypePath.put("Special Operators", "/js-lib");
-		defaultTypePath.put("Statements", "/js-lib");
-		defaultTypePath.put("XML", "/js-lib");
-		defaultTypePath.put("XMLList", "/js-lib");
-		defaultTypePath.put("Exception", "/");
-		// special types
-		defaultTypePath.put("JSServer", "/plugins/maintenance/");
-		defaultTypePath.put("JSTableObject", "/plugins/maintenance/");
-		defaultTypePath.put("JSColumnObject", "/plugins/maintenance/");
-		defaultTypePath.put("Component", "/forms/runtimeform/elements");
+		// special return types that are used by the maintenance plugin but they are implemented&come from servoy_shared/core classes
+		// but we do want them under the maintenance plugin... not in core docs
+		specialTypePaths.put("JSServer", "/reference/servoyextensions/server-plugins/maintenance/");
+		specialTypePaths.put("JSTableObject", "/reference/servoyextensions/server-plugins/maintenance/");
+		specialTypePaths.put("JSColumnObject", "/reference/servoyextensions/server-plugins/maintenance/");
+
+		// the following ones are not generated .md files; they were manually created at that path; so we have to hardcode them
+		specialTypePaths.put("enum", "/reference/servoycore/dev-api/");
+		specialTypePaths.put("Exception", "/reference/servoycore/dev-api/");
 	}
 
 	private static final HashMap<String, String> qualifiedToName = new HashMap<>();
 	private static final HashMap<String, String> publicToRootPath = new HashMap<>();
 	private static final HashMap<String, String> returnTypesToParentName = new HashMap<>();
+	private static final Map<String, String> publicNameToPluginProviderClassPublicName = new HashMap<>(); // plugins already have the plugin name as dir in their root path; do not generate another dir; it is null for non-plugin docs
+
 	private static final Set<String> storeAsReadMe = new HashSet<>();
+	private static final Set<String> doNotStoreAsReadMe = new HashSet<>();
+
+	private static final Set<String> excludedPluginJarNames = Set.of("aibridge.jar");
 
 	static
 	{
-		// TODO wouldn't it be enough to always say it's "storeAsReadme" if it has return types?
-		storeAsReadMe.add("Application");
-		storeAsReadMe.add("Database Manager");
-		storeAsReadMe.add("SolutionModel");
-		storeAsReadMe.add("Datasources");
+		// we always say it's "storeAsReadme" if it has return types - automatically
+		// so here we add those public names that don't list return types in the .java files
+
 		storeAsReadMe.add("Forms");
 		storeAsReadMe.add("RuntimeForm");
-		storeAsReadMe.add("JS Lib");
-		storeAsReadMe.add("ServoyException");
 		storeAsReadMe.add("Solution");
-		storeAsReadMe.add("Client Utils");
+		storeAsReadMe.add("elements");
+		storeAsReadMe.add("containers");
 
-		storeAsReadMe.add("amortization");
-		storeAsReadMe.add("clientmanager");
-		storeAsReadMe.add("file");
-		storeAsReadMe.add("headlessclient");
-		storeAsReadMe.add("http");
-		storeAsReadMe.add("images");
-		storeAsReadMe.add("jwt");
-		storeAsReadMe.add("mail");
-		storeAsReadMe.add("maintenance");
-		storeAsReadMe.add("mobileservice");
-		storeAsReadMe.add("oauth");
-		storeAsReadMe.add("openid");
-		storeAsReadMe.add("rest_ws");
-		storeAsReadMe.add("spellcheck");
-		storeAsReadMe.add("textxport");
-		storeAsReadMe.add("udp");
-		storeAsReadMe.add("window");
-		storeAsReadMe.add("XmlReader");
+		// exceptions from the rule that stuff with valid return types are dirs and generate a README.md in that dir:
+		// otherwise for example both ServoyException and DataException that extends ServoyException will be seen as having return types and thus generating folders, and we do not want that for DataException...
+		doNotStoreAsReadMe.add("DataException");
 	}
 
 	private final Map<String, Object> root;
 	private final Path path;
+	private final String rootPath;
+	private final static java.util.function.Function<String, String> htmlToMarkdownConverter = (initialDescription) -> {
+		if (initialDescription == null) return null;
 
-	public MarkdownGenerator(String publicName, String scriptingName, String parentPath)
+		String convertedDesc = TextUtils.newLinesToBackslashN(initialDescription).replace("%%prefix%%", "").replace("%%elementName%%",
+			"myElement");
+		convertedDesc = convertedDesc.trim(); // probably not needed
+		return SpecMarkdownGenerator.turnHTMLJSDocIntoMarkdown(convertedDesc);
+	};
+
+	public MarkdownGenerator(String publicName, String scriptingName, String description,
+		String parentPath, List<String> publicNamesOfReturnTypes)
 	{
 		root = new HashMap<>();
 		root.put("classname", publicName);
+
+		/**
+		 * Quick convert of HTML to String for use in the template.
+		 */
+		root.put("MD", (TemplateMethodModelEx)((params) -> htmlToMarkdownConverter.apply((String)DeepUnwrap.unwrap((TemplateModel)params.get(0)))));
+
+		this.rootPath = parentPath;
+
 		if (scriptingName != null && !scriptingName.equals(publicName)) root.put("scriptingname", scriptingName);
+		if (description != null) root.put("description", htmlToMarkdownConverter.apply(description));
 		String classNoSpace = publicName.replace(" ", "%20").toLowerCase();
+
+		classList(RETURN_TYPES_SECTION_IN_TEMPLATE, publicNamesOfReturnTypes);
+
 		if (storeAsReadMe.contains(publicName))
 		{
 			classNoSpace = "README";
@@ -182,12 +190,12 @@ public class MarkdownGenerator
 		root.put("classname_nospace", classNoSpace);
 		root.put("instance", this);
 
-		if ("/design-api".equals(parentPath))
+		if ("/reference/servoycore/object-model/solution".equals(parentPath))
 		{
-			String returnType = returnTypesToParentName.get(publicName);
-			if (returnType != null)
+			String parentOfReturnedType = returnTypesToParentName.get(publicName);
+			if (parentOfReturnedType != null)
 			{
-				path = Paths.get(parentPath, returnType);
+				path = Paths.get(parentPath, parentOfReturnedType);
 			}
 			else
 			{
@@ -196,11 +204,16 @@ public class MarkdownGenerator
 		}
 		else
 		{
-			path = parentPath != null ? Paths.get(parentPath) : Paths.get(generatePath(publicName));
+			path = Paths.get(generatePathInLauncherOutputDir(publicName));
 		}
 	}
 
-	public static void main(String[] args) throws IOException, ClassNotFoundException, URISyntaxException
+	private String getPublicName()
+	{
+		return (String)root.get("classname");
+	}
+
+	public static void main(String[] args) throws IOException, ClassNotFoundException, URISyntaxException, InstantiationException, IllegalAccessException
 	{
 		cfg = new Configuration(Configuration.VERSION_2_3_31);
 		cfg.setTemplateLoader(new ClassTemplateLoader(MarkdownGenerator.class, "template"));
@@ -210,8 +223,8 @@ public class MarkdownGenerator
 		cfg.setLogTemplateExceptions(false);
 		cfg.setWrapUncheckedExceptions(true);
 		cfg.setFallbackOnNullLoopVariable(false);
-		fillStaticParents(returnTypesToParentName);
 
+		fillStaticParents(returnTypesToParentName);
 
 		temp = cfg.getTemplate("markdown_template.md");
 
@@ -248,15 +261,15 @@ public class MarkdownGenerator
 	public static void fillStaticParents(HashMap<String, String> retTypesToParentName)
 	{
 		retTypesToParentName.put("DataException", "ServoyException");
-//		JSColumnObject");
-//		JSServer");
-//		JSTableObject");
 		retTypesToParentName.put("RuntimeForm", "Forms");
 		retTypesToParentName.put("RuntimeContainer", "RuntimeForm");
 		retTypesToParentName.put("containers", "RuntimeForm");
 		retTypesToParentName.put("elements", "RuntimeForm");
 		retTypesToParentName.put("controller", "RuntimeForm");
 
+		retTypesToParentName.put("RuntimeContainer", "containers");
+
+		retTypesToParentName.put("Component", "elements");
 		retTypesToParentName.put("RuntimeAccordionPanel", "elements");
 		retTypesToParentName.put("RuntimeDataLabel", "elements");
 		retTypesToParentName.put("RuntimeInsetList", "elements");
@@ -287,29 +300,7 @@ public class MarkdownGenerator
 		retTypesToParentName.put("RuntimeWebComponent", "elements");
 
 
-		retTypesToParentName.put("Calendar", "Form");
-		retTypesToParentName.put("Footer", "Form");
-		retTypesToParentName.put("Header", "Form");
-		retTypesToParentName.put("HeaderTitle", "Form");
-		retTypesToParentName.put("InsetList", "Form");
 		retTypesToParentName.put("Layout Container", "Form");
-		retTypesToParentName.put("ListForm", "Form");
-		retTypesToParentName.put("Bean", "Form");
-		retTypesToParentName.put("Button", "Form");
-		retTypesToParentName.put("CheckBoxes", "Form");
-		retTypesToParentName.put("ComboBox", "Form");
-		retTypesToParentName.put("Image", "Form");
-		retTypesToParentName.put("Label", "Form");
-		retTypesToParentName.put("Part", "Form");
-		retTypesToParentName.put("Password", "Form");
-		retTypesToParentName.put("Portal", "Form");
-		retTypesToParentName.put("RadioButtons", "Form");
-		retTypesToParentName.put("Rectangle", "Form");
-		retTypesToParentName.put("TabPanel", "Form");
-		retTypesToParentName.put("Tab", "Form");
-		retTypesToParentName.put("Table", "Form");
-		retTypesToParentName.put("TextArea", "Form");
-		retTypesToParentName.put("TextField", "Form");
 
 		retTypesToParentName.put("RelationItem", "Relation");
 	}
@@ -359,8 +350,12 @@ public class MarkdownGenerator
 	}
 
 	public static void generateCoreAndPluginDocs(String jsLibURL, String servoyDocURL, String designDocURL, String pluginDir, IDocFromXMLGenerator docGenerator)
-		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException
+		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException, InstantiationException, IllegalAccessException
 	{
+		targetInstallClassLoader = new URLClassLoader("Target Servoy installation classloader",
+			findJarURLsFromServoyInstall(new File(new URI(pluginDir).normalize()).getAbsolutePath()),
+			MarkdownGenerator.class.getClassLoader());
+
 		boolean ngOnly = false;
 
 		do
@@ -371,20 +366,19 @@ public class MarkdownGenerator
 			System.err.println("Generating core and java plugin content (ngOnly = " + ngOnly + ")");
 
 			System.err.println("  - " + jsLibURL);
-			DocumentationManager manager = DocumentationManager.fromXML(new URL(jsLibURL), MarkdownGenerator.class.getClassLoader());
-			docGenerator.generateDocsFromXML(manager, null, ngOnly);
+			DocumentationManager manager = DocumentationManager.fromXML(new URL(jsLibURL), targetInstallClassLoader);
+			docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
+			docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
 
 			System.err.println("  - " + servoyDocURL);
-			manager = DocumentationManager.fromXML(new URL(servoyDocURL), MarkdownGenerator.class.getClassLoader());
-			docGenerator.generateDocsFromXML(manager, null, ngOnly);
+			manager = DocumentationManager.fromXML(new URL(servoyDocURL), targetInstallClassLoader);
+			docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
+			docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
 
 			System.err.println("  - " + designDocURL);
-			manager = DocumentationManager.fromXML(new URL(designDocURL), MarkdownGenerator.class.getClassLoader());
-			docGenerator.generateDocsFromXML(manager, "/design-api", ngOnly);
-
-			System.err.println("  - " + designDocURL);
-			manager = DocumentationManager.fromXML(new URL(designDocURL), MarkdownGenerator.class.getClassLoader());
-			docGenerator.generateDocsFromXML(manager, "/design-api", ngOnly);
+			manager = DocumentationManager.fromXML(new URL(designDocURL), targetInstallClassLoader);
+			docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/object-model/solution", null);
+			docGenerator.generateDocsFromXML(manager, "/reference/servoycore/object-model/solution", ngOnly);
 
 			System.err.println("  - plugins (from " + pluginDir + "):");
 			File file2 = new File(new URI(pluginDir).normalize());
@@ -394,54 +388,120 @@ public class MarkdownGenerator
 				File[] jars = file2.listFiles((child) -> child.getName().toLowerCase().endsWith(".jar"));
 				for (File jar : jars)
 				{
-
-					try (ZipFile zf = new ZipFile(jar))
+					if (!excludedPluginJarNames.contains(jar.getName()))
 					{
-						zf.stream().filter(entry -> entry.getName().toLowerCase().endsWith("servoy-extension.xml"))
-							.map(entry -> {
-								try
-								{
-									return zf.getInputStream(entry);
-								}
-								catch (IOException e)
-								{
-									e.printStackTrace();
-								}
-								return null;
-							}).filter(is -> is != null)
-							.forEach(is -> {
-								try
-								{
-									System.err.println("    * " + jar.getName());
-									DocumentationManager docManager = DocumentationManager.fromXML(is, MarkdownGenerator.class.getClassLoader());
-									ObjectDocumentation pluginProvider = null;
+						try (ZipFile zf = new ZipFile(jar))
+						{
+							zf.stream().filter(entry -> entry.getName().toLowerCase().endsWith("servoy-extension.xml"))
+								.map(entry -> {
+									try
+									{
+										return zf.getInputStream(entry);
+									}
+									catch (IOException e)
+									{
+										e.printStackTrace();
+									}
+									return null;
+								})
+								.filter(is -> is != null)
+								.map(is -> {
+									// As some types can be accessed between plugins, we need to separate this processDocObjectToPathMaps(...) out of the main
+									// generateDocsFromXML(...) so that we could identify all types from all plugins (by calling only this method for each plugin)
+									// before generating the actual docs for plugins (via generateDocsFromXML(...)).
+									//
+									// For example http plugin's putrequest used the JS file from the file plugin.
+
+									DocumentationManager docManager = DocumentationManager.fromXML(is, targetInstallClassLoader);
+									IObjectDocumentation pluginProvider = null;
 									for (IObjectDocumentation docObj : docManager.getObjects().values())
-										if (((ObjectDocumentation)docObj).getScriptingName() != null &&
-											((ObjectDocumentation)docObj).getScriptingName().startsWith("plugins."))
+										if (docObj.getScriptingName() != null &&
+											docObj.getScriptingName().startsWith("plugins."))
 										{
-											pluginProvider = (ObjectDocumentation)docObj;
+											pluginProvider = docObj;
 											break;
 										}
 
 									String pluginPath;
+									String pluginProviderPublicNameOrJarName;
 									if (pluginProvider != null)
-										pluginPath = "/" + pluginProvider.getScriptingName().replace('.', '/')/* for example plugins.http */;
+									{
+										// for example plugins.http
+										pluginPath = "/reference/servoyextensions/server-" + pluginProvider.getScriptingName().replace('.', '/');
+										pluginProviderPublicNameOrJarName = pluginProvider.getPublicName();
+									}
 									else
-										pluginPath = "/plugins/" + jar.getName().substring(0, jar.getName().length() - 4);
+									{
+										pluginProviderPublicNameOrJarName = jar.getName().substring(0, jar.getName().length() - 4);
+										pluginPath = "/reference/servoyextensions/server-plugins/" + pluginProviderPublicNameOrJarName;
+									}
 
-									docGenerator.generateDocsFromXML(docManager, pluginPath, ng);
-								}
-								catch (ClassNotFoundException | IOException e)
-								{
-									e.printStackTrace();
-								}
-							});
+									try
+									{
+										docGenerator.processDocObjectToPathAndOtherMaps(docManager, pluginPath, pluginProviderPublicNameOrJarName);
+										return new PluginDocumentationPreparated(docManager, pluginPath);
+									}
+									catch (ClassNotFoundException | InstantiationException | IllegalAccessException e)
+									{
+										e.printStackTrace();
+										return null;
+									}
+								})
+								.forEach(pluginDocumentationPreparated -> {
+									if (pluginDocumentationPreparated != null)
+									{
+										try
+										{
+											System.err.println("    * " + jar.getName());
 
+											docGenerator.generateDocsFromXML(pluginDocumentationPreparated.docManager, pluginDocumentationPreparated.pluginPath,
+												ng);
+										}
+										catch (ClassNotFoundException | IOException e)
+										{
+											e.printStackTrace();
+										}
+									}
+								});
+						}
 					}
 				}
 			}
 		}
 		while (ngOnly);
+	}
+
+	private static URL[] findJarURLsFromServoyInstall(String pluginDir) throws IOException
+	{
+		List<URL> jarURLsFromInstall = new ArrayList<>();
+		// install-dir
+		//     application_server
+		//         plugins
+		//             *.jar (nested)
+		//     developer
+		//         plugins
+		//             *.jar (nested)
+		addAllNestedJarFilesOfDir(pluginDir, jarURLsFromInstall);
+		addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "developer", "plugins").normalize().toString(), jarURLsFromInstall);
+		return jarURLsFromInstall.toArray(new URL[jarURLsFromInstall.size()]);
+	}
+
+	private static void addAllNestedJarFilesOfDir(String pluginDir, List<URL> jarURLsFromInstall) throws IOException
+	{
+		try (Stream<Path> fileStream = Files.find(Path.of(pluginDir), 500 /* meant to be a really big number */,
+			(filePath, basicFileAttributes) -> filePath.toString().endsWith(".jar"), FileVisitOption.FOLLOW_LINKS))
+		{
+			fileStream.forEach((filePath) -> {
+				try
+				{
+					jarURLsFromInstall.add(filePath.normalize().toUri().toURL());
+				}
+				catch (MalformedURLException e)
+				{
+					e.printStackTrace();
+				}
+			});
+		}
 	}
 
 	private void table(String name, List<IFunctionDocumentation> functions, Class< ? > cls, boolean ngOnly)
@@ -453,7 +513,8 @@ public class MarkdownGenerator
 			{
 				if (fd.isDeprecated()) continue;
 				if (ngOnly && !fd.getClientSupport().hasSupport(ClientSupport.ng)) continue;
-				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly);
+				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly,
+					htmlToMarkdownConverter);
 				models.add(ftm);
 //			if ("void".equals(ftm.getReturnType()) || ftm.getReturnType() == null)
 //			{
@@ -479,21 +540,9 @@ public class MarkdownGenerator
 		root.put("supportedClients", support);
 	}
 
-	private void classList(String section, Class< ? >[] alltypes)
+	private void classList(String section, List<String> publicNamesOfTypes)
 	{
-		if (alltypes != null && alltypes.length > 0)
-		{
-			List<String> publicNames = new ArrayList<>(alltypes.length);
-			for (Class< ? > alltype : alltypes)
-			{
-				String publicName = getPublicName(alltype);
-				if (publicName != null && !"Object".equals(publicName))
-				{
-					publicNames.add(publicName);
-				}
-			}
-			root.put(section, publicNames);
-		}
+		if (publicNamesOfTypes != null) root.put(section, publicNamesOfTypes);
 	}
 
 	private String generate()
@@ -513,10 +562,10 @@ public class MarkdownGenerator
 
 	public String getReturnTypePath(String publicName)
 	{
-		Path p1 = Paths.get(generatePath(publicName));
+		Path p1 = Paths.get(generatePathInLauncherOutputDir(publicName));
 		Path relativize = path.relativize(p1);
 		String relativePath = relativize.toString().replace('\\', '/').replace(" ", "%20");
-		return ((relativePath.isBlank() ? "." : relativePath) + "/" + publicName + ".md").toLowerCase();
+		return ((relativePath.isBlank() ? "." : relativePath) + "/" + (storeAsReadMe.contains(publicName) ? "" : publicName + ".md")).toLowerCase();
 	}
 
 	public Path getPath()
@@ -524,40 +573,39 @@ public class MarkdownGenerator
 		return path;
 	}
 
-	private String generatePath(String publicName)
+	/**
+	 * Generates the path where this publicName's .md file should be generated relative to the launcher's output dir (so not to the current generateDocsFromXML call's path, but it includes that).
+	 */
+	private String generatePathInLauncherOutputDir(String publicName)
 	{
-		String p = defaultTypePath.get(publicName);
-		if (p == null)
+		String specialTypePath = specialTypePaths.get(publicName);
+		if (specialTypePath != null) return specialTypePath;
+
+		String publicNameOfItsPluginProvider = publicNameToPluginProviderClassPublicName.get(publicName); // so if this is a type from a plugin, get the public name of the plugin's script provider
+
+		// NOTE: nestedPartOfPath does not include the .md filename, just the dir path to it
+		// if it's supposed to be a folder add folder name to path;
+		// but if it is the main provider of a plugin with return types, the plugin folder is already it's folder, so don't add it twice like ...server-plugins/file/file/.. for example
+		String nestedPartOfPath = (storeAsReadMe.contains(publicName) &&
+			!publicName.equals(publicNameOfItsPluginProvider) ? "/" + publicName : "");
+
+		String publicNameToSearchFor = publicName;
+
+		// check nesting
+		String parent = returnTypesToParentName.get(publicName);
+		while (parent != null)
 		{
-			String parent = returnTypesToParentName.get(publicName);
-			if (parent == null)
-			{
-				if (storeAsReadMe.contains(publicName))
-				{
-					p = "/" + publicName;
-				}
-				else p = "/";
-			}
-			else
-			{
-				String rootPath = publicToRootPath.get(parent);
-				if (rootPath != null)
-				{
-					return rootPath;
-				}
-				else
-				{
-					String parent2 = returnTypesToParentName.get(parent);
-					while (parent2 != null)
-					{
-						parent = parent2 + "/" + parent;
-						parent2 = returnTypesToParentName.get(parent2);
-					}
-				}
-				p = "/" + parent;
-			}
+			publicNameToSearchFor = parent; // the location of the .md file will be in the same dir as the parent's README.md file
+
+			// if a parent of it is the main provider of a plugin with or without return types, that is located in the main plugin dir directly without additional nesting in case if has return types, for example jsfile has "file" as parent but it is inside the file plugin directly not in ..server-plugins/file/file/..
+			nestedPartOfPath = (parent.equals(publicNameOfItsPluginProvider) ? "" : parent + "/") + nestedPartOfPath;
+			parent = returnTypesToParentName.get(parent);
 		}
-		return p;
+
+		// it is a type returned by a parent node (for example JSWindow - who's parent is application)
+		// find the parent's path and concatenate?
+		String rootPathToSearchFor = publicToRootPath.get(publicNameToSearchFor);
+		return ((rootPathToSearchFor != null ? rootPathToSearchFor : rootPath) + "/" + nestedPartOfPath).replace(' ', '-');
 	}
 
 	public static String getPublicName(Class< ? > type)
@@ -612,6 +660,14 @@ public class MarkdownGenerator
 			else if (IJSDataSet.class.isAssignableFrom(type) || IDataSet.class.isAssignableFrom(type))
 			{
 				return "JSDataSet";
+			}
+			else if (ServoyException.class.isAssignableFrom(type))
+			{
+				return "ServoyException";
+			}
+			else if (DataException.class.isAssignableFrom(type))
+			{
+				return "DataException";
 			}
 			else if (Exception.class.isAssignableFrom(type))
 			{
@@ -683,24 +739,64 @@ public class MarkdownGenerator
 			return name;
 		}
 		return "void";
-
 	}
 
 	private static class MarkdownDocFromXMLGenerator implements IDocFromXMLGenerator
 	{
 
-		public void generateDocsFromXML(DocumentationManager manager, String path, boolean ngOnly)
-			throws MalformedURLException, ClassNotFoundException, IOException
+		private Map<String, List<String>> computedReturnTypes = null;
+
+		/**
+		 * As some types can be accessed between plugins, we need to separate this processDocObjectToPathMaps(...) out of the main
+		 * generateDocsFromXML(...) so that we could identify all types from all plugins (by calling only this method for each plugin)
+		 * before generating the actual docs for plugins (via generateDocsFromXML(...)).<br/><br/>
+		 *
+		 * For example http plugin's putrequest used the JS file from the file plugin.
+		 */
+		public void processDocObjectToPathAndOtherMaps(DocumentationManager manager, String path, String pluginProviderPublicName)
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException
 		{
 			SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
+
+			// first loop sets the qualifiedToName for all and fixes returnTypes for all
 			for (IObjectDocumentation doc : objects.values())
 			{
 				qualifiedToName.put(doc.getQualifiedName(), doc.getPublicName());
+				if (pluginProviderPublicName != null) publicNameToPluginProviderClassPublicName.put(doc.getPublicName(), pluginProviderPublicName);
 				if (path != null) publicToRootPath.put(doc.getPublicName(), path);
+
+				Class< ? > cls = targetInstallClassLoader.loadClass(doc.getQualifiedName());
+				IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
+
+				if (returnTypes == null)
+				{
+					// in case the class does not statically register return type to ScriptObjectRegistry, do register them
+					// now if it has returnTypes; the xml doc generated from annotations seems to miss this info...
+
+					// add returnTypes if needed; this code is the same as the one in SolutionExplorerTreeContentProvider.addBeanAndBeanChildNodes(Bean)
+					IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(cls);
+					if ((scriptObject == null || scriptObject.getAllReturnedTypes() == null) && IReturnedTypesProvider.class.isAssignableFrom(cls))
+					{
+						final Class< ? >[] allReturnedTypes = ((IReturnedTypesProvider)cls.newInstance()).getAllReturnedTypes();
+						ScriptObjectRegistry.registerReturnedTypesProviderForClass(cls, new IReturnedTypesProvider()
+						{
+
+							public Class< ? >[] getAllReturnedTypes()
+							{
+								return allReturnedTypes;
+							}
+						});
+						returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
+					}
+				}
 			}
+
+			computedReturnTypes = new HashMap<>();
+
+			// second loop uses previously set qualifiedToName and return types
 			for (IObjectDocumentation doc : objects.values())
 			{
-				Class< ? > cls = Class.forName(doc.getQualifiedName());
+				Class< ? > cls = targetInstallClassLoader.loadClass(doc.getQualifiedName());
 				IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
 				if (returnTypes != null && returnTypes.getAllReturnedTypes() != null && returnTypes.getAllReturnedTypes().length > 0)
 				{
@@ -718,38 +814,60 @@ public class MarkdownGenerator
 					}
 //				returnTypesToParentName.put(doc.getPublicName(), doc.getPublicName());
 				}
-			}
-			File userDir = new File(System.getProperty("user.dir"));
-			for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
-			{
-				IObjectDocumentation value = entry.getValue();
-				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") || value.getFunctions().size() == 0) continue;
-				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value instanceof ObjectDocumentation odv ? odv.getScriptingName() : null,
-					path);
-				Class< ? > cls = Class.forName(value.getQualifiedName());
-				IReturnedTypesProvider returnTypes = ScriptObjectRegistry.getScriptObjectForClass(cls);
+
+				ArrayList<Class< ? >> filteredReturnTypes = null;
+
 				if (returnTypes != null && returnTypes.getAllReturnedTypes() != null)
 				{
 					Class< ? >[] allReturnedTypes = returnTypes.getAllReturnedTypes();
-					ArrayList<Class< ? >> filterReturnTypes = new ArrayList<>();
+					filteredReturnTypes = new ArrayList<>();
 					for (Class< ? > clsReturn : allReturnedTypes)
 					{
 						IObjectDocumentation retDoc = objects.get(clsReturn.getCanonicalName());
 						if (retDoc == null || !retDoc.isDeprecated())
 						{
-							filterReturnTypes.add(clsReturn);
+							filteredReturnTypes.add(clsReturn);
 						}
 					}
-					cg.classList("returnTypes", filterReturnTypes.toArray(new Class< ? >[filterReturnTypes.size()]));
 				}
+
+				List<String> usableReturnTypes = getUsablePublicNamesFromClassList(filteredReturnTypes);
+				if (usableReturnTypes != null)
+				{
+					computedReturnTypes.put(doc.getPublicName(), usableReturnTypes);
+					if (!doNotStoreAsReadMe.contains(doc.getPublicName()))
+					{
+						storeAsReadMe.add(doc.getPublicName());
+					}
+				}
+			}
+		}
+
+		public void generateDocsFromXML(DocumentationManager manager, String path, boolean ngOnly)
+			throws ClassNotFoundException, IOException
+		{
+			SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
+
+			File userDir = new File(System.getProperty("user.dir"));
+			for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
+			{
+				IObjectDocumentation value = entry.getValue();
+
+				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") || value.getFunctions().size() == 0) continue;
+				if (ngOnly && !value.getClientSupport().hasSupport(ClientSupport.ng)) continue;
+
+				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value.getScriptingName(), value.getDescription(),
+					path, computedReturnTypes.get(value.getPublicName()));
 
 				if (!ngOnly) cg.generateClientSupport(value);
 
 				if (value.getExtendsClass() != null)
 				{
-					cg.classList("extends", new Class[] { Class.forName(value.getExtendsClass()) });
+					cg.classList(EXTENDS_CLASS_SECTION_IN_TEMPLATE,
+						getUsablePublicNamesFromClassList(Arrays.asList(targetInstallClassLoader.loadClass(value.getExtendsClass()))));
 				}
 
+				Class< ? > cls = targetInstallClassLoader.loadClass(value.getQualifiedName());
 
 				SortedSet<IFunctionDocumentation> functions = value.getFunctions();
 				List<IFunctionDocumentation> constants = getConstants(functions);
@@ -804,6 +922,29 @@ public class MarkdownGenerator
 //			}
 			}
 		}
+
+		private List<String> getUsablePublicNamesFromClassList(List<Class< ? >> filteredReturnTypes)
+		{
+			if (filteredReturnTypes != null && filteredReturnTypes.size() > 0)
+			{
+				List<String> publicNames = new ArrayList<>(filteredReturnTypes.size());
+				for (Class< ? > alltype : filteredReturnTypes)
+				{
+					String publicName = getPublicName(alltype);
+					if (publicName != null && !"Object".equals(publicName))
+					{
+						publicNames.add(publicName);
+					}
+				}
+				if (publicNames.size() > 0) return publicNames;
+			}
+			return null;
+		}
+
+	}
+
+	private static record PluginDocumentationPreparated(DocumentationManager docManager, String pluginPath)
+	{
 	}
 
 }

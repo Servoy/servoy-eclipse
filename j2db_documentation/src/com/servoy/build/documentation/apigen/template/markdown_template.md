@@ -1,9 +1,13 @@
 <#-- This is a GENERATED file. DO NOT modify/push it manually as all changes will be lost the next time this documentation is generated. MODIFY the markdown_template.md file from j2db_documentation instead -->
 # ${classname}<#if scriptingname??>
-\(${scriptingname}\)</#if>
+\(${scriptingname}\)</#if><#if description??>
+
+## Overview
+
+${description}</#if>
 <#if returnTypes??>
 
-## **Return Types**
+## **Returned Types**
 <#list returnTypes as returntype>[${returntype}](${instance.getReturnTypePath(returntype)}),</#list>
 </#if>
 <#if supportedClients??>
@@ -25,125 +29,131 @@ ${extend}
 </#if>
 <#if constants??>
 
-## Constants Summary
+## Constants Summarized
 
 | Type                                                  | Name                                          | Summary                                                          |
 | ----------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 <#list constants as constant>
-| [${constant.getReturnType()}](${instance.getReturnTypePath(constant.getReturnType())}) | [${constant.getFullFunctionName()}](${classname_nospace}.md#${constant.getAnchoredName()})                   | ${constant.getSummary()}.                                    |
+| [${MD(constant.getReturnType())}](${instance.getReturnTypePath(constant.getReturnType())}) | [${MD(constant.getFullFunctionName())}](${classname_nospace}.md#${constant.getAnchoredName()})                   | ${constant.getSummary()}                                    |
 </#list>
 </#if>
 <#if properties??>
 
-## Property Summary
+## Properties Summarized
 
 | Type                                                  | Name                    | Summary                                                                                                           |
 | ----------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 <#list properties as prop>
-| [${prop.getReturnType()}](${instance.getReturnTypePath(prop.getReturnType())}) | [${prop.getFullFunctionName()}](${classname_nospace}.md#${prop.getAnchoredName()})                   | ${prop.getSummary()}.                                    |
+| [${MD(prop.getReturnType())}](${instance.getReturnTypePath(prop.getReturnType())}) | [${MD(prop.getFullFunctionName())}](${classname_nospace}.md#${prop.getAnchoredName()})                   | ${prop.getSummary()}                                    |
 </#list>
 </#if>
 <#if commands??>
 
-## Commands Summary
+## Commands Summarized
 
 | Type                                                  | Name                    | Summary                                                                                                           |
 | ----------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 <#list commands as command>
-| [${command.getReturnType()}](${instance.getReturnTypePath(command.getReturnType())}) | [${command.getFullFunctionName()}](${classname_nospace}.md#${command.getAnchoredName()})                   | ${command.getSummary()}.                                    |
+<#if command.getReturnType() != 'void'>
+| [${MD(command.getReturnType())}](${instance.getReturnTypePath(command.getReturnType())}) | [${MD(command.getFullFunctionName())}](${classname_nospace}.md#${command.getAnchoredName()})                   | ${command.getSummary()}                                   |
+<#else>
+| void | [${MD(command.getFullFunctionName())}](${classname_nospace}.md#${command.getAnchoredName()})                   | ${command.getSummary()}                                   |
+</#if>
 </#list>
 </#if>
 <#if events??>
 
-## Events Summary
+## Events Summarized
 
 | Type                                                  | Name                    | Summary                                                                                                           |
 | ----------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 <#list events as event>
-| [${event.getReturnType()}](${instance.getReturnTypePath(event.getReturnType())}) | [${event.getFullFunctionName()}](${classname_nospace}.md#${event.getAnchoredName()})                   | ${event.getSummary()}.                                    |
+<#if event.getReturnType() != 'void'>
+| [${MD(event.getReturnType())}](${instance.getReturnTypePath(event.getReturnType())}) | [${MD(event.getFullFunctionName())}](${classname_nospace}.md#${event.getAnchoredName()})                   | ${event.getSummary()}                                    |
+<#else>
+| void | [${MD(event.getFullFunctionName())}](${classname_nospace}.md#${event.getAnchoredName()})                   | ${event.getSummary()}                      
+</#if>
 </#list>
 </#if>
 <#if methods??>
 
-## Methods Summary
+## Methods Summarized
 
 | Type                                | Name                                                                                | Summary                                                             |
 | ----------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 <#list methods as method>
 <#if method.getReturnType() != 'void'>
-| [${method.getReturnType()}](${instance.getReturnTypePath(method.getReturnType())}) | [${method.getFullFunctionName()}](${classname_nospace}.md#${method.getAnchoredName()})                   | ${method.getSummary()}.                                    |
+| [${MD(method.getReturnType())}](${instance.getReturnTypePath(method.getReturnType())}) | [${MD(method.getFullFunctionName())}](${classname_nospace}.md#${method.getAnchoredName()})                   | ${method.getSummary()}                                    |
 <#else>
-|void | [${method.getFullFunctionName()}](${classname_nospace}.md#${method.getAnchoredName()})                   | ${method.getSummary()}.                                    |
+| void | [${MD(method.getFullFunctionName())}](${classname_nospace}.md#${method.getAnchoredName()})                   | ${method.getSummary()}                                    |
 </#if>
 </#list>
 </#if>
 <#if constants??>
 
-## Constants Details
+## Constants Detailed
 
 <#list constants as item>
-### ${item.getFullFunctionName()}
+### ${MD(item.getFullFunctionName())}
 
 ${item.getDescription()}
 
-**Returns**\
-[${item.getReturnType()}](${instance.getReturnTypePath(item.getReturnType())}) <#if item.getReturnTypeDescription()??>${item.getReturnTypeDescription()}</#if>
+**Type**\
+[${MD(item.getReturnType())}](${instance.getReturnTypePath(item.getReturnType())})<#if item.getReturnTypeDescription()??> ${item.getReturnTypeDescription()}</#if>
 <#if item.getSupportedClients()??>
 
 **Supported Clients**\
 ${item.getSupportedClients()}
 </#if>
+<#if item.getSampleCode()??>
 
 **Sample**
 
-```javascript
-${item.getSampleCode()}
-```
+${item.getSampleCode()?trim}
+</#if>
 </#list>
 </#if>
 <#if properties??>
 
-## Properties Details
+## Properties Detailed
 
 <#list properties as item>
-### ${item.getFullFunctionName()}
+### ${MD(item.getFullFunctionName())}
 
 ${item.getDescription()}
 
-**Returns**\
-[${item.getReturnType()}](${instance.getReturnTypePath(item.getReturnType())}) <#if item.getReturnTypeDescription()??>${item.getReturnTypeDescription()}</#if>
+**Type**\
+[${MD(item.getReturnType())}](${instance.getReturnTypePath(item.getReturnType())})<#if item.getReturnTypeDescription()??> ${item.getReturnTypeDescription()}</#if>
 <#if item.getSupportedClients()??>
 
 **Supported Clients**\
 ${item.getSupportedClients()}
 </#if>
+<#if item.getSampleCode()??>
 
 **Sample**
 
-```javascript
-${item.getSampleCode()}
-```
+${item.getSampleCode()?trim}
+</#if>
 </#list>
 </#if>
-<#if methods??>
+<#if events??>
 
-## Methods Details
-<#list methods as item>
+## Events Detailed
+<#list events as item>
 
-### ${item.getFullFunctionName()}
+### ${MD(item.getFullFunctionName())}
 
 ${item.getDescription()}
 <#if item.getParameters()??>
 
-**Parameters**\
+**Parameters**
 <#list item.getParameters() as param>
-[${param.getParamType()}](${instance.getReturnTypePath(param.getParamType())})<#if param.getName()??> ${param.getName()}</#if> <#if param.getDescription()??>${param.getDescription()}</#if><#if param?has_next>\</#if>
+* [${MD(param.getParamType())}](${instance.getReturnTypePath(param.getParamType())})<#if param.getName()??> **${param.getName()}**</#if><#if param.getDescription()??> ${param.getDescription()}</#if>
 </#list>
 </#if>
 
-**Returns**\
-<#if item.getReturnType() != 'void'>
-[${item.getReturnType()}](${instance.getReturnTypePath(item.getReturnType())})<#if item.getReturnTypeDescription()??> ${item.getReturnTypeDescription()}</#if>
+**Returns:** <#if item.getReturnType() != 'void'>[${MD(item.getReturnType())}](${instance.getReturnTypePath(item.getReturnType())})<#if item.getReturnTypeDescription()??> ${item.getReturnTypeDescription()}</#if>
 <#else>
 void<#if item.getReturnTypeDescription()??>${item.getReturnTypeDescription()}</#if>
 </#if>
@@ -152,11 +162,44 @@ void<#if item.getReturnTypeDescription()??>${item.getReturnTypeDescription()}</#
 **Supported Clients**\
 ${item.getSupportedClients()}
 </#if>
+<#if item.getSampleCode()??>
 
 **Sample**
 
-```javascript
-${item.getSampleCode()}
-```
+${item.getSampleCode()?trim}
+</#if>
+</#list>
+</#if>
+<#if methods??>
+
+## Methods Detailed
+<#list methods as item>
+
+### ${MD(item.getFullFunctionName())}
+
+${item.getDescription()}
+<#if item.getParameters()??>
+
+**Parameters**
+<#list item.getParameters() as param>
+* [${MD(param.getParamType())}](${instance.getReturnTypePath(param.getParamType())})<#if param.getName()??> **${param.getName()}**</#if> <#if param.getDescription()??>${param.getDescription()}</#if>
+</#list>
+</#if>
+
+**Returns:** <#if item.getReturnType() != 'void'>[${MD(item.getReturnType())}](${instance.getReturnTypePath(item.getReturnType())})<#if item.getReturnTypeDescription()??> ${item.getReturnTypeDescription()}</#if>
+<#else>
+void<#if item.getReturnTypeDescription()??>${item.getReturnTypeDescription()}</#if>
+</#if>
+<#if item.getSupportedClients()??>
+
+**Supported Clients**\
+${item.getSupportedClients()}
+</#if>
+<#if item.getSampleCode()??>
+
+**Sample**
+
+${item.getSampleCode()?trim}
+</#if>
 </#list>
 </#if>

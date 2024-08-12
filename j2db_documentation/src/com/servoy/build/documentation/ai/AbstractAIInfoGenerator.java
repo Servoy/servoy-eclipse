@@ -20,7 +20,6 @@ package com.servoy.build.documentation.ai;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -122,8 +121,14 @@ public abstract class AbstractAIInfoGenerator
 			this.registerNewInfo = registerNewInfo;
 		}
 
+		public void processDocObjectToPathAndOtherMaps(DocumentationManager manager, String path, String pluginProviderPublicName)
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException
+		{
+			// anything here?
+		}
+
 		public void generateDocsFromXML(DocumentationManager manager, String path, boolean ngOnly)
-			throws MalformedURLException, ClassNotFoundException, IOException
+			throws ClassNotFoundException, IOException
 		{
 			// FIXME implememnt
 //

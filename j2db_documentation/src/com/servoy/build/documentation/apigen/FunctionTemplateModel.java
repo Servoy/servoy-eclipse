@@ -39,23 +39,26 @@ public class FunctionTemplateModel
 	private final Function<Class, String> cg;
 	private final Class cls;
 	private final boolean ngOnly;
+	private final Function<String, String> descriptionStringConverter;
 
-	/**
-	 * @param obj
-	 */
-	public FunctionTemplateModel(IFunctionDocumentation obj, Function<Class, String> cg, Class cls, boolean ngOnly)
+	public FunctionTemplateModel(IFunctionDocumentation obj, Function<Class, String> cg, Class cls, boolean ngOnly,
+		Function<String, String> descriptionStringConverter)
 	{
 		this.obj = obj;
 		this.cg = cg;
 		this.cls = cls;
 		this.ngOnly = ngOnly;
+		this.descriptionStringConverter = descriptionStringConverter;
 	}
 
 	public String getSummary()
 	{
 		String summary = obj.getSummary(ClientSupport.Default);
+
 		if (summary == null) summary = getDescription();
-		return summary.replace('\n', ' ');
+		else if (descriptionStringConverter != null) summary = descriptionStringConverter.apply(summary);
+
+		return summary.replaceAll("(\\s*\\n)+", " "); // no new lines allowed in summary (even if it is built based on description); the descriptionStringConverter could turn it into markdown line endings like [space][space]\n
 	}
 
 	public String getDescription()
@@ -65,7 +68,9 @@ public class FunctionTemplateModel
 		{
 			return "";
 		}
-		return description.replace("<br>", "").replace("<br/>", "");
+
+		if (descriptionStringConverter != null) return descriptionStringConverter.apply(description);
+		else return description;
 	}
 
 	public String getReturnType()
@@ -80,7 +85,8 @@ public class FunctionTemplateModel
 
 	public String getReturnTypeDescription()
 	{
-		return obj.getReturnDescription();
+		if (descriptionStringConverter != null) return descriptionStringConverter.apply(obj.getReturnDescription());
+		else return obj.getReturnDescription();
 	}
 
 	public List<Parameter> getParameters()
@@ -105,8 +111,11 @@ public class FunctionTemplateModel
 				while (iterator.hasNext())
 				{
 					IParameterDocumentation paramDoc = iterator.next();
+
 					String description = paramDoc.getDescription();
 					description = description == null ? " ;" : description;
+					if (descriptionStringConverter != null) description = descriptionStringConverter.apply(description);
+
 					String paramType = cg.apply(paramDoc.getType());
 					if ("void".equals(paramType))
 					{
@@ -176,14 +185,23 @@ public class FunctionTemplateModel
 		return MarkdownGenerator.getSupportedClientsList(obj.getClientSupport()).stream().collect(Collectors.joining(","));
 	}
 
-	/**
-	 * @return
-	 */
 	public String getSampleCode()
 	{
 		String sample = obj.getSample(ClientSupport.Default);
-		if (sample == null) return "";
-		return sample.replace("%%prefix%%", "");
+		if (sample == null) return null;
+
+		if (descriptionStringConverter != null)
+		{
+			// we pass sample code through converter because in the javadocs there might be samples that include nested jsdocs so /** ... */ and those are turned into html escaped chars like &#123; in order not to break/end the initial javadoc; and for example the converter might unescape those back into UTF8 chars that we need
+			// we also add <pre> around it so that the converter will turn it into the correct code block instead of normal description text
+			String trimmedSample = sample.trim();
+			sample = descriptionStringConverter
+				.apply((trimmedSample.startsWith("<pre>") || trimmedSample.startsWith("<pre data-puremarkdown>") || trimmedSample.startsWith("<code>"))
+					? sample : "<pre>" + sample + "</pre>");
+		}
+		else sample = sample.replace("%%prefix%%", "");
+
+		return sample;
 	}
 
 }
