@@ -26,6 +26,8 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -110,7 +112,6 @@ public class NatTextDialogControl extends Composite
 					case SWT.ARROW_DOWN :
 						dialogOpener.commit(MoveDirectionEnum.DOWN, true);
 						break;
-					case SWT.TAB :
 					case SWT.ARROW_RIGHT :
 						dialogOpener.commit(MoveDirectionEnum.RIGHT, true);
 						break;
@@ -122,6 +123,26 @@ public class NatTextDialogControl extends Composite
 			@Override
 			public void keyPressed(KeyEvent e)
 			{
+			}
+		});
+
+		button.addTraverseListener(new TraverseListener()
+		{
+			@Override
+			public void keyTraversed(TraverseEvent e)
+			{
+				if (e.detail == SWT.TRAVERSE_TAB_NEXT)
+				{
+					dialogOpener.commit(MoveDirectionEnum.RIGHT, true);
+				}
+				else if (e.detail == SWT.TRAVERSE_TAB_PREVIOUS)
+				{
+					if (control instanceof Text)
+					{
+						((Text)control).setSelection(getValue().length());
+						control.setFocus();
+					}
+				}
 			}
 		});
 	}
