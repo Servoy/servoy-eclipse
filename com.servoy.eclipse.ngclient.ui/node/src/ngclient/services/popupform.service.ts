@@ -44,14 +44,11 @@ export class PopupFormService {
     public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void {
         this.doc.body.removeEventListener('mouseup', this.formPopupBodyListener);
         if (this.formPopupComponent) {
-            this.formService.hideForm(this.formPopupComponent.instance.popup.form);
-            if (this.formPopupComponent.instance.popup.onClose) {
-                const jsEvent = this.utils.createJSEvent({ target: this.doc.getElementById('formpopup') }, 'popupClose');
-                if (jsEvent) {
-                    jsEvent.formName = this.formPopupComponent.instance.popup.onClose.formname;
-                }
-                this.servicesService.callServiceServerSideApi('window', 'formPopupClosed',  [jsEvent]);
-            }
+			let popup = this.formPopupComponent.instance.popup;
+			while(popup) {
+				this.hidePopupForm(popup);
+				popup = popup.parent;
+			}
         }
 
         const customEvent = new CustomEvent('enableTabseq', {
@@ -74,13 +71,27 @@ export class PopupFormService {
             this.servicesService.callServiceServerSideApi('window', 'clearPopupForm', []);
         }
         if (this.formPopupComponent) {
-            this.formPopupComponent.destroy();
-            this.formPopupComponent = null;
+			let popup = this.formPopupComponent;
+			while(popup) {
+				const parent = popup.instance.popup.parentInstance ? popup.instance.popup.parentInstance as ComponentRef<ServoyFormPopupComponent> : null;
+				popup.destroy();
+				if (parent) {
+					popup = parent;
+				} else {
+					popup = null;
+				}
+			}
+			this.formPopupComponent = null;
         }
     }
 
     private showPopup(popup: PopupForm, counter?: number) {
-		if (this.formPopupComponent) return; // another popup is still visible
+		if ((this.formPopupComponent && !popup.parent) || 
+		(this.formPopupComponent && this.formPopupComponent.instance.popup.form === popup.form && this.objectsAreEquals(this.formPopupComponent.instance.popup.parent, popup.parent))) return;
+		if (!this.formPopupComponent && popup.parent) {
+			this.servicesService.callServiceServerSideApi('window', 'clearPopupForm', []);
+			return;
+		}
         const docComponent = this.doc.getElementById(popup.component);
         if ((popup.component && !docComponent && (!counter || counter < 10)) && (popup.component != this.clickedComponentId)) {
             setTimeout(() => {
@@ -92,16 +103,74 @@ export class PopupFormService {
             if (popup.component && popup.component === this.clickedComponentId) {
                 this.sequencePopup = true;
             }
+			if (this.formPopupComponent && popup.parent) {
+				// destroy siblign and his childs
+				if (this.formPopupComponent.instance.popup.form !== popup.parent.form && this.formPopupComponent.instance.popup.parent) {
+					const frms: ComponentRef<ServoyFormPopupComponent>[] = [];
+					let current: PopupForm = this.formPopupComponent.instance.popup;
+					while (current && !this.objectsAreEquals(current.parent, popup.parent)) {
+						if (current.parentInstance) {
+							frms.push(current.parentInstance as ComponentRef<ServoyFormPopupComponent>);
+						}
+						if (current.parentInstance) {
+							current = (current.parentInstance as ComponentRef<ServoyFormPopupComponent>).instance.popup;
+						} else {
+							current = current.parent;
+						}
+					}
+					frms.reverse().push(this.formPopupComponent);
+					frms.forEach(item => {
+						this.closeSiblingsFormPopup(item);
+					});
+				}
+				
+				// set the right instance of parent
+				popup.parentInstance = null;
+				let parent = this.formPopupComponent.instance.popup;
+				while (parent) {
+					if (this.objectsAreEquals(parent.parent, popup.parent) && parent.parentInstance) {
+						popup.parentInstance = parent.parentInstance as ComponentRef<ServoyFormPopupComponent>;
+						break;
+					}
+					if (parent.parentInstance) {
+						parent = (parent.parentInstance as ComponentRef<ServoyFormPopupComponent>).instance.popup;
+					} else {
+						parent = parent.parent;
+					}	
+				}
+				if (popup.parentInstance === null) {
+					popup.parentInstance = this.formPopupComponent;
+				}
+			}
             this.formPopupComponent = this.mainViewRefService.mainContainer.createComponent(ServoyFormPopupComponent);
             this.formPopupComponent.instance.setPopupForm(popup);
             this.sequencePopup = false;
-            setTimeout(() => {
-                this.doc.body.addEventListener('mouseup', this.formPopupBodyListener);
-            }, 300);
-
+			setTimeout(() => {
+				this.doc.body.addEventListener('mouseup', this.formPopupBodyListener);
+			}, 300);
         }
     }
-
+	
+	private closeSiblingsFormPopup(frmRef: ComponentRef<ServoyFormPopupComponent>) {
+		const popup = frmRef.instance.popup;
+		this.hidePopupForm(popup);
+		frmRef.destroy();
+	}
+	
+	private hidePopupForm(popup: PopupForm) {
+		this.formService.hideForm(popup.form);
+		if (popup.onClose) {
+			const jsEvent = this.utils.createJSEvent({ target: this.doc.getElementById('formpopup') }, 'popupClose');
+			if (jsEvent) {
+				jsEvent.formName = popup.onClose.formname;
+			}
+			this.servicesService.callServiceServerSideApi('window', 'formPopupClosed',  [jsEvent]);
+		}
+	}
+	
+	private objectsAreEquals(obj1: object, obj2: object) {
+		return JSON.stringify(obj1) === JSON.stringify(obj2);
+	}
 
     private formPopupBodyListener = (event: Event) => {
 
