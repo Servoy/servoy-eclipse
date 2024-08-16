@@ -92,7 +92,6 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecification.SourceOfCodeExtractedDocs;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.types.StyleClassPropertyType;
-import org.sablo.util.TextUtils;
 
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -210,6 +209,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Text;
+import com.servoy.j2db.util.TextUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -2841,7 +2841,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else
 			{
-				tooltip = tmp.toString() + "<pre>" + tooltip + "</pre>";
+				tooltip = tmp.toString() + "<br/><br/>" + tooltip;
 			}
 			return tooltip;
 		}

@@ -54,11 +54,12 @@ import org.mozilla.javascript.ast.Comment;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
-import org.sablo.util.TextUtils;
 import org.sablo.util.ValueReference;
 import org.sablo.websocket.impl.ClientService;
 
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.TextUtils;
 import com.servoy.j2db.util.Utils;
 
 import freemarker.cache.ClassTemplateLoader;
@@ -444,7 +445,7 @@ public class SpecMarkdownGenerator
 		String doc = StringEscapeUtils.unescapeHtml4(htmlDoc);
 
 		Pattern splitPattern = Pattern.compile(
-			"(?<splitToken>\\@param|\\@example|\\@return|\\@deprecated|<br>|<br/>|<pre data-puremarkdown>|<pre>|</pre>|<code>|</code>|<a href=\"|</a>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>)");
+			"(?<splitToken>\\@param|\\@example|\\@return|\\@deprecated|<br>|<br/>|<pre data-puremarkdown>|<pre text>|<pre>|</pre>|<code>|</code>|<a href=\"|</a>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>)");
 		Matcher matcher = splitPattern.matcher(doc);
 
 		List<String> matchedTokens = new ArrayList<>();
@@ -518,7 +519,7 @@ public class SpecMarkdownGenerator
 
 					// INTENTIONAL fall-through to next 'case'; so no break here
 					// $FALL-THROUGH$
-				case "<pre>", "@example" :
+				case "<pre>", "<pre text>", "@example" : // for "<pre text>" see HtmlUtils.applyDescriptionMagic(...) docs; it's meant for descriptions that expect monospaced font and keeping spaces/newlines
 					trimTrailingInPrecedingInbetweenContent = true;
 					// INTENTIONAL fall-through to next 'case'; so no break here
 					//$FALL-THROUGH$
@@ -526,7 +527,7 @@ public class SpecMarkdownGenerator
 					// any tokens inside these blocks need to go into "betweenMatches"
 					// "i" also advances as needed
 
-					int indexOfSpaceBeforeTagAttrs = token.indexOf(" "); // for example -1 for <pre> but 4 for "<pre data-puremarkdown>; we use it to generate search tag </pre> in both cases below
+					int indexOfSpaceBeforeTagAttrs = token.indexOf(" "); // for example -1 for <pre> but 4 for <pre data-puremarkdown> or <pre text>; we use it to generate search tag </pre> in both cases below
 					String closingTagStartsWith = ("@example".equals(token) ? "@"
 						: "</" + (indexOfSpaceBeforeTagAttrs >= 0 ? token.subSequence(1, indexOfSpaceBeforeTagAttrs) + ">" : token.substring(1)));
 					StringBuilder fullTextToClosingCodeOrPreTag = new StringBuilder();
@@ -743,19 +744,20 @@ public class SpecMarkdownGenerator
 					addInBetweenAsRawMarkdown = true;
 					// INTENTIONAL fall-through to next 'case'; so no break here
 					// $FALL-THROUGH$
-				case "<pre>" :
+				case "<pre>", "<pre text>" :
 					if (!endsWithMarkdownNewline(result, currentIndentLevel)) nextLinePlusIndent(result, currentIndentLevel);
 
 					// prepare to 'escape' backticks in code/pre content; in markdown this means modifying the start and end special meaning backtick char count to a higher value then the one in the pre/code content...
 					// also if the code / pre content starts or ends with backtick, then some spaces need to be added between that and the special meaning backticks (start/end tags of the code/pre section)
 					String contentAfterPre = betweenMatches.get(i + 1);
 
-					if ("<pre>".equals(token))
+					if ("<pre>".equals(token) || "<pre text>".equals(token))
 					{
+						String syntaxHighlight = "<pre>".equals(token) ? "js" : "";
 						codeBacktickState.value = countContinuousBackticks(contentAfterPre);
 						if (codeBacktickState.value.maxContinousBacktickCount > 2)
-							result.appendWithoutEscaping("`".repeat(codeBacktickState.value.maxContinousBacktickCount + 1) + "js\n");
-						else result.appendWithoutEscaping("```js\n");
+							result.appendWithoutEscaping("`".repeat(codeBacktickState.value.maxContinousBacktickCount + 1) + syntaxHighlight + "\n");
+						else result.appendWithoutEscaping("```" + syntaxHighlight + "\n");
 					}
 
 					if (contentAfterPre.startsWith("\n") || contentAfterPre.endsWith("\n"))
@@ -834,7 +836,7 @@ public class SpecMarkdownGenerator
 		String inbetween = inbetweenUnprocessed;
 
 		// ok now do add the "betweenMatches" content that was before 'token'
-		if (!preserveMultipleWhiteSpaces) inbetween = inbetween.replaceAll("\s+", " ");
+		if (!preserveMultipleWhiteSpaces) inbetween = inbetween.replaceAll("\\s+", " ");
 
 		if (shouldTrimLeadingTheInBetweenContent.value.booleanValue())
 		{
@@ -975,6 +977,7 @@ public class SpecMarkdownGenerator
 		String doc = TextUtils.newLinesToBackslashN(initialDescription).replace("%%prefix%%", "").replace("%%elementName%%", "myElement");
 
 		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = TextUtils.stripCommentStartMiddleAndEndChars(doc);
+		doc = HtmlUtils.applyDescriptionMagic(doc);
 		doc = doc.trim();
 		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = turnHTMLJSDocIntoMarkdown(doc, indentLevel);
 		return doc;

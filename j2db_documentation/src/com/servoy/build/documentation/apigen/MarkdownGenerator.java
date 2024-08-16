@@ -57,7 +57,6 @@ import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
-import org.sablo.util.TextUtils;
 
 import com.servoy.base.scripting.api.IJSController;
 import com.servoy.base.scripting.api.IJSDataSet;
@@ -86,6 +85,7 @@ import com.servoy.j2db.scripting.JSMap;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.solutionmodel.ISMPart;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.ServoyJSONObject;
 
@@ -158,8 +158,8 @@ public class MarkdownGenerator
 	private final static java.util.function.Function<String, String> htmlToMarkdownConverter = (initialDescription) -> {
 		if (initialDescription == null) return null;
 
-		String convertedDesc = TextUtils.newLinesToBackslashN(initialDescription).replace("%%prefix%%", "").replace("%%elementName%%",
-			"myElement");
+		String convertedDesc = HtmlUtils.applyDescriptionMagic(initialDescription.replace("%%prefix%%", "").replace("%%elementName%%",
+			"myElement"));
 		convertedDesc = convertedDesc.trim(); // probably not needed
 		return SpecMarkdownGenerator.turnHTMLJSDocIntoMarkdown(convertedDesc);
 	};
