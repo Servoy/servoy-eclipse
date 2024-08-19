@@ -1991,10 +1991,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			c = c.replaceAll(separator, "<br/>");
 		}
 		if (elementName != null) c = c.replaceAll("%%elementName%%", elementName);
+
+		String[] splitExample = c.split("@example");
+		if (splitExample.length > 1)
+		{
+			String example = splitExample[1].split("@")[0];
+			if (!example.isBlank())
+			{
+				c = c.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+			}
+		}
+
 		if (!toHTML) return c;
 
-		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(c));
-		try
+		try (JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(c)))
 		{
 			return reader.getString().replaceAll(System.getProperty("line.separator"), "<br/>");
 		}
