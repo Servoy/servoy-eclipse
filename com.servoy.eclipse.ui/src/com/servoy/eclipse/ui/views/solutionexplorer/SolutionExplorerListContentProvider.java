@@ -62,11 +62,13 @@ import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.ConstStatement;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.IVariableStatement;
+import org.eclipse.dltk.javascript.ast.JSNode;
 import org.eclipse.dltk.javascript.ast.ObjectInitializer;
 import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.PropertyInitializer;
 import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.ast.ThisExpression;
 import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.v4.LetStatement;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
@@ -1859,6 +1861,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
 					{
+						private ICustomType< ? > customType;
 
 						@Override
 						public ASTNode visitBinaryOperation(BinaryOperation node)
@@ -1922,10 +1925,51 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						@Override
 						public ASTNode visitFunctionStatement(FunctionStatement node)
 						{
-							WebObjectFunctionDefinition api = apis.get(node.getFunctionName());
-							if (api != null && node.getDocumentation() != null)
+							if (node.getDocumentation() != null)
 							{
-								api.setDocumentation(node.getDocumentation().getText());
+								WebObjectFunctionDefinition api = apis.get(node.getFunctionName());
+								if (api != null)
+								{
+									String doc = node.getDocumentation().getText();
+									String example = doc.split("@example")[1].split("@")[0];
+									if (!example.isBlank())
+									{
+										doc = doc.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+									}
+									api.setDocumentation(doc);
+								}
+								else
+								{
+									customType = spec.getDeclaredCustomObjectTypes().get(node.getFunctionName());
+									if (customType != null)
+									{
+										String text = node.getDocumentation().getText();
+										customType.setDocumentation(text);
+										try
+										{
+											return super.visitFunctionStatement(node);
+										}
+										finally
+										{
+											customType = null;
+										}
+									}
+
+								}
+							}
+							else if (customType != null)
+							{
+								// we hit a function node when parsing a custom type.
+								JSNode parent = node.getParent();
+								if (parent instanceof BinaryOperation bo && bo.getLeftExpression() instanceof PropertyExpression pe &&
+									pe.getDocumentation() != null)
+								{
+									WebObjectApiFunctionDefinition apiFunction = customType.getApiFunction(pe.getProperty().toString());
+									if (apiFunction != null)
+									{
+										apiFunction.setDocumentation(pe.getDocumentation().getText());
+									}
+								}
 							}
 							return super.visitFunctionStatement(node);
 						}
@@ -1942,6 +1986,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						{
 							visitIVariableStatement(node);
 							return super.visitLetStatement(node);
+						}
+
+						/*
+						 * (non-Javadoc)
+						 *
+						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitThisExpression(org.eclipse.dltk.javascript.ast.ThisExpression)
+						 */
+						@Override
+						public ASTNode visitThisExpression(ThisExpression node)
+						{
+							return super.visitThisExpression(node);
 						}
 
 						@Override

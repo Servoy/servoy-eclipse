@@ -1229,61 +1229,7 @@ public class TypeCreator extends TypeCache
 		Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
 		for (WebObjectApiFunctionDefinition api : apis.values())
 		{
-			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
-			method.setName(api.getName());
-			if (api.getDocumentation() != null)
-			{
-				StringBuilder description = new StringBuilder(api.getDocumentation());
-				if (!api.getDocumentation().contains("@deprecated")) description.append(api.getDeprecatedMessage());
-				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(description.toString(),
-					STANDARD_ELEMENT_NAME, true));
-				method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
-			}
-			else
-			{
-				if (!"".equals(api.getDeprecatedMessage())) method.setDescription(api.getDeprecatedMessage());
-				method.setDeprecated(api.isDeprecated());
-			}
-
-			PropertyDescription pd = api.getReturnType();
-			JSType returnType = getType(context, pd);
-			if (returnType == null && pd != null)
-			{
-				if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
-					((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
-				{
-
-					returnType = getTypeRef(null, ElementUtil.CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
-				}
-				else
-				{
-					returnType = getTypeRef(null, ("object".equals(pd.getType().getName())) ? "Object" : pd.getType().getName());
-				}
-			}
-			if (api.getReturnType() != null && PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
-			{
-				returnType = TypeUtil.arrayOf(returnType);
-			}
-			method.setType(returnType);
-			EList<Parameter> parameters = method.getParameters();
-			for (PropertyDescription paramDesc : api.getParameters())
-			{
-				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
-				param.setName(paramDesc.getName());
-				if (paramDesc.isOptional()) param.setKind(ParameterKind.OPTIONAL);
-
-				JSType paramType = getType(context, paramDesc);
-				if (paramType == null)
-				{
-					paramType = getTypeRef(null, paramDesc.getType().getName());
-				}
-				if (paramType != null && PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
-				{
-					paramType = TypeUtil.arrayOf(paramType);
-				}
-				param.setType(paramType);
-				parameters.add(param);
-			}
+			Method method = createMethod(context, api);
 			members.add(method);
 		}
 		if (!fullTypeName.startsWith(WEB_SERVICE))
@@ -1333,6 +1279,71 @@ public class TypeCreator extends TypeCache
 			}
 		}
 		return addType(bucket, type);
+	}
+
+	/**
+	 * @param context
+	 * @param api
+	 * @return
+	 */
+	private Method createMethod(String context, WebObjectApiFunctionDefinition api)
+	{
+		Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+		method.setName(api.getName());
+		if (api.getDocumentation() != null)
+		{
+			StringBuilder description = new StringBuilder(api.getDocumentation());
+			if (!api.getDocumentation().contains("@deprecated")) description.append(api.getDeprecatedMessage());
+			method.setDescription(SolutionExplorerListContentProvider.getParsedComment(description.toString(),
+				STANDARD_ELEMENT_NAME, true));
+			method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
+		}
+		else
+		{
+			if (!"".equals(api.getDeprecatedMessage())) method.setDescription(api.getDeprecatedMessage());
+			method.setDeprecated(api.isDeprecated());
+		}
+
+		PropertyDescription pd = api.getReturnType();
+		JSType returnType = getType(context, pd);
+		if (returnType == null && pd != null)
+		{
+			if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
+				((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+			{
+
+				returnType = getTypeRef(null, ElementUtil.CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
+			}
+			else
+			{
+				returnType = getTypeRef(null, ("object".equals(pd.getType().getName())) ? "Object" : pd.getType().getName());
+			}
+		}
+		if (api.getReturnType() != null && PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
+		{
+			returnType = TypeUtil.arrayOf(returnType);
+		}
+		method.setType(returnType);
+		EList<Parameter> parameters = method.getParameters();
+		for (PropertyDescription paramDesc : api.getParameters())
+		{
+			Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setName(paramDesc.getName());
+			if (paramDesc.isOptional()) param.setKind(ParameterKind.OPTIONAL);
+
+			JSType paramType = getType(context, paramDesc);
+			if (paramType == null)
+			{
+				paramType = getTypeRef(null, paramDesc.getType().getName());
+			}
+			if (paramType != null && PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
+			{
+				paramType = TypeUtil.arrayOf(paramType);
+			}
+			param.setType(paramType);
+			parameters.add(param);
+		}
+		return method;
 	}
 
 	private Method fillParameter(Method method, Parameter... params)
@@ -4851,9 +4862,8 @@ public class TypeCreator extends TypeCache
 				type.setName(ElementUtil.CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
 				type.setKind(TypeKind.JAVA);
 				EList<Member> members = type.getMembers();
-				if (iPropertyType instanceof ICustomType< ? >)
+				if (iPropertyType instanceof ICustomType< ? > customType)
 				{
-					ICustomType< ? > customType = (ICustomType< ? >)iPropertyType;
 					PropertyDescription customJSONTypeDefinition = customType.getCustomJSONTypeDefinition();
 					Map<String, PropertyDescription> properties = customJSONTypeDefinition.getProperties();
 					for (PropertyDescription pd : properties.values())
@@ -4887,6 +4897,12 @@ public class TypeCreator extends TypeCache
 						Property property = createProperty(name, false, memberType, pd.getDocumentation(), null);
 						property.setDeprecated(pd.isDeprecated());
 						members.add(property);
+					}
+					Collection<WebObjectApiFunctionDefinition> apiFunctions = customType.getApiFunctions();
+					for (WebObjectApiFunctionDefinition apiFunction : apiFunctions)
+					{
+						Method method = createMethod(context, apiFunction);
+						members.add(method);
 					}
 				}
 				return addType(null, type);
