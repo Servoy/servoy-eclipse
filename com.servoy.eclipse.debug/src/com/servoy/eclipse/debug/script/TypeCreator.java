@@ -1229,8 +1229,7 @@ public class TypeCreator extends TypeCache
 		Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
 		for (WebObjectApiFunctionDefinition api : apis.values())
 		{
-			Method method = createMethod(context, api);
-			members.add(method);
+			members.addAll(createMethods(context, api));
 		}
 		if (!fullTypeName.startsWith(WEB_SERVICE))
 		{
@@ -1279,6 +1278,29 @@ public class TypeCreator extends TypeCache
 			}
 		}
 		return addType(bucket, type);
+	}
+
+	/**
+	 * This will create the method of the give FunctionDefinition but will also create the overloads if they exist
+	 *
+	 * @param context
+	 * @param api
+	 * @return
+	 */
+	private Collection<Method> createMethods(String context, WebObjectApiFunctionDefinition api)
+	{
+		Method method = createMethod(context, api);
+		if (api.getOverloads().size() > 0)
+		{
+			ArrayList<Method> overloads = new ArrayList<>();
+			overloads.add(method);
+			for (WebObjectApiFunctionDefinition overload : api.getOverloads())
+			{
+				overloads.add(createMethod(context, overload));
+			}
+			return overloads;
+		}
+		return Arrays.asList(method);
 	}
 
 	/**
@@ -4901,8 +4923,7 @@ public class TypeCreator extends TypeCache
 					Collection<WebObjectApiFunctionDefinition> apiFunctions = customType.getApiFunctions();
 					for (WebObjectApiFunctionDefinition apiFunction : apiFunctions)
 					{
-						Method method = createMethod(context, apiFunction);
-						members.add(method);
+						members.addAll(createMethods(context, apiFunction));
 					}
 				}
 				return addType(null, type);
