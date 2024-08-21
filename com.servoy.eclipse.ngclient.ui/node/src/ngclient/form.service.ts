@@ -45,12 +45,18 @@ export class FormService {
                             if (!this.formComponentCache.has(formname)) {
                                 this.formComponentCache.set(formname, new Deferred<unknown>());
                             }
-                            const deferred = this.formComponentCache.get(formname) as Deferred<unknown>;
-                            deferred.promise.then(() =>
-                                this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService)
-                            ).catch(error => {
-                                console.log(error);
-                            });
+                            if (this.formsCache.get(formname) != null) {
+                                // if the form cache is already there but no ui yet, then just update the model
+                                this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService, true)
+                            }
+                            else {
+                                const deferred = this.formComponentCache.get(formname) as Deferred<unknown>;
+                                deferred.promise.then(() =>
+                                    this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService)
+                                ).catch(error => {
+                                    console.log(error);
+                                });
+                            }
                         }
                     }
                 }
@@ -541,8 +547,8 @@ export class FormService {
             }, this.typesRegistry);
     }
 
-    private formMessageHandler(formCache: FormCache, formName: string, msg: {forms: {[property: string]: {[property: string]: {[property: string]: unknown}}}}, servoyService: ServoyService) {
-        const formComponent = this.formComponentCache.get(formName) as IFormComponent;
+    private formMessageHandler(formCache: FormCache, formName: string, msg: {forms: {[property: string]: {[property: string]: {[property: string]: unknown}}}}, servoyService: ServoyService, skipFormComponent?: boolean) {
+        const formComponent = skipFormComponent? null: this.formComponentCache.get(formName) as IFormComponent;
 
         const newFormData = msg.forms[formName];
         const newFormProperties = newFormData['']; // properties of the form itself
@@ -554,7 +560,7 @@ export class FormService {
             // currently what server side sends for the form itself doesn't need client side conversions
             for (const p of Object.keys(newFormProperties)) {
 				comp.model[p] = newFormProperties[p];
-                formComponent[p] = newFormProperties[p]; 
+                if (formComponent) formComponent[p] = newFormProperties[p]; 
             }
         }
 
@@ -580,9 +586,9 @@ export class FormService {
             FormService.updateComponentModelPropertiesFromServer(newComponentProperties, comp, componentSpec, this.converterService,
                 (propertyName: string, newPropertyValue: any) => this.createChangeListenerForSmartValue(formCache.formname, componentName, propertyName, newPropertyValue),
                 (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[]) =>
-                    formComponent.triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName, propertiesChangedButNotByRef));
+                    formComponent?.triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName, propertiesChangedButNotByRef));
         }
-        formComponent.detectChanges(); // this will also fire ngOnChanges which will fire svyOnChanges for all root props that changed by ref
+        formComponent?.detectChanges(); // this will also fire ngOnChanges which will fire svyOnChanges for all root props that changed by ref
     }
 
     private walkOverChildren(children: ServerElement[], formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
