@@ -2404,17 +2404,17 @@ public class ServoyFormBuilder
 		if (realValueType != 0 && realValueType != dataProviderType)
 		{
 
-			boolean isValidNumberVariable = dataProvider instanceof ScriptVariable &&
-				((realValueType == IColumnTypes.INTEGER && dataProviderType == IColumnTypes.NUMBER) ||
-					(realValueType == IColumnTypes.NUMBER && dataProviderType == IColumnTypes.INTEGER));
+			boolean isMatchingType = dataProvider instanceof ScriptVariable &&
+				((realValueType == IColumnTypes.INTEGER && (dataProviderType == IColumnTypes.NUMBER || dataProviderType == IColumnTypes.TEXT)) ||
+					(realValueType == IColumnTypes.NUMBER && (dataProviderType == IColumnTypes.INTEGER || dataProviderType == IColumnTypes.TEXT)));
 
-			if (!isValidNumberVariable && dataProvider.hasFlag(IBaseColumn.UUID_COLUMN))
+			if (!isMatchingType && dataProvider.hasFlag(IBaseColumn.UUID_COLUMN))
 			{
 				// if the dataprovider is a uuid column then allow text or media columns.
-				isValidNumberVariable = realValueType == IColumnTypes.TEXT || realValueType == IColumnTypes.MEDIA;
+				isMatchingType = realValueType == IColumnTypes.TEXT || realValueType == IColumnTypes.MEDIA;
 			}
 
-			if (!isValidNumberVariable)
+			if (!isMatchingType)
 			{
 
 				ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(), Column.getDisplayTypeString(realValueType),
