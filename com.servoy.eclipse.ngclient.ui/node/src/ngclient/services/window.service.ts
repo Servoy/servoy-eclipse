@@ -260,7 +260,7 @@ export class WindowService {
     public setTitle(name: string, title: string ) {
         this.saveInSessionStorage(title, 'title');
         if ( this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW ) {
-            this.instances[name].title = title;
+            this.instances[name].setTitle(title);
         } else {
             this.titleService.setTitle(title);
         }
@@ -566,5 +566,10 @@ export class SvyWindow {
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.location');
         this.windowService.localStorageService.remove(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.size');
+    }
+
+    setTitle(title: string) {
+        this.title = title;
+        if(this.bsWindowInstance) this.bsWindowInstance.setTitle(title);
     }
 }

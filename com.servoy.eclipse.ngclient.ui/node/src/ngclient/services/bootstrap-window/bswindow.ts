@@ -225,6 +225,15 @@ export class BSWindow {
         return this.windowTab;
     }
 
+    setTitle(title: string) {
+        if(this.options) {
+            this.options.title = title;
+            if(this.options.elements && this.options.elements.title) {
+                this.options.elements.title.innerHTML = title;
+            }
+        }
+    }
+
     getTitle() {
         return this.options.title;
     }
