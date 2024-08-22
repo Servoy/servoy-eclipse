@@ -92,6 +92,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.CustomJSONObjectType;
+import org.sablo.specification.property.CustomVariableArgsType;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
@@ -1361,6 +1362,10 @@ public class TypeCreator extends TypeCache
 			if (paramType != null && PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
 			{
 				paramType = TypeUtil.arrayOf(paramType);
+			}
+			if (paramDesc.getType() instanceof CustomVariableArgsType)
+			{
+				param.setKind(ParameterKind.VARARGS);
 			}
 			param.setType(paramType);
 			parameters.add(param);
