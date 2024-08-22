@@ -40,8 +40,8 @@ import { TypesRegistry} from '../sablo/types_registry';
             </div>
             <ng-template *ngFor="let item of formCache.mainStructure?.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
       </div>
-      <div *ngIf="!formCache.absolute && name==='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
-            <div (mousedown)="onVariantsMouseDown($event)" *ngFor="let item of formCache.mainStructure?.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" style="position:absolute">
+      <div *ngIf="!formCache.absolute && name==='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses" (keyup)="onVariantKeyup($event)"> <!-- main container div -->
+            <div (mousedown)="onVariantsMouseDown($event)" (keyup)="onVariantKeyup($event)" *ngFor="let item of formCache.mainStructure?.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" style="position:absolute">
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>
             </div>
       </div>
@@ -226,6 +226,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.insertedVariants = null;
                 this.variantsLoaded = false;
                 this.showWireframe = this.designMode;
+                this.windowRefService.nativeWindow.parent.postMessage({ id: 'onDestroyVariants'}, '*');
 
             }
             if (event.data.id === 'createDraggedComponent') {
@@ -340,6 +341,12 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover',
             formWidth,
             formHeight}, '*');
+    }
+
+    public onVariantKeyup(event: KeyboardEvent) {
+        if (event.keyCode === 27) {
+            this.windowRefService.nativeWindow.parent.postMessage({ id: 'variantsEscapePressed'}, '*');
+        }
     }
 
     public onVariantsMouseDown(event: MouseEvent) {

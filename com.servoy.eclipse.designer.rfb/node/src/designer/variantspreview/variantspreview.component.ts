@@ -35,17 +35,19 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	maxPopupHeight = 300;
     popupParkingPosition = '-10000px';
     scrollbarwidth = 32;
+	showVariantPopup = false;
 	
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
         private windowRef: WindowRefService, private popoverCfgRef: NgbPopoverConfig, private editorSession: EditorSessionService,
 		private editorContentService: EditorContentService) {
 	
 		this.editorSession.variantsTrigger.subscribe((value) => {
-			if (value.show) {
+			if (value.show == true) {
 				this.top = value.top;
 				this.left = value.left;
-			} else {
-				this.hidePopover('block');
+				this.showPopover();
+			} else if (value.show == false) {
+				this.hidePopover();
 			}
 		});
 
@@ -80,6 +82,8 @@ export class VariantsPreviewComponent implements AfterViewInit {
 				this.variantsIFrame = this.document.getElementById('VariantsForm') as HTMLIFrameElement;
 				this.variantsIFrame.contentWindow.document.body.addEventListener('mouseup', this.onMouseUp);
                 this.variantsIFrame.contentWindow.document.body.addEventListener('mousemove', this.onMouseMove);
+			} else if (event.data.id === 'variantsEscapePressed') {
+				this.editorSession.variantsTrigger.emit({ show: false });
 			}
         });
         if (!this.isPopoverInitialized) {
@@ -94,22 +98,21 @@ export class VariantsPreviewComponent implements AfterViewInit {
         this.left = -1000;
         //need to create the form prior to correctly rendering variants in designer
         this.setPopoverSizeAndPosition(100, 100);
-		this.hidePopover('block');
+		this.hidePopover();
 
     }
 
-	hidePopover(iframeDisplay: string) {
+	hidePopover() {
 		this.editorSession.variantsPopup.emit({status: 'hidden'});
-        if (this.variantsIFrame) {
-            this.variantsIFrame.style.display = iframeDisplay;
-            const popoverCtrl = this.document.getElementById('VariantsCtrl');
-            popoverCtrl.style.top = this.popupParkingPosition;
-            popoverCtrl.style.left = this.popupParkingPosition;	
-        }
+        this.variantsIFrame.style.display = 'none';
+        const popoverCtrl = this.document.getElementById('VariantsCtrl');
+        popoverCtrl.style.top = this.popupParkingPosition;
+        popoverCtrl.style.left = this.popupParkingPosition;	
 	}
 
 	showPopover() {
 		this.editorSession.variantsPopup.emit({status: 'visible'});
+		this.variantsIFrame.style.display = 'block';
 	}
 
 	setPopoverSizeAndPosition(formWidth: number, formHeight: number) {
@@ -150,7 +153,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	}
 
 	onVariantsClick = () => {
-		this.hidePopover('block');
+		this.showPopover();
 	}
 
 	onVariantMouseDown = (pageX: number, pageY: number) => {
@@ -166,16 +169,16 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		event.stopPropagation();
 		if (this.variantItemBeingDragged) {
 			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDragged);
-			this.variantItemBeingDragged = null;
 			this.windowRef.nativeWindow.postMessage({ id: 'onVariantMouseUp'});
 		}
+		this.variantItemBeingDragged = null;
 	}
 
 	onMouseMove = () => {
 		if (this.variantItemBeingDragged) {
 			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDragged);
 			this.variantItemBeingDragged = null;
-			this.hidePopover('none');
+			this.hidePopover();
 		}
 	}
 

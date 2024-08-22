@@ -43,6 +43,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 //element
                 this.onVariantMouseUp();
             }
+
+            if (event.data.id === 'onDestroyVariants') {
+                this.onVariantsDestroy();
+            }
         });
         this.editorContentService.getBodyElement().addEventListener('mouseup', this.onMouseUp);
         this.editorContentService.getBodyElement().addEventListener('mousemove', this.onMouseMove);
@@ -150,6 +154,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             this.editorContentService.sendMessageToIframe({ id: 'destroyElement' });
             this.dragItem.paletteItemBeingDragged = null;
             this.dragItem.contentItemBeingDragged = null;
+        }
+    }
+
+    onVariantsDestroy() {
+        if (this.dragItem.paletteItemBeingDragged) {
             this.draggedVariant.element = null;
         }
     }
@@ -198,6 +207,9 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onMouseUp = (event: MouseEvent) => {
+        if (event.target && (event.target as Element).className === 'popover-body') {
+            return; // it has a separate handler
+        }
         if (this.dragItem.paletteItemBeingDragged) {
             this.editorSession.setDragging(false);
             this.editorContentService.getBodyElement().removeChild(this.dragItem.paletteItemBeingDragged);
@@ -308,7 +320,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         if (this.snapData) return;
 
         if (this.dragItem.paletteItemBeingDragged) {
-
+        
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', event.pageX + 'px');
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
             if (this.dragItem.contentItemBeingDragged) {
