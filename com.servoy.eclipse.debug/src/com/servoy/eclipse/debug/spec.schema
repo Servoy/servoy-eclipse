@@ -421,32 +421,39 @@
                                 "elementConfig": {
                                     "type": "object",
                                     "allOf": [ { "$ref": "#/definitions/propertyConfig" } ]
+
+								},
+								"extraPropertiesCategory": {
+                                    "type": "string"
+                                },
+                                "extraProperties": {
+                                    "type": "object"
                                 }
-                            },
-                            "required":["type"],
-                            "additionalProperties": false
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        },
-        "handlers":
-        {
-            "description": "The event handlers this component has",
-            "type": "object",
-            "patternProperties": {
-                "^\\S+$": {
-                    "oneOf": [
-                        {
-                            "type": "string",
-                            "enum" : ["function"]
-                        },
-                        {
-                            "type": "object",
-                            "description": "The description of this component handler",
-                            "properties": {
-                                "returns": {
+							},
+				        	"required":["type"],
+							"additionalProperties": false
+						}
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"handlers":
+		{
+			"description": "The event handlers this component has",
+			"type": "object",
+			"patternProperties": {
+				"^\\S+$": {
+					"oneOf": [
+						{
+							"type": "string",
+				        	"enum" : ["function"]
+						},
+						{
+							"type": "object",
+							"description": "The description of this component handler",
+							"properties": {
+								"returns": {
                                     "description": "the datatype this handler call returns",
                                     "oneOf": [
                                         {

@@ -52,6 +52,10 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 	@Override
 	public String getText(Object value)
 	{
+		if (value == null)
+		{
+			return Messages.LabelNone;
+		}
 		if (value instanceof String)
 		{
 			// working set

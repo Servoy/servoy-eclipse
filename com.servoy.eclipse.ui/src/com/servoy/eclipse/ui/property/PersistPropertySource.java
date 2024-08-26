@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -80,6 +81,7 @@ import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.SecureStringPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
+import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
@@ -191,6 +193,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.Part;
@@ -228,6 +231,7 @@ import com.servoy.j2db.server.ngclient.property.types.JSONPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MapPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ModifiablePropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGStyleClassPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
@@ -478,6 +482,60 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						catch (RepositoryException e)
 						{
 							ServoyLog.logError(e);
+						}
+					}
+				}
+				if (persistContext.getPersist() instanceof MenuItem)
+				{
+					Map<String, Map<String, Object>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
+					if (extraProperties != null)
+					{
+						for (String categoryName : extraProperties.keySet())
+						{
+							Map<String, Object> extraCategoryProperties = extraProperties.get(categoryName);
+							for (String propertyName : extraCategoryProperties.keySet())
+							{
+								Object typeInformation = extraCategoryProperties.get(propertyName);
+								String typeName = typeInformation instanceof String ? (String)typeInformation : ((JSONObject)typeInformation).getString("type");
+								Object defaultValue = typeInformation instanceof JSONObject ? ((JSONObject)typeInformation).opt("default") : null;
+								boolean hasDefaultValue = typeInformation instanceof JSONObject ? ((JSONObject)typeInformation).has("default") : false;
+								IPropertyType< ? > propertyType = TypesRegistry.getType(typeName, false);
+								ValuesConfig config = null;
+								if (typeInformation instanceof JSONObject && ((JSONObject)typeInformation).has("values"))
+								{
+									propertyType = ValuesPropertyType.INSTANCE;
+									config = new ValuesConfig();
+									ArrayList<Object> listdata = new ArrayList<Object>();
+									JSONArray array = ((JSONObject)typeInformation).optJSONArray("values");
+									if (array != null)
+									{
+										for (int i = 0; i < array.length(); i++)
+										{
+											listdata.add(array.get(i));
+										}
+										config.setValues(listdata.toArray());
+										if (defaultValue != null)
+										{
+											config.addDefault(defaultValue, defaultValue.toString());
+										}
+									}
+								}
+								if (propertyType != null)
+								{
+									IPropertyDescriptor pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
+										new PropertyDescriptionBuilder().withName(propertyName).withType(
+											propertyType).withDefaultValue(defaultValue).withHasDefault(hasDefaultValue).withConfig(config).build(),
+										form, persistContext,
+										readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
+										flattenedEditingSolution);
+									if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
+									{
+										((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(categoryName);
+									}
+
+									propertyDescriptors.put(pd.getId(), pd);
+								}
+							}
 						}
 					}
 				}
@@ -925,6 +983,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							return new PropertyController<Object, String>(id, displayName,
 								new BeanAsTextPropertyConverter(propertyDescriptor.getPropertyEditor()), null, new ICellEditorFactory()
 								{
+
 									public CellEditor createPropertyEditor(Composite parent)
 									{
 										return new TextCellEditor(parent);
@@ -1357,6 +1416,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				resultingPropertyDescriptor = new PropertyController<java.awt.Point, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Point>()
 				{
+
 					@Override
 					public Object convertProperty(Object id, java.awt.Point value)
 					{
@@ -1373,6 +1433,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 				}, PointPropertySource.getLabelProvider(), new ICellEditorFactory()
 				{
+
 					public CellEditor createPropertyEditor(Composite parent)
 					{
 						return PointPropertySource.createPropertyEditor(parent);
@@ -1427,6 +1488,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				resultingPropertyDescriptor = new PropertyController<CSSPosition, Object>(id, displayName, new ComplexPropertyConverter<CSSPosition>()
 				{
+
 					@Override
 					public Object convertProperty(Object property, CSSPosition value)
 					{
@@ -1443,6 +1505,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 				}, CSSPositionPropertySource.getLabelProvider(), new ICellEditorFactory()
 				{
+
 					public CellEditor createPropertyEditor(Composite parent)
 					{
 						return CSSPositionPropertySource.createPropertyEditor(parent);
@@ -1477,8 +1540,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 			else if (propertyType == BooleanPropertyType.INSTANCE || propertyType.isProtecting())
 			{
-				if (propertyDescriptor.propertyDescriptor instanceof BasePropertyHandler bph &&
-					bph.getPropertyType() == Boolean.class)
+				if (propertyDescriptor.propertyDescriptor instanceof
+
+				BasePropertyHandler bph && bph.getPropertyType() == Boolean.class)
 				{
 					resultingPropertyDescriptor = new TreeStateCheckboxPropertyDescriptor(id, displayName);
 				}
@@ -1673,8 +1737,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			if (resultingPropertyDescriptor instanceof IKeepsTooltip)
 			{
-				((IKeepsTooltip)resultingPropertyDescriptor)
-					.setTooltipText(propertyDescription.getDocumentation());
+				((IKeepsTooltip)resultingPropertyDescriptor).setTooltipText(propertyDescription.getDocumentation());
 			}
 		}
 		return resultingPropertyDescriptor;
@@ -2109,6 +2172,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			catch (Exception e)
 			{
 				ServoyLog.logError("Could not get property value for id " + id + " on object " + beanPropertyDescriptor.valueObject, e);
+			}
+		}
+		else if (persistContext.getPersist() instanceof MenuItem)
+		{
+			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
+			if (propertyDescriptor != null)
+			{
+				return ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
 			}
 		}
 		return null;
@@ -2636,6 +2707,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(),
 						"styleName".equals(id) || "extendsID".equals(id));
 				}
+			}
+		}
+		else if (persistContext.getPersist() instanceof MenuItem)
+		{
+			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
+			if (propertyDescriptor != null)
+			{
+				((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), id.toString(), value);
 			}
 		}
 	}
@@ -3256,6 +3335,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				return new PropertyController<String, Object[]>(id, displayName, converter, labelProvider, new ICellEditorFactory()
 				{
+
 					public CellEditor createPropertyEditor(Composite parent)
 					{
 						return new ListSelectCellEditor(parent, "Select " + displayName, labelProvider, null, readOnly, allValues.toArray(),
@@ -3509,7 +3589,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			return new ValuelistPropertyController<Integer>(id, displayName, persistContext, true);
 		}
-
+		if (propertyType instanceof MenuPropertyType)
+		{
+			return new JSMenuPropertyController<Integer>(id, displayName, persistContext);
+		}
 		if (propertyType == MediaPropertyType.INSTANCE)
 		{
 			MediaPropertyControllerConfig config = null;
@@ -3533,7 +3616,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, table);
 		}
 
-		ITypePropertyDescriptorFactory sabloOrNgTypeFactory = UITypesRegistry.getTypePropertyDescriptorFactory(propertyDescription.getType());
+		ITypePropertyDescriptorFactory sabloOrNgTypeFactory = UITypesRegistry
+			.getTypePropertyDescriptorFactory(propertyDescription.getType());
 		if (sabloOrNgTypeFactory != null)
 		{
 			return sabloOrNgTypeFactory.createPropertyDescriptor(id, persistPropertySource, displayName, flattenedEditingSolution, persistContext,
@@ -3589,6 +3673,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 				}))
 			{
+
 				@Override
 				public IMergedPropertyDescriptor createMergedPropertyDescriptor(IMergeablePropertyDescriptor pd)
 				{
@@ -3600,6 +3685,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					return true;
 				}
+
 			};
 		}
 
