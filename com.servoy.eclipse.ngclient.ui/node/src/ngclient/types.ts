@@ -130,7 +130,7 @@ export class FormCache implements IFormCache {
     public getClientSideType(componentName: string, propertyName: string) {
         const componentSpec = this.getComponentSpecification(componentName);
 
-        let type = componentSpec.getPropertyType(propertyName);
+        let type = componentSpec?.getPropertyType(propertyName);
         if (!type) type = this.componentCache.get(componentName)?.dynamicClientSideTypes[propertyName];
         if (!type) type = this.getFormComponent(componentName)?.dynamicClientSideTypes[propertyName];
 
