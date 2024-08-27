@@ -309,11 +309,19 @@ describe('FormComponentComponentTest', () => {
         button3InsideTestComponentDebug = fixture.debugElement.query(By.css('.button3'));
 
         testComponentModel = formService.getFormCacheByName('aForm').getComponent('myCustomTestComponent').model as ComponentModelContents;
-        expect(sabloService.callService).toHaveBeenCalledOnceWith(
+        expect(sabloService.callService).toHaveBeenCalledWith(
             'formService',
             'formLoaded',
             { formname: 'aForm' },
             true);
+         expect(sabloService.callService).toHaveBeenCalledWith(
+            'formService',
+            'dataPush',
+            { formname: 'aForm',
+             beanname: '',
+             changes: { size : jasmine.anything() } },
+            true);    
+        expect(sabloService.callService).toHaveBeenCalledTimes(2);    
         sabloService.callService.calls.reset();
     });
 
