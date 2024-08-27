@@ -1,18 +1,21 @@
-import { Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-        TemplateRef,  ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject } from '@angular/core';
+import {
+    Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+    TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, AfterViewInit
+} from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, IFormComponent } from '../types';
 
 import { ServoyService } from '../servoy.service';
 
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerService, LoggerFactory, ServoyBaseComponent } from '@servoy/public';
+import { LoggerService, LoggerFactory, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
 import { ServoyApi } from '../servoy_api';
 import { FormService } from '../form.service';
 import { DOCUMENT } from '@angular/common';
 import { ConverterService } from '../../sablo/converter.service';
 import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_registry';
+import { fromEvent, debounceTime, Subscription } from 'rxjs';
 
 @Component({
     template: ''
@@ -97,7 +100,7 @@ export abstract class AbstractFormComponent {
         }
     }
 
-    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]): void {
+    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[]): void {
         const comp = this.componentCache[componentName];
         if (comp) {
             const changes = {};
@@ -173,13 +176,13 @@ export abstract class AbstractFormComponent {
 <ng-template #servoycoreSlider let-callback="callback" let-state="state"><servoycore-slider  [animate]="state.model.animate" [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="callback.datachange(state,'dataProviderID',$event, true)" [enabled]="state.model.enabled" [location]="state.model.location" [max]="state.model.max" [min]="state.model.min" [orientation]="state.model.orientation" [range]="state.model.range" [size]="state.model.size" [step]="state.model.step" *ngIf="state.model.visible" [onChangeMethodID]="callback.getHandler(state,'onChangeMethodID')" [onCreateMethodID]="callback.getHandler(state,'onCreateMethodID')" [onSlideMethodID]="callback.getHandler(state,'onSlideMethodID')" [onStartMethodID]="callback.getHandler(state,'onStartMethodID')" [onStopMethodID]="callback.getHandler(state,'onStopMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-slider></ng-template>
      <!-- component template generate end -->
    `
-   /* eslint-enable max-len */
+    /* eslint-enable max-len */
 })
 
 /**
  * This is the definition of a angular component that represents servoy forms.
  */
-export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, IFormComponent {
+export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, IFormComponent {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
     // structure viewchild template generate start
@@ -206,18 +209,24 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     absolutFormPosition = {};
 
-    private handlerCache: { [property: string]: { [property: string]: (event:Event) => void } } = {};
+    private handlerCache: { [property: string]: { [property: string]: (event: Event) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private log: LoggerService;
+    private resizeSubscription$: Subscription;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
-                private servoyService: ServoyService, logFactory: LoggerFactory,
-                private changeHandler: ChangeDetectorRef,
-                private el: ElementRef<Element>, protected renderer: Renderer2,
-                private converterService: ConverterService<unknown>,
-                @Inject(DOCUMENT) private document: Document) {
+        private servoyService: ServoyService, logFactory: LoggerFactory,
+        private changeHandler: ChangeDetectorRef,
+        private el: ElementRef<Element>, protected renderer: Renderer2,
+        private converterService: ConverterService<unknown>,
+        @Inject(DOCUMENT) private document: Document,
+        private windowRefService: WindowRefService) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
+        const resizeObservable$ = fromEvent(this.windowRefService.nativeWindow, 'resize')
+        this.resizeSubscription$ = resizeObservable$.pipe(debounceTime(500)).subscribe(evt => {
+            this.onResize()
+        });
     }
 
     public static doCallApiOnComponent(comp: ServoyBaseComponent<any>, componentSpec: IWebObjectSpecification, apiName: string, args: any[],
@@ -274,20 +283,25 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             this.componentCache = {};
 
             this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
-            this.renderer.setAttribute(this.el.nativeElement,'name', this.name);
+            this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
 
         }
-       this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
+        this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
+    }
+
+    ngAfterViewInit() {
+        this.onResize();
     }
 
     ngOnDestroy() {
         this.formservice.destroy(this.name);
+        this.resizeSubscription$.unsubscribe();
     }
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname] : ( item.cssPositionContainer ? this.cssPositionContainer : this.svyResponsiveDiv);
-        } else if (item instanceof FormComponentCache ) {
+            return item.tagname ? this[item.tagname] : (item.cssPositionContainer ? this.cssPositionContainer : this.svyResponsiveDiv);
+        } else if (item instanceof FormComponentCache) {
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
@@ -303,7 +317,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
     }
 
-    getTemplateForLFC(state: ComponentCache ): TemplateRef<any> {
+    getTemplateForLFC(state: ComponentCache): TemplateRef<any> {
         if (state.type.includes('formcomponent')) {
             return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
         } else {
@@ -311,7 +325,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             // TODO - hmm type is already camel case here with dashes removed normally - so I don't think we need the indexOf, replace etc anymore
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
-            compDirectiveName =  compDirectiveName.replace('-','');
+            compDirectiveName = compDirectiveName.replace('-', '');
             return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)];
         }
     }
@@ -319,8 +333,8 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     public getAbsoluteFormStyle() {
         const formData = this.formCache.getComponent('');
 
-        for (const key in this.absolutFormPosition){
-            if (this.absolutFormPosition.hasOwnProperty(key)){
+        for (const key in this.absolutFormPosition) {
+            if (this.absolutFormPosition.hasOwnProperty(key)) {
                 delete this.absolutFormPosition[key];
             }
         }
@@ -380,11 +394,11 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         return func;
     }
 
-    registerComponent(component: ServoyBaseComponent<any> ): void {
+    registerComponent(component: ServoyBaseComponent<any>): void {
         this.componentCache[component.name] = component;
     }
 
-    unRegisterComponent(component: ServoyBaseComponent<any> ): void {
+    unRegisterComponent(component: ServoyBaseComponent<any>): void {
         delete this.componentCache[component.name];
     }
 
@@ -405,7 +419,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
                 return comp.callApi(path[1], apiName, args, path.slice(2));
             } else {
                 this.log.error('trying to call api: ' + apiName + ' on component: ' + componentName + ' with path: ' + path +
-                 ', but comp: ' + (comp == null?' is not found':comp.name + ' doesnt implement IApiExecutor') );
+                    ', but comp: ' + (comp == null ? ' is not found' : comp.name + ' doesnt implement IApiExecutor'));
             }
             return null;
         } else {
@@ -415,7 +429,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     getContainerByName(containername: string): Element {
-       return this.document.querySelector('[name="'+this.name+'.'+containername+'"]');
+        return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
     }
 
     public updateFormStyleClasses(ngutilsstyleclasses: string): void {
@@ -429,23 +443,35 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
         this.detectChanges();
     }
+
+    private onResize(): void {
+        const formElement = this.el.nativeElement.querySelector('.svy-form');
+        if (formElement) {
+            const formSize = formElement.getBoundingClientRect();
+            const value = { width: formSize.width, height: formSize.height }
+            const oldValue = this.formCache.getComponent('').model['size'];
+            if (oldValue.width != value.width || oldValue.height != value.height) {
+                this.formservice.sendChanges(this.name, '', 'size', value, oldValue, false);
+            }
+        }
+    }
 }
 
 class FormComponentServoyApi extends ServoyApi {
     constructor(item: ComponentCache,
-                formname: string,
-                absolute: boolean,
-                formservice: FormService,
-                servoyService: ServoyService,
-                private fc: FormComponent) {
+        formname: string,
+        absolute: boolean,
+        formservice: FormService,
+        servoyService: ServoyService,
+        private fc: FormComponent) {
         super(item, formname, absolute, formservice, servoyService, false);
     }
 
-    registerComponent(comp: ServoyBaseComponent<any> ) {
+    registerComponent(comp: ServoyBaseComponent<any>) {
         this.fc.registerComponent(comp);
     }
 
-    unRegisterComponent(comp: ServoyBaseComponent<any> ) {
+    unRegisterComponent(comp: ServoyBaseComponent<any>) {
         this.fc.unRegisterComponent(comp);
     }
 }
