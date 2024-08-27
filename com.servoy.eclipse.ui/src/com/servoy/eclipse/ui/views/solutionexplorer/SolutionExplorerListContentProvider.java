@@ -1931,10 +1931,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								if (api != null)
 								{
 									String doc = node.getDocumentation().getText();
-									String example = doc.split("@example")[1].split("@")[0];
-									if (!example.isBlank())
+									String[] split = doc.split("@example");
+									if (split.length > 1)
 									{
-										doc = doc.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+										String example = split[1].split("@")[0];
+										if (!example.isBlank())
+										{
+											doc = doc.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+										}
 									}
 									api.setDocumentation(doc);
 								}
