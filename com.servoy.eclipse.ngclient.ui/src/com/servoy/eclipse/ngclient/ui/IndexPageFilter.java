@@ -86,7 +86,7 @@ public class IndexPageFilter implements Filter
 			distFolder = new File(projectFolder, "dist/app/browser");
 			indexFile = new File(distFolder, "index.html");
 		}
-		String solutionName = getSolutionNameFromURI(Paths.get(requestURI).normalize());
+		String solutionName = getSolutionNameFromURI(Paths.get(requestURI.replace(':', '_')).normalize());
 		if (indexFile != null && indexFile.exists())
 		{
 			if (solutionName != null &&
@@ -126,7 +126,7 @@ public class IndexPageFilter implements Filter
 			}
 			else
 			{
-				String normalize = Paths.get(requestURI).normalize().toString();
+				String normalize = Paths.get(requestURI.replace(':', '_')).normalize().toString();
 				File file = new File(distFolder, normalize);
 				String localeId = request.getParameter("localeid");
 				if (requestURI.startsWith("/locales/") && localeId != null && !file.exists())
