@@ -28,6 +28,7 @@ import javax.swing.border.Border;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
@@ -322,5 +323,20 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 	protected IPropertyDescriptor getDescriptor()
 	{
 		return super.getDescriptor();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.views.properties.PropertySheetEntry#getEditor(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	public CellEditor getEditor(Composite parent)
+	{
+		if (parent == null)
+		{
+			return this.editor;
+		}
+		return super.getEditor(parent);
 	}
 }

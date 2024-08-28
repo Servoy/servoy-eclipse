@@ -22,6 +22,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -29,6 +30,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -42,6 +44,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -58,6 +62,8 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetSorter;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.actions.CopyPropertyValueAction;
+import com.servoy.eclipse.ui.actions.PastePropertyValueAction;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.property.IProvidesTooltip;
 import com.servoy.eclipse.ui.resource.FontResource;
@@ -78,6 +84,9 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 	private Composite composite;
 	private Label propertiesLabel;
 	private final Map<String, IAction> actions;
+	private Clipboard clipboard2;
+	private CopyPropertyValueAction copyValueAction;
+	private PastePropertyValueAction pasteValueAction;
 
 	public ModifiedPropertySheetPage(Map<String, IAction> actions)
 	{
@@ -349,6 +358,21 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				selectionChanged(activeEditor, selectionProvider.getSelection());
 			}
 		}
+
+		Shell shell = control.getShell();
+		clipboard2 = new Clipboard(shell.getDisplay());
+
+		MenuManager menuManager = (MenuManager)control.getMenu().getData(MenuManager.MANAGER_KEY);
+		menuManager.add(copyValueAction = new CopyPropertyValueAction("Copy Value", clipboard2));
+		menuManager.add(pasteValueAction = new PastePropertyValueAction("Paste Value", clipboard2, this));
+
+		Menu menu = menuManager.getMenu();
+		if (menu != null)
+		{
+			menu.dispose();
+		}
+		menu = menuManager.createContextMenu(control);
+		control.setMenu(menu);
 	}
 
 	private TreeItem getNextSibling(Tree tree, TreeItem currentItem, boolean forward)
@@ -479,5 +503,32 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			}
 			propertiesLabel.setText(text);
 		}
+	}
+
+	@Override
+	public void handleEntrySelection(ISelection selection)
+	{
+		super.handleEntrySelection(selection);
+		if (copyValueAction != null)
+		{
+			copyValueAction.selectionChanged((IStructuredSelection)selection);
+		}
+		if (pasteValueAction != null)
+		{
+			pasteValueAction.selectionChanged((IStructuredSelection)selection);
+		}
+	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		if (clipboard2 != null)
+		{
+			clipboard2.dispose();
+			clipboard2 = null;
+		}
+		copyValueAction = null;
+		pasteValueAction = null;
 	}
 }
