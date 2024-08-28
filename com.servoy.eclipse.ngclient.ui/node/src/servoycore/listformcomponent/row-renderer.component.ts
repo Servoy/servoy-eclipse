@@ -22,7 +22,7 @@ export class RowRenderer implements AgRendererComponent {
     agInit(params: ICellRendererParams): void {
         this.lfc = params.context['componentParent'];
         this.foundsetRows = params.data;
-        this.startIndex = (params.rowIndex - this.lfc.foundset.viewPort.startIndex) * this.lfc.numberOfColumns;
+        this.startIndex =(params.node.rowIndex - this.lfc.foundset.viewPort.startIndex) * this.lfc.numberOfColumns;
 
     }
 
