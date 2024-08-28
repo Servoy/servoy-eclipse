@@ -174,7 +174,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     public getAsPlainText() {
-        return this.getEditor().getContent().replace(/<[^>]*>/g, '');
+        return this.getEditor().getContent({ format: 'text' });
     }
 
     public getScrollX(): number {
