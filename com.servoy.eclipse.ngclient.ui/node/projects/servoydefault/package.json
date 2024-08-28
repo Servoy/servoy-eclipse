@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@angular/cdk": "^18",
-    "@eonasdan/tempus-dominus": "^6.9.9",
+    "@eonasdan/tempus-dominus": "^6.9.10",
     "@ng-bootstrap/ng-bootstrap": "^17",
     "@popperjs/core": "<3",
     "@tinymce/tinymce-angular": "<8",
