@@ -73,6 +73,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.forms.HyperlinkSettings;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -367,6 +369,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		excomposite.setExpanded(false);
 		excomposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		excomposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		excomposite.addExpansionListener(new ExpansionAdapter()
+		{
+			@Override
+			public void expansionStateChanged(ExpansionEvent e)
+			{
+				relayout();
+			}
+		});
 
 		advancedSettingsComposite = new Composite(excomposite, SWT.NONE);
 		advancedSettingsComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
