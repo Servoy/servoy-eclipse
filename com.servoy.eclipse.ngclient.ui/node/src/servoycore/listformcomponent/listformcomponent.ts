@@ -410,9 +410,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     private scrollToSelection() {
         if(this.foundset.selectedRowIndexes.length) {
-            const rowCount = this.agGrid.api['serverSideRowModel'].getRowCount();
+            const rowCount = this.agGrid.api.getDisplayedRowCount();
             if(this.foundset.selectedRowIndexes[0] > rowCount - AGGRID_CACHE_BLOCK_SIZE) {
-                this.agGrid.api['serverSideRowModel'].setRowCount(Math.min(this.foundset.selectedRowIndexes[0] + AGGRID_CACHE_BLOCK_SIZE, this.foundset.serverSize));
+                (this.agGrid.api.getModel() as any).setRowCount(Math.min(this.foundset.selectedRowIndexes[0] + AGGRID_CACHE_BLOCK_SIZE, this.foundset.serverSize));
             }
             this.agGrid.api.ensureIndexVisible(this.foundset.selectedRowIndexes[0]);
         }        
