@@ -126,6 +126,7 @@ import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
+import com.servoy.eclipse.ui.node.TreeBuilder;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
@@ -156,6 +157,7 @@ import com.servoy.j2db.dataprocessing.datasource.SPDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.ViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
+import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.ScriptParameter;
 import com.servoy.j2db.documentation.ServoyDocumented;
@@ -1221,8 +1223,10 @@ public class TypeCreator extends TypeCache
 					memberType = TypeUtil.arrayOf(memberType);
 				}
 				if (name.endsWith("ID")) name = name.substring(0, name.length() - 2);
-				Property property = createProperty(name, false, memberType, SolutionExplorerListContentProvider.getParsedComment(pd.getDocumentation(),
-					STANDARD_ELEMENT_NAME, true), null);
+				Property property = createProperty(name, false, memberType,
+					SolutionExplorerListContentProvider.getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic),
+						STANDARD_ELEMENT_NAME, true),
+					null);
 				property.setDeprecated(pd.isDeprecated());
 				members.add(property);
 			}
@@ -1490,12 +1494,6 @@ public class TypeCreator extends TypeCache
 		return null;
 	}
 
-	/**
-	 * @param context
-	 * @param typeName
-	 * @param cls
-	 * @return
-	 */
 	protected final Type createType(String context, String typeName, Class< ? > cls)
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
@@ -1509,6 +1507,13 @@ public class TypeCreator extends TypeCache
 			ImageDescriptor desc = IconProvider.instance().descriptor(cls);
 			type.setAttribute(IMAGE_DESCRIPTOR, desc);
 		}
+
+		if (cls != null)
+		{
+			String description = TypeCreator.getTopLevelDoc(cls);
+			if (description != null) type.setDescription(description);
+		}
+
 		if (IDeprecated.class.isAssignableFrom(cls) || cls.isAnnotationPresent(Deprecated.class) ||
 			(prefixedTypes.containsKey(cls) && typeName.equals(cls.getSimpleName())))
 		{
@@ -1587,11 +1592,6 @@ public class TypeCreator extends TypeCache
 		return type;
 	}
 
-	/**
-	 * @param typeName
-	 * @param members
-	 * @param class1
-	 */
 	@SuppressWarnings("deprecation")
 	private final void fill(String context, EList<Member> membersList, Class< ? > scriptObjectClass, String typeName)
 	{
@@ -2316,12 +2316,6 @@ public class TypeCreator extends TypeCache
 
 	private static final ConcurrentMap<MethodSignature, String> docCache = new ConcurrentHashMap<MethodSignature, String>(64, 0.9f, 16);
 
-	/**
-	 * @param key
-	 * @param scriptObject
-	 * @param name
-	 * @return
-	 */
 	@SuppressWarnings("deprecation")
 	public static String getDoc(String name, Class< ? > scriptObjectClass, Class< ? >[] parameterTypes)
 	{
@@ -2349,7 +2343,7 @@ public class TypeCreator extends TypeCache
 						if (deprecatedText != null)
 						{
 							docBuilder.append("<br/><b>@deprecated</b>&nbsp;");
-							docBuilder.append(deprecatedText);
+							docBuilder.append(HtmlUtils.applyDescriptionMagic(deprecatedText));
 							docBuilder.append("<br/>");
 						}
 						else
@@ -2361,7 +2355,7 @@ public class TypeCreator extends TypeCache
 					if (toolTip != null && toolTip.trim().length() != 0)
 					{
 						docBuilder.append("<br/>");
-						docBuilder.append(toolTip.replace("\r\n", "<br/>").replace("\n", "<br/>"));
+						docBuilder.append(HtmlUtils.applyDescriptionMagic(toolTip));
 						docBuilder.append("<br/>");
 					}
 					sampleDoc = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes, clientType);
@@ -2378,7 +2372,7 @@ public class TypeCreator extends TypeCache
 						returnText = "<b>@return</b> ";
 						if (returnedType != null)
 							returnText += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType) + ' ';
-						if (returnDescription != null) returnText += returnDescription;
+						if (returnDescription != null) returnText += HtmlUtils.applyDescriptionMagic(returnDescription);
 					}
 				}
 				else
@@ -2391,7 +2385,7 @@ public class TypeCreator extends TypeCache
 					if (toolTip != null && toolTip.trim().length() != 0)
 					{
 						docBuilder.append("<br/>");
-						docBuilder.append(toolTip);
+						docBuilder.append(HtmlUtils.applyDescriptionMagic(toolTip));
 						docBuilder.append("<br/>");
 					}
 					sampleDoc = scriptObject.getSample(name);
@@ -2425,7 +2419,7 @@ public class TypeCreator extends TypeCache
 							if (parameter.getDescription() != null)
 							{
 								sb.append(" ");
-								sb.append(parameter.getDescription());
+								sb.append(HtmlUtils.applyDescriptionMagic(parameter.getDescription()));
 							}
 							sb.append("<br/>");
 						}
@@ -2442,6 +2436,56 @@ public class TypeCreator extends TypeCache
 			}
 			docCache.putIfAbsent(cacheKey, doc);
 		}
+		return doc;
+	}
+
+	/**
+	 * Can return null if the is no such doc available.
+	 */
+	@SuppressWarnings("deprecation")
+	public static String getTopLevelDoc(Class< ? > scriptObjectClass)
+	{
+		if (scriptObjectClass == null) return null;
+
+		// probably we don't create these basic Javascript types; they are already present from DLTK and documentation comes from DLTK directly
+		// so isJSLib will probably always be false...
+		boolean isJSLib = "com.servoy.j2db.documentation.scripting.docs".equals(scriptObjectClass.getPackageName());
+
+		MethodSignature cacheKey = new MethodSignature(scriptObjectClass, null, null);
+		String doc = docCache.get(cacheKey);
+		if (doc == null)
+		{
+			IObjectDocumentation objectDocumentation = null;
+			if (isJSLib) objectDocumentation = TreeBuilder.getDocObjectForJSLibClass(scriptObjectClass);
+			else
+			{
+				IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
+				if (scriptObject instanceof ITypedScriptObject)
+					objectDocumentation = ((ITypedScriptObject)scriptObject).getObjectDocumentation();
+			}
+
+			if (objectDocumentation != null)
+			{
+				StringBuilder docBuilder = new StringBuilder(200);
+
+				if (objectDocumentation.isDeprecated())
+				{
+					docBuilder.append("<br/><b>@deprecated</b><br/>");
+				}
+				String description = objectDocumentation
+					.getDescription(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
+				if (description != null && description.trim().length() != 0)
+				{
+					docBuilder.append("<br/>");
+					docBuilder.append(HtmlUtils.applyDescriptionMagic(description));
+					docBuilder.append("<br/>");
+				}
+				if (docBuilder.length() > 0) doc = docBuilder.toString();
+			}
+			docCache.putIfAbsent(cacheKey, doc == null ? "" : doc);
+		}
+		else if (doc.length() == 0) doc = null;
+
 		return doc;
 	}
 
@@ -3201,6 +3245,10 @@ public class TypeCreator extends TypeCache
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(clientPlugin.getName());
 					property.setReadOnly(true);
+
+					String description = TypeCreator.getTopLevelDoc(scriptObject.getClass());
+					if (description != null) property.setDescription(description);
+
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
 					property.setType(getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'));
 
@@ -3272,6 +3320,7 @@ public class TypeCreator extends TypeCache
 						String name = spec.getScriptingName();
 						property.setName(name);
 						property.setReadOnly(true);
+						property.setDescription(spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic));
 						wcServices.put("WebService<" + name + '>', spec);
 						property.setType(getTypeRef(context, "WebService<" + name + '>'));
 						members.add(property);
@@ -3496,11 +3545,12 @@ public class TypeCreator extends TypeCache
 
 			String config = fullTypeName.substring(indexOf + 1, fullTypeName.length() - 1);
 			String superTypeName = fullTypeName.substring(0, indexOf);
-			if (cachedSuperTypeTemplateType == null)
+			Type cstt = cachedSuperTypeTemplateType;
+			if (cstt == null)
 			{
-				cachedSuperTypeTemplateType = createBaseType(context, superTypeName);
+				cstt = cachedSuperTypeTemplateType = createBaseType(context, superTypeName);
 			}
-			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+			EList<Member> members = cstt.getMembers();
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
@@ -3515,6 +3565,7 @@ public class TypeCreator extends TypeCache
 			type.getMembers().addAll(overwrittenMembers);
 			type.setName(fullTypeName);
 			type.setKind(TypeKind.JAVA);
+			type.setDescription(cstt.getDescription());
 //			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
 			type.setSuperType(getType(context, superTypeName));
 			return type;
@@ -3529,11 +3580,6 @@ public class TypeCreator extends TypeCache
 			return createOverrideMember(member, context, config);
 		}
 
-		/**
-		 * @param context
-		 * @param fullTypeName
-		 * @return
-		 */
 		protected Type createBaseType(String context, String fullTypeName)
 		{
 			Class< ? > cls = QUERY_BUILDER_CLASSES.get(fullTypeName);

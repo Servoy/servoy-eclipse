@@ -108,8 +108,10 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
+import com.servoy.eclipse.ui.node.IDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.TreeBuilder;
 import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -125,7 +127,9 @@ import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
+import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.documentation.ServoyDocumented;
+import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Bean;
@@ -174,6 +178,7 @@ import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
@@ -275,9 +280,11 @@ public class SolutionExplorerTreeContentProvider
 
 	private final ISpecReloadListener specReloadListener = new SpecReloadListener();
 
-	private static PlatformSimpleUserNode createTypeNode(String displayName, UserNodeType type, Class< ? > realType, PlatformSimpleUserNode parent)
+	private static PlatformSimpleUserNode createTypeNode(String displayName, UserNodeType type, Class< ? > realType, PlatformSimpleUserNode parent,
+		boolean isJSLibNode)
 	{
-		PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, type, null, IconProvider.instance().image(realType), realType);
+		PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, type, null, IconProvider.instance().image(realType), realType,
+			isJSLibNode ? new JSLibScriptObjectFeedback(null, realType) : new ScriptObjectFeedback(null, realType));
 		node.parent = parent;
 		return node;
 	}
@@ -291,30 +298,32 @@ public class SolutionExplorerTreeContentProvider
 			uiActivator.loadImageFromBundle("api_explorer.png"));
 		apiexplorer.parent = invisibleRootNode;
 
-		PlatformSimpleUserNode jslib = createTypeNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, JSLib.class, apiexplorer);
+		PlatformSimpleUserNode jslib = createTypeNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, JSLib.class, apiexplorer, true);
 
 		jslib.children = new PlatformSimpleUserNode[] { //
-			createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Date, UserNodeType.DATE, com.servoy.j2db.documentation.scripting.docs.Date.class, jslib), //
-			createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Object, UserNodeType.OBJECT, com.servoy.j2db.documentation.scripting.docs.Object.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Map, UserNodeType.MAP, com.servoy.j2db.documentation.scripting.docs.Map.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Set, UserNodeType.SET, com.servoy.j2db.documentation.scripting.docs.Set.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Iterator, UserNodeType.ITERATOR, com.servoy.j2db.documentation.scripting.docs.Iterator.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Date, UserNodeType.DATE, com.servoy.j2db.documentation.scripting.docs.Date.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Object, UserNodeType.OBJECT, com.servoy.j2db.documentation.scripting.docs.Object.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Map, UserNodeType.MAP, com.servoy.j2db.documentation.scripting.docs.Map.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Set, UserNodeType.SET, com.servoy.j2db.documentation.scripting.docs.Set.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Iterator, UserNodeType.ITERATOR, com.servoy.j2db.documentation.scripting.docs.Iterator.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_Iterablevalue, UserNodeType.ITERABELVALUE, com.servoy.j2db.documentation.scripting.docs.IterableValue.class,
-				jslib), //
-			createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib), //
-			createTypeNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, com.servoy.j2db.documentation.scripting.docs.RegExp.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
+				jslib, true), //
+			createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, com.servoy.j2db.documentation.scripting.docs.RegExp.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib,
+				true), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
-				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-				jslib) };
+				jslib, true) };
 
-		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, apiexplorer);
+		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, apiexplorer,
+			false);
 
 		Class< ? >[] allJSApplicationTypes = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
 		List<Class< ? >> list = new ArrayList<Class< ? >>();
@@ -374,26 +383,27 @@ public class SolutionExplorerTreeContentProvider
 			uiActivator.loadImageFromBundle("all_packages.png"));
 		allWebPackagesNode.parent = invisibleRootNode;
 
-		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, apiexplorer);
+		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, apiexplorer, false);
 		addReturnTypeNodesPlaceHolder(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 
-		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, apiexplorer);
+		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, apiexplorer, false);
 
-		PlatformSimpleUserNode clientutils = createTypeNode(Messages.TreeStrings_ClientUtils, UserNodeType.CLIENT_UTILS, JSClientUtils.class, apiexplorer);
+		PlatformSimpleUserNode clientutils = createTypeNode(Messages.TreeStrings_ClientUtils, UserNodeType.CLIENT_UTILS, JSClientUtils.class, apiexplorer,
+			false);
 		addReturnTypeNodesPlaceHolder(clientutils, ScriptObjectRegistry.getScriptObjectForClass(JSClientUtils.class).getAllReturnedTypes());
 
-		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, apiexplorer);
+		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, apiexplorer, false);
 
-		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, apiexplorer);
+		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, apiexplorer, false);
 
 		addReturnTypeNodesPlaceHolder(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
-		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, apiexplorer);
+		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, apiexplorer, false);
 
-		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, apiexplorer);
+		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, apiexplorer, false);
 		addReturnTypeNodesPlaceHolder(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
 
-		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, apiexplorer);
+		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, apiexplorer, false);
 		addReturnTypeNodesPlaceHolder(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.png"));
@@ -2226,7 +2236,9 @@ public class SolutionExplorerTreeContentProvider
 				Image icon = getIconFromSpec(spec, true);
 				if (icon == null) icon = uiActivator.loadImageFromBundle("plugin.png");
 				PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
-					icon, WebServiceScriptable.class);
+					icon, WebServiceScriptable.class, new SimpleDeveloperFeedback(
+						SolutionExplorerListContentProvider.PLUGIN_PREFIX + "." + spec.getScriptingName(), null,
+						spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic)));
 				allPluginNodes.add(node);
 				node.parent = pluginNode;
 			}
@@ -2261,7 +2273,8 @@ public class SolutionExplorerTreeContentProvider
 						if (scriptObject != null)
 						{
 							PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, null,
-								scriptObject.getClass())
+								scriptObject.getClass(),
+								new ScriptObjectFeedback(SolutionExplorerListContentProvider.PLUGIN_PREFIX + "." + plugin.getName(), scriptObject.getClass()))
 							{
 								@Override
 								public Image getIcon()
@@ -2492,7 +2505,7 @@ public class SolutionExplorerTreeContentProvider
 						nodeName = cls.getName().substring(index + 1);
 					}
 					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, uiActivator.loadImageFromBundle("class.png"),
-						cls);
+						cls, new ScriptObjectFeedback(null, cls));
 					JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
 					if (IConstantsObject.class.isAssignableFrom(cls) &&
 						!(javaMembers instanceof InstanceJavaMembers && javaMembers.getMethodIds(false).size() > 0))
@@ -3022,7 +3035,7 @@ public class SolutionExplorerTreeContentProvider
 					}
 					node.setDeveloperFeedback(
 						new SimpleDeveloperFeedback("elements." + element.getName() + ".", null,
-							spec != null ? "<p>" + spec.getDocumentation() + "</p>" : null));
+							spec != null ? spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic) : null));
 				}
 				elements.add(node);
 				node.parent = parentNode;
@@ -4080,6 +4093,74 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
+	/**
+	 * Used to get tooltip text for script objects documented in JSLib.
+	 */
+	private static class JSLibScriptObjectFeedback extends ScriptObjectFeedback
+	{
+
+		JSLibScriptObjectFeedback(String codeSample, Class< ? > scriptObjectClass)
+		{
+			super(codeSample, scriptObjectClass);
+		}
+
+		@Override
+		protected IObjectDocumentation getDocObjForClass()
+		{
+			return TreeBuilder.getDocObjectForJSLibClass(cls);
+		}
+
+	}
+
+	/**
+	 * Used to get tooltip text for script objects documented in core or plugins.
+	 */
+	private static class ScriptObjectFeedback implements IDeveloperFeedback
+	{
+		private final String codeSample;
+		protected Class< ? > cls;
+		private String tooltip;
+
+		ScriptObjectFeedback(String codeSample, Class< ? > scriptObjectClass)
+		{
+			this.codeSample = codeSample;
+			this.cls = scriptObjectClass;
+		}
+
+		public String getSample()
+		{
+			return null;
+		}
+
+		public String getCode()
+		{
+			return codeSample;
+		}
+
+		public String getToolTipText()
+		{
+			if (tooltip == null && cls != null)
+			{
+				IObjectDocumentation docObj = getDocObjForClass();
+				cls = null; // just to not search again...
+				String desc = (docObj != null ? docObj.getDescription(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType())
+					: null);
+				if (desc != null)
+				{
+					tooltip = HtmlUtils.applyDescriptionMagic(desc);
+				}
+			}
+
+			return tooltip;
+		}
+
+		protected IObjectDocumentation getDocObjForClass()
+		{
+			IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(cls);
+			return scriptObject instanceof XMLScriptObjectAdapter soo ? soo.getObjectDocumentation() : null;
+		}
+
+	}
 
 	public PlatformSimpleUserNode getAllWebPackagesNode()
 	{

@@ -56,6 +56,16 @@ public class TreeBuilder
 		return docManager;
 	}
 
+	public static IObjectDocumentation getDocObjectForJSLibClass(Class< ? > cls)
+	{
+		IDocumentationManager dm = getDocManager();
+		if (dm != null)
+		{
+			return dm.getObjectByQualifiedName(cls.getCanonicalName());
+		}
+		return null;
+	}
+
 	public static UserNode[] createLengthAndArray(IImageLookup imageLookup, String prefix)
 	{
 		Image propertiesIcon = imageLookup.loadImage("properties.png");

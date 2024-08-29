@@ -176,6 +176,9 @@ public class FunctionTemplateModel
 	public String getAnchoredName()
 	{
 		String fullName = getFullFunctionName().toLowerCase();
+
+		if (fullName.startsWith("[") && fullName.endsWith("]")) fullName = fullName.substring(1, fullName.length() - 1); // markdown expects "index", not "[index]" as anchor for example in runtimeform/elements/README.md in the properties summary section
+
 		return fullName.replace(" ", "-").replace("()", "").replace("(", "-").replace(")", "").replace(",", "");
 	}
 
