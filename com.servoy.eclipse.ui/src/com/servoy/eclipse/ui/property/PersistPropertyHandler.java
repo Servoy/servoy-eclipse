@@ -118,6 +118,7 @@ import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
@@ -1022,7 +1023,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 					if (sabloSpecEvenForLegacyComponents != null)
 					{
 						PropertyDescription propertyDescription = sabloSpecEvenForLegacyComponents.getProperty(propertyOrHandlerName);
-						toolTip = (propertyDescription != null ? propertyDescription.getDocumentation() : null);
+						toolTip = (propertyDescription != null ? propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic) : null);
 					}
 				}
 			}

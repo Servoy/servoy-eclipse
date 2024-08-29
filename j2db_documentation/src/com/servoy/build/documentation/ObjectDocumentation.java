@@ -158,9 +158,13 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 		this.scriptingName = scriptingName;
 	}
 
-	public String getDescription()
+	public String getDescription(ClientSupport csp)
 	{
-		return description;
+		ClientSupport searchCSp = csp;
+		if (searchCSp == null) searchCSp = ClientSupport.Default;
+
+		if (getClientSupport().hasSupport(csp)) return description;
+		else return null;
 	}
 
 	@Override

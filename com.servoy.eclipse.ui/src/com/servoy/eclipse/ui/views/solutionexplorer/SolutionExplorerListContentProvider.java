@@ -1833,7 +1833,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						// it has to be a stand-alone comment, not a comment of some method / variable
 						// and it has to be the first comment in the file (should we limit it to be the first thing in the file?)
 						if (!firstComment.isDocumentation())
-							spec.setDocumentation(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(firstComment.getText())));
+							spec.setDescription(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(firstComment.getText())));
 					}
 
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
@@ -1937,7 +1937,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								PropertyDescription pd = properties.get(node.getVariables().get(0).getVariableName());
 								if (pd != null)
 								{
-									pd.setDocumentation(node.getDocumentation().getText());
+									pd.setDescription(node.getDocumentation().getText());
 								}
 							}
 						}
@@ -1973,7 +1973,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (!toHTML) return c;
 
 		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(c));
-		try
+		try (reader)
 		{
 			return reader.getString().replaceAll(System.getProperty("line.separator"), "<br/>");
 		}
@@ -3204,12 +3204,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getSample()
 		{
-			return getParsedSample(elementName, pd.getDocumentation());
+			return getParsedSample(elementName, pd.getDescriptionRaw());
 		}
 
 		public String getToolTipText()
 		{
-			return getParsedComment(pd.getDocumentation(), elementName, false);
+			return getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic), elementName, false);
 		}
 	}
 

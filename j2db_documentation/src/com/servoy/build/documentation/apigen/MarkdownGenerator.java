@@ -904,7 +904,7 @@ public class MarkdownGenerator
 				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") || value.getFunctions().size() == 0) continue;
 				if (ngOnly && !value.getClientSupport().hasSupport(ClientSupport.ng)) continue;
 
-				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value.getScriptingName(), value.getDescription(),
+				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value.getScriptingName(), value.getDescription(value.getClientSupport()),
 					path, computedReturnTypes.get(value.getPublicName()));
 
 				if (!ngOnly) cg.generateClientSupport(value);

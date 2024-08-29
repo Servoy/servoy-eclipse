@@ -241,6 +241,7 @@ import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.JavaVersion;
 import com.servoy.j2db.util.Pair;
@@ -1267,7 +1268,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				ComboboxPropertyController<Boolean> cpc = new ComboboxPropertyController<Boolean>(id, displayName,
 					new ComboboxPropertyModel<Boolean>(new Boolean[] { Boolean.TRUE, Boolean.FALSE }, new String[] { "true", "false" }).addDefaultValue(),
 					Messages.LabelUnresolved);
-				cpc.setTooltipText(propertyDescription.getDocumentation());
+				cpc.setTooltipText(propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic));
 				return cpc;
 			}
 			else if (propertyDescription.hasTag(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE) &&
@@ -1275,7 +1276,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				PropertyController<String, ? > tpc = createTypeaheadPropertyController(persistContext.getPersist(), id, displayName, form,
 					((ValuesConfig)propertyDescription.getConfig()));
-				if (tpc != null) tpc.setTooltipText(propertyDescription.getDocumentation());
+				if (tpc != null) tpc.setTooltipText(propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic));
 				return tpc;
 			}
 
@@ -1674,7 +1675,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			if (resultingPropertyDescriptor instanceof IKeepsTooltip)
 			{
 				((IKeepsTooltip)resultingPropertyDescriptor)
-					.setTooltipText(propertyDescription.getDocumentation());
+					.setTooltipText(propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic));
 			}
 		}
 		return resultingPropertyDescriptor;
@@ -1797,7 +1798,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				// config is probably a boolean - created in case of legacy component event handlers
 				// but then the tooltip should be in tags as for normal properties see PersistPropertyHandler.getPropertyDescription() for events
-				tooltipText = propertyDescription.getDocumentation();
+				tooltipText = propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic);
 			}
 			if (tooltipText == null && !(persistContext.getPersist() instanceof IBasicWebObject))
 			{

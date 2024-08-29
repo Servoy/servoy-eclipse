@@ -206,7 +206,7 @@ public class AiBridgeHandler extends AbstractHandler implements ISelectionListen
 					if (property != null)
 					{
 						appendData(action.getName() + ":\n", sb);
-						appendData(property.getDocumentation(), sb);
+						appendData(property.getDescriptionProcessed(true, null), sb);
 					}
 				}
 			});
