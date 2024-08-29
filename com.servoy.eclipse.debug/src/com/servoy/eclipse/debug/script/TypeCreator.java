@@ -4967,7 +4967,7 @@ public class TypeCreator extends TypeCache
 						{
 							memberType = TypeUtil.arrayOf(memberType);
 						}
-						Property property = createProperty(name, false, memberType, pd.getDocumentation(), null);
+						Property property = createProperty(name, false, memberType, pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic), null);
 						property.setDeprecated(pd.isDeprecated());
 						members.add(property);
 					}
