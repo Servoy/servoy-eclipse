@@ -35,7 +35,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * An {@link ISearchQuery} implementation for finding Medias in frm and js files.
- * 
+ *
  * @author obuligan
  * @since 7.4
  */
@@ -50,15 +50,17 @@ public class MediaSearch extends AbstractPersistSearch
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
 	{
 		IResource[] scopes = getScopes((Solution)mediaImage.getRootObject());
-		IResource resourceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject();
-		scopes = Utils.arrayAdd(scopes, resourceProject, true);
-
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
+		{
+			IResource resourceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject();
+			scopes = Utils.arrayAdd(scopes, resourceProject, true);
+		}
 		TextSearchResultCollector collector = getResultCollector();
 
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.js" }, true);
@@ -72,7 +74,7 @@ public class MediaSearch extends AbstractPersistSearch
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.ISearchQuery#getLabel()
 	 */
 	public String getLabel()

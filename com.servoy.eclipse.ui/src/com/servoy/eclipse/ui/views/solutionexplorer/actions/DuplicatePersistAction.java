@@ -46,6 +46,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -202,15 +203,17 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				List<Object> workingSets = new ArrayList<Object>();
 				workingSets.add(SELECTION_NONE);
 				String listValue = null;
+				ServoyResourcesProject activeResourcesPropject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 				IStructuredSelection selection = (IStructuredSelection)listViewer.getSelection();
 				if (!selection.isEmpty())
 				{
 					listValue = (String)selection.getFirstElement();
 				}
-				if (listValue != null)
+				if (listValue != null && activeResourcesPropject != null)
 				{
-					List<String> existingWorkingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
-						new String[] { listValue });
+					List<String> existingWorkingSets = activeResourcesPropject
+						.getServoyWorkingSets(
+							new String[] { listValue });
 					if (existingWorkingSets != null)
 					{
 						workingSets.addAll(existingWorkingSets);
@@ -218,8 +221,8 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				}
 				workingSetNameCombo.setInput(workingSets.toArray());
 
-				String workingSetOfFormName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject()
-					.getWorkingSetOfPersist(((Form)persist).getName(), solutionNames);
+				String workingSetOfFormName = (activeResourcesPropject != null) ? activeResourcesPropject
+					.getWorkingSetOfPersist(((Form)persist).getName(), solutionNames) : null;
 				if (workingSetOfFormName != null)
 				{
 					workingSetNameCombo.setSelection(new StructuredSelection(workingSetOfFormName));

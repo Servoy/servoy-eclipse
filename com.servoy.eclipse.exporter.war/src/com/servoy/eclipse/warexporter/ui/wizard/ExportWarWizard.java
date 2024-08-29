@@ -474,16 +474,20 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 			ArrayList<String> tmp = new ArrayList<>();
 			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			String activeResourcesProjectName = servoyModel.getActiveResourcesProject().getProject().getName();
+			String activeResourcesProjectName = servoyModel.getActiveResourcesProject() != null ? servoyModel.getActiveResourcesProject().getProject().getName()
+				: null;
 			List<ServoyProject> activeProjects = Arrays.asList(servoyModel.getModulesOfActiveProject());
 
 			ServoyProject[] servoyProjects = servoyModel.getServoyProjects();
-			for (ServoyProject servoyProject : servoyProjects)
+			if (activeResourcesProjectName != null)
 			{
-				if (!activeProjects.contains(servoyProject) && servoyProject.getResourcesProject() != null &&
-					servoyProject.getResourcesProject().getProject().getName().equals(activeResourcesProjectName))
+				for (ServoyProject servoyProject : servoyProjects)
 				{
-					tmp.add(servoyProject.getProject().getName());
+					if (!activeProjects.contains(servoyProject) && servoyProject.getResourcesProject() != null &&
+						servoyProject.getResourcesProject().getProject().getName().equals(activeResourcesProjectName))
+					{
+						tmp.add(servoyProject.getProject().getName());
+					}
 				}
 			}
 			nonActiveSolutionPage = new ListSelectionPage("noneactivesolutions", "Choose the non-active solutions",

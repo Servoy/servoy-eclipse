@@ -450,7 +450,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 			String parentWorkingSet = newFormWizardPage.getWorkingSet();
 			if (superForm != null || parentWorkingSet != null)
 			{
-				if (parentWorkingSet == null && superForm != null)
+				if (parentWorkingSet == null && superForm != null &&
+					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 				{
 					parentWorkingSet = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getContainingWorkingSet(
 						superForm.getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
