@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.9.0.4000_rc</version>
+		<version>2024.12.0.4020_rc</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.product</artifactId>
