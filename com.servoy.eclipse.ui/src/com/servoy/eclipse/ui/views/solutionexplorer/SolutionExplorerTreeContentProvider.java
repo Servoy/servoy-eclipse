@@ -171,6 +171,7 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
@@ -2241,6 +2242,7 @@ public class SolutionExplorerTreeContentProvider
 						spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic)));
 				allPluginNodes.add(node);
 				node.parent = pluginNode;
+				this.addCustomTypesNodes(node, spec, null);
 			}
 		}
 		pluginNode.children = allPluginNodes.toArray(new PlatformSimpleUserNode[allPluginNodes.size()]);
@@ -2459,8 +2461,9 @@ public class SolutionExplorerTreeContentProvider
 	{
 		if (node != null && spec != null)
 		{
-			Map<String, ICustomType< ? >> customTypes = spec.getDeclaredCustomObjectTypes();
-			if (customTypes != null && customTypes.size() > 0)
+			Map<String, ICustomType< ? >> customTypes = new HashMap<String, ICustomType< ? >>(spec.getDeclaredCustomObjectTypes());
+			customTypes.values().removeIf(type -> WebFormComponent.isPrivateProperty(type.getCustomJSONTypeDefinition()));
+			if (customTypes.size() > 0)
 			{
 				PlatformSimpleUserNode customTypesNode = new PlatformSimpleUserNode("CustomTypes", UserNodeType.CUSTOM_TYPE, spec, originalForm,
 					uiActivator.loadImageFromBundle("components_package.png"));

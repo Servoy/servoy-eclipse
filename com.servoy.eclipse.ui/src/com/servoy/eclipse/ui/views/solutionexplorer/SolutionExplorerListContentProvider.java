@@ -215,6 +215,7 @@ import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
+import com.servoy.j2db.util.StringComparator;
 import com.servoy.j2db.util.Text;
 import com.servoy.j2db.util.TextUtils;
 import com.servoy.j2db.util.UUID;
@@ -2115,19 +2116,26 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					Image icon = propertiesIcon;
 					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebObjectSpecification)o).getScriptingName() + ".";
 					IDeveloperFeedback feedback;
-
+					String displayParams = "";
 					if (spec.getApiFunction(id) != null)
 					{
 						final WebObjectFunctionDefinition api = spec.getApiFunction(id);
 						if (api.isDeprecated()) continue;
+						displayParams = "(";
 						icon = functionIcon;
 						final List<String> parNames = new ArrayList<String>();
 						List<String> parTypes = new ArrayList<String>();
-						for (PropertyDescription pd : api.getParameters())
+						for (int i = 0; i < api.getParameters().getDefinedArgsCount(); i++)
 						{
+							PropertyDescription pd = api.getParameters().getParameterDefinition(i);
 							parNames.add(pd.getName());
 							parTypes.add(ElementUtil.getDecoratedCustomTypeName(pd.getType()));
+							displayParams += pd.getName();
+							if (i < api.getParameters().getDefinedArgsCount() - 1) displayParams += ", ";
 						}
+						displayParams += ")";
+						String returnString = api.getReturnType() != null ? ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()) : "void";
+						displayParams += " - " + returnString;
 						feedback = new MethodFeedback(id, parTypes.toArray(new String[0]), pluginsPrefix, null, new IScriptObject()
 						{
 
@@ -2161,11 +2169,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
 							}
 
-						}, null, api.getReturnType() != null ? ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()) : "void");
+						}, null, returnString);
 					}
 					else feedback = new WebObjectFieldFeedback(spec.getProperty(id), elementName, pluginsPrefix + id);
 
-					UserNode node = new UserNode(id, actionType, feedback, real, icon);
+					UserNode node = new UserNode(id + displayParams, actionType, feedback, real, icon);
 					node.setClientSupport(ClientSupport.ng);
 					serviceIds.add(node);
 				}
@@ -2487,58 +2495,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
 			for (final WebObjectApiFunctionDefinition api : apis.values())
 			{
-				String name = api.getName();
-				String displayParams = "(";
-				IFunctionParameters parameters = api.getParameters();
-				final List<String> parNames = new ArrayList<String>();
-				List<String> parTypes = new ArrayList<String>();
-
-				for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
-				{
-					displayParams += parameters.getParameterDefinition(i).getName();
-					parNames.add(parameters.getParameterDefinition(i).getName());
-					parTypes.add(ElementUtil.getDecoratedCustomTypeName(parameters.getParameterDefinition(i).getType()));
-					if (i < parameters.getDefinedArgsCount() - 1) displayParams += ", ";
-				}
-				displayParams += ")";
-				String returnString = api.getReturnType() != null ? ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()) : "void";
-				displayParams += " - " + returnString;
-				MethodFeedback feedback = new MethodFeedback(name, parTypes.toArray(new String[0]), prefixForWebComponentMembers, null, new IScriptObject()
-				{
-
-					@Override
-					public Class< ? >[] getAllReturnedTypes()
-					{
-						return null;
-					}
-
-					@Override
-					public String getSample(String methodName)
-					{
-						return getParsedSample(webcomponent.getName(), api.getDocumentation());
-					}
-
-					@Override
-					public String getToolTip(String methodName)
-					{
-						return getParsedComment(api.getDocumentation(), webcomponent.getName(), false);
-					}
-
-					@Override
-					public String[] getParameterNames(String methodName)
-					{
-						return parNames.toArray(new String[0]);
-					}
-
-					@Override
-					public boolean isDeprecated(String methodName)
-					{
-						return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
-					}
-
-				}, null, returnString);
-
-				sortedApis.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
+				sortedApis.add(this.getApiNode(api, prefixForWebComponentMembers, webcomponent.getName(), webcomponent));
 			}
 			if (spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
 				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0)
@@ -2554,6 +2511,62 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		nodes.addAll(sortedApis);
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 
+	}
+
+	private UserNode getApiNode(WebObjectApiFunctionDefinition api, String prefix, String elementName, Object realObject)
+	{
+		String name = api.getName();
+		String displayParams = "(";
+		IFunctionParameters parameters = api.getParameters();
+		final List<String> parNames = new ArrayList<String>();
+		List<String> parTypes = new ArrayList<String>();
+
+		for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
+		{
+			displayParams += parameters.getParameterDefinition(i).getName();
+			parNames.add(parameters.getParameterDefinition(i).getName());
+			parTypes.add(ElementUtil.getDecoratedCustomTypeName(parameters.getParameterDefinition(i).getType()));
+			if (i < parameters.getDefinedArgsCount() - 1) displayParams += ", ";
+		}
+		displayParams += ")";
+		String returnString = api.getReturnType() != null ? ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()) : "void";
+		displayParams += " - " + returnString;
+		MethodFeedback feedback = new MethodFeedback(name, parTypes.toArray(new String[0]), prefix, null, new IScriptObject()
+		{
+
+			@Override
+			public Class< ? >[] getAllReturnedTypes()
+			{
+				return null;
+			}
+
+			@Override
+			public String getSample(String methodName)
+			{
+				return getParsedSample(elementName, api.getDocumentation());
+			}
+
+			@Override
+			public String getToolTip(String methodName)
+			{
+				return getParsedComment(api.getDocumentation(), elementName, false);
+			}
+
+			@Override
+			public String[] getParameterNames(String methodName)
+			{
+				return parNames.toArray(new String[0]);
+			}
+
+			@Override
+			public boolean isDeprecated(String methodName)
+			{
+				return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
+			}
+
+		}, null, returnString);
+
+		return new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, realObject, functionIcon);
 	}
 
 	private SimpleUserNode[] getCustomTypeMembers(Object realObject)
@@ -2581,6 +2594,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS,
 					new WebObjectFieldFeedback(pd, name, name), customType,
 					propertiesIcon));
+			}
+
+			Collection<WebObjectApiFunctionDefinition> apiFunctions = new SortedList<WebObjectApiFunctionDefinition>(StringComparator.INSTANCE,
+				customType.getApiFunctions());
+			for (WebObjectApiFunctionDefinition apiFunction : apiFunctions)
+			{
+				nodes.add(this.getApiNode(apiFunction, null, null, null));
+				if (apiFunction.getOverloads().size() > 0)
+				{
+					for (WebObjectApiFunctionDefinition overload : apiFunction.getOverloads())
+					{
+						nodes.add(this.getApiNode(overload, null, null, null));
+					}
+				}
 			}
 
 		}

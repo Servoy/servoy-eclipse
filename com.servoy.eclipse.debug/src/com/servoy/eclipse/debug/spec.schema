@@ -888,6 +888,9 @@
                             "extends": {
                                 "type": "string"
                             },
+                            "tags": {
+                                "type": "object"
+                            },
                             "serversideapi" : {
                                     "description": "The internal api this component has, can be called from client or from server side scripting",
                                     "type": "object",
