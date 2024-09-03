@@ -78,6 +78,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
@@ -132,6 +133,7 @@ public class DesignerFilter implements Filter
 					}
 
 					boolean skipDefault = EditorUtil.hideDefaultComponents(form);
+					boolean hasMenuProperty = false;
 
 					TreeMap<String, Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>> componentCategories = new TreeMap<>();
 					for (Entry<String, PackageSpecification<WebObjectSpecification>> entry : specProvider.getWebObjectSpecifications().entrySet())
@@ -155,6 +157,10 @@ public class DesignerFilter implements Filter
 								componentCategories.put(categoryName, pair);
 							}
 							pair.getRight().add(spec);
+							if (spec.getProperties(MenuPropertyType.INSTANCE).size() > 0)
+							{
+								hasMenuProperty = true;
+							}
 						}
 					}
 
@@ -165,6 +171,10 @@ public class DesignerFilter implements Filter
 					// Step 1: create a list with all keys containing first the layout and then the component packages
 					List<String> orderedKeys = new ArrayList<String>();
 					orderedKeys.add("Templates");
+					if (hasMenuProperty && fl.getMenus(false).hasNext())
+					{
+						orderedKeys.add("Servoy Menu");
+					}
 					orderedKeys.addAll(specProvider.getLayoutSpecifications().keySet());
 
 					for (String category : componentCategories.keySet())
@@ -295,6 +305,24 @@ public class DesignerFilter implements Filter
 								jsonWriter.endArray();
 								jsonWriter.endObject();
 							}
+						}
+						else if (key.equals("Servoy Menu"))
+						{
+							jsonWriter.object();
+							jsonWriter.key("packageName").value("Servoy Menu");
+							jsonWriter.key("packageDisplayname").value("Servoy Menu");
+							jsonWriter.key("components");
+							jsonWriter.array();
+							fl.getMenus(true).forEachRemaining(menu -> {
+								jsonWriter.object();
+								jsonWriter.key("name").value(menu.getName());
+								jsonWriter.key("componentType").value("jsmenu");
+								jsonWriter.key("displayName").value(menu.getName());
+								jsonWriter.key("icon").value("rfb/angular/images/column.png");
+								jsonWriter.endObject();
+							});
+							jsonWriter.endArray();
+							jsonWriter.endObject();
 						}
 						if (startedArray && specProvider.getLayoutSpecifications().containsKey(key))
 						{
