@@ -182,7 +182,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 	private CloseableHttpResponse sendRequest(IDialogSettings settings) throws ClientProtocolException, IOException, HttpHostConnectException
 	{
-		final String srvAddress = System.getProperty("ngdesktop.service.url");
+		final String srvAddress = System.getProperty("ngdesktop.service.address");
 		if (srvAddress != null && isValidUrl(srvAddress))
 			service_url = srvAddress;
 
