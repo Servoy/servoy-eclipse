@@ -23,6 +23,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
     clientURL: SafeResourceUrl;
     margin = 16; //ng-popover margin
 	variantItemBeingDragged: Node;
+	variantItemBeingDisplayed: Node;
 	variantsIFrame: HTMLIFrameElement;
 	top = -1000;
 	left = -1000;
@@ -157,27 +158,36 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	}
 
 	onVariantMouseDown = (pageX: number, pageY: number) => {
-		this.variantItemBeingDragged = this.variantsIFrame.contentWindow.document.elementFromPoint(pageX, pageY).cloneNode(true) as Element;
-		this.renderer.setStyle(this.variantItemBeingDragged, 'left',pageX + 'px');
-        this.renderer.setStyle(this.variantItemBeingDragged, 'top', pageY + 'px');
-        this.renderer.setStyle(this.variantItemBeingDragged, 'position', 'absolute');
+		this.variantItemBeingDragged = this.variantsIFrame.contentWindow.document.elementFromPoint(pageX, pageY)?.cloneNode(true) as Element;
+		this.variantItemBeingDisplayed = this.variantsIFrame.contentWindow.document.elementFromPoint(pageX, pageY)?.parentNode.cloneNode(true) as Element;
 		this.renderer.setAttribute(this.variantItemBeingDragged, 'id', 'svy_variantelement');
-        this.variantsIFrame.contentWindow.document.body.appendChild(this.variantItemBeingDragged);
+
+		const applyStyles = (element: Element) => {
+			this.renderer.setStyle(element, 'left', `${pageX}px`);
+			this.renderer.setStyle(element, 'top', `${pageY}px`);
+			this.renderer.setStyle(element, 'position', 'absolute');
+		};
+		
+        applyStyles(this.variantItemBeingDragged as Element);
+		applyStyles(this.variantItemBeingDisplayed as Element);
+		this.variantsIFrame.contentWindow.document.body.appendChild(this.variantItemBeingDisplayed);
 	}
 
 	onMouseUp = (event: MouseEvent) => {
 		event.stopPropagation();
-		if (this.variantItemBeingDragged) {
-			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDragged);
+		if (this.variantItemBeingDisplayed) {
+			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDisplayed);
 			this.windowRef.nativeWindow.postMessage({ id: 'onVariantMouseUp'});
 		}
 		this.variantItemBeingDragged = null;
+		this.variantItemBeingDisplayed = null;
 	}
 
 	onMouseMove = () => {
-		if (this.variantItemBeingDragged) {
-			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDragged);
+		if (this.variantItemBeingDisplayed) {
+			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDisplayed);
 			this.variantItemBeingDragged = null;
+			this.variantItemBeingDisplayed = null;
 			this.hidePopover();
 		}
 	}
