@@ -2179,6 +2179,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								case IRepository.VALUELISTS :
 								case IRepository.SCRIPTVARIABLES :
 								case IRepository.METHODS :
+								case IRepository.MENUS :
 									break;
 								default :
 									addBadStructureMarker(o, servoyProject, project);
