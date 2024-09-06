@@ -1593,6 +1593,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				else if (propertyType == MapPropertyType.INSTANCE || propertyType == JSONPropertyType.INSTANCE)
 				{
+					if (persistContext.getPersist() instanceof MenuItem && IContentSpecConstants.PROPERTY_PERMISSIONS.equals(id))
+					{
+						return new PermissionsPropertyController(id, displayName);
+					}
 					Object valueTypes = propertyDescription.getTag(PropertyDescription.VALUE_TYPES_TAG_FOR_PROP);
 					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null, propertyType == JSONPropertyType.INSTANCE,
 						valueTypes instanceof JSONObject ? (JSONObject)valueTypes : null);
@@ -1738,7 +1742,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			if (resultingPropertyDescriptor instanceof IKeepsTooltip)
 			{
-				((IKeepsTooltip)resultingPropertyDescriptor).setTooltipText(propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic));
+				((IKeepsTooltip)resultingPropertyDescriptor)
+					.setTooltipText(propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic));
 			}
 		}
 		return resultingPropertyDescriptor;

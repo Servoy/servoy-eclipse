@@ -90,6 +90,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
@@ -112,6 +113,7 @@ import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.JSONPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -937,6 +939,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		{
 			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(BooleanPropertyType.INSTANCE).withHasDefault(true)
 				.withTags(setTooltipOnTagsJSONObjectHack).build();
+		}
+		else if (obj instanceof MenuItem && IContentSpecConstants.PROPERTY_PERMISSIONS.equals(name))
+		{
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(JSONPropertyType.INSTANCE).build();
 		}
 		else builtSabloPD = super.getPropertyDescription(obj, propertySource, persistContext);
 
