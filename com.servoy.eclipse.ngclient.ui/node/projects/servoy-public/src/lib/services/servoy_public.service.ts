@@ -101,6 +101,8 @@ export abstract class ServoyPublicService {
      * cancel/hide the form popup that is currently showing.
      */
     public abstract cancelFormPopup(disableClearPopupFormCallToServer: boolean): void;
+	
+	public abstract cancelForm(form: string): void;
     /**
      * Internal api, used by ngutils services to set the styleclass of forms, the argument is a map of formname->styleclases
      *
