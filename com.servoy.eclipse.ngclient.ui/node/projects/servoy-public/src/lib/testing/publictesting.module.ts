@@ -119,6 +119,8 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public showForm(_popup: PopupForm): void {}
 
     public cancelFormPopup(_disableClearPopupFormCallToServer: boolean): void {}
+	
+	public cancelForm(_form: string): void {}
 
     public setFormStyleClasses(_styleclasses: {property: string}): void {}
 

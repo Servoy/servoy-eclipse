@@ -40,6 +40,32 @@ export class PopupFormService {
             this.showPopup(popup);
         });
     }
+	
+	public cancelForm(form: string) {
+		const frms: ComponentRef<ServoyFormPopupComponent>[] = [];
+		let newFormPopupComponent: ComponentRef<ServoyFormPopupComponent> = null;
+		let current = this.formPopupComponent;
+		while (current) {
+			const popup: PopupForm = current.instance.popup;
+			if (popup.form === form) {
+				break;
+			}
+			if (popup.parentInstance && popup.form !== form) {
+				frms.push(current);
+			}
+			if (popup.parentInstance) {
+				current = (popup.parentInstance as ComponentRef<ServoyFormPopupComponent>);
+			} else {
+				current = null;
+			}
+			newFormPopupComponent = current;
+		}
+		frms.forEach(item => {
+			this.closeSiblingsFormPopup(item);
+		});
+		
+		this.formPopupComponent = newFormPopupComponent;
+	}
 
     public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void {
         this.doc.body.removeEventListener('mouseup', this.formPopupBodyListener);

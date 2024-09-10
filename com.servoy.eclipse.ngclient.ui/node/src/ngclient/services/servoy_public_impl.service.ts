@@ -108,6 +108,10 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     cancelFormPopup(disableClearPopupFormCallToServer: boolean): void {
         this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer);
     }
+	
+	cancelForm(form: string) {
+		this.popupFormService.cancelForm(form);
+	}
 
     setFormStyleClasses(styleclasses: { property: string }): void {
         this.formService.setFormStyleClasses(styleclasses);

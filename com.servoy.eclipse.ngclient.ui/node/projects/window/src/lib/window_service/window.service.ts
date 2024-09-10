@@ -29,6 +29,11 @@ export class WindowPluginService {
     cancelFormPopupInternal(disableClearPopupFormCallToServer: boolean): void {
         this.servoyService.cancelFormPopup(disableClearPopupFormCallToServer);
     }
+	
+	cancelForm(form: string) {
+		this.servoyService.cancelForm(form);
+	}
+	
     get shortcuts(): Shortcut[] {
         return this._shortcuts;
     }
