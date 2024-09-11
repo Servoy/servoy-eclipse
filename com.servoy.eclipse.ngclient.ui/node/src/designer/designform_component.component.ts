@@ -137,6 +137,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         super(renderer);
         formservice.setDesignerMode();
         this.log = logFactory.getLogger('FormComponent');
+        this.disableTransitions();        
 
         this.isVariantForm = (this.name === 'VariantsForm');
         this.windowRefService.nativeWindow.addEventListener('message', (event) => {
@@ -322,6 +323,17 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
             this.detectChanges();
         });
+    }
+
+    disableTransitions() {
+        const styleElement = this.renderer.createElement('style');
+        styleElement.textContent = `
+            * {
+                transition: none !important;
+                animation: none !important;
+            }
+        `;
+        this.renderer.appendChild(document.head, styleElement);
     }
     
     
