@@ -42,4 +42,10 @@ export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElem
             this.dataProviderID = newValue;
         }
     }
+    
+    onClick(event){
+        if (this.editable == false && this.onActionMethodID) {
+            this.onActionMethodID(event)
+        }
+    }
 }

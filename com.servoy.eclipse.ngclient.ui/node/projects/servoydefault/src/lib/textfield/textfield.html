@@ -5,6 +5,7 @@
 	   [ngModel]="dataProviderID"
 	   (ngModelChange)="onModelChange($event)"
 	   (change)="pushUpdate()"
+	   (click)="onClick($event)"
 	   [svyFormat]="format"
 	   [svyDecimalKeyConverter]="format"
        [svyStartEdit]="'dataProviderID'"
