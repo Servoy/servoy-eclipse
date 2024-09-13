@@ -600,6 +600,29 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
 									res.add(dropTarget);
+									if (initialDropTarget != null &&
+										!initialDropTarget.getUUID().equals(parentSupportingElements.getUUID()))
+									{
+										FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(parentSupportingElements);
+										ISupportChilds parent = PersistHelper.getFlattenedPersist(flattenedSolution, form, parentSupportingElements);
+										Iterator<IPersist> it = parent.getAllObjects();
+										while (it.hasNext())
+										{
+											IPersist child = it.next();
+											IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, form));
+											if (!overridePersist.getUUID().equals(child.getUUID()))
+											{
+												parent.removeChild(child);
+												// do not add the override again, the getOverridePersist should already create it in the right place (probably directly on form)
+												//parent.addChild(overridePersist);
+											}
+											// parent is overridden, make sure all children are sent to designer
+											if (!extraChangedPersists.contains(overridePersist))
+											{
+												extraChangedPersists.add(overridePersist);
+											}
+										}
+									}
 								}
 //								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
 //								{
