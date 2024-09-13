@@ -17,6 +17,8 @@
 package com.servoy.eclipse.debug.script;
 
 
+import static com.servoy.j2db.util.Utils.stream;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.rmi.RemoteException;
@@ -35,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
@@ -252,6 +255,7 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
+import com.servoy.j2db.scripting.annotations.JSRagtest;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
@@ -366,12 +370,14 @@ public class TypeCreator extends TypeCache
 
 	public static final String ARRAY_INDEX_PROPERTY_PREFIX = "array__indexedby_";
 
+	// Type attributes
 	public static final String IMAGE_DESCRIPTOR = "servoy.IMAGEDESCRIPTOR";
 	public static final String RESOURCE = "servoy.RESOURCE";
-	public static final String VALUECOLLECTION = "servoy.VALUECOLLECTION";
 	public static final String LAZY_VALUECOLLECTION = "servoy.LAZY_VALUECOLLECTION";
+	private static final String RAGTEST_RECEIVING_TYPES = "servoy.RAGTEST_RECEIVING_TYPES";
+	private static final String RAGTEST_RETURN_TYPE = "servoy.RAGTEST_RETURN_TYPE";
 
-	public final static Set<String> BASE_TYPES = new HashSet<String>(128);
+	public final static Set<String> BASE_TYPES = new HashSet<>(128);
 
 	static
 	{
@@ -1814,15 +1820,27 @@ public class TypeCreator extends TypeCache
 						}
 
 						boolean readOnly = false;
-						if (object instanceof BeanProperty)
+						JSRagtest ragtest = null;
+						if (object instanceof BeanProperty beanProperty)
 						{
-							readOnly = AnnotationManagerReflection.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), scriptObjectClass,
-								JSReadonlyProperty.class);
+							var annotationManager = AnnotationManagerReflection.getInstance();
+							java.lang.reflect.Method getter = beanProperty.getGetter();
+							readOnly = annotationManager.isAnnotationPresent(getter, scriptObjectClass, JSReadonlyProperty.class);
+							ragtest = annotationManager.getAnnotation(getter, scriptObjectClass, JSRagtest.class);
+							if (ragtest != null)
+							{
+								System.err.println("RAGTEST");
+							}
 						}
 
 						Property property = createProperty(propertyName, readOnly, returnType, getDoc(name, scriptObjectClass, null), descriptor);
 						if (!visible) property.setVisible(false);
 						property.setStatic(type == STATIC_FIELD);
+						if (ragtest != null)
+						{
+							property.setAttribute(RAGTEST_RECEIVING_TYPES, ragtest.ragtestin());
+							property.setAttribute(RAGTEST_RETURN_TYPE, Integer.valueOf(ragtest.ragtestout()));
+						}
 
 						if (object instanceof BeanProperty || (object instanceof Field && property.isStatic()))
 						{
@@ -2849,12 +2867,59 @@ public class TypeCreator extends TypeCache
 			{
 				return TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>'));
 			}
+
+//			member.getType()
+//
+//			JSRagtest annotation = memberbox[i].method().getAnnotation(JSRagtest.class);
+//			if (annotation != null)
+//			{
+//				if (annotation.arguments().length > 0) parameterTypes = annotation.arguments();
+//				if (annotation.returns() != Object.class) returnTypeClz = annotation.returns();
+//
+//			}
+
+
 			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
 				memberType.getName().equals(QBJoin.class.getSimpleName()) ||
 				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
 				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()))
 			{
-				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
+
+				String ragtestConfig = config;
+				int ragtestIndex = ragtestConfig.indexOf("#");
+				if (ragtestIndex > 0)
+				{
+					ragtestConfig = ragtestConfig.substring(0, ragtestIndex);
+				}
+				Integer ragtestReturnType = (Integer)member.getAttribute(RAGTEST_RETURN_TYPE);
+				if (ragtestReturnType != null)
+				{
+					String typeName = IDataProvider.getTypeName(ragtestReturnType.intValue());
+					if (typeName == null)
+					{
+						ragtestConfig += "#" + typeName;
+					}
+				}
+
+
+				Member overriddenMember = TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + ragtestConfig + '>'));
+//				Member overriddenMember = TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
+
+
+				int[] ragtestReceivingTypes = (int[])member.getAttribute(RAGTEST_RECEIVING_TYPES);
+				if (ragtestReceivingTypes != null)
+				{
+					// RAGTEST alleen als config een #datatype heeft
+					if (stream(ragtestReceivingTypes).mapToObj(ragtest -> IDataProvider.getTypeName(ragtest)).filter(Objects::nonNull).noneMatch(
+						ragtest -> config.endsWith("#" + ragtest)))
+					{
+						overriddenMember.setDeprecated(true);
+//						overriddenMember.setVisible(false);
+						overriddenMember.setDescription(overriddenMember.getDescription() + "<br><b>This function is not supported RAGTEST</b>.");
+
+					}
+				}
+				return overriddenMember;
 			}
 		}
 
@@ -3498,7 +3563,7 @@ public class TypeCreator extends TypeCache
 
 	}
 
-	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new ConcurrentHashMap<String, Class< ? >>();
+	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new HashMap<>();
 
 	static
 	{
@@ -3551,7 +3616,7 @@ public class TypeCreator extends TypeCache
 				cstt = cachedSuperTypeTemplateType = createBaseType(context, superTypeName);
 			}
 			EList<Member> members = cstt.getMembers();
-			List<Member> overwrittenMembers = new ArrayList<Member>();
+			List<Member> overwrittenMembers = new ArrayList<>();
 			for (Member member : members)
 			{
 				Member overridden = createMember(member, context, config);
@@ -3685,7 +3750,15 @@ public class TypeCreator extends TypeCache
 				property.setName(provider.getDataProviderID());
 				property.setAttribute(RESOURCE, provider);
 				property.setVisible(true);
-				property.setType(getTypeRef(context, QBColumn.class.getSimpleName() + '<' + dataSource + '>'));
+
+				String dataProviderTypeName = provider.getDataProviderTypeName();
+				String typeParameters = dataSource;
+				if (dataProviderTypeName != null)
+				{
+					typeParameters += "#" + dataProviderTypeName;
+				}
+
+				property.setType(getTypeRef(context, QBColumn.class.getSimpleName() + '<' + typeParameters + '>'));
 				ImageDescriptor image = COLUMN_IMAGE;
 				String description = "Column";
 				if (provider instanceof AggregateVariable)
