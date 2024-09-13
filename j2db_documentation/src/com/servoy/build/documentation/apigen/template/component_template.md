@@ -15,10 +15,10 @@ You can access it in code via: **plugins.${service_scripting_name}**
 
 ${overview}
 </#if>
-
 <#if service>
 <#-- This is a reference page; many services have detailed usage guides [here](CURRENTLY SERVICE GUIDES ARE IN THE SAME DIR, INSIDE "REFERENCE", JUST LIKE THIS REFERENCE PAGE, BUT THIS IS PROBABLY TEMPORARY). -->
 <#else>
+
 This is a reference page; many components have detailed usage guides [here](https://docs.servoy.com/guides/develop/application-design/ui-components).
 </#if>
 <#if properties??>

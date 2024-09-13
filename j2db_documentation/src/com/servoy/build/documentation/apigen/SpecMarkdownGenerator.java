@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -412,12 +413,16 @@ public class SpecMarkdownGenerator
 	}
 
 	/**
-	 * Same as {@link #turnHTMLJSDocIntoMarkdown(String, int)} with indentSpaces set to 0.
+	 * Same as {@link #turnHTMLJSDocIntoMarkdown(String, int, boolean)} with indentSpaces set to 0.
 	 */
 	public static String turnHTMLJSDocIntoMarkdown(String doc)
 	{
 		return turnHTMLJSDocIntoMarkdown(doc, 0);
 	}
+
+	private static final Pattern splitPatternForHTMLToMarkdownConversion = Pattern.compile(
+		"\\@param|\\@example|\\@return|(?<tag>\\@\\p{Alpha}+)|<br>|<br/>|<pre data-puremarkdown>|<pre text>|<pre>|</pre>|<code>|</code>|<a href=\"|</a>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>");
+	private final static String AT_SOMETHING_WITHOUT_SPECIAL_MEANING_MARKER = "an@Somethingwithoutspecialmeaning";
 
 	/**
 	 * IMPORTANT: this method expects that all newlines in "doc" are '\n'. Make sure that is the case before calling this method.
@@ -431,41 +436,40 @@ public class SpecMarkdownGenerator
 	 *     <li>...</li>
 	 * </ul></p>
 	 * <p>If it doesn't contain html tags, we have to pay attention anyway to newlines for example so that they are correct according to markdown syntax.</p>
-	 * <p>Also things such as @param or @return need to be styled properly. @example and it's content as well...</p>
+	 * <p>Also things such as @param or @return will be styled properly - if present. @example and it's content as well...</p>
+	 *
 	 * @param indentLevel the number of indent levels (1 lvl -> 4 spaces) that each line should be indented with (in case this content will be used as part of a
 	 *                    list item, 4 spaces means one level on indentation in the lists (so according to one of the items); this does
 	 *                    NOT affect the first line, as the caller uses that as a pre-indented list item
+	 * @param applyDescriptionMagicOnDescriptions if it should call HtmlUtils.applyDescriptionMagic(doc) on main description and param/return/... descriptions as well. So it expects that the given string might have the param, return etc. docs included in it as well.
 	 */
 	public static String turnHTMLJSDocIntoMarkdown(String htmlDoc, int indentLevel)
 	{
 		// DO ADD NEW UNIT tests to SpecMarkdownGeneratorTest from the test repo for every new bug encountered / tweak made
 		if (htmlDoc == null) return null;
 
-		// first get rid of the &nbsp; &gt; &#21; etc - turn them into UTF8 chars
-		String doc = StringEscapeUtils.unescapeHtml4(htmlDoc);
-
-		Pattern splitPattern = Pattern.compile(
-			"(?<splitToken>\\@param|\\@example|\\@return|\\@deprecated|<br>|<br/>|<pre data-puremarkdown>|<pre text>|<pre>|</pre>|<code>|</code>|<a href=\"|</a>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>)");
-		Matcher matcher = splitPattern.matcher(doc);
+		Matcher matcher = splitPatternForHTMLToMarkdownConversion.matcher(htmlDoc);
 
 		List<String> matchedTokens = new ArrayList<>();
+		List<Boolean> matchedTokensIsNonSpecialAtThing = new ArrayList<>();
 		List<String> betweenMatches = new ArrayList<>();
 		int lastGroupMatchEndIndex = 0;
 		while (matcher.find())
 		{
 			MatchResult matchResult = matcher.toMatchResult();
-			betweenMatches.add(doc.substring(lastGroupMatchEndIndex, matchResult.start()));
+			betweenMatches.add(htmlDoc.substring(lastGroupMatchEndIndex, matchResult.start()));
 			matchedTokens.add(matchResult.group());
+			matchedTokensIsNonSpecialAtThing.add(Boolean.valueOf(matchResult.group(1) != null));
 			lastGroupMatchEndIndex = matchResult.end();
 		}
 
-		betweenMatches.add(doc.substring(lastGroupMatchEndIndex));
+		betweenMatches.add(htmlDoc.substring(lastGroupMatchEndIndex));
 
 		int currentIndentLevel = indentLevel;
 
 		// we could have used 3rd party libs for this translation... but those don't have this "indentLevel" that we need when indenting sub-properties of custom types in the docs...
 
-		MarkdownContentAppender result = new MarkdownContentAppender(doc.length());
+		MarkdownContentAppender result = new MarkdownContentAppender(htmlDoc.length());
 
 		ValueReference<Boolean> shouldTrimLeadingTheInBetweenContent = new ValueReference<>(Boolean.TRUE);
 		Stack<Boolean> listLevelOrderedOrNot = new Stack<>();
@@ -500,12 +504,14 @@ public class SpecMarkdownGenerator
 			boolean preserveMultipleWhiteSpaces = false; // in case of code/pre
 
 			// before we add betweenMatches.get(i) to the result, see what token follows it - so we know what kind of processing it needs
-			// NOTE: remember neither the content before this token not the token itself are yet added; token is checked again later,
+			// NOTE: remember neither the content before this token nor the token itself are yet added; token is checked again later,
 			// after preceding content is actually added
-			switch (token)
+
+			String tokenForSwitchChecks = (matchedTokensIsNonSpecialAtThing.get(i).booleanValue() ? AT_SOMETHING_WITHOUT_SPECIAL_MEANING_MARKER : token); // this is a bit of a hack to be able to use the value of matchedTokensIsNonSpecialAtThing directly in the case statement
+			switch (tokenForSwitchChecks)
 			{
 				case "<br>", "<br/>" :
-				case "@param", "@return", "@deprecated", "@exampleDoNotAutoAddCodeBlock" :
+				case "@param", "@return", "@exampleDoNotAutoAddCodeBlock", AT_SOMETHING_WITHOUT_SPECIAL_MEANING_MARKER :
 				case "<p>", "</p>" :
 				case "<ul>", "</ul>", "<ol>", "</ol>", "<li>", "</li>" :
 					trimTrailingInPrecedingInbetweenContent = true;
@@ -550,7 +556,7 @@ public class SpecMarkdownGenerator
 						if (contentAfterPreTag.indexOf('\n') >= 0)
 						{
 							// ok, it is multi-line, switch to <pre>
-							token = "<pre>";
+							token = tokenForSwitchChecks = "<pre>";
 							if ("</code>".equals(matchedTokens.get(i + 1))) matchedTokens.set(i + 1, "</pre>"); // otherwise it's malformed HTML I guess
 
 							// now do what this switch would have done for <code>
@@ -575,7 +581,7 @@ public class SpecMarkdownGenerator
 					betweenMatches.set(i + 1, inBetweenTextThatIsAfterLink);
 
 					// add a fictional token (that we can use to end the text part of the link in the switch statement that follows)
-					// and the link as in-between just before the </a> token (that can then generate the actual link part)
+					// and the link has in-between just before the </a> token (that can then generate the actual link part)
 
 					int j = i + 1;
 					while (j < matchedTokens.size() && !matchedTokens.get(j).equals("</a>"))
@@ -584,6 +590,7 @@ public class SpecMarkdownGenerator
 					if (j < matchedTokens.size())
 					{
 						matchedTokens.add(j, "<a link part follows>");
+						matchedTokensIsNonSpecialAtThing.add(j, Boolean.FALSE);
 						betweenMatches.add(j + 1, link);
 					}
 					break;
@@ -599,14 +606,14 @@ public class SpecMarkdownGenerator
 				addInBetweenAsRawMarkdown, currentIndentLevel, codeBacktickState, token, insideExampleSectionThatAutoAddsCodeBlock);
 
 			// now append anything that the token needs to add
-			switch (token)
+			switch (tokenForSwitchChecks)
 			{
 				case "<br>", "<br/>" :
 					result.appendWithoutEscaping("  ");
 					nextLinePlusIndent(result, currentIndentLevel);
 					shouldTrimLeadingTheInBetweenContent.value = Boolean.TRUE;
 					break;
-				case "@param", "@example", "@return", "@deprecated", "@exampleDoNotAutoAddCodeBlock" :
+				case "@param", "@example", "@return", "@exampleDoNotAutoAddCodeBlock", AT_SOMETHING_WITHOUT_SPECIAL_MEANING_MARKER :
 					if (firstAtSomething)
 					{
 						// add an empty line - to have a bit of visual separation between the description of an API and the @param, @return etc.
@@ -655,14 +662,36 @@ public class SpecMarkdownGenerator
 						//  @return something
 						// then we don't want to left trim what follows after "@example" (that would remove the 4 spaces as well), just the \n
 						int firstBackslashNPosition = contentAfterExampleTag.indexOf('\n');
-						if (firstBackslashNPosition == contentAfterExampleTag.length() - 1)
+						if (firstBackslashNPosition >= 0 && contentAfterExampleTag.substring(firstBackslashNPosition).trim().length() == 0)
 						{
 							// one line
+							// so the if above should identify both
+							// -----
+							// @example i = i + 1
+							// return something
+							// -----
+							// and
+							// -----
+							// @example i = i + 1
+							//
+							// @return something
+							// -----
 							shouldTrimLeadingTheInBetweenContent.value = Boolean.TRUE;
+							betweenMatches.set(i + 1, contentAfterExampleTag.substring(0, firstBackslashNPosition));
 						}
 						else
 						{
-							if (firstBackslashNPosition >= 0) betweenMatches.set(i + 1, contentAfterExampleTag.substring(firstBackslashNPosition + 1));
+							// if we have something like
+							//
+							// @example     a = a + 1;
+							//     output(a);
+							//
+							// then first \n is not the one where the multi-line code starts; then it starts after the first space
+							if (firstBackslashNPosition >= 0 && contentAfterExampleTag.substring(0, firstBackslashNPosition + 1).trim().length() == 0)
+								betweenMatches.set(i + 1, StringUtils.stripEnd(contentAfterExampleTag.substring(firstBackslashNPosition + 1), null));
+							else if (contentAfterExampleTag.charAt(0) == ' ')
+								betweenMatches.set(i + 1, StringUtils.stripEnd(contentAfterExampleTag.substring(1), null));
+							else betweenMatches.set(i + 1, StringUtils.stripEnd(contentAfterExampleTag, null));
 						}
 					}
 					break;
@@ -833,7 +862,8 @@ public class SpecMarkdownGenerator
 		String token,
 		ValueReference<Boolean> insideExampleSectionThatAutoAddsCodeBlock)
 	{
-		String inbetween = inbetweenUnprocessed;
+		// first get rid of the &nbsp; &gt; &#21; etc - turn them into UTF8 chars
+		String inbetween = StringEscapeUtils.unescapeHtml4(inbetweenUnprocessed);
 
 		// ok now do add the "betweenMatches" content that was before 'token'
 		if (!preserveMultipleWhiteSpaces) inbetween = inbetween.replaceAll("\\s+", " ");
@@ -977,10 +1007,81 @@ public class SpecMarkdownGenerator
 		String doc = TextUtils.newLinesToBackslashN(initialDescription).replace("%%prefix%%", "").replace("%%elementName%%", "myElement");
 
 		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = TextUtils.stripCommentStartMiddleAndEndChars(doc);
-		doc = HtmlUtils.applyDescriptionMagic(doc);
+
 		doc = doc.trim();
-		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = turnHTMLJSDocIntoMarkdown(doc, indentLevel);
+		if (docGenerator.shouldTurnAPIDocsIntoMarkdown()) doc = turnHTMLJSDocIntoMarkdown(applyDescriptionMagicOnDescriptions(doc), indentLevel);
 		return doc;
+	}
+
+	private final static Pattern descriptionSplitPattern = Pattern.compile(
+		"^\\h*(\\@param|\\@return)(\\h+\\p{Alnum}*\\h*\\{.+\\})?\\h*|^\\h*\\@\\p{Alpha}+\\h*", Pattern.MULTILINE);
+
+	/**
+	 * As when we read the _doc.js files of components/services, the "doc" will
+	 * contain the main description as well as potentially tags such as @param, @return, ... with their own descriptions,
+	 * and HtmlUtils.applyDescriptionMagic(...) does not work with that, but only with single descriptions (otherwise for example blank new lines
+	 * before a @param tag might confuse it), here we:
+	 * <ul>
+	 *   <li>split the doc into it's independent single descriptions</li>
+	 *   <li>apply HtmlUtils.applyDescriptionMagic(...)</li>
+	 *   <li>add everything back in it's place</li>
+	 * </ul>
+	 *
+	 * @param doc a doc that potentially has @param, @return, ... tags in it
+	 * @return a doc where all independent descriptions (main, the ones of params, return values etc) were processed by HtmlUtils.applyDescriptionMagic(...)
+	 */
+	public static String applyDescriptionMagicOnDescriptions(String htmlDoc)
+	{
+		// DO ADD NEW UNIT tests to SpecMarkdownGeneratorTest from the test repo for every new bug encountered / tweak made
+		if (htmlDoc == null) return null;
+
+		StringBuilder sb = new StringBuilder(htmlDoc.length() + htmlDoc.length() / 4);
+
+		Matcher matcher = descriptionSplitPattern.matcher(htmlDoc);
+
+		List<String> matchedTokens = new ArrayList<>();
+		List<String> betweenMatches = new ArrayList<>();
+		int lastGroupMatchEndIndex = 0;
+		while (matcher.find())
+		{
+			MatchResult matchResult = matcher.toMatchResult();
+			betweenMatches.add(htmlDoc.substring(lastGroupMatchEndIndex, matchResult.start()));
+			matchedTokens.add(matchResult.group());
+
+			lastGroupMatchEndIndex = matchResult.end();
+		}
+
+		betweenMatches.add(htmlDoc.substring(lastGroupMatchEndIndex));
+
+		for (int i = 0; i < matchedTokens.size(); i++)
+		{
+			String tokenProcessed = matchedTokens.get(i).trim();
+			handleInBetweenProcessedForApplyDescriptionsMagic(sb, betweenMatches, matchedTokens, i);
+
+			sb.append(tokenProcessed);
+			if (betweenMatches.get(i + 1).trim().length() > 0) sb.append(" ");
+		}
+		handleInBetweenProcessedForApplyDescriptionsMagic(sb, betweenMatches, matchedTokens, matchedTokens.size());
+
+		return sb.toString();
+	}
+
+	private static void handleInBetweenProcessedForApplyDescriptionsMagic(StringBuilder sb, List<String> betweenMatches, List<String> matchedTokens, int i)
+	{
+		boolean isAfterExampleToken = (i > 0 && matchedTokens.get(i - 1).contains("@example"));
+
+		String inbetweenProcessed = (isAfterExampleToken ? StringUtils.stripEnd(betweenMatches.get(i), null)
+			: HtmlUtils.applyDescriptionMagic(betweenMatches.get(i).trim()));
+
+		if (inbetweenProcessed.length() > 0)
+		{
+			sb.append(inbetweenProcessed);
+			if (matchedTokens.size() != i /* but not if nothing follows */)
+			{
+				sb.append("\n");
+				if (i == 0 /* an extra new line after description */) sb.append("\n");
+			}
+		}
 	}
 
 	private Record createFunction(String name, JSONObject specEntry)
@@ -1162,6 +1263,7 @@ public class SpecMarkdownGenerator
 				case "int" -> "../../../servoycore/dev-api/js-lib/number.md";
 				case "long" -> "../../../servoycore/dev-api/js-lib/number.md";
 				case "double" -> "../../../servoycore/dev-api/js-lib/number.md";
+				case "byte" -> "../../../servoycore/dev-api/js-lib/number.md";
 				case "float" -> "../../../servoycore/dev-api/js-lib/number.md";
 				case "json" -> "../../../servoycore/dev-api/js-lib/json.md";
 				case "dimension" -> "../../../servoycore/dev-api/js-lib/dimension.md";
@@ -1197,7 +1299,14 @@ public class SpecMarkdownGenerator
 				case "media" -> "../../../servoy-developer/property\\_types.md#media";
 				case "valuelist" -> "../../../servoy-developer/property\\_types.md#valuelist";
 				case "labelfor" -> "../../../servoy-developer/property\\_types.md#labelfor";
+				case "modifiable" -> "../../../servoy-developer/property\\_types.md#modifiable";
+				case "valuelistconfig" -> "../../../servoy-developer/property\\_types.md#valuelistConfig";
+				case "border" -> "../../../servoy-developer/property\\_types.md#border";
 
+				case "jsdndevent" -> "../../../servoycore/dev-api/application/jsdndevent.md";
+				case "jsmenu" -> "../../../servoycore/dev-api/menus/jsmenu.md";
+				case "jsmenuitem" -> "../../../servoycore/dev-api/menus/jsmenuitem.md";
+				case "runtimecomponent" -> "../../../servoycore/dev-api/forms/runtimeform/elements/runtimecomponent.md";
 				case "runtimewebcomponent" -> "../../../servoycore/dev-api/forms/runtimeform/elements/runtimewebcomponent.md";
 				case "jswebcomponent" -> "../../../servoycore/dev-api/solutionmodel/jswebcomponent.md";
 

@@ -22,7 +22,8 @@ Import-Package: freemarker.cache,
  freemarker.template.utility,
  org.apache.commons.io,
  org.apache.commons.io.filefilter,
- org.apache.commons.text;version="1.12.0",
+ org.apache.commons.lang3,
+ org.apache.commons.text,
  org.dom4j,
- org.dom4j.io;version="[2.1.0,3.0.0)"
+ org.dom4j.io
 Automatic-Module-Name: j2db_documentation
