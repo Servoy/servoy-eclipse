@@ -47,7 +47,7 @@ public class OpenUrlAction implements IWorkbenchWindowActionDelegate
 		{
 			if (openWiki.equals(action.getActionDefinitionId()))
 			{
-				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://wiki.servoy.com"));
+				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://docs.servoy.com"));
 			}
 			else if (openTutorial.equals(action.getActionDefinitionId()))
 			{
