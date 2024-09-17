@@ -219,4 +219,9 @@ public class CSSValue
 		}
 		return px + "";
 	}
+
+	public void setParentContainerSize(int size)
+	{
+		this.parentSize = size;
+	}
 }

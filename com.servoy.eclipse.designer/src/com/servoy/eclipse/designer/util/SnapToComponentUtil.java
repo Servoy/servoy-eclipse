@@ -573,12 +573,27 @@ public class SnapToComponentUtil
 			else
 			{
 				CSSValue computed = computeValueBasedOnOppositeTargetProperty(property, containerSize, val);
-				setCssValue(newPosition, property, computed);
-			}
-			//clear the opposite property value if the size property is set
-			if (oldPosition == null || getCssValue(newPosition, sizeProperty, containerSize).isSet())
-			{
-				setCssValue(newPosition, oppositeProperty, CSSValue.NOT_SET);
+				if (getCssValue(targetPosition, property, targetContainerSize).isSet())
+				{
+					//if the target has the same anchor just set the computed value
+					setCssValue(newPosition, property, computed);
+					//clear the opposite property value if the size property is set
+					if (oldPosition == null || getCssValue(newPosition, sizeProperty, containerSize).isSet())
+					{
+						setCssValue(newPosition, oppositeProperty, CSSValue.NOT_SET);
+					}
+				}
+				else
+				{
+					//the target has the opposite property set, use the computed value and the size to obtain the opposite property value
+					CSSValue oppositeComputed = computeValueBasedOnOppositeProperty(newPosition, oppositeProperty, containerSize, computed);
+					setCssValue(newPosition, oppositeProperty, oppositeComputed);
+					//clear the property value if the size property is set
+					if (oldPosition == null || getCssValue(newPosition, sizeProperty, containerSize).isSet())
+					{
+						setCssValue(newPosition, property, CSSValue.NOT_SET);
+					}
+				}
 			}
 		}
 		else if (getCssValue(targetPosition, oppositeProperty, targetContainerSize).isSet() &&
@@ -662,23 +677,32 @@ public class SnapToComponentUtil
 	private static CSSValue computeValueBasedOnOppositeTargetProperty(String property, java.awt.Dimension containerSize,
 		CSSValue oppositePropertyValue)
 	{
-		if (oppositePropertyValue.isPercentage())
-		{
-			return new CSSValue(100 - oppositePropertyValue.getPercentage(), 0);
-		}
+		CSSValue result = CSSValue.NOT_SET;
+		boolean isPercentage = oppositePropertyValue.isPercentage();
 		switch (property)
 		{
 			case "left" :
-				return new CSSValue(0, oppositePropertyValue.getAsPixels());
+				result = new CSSValue(isPercentage ? 100 - oppositePropertyValue.getPercentage() : 0,
+					isPercentage ? 0 : oppositePropertyValue.getAsPixels());
+				result.setParentContainerSize(containerSize.width);
+				break;
 			case "right" :
-				return new CSSValue(0, containerSize.width - oppositePropertyValue.getAsPixels());
-
+				String val = oppositePropertyValue.isPercentage() ? 100 - oppositePropertyValue.getPercentage() + "%"
+					: containerSize.width - oppositePropertyValue.getAsPixels() + "px";
+				result = new CSSValue(val, containerSize.width, true);
+				break;
 			case "top" :
-				return new CSSValue(0, oppositePropertyValue.getAsPixels());
+				result = new CSSValue(oppositePropertyValue.isPercentage() ? 100 - oppositePropertyValue.getPercentage() : 0,
+					isPercentage ? 0 : oppositePropertyValue.getAsPixels());
+				result.setParentContainerSize(containerSize.height);
+				break;
 			case "bottom" :
-				return new CSSValue(0, containerSize.height - oppositePropertyValue.getAsPixels());
+				String bottom = oppositePropertyValue.isPercentage() ? 100 - oppositePropertyValue.getPercentage() + "%"
+					: containerSize.height - oppositePropertyValue.getAsPixels() + "px";
+				result = new CSSValue(bottom, containerSize.height, true);
+				break;
 		}
-		return CSSValue.NOT_SET;
+		return result;
 	}
 
 
