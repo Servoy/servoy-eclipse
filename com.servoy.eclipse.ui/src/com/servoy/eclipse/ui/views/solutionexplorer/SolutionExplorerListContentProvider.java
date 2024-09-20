@@ -1762,12 +1762,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		boolean current = (Context.getCurrentContext() != null);
 		JavaMembers jm = null;
+		if (!current)
+		{
+			Context.enter();
+		}
 		try
 		{
-			if (!current)
-			{
-				Context.enter();
-			}
 			jm = new DeclaringClassJavaMembers(null, specificClazz, specificClazz);
 		}
 		finally
@@ -2085,12 +2085,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		boolean current = (Context.getCurrentContext() != null);
 		InstanceJavaMembers ijm = null;
+		if (!current)
+		{
+			Context.enter();
+		}
 		try
 		{
-			if (!current)
-			{
-				Context.enter();
-			}
 			ijm = new InstanceJavaMembers(new DummyScope(), o.getClass());
 		}
 		finally
