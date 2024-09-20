@@ -10,11 +10,12 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
     beforeEach( waitForAsync(() => {
-        servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm', 'trustAsHtml','registerComponent','unRegisterComponent'] );
+        servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm', 'isInAbsoluteLayout', 'trustAsHtml','registerComponent','unRegisterComponent'] );
         servoyApi.getMarkupId.and.returnValue( '1' );
+        servoyApi.isInAbsoluteLayout.and.returnValue( true );
         servoyApi.formWillShow.and.returnValue( Promise.resolve( true ) );
         servoyApi.hideForm.and.returnValue( Promise.resolve( true ) );
-        servoyApi.trustAsHtml.and.returnValue( Promise.resolve( true ) );
+        servoyApi.trustAsHtml.and.returnValue(  true );
         TestBed.configureTestingModule( {
             declarations: [
                 ServoyDefaultTabpanel
