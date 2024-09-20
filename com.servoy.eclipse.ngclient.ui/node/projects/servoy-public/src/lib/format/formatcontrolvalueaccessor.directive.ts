@@ -108,7 +108,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             let format = this.format.display ? this.format.display : this.format.edit;
             if (this.hasFocus && this.format.edit && !this.format.isMask) format = this.format.edit;
             try {
-                data = this.formatService.unformat(data, format, type, this.realValue);
+                data = this.formatService.unformat(data, format, type, this.realValue, true);
             } catch (e) {
                 this.log.error(e);
                 //TODO set error state
