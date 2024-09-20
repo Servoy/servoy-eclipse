@@ -189,9 +189,10 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 		}
 		else if (create)
 		{
+			Context cx = Context.enter();
 			try
 			{
-				scope = Context.enter().newObject(ss);
+				scope = cx.newObject(ss);
 				ss.putWithoutFireChange(TEST_SCOPE, scope);
 				scope.setParentScope(ss);
 			}
