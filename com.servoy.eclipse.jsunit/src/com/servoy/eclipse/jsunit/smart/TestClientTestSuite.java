@@ -65,7 +65,7 @@ public class TestClientTestSuite extends ApplicationJSTestSuite
 		}
 		finally
 		{
-			J2DBGlobals.setSingletonServiceProvider(prevServiceProvider);
+			J2DBGlobals.setServiceProvider(prevServiceProvider);
 		}
 	}
 
