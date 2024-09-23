@@ -7,6 +7,7 @@ Shell *{
 }
 
 Table, Tree {
+    swt-lines-visible: false;
     swt-header-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
     swt-header-background-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
 }
@@ -46,6 +47,15 @@ CTabFolder, Shell CTabFolder {
 CTabItem:selected,
 CTabItem:selected CLabel {
     color: white;
+}
+
+ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Tree,
+ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Composite> Tree {
+    swt-lines-visible: false;
+}
+
+#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Tree {
+    swt-lines-visible: false;
 }
 
 .DragFeedback {
