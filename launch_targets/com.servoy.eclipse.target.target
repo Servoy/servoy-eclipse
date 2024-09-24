@@ -28,36 +28,36 @@
             <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.source.feature.group" version="2.4.0.202405230453"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/eclipse/updates/4.32/"/>
-            <unit id="org.eclipse.emf.ecore.feature.group" version="2.37.0.v20240203-0859"/>
-            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.2500.v20240513-1750"/>
-            <unit id="org.eclipse.sdk.ide" version="4.32.0.I20240601-0610"/>
+            <repository location="https://download.eclipse.org/eclipse/updates/4.33/"/>
+            <unit id="org.eclipse.emf.ecore.feature.group" version="2.38.0.v20240721-0802"/>
+            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.2600.v20240722-2106"/>
+            <unit id="org.eclipse.sdk.ide" version="4.33.0.I20240903-0240"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/releases/2024-06"/>
-            <unit id="org.eclipse.egit.feature.group" version="6.10.0.202406032230-r"/>
-            <unit id="org.eclipse.epp.mpc.feature.group" version="1.10.3.v20240228-1000"/>
-            <unit id="org.eclipse.jgit.feature.group" version="6.10.0.202406032230-r"/>
-            <unit id="org.eclipse.jgit.http.apache.feature.group" version="6.10.0.202406032230-r"/>
-            <unit id="org.eclipse.jgit.lfs.feature.group" version="6.10.0.202406032230-r"/>
-            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.34.0.v202405180419"/>
+            <repository location="https://download.eclipse.org/releases/2024-09"/>
+            <unit id="org.eclipse.egit.feature.group" version="7.0.0.202409031743-r"/>
+            <unit id="org.eclipse.epp.mpc.feature.group" version="1.11.0.v20240709-1650"/>
+            <unit id="org.eclipse.jgit.feature.group" version="7.0.0.202409031743-r"/>
+            <unit id="org.eclipse.jgit.http.apache.feature.group" version="7.0.0.202409031743-r"/>
+            <unit id="org.eclipse.jgit.lfs.feature.group" version="7.0.0.202409031743-r"/>
+            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.35.0.v202408150414"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.20.0"/>
-            <unit id="org.eclipse.draw2d.feature.group" version="3.20.0.202405290843"/>
-            <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.20.0.202405290843"/>
-            <unit id="org.eclipse.gef.feature.group" version="3.20.0.202405290843"/>
-            <unit id="org.eclipse.gef.sdk.feature.group" version="3.20.0.202405290843"/>
+            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.21.0"/>
+            <unit id="org.eclipse.draw2d.feature.group" version="3.21.0.202409021815"/>
+            <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.21.0.202409021815"/>
+            <unit id="org.eclipse.gef.feature.group" version="3.21.0.202409021815"/>
+            <unit id="org.eclipse.gef.sdk.feature.group" version="3.21.0.202409021815"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tm4e/releases/0.12.0/"/>
-            <unit id="org.eclipse.tm4e.feature.feature.group" version="0.12.0.202405210827"/>
-            <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.12.0.202405210827"/>
+            <repository location="https://download.eclipse.org/tm4e/releases/0.13.0/"/>
+            <unit id="org.eclipse.tm4e.feature.feature.group" version="0.13.0.202408262111"/>
+            <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.13.0.202408262111"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2024.09"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202407231120"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202407231204"/>
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2024.12"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202409241203"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202409241206"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
