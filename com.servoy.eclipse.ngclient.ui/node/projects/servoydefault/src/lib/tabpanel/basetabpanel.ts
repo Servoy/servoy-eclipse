@@ -38,7 +38,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
     private waitingForServerVisibility = {};
     private lastSelectedTab: Tab;
 
-    private log: LoggerService;
+    protected log: LoggerService;
 
     constructor(private windowRefService: WindowRefService, logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);

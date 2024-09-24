@@ -34,22 +34,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     }
     
     getContainerStyle(element: HTMLElement) : { [property: string]: any }{
-        const navpane = element.querySelector('[ngbnavpane]');
-        const fullsize = (this.height === '100%');
-        if (navpane) {
-            if (this.height > 0) this.renderer.setStyle(navpane, 'min-height', this.height + 'px');
-            else this.renderer.setStyle(navpane, 'height', '100%');
-            this.renderer.setStyle(navpane, 'position', 'relative');
-            if (fullsize) {
-                const tabs = element.querySelector('ul');
-                let calcHeight = tabs.clientHeight;
-                const clientRects = tabs.getClientRects();
-                if (clientRects && clientRects.length > 0) {
-                    calcHeight = tabs.getClientRects()[0].height;
-                }
-                this.renderer.setStyle(navpane.parentElement, 'height', 'calc(100% - ' + calcHeight + 'px)');
-            }
-        }
+        this.updateNavpane(element);
         if (this.servoyApi.isInAbsoluteLayout()) {
             const tabs = element.querySelector('ul');
             let calcHeight = tabs.clientHeight;
@@ -61,7 +46,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
             // should we set this to absolute ? it cannot be relative
             delete this.containerStyle.position;
         } else {
-            if (fullsize) {
+            if (this.height === '100%') {
                 this.containerStyle['height'] = this.height;
                 if (this.getNativeElement()) this.renderer.setStyle(this.getNativeElement(), 'height', '100%');
             } else {
@@ -70,5 +55,46 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
         }
         this.containerStyle['marginTop'] = (element.offsetWidth < element.scrollWidth ? 8 : 0) + 'px';
         return this.containerStyle;
+    }
+
+    updateNavpaneTimeout: any;
+    updateNavpaneTimeoutCounter: number = 0;
+    private updateNavpane(element: HTMLElement) {
+        if(this.updateNavpaneTimeout) {
+            clearTimeout(this.updateNavpaneTimeout);
+            this.updateNavpaneTimeout = null;
+        }
+        const navpane = element.querySelector('[ngbnavpane].show');
+        if (navpane) {
+            this.updateNavpaneTimeoutCounter = 0;
+            if (this.height > 0) this.renderer.setStyle(navpane, 'min-height', this.height + 'px');
+            else this.renderer.setStyle(navpane, 'height', '100%');
+            this.renderer.setStyle(navpane, 'position', 'relative');
+            if (this.height === '100%') {
+                const tabs = element.querySelector('ul');
+                let calcHeight = tabs.clientHeight;
+                const clientRects = tabs.getClientRects();
+                if (clientRects && clientRects.length > 0) {
+                    calcHeight = tabs.getClientRects()[0].height;
+                }
+                this.renderer.setStyle(navpane.parentElement, 'height', 'calc(100% - ' + calcHeight + 'px)');
+            }
+        } else {
+            if(this.updateNavpaneTimeoutCounter < 10) {
+                this.updateNavpaneTimeoutCounter++;
+                this.updateNavpaneTimeout = setTimeout(() => {
+                    this.updateNavpane(element);
+                }, 200);
+            } else {
+                this.log.warn('Could not find navpane in tabpanel');
+            }
+        }
+    }
+
+    ngOnDestroy(): void {
+        super.ngOnDestroy();
+        if(this.updateNavpaneTimeout) {
+            clearTimeout(this.updateNavpaneTimeout);
+        }
     }
 }
