@@ -184,7 +184,7 @@
                 <dependency>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.2.2</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -214,7 +214,7 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.14.18</version>
+                    <version>1.15.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -226,7 +226,7 @@
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-compress</artifactId>
-                    <version>1.26.2</version>
+                    <version>1.27.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -238,7 +238,7 @@
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-lang3</artifactId>
-                    <version>3.15.0</version>
+                    <version>3.17.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -256,19 +256,19 @@
                 <dependency>
                     <groupId>org.apache.httpcomponents.client5</groupId>
                     <artifactId>httpclient5</artifactId>
-                    <version>5.3.1</version>
+                    <version>5.4</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.httpcomponents.core5</groupId>
                     <artifactId>httpcore5-h2</artifactId>
-                    <version>5.2.5</version>
+                    <version>5.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.httpcomponents.core5</groupId>
                     <artifactId>httpcore5</artifactId>
-                    <version>5.2.5</version>
+                    <version>5.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -280,25 +280,25 @@
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-api</artifactId>
-                    <version>2.23.1</version>
+                    <version>2.24.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-core</artifactId>
-                    <version>2.23.1</version>
+                    <version>2.24.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-slf4j2-impl</artifactId>
-                    <version>2.23.1</version>
+                    <version>2.24.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-web</artifactId>
-                    <version>2.23.1</version>
+                    <version>2.24.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -358,7 +358,7 @@
                 <dependency>
                     <groupId>org.jboss.logging</groupId>
                     <artifactId>jboss-logging</artifactId>
-                    <version>3.6.0.Final</version>
+                    <version>3.6.1.Final</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -370,7 +370,7 @@
                 <dependency>
                     <groupId>org.yaml</groupId>
                     <artifactId>snakeyaml</artifactId>
-                    <version>2.2</version>
+                    <version>2.3</version>
                     <type>jar</type>
                 </dependency>
             </dependencies>
