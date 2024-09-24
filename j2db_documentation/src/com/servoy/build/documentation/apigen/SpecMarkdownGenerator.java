@@ -70,7 +70,10 @@ import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNotFoundException;
+import freemarker.template.utility.DeepUnwrap;
 
 /**
  * @author jcompagner
@@ -96,6 +99,15 @@ public class SpecMarkdownGenerator
 	private static File componentsRootDir;
 	private static File servicePackagesDir;
 	private static File componentPackagesDir;
+
+	private final static java.util.function.Function<String, String> htmlToMarkdownConverter = (initialDescription) -> {
+		if (initialDescription == null) return null;
+
+		String convertedDesc = HtmlUtils.applyDescriptionMagic(initialDescription.replace("%%prefix%%", "").replace("%%elementName%%",
+			"myElement"));
+		convertedDesc = convertedDesc.trim(); // probably not needed
+		return SpecMarkdownGenerator.turnHTMLJSDocIntoMarkdown(convertedDesc);
+	};
 
 	/**
 	 * It will generate the reference docs markdown for NG components and services.
@@ -313,6 +325,12 @@ public class SpecMarkdownGenerator
 		this.docGenerator = docGenerator;
 
 		root = new HashMap<>();
+
+		/**
+		 * Quick convert of HTML to String for use in the template.
+		 */
+		root.put("MD", (TemplateMethodModelEx)((params) -> htmlToMarkdownConverter.apply((String)DeepUnwrap.unwrap((TemplateModel)params.get(0)))));
+
 		if (globalRootEntries != null) root.putAll(globalRootEntries);
 
 		String docFileName = jsonObject.optString("doc", null);
@@ -423,6 +441,8 @@ public class SpecMarkdownGenerator
 	private static final Pattern splitPatternForHTMLToMarkdownConversion = Pattern.compile(
 		"(^\\h*(\\@param|\\@example|\\@return|(?<tag>\\@\\p{Alpha}+)))|<br>|<br/>|<pre data-puremarkdown>|<pre text>|<pre>|</pre>|<code>|</code>|<a href=\"|</a>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>",
 		Pattern.MULTILINE);
+	// IMPORTANT - if you add or remove groups, so (), make sure that the matchedTokensIsNonSpecialAtThing code below keeps using the correct group index
+
 	private final static String AT_SOMETHING_WITHOUT_SPECIAL_MEANING_MARKER = "an@Somethingwithoutspecialmeaning";
 
 	/**
@@ -460,7 +480,7 @@ public class SpecMarkdownGenerator
 			MatchResult matchResult = matcher.toMatchResult();
 			betweenMatches.add(htmlDoc.substring(lastGroupMatchEndIndex, matchResult.start()));
 			matchedTokens.add(matchResult.group().trim()); // trim() is used here to get rid of leading spaces in @something tokens; the rest of the tokens that can match from the regex. don't have white space in them anyway
-			matchedTokensIsNonSpecialAtThing.add(Boolean.valueOf(matchResult.group(1) != null));
+			matchedTokensIsNonSpecialAtThing.add(Boolean.valueOf(matchResult.group(3) != null));
 			lastGroupMatchEndIndex = matchResult.end();
 		}
 
@@ -1076,11 +1096,11 @@ public class SpecMarkdownGenerator
 		if (inbetweenProcessed.length() > 0)
 		{
 			sb.append(inbetweenProcessed);
-			if (matchedTokens.size() != i /* but not if nothing follows */)
-			{
-				sb.append("\n");
-				if (i == 0 /* an extra new line after description */) sb.append("\n");
-			}
+		}
+		if (sb.length() > 0 && matchedTokens.size() != i /* but not if nothing follows */)
+		{
+			sb.append("\n");
+			if (i == 0 /* an extra new line after description */) sb.append("\n");
 		}
 	}
 
@@ -1430,6 +1450,11 @@ public class SpecMarkdownGenerator
 			{
 				file.getParentFile().mkdirs();
 				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
+
+				/**
+				 * Quick convert of HTML to String for use in the template.
+				 */
+				root.put("MD", (TemplateMethodModelEx)((params) -> htmlToMarkdownConverter.apply((String)DeepUnwrap.unwrap((TemplateModel)params.get(0)))));
 
 				root.put("packageName", packageName);
 				root.put("instance", this);
