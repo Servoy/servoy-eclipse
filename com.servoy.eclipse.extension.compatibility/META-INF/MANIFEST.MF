@@ -15,7 +15,6 @@ Require-Bundle: servoy_shared,
  org.apache.logging.log4j.core,
  org.apache.commons.commons-pool2,
  j2db_server,
- org.apache.commons.codec,
  org.apache.commons.commons-collections4,
  sablo,
  javax.websocket,
@@ -31,7 +30,8 @@ Require-Bundle: servoy_shared,
  wrapped.org.apache.httpcomponents.core5.httpcore5;bundle-version="5.2.3",
  wrapped.org.apache.httpcomponents.core5.httpcore5-h2;bundle-version="5.2.3",
  org.apache.commons.commons-compress;bundle-version="1.25.0",
- org.apache.commons.logging;bundle-version="1.2.0"
+ org.apache.commons.logging;bundle-version="1.2.0",
+ org.apache.commons.commons-codec;bundle-version="1.16.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
