@@ -421,7 +421,8 @@ public class SpecMarkdownGenerator
 	}
 
 	private static final Pattern splitPatternForHTMLToMarkdownConversion = Pattern.compile(
-		"\\@param|\\@example|\\@return|(?<tag>\\@\\p{Alpha}+)|<br>|<br/>|<pre data-puremarkdown>|<pre text>|<pre>|</pre>|<code>|</code>|<a href=\"|</a>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>");
+		"(^\\h*(\\@param|\\@example|\\@return|(?<tag>\\@\\p{Alpha}+)))|<br>|<br/>|<pre data-puremarkdown>|<pre text>|<pre>|</pre>|<code>|</code>|<a href=\"|</a>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>",
+		Pattern.MULTILINE);
 	private final static String AT_SOMETHING_WITHOUT_SPECIAL_MEANING_MARKER = "an@Somethingwithoutspecialmeaning";
 
 	/**
@@ -458,7 +459,7 @@ public class SpecMarkdownGenerator
 		{
 			MatchResult matchResult = matcher.toMatchResult();
 			betweenMatches.add(htmlDoc.substring(lastGroupMatchEndIndex, matchResult.start()));
-			matchedTokens.add(matchResult.group());
+			matchedTokens.add(matchResult.group().trim()); // trim() is used here to get rid of leading spaces in @something tokens; the rest of the tokens that can match from the regex. don't have white space in them anyway
 			matchedTokensIsNonSpecialAtThing.add(Boolean.valueOf(matchResult.group(1) != null));
 			lastGroupMatchEndIndex = matchResult.end();
 		}
@@ -497,7 +498,6 @@ public class SpecMarkdownGenerator
 
 				if (preOrCodeTagFound) token = "@exampleDoNotAutoAddCodeBlock"; // make it behave just like a @param or @return in how it processes it's content
 			}
-
 
 			boolean trimTrailingInPrecedingInbetweenContent = false; // so we know we have to trimTrailing;
 
@@ -1014,7 +1014,7 @@ public class SpecMarkdownGenerator
 	}
 
 	private final static Pattern descriptionSplitPattern = Pattern.compile(
-		"^\\h*(\\@param|\\@return)(\\h+\\p{Alnum}*\\h*\\{.+\\})?\\h*|^\\h*\\@\\p{Alpha}+\\h*", Pattern.MULTILINE);
+		"(^\\h*(\\@param|\\@return)(\\h+\\p{Alnum}*\\h*\\{.+\\})?\\h*)|(^\\h*\\@\\p{Alpha}+\\h*)", Pattern.MULTILINE);
 
 	/**
 	 * As when we read the _doc.js files of components/services, the "doc" will
