@@ -82,7 +82,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
 
         fixture.detectChanges();
-        tick();
+        tick(250);
 		discardPeriodicTasks();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
@@ -98,7 +98,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
 
         fixture.detectChanges();
-        tick();
+        tick(250);
 		discardPeriodicTasks();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
