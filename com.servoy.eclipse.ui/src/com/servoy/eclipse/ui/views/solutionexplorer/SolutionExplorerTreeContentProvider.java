@@ -3087,7 +3087,7 @@ public class SolutionExplorerTreeContentProvider
 			if (elementRealObject instanceof Object[] && ((Object[])elementRealObject).length > 0 && ((Object[])elementRealObject)[0] instanceof Bean) continue; // children already added
 			List<SimpleUserNode> nodeChildren = children.get(element);
 			int i;
-			if (element == elementsNode && parentElementsNode != null && parentElementsNode.children.length > 0)
+			if (element == elementsNode && parentElementsNode != null && parentElementsNode.children != null && parentElementsNode.children.length > 0)
 			{
 				element.children = new PlatformSimpleUserNode[nodeChildren == null ? 1 : (nodeChildren.size() + 1)];
 				element.children[0] = parentElementsNode;
