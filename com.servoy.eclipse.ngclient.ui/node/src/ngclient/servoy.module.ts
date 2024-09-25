@@ -25,6 +25,8 @@ import {MainRoutingModule} from './main-routing.module';
 import { DeveloperService } from './developer.service';
 import { AlertWindowComponent} from './services/alert-window/alert-window.component';
 import { MessageDialogWindowComponent } from './services/message-dialog-window/message-dialog-window.component';
+import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
+import { RowRenderer } from '../servoycore/listformcomponent/row-renderer.component';
 
 @NgModule( {
     declarations: [
@@ -36,7 +38,9 @@ import { MessageDialogWindowComponent } from './services/message-dialog-window/m
         ServoyFormPopupComponent,
         LoadingIndicatorComponent,
         AlertWindowComponent,
-        MessageDialogWindowComponent
+        MessageDialogWindowComponent,
+        ListFormComponent,
+        RowRenderer
     ],
     imports: [
         CommonModule,
