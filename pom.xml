@@ -10,7 +10,7 @@
 	<packaging>pom</packaging>
 	<version>2024.12.0.4020_rc</version>
 	<properties>
-		<tycho.version>4.0.8</tycho.version>
+		<tycho.version>4.0.9</tycho.version>
 		<rhino.version>1.7.15.s2</rhino.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
@@ -354,7 +354,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
-						<version>1.8</version>
+						<version>3.1.0</version>
 						<inherited>false</inherited>
 						<executions>
 							<execution>
