@@ -108,6 +108,10 @@ ExpandableComposite {
     swt-header-background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
 
+Shell > Composite > Table {
+  background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
+}
+
 .svyNatTable {
     min-height: 300px;
     text-trim: false;
