@@ -159,7 +159,7 @@ export class EditorContentService {
                     redrawDecorators = true;
 
                     const rawModelProperties = elem.model;
-                    elem.model = {};
+                    elem.model = {visible:true};
 
                     const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.specName);
                     const componentDynamicTypesHolder = {};
@@ -363,6 +363,9 @@ export class EditorContentService {
     updateComponentProperties(component: IComponentCache, elem: ServerElement): boolean {
         let redrawDecorators = false;
         component.layout = elem.position;
+        
+        // default properties should be copied over, we need to because below we delete properties that are not in the server side model
+        if (elem.model.visible == undefined)  elem.model.visible = component.model.visible;
 
         const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.specName);
         const componentDynamicTypesHolder = {};
