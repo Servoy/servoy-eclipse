@@ -338,18 +338,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
                     this.renderGhostsInternal(this.ghostContainers);
                 }
-                if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
-                    const obj = {};
-                    obj[this.draggingGhost.uuid] = { 'x': event.pageX - this.editorContentService.getLeftPositionIframe() - this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - this.editorContentService.getTopPositionIframe() - this.topOffsetRelativeToSelectedGhost };
-                    if (this.draggingGhostComponents) {
-                        for (const draggingInfo of this.draggingGhostComponents) {
-                            obj[draggingInfo.ghost.uuid] = { 'x': event.pageX - this.mousedownpoint.x + draggingInfo.originalLeft - this.containerLeftOffset, 
-                                                             'y': event.pageY - this.mousedownpoint.y + draggingInfo.originalTop - this.containerTopOffset };
-                        }
-                    }
-                    this.editorSession.sendChanges(obj);
-                    this.renderGhosts();
-                }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
                     const changes = {};
                     if (this.partTopPosition < this.topLimit) {
