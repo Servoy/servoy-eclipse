@@ -2180,7 +2180,24 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
-				return ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
+				Object value = ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
+				if (value != null && value instanceof String && Utils.getAsUUID(value, false) != null)
+				{
+					Map<String, Map<String, Object>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
+					Object typeInformation = extraProperties.get(propertyDescriptor.getCategory()).get(id);
+					String typeName = typeInformation instanceof String ? (String)typeInformation : ((JSONObject)typeInformation).getString("type");
+					IPropertyType< ? > propertyType = TypesRegistry.getType(typeName, false);
+					if (propertyType instanceof ValueListPropertyType || propertyType instanceof FormPropertyType)
+					{
+						IPersist persist = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+							.searchPersist((String)value);
+						if (persist instanceof AbstractBase)
+						{
+							value = Integer.valueOf(persist.getID());
+						}
+					}
+				}
+				return value;
 			}
 		}
 		return null;
@@ -2715,6 +2732,25 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
+				if (value instanceof Integer)
+				{
+					Map<String, Map<String, Object>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
+					Object typeInformation = extraProperties.get(propertyDescriptor.getCategory()).get(id);
+					String typeName = typeInformation instanceof String ? (String)typeInformation : ((JSONObject)typeInformation).getString("type");
+					IPropertyType< ? > propertyType = TypesRegistry.getType(typeName, false);
+					if (propertyType instanceof ValueListPropertyType)
+					{
+						ValueList val = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+							.getValueList(((Integer)value).intValue());
+						value = (val == null) ? null : val.getUUID().toString();
+					}
+					else if (propertyType instanceof FormPropertyType)
+					{
+						Form frm = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+							.getForm(((Integer)value).intValue());
+						value = (frm == null) ? null : frm.getUUID().toString();
+					}
+				}
 				((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), id.toString(), value);
 			}
 		}
