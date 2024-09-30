@@ -533,7 +533,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 									{
 										((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(categoryName);
 									}
-
 									propertyDescriptors.put(pd.getId(), pd);
 								}
 							}
@@ -1738,7 +1737,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			if (resultingPropertyDescriptor instanceof IKeepsTooltip)
 			{
-				((IKeepsTooltip)resultingPropertyDescriptor).setTooltipText(propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic));
+				((IKeepsTooltip)resultingPropertyDescriptor)
+					.setTooltipText(propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic));
 			}
 		}
 		return resultingPropertyDescriptor;
@@ -3592,7 +3592,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		if (propertyType instanceof MenuPropertyType)
 		{
-			return new JSMenuPropertyController<Integer>(id, displayName, persistContext);
+			return new JSMenuPropertyController(id, displayName, persistContext);
 		}
 		if (propertyType == MediaPropertyType.INSTANCE)
 		{
