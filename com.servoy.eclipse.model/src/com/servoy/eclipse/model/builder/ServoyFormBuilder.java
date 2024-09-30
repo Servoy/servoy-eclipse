@@ -96,6 +96,7 @@ import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -127,6 +128,7 @@ import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -1764,6 +1766,18 @@ public class ServoyFormBuilder
 								BuilderDependencies.getInstance().addDependency(form, frm);
 							}
 							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof MenuPropertyType)
+						{
+							Menu menu = flattenedSolution.getMenu(value.toString());
+							if (menu == null)
 							{
 								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
 									form);
