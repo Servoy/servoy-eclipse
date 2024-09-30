@@ -78,8 +78,16 @@ public class JSMenuPropertyController extends PropertyController<Object, Integer
 		{
 			public Integer convertProperty(Object id, Object value)
 			{
-				Menu menu = value != null ? flattenedEditingSolution.getMenu(value.toString()) : null;
-				return Integer.valueOf(menu == null ? MenuLabelProvider.MENU_NONE : menu.getID());
+				if (value == null)
+				{
+					return Integer.valueOf(MenuLabelProvider.MENU_NONE);
+				}
+				Menu menu = flattenedEditingSolution.getMenu(value.toString());
+				if (menu != null)
+				{
+					return Integer.valueOf(menu.getID());
+				}
+				return Integer.valueOf(MenuLabelProvider.MENU_UNRESOLVED);
 			}
 
 			public Object convertValue(Object id, Integer value)
@@ -87,7 +95,7 @@ public class JSMenuPropertyController extends PropertyController<Object, Integer
 				int menuId = value.intValue();
 				if (menuId == MenuLabelProvider.MENU_NONE) return null;
 				Menu menu = flattenedEditingSolution.getMenu(menuId);
-				return menu == null ? null : menu.getName();
+				return menu == null ? null : menu.getUUID();
 			}
 		};
 	}
