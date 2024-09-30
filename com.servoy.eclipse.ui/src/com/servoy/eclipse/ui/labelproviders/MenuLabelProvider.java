@@ -38,6 +38,8 @@ import com.servoy.j2db.persistence.Menu;
 public class MenuLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider, IDeprecationProvider
 {
 	public static final int MENU_NONE = 0;
+	public static final int MENU_UNRESOLVED = -1;
+
 	private final FlattenedSolution flattenedSolution;
 
 	public MenuLabelProvider(FlattenedSolution flattenedSolution)
