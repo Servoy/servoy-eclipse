@@ -503,7 +503,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								{
 									((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(categoryName);
 								}
-
 								if (pd != null)
 								{
 									propertyDescriptors.put(pd.getId(), pd);
@@ -2158,7 +2157,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
-				return ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
+				Object value = ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
+				if (value != null && value instanceof String && Utils.getAsUUID(value, false) != null)
+				{
+					IPropertyType< ? > propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					if (propertyType instanceof ValueListPropertyType || propertyType instanceof FormPropertyType)
+					{
+						IPersist persist = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+							.searchPersist((String)value);
+						if (persist instanceof AbstractBase)
+						{
+							value = Integer.valueOf(persist.getID());
+						}
+					}
+				}
+				return value;
 			}
 		}
 		return null;
@@ -2693,6 +2706,22 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
+				if (value instanceof Integer)
+				{
+					IPropertyType< ? > propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					if (propertyType instanceof ValueListPropertyType)
+					{
+						ValueList val = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+							.getValueList(((Integer)value).intValue());
+						value = (val == null) ? null : val.getUUID().toString();
+					}
+					else if (propertyType instanceof FormPropertyType)
+					{
+						Form frm = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+							.getForm(((Integer)value).intValue());
+						value = (frm == null) ? null : frm.getUUID().toString();
+					}
+				}
 				((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), id.toString(), value);
 			}
 		}
@@ -3570,7 +3599,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		if (propertyType instanceof MenuPropertyType)
 		{
-			return new JSMenuPropertyController<Integer>(id, displayName, persistContext);
+			return new JSMenuPropertyController(id, displayName, persistContext);
 		}
 		if (propertyType == MediaPropertyType.INSTANCE)
 		{
