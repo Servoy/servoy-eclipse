@@ -59,7 +59,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -81,7 +80,6 @@ import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.SecureStringPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
-import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
@@ -488,55 +486,30 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				if (persistContext.getPersist() instanceof MenuItem)
 				{
-					Map<String, Map<String, Object>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
+					Map<String, Map<String, PropertyDescription>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
 					if (extraProperties != null)
 					{
 						for (String categoryName : extraProperties.keySet())
 						{
-							Map<String, Object> extraCategoryProperties = extraProperties.get(categoryName);
+							Map<String, PropertyDescription> extraCategoryProperties = extraProperties.get(categoryName);
 							for (String propertyName : extraCategoryProperties.keySet())
 							{
-								Object typeInformation = extraCategoryProperties.get(propertyName);
-								String typeName = typeInformation instanceof String ? (String)typeInformation : ((JSONObject)typeInformation).getString("type");
-								Object defaultValue = typeInformation instanceof JSONObject ? ((JSONObject)typeInformation).opt("default") : null;
-								boolean hasDefaultValue = typeInformation instanceof JSONObject ? ((JSONObject)typeInformation).has("default") : false;
-								IPropertyType< ? > propertyType = TypesRegistry.getType(typeName, false);
-								ValuesConfig config = null;
-								if (typeInformation instanceof JSONObject && ((JSONObject)typeInformation).has("values"))
+								IPropertyDescriptor pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
+									extraCategoryProperties.get(propertyName),
+									form, persistContext,
+									readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
+									flattenedEditingSolution);
+								if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
 								{
-									propertyType = ValuesPropertyType.INSTANCE;
-									config = new ValuesConfig();
-									ArrayList<Object> listdata = new ArrayList<Object>();
-									JSONArray array = ((JSONObject)typeInformation).optJSONArray("values");
-									if (array != null)
-									{
-										for (int i = 0; i < array.length(); i++)
-										{
-											listdata.add(array.get(i));
-										}
-										config.setValues(listdata.toArray());
-										if (defaultValue != null)
-										{
-											config.addDefault(defaultValue, defaultValue.toString());
-										}
-									}
+									((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(categoryName);
 								}
-								if (propertyType != null)
-								{
-									IPropertyDescriptor pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
-										new PropertyDescriptionBuilder().withName(propertyName).withType(
-											propertyType).withDefaultValue(defaultValue).withHasDefault(hasDefaultValue).withConfig(config).build(),
-										form, persistContext,
-										readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
-										flattenedEditingSolution);
-									if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
-									{
-										((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(categoryName);
-									}
 
+								if (pd != null)
+								{
 									propertyDescriptors.put(pd.getId(), pd);
 								}
 							}
+
 						}
 					}
 				}

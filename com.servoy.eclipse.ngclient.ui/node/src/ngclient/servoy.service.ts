@@ -23,6 +23,7 @@ import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
 import { SvyUtilsService } from './utils.service';
 import { ClientFunctionType } from './converters/clientfunction_converter';
+import { JSMenuType } from './converters/jsmenu_converter';
 import { ClientFunctionService } from './services/clientfunction.service';
 import { UIBlockerService } from './services/ui_blocker.service';
 import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
@@ -119,6 +120,7 @@ export class ServoyService {
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
         typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this, this.utils));
         typesRegistry.registerGlobalType(ServerFunctionType.NATIVE_FUNCTION_TYPE_NAME, new ServerFunctionType(this, this.utils));
+        typesRegistry.registerGlobalType(JSMenuType.TYPE_NAME, new JSMenuType());
     }
 
     public connect() {
