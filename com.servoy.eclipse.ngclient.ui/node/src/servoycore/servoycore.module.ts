@@ -9,7 +9,6 @@ import { SessionView } from './session-view/session-view';
 import { ServoyCoreFormContainer } from './formcontainer/formcontainer';
 import {AddAttributeDirective} from './addattribute.directive';
 import { ServoyPublicModule } from '@servoy/public';
-import { AgGridModule } from '@ag-grid-community/angular';
 import { ModuleRegistry } from '@ag-grid-community/core';
 import { LicenseManager } from '@ag-grid-enterprise/core';
 import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
@@ -28,8 +27,7 @@ import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-respo
     ],
     imports: [CommonModule,
         FormsModule,
-        ServoyPublicModule,
-        AgGridModule
+        ServoyPublicModule
     ],
     providers: [],
     bootstrap: [],
