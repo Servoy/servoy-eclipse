@@ -17,16 +17,16 @@
 
 package com.servoy.eclipse.jsunit.mobile;
 
-import junit.framework.Test;
-import junit.framework.TestResult;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.servoy.eclipse.jsunit.mobile.SuiteBridge.ICancelMonitor;
 import com.servoy.eclipse.jsunit.scriptunit.RemoteScriptUnitRunnerClient;
 import com.servoy.eclipse.jsunit.scriptunit.ScriptUnitTestRunNotifier;
 import com.servoy.eclipse.model.test.TestTarget;
+
+import junit.framework.Test;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
 
 /**
  * Test suite that is generated and ran remotely from inside a mobile client browser.
@@ -80,7 +80,7 @@ public class MobileClientTestSuite extends TestSuite
 		// because in this case that flag can be tested from time to time while waiting for the client to connect - so it could actually STOP while waiting indefinitely (or a long time) for the client.
 		// otherwise it could just wait forever or until a timeout occurs...
 
-		ScriptUnitTestRunNotifier scriptUnitNotifier = new ScriptUnitTestRunNotifier(bridge.getTestList(), result);
+		ScriptUnitTestRunNotifier scriptUnitNotifier = new ScriptUnitTestRunNotifier(bridge.getTestList(), result, target);
 		result.addListener(scriptUnitNotifier);
 
 		bridge.runClientTests(result);

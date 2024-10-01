@@ -36,15 +36,18 @@ import junit.framework.TestResult;
 public class TestClientTestSuite extends ApplicationJSTestSuite
 {
 
+	private final TestTarget target;
+
 	public TestClientTestSuite(IApplication application, TestTarget target)
 	{
 		super(application, target, false);
+		this.target = target;
 	}
 
 	@Override
 	public void run(TestResult result)
 	{
-		ScriptUnitTestRunNotifier scriptUnitNotifier = new ScriptUnitTestRunNotifier(testList, result);
+		ScriptUnitTestRunNotifier scriptUnitNotifier = new ScriptUnitTestRunNotifier(testList, result, target);
 		result.addListener(scriptUnitNotifier);
 		super.run(result);
 	}

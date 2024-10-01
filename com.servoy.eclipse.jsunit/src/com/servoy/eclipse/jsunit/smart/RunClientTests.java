@@ -35,7 +35,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 
 /**
  * @author acostescu
@@ -43,7 +42,7 @@ import com.servoy.j2db.server.shared.IDebugHeadlessClient;
 public class RunClientTests extends RunJSUnitTests
 {
 
-	private IDebugHeadlessClient testApp;
+	private DebugTestClient testApp;
 	private JSUnitUserManager testUserManager;
 
 	public RunClientTests(TestTarget testTarget, ILaunch launch, IProgressMonitor monitor, boolean debugMode)
@@ -56,6 +55,7 @@ public class RunClientTests extends RunJSUnitTests
 	{
 		// in case debug smart client was already used, start clean
 		testApp = Activator.getDefault().getJSUnitClient();
+		testApp.startTesting();
 		if (!testApp.isShutDown())
 		{
 			// terminate script engine (because it might be suspended (at breakpoint for example), blocking AWT)
@@ -182,35 +182,33 @@ public class RunClientTests extends RunJSUnitTests
 			final Activator plugin = Activator.getDefault();
 			if (plugin != null)
 			{
-				if (!plugin.getJSUnitClient().isShutDown())
+				if (!testApp.isShutDown())
 				{
-					plugin.getJSUnitClient().invokeAndWait(new Runnable()
+					testApp.invokeAndWait(new Runnable()
 					{
 						public void run()
 						{
-							plugin.getJSUnitClient().closeSolution(false);
+							testApp.closeSolution(false);
 							try
 							{
 								Thread.sleep(1000);
-								if (plugin != null)
-								{
-									plugin.getJSUnitClient().closeSolution(true);
-								}
+								testApp.closeSolution(true);
 							}
 							catch (InterruptedException e)
 							{
 							}
-							plugin.getJSUnitClient().logout(null);
-							plugin.getJSUnitClient().getClientInfo().clearUserInfo();
+							testApp.logout(null);
+							testApp.getClientInfo().clearUserInfo();
 						}
 					});
 				}
 				else
 				{
-					plugin.getJSUnitClient().getClientInfo().clearUserInfo();
+					testApp.getClientInfo().clearUserInfo();
 				}
 			}
 		}
+		testApp.stopTesting();
 	}
 
 }
