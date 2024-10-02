@@ -120,7 +120,7 @@ export class ServoyService {
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
         typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this, this.utils));
         typesRegistry.registerGlobalType(ServerFunctionType.NATIVE_FUNCTION_TYPE_NAME, new ServerFunctionType(this, this.utils));
-        typesRegistry.registerGlobalType(JSMenuType.TYPE_NAME, new JSMenuType());
+        typesRegistry.registerGlobalType(JSMenuType.TYPE_NAME, new JSMenuType(converterService));
     }
 
     public connect() {

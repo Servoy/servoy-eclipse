@@ -3455,15 +3455,19 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				options = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true /* related calcs */, false, false, false, false,
 					INCLUDE_RELATIONS.NESTED, false, true, relations);
 			}
-			else
+			else if (form != null)
 			{
-				if (form == null) return null;
 
 				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
 					flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, true, true, true, table != null,
 					true, INCLUDE_RELATIONS.NESTED, true, true, null);
 
+			}
+			else
+			{
+				options = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true, true, true, false,
+					true, INCLUDE_RELATIONS.NESTED, true, true, null);
 			}
 
 			return createDataproviderController(persistContext, readOnly, id, displayName, flattenedEditingSolution, form, table, options);

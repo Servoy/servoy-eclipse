@@ -84,7 +84,8 @@ public class DataProviderCellEditor extends DialogCellEditor
 	{
 		DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), PersistContext.create(form), flattenedSolution,
 			table != null ? table
-				: ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(flattenedSolution.getFlattenedForm(form).getDataSource()),
+				: (form != null
+					? ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(flattenedSolution.getFlattenedForm(form).getDataSource()) : null),
 			input, getSelection(), SWT.NONE, title);
 		dialog.open();
 
