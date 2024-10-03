@@ -43,6 +43,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
+import com.servoy.eclipse.ui.wizards.NewOAuthConfigWizard;
 import com.servoy.j2db.persistence.Solution.AUTHENTICATOR_TYPE;
 
 public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController<T>
@@ -65,7 +67,7 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 		IComboboxPropertyModel<T> model = this.getModel();
 		ModifiedComboBoxCellEditor editor = new ModifiedComboBoxCellEditor(parent, EMPTY_STRING_ARRAY, SWT.READ_ONLY, model.getDefaultValueIndex() == 0)
 		{
-			private Button redirectButton;
+			private Button openButton;
 
 			@Override
 			public void activate()
@@ -75,7 +77,7 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 				setItems(model.getDisplayValues());
 				doSetValue(value);
 				AUTHENTICATOR_TYPE servoyCloud = AUTHENTICATOR_TYPE.SERVOY_CLOUD;
-				redirectButton.setEnabled(value.equals(servoyCloud.getValue()));
+				openButton.setEnabled(value.equals(servoyCloud.getValue()) || value.equals(AUTHENTICATOR_TYPE.OAUTH.getValue()));
 
 				super.activate();
 			}
@@ -96,29 +98,49 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 			{
 				Composite composite = new Composite(parent, SWT.NONE);
 				CCombo combo = (CCombo)super.createControl(composite);
-				redirectButton = new Button(composite, SWT.FLAT);
+				openButton = new Button(composite, SWT.FLAT);
 
-				redirectButton.setText("...");
-				redirectButton.setEnabled(false);
-				redirectButton.setToolTipText("Go to Servoy Cloud");
+				openButton.setText("...");
+				openButton.setEnabled(false);
+				String tooltipText = ((Integer)doGetValue()).intValue() == AUTHENTICATOR_TYPE.OAUTH.getValue()
+					? "Configure Stateless Login with an OAuth provider"
+					: "Go to Servoy Cloud";
+				openButton.setToolTipText(tooltipText);
 
 				GroupLayout groupLayout = new GroupLayout(composite);
 				SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
 				sequentialGroup.add(combo, GroupLayout.PREFERRED_SIZE, 135, Integer.MAX_VALUE);
-				sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(redirectButton);
+				sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(openButton);
 				groupLayout.setHorizontalGroup(sequentialGroup);
 
 				ParallelGroup parallelGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false);
-				parallelGroup.add(redirectButton, 0, 0, Integer.MAX_VALUE);
+				parallelGroup.add(openButton, 0, 0, Integer.MAX_VALUE);
 				parallelGroup.add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE);
 				groupLayout.setVerticalGroup(parallelGroup);
 
 				composite.setLayout(groupLayout);
 
-				redirectButton.addMouseListener(new MouseAdapter()
+				openButton.addMouseListener(new MouseAdapter()
 				{
 					@Override
 					public void mouseDown(MouseEvent e)
+					{
+						Integer value = (Integer)doGetValue();
+						if (value.intValue() == AUTHENTICATOR_TYPE.SERVOY_CLOUD.getValue())
+						{
+							redirectToTheCloud();
+						}
+						else if (value.intValue() == AUTHENTICATOR_TYPE.OAUTH.getValue())
+						{
+							Display.getDefault().asyncExec(() -> {
+								OpenWizardAction action = new OpenWizardAction(NewOAuthConfigWizard.class, null,
+									"Configure Stateless Login with an OAuth provider");
+								action.run();
+							});
+						}
+					}
+
+					private void redirectToTheCloud()
 					{
 						String solutionUUID = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getUUID().toString();
 						String loginToken = ServoyLoginDialog.getLoginToken();
@@ -161,8 +183,16 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 					public void widgetSelected(SelectionEvent event)
 					{
 						// the selection is already updated at this point using the SelectionAdapter created in super.createControl()
-						redirectButton
-							.setEnabled(((CCombo)event.getSource()).getItems()[((CCombo)event.getSource()).getSelectionIndex()].equals("SERVOY_CLOUD"));
+						String selection = ((CCombo)event.getSource()).getItems()[((CCombo)event.getSource()).getSelectionIndex()];
+						openButton.setEnabled("SERVOY_CLOUD".equals(selection) || "OAUTH".equals(selection));
+						if ("SERVOY_CLOUD".equals(selection))
+						{
+							openButton.setToolTipText("Go to Servoy Cloud");
+						}
+						else if ("OAUTH".equals(selection))
+						{
+							openButton.setToolTipText("Configure Stateless Login with an OAuth provider");
+						}
 						fireApplyEditorValue();
 					}
 				});
