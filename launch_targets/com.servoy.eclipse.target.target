@@ -68,6 +68,12 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>com.auth0</groupId>
+                    <artifactId>jwks-rsa</artifactId>
+                    <version>0.22.1</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-annotations</artifactId>
                     <version>2.17.2</version>
@@ -89,6 +95,24 @@
                     <groupId>com.fasterxml</groupId>
                     <artifactId>classmate</artifactId>
                     <version>1.7.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.github.scribejava</groupId>
+                    <artifactId>scribejava-apis</artifactId>
+                    <version>8.3.3</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.github.scribejava</groupId>
+                    <artifactId>scribejava-core</artifactId>
+                    <version>8.3.3</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.github.scribejava</groupId>
+                    <artifactId>scribejava-java8</artifactId>
+                    <version>8.3.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
