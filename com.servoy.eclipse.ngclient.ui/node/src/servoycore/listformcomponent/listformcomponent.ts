@@ -772,11 +772,17 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getAGGridStyle(): any {
+        const aggridStyle = {
+            '--ag-row-height': 42,
+            '--ag-header-height': 48,
+            '--ag-list-item-height': 24
+        };
         if (this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight < 1) {
-            return { height: '100%' };
+            aggridStyle['height'] = '100%';
         } else {
-            return { 'height.px': this.responsiveHeight };
+            aggridStyle['height.px'] = this.responsiveHeight;
         }
+        return aggridStyle;
     }
 }
 
