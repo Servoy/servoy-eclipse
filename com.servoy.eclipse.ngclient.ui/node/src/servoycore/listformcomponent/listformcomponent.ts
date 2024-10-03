@@ -396,7 +396,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     changes.forEach(change => {
                         insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
                     });
-                    if (insertOrDeletes) this.agGrid.api.refreshServerSide({ purge: true });
+                    if (insertOrDeletes) {
+                        this.agGrid.api.refreshServerSide({ purge: true });
+                        this.agGrid.api.setRowCount(this.foundset.serverSize ? this.foundset.serverSize : 0);
+                    }
                     else this.agGrid.api.refreshCells();
                 } else if (event.viewportRowsCompletelyChanged || event.fullValueChanged) {
                     this.agGrid.api.refreshServerSide({ purge: true });
@@ -528,7 +531,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
         if (row._cache) {
             const cache = row._cache.get(cm.name);
-            if (cache) return cache;
+            if (cache && cache.rowIndex === rowIndex) return cache;
         }
 
         if (item?.model?.servoyAttributes) {
