@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISaveablePart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
@@ -66,11 +67,14 @@ import com.servoy.eclipse.ui.actions.CopyPropertyValueAction;
 import com.servoy.eclipse.ui.actions.PastePropertyValueAction;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.property.IProvidesTooltip;
+import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.eclipse.ui.views.solutionexplorer.HTMLToolTipSupport;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Settings;
@@ -121,6 +125,28 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					}
 				}
 				return super.compare(entryA, entryB);
+			}
+
+			@Override
+			public int compareCategories(String categoryA, String categoryB)
+			{
+				IWorkbenchPage iwpage = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getActivePage();
+				if (iwpage != null && iwpage.getActivePart() instanceof SolutionExplorerView)
+				{
+					SolutionExplorerView view = (SolutionExplorerView)iwpage.getActivePart();
+					if (view.getSelectedTreeElement() instanceof MenuItem)
+					{
+						if (PropertyCategory.Properties.name().equals(categoryA))
+						{
+							return -1;
+						}
+						if (PropertyCategory.Properties.name().equals(categoryB))
+						{
+							return 1;
+						}
+					}
+				}
+				return super.compareCategories(categoryA, categoryB);
 			}
 		});
 
