@@ -1447,6 +1447,12 @@ public class TypeCreator extends TypeCache
 			property.setName("foundset");
 			property.setType(getTypeRef(context, FoundSet.JS_FOUNDSET));
 			members.add(property);
+			property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName("relationname");
+			property.setType(getTypeRef(context, "String"));
+			property.setDescription(
+				"The relation name for creating the foundset, will be the same as setting this at design time. It is prefferred to set the foundset object directly, so only use this if foundset object is not available yet.");
+			members.add(property);
 			Object cfg = pd.getConfig();
 			if (cfg instanceof FoundsetPropertyTypeConfig)
 			{
