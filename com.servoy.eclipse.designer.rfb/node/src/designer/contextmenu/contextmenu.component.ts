@@ -36,7 +36,7 @@ export class ContextMenuComponent implements OnInit {
     selectionAnchor = 0;
 
     constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService,
-        protected urlParser: URLParserService,  private windowRef: WindowRefService,) {
+        protected urlParser: URLParserService, private windowRef: WindowRefService) {
     }
 
     ngOnInit(): void {
@@ -187,6 +187,18 @@ export class ContextMenuComponent implements OnInit {
         this.element.nativeElement.style.display = 'block';
         this.element.nativeElement.style.left = event.pageX + 'px';
         this.element.nativeElement.style.top = event.pageY + 'px';
+        this.windowRef.nativeWindow.navigator.clipboard.read().then(content => {
+            const node = this.element.nativeElement.querySelector('.svypaste');
+            if (node) {
+                if (!content || content.length == 0 || content[0].types.indexOf('text/plain') < 0) {
+                    node.classList.add('disabled');
+                }
+                else {
+                    node.classList.remove('disabled');
+                }
+            }
+
+        });
     }
 
     private hide() {
@@ -226,14 +238,14 @@ export class ContextMenuComponent implements OnInit {
                 const menu: HTMLElement = submenu.querySelector('.dropdown-menu');
                 const ctxmenu: HTMLElement = submenu.closest('#contextMenu');
                 if (menu.clientHeight > 200 && (window.innerHeight - ctxmenu.getBoundingClientRect().top - menu.clientHeight) <= 100) {
-					if (ctxmenu.getBoundingClientRect().top > menu.clientHeight) {
-						menu.style.top = (-ctxmenu.getBoundingClientRect().top + menu.clientHeight - submenu.clientHeight) + 'px';
-					} else {
-						menu.style.top = -ctxmenu.getBoundingClientRect().top + 'px';
-					}
-				} else {
-					menu.style.top = '';
-				}	
+                    if (ctxmenu.getBoundingClientRect().top > menu.clientHeight) {
+                        menu.style.top = (-ctxmenu.getBoundingClientRect().top + menu.clientHeight - submenu.clientHeight) + 'px';
+                    } else {
+                        menu.style.top = -ctxmenu.getBoundingClientRect().top + 'px';
+                    }
+                } else {
+                    menu.style.top = '';
+                }
                 //the submenu can only be displayed on the right or left side of the contextmenu
                 if (this.element.nativeElement.offsetWidth + this.getElementOffset(this.element.nativeElement).left + menu.offsetWidth > viewport.right) {
                     //+5 to make it overlap the menu a bit
@@ -599,6 +611,31 @@ export class ContextMenuComponent implements OnInit {
         }
 
         entry = new ContextmenuItem(
+            'Copy',
+            () => {
+                this.editorSession.executeAction('copy');
+            }
+        );
+        entry.getItemClass = () => {
+            if (!this.selection || this.selection.length == 0) {
+                return 'disabled';
+            }
+            return ''
+        };
+        this.menuItems.push(entry);
+
+        entry = new ContextmenuItem(
+            'Paste',
+            () => {
+                this.editorSession.executeAction('paste');
+            }
+        );
+        entry.getItemClass = () => {
+            return 'svypaste'
+        };
+        this.menuItems.push(entry);
+
+        entry = new ContextmenuItem(
             '',
             null
         );
@@ -607,7 +644,7 @@ export class ContextMenuComponent implements OnInit {
         };
         this.menuItems.push(entry);
 
-		// deprecated
+        // deprecated
         /*entry = new ContextmenuItem(
             'Save as template ...',
             () => {
@@ -702,7 +739,7 @@ export class ContextMenuComponent implements OnInit {
     private isInResponsiveContainer(): boolean {
         if (this.selection && this.selection.length > 0) {
             for (const selection of this.selection) {
-                const node = this.editorContentService.getContentElement(selection );
+                const node = this.editorContentService.getContentElement(selection);
                 if (node && node.parentElement.closest('.svy-responsivecontainer')) {
                     return true;
                 }
@@ -710,11 +747,11 @@ export class ContextMenuComponent implements OnInit {
         }
         return false;
     }
-    
-    private canDeleteSelection() : boolean{
-         if (this.selection && this.selection.length > 0) {
+
+    private canDeleteSelection(): boolean {
+        if (this.selection && this.selection.length > 0) {
             for (const selection of this.selection) {
-                const node = this.editorContentService.getContentElement(selection );
+                const node = this.editorContentService.getContentElement(selection);
                 if (node) {
                     if (node.parentElement.closest('.svy-listformcomponent')) return false;
                     if (node.parentElement.closest('.svy-formcomponent')) return false;
@@ -725,7 +762,7 @@ export class ContextMenuComponent implements OnInit {
         else return false;
         return true;
     }
-    
+
     private isAnchored(anchor: number): boolean {
         if (this.selection && this.selection.length == 1) {
             if (this.selectionAnchor == 0)
@@ -741,7 +778,7 @@ export class ContextMenuComponent implements OnInit {
         if (this.selection && this.selection.length == 1) {
             const obj = {};
             const nodeid = this.selection[0];
-            const node = this.editorContentService.getContentElement(this.selection[0] );
+            const node = this.editorContentService.getContentElement(this.selection[0]);
             if (node && node.hasAttribute('svy-anchors')) {
                 let beanAnchor = parseInt(node.getAttribute('svy-anchors'));
                 if (beanAnchor == 0)
@@ -826,7 +863,7 @@ export class ContextmenuItem {
         public text: string,
         private functionToExecute: () => void) {
     }
-    
+
     public execute() {
         this.functionToExecute();
         return false;
