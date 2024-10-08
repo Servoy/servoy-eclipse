@@ -40,14 +40,18 @@ import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
+import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.ui.NatEventData;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
+import org.eclipse.nebula.widgets.nattable.widget.EditModeEnum;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Text;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.core.Activator;
@@ -183,10 +187,16 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 	{
 		Style style = new Style();
 		style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
+		style.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE); //trying to vertical align, but is not used
 		configRegistry.registerConfigAttribute(
 			CellConfigAttributes.CELL_STYLE,
 			style,
 			DisplayMode.NORMAL,
+			dp.getName());
+		configRegistry.registerConfigAttribute(
+			CellConfigAttributes.CELL_STYLE,
+			style,
+			DisplayMode.EDIT,
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
@@ -196,7 +206,21 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
-			new TextCellEditor(true, true, true), DisplayMode.EDIT,
+			new TextCellEditor(true, true, true)
+			{
+				@Override
+				public Text createEditorControl(Composite parent_)
+				{
+					int style_ = SWT.LEFT;
+					if (this.editMode == EditModeEnum.DIALOG)
+					{
+						style_ = style_ | SWT.BORDER;
+					}
+
+					return super.createEditorControl(parent_, style_);
+				}
+			}, //
+			DisplayMode.EDIT,
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
@@ -217,11 +241,6 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 			CellConfigAttributes.CELL_STYLE,
 			style,
 			DisplayMode.NORMAL,
-			dp.getName());
-
-		configRegistry.registerConfigAttribute(
-			EditConfigAttributes.CELL_EDITOR,
-			dialogCellEditor, DisplayMode.NORMAL,
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
