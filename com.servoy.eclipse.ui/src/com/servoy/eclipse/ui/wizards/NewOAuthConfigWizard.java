@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.json.JSONObject;
@@ -24,9 +25,10 @@ import com.servoy.j2db.util.ServoyJSONObject;
  */
 public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 {
-	private NewOAuthApiPage page;
+	private NewOAuthApiPage apiPage;
 	private JSONObject jsonConfig;
 	private Solution solution;
+	private NewOAuthConfigJsonConfigPage advancedPage;
 
 	public NewOAuthConfigWizard()
 	{
@@ -36,8 +38,10 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 	@Override
 	public void addPages()
 	{
-		page = new NewOAuthApiPage();
-		addPage(page);
+		apiPage = new NewOAuthApiPage(this);
+		advancedPage = new NewOAuthConfigJsonConfigPage(this);
+		addPage(apiPage);
+		addPage(advancedPage);
 	}
 
 	@Override
@@ -53,7 +57,7 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 			repository.updateNodesInWorkspace(new IPersist[] { solution }, false);
 			return true;
 		}
-		//TODO set error
+		((WizardPage)getContainer().getCurrentPage()).setErrorMessage("The configuration is wrong. Please check if it follows the documentation.");
 		return false;
 	}
 
@@ -86,7 +90,7 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 			return false;
 		}
 
-		if ("Custom".equals(page.getApiSelection()))
+		if ("Custom".equals(apiPage.getApiSelection()))
 		{
 			if (jsonConfig.optString(StatelessLoginHandler.AUTHORIZATION_BASE_URL, "").isEmpty() ||
 				jsonConfig.optString(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, "").isEmpty())
@@ -96,5 +100,10 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 		}
 
 		return true;
+	}
+
+	public void updateConfig(JSONObject jsonObject)
+	{
+		jsonConfig = jsonObject;
 	}
 }
