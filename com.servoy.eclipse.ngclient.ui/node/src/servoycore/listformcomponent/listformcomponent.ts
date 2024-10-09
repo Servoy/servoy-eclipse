@@ -40,7 +40,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
     <ng-container *ngIf="!useScrolling">
         <div *ngIf="containedForm&&containedForm.absoluteLayout">
             <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
-                <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item['layout']" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+                <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                     <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
                 </div>
             </div>
