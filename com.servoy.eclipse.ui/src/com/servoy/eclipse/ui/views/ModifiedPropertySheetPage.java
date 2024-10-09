@@ -51,7 +51,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISaveablePart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
@@ -71,7 +70,6 @@ import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.eclipse.ui.views.solutionexplorer.HTMLToolTipSupport;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.MenuItem;
@@ -92,10 +90,38 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 	private CopyPropertyValueAction copyValueAction;
 	private PastePropertyValueAction pasteValueAction;
 
+	private IPersist selectedPersist = null;
+
 	public ModifiedPropertySheetPage(Map<String, IAction> actions)
 	{
 		super();
 		this.actions = actions;
+	}
+
+	@Override
+	public void selectionChanged(IWorkbenchPart part, ISelection selection)
+	{
+		if (selection instanceof IStructuredSelection sel && !sel.isEmpty())
+		{
+			Object firstElement = sel.getFirstElement();
+			if (firstElement instanceof IAdaptable adaptable)
+			{
+				firstElement = adaptable.getAdapter(IPersist.class);
+			}
+			if (firstElement instanceof IPersist persist)
+			{
+				selectedPersist = persist;
+			}
+			else
+			{
+				selectedPersist = null;
+			}
+		}
+		else
+		{
+			selectedPersist = null;
+		}
+		super.selectionChanged(part, selection);
 	}
 
 	@Override
@@ -130,20 +156,15 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			@Override
 			public int compareCategories(String categoryA, String categoryB)
 			{
-				IWorkbenchPage iwpage = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getActivePage();
-				if (iwpage != null && iwpage.getActivePart() instanceof SolutionExplorerView)
+				if (selectedPersist instanceof MenuItem)
 				{
-					SolutionExplorerView view = (SolutionExplorerView)iwpage.getActivePart();
-					if (view.getSelectedTreeElement() instanceof MenuItem)
+					if (PropertyCategory.Properties.name().equals(categoryA))
 					{
-						if (PropertyCategory.Properties.name().equals(categoryA))
-						{
-							return -1;
-						}
-						if (PropertyCategory.Properties.name().equals(categoryB))
-						{
-							return 1;
-						}
+						return -1;
+					}
+					if (PropertyCategory.Properties.name().equals(categoryB))
+					{
+						return 1;
 					}
 				}
 				return super.compareCategories(categoryA, categoryB);
