@@ -6,6 +6,7 @@ import { ServicesService } from '../../sablo/services.service';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
 import { MainViewRefService, PopupForm } from '@servoy/public';
+import { isEqual } from 'lodash-es';
 
 @Injectable()
 export class PopupFormService {
@@ -113,7 +114,7 @@ export class PopupFormService {
 
     private showPopup(popup: PopupForm, counter?: number) {
 		if ((this.formPopupComponent && !popup.parent) || 
-		(this.formPopupComponent && this.formPopupComponent.instance.popup.form === popup.form && this.objectsAreEquals(this.formPopupComponent.instance.popup.parent, popup.parent))) return;
+		(this.formPopupComponent && this.formPopupComponent.instance.popup.form === popup.form && isEqual(this.formPopupComponent.instance.popup.parent, popup.parent))) return;
 		if (!this.formPopupComponent && popup.parent) {
 			this.servicesService.callServiceServerSideApi('window', 'clearPopupForm', []);
 			return;
@@ -134,7 +135,7 @@ export class PopupFormService {
 				if (this.formPopupComponent.instance.popup.form !== popup.parent.form && this.formPopupComponent.instance.popup.parent) {
 					const frms: ComponentRef<ServoyFormPopupComponent>[] = [];
 					let current: PopupForm = this.formPopupComponent.instance.popup;
-					while (current && !this.objectsAreEquals(current.parent, popup.parent)) {
+					while (current && !isEqual(current.parent, popup.parent)) {
 						if (current.parentInstance) {
 							frms.push(current.parentInstance as ComponentRef<ServoyFormPopupComponent>);
 						}
@@ -154,7 +155,7 @@ export class PopupFormService {
 				popup.parentInstance = null;
 				let parent = this.formPopupComponent.instance.popup;
 				while (parent) {
-					if (this.objectsAreEquals(parent.parent, popup.parent) && parent.parentInstance) {
+					if (isEqual(parent.parent, popup.parent) && parent.parentInstance) {
 						popup.parentInstance = parent.parentInstance as ComponentRef<ServoyFormPopupComponent>;
 						break;
 					}
@@ -192,10 +193,6 @@ export class PopupFormService {
 			}
 			this.servicesService.callServiceServerSideApi('window', 'formPopupClosed',  [jsEvent]);
 		}
-	}
-	
-	private objectsAreEquals(obj1: object, obj2: object) {
-		return JSON.stringify(obj1) === JSON.stringify(obj2);
 	}
 
     private formPopupBodyListener = (event: Event) => {
