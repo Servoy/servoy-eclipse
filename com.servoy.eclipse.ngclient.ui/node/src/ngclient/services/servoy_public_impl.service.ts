@@ -106,11 +106,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
 
     cancelFormPopup(disableClearPopupFormCallToServer_or_name: boolean|string): void {
-        if (typeof disableClearPopupFormCallToServer_or_name === 'boolean') {
-            this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer_or_name);
-        } else if (typeof disableClearPopupFormCallToServer_or_name === 'string') {
-            this.popupFormService.cancelForm(disableClearPopupFormCallToServer_or_name);
-        }
+        this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer_or_name);
     }
 
     setFormStyleClasses(styleclasses: { property: string }): void {
