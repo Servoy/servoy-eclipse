@@ -85,13 +85,9 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
 
     }
 
-    cancelFormPopup(disableClearPopupFormCallToServer: boolean): void {
+    cancelFormPopup(disableClearPopupFormCallToServer_or_name: boolean|string): void {
 
     }
-	
-	cancelForm(form: string): void {
-		
-	}
 	
     setFormStyleClasses(styleclasses: { property: string }): void {
     }
