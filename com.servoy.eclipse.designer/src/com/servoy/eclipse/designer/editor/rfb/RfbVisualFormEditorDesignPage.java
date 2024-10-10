@@ -524,6 +524,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			public void run()
 			{
 				designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh", new Object[] { });
+				designerWebsocketSession.valueChanged();
 			}
 		});
 	}

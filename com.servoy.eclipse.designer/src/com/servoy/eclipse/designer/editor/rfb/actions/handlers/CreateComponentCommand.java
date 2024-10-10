@@ -941,10 +941,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				{
 					for (IPersist persist : newPersist)
 					{
-						if (persist instanceof ISupportExtendsID && PersistHelper.getSuperPersist((ISupportExtendsID)persist) != null)
+						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() > 0)
 						{
 							// very likely a complex inheritance situation that won't refresh correctly, just reinitialize form designer
 							doFullFormRefresh();
+							break;
 						}
 					}
 				}
