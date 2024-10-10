@@ -287,19 +287,19 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.logging.log4j.api"
-         version="2.24.0"/>
+         version="2.24.1"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
-         version="2.24.0"/>
+         version="2.24.1"/>
 
    <plugin
          id="org.apache.logging.log4j.web"
-         version="2.24.0"/>
+         version="2.24.1"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j2.impl"
-         version="2.24.0"/>
+         version="2.24.1"/>
 
    <plugin
          id="javax.transaction"
