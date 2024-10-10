@@ -35,6 +35,7 @@ public class NewOAuthApiPage extends WizardPage
 	private Text jwksUriText;
 	private Text authorizationBaseUrlText;
 	private Text accessTokenEndpointText;
+	private Text refreshTokenEndpointText;
 	private final NewOAuthConfigWizard wizard;
 
 	protected NewOAuthApiPage(NewOAuthConfigWizard wizard)
@@ -111,6 +112,14 @@ public class NewOAuthApiPage extends WizardPage
 		accessTokenEndpointText.addListener(SWT.FocusOut, e -> updateAccessTokenEndpoint());
 		accessTokenEndpointText.addModifyListener(e -> updateAccessTokenEndpoint());
 		accessTokenEndpointText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
+
+		Label refreshTokenEndpointLabel = new Label(container, SWT.NONE);
+		refreshTokenEndpointLabel.setText("Refresh Token Endpoint:");
+		refreshTokenEndpointText = new Text(container, SWT.BORDER);
+		refreshTokenEndpointText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		refreshTokenEndpointText.addListener(SWT.FocusOut, e -> updateRefreshTokenEndpoint());
+		refreshTokenEndpointText.addModifyListener(e -> updateRefreshTokenEndpoint());
+		refreshTokenEndpointText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
 
 		Label jwksUriLabel = new Label(container, SWT.NONE);
 		jwksUriLabel.setText("JWKS URI:");
@@ -227,9 +236,22 @@ public class NewOAuthApiPage extends WizardPage
 				json.put(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, accessTokenEndpointText.getText().trim());
 				json.put(StatelessLoginHandler.AUTHORIZATION_BASE_URL, authorizationBaseUrlText.getText().trim());
 				json.put(StatelessLoginHandler.JWKS_URI, jwksUriText.getText().trim());
+				updateRefreshTokenEndpoint();
 			}
 		}
 		return isComplete;
+	}
+
+	private void updateRefreshTokenEndpoint()
+	{
+		if (!"".equals(refreshTokenEndpointText.getText().trim()))
+		{
+			wizard.getJSON().put(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT, refreshTokenEndpointText.getText().trim());
+		}
+		else
+		{
+			wizard.getJSON().remove(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT);
+		}
 	}
 
 	public String getApiSelection()
@@ -262,15 +284,17 @@ public class NewOAuthApiPage extends WizardPage
 		{
 			scopeText.setText("openid email");
 		}
-		if ("Custom".equals(selected))
+		boolean isCustomSelected = "Custom".equals(selected);
+		if (isCustomSelected)
 		{
 			accessTokenEndpointText.setText(oauthJson.optString(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, ""));
 			authorizationBaseUrlText.setText(oauthJson.optString(StatelessLoginHandler.AUTHORIZATION_BASE_URL, ""));
+			authorizationBaseUrlText.setText(oauthJson.optString(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT, ""));
 		}
 		jwksUriText.setText(oauthJson.optString(StatelessLoginHandler.JWKS_URI, ""));
-		authorizationBaseUrlText.setEnabled("Custom".equals(selected));
-		accessTokenEndpointText.setEnabled("Custom".equals(selected));
-		jwksUriText.setEnabled("Custom".equals(selected));
-
+		authorizationBaseUrlText.setEnabled(isCustomSelected);
+		accessTokenEndpointText.setEnabled(isCustomSelected);
+		refreshTokenEndpointText.setEnabled(isCustomSelected);
+		jwksUriText.setEnabled(isCustomSelected);
 	}
 }

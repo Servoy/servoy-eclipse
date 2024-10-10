@@ -20,7 +20,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
- *
+ * Wizard to setup an oauth configuration for stateless login.
  * @author emera
  */
 public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
