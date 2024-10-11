@@ -59,7 +59,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -81,7 +80,6 @@ import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.SecureStringPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
-import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
@@ -488,55 +486,29 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				if (persistContext.getPersist() instanceof MenuItem)
 				{
-					Map<String, Map<String, Object>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
+					Map<String, Map<String, PropertyDescription>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
 					if (extraProperties != null)
 					{
 						for (String categoryName : extraProperties.keySet())
 						{
-							Map<String, Object> extraCategoryProperties = extraProperties.get(categoryName);
+							Map<String, PropertyDescription> extraCategoryProperties = extraProperties.get(categoryName);
 							for (String propertyName : extraCategoryProperties.keySet())
 							{
-								Object typeInformation = extraCategoryProperties.get(propertyName);
-								String typeName = typeInformation instanceof String ? (String)typeInformation : ((JSONObject)typeInformation).getString("type");
-								Object defaultValue = typeInformation instanceof JSONObject ? ((JSONObject)typeInformation).opt("default") : null;
-								boolean hasDefaultValue = typeInformation instanceof JSONObject ? ((JSONObject)typeInformation).has("default") : false;
-								IPropertyType< ? > propertyType = TypesRegistry.getType(typeName, false);
-								ValuesConfig config = null;
-								if (typeInformation instanceof JSONObject && ((JSONObject)typeInformation).has("values"))
+								IPropertyDescriptor pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
+									extraCategoryProperties.get(propertyName),
+									form, persistContext,
+									readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
+									flattenedEditingSolution);
+								if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
 								{
-									propertyType = ValuesPropertyType.INSTANCE;
-									config = new ValuesConfig();
-									ArrayList<Object> listdata = new ArrayList<Object>();
-									JSONArray array = ((JSONObject)typeInformation).optJSONArray("values");
-									if (array != null)
-									{
-										for (int i = 0; i < array.length(); i++)
-										{
-											listdata.add(array.get(i));
-										}
-										config.setValues(listdata.toArray());
-										if (defaultValue != null)
-										{
-											config.addDefault(defaultValue, defaultValue.toString());
-										}
-									}
+									((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(categoryName);
 								}
-								if (propertyType != null)
+								if (pd != null)
 								{
-									IPropertyDescriptor pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
-										new PropertyDescriptionBuilder().withName(propertyName).withType(
-											propertyType).withDefaultValue(defaultValue).withHasDefault(hasDefaultValue).withConfig(config).build(),
-										form, persistContext,
-										readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
-										flattenedEditingSolution);
-									if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
-									{
-										((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(categoryName);
-									}
-
 									propertyDescriptors.put(pd.getId(), pd);
 								}
 							}
+
 						}
 					}
 				}
@@ -2185,7 +2157,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
-				return ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
+				Object value = ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
+				if (value != null && value instanceof String && Utils.getAsUUID(value, false) != null)
+				{
+					IPropertyType< ? > propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					if (propertyType instanceof ValueListPropertyType || propertyType instanceof FormPropertyType)
+					{
+						IPersist persist = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+							.searchPersist((String)value);
+						if (persist instanceof AbstractBase)
+						{
+							value = Integer.valueOf(persist.getID());
+						}
+					}
+				}
+				return value;
 			}
 		}
 		return null;
@@ -2720,6 +2706,22 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
+				if (value instanceof Integer)
+				{
+					IPropertyType< ? > propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					if (propertyType instanceof ValueListPropertyType)
+					{
+						ValueList val = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+							.getValueList(((Integer)value).intValue());
+						value = (val == null) ? null : val.getUUID().toString();
+					}
+					else if (propertyType instanceof FormPropertyType)
+					{
+						Form frm = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+							.getForm(((Integer)value).intValue());
+						value = (frm == null) ? null : frm.getUUID().toString();
+					}
+				}
 				((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), id.toString(), value);
 			}
 		}
@@ -3453,15 +3455,19 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				options = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true /* related calcs */, false, false, false, false,
 					INCLUDE_RELATIONS.NESTED, false, true, relations);
 			}
-			else
+			else if (form != null)
 			{
-				if (form == null) return null;
 
 				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
 					flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, true, true, true, table != null,
 					true, INCLUDE_RELATIONS.NESTED, true, true, null);
 
+			}
+			else
+			{
+				options = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true, true, true, false,
+					true, INCLUDE_RELATIONS.NESTED, true, true, null);
 			}
 
 			return createDataproviderController(persistContext, readOnly, id, displayName, flattenedEditingSolution, form, table, options);
@@ -3597,7 +3603,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		if (propertyType instanceof MenuPropertyType)
 		{
-			return new JSMenuPropertyController<Integer>(id, displayName, persistContext);
+			return new JSMenuPropertyController(id, displayName, persistContext);
 		}
 		if (propertyType == MediaPropertyType.INSTANCE)
 		{

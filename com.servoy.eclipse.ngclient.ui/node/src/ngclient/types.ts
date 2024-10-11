@@ -216,7 +216,7 @@ export class ComponentCache implements IComponentCache {
         public layout: { [property: string]: string },
         public readonly typesRegistry: TypesRegistry) {
             this.type = ComponentCache.convertToJSName(elType ? elType : specName);
-            this.model = {};
+            this.model = {visible:true};
     }
 
     private static convertToJSName(webObjectSpecName: string) {

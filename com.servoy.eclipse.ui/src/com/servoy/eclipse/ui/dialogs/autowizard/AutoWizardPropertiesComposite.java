@@ -245,7 +245,13 @@ public class AutoWizardPropertiesComposite
 			DataLayer bodyDataLayer = new DataLayer(dataProvider);
 			bodyDataLayer.setDefaultRowHeight(40);
 			bodyDataLayer.setColumnPercentageSizing(true);
-			bodyDataLayer.setDefaultMinColumnWidth(20);
+			bodyDataLayer.setDefaultMinColumnWidth(10);
+			if (propertyNames.size() > 3)
+			{
+				//make the column before the delete larger
+				bodyDataLayer.setMinColumnWidth(propertyNames.size() - 2, 100);
+				bodyDataLayer.setMinColumnWidth(propertyNames.size() - 1, 150);
+			}
 			bodyDataLayer.setDistributeRemainingRowSpace(true);
 
 			AggregateConfigLabelAccumulator accumulator = new AggregateConfigLabelAccumulator();
@@ -253,8 +259,10 @@ public class AutoWizardPropertiesComposite
 			// tell the CSS engine about the added labels
 			accumulator.add(new ColumnLabelAccumulator(dataProvider));
 
-			final ColumnOverrideLabelAccumulator columnLabelAccumulator = new ColumnOverrideLabelAccumulator(bodyDataLayer);
+			final ColumnOverrideLabelAccumulator columnLabelAccumulator = new ColumnOverrideLabelAccumulator(
+				bodyDataLayer);
 			bodyDataLayer.setConfigLabelAccumulator(columnLabelAccumulator);
+
 			registerColumnLabels(columnLabelAccumulator);
 
 			accumulator.add(columnLabelAccumulator);

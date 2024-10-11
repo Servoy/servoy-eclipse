@@ -16,8 +16,8 @@
  */
 package com.servoy.eclipse.jsunit.runner;
 
+import java.util.ArrayDeque;
 import java.util.List;
-import java.util.Stack;
 import java.util.regex.Pattern;
 
 import org.mozilla.javascript.Scriptable;
@@ -41,7 +41,7 @@ public abstract class JSUnitTestListenerHandler<T, E>
 
 	private final TestResult result;
 	private final List<Test> testList;
-	private final Stack<Test> testStack = new Stack<Test>();
+	private final ArrayDeque<Test> testStack = new ArrayDeque<>();
 	private int startedTestsCount;
 	private final Pattern[] stackElementFilters;
 
@@ -241,7 +241,7 @@ public abstract class JSUnitTestListenerHandler<T, E>
 	 */
 	public Test popLastStartedTest()
 	{
-		return testStack.pop();
+		return testStack.pollFirst();
 	}
 
 	/**

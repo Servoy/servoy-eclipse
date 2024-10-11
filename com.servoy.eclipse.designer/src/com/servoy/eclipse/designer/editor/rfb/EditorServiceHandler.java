@@ -41,6 +41,7 @@ import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.MoveDownCommand;
 import com.servoy.eclipse.designer.editor.commands.MoveUpCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
+import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.GroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.UngroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
@@ -245,6 +246,19 @@ public class EditorServiceHandler implements IServerService
 				CopyAction cp = new CopyAction(editorPart);
 				cp.update();
 				cp.run();
+				return null;
+			}
+		});
+
+		configuredHandlers.put("paste", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				PasteAction pasteAction = new PasteAction(com.servoy.eclipse.core.Activator.getDefault().getDesignClient(), selectionProvider, editorPart,
+					fieldPositioner);
+				pasteAction.update();
+				pasteAction.run();
 				return null;
 			}
 		});

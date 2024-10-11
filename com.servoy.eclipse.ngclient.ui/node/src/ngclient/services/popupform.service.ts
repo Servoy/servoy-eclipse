@@ -6,6 +6,7 @@ import { ServicesService } from '../../sablo/services.service';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
 import { MainViewRefService, PopupForm } from '@servoy/public';
+import { isEqual } from 'lodash-es';
 
 @Injectable()
 export class PopupFormService {
@@ -40,80 +41,80 @@ export class PopupFormService {
             this.showPopup(popup);
         });
     }
-	
-	public cancelForm(form: string) {
-		const frms: ComponentRef<ServoyFormPopupComponent>[] = [];
-		let newFormPopupComponent: ComponentRef<ServoyFormPopupComponent> = null;
-		let current = this.formPopupComponent;
-		while (current) {
-			const popup: PopupForm = current.instance.popup;
-			if (popup.form === form) {
-				break;
-			}
-			if (popup.parentInstance && popup.form !== form) {
-				frms.push(current);
-			}
-			if (popup.parentInstance) {
-				current = (popup.parentInstance as ComponentRef<ServoyFormPopupComponent>);
-			} else {
-				current = null;
-			}
-			newFormPopupComponent = current;
-		}
-		frms.forEach(item => {
-			this.closeSiblingsFormPopup(item);
-		});
-		
-		this.formPopupComponent = newFormPopupComponent;
-	}
 
-    public cancelFormPopup(disableClearPopupFormCallToServer: boolean): void {
-        this.doc.body.removeEventListener('mouseup', this.formPopupBodyListener);
-        if (this.formPopupComponent) {
-			let popup = this.formPopupComponent.instance.popup;
-			while(popup) {
-				this.hidePopupForm(popup);
-				popup = popup.parent;
-			}
-        }
+    public cancelFormPopup(disableClearPopupFormCallToServer_or_name: boolean|string): void {
+        if (typeof disableClearPopupFormCallToServer_or_name === 'boolean') {
+            this.doc.body.removeEventListener('mouseup', this.formPopupBodyListener);
+            if (this.formPopupComponent) {
+                let popup = this.formPopupComponent.instance.popup;
+                while (popup) {
+                    this.hidePopupForm(popup);
+                    popup = popup.parent;
+                }
+            }
 
-        const customEvent = new CustomEvent('enableTabseq', {
-            bubbles: true
-        });
-        this.doc.getElementById('mainForm').dispatchEvent(customEvent);
+            const customEvent = new CustomEvent('enableTabseq', {
+                bubbles: true
+            });
+            this.doc.getElementById('mainForm').dispatchEvent(customEvent);
 
-        /*
-         * Because server side code in window_server.js checks for scope.model.popupform != null when closing a form popup it must have the correct value server-side; so
-         *     - when it is closed by a click outside the popup form area that happens to be exactly on a button that opens it again, the current method executes and
-         *       "scope.model.popupform" needs to reach server before the button click that will open the form editor again executes not after (because if it is set to null
-         *       after the reshow, it will be in a wrong state server-side); that is why we use callServerSideApi here instead of relying on a shallow watch (pushToServer in spec)
-         *       on the model property which would send the null change too late
-         *     - if one would click twice really fast on a button that shows a form popup, both those clicks are queued on the server's event queue; it shows the first time
-         *       then in server side code - when the show is called the second time it would close the first one and show it again; but in this case we must not call callServerSideApi
-         *       to set scope.model.popupform to null because that would execute after the second show is done (it is queued after it on server) and again we'd end up with a shown
-         *       form popup but a null scope.model.popupform on server which is wrong... that is the purpose of "disableClearPopupFormCallToServer" flag
-         */
-        if (!disableClearPopupFormCallToServer) {
-            this.servicesService.callServiceServerSideApi('window', 'clearPopupForm', []);
-        }
-        if (this.formPopupComponent) {
-			let popup = this.formPopupComponent;
-			while(popup) {
-				const parent = popup.instance.popup.parentInstance ? popup.instance.popup.parentInstance as ComponentRef<ServoyFormPopupComponent> : null;
-				popup.destroy();
-				if (parent) {
-					popup = parent;
-				} else {
-					popup = null;
-				}
-			}
-			this.formPopupComponent = null;
+            /*
+             * Because server side code in window_server.js checks for scope.model.popupform != null when closing a form popup it must have the correct value server-side; so
+             *     - when it is closed by a click outside the popup form area that happens to be exactly on a button that opens it again, the current method executes and
+             *       "scope.model.popupform" needs to reach server before the button click that will open the form editor again executes not after (because if it is set to null
+             *       after the reshow, it will be in a wrong state server-side); that is why we use callServerSideApi here instead of relying on a shallow watch (pushToServer in spec)
+             *       on the model property which would send the null change too late
+             *     - if one would click twice really fast on a button that shows a form popup, both those clicks are queued on the server's event queue; it shows the first time
+             *       then in server side code - when the show is called the second time it would close the first one and show it again; but in this case we must not call callServerSideApi
+             *       to set scope.model.popupform to null because that would execute after the second show is done (it is queued after it on server) and again we'd end up with a shown
+             *       form popup but a null scope.model.popupform on server which is wrong... that is the purpose of "disableClearPopupFormCallToServer" flag
+             */
+            if (!disableClearPopupFormCallToServer_or_name) {
+                this.servicesService.callServiceServerSideApi('window', 'clearPopupForm', []);
+            }
+            if (this.formPopupComponent) {
+                let popup = this.formPopupComponent;
+                while (popup) {
+                    const parent = popup.instance.popup.parentInstance ? popup.instance.popup.parentInstance as ComponentRef<ServoyFormPopupComponent> : null;
+                    popup.destroy();
+                    if (parent) {
+                        popup = parent;
+                    } else {
+                        popup = null;
+                    }
+                }
+                this.formPopupComponent = null;
+            }
+        } else if (typeof disableClearPopupFormCallToServer_or_name === 'string') {
+            const frms: ComponentRef<ServoyFormPopupComponent>[] = [];
+            let newFormPopupComponent: ComponentRef<ServoyFormPopupComponent> = null;
+            let current = this.formPopupComponent;
+            while (current) {
+                const popup: PopupForm = current.instance.popup;
+                if (popup.form === disableClearPopupFormCallToServer_or_name) {
+                    break;
+                }
+                if (popup.parentInstance && popup.form !== disableClearPopupFormCallToServer_or_name) {
+                    frms.push(current);
+                }
+                if (popup.parentInstance) {
+                    current = (popup.parentInstance as ComponentRef<ServoyFormPopupComponent>);
+                } else {
+                    current = null;
+                }
+                newFormPopupComponent = current;
+            }
+            frms.forEach(item => {
+                this.closeSiblingsFormPopup(item);
+            });
+
+            this.formPopupComponent = newFormPopupComponent;
         }
     }
 
     private showPopup(popup: PopupForm, counter?: number) {
 		if ((this.formPopupComponent && !popup.parent) || 
-		(this.formPopupComponent && this.formPopupComponent.instance.popup.form === popup.form && this.objectsAreEquals(this.formPopupComponent.instance.popup.parent, popup.parent))) return;
+		(this.formPopupComponent && this.formPopupComponent.instance.popup.form === popup.form && isEqual(this.formPopupComponent.instance.popup.parent, popup.parent))) return;
 		if (!this.formPopupComponent && popup.parent) {
 			this.servicesService.callServiceServerSideApi('window', 'clearPopupForm', []);
 			return;
@@ -134,7 +135,7 @@ export class PopupFormService {
 				if (this.formPopupComponent.instance.popup.form !== popup.parent.form && this.formPopupComponent.instance.popup.parent) {
 					const frms: ComponentRef<ServoyFormPopupComponent>[] = [];
 					let current: PopupForm = this.formPopupComponent.instance.popup;
-					while (current && !this.objectsAreEquals(current.parent, popup.parent)) {
+					while (current && !isEqual(current.parent, popup.parent)) {
 						if (current.parentInstance) {
 							frms.push(current.parentInstance as ComponentRef<ServoyFormPopupComponent>);
 						}
@@ -154,7 +155,7 @@ export class PopupFormService {
 				popup.parentInstance = null;
 				let parent = this.formPopupComponent.instance.popup;
 				while (parent) {
-					if (this.objectsAreEquals(parent.parent, popup.parent) && parent.parentInstance) {
+					if (isEqual(parent.parent, popup.parent) && parent.parentInstance) {
 						popup.parentInstance = parent.parentInstance as ComponentRef<ServoyFormPopupComponent>;
 						break;
 					}
@@ -192,10 +193,6 @@ export class PopupFormService {
 			}
 			this.servicesService.callServiceServerSideApi('window', 'formPopupClosed',  [jsEvent]);
 		}
-	}
-	
-	private objectsAreEquals(obj1: object, obj2: object) {
-		return JSON.stringify(obj1) === JSON.stringify(obj2);
 	}
 
     private formPopupBodyListener = (event: Event) => {

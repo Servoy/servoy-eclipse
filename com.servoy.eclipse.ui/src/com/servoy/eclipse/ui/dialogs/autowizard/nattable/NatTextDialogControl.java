@@ -75,7 +75,7 @@ public class NatTextDialogControl extends Composite
 		this.control.setForeground(this.cellStyle.getAttributeValue(CellStyleAttributes.FOREGROUND_COLOR));
 		this.control.setFont(this.cellStyle.getAttributeValue(CellStyleAttributes.FONT));
 
-		this.control.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
+		this.control.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, true));
 		Button button = new Button(this, SWT.PUSH);
 		button.setImage(iconImage);
 		button.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, true));

@@ -1246,11 +1246,14 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		public List<Pair<T1, T2>> getSet1()
 		{
 			ArrayList<Pair<T1, T2>> l = new ArrayList<Pair<T1, T2>>();
-			for (Pair<T1, T2> p : initialPairs)
+			if (contentProvider != null)
 			{
-				if (contentProvider.getSet(p) == SET1)
+				for (Pair<T1, T2> p : initialPairs)
 				{
-					l.add(p);
+					if (contentProvider.getSet(p) == SET1)
+					{
+						l.add(p);
+					}
 				}
 			}
 			return l;
@@ -1259,11 +1262,14 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		public List<Pair<T1, T2>> getSet2()
 		{
 			ArrayList<Pair<T1, T2>> l = new ArrayList<Pair<T1, T2>>();
-			for (Pair<T1, T2> p : initialPairs)
+			if (contentProvider != null)
 			{
-				if (contentProvider.getSet(p) == SET2)
+				for (Pair<T1, T2> p : initialPairs)
 				{
-					l.add(p);
+					if (contentProvider.getSet(p) == SET2)
+					{
+						l.add(p);
+					}
 				}
 			}
 			return l;
@@ -1272,11 +1278,14 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		public List<Pair<T1, T2>> getSet3()
 		{
 			ArrayList<Pair<T1, T2>> l = new ArrayList<Pair<T1, T2>>();
-			for (Pair<T1, T2> p : initialPairs)
+			if (contentProvider != null)
 			{
-				if (contentProvider.getSet(p) == SET3)
+				for (Pair<T1, T2> p : initialPairs)
 				{
-					l.add(p);
+					if (contentProvider.getSet(p) == SET3)
+					{
+						l.add(p);
+					}
 				}
 			}
 			return l;

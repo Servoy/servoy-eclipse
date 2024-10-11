@@ -19,6 +19,7 @@ package com.servoy.eclipse.jsunit.smart;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.test.SolutionJSUnitSuiteCodeBuilder;
@@ -152,4 +153,43 @@ public class DebugTestClient extends DebugHeadlessClient
 			return new ScriptEngine(this);
 		}
 	}
+
+	private final AtomicBoolean testRunning = new AtomicBoolean(false);
+
+	/**
+	 * this is called when testing is started on this client.
+	 * if testing was already started (and not stopped) then this will wait for that.
+	 */
+	public void startTesting()
+	{
+		// try to set it to true if it was false.
+		// if not wait for it.
+		while (!testRunning.compareAndSet(false, true))
+		{
+			synchronized (testRunning)
+			{
+				try
+				{
+					testRunning.wait();
+				}
+				catch (InterruptedException e)
+				{
+					break;
+				}
+			}
+		}
+	}
+
+
+	public void stopTesting()
+	{
+		// just set the flag to false
+		testRunning.set(false);
+		// and notify any waiting thread
+		synchronized (testRunning)
+		{
+			testRunning.notifyAll();
+		}
+	}
+
 }

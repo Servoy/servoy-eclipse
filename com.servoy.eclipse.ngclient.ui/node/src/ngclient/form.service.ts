@@ -656,7 +656,7 @@ export class FormService {
                     }
 
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
-                    const fcc = new FormComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.responsive, elem.position, formComponentProperties,
+                    const fcc = new FormComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.responsive, elem.position?elem.position:elem.model.cssPosition, formComponentProperties,
                         !!elem.model.foundset, this.typesRegistry);
 
                     this.handleComponentModelConversionsAndChangeListeners(elem, fcc, componentSpec, formCache);
@@ -667,7 +667,7 @@ export class FormService {
                     formCache.add(fcc, parent);
                 } else {
                     // simple component
-                    const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry);
+                    const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position?elem.position:elem.model.cssPosition, this.typesRegistry);
                     this.handleComponentModelConversionsAndChangeListeners(elem, comp, componentSpec, formCache);
 
                     formCache.add(comp, parent);
@@ -710,7 +710,7 @@ export interface ServerElement {
     part: boolean,
     layout: boolean| { [property: string]: string },
     position: { [property: string]: string },
-    model: { [property: string]: unknown, containedForm: {[property: string]: unknown }, styleClass: string, servoyAttributes: { [property: string]: string }},
+    model: { [property: string]: unknown, containedForm: {[property: string]: unknown }, styleClass: string, servoyAttributes: { [property: string]: string }, cssPosition: { [property: string]: string }},
     styleclass: Array<string>,
     classes: Array<string>
     formComponent: Array<string>,

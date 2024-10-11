@@ -67,7 +67,7 @@ public class XMLScriptObjectAdapterLoader
 				ServoyLog.logError("Error reading documentation from " + url, t);
 			}
 
-			// the following - commented out code is only to be used when for adjusting native-references.xml of org.eclipse.dltk.javascript.core/resources
+			// the following - commented out code is only to be used for adjusting native-references.xml of org.eclipse.dltk.javascript.core/resources
 			// when one of the classes in com.servoy.j2db.documentation.scripting.docs changed
 			// see NGClientStarter commented code that prints those out to console and those can be used as descriptions in native-references.xml (used in code completion for native javascript types)
 //			url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc_jslib.xml");

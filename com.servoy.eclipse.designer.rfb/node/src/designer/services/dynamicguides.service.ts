@@ -32,6 +32,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	initialRectangle: DOMRect;
 	formBounds: DOMRect;
 	snapToEndEnabled: boolean = true;
+	parentContainer: Element;
 
     constructor(private editorContentService: EditorContentService, protected readonly editorSession: EditorSessionService) {
         this.editorSession.addDynamicGuidesChangedListener(this);
@@ -58,9 +59,16 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         if (this.leftPos.size == 0) {
             this.rectangles = [];
 			this.uuids = [];
-			this.element = this.editorSession.getSelection().length == 1 ? this.editorContentService.getContentElementById(this.editorSession.getSelection()[0]) : 
-				this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
+			const contentElements = this.editorContentService.getContentElementsFromPoint(point);
+			if (this.editorSession.getSelection().length == 1) {
+				this.element = this.editorContentService.getContentElementById(this.editorSession.getSelection()[0]);
+				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id'));
+			}
+			let parent = contentElements.find(e => e.classList.contains('svy-formcomponent'));
             this.uuid = this.element?.getAttribute('svy-id');
+			if (this.uuid && parent && this.uuid.indexOf(parent.getAttribute('svy-id').replace(/-/g,'_')) > 0 ){
+				this.parentContainer = parent;
+			}
 			this.formBounds = this.editorContentService.getContentForm().getBoundingClientRect();
             for (let comp of this.editorContentService.getAllContentElements()) {
 				const componentType = comp.getAttribute('svy-formelement-type');
@@ -334,7 +342,14 @@ this.snapToEndEnabled = !event.shiftKey;
 			this.initialPoint = point;
 			this.initialRectangle = rect;
 		}
+		if (this.parentContainer) this.adjustPropertiesToContainer(properties);
 		this.snapDataListener.next(properties.guides.length == 0 ? null : properties);
+	}
+
+	private adjustPropertiesToContainer(properties: SnapData) {
+		const parentBounds = this.parentContainer.getBoundingClientRect();
+		properties.top -= parentBounds.top;
+		properties.left -= parentBounds.left;
 	}
 
 	private checkSnapToSize(properties: SnapData, rect: DOMRect, overlapsX: DOMRect[], overlapsY: DOMRect[]) {

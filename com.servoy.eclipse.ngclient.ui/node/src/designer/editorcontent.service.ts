@@ -159,7 +159,7 @@ export class EditorContentService {
                     redrawDecorators = true;
 
                     const rawModelProperties = elem.model;
-                    elem.model = {};
+                    elem.model = {visible:true};
 
                     const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.specName);
                     const componentDynamicTypesHolder = {};
@@ -177,7 +177,7 @@ export class EditorContentService {
                         const layout: { [property: string]: string } = {};
                         this.fillLayout(elem, formCache, layout);
                         const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
-                        const fcc = new FormComponentCache(elem.name, elem.specName, undefined, elem.handlers, elem.responsive, elem.position,
+                        const fcc = new FormComponentCache(elem.name, elem.specName, undefined, elem.handlers, elem.responsive, elem.position?elem.position:elem.model.cssPosition,
                             formComponentProperties, elem.model.foundset, this.typesRegistry).initForDesigner(elem.model);
                         formCache.addFormComponent(fcc);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
@@ -208,7 +208,7 @@ export class EditorContentService {
                             }
                         });
                     } else {
-                        const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry).initForDesigner(elem.model);
+                        const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position?elem.position:elem.model.cssPosition, this.typesRegistry).initForDesigner(elem.model);
                         formCache.add(comp);
                         const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
                         if (parentUUID) {
@@ -362,7 +362,10 @@ export class EditorContentService {
 
     updateComponentProperties(component: IComponentCache, elem: ServerElement): boolean {
         let redrawDecorators = false;
-        component.layout = elem.position;
+        component.layout = elem.position?elem.position:elem.model.cssPosition;
+        
+        // default properties should be copied over, we need to because below we delete properties that are not in the server side model
+        if (elem.model.visible == undefined)  elem.model.visible = component.model.visible;
 
         const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.specName);
         const componentDynamicTypesHolder = {};

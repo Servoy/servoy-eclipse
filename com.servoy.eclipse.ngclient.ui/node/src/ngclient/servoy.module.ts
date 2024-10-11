@@ -1,22 +1,16 @@
-import { CommonModule } from '@angular/common';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 
 import { MainComponent } from './main.component';
 
 import { FormComponent } from './form/form_component.component';
 
-import { AllServicesModules } from './allservices.service';
-import { AllComponentsModule } from './allcomponents.module';
 import { DefaultLoginWindowComponent } from './services/default-login-window/default-login-window.component';
 import { FileUploadWindowComponent } from './services/file-upload-window/file-upload-window.component';
 import { DialogWindowComponent } from './services/dialog-window/dialog-window.component';
 import { ServoyFormPopupComponent } from './services/popupform/popupform';
 import { UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
-import { ServoyPublicModule, ServoyPublicService } from '@servoy/public';
 import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
-import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 
 import { ServerDataService } from './services/serverdata.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
@@ -25,6 +19,8 @@ import {MainRoutingModule} from './main-routing.module';
 import { DeveloperService } from './developer.service';
 import { AlertWindowComponent} from './services/alert-window/alert-window.component';
 import { MessageDialogWindowComponent } from './services/message-dialog-window/message-dialog-window.component';
+import { LFCModule } from './lfc.module';
+import { ServoyPublicService } from '@servoy/public';
 
 @NgModule( {
     declarations: [
@@ -39,13 +35,8 @@ import { MessageDialogWindowComponent } from './services/message-dialog-window/m
         MessageDialogWindowComponent
     ],
     imports: [
-        CommonModule,
-        FormsModule,
-        AllComponentsModule,
-        AllServicesModules,
-        ServoyPublicModule,
         MainRoutingModule,
-        ServoyCoreComponentsModule
+        LFCModule
     ],
     providers: [UpperCasePipe, LowerCasePipe,
         ServerDataService, BSWindowManager, DatePipe, DecimalPipe,

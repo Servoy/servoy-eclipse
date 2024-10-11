@@ -138,7 +138,7 @@ public class ComponentTemplateGenerator
 		for (PropertyDescription pd : specProperties)
 		{
 			String name = pd.getName();
-			if (name.equals("anchors") || name.equals("formIndex")) continue;
+			if (name.equals("anchors") || name.equals("formIndex") || name.equals("size") || name.equals("location")) continue;
 			if (name.equals(IContentSpecConstants.PROPERTY_ATTRIBUTES))
 			{
 				name = "servoyAttributes";

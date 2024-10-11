@@ -66,11 +66,13 @@ import com.servoy.eclipse.ui.actions.CopyPropertyValueAction;
 import com.servoy.eclipse.ui.actions.PastePropertyValueAction;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.property.IProvidesTooltip;
+import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.eclipse.ui.views.solutionexplorer.HTMLToolTipSupport;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Settings;
@@ -88,10 +90,38 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 	private CopyPropertyValueAction copyValueAction;
 	private PastePropertyValueAction pasteValueAction;
 
+	private IPersist selectedPersist = null;
+
 	public ModifiedPropertySheetPage(Map<String, IAction> actions)
 	{
 		super();
 		this.actions = actions;
+	}
+
+	@Override
+	public void selectionChanged(IWorkbenchPart part, ISelection selection)
+	{
+		if (selection instanceof IStructuredSelection sel && !sel.isEmpty())
+		{
+			Object firstElement = sel.getFirstElement();
+			if (firstElement instanceof IAdaptable adaptable)
+			{
+				firstElement = adaptable.getAdapter(IPersist.class);
+			}
+			if (firstElement instanceof IPersist persist)
+			{
+				selectedPersist = persist;
+			}
+			else
+			{
+				selectedPersist = null;
+			}
+		}
+		else
+		{
+			selectedPersist = null;
+		}
+		super.selectionChanged(part, selection);
 	}
 
 	@Override
@@ -121,6 +151,23 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					}
 				}
 				return super.compare(entryA, entryB);
+			}
+
+			@Override
+			public int compareCategories(String categoryA, String categoryB)
+			{
+				if (selectedPersist instanceof MenuItem)
+				{
+					if (PropertyCategory.Properties.name().equals(categoryA))
+					{
+						return -1;
+					}
+					if (PropertyCategory.Properties.name().equals(categoryB))
+					{
+						return 1;
+					}
+				}
+				return super.compareCategories(categoryA, categoryB);
 			}
 		});
 

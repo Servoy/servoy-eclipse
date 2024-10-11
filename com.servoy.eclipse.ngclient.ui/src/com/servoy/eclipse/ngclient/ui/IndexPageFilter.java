@@ -89,6 +89,11 @@ public class IndexPageFilter implements Filter
 		String solutionName = getSolutionNameFromURI(Paths.get(requestURI.replace(':', '_')).normalize());
 		if (indexFile != null && indexFile.exists())
 		{
+			if (AngularIndexPageWriter.handleOauth(request, response))
+			{
+				return;
+			}
+			
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
 					requestURI.toLowerCase().endsWith("/index.html")))

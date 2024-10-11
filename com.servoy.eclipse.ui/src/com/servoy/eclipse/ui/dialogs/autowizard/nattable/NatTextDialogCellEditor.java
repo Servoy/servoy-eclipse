@@ -92,12 +92,13 @@ public abstract class NatTextDialogCellEditor extends AbstractCellEditor impleme
 				@Override
 				public void keyReleased(KeyEvent e)
 				{
-					_keyReleased(e, textControl);
+
 				}
 
 				@Override
 				public void keyPressed(KeyEvent e)
 				{
+					_keyPressed(e, textControl);
 				}
 			});
 		}
@@ -115,7 +116,7 @@ public abstract class NatTextDialogCellEditor extends AbstractCellEditor impleme
 		return editor;
 	}
 
-	public void _keyReleased(KeyEvent e, Text textControl)
+	public void _keyPressed(KeyEvent e, Text textControl)
 	{
 		switch (e.keyCode)
 		{

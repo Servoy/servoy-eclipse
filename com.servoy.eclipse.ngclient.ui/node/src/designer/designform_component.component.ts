@@ -30,12 +30,12 @@ import { TypesRegistry} from '../sablo/types_registry';
           <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
                    <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
           </div>
       </div>
       <div *ngIf="!formCache.absolute && name!=='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
-            <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+            <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
                    <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
             </div>
             <ng-template *ngFor="let item of formCache.mainStructure?.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
@@ -137,7 +137,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         super(renderer);
         formservice.setDesignerMode();
         this.log = logFactory.getLogger('FormComponent');
-        this.disableTransitions();        
 
         this.isVariantForm = (this.name === 'VariantsForm');
         this.windowRefService.nativeWindow.addEventListener('message', (event) => {
@@ -325,18 +324,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         });
     }
 
-    disableTransitions() {
-        const styleElement = this.renderer.createElement('style');
-        styleElement.textContent = `
-            * {
-                transition: none !important;
-                animation: none !important;
-            }
-        `;
-        this.renderer.appendChild(document.head, styleElement);
-    }
-    
-    
     sendVariantSizes() {
         const variants = this.document.getElementsByClassName('variant_item');
         if (!this.variantsLoaded || variants.length === 0) {

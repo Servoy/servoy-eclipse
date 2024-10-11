@@ -40,7 +40,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
     <ng-container *ngIf="!useScrolling">
         <div *ngIf="containedForm&&containedForm.absoluteLayout">
             <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
-                <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item['layout']" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+                <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                     <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
                 </div>
             </div>
@@ -396,7 +396,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     changes.forEach(change => {
                         insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
                     });
-                    if (insertOrDeletes) this.agGrid.api.refreshServerSide({ purge: true });
+                    if (insertOrDeletes) {
+                        this.agGrid.api.refreshServerSide({ purge: true });
+                        this.agGrid.api.setRowCount(this.foundset.serverSize ? this.foundset.serverSize : 0);
+                    }
                     else this.agGrid.api.refreshCells();
                 } else if (event.viewportRowsCompletelyChanged || event.fullValueChanged) {
                     this.agGrid.api.refreshServerSide({ purge: true });
@@ -412,7 +415,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if(this.foundset.selectedRowIndexes.length) {
             const rowCount = this.agGrid.api.getDisplayedRowCount();
             if(this.foundset.selectedRowIndexes[0] > rowCount - AGGRID_CACHE_BLOCK_SIZE) {
-                (this.agGrid.api.getModel() as any).setRowCount(Math.min(this.foundset.selectedRowIndexes[0] + AGGRID_CACHE_BLOCK_SIZE, this.foundset.serverSize));
+                this.agGrid.api.setRowCount(Math.min(this.foundset.selectedRowIndexes[0] + AGGRID_CACHE_BLOCK_SIZE, this.foundset.serverSize));
             }
             this.agGrid.api.ensureIndexVisible(this.foundset.selectedRowIndexes[0]);
         }        
@@ -528,7 +531,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
         if (row._cache) {
             const cache = row._cache.get(cm.name);
-            if (cache) return cache;
+            if (cache && cache.rowIndex === rowIndex) return cache;
         }
 
         if (item?.model?.servoyAttributes) {
@@ -769,11 +772,17 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getAGGridStyle(): any {
+        const aggridStyle = {
+            '--ag-row-height': 42,
+            '--ag-header-height': 48,
+            '--ag-list-item-height': 24
+        };
         if (this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight < 1) {
-            return { height: '100%' };
+            aggridStyle['height'] = '100%';
         } else {
-            return { 'height.px': this.responsiveHeight };
+            aggridStyle['height.px'] = this.responsiveHeight;
         }
+        return aggridStyle;
     }
 }
 

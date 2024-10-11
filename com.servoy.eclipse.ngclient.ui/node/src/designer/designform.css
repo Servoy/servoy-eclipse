@@ -1,3 +1,8 @@
+* {
+  transition: none !important;
+  animation: none !important;
+}
+
 .user-selection-off {
     -webkit-user-select: none;
     -khtml-user-select: none;

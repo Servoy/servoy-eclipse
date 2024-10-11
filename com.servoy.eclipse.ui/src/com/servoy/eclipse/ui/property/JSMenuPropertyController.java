@@ -30,6 +30,7 @@ import com.servoy.eclipse.ui.labelproviders.MenuLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Menu;
 
 /**
  * Property controller for selecting value list in Properties view.
@@ -38,7 +39,7 @@ import com.servoy.j2db.FlattenedSolution;
  *
  * @param <P> property type
  */
-public class JSMenuPropertyController<P> extends PropertyController<P, Integer>
+public class JSMenuPropertyController extends PropertyController<Object, Integer>
 {
 	private final PersistContext persistContext;
 
@@ -62,6 +63,41 @@ public class JSMenuPropertyController<P> extends PropertyController<P, Integer>
 		return new ListSelectCellEditor(parent, "Select Servoy Menu", getLabelProvider(), new JSMenuValueEditor(flattenedEditingSolution), isReadOnly(),
 			actualList.toArray(),
 			SWT.NONE, null, "menuDialog");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.property.PropertyController#createConverter()
+	 */
+	@Override
+	protected IPropertyConverter<Object, Integer> createConverter()
+	{
+		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
+		return new IPropertyConverter<Object, Integer>()
+		{
+			public Integer convertProperty(Object id, Object value)
+			{
+				if (value == null)
+				{
+					return Integer.valueOf(MenuLabelProvider.MENU_NONE);
+				}
+				Menu menu = flattenedEditingSolution.getMenu(value.toString());
+				if (menu != null)
+				{
+					return Integer.valueOf(menu.getID());
+				}
+				return Integer.valueOf(MenuLabelProvider.MENU_UNRESOLVED);
+			}
+
+			public Object convertValue(Object id, Integer value)
+			{
+				int menuId = value.intValue();
+				if (menuId == MenuLabelProvider.MENU_NONE) return null;
+				Menu menu = flattenedEditingSolution.getMenu(menuId);
+				return menu == null ? null : menu.getUUID();
+			}
+		};
 	}
 
 	public static class JSMenuValueEditor implements IValueEditor<Integer>

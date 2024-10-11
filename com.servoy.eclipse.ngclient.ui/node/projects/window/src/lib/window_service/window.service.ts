@@ -31,7 +31,7 @@ export class WindowPluginService {
     }
 	
 	cancelForm(form: string) {
-		this.servoyService.cancelForm(form);
+		this.servoyService.cancelFormPopup(form);
 	}
 	
     get shortcuts(): Shortcut[] {

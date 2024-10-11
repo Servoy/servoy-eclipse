@@ -47,7 +47,7 @@ public class TestTarget
 	private final static String DELIM = "|";
 
 
-	private Pair<Solution, String> globalScopeToTest; // if a global scope should be tested 
+	private Pair<Solution, String> globalScopeToTest; // if a global scope should be tested
 	private Solution moduleToTest; // if a module is to be tested
 	private Form formToTest; // if a form scope should be tested
 	private ScriptMethod testMethodToTest; // if only one test method should be tested
@@ -56,6 +56,8 @@ public class TestTarget
 	private Form testMethodsForm;
 	private String testMethodsScope;
 	private int type; //value of SOLUTION ,FORM, GLOBAL_SCOPE...
+
+	public Object launch;
 
 	private TestTarget()
 	{

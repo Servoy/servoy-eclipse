@@ -89,6 +89,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.IWebComponent;
@@ -600,6 +601,29 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
 									res.add(dropTarget);
+									if (initialDropTarget != null &&
+										!initialDropTarget.getUUID().equals(parentSupportingElements.getUUID()))
+									{
+										FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(parentSupportingElements);
+										ISupportChilds parent = PersistHelper.getFlattenedPersist(flattenedSolution, form, parentSupportingElements);
+										Iterator<IPersist> it = parent.getAllObjects();
+										while (it.hasNext())
+										{
+											IPersist child = it.next();
+											IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, form));
+											if (!overridePersist.getUUID().equals(child.getUUID()))
+											{
+												parent.removeChild(child);
+												// do not add the override again, the getOverridePersist should already create it in the right place (probably directly on form)
+												//parent.addChild(overridePersist);
+											}
+											// parent is overridden, make sure all children are sent to designer
+											if (!extraChangedPersists.contains(overridePersist))
+											{
+												extraChangedPersists.add(overridePersist);
+											}
+										}
+									}
 								}
 //								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
 //								{
@@ -612,18 +636,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								IPersist[] result = res.toArray(new IPersist[0]);
 								if (fullRefreshNeeded)
 								{
-									IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-									for (IEditorReference editorRef : editorRefs)
-									{
-										IEditorPart editor = editorRef.getEditor(false);
-										if (editor instanceof BaseVisualFormEditor)
-										{
-											BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
-											if (activePage instanceof RfbVisualFormEditorDesignPage)
-												((RfbVisualFormEditorDesignPage)activePage).refreshContent();
-											break;
-										}
-									}
+									doFullFormRefresh();
 								}
 								return result;
 							}
@@ -923,11 +936,40 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				}
 
 				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, asList(newPersist));
+
+				if (form.getExtendsID() > 0 && newPersist.length > 1)
+				{
+					for (IPersist persist : newPersist)
+					{
+						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() > 0)
+						{
+							// very likely a complex inheritance situation that won't refresh correctly, just reinitialize form designer
+							doFullFormRefresh();
+							break;
+						}
+					}
+				}
 			}
 		}
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError("Could not undo create elements", e);
+		}
+	}
+
+	public static void doFullFormRefresh()
+	{
+		IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+		for (IEditorReference editorRef : editorRefs)
+		{
+			IEditorPart editor = editorRef.getEditor(false);
+			if (editor instanceof BaseVisualFormEditor)
+			{
+				BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
+				if (activePage instanceof RfbVisualFormEditorDesignPage)
+					((RfbVisualFormEditorDesignPage)activePage).refreshContent();
+				break;
+			}
 		}
 	}
 
