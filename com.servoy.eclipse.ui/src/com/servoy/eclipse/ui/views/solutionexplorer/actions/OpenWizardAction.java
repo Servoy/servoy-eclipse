@@ -43,6 +43,7 @@ import com.servoy.eclipse.ui.util.EditorUtil.SaveDirtyEditorsOutputEnum;
 import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
+import com.servoy.eclipse.ui.wizards.NewOAuthConfigWizard;
 
 /**
  * Action for opening a wizard.
@@ -241,6 +242,18 @@ public class OpenWizardAction extends Action
 					super.updateButtons();
 					Button fns = this.getButton(IDialogConstants.FINISH_ID);
 					if (fns != null && copyWarToCmd != null) copyWarToCmd.setEnabled(fns.isEnabled());
+				}
+
+				@Override
+				protected Button createButton(Composite parent, int id, String label,
+					boolean defaultButton)
+				{
+					if (id == IDialogConstants.NEXT_ID && wizard instanceof NewOAuthConfigWizard)
+					{
+						return super.createButton(parent, id,
+							"Advanced parameters >", defaultButton);
+					}
+					return super.createButton(parent, id, label, defaultButton);
 				}
 
 			};

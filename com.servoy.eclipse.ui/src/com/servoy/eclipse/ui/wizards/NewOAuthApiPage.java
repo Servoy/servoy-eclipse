@@ -123,13 +123,13 @@ public class NewOAuthApiPage extends WizardPage
 
 		Label jwksUriLabel = new Label(container, SWT.NONE);
 		jwksUriLabel.setText("JWKS URI:");
+		jwksUriLabel.setToolTipText("The JSON Web Key Set (JWKS) is a set of keys containing the public keys " +
+			" used to verify the id token issued by the Authorization Server.");
 		jwksUriText = new Text(container, SWT.BORDER);
 		jwksUriText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		jwksUriText.addListener(SWT.FocusOut, e -> updateJWKS_URI());
 		jwksUriText.addModifyListener(e -> updateJWKS_URI());
 		jwksUriText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
-		jwksUriText.setToolTipText("The JSON Web Key Set (JWKS) is a set of keys containing the public keys " +
-			" used to verify the id token issued by the Authorization Server.");
 
 		setControl(container);
 		setPageComplete(isPageComplete());
