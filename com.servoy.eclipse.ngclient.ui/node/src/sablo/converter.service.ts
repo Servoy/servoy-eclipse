@@ -175,7 +175,9 @@ export class ConverterService<T> {
             if (arg && arg.originalEvent) arg = arg.originalEvent;
 
             // TODO these two ifs could be moved to a "JSEvent" client side type implementation (and if spec is correct it will work through the normal types system)
-            if (arg instanceof MouseEvent || arg instanceof KeyboardEvent) {
+            if (arg instanceof MouseEvent || arg instanceof KeyboardEvent
+                    // this second part of the condition is a workaround for when running under cypress e2e tests in an iframe and clicking in developer tools in chrome; then it's a bug in cypress that generates the events using parent window constructors instead of client window constructors
+                    || (arg?.constructor ? window[arg?.constructor?.name]?.['prototype'] instanceof MouseEvent : false) || (arg?.constructor ? window[arg?.constructor?.name]?.['prototype'] instanceof KeyboardEvent : false)) {
                 const $event = arg;
                 const eventObj = {};
                 let modifiers = 0;
@@ -192,7 +194,9 @@ export class ConverterService<T> {
                 eventObj['y'] = $event['pageY'];
                 eventObj['data'] = $event['data'];
                 arg = eventObj;
-            } else if (arg instanceof Event) {
+            } else if (arg instanceof Event
+                // this second part of the condition is a workaround for when running under cypress e2e tests in an iframe and clicking in developer tools in chrome; then it's a bug in cypress that generates the events using parent window constructors instead of client window constructors
+                    || (arg?.constructor ? window[arg?.constructor?.name]?.['prototype'] instanceof Event : false)) {
                 const eventObj = {};
                 eventObj['type'] = 'event';
                 eventObj['eventName'] = eventName;
