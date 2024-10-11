@@ -39,7 +39,7 @@ export class ConverterService<T> {
         const dateType = new DateType();
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, dateType);
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, dateType);
-        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, this)); // used for 'object' type as well as for the default conversions
+        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, this, logFactory)); // used for 'object' type as well as for the default conversions
     }
 
     public static getCombinedPropertyNames(now: any, prev: any) {
