@@ -17,8 +17,6 @@
 package com.servoy.eclipse.debug.script;
 
 
-import static com.servoy.j2db.util.Utils.stream;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.rmi.RemoteException;
@@ -37,7 +35,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
@@ -110,6 +107,7 @@ import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.base.persistence.IBaseColumn;
+import com.servoy.base.persistence.constants.IColumnTypeConstants;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -216,13 +214,18 @@ import com.servoy.j2db.querybuilder.impl.QBAggregates;
 import com.servoy.j2db.querybuilder.impl.QBColumn;
 import com.servoy.j2db.querybuilder.impl.QBColumns;
 import com.servoy.j2db.querybuilder.impl.QBCondition;
+import com.servoy.j2db.querybuilder.impl.QBDatetimeColumn;
 import com.servoy.j2db.querybuilder.impl.QBFactory;
 import com.servoy.j2db.querybuilder.impl.QBFunction;
 import com.servoy.j2db.querybuilder.impl.QBFunctions;
+import com.servoy.j2db.querybuilder.impl.QBGenericColumn;
 import com.servoy.j2db.querybuilder.impl.QBGroupBy;
+import com.servoy.j2db.querybuilder.impl.QBIntegerColumn;
 import com.servoy.j2db.querybuilder.impl.QBJoin;
 import com.servoy.j2db.querybuilder.impl.QBJoins;
 import com.servoy.j2db.querybuilder.impl.QBLogicalCondition;
+import com.servoy.j2db.querybuilder.impl.QBMediaColumn;
+import com.servoy.j2db.querybuilder.impl.QBNumberColumn;
 import com.servoy.j2db.querybuilder.impl.QBParameter;
 import com.servoy.j2db.querybuilder.impl.QBParameters;
 import com.servoy.j2db.querybuilder.impl.QBPart;
@@ -231,6 +234,7 @@ import com.servoy.j2db.querybuilder.impl.QBSelect;
 import com.servoy.j2db.querybuilder.impl.QBSort;
 import com.servoy.j2db.querybuilder.impl.QBSorts;
 import com.servoy.j2db.querybuilder.impl.QBTableClause;
+import com.servoy.j2db.querybuilder.impl.QBTextColumn;
 import com.servoy.j2db.querybuilder.impl.QBWhereCondition;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
@@ -255,7 +259,6 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
-import com.servoy.j2db.scripting.annotations.JSRagtest;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
@@ -370,14 +373,12 @@ public class TypeCreator extends TypeCache
 
 	public static final String ARRAY_INDEX_PROPERTY_PREFIX = "array__indexedby_";
 
-	// Type attributes
 	public static final String IMAGE_DESCRIPTOR = "servoy.IMAGEDESCRIPTOR";
 	public static final String RESOURCE = "servoy.RESOURCE";
+	public static final String VALUECOLLECTION = "servoy.VALUECOLLECTION";
 	public static final String LAZY_VALUECOLLECTION = "servoy.LAZY_VALUECOLLECTION";
-	private static final String RAGTEST_RECEIVING_TYPES = "servoy.RAGTEST_RECEIVING_TYPES";
-	private static final String RAGTEST_RETURN_TYPE = "servoy.RAGTEST_RETURN_TYPE";
 
-	public final static Set<String> BASE_TYPES = new HashSet<>(128);
+	public final static Set<String> BASE_TYPES = new HashSet<String>(128);
 
 	static
 	{
@@ -479,27 +480,33 @@ public class TypeCreator extends TypeCache
 		addScopeType("FormComponentType", new FormComponentTypeCreator());
 		addScopeType(RUNTIME_WEB_COMPONENT, new WebComponentTypeCreator());
 		addScopeType(ElementUtil.CUSTOM_TYPE, new CustomTypeCreator());
-		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBFactory.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBFunction.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBGroupBy.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBJoin.class.getSimpleName(), new QueryBuilderJoinCreator());
-		addScopeType(QBJoins.class.getSimpleName(), new QueryBuilderJoinsCreator());
-		addScopeType(QBLogicalCondition.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBWhereCondition.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBResult.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBSelect.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBSort.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBSorts.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBTableClause.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBPart.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBParameter.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBParameters.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
-		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBAggregates.class.getSimpleName(), new QueryBuilderCreator());
+
+		addQueryBuilderScopeType(QBAggregate.class);
+		addQueryBuilderScopeType(QBColumn.class);
+		addQueryBuilderScopeType(QBIntegerColumn.class);
+		addQueryBuilderScopeType(QBDatetimeColumn.class);
+		addQueryBuilderScopeType(QBNumberColumn.class);
+		addQueryBuilderScopeType(QBMediaColumn.class);
+		addQueryBuilderScopeType(QBTextColumn.class);
+		addQueryBuilderScopeType(QBCondition.class);
+		addQueryBuilderScopeType(QBFactory.class);
+		addQueryBuilderScopeType(QBFunction.class);
+		addQueryBuilderScopeType(QBGroupBy.class);
+		addScopeType(QBJoin.class.getSimpleName(), new QueryBuilderJoinCreator()); // Handled separately
+		addQueryBuilderScopeType(QBJoins.class, new QueryBuilderJoinsCreator());
+		addQueryBuilderScopeType(QBLogicalCondition.class);
+		addQueryBuilderScopeType(QBWhereCondition.class);
+		addQueryBuilderScopeType(QBResult.class);
+		addQueryBuilderScopeType(QBSelect.class);
+		addQueryBuilderScopeType(QBSort.class);
+		addQueryBuilderScopeType(QBSorts.class);
+		addQueryBuilderScopeType(QBTableClause.class);
+		addQueryBuilderScopeType(QBPart.class);
+		addQueryBuilderScopeType(QBParameter.class);
+		addQueryBuilderScopeType(QBParameters.class);
+		addQueryBuilderScopeType(QBColumns.class, new QueryBuilderColumnsCreator());
+		addQueryBuilderScopeType(QBFunctions.class);
+		addQueryBuilderScopeType(QBAggregates.class);
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
 		addScopeType(ViewDataSource.class.getSimpleName(), new ViewDataSourceCreator());
 		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class)
@@ -509,7 +516,7 @@ public class TypeCreator extends TypeCache
 			{
 				try
 				{
-					return server instanceof IServer && !((IServer)server).getProcedures().isEmpty();
+					return server instanceof IServer iserver && !iserver.getProcedures().isEmpty();
 				}
 				catch (RepositoryException | RemoteException e)
 				{
@@ -524,6 +531,17 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 		addScopeType(JSViewDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSViewDataSource.class, ClientSupport.ng_wc_sc));
+	}
+
+	private void addQueryBuilderScopeType(Class< ? > clazz)
+	{
+		addQueryBuilderScopeType(clazz, new QueryBuilderCreator());
+	}
+
+	private void addQueryBuilderScopeType(Class< ? > clazz, IScopeTypeCreator creator)
+	{
+		addScopeType(clazz.getSimpleName(), creator); // RAGTEST map QBColumn op QBGenericColumn of vv
+		QUERY_BUILDER_CLASSES.put(clazz.getSimpleName(), clazz);
 	}
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
@@ -1532,36 +1550,30 @@ public class TypeCreator extends TypeCache
 			makeDeprecated(type);
 		}
 
-		Type superT = null;
-		ServoyDocumented anno = cls.getAnnotation(ServoyDocumented.class);
-		if (anno != null && anno.extendsComponent() != null && !anno.extendsComponent().trim().equals(""))
+		Type superT = getDocumentedSupertype(context, cls);
+		if (superT == null)
 		{
-			superT = getType(context, anno.extendsComponent().trim());
-			if (superT == null)
-				ServoyLog.logWarning("@ServoyDocumented.extendsComponent for type '" + typeName + "' was not found. Value: " + anno.extendsComponent(), null);
-		}
-		else if (cls != IRuntimeComponent.class && IRuntimeComponent.class.isAssignableFrom(cls))
-		{
-			superT = getType(context, "RuntimeComponent");
-		}
-		else if (cls.getSuperclass() != null)
-		{
-			Class< ? > superCls = classTypes.get(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(cls.getSuperclass()));
-			if (superCls != null)
+			if (cls != IRuntimeComponent.class && IRuntimeComponent.class.isAssignableFrom(cls))
 			{
-				JavaMembers superClassMembers = ScriptObjectRegistry.getJavaMembers(superCls, null);
-				JavaMembers classMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
-				// only add the super type if both are of the same javamembers class (instance or not) or the super class is a specific js class.
-				if (classMembers.getClass() == superClassMembers.getClass() || superClassMembers instanceof InstanceJavaMembers)
+				superT = getType(context, "RuntimeComponent");
+			}
+			else if (cls.getSuperclass() != null)
+			{
+				Class< ? > superCls = classTypes.get(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(cls.getSuperclass()));
+				if (superCls != null)
 				{
-					superT = getType(context, cls.getSuperclass().getSimpleName());
+					JavaMembers superClassMembers = ScriptObjectRegistry.getJavaMembers(superCls, null);
+					JavaMembers classMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
+					// only add the super type if both are of the same javamembers class (instance or not) or the super class is a specific js class.
+					if (classMembers.getClass() == superClassMembers.getClass() || superClassMembers instanceof InstanceJavaMembers)
+					{
+						superT = getType(context, cls.getSuperclass().getSimpleName());
+					}
 				}
 			}
 		}
-		if (superT != null)
-		{
-			type.setSuperType(superT);
-		}
+
+		type.setSuperType(superT);
 
 		Class< ? >[] returnTypes = linkedTypes.get(cls);
 		if (returnTypes != null)
@@ -1602,6 +1614,22 @@ public class TypeCreator extends TypeCache
 			}
 		}
 		return type;
+	}
+
+	private Type getDocumentedSupertype(String context, Class< ? > cls)
+	{
+		Type superT = null;
+		ServoyDocumented anno = cls.getAnnotation(ServoyDocumented.class);
+		if (anno != null && anno.extendsComponent() != null && anno.extendsComponent().length() > 0)
+		{
+			superT = getType(context, anno.extendsComponent());
+			if (superT == null)
+			{
+				ServoyLog.logWarning(
+					"@ServoyDocumented.extendsComponent for class '" + cls.getCanonicalName() + "' was not found. Value: " + anno.extendsComponent(), null);
+			}
+		}
+		return superT;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1826,27 +1854,15 @@ public class TypeCreator extends TypeCache
 						}
 
 						boolean readOnly = false;
-						JSRagtest ragtest = null;
-						if (object instanceof BeanProperty beanProperty)
+						if (object instanceof BeanProperty)
 						{
-							var annotationManager = AnnotationManagerReflection.getInstance();
-							java.lang.reflect.Method getter = beanProperty.getGetter();
-							readOnly = annotationManager.isAnnotationPresent(getter, scriptObjectClass, JSReadonlyProperty.class);
-							ragtest = annotationManager.getAnnotation(getter, scriptObjectClass, JSRagtest.class);
-							if (ragtest != null)
-							{
-								System.err.println("RAGTEST");
-							}
+							readOnly = AnnotationManagerReflection.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), scriptObjectClass,
+								JSReadonlyProperty.class);
 						}
 
 						Property property = createProperty(propertyName, readOnly, returnType, getDoc(name, scriptObjectClass, null), descriptor);
 						if (!visible) property.setVisible(false);
 						property.setStatic(type == STATIC_FIELD);
-						if (ragtest != null)
-						{
-							property.setAttribute(RAGTEST_RECEIVING_TYPES, ragtest.ragtestin());
-							property.setAttribute(RAGTEST_RETURN_TYPE, Integer.valueOf(ragtest.ragtestout()));
-						}
 
 						if (object instanceof BeanProperty || (object instanceof Field && property.isStatic()))
 						{
@@ -2873,59 +2889,12 @@ public class TypeCreator extends TypeCache
 			{
 				return TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>'));
 			}
-
-//			member.getType()
-//
-//			JSRagtest annotation = memberbox[i].method().getAnnotation(JSRagtest.class);
-//			if (annotation != null)
-//			{
-//				if (annotation.arguments().length > 0) parameterTypes = annotation.arguments();
-//				if (annotation.returns() != Object.class) returnTypeClz = annotation.returns();
-//
-//			}
-
-
 			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
 				memberType.getName().equals(QBJoin.class.getSimpleName()) ||
 				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
 				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()))
 			{
-
-				String ragtestConfig = config;
-				int ragtestIndex = ragtestConfig.indexOf("#");
-				if (ragtestIndex > 0)
-				{
-					ragtestConfig = ragtestConfig.substring(0, ragtestIndex);
-				}
-				Integer ragtestReturnType = (Integer)member.getAttribute(RAGTEST_RETURN_TYPE);
-				if (ragtestReturnType != null)
-				{
-					String typeName = IDataProvider.getTypeName(ragtestReturnType.intValue());
-					if (typeName == null)
-					{
-						ragtestConfig += "#" + typeName;
-					}
-				}
-
-
-				Member overriddenMember = TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + ragtestConfig + '>'));
-//				Member overriddenMember = TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
-
-
-				int[] ragtestReceivingTypes = (int[])member.getAttribute(RAGTEST_RECEIVING_TYPES);
-				if (ragtestReceivingTypes != null)
-				{
-					// RAGTEST alleen als config een #datatype heeft
-					if (stream(ragtestReceivingTypes).mapToObj(ragtest -> IDataProvider.getTypeName(ragtest)).filter(Objects::nonNull).noneMatch(
-						ragtest -> config.endsWith("#" + ragtest)))
-					{
-						overriddenMember.setDeprecated(true);
-//						overriddenMember.setVisible(false);
-						overriddenMember.setDescription(overriddenMember.getDescription() + "<br><b>This function is not supported RAGTEST</b>.");
-
-					}
-				}
-				return overriddenMember;
+				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
 			}
 		}
 
@@ -3571,36 +3540,6 @@ public class TypeCreator extends TypeCache
 
 	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new HashMap<>();
 
-	static
-	{
-		addClass(QBAggregate.class);
-		addClass(QBColumn.class);
-		addClass(QBColumns.class);
-		addClass(QBCondition.class);
-		addClass(QBFactory.class);
-		addClass(QBFunction.class);
-		addClass(QBGroupBy.class);
-//		addClass(QBJoin.class); Handled separately
-		addClass(QBJoins.class);
-		addClass(QBLogicalCondition.class);
-		addClass(QBWhereCondition.class);
-		addClass(QBResult.class);
-		addClass(QBSelect.class);
-		addClass(QBSort.class);
-		addClass(QBSorts.class);
-		addClass(QBPart.class);
-		addClass(QBTableClause.class);
-		addClass(QBParameter.class);
-		addClass(QBParameters.class);
-		addClass(QBFunctions.class);
-		addClass(QBAggregates.class);
-	}
-
-	private static void addClass(Class< ? > clazz)
-	{
-		QUERY_BUILDER_CLASSES.put(clazz.getSimpleName(), clazz);
-	}
-
 	private class QueryBuilderCreator implements IScopeTypeCreator
 	{
 		private Type cachedSuperTypeTemplateType = null;
@@ -3622,7 +3561,7 @@ public class TypeCreator extends TypeCache
 				cstt = cachedSuperTypeTemplateType = createBaseType(context, superTypeName);
 			}
 			EList<Member> members = cstt.getMembers();
-			List<Member> overwrittenMembers = new ArrayList<>();
+			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
 				Member overridden = createMember(member, context, config);
@@ -3655,11 +3594,18 @@ public class TypeCreator extends TypeCache
 		{
 			Class< ? > cls = QUERY_BUILDER_CLASSES.get(fullTypeName);
 			Type type = TypeCreator.this.createType(context, fullTypeName, cls);
-			String superclass = cls.getSuperclass().getSimpleName();
-			if (QUERY_BUILDER_CLASSES.containsKey(superclass))
+
+			Type superType = getDocumentedSupertype(context, cls);
+			if (superType == null && cls.getSuperclass() != null)
 			{
-				type.setSuperType(getType(context, superclass));
+				String superclass = cls.getSuperclass().getSimpleName();
+				if (QUERY_BUILDER_CLASSES.containsKey(superclass))
+				{
+					superType = getType(context, superclass);
+				}
 			}
+
+			type.setSuperType(superType);
 			return type;
 		}
 
@@ -3756,30 +3702,36 @@ public class TypeCreator extends TypeCache
 				property.setName(provider.getDataProviderID());
 				property.setAttribute(RESOURCE, provider);
 				property.setVisible(true);
-
-				String dataProviderTypeName = provider.getDataProviderTypeName();
-				String typeParameters = dataSource;
-				if (dataProviderTypeName != null)
-				{
-					typeParameters += "#" + dataProviderTypeName;
-				}
-
-				property.setType(getTypeRef(context, QBColumn.class.getSimpleName() + '<' + typeParameters + '>'));
+				property.setType(getTypeRef(context, determineColumnClass(provider).getSimpleName() + '<' + dataSource + '>'));
 				ImageDescriptor image = COLUMN_IMAGE;
 				String description = "Column";
-				if (provider instanceof AggregateVariable)
-				{
-					image = COLUMN_AGGR_IMAGE;
-					description = "Aggregate (" + ((AggregateVariable)provider).getRootObject().getName() + ")";
-				}
-				else if (provider instanceof ScriptCalculation)
+				if (provider instanceof ScriptCalculation scriptCalculation)
 				{
 					image = COLUMN_CALC_IMAGE;
-					description = "Calculation (" + ((ScriptCalculation)provider).getRootObject().getName() + ")";
+					description = "Calculation (" + scriptCalculation.getRootObject().getName() + ")";
 				}
 				property.setAttribute(IMAGE_DESCRIPTOR, image);
 				property.setDescription(description.intern());
 				members.add(property);
+			}
+		}
+
+		private static Class< ? > determineColumnClass(IDataProvider provider)
+		{
+			switch (provider.getDataProviderType())
+			{
+				case IColumnTypeConstants.DATETIME :
+					return QBDatetimeColumn.class;
+				case IColumnTypeConstants.TEXT :
+					return QBTextColumn.class;
+				case IColumnTypeConstants.NUMBER :
+					return QBNumberColumn.class;
+				case IColumnTypeConstants.INTEGER :
+					return QBIntegerColumn.class;
+				case IColumnTypeConstants.MEDIA :
+					return QBMediaColumn.class;
+				default :
+					return QBGenericColumn.class;
 			}
 		}
 
