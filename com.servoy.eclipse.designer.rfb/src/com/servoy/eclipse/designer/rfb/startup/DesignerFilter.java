@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +64,7 @@ import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
+import com.servoy.eclipse.designer.rfb.palette.PaletteFavoritesHandler;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -509,9 +511,14 @@ public class DesignerFilter implements Filter
 					}
 					jsonWriter.endArray();
 					JSONArray jsonArray = new JSONArray(sw.toString());
-					jsonArray = PaletteCommonsHandler.getInstance()
-						.insertcommonsCategory(jsonArray);
-					;
+					if (PlatformUI.getPreferenceStore().getBoolean("commons"))
+					{
+						jsonArray = PaletteCommonsHandler.getInstance().insertcommonsCategory(jsonArray);
+					}
+					if (PlatformUI.getPreferenceStore().getBoolean("favorites"))
+					{
+						jsonArray = PaletteFavoritesHandler.getInstance().insertFavoritesCategory(jsonArray);
+					}
 					servletResponse.getWriter().write(jsonArray.toString());
 				}
 				catch (JSONException ex)

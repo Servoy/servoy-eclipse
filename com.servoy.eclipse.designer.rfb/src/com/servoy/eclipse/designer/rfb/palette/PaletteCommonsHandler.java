@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -218,6 +219,20 @@ public class PaletteCommonsHandler
 				double usagePercentage = getUsagePercentage(utcTimestamp, component.getString("name"));
 				addComponentKeyToCommonsPercentageList(component.getString("name"), usagePercentage);
 			}
+			if (!packageJSON.has("categories")) continue;
+			JSONObject categories = packageJSON.getJSONObject("categories");
+			Iterator< ? > iterator = categories.keys();
+			while (iterator.hasNext())
+			{
+				Object element = iterator.next();
+				JSONArray catComponents = categories.getJSONArray(element.toString());
+				for (int k = 0; k < catComponents.length(); k++)
+				{
+					JSONObject component = catComponents.getJSONObject(k);
+					double usagePercentage = getUsagePercentage(utcTimestamp, component.getString("name"));
+					addComponentKeyToCommonsPercentageList(component.getString("name"), usagePercentage);
+				}
+			}
 		}
 		JSONArray commonsComponents = getCommonsComponents(packages);
 		commonsCategory.put("components", commonsComponents);
@@ -250,6 +265,22 @@ public class PaletteCommonsHandler
 				if (keysList.contains(component.getString("name")))
 				{
 					componentsArray.put(component);
+				}
+			}
+			if (!packageJSON.has("categories")) continue;
+			JSONObject categories = packageJSON.getJSONObject("categories");
+			Iterator< ? > iterator = categories.keys();
+			while (iterator.hasNext())
+			{
+				Object element = iterator.next();
+				JSONArray catComponents = categories.getJSONArray(element.toString());
+				for (int k = 0; k < catComponents.length(); k++)
+				{
+					JSONObject component = catComponents.getJSONObject(k);
+					if (keysList.contains(component.getString("name")))
+					{
+						componentsArray.put(component);
+					}
 				}
 			}
 		}

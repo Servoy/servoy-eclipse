@@ -16,6 +16,10 @@
                                 <img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{component.displayName}}
                                 </span>
                                 <designer-variantscontent [component]="component" (click)="onVariantClick($event, component, component.packageName ? component.packageName : package.packageName)" *ngIf="component.styleVariantCategory"></designer-variantscontent>
+                                <span name="favIcon" *ngIf="component.isFav === undefined ? false : true" class="favIcon" (click)="onFavoriteCLick($event, component)">
+                                    <i name="favIcon" *ngIf="!component.isFav" class="fa-regular fa-star"></i>
+                                    <i name="favIcon" *ngIf="component.isFav" class="fa-solid fa-star"></i>
+                                </span>
                                 <ul>
                                 	<li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)">
                                 	   <span>
@@ -34,6 +38,10 @@
                                 <ul>
                                      <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of categoryObject.value | searchTextFilter : searchText" (click)="onClick(component)">
                                          <span><img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{component.displayName}}</span>
+                                         <span name="favIcon" *ngIf="component.isFav === undefined ? false : true" class="favIcon" (click)="onFavoriteCLick($event, component)">
+                                            <i name="favIcon" *ngIf="!component.isFav" class="fa-regular fa-star"></i>
+                                            <i name="favIcon" *ngIf="component.isFav" class="fa-solid fa-star"></i>
+                                         </span>
                                      </li>
                                 </ul>
                             </li>

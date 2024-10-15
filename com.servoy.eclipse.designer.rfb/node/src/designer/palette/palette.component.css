@@ -19,7 +19,7 @@
     list-style-type: none;
     padding-left: 10px;
     cursor: pointer;
-     margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 
@@ -27,7 +27,7 @@
     padding-top: 0px;
     white-space: nowrap;
     font-size: 12px;
-     margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .palette li>span:hover {
@@ -46,4 +46,27 @@
     --bs-accordion-active-bg: rgb(255, 187, 55);
     --bs-accordion-active-color: #212529;
     --bs-accordion-btn-padding-y: 0.5rem;
+}
+
+.accordion .accordion-body {
+    padding: 5px 20px 5px 20px;
+}
+
+.accordion .accordion-button {
+    height: 20px;
+    font-size: 14px;
+    min-width: 195px;
+}
+
+.accordion .accordion-button::after, .accordion .accordion-button:not(.collapsed)::after {
+    --bs-accordion-btn-icon-width: 0.8rem;
+}
+
+.favIcon {
+    margin-left: 10px;
+    visibility: hidden;
+}
+
+.palette ul>li:hover>.favIcon {
+    visibility: visible;
 }

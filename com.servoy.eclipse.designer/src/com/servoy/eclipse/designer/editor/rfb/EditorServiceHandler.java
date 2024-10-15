@@ -65,6 +65,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositi
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
+import com.servoy.eclipse.designer.rfb.palette.PaletteFavoritesHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -152,6 +153,16 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("openScript", new OpenScriptHandler(editorPart));
 		configuredHandlers.put("openFormHierarchy", new OpenFormHierarchyHandler(selectionProvider));
 		configuredHandlers.put("updatePaletteOrder", new UpdatePaletteOrder());
+		configuredHandlers.put("updateFavoritesComponents", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				PaletteFavoritesHandler.getInstance().updateFavorite(args.getString("name"));
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshPalette();
+				return null;
+			}
+		});
 		configuredHandlers.put("openContainedForm", new OpenContainedFormHandler(editorPart));
 		configuredHandlers.put("buildTiNG", new IServerService()
 		{
