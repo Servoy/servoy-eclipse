@@ -34,7 +34,8 @@ Require-Bundle: servoy_shared,
  org.apache.commons.commons-codec;bundle-version="1.16.0",
  com.github.scribejava.apis;bundle-version="8.3.3",
  com.github.scribejava.core;bundle-version="8.3.3",
- com.github.scribejava.java8;bundle-version="8.3.3"
+ com.github.scribejava.java8;bundle-version="8.3.3",
+ wrapped.com.auth0.jwks-rsa;bundle-version="0.22.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
