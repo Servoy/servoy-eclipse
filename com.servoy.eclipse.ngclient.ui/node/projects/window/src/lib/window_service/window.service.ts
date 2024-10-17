@@ -76,7 +76,9 @@ export class WindowPluginService {
                                         argsWithEvent.push(args);
                                     }
                                 }
-                                targetEl.dispatchEvent(new CustomEvent('change'));
+                                if (document.activeElement !== targetEl) {
+                                    targetEl.dispatchEvent(new CustomEvent('change'));
+                                }
                                 //$sabloTestability.block(true);
                                 setTimeout((clb: { script: string; formname?: string }, clbArgs: Array<any>) => {
                                     let formName = clbArgs[0].formName;
