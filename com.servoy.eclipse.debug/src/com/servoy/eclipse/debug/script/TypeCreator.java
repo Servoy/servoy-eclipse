@@ -123,6 +123,7 @@ import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
+import com.servoy.eclipse.model.util.MenuFoundsetServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
@@ -142,6 +143,8 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
+import com.servoy.j2db.dataprocessing.MenuFoundSet;
+import com.servoy.j2db.dataprocessing.MenuItemRecord;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
 import com.servoy.j2db.dataprocessing.ViewFoundSet;
@@ -150,8 +153,10 @@ import com.servoy.j2db.dataprocessing.datasource.DBDataSource;
 import com.servoy.j2db.dataprocessing.datasource.DBDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
+import com.servoy.j2db.dataprocessing.datasource.JSMenuDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.dataprocessing.datasource.MemDataSource;
+import com.servoy.j2db.dataprocessing.datasource.MenuDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.ViewDataSource;
@@ -456,6 +461,8 @@ public class TypeCreator extends TypeCache
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
 		addScopeType(ViewRecord.VIEW_RECORD, new ViewRecordCreator());
 		addScopeType(ViewFoundSet.VIEW_FOUNDSET, new ViewFoundSetCreator());
+		//addScopeType(MenuItemRecord.MENUITEM_RECORD, new MenuItemRecordCreator());
+		//addScopeType(MenuFoundSet.MENU_FOUNDSET, new MenuFoundSetCreator());
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("RuntimeForm", new FormScopeCreator());
@@ -495,6 +502,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBAggregates.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
+		addScopeType(MenuDataSource.class.getSimpleName(), new MenuDataSourceCreator());
 		addScopeType(ViewDataSource.class.getSimpleName(), new ViewDataSourceCreator());
 		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class)
 		{
@@ -518,6 +526,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 		addScopeType(JSViewDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSViewDataSource.class, ClientSupport.ng_wc_sc));
+		addScopeType(JSMenuDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSMenuDataSource.class, ClientSupport.ng_wc_sc));
 	}
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
@@ -777,7 +786,7 @@ public class TypeCreator extends TypeCache
 					IReturnedTypesProvider datasourceReturns = ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class);
 					for (Class< ? > cls : datasourceReturns.getAllReturnedTypes())
 					{
-						if (cls != DBDataSource.class && cls != MemDataSource.class && cls != ViewDataSource.class)
+						if (cls != DBDataSource.class && cls != MemDataSource.class && cls != ViewDataSource.class && cls != MenuDataSource.class)
 						{
 							clsses.add(cls);
 						}
@@ -2858,7 +2867,8 @@ public class TypeCreator extends TypeCache
 			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
 				memberType.getName().equals(QBJoin.class.getSimpleName()) ||
 				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
-				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()))
+				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()) ||
+				memberType.getName().equals(MenuFoundSet.class.getSimpleName()) || memberType.getName().equals(MenuItemRecord.class.getSimpleName()))
 			{
 				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
 			}
@@ -3388,7 +3398,8 @@ public class TypeCreator extends TypeCache
 				String foundsetType = FoundSet.JS_FOUNDSET;
 				if (ds != null)
 				{
-					foundsetType = ds.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON) ? ViewFoundSet.VIEW_FOUNDSET : FoundSet.JS_FOUNDSET;
+					foundsetType = ds.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON) ? ViewFoundSet.VIEW_FOUNDSET
+						: (ds.startsWith(DataSourceUtils.MENU_DATASOURCE_SCHEME_COLON) ? MenuFoundSet.MENU_FOUNDSET : FoundSet.JS_FOUNDSET);
 					foundsetType += '<' + ds + '>';
 				}
 				Member clone = TypeCreator.clone(getMember("foundset", baseType), getTypeRef(context, foundsetType));
@@ -3909,7 +3920,41 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	private class MenuDataSourceCreator implements IScopeTypeCreator
+	{
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setSuperType(createArrayLookupType(context, JSMenuDataSource.class));
+			MenuFoundsetServerWrapper wrapper = new MenuFoundsetServerWrapper();
+			Collection<String> tableNames = wrapper.getTableNames();
+			EList<Member> members = type.getMembers();
+			for (String name : tableNames)
+			{
+				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+				property.setName(name);
+				property.setVisible(true);
+				property.setType(getTypeRef(context, JSMenuDataSource.class.getSimpleName() + '<' + DataSourceUtils.createMenuDataSource(name) + '>'));
+				property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
+				property.setDescription("Menu datasource");
+				members.add(property);
+			}
 
+			return type;
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
 	private class SPDataSourceServerCreator implements IScopeTypeCreator
 	{
 		public Type createType(String context, String fullTypeName)
