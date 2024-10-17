@@ -4,7 +4,7 @@
 	   [id]="servoyApi.getMarkupId()"
 	   [ngModel]="dataProviderID"
 	   (ngModelChange)="onModelChange($event)"
-	   (change)="pushUpdate()"
+	   (change)="handleChangeEvent($event)"
 	   (click)="onClick($event)"
 	   [svyFormat]="format"
 	   [svyDecimalKeyConverter]="format"
