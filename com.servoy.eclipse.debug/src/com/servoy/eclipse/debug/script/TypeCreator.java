@@ -224,7 +224,6 @@ import com.servoy.j2db.querybuilder.impl.QBDatetimeColumn;
 import com.servoy.j2db.querybuilder.impl.QBFactory;
 import com.servoy.j2db.querybuilder.impl.QBFunction;
 import com.servoy.j2db.querybuilder.impl.QBFunctions;
-import com.servoy.j2db.querybuilder.impl.QBGenericColumn;
 import com.servoy.j2db.querybuilder.impl.QBGroupBy;
 import com.servoy.j2db.querybuilder.impl.QBIntegerColumn;
 import com.servoy.j2db.querybuilder.impl.QBJoin;
@@ -265,6 +264,7 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
+import com.servoy.j2db.scripting.annotations.JSIgnore;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
@@ -490,8 +490,6 @@ public class TypeCreator extends TypeCache
 		addScopeType(ElementUtil.CUSTOM_TYPE, new CustomTypeCreator());
 
 		addQueryBuilderScopeType(QBAggregate.class);
-//		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator()); // RAGTEST map QBColumn op QBGenericColumn of vv
-//		QUERY_BUILDER_CLASSES.put(QBColumn.class.getSimpleName(), QBGenericColumn.class);
 		addQueryBuilderScopeType(QBColumn.class);
 		addQueryBuilderScopeType(QBIntegerColumn.class);
 		addQueryBuilderScopeType(QBDatetimeColumn.class);
@@ -552,7 +550,7 @@ public class TypeCreator extends TypeCache
 
 	private void addQueryBuilderScopeType(Class< ? > clazz, IScopeTypeCreator creator)
 	{
-		addScopeType(clazz.getSimpleName(), creator); // RAGTEST map QBColumn op QBGenericColumn of vv
+		addScopeType(clazz.getSimpleName(), creator);
 		QUERY_BUILDER_CLASSES.put(clazz.getSimpleName(), clazz);
 	}
 
@@ -1670,16 +1668,16 @@ public class TypeCreator extends TypeCache
 					al.add((String)element);
 				}
 			}
-			if (javaMembers instanceof InstanceJavaMembers)
+			if (javaMembers instanceof InstanceJavaMembers instanceJavaMembers)
 			{
-				al.removeAll(((InstanceJavaMembers)javaMembers).getGettersAndSettersToHide());
+				al.removeAll(instanceJavaMembers.getGettersAndSettersToHide());
 			}
 			else
 			{
 				al.removeAll(objectMethods);
 			}
 
-			List<Member> newMembers = new ArrayList<Member>();
+			List<Member> newMembers = new ArrayList<>();
 			for (String name : al)
 			{
 				int type = 0;
@@ -1706,6 +1704,14 @@ public class TypeCreator extends TypeCache
 
 				if (object != null)
 				{
+					if (object instanceof BeanProperty beanProperty &&
+						AnnotationManagerReflection.getInstance().isAnnotationPresent(beanProperty.getGetter(), scriptObjectClass,
+							JSIgnore.class))
+					{
+						// RAGTEST doc deze
+						continue;
+					}
+
 					if (type == INSTANCE_METHOD || type == STATIC_METHOD)
 					{
 						MemberBox[] memberbox = null;
@@ -2575,10 +2581,6 @@ public class TypeCreator extends TypeCache
 	 */
 	private static Class< ? > getGenericReturnType(Class< ? > cls, java.lang.reflect.Method method)
 	{
-		if (method.getName().equals("maxragtest"))
-		{
-			System.err.println("RAGTEST");
-		}
 		var typeToken = TypeToken.of(cls);
 		var returnType = typeToken.method(method).getReturnType();
 		return returnType.getRawType();
@@ -3761,7 +3763,7 @@ public class TypeCreator extends TypeCache
 				case IColumnTypeConstants.MEDIA :
 					return QBMediaColumn.class;
 				default :
-					return QBGenericColumn.class;
+					return QBColumn.class;
 			}
 		}
 
