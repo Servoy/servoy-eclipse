@@ -76,7 +76,8 @@ export class WindowPluginService {
                                         argsWithEvent.push(args);
                                     }
                                 }
-                                if (document.activeElement !== targetEl) {
+                                // should trigger a change only if the shorcut is a combination of 'CTRL' + any key
+                                if (translatedShortcut.startsWith('CTRL+')) {
                                     targetEl.dispatchEvent(new CustomEvent('change'));
                                 }
                                 //$sabloTestability.block(true);
