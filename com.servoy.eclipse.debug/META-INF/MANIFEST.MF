@@ -43,7 +43,8 @@ Export-Package: com.servoy.eclipse.debug,
  com.servoy.eclipse.debug.actions,
  com.servoy.eclipse.debug.handlers
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Import-Package: com.servoy.eclipse.ngclient.ui,
+Import-Package: com.google.common.reflect;version="[33.0.0,34.0.0)",
+ com.servoy.eclipse.ngclient.ui,
  com.servoy.eclipse.ngclient.ui.utils,
  org.apache.commons.compress.archivers.tar;version="1.25.0",
  org.apache.commons.compress.compressors.gzip;version="1.25.0",

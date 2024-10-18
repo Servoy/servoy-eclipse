@@ -106,6 +106,7 @@ import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
+import com.google.common.reflect.TypeToken;
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.persistence.constants.IColumnTypeConstants;
 import com.servoy.base.persistence.constants.IFormConstants;
@@ -489,6 +490,8 @@ public class TypeCreator extends TypeCache
 		addScopeType(ElementUtil.CUSTOM_TYPE, new CustomTypeCreator());
 
 		addQueryBuilderScopeType(QBAggregate.class);
+//		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator()); // RAGTEST map QBColumn op QBGenericColumn of vv
+//		QUERY_BUILDER_CLASSES.put(QBColumn.class.getSimpleName(), QBGenericColumn.class);
 		addQueryBuilderScopeType(QBColumn.class);
 		addQueryBuilderScopeType(QBIntegerColumn.class);
 		addQueryBuilderScopeType(QBDatetimeColumn.class);
@@ -1713,7 +1716,7 @@ public class TypeCreator extends TypeCache
 						int membersSize = memberbox == null ? 0 : memberbox.length;
 						for (int i = 0; i < membersSize; i++)
 						{
-							Class< ? > returnTypeClz = getReturnType(memberbox[i]);
+							Class< ? > returnTypeClz = getReturnType(scriptObjectClass, memberbox[i]);
 							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 							method.setName(name);
 							Class< ? >[] parameterTypes = memberbox[i].getParameterTypes();
@@ -1834,7 +1837,7 @@ public class TypeCreator extends TypeCache
 					}
 					else
 					{
-						Class< ? > returnTypeClz = getReturnType(object);
+						Class< ? > returnTypeClz = getReturnType(scriptObjectClass, object);
 						JSType returnType = null;
 						if (returnTypeClz != null)
 						{
@@ -2538,31 +2541,47 @@ public class TypeCreator extends TypeCache
 		return doc;
 	}
 
-	public static Class< ? > getReturnType(Object object)
+	public static Class< ? > getReturnType(Class< ? > cls, Object object)
 	{
 		Class< ? > returnType = null;
-		if (object instanceof NativeJavaMethod)
+		if (object instanceof NativeJavaMethod method)
 		{
-			NativeJavaMethod method = (NativeJavaMethod)object;
 			MemberBox[] methods = method.getMethods();
 			if (methods != null && methods.length > 0)
 			{
-				returnType = methods[0].getReturnType();
+				returnType = getGenericReturnType(cls, methods[0].method());
 			}
 		}
-		else if (object instanceof MemberBox)
+		else if (object instanceof MemberBox memberBox)
 		{
-			returnType = ((MemberBox)object).getReturnType();
+			returnType = getGenericReturnType(cls, memberBox.method());
+
 		}
-		else if (object instanceof BeanProperty)
+		else if (object instanceof BeanProperty beanProperty)
 		{
-			returnType = ((BeanProperty)object).getGetter().getReturnType();
+			returnType = getGenericReturnType(cls, beanProperty.getGetter());
 		}
-		else if (object instanceof Field)
+		else if (object instanceof Field field)
 		{
-			returnType = ((Field)object).getType();
+			returnType = field.getType();
 		}
 		return getReturnType(returnType);
+	}
+
+	/**
+	 * RAGTEST doc
+	 * @param getter
+	 * @return
+	 */
+	private static Class< ? > getGenericReturnType(Class< ? > cls, java.lang.reflect.Method method)
+	{
+		if (method.getName().equals("maxragtest"))
+		{
+			System.err.println("RAGTEST");
+		}
+		var typeToken = TypeToken.of(cls);
+		var returnType = typeToken.method(method).getReturnType();
+		return returnType.getRawType();
 	}
 
 	/**
