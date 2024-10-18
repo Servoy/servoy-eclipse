@@ -1274,7 +1274,7 @@ public class SpecMarkdownGenerator
 
 			@SuppressWarnings("unchecked")
 			Map<String, Record> types = (Map<String, Record>)root.get("types");
-			if (types != null && types.get(type) != null) return "#" + type;
+			if (types != null && types.get(type) != null) return "#" + type.toLowerCase();
 			return switch (type.toLowerCase())
 			{
 				case "object" -> "../../../servoycore/dev-api/js-lib/object.md";
