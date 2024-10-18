@@ -91,7 +91,8 @@ Returns: [${MD(propValue.returnValue())}](${instance.getReturnTypePath(propValue
 ## Types<#-- Due to markdown limitations that do not allow both anchors and lists/tables, so ### inside indentation workarounds (tables / lists), we could either use non-breaking spaces (&#160;) but when line wraps, it would still wrap from the beginning; so we drop anchor usage so subProperties of types are no longer #### , but lists - that can be used as a better indentation workaround... -->
 
 <#list types as typeName, typeValue>
-### ${MD(typeName)}
+### ${MD(typeName)} 
+  scripting type: CustomType<${componentinternalname}.${typeName}>
 <#list typeValue as propName, propValue>
  - ${MD(propName)}
 <#if propValue.doc()??>
