@@ -194,7 +194,7 @@ public class CreateComponentHandler implements IServerService
 					Menu menu = flattenedSolution.getMenu(menuName[0]);
 					if (menu != null)
 					{
-						webComponent.setProperty(menuPropertyName[0], menu.getID());
+						webComponent.setProperty(menuPropertyName[0], menu.getUUID());
 					}
 				}
 				if (newSelection[0] != null) selectionProvider.setSelection(newSelection[0]);
