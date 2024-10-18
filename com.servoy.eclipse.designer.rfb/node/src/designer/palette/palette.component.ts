@@ -81,6 +81,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     onPaletteScroll() {
         this.editorSession.variantsScroll.emit({ scrollPos: this.editorContentService.getPallete().scrollTop });
     }
+    
+    onFavoriteCLick(event: MouseEvent, component: PaletteComp) {
+        event.stopPropagation();
+        this.editorSession.updateFavoritesComponents(component);
+    }
 
     onVariantClick(event: MouseEvent, component: PaletteComp, packageName: string) {
         this.draggedVariant.packageName = packageName;
@@ -164,7 +169,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: unknown }, ghost: PaletteComp, propertyName?: string, propertyValue?: { [property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
-        if (event.target && (event.target as Element).getAttribute('name') === 'variants') {
+        if (event.target && ((event.target as Element).getAttribute('name') === 'variants' || (event.target as Element).getAttribute('name') === 'favIcon')) {
             return; // it has a separate handler
         }
         event.stopPropagation();
@@ -176,7 +181,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
         this.dragItem.paletteItemBeingDragged = target.cloneNode(true) as Element;
         Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
-            if (child.tagName === 'DESIGNER-VARIANTSCONTENT') {
+            if (child.tagName === 'DESIGNER-VARIANTSCONTENT' || child.getAttribute('name') === 'favIcon') {
                 this.dragItem.paletteItemBeingDragged.removeChild(child);
             }
         })

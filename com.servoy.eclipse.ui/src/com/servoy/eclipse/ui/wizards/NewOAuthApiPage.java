@@ -5,6 +5,8 @@ import java.util.stream.IntStream;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -83,11 +85,25 @@ public class NewOAuthApiPage extends WizardPage
 		offlineAccessType = new Button(accessTypeGroup, SWT.RADIO);
 		offlineAccessType.setText("Yes");
 		offlineAccessType.setSelection(true);
-		offlineAccessType.addListener(SWT.DefaultSelection, e -> updateGetRefreshToken());
+		offlineAccessType.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				updateGetRefreshToken();
+			}
+		});
 
 		onlineAccessType = new Button(accessTypeGroup, SWT.RADIO);
 		onlineAccessType.setText("No");
-		onlineAccessType.addListener(SWT.DefaultSelection, e -> updateGetRefreshToken());
+		onlineAccessType.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				updateGetRefreshToken();
+			}
+		});
 
 		Label scopeLabel = new Label(container, SWT.NONE);
 		scopeLabel.setText("Default scope:");
@@ -123,13 +139,13 @@ public class NewOAuthApiPage extends WizardPage
 
 		Label jwksUriLabel = new Label(container, SWT.NONE);
 		jwksUriLabel.setText("JWKS URI:");
+		jwksUriLabel.setToolTipText("The JSON Web Key Set (JWKS) is a set of keys containing the public keys " +
+			" used to verify the id token issued by the Authorization Server.");
 		jwksUriText = new Text(container, SWT.BORDER);
 		jwksUriText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		jwksUriText.addListener(SWT.FocusOut, e -> updateJWKS_URI());
 		jwksUriText.addModifyListener(e -> updateJWKS_URI());
 		jwksUriText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
-		jwksUriText.setToolTipText("The JSON Web Key Set (JWKS) is a set of keys containing the public keys " +
-			" used to verify the id token issued by the Authorization Server.");
 
 		setControl(container);
 		setPageComplete(isPageComplete());

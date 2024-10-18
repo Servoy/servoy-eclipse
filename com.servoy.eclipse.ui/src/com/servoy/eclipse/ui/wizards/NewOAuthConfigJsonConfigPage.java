@@ -27,6 +27,7 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 	private static final String GOOGLE_DOCS = "https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow#oauth-2.0-endpoints";
 	private Text jsonTextArea;
 	private final NewOAuthConfigWizard wizard;
+	private Link warn_;
 
 	protected NewOAuthConfigJsonConfigPage(NewOAuthConfigWizard wizard)
 	{
@@ -49,7 +50,7 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		warnLabel.setLayoutData(data);
 		warnLabel.setText("Careful");
-		Link warn_ = new Link(container, SWT.WRAP);
+		warn_ = new Link(container, SWT.WRAP);
 		warn_.setLayoutData(data);
 		StringBuilder text = new StringBuilder("Adjustments to the configuration must be made according to the ");
 		String api = wizard.getJSON().optString(StatelessLoginHandler.OAUTH_API, "Custom");
@@ -121,5 +122,9 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 	{
 		super.setVisible(visible);
 		updateJsonContent();
+		StringBuilder text = new StringBuilder("New parameters and adjustments to the configuration must be made according to the ");
+		String api = wizard.getJSON().optString(StatelessLoginHandler.OAUTH_API, "Custom");
+		text.append(getDocumentationLink(api));
+		warn_.setText(text.toString());
 	}
 }
