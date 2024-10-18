@@ -1329,6 +1329,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			groupSecurityInfo = element;
 			if (groupSecurityInfo.getName().equals(group)) break;
 		}
+		ServoyLog.logError(new Exception("Gsi not found for group " + group));
 		return groupSecurityInfo;
 	}
 
