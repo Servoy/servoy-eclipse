@@ -12,39 +12,22 @@ import {ServoyDefaultBaseField} from '../basefield';
 } )
 export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElement> {
 
-    private initialValue: any;
-    private changeEmitted = false;
-
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef , formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
         super(renderer, cdRef, formattingService, doc);
     }
 
     attachFocusListeners(nativeElement: any) {
-        super.attachFocusListeners(nativeElement);
-
-        this.renderer.listen(nativeElement, 'focus', (e) => {
-            this.initialValue = nativeElement.value;
-            this.changeEmitted = false;
-        });
-
-        this.renderer.listen(nativeElement, 'blur', (e) => {
-            if (this.changeEmitted) return;
-
-            const currentValue = nativeElement.value;
-            
-            if (currentValue !== this.initialValue) {
-                this.onModelChange(currentValue);
-                this.handleChangeEvent(e); 
-                this.changeEmitted = true;
-            }
-        });
-    }
-
-    handleChangeEvent(event: Event) {
-        if (!this.changeEmitted) {
-            this.pushUpdate();
-            this.changeEmitted = true;
-        }
+        if (this.onFocusGainedMethodID)
+            this.renderer.listen( nativeElement, 'focus', ( e ) => {
+                if ( this.mustExecuteOnFocus !== false ) {
+                    this.onFocusGainedMethodID( e );
+                }
+                this.mustExecuteOnFocus = true;
+            } );
+        if (this.onFocusLostMethodID)
+            this.renderer.listen( nativeElement, 'blur', ( e ) => {
+                this.onFocusLostMethodID(e);
+            } );
     }
 
     onModelChange(newValue) {
