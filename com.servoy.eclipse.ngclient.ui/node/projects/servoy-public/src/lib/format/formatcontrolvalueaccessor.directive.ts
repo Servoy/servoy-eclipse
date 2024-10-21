@@ -64,7 +64,11 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private listeners = [];
     private maskFormat : MaskFormat;
     private readonly log: LoggerService;
+<<<<<<< release
     private focusText: string;
+=======
+    private focusText: String;
+>>>>>>> fedbe22 SVY-19597 Servoy Field with displayType TEXT_FIELD does not trigger onDataChange when format is present in Safari Version 17.4.1
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService,
         @Inject(DOCUMENT) private doc: Document, logFactory: LoggerFactory) {
@@ -79,13 +83,18 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
             this.writeValue(this.realValue);
         }
+<<<<<<< release
         if (!this.format.isMask && (this.format.uppercase || this.format.lowercase) && this.focusText != this._elementRef.nativeElement.value && inputType === 'text'){
+=======
+        if (!this.format.isMask && this.focusText != this.realValue && inputType === 'text'){
+>>>>>>> fedbe22 SVY-19597 Servoy Field with displayType TEXT_FIELD does not trigger onDataChange when format is present in Safari Version 17.4.1
             this._elementRef.nativeElement.dispatchEvent(new CustomEvent('change', { bubbles: true }));
         }
     }
 
     @HostListener('focus', []) focussed() {
         this.hasFocus = true;
+        this.focusText = this._elementRef.nativeElement.value;
         if (this.format.display && this.format.edit && this.format.edit !== this.format.display) {
             this.writeValue(this.realValue);
         }
@@ -153,6 +162,8 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 			else data = null;
 			
 			this.setRealValue(data);
+        } else if (inputType === 'text') {
+            this.setRealValue(data);
         }
 	}
 	
