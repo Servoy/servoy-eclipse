@@ -1,7 +1,7 @@
-<div class="svy-tabpanel" #element style='height:100%;width:100%;position:absolute;'>
+<div class="svy-tabpanel" #element style='height:100%;width:100%;position:absolute;' [sabloTabseq]="tabSeq"
+    [sabloTabseqConfig]="{container: true, reservedGap: 50}">
 <ul ngbNav #nav="ngbNav" class="nav-tabs text-nowrap flex-nowrap" [(activeId)]="selectedTabID" style="overflow-x: auto; overflow-y: hidden;" (navChange)="onTabChange($event)"
-	[class]='styleClass' [id]="servoyApi.getMarkupId()" [sabloTabseq]="tabSeq"
-	[sabloTabseqConfig]="{container: true, reservedGap: 50}">
+	[class]='styleClass' [id]="servoyApi.getMarkupId()">
 	<li *ngFor="let tab of tabs" [ngbNavItem]="tab._id" [disabled]="tab.disabled || !enabled || !tab.containsFormId"
 		[id]="tab._id"  [svyTooltip]="tab.toolTipText">
 		<a ngbNavLink svy-mnemonic='tab.mnemonic'>
