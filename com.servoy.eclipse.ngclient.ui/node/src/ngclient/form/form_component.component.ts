@@ -221,7 +221,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         private el: ElementRef<Element>, protected renderer: Renderer2,
         private converterService: ConverterService<unknown>,
         @Inject(DOCUMENT) private document: Document,
-        private windowRefService: WindowRefService,) {
+        private windowRefService: WindowRefService) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
         const resizeObservable$ = fromEvent(this.windowRefService.nativeWindow, 'resize')
