@@ -469,24 +469,22 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     snap(data: SnapData) {
-        if (this.editorSession.getState().dragging) {
+        if (this.dragItem?.paletteItemBeingDragged && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
+            this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
+        }
+        if (this.dragItem?.contentItemBeingDragged) {
             this.snapData = data;
             if (this.snapData?.top && this.snapData?.left) {
-                if (this.dragItem && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
-                    this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData.left + 'px');
+                if (this.snapData?.width) {
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
                 }
-                if (this.dragItem.contentItemBeingDragged) {
-                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData.left + 'px');
-                    if (this.snapData?.width) {
-                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
-                    }
-                    if (this.snapData?.height) {
-                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
-                    }
-                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData.top + 'px');
-                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
-                    this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
+                if (this.snapData?.height) {
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
                 }
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData.top + 'px');
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
+                this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
             }
         }
         else {
