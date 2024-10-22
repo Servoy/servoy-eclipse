@@ -16,6 +16,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     private rectangles : DOMRect[];
 	private uuids: string[];
 	private types: Map<string, string> = new Map();
+	private parents: Map<string, string> = new Map();
     private element: Element;
     private uuid: string;
     
@@ -82,6 +83,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
                 this.middleV.set(id, (bounds.top + bounds.bottom) / 2);
                 this.middleH.set(id, (bounds.left + bounds.right) / 2);
 				this.types.set(id, componentType);
+				this.parents.set(id, this.getParent(comp)?.getAttribute('svy-id'));
                 if (id !== this.uuid){
 					this.rectangles.push(bounds);
 					this.uuids.push(id);
@@ -97,6 +99,16 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
             this.middleV = new Map([...this.middleV].sort(sortfn));
         }
     }
+
+	private getParent(element: HTMLElement) {
+		while (element.parentElement) {
+			element = element.parentElement;
+			if (element.classList.contains('svy-formcomponent') || element.classList.contains('svy-form')) {
+				return element;
+			}
+		}
+		return null;
+	}
 
     onMouseUp(): void {
        this.clear();
@@ -154,9 +166,15 @@ this.snapToEndEnabled = !event.shiftKey;
     }
     
     private isSnapInterval(uuid, coordinate, posMap) {
+		const parent = this.parents.get(uuid);
         for (let [key, value] of posMap) {
             if (key === uuid) continue;
             if ((coordinate > value - this.snapThreshold) && (coordinate < value + this.snapThreshold)) {
+				if (parent !== null && parent !== this.parents.get(key)) {
+					//if the parent of the dragged component is not the form,
+					//then it needs to be in the same container
+					continue;
+				}
                 //return the first component id that matches the coordinate
                 return {uuid: key};
             }
