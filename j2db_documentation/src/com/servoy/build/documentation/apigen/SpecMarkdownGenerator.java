@@ -40,6 +40,7 @@ import java.util.jar.Manifest;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
@@ -50,9 +51,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.mozilla.javascript.CompilerEnvirons;
+import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.Comment;
+import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.PropertyGet;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.util.ValueReference;
@@ -366,6 +370,22 @@ public class SpecMarkdownGenerator
 						{
 							String name = fn.getFunctionName().toSource();
 							apiDoc.put(name, processFunctionJSDoc(comment.toSource()));
+							if (fn.getBody().hasChildren())
+							{
+								fn.getBody().forEach(node -> {
+									if (node instanceof ExpressionStatement es && es.getExpression() instanceof Assignment as &&
+										as.getLeft() instanceof PropertyGet pg)
+									{
+										String jsDoc = as.getJsDoc();
+										if (jsDoc != null)
+										{
+											String propName = pg.getRight().toSource();
+											apiDoc.put(name + "." + propName, processFunctionJSDoc(jsDoc));
+										}
+
+									}
+								});
+							}
 						}
 						else if (prevComment == null)
 						{
@@ -1106,6 +1126,11 @@ public class SpecMarkdownGenerator
 
 	private Record createFunction(String name, JSONObject specEntry)
 	{
+		return createFunction(name, specEntry, name);
+	}
+
+	private Record createFunction(String name, JSONObject specEntry, String apiDocName)
+	{
 		String returnType = specEntry.optString("returns", null);
 		JSONArray parameters = specEntry.optJSONArray("parameters");
 		String deprecationString = specEntry.optString("deprecated", null);
@@ -1116,7 +1141,7 @@ public class SpecMarkdownGenerator
 			returnType = fullReturnType.optString("type", "");
 		}
 
-		String jsDocEquivalent = apiDoc.get(name);
+		String jsDocEquivalent = apiDoc.get(apiDocName);
 		if (jsDocEquivalent == null)
 		{
 			jsDocEquivalent = processFunctionJSDoc(createFunctionDocFromSpec(specEntry, params, returnType, fullReturnType,
@@ -1212,7 +1237,34 @@ public class SpecMarkdownGenerator
 			while (keys.hasNext())
 			{
 				String type = keys.next();
-				map.put(type, makeMap(types.optJSONObject(type), this::createPropertyIndented));
+				JSONObject typeObject = types.optJSONObject(type);
+				if (typeObject.has("tags") && "private".equals(typeObject.getJSONObject("tags").optString("scope"))) continue;
+
+				if (typeObject.has("model"))
+				{
+					String extend = typeObject.optString("extends", null);
+					if (extend != null)
+					{
+						extend = '[' + extend + "](#" + extend.toLowerCase() + ')';
+					}
+					else extend = "";
+					Map<String, Object> modelMap = makeMap(typeObject.getJSONObject("model"), this::createPropertyIndented);
+					if (typeObject.has("serversideapi"))
+					{
+						var x = new BiFunction<String, JSONObject, Record>()
+						{
+							@Override
+							public Record apply(String functionName, JSONObject object)
+							{
+								return createFunction(functionName, object, type + "." + functionName);
+							}
+						};
+						Map<String, Object> apiMap = makeMap(typeObject.getJSONObject("serversideapi"), x);
+						map.put(type, Map.of("model", modelMap, "serversideapi", apiMap, "extends", extend));
+					}
+					else map.put(type, Map.of("model", modelMap, "extends", extend));
+				}
+				else map.put(type, Map.of("model", makeMap(typeObject, this::createPropertyIndented)));
 			}
 			return map.size() > 0 ? map : null;
 		}
@@ -1230,15 +1282,24 @@ public class SpecMarkdownGenerator
 				String key = keys.next();
 				if ("size".equals(key)) continue;
 				Object value = properties.get(key);
-				if (value instanceof JSONObject)
+				if (value instanceof JSONObject json)
 				{
-					Object tags = ((JSONObject)value).opt("tags");
+					Object tags = json.opt("tags");
 					if (tags instanceof JSONObject)
 					{
 						String scope = ((JSONObject)tags).optString("scope");
 						if ("private".equals(scope)) continue;
 					}
-					map.put(key, transformer.apply(key, (JSONObject)value));
+					Record record = transformer.apply(key, json);
+					map.put(record.toString(), record);
+					JSONArray overloads = json.optJSONArray("overloads");
+					if (overloads != null)
+					{
+						overloads.forEach(overload -> {
+							Record r = transformer.apply(key, (JSONObject)overload);
+							map.put(r.toString(), r);
+						});
+					}
 				}
 				else map.put(key, transformer.apply(key, new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString())));
 			}
@@ -1354,10 +1415,20 @@ public class SpecMarkdownGenerator
 	 */
 	public record Function(String name, List<Parameter> parameters, String returnValue, String doc, String deprecationString)
 	{
+		@Override
+		public String toString()
+		{
+			return name + '(' + parameters.stream().map(parameter -> parameter.name).collect(Collectors.joining(",")) + ')';
+		}
 	}
 
 	public record Parameter(String name, String type, String doc, boolean optional)
 	{
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 
 	/**
@@ -1365,6 +1436,11 @@ public class SpecMarkdownGenerator
 	 */
 	public record Property(String name, String type, String defaultValue, String doc, String deprecationString)
 	{
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 
 	public abstract static class NGPackageInfoGenerator implements INGPackageInfoGenerator
