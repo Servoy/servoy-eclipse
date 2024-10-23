@@ -110,7 +110,7 @@ public class MarkdownGenerator
 	private static URLClassLoader targetInstallClassLoader;
 
 	private static Configuration cfg;
-	private static Template temp;
+	private static Template template;
 
 	private static Map<String, String> specialTypePaths = new HashMap<>();
 	static
@@ -226,14 +226,17 @@ public class MarkdownGenerator
 
 		fillStaticParents(returnTypesToParentName);
 
-		temp = cfg.getTemplate("markdown_template.md");
 
 		String jsLib = args[0];
 		String servoyDoc = args[1];
 		String designDoc = args[2];
 		String pluginDir = args[3];
+		boolean generateForAI = "forAI".equals(args[4]);
 
-		generateCoreAndPluginDocs(jsLib, servoyDoc, designDoc, pluginDir, new MarkdownDocFromXMLGenerator());
+		if (generateForAI) template = cfg.getTemplate("ai_template.md");
+		else template = cfg.getTemplate("markdown_template.md");
+
+		generateCoreAndPluginDocs(jsLib, servoyDoc, designDoc, pluginDir, generateForAI, new MarkdownDocFromXMLGenerator(generateForAI));
 	}
 
 	public static List<String> getSupportedClientsList(ClientSupport clientSupport)
@@ -349,7 +352,8 @@ public class MarkdownGenerator
 		return retValue.size() > 0 ? retValue : null;
 	}
 
-	public static void generateCoreAndPluginDocs(String jsLibURL, String servoyDocURL, String designDocURL, String pluginDir, IDocFromXMLGenerator docGenerator)
+	public static void generateCoreAndPluginDocs(String jsLibURL, String servoyDocURL, String designDocURL, String pluginDir, boolean generateForAI,
+		IDocFromXMLGenerator docGenerator)
 		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException, InstantiationException, IllegalAccessException
 	{
 		targetInstallClassLoader = new URLClassLoader("Target Servoy installation classloader",
@@ -384,20 +388,30 @@ public class MarkdownGenerator
 
 			System.err.println("Generating core and java plugin content (ngOnly = " + ngOnly + ")");
 
-			System.err.println("  - " + jsLibURL);
-			DocumentationManager manager = DocumentationManager.fromXML(new URL(jsLibURL), targetInstallClassLoader);
-			docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
-			docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
+			DocumentationManager manager;
+
+			if (!generateForAI)
+			{
+				System.err.println("  - " + jsLibURL);
+				manager = DocumentationManager.fromXML(new URL(jsLibURL), targetInstallClassLoader);
+				docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
+				docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
+			}
 
 			System.err.println("  - " + servoyDocURL);
 			manager = DocumentationManager.fromXML(new URL(servoyDocURL), targetInstallClassLoader);
 			docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
 			docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
 
-			System.err.println("  - " + designDocURL);
-			manager = DocumentationManager.fromXML(new URL(designDocURL), targetInstallClassLoader);
-			docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/object-model/solution", null);
-			docGenerator.generateDocsFromXML(manager, "/reference/servoycore/object-model/solution", ngOnly);
+			if (!generateForAI)
+			{
+				// TODO when the object model / persists should also be generated for AI, the if can be removed and this code will always execute
+
+				System.err.println("  - " + designDocURL);
+				manager = DocumentationManager.fromXML(new URL(designDocURL), targetInstallClassLoader);
+				docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/object-model/solution", null);
+				docGenerator.generateDocsFromXML(manager, "/reference/servoycore/object-model/solution", ngOnly);
+			}
 
 			System.err.println("  - plugins (from " + pluginDir + "):");
 			File file2 = new File(new URI(pluginDir).normalize());
@@ -486,6 +500,8 @@ public class MarkdownGenerator
 					}
 				}
 			}
+
+			docGenerator.writeAggregatedOutput(ngOnly);
 		}
 		while (ngOnly);
 	}
@@ -599,7 +615,7 @@ public class MarkdownGenerator
 		StringWriter out = new StringWriter();
 		try
 		{
-			temp.process(root, out);
+			template.process(root, out);
 		}
 		catch (TemplateException | IOException e)
 		{
@@ -792,7 +808,14 @@ public class MarkdownGenerator
 	private static class MarkdownDocFromXMLGenerator implements IDocFromXMLGenerator
 	{
 
+		private StringBuilder aggregatedOutput = null;
+
 		private Map<String, List<String>> computedReturnTypes = null;
+
+		private MarkdownDocFromXMLGenerator(boolean generateForAI)
+		{
+			if (generateForAI) aggregatedOutput = new StringBuilder("Servoy scripting is based on javascript. Here is the API:\n\n");
+		}
 
 		/**
 		 * As some types can be accessed between plugins, we need to separate this processDocObjectToPathMaps(...) out of the main
@@ -947,6 +970,7 @@ public class MarkdownGenerator
 				try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
 				{
 					writer.write(output);
+					if (aggregatedOutput != null) aggregatedOutput.append(output);
 				}
 
 //			file = new File(userDir, "generated_old/" + value.getPublicName() + ".html");
@@ -987,6 +1011,23 @@ public class MarkdownGenerator
 				if (publicNames.size() > 0) return publicNames;
 			}
 			return null;
+		}
+
+		@Override
+		public void writeAggregatedOutput(boolean ngOnly) throws IOException
+		{
+			if (aggregatedOutput != null)
+			{
+				File userDir = new File(System.getProperty("user.dir"));
+				File file = new File(userDir, (ngOnly ? "ng_generated/" : "generated/") + "aggregated_output.md");
+				file.getParentFile().mkdirs();
+				try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
+				{
+					writer.write(aggregatedOutput.toString());
+				}
+
+				aggregatedOutput.setLength("Servoy scripting is based on javascript. Here is the API:\n\n".length());
+			}
 		}
 
 	}

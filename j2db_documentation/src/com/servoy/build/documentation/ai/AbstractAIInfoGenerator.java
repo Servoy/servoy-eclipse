@@ -234,6 +234,12 @@ public abstract class AbstractAIInfoGenerator
 //			}
 		}
 
+		@Override
+		public void writeAggregatedOutput(boolean ngOnly) throws IOException
+		{
+			// TODO Auto-generated method stub
+		}
+
 	}
 
 	protected static interface IInfoKeeper

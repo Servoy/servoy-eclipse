@@ -142,6 +142,11 @@ public class FunctionTemplateModel
 		return null;
 	}
 
+	public String getFunctionNameOnly()
+	{
+		return obj.getMainName();
+	}
+
 	public String getFullFunctionName()
 	{
 		String functionName = obj.getMainName();
