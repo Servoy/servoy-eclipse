@@ -176,7 +176,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.editorSession.variantsTrigger.emit({ show: false });
 
         let target = event.target as HTMLElement;
-        if (target.localName === 'designer-variantscontent') {
+        if (target.localName === 'designer-variantscontent' || target.localName === 'img') {
             target = target.closest('li');
         }
         this.dragItem.paletteItemBeingDragged = target.cloneNode(true) as Element;
@@ -317,7 +317,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onMouseMove = (event: MouseEvent) => {
-        if (event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
+        const paletteRect: DOMRect = this.editorContentService.getPallete().getBoundingClientRect();
+        if (event.pageX >= paletteRect.width && event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
         }
