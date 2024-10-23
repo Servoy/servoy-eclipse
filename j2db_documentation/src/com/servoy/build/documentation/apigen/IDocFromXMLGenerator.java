@@ -35,4 +35,6 @@ public interface IDocFromXMLGenerator
 	void generateDocsFromXML(DocumentationManager manager, String path, boolean ngOnly)
 		throws ClassNotFoundException, IOException;
 
+	void writeAggregatedOutput(boolean ngOnly) throws IOException;
+
 }
