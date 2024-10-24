@@ -76,8 +76,8 @@ export class WindowPluginService {
                                         argsWithEvent.push(args);
                                     }
                                 }
-                                // should trigger a change only if the shorcut is a combination of 'CTRL' + any key
-                                if (translatedShortcut.startsWith('CTRL+')) {
+                                // should trigger a change only if the shorcut is a combination of 'CTRL' or 'ALT' or 'META' + any key
+                                if (this.checkModifierKey(translatedShortcut)) {
                                     targetEl.dispatchEvent(new CustomEvent('change'));
                                 }
                                 //$sabloTestability.block(true);
@@ -115,6 +115,10 @@ export class WindowPluginService {
     set popupMenus(popupmenus: Popup[]) {
         this._popupmenus = popupmenus;
         this.showPopupMenu();
+    }
+    
+    private checkModifierKey(str: string) {
+        return ['ctrl', 'alt', 'meta'].some(item => str.toLowerCase().startsWith(item));
     }
 
     private showPopupMenu() {
