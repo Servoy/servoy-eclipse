@@ -360,7 +360,7 @@ public class EventsComposite extends Composite
 			onFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID, true, true, false),
 			onFoundSetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID, true, true, false),
 			onFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID, true, true, false),
-			onFoundsetBeforeSelectionChange(StaticContentSpecLoader.PROPERTY_ONFOUNDSETBEFORESELECTIONCHANGEMETHODID, true, true, false),
+			onFoundSetBeforeSelectionChange(StaticContentSpecLoader.PROPERTY_ONFOUNDSETBEFORESELECTIONCHANGEMETHODID, true, true, false),
 			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID, true, true, false),
 			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID, true, true, false),
 			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID, true, true, false),
