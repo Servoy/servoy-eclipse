@@ -176,7 +176,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					continue;
 				}
                 //return the first component id that matches the coordinate
-                return {uuid: key};
+                return {uuid: key, container: this.parents.get(key)};
             }
         }
         return null;        
@@ -694,6 +694,7 @@ this.snapToEndEnabled = !event.shiftKey;
             const e2 = pair[1];   
 			const left = properties.left ? properties.left : rect.x;
 			const uuids = [this.uuids[this.rectangles.indexOf(e1)], this.uuids[this.rectangles.indexOf(e2)]];
+			const containers = [this.parents.get(uuids[0]), this.parents.get(uuids[1])];
 			const previousProperties = { ...properties };
             if (e2.top > e1.bottom && rect.top > e2.bottom) {
 				const dist = e2.top - e1.bottom;
@@ -706,7 +707,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'y')) {
 						continue;
 					}
-					properties.cssPosition['distY'] = {pos: 1, targets: uuids};
+					properties.cssPosition['distY'] = {pos: 1, targets: uuids, containers: containers};
 					return this.addVerticalGuides(e1, e2, r, dist, properties);
 				}
 			}
@@ -721,7 +722,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'y')) {
 						continue;
 					}
-					properties.cssPosition['distY'] = {pos: -1, targets: uuids};
+					properties.cssPosition['distY'] = {pos: -1, targets: uuids, containers: containers};
     				return this.addVerticalGuides(r, e1, e2, dist, properties);
 				}
 			}
@@ -736,7 +737,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'y')) {
 						continue;
 					}
-					properties.cssPosition['distY'] = {pos: 0, targets: uuids};
+					properties.cssPosition['distY'] = {pos: 0, targets: uuids, containers: containers};
     				return this.addVerticalGuides(e1, r, e2, dist - rect.height/2, properties);
 				}
 			}
@@ -750,6 +751,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			const e1 = pair[0];
             const e2 = pair[1];
 			const uuids = [this.uuids[this.rectangles.indexOf(e1)], this.uuids[this.rectangles.indexOf(e2)]];
+			const containers = [this.parents.get(uuids[0]), this.parents.get(uuids[1])];
 			const previousProperties = { ...properties };
             if (e2.left > e1.right && rect.left > e2.right) {
 				const dist = e2.left - e1.right;
@@ -762,7 +764,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					 if (this.isOutOfBounds(previousProperties, properties, r, 'x')) {
 						continue;
 					}
-					properties.cssPosition['distX'] = {pos: 1, targets: uuids};
+					properties.cssPosition['distX'] = {pos: 1, targets: uuids, containers: containers};
     				return this.addHorizontalGuides(e1, e2, r, dist, properties);
                 }
 			}
@@ -777,7 +779,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'x')) {
 						continue;
 					}
-					properties.cssPosition['distX'] = {pos: -1, targets: uuids};
+					properties.cssPosition['distX'] = {pos: -1, targets: uuids, containers: containers};
                    	return this.addHorizontalGuides(r, e1, e2, dist, properties);
                	}
 			}
@@ -792,7 +794,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'x')) {
 						continue;
 					}
-					properties.cssPosition['distX'] = {pos: 0, targets: uuids};
+					properties.cssPosition['distX'] = {pos: 0, targets: uuids, containers: containers};
     				return this.addHorizontalGuides(e1, r, e2, dist - rect.width/2, properties);
 				}
 			}
