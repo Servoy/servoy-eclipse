@@ -56,29 +56,7 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 		String api = wizard.getJSON().optString(StatelessLoginHandler.OAUTH_API, "Custom");
 		text.append(getDocumentationLink(api));
 		warn_.setText(text.toString());
-		warn_.addListener(SWT.Selection, event -> {
-			String url = null;
-			switch (api)
-			{
-				case "Google" :
-					url = GOOGLE_DOCS;
-					break;
-				case "Microsoft" :
-					url = MICROSOFT_DOCS;
-					break;
-			}
-			if (url != null)
-			{
-				try
-				{
-					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-		});
+		warn_.addListener(SWT.Selection, event -> openLinkInBrowser());
 
 
 		jsonTextArea = new Text(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -88,6 +66,32 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 		});
 
 		setControl(container);
+	}
+
+	private void openLinkInBrowser()
+	{
+		String url = null;
+		String api = wizard.getJSON().optString(StatelessLoginHandler.OAUTH_API, "Custom");
+		switch (api)
+		{
+			case "Google" :
+				url = GOOGLE_DOCS;
+				break;
+			case "Microsoft" :
+				url = MICROSOFT_DOCS;
+				break;
+		}
+		if (url != null)
+		{
+			try
+			{
+				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
 	}
 
 	private String getDocumentationLink(String api)
