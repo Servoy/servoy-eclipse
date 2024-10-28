@@ -233,7 +233,8 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
             this.getChangeListenerGeneratorForSmartNonFSLinkedProps(),
             (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[]) => (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate ?
                 this.sabloService.addIncomingMessageHandlingDoneTask(() => {
-                    this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1)
+                    if (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate)
+                        this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1)
                 }) : undefined));
 
         // component property is now be able to send itself entirely at runtime; we need to handle viewport conversions here as well
@@ -283,7 +284,8 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                 this.getChangeListenerGeneratorForSmartNonFSLinkedProps(),
                 (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[]) => (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate ?
                     this.sabloService.addIncomingMessageHandlingDoneTask(() => {
-                        this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1)
+                        if (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate)
+                            this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(propertiesChangedButNotByRef, -1)
                     }) : undefined));
             done = true;
         }
@@ -495,7 +497,8 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
         // trigger ngOnChanges for properties that had updates but the ref remained the same (as those will not automatically be triggered by root detectChanges())
         cellsChangedButNotByRef.forEach((rowEntriesChangedButNotByRef) => (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate ?
             this.sabloService.addIncomingMessageHandlingDoneTask(() => {
-                this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(rowEntriesChangedButNotByRef.propertiesChangedButNotByRef, rowEntriesChangedButNotByRef.relativeRowIndex)
+                if (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate)
+                    this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(rowEntriesChangedButNotByRef.propertiesChangedButNotByRef, rowEntriesChangedButNotByRef.relativeRowIndex)
             }) : undefined));
     }
 

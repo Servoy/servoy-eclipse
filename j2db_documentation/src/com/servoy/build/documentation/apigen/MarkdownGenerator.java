@@ -135,6 +135,7 @@ public class MarkdownGenerator
 	private static final Set<String> doNotStoreAsReadMe = new HashSet<>();
 
 	private static final Set<String> excludedPluginJarNames = Set.of("aibridge.jar");
+	private static final List<String> nonDefaultPluginJarNamesThatWeDoGenerateDocsFor = Arrays.asList("servoy_jasperreports.jar"); // we check that these were found so that we don't forget by mistake to generate the docs for them
 
 	static
 	{
@@ -242,21 +243,24 @@ public class MarkdownGenerator
 	public static List<String> getSupportedClientsList(ClientSupport clientSupport)
 	{
 		List<String> support = new ArrayList<>();
-		if (clientSupport.hasSupport(ClientSupport.sc))
+		if (clientSupport != null)
 		{
-			support.add("SmartClient");
-		}
-		if (clientSupport.hasSupport(ClientSupport.wc))
-		{
-			support.add("WebClient");
-		}
-		if (clientSupport.hasSupport(ClientSupport.ng))
-		{
-			support.add("NGClient");
-		}
-		if (clientSupport.hasSupport(ClientSupport.mc))
-		{
-			support.add("MobileClient");
+			if (clientSupport.hasSupport(ClientSupport.sc))
+			{
+				support.add("SmartClient");
+			}
+			if (clientSupport.hasSupport(ClientSupport.wc))
+			{
+				support.add("WebClient");
+			}
+			if (clientSupport.hasSupport(ClientSupport.ng))
+			{
+				support.add("NGClient");
+			}
+			if (clientSupport.hasSupport(ClientSupport.mc))
+			{
+				support.add("MobileClient");
+			}
 		}
 		return support;
 	}
@@ -339,9 +343,12 @@ public class MarkdownGenerator
 	private static List<IFunctionDocumentation> getFilteredList(Integer typeEvent, SortedSet<IFunctionDocumentation> functions)
 	{
 		List<IFunctionDocumentation> retValue = new ArrayList<IFunctionDocumentation>();
+		ClientSupport fdCs;
 		for (IFunctionDocumentation fd : functions)
 		{
-			if (fd.getClientSupport().hasSupport(ClientSupport.Default))
+			fdCs = fd.getClientSupport();
+			if (fdCs == null) fdCs = ClientSupport.Default;
+			if (fdCs.hasSupport(ClientSupport.Default))
 			{
 				if (fd.getType().intValue() == typeEvent.intValue())
 				{
@@ -419,8 +426,11 @@ public class MarkdownGenerator
 			{
 				// this is an directory with jars
 				File[] jars = file2.listFiles((child) -> child.getName().toLowerCase().endsWith(".jar"));
+				Set<String> foundJars = new HashSet<>();
+
 				for (File jar : jars)
 				{
+					foundJars.add(jar.getName());
 					if (!excludedPluginJarNames.contains(jar.getName()))
 					{
 						try (ZipFile zf = new ZipFile(jar))
@@ -499,6 +509,10 @@ public class MarkdownGenerator
 						}
 					}
 				}
+				for (String nonDefaultPluginThatShouldHaveBeenFound : nonDefaultPluginJarNamesThatWeDoGenerateDocsFor)
+					if (!foundJars.contains(nonDefaultPluginThatShouldHaveBeenFound)) throw new RuntimeException(
+						"Cannot find (explicitly required) plugin '" + nonDefaultPluginThatShouldHaveBeenFound + "' in dir: " + pluginDir +
+							"\nYou have to manually copy a release of that plugin into the plugins dir...");
 			}
 
 			docGenerator.writeAggregatedOutput(ngOnly);
@@ -573,10 +587,15 @@ public class MarkdownGenerator
 		if (functions != null && functions.size() > 0)
 		{
 			List<FunctionTemplateModel> models = new ArrayList<>();
+			ClientSupport fdCs;
 			for (IFunctionDocumentation fd : functions)
 			{
 				if (fd.isDeprecated()) continue;
-				if (ngOnly && !fd.getClientSupport().hasSupport(ClientSupport.ng)) continue;
+
+				fdCs = fd.getClientSupport();
+				if (fdCs == null) fdCs = ClientSupport.Default;
+
+				if (ngOnly && !fdCs.hasSupport(ClientSupport.ng)) continue;
 				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly,
 					htmlToMarkdownConverter);
 				models.add(ftm);
@@ -924,10 +943,13 @@ public class MarkdownGenerator
 			{
 				IObjectDocumentation value = entry.getValue();
 
-				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") || value.getFunctions().size() == 0) continue;
-				if (ngOnly && !value.getClientSupport().hasSupport(ClientSupport.ng)) continue;
+				String description = value.getDescription(value.getClientSupport());
+				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") ||
+					(value.getFunctions().size() == 0 && (description == null || description.trim().length() == 0) && computedReturnTypes.size() == 0))
+					continue;
+				if (ngOnly && !(value.getClientSupport() == null ? ClientSupport.Default : value.getClientSupport()).hasSupport(ClientSupport.ng)) continue;
 
-				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value.getScriptingName(), value.getDescription(value.getClientSupport()),
+				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value.getScriptingName(), description,
 					path, computedReturnTypes.get(value.getPublicName()));
 
 				if (!ngOnly) cg.generateClientSupport(value);

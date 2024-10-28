@@ -163,7 +163,10 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 		ClientSupport searchCSp = csp;
 		if (searchCSp == null) searchCSp = ClientSupport.Default;
 
-		if (getClientSupport().hasSupport(csp)) return description;
+		ClientSupport thisObjectsSupport = getClientSupport();
+		if (thisObjectsSupport == null) thisObjectsSupport = ClientSupport.Default;
+
+		if (thisObjectsSupport.hasSupport(csp)) return description;
 		else return null;
 	}
 

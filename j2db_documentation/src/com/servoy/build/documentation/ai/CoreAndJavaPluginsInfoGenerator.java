@@ -96,10 +96,15 @@ public class CoreAndJavaPluginsInfoGenerator
 		if (functions != null && functions.size() > 0)
 		{
 			List<FunctionTemplateModel> models = new ArrayList<>();
+			ClientSupport fdCs;
 			for (IFunctionDocumentation fd : functions)
 			{
 				if (fd.isDeprecated()) continue;
-				if (ngOnly && !fd.getClientSupport().hasSupport(ClientSupport.ng)) continue;
+
+				fdCs = fd.getClientSupport();
+				if (fdCs == null) fdCs = ClientSupport.Default;
+
+				if (ngOnly && !fdCs.hasSupport(ClientSupport.ng)) continue;
 				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly, null);
 				models.add(ftm);
 //			if ("void".equals(ftm.getReturnType()) || ftm.getReturnType() == null)
