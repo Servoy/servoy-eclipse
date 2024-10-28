@@ -170,7 +170,7 @@ this.snapToEndEnabled = !event.shiftKey;
         for (let [key, value] of posMap) {
             if (key === uuid) continue;
             if ((coordinate > value - this.snapThreshold) && (coordinate < value + this.snapThreshold)) {
-				if (parent !== null && parent !== this.parents.get(key)) {
+				if (parent != null && parent !== this.parents.get(key)) {
 					//if the parent of the dragged component is not the form,
 					//then it needs to be in the same container
 					continue;
