@@ -88,6 +88,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -685,9 +686,9 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 		public void persistChanges(Collection<IPersist> changes)
 		{
-			Object media = changes.iterator().next();
+			Object persist = changes.iterator().next();
 
-			if (media instanceof Media mediaFile)
+			if (persist instanceof Media mediaFile)
 			{
 
 				if (mediaFile.getName().equals("variants.json") || mediaFile.getName().endsWith(".less") || mediaFile.getName().endsWith(".css"))
@@ -696,6 +697,11 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				}
 
 			}
+			else if (persist instanceof Menu)
+			{
+				refresh(false);
+			}
+
 		}
 
 

@@ -1323,13 +1323,16 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	protected GroupSecurityInfo getGroupSecurityInfo(String group)
 	{
-		GroupSecurityInfo groupSecurityInfo = null;
+		if (group == null) return null;
 		for (GroupSecurityInfo element : groupInfos)
 		{
-			groupSecurityInfo = element;
-			if (groupSecurityInfo.getName().equals(group)) break;
+			if (group.equals(element.getName()))
+			{
+				return element;
+			}
 		}
-		return groupSecurityInfo;
+		ServoyLog.logError(new Exception("Gsi not found for group " + group));
+		return null;
 	}
 
 	public String checkPasswordForUserName(String clientId, String userName, String password)

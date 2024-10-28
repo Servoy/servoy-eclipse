@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.util;
 
+import java.awt.Dimension;
 import java.awt.Point;
 
 import org.eclipse.core.runtime.Assert;
@@ -73,16 +74,20 @@ public class SnapToComponentUtil
 		{
 			JSONObject jsonObject = obj.getJSONObject(property);
 			ISupportCSSPosition target = getTarget(form, jsonObject.optString("uuid"));
+			ISupportCSSPosition targetContainer = getTarget(form, jsonObject.optString("container"));
+			CSSPosition targetContainerCssPos = targetContainer != null ? targetContainer.getCssPosition() : null;
 			AbstractContainer targetParent = target != null ? CSSPositionUtils.getParentContainer(target) : null;
 
 			switch (property)
 			{
 				case "middleH" :
-					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), targetParent.getSize(), "left", "right", "width");
+					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), targetParent.getSize(), targetContainerCssPos,
+						"left", "right", "width");
 					break;
 
 				case "middleV" :
-					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), targetParent.getSize(), "top", "bottom", "height");
+					snapToMiddle(newPosition, position, componentParent.getSize(), target.getCssPosition(), targetParent.getSize(), targetContainerCssPos,
+						"top", "bottom", "height");
 					break;
 
 				case "endWidth" :
@@ -108,7 +113,8 @@ public class SnapToComponentUtil
 					break;
 
 				default :
-					setCssValue(jsonObject, property, newPosition, position, target.getCssPosition(), componentParent.getSize(), targetParent.getSize());
+					setCssValue(jsonObject, property, newPosition, position, target.getCssPosition(), componentParent.getSize(), targetParent.getSize(),
+						targetContainerCssPos);
 			}
 		}
 
@@ -183,23 +189,29 @@ public class SnapToComponentUtil
 		String lowerProperty, String higherProperty, String sizeProperty)
 	{
 		JSONArray uuids = obj.getJSONArray("targets");
+		JSONArray containers = obj.getJSONArray("containers");
 		ISupportCSSPosition target1 = getTarget(form, uuids.getString(0));
 		AbstractContainer parent1 = target1 != null ? CSSPositionUtils.getParentContainer(target1) : null;
 		ISupportCSSPosition target2 = getTarget(form, uuids.getString(1));
 		AbstractContainer parent2 = target1 != null ? CSSPositionUtils.getParentContainer(target2) : null;
+		ISupportCSSPosition targetContainer1 = getTarget(form, containers.optString(0));
+		CSSPosition targetContainerCssPos1 = targetContainer1 != null ? targetContainer1.getCssPosition() : null;
+		ISupportCSSPosition targetContainer2 = getTarget(form, containers.optString(1));
+		CSSPosition targetContainerCssPos2 = targetContainer2 != null ? targetContainer2.getCssPosition() : null;
 		CSSPosition pos1 = target1.getCssPosition();
 		CSSPosition pos2 = target2.getCssPosition();
 		java.awt.Dimension parent1Size = parent1.getSize();
 		java.awt.Dimension parent2Size = parent2.getSize();
 
 		int pos = obj.optInt("pos", -1);
-		snapToDist(newPosition, oldPosition, parentSize, lowerProperty, higherProperty, sizeProperty, pos1, pos2, parent1Size, parent2Size, pos);
+		snapToDist(newPosition, oldPosition, parentSize, lowerProperty, higherProperty, sizeProperty, pos1, pos2, parent1Size, parent2Size, pos,
+			targetContainerCssPos1, targetContainerCssPos2);
 
 	}
 
 	public static void snapToDist(CSSPosition newPosition, CSSPosition oldPosition, java.awt.Dimension parentSize, String lowerProperty, String higherProperty,
 		String sizeProperty, CSSPosition pos1, CSSPosition pos2, java.awt.Dimension parent1Size, java.awt.Dimension parent2Size,
-		int pos)
+		int pos, CSSPosition targetContainerCssPos1, CSSPosition targetContainerCssPos2)
 	{
 		CSSValue sizeValue = getOrComputeValue(newPosition, sizeProperty, parentSize);
 		switch (pos)
@@ -207,7 +219,8 @@ public class SnapToComponentUtil
 			case -1 :
 			{
 				//above the targets
-				CSSValue dist = computeDist(lowerProperty, higherProperty, pos1, pos2, parent1Size, parent2Size);
+				CSSValue dist = computeDist(lowerProperty, higherProperty, pos1, pos2, parent1Size, parent2Size, parentSize, targetContainerCssPos1,
+					targetContainerCssPos2);
 				CSSValue l1 = getOrComputeValue(pos1, lowerProperty, parent1Size);
 				CSSValue higherPropertyValue = l1.minus(dist).toHigherProperty();
 
@@ -236,7 +249,8 @@ public class SnapToComponentUtil
 			case 1 :
 			{
 				//below the targets
-				CSSValue dist = computeDist(lowerProperty, higherProperty, pos1, pos2, parent1Size, parent2Size);
+				CSSValue dist = computeDist(lowerProperty, higherProperty, pos1, pos2, parent1Size, parent2Size, parentSize, targetContainerCssPos1,
+					targetContainerCssPos2);
 				CSSValue h2 = getOrComputeValue(pos2, higherProperty, parent2Size);
 
 				//set the same anchoring as the closest target (second)
@@ -308,10 +322,10 @@ public class SnapToComponentUtil
 
 
 	private static CSSValue computeDist(String lowerProperty, String higherProperty, CSSPosition pos1, CSSPosition pos2, java.awt.Dimension parent1Size,
-		java.awt.Dimension parent2Size)
+		java.awt.Dimension parent2Size, Dimension parentSize, CSSPosition targetContainerCssPos1, CSSPosition targetContainerCssPos2)
 	{
-		CSSValue h1 = getOrComputeValue(pos1, higherProperty, parent1Size);
-		CSSValue l2 = getOrComputeValue(pos2, lowerProperty, parent2Size);
+		CSSValue h1 = getOrComputeValue(pos1, higherProperty, parent1Size, parentSize, targetContainerCssPos1);
+		CSSValue l2 = getOrComputeValue(pos2, lowerProperty, parent2Size, parentSize, targetContainerCssPos2);
 		CSSValue dist = l2.minus(h1);
 		return dist;
 	}
@@ -401,12 +415,12 @@ public class SnapToComponentUtil
 
 
 	public static void snapToMiddle(CSSPosition newPosition, CSSPosition oldPosition, java.awt.Dimension parentSize, CSSPosition midCssPosition,
-		java.awt.Dimension targetParentSize, String lowerProperty, String higherProperty, String sizeProperty)
+		java.awt.Dimension targetParentSize, CSSPosition targetContainerCssPos, String lowerProperty, String higherProperty, String sizeProperty)
 	{
 		CSSValue mid = CSSValue.NOT_SET;
-		CSSValue lowerPropertyValue = getCssValue(midCssPosition, lowerProperty, targetParentSize);
-		CSSValue higherPropertyValue = getCssValue(midCssPosition, higherProperty, targetParentSize);
-		CSSValue targetSizeValue = getCssValue(midCssPosition, sizeProperty, targetParentSize);
+		CSSValue lowerPropertyValue = getCssValue(midCssPosition, lowerProperty, targetParentSize, targetContainerCssPos, parentSize);
+		CSSValue higherPropertyValue = getCssValue(midCssPosition, higherProperty, targetParentSize, targetContainerCssPos, parentSize);
+		CSSValue targetSizeValue = getCssValue(midCssPosition, sizeProperty, targetParentSize, targetContainerCssPos, parentSize);
 		CSSValue sizeValue = getCssValue(oldPosition, sizeProperty, parentSize);
 		if (sizeValue.isSet())
 		{
@@ -452,7 +466,18 @@ public class SnapToComponentUtil
 
 	private static CSSValue getOrComputeValue(CSSPosition pos, String property, java.awt.Dimension parentSize)
 	{
-		CSSValue value = getCssValue(pos, property, parentSize);
+		CSSValue value = getCssValue(pos, property, parentSize, null, null);
+		if (!value.isSet())
+		{
+			value = computeValueBasedOnOppositeProperty(pos, property, parentSize, getCssValue(pos, getOppositeProperty(property), parentSize));
+		}
+		return value;
+	}
+
+	private static CSSValue getOrComputeValue(CSSPosition pos, String property, java.awt.Dimension parentSize, Dimension parentSize_,
+		CSSPosition targetContainerCssPos)
+	{
+		CSSValue value = getCssValue(pos, property, parentSize, targetContainerCssPos, parentSize_);
 		if (!value.isSet())
 		{
 			value = computeValueBasedOnOppositeProperty(pos, property, parentSize, getCssValue(pos, getOppositeProperty(property), parentSize));
@@ -553,15 +578,16 @@ public class SnapToComponentUtil
 	 * @param targetPosition the css position object of the snap target
 	 * @param containerSize the size of the source component parent
 	 * @param targetContainerSize the size of the target component parent
+	 * @param targetContainerCssPos on the form
 	 */
 	public static void setCssValue(JSONObject jsonObject, String property, CSSPosition newPosition, CSSPosition oldPosition, CSSPosition targetPosition,
-		java.awt.Dimension containerSize, java.awt.Dimension targetContainerSize)
+		java.awt.Dimension containerSize, java.awt.Dimension targetContainerSize, CSSPosition targetContainerCssPos)
 	{
 		String sizeProperty = getSizeProperty(property);
 		String oppositeProperty = getOppositeProperty(property);
 		String targetProperty = jsonObject.optString("prop", property);
 		String targetOppositeProperty = getOppositeProperty(oppositeProperty);
-		CSSValue val = getCssValue(targetPosition, targetProperty, targetContainerSize);
+		CSSValue val = getCssValue(targetPosition, targetProperty, targetContainerSize, targetContainerCssPos, containerSize);
 		if (val.isSet())
 		{
 			//if the property is set on the target, then we copy on the source component and clear the opposite property if the size property is set
@@ -573,7 +599,7 @@ public class SnapToComponentUtil
 			else
 			{
 				CSSValue computed = computeValueBasedOnOppositeTargetProperty(property, containerSize, val);
-				if (getCssValue(targetPosition, property, targetContainerSize).isSet())
+				if (getCssValue(targetPosition, property, targetContainerSize, targetContainerCssPos, containerSize).isSet())
 				{
 					//if the target has the same anchor just set the computed value
 					setCssValue(newPosition, property, computed);
@@ -596,11 +622,11 @@ public class SnapToComponentUtil
 				}
 			}
 		}
-		else if (getCssValue(targetPosition, oppositeProperty, targetContainerSize).isSet() &&
-			getCssValue(targetPosition, sizeProperty, targetContainerSize).isSet())
+		else if (getCssValue(targetPosition, oppositeProperty, targetContainerSize, targetContainerCssPos, containerSize).isSet() &&
+			getCssValue(targetPosition, sizeProperty, targetContainerSize, targetContainerCssPos, containerSize).isSet())
 		{
 			//the property is not set on the target, need to compute it using the size and the value of the opposite property
-			CSSValue oppositePropertyValue = getCssValue(targetPosition, oppositeProperty, targetContainerSize);
+			CSSValue oppositePropertyValue = getCssValue(targetPosition, oppositeProperty, targetContainerSize, targetContainerCssPos, containerSize);
 			CSSValue computedPropertyValue = computeValueBasedOnOppositeProperty(targetPosition, property, targetContainerSize, oppositePropertyValue);
 
 			//clear the property because the target component does also not have it and we want the same anchoring
@@ -625,8 +651,8 @@ public class SnapToComponentUtil
 				computedPropertyValue);
 			setCssValue(newPosition, oppositeProperty, computedOppositePropertySourceComponent);
 		}
-		else if (getCssValue(targetPosition, targetOppositeProperty, targetContainerSize).isSet() &&
-			getCssValue(targetPosition, sizeProperty, targetContainerSize).isSet())
+		else if (getCssValue(targetPosition, targetOppositeProperty, targetContainerSize, targetContainerCssPos, containerSize).isSet() &&
+			getCssValue(targetPosition, sizeProperty, targetContainerSize, targetContainerCssPos, containerSize).isSet())
 		{
 			CSSValue oppositePropertyValue = getCssValue(targetPosition, targetOppositeProperty, targetContainerSize);
 			CSSValue computed = computeValueBasedOnOppositeProperty(targetPosition, targetProperty, targetContainerSize,
@@ -643,6 +669,39 @@ public class SnapToComponentUtil
 				setCssValue(newPosition, property, computedPropertyValue);
 			}
 		}
+	}
+
+	public static CSSValue getCssValue(CSSPosition targetPosition, String targetProperty, Dimension targetContainerSize, CSSPosition targetContainerCssPos,
+		Dimension containerSize)
+	{
+		CSSValue val = getCssValue(targetPosition, targetProperty, targetContainerSize);
+		if (val.isSet() && targetContainerCssPos != null)
+		{
+			switch (targetProperty)
+			{
+				case "left" :
+				{
+					CSSValue left = getCssValue(targetContainerCssPos, targetProperty, containerSize);
+					return val.plus(left);
+				}
+				case "right" :
+				{
+					// TODO impl
+					break;
+				}
+				case "top" :
+				{
+					CSSValue top = getCssValue(targetContainerCssPos, targetProperty, containerSize);
+					return val.plus(top);
+				}
+				case "bottom" :
+				{
+					// TODO impl
+				}
+				//TODO width, height?
+			}
+		}
+		return val;
 	}
 
 	private static CSSValue computeValueBasedOnOppositeProperty(CSSPosition position, String property, java.awt.Dimension containerSize,
