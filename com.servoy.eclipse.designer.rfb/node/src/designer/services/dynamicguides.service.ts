@@ -72,6 +72,11 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 			this.formBounds = this.editorContentService.getContentForm().getBoundingClientRect();
             for (let comp of this.editorContentService.getAllContentElements()) {
+				const compParent = this.getParent(comp);
+				if (compParent?.classList.contains('svy-formcomponent')) {
+					//ignore components within FC
+					continue;
+				}
 				const componentType = comp.getAttribute('svy-formelement-type');
 				if (componentType == null) continue;
                 const id = comp.getAttribute('svy-id');
@@ -83,7 +88,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
                 this.middleV.set(id, (bounds.top + bounds.bottom) / 2);
                 this.middleH.set(id, (bounds.left + bounds.right) / 2);
 				this.types.set(id, componentType);
-				this.parents.set(id, this.getParent(comp)?.getAttribute('svy-id'));
+				this.parents.set(id, compParent?.getAttribute('svy-id'));
                 if (id !== this.uuid){
 					this.rectangles.push(bounds);
 					this.uuids.push(id);
@@ -279,6 +284,11 @@ this.snapToEndEnabled = !event.shiftKey;
 	}
 
 	computeGuides(event: MouseEvent, point: { x: number, y: number }) {
+		if (this.parentContainer?.classList.contains('svy-formcomponent')) {
+			//disable for components within a form component
+			this.snapDataListener.next(null);
+			return;
+		}
 		const resizing = this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
         let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
         const draggedItem = this.editorContentService.getContentElementById('svy_draggedelement');
