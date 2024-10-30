@@ -283,7 +283,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 },
                 onFirstDataRendered: (params: any) => {
                     this.scrollToSelection();
-                }
+                },
+                domLayout: this.responsiveHeight < 0 ? 'autoHeight' : 'normal'
             };
         }
 
