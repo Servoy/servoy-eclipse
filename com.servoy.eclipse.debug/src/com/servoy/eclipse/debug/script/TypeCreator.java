@@ -266,6 +266,7 @@ import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ModifiablePropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RecordPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RuntimeComponentPropertyType;
@@ -461,7 +462,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
 		addScopeType(ViewRecord.VIEW_RECORD, new ViewRecordCreator());
 		addScopeType(ViewFoundSet.VIEW_FOUNDSET, new ViewFoundSetCreator());
-		//addScopeType(MenuItemRecord.MENUITEM_RECORD, new MenuItemRecordCreator());
+		addScopeType(MenuItemRecord.MENUITEM_RECORD, new MenuItemRecordCreator());
 		//addScopeType(MenuFoundSet.MENU_FOUNDSET, new MenuFoundSetCreator());
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
@@ -3146,7 +3147,61 @@ public class TypeCreator extends TypeCache
 		}
 
 	}
+	private class MenuItemRecordCreator implements IScopeTypeCreator
+	{
 
+		@Override
+		public Type createType(String context, String fullTypeName)
+		{
+			Type type = TypeCreator.this.createType(context, fullTypeName, MenuItemRecord.class);
+			ImageDescriptor desc = IconProvider.instance().descriptor(MenuItemRecord.class);
+			type.setAttribute(IMAGE_DESCRIPTOR, desc);
+			EList<Member> members = type.getMembers();
+			members.add(createProperty("itemID", true, getTypeRef(context, "String"), "Menu Item name.", PROPERTY));
+			members.add(createProperty("menuText", true, getTypeRef(context, "String"), "Menu Item text.", PROPERTY));
+			members.add(createProperty("styleClass", true, getTypeRef(context, "String"), "Menu Item styleclass.", PROPERTY));
+			members.add(createProperty("iconStyleClass", true, getTypeRef(context, "String"), "Menu Item icon styleclass.", PROPERTY));
+			members.add(createProperty("tooltipText", true, getTypeRef(context, "String"), "Menu Item tooltip text.", PROPERTY));
+			members.add(createProperty("enabled", true, getTypeRef(context, "Boolean"), "Menu Item enabled.", PROPERTY));
+			members.add(createProperty("tooltipText", true, getTypeRef(context, "String"), "Menu Item tooltip text.", PROPERTY));
+			members.add(createProperty("callbackArguments", true, getTypeRef(context, "Object"), "Menu Item onAction callback arguments.", PROPERTY));
+			for (String category : MenuPropertyType.INSTANCE.getExtraProperties().keySet())
+			{
+				Map<String, PropertyDescription> propertiesMap = MenuPropertyType.INSTANCE.getExtraProperties().get(category);
+				for (PropertyDescription propertyDescription : propertiesMap.values())
+				{
+					String extraPropertyType = "String";
+					if (propertyDescription.getType() instanceof BooleanPropertyType || propertyDescription.getType() instanceof IntPropertyType)
+					{
+						extraPropertyType = "Boolean";
+					}
+					if (propertyDescription.getType() instanceof DatePropertyType)
+					{
+						extraPropertyType = "Date";
+					}
+					members.add(createProperty(propertyDescription.getName(), true, getTypeRef(context, extraPropertyType),
+						"Menu Item " + propertyDescription.getName() + " extra property, from '" + category + "' category", PROPERTY));
+				}
+			}
+			members
+				.add(createProperty(MenuItemRecord.MENUITEM_RELATION_NAME, true, getTypeRef(context, "MenuFoundSet"), "Menu Item children.", RELATION_IMAGE));
+			members.add(createProperty("foundset", true, getTypeRef(context, "MenuFoundSet"), "Menu Item parent foundset.", PROPERTY));
+			return addType(null, type);
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+
+		}
+
+	}
 
 	private class JSDataSetCreator implements IScopeTypeCreator
 	{
