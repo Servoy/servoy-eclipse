@@ -2,14 +2,15 @@
     [sabloTabseqConfig]="{container: true, reservedGap: 50}">
 <ul ngbNav #nav="ngbNav" class="nav-tabs text-nowrap flex-nowrap" [(activeId)]="selectedTabID" style="overflow-x: auto; overflow-y: hidden;" (navChange)="onTabChange($event)"
 	[class]='styleClass' [id]="servoyApi.getMarkupId()">
-	<li *ngFor="let tab of tabs" [ngbNavItem]="tab._id" [disabled]="tab.disabled || !enabled || !tab.containsFormId"
+	<li *ngFor="let tab of tabs;let i = index" [ngbNavItem]="tab._id" [disabled]="tab.disabled || !enabled || !tab.containsFormId" (click)="tabClicked(tab, i)"
 		[id]="tab._id"  [svyTooltip]="tab.toolTipText">
 		<a ngbNavLink svy-mnemonic='tab.mnemonic'>
-			<img ng-hide="tab.imageMediaID == ''" ng-src='tab.imageMediaID' />
+			<img *ngIf="tab.imageMediaID" ng-src='tab.imageMediaID' />
 			<span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
 				[innerHTML]='tab?.text| htmlFilter| trustAsHtml:servoyApi.trustAsHtml()'></span>
 		</a>
 		<ng-template ngbNavContent>
+            <default-tabpanel-active-tab-visibility-listener [tab]="tab" (visibleTab)="onVisibleTab(tab)"></default-tabpanel-active-tab-visibility-listener>
 			<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}">
 			</ng-template>
 		</ng-template>

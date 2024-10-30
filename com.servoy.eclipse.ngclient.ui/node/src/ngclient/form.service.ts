@@ -250,11 +250,14 @@ export class FormService {
     }
 
     public getFormCache(form: IFormComponent): FormCache {
+        return this.formsCache.get(form.name);
+    }
+        
+    public resolveComponentCache(form: IFormComponent): void {
         if (this.formComponentCache.get(form.name) instanceof Deferred) {
             (this.formComponentCache.get(form.name) as Deferred<any>).resolve(null);
         }
         this.formComponentCache.set(form.name, form);
-        return this.formsCache.get(form.name);
     }
 
     public getFormStyleClasses(name: string) {

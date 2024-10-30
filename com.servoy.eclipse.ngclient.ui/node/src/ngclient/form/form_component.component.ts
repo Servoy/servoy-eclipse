@@ -308,6 +308,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     ngAfterViewInit() {
+        this.formservice.resolveComponentCache(this);
         this.onResize();
     }
 
