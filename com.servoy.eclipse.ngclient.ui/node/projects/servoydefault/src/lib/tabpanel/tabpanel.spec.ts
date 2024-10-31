@@ -1,6 +1,6 @@
 import { SimpleChanges, SimpleChange } from '@angular/core';
 import { TestBed, fakeAsync, tick, waitForAsync, discardPeriodicTasks } from '@angular/core/testing';
-import { ServoyDefaultTabpanel } from './tabpanel';
+import { ServoyDefaultTabpanel, DefaultTabpanelActiveTabVisibilityListener } from './tabpanel';
 import { Tab } from './basetabpanel';
 
 import { ServoyApi, ServoyPublicTestingModule, LoggerFactory, WindowRefService } from '@servoy/public';
@@ -18,7 +18,8 @@ describe( 'ServoyDefaultTabpanel', () => {
         servoyApi.trustAsHtml.and.returnValue(  true );
         TestBed.configureTestingModule( {
             declarations: [
-                ServoyDefaultTabpanel
+                ServoyDefaultTabpanel,
+                DefaultTabpanelActiveTabVisibilityListener
             ],
             imports: [NgbModule, ServoyPublicTestingModule],
             providers: [WindowRefService, LoggerFactory]
