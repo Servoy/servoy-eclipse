@@ -9,7 +9,12 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
+    let mockMO;
+    let observerTarget;
     beforeEach( waitForAsync(() => {
+        mockMO = spyOn(window, "MutationObserver");
+        mockMO.and.returnValue( { observe: (param) => {observerTarget=param }, disconnect: () => { },takeRecords: () => [] } );
+       
         servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm', 'isInAbsoluteLayout', 'trustAsHtml','registerComponent','unRegisterComponent'] );
         servoyApi.getMarkupId.and.returnValue( '1' );
         servoyApi.isInAbsoluteLayout.and.returnValue( true );
@@ -59,6 +64,9 @@ describe( 'ServoyDefaultTabpanel', () => {
         changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
         fixture.componentInstance.ngOnChanges( changes );
 
+        fixture.detectChanges();
+        
+        mockMO.calls.mostRecent().args[0]([{attributeName:'class', target: observerTarget}]);
         fixture.detectChanges();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_0' );
         expect( fixture.componentInstance.tabIndex ).toBe( 1 );
