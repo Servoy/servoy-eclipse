@@ -154,8 +154,6 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 			else data = null;
 			
 			this.setRealValue(data);
-        } else if (inputType === 'text') {
-            this.setRealValue(data);
         }
 	}
 	
