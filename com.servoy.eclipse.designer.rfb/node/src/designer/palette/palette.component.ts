@@ -169,19 +169,21 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: unknown }, ghost: PaletteComp, propertyName?: string, propertyValue?: { [property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
-        if (event.target && ((event.target as Element).getAttribute('name') === 'variants' || (event.target as Element).getAttribute('name') === 'favIcon')) {
+        if (event.target && ((event.target as Element).getAttribute('name') === 'variants' || (event.target as Element).getAttribute('name') === 'favIcon') || (event.target as HTMLElement).id === 'chevron') {
             return; // it has a separate handler
         }
         event.stopPropagation();
         this.editorSession.variantsTrigger.emit({ show: false });
 
         let target = event.target as HTMLElement;
-        if (target.localName === 'designer-variantscontent' || target.localName === 'img') {
+        if (target.localName === 'designer-variantscontent') {
             target = target.closest('li');
+        } else if (target.localName === 'img' && target.id === '') {
+            target = target.closest('li').querySelector('span');
         }
         this.dragItem.paletteItemBeingDragged = target.cloneNode(true) as Element;
         Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
-            if (child.tagName === 'DESIGNER-VARIANTSCONTENT' || child.getAttribute('name') === 'favIcon') {
+            if (child.tagName === 'DESIGNER-VARIANTSCONTENT' || child.getAttribute('name') === 'favIcon' || child.id === 'chevron') {
                 this.dragItem.paletteItemBeingDragged.removeChild(child);
             }
         })
