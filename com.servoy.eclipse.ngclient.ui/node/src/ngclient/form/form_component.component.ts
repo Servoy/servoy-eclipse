@@ -302,13 +302,12 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
             this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
             this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
-
+            this.formservice.resolveComponentCache(this);
         }
         this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
     }
 
     ngAfterViewInit() {
-        this.formservice.resolveComponentCache(this);
         this.onResize();
     }
 
