@@ -64,7 +64,6 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private listeners = [];
     private maskFormat : MaskFormat;
     private readonly log: LoggerService;
-    private focusText: string;
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService,
         @Inject(DOCUMENT) private doc: Document, logFactory: LoggerFactory) {
@@ -78,9 +77,6 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         const inputType = this.getType();
         if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
             this.writeValue(this.realValue);
-        }
-        if (!this.format.isMask && (this.format.uppercase || this.format.lowercase) && this.focusText != this._elementRef.nativeElement.value && inputType === 'text'){
-            this._elementRef.nativeElement.dispatchEvent(new CustomEvent('change', { bubbles: true }));
         }
     }
 
