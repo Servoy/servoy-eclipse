@@ -25,8 +25,11 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -41,6 +44,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PartInitException;
@@ -810,10 +814,35 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				for (String tableName : tableNames)
 				{
 					contentProvider.add(new Table(DataSourceUtils.createDBTableDataSource(serverName, tableName)), itemsFilter);
-					ITable table = server.getTable(tableName);
-					table.getColumns().forEach(
-						column -> contentProvider.add(new Column(DataSourceUtils.createDBTableDataSource(serverName, tableName), column.getName()),
-							itemsFilter));
+					if (showTableColumnsAction.isChecked())
+					{
+						Job job = new Job("Loading columns for table " + tableName)
+						{
+							@Override
+							protected IStatus run(IProgressMonitor monitor)
+							{
+								try
+								{
+									ITable table = server.getTable(tableName);
+									table.getColumns().forEach(
+										column -> contentProvider.add(
+											new Column(DataSourceUtils.createDBTableDataSource(serverName, tableName), column.getName()),
+											itemsFilter));
+									reloadCache(false, new NullProgressMonitor());
+									Display.getDefault().asyncExec(() -> {
+										refresh();
+									});
+								}
+								catch (RepositoryException | RemoteException e)
+								{
+									ServoyLog.logError(e);
+								}
+								return Status.OK_STATUS;
+							}
+						};
+						job.schedule();
+						job.setRule(new ServerScheduleRule(serverName));
+					}
 				}
 			}
 			catch (Exception e)
@@ -1017,6 +1046,31 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		public String getScopeName()
 		{
 			return scopeName;
+		}
+	}
+
+	public static final class ServerScheduleRule implements ISchedulingRule
+	{
+		private final String serverName;
+
+		/**
+		 * @param serverName
+		 */
+		public ServerScheduleRule(String serverName)
+		{
+			this.serverName = serverName;
+		}
+
+		@Override
+		public boolean isConflicting(ISchedulingRule rule)
+		{
+			return rule instanceof ServerScheduleRule ssr && ssr.serverName.equals(serverName);
+		}
+
+		@Override
+		public boolean contains(ISchedulingRule rule)
+		{
+			return false;
 		}
 	}
 }
