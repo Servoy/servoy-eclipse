@@ -108,7 +108,7 @@ export abstract class AbstractFormComponent {
                 changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
             });
             comp.ngOnChanges(changes);
-            // this is kind of like a push so we should trigger this.
+            // this is kind of like a push so we should trigger detection for this
             comp.detectChanges();
         }
     }

@@ -16,20 +16,6 @@ export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElem
         super(renderer, cdRef, formattingService, doc);
     }
 
-    attachFocusListeners(nativeElement: any) {
-        if (this.onFocusGainedMethodID)
-            this.renderer.listen( nativeElement, 'focus', ( e ) => {
-                if ( this.mustExecuteOnFocus !== false ) {
-                    this.onFocusGainedMethodID( e );
-                }
-                this.mustExecuteOnFocus = true;
-            } );
-        if (this.onFocusLostMethodID)
-            this.renderer.listen( nativeElement, 'blur', ( e ) => {
-                this.onFocusLostMethodID(e);
-            } );
-    }
-
     onModelChange(newValue) {
         if(newValue && typeof newValue.getTime === 'function' && isNaN(newValue.getTime())) {
             // invalid date, force dataprovider display with invalid date text

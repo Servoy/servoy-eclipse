@@ -17,7 +17,10 @@ import { SvyUtilsService } from './utils.service';
 })
 export class FormService {
 
-    private formsCache: Map<string, FormCache>;
+    private formsCache: Map<string, FormCache>; // keeps form state (not actual angular components that are forms)
+    private formsCachePendingRunnables: Map<string, ((FormCache) => void)[]>; // in case code wants to execute to update formCache content before form cache is sent from server;;
+                             // this should normally not happen (use of 'formCachePendingRunnables') since SVY-19635 and we do print a warning message when it does...
+    
     private log: LoggerService;
     private formComponentCache: Map<string, IFormComponent | Deferred<any>>; // this refers to forms (angular components), not to servoy form components
     private ngUtilsFormStyleclasses: { property: string };
@@ -29,6 +32,7 @@ export class FormService {
 
         this.log = logFactory.getLogger('FormService');
         this.formsCache = new Map();
+        this.formsCachePendingRunnables = new Map();
         this.formComponentCache = new Map();
         this.utils.setFormService(this);
         websocketService.getSession().then((session) => {
@@ -37,26 +41,23 @@ export class FormService {
                 if (msg.forms) {
                     for (const formname in msg.forms) {
                         // if form is loaded
-                        if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)) {
+                        if (this.formsCache.has(formname)) {
                             this.clientFunctionService.waitForLoading().finally(() => {
                                 this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService);
                             });
                         } else {
-                            if (!this.formComponentCache.has(formname)) {
-                                this.formComponentCache.set(formname, new Deferred<unknown>());
+                            this.log.warn('Updates to a form state/cache/model came before it was initialized; this is no longer expected; form: ' + formname);
+                            // do treat this situation anyway, even if it's no loner expected
+                            let pendingRunnablesForThisForm = this.formsCachePendingRunnables.get(formname);
+                            if (!pendingRunnablesForThisForm) {
+                                pendingRunnablesForThisForm = [];
+                                this.formsCachePendingRunnables.set(formname, pendingRunnablesForThisForm);
                             }
-                            if (this.formsCache.get(formname) != null) {
-                                // if the form cache is already there but no ui yet, then just update the model
-                                this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService, true)
-                            }
-                            else {
-                                const deferred = this.formComponentCache.get(formname) as Deferred<unknown>;
-                                deferred.promise.then(() =>
-                                    this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService)
-                                ).catch(error => {
-                                    console.log(error);
-                                });
-                            }
+                            
+                            pendingRunnablesForThisForm.push((formCache) => {
+                                // it is not needed here to do this.clientFunctionService.waitForLoading().finally, as pendingRunnables will always run inside that anyway
+                                this.formMessageHandler(formCache, formname, msg, servoyService);
+                            });
                         }
                     }
                 }
@@ -319,13 +320,28 @@ export class FormService {
 
     public createFormCache(formName: string, jsonData: any, url: string) {
         const formCache = new FormCache(formName, jsonData.size, jsonData.responsive, url, this.typesRegistry);
+
         this.walkOverChildren(jsonData.children, formCache);
+
         this.clientFunctionService.waitForLoading().finally(() => {
             this.formsCache.set(formName, formCache);
+            
+            let pendingRunnablesForThisFormState = this.formsCachePendingRunnables.get(formName);
+            if (pendingRunnablesForThisFormState) {
+                // note that here we are already inside this.clientFunctionService.waitForLoading().finally, so the pending runnables do not need to do that themselves
+                pendingRunnablesForThisFormState.forEach(r => r(formCache));
+                this.formsCachePendingRunnables.delete(formName);
+            }
+            
             const formComponent = this.formComponentCache.get(formName);
             if (instanceOfFormComponent(formComponent)) {
+                // there is a form angular component that needs to update it's form state to the new one
                 formComponent.formCacheChanged(formCache);
             } else {
+                // if it is not a update on an existing form (solution model) but a new form,
+                // make sure to call detectChanges() on all existing forms, because 1 of
+                // those could show the new form in it (as tab for example), and that form should be marked as
+                // changed so that everything is change-detected correctly
                 this.formComponentCache.forEach((value) => {
                     if (instanceOfFormComponent(value)) {
                         value.detectChanges();
@@ -550,8 +566,11 @@ export class FormService {
             }, this.typesRegistry);
     }
 
-    private formMessageHandler(formCache: FormCache, formName: string, msg: {forms: {[property: string]: {[property: string]: {[property: string]: unknown}}}}, servoyService: ServoyService, skipFormComponent?: boolean) {
-        const formComponent = skipFormComponent? null: this.formComponentCache.get(formName) as IFormComponent;
+    private formMessageHandler(formCache: FormCache, formName: string, msg: {forms: {[property: string]: {[property: string]: {[property: string]: unknown}}}}, servoyService: ServoyService) {
+        // if the form angular component is already created, update it's properties and use it as well; if not, just update models so form/component 'caches'
+        const fc = this.formComponentCache.get(formName);
+        let formComponent: IFormComponent;
+        if (fc && !(fc instanceof Deferred)) formComponent = fc as IFormComponent;
 
         const newFormData = msg.forms[formName];
         const newFormProperties = newFormData['']; // properties of the form itself

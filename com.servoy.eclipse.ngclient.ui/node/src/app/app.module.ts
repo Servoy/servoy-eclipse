@@ -13,5 +13,5 @@ import { AppComponent } from './app.component';
     bootstrap: [AppComponent], imports: [BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
-        AppRoutingModule], providers: [provideHttpClient(withInterceptorsFromDi()),provideZoneChangeDetection({ eventCoalescing: true})] })
+        AppRoutingModule], providers: [provideHttpClient(withInterceptorsFromDi()),provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true })] })
 export class AppModule { }
