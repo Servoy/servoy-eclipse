@@ -364,7 +364,7 @@ public class MarkdownGenerator
 		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException, InstantiationException, IllegalAccessException
 	{
 		targetInstallClassLoader = new URLClassLoader("Target Servoy installation classloader",
-			findJarURLsFromServoyInstall(new File(new URI(pluginDir).normalize()).getAbsolutePath()),
+			findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()), // Ensure absolute path is used
 			MarkdownGenerator.class.getClassLoader());
 //
 //		Class< ? > elusiveClass = targetInstallClassLoader.loadClass("com.servoy.extensions.plugins.jwt.client.Builder");
@@ -388,6 +388,11 @@ public class MarkdownGenerator
 
 		boolean ngOnly = false;
 
+		URL jsLibURLObject = new File(jsLibURL).toURI().toURL();
+		URL servoyDocURLObject = new File(servoyDocURL).toURI().toURL();
+		URL designDocURLObject = new File(designDocURL).toURI().toURL();
+
+
 		do
 		{
 			ngOnly = !ngOnly;
@@ -399,29 +404,28 @@ public class MarkdownGenerator
 
 			if (!generateForAI)
 			{
-				System.err.println("  - " + jsLibURL);
-				manager = DocumentationManager.fromXML(new URL(jsLibURL), targetInstallClassLoader);
+				// TODO when the object model / persists should also be generated for AI, the if can be removed and this code will always execute
+				System.err.println("  - " + jsLibURLObject);
+				manager = DocumentationManager.fromXML(jsLibURLObject, targetInstallClassLoader);
 				docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
 				docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
 			}
 
-			System.err.println("  - " + servoyDocURL);
-			manager = DocumentationManager.fromXML(new URL(servoyDocURL), targetInstallClassLoader);
+			System.err.println("  - " + servoyDocURLObject);
+			manager = DocumentationManager.fromXML(servoyDocURLObject, targetInstallClassLoader);
 			docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
 			docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
 
 			if (!generateForAI)
 			{
-				// TODO when the object model / persists should also be generated for AI, the if can be removed and this code will always execute
-
-				System.err.println("  - " + designDocURL);
-				manager = DocumentationManager.fromXML(new URL(designDocURL), targetInstallClassLoader);
+				System.err.println("  - " + designDocURLObject);
+				manager = DocumentationManager.fromXML(designDocURLObject, targetInstallClassLoader);
 				docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/object-model/solution", null);
 				docGenerator.generateDocsFromXML(manager, "/reference/servoycore/object-model/solution", ngOnly);
 			}
 
 			System.err.println("  - plugins (from " + pluginDir + "):");
-			File file2 = new File(new URI(pluginDir).normalize());
+			File file2 = new File(new File(pluginDir).toURI().normalize());
 			if (file2.isDirectory())
 			{
 				// this is an directory with jars
