@@ -84,7 +84,6 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
@@ -840,14 +839,15 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 								return Status.OK_STATUS;
 							}
 						};
-						job.schedule();
 						job.setRule(new ServerScheduleRule(serverName));
+						job.schedule();
+
 					}
 				}
 			}
 			catch (Exception e)
 			{
-				Debug.error(e);
+				ServoyLog.logError(e);
 			}
 		}
 
@@ -1070,7 +1070,13 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		@Override
 		public boolean contains(ISchedulingRule rule)
 		{
-			return false;
+			return equals(rule);
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			return this == obj || (obj instanceof ServerScheduleRule ssr && ssr.serverName.equals(serverName));
 		}
 	}
 }
