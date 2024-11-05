@@ -1,6 +1,6 @@
 import {
     Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-    TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, AfterViewInit
+    TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, AfterViewInit, AfterViewChecked
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, IFormComponent } from '../types';
@@ -182,7 +182,7 @@ export abstract class AbstractFormComponent {
 /**
  * This is the definition of a angular component that represents servoy forms.
  */
-export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, IFormComponent {
+export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, AfterViewChecked, IFormComponent {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
     // structure viewchild template generate start
@@ -302,13 +302,17 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
             this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
             this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
-            this.formservice.resolveComponentCache(this);
         }
         this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
     }
 
     ngAfterViewInit() {
+        this.formservice.resolveComponentCache(this);
         this.onResize();
+    }
+    
+    ngAfterViewChecked() {
+        this.formservice.resolveComponentCache(this);
     }
 
     ngOnDestroy() {
