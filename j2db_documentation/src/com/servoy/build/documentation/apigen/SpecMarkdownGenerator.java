@@ -802,7 +802,7 @@ public class SpecMarkdownGenerator
 
 					break;
 				case "</code>" :
-					if (codeBacktickState.value.maxContinousBacktickCount > 0)
+					if (codeBacktickState.value != null && codeBacktickState.value.maxContinousBacktickCount > 0)
 						result.appendWithoutEscaping(
 							(codeBacktickState.value.endsWithBacktick ? " " : "") + "`".repeat(codeBacktickState.value.maxContinousBacktickCount + 1));
 					else result.appendWithoutEscaping("`");
@@ -847,7 +847,7 @@ public class SpecMarkdownGenerator
 					if (addInBetweenAsRawMarkdown) addInBetweenAsRawMarkdown = false;
 					else
 					{
-						if (codeBacktickState.value.maxContinousBacktickCount > 2)
+						if (codeBacktickState.value != null && codeBacktickState.value.maxContinousBacktickCount > 2)
 							result.appendWithoutEscaping("\n" + "`".repeat(codeBacktickState.value.maxContinousBacktickCount + 1));
 						else result.appendWithoutEscaping("\n```");
 						codeBacktickState.value = null;
