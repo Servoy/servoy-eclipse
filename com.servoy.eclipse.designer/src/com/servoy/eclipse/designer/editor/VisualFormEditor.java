@@ -322,6 +322,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		{
 			return dummyCommandStack;
 		}
+		if (adapter.equals(CommandStack.class))
+		{
+			return getCommandStack();
+		}
 		if (adapter.equals(IContextProvider.class))
 		{
 			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_editor");
