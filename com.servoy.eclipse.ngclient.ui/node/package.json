@@ -14,6 +14,8 @@
     "build_debug_nowatch": "ng build ngclient2 --watch=false",
     "build_lib_debug": "ng build @servoy/public --watch",
     "build_default_debug": "ng build @servoy/servoydefault --watch",
+    "build_mobile": "ng build --configuration mobile --subresource-integrity=true ngclient2",
+    "build_mobile_debug": "ng build --configuration development_mobile ngclient2",
     "test_public": "ng test @servoy/public --watch --browsers Chrome",
     "test_default": "ng test @servoy/servoydefault --watch --browsers Chrome",
     "test_dialogs": "ng test @servoy/dialogs --watch --browsers Chrome",
