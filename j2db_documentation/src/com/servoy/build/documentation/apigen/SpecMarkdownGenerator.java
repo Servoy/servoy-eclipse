@@ -459,7 +459,7 @@ public class SpecMarkdownGenerator
 	}
 
 	private static final Pattern splitPatternForHTMLToMarkdownConversion = Pattern.compile(
-		"(^\\h*(\\@param|\\@example|\\@return|(?<tag>\\@\\p{Alpha}+)))|<br>|<br/>|<pre data-puremarkdown>|<pre text>|<pre>|</pre>|<code>|</code>|<a href=\"|</a>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>",
+		"(^\\h*(\\@param|\\@example|\\@return|(?<tag>\\@\\p{Alpha}+)))|<br>|<br/>|<pre data-puremarkdown>|<pre text>|<pre>|</pre>|<code>|</code>|<a href=\"|</a>|<b>|</b>|<i>|</i>|<ul>|</ul>|<ol>|</ol>|<li>|</li>|<p>|</p>|<h1>|</h1>|<h2>|</h2>|<h3>|</h3>|<h4>|</h4>",
 		Pattern.MULTILINE);
 	// IMPORTANT - if you add or remove groups, so (), make sure that the matchedTokensIsNonSpecialAtThing code below keeps using the correct group index
 
@@ -550,6 +550,23 @@ public class SpecMarkdownGenerator
 			String tokenForSwitchChecks = (matchedTokensIsNonSpecialAtThing.get(i).booleanValue() ? AT_SOMETHING_WITHOUT_SPECIAL_MEANING_MARKER : token); // this is a bit of a hack to be able to use the value of matchedTokensIsNonSpecialAtThing directly in the case statement
 			switch (tokenForSwitchChecks)
 			{
+				case "</h1>" :
+					result.appendWithoutEscaping("# ");
+					shouldTrimLeadingTheInBetweenContent.value = Boolean.TRUE;
+					break;
+				case "</h2>" :
+					result.appendWithoutEscaping("## ");
+					shouldTrimLeadingTheInBetweenContent.value = Boolean.TRUE;
+					break;
+				case "</h3>" :
+					result.appendWithoutEscaping("### ");
+					shouldTrimLeadingTheInBetweenContent.value = Boolean.TRUE;
+					break;
+				case "</h4>" :
+					result.appendWithoutEscaping("#### ");
+					shouldTrimLeadingTheInBetweenContent.value = Boolean.TRUE;
+					break;
+
 				case "<br>", "<br/>" :
 				case "@param", "@return", "@exampleDoNotAutoAddCodeBlock", AT_SOMETHING_WITHOUT_SPECIAL_MEANING_MARKER :
 				case "<p>", "</p>" :
@@ -648,6 +665,12 @@ public class SpecMarkdownGenerator
 			// now append anything that the token needs to add
 			switch (tokenForSwitchChecks)
 			{
+				case "</h1>" :
+				case "</h2>" :
+				case "</h3>" :
+				case "</h4>" :
+					nextLinePlusIndent(result, currentIndentLevel);
+					break;
 				case "<br>", "<br/>" :
 					result.appendWithoutEscaping("  ");
 					nextLinePlusIndent(result, currentIndentLevel);
