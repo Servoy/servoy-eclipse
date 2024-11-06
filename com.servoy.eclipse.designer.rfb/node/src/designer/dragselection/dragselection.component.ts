@@ -190,28 +190,10 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         }
 
         if (this.selectionToDrag.length > 0) {
-            let firstSelectedNode = this.selectionToDrag[0];
-            if (firstSelectedNode[0]) firstSelectedNode = firstSelectedNode[0];
             const changeX = event.clientX - this.dragStartEvent.clientX;
             const changeY = event.clientY - this.dragStartEvent.clientY;
 
-            //make sure no element goes offscreen
-            let canMove = true;
-            for (let i = 0; i < this.selectionToDrag.length; i++) {
-                const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[i]);
-                if (!elementInfo) {
-                    let node = this.editorContentService.getContentElement(this.selectionToDrag[i]);
-                    node = this.getSvyWrapper(node);
-                    this.currentElementsInfo.set(this.selectionToDrag[i], new ElementInfo(node));
-                }
-
-                if (elementInfo && (elementInfo.y + changeY < 0 || elementInfo.x + changeX < 0)) {
-                    canMove = false;
-                    break;
-                }
-            }
-
-            if (canMove) {
+            if (this.canMove(changeX, changeY)) {
                 this.updateLocation(changeX, changeY);
             }
             this.dragStartEvent = event;
@@ -449,10 +431,32 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             } else {
                 this.scroll.x = 0;
             }
-            this.updateLocation(this.scroll.x, this.scroll.y);
+            if (this.selectionToDrag.length > 0) {
+                if (this.canMove(this.scroll.x, this.scroll.y)) {
+                    this.updateLocation(this.scroll.x, this.scroll.y);
+                }
+            }
         }
 
         this.scroll.x = this.contentArea.scrollLeft;
         this.scroll.y = this.contentArea.scrollTop;
+    }
+    
+    canMove(x: number, y: number): boolean {
+        //make sure no element goes offscreen top or left
+        let canMove = true;
+        for (let i = 0; i < this.selectionToDrag.length; i++) {
+            const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[i]);
+            if (!elementInfo) {
+                let node = this.editorContentService.getContentElement(this.selectionToDrag[i]);
+                node = this.getSvyWrapper(node);
+                this.currentElementsInfo.set(this.selectionToDrag[i], new ElementInfo(node));
+            }
+            if (elementInfo && (elementInfo.y + y < 0 || elementInfo.x + x < 0)) {
+                canMove = false;
+                break;
+            }
+        }
+        return canMove;
     }
 }
