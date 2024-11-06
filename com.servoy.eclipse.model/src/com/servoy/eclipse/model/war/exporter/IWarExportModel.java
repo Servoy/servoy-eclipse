@@ -21,7 +21,7 @@ import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
  * @author gboros
  * @since 8.0
  */
-public interface IWarExportModel extends IExportSolutionModel
+public interface IWarExportModel extends IExportSolutionModel, ITiNGExportModel
 {
 	public String enc_prefix = "encrypted:";//keep in sync with Settings.enc_prefix
 
@@ -137,27 +137,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	public boolean isSkipDatabaseViewsUpdate();
 
 	public void setSkipDatabaseViewsUpdate(boolean skip);
-
-	public Set<String> getExportedPackagesExceptSablo();
-
-	/**
-	 * Gets all components that are to be exported. This includes under-the-hood components, components that are explicitly used by solution and any
-	 * optional components that the user picked during export.
-	 */
-	Set<String> getAllExportedComponents();
-
-	/**
-	 * Gets almost all services that are to be exported. This includes under-the-hood services, services that are explicitly used by solution and any
-	 * optional services that the user picked during export.<br/><br/>
-	 *
-	 * This currently won't include any sablo content as all needed sablo js files are referenced statically from the page (pointing to jar file inside war) when serving ng clients.<br/>
-	 * And here we want only the contents that will be wro grouped/optimized to be included.<br/><br/>
-	 *
-	 * {@link #getComponentsNeededUnderTheHood()} would be the same if sablo would have components, but it does not have any so sablo does not matter there...
-	 */
-	Set<String> getAllExportedServicesWithoutSabloServices();
-
-	public String exportNG2Mode();
 
 	/**
 	 * If a property file {@link #getServoyPropertiesFileName()} was not specified then a properties file will be generated using this method and other

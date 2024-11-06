@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.DialogSettings;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -65,7 +63,6 @@ import com.servoy.eclipse.ui.wizards.DirtySaveExportWizard;
 import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 import com.servoy.eclipse.ui.wizards.exportsolution.pages.ExportConfirmationPage;
-import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -127,18 +124,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export");
-		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
-		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		if (activeProject != null)
-		{
-			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
-			setDialogSettings(section);
-		}
-		else
-		{
-			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard");
-			setDialogSettings(section);
-		}
+		setDialogSettings(ExportWarModel.getDialogSettings());
 		setNeedsProgressMonitor(true);
 	}
 

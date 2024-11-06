@@ -36,7 +36,7 @@ import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.impl.ClientService;
 
-import com.servoy.eclipse.model.war.exporter.IWarExportModel;
+import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
@@ -56,7 +56,7 @@ public class ComponentTemplateGenerator
 	 *  right is the viewchild reference value to those components
 	 * @return Pair<String,String>
 	 */
-	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(IWarExportModel model)
+	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(ITiNGExportModel model)
 	{
 		StringBuilder template = new StringBuilder();
 		StringBuilder viewChild = new StringBuilder();
