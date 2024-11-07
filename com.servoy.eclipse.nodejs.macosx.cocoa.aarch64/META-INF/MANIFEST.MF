@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Node.js - macosx.cocoa.aarch64
 Bundle-SymbolicName: com.servoy.eclipse.nodejs.macosx.cocoa.aarch64;singleton:=true
-Bundle-Version: 20.11.1
+Bundle-Version: 20.18.0
 Bundle-Vendor: Servoy
 Eclipse-PlatformFilter: (& (osgi.ws=cocoa)(osgi.os=macosx)(osgi.arch=aarch64))
 Require-Bundle: com.servoy.eclipse.ngclient.ui

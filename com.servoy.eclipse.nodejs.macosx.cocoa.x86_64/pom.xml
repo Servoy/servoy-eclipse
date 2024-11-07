@@ -12,7 +12,7 @@
 		<version>2024.3.3.3946_LTS</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</artifactId>
-	<version>20.11.1</version>
+	<version>20.18.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
