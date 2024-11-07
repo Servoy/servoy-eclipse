@@ -155,7 +155,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		if (EDITOR_CONTENT_SERVICE.equals(name))
 		{
-			return new ClientService(EDITOR_CONTENT_SERVICE, EDITOR_CONTENT_SERVICE_SPECIFICATION);
+			return new ClientService(EDITOR_CONTENT_SERVICE, EDITOR_CONTENT_SERVICE_SPECIFICATION, this);
 		}
 		return super.createClientService(name);
 	}
