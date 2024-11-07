@@ -911,7 +911,32 @@ public class SpecMarkdownGenerator
 			shouldTrimLeadingTheInBetweenContent, !insideExampleSectionThatAutoAddsCodeBlock.value.booleanValue(),
 			addInBetweenAsRawMarkdown, currentIndentLevel, codeBacktickState, null, insideExampleSectionThatAutoAddsCodeBlock);
 
-		return result.toString();
+		return sanitizeReferences(result.toString());
+	}
+
+	//regular point char is escaped - this is creating problems in recognizing references.
+	// for example in markdown I get: \.\./\.\./myreference.md instead of ../../myReference.md
+	// while some markdown viewers can handle this, others can;t
+	// make sure of unescaped points inside references
+	private static String sanitizeReferences(String markdownContent)
+	{
+		Pattern pattern = Pattern.compile("\\[(.*?)\\]\\((.*?)\\)");
+		Matcher matcher = pattern.matcher(markdownContent);
+
+		StringBuffer sanitizedContent = new StringBuffer();
+
+		while (matcher.find())
+		{
+			// Capture groups for text and reference
+			String text = matcher.group(1);
+			String reference = matcher.group(2).replace("\\.", "."); // Remove escaping for periods in reference only
+
+			// Append the sanitized replacement to the result
+			matcher.appendReplacement(sanitizedContent, "[" + text + "](" + reference + ")");
+		}
+		matcher.appendTail(sanitizedContent); // Append the remaining content
+
+		return sanitizedContent.toString();
 	}
 
 	private static void addInBetweenContent(MarkdownContentAppender result,
