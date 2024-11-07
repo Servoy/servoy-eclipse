@@ -390,19 +390,19 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.jre.linux.x86_64"
          os="linux"
          arch="x86_64"
-         version="21.0.1"/>
+         version="21.0.5"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
          os="win32"
          arch="x86_64"
-         version="21.0.1"/>
+         version="21.0.5"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
          os="macosx"
          arch="x86_64"
-         version="21.0.1"/>
+         version="21.0.5"/>
 
    <plugin
          id="javax.persistence-api"
@@ -412,7 +412,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.jre.macosx.aarch64"
          os="macosx"
          arch="aarch64"
-         version="21.0.1"/>
+         version="21.0.5"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"
