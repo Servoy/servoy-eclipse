@@ -15,7 +15,7 @@
 
 	<artifactId>com.servoy.eclipse.jre.win32.x86_64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>21.0.4</version>
+	<version>21.0.5</version>
 
 	<build>
 		<plugins>
