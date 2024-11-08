@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Node.js - linux.gtk.x86_64
 Bundle-SymbolicName: com.servoy.eclipse.nodejs.linux.gtk.x86_64;singleton:=true
-Bundle-Version: 20.15.1
+Bundle-Version: 20.18.0
 Bundle-Vendor: Servoy
 Eclipse-PlatformFilter: (& (osgi.ws=gtk)(osgi.os=linux)(osgi.arch=x86_64))
 Require-Bundle: com.servoy.eclipse.ngclient.ui
