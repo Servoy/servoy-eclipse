@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.inmemory.MenuTable;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -33,6 +34,7 @@ import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -137,6 +139,10 @@ public class DataProviderCellEditor extends DialogCellEditor
 			IDataProvider provider = null;
 			if (value instanceof String) provider = converter.convertProperty(null, (String)value);
 			else if (value instanceof IDataProvider) provider = (IDataProvider)value;
+			if (provider instanceof Column && ((Column)provider).getTable() instanceof MenuTable)
+			{
+				return false;
+			}
 			return provider != null && provider != DataProviderContentProvider.NONE;
 		}
 

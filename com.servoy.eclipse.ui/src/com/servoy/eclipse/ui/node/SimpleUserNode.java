@@ -99,6 +99,7 @@ public class SimpleUserNode implements IAdaptable
 	{
 		this(displayName, type);
 		this._realObject = realObject;
+		storeContainingPersistIfNeeded(_realObject);
 		this.icon = icon;
 		this.developerFeedback = developerFeedback;
 	}

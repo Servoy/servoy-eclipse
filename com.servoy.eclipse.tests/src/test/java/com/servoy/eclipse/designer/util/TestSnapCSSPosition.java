@@ -45,7 +45,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
 		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
@@ -67,7 +67,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
 		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
@@ -89,7 +89,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		//target has top-left anchor, so the right should not be set
 		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.right));
@@ -112,7 +112,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
 		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
@@ -134,7 +134,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos left should NOT be set because target has top-right anchors", CSSPositionUtils.isSet(newPosition.left));
 		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
@@ -156,7 +156,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.top));
 		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.bottom));
@@ -178,7 +178,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos bottom should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
 		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
@@ -200,7 +200,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos bottom should NOT be set because the target has top anchor", CSSPositionUtils.isSet(newPosition.bottom));
 		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
@@ -222,12 +222,12 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		property = "bottom";
 		json = new JSONObject("{prop: bottom }");
 		targetPosition = new CSSPosition("269", "160", "-1", "340", "0", "30");
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
 		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
@@ -255,7 +255,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
 		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
@@ -277,7 +277,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
 		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
@@ -299,7 +299,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
 		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
@@ -321,7 +321,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
 		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
@@ -343,7 +343,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize);
+		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
 		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
@@ -362,7 +362,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, "left", "right", "width");
+		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, null, "left", "right", "width");
 
 		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
 		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
@@ -381,7 +381,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, "left", "right", "width");
+		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, null, "left", "right", "width");
 
 		assertFalse("css pos width should NOT be set", CSSPositionUtils.isSet(newPosition.width));
 		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
@@ -400,7 +400,7 @@ public class TestSnapCSSPosition
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
-		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, "top", "bottom", "height");
+		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, null, "top", "bottom", "height");
 
 		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.top));
 		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.bottom));
@@ -420,7 +420,7 @@ public class TestSnapCSSPosition
 		int pos = 1; //below
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
-		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
 		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
 		assertFalse("css pos bottom should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
@@ -440,7 +440,7 @@ public class TestSnapCSSPosition
 		int pos = -1; //above
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
-		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
 		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
 		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
@@ -460,7 +460,7 @@ public class TestSnapCSSPosition
 		int pos = 1; //below
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
-		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
 		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
 		assertFalse("css pos bottom should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
@@ -480,7 +480,7 @@ public class TestSnapCSSPosition
 		int pos = -1; //above
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
-		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
 		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
 		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
@@ -500,7 +500,7 @@ public class TestSnapCSSPosition
 		int pos = 0; //between the targets
 
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
-		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos);
+		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
 		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
 		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
@@ -595,5 +595,37 @@ public class TestSnapCSSPosition
 
 		assertEquals("27%", newPosition.left);
 		assertEquals("css pos right should be computed from the target and left values", "33%", newPosition.right);
+	}
+	
+	@Test
+	public void testFCComp_GetCssValue_Left() throws Exception
+	{
+		//for component in fc
+		CSSPosition targetPosition = new CSSPosition("83", "-1", "-1", "59", "142", "30");
+		String targetProperty ="left" ;
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
+		CSSPosition targetContainerCssPos = new CSSPosition("68", "-1", "-1", "220", "240", "200");
+		java.awt.Dimension fcSize = new java.awt.Dimension(640, 480); //TODO should this be the actual fc size or the fc size on the form?
+		
+		CSSValue value = SnapToComponentUtil.getCssValue(targetPosition, targetProperty, fcSize, targetContainerCssPos, containerSize);
+		assertTrue(value.isSet());
+		assertEquals(279, value.getPixels());
+	}
+	
+	@Test
+	public void testFCComp_GetCssValue_Top() throws Exception
+	{
+		//for component in fc
+		CSSPosition targetPosition = new CSSPosition("83", "-1", "-1", "59", "142", "30");
+		String targetProperty ="top" ;
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
+		CSSPosition targetContainerCssPos = new CSSPosition("68", "-1", "-1", "220", "240", "200");
+		java.awt.Dimension fcSize = new java.awt.Dimension(640, 480); //TODO should this be the actual fc size or the fc size on the form?
+		
+		CSSValue value = SnapToComponentUtil.getCssValue(targetPosition, targetProperty, fcSize, targetContainerCssPos, containerSize);
+		assertTrue(value.isSet());
+		assertEquals(151, value.getPixels());
 	}
 }

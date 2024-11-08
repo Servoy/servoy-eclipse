@@ -50,6 +50,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.FinishPage;
+import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.eclipse.ui.wizards.DirtySaveExportWizard;
 
 public class ExportMobileWizard extends DirtySaveExportWizard implements IExportWizard
@@ -58,7 +59,7 @@ public class ExportMobileWizard extends DirtySaveExportWizard implements IExport
 
 	private static final String CAN_FINISH = "canFinish_";
 
-	private final MobileExporter mobileExporter = new MobileExporter();
+	private final MobileExporter mobileExporter;
 
 	private final CustomizedFinishPage finishPage;
 
@@ -78,6 +79,7 @@ public class ExportMobileWizard extends DirtySaveExportWizard implements IExport
 	public ExportMobileWizard()
 	{
 		finishPage = new CustomizedFinishPage("lastPage");
+		mobileExporter = new MobileExporter(new ExportWarModel(ExportWarModel.getDialogSettings()));
 		pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", mobileExporter);
 		warExportPage = new WarExportPage("outputPage", "Choose output", null, finishPage, pgAppPage, mobileExporter);
 		pgAppPage.setWarExportPage(warExportPage);

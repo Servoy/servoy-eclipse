@@ -175,7 +175,7 @@ export class SabloService {
      * IMPORTANT!
      * 
      * If the returned value is a promise and if the caller is INTERNAL code that chains more .then() or other methods and returns the new promise
-     * to it's own callers, it MUST to wrap the new promise (returned by that then() for example) using wrapPromiseToPropagateCustomRequestInfoInternal() of websocket.service.ts.
+     * to it's own callers, it MUST wrap the new promise (returned by that then() for example) using wrapPromiseToPropagateCustomRequestInfoInternal() of websocket.service.ts.
      * 
      * This is so that the promise that ends up in (3rd party or our own) components and service code - that can then set .requestInfo on it - ends up to be
      * propagated into the promise that this callService(...) registered in "deferredEvents"; that is where any user set .requestInfo has to end up, because

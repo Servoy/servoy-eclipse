@@ -111,8 +111,10 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
     };
 
     pushUpdate() {
-        if (!this.dataProviderID && !this.isEditable()){
-			if (this.valuelistID) {
+        if (!this.dataProviderID && (!this.isEditable() || this.findmode)){
+            if (this.findmode || !this.valuelistID){
+                this.dataProviderID = this.elementRef.nativeElement.value;
+            } else {
 				const allowEmptyValue = this.valuelistID[0]?.displayValue === '' && this.valuelistID[0]?.realValue === null;
 				if(!allowEmptyValue) {
 					if (this.valuelistID[0]?.displayValue && this.valuelistID[0]?.realValue && this.elementRef.nativeElement.value === this.valuelistID[0]?.displayValue) {
@@ -123,9 +125,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 					}
 					return;
 				}
-			} else {
-				this.dataProviderID = this.elementRef.nativeElement.value;
-			}
+			} 
 		}
 		this.currentValue = this.dataProviderID;
         super.pushUpdate();

@@ -372,9 +372,9 @@ public class DocumentationView extends ViewPart implements ISelectionListener, I
 			case I18N_ITEM :
 				return "https://docs.servoy.com/reference/servoycore/dev-api/i18n";
 			case INMEMORY_DATASOURCE :
-				break;
+				return "https://docs.servoy.com/reference/servoycore/dev-api/datasources/memdatasource";
 			case INMEMORY_DATASOURCES :
-				break;
+				return "https://docs.servoy.com/reference/servoycore/dev-api/datasources/memdatasource";
 			case ITERABELVALUE :
 				break;
 			case ITERATOR :
@@ -418,9 +418,9 @@ public class DocumentationView extends ViewPart implements ISelectionListener, I
 			case PLUGINS_ITEM :
 				return "https://docs.servoy.com/reference/servoyextensions/server-plugins"; // these are also browser plugins i guess.
 			case PROCEDURE :
-				break;
+				return "https://docs.servoy.com/reference/servoycore/dev-api/spdatasource";
 			case PROCEDURES :
-				break;
+				return "https://docs.servoy.com/reference/servoycore/dev-api/spdatasources";
 			case REGEXP :
 				break;
 			case RELATION :
@@ -515,7 +515,7 @@ public class DocumentationView extends ViewPart implements ISelectionListener, I
 			case VIEWS :
 				break;
 			case VIEW_FOUNDSET :
-				break;
+				return "https://docs.servoy.com/reference/servoycore/dev-api/database-manager/viewfoundset";
 			case VIEW_FOUNDSETS :
 				break;
 			case WEB_OBJECT_FOLDER :

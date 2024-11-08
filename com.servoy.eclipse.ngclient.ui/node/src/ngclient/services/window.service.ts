@@ -13,6 +13,7 @@ import { ApplicationService } from './application.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { FormSettings } from '../types';
+import { environment as env} from '../../environments/environment';
 
 @Injectable()
 export class WindowService {
@@ -50,6 +51,15 @@ export class WindowService {
 
         this.windowCounter = 0;
         this.renderer2 = rendererFactory.createRenderer(null, null);
+        
+        if (env.mobile && (this.windowRefService.nativeWindow as any)._formdata_) {
+			const formsData: Array<{[key: string]: any}> = (this.windowRefService.nativeWindow as any)._formdata_;
+			formsData.forEach(formData => {
+				for (const formName in formData) {
+					this.formService.createFormCache(formName, formData[formName], formName);
+				}
+			})   
+        }
     }
 
     public updateController(formName: string, formStructure: string, url: string) {

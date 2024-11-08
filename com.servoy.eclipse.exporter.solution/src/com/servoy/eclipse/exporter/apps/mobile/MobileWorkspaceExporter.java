@@ -19,6 +19,7 @@ package com.servoy.eclipse.exporter.apps.mobile;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
@@ -52,7 +53,7 @@ public class MobileWorkspaceExporter extends AbstractWorkspaceExporter<MobileArg
 		{
 			if (solution.getSolutionType() == SolutionMetaData.MOBILE)
 			{
-				MobileExporter exporter = new MobileExporter();
+				MobileExporter exporter = new MobileExporter(null); // TODO should this be the CommandLineExporterModel ???
 				exporter.setSolutionName(solution.getName());
 				exporter.setOutputFolder(new File(configuration.getExportFilePath()));
 				exporter.setServerURL(configuration.getServerURL());
@@ -62,7 +63,7 @@ public class MobileWorkspaceExporter extends AbstractWorkspaceExporter<MobileArg
 //			exporter.setSkipConnect(..allow user to specify license and check it..); // TODO a separate case was created for this: SVY-4807
 				try
 				{
-					exporter.doExport(false);
+					exporter.doExport(false, new NullProgressMonitor());
 				}
 				catch (Exception ex)
 				{

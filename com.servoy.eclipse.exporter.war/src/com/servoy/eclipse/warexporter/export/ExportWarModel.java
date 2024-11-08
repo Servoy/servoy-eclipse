@@ -36,15 +36,19 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -61,6 +65,16 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
  */
 public class ExportWarModel extends AbstractWarExportModel
 {
+
+	public static IDialogSettings getDialogSettings()
+	{
+		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		IDialogSettings section = activeProject != null
+			? DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName())
+			: DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard");
+		return section;
+	}
 
 	private String fileName;
 	private final List<String> plugins = new ArrayList<String>();

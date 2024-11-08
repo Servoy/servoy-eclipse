@@ -22,7 +22,8 @@ Require-Bundle: com.servoy.eclipse.model,
  org.eclipse.ui.ide,
  org.maven.ide.eclipse.grouplayout,
  org.apache.commons.commons-collections4,
- com.servoy.eclipse.debug
+ com.servoy.eclipse.debug,
+ com.servoy.eclipse.exporter.war
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

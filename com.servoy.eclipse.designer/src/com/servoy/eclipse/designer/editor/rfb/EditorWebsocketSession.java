@@ -71,7 +71,7 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 	{
 		if (EDITOR_SERVICE.equals(name))
 		{
-			return new ClientService(name, EDITOR_SERVICE_SPECIFICATION);
+			return new ClientService(name, EDITOR_SERVICE_SPECIFICATION, this);
 		}
 		return super.createClientService(name);
 	}

@@ -47,6 +47,7 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -355,7 +356,7 @@ public class PhoneGapConnector
 				configFile = tempConfigFile;
 			}
 			mobileExporter.setConfigFile(configFile);
-			exportedFile = mobileExporter.doExport(true);
+			exportedFile = mobileExporter.doExport(true, new NullProgressMonitor());
 			entity.addPart("file", new FileBody(exportedFile));
 
 			request.setEntity(entity.build());

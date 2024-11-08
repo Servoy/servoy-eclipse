@@ -1,6 +1,6 @@
 import {
     Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-    TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, AfterViewInit
+    TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, AfterViewInit, AfterViewChecked
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, IFormComponent } from '../types';
@@ -108,7 +108,7 @@ export abstract class AbstractFormComponent {
                 changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
             });
             comp.ngOnChanges(changes);
-            // this is kind of like a push so we should trigger this.
+            // this is kind of like a push so we should trigger detection for this
             comp.detectChanges();
         }
     }
@@ -182,7 +182,7 @@ export abstract class AbstractFormComponent {
 /**
  * This is the definition of a angular component that represents servoy forms.
  */
-export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, IFormComponent {
+export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, AfterViewChecked, IFormComponent {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
     // structure viewchild template generate start
@@ -221,7 +221,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         private el: ElementRef<Element>, protected renderer: Renderer2,
         private converterService: ConverterService<unknown>,
         @Inject(DOCUMENT) private document: Document,
-        private windowRefService: WindowRefService,) {
+        private windowRefService: WindowRefService) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
         const resizeObservable$ = fromEvent(this.windowRefService.nativeWindow, 'resize')
@@ -302,13 +302,17 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
             this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
             this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
-
         }
         this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
     }
 
     ngAfterViewInit() {
+        this.formservice.resolveComponentCache(this);
         this.onResize();
+    }
+    
+    ngAfterViewChecked() {
+        this.formservice.resolveComponentCache(this);
     }
 
     ngOnDestroy() {

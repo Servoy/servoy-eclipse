@@ -708,7 +708,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 			private MobileExporter getMobileExporter(HttpRequest request)
 			{
-				MobileExporter exporter = new MobileExporter();
+				MobileExporter exporter = new MobileExporter(null);
 				exporter.setDebugMode(true);
 				exporter.setServerURL(request.queryParam("u"));
 				exporter.setSolutionName(request.queryParam("s"));

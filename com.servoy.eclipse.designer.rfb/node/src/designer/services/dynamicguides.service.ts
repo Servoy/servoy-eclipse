@@ -16,6 +16,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     private rectangles : DOMRect[];
 	private uuids: string[];
 	private types: Map<string, string> = new Map();
+	private parents: Map<string, string> = new Map();
     private element: Element;
     private uuid: string;
     
@@ -71,6 +72,11 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 			this.formBounds = this.editorContentService.getContentForm().getBoundingClientRect();
             for (let comp of this.editorContentService.getAllContentElements()) {
+				const compParent = this.getParent(comp);
+				if (compParent?.classList.contains('svy-formcomponent')) {
+					//ignore components within FC
+					continue;
+				}
 				const componentType = comp.getAttribute('svy-formelement-type');
 				if (componentType == null) continue;
                 const id = comp.getAttribute('svy-id');
@@ -82,6 +88,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
                 this.middleV.set(id, (bounds.top + bounds.bottom) / 2);
                 this.middleH.set(id, (bounds.left + bounds.right) / 2);
 				this.types.set(id, componentType);
+				this.parents.set(id, compParent?.getAttribute('svy-id'));
                 if (id !== this.uuid){
 					this.rectangles.push(bounds);
 					this.uuids.push(id);
@@ -97,6 +104,16 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
             this.middleV = new Map([...this.middleV].sort(sortfn));
         }
     }
+
+	private getParent(element: HTMLElement) {
+		while (element.parentElement) {
+			element = element.parentElement;
+			if (element.classList.contains('svy-formcomponent') || element.classList.contains('svy-form')) {
+				return element;
+			}
+		}
+		return null;
+	}
 
     onMouseUp(): void {
        this.clear();
@@ -154,11 +171,17 @@ this.snapToEndEnabled = !event.shiftKey;
     }
     
     private isSnapInterval(uuid, coordinate, posMap) {
+		const parent = this.parents.get(uuid);
         for (let [key, value] of posMap) {
             if (key === uuid) continue;
             if ((coordinate > value - this.snapThreshold) && (coordinate < value + this.snapThreshold)) {
+				if (parent != null && parent !== this.parents.get(key)) {
+					//if the parent of the dragged component is not the form,
+					//then it needs to be in the same container
+					continue;
+				}
                 //return the first component id that matches the coordinate
-                return {uuid: key};
+                return {uuid: key, container: this.parents.get(key)};
             }
         }
         return null;        
@@ -261,6 +284,11 @@ this.snapToEndEnabled = !event.shiftKey;
 	}
 
 	computeGuides(event: MouseEvent, point: { x: number, y: number }) {
+		if (this.parentContainer?.classList.contains('svy-formcomponent')) {
+			//disable for components within a form component
+			this.snapDataListener.next(null);
+			return;
+		}
 		const resizing = this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
         let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
         const draggedItem = this.editorContentService.getContentElementById('svy_draggedelement');
@@ -676,6 +704,7 @@ this.snapToEndEnabled = !event.shiftKey;
             const e2 = pair[1];   
 			const left = properties.left ? properties.left : rect.x;
 			const uuids = [this.uuids[this.rectangles.indexOf(e1)], this.uuids[this.rectangles.indexOf(e2)]];
+			const containers = [this.parents.get(uuids[0]), this.parents.get(uuids[1])];
 			const previousProperties = { ...properties };
             if (e2.top > e1.bottom && rect.top > e2.bottom) {
 				const dist = e2.top - e1.bottom;
@@ -688,7 +717,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'y')) {
 						continue;
 					}
-					properties.cssPosition['distY'] = {pos: 1, targets: uuids};
+					properties.cssPosition['distY'] = {pos: 1, targets: uuids, containers: containers};
 					return this.addVerticalGuides(e1, e2, r, dist, properties);
 				}
 			}
@@ -703,7 +732,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'y')) {
 						continue;
 					}
-					properties.cssPosition['distY'] = {pos: -1, targets: uuids};
+					properties.cssPosition['distY'] = {pos: -1, targets: uuids, containers: containers};
     				return this.addVerticalGuides(r, e1, e2, dist, properties);
 				}
 			}
@@ -718,7 +747,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'y')) {
 						continue;
 					}
-					properties.cssPosition['distY'] = {pos: 0, targets: uuids};
+					properties.cssPosition['distY'] = {pos: 0, targets: uuids, containers: containers};
     				return this.addVerticalGuides(e1, r, e2, dist - rect.height/2, properties);
 				}
 			}
@@ -732,6 +761,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			const e1 = pair[0];
             const e2 = pair[1];
 			const uuids = [this.uuids[this.rectangles.indexOf(e1)], this.uuids[this.rectangles.indexOf(e2)]];
+			const containers = [this.parents.get(uuids[0]), this.parents.get(uuids[1])];
 			const previousProperties = { ...properties };
             if (e2.left > e1.right && rect.left > e2.right) {
 				const dist = e2.left - e1.right;
@@ -744,7 +774,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					 if (this.isOutOfBounds(previousProperties, properties, r, 'x')) {
 						continue;
 					}
-					properties.cssPosition['distX'] = {pos: 1, targets: uuids};
+					properties.cssPosition['distX'] = {pos: 1, targets: uuids, containers: containers};
     				return this.addHorizontalGuides(e1, e2, r, dist, properties);
                 }
 			}
@@ -759,7 +789,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'x')) {
 						continue;
 					}
-					properties.cssPosition['distX'] = {pos: -1, targets: uuids};
+					properties.cssPosition['distX'] = {pos: -1, targets: uuids, containers: containers};
                    	return this.addHorizontalGuides(r, e1, e2, dist, properties);
                	}
 			}
@@ -774,7 +804,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (this.isOutOfBounds(previousProperties, properties, r, 'x')) {
 						continue;
 					}
-					properties.cssPosition['distX'] = {pos: 0, targets: uuids};
+					properties.cssPosition['distX'] = {pos: 0, targets: uuids, containers: containers};
     				return this.addHorizontalGuides(e1, r, e2, dist - rect.width/2, properties);
 				}
 			}

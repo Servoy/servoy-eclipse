@@ -12,7 +12,7 @@
                         <ul>
                             <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
                                 <span>
-                                <img draggable="false" *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
+                                <img id="chevron" draggable="false" *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
                                 <img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{component.displayName}}
                                 </span>
                                 <designer-variantscontent [component]="component" (click)="onVariantClick($event, component, component.packageName ? component.packageName : package.packageName)" *ngIf="component.styleVariantCategory"></designer-variantscontent>

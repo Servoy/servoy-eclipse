@@ -544,6 +544,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         // really make sure all form state is reverted to default
         // Form Instances are reused for tabpanels that have a template reference to this.
         this.formCache = this.formservice.getFormCache(this);
+        this.formservice.resolveComponentCache(this);
         const styleClasses: string = this.formCache.getComponent('').model.styleClass;
         if (styleClasses)
             this.formClasses = styleClasses.split(' ');

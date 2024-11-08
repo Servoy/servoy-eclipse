@@ -169,7 +169,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: { [property: string]: unknown }, ghost: PaletteComp, propertyName?: string, propertyValue?: { [property: string]: string }, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: { [property: string]: string }, children?: [{ [property: string]: string }]) {
-        if (event.target && ((event.target as Element).getAttribute('name') === 'variants' || (event.target as Element).getAttribute('name') === 'favIcon')) {
+        if (event.target && ((event.target as Element).getAttribute('name') === 'variants' || (event.target as Element).getAttribute('name') === 'favIcon') || (event.target as HTMLElement).id === 'chevron') {
             return; // it has a separate handler
         }
         event.stopPropagation();
@@ -178,10 +178,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         let target = event.target as HTMLElement;
         if (target.localName === 'designer-variantscontent') {
             target = target.closest('li');
+        } else if (target.localName === 'img' && target.id === '') {
+            target = target.closest('li').querySelector('span');
         }
         this.dragItem.paletteItemBeingDragged = target.cloneNode(true) as Element;
         Array.from(this.dragItem.paletteItemBeingDragged.children).forEach(child => {
-            if (child.tagName === 'DESIGNER-VARIANTSCONTENT' || child.getAttribute('name') === 'favIcon') {
+            if (child.tagName === 'DESIGNER-VARIANTSCONTENT' || child.getAttribute('name') === 'favIcon' || child.id === 'chevron') {
                 this.dragItem.paletteItemBeingDragged.removeChild(child);
             }
         })
@@ -317,7 +319,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onMouseMove = (event: MouseEvent) => {
-        if (event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
+        const paletteRect: DOMRect = this.editorContentService.getPallete().getBoundingClientRect();
+        if (event.pageX >= paletteRect.width && event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
         }
@@ -469,24 +472,22 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     snap(data: SnapData) {
-        if (this.editorSession.getState().dragging) {
+        if (this.dragItem?.paletteItemBeingDragged && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
+            this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
+        }
+        if (this.dragItem?.contentItemBeingDragged) {
             this.snapData = data;
             if (this.snapData?.top && this.snapData?.left) {
-                if (this.dragItem && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
-                    this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData.left + 'px');
+                if (this.snapData?.width) {
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
                 }
-                if (this.dragItem.contentItemBeingDragged) {
-                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', this.snapData.left + 'px');
-                    if (this.snapData?.width) {
-                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'width', this.snapData.width + 'px');
-                    }
-                    if (this.snapData?.height) {
-                        this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
-                    }
-                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData.top + 'px');
-                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
-                    this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
+                if (this.snapData?.height) {
+                    this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'height', this.snapData.height + 'px');
                 }
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', this.snapData.top + 'px');
+                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
+                this.renderer.addClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
             }
         }
         else {

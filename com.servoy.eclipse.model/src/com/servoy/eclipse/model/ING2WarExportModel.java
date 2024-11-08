@@ -21,7 +21,7 @@ import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import com.servoy.eclipse.model.war.exporter.IWarExportModel;
+import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 
 /**
  * @author jcompagner
@@ -29,7 +29,7 @@ import com.servoy.eclipse.model.war.exporter.IWarExportModel;
  */
 public interface ING2WarExportModel
 {
-	IWarExportModel getModel();
+	ITiNGExportModel getModel();
 
 	File getExportLocation();
 

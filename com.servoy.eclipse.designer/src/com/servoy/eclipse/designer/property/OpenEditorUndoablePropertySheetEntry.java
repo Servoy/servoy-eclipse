@@ -65,7 +65,8 @@ public final class OpenEditorUndoablePropertySheetEntry extends UndoableProperty
 			IEditorPart persistEditor = EditorUtil.openPersistEditor(getValues()[0], false);
 			if (persistEditor != null)
 			{
-				setCommandStack(persistEditor.getAdapter(CommandStack.class));
+				// Don't cache the stack here, if the form is closed and we edit again a new command stack is created
+				return persistEditor.getAdapter(CommandStack.class);
 			}
 		}
 		return stack;

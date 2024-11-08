@@ -27,5 +27,5 @@ import com.servoy.j2db.persistence.IPersist;
  */
 public interface IValueFilter
 {
-	String getFilteredValue(IPersist persist, Map<String, Object> property_values, String key, String value);
+	Object getFilteredValue(IPersist persist, Map<String, Object> property_values, String key, String value);
 }

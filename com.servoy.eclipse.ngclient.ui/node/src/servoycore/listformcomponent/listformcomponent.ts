@@ -92,6 +92,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() readOnly: boolean;
     @Input() editable: boolean;
     @Input() onSelectionChanged: (event: any) => void;
+    @Input() onListItemClick: (record: any, event: any) => void;
 
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
@@ -201,6 +202,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         this.onSelectionChanged(event);
                     }
                 }
+                if(this.onListItemClick) {
+                    this.onListItemClick(this.foundset.getRecordRefByRowID(row['_svyRowId']), event);
+                }
                 break;
             }
         }
@@ -283,7 +287,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 },
                 onFirstDataRendered: (params: any) => {
                     this.scrollToSelection();
-                }
+                },
+                domLayout: this.responsiveHeight < 0 ? 'autoHeight' : 'normal'
             };
         }
 

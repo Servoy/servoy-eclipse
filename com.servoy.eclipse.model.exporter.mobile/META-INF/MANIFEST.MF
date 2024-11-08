@@ -7,7 +7,9 @@ Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.runtime,
  servoy_base,
  servoy_shared,
- com.servoy.eclipse.model
+ com.servoy.eclipse.model,
+ servoy_ngclient,
+ sablo
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/js.jar,

@@ -1,10 +1,11 @@
 import { LoggerFactory, LoggerService, LogLevel } from '@servoy/public';
-import { CustomEventEmitter, CustomEvent } from '../util/eventemitter';
+import { CustomEventEmitter } from '../util/eventemitter';
+import { IWebSocket, WebsocketCustomEvent } from './iwebsocket';
 
 
 type UrlFunction = () => string;
 
-export class ReconnectingWebSocket {
+export class ReconnectingWebSocket implements IWebSocket {
     /** Whether or not the websocket should attempt to connect immediately upon instantiation. */
     private automaticOpen = true;
 
@@ -245,12 +246,4 @@ export class ReconnectingWebSocket {
         return typeof (this.url) === 'function' ? this.url() : this.url;
     }
 
-}
-
-export class WebsocketCustomEvent extends CustomEvent {
-    public isReconnect: boolean;
-    public code: number;
-    public reason: string;
-    public wasClean: boolean;
-    public data: any;
 }

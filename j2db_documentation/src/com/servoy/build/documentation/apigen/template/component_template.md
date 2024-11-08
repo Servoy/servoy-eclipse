@@ -91,8 +91,11 @@ Returns: [${MD(propValue.returnValue())}](${instance.getReturnTypePath(propValue
 ## Types<#-- Due to markdown limitations that do not allow both anchors and lists/tables, so ### inside indentation workarounds (tables / lists), we could either use non-breaking spaces (&#160;) but when line wraps, it would still wrap from the beginning; so we drop anchor usage so subProperties of types are no longer #### , but lists - that can be used as a better indentation workaround... -->
 
 <#list types as typeName, typeValue>
-### ${MD(typeName)}
-<#list typeValue as propName, propValue>
+## ${MD(typeName)} 
+  scripting type: CustomType<${componentinternalname}.${typeName}>
+<#if typeValue.extends?has_content>  extends: ${typeValue.extends}</#if>
+  
+<#list typeValue.model as propName, propValue>
  - ${MD(propName)}
 <#if propValue.doc()??>
      - ${propValue.doc()}  
@@ -102,6 +105,28 @@ Returns: [${MD(propValue.returnValue())}](${instance.getReturnTypePath(propValue
      - **Default Value**: ${MD(propValue.defaultValue())}
 </#if>
 </#list>
+<#if typeValue.serversideapi??>
+
+<#list typeValue.serversideapi as propName, propValue>
+### ${MD(propName)}
+<#if propValue.doc()??>
+
+${propValue.doc()?trim}
+
+</#if>
+<#if propValue.parameters()?has_content>
+Parameters:  
+<#list propValue.parameters() as param> 
+> ${MD(param.name())} [${MD(param.type())}](${instance.getReturnTypePath(param)})<#if param.optional()> (optional)</#if>  
+</#list>
+</#if>
+<#if propValue.returnValue()??>
+
+Returns: [${MD(propValue.returnValue())}](${instance.getReturnTypePath(propValue)})  
+</#if>
+***
+ </#list>
+ </#if>
 </#list>
 </#if>
 

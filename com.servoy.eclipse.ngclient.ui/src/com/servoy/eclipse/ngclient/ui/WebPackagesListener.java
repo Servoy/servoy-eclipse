@@ -84,7 +84,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.SerialRule;
-import com.servoy.eclipse.model.war.exporter.IWarExportModel;
+import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
@@ -113,17 +113,32 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 */
 	private static final class PackageCheckerJob extends Job
 	{
-		private final IWarExportModel warExportModel;
+		private final ITiNGExportModel warExportModel;
 		private final File projectFolder;
+		private final String whatToRun;
 
 		/**
 		 * @param name
 		 */
-		private PackageCheckerJob(String name, File projectFolder, IWarExportModel warExportModel)
+		private PackageCheckerJob(String name, File projectFolder, ITiNGExportModel warExportModel)
 		{
 			super(name);
 			this.warExportModel = warExportModel;
 			this.projectFolder = projectFolder;
+			String toRun = "build_debug_nowatch";
+			if (warExportModel != null)
+			{
+				if (warExportModel.exportNG2Mode() != null)
+				{
+					toRun = "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : warExportModel.exportNG2Mode();
+				}
+				else
+				{
+					toRun = "build";
+				}
+			}
+			whatToRun = toRun;
+
 		}
 
 		@Override
@@ -800,9 +815,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					else
 					{
-						String whatToRun = warExportModel != null ? "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : "build"
-							: "build_debug_nowatch";
-						whatToRun = "build_debug_nowatch";
 						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("run", whatToRun));
 						try
 						{

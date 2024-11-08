@@ -360,6 +360,25 @@ export interface IFoundsetTree extends Array<any> {
     getAndResetUpdatedCheckboxValues(): {key: boolean};
 }
 
+export interface IJSMenu{
+    items : IJSMenuItem[];
+    name: string;
+    styleClass: string;
+    pushDataProviderValue(category: string, propertyName: string, itemIndex: number, dataproviderValue: any): void;
+}
+
+export interface IJSMenuItem{
+    items : IJSMenuItem[];
+    menuText: string;
+    styleClass: string;
+    itemID: string;
+    enabled: boolean;
+    iconStyleClass: string;
+    tooltipText: string;
+    isSelected: boolean;
+    extraProperties: {Navbar:any, Sidenav:any};
+}
+
 export interface IPopupSupportComponent {
     closePopup();
 }

@@ -42,7 +42,7 @@ describe('FoundsetLinked Converter', () => {
         converterService = TestBed.inject(ConverterService) as ConverterService<FoundsetLinkedValue>;
         typesRegistry = TestBed.inject(TypesRegistry);
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, new DateType(), true);
-        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService), true);
+        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService, loggerFactory), true);
         typesRegistry.registerGlobalType(FoundsetType.TYPE_NAME, new FoundsetType(sabloService, sabloDeferHelper, viewportService, loggerFactory));
         typesRegistry.registerGlobalType(FoundsetLinkedType.TYPE_NAME, new FoundsetLinkedType(sabloService, viewportService, loggerFactory));
         changeNotified = false;

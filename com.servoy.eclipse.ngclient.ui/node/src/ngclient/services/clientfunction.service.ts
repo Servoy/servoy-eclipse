@@ -39,7 +39,7 @@ export class ClientFunctionService {
     }
 
     public waitForLoading(): IPromiseLike {
-        if (this.deferred)  return this.deferred.promise;
+        if (this.deferred) return this.deferred.promise;
         return new PromiseLike();
     }
 }
