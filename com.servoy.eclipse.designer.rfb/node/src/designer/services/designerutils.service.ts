@@ -64,7 +64,7 @@ export class DesignerUtilsService {
 
     getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget: Element = null;
-        if (type == 'layout' || (type == 'component' && !absoluteLayout)) {
+        if (type == 'layout' || ((type == 'component' || type === 'jsmenu') && !absoluteLayout)) {
             const realName = layoutName ? layoutName : 'component';
 
             dropTarget = this.getNode(event, true, skipNodeId);
@@ -178,7 +178,7 @@ export class DesignerUtilsService {
                     };
                 }
             }
-        } else if (type != 'component' && type != 'template') {
+        } else if (type != 'jsmenu' && type != 'component' && type != 'template') {
             dropTarget = this.getNode(event);
             if (dropTarget && dropTarget.getAttribute('svy-types')) {
                 if (dropTarget.getAttribute('svy-types').indexOf(type) <= 0)

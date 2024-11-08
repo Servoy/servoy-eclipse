@@ -321,6 +321,12 @@ public class DesignerFilter implements Filter
 								jsonWriter.key("componentType").value("jsmenu");
 								jsonWriter.key("displayName").value(menu.getName());
 								jsonWriter.key("icon").value("rfb/angular/images/column.png");
+								Map<String, Object> model = new HashMap<String, Object>();
+								HashMap<String, Number> size = new HashMap<String, Number>();
+								size.put("height", Integer.valueOf(30));
+								size.put("width", Integer.valueOf(30));
+								model.put("size", size);
+								jsonWriter.key("model").value(new JSONObject(model));
 								jsonWriter.endObject();
 							});
 							jsonWriter.endArray();
