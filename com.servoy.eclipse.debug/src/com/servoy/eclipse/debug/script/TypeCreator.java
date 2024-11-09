@@ -220,9 +220,9 @@ import com.servoy.j2db.querybuilder.impl.QBAggregates;
 import com.servoy.j2db.querybuilder.impl.QBColumn;
 import com.servoy.j2db.querybuilder.impl.QBColumns;
 import com.servoy.j2db.querybuilder.impl.QBCondition;
+import com.servoy.j2db.querybuilder.impl.QBCountAggregate;
 import com.servoy.j2db.querybuilder.impl.QBDatetimeColumn;
 import com.servoy.j2db.querybuilder.impl.QBFactory;
-import com.servoy.j2db.querybuilder.impl.QBFunction;
 import com.servoy.j2db.querybuilder.impl.QBFunctions;
 import com.servoy.j2db.querybuilder.impl.QBGroupBy;
 import com.servoy.j2db.querybuilder.impl.QBIntegerColumn;
@@ -264,7 +264,6 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
-import com.servoy.j2db.scripting.annotations.JSIgnore;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
@@ -491,6 +490,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(ElementUtil.CUSTOM_TYPE, new CustomTypeCreator());
 
 		addQueryBuilderScopeType(QBAggregate.class);
+		addQueryBuilderScopeType(QBCountAggregate.class);
 		addQueryBuilderScopeType(QBColumn.class);
 		addQueryBuilderScopeType(QBIntegerColumn.class);
 		addQueryBuilderScopeType(QBDatetimeColumn.class);
@@ -499,7 +499,6 @@ public class TypeCreator extends TypeCache
 		addQueryBuilderScopeType(QBTextColumn.class);
 		addQueryBuilderScopeType(QBCondition.class);
 		addQueryBuilderScopeType(QBFactory.class);
-		addQueryBuilderScopeType(QBFunction.class);
 		addQueryBuilderScopeType(QBGroupBy.class);
 		addScopeType(QBJoin.class.getSimpleName(), new QueryBuilderJoinCreator()); // Handled separately
 		addQueryBuilderScopeType(QBJoins.class, new QueryBuilderJoinsCreator());
@@ -1705,14 +1704,6 @@ public class TypeCreator extends TypeCache
 
 				if (object != null)
 				{
-					if (object instanceof BeanProperty beanProperty &&
-						AnnotationManagerReflection.getInstance().isAnnotationPresent(beanProperty.getGetter(), scriptObjectClass,
-							JSIgnore.class))
-					{
-						// RAGTEST doc deze
-						continue;
-					}
-
 					if (type == INSTANCE_METHOD || type == STATIC_METHOD)
 					{
 						MemberBox[] memberbox = null;
