@@ -1422,7 +1422,7 @@ public class TypeCreator extends TypeCache
 		if (pd == null) return null;
 		IPropertyType< ? > type = pd.getType();
 		if (type == BooleanPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.BOOLEAN);
-		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE)
+		if (type instanceof IntPropertyType || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE)
 			return getTypeRef(context, ITypeNames.NUMBER);
 		if (type == SecureStringPropertyType.INSTANCE || type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE ||
 			type == ModifiablePropertyType.INSTANCE ||

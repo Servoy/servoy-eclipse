@@ -1666,7 +1666,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						{
 							type = NumberCellEditor.FLOAT;
 						}
-						else if (propertyType == IntPropertyType.INSTANCE)
+						else if (propertyType instanceof IntPropertyType)
 						{
 							type = NumberCellEditor.INTEGER;
 						}
