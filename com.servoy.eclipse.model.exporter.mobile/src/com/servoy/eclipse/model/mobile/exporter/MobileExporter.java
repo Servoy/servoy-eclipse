@@ -51,6 +51,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectHandlerFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
@@ -727,6 +728,24 @@ public class MobileExporter
 			Settings.getInstance().setProperty("servoy.ngclient.testingMode", prevValue);
 		}
 		String modelDataString = modelData.toString();
+
+		WebObjectSpecification[] allWebObjectSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
+		JSONObject spec = new JSONObject();
+		for (WebObjectSpecification webObjectSpecification : allWebObjectSpecifications)
+		{
+			JSONObject component = new JSONObject();
+			Map<String, PropertyDescription> properties = webObjectSpecification.getProperties();
+			for (Entry<String, PropertyDescription> entry : properties.entrySet())
+			{
+				component.put(entry.getKey(), entry.getValue().getType().getName());
+			}
+
+			spec.put(webObjectSpecification.getName(), component);
+		}
+
+		String specDataString = "var _specdata_ = " + spec.toString();
+
+
 		// Write files for running from java source
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
 		boolean developmentWorkspaceExport = "war".equals(outputFolder.getName()) && outputFolder.getParent() != null && tmpP.exists();
@@ -745,6 +764,9 @@ public class MobileExporter
 			Utils.writeTXTFile(outputFile, modelDataString);
 			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/form_json.js"), modelDataString);
 
+			outputFile = new File(tmpP, "spec_json.js");
+			Utils.writeTXTFile(outputFile, modelDataString);
+			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/spec_json.js"), specDataString);
 		}
 
 		File exportedFile = null;
@@ -842,6 +864,7 @@ public class MobileExporter
 					}
 					entry = zipStream.getNextEntry();
 				}
+				addZipEntry(moduleName + "/" + renameMap.get("spec_json.js"), warStream, Utils.getUTF8EncodedStream(specDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("form_json.js"), warStream, Utils.getUTF8EncodedStream(modelDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
 				addZipEntry(moduleName + "/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
@@ -915,6 +938,7 @@ public class MobileExporter
 		renameMap.put(htmlFile, "index.html");
 
 		addRenameEntries(renameMap, moduleName + "/", "form_json", ".js");
+		addRenameEntries(renameMap, moduleName + "/", "spec_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "servoy_utils", ".js");
