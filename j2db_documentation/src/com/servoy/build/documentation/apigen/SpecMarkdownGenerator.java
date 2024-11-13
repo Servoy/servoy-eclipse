@@ -1384,7 +1384,7 @@ public class SpecMarkdownGenerator
 			@SuppressWarnings("unchecked")
 			Map<String, Record> types = (Map<String, Record>)root.get("types");
 			if (types != null && types.get(type) != null) return "#" + type.toLowerCase();
-			return switch (type.toLowerCase())
+			return switch (type.toLowerCase()) // TODO why don't we do an exact case match here? for example "foUnDSET" is allowed or just "foundset"?
 			{
 				case "object" -> "../../../servoycore/dev-api/js-lib/object.md";
 				case "string" -> "../../../servoycore/dev-api/js-lib/string.md";
@@ -1400,37 +1400,38 @@ public class SpecMarkdownGenerator
 				case "date" -> "../../../servoycore/dev-api/js-lib/date.md";
 				case "jsevent" -> "../../../servoycore/dev-api/application/jsevent.md";
 				case "jsupload" -> "../../../servoycore/dev-api/application/jsupload.md";
-				case "tagstring" -> "../../../servoy-developer/property\\_types.md#tagstring";
-				case "titlestring" -> "../../../servoy-developer/property\\_types.md#titlestring";
-				case "styleclass" -> "../../../servoy-developer/property\\_types.md#styleclass";
-				case "protected" -> "../../../servoy-developer/property\\_types.md#protected";
-				case "enabled" -> "../../../servoy-developer/property\\_types.md#protected";
-				case "readonly" -> "../../../servoy-developer/property\\_types.md#protected";
-				case "variant" -> "../../../servoy-developer/property\\_types.md#variant";
-				case "visible" -> "../../../servoy-developer/property\\_types.md#visible";
-				case "tabseq" -> "../../../servoy-developer/property\\_types.md#tabseq";
-				case "format" -> "../../../servoy-developer/property\\_types.md#format";
-				case "color" -> "../../../servoy-developer/property\\_types.md#color";
-				case "map" -> "../../../servoy-developer/property\\_types.md#map";
-				case "scrollbars" -> "../../../servoy-developer/property\\_types.md#scrollbars";
-				case "dataprovider" -> "../../../servoy-developer/property\\_types.md#dataprovider";
-				case "${dataprovidertype}" -> "../../../servoy-developer/property\\_types.md#dataprovider";
-				case "relation" -> "../../../servoy-developer/property\\_types.md#relation";
-				case "form" -> "../../../servoy-developer/property\\_types.md#form";
-				case "formscope" -> "../../../servoy-developer/property\\_types.md#form";
-				case "formcomponent" -> "../../../servoy-developer/property\\_types.md#formcomponent";
-				case "record" -> "../../../servoy-developer/property\\_types.md#record";
-				case "foundset" -> "../../../servoy-developer/property\\_types.md#foundset";
-				case "foundsetref" -> "../../../servoy-developer/property\\_types.md#foundsetref";
-				case "dataset" -> "../../../servoy-developer/property\\_types.md#dataset";
-				case "function" -> "../../../servoy-developer/property\\_types.md#function";
-				case "clientfunction" -> "../../../servoy-developer/property\\_types.md#clientfunction";
-				case "media" -> "../../../servoy-developer/property\\_types.md#media";
-				case "valuelist" -> "../../../servoy-developer/property\\_types.md#valuelist";
-				case "labelfor" -> "../../../servoy-developer/property\\_types.md#labelfor";
-				case "modifiable" -> "../../../servoy-developer/property\\_types.md#modifiable";
-				case "valuelistconfig" -> "../../../servoy-developer/property\\_types.md#valuelistConfig";
-				case "border" -> "../../../servoy-developer/property\\_types.md#border";
+				case "tagstring" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#tagstring";
+				case "titlestring" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#titlestring";
+				case "styleclass" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#styleclass";
+				case "protected" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#protected";
+				case "enabled" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#protected";
+				case "readonly" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#protected";
+				case "variant" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#variant";
+				case "visible" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#visible";
+				case "tabseq" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#tabseq";
+				case "format" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#format";
+				case "color" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#color";
+				case "map" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#map";
+				case "scrollbars" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#scrollbars";
+				case "dataprovider" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#dataprovider";
+				case "${dataprovidertype}" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#dataprovider";
+				case "relation" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#relation";
+				case "form" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#form";
+				case "formscope" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#form";
+				case "formcomponent" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#formcomponent";
+				case "record" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#record";
+				case "foundset" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#foundset";
+				case "foundsetinitialpagesize" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#foundsetinitialpagesize";
+				case "foundsetref" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#foundsetref";
+				case "dataset" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#dataset";
+				case "function" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#function";
+				case "clientfunction" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#clientfunction";
+				case "media" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#media";
+				case "valuelist" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#valuelist";
+				case "labelfor" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#labelfor";
+				case "modifiable" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#modifiable";
+				case "valuelistconfig" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#valuelistConfig";
+				case "border" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#border";
 
 				case "jsdndevent" -> "../../../servoycore/dev-api/application/jsdndevent.md";
 				case "jsmenu" -> "../../../servoycore/dev-api/menus/jsmenu.md";
