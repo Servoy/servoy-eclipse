@@ -104,6 +104,8 @@ public class SpecMarkdownGenerator
 	private static File servicePackagesDir;
 	private static File componentPackagesDir;
 
+	private static final DuplicateTracker duplicateTracker = DuplicateTracker.getInstance();
+
 	private final static java.util.function.Function<String, String> htmlToMarkdownConverter = (initialDescription) -> {
 		if (initialDescription == null) return null;
 
@@ -195,6 +197,7 @@ public class SpecMarkdownGenerator
 
 	private static String clearGeneratedDocsDirOnGitbookRepo(File dirWithGeneratedDocs, boolean onlySubDirs) throws IOException
 	{
+		System.out.println("SSSSSSSSSSSSSSSPPPPPPPPPPEEEEEEEEEEEEECCCCCCCC: clearGeneratedDocsDirOnGitbookRepo(" + dirWithGeneratedDocs.getPath() + ")");
 		if (onlySubDirs)
 		{
 			if (!dirWithGeneratedDocs.exists() || !dirWithGeneratedDocs.isDirectory())
@@ -1558,6 +1561,7 @@ public class SpecMarkdownGenerator
 				file.getParentFile().mkdirs();
 				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
 				componentTemplate.process(root, out);
+				duplicateTracker.trackFile(file.getName(), file.toString());
 			}
 			catch (TemplateException | IOException e)
 			{
@@ -1589,6 +1593,8 @@ public class SpecMarkdownGenerator
 				root.put("allWebObjectsOfCurrentPackage", allWebObjectsOfCurrentPackage);
 
 				packageTemplate.process(root, out);
+				duplicateTracker.trackFile(file.getName(), file.toString());
+
 			}
 			catch (TemplateException | IOException e)
 			{

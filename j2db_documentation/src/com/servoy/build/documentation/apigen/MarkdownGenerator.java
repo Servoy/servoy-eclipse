@@ -26,7 +26,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -111,6 +110,8 @@ public class MarkdownGenerator
 
 	private static Configuration cfg;
 	private static Template template;
+
+	private static final DuplicateTracker duplicateTracker = DuplicateTracker.getInstance();
 
 	private static Map<String, String> specialTypePaths = new HashMap<>();
 	static
@@ -228,11 +229,33 @@ public class MarkdownGenerator
 		fillStaticParents(returnTypesToParentName);
 
 
+		boolean analyzeOutput = false;
+		boolean deleteDuplicates = false;
+		if (args.length == 1)
+		{
+			analyzeOutput = "analyzeOutput".equals(args[0]);
+			deleteDuplicates = "deleteDuplicates".equals(args[0]);
+		}
+
+		if (analyzeOutput)
+		{
+			MarkdownOutputAnalyzer.analyze();
+			return;
+		}
+
+		if (deleteDuplicates)
+		{
+			MarkdownDeleteDuplicates.deleteDuplicates();
+			return;
+		}
+
 		String jsLib = args[0];
 		String servoyDoc = args[1];
 		String designDoc = args[2];
 		String pluginDir = args[3];
 		boolean generateForAI = "forAI".equals(args[4]);
+
+		duplicateTracker.init(); // avoid init prior to analyze params; you may overwrite unintentionaly some usefull content for analyzing
 
 		if (generateForAI) template = cfg.getTemplate("ai_template.md");
 		else template = cfg.getTemplate("markdown_template.md");
@@ -408,6 +431,7 @@ public class MarkdownGenerator
 				System.err.println("  - " + jsLibURLObject);
 				manager = DocumentationManager.fromXML(jsLibURLObject, targetInstallClassLoader);
 				docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
+
 				docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
 			}
 
@@ -513,10 +537,10 @@ public class MarkdownGenerator
 						}
 					}
 				}
-				for (String nonDefaultPluginThatShouldHaveBeenFound : nonDefaultPluginJarNamesThatWeDoGenerateDocsFor)
-					if (!foundJars.contains(nonDefaultPluginThatShouldHaveBeenFound)) throw new RuntimeException(
-						"Cannot find (explicitly required) plugin '" + nonDefaultPluginThatShouldHaveBeenFound + "' in dir: " + pluginDir +
-							"\nYou have to manually copy a release of that plugin into the plugins dir...");
+//				for (String nonDefaultPluginThatShouldHaveBeenFound : nonDefaultPluginJarNamesThatWeDoGenerateDocsFor)
+//					if (!foundJars.contains(nonDefaultPluginThatShouldHaveBeenFound)) throw new RuntimeException(
+//						"Cannot find (explicitly required) plugin '" + nonDefaultPluginThatShouldHaveBeenFound + "' in dir: " + pluginDir +
+//							"\nYou have to manually copy a release of that plugin into the plugins dir...");
 			}
 
 			docGenerator.writeAggregatedOutput(ngOnly);
@@ -992,10 +1016,12 @@ public class MarkdownGenerator
 					publicName = publicName.toLowerCase();
 				}
 				File file = new File(userDir, (ngOnly ? "ng_generated/" : "generated/") + (parent.toLowerCase() + '/' + publicName + ".md").replace(' ', '-'));
+
 				file.getParentFile().mkdirs();
 				try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
 				{
 					writer.write(output);
+					duplicateTracker.trackFile(file.getName(), file.toString());
 					if (aggregatedOutput != null) aggregatedOutput.append(output);
 				}
 
@@ -1050,6 +1076,7 @@ public class MarkdownGenerator
 				try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
 				{
 					writer.write(aggregatedOutput.toString());
+					duplicateTracker.trackFile(file.getName(), file.toString());
 				}
 
 				aggregatedOutput.setLength("Servoy scripting is based on javascript. Here is the API:\n\n".length());
