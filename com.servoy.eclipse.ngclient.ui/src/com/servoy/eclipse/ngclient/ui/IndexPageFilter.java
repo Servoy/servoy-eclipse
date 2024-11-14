@@ -93,7 +93,7 @@ public class IndexPageFilter implements Filter
 			{
 				return;
 			}
-			
+
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
 					requestURI.toLowerCase().endsWith("/index.html")))
@@ -101,7 +101,7 @@ public class IndexPageFilter implements Filter
 				Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
 				if (showLogin.getLeft().booleanValue())
 				{
-					StatelessLoginHandler.writeLoginPage(request, response, solutionName);
+					StatelessLoginHandler.writeLoginPage(request, response, solutionName, showLogin.getRight());
 					return;
 				}
 				if (showLogin.getRight() != null)
@@ -116,7 +116,7 @@ public class IndexPageFilter implements Filter
 					contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
 				return;
 			}
-			else if (solutionName != null && StatelessLoginHandler.handlePossibleCloudRequest(request, response, solutionName))
+			else if (solutionName != null && StatelessLoginHandler.handlePossibleCloudRequest(request, response, solutionName, indexFile))
 			{
 				return;
 			}
