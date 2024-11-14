@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 
 import { ConverterService, instanceOfChangeAwareValue, ChangeListenerFunction } from './converter.service';
-import { LoggerService, LoggerFactory, RequestInfoPromise } from '@servoy/public';
+import { LoggerService, LoggerFactory, RequestInfoPromise, Deferred } from '@servoy/public';
 import { TypesRegistry, IType, IWebObjectSpecification, IPropertyContextCreator, PushToServerUtils, PushToServerEnum } from '../sablo/types_registry';
 import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
+import { ClientFunctionService } from './clientfunction.service';
 
 @Injectable({
     providedIn: 'root'
@@ -19,7 +20,8 @@ export class ServicesService {
         private readonly typesRegistry: TypesRegistry,
         websocketService: WebsocketService,
         private sabloService: SabloService,
-        logFactory: LoggerFactory) {
+        logFactory: LoggerFactory,
+        private clientFunctionService: ClientFunctionService) {
         this.log = logFactory.getLogger('ServicesService');
 
         websocketService.getSession().then((session) => session.setServicesHandler({
@@ -36,19 +38,25 @@ export class ServicesService {
             },
 
             handlerServiceUpdatesFromServer: (servicesUpdatesFromServerJSON: any): void => {
-                this.updateServiceScopes(servicesUpdatesFromServerJSON);
+                this.clientFunctionService.waitForLoading().finally(() => {
+                    this.updateServiceScopes(servicesUpdatesFromServerJSON);
+                });
             },
 
             handleNormalServiceApis: (serviceApisJSON: any, previousResponseValue: any): any => {
                 // normal api calls
-                let responseValue: any = previousResponseValue;
-                for (const serviceCall of serviceApisJSON as Array<ApiCallFromServer>) {
-                    if (!serviceCall['pre_data_service_call']) {
-                        // responseValue keeps last services call return value
-                        responseValue = this.callServiceApi(serviceCall); // this handles arg type conversions and return value type conversion as well
+                const def = new Deferred();
+                this.clientFunctionService.waitForLoading().finally(() => {
+                    let responseValue: any = previousResponseValue;
+                    for (const serviceCall of serviceApisJSON as Array<ApiCallFromServer>) {
+                        if (!serviceCall['pre_data_service_call']) {
+                            // responseValue keeps last services call return value
+                            responseValue = this.callServiceApi(serviceCall); // this handles arg type conversions and return value type conversion as well
+                        }
                     }
-                }
-                return responseValue;
+                    def.resolve(responseValue);
+                });
+                return def.promise;
             }
         }));
     }

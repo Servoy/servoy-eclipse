@@ -27,7 +27,7 @@ import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { PopupFormService } from '../services/popupform.service';
 import { AddAttributeDirective } from '../../servoycore/addattribute.directive';
 
-import { ClientFunctionService } from '../../ngclient/services/clientfunction.service';
+import { ClientFunctionService } from '../../sablo/clientfunction.service';
 import { ObjectType } from '../../sablo/converters/object_converter';
 
 import { By } from '@angular/platform-browser';
