@@ -108,6 +108,7 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 				closeShell();
 			}
 		}
+		super.deactivate();
 	}
 
 	@Override
