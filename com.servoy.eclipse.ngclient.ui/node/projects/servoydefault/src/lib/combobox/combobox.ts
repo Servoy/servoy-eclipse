@@ -156,7 +156,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         this.valueComparator = this.valuelistID && this.valuelistID.isRealValueDate() ? this.dateValueCompare : this.valueCompare;
         if (changes['dataProviderID'] && this.findmode) {
             this.formattedValue = this.dataProviderID;
-        } else if (changes['dataProviderID'] && this.valuelistID) {
+        } else if ( (changes['dataProviderID'] || changes['valuelistID']) && this.valuelistID) {
             // eslint-disable-next-line eqeqeq
             const valueListElem = this.valuelistID.find(this.valueComparator);
             if (valueListElem) this.formattedValue = this.formatService.format(valueListElem.displayValue, this.format, false);
