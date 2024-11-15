@@ -26,7 +26,7 @@
                 [ngClass]="{active:valueComparator(value)}" 
                 (click)="updateValue(value.realValue)">
                  <!-- do not break the next line -->
-                <strong>{{getStrongValue(value.displayValue | formatFilter:format | emptyValue)}}</strong>{{getRemainingValue(value.displayValue | formatFilter:format | emptyValue)}}
+                {{getRemainingValueBefore(value.displayValue | formatFilter:format | emptyValue)}}<strong>{{getStrongValue(value.displayValue | formatFilter:format | emptyValue)}}</strong>{{getRemainingValueAfter(value.displayValue | formatFilter:format | emptyValue)}}
             </button>
         </ng-container>
       </div>
