@@ -2388,11 +2388,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 					// DO STUFF RELATED TO RESOURCES PROJECTS
 					checkForResourcesProjectRename(element, project);
-					if (activeResourcesProject != null && project == activeResourcesProject.getProject() && project.isOpen() &&
-						project.hasNature(ServoyResourcesProject.NATURE_ID))
-					{
-						modifyDBIFilesToAllClones(element);
-					}
 					if (element.getKind() != IResourceDelta.REMOVED && project.isOpen())
 					{
 						// something happened to this project, resulting in a valid open project; see if it is the currently active resources project
@@ -2560,64 +2555,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				MessageDialog.openError(UIUtils.getActiveShell(), "Save error", ex.getMessage());
 			}
 		});
-	}
-
-	private void modifyDBIFilesToAllClones(final IResourceDelta element)
-	{
-		List<IResourceDelta> al = findChangedFiles(element, new ArrayList<IResourceDelta>());
-		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
-		if (serverManager != null && dataModelManager != null)
-		{
-			for (IResourceDelta fileRd : al)
-			{
-				final IFile file = (IFile)fileRd.getResource();
-				if (file.getName().endsWith(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT))
-				{
-					String serverName = file.getParent().getName();
-					final IServer[] servers = serverManager.getDataModelCloneServers(serverName);
-					if (servers != null && servers.length > 0)
-					{
-						final String tableName = file.getName().substring(0,
-							file.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-						final Job job = new WorkspaceJob("Writing dbi file changes to all clones - " + file.getName())
-						{
-							@Override
-							public IStatus runInWorkspace(IProgressMonitor monitor)
-							{
-								for (IServer server : servers)
-								{
-									try
-									{
-										IFile cloneFile = dataModelManager.getDBIFile(server.getName(), tableName);
-										if ((element.getKind() == IResourceDelta.REMOVED || !file.exists()) && cloneFile.exists())
-										{
-											cloneFile.delete(true, null);
-										}
-										if (file.exists() && (element.getKind() == IResourceDelta.ADDED || element.getKind() == IResourceDelta.CHANGED))
-										{
-											try (InputStream is = file.getContents())
-											{
-												ResourcesUtils.createOrWriteFile(cloneFile, is, true);
-											}
-										}
-									}
-									catch (Exception ex)
-									{
-										ServoyLog.logError(ex);
-									}
-								}
-								return Status.OK_STATUS;
-							}
-						};
-
-						job.setUser(false);
-						job.setSystem(true);
-						job.setRule(getWorkspace().getRoot());
-						job.schedule();
-					}
-				}
-			}
-		}
 	}
 
 	private void checkForResourcesProjectRename(IResourceDelta element, IProject project)
