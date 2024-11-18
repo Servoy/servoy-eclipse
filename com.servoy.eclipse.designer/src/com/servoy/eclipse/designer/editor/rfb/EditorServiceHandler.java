@@ -111,7 +111,7 @@ public class EditorServiceHandler implements IServerService
 	{
 		configuredHandlers.put("getGhostComponents", new GhostHandler(editorPart));
 		configuredHandlers.put("setSelection", new SetSelectionHandler(editorPart, selectionListener, selectionProvider));
-		configuredHandlers.put("revertForm", new RevertFormCommand(editorPart));
+		configuredHandlers.put("revertForm", new RevertFormCommand());
 
 		configuredHandlers.put("setTabSequence", new SetTabSequenceCommand(editorPart, selectionProvider));
 

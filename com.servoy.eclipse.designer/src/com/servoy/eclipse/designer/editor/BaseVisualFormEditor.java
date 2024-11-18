@@ -226,7 +226,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removeActiveProjectListener(this);
 		servoyModel.removePersistChangeListener(false, this);
-		revert(false);
+		revert(false, false);
 
 		if (dummyActionRegistry != null)
 		{
@@ -240,7 +240,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	 *
 	 * @param force
 	 */
-	public void revert(boolean force)
+	public void revert(boolean force, boolean refresh)
 	{
 		if (force || isDirty())
 		{
@@ -248,6 +248,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel().revertEditingPersist(servoyProject, form);
 				getCommandStack().flush();
+				if (refresh)
+				{
+					this.refresh(new ArrayList<IPersist>(), true);
+				}
 			}
 			catch (RepositoryException e)
 			{
