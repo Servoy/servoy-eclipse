@@ -38,6 +38,7 @@ public class NewOAuthApiPage extends WizardPage
 	private Text authorizationBaseUrlText;
 	private Text accessTokenEndpointText;
 	private Text refreshTokenEndpointText;
+	private Text revokeTokenEndpointText;
 	private final NewOAuthConfigWizard wizard;
 
 	protected NewOAuthApiPage(NewOAuthConfigWizard wizard)
@@ -137,6 +138,14 @@ public class NewOAuthApiPage extends WizardPage
 		refreshTokenEndpointText.addModifyListener(e -> updateRefreshTokenEndpoint());
 		refreshTokenEndpointText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
 
+		Label revokeTokenEndpointLabel = new Label(container, SWT.NONE);
+		revokeTokenEndpointLabel.setText("Revoke Token Endpoint:");
+		revokeTokenEndpointText = new Text(container, SWT.BORDER);
+		revokeTokenEndpointText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		revokeTokenEndpointText.addListener(SWT.FocusOut, e -> updateRevokeTokenEndpoint());
+		revokeTokenEndpointText.addModifyListener(e -> updateRevokeTokenEndpoint());
+		revokeTokenEndpointText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
+
 		Label jwksUriLabel = new Label(container, SWT.NONE);
 		jwksUriLabel.setText("JWKS URI:");
 		jwksUriLabel.setToolTipText("The JSON Web Key Set (JWKS) is a set of keys containing the public keys " +
@@ -207,11 +216,18 @@ public class NewOAuthApiPage extends WizardPage
 	{
 		String provider = apiCombo.getText();
 		JSONObject oauthJson = wizard.getJSON();
+		boolean isCustomSelected = "Custom".equals(provider);
 
-		if (!"Custom".equals(provider) && oauthJson.has(StatelessLoginHandler.AUTHORIZATION_BASE_URL))
+		if (!isCustomSelected)
 		{
 			oauthJson.remove(StatelessLoginHandler.AUTHORIZATION_BASE_URL);
 			oauthJson.remove(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT);
+			oauthJson.remove(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT);
+			oauthJson.remove(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT);
+			authorizationBaseUrlText.setText("");
+			accessTokenEndpointText.setText("");
+			refreshTokenEndpointText.setText("");
+			revokeTokenEndpointText.setText("");
 		}
 		switch (provider)
 		{
@@ -230,9 +246,11 @@ public class NewOAuthApiPage extends WizardPage
 				oauthJson.put(StatelessLoginHandler.JWKS_URI, "");
 				break;
 		}
-		authorizationBaseUrlText.setEnabled("Custom".equals(provider));
-		accessTokenEndpointText.setEnabled("Custom".equals(provider));
-		jwksUriText.setEnabled("Custom".equals(provider));
+		authorizationBaseUrlText.setEnabled(isCustomSelected);
+		accessTokenEndpointText.setEnabled(isCustomSelected);
+		refreshTokenEndpointText.setEnabled(isCustomSelected);
+		revokeTokenEndpointText.setEnabled(isCustomSelected);
+		jwksUriText.setEnabled(isCustomSelected);
 
 		getWizard().getContainer().updateButtons();
 	}
@@ -251,6 +269,8 @@ public class NewOAuthApiPage extends WizardPage
 			{
 				json.put(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, accessTokenEndpointText.getText().trim());
 				json.put(StatelessLoginHandler.AUTHORIZATION_BASE_URL, authorizationBaseUrlText.getText().trim());
+				json.put(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT, refreshTokenEndpointText.getText().trim());
+				json.put(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT, revokeTokenEndpointText.getText().trim());
 				json.put(StatelessLoginHandler.JWKS_URI, jwksUriText.getText().trim());
 				updateRefreshTokenEndpoint();
 			}
@@ -269,6 +289,19 @@ public class NewOAuthApiPage extends WizardPage
 			wizard.getJSON().remove(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT);
 		}
 	}
+
+	private void updateRevokeTokenEndpoint()
+	{
+		if (!"".equals(refreshTokenEndpointText.getText().trim()))
+		{
+			wizard.getJSON().put(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT, revokeTokenEndpointText.getText().trim());
+		}
+		else
+		{
+			wizard.getJSON().remove(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT);
+		}
+	}
+
 
 	public String getApiSelection()
 	{
@@ -305,12 +338,14 @@ public class NewOAuthApiPage extends WizardPage
 		{
 			accessTokenEndpointText.setText(oauthJson.optString(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, ""));
 			authorizationBaseUrlText.setText(oauthJson.optString(StatelessLoginHandler.AUTHORIZATION_BASE_URL, ""));
-			authorizationBaseUrlText.setText(oauthJson.optString(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT, ""));
+			refreshTokenEndpointText.setText(oauthJson.optString(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT, ""));
+			revokeTokenEndpointText.setText(oauthJson.optString(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT, ""));
 		}
 		jwksUriText.setText(oauthJson.optString(StatelessLoginHandler.JWKS_URI, ""));
 		authorizationBaseUrlText.setEnabled(isCustomSelected);
 		accessTokenEndpointText.setEnabled(isCustomSelected);
 		refreshTokenEndpointText.setEnabled(isCustomSelected);
+		revokeTokenEndpointText.setEnabled(isCustomSelected);
 		jwksUriText.setEnabled(isCustomSelected);
 	}
 }
