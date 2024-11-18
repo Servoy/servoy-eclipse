@@ -22,6 +22,9 @@ import java.util.Map;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ISelection;
@@ -64,6 +67,7 @@ import org.eclipse.ui.views.properties.PropertySheetSorter;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.actions.CopyPropertyValueAction;
 import com.servoy.eclipse.ui.actions.PastePropertyValueAction;
+import com.servoy.eclipse.ui.actions.ToggleNoDefaultPropertiesViewAction;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.property.IProvidesTooltip;
 import com.servoy.eclipse.ui.property.PropertyCategory;
@@ -92,10 +96,21 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 
 	private IPersist selectedPersist = null;
 
+	private ToggleNoDefaultPropertiesViewAction toggleNoDefaultPropertiesViewAction;
+
 	public ModifiedPropertySheetPage(Map<String, IAction> actions)
 	{
 		super();
 		this.actions = actions;
+	}
+
+	@Override
+	public void makeContributions(IMenuManager menuManager,
+		IToolBarManager toolBarManager, IStatusLineManager statusLineManager)
+	{
+		super.makeContributions(menuManager, toolBarManager, statusLineManager);
+		toggleNoDefaultPropertiesViewAction = new ToggleNoDefaultPropertiesViewAction();
+		toolBarManager.add(toggleNoDefaultPropertiesViewAction);
 	}
 
 	@Override
@@ -577,5 +592,8 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 		}
 		copyValueAction = null;
 		pasteValueAction = null;
+
+		toggleNoDefaultPropertiesViewAction = null;
+
 	}
 }
