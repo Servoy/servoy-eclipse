@@ -25,6 +25,9 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 {
 	private static final String MICROSOFT_DOCS = "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-implicit-grant-flow#send-the-sign-in-request";
 	private static final String GOOGLE_DOCS = "https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow#oauth-2.0-endpoints";
+	private static final String APPLE_DOCS = "https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api";
+	private static final String LINKEDIN_DOCS = "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?tabs=HTTPS1";
+
 	private Text jsonTextArea;
 	private final NewOAuthConfigWizard wizard;
 	private Link warn_;
@@ -77,8 +80,14 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 			case "Google" :
 				url = GOOGLE_DOCS;
 				break;
-			case "Microsoft" :
+			case "Microsoft AD" :
 				url = MICROSOFT_DOCS;
+				break;
+			case "LinkedIn" :
+				url = LINKEDIN_DOCS;
+				break;
+			case "Apple" :
+				url = APPLE_DOCS;
 				break;
 		}
 		if (url != null)
@@ -101,9 +110,15 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 			case "Google" :
 				return "<a href=\"" + GOOGLE_DOCS +
 					"\">Google documentation</a>";
-			case "Microsoft" :
+			case "Microsoft AD" :
 				return "<a href=\"" + MICROSOFT_DOCS +
 					"\">Microsoft documentation</a>";
+			case "LinkedIn" :
+				return "<a href=\"" + LINKEDIN_DOCS +
+					"\">LinkedIn documentation</a>";
+			case "Apple" :
+				return "<a href=\"" + APPLE_DOCS +
+					"\">Apple documentation</a>";
 		}
 		return "documentation of the selected provider.\n";
 	}

@@ -27,7 +27,9 @@ public class NewOAuthApiPage extends WizardPage
 {
 	private static final String MICROSOFT_JWKS = "https://login.microsoftonline.com/common/discovery/v2.0/keys";
 	private static final String GOOGLE_JWKS = "https://www.googleapis.com/oauth2/v3/certs";
-	private static final String[] items = new String[] { "Google", "Microsoft", "Custom" };
+	private static final String APPLE_JWKS = "https://appleid.apple.com/auth/keys";
+	private static final String LINKEDIN_JWKS = "https://www.linkedin.com/oauth/openid/jwks";
+	private static final String[] items = new String[] { "Google", "Microsoft AD", "Apple", "Linkedin", "Custom" };
 	private Combo apiCombo;
 	private Text clientIdText;
 	private Text clientSecretText;
@@ -199,7 +201,7 @@ public class NewOAuthApiPage extends WizardPage
 	private void updateGetRefreshToken()
 	{
 		String provider = apiCombo.getText();
-		if ("Google".equals(provider) || "Microsoft".equals(provider))
+		if ("Google".equals(provider) || "Microsoft AD".equals(provider))
 		{
 			if (offlineAccessType.getSelection())
 			{
@@ -233,17 +235,34 @@ public class NewOAuthApiPage extends WizardPage
 		{
 			case "Google" :
 				oauthJson.put(StatelessLoginHandler.OAUTH_API, "Google");
-				oauthJson.put(StatelessLoginHandler.JWKS_URI, GOOGLE_JWKS);
+				jwksUriText.setText(GOOGLE_JWKS);
+				scopeText.setText("openid email");
 				oauthJson.remove("tenant");
 				break;
-			case "Microsoft" :
-				oauthJson.put(StatelessLoginHandler.OAUTH_API, "Microsoft");
-				oauthJson.put(StatelessLoginHandler.JWKS_URI, MICROSOFT_JWKS);
+			case "Microsoft AD" :
+				oauthJson.put(StatelessLoginHandler.OAUTH_API, "Microsoft AD");
+				jwksUriText.setText(MICROSOFT_JWKS);
+				scopeText.setText("openid email");
 				oauthJson.put("tenant", "");
+				break;
+			case "Apple" :
+				oauthJson.put(StatelessLoginHandler.OAUTH_API, "Apple");
+				jwksUriText.setText(APPLE_JWKS);
+				scopeText.setText("name email");
+				oauthJson.remove("tenant");
+				oauthJson.remove("access_type"); //refresh token is returned by default
+				break;
+			case "Linkedin" :
+				oauthJson.put(StatelessLoginHandler.OAUTH_API, "LinkedIn");
+				jwksUriText.setText(LINKEDIN_JWKS);
+				scopeText.setText("openid email");
+				oauthJson.remove("tenant");
+				oauthJson.remove("access_type");
 				break;
 			case "Custom" :
 				oauthJson.remove(StatelessLoginHandler.OAUTH_API);
 				oauthJson.put(StatelessLoginHandler.JWKS_URI, "");
+				oauthJson.remove("tenant");
 				break;
 		}
 		authorizationBaseUrlText.setEnabled(isCustomSelected);
@@ -265,14 +284,21 @@ public class NewOAuthApiPage extends WizardPage
 			json.put(StatelessLoginHandler.CLIENT_ID, clientIdText.getText().trim());
 			json.put(StatelessLoginHandler.API_SECRET, clientSecretText.getText().trim());
 			json.put(StatelessLoginHandler.DEFAULT_SCOPE, scopeText.getText().trim());
+			json.put(StatelessLoginHandler.JWKS_URI, jwksUriText.getText().trim());
 			if ("Custom".equals(getApiSelection()))
 			{
 				json.put(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, accessTokenEndpointText.getText().trim());
 				json.put(StatelessLoginHandler.AUTHORIZATION_BASE_URL, authorizationBaseUrlText.getText().trim());
 				json.put(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT, refreshTokenEndpointText.getText().trim());
 				json.put(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT, revokeTokenEndpointText.getText().trim());
-				json.put(StatelessLoginHandler.JWKS_URI, jwksUriText.getText().trim());
 				updateRefreshTokenEndpoint();
+			}
+			else
+			{
+				json.remove(StatelessLoginHandler.AUTHORIZATION_BASE_URL);
+				json.remove(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT);
+				json.remove(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT);
+				json.remove(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT);
 			}
 		}
 		return isComplete;
