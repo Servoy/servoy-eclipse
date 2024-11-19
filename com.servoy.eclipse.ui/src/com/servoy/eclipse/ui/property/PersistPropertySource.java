@@ -2119,10 +2119,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return false;
 		}
 		IEclipsePreferences eclipsePreferences = com.servoy.eclipse.ui.Activator.getDefault().getEclipsePreferences();
-		if (eclipsePreferences.getBoolean(ToggleNoDefaultPropertiesViewAction.SHOW_NO_DEFAULT_PROPERTIES, false) &&
-			!isPropertySet(propertyDescriptor.propertyDescriptor.getName()))
+		if (eclipsePreferences.getBoolean(ToggleNoDefaultPropertiesViewAction.SHOW_NO_DEFAULT_PROPERTIES, false))
 		{
-			return false;
+			String propertyName = propertyDescriptor.propertyDescriptor.getName();
+			if ("designTimeProperties".equals(propertyName)) propertyName = IContentSpecConstants.PROPERTY_DESIGNTIME;
+			return isPropertySet(propertyName);
 		}
 
 		return propertyDescriptor.propertyDescriptor.shouldShow(persistContext);
