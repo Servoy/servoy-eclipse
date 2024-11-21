@@ -102,7 +102,7 @@ export class WindowService {
                 return;
             }
 
-            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-dialog').length < 1) {
                 const customEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
                 });
@@ -251,7 +251,7 @@ export class WindowService {
                 }
             }
             instance.hide();
-            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-dialog').length < 1) {
                 const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                 });
