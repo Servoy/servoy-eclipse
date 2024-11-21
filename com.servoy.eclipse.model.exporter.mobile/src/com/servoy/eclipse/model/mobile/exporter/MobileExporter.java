@@ -44,6 +44,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jshybugger.instrumentation.DebugInstrumentator;
 import org.jshybugger.instrumentation.JsCodeLoader;
@@ -51,7 +52,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
-import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectHandlerFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
@@ -729,18 +729,41 @@ public class MobileExporter
 		}
 		String modelDataString = modelData.toString();
 
-		WebObjectSpecification[] allWebObjectSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 		JSONObject spec = new JSONObject();
+
+		WebObjectSpecification[] allWebObjectSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 		for (WebObjectSpecification webObjectSpecification : allWebObjectSpecifications)
 		{
-			JSONObject component = new JSONObject();
-			Map<String, PropertyDescription> properties = webObjectSpecification.getProperties();
-			for (Entry<String, PropertyDescription> entry : properties.entrySet())
+			try (InputStream stream = webObjectSpecification.getSpecURL().openStream())
 			{
-				component.put(entry.getKey(), entry.getValue().getType().getName());
-			}
+				String content = IOUtils.toString(stream, Charset.forName("UTF8"));
+				JSONObject json = new JSONObject(content);
+				JSONObject properties = json.getJSONObject("model");
+				// strip it a bit
+				properties.keys().forEachRemaining(key -> {
+					if (properties.get(key) instanceof JSONObject property)
+					{
+						property.remove("default");
+						property.remove("tags");
+						property.remove("values");
+					}
+					else
+					{
+						// replace the type string with a json object for easer use in the client
+						JSONObject property = new JSONObject();
+						property.put("type", properties.get(key));
+						properties.put(key, property);
+					}
+				});
 
-			spec.put(webObjectSpecification.getName(), component);
+
+				JSONObject api = json.optJSONObject("api");
+				JSONObject component = new JSONObject();
+				component.put("model", properties);
+				component.put("api", api);
+
+				spec.put(webObjectSpecification.getName(), component);
+			}
 		}
 
 		String specDataString = "var _specdata_ = " + spec.toString();
