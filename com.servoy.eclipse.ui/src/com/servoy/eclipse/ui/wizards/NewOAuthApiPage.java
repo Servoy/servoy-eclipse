@@ -231,6 +231,10 @@ public class NewOAuthApiPage extends WizardPage
 			refreshTokenEndpointText.setText("");
 			revokeTokenEndpointText.setText("");
 		}
+		if (!"Apple".equals(provider))
+		{
+			oauthJson.remove("response_mode");
+		}
 		switch (provider)
 		{
 			case "Google" :
@@ -249,6 +253,7 @@ public class NewOAuthApiPage extends WizardPage
 				oauthJson.put(StatelessLoginHandler.OAUTH_API, "Apple");
 				jwksUriText.setText(APPLE_JWKS);
 				scopeText.setText("name email");
+				oauthJson.put("response_mode", "form_post");
 				oauthJson.remove("tenant");
 				oauthJson.remove("access_type"); //refresh token is returned by default
 				break;
