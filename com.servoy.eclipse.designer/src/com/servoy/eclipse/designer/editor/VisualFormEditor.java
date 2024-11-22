@@ -240,10 +240,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	}
 
 	@Override
-	public void revert(boolean force)
+	public void revert(boolean force, boolean refresh)
 	{
 		boolean revert = force || isDirty();
-		super.revert(force);
+		super.revert(force, refresh);
 		if (revert)
 		{
 			if (graphicaleditor instanceof RfbVisualFormEditorDesignPage)

@@ -383,31 +383,6 @@ export interface IPopupSupportComponent {
     closePopup();
 }
 
-/**
- * Besides working like a normal Promise that you can use to get notified when some action is done (success/error/finally), chain etc., this promise also
- * contains field "requestInfo" which can be set by the user and could later be reported in some listener events back to the user (in case this same action
- * is going to trigger those listeners as well).
- *
- * @since 2021.09
- */
-export interface RequestInfoPromise<T> extends Promise<T> {
-
-    /**
-     * You can assign any value to it. The value that you assign - if any - will be given back in the
-     * event object of any listener that will be triggered as a result of the promise's action. So in
-     * case the same action, when done, will trigger both the "then" of the Promise and a separate
-     * listener, that separate listener will contain this "requestInfo" value.
-     *
-     * This is useful for some components that want to know if some change (reported by the listener)
-     * happened due to an action that the component requested or due to changes in the outside world.
-     * (eg: FoundsetPropertyValue.loadRecordsAsync(...) returns RequestInfoPromise and 
-     * FoundsetChangeEvent.requestInfos array can return that RequestInfoPromise.requestInfo on the
-     * event that was triggered by that loadRecordsAsync).
-     */
-    requestInfo?: any;
-
-}
-
 export interface IFoundsetFieldsOnly {
 
     /**
@@ -659,6 +634,9 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * because they are used/useful in other scenarios as well, not just initially: for example when a
      * related foundset changes parent record, when a search/find is performed and so on.
      *
+     * See also the description of "foundsetInitialPageSize" property type for a way to set this
+     * at design-time (via properties view) or before the form is shown for components that 'page' data.
+     *
      * @param preferredSize the preferred number or rows that the viewport should get automatically
      *                      from the server.
      * @param sendViewportWithSelection if this is true, the auto-sent viewport will contain
@@ -683,21 +661,44 @@ export interface IFoundset extends IFoundsetFieldsOnly {
 
 }
 
-export interface ViewportChangeEvent {
-    // the following keys appear if each of these got updated from server; the names of those
-    // keys suggest what it was that changed; oldValue and newValue are the values for what changed
-    // (e.g. new server size and old server size) so not the whole foundset property new/old value
+export interface ViewPort {
+    startIndex: number;
+    size: number;
+    rows: ViewPortRow[];
+};
 
-    viewportRowsCompletelyChanged?: { oldValue: any[]; newValue: any[] };
+export interface ViewPortRow extends Record<string, any> {
 
-    // if we received add/remove/change operations on a set of rows from the viewport, this key
-    // will be set; as seen below, it contains "updates" which is an array that holds a sequence of
-    // granular update operations to the viewport; the array will hold one or more granular add or remove
-    // or update operations;
-    // all the "startIndex" and "endIndex" values below are relative to the viewport's state after all
-    // previous updates in the array were already processed (so they are NOT relative to the initial state);
-    // indexes are 0 based
-    viewportRowsUpdated?: ViewportRowUpdates;
+    _svyRowId: string;
+    
+    /** components that use the foundset property are free to use this property however they like; it is not set/used by the foundset impl. */
+    _cache?: Map<string, any>;
+
+}
+
+/**
+ * Besides working like a normal Promise that you can use to get notified when some action is done (success/error/finally), chain etc., this promise also
+ * contains field "requestInfo" which can be set by the user and could later be reported in some listener events back to the user (in case this same action
+ * is going to trigger those listeners as well).
+ *
+ * @since 2021.09
+ */
+export interface RequestInfoPromise<T> extends Promise<T> {
+
+    /**
+     * You can assign any value to it. The value that you assign - if any - will be given back in the
+     * event object of any listener that will be triggered as a result of the promise's action. So in
+     * case the same action, when done, will trigger both the "then" of the Promise and a separate
+     * listener, that separate listener will contain this "requestInfo" value.
+     *
+     * This is useful for some components that want to know if some change (reported by the listener)
+     * happened due to an action that the component requested or due to changes in the outside world.
+     * (eg: FoundsetPropertyValue.loadRecordsAsync(...) returns RequestInfoPromise and 
+     * FoundsetChangeEvent.requestInfos array can return that RequestInfoPromise.requestInfo on the
+     * event that was triggered by that loadRecordsAsync).
+     */
+    requestInfo?: any;
+
 }
 
 export interface FoundsetChangeEvent extends ViewportChangeEvent {
@@ -741,6 +742,23 @@ export interface FoundsetChangeEvent extends ViewportChangeEvent {
     userSetSelection?: boolean;
 }
 
+export interface ViewportChangeEvent {
+    // the following keys appear if each of these got updated from server; the names of those
+    // keys suggest what it was that changed; oldValue and newValue are the values for what changed
+    // (e.g. new server size and old server size) so not the whole foundset property new/old value
+
+    viewportRowsCompletelyChanged?: { oldValue: any[]; newValue: any[] };
+
+    // if we received add/remove/change operations on a set of rows from the viewport, this key
+    // will be set; as seen below, it contains "updates" which is an array that holds a sequence of
+    // granular update operations to the viewport; the array will hold one or more granular add or remove
+    // or update operations;
+    // all the "startIndex" and "endIndex" values below are relative to the viewport's state after all
+    // previous updates in the array were already processed (so they are NOT relative to the initial state);
+    // indexes are 0 based
+    viewportRowsUpdated?: ViewportRowUpdates;
+}
+
 export type ViewportChangeListener = (changeEvent: ViewportChangeEvent) => void;
 export type FoundsetChangeListener = (changeEvent: FoundsetChangeEvent) => void;
 
@@ -769,17 +787,6 @@ export enum ChangeType  {
      * result in a delete notification + smaller viewport size notification
      */
     ROWS_DELETED
-}
-
-export interface ViewPort {
-    startIndex: number;
-    size: number;
-    rows: ViewPortRow[];
-};
-
-export interface ViewPortRow extends Record<string, any> {
-    _svyRowId: string;
-    _cache?: Map<string, any>;
 }
 
 /**

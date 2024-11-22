@@ -11,7 +11,7 @@ import { WindowService } from './services/window.service';
 import { SessionService } from './services/session.service';
 import {PopupFormService} from './services/popupform.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
-import { ClientFunctionService } from './services/clientfunction.service';
+import { ClientFunctionService } from '../sablo/clientfunction.service';
 import { SabloService } from '../sablo/sablo.service';
 import { TypesRegistry } from '../sablo/types_registry';
 // generated imports start

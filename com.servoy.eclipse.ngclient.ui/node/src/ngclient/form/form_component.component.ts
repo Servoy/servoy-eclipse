@@ -330,7 +330,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             let componentRef = this[item.type];
 
             // "injectedComponentRefs" is used only for being able to inject some TEST component templates inside Karma/Jasmine unit tests
-            if (!componentRef) componentRef = this.injectedComponentRefs[item.type];
+            if (!componentRef && this.injectedComponentRefs) componentRef = this.injectedComponentRefs[item.type];
 
             if (componentRef === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));

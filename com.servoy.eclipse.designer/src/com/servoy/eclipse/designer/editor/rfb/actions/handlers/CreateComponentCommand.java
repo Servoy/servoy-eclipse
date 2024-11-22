@@ -52,6 +52,7 @@ import org.sablo.websocket.utils.PropertyUtils;
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
+import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -524,7 +525,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 										((ComponentTypeConfig)property.getConfig()).forFoundset != null)
 									{
 										// list form component
-										FormComponentTreeSelectDialog.selectFormComponent(webComponent, form);
+										FormComponentTreeSelectDialog.setFormComponentProperty(webComponent, form, FormComponentTreeSelectDialog.selectFormComponent(webComponent, form));
 									}
 									else
 									{

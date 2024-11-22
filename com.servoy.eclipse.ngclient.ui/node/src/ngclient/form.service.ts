@@ -6,7 +6,7 @@ import { ConverterService, IChangeAwareValue, instanceOfChangeAwareValue, Change
 import { ServoyService } from './servoy.service';
 import { get, set } from 'lodash-es';
 import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
-import { ClientFunctionService } from './services/clientfunction.service';
+import { ClientFunctionService } from '../sablo/clientfunction.service';
 import { PushToServerEnum, IType, IWebObjectSpecification, TypesRegistry, RootPropertyContextCreator, PushToServerUtils } from '../sablo/types_registry';
 import { FoundsetLinkedValue } from './converters/foundsetLinked_converter';
 import { DateType } from '../sablo/converters/date_converter';

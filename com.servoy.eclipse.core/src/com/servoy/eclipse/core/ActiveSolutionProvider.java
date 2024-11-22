@@ -100,7 +100,7 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 
 	private String getNGVariableState()
 	{
-		return translateEnablement(sm.isActiveSolutionNGClient());
+		return translateEnablement(sm.isActiveSolutionNGClient() || sm.isActiveSolutionMobile());
 	}
 
 	private String getNGDesktopVariableState()

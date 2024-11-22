@@ -44,6 +44,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.jshybugger.instrumentation.DebugInstrumentator;
 import org.jshybugger.instrumentation.JsCodeLoader;
@@ -727,6 +728,47 @@ public class MobileExporter
 			Settings.getInstance().setProperty("servoy.ngclient.testingMode", prevValue);
 		}
 		String modelDataString = modelData.toString();
+
+		JSONObject spec = new JSONObject();
+
+		WebObjectSpecification[] allWebObjectSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
+		for (WebObjectSpecification webObjectSpecification : allWebObjectSpecifications)
+		{
+			try (InputStream stream = webObjectSpecification.getSpecURL().openStream())
+			{
+				String content = IOUtils.toString(stream, Charset.forName("UTF8"));
+				JSONObject json = new JSONObject(content);
+				JSONObject properties = json.getJSONObject("model");
+				// strip it a bit
+				properties.keys().forEachRemaining(key -> {
+					if (properties.get(key) instanceof JSONObject property)
+					{
+						property.remove("default");
+						property.remove("tags");
+						property.remove("values");
+					}
+					else
+					{
+						// replace the type string with a json object for easer use in the client
+						JSONObject property = new JSONObject();
+						property.put("type", properties.get(key));
+						properties.put(key, property);
+					}
+				});
+
+
+				JSONObject api = json.optJSONObject("api");
+				JSONObject component = new JSONObject();
+				component.put("model", properties);
+				component.put("api", api);
+
+				spec.put(webObjectSpecification.getName(), component);
+			}
+		}
+
+		String specDataString = "var _specdata_ = " + spec.toString();
+
+
 		// Write files for running from java source
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
 		boolean developmentWorkspaceExport = "war".equals(outputFolder.getName()) && outputFolder.getParent() != null && tmpP.exists();
@@ -745,6 +787,9 @@ public class MobileExporter
 			Utils.writeTXTFile(outputFile, modelDataString);
 			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/form_json.js"), modelDataString);
 
+			outputFile = new File(tmpP, "spec_json.js");
+			Utils.writeTXTFile(outputFile, modelDataString);
+			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/spec_json.js"), specDataString);
 		}
 
 		File exportedFile = null;
@@ -842,6 +887,7 @@ public class MobileExporter
 					}
 					entry = zipStream.getNextEntry();
 				}
+				addZipEntry(moduleName + "/" + renameMap.get("spec_json.js"), warStream, Utils.getUTF8EncodedStream(specDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("form_json.js"), warStream, Utils.getUTF8EncodedStream(modelDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
 				addZipEntry(moduleName + "/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
@@ -915,6 +961,7 @@ public class MobileExporter
 		renameMap.put(htmlFile, "index.html");
 
 		addRenameEntries(renameMap, moduleName + "/", "form_json", ".js");
+		addRenameEntries(renameMap, moduleName + "/", "spec_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "servoy_utils", ".js");

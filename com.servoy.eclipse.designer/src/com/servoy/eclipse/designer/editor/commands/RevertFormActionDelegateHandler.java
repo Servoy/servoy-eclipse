@@ -25,7 +25,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * An action to revert the form editor when dirty.
- * 
+ *
  * @author rgansevles
  */
 public class RevertFormActionDelegateHandler extends AbstractEditorActionDelegateHandler
@@ -33,7 +33,7 @@ public class RevertFormActionDelegateHandler extends AbstractEditorActionDelegat
 	@Override
 	public void run()
 	{
-		((BaseVisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).revert(false);
+		((BaseVisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).revert(false, true);
 	}
 
 	@Override

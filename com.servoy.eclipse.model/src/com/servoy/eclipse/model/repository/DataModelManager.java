@@ -19,7 +19,6 @@ package com.servoy.eclipse.model.repository;
 import static com.servoy.j2db.util.DatabaseUtils.deserializeServerInfo;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -58,7 +57,6 @@ import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.preferences.DbiPreferences;
-import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -235,7 +233,17 @@ public class DataModelManager implements IServerInfoManager
 		{
 			element.removeColumnInfo();
 		}
-		IFile file = getDBIFile(t.getServerName(), t.getName());
+		IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
+		String serverName = t.getServerName();
+		if (s != null)
+		{
+			String parentServerName = s.getConfig().getDataModelCloneFrom();
+			if (parentServerName != null)
+			{
+				serverName = parentServerName;
+			}
+		}
+		IFile file = getDBIFile(serverName, t.getName());
 		if (file.exists())
 		{
 			InputStream is = null;
@@ -243,7 +251,6 @@ public class DataModelManager implements IServerInfoManager
 			{
 				is = file.getContents(true);
 				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
 				{
 					deserializeTable(s, t, json_table);
@@ -281,7 +288,6 @@ public class DataModelManager implements IServerInfoManager
 			boolean clonedServerWithoutTableDbiInDeveloper = false;
 			if (ApplicationServerRegistry.get().isDeveloperStartup())
 			{
-				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				// checking if the server is a clone
 				if (s != null && s.getConfig() != null && s.getConfig().getDataModelCloneFrom() != null && s.getConfig().getDataModelCloneFrom().length() != 0)
 					clonedServerWithoutTableDbiInDeveloper = true;
@@ -300,7 +306,7 @@ public class DataModelManager implements IServerInfoManager
 	public TableMetaInfo getTableMetainfo(IServerInternal server, String tableName)
 	{
 		if (server == null || tableName == null || !server.getConfig().isEnabled() || !server.isValid()) return TableMetaInfo.DEFAULT; // this should never happen
-		IFile file = getDBIFile(server.getName(), tableName);
+		IFile file = getDBIFile(server.getConfig().getDataModelCloneFrom() != null ? server.getConfig().getDataModelCloneFrom() : server.getName(), tableName);
 		if (file.exists())
 		{
 			InputStream is = null;
@@ -399,25 +405,6 @@ public class DataModelManager implements IServerInfoManager
 		//updateAllColumnInfo(t);
 	}
 
-	public void serializeAllColumnInfo(Table t, IFileAccess fileAccess, String projectName) throws RepositoryException
-	{
-		if (t == null) return;
-
-		try
-		{
-			String out = serializeTable(t);
-			fileAccess.setUTF8Contents(projectName + '/' + getRelativeServerPath(t.getServerName()) + IPath.SEPARATOR + getDBIFileName(t.getName()), out);
-		}
-		catch (JSONException e)
-		{
-			throw new RepositoryException(e);
-		}
-		catch (IOException e)
-		{
-			throw new RepositoryException(e);
-		}
-	}
-
 	public static void reloadAllColumnInfo(IServerInternal server)
 	{
 		server.reloadServerInfo();
@@ -445,6 +432,10 @@ public class DataModelManager implements IServerInfoManager
 	private void updateAllColumnInfoImpl(final ITable t, boolean checkForMarkers) throws RepositoryException
 	{
 		if (t == null || !writeDBIFiles) return;
+
+		// do not write dbi files of clones, just load content from parent server
+		IServerInternal server = (IServerInternal)sm.getServer(t.getServerName());
+		if (server != null && server.getConfig().getDataModelCloneFrom() != null) return;
 
 		// this optimize would normally be OK - but would block writes when startAsTeamProvider is true... so leave it out for now (until we stop using 2 column info providers)
 		// if there are no changes in column info, no use saving them... just to produce (time stamp) outgoing changes in team providers

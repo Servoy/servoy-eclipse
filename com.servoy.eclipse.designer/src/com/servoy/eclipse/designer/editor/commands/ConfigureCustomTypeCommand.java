@@ -42,6 +42,7 @@ import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.IPropertyType;
 
+import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -95,16 +96,20 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 					{
 						// list form component
 						Display.getDefault().asyncExec(() -> {
-							activeEditor.getCommandStack()
-								.execute(
-									new BaseRestorableCommand("createComponent")
-									{
-										@Override
-										public void execute()
+							RelatedForm relatedForm = FormComponentTreeSelectDialog.selectFormComponent(webComponent, activeEditor.getForm());
+							if (relatedForm != null)
+							{
+								activeEditor.getCommandStack()
+									.execute(
+										new BaseRestorableCommand("createComponent")
 										{
-											FormComponentTreeSelectDialog.selectFormComponent(webComponent, activeEditor.getForm());
-										}
-									});
+											@Override
+											public void execute()
+											{
+												FormComponentTreeSelectDialog.setFormComponentProperty(webComponent, activeEditor.getForm(), relatedForm);
+											}
+										});
+							}
 						});
 					}
 					else

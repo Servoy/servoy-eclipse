@@ -128,7 +128,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			String toRun = "build_debug_nowatch";
 			if (warExportModel != null)
 			{
-				if (warExportModel.exportNG2Mode() != null)
+				// skip the null values and the true value then it should just be "build"
+				if (!Arrays.asList(null, "", "true").contains(warExportModel.exportNG2Mode()))
 				{
 					toRun = "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : warExportModel.exportNG2Mode();
 				}

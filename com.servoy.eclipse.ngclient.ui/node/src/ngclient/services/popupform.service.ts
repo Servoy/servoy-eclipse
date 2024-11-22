@@ -52,12 +52,13 @@ export class PopupFormService {
                     popup = popup.parent;
                 }
             }
-
-            const customEvent = new CustomEvent('enableTabseq', {
-                bubbles: true
-            });
-            this.doc.getElementById('mainForm').dispatchEvent(customEvent);
-
+            
+            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-dialog').length < 1) {
+                const customEvent = new CustomEvent('enableTabseq', {
+                    bubbles: true
+                });
+                this.doc.getElementById('mainForm').dispatchEvent(customEvent);
+            }
             /*
              * Because server side code in window_server.js checks for scope.model.popupform != null when closing a form popup it must have the correct value server-side; so
              *     - when it is closed by a click outside the popup form area that happens to be exactly on a button that opens it again, the current method executes and

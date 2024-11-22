@@ -37,6 +37,7 @@ import javax.swing.border.Border;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellEditorValidator;
@@ -101,6 +102,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.actions.ToggleNoDefaultPropertiesViewAction;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
@@ -1666,7 +1668,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						{
 							type = NumberCellEditor.FLOAT;
 						}
-						else if (propertyType == IntPropertyType.INSTANCE)
+						else if (propertyType instanceof IntPropertyType)
 						{
 							type = NumberCellEditor.INTEGER;
 						}
@@ -2116,6 +2118,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			return false;
 		}
+		IEclipsePreferences eclipsePreferences = com.servoy.eclipse.ui.Activator.getDefault().getEclipsePreferences();
+		if (eclipsePreferences.getBoolean(ToggleNoDefaultPropertiesViewAction.SHOW_NO_DEFAULT_PROPERTIES, false))
+		{
+			String propertyName = propertyDescriptor.propertyDescriptor.getName();
+			if ("designTimeProperties".equals(propertyName)) propertyName = IContentSpecConstants.PROPERTY_DESIGNTIME;
+			return isPropertySet(propertyName);
+		}
+
 		return propertyDescriptor.propertyDescriptor.shouldShow(persistContext);
 	}
 

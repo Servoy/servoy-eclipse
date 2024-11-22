@@ -267,7 +267,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -ng2 true / false / sourcemaps ... export Titanium NG2 binaries.  If 'sourcemaps' is\n"
 			+ "             given, sourcemaps will be generated for .ts files - useful for debugging.\n"
 			+ "             Default: true\n"
-			+ "        -ng1 ... export NG1 client resources; not exported by default.\n"
 			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}

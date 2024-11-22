@@ -611,9 +611,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				// do add the child base component so that it gets this new update
 				while (parent != null && !(parent instanceof Form))
 				{
-					if (parent instanceof BaseComponent)
+					if (parent instanceof BaseComponent baseComponentParent)
 					{
-						baseComponents.add((BaseComponent)parent);
+						baseComponents.add(baseComponentParent);
+						IPersist superPersist = PersistHelper.getSuperPersist(baseComponentParent);
+						if (superPersist instanceof IFormElement superPersistFormElement)
+						{
+							deletedComponents.add(superPersistFormElement);
+						}
 						parent = null;
 					}
 					else parent = parent.getParent();

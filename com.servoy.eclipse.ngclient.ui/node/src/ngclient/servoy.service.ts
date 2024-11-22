@@ -24,7 +24,7 @@ import { FormSettings } from './types';
 import { SvyUtilsService } from './utils.service';
 import { ClientFunctionType } from './converters/clientfunction_converter';
 import { JSMenuType } from './converters/jsmenu_converter';
-import { ClientFunctionService } from './services/clientfunction.service';
+import { ClientFunctionService } from '../sablo/clientfunction.service';
 import { UIBlockerService } from './services/ui_blocker.service';
 import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
 import { ServerFunctionType } from './converters/serverfunction_converter';

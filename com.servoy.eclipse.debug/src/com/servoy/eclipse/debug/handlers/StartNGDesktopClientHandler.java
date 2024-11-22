@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -362,8 +363,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			{
 				try
 				{
-					existingProcess.exitValue(); // Throws exception if still running
-					ngdesktopProcess.compareAndSet(existingProcess, null); // Process ended, reset it
+					existingProcess.destroy();
+					ngdesktopProcess.set(null); // Process ended, reset it
 				}
 				catch (IllegalThreadStateException ex)
 				{
@@ -391,8 +392,11 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			builder.directory(new File(System.getProperty("user.dir")));
 			builder.redirectErrorStream(true); // redirect error stream to the output stream
 			Process process = builder.start();
-
-			process.waitFor();
+			ngdesktopProcess.set(process);
+			if (!process.waitFor(50, TimeUnit.MINUTES))
+			{
+				runNgDesktop(monitor);
+			}
 
 		}
 		catch (IOException | InterruptedException e)

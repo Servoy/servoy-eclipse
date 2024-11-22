@@ -20,7 +20,6 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.RevertFormActionDelegateHandler;
 
 /**
@@ -29,16 +28,12 @@ import com.servoy.eclipse.designer.editor.commands.RevertFormActionDelegateHandl
  */
 public class RevertFormCommand extends RevertFormActionDelegateHandler implements IServerService
 {
-
-	private final BaseVisualFormEditor editorPart;
-
 	/**
 	 * @param editorPart
 	 */
-	public RevertFormCommand(BaseVisualFormEditor editorPart)
+	public RevertFormCommand()
 	{
 		super();
-		this.editorPart = editorPart;
 	}
 
 	@Override
