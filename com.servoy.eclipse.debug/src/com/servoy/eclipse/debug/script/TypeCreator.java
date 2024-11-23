@@ -215,7 +215,6 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.plugins.IPluginManager;
-import com.servoy.j2db.querybuilder.impl.QBAggregate;
 import com.servoy.j2db.querybuilder.impl.QBAggregates;
 import com.servoy.j2db.querybuilder.impl.QBColumn;
 import com.servoy.j2db.querybuilder.impl.QBColumns;
@@ -489,7 +488,6 @@ public class TypeCreator extends TypeCache
 		addScopeType(RUNTIME_WEB_COMPONENT, new WebComponentTypeCreator());
 		addScopeType(ElementUtil.CUSTOM_TYPE, new CustomTypeCreator());
 
-		addQueryBuilderScopeType(QBAggregate.class);
 		addQueryBuilderScopeType(QBCountAggregate.class);
 		addQueryBuilderScopeType(QBColumn.class);
 		addQueryBuilderScopeType(QBIntegerColumn.class);
@@ -2068,7 +2066,9 @@ public class TypeCreator extends TypeCache
 
 		ClientSupport getClientSupport();
 
-		void flush();
+		default void flush()
+		{
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -2755,10 +2755,6 @@ public class TypeCreator extends TypeCache
 			return ClientSupport.All;
 		}
 
-		@Override
-		public void flush()
-		{
-		}
 	}
 
 	private class ScopeScopeCreator implements IScopeTypeCreator
@@ -2893,11 +2889,6 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.All;
-		}
-
-		@Override
-		public void flush()
-		{
 		}
 
 	}
@@ -3241,12 +3232,6 @@ public class TypeCreator extends TypeCache
 			return ClientSupport.ng_wc_sc;
 		}
 
-		@Override
-		public void flush()
-		{
-
-		}
-
 	}
 
 	private class JSDataSetCreator implements IScopeTypeCreator
@@ -3269,11 +3254,6 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.ng_wc_sc;
-		}
-
-		@Override
-		public void flush()
-		{
 		}
 	}
 
@@ -3453,11 +3433,6 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
-
-		@Override
-		public void flush()
-		{
-		}
 	}
 
 	private class FormScopeCreator implements IScopeTypeCreator
@@ -3565,11 +3540,6 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
-
-		@Override
-		public void flush()
-		{
-		}
 	}
 
 	private class RuntimeContainersScopeCreator implements IScopeTypeCreator
@@ -3607,16 +3577,9 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.ng;
 		}
-
-		@Override
-		public void flush()
-		{
-			// TODO Auto-generated method stub
-		}
-
 	}
 
-	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new HashMap<>();
+	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new ConcurrentHashMap<>();
 
 	private class QueryBuilderCreator implements IScopeTypeCreator
 	{
@@ -3817,11 +3780,6 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.ng_wc_sc;
 		}
-
-		@Override
-		public void flush()
-		{
-		}
 	}
 
 	private class QueryBuilderJoinsCreator extends QueryBuilderCreator
@@ -3929,11 +3887,6 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.ng_wc_sc;
 		}
-
-		@Override
-		public void flush()
-		{
-		}
 	}
 	private class MemDataSourceCreator implements IScopeTypeCreator
 	{
@@ -3966,11 +3919,6 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.ng_wc_sc;
-		}
-
-		@Override
-		public void flush()
-		{
 		}
 	}
 	private class ViewDataSourceCreator implements IScopeTypeCreator
@@ -4005,11 +3953,6 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.ng_wc_sc;
 		}
-
-		@Override
-		public void flush()
-		{
-		}
 	}
 
 	private class MenuDataSourceCreator implements IScopeTypeCreator
@@ -4040,11 +3983,6 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.ng_wc_sc;
-		}
-
-		@Override
-		public void flush()
-		{
 		}
 	}
 	private class SPDataSourceServerCreator implements IScopeTypeCreator
@@ -4149,11 +4087,6 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.ng_wc_sc;
-		}
-
-		@Override
-		public void flush()
-		{
 		}
 	}
 
@@ -4354,11 +4287,6 @@ public class TypeCreator extends TypeCache
 		{
 			return csp;
 		}
-
-		@Override
-		public void flush()
-		{
-		}
 	}
 
 	private class InvisibleRelationsScopeCreator extends RelationsScopeCreator
@@ -4405,11 +4333,6 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.All;
-		}
-
-		@Override
-		public void flush()
-		{
 		}
 	}
 
@@ -4555,11 +4478,6 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
-
-		@Override
-		public void flush()
-		{
-		}
 	}
 
 	public class FormComponentTypeCreator implements IScopeTypeCreator
@@ -4589,11 +4507,6 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.ng;
-		}
-
-		@Override
-		public void flush()
-		{
 		}
 	}
 
@@ -5046,11 +4959,6 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.All;
 		}
-
-		@Override
-		public void flush()
-		{
-		}
 	}
 
 	public class CustomTypeCreator implements IScopeTypeCreator
@@ -5130,11 +5038,6 @@ public class TypeCreator extends TypeCache
 		{
 			return ClientSupport.ng;
 		}
-
-		@Override
-		public void flush()
-		{
-		}
 	}
 
 	public class WebComponentTypeCreator implements IScopeTypeCreator
@@ -5162,11 +5065,6 @@ public class TypeCreator extends TypeCache
 		public ClientSupport getClientSupport()
 		{
 			return ClientSupport.ng;
-		}
-
-		@Override
-		public void flush()
-		{
 		}
 	}
 
