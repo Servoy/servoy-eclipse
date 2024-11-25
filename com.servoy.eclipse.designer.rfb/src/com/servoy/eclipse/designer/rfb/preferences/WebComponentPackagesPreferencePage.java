@@ -77,23 +77,6 @@ public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePag
 		addField(showLegacyEditor);
 
 		setTopMargin(parentForLastFieldThatShouldBeSeparatedVisually, 25);
-		parentForLastFieldThatShouldBeSeparatedVisually = getFieldEditorParent();
-
-		BooleanFieldEditor showCommonsEditor = new BooleanFieldEditor("commons",
-			"Commonly Used Components - are the top 5 components frequently used in the project",
-			parentForLastFieldThatShouldBeSeparatedVisually);
-		showCommonsEditor.getDescriptionControl(parentForLastFieldThatShouldBeSeparatedVisually)
-			.setToolTipText("if this is not checked, the Commonly Used category will not show in the form designer's palette");
-		addField(showCommonsEditor);
-
-		BooleanFieldEditor showFavoritesEditor = new BooleanFieldEditor("favorites",
-			"Favorites Components - are those components selected by the user",
-			parentForLastFieldThatShouldBeSeparatedVisually);
-		showFavoritesEditor.getDescriptionControl(parentForLastFieldThatShouldBeSeparatedVisually)
-			.setToolTipText("if this is not checked, the Favorites Components category will not show in the form designer's palette");
-		addField(showFavoritesEditor);
-
-		setTopMargin(parentForLastFieldThatShouldBeSeparatedVisually, 25);
 	}
 
 

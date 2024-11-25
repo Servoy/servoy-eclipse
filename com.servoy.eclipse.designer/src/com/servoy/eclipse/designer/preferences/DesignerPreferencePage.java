@@ -45,6 +45,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	{
 	}
 
+	private Button favoritesComponentsCheck;
+	private Button commonlyUsedComponentsCheck;
 	private Spinner copyPasteOffsetSpinner;
 	private Spinner commonlyUsedSizeSpinner;
 	private Spinner stepSizeSpinner;
@@ -70,6 +72,13 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		Composite optionsPanel = new Composite(rootPanel, SWT.NONE);
 		optionsPanel.setLayout(new GridLayout(1, false));
+
+		favoritesComponentsCheck = new Button(optionsPanel, SWT.CHECK);
+		favoritesComponentsCheck.setText("Show Favorites Components - are those components selected by the user");
+
+		commonlyUsedComponentsCheck = new Button(optionsPanel, SWT.CHECK);
+		commonlyUsedComponentsCheck.setText(
+			"Show Commonly Used Components - are the top 5 components frequently used in the project, if the below property \"Commonly used package size\" is not changed");
 
 		Composite copyPastePanel = new Composite(optionsPanel, SWT.NONE);
 		copyPastePanel.setLayout(new GridLayout(2, false));
@@ -149,6 +158,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
 
+		favoritesComponentsCheck.setSelection(prefs.getShowFavoritesComponents());
+		commonlyUsedComponentsCheck.setSelection(prefs.getShowCommonlyUsedComponents());
 		copyPasteOffsetSpinner.setSelection(prefs.getCopyPasteOffset());
 		commonlyUsedSizeSpinner.setSelection(prefs.getCommonlyUsedSize());
 		stepSizeSpinner.setSelection(prefs.getStepSize());
@@ -167,6 +178,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	{
 		DesignerPreferences prefs = new DesignerPreferences();
 
+		prefs.setShowFavoritesComponents(favoritesComponentsCheck.getSelection());
+		prefs.setShowCommonlyUsedComponents(commonlyUsedComponentsCheck.getSelection());
 		prefs.setCopyPasteOffset(copyPasteOffsetSpinner.getSelection());
 		prefs.setCommonlyUsedSize(commonlyUsedSizeSpinner.getSelection());
 		prefs.setStepSize(stepSizeSpinner.getSelection(), largeStepSizeSpinner.getSelection());
@@ -185,6 +198,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	@Override
 	protected void performDefaults()
 	{
+		favoritesComponentsCheck.setSelection(DesignerPreferences.SHOW_FAVORITES_COMPONENTS_DEFAULT);
+		commonlyUsedComponentsCheck.setSelection(DesignerPreferences.SHOW_COMMONLY_USED_COMPONENTS_DEFAULT);
 		copyPasteOffsetSpinner.setSelection(DesignerPreferences.COPY_PASTE_OFFSET_DEFAULT);
 		commonlyUsedSizeSpinner.setSelection(DesignerPreferences.COMMONLY_USED_SIZE_DEFAULT);
 		stepSizeSpinner.setSelection(DesignerPreferences.STEP_SIZE_DEFAULT);

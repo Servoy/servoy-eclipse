@@ -56,6 +56,8 @@ public class DesignerPreferences
 
 	public static final String METRICS_SETTING = "preferdMetrics";
 	public static final String STEP_SIZE_SETTING = "stepSize";
+	public static final String SHOW_FAVORITES_COMPONENTS_SETTING = "showFavoritesComponents";
+	public static final String SHOW_COMMONLY_USED_COMPONENTS_SETTING = "showCommonlyUsedComponents";
 	public static final String COPY_PASTE_OFFSET_SETTING = "copyPasteOffset";
 	public static final String COMMONLY_USED_SIZE_SETTING = "commonlyUsedSize";
 	public static final String ALIGNMENT_THRESHOLD_SETTING = "alignmentThreshold";
@@ -101,6 +103,8 @@ public class DesignerPreferences
 	public static final String SNAP_TO_GRID = "grid";
 	public static final String SNAP_TO_NONE = "none";
 
+	public static final boolean SHOW_FAVORITES_COMPONENTS_DEFAULT = false;
+	public static final boolean SHOW_COMMONLY_USED_COMPONENTS_DEFAULT = true;
 	public static final int COPY_PASTE_OFFSET_DEFAULT = 10;
 	public static final int COMMONLY_USED_SIZE_DEFAULT = 5;
 	public static final int ALIGNMENT_THRESHOLD_DEFAULT = 3;
@@ -266,6 +270,26 @@ public class DesignerPreferences
 	public void setStepSize(int stepSize, int largeStepSize)
 	{
 		setProperty(STEP_SIZE_SETTING, stepSize + "," + largeStepSize);
+	}
+
+	public boolean getShowFavoritesComponents()
+	{
+		return getProperty(SHOW_FAVORITES_COMPONENTS_SETTING, SHOW_FAVORITES_COMPONENTS_DEFAULT);
+	}
+
+	public void setShowFavoritesComponents(boolean showFavoritesComponents)
+	{
+		setProperty(SHOW_FAVORITES_COMPONENTS_SETTING, showFavoritesComponents);
+	}
+
+	public boolean getShowCommonlyUsedComponents()
+	{
+		return getProperty(SHOW_COMMONLY_USED_COMPONENTS_SETTING, SHOW_COMMONLY_USED_COMPONENTS_DEFAULT);
+	}
+
+	public void setShowCommonlyUsedComponents(boolean showCommonlyUsedComponents)
+	{
+		setProperty(SHOW_COMMONLY_USED_COMPONENTS_SETTING, showCommonlyUsedComponents);
 	}
 
 	public int getCopyPasteOffset()

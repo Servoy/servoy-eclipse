@@ -47,7 +47,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,6 +66,7 @@ import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
 import com.servoy.eclipse.designer.rfb.palette.PaletteFavoritesHandler;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -517,11 +517,12 @@ public class DesignerFilter implements Filter
 					}
 					jsonWriter.endArray();
 					JSONArray jsonArray = new JSONArray(sw.toString());
-					if (PlatformUI.getPreferenceStore().getBoolean("commons"))
+					DesignerPreferences designerPrefs = new DesignerPreferences();
+					if (designerPrefs.getShowCommonlyUsedComponents())
 					{
 						jsonArray = PaletteCommonsHandler.getInstance().insertcommonsCategory(jsonArray);
 					}
-					if (PlatformUI.getPreferenceStore().getBoolean("favorites"))
+					if (designerPrefs.getShowFavoritesComponents())
 					{
 						jsonArray = PaletteFavoritesHandler.getInstance().insertFavoritesCategory(jsonArray);
 					}
