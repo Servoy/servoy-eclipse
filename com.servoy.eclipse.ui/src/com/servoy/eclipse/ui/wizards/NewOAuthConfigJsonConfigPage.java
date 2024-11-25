@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.server.ngclient.OAuthUtils;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
 
 /**
@@ -65,7 +66,8 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 		jsonTextArea = new Text(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		jsonTextArea.setLayoutData(new GridData(GridData.FILL_BOTH));
 		jsonTextArea.addModifyListener(e -> {
-			wizard.updateConfig(new JSONObject(jsonTextArea.getText()));
+			if (jsonTextArea.getText().trim().startsWith("{"))
+				wizard.updateConfig(new JSONObject(jsonTextArea.getText().trim()));
 		});
 
 		setControl(container);
@@ -77,16 +79,16 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 		String api = wizard.getJSON().optString(StatelessLoginHandler.OAUTH_API, "Custom");
 		switch (api)
 		{
-			case "Google" :
+			case OAuthUtils.GOOGLE :
 				url = GOOGLE_DOCS;
 				break;
-			case "Microsoft AD" :
+			case OAuthUtils.MICROSOFT_AD :
 				url = MICROSOFT_DOCS;
 				break;
-			case "LinkedIn" :
+			case OAuthUtils.LINKED_IN :
 				url = LINKEDIN_DOCS;
 				break;
-			case "Apple" :
+			case OAuthUtils.APPLE :
 				url = APPLE_DOCS;
 				break;
 		}
@@ -107,16 +109,16 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 	{
 		switch (api)
 		{
-			case "Google" :
+			case OAuthUtils.GOOGLE :
 				return "<a href=\"" + GOOGLE_DOCS +
 					"\">Google documentation</a>";
-			case "Microsoft AD" :
+			case OAuthUtils.MICROSOFT_AD :
 				return "<a href=\"" + MICROSOFT_DOCS +
 					"\">Microsoft documentation</a>";
-			case "LinkedIn" :
+			case OAuthUtils.LINKED_IN :
 				return "<a href=\"" + LINKEDIN_DOCS +
 					"\">LinkedIn documentation</a>";
-			case "Apple" :
+			case OAuthUtils.APPLE :
 				return "<a href=\"" + APPLE_DOCS +
 					"\">Apple documentation</a>";
 		}

@@ -1,6 +1,7 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -9,6 +10,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -26,9 +28,9 @@ import com.servoy.j2db.util.ServoyJSONObject;
 public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 {
 	private NewOAuthApiPage apiPage;
-	private JSONObject jsonConfig;
 	private Solution solution;
 	private NewOAuthConfigJsonConfigPage advancedPage;
+	private OAuthApiConfiguration model;
 
 	public NewOAuthConfigWizard()
 	{
@@ -47,11 +49,12 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 	@Override
 	public boolean performFinish()
 	{
-		Object service = StatelessLoginHandler.createOauthService(jsonConfig, new HashMap<>(), "http://");
+		JSONObject json = getJSON();
+		Object service = StatelessLoginHandler.createOauthService(json, new HashMap<>(), "http://");
 		if (service != null)
 		{
 			JSONObject original = new ServoyJSONObject(solution.getCustomProperties(), true);
-			original.put("oauth", jsonConfig);
+			original.put("oauth", json);
 			solution.setCustomProperties(ServoyJSONObject.toString(original, true, true, true));
 			EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 			repository.updateNodesInWorkspace(new IPersist[] { solution }, false);
@@ -70,40 +73,51 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 		{
 			solution = activeProject.getEditingSolution();
 			JSONObject original = new ServoyJSONObject(solution.getCustomProperties(), true);
-			jsonConfig = original.optJSONObject(StatelessLoginHandler.OAUTH_CUSTOM_PROPERTIES);
-			if (jsonConfig == null) jsonConfig = new JSONObject();
+			JSONObject jsonConfig = original.optJSONObject(StatelessLoginHandler.OAUTH_CUSTOM_PROPERTIES);
+			if (jsonConfig != null)
+			{
+				try
+				{
+					this.model = (new ObjectMapper()).readValue(jsonConfig.toString(), OAuthApiConfiguration.class);
+				}
+				catch (Exception e)
+				{
+					((WizardPage)getContainer().getCurrentPage()).setErrorMessage("Could not load the configuration.");
+				}
+			}
 		}
 	}
 
 	public JSONObject getJSON()
 	{
-		return jsonConfig;
+		return model != null ? new JSONObject(model.toJson()) : new JSONObject();
 	}
 
 	@Override
 	public boolean canFinish()
 	{
-		// common fields for all APIs
-		if (jsonConfig.optString(StatelessLoginHandler.CLIENT_ID, "").isEmpty() || jsonConfig.optString(StatelessLoginHandler.API_SECRET, "").isEmpty() ||
-			jsonConfig.optString(StatelessLoginHandler.JWKS_URI, "").isEmpty())
-		{
-			return false;
-		}
-
-		if ("Custom".equals(apiPage.getApiSelection()))
-		{
-			if (jsonConfig.optString(StatelessLoginHandler.AUTHORIZATION_BASE_URL, "").isEmpty() ||
-				jsonConfig.optString(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, "").isEmpty())
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return model != null && model.isValid();
 	}
 
 	public void updateConfig(JSONObject jsonObject)
 	{
-		jsonConfig = jsonObject;
+		try
+		{
+			this.model = (new ObjectMapper()).readValue(jsonObject.toString(), OAuthApiConfiguration.class);
+		}
+		catch (Exception e)
+		{
+			//ignore exception on edit
+		}
+	}
+
+	public Optional<OAuthApiConfiguration> getModel()
+	{
+		return Optional.ofNullable(this.model);
+	}
+
+	public void setModel(OAuthApiConfiguration newModel)
+	{
+		this.model = newModel;
 	}
 }
