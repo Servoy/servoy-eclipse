@@ -427,6 +427,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
+            if (item.type === 'menu') return;
             if (this[item.type] === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }
