@@ -165,5 +165,6 @@ public enum UserNodeType
 	CUSTOM_TYPE,
 	MENUS,
 	MENU,
-	MENU_ITEM
+	MENU_ITEM,
+	MENU_FOUNDSETS
 }
