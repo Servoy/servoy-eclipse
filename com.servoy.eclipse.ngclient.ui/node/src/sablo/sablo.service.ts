@@ -17,6 +17,9 @@ export class SabloService {
     private log: LoggerService;
     private inLogCall = false;
 
+    private expectFormToShowOnClientDeferr: Deferred<void>; // see comment from expectFormToShowOnClient()
+    private noOfFormsThatAreGoingToShow: number = 0;
+
     constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private windowRefService: WindowRefService, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SabloService');
         this.windowRefService.nativeWindow.window.addEventListener('beforeunload', () => {
@@ -83,7 +86,6 @@ export class SabloService {
         }
     }
     
-
     public connect(context, queryArgs, websocketUri): WebsocketSession {
         const wsSessionArgs = {
             context,
@@ -116,6 +118,45 @@ export class SabloService {
 
     public resolveDeferedEvent(cmsgid: number, argument: unknown, success: boolean) {
         this.wsSession.resolveDeferedEvent(cmsgid, argument, success);
+    }
+    
+    /**
+     * SHOULD ONLY GET CALLED FROM SERVER-SIDE CODE via websocket!
+     * It is generic; it does not keep track of the form name because one form show might show multilple nested ones;
+     * and this method is currently called only for the main container switch form or a component (for example a tab panel) showing a form.
+     */
+    public expectFormToShowOnClient(expectAFormToShow: boolean) {
+        if (expectAFormToShow) {
+            this.noOfFormsThatAreGoingToShow++;
+            if (this.noOfFormsThatAreGoingToShow == 1) this.expectFormToShowOnClientDeferr = new Deferred();
+        } else {
+            this.noOfFormsThatAreGoingToShow--;
+            if (this.noOfFormsThatAreGoingToShow == 0) {
+                this.expectFormToShowOnClientDeferr.resolve();
+                delete this.expectFormToShowOnClientDeferr;
+            }
+        }
+        // normally this.noOfFormsThatAreGoingToShow is either 0 or 1; it's 1 when server knows it will 'touch' a form that was/will be made visible;
+        // so server already scheduled telling the client to show that form but in an "invokeLater" with a high event execution level... the client-side
+        // code only needs to know this in case a server-to-client component sync API call happens meanwhile, so that it knows it should wait for the form show to arrive and for the
+        // form to be shown on clientt before trying to execute that sync call.
+    }
+    
+    /**
+     * If server is going to send a form show to client soon (it has scheduled an invokeLater with high event queue prio that will trigger a show/switch form
+     * either of the main form or inside a component that can show/hide forms), then this method gives you a way of waiting until that happens.
+     * 
+     * If isExpectingFormToShow() returns false, calling this method will give an exception.
+     */
+    public waitForPendingFormShowFromServer(): Promise<void>  {
+        return this.expectFormToShowOnClientDeferr.promise;
+    }
+
+    /**
+     * see doc of waitForPendingFormShowFromServer().
+     */
+    public isExpectingAFormToShowSoon() {
+        return !!this.expectFormToShowOnClientDeferr;
     }
 
     public getClientnr() {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
-import { LoggerService, LoggerFactory, Deferred, RequestInfoPromise } from '@servoy/public';
+import { LoggerService, LogLevel, LoggerFactory, Deferred, RequestInfoPromise } from '@servoy/public';
 import { ConverterService, IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged, instanceOfUIDestroyAwareValue } from '../sablo/converter.service';
 import { ServoyService } from './servoy.service';
 import { get, set } from 'lodash-es';
@@ -65,38 +65,109 @@ export class FormService {
                     // this is a component API call; execute it
                     // {"call":{"form":"product","bean":"datatextfield1","api":"requestFocus","args":[arg1, arg2]}, // optionally "viewIndex":1 }
                     const componentCall = msg.call;
-                    
 
-                    this.log.spam(this.log.buildMessage(() => ('sbl * Received API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                    if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] Received API call from server: "' + componentCall.api + '" to form ' + componentCall.form
                         + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
 
-                    const callItNow = ((doReturnTheRetVal: boolean) => {
-                        const formComponent = this.formComponentCache.get(componentCall.form) as IFormComponent;
-                        const def = new Deferred();
-                        this.clientFunctionService.waitForLoading().finally(() => {
-                            const retValue = formComponent.callApi(componentCall.bean, componentCall.api, componentCall.args, componentCall.propertyPath);
-                            formComponent.detectChanges();
-                            def.resolve(retValue);
+                    const callItOnceClientFunctionsAreLoaded = ((doReturnTheRetVal: boolean) => {
+                        const def = new Deferred(); // because clientFunctionService.waitForLoading().finally does not return a Promise that we could use directly, we create an explicit defer here in order to have a promise to return
+
+                        if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "callItOnceClientFunctionsAreLoaded" 1 for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                            + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                        this.clientFunctionService.waitForLoading().finally(() => { // this can execute sync right away if there is no need to wait for client functions to load
+                            // as this could execute later, make sure the form is still there
+                            if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
+                                if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "callItOnceClientFunctionsAreLoaded" 2; really calling it now; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                                    + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                                const formComponent = this.formComponentCache.get(componentCall.form) as IFormComponent;
+                                const retValue = formComponent.callApi(componentCall.bean, componentCall.api, componentCall.args, componentCall.propertyPath);
+                                formComponent.detectChanges();
+                                def.resolve(retValue);
+                            } else {
+                                this.log.error(this.log.buildMessage(() => ('[compAPIcalled] calling api ' + componentCall.api + ' in form ' + componentCall.form + ' on component '
+                                    + componentCall.bean + '. Form was loaded but it got unloaded while waiting for clientFunctionServices to load; unexpected... Api call was skipped.')));
+                                def.resolve(undefined);
+                            }
                         });
                         if (doReturnTheRetVal) return def.promise;
                     });
 
                     // if form is loaded just call the api
                     if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
-                        return callItNow(true);
+                        return callItOnceClientFunctionsAreLoaded(true);
                     }
+
+                    // else
+
+                    const waitForFormToShowOnClientThenCallAPI = (doReturnTheRetVal: boolean, timeOutIfItDoesNotShowMS: number) => {
+                        if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "waitForFormToShowOnClientThenCallAPI" for API call from server; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                            + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                        // if form got loaded meanwhile call the API
+                        if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
+                            return callItOnceClientFunctionsAreLoaded(true);
+                        }
+
+                        if (!this.formComponentCache.has(componentCall.form)) {
+                            this.formComponentCache.set(componentCall.form, new Deferred<any>());
+                        }
+                        const deferredFCC = this.formComponentCache.get(componentCall.form) as Deferred<any>;
+
+                        if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "waitForFormToShowOnClientThenCallAPI" will wait for form ui to load; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                            + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                        const cancelled: [boolean] = [ false ];
+                        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                        const thenPromise = deferredFCC.promise.then(() => { if (!cancelled[0]) return callItOnceClientFunctionsAreLoaded(doReturnTheRetVal) });
+                        
+                        if (timeOutIfItDoesNotShowMS > 0) {
+                            // it's either a sync call or a simple async (without wait until form loads) call, and the form ui was not yet loaded; but server said that forms will be made visible soon
+                            
+                            // prepare a promise that resolves when the callItOnceClientFunctionsAreLoaded 'then' promise resolves
+                            // OR gives up and returns undefined if the timeout elapses and it was not called
+                            const deferred = new Deferred<any>();
+                            
+                            if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] api call will time-out if form does not load soon; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                                + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                            const timeout = setTimeout(() => {
+                                this.log.error(this.log.buildMessage(() => ('[compAPIcalled] Error; api call timed out waiting for form UI to load; it will no longer be called; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                                    + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                                cancelled[0] = true;
+                                deferred.resolve(undefined);
+                            }, timeOutIfItDoesNotShowMS);
+                            thenPromise.then((rv) => {
+                                if (!cancelled[0]) {
+                                    deferred.resolve(rv);
+                                    clearTimeout(timeout);
+                                }
+                            });
+                            return deferred.promise;
+                        } else return thenPromise; // it a delayUntilFormLoads async call
+                    }
+                    
                     if (!componentCall.delayUntilFormLoads) {
-                        // form is not loaded yet, api cannot wait; i think this should be an error
-                        this.log.error(this.log.buildMessage(() => ('calling api ' + componentCall.api + ' in form ' + componentCall.form + ' on component '
-                            + componentCall.bean + '. Form not loaded and api cannot be delayed. Api call was skipped.')));
-                        return;
+                        if (this.sabloService.isExpectingAFormToShowSoon()) {
+                            // it could be that the needed form is already scheduled to show (on server-side) but it's not yet sent to client
+                            // (if this call to client-side API was initiated by solution onShow handler code)
+                            return this.sabloService.waitForPendingFormShowFromServer().finally(() => {
+                                return waitForFormToShowOnClientThenCallAPI(true, 3000);
+                            });
+                        } else {
+                            // form is not loaded yet, api cannot wait; the server did not notify that a form show
+                            // will happen soon (it's not scheduled on the event thread serverside); this should be an error
+                            // (calling api calls - sync or async - that do no have 'delayUntilFormLoads', the form is not loaded on client,
+                            // and no form is going to show in moments... probably solution code does this calls on non-visible forms... that is not supported)
+                            this.log.error(this.log.buildMessage(() => ('[compAPIcalled] Error calling api ' + componentCall.api + ' in form ' + componentCall.form + ' on component '
+                                + componentCall.bean + '. Form not loaded, no form show expected, and the api cannot be delayed. Api call was skipped.')));
+                            return;
+                        }
+                    } else {
+                        waitForFormToShowOnClientThenCallAPI(false, -1); // it's a an async call with wait until form loads; no need to return anything
                     }
-                    if (!this.formComponentCache.has(componentCall.form)) {
-                        this.formComponentCache.set(componentCall.form, new Deferred<any>());
-                    }
-                    const deferred = this.formComponentCache.get(componentCall.form) as Deferred<any>;
-                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                    deferred.promise.then(() => callItNow(false));
                 }
             });
         }).catch((error) => {
@@ -255,7 +326,12 @@ export class FormService {
     }
         
     public resolveComponentCache(form: IFormComponent): void {
-        if (this.formComponentCache.get(form.name) instanceof Deferred) {
+        const previousValue = this.formComponentCache.get(form.name);
+        if (!previousValue || previousValue instanceof Deferred) {
+            this.sabloService.callService('formService', 'formLoaded', { formname: form.name }, true);
+        }
+        
+        if (previousValue instanceof Deferred) {
             (this.formComponentCache.get(form.name) as Deferred<any>).resolve(null);
         }
         this.formComponentCache.set(form.name, form);
@@ -288,7 +364,12 @@ export class FormService {
     }
 
     public destroy(formName: string) {
+        const previousFormUI = this.formComponentCache.get(formName);
         this.formComponentCache.delete(formName);
+
+        if (previousFormUI && !(previousFormUI instanceof Deferred))
+            this.sabloService.callService('formService', 'formUnloaded', { formname: formName }, true);
+
         const form = this.formsCache.get(formName);
         if (form) {
             form.componentCache.forEach((comp) => {
