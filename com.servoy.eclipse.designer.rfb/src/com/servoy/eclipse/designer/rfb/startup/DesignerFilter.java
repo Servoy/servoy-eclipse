@@ -316,7 +316,7 @@ public class DesignerFilter implements Filter
 							jsonWriter.array();
 							fl.getMenus(true).forEachRemaining(menu -> {
 								jsonWriter.object();
-								jsonWriter.key("name").value(menu.getName());
+								jsonWriter.key("name").value("servoymenu-" + menu.getName());
 								jsonWriter.key("componentType").value("jsmenu");
 								jsonWriter.key("displayName").value(menu.getName());
 								jsonWriter.key("icon").value("rfb/angular/images/column.png");
