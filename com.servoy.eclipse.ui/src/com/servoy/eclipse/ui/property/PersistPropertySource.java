@@ -1921,7 +1921,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
 			{
-				boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
+				boolean add = object.getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
 					!((WebComponent)object).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
 				if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
 				{
@@ -2049,8 +2049,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			Solution solution = (Solution)persist.getRootObject();
 
-			boolean multiSelect = solution.getSolutionType() != SolutionMetaData.MOBILE &&
-				PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(persist)).size() > 0;
+			boolean multiSelect = PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(persist)).size() > 0;
 			if (!multiSelect && ((form != null && form.isResponsiveLayout()) || SolutionMetaData.isNGOnlySolution(solution.getSolutionType())))
 			{
 				// responsive forms or ng-client solution: use multi-select for style class
