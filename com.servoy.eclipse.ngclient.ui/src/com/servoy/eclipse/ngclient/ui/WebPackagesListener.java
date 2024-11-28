@@ -86,6 +86,7 @@ import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.SerialRule;
 import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
+import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;

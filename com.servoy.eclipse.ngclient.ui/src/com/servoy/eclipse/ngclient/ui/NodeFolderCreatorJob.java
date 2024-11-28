@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Bundle;
 
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Utils;
 
 /**
