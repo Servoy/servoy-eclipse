@@ -23,7 +23,7 @@ import com.servoy.j2db.server.ngclient.OAuthUtils;
 public class NewOAuthApiPage extends WizardPage
 {
 	private static final String CUSTOM = "Custom";
-	private static final String[] items = new String[] { OAuthUtils.GOOGLE, OAuthUtils.MICROSOFT_AD, OAuthUtils.APPLE, OAuthUtils.LINKED_IN, CUSTOM };
+	private static final String[] items = new String[] { OAuthUtils.GOOGLE, OAuthUtils.MICROSOFT_AD, OAuthUtils.APPLE, OAuthUtils.OKTA, OAuthUtils.LINKED_IN, CUSTOM };
 
 	private Combo apiCombo;
 	private Text authorizationBaseUrlText;
@@ -254,9 +254,8 @@ public class NewOAuthApiPage extends WizardPage
 				case OAuthUtils.MICROSOFT_AD :
 					model.setApi(OAuthUtils.MICROSOFT_AD);
 					model.setJwksUri(OAuthUtils.MICROSOFT_JWKS);
-					model.setDefaultTenant("common"); // default tenant for Microsoft
 					model.setScope("openid email");
-					model.setTenant("");
+					model.setCustomParameter("tenant", "common");
 					break;
 
 				case OAuthUtils.APPLE :
@@ -264,6 +263,13 @@ public class NewOAuthApiPage extends WizardPage
 					model.setJwksUri(OAuthUtils.APPLE_JWKS);
 					model.setScope("name email");
 					model.setAdditionalParameter("response_mode", "form_post");
+					break;
+
+				case OAuthUtils.OKTA :
+					model.setApi(OAuthUtils.OKTA);
+					model.setJwksUri(OAuthUtils.OKTA_JWKS);
+					model.setScope("openid profile email");
+					model.setCustomParameter("domain", "");
 					break;
 
 				case OAuthUtils.LINKED_IN :

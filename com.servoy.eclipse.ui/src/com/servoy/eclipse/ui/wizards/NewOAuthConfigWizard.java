@@ -17,6 +17,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.ngclient.OAuthUtils;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -50,7 +51,7 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 	public boolean performFinish()
 	{
 		JSONObject json = getJSON();
-		Object service = StatelessLoginHandler.createOauthService(json, new HashMap<>(), "http://");
+		Object service = OAuthUtils.createOauthService(json, new HashMap<>(), "http://");
 		if (service != null)
 		{
 			JSONObject original = new ServoyJSONObject(solution.getCustomProperties(), true);
@@ -104,6 +105,7 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 		try
 		{
 			this.model = (new ObjectMapper()).readValue(jsonObject.toString(), OAuthApiConfiguration.class);
+			getContainer().updateButtons();
 		}
 		catch (Exception e)
 		{

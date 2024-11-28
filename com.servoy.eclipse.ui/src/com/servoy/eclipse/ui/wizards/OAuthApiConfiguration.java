@@ -2,6 +2,8 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -17,6 +19,7 @@ import com.servoy.j2db.server.ngclient.OAuthUtils;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OAuthApiConfiguration
 {
+	private static Pattern placeholderPattern = Pattern.compile("\\{([^}]+)}");
 
 	@JsonProperty("api")
 	private String api;
@@ -33,13 +36,11 @@ public class OAuthApiConfiguration
 	@JsonProperty("defaultScope")
 	private String scope;
 
-	@JsonIgnore
-	private String defaultTenantId;
-
-	@JsonProperty("tenant")
-	private String tenant; // nullable, only for APIs that support tenants
-
 	private final Map<String, String> additionalParameters = new HashMap<>(); // flattened in JSON
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	@JsonProperty("customParameters")
+	private Map<String, String> customParameters;
 
 	//nullable, only for custom api
 	@JsonProperty("authorizationBaseUrl")
@@ -86,10 +87,62 @@ public class OAuthApiConfiguration
 
 	public String getJwksUri()
 	{
-		if (jwksUri == null) return jwksUri;
-		String effectiveTenant = (tenant == null || tenant.trim().isEmpty()) ? defaultTenantId : tenant;
+		if (jwksUri == null) return null;
+
 		String jwks = OAuthUtils.getJWKS_URI(this.api);
-		return jwks != null && jwks.contains("{tenant}") ? jwks.replace("{tenant}", effectiveTenant) : jwksUri;
+		if (jwks != null && jwks.contains("{"))
+		{
+			return replacePlaceholders(jwks);
+		}
+		return jwksUri;
+	}
+
+	private String replacePlaceholders(String jwks)
+	{
+		if (customParameters == null || customParameters.isEmpty())
+		{
+			return jwks; // no replacements if no custom parameters
+		}
+
+		StringBuilder updatedJwks = new StringBuilder(jwks);
+		Matcher matcher = placeholderPattern.matcher(jwks);
+
+		while (matcher.find())
+		{
+			String placeholder = matcher.group(1);
+			String replacement = customParameters.getOrDefault(placeholder, "");
+			if (!replacement.isEmpty())
+			{
+				int start = matcher.start();
+				int end = matcher.end();
+				updatedJwks.replace(start, end, replacement);
+				matcher = placeholderPattern.matcher(updatedJwks);
+			}
+		}
+		return updatedJwks.toString();
+	}
+
+	public void setCustomParameter(String key, String value)
+	{
+		if (this.customParameters == null)
+		{
+			this.customParameters = new HashMap<>();
+		}
+		this.customParameters.put(key, value);
+	}
+
+	public Map<String, String> getCustomParameters()
+	{
+		if (this.customParameters == null)
+		{
+			this.customParameters = new HashMap<>();
+		}
+		return this.customParameters;
+	}
+
+	public void setCustomParameters(Map<String, String> customParameters)
+	{
+		this.customParameters = customParameters != null ? customParameters : new HashMap<>();
 	}
 
 	public void setJwksUri(String jwksUrl)
@@ -105,21 +158,6 @@ public class OAuthApiConfiguration
 	public void setScope(String scope)
 	{
 		this.scope = scope;
-	}
-
-	public void setDefaultTenant(String defaultTenant)
-	{
-		this.defaultTenantId = defaultTenant;
-	}
-
-	public String getTenant()
-	{
-		return tenant;
-	}
-
-	public void setTenant(String tenant)
-	{
-		this.tenant = tenant;
 	}
 
 	@JsonAnyGetter
@@ -191,7 +229,7 @@ public class OAuthApiConfiguration
 	@JsonIgnore
 	public boolean isValid()
 	{
-		if (isNullOrEmpty(getClientId()) || isNullOrEmpty(getClientSecret()) || isNullOrEmpty(getJwksUri()))
+		if (isNullOrEmpty(getClientId()) || isNullOrEmpty(getClientSecret()) || isNullOrEmpty(getJwksUri()) || getJwksUri().contains("{"))
 		{
 			return false;
 		}

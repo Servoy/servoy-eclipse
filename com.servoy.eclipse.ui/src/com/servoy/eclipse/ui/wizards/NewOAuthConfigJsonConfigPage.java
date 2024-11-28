@@ -17,7 +17,6 @@ import org.json.JSONObject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.server.ngclient.OAuthUtils;
-import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
 
 /**
  * @author emera
@@ -28,6 +27,7 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 	private static final String GOOGLE_DOCS = "https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow#oauth-2.0-endpoints";
 	private static final String APPLE_DOCS = "https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api";
 	private static final String LINKEDIN_DOCS = "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?tabs=HTTPS1";
+	private static final String OKTA_DOCS = "https://developer.okta.com/docs/api/openapi/okta-oauth/guides/overview";
 
 	private Text jsonTextArea;
 	private final NewOAuthConfigWizard wizard;
@@ -57,7 +57,7 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 		warn_ = new Link(container, SWT.WRAP);
 		warn_.setLayoutData(data);
 		StringBuilder text = new StringBuilder("Adjustments to the configuration must be made according to the ");
-		String api = wizard.getJSON().optString(StatelessLoginHandler.OAUTH_API, "Custom");
+		String api = wizard.getJSON().optString(OAuthUtils.OAUTH_API, "Custom");
 		text.append(getDocumentationLink(api));
 		warn_.setText(text.toString());
 		warn_.addListener(SWT.Selection, event -> openLinkInBrowser());
@@ -76,7 +76,7 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 	private void openLinkInBrowser()
 	{
 		String url = null;
-		String api = wizard.getJSON().optString(StatelessLoginHandler.OAUTH_API, "Custom");
+		String api = wizard.getJSON().optString(OAuthUtils.OAUTH_API, "Custom");
 		switch (api)
 		{
 			case OAuthUtils.GOOGLE :
@@ -90,6 +90,9 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 				break;
 			case OAuthUtils.APPLE :
 				url = APPLE_DOCS;
+				break;
+			case OAuthUtils.OKTA :
+				url = OKTA_DOCS;
 				break;
 		}
 		if (url != null)
@@ -121,6 +124,9 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 			case OAuthUtils.APPLE :
 				return "<a href=\"" + APPLE_DOCS +
 					"\">Apple documentation</a>";
+			case OAuthUtils.OKTA :
+				return "<a href=\"" + OKTA_DOCS +
+					"\">Okta documentation</a>";
 		}
 		return "documentation of the selected provider.\n";
 	}
@@ -144,7 +150,7 @@ public class NewOAuthConfigJsonConfigPage extends WizardPage
 		super.setVisible(visible);
 		updateJsonContent();
 		StringBuilder text = new StringBuilder("New parameters and adjustments to the configuration must be made according to the ");
-		String api = wizard.getJSON().optString(StatelessLoginHandler.OAUTH_API, "Custom");
+		String api = wizard.getJSON().optString(OAuthUtils.OAUTH_API, "Custom");
 		text.append(getDocumentationLink(api));
 		warn_.setText(text.toString());
 	}
