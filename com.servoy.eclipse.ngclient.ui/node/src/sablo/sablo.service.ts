@@ -224,6 +224,8 @@ export class SabloService {
      * return it back to the user (component/service code).   
      */
     public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): RequestInfoPromise<T> {
+        if (!this.wsSession) return; // in designer, designform_component.component.ts can for example call resolve form component - and that can end up in a service call (formLoaded); but that one doesn't have a wsSession; so avoid the error
+        
         const promise = this.wsSession.callService<T>(serviceName, methodName, argsObject, async);
         return async ? promise : this.waitForServiceCallbacks<T>(promise, [100, 200, 500, 1000, 3000, 5000]);
     }
