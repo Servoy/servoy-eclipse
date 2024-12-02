@@ -40,6 +40,7 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
@@ -51,6 +52,7 @@ import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -119,6 +121,11 @@ public class FormatCellEditor extends TextDialogCellEditor
 					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponentClassName);
 					pd = spec.getProperty(propertyName);
 
+				}
+				else if (persist instanceof IFormElement)
+				{
+					WebObjectSpecification spec = FormTemplateGenerator.getWebObjectSpecification((IFormElement)persist);
+					pd = spec.getProperty(propertyName);
 				}
 				if (pd != null)
 				{
