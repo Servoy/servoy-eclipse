@@ -179,7 +179,7 @@ public class ColumnComposite extends Composite
 					tabFolder.setVisible(b);
 					if (b) propagateSelection(c);
 					tableViewer.getTable().setToolTipText(c.getNote());
-					ColumnComposite.this.layout(true, true);
+					//ColumnComposite.this.layout(true, true);
 
 					Display.getDefault().asyncExec(new Runnable()
 					{
