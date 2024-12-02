@@ -89,7 +89,7 @@ export class PopupFormService {
             }, 50);
         } else {
             this.sequencePopup = false;
-            if (popup.component == this.clickedComponentId) {
+            if (popup.component && popup.component == this.clickedComponentId) {
                 this.sequencePopup = true;
             }
             this.formPopupComponent = this.mainViewRefService.mainContainer.createComponent(ServoyFormPopupComponent);
@@ -106,7 +106,7 @@ export class PopupFormService {
     private formPopupBodyListener = (event: Event) => {
 
         const target = event.target as HTMLElement;
-        if (target && target.id) {
+        if (target && target.id && this.formPopupComponent) {
             this.clickedComponentId = target.id;
             this.x = this.formPopupComponent.instance._left;
             this.y = this.formPopupComponent.instance._top;
