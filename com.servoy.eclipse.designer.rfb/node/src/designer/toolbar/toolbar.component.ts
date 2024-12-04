@@ -212,6 +212,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 this.applyHideInherited(result);
             }
         });
+        
         const solutionLayoutsCssPromise = this.editorSession.isShowSolutionLayoutsCss();
         void solutionLayoutsCssPromise.then((result: boolean) => {
             if (!result) {
@@ -223,9 +224,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         const solutionCssPromise = this.editorSession.isShowSolutionCss();
         void solutionCssPromise.then((result: boolean) => {
             if (!result) {
-                this.btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
+            this.btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
+            this.editorContentService.executeOnlyAfterInit(() => {
                 this.setShowSolutionCss(result);
-            }
+            });
+        }
             this.editorSession.getState().showSolutionCss = result;
         });
         const zoomLevelPromise = this.editorSession.getZoomLevel();
