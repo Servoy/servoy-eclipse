@@ -953,9 +953,13 @@ public class SolutionExplorerTreeContentProvider
 					{
 						addFormNodeChildren(un);
 					}
-					else if (type == UserNodeType.MENUS || type == UserNodeType.MENU_FOUNDSETS)
+					else if (type == UserNodeType.MENUS)
 					{
-						addMenusNodeChildren(un, type == UserNodeType.MENUS);
+						addMenusNodeChildren(un, UserNodeType.MENU, true);
+					}
+					else if (type == UserNodeType.MENU_FOUNDSETS)
+					{
+						addMenusNodeChildren(un, UserNodeType.MENU_FOUNDSET, false);
 					}
 					else if (type == UserNodeType.SERVERS)
 					{
@@ -2036,7 +2040,7 @@ public class SolutionExplorerTreeContentProvider
 		return false;
 	}
 
-	private void addMenusNodeChildren(PlatformSimpleUserNode menusNode, boolean addChildren)
+	private void addMenusNodeChildren(PlatformSimpleUserNode menusNode, UserNodeType childType, boolean addChildren)
 	{
 		Solution solution = (Solution)menusNode.getRealObject();
 		List<PlatformSimpleUserNode> menuNodes = new ArrayList<PlatformSimpleUserNode>();
@@ -2045,7 +2049,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			Menu menu = it.next();
 
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), UserNodeType.MENU, "", "", menu,
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), childType, "", "", menu,
 				uiActivator.loadImageFromBundle("column.png"));
 			menuNodes.add(node);
 			node.parent = menusNode;
@@ -3483,11 +3487,11 @@ public class SolutionExplorerTreeContentProvider
 						else if (persist instanceof Menu)
 						{
 							PlatformSimpleUserNode menusNode = findChildNode(node, Messages.TreeStrings_Menus);
-							addMenusNodeChildren(menusNode, true);
+							addMenusNodeChildren(menusNode, UserNodeType.MENU, true);
 							view.refreshTreeNodeFromModel(menusNode);
 
 							PlatformSimpleUserNode menuFoundsetsNode = findChildNode(node, Messages.TreeStrings_MenuFoundsets);
-							addMenusNodeChildren(menuFoundsetsNode, false);
+							addMenusNodeChildren(menuFoundsetsNode, UserNodeType.MENU_FOUNDSET, false);
 							view.refreshTreeNodeFromModel(menuFoundsetsNode);
 						}
 					}

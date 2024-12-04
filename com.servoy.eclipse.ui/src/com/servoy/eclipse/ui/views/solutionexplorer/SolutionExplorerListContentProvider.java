@@ -135,6 +135,8 @@ import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
+import com.servoy.j2db.dataprocessing.datasource.JSMenuDataSource;
+import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
@@ -163,6 +165,8 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
@@ -490,6 +494,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createViewFoundsets(((ViewFoundsetsServer)un.getRealObject()).getServoyProject(), includeModules);
 			}
+			else if (type == UserNodeType.MENU_FOUNDSETS)
+			{
+				lm = createMenuFoundsets((Solution)un.getRealObject());
+			}
+			else if (type == UserNodeType.MENU_FOUNDSET)
+			{
+				String prefix = ".menu." + ((Menu)un.getRealObject()).getName();
+				lm = getJSMethods(JSMenuDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.MENU_FOUNDSET, null, null);
+			}
 			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
 				lm = createViews((IServerInternal)un.getRealObject());
@@ -607,11 +620,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.MENU)
 			{
-				lm = getJSMethods(JSMenu.class, IExecutingEnviroment.TOPLEVEL_MENUS, null, UserNodeType.MENU, null, null);
+				String prefix = ".getMenu('" + ((Menu)un.getRealObject()).getName() + "')";
+				lm = getJSMethods(JSMenu.class, IExecutingEnviroment.TOPLEVEL_MENUS + prefix, null, UserNodeType.MENU, null, null);
 			}
 			else if (type == UserNodeType.MENU_ITEM)
 			{
-				lm = getJSMethods(JSMenuItem.class, IExecutingEnviroment.TOPLEVEL_MENUS, null, UserNodeType.MENU_ITEM, null, null);
+				MenuItem item = (MenuItem)un.getRealObject();
+				String prefix = ".getMenu('" + ((Menu)item.getParent()).getName() + "').getMenuItem('" + item.getName() + "')";
+				lm = getJSMethods(JSMenuItem.class, IExecutingEnviroment.TOPLEVEL_MENUS + prefix, null, UserNodeType.MENU_ITEM, null, null);
 			}
 			else if (type == UserNodeType.PLUGINS)
 			{
@@ -1370,6 +1386,23 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return createTables(servoyProject, bIncludeModules, UserNodeType.VIEW_FOUNDSET);
 	}
 
+
+	public static SimpleUserNode[] createMenuFoundsets(Solution solution)
+	{
+		List<PlatformSimpleUserNode> menuNodes = new ArrayList<PlatformSimpleUserNode>();
+		Iterator<Menu> it = solution.getMenus(true);
+		while (it.hasNext())
+		{
+			Menu menu = it.next();
+
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), UserNodeType.MENU_FOUNDSET, "", "", menu,
+				uiActivator.loadImageFromBundle("column.png"));
+			menuNodes.add(node);
+		}
+		return menuNodes.toArray(new SimpleUserNode[menuNodes.size()]);
+	}
+
+
 	private static SimpleUserNode[] createTables(ServoyProject servoyProject, boolean bIncludeModules, UserNodeType nodeType)
 	{
 		ArrayList<SimpleUserNode> serverNodeChildren = new ArrayList<SimpleUserNode>();
@@ -1875,7 +1908,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						{
 							if (node.getOperationText().trim().equals("=") && node.getLeftExpression() instanceof PropertyExpression)
 							{
-								String expr = ((PropertyExpression)node.getLeftExpression()).toString();
+								String expr = node.getLeftExpression().toString();
 								if (expr.startsWith("$scope.api") || expr.startsWith("scope.api"))
 								{
 									WebObjectFunctionDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
