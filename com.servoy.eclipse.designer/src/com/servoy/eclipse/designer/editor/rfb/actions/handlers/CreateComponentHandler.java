@@ -110,7 +110,7 @@ public class CreateComponentHandler implements IServerService
 		}
 		final String[] menuName = new String[] { null };
 		final String[] menuPropertyName = new String[] { null };
-		if (options.getName().startsWith("servoymenu-"))
+		if (options.getName() != null && options.getName().startsWith("servoymenu-"))
 		{
 			List<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
 			WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();

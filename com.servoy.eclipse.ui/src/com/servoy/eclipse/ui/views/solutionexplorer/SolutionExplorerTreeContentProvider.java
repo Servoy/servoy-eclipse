@@ -2048,8 +2048,13 @@ public class SolutionExplorerTreeContentProvider
 		while (it.hasNext())
 		{
 			Menu menu = it.next();
+			String tooltip = "Menu node " + menu.getName() + " for creating a menu";
+			if (childType == UserNodeType.MENU_FOUNDSET)
+			{
+				tooltip = "Menu based datasource: <b>'menu:" + menu.getName() + "'</b>";
+			}
 
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), childType, "", "", menu,
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), childType, "", tooltip, menu,
 				uiActivator.loadImageFromBundle("column.png"));
 			menuNodes.add(node);
 			node.parent = menusNode;
@@ -2068,7 +2073,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			if (persist instanceof MenuItem menuItem)
 			{
-				PlatformSimpleUserNode node = new PlatformSimpleUserNode(menuItem.getName(), UserNodeType.MENU_ITEM, "", "", menuItem,
+				PlatformSimpleUserNode node = new PlatformSimpleUserNode(menuItem.getName(), UserNodeType.MENU_ITEM, "", "Menu item", menuItem,
 					uiActivator.loadImageFromBundle("class.png"));
 				menuNodes.add(node);
 				node.parent = parentNode;
