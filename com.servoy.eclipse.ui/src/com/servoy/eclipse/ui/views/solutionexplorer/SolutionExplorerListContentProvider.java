@@ -680,6 +680,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				String prefix = '.' + DataSourceUtils.INMEM_DATASOURCE + '.' + ((IDataSourceWrapper)un.getRealObject()).getTableName();
 				lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
 			}
+			else if (type == UserNodeType.VIEW_FOUNDSET)
+			{
+				String prefix = '.' + DataSourceUtils.VIEW_DATASOURCE + '.' + ((IDataSourceWrapper)un.getRealObject()).getTableName();
+				lm = getJSMethods(JSViewDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null,
+					null);
+			}
 			else if (type == UserNodeType.TABLE)
 			{
 				String prefix = '.' + DataSourceUtilsBase.DB_DATASOURCE_SCHEME + '.' + ((TableWrapper)un.getRealObject()).getServerName() + '.' +
