@@ -626,7 +626,23 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.MENU_ITEM)
 			{
 				MenuItem item = (MenuItem)un.getRealObject();
-				String prefix = ".getMenu('" + ((Menu)item.getParent()).getName() + "').getMenuItem('" + item.getName() + "')";
+				List<MenuItem> menuItemsHierarchy = new ArrayList<>();
+				menuItemsHierarchy.add(item);
+				while (item.getParent() instanceof MenuItem mi)
+				{
+					menuItemsHierarchy.add(mi);
+					item = mi;
+				}
+				StringBuilder prefix = new StringBuilder();
+				prefix.append(".getMenu('");
+				prefix.append(((Menu)item.getParent()).getName());
+				for (int i = menuItemsHierarchy.size(); --i >= 0;)
+				{
+					prefix.append("').getMenuItem('");
+					prefix.append(menuItemsHierarchy.get(i).getName());
+				}
+				prefix.append("')");
+				;
 				lm = getJSMethods(JSMenuItem.class, IExecutingEnviroment.TOPLEVEL_MENUS + prefix, null, UserNodeType.MENU_ITEM, null, null);
 			}
 			else if (type == UserNodeType.PLUGINS)
@@ -1389,13 +1405,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static SimpleUserNode[] createMenuFoundsets(Solution solution)
 	{
-		List<PlatformSimpleUserNode> menuNodes = new ArrayList<PlatformSimpleUserNode>();
+		List<SimpleUserNode> menuNodes = new ArrayList<>();
 		Iterator<Menu> it = solution.getMenus(true);
 		while (it.hasNext())
 		{
 			Menu menu = it.next();
 
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), UserNodeType.MENU_FOUNDSET, "", "", menu,
+			SimpleUserNode node = new SimpleUserNode(menu.getName(), UserNodeType.MENU_FOUNDSET,
+				new DataSourceFeedback(DataSourceUtils.createMenuDataSource(menu.getName()), false), (Object)menu,
 				uiActivator.loadImageFromBundle("column.png"));
 			menuNodes.add(node);
 		}
