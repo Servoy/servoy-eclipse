@@ -183,7 +183,8 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		}
 		else
 		{
-			if (!txt.startsWith(DataSourceUtilsBase.DB_DATASOURCE_SCHEME_COLON_SLASH) && !txt.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
+			if (!txt.startsWith(DataSourceUtilsBase.DB_DATASOURCE_SCHEME_COLON_SLASH) && !txt.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) &&
+				!txt.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON))
 			{
 				IFile file = ed.getEditorInput().getAdapter(IFile.class);
 				if (file.getName().toLowerCase().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
