@@ -1389,13 +1389,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static SimpleUserNode[] createMenuFoundsets(Solution solution)
 	{
-		List<PlatformSimpleUserNode> menuNodes = new ArrayList<PlatformSimpleUserNode>();
+		List<SimpleUserNode> menuNodes = new ArrayList<>();
 		Iterator<Menu> it = solution.getMenus(true);
 		while (it.hasNext())
 		{
 			Menu menu = it.next();
 
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), UserNodeType.MENU_FOUNDSET, "", "", menu,
+			SimpleUserNode node = new SimpleUserNode(menu.getName(), UserNodeType.MENU_FOUNDSET,
+				new DataSourceFeedback(DataSourceUtils.createMenuDataSource(menu.getName()), false), (Object)menu,
 				uiActivator.loadImageFromBundle("column.png"));
 			menuNodes.add(node);
 		}
