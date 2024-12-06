@@ -93,7 +93,7 @@ public class SetSelectionHandler implements IServerService
 				selectionProvider.setSelection(selection.size() == 0 ? null : structuredSelection);
 
 				// if a set selection came from the browser, then this should have focus and should be the active part
-				if (editorPart != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
+				if (selection.size() > 0 && editorPart != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
 				{
 					// if that is not the case make it active, can happen in certain conditions
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
