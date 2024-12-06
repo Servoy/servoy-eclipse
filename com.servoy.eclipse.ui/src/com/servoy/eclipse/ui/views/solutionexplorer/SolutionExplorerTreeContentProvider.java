@@ -3495,9 +3495,16 @@ public class SolutionExplorerTreeContentProvider
 							addMenusNodeChildren(menusNode, UserNodeType.MENU, true);
 							view.refreshTreeNodeFromModel(menusNode);
 
-							PlatformSimpleUserNode menuFoundsetsNode = findChildNode(node, Messages.TreeStrings_MenuFoundsets);
-							addMenusNodeChildren(menuFoundsetsNode, UserNodeType.MENU_FOUNDSET, false);
-							view.refreshTreeNodeFromModel(menuFoundsetsNode);
+							PlatformSimpleUserNode menuFoundsetsNode = findChildNode(node, Messages.TreeStrings_Datasources);
+							if (menuFoundsetsNode != null)
+							{
+								menuFoundsetsNode = findChildNode(menuFoundsetsNode, Messages.TreeStrings_MenuFoundsets);
+								if (menuFoundsetsNode != null)
+								{
+									addMenusNodeChildren(menuFoundsetsNode, UserNodeType.MENU_FOUNDSET, false);
+									view.refreshTreeNodeFromModel(menuFoundsetsNode);
+								}
+							}
 						}
 					}
 				}
