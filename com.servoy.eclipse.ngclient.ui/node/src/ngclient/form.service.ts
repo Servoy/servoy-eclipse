@@ -133,7 +133,7 @@ export class FormService {
                                 + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
 
                             const timeout = setTimeout(() => {
-                                this.log.error(this.log.buildMessage(() => ('[compAPIcalled] Error; api call timed out waiting for form UI to load; it will no longer be called; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                                this.log.error(this.log.buildMessage(() => ('[compAPIcalled] Error; non-delayed api call timed out waiting for form UI to load; it will no longer be called; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
                                     + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
 
                                 cancelled[0] = true;
@@ -142,6 +142,14 @@ export class FormService {
                             thenPromise.then((rv) => {
                                 if (!cancelled[0]) {
                                     deferred.resolve(rv);
+                                    clearTimeout(timeout);
+                                }
+                            }, () => {
+                                if (!cancelled[0]) {
+                                    this.log.error(this.log.buildMessage(() => ('[compAPIcalled] Error; non-delayed api call cancelled waiting for form UI to load; but the form was destroyed; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                                        + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+    
+                                    deferred.resolve(undefined);
                                     clearTimeout(timeout);
                                 }
                             });
@@ -435,6 +443,10 @@ export class FormService {
 
     public destroyFormCache(formName: string) {
         this.formsCache.delete(formName);
+        
+        const previousValue = this.formComponentCache.get(formName);
+        if (previousValue instanceof Deferred) previousValue.reject("Form " + formName + " was destroyed on server. Rejecting and clearing client side form ui defer in order to avoid leaks.");
+
         this.formComponentCache.delete(formName);
     }
 
