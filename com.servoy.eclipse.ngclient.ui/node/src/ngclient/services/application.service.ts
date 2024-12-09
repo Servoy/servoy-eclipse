@@ -422,9 +422,19 @@ export class ApplicationService {
         return this.windowRefService.nativeWindow.navigator.clipboard.readText();
     }
 
-    public replaceUrlState() {
-        history.replaceState({}, '', this.windowRefService.nativeWindow.location.href.split('?')[0]);
-    }
+	public replaceUrlState(path?: string): void {
+	    const currentUrl = this.windowRefService.nativeWindow.location.href;
+	    const baseUrl = currentUrl.split('?')[0];
+
+	    if (path && baseUrl.indexOf(path) !== -1) {
+	        const pathIndex = baseUrl.indexOf(path);
+	        if (pathIndex !== -1) {
+	            history.replaceState({}, '',  baseUrl.substring(0, pathIndex) + '/index.html');
+	        }
+	    } else {
+	        history.replaceState({}, '', baseUrl);
+	    }
+	}
 
     private showDefaultLoginWindow() {
         const defaultLoginWindowComponent = this.mainViewRefService.mainContainer.createComponent(DefaultLoginWindowComponent);
