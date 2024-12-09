@@ -36,6 +36,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.Debug;
 
 /**
  * @author user
@@ -84,6 +85,7 @@ public class SetSelectionHandler implements IServerService
 				if (group.getElements().hasNext()) selection.add(group);
 			}
 		}
+		Debug.warn("Selection call from the browser for form " + editorPart.getForm().getName() + " with selection : " + json);
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
@@ -97,6 +99,7 @@ public class SetSelectionHandler implements IServerService
 				{
 					// if that is not the case make it active, can happen in certain conditions
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
+					Debug.warn("Making the editor part of the form " + editorPart.getForm().getName() + " active for selection : " + json);
 				}
 
 			}
