@@ -46,6 +46,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTag;
+import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTags;
+import org.eclipse.dltk.javascript.parser.jsdoc.SimpleJSDocParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -220,7 +223,7 @@ public class SpecMarkdownGenerator
 		INGPackageInfoGenerator docGenerator, Map<String, Object> globalRootEntries)
 		throws JSONException, TemplateException, IOException
 	{
-		System.err.println("Generating NG package content");
+		System.out.println("Generating NG package content");
 		for (String dirname : webPackageDirs)
 		{
 			File dir = new File(dirname);
@@ -230,7 +233,7 @@ public class SpecMarkdownGenerator
 			}
 			else
 			{
-				System.err.println("  - NG package dir " + dirname);
+				System.out.println("  - NG package dir " + dirname);
 			}
 
 			// get package name / display name
@@ -287,7 +290,7 @@ public class SpecMarkdownGenerator
 				}
 				catch (RuntimeException e)
 				{
-					System.err.println(contents);
+					System.err.println(e.getMessage());
 					throw e;
 				}
 			}).forEach(generator -> {
@@ -424,7 +427,8 @@ public class SpecMarkdownGenerator
 		root.put("events", makeMap(jsonObject.optJSONObject("handlers"), this::createFunction));
 		Map<String, Object> api = makeMap(jsonObject.optJSONObject("api"), this::createFunction);
 		root.put("api", api);
-		root.put("types", makeTypes(jsonObject.optJSONObject("types")));
+		Object types = makeTypes(jsonObject.optJSONObject("types"));
+		root.put("types", types);
 
 		service = false;
 		JSONObject ng2Config = jsonObject.optJSONObject("ng2Config");
@@ -1191,6 +1195,12 @@ public class SpecMarkdownGenerator
 		{
 			returnType = fullReturnType.optString("type", "");
 		}
+		else if (returnType != null)
+		{
+			fullReturnType = new JSONObject();
+			fullReturnType.put("description", "");
+			fullReturnType.put("type", returnType);
+		}
 
 		String jsDocEquivalent = apiDoc.get(apiDocName);
 		if (jsDocEquivalent == null)
@@ -1198,7 +1208,100 @@ public class SpecMarkdownGenerator
 			jsDocEquivalent = processFunctionJSDoc(createFunctionDocFromSpec(specEntry, params, returnType, fullReturnType,
 				docGenerator.shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt()));
 		}
-		return new Function(name, params, returnType, jsDocEquivalent, deprecationString);
+
+		if (jsDocEquivalent != null)
+		{
+			Pattern pattern = Pattern.compile("^\\s*\\*+\\s*(\\\\\\{[^}]+\\\\\\})?\\s*(\\\\\\[[^\\]]+\\\\\\])?");
+
+			SimpleJSDocParser jsDocParser = new SimpleJSDocParser();
+			JSDocTags jsDocTags = jsDocParser.parse(jsDocEquivalent, 0);
+			int paramIndex = 0;
+			StringBuilder updatedJsDocEquivalent = new StringBuilder(jsDocEquivalent);
+			int delta = 0;
+			for (int index = 0; index < jsDocTags.size(); index++)
+			{
+				JSDocTag jsDocTag = jsDocTags.get(index);
+				if (jsDocTag.name().equals(JSDocTag.PARAM) || jsDocTag.name().equals(JSDocTag.RETURN))
+				{
+					String explanation = extractJSTagExplanation(jsDocTag.value(), pattern);
+					if (explanation == null) continue;
+					if (jsDocTag.name().equals(JSDocTag.PARAM) && params != null)
+					{
+						if (paramIndex > params.size() - 1)
+						{
+							System.err.println("Wrong number of parameters in JSDoc. Please check the documentation and spec for: " + apiDocName);
+							continue;
+						}
+
+						Parameter param = params.get(paramIndex);
+						Parameter newParam = new Parameter(param.name(), param.type(), explanation, param.optional());
+						params.set(paramIndex, newParam);
+						paramIndex++;
+					}
+					else if (jsDocTag.name().equals(JSDocTag.RETURN))
+					{
+						if (fullReturnType == null)
+						{
+							System.err.println("Wrong return in JSDoc. Please check the documentation and spec for: " + apiDocName);
+							fullReturnType = new JSONObject();
+						}
+						fullReturnType.put("description", explanation);
+						fullReturnType.put("type", returnType);
+					}
+
+
+					int tagStart = jsDocTag.start();
+					int tagEnd = jsDocTag.end();
+					try
+					{
+						if (tagStart != -1 && (tagEnd > tagStart))
+						{
+							while (tagStart > 0 && (updatedJsDocEquivalent.charAt(tagStart - delta - 1) == '*'))
+								tagStart--;
+							while (tagEnd < (updatedJsDocEquivalent.length() + delta) &&
+								Character.isWhitespace(updatedJsDocEquivalent.charAt(tagEnd - delta + 1)))
+								tagEnd++;
+							if (tagEnd < updatedJsDocEquivalent.length() + delta) tagEnd++; // end of line
+							updatedJsDocEquivalent = updatedJsDocEquivalent.replace(tagStart - delta, tagEnd - delta, "");
+							delta += (tagEnd - tagStart);
+
+						}
+					}
+					catch (IndexOutOfBoundsException e)
+					{
+						System.err.println(e.getMessage());
+					}
+				}
+			}
+			jsDocEquivalent = updatedJsDocEquivalent.toString();
+		}
+		//make sure the code template generation is not crash
+		if (fullReturnType == null)
+		{
+			//create an empty one
+			fullReturnType = new JSONObject();
+			fullReturnType.put("description", "");
+			fullReturnType.put("type", "");
+		}
+		return new Function(name, params, fullReturnType, jsDocEquivalent, deprecationString);
+	}
+
+	private String extractJSTagExplanation(String input, Pattern pattern)
+	{
+		Matcher matcher = pattern.matcher(input.trim());
+		String explanation = input.trim();
+		if (matcher.find())
+		{
+			// Check if at least one part is present
+			if (matcher.group(1) != null || matcher.group(2) != null)
+			{
+				// Extract the remaining part after the last match
+				explanation = input.substring(matcher.end()).trim();
+
+			}
+		}
+
+		return explanation.isEmpty() ? null : explanation;
 	}
 
 	/**
@@ -1236,15 +1339,17 @@ public class SpecMarkdownGenerator
 
 		if (returnType != null)
 		{
-			if (shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt || (fullReturnType != null && fullReturnType.optString("doc", null) != null))
+			//spec.schema is using "description" for "returns" and not "doc"
+			if (shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt ||
+				(fullReturnType != null && fullReturnType.optString("description", null) != null))
 			{
 
 				somethingWasWritten = true;
 				generatedJSDocCommentFromSpec.append("\n * @return {").append(returnType).append('}');
-				if (fullReturnType != null && fullReturnType.optString("doc", null) != null)
+				if (fullReturnType != null && fullReturnType.optString("description", null) != null)
 				{
 					someDocEntryFromSpecWasWritten = true;
-					generatedJSDocCommentFromSpec.append(fullReturnType.optString("doc"));
+					generatedJSDocCommentFromSpec.append(fullReturnType.optString("description"));
 				}
 			} // else, in markdown generator/docs.servoy.com, parameters are written separately anyway so if we don't have more info, don't write more info
 		}
@@ -1378,7 +1483,7 @@ public class SpecMarkdownGenerator
 		}
 		else if (rcd instanceof Function)
 		{
-			type = ((Function)rcd).returnValue();
+			type = ((Function)rcd).returnValue().getString("type");
 		}
 		if (type != null)
 		{
@@ -1465,13 +1570,33 @@ public class SpecMarkdownGenerator
 	/**
 	 * @param deprecationString null if not deprecated, "true" or a deprecation explanation if deprecated...
 	 */
-	public record Function(String name, List<Parameter> parameters, String returnValue, String doc, String deprecationString)
+	public record Function(String name, List<Parameter> parameters, JSONObject returnValue, String doc, String deprecationString)
 	{
 		@Override
 		public String toString()
 		{
 			return name + '(' + parameters.stream().map(parameter -> parameter.name).collect(Collectors.joining(",")) + ')';
 		}
+
+		public String returnType()
+		{
+			return returnValue != null ? returnValue.optString("type", null) : null;
+		}
+
+		@Override
+		public JSONObject returnValue()
+		{
+			if (returnValue != null)
+			{
+				String type = returnValue.optString("type", null);
+				if (type == null || type != null && type.isBlank())
+				{
+					return null;
+				}
+			}
+			return returnValue;
+		}
+
 	}
 
 	public record Parameter(String name, String type, String doc, boolean optional)

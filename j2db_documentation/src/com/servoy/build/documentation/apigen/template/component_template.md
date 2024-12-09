@@ -57,7 +57,7 @@ Parameters:
 </#if>
 <#if propValue.returnValue()??>
 
-Returns: [${MD(propValue.returnValue())}](${instance.getReturnTypePath(propValue)})  
+Returns: [${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)})
 </#if>
 ***
 </#list>
@@ -76,12 +76,13 @@ ${propValue.doc()?trim}
 <#if propValue.parameters()?has_content>
 Parameters:  
 <#list propValue.parameters() as param> 
-> ${MD(param.name())} [${MD(param.type())}](${instance.getReturnTypePath(param)})<#if param.optional()> (optional)</#if>  
+> ${MD(param.name())} [${MD(param.type())}](${instance.getReturnTypePath(param)}) ${param.doc()} <#if param.optional()> (optional)</#if>  
 </#list>
 </#if>
+
 <#if propValue.returnValue()??>
 
-Returns: [${MD(propValue.returnValue())}](${instance.getReturnTypePath(propValue)})  
+Returns: [${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)})  
 </#if>
 ***
  </#list>
@@ -117,12 +118,12 @@ ${propValue.doc()?trim}
 <#if propValue.parameters()?has_content>
 Parameters:  
 <#list propValue.parameters() as param> 
-> ${MD(param.name())} [${MD(param.type())}](${instance.getReturnTypePath(param)})<#if param.optional()> (optional)</#if>  
+> ${MD(param.name())} [${MD(param.type())}](${instance.getReturnTypePath(param)}) ${param.doc()} <#if param.optional()> (optional)</#if>  
 </#list>
 </#if>
 <#if propValue.returnValue()??>
 
-Returns: [${MD(propValue.returnValue())}](${instance.getReturnTypePath(propValue)})  
+Returns: [${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)}) ${propValue.returnValue().description} 
 </#if>
 ***
  </#list>

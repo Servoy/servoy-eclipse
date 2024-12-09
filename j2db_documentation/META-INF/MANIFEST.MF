@@ -14,7 +14,8 @@ Require-Bundle: com.fasterxml.jackson.core.jackson-annotations;bundle-version="2
  com.servoy.eclipse.core,
  com.servoy.eclipse.debug,
  j2db_server,
- sablo
+ sablo,
+ org.eclipse.dltk.javascript.parser;bundle-version="5.2.0"
 Export-Package: com.servoy.build.documentation
 Import-Package: freemarker.cache,
  freemarker.core,
