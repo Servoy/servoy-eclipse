@@ -1201,8 +1201,21 @@ public class SpecMarkdownGenerator
 			fullReturnType.put("description", "");
 			fullReturnType.put("type", returnType);
 		}
+		String myApiDocName = apiDocName;
+		if (specEntry.optBoolean("overload"))
+		{
+			JSONArray specParams = specEntry.optJSONArray("parameters");
+			if (specParams != null && specParams.length() > 0)
+			{
+				for (int index = 0; index < specParams.length(); index++)
+				{
+					JSONObject param = specParams.getJSONObject(index);
+					myApiDocName += "_" + param.getString("name");
+				}
+			}
+		}
 
-		String jsDocEquivalent = apiDoc.get(apiDocName);
+		String jsDocEquivalent = apiDoc.get(myApiDocName);
 		if (jsDocEquivalent == null)
 		{
 			jsDocEquivalent = processFunctionJSDoc(createFunctionDocFromSpec(specEntry, params, returnType, fullReturnType,
@@ -1211,7 +1224,7 @@ public class SpecMarkdownGenerator
 
 		if (jsDocEquivalent != null)
 		{
-			Pattern pattern = Pattern.compile("^\\s*\\*+\\s*(\\\\\\{[^}]+\\\\\\})?\\s*(\\\\\\[[^\\]]+\\\\\\])?");
+			Pattern pattern = Pattern.compile("^\\s*(\\*{1,2}\\s*)?(\\\\\\{[^}]+\\\\\\})?\\s*(\\\\\\[[^\\]]+\\\\\\])?");
 
 			SimpleJSDocParser jsDocParser = new SimpleJSDocParser();
 			JSDocTags jsDocTags = jsDocParser.parse(jsDocEquivalent, 0);
@@ -1221,10 +1234,11 @@ public class SpecMarkdownGenerator
 			for (int index = 0; index < jsDocTags.size(); index++)
 			{
 				JSDocTag jsDocTag = jsDocTags.get(index);
+				int tagStart = jsDocTag.start();
+				int tagEnd = jsDocTag.end();
 				if (jsDocTag.name().equals(JSDocTag.PARAM) || jsDocTag.name().equals(JSDocTag.RETURN))
 				{
 					String explanation = extractJSTagExplanation(jsDocTag.value(), pattern);
-					if (explanation == null) continue;
 					if (jsDocTag.name().equals(JSDocTag.PARAM) && params != null)
 					{
 						if (paramIndex > params.size() - 1)
@@ -1234,6 +1248,10 @@ public class SpecMarkdownGenerator
 						}
 
 						Parameter param = params.get(paramIndex);
+						if (explanation.indexOf("\\[") > 0 && explanation.indexOf("\\]") > 0)
+						{
+							explanation = explanation.replaceAll("\\\\\\[(\\d)\\\\\\]", "\n>   - [$1]");
+						}
 						Parameter newParam = new Parameter(param.name(), param.type(), explanation, param.optional());
 						params.set(paramIndex, newParam);
 						paramIndex++;
@@ -1248,10 +1266,6 @@ public class SpecMarkdownGenerator
 						fullReturnType.put("description", explanation);
 						fullReturnType.put("type", returnType);
 					}
-
-
-					int tagStart = jsDocTag.start();
-					int tagEnd = jsDocTag.end();
 					try
 					{
 						if (tagStart != -1 && (tagEnd > tagStart))
@@ -1272,11 +1286,18 @@ public class SpecMarkdownGenerator
 						System.err.println(e.getMessage());
 					}
 				}
+				else if (jsDocTag.name().equals(JSDocTag.EXAMPLE))
+				{
+					int exIndex = updatedJsDocEquivalent.indexOf("@example");
+					updatedJsDocEquivalent = updatedJsDocEquivalent.replace(exIndex, exIndex + 8, "Example:");
+
+				}
 			}
 			jsDocEquivalent = updatedJsDocEquivalent.toString();
 		}
 		//make sure the code template generation is not crash
 		if (fullReturnType == null)
+
 		{
 			//create an empty one
 			fullReturnType = new JSONObject();
@@ -1301,7 +1322,7 @@ public class SpecMarkdownGenerator
 			}
 		}
 
-		return explanation.isEmpty() ? null : explanation;
+		return (explanation == null || explanation.isEmpty()) ? "" : explanation;
 	}
 
 	/**
@@ -1452,6 +1473,7 @@ public class SpecMarkdownGenerator
 					if (overloads != null)
 					{
 						overloads.forEach(overload -> {
+							((JSONObject)overload).put("overload", true);
 							Record r = transformer.apply(key, (JSONObject)overload);
 							map.put(r.toString(), r);
 						});
