@@ -428,9 +428,7 @@ export class ApplicationService {
 
 	    if (path && baseUrl.indexOf(path) !== -1) {
 	        const pathIndex = baseUrl.indexOf(path);
-	        if (pathIndex !== -1) {
-	            history.replaceState({}, '',  baseUrl.substring(0, pathIndex) + '/index.html');
-	        }
+	        history.replaceState({}, '',  baseUrl.substring(0, pathIndex) + '/index.html');
 	    } else {
 	        history.replaceState({}, '', baseUrl);
 	    }
