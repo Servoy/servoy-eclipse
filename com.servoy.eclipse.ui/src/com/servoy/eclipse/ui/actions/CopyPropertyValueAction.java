@@ -27,6 +27,7 @@ import org.eclipse.ui.views.properties.IPropertySheetEntry;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.Messages;
 
 /**
  * @author lvostinar
@@ -73,8 +74,15 @@ public class CopyPropertyValueAction extends Action
 		// Assume single selection
 		IPropertySheetEntry entry = (IPropertySheetEntry)selection
 			.getFirstElement();
-
-		setClipboard(entry.getValueAsString());
+		String text = entry.getValueAsString();
+		if (text != null)
+		{
+			if (text.endsWith(Messages.LabelInherited + ")") || text.endsWith(Messages.LabelOverride + ")"))
+			{
+				text = text.substring(0, text.lastIndexOf("(") - 1);
+			}
+		}
+		setClipboard(text);
 	}
 
 	/**
