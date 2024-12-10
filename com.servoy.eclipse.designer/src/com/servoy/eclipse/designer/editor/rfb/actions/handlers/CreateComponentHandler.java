@@ -147,7 +147,7 @@ public class CreateComponentHandler implements IServerService
 				return null;
 			}
 			WebObjectSpecification spec = (WebObjectSpecification)((StructuredSelection)dialog.getSelection()).getFirstElement();
-			menuName[0] = options.getName();
+			menuName[0] = options.getName().split("servoymenu-")[1];
 			options.setName(spec.getName());
 			options.setPackageName(spec.getPackageName());
 			menuPropertyName[0] = spec.getProperties(MenuPropertyType.INSTANCE).iterator().next().getName();
