@@ -52,12 +52,12 @@ ${propValue.doc()?trim}
 <#if propValue.parameters()?has_content>
 **Parameters:**  
 <#list propValue.parameters() as param> 
-> - ${MD(param.name())} - [${MD(param.type())}](${instance.getReturnTypePath(param)})
+> - {[${MD(param.type())}](${instance.getReturnTypePath(param)})} ${MD(param.name())}
 </#list>
 </#if>
 <#if propValue.returnValue()??>
 
-**Returns:** [${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)})
+**Returns:** {[${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)})}
 </#if>
 ***
 </#list>
@@ -76,14 +76,13 @@ ${propValue.doc()?trim}
 <#if propValue.parameters()?has_content>
 **Parameters:**  
 <#list propValue.parameters() as param> 
-> - ${MD(param.name())} ([${MD(param.type())}](${instance.getReturnTypePath(param)}))<#if param.optional()>  - (optional)
-</#if><#if param.doc()??>: ${param.doc()} </#if>
+> - {[${MD(param.type())}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if> <#if param.doc()??>${param.doc()}</#if>
 </#list>
 </#if>
 
 <#if propValue.returnValue()??>
 
-**Returns:** [${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)})<#if propValue.returnValue().description??>:</#if> ${propValue.returnValue().description} 
+**Returns:** [${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)}) ${propValue.returnValue().description} 
 </#if>
 ***
  </#list>
@@ -119,7 +118,7 @@ ${propValue.doc()?trim}
 <#if propValue.parameters()?has_content>
 **Parameters:**  
 <#list propValue.parameters() as param> 
-> - ${MD(param.name())} [${MD(param.type())}](${instance.getReturnTypePath(param)}) <#if param.optional()> (optional)</#if>${param.doc()}  
+> - [${MD(param.type())}](${instance.getReturnTypePath(param)}) <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if>  ${param.doc()}  
 </#list>
 </#if>
 <#if propValue.returnValue()??>

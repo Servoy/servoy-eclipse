@@ -1224,6 +1224,7 @@ public class SpecMarkdownGenerator
 
 		if (jsDocEquivalent != null)
 		{
+			//at this point all special characters like {,},(,}, ., [, ], etc are getting escaped; the regex must take into account this
 			Pattern pattern = Pattern.compile("^\\s*(\\*{1,2}\\s*)?(\\\\\\{[^}]+\\\\\\})?\\s*(\\\\\\[[^\\]]+\\\\\\])?");
 
 			SimpleJSDocParser jsDocParser = new SimpleJSDocParser();
@@ -1238,21 +1239,20 @@ public class SpecMarkdownGenerator
 				int tagEnd = jsDocTag.end();
 				if (jsDocTag.name().equals(JSDocTag.PARAM) || jsDocTag.name().equals(JSDocTag.RETURN))
 				{
-					String explanation = extractJSTagExplanation(jsDocTag.value(), pattern);
+					Parameter param = null;
+					if (paramIndex < params.size()) param = params.get(paramIndex);
+					JSONObject tagElements = extractJSTagElements(jsDocTag.value(), pattern, name, param != null ? param.name() : null);
 					if (jsDocTag.name().equals(JSDocTag.PARAM) && params != null)
 					{
 						if (paramIndex > params.size() - 1)
 						{
 							System.err.println("Wrong number of parameters in JSDoc. Please check the documentation and spec for: " + apiDocName);
+							paramIndex++;
 							continue;
 						}
 
-						Parameter param = params.get(paramIndex);
-						if (explanation.indexOf("\\[") > 0 && explanation.indexOf("\\]") > 0)
-						{
-							explanation = explanation.replaceAll("\\\\\\[(\\d)\\\\\\]", "\n>   - [$1]");
-						}
-						Parameter newParam = new Parameter(param.name(), param.type(), explanation, param.optional());
+
+						Parameter newParam = new Parameter(param.name(), param.type(), tagElements.optString("explanation", ""), param.optional());
 						params.set(paramIndex, newParam);
 						paramIndex++;
 					}
@@ -1263,7 +1263,7 @@ public class SpecMarkdownGenerator
 							System.err.println("Wrong return in JSDoc. Please check the documentation and spec for: " + apiDocName);
 							fullReturnType = new JSONObject();
 						}
-						fullReturnType.put("description", explanation);
+						fullReturnType.put("description", tagElements.optString("explanation", ""));
 						fullReturnType.put("type", returnType);
 					}
 					try
@@ -1307,22 +1307,61 @@ public class SpecMarkdownGenerator
 		return new Function(name, params, fullReturnType, jsDocEquivalent, deprecationString);
 	}
 
-	private String extractJSTagExplanation(String input, Pattern pattern)
+	private JSONObject extractJSTagElements(String input, Pattern pattern, String docName, String paramName)
 	{
 		Matcher matcher = pattern.matcher(input.trim());
 		String explanation = input.trim();
+		JSONObject result = new JSONObject();
+		String type = null;
+		String name = null;
+
 		if (matcher.find())
 		{
-			// Check if at least one part is present
-			if (matcher.group(1) != null || matcher.group(2) != null)
+			type = matcher.group(2) != null
+				? matcher.group(2).replaceAll("\\\\[{}]", "").trim()
+				: null;
+			name = matcher.group(3) != null
+				? matcher.group(3).replaceAll("\\\\[\\[\\]]", "").trim()
+				: null;
+			if (matcher.group(1) != null && type != null) //** {type}
 			{
-				// Extract the remaining part after the last match
 				explanation = input.substring(matcher.end()).trim();
-
+				if (name == null) //!= means parameter name between square brackets)
+				{
+					String[] explanationWords = explanation.split("\\s+", 2);
+					if (explanationWords.length > 0)
+					{
+						String firstWord = explanationWords[0];
+						// Check if the first word matches type (ignore case)
+						if (type.toLowerCase().contains(firstWord.toLowerCase()))
+						{
+							name = firstWord;
+							explanation = explanationWords.length > 1 ? explanationWords[1].trim() : "";
+						}
+						else if (explanationWords.length > 1 && explanationWords[1].toLowerCase().contains(firstWord.toLowerCase()))
+						{
+							name = firstWord;
+							explanation = explanationWords.length > 1 ? explanationWords[1].trim() : "";
+						}
+					}
+					if (paramName != null && !paramName.equals(name))
+					{
+						System.err
+							.println("Wrong parameter name in _doc.js: " + (name != null ? docName + "." + name : null) + " (specName: " + paramName + ")");
+					}
+				}
+				if (!explanation.isEmpty())
+				{//capitalize first letter
+					explanation = explanation.substring(0, 1).toUpperCase() + explanation.substring(1);
+				}
 			}
 		}
 
-		return (explanation == null || explanation.isEmpty()) ? "" : explanation;
+		result.put("name", name != null ? name : "");
+		result.put("type", type != null ? type : "");
+		result.put("explanation", explanation != null ? explanation : "");
+
+		return result;
 	}
 
 	/**
