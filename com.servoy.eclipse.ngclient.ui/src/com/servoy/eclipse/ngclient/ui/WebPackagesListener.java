@@ -647,7 +647,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// fist create the servoy/public dist if needed
 					String location = Activator.getInstance().getBundle().getLocation();
 					int fromSourceIndex = location.indexOf("file:/");
-					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists())
+					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists() || sourceChanged)
 					{
 						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
 							Arrays.asList("run", "build_lib_debug_nowatch"));
