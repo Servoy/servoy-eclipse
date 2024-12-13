@@ -110,7 +110,7 @@ public class CreateComponentHandler implements IServerService
 		}
 		final String[] menuName = new String[] { null };
 		final String[] menuPropertyName = new String[] { null };
-		if ("Servoy Menu".equals(options.getPackageName()))
+		if (options.getName() != null && options.getName().startsWith("servoymenu-"))
 		{
 			List<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
 			WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
@@ -147,7 +147,7 @@ public class CreateComponentHandler implements IServerService
 				return null;
 			}
 			WebObjectSpecification spec = (WebObjectSpecification)((StructuredSelection)dialog.getSelection()).getFirstElement();
-			menuName[0] = options.getName();
+			menuName[0] = options.getName().split("servoymenu-")[1];
 			options.setName(spec.getName());
 			options.setPackageName(spec.getPackageName());
 			menuPropertyName[0] = spec.getProperties(MenuPropertyType.INSTANCE).iterator().next().getName();

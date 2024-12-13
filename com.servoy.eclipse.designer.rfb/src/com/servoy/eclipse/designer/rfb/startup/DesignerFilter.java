@@ -47,7 +47,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -317,7 +316,7 @@ public class DesignerFilter implements Filter
 							jsonWriter.array();
 							fl.getMenus(true).forEachRemaining(menu -> {
 								jsonWriter.object();
-								jsonWriter.key("name").value(menu.getName());
+								jsonWriter.key("name").value("servoymenu-" + menu.getName());
 								jsonWriter.key("componentType").value("jsmenu");
 								jsonWriter.key("displayName").value(menu.getName());
 								jsonWriter.key("icon").value("rfb/angular/images/column.png");
@@ -517,14 +516,8 @@ public class DesignerFilter implements Filter
 					}
 					jsonWriter.endArray();
 					JSONArray jsonArray = new JSONArray(sw.toString());
-					if (PlatformUI.getPreferenceStore().getBoolean("commons"))
-					{
-						jsonArray = PaletteCommonsHandler.getInstance().insertcommonsCategory(jsonArray);
-					}
-					if (PlatformUI.getPreferenceStore().getBoolean("favorites"))
-					{
-						jsonArray = PaletteFavoritesHandler.getInstance().insertFavoritesCategory(jsonArray);
-					}
+					jsonArray = PaletteCommonsHandler.getInstance().insertcommonsCategory(jsonArray);
+					jsonArray = PaletteFavoritesHandler.getInstance().insertFavoritesCategory(jsonArray);
 					servletResponse.getWriter().write(jsonArray.toString());
 				}
 				catch (JSONException ex)

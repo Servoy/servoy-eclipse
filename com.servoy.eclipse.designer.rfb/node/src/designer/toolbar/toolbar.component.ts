@@ -5,9 +5,9 @@ import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
 export enum TOOLBAR_CONSTANTS {
-    LAYOUTS_COMPONENTS_CSS = 'Layouts & Components CSS',
-    COMPONENTS_CSS = 'Components CSS',
-    NO_CSS = 'No CSS',
+    LAYOUTS_COMPONENTS_CSS = 'Solution CSS',
+    COMPONENTS_CSS = 'No Solution CSS for Layouts',
+    NO_CSS = 'No Solution CSS',
     SAME_SIZE = 'Selected Element Same Size Indicator',
     ANCHOR_INDICATOR = 'Selected Element Anchoring Indicator',
     LAYOUTS_COMPONENTS_CSS_ICON = 'url(designer/assets/images/layouts_components_css.png)',
@@ -212,6 +212,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 this.applyHideInherited(result);
             }
         });
+        
         const solutionLayoutsCssPromise = this.editorSession.isShowSolutionLayoutsCss();
         void solutionLayoutsCssPromise.then((result: boolean) => {
             if (!result) {
@@ -223,9 +224,11 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         const solutionCssPromise = this.editorSession.isShowSolutionCss();
         void solutionCssPromise.then((result: boolean) => {
             if (!result) {
-                this.btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
+            this.btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
+            this.editorContentService.executeOnlyAfterInit(() => {
                 this.setShowSolutionCss(result);
-            }
+            });
+        }
             this.editorSession.getState().showSolutionCss = result;
         });
         const zoomLevelPromise = this.editorSession.getZoomLevel();
@@ -977,15 +980,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     }
 
     setShowSolutionCss(state) {
-        this.editorContentService.querySelectorAllInContent('link').forEach(link  => {
-            if (link instanceof HTMLLinkElement && link.getAttribute('svy-stylesheet')) {
-                if (state) {
-                    link.disabled = false;
-                }
-                else {
-                    link.disabled = true;
-                }
-            }
+        this.editorContentService.querySelectorAllInContent('link[svy-stylesheet]').forEach(link  => {
+            const htmlLink = link as HTMLLinkElement;
+            htmlLink.disabled = !state;
         });
     }
 

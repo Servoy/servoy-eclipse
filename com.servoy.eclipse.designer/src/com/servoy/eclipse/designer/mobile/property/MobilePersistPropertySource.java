@@ -126,15 +126,6 @@ public class MobilePersistPropertySource extends PersistPropertySource
 			// Special case: add as hidden property, needed for setting value via palette
 			return true;
 		}
-		if (StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) &&
-			getPersist() instanceof GraphicalComponent &&
-			Boolean.TRUE.equals(((GraphicalComponent)getPersist()).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName)) &&
-			getContext() instanceof Form)
-		{
-			// Special case: allow setting of header style class via headertext element
-			return false;
-		}
-
 		if ((StaticContentSpecLoader.PROPERTY_ENABLED.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) ||
 			StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(propertyDescriptor.propertyDescriptor.getName()) ||
 			StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(

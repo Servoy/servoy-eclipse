@@ -1,7 +1,7 @@
 package com.servoy.eclipse.ui.wizards;
 
-import java.util.Arrays;
-import java.util.stream.IntStream;
+import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -9,41 +9,37 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.json.JSONObject;
 
-import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
+import com.servoy.j2db.server.ngclient.OAuthUtils;
 
 /**
- *
  * @author emera
  */
 public class NewOAuthApiPage extends WizardPage
 {
-	private static final String MICROSOFT_JWKS = "https://login.microsoftonline.com/common/discovery/v2.0/keys";
-	private static final String GOOGLE_JWKS = "https://www.googleapis.com/oauth2/v3/certs";
-	private static final String APPLE_JWKS = "https://appleid.apple.com/auth/keys";
-	private static final String LINKEDIN_JWKS = "https://www.linkedin.com/oauth/openid/jwks";
-	private static final String[] items = new String[] { "Google", "Microsoft AD", "Apple", "Linkedin", "Custom" };
+	private static final String CUSTOM = "Custom";
+	private static final String[] items = new String[] { OAuthUtils.GOOGLE, OAuthUtils.MICROSOFT_AD, OAuthUtils.APPLE, OAuthUtils.OKTA, OAuthUtils.LINKED_IN, CUSTOM };
+
 	private Combo apiCombo;
-	private Text clientIdText;
-	private Text clientSecretText;
-	private Button onlineAccessType;
-	private Button offlineAccessType;
-	private Text scopeText;
-	private Text jwksUriText;
 	private Text authorizationBaseUrlText;
 	private Text accessTokenEndpointText;
 	private Text refreshTokenEndpointText;
 	private Text revokeTokenEndpointText;
-	private final NewOAuthConfigWizard wizard;
+	private Text jwksUriText;
+	private Text scopeText;
+	private Button offlineButton;
+	private Button onlineButton;
 
-	protected NewOAuthApiPage(NewOAuthConfigWizard wizard)
+	private final NewOAuthConfigWizard wizard;
+	private Text clientIdText;
+	private Text clientSecretText;
+
+	public NewOAuthApiPage(NewOAuthConfigWizard wizard)
 	{
 		super("OAuth Configuration");
 		setTitle("OAuth Configuration Wizard");
@@ -55,161 +51,156 @@ public class NewOAuthApiPage extends WizardPage
 	public void createControl(Composite parent)
 	{
 		Composite container = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout(2, false);
-		layout.marginHeight = 10;
-		layout.marginWidth = 20;
-		container.setLayout(layout);
+		container.setLayout(new GridLayout(2, false));
 
-		Label apiLabel = new Label(container, SWT.NONE);
-		apiLabel.setText("OAuth Provider:");
-
-		apiCombo = new Combo(container, SWT.READ_ONLY);
-		apiCombo.setItems(items);
-		apiCombo.addModifyListener(e -> updateApiSettings());
-
-		Label clientIdLabel = new Label(container, SWT.NONE);
-		clientIdLabel.setText("Client ID:");
-		clientIdText = new Text(container, SWT.BORDER);
-		clientIdText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		clientIdText.addListener(SWT.FocusOut, e -> updateClientId());
-		clientIdText.addModifyListener(e -> updateClientId());
-
-		Label clientSecretLabel = new Label(container, SWT.NONE);
-		clientSecretLabel.setText("Client Secret:");
-		clientSecretText = new Text(container, SWT.BORDER);
-		clientSecretText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		clientSecretText.addListener(SWT.FocusOut, e -> updateClientSecret());
-		clientSecretText.addModifyListener(e -> updateClientSecret());
-
-		Label accessTypeLabel = new Label(container, SWT.NONE);
-		accessTypeLabel.setText("Refresh token (if available):");
-		Composite accessTypeGroup = new Composite(container, SWT.NONE);
-		accessTypeGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
-		offlineAccessType = new Button(accessTypeGroup, SWT.RADIO);
-		offlineAccessType.setText("Yes");
-		offlineAccessType.setSelection(true);
-		offlineAccessType.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				updateGetRefreshToken();
-			}
-		});
-
-		onlineAccessType = new Button(accessTypeGroup, SWT.RADIO);
-		onlineAccessType.setText("No");
-		onlineAccessType.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				updateGetRefreshToken();
-			}
-		});
-
-		Label scopeLabel = new Label(container, SWT.NONE);
-		scopeLabel.setText("Default scope:");
-		scopeText = new Text(container, SWT.BORDER);
-		scopeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		scopeText.addListener(SWT.FocusOut, e -> updateScope());
-		scopeText.addModifyListener(e -> updateScope());
-
-		int indexOfCustom = Arrays.asList(items).indexOf("Custom");
-		Label authorizationBaseUrlLabel = new Label(container, SWT.NONE);
-		authorizationBaseUrlLabel.setText("Authorization Base URL:");
-		authorizationBaseUrlText = new Text(container, SWT.BORDER);
-		authorizationBaseUrlText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		authorizationBaseUrlText.addListener(SWT.FocusOut, e -> updateAuthorizationBaseUrl());
-		authorizationBaseUrlText.addModifyListener(e -> updateAuthorizationBaseUrl());
-		authorizationBaseUrlText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
-
-		Label accessTokenEndpointLabel = new Label(container, SWT.NONE);
-		accessTokenEndpointLabel.setText("Access Token Endpoint:");
-		accessTokenEndpointText = new Text(container, SWT.BORDER);
-		accessTokenEndpointText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		accessTokenEndpointText.addListener(SWT.FocusOut, e -> updateAccessTokenEndpoint());
-		accessTokenEndpointText.addModifyListener(e -> updateAccessTokenEndpoint());
-		accessTokenEndpointText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
-
-		Label refreshTokenEndpointLabel = new Label(container, SWT.NONE);
-		refreshTokenEndpointLabel.setText("Refresh Token Endpoint:");
-		refreshTokenEndpointText = new Text(container, SWT.BORDER);
-		refreshTokenEndpointText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		refreshTokenEndpointText.addListener(SWT.FocusOut, e -> updateRefreshTokenEndpoint());
-		refreshTokenEndpointText.addModifyListener(e -> updateRefreshTokenEndpoint());
-		refreshTokenEndpointText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
-
-		Label revokeTokenEndpointLabel = new Label(container, SWT.NONE);
-		revokeTokenEndpointLabel.setText("Revoke Token Endpoint:");
-		revokeTokenEndpointText = new Text(container, SWT.BORDER);
-		revokeTokenEndpointText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		revokeTokenEndpointText.addListener(SWT.FocusOut, e -> updateRevokeTokenEndpoint());
-		revokeTokenEndpointText.addModifyListener(e -> updateRevokeTokenEndpoint());
-		revokeTokenEndpointText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
-
-		Label jwksUriLabel = new Label(container, SWT.NONE);
-		jwksUriLabel.setText("JWKS URI:");
-		jwksUriLabel.setToolTipText("The JSON Web Key Set (JWKS) is a set of keys containing the public keys " +
-			" used to verify the id token issued by the Authorization Server.");
-		jwksUriText = new Text(container, SWT.BORDER);
-		jwksUriText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		jwksUriText.addListener(SWT.FocusOut, e -> updateJWKS_URI());
-		jwksUriText.addModifyListener(e -> updateJWKS_URI());
-		jwksUriText.setEnabled(apiCombo.getSelectionIndex() == indexOfCustom);
+		createApiCombo(container);
+		OAuthApiConfiguration apiConfiguration = wizard.getModel().get();
+		clientIdText = createField(container, "Client ID:", true, value -> wizard.getModel().get().setClientId(value),
+			apiConfiguration.getClientId());
+		clientSecretText = createField(container, "Client Secret:", true, value -> wizard.getModel().get().setClientSecret(value),
+			apiConfiguration.getClientSecret());
+		scopeText = createField(container, "Scope:", true, value -> wizard.getModel().get().getScope(), apiConfiguration.getScope());
+		createAccessTypeRadios(container);
+		authorizationBaseUrlText = createField(container, "Authorization Base URL:", false,
+			value -> wizard.getModel().get().setAuthorizationBaseUrl(value), apiConfiguration.getAuthorizationBaseUrl());
+		accessTokenEndpointText = createField(container, "Access Token Endpoint:", false,
+			value -> wizard.getModel().get().setAccessTokenEndpoint(value), apiConfiguration.getAccessTokenEndpoint());
+		refreshTokenEndpointText = createField(container, "Refresh Token Endpoint:", false,
+			value -> wizard.getModel().get().setRefreshTokenEndpoint(value), apiConfiguration.getRefreshTokenEndpoint());
+		revokeTokenEndpointText = createField(container, "Revoke Token Endpoint:", false,
+			value -> wizard.getModel().get().setRevokeTokenEndpoint(value), apiConfiguration.getRevokeTokenEndpoint());
+		jwksUriText = createField(container, "JWKS URI:", false, value -> wizard.getModel().get().setJwksUri(value),
+			apiConfiguration.getJwksUri());
 
 		setControl(container);
-		setPageComplete(isPageComplete());
+		updateApiSettings();
 	}
 
-	private void updateScope()
+	private void createApiCombo(Composite container)
 	{
-		wizard.getJSON().put(StatelessLoginHandler.DEFAULT_SCOPE, scopeText.getText());
-		wizard.getContainer().updateButtons();
+		Label label = new Label(container, SWT.NONE);
+		label.setText("API:");
+
+		apiCombo = new Combo(container, SWT.DROP_DOWN | SWT.READ_ONLY);
+		apiCombo.setItems(items);
+
+		wizard.getModel().ifPresentOrElse(model -> {
+			String selectedApi = model.getApi(); // Get API from the existing model
+			if (selectedApi != null && !selectedApi.isEmpty())
+			{
+				int index = apiCombo.indexOf(selectedApi);
+				if (index != -1)
+				{
+					apiCombo.select(index);
+				}
+				else
+				{
+					apiCombo.select(apiCombo.indexOf(CUSTOM));
+				}
+			}
+			else
+			{
+				apiCombo.select(apiCombo.indexOf(CUSTOM));
+			}
+		}, () -> {
+			// Create a default model with the first API (Google)
+			OAuthApiConfiguration defaultModel = new OAuthApiConfiguration();
+			defaultModel.setApi(OAuthUtils.GOOGLE);
+			defaultModel.setJwksUri(OAuthUtils.GOOGLE_JWKS);
+			defaultModel.setScope("openid email");
+			wizard.setModel(defaultModel); // Store the new model
+			apiCombo.select(0); // Default to first item
+		});
+
+		apiCombo.addModifyListener(e -> updateApiSettings());
 	}
 
-	private void updateClientId()
+
+	private Text createField(Composite container, String labelText, boolean editable, java.util.function.Consumer<String> setter,
+		String initialValue)
 	{
-		wizard.getJSON().put(StatelessLoginHandler.CLIENT_ID, clientIdText.getText());
-		wizard.getContainer().updateButtons();
+		Label label = new Label(container, SWT.NONE);
+		label.setText(labelText);
+
+		Text field = new Text(container, SWT.BORDER);
+		field.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		field.setEnabled(editable);
+
+		if (initialValue != null)
+		{
+			field.setText(initialValue);
+		}
+		if (setter != null)
+		{
+			field.addModifyListener(e -> setter.accept(field.getText()));
+			getWizard().getContainer().updateButtons();
+		}
+		return field;
 	}
 
-	private void updateClientSecret()
+	private void createAccessTypeRadios(Composite container)
 	{
-		wizard.getJSON().put(StatelessLoginHandler.API_SECRET, clientSecretText.getText());
-		wizard.getContainer().updateButtons();
+		Label label = new Label(container, SWT.NONE);
+		label.setText("Refresh token (if available):");
+
+		Composite radioContainer = new Composite(container, SWT.NONE);
+		radioContainer.setLayout(new GridLayout(2, true));
+
+		offlineButton = new Button(radioContainer, SWT.RADIO);
+		offlineButton.setText("Yes");
+		boolean refresh = refreshToken();
+		offlineButton.setSelection(refresh);
+		offlineButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				updateGetRefreshToken();
+			}
+		});
+
+		onlineButton = new Button(radioContainer, SWT.RADIO);
+		onlineButton.setText("No");
+		onlineButton.setSelection(!refresh);
+		onlineButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				updateGetRefreshToken();
+			}
+		});
 	}
 
-	private void updateJWKS_URI()
+	private boolean refreshToken()
 	{
-		wizard.getJSON().put(StatelessLoginHandler.JWKS_URI, jwksUriText.getText());
-		wizard.getContainer().updateButtons();
-	}
-
-	private void updateAuthorizationBaseUrl()
-	{
-		wizard.getJSON().put(StatelessLoginHandler.AUTHORIZATION_BASE_URL, authorizationBaseUrlText.getText());
-		wizard.getContainer().updateButtons();
-	}
-
-	private void updateAccessTokenEndpoint()
-	{
-		wizard.getJSON().put(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, accessTokenEndpointText.getText());
-		wizard.getContainer().updateButtons();
+		String provider = apiCombo.getText();
+		if (OAuthUtils.GOOGLE.equals(provider) || OAuthUtils.MICROSOFT_AD.equals(provider))
+		{
+			Map<String, String> additionalParameters = wizard.getModel().get().getAdditionalParameters();
+			return "offline".equals(additionalParameters.get("access_type"));
+		}
+		if (OAuthUtils.APPLE.equals(provider) || CUSTOM.equals(provider) && wizard.getModel().get().getRefreshTokenEndpoint() != null)
+		{
+			//Apple always returns the refresh token together with the access token
+			return true;
+		}
+		return false;
 	}
 
 	private void updateGetRefreshToken()
 	{
 		String provider = apiCombo.getText();
-		if ("Google".equals(provider) || "Microsoft AD".equals(provider))
+		//Google and Microsoft need the access_type parameter offline to return the refresh token
+		if (OAuthUtils.GOOGLE.equals(provider) || OAuthUtils.MICROSOFT_AD.equals(provider))
 		{
-			if (offlineAccessType.getSelection())
+			if (onlineButton.getSelection())
 			{
-				wizard.getJSON().put("access_type", "offline");
+				wizard.getModel().get().setAdditionalParameter("access_type", "online");
 			}
 			else
 			{
-				wizard.getJSON().put("access_type", "online");
+				wizard.getModel().get().setAdditionalParameter("access_type", "offline");
 			}
 		}
 	}
@@ -217,126 +208,106 @@ public class NewOAuthApiPage extends WizardPage
 	private void updateApiSettings()
 	{
 		String provider = apiCombo.getText();
-		JSONObject oauthJson = wizard.getJSON();
-		boolean isCustomSelected = "Custom".equals(provider);
+		OAuthApiConfiguration model = wizard.getModel().orElseGet(() -> {
+			OAuthApiConfiguration newModel = new OAuthApiConfiguration();
+			wizard.setModel(newModel);
+			return newModel;
+		});
 
-		if (!isCustomSelected)
+		if (jwksUriText == null)
 		{
-			oauthJson.remove(StatelessLoginHandler.AUTHORIZATION_BASE_URL);
-			oauthJson.remove(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT);
-			oauthJson.remove(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT);
-			oauthJson.remove(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT);
-			authorizationBaseUrlText.setText("");
-			accessTokenEndpointText.setText("");
-			refreshTokenEndpointText.setText("");
-			revokeTokenEndpointText.setText("");
+			// prevent execution if fields are not initialized
+			return;
 		}
-		if (!"Apple".equals(provider))
-		{
-			oauthJson.remove("response_mode");
-		}
-		switch (provider)
-		{
-			case "Google" :
-				oauthJson.put(StatelessLoginHandler.OAUTH_API, "Google");
-				jwksUriText.setText(GOOGLE_JWKS);
-				scopeText.setText("openid email");
-				oauthJson.remove("tenant");
-				break;
-			case "Microsoft AD" :
-				oauthJson.put(StatelessLoginHandler.OAUTH_API, "Microsoft AD");
-				jwksUriText.setText(MICROSOFT_JWKS);
-				scopeText.setText("openid email");
-				oauthJson.put("tenant", "");
-				break;
-			case "Apple" :
-				oauthJson.put(StatelessLoginHandler.OAUTH_API, "Apple");
-				jwksUriText.setText(APPLE_JWKS);
-				scopeText.setText("name email");
-				oauthJson.put("response_mode", "form_post");
-				oauthJson.remove("tenant");
-				oauthJson.remove("access_type"); //refresh token is returned by default
-				break;
-			case "Linkedin" :
-				oauthJson.put(StatelessLoginHandler.OAUTH_API, "LinkedIn");
-				jwksUriText.setText(LINKEDIN_JWKS);
-				scopeText.setText("openid email");
-				oauthJson.remove("tenant");
-				oauthJson.remove("access_type");
-				break;
-			case "Custom" :
-				oauthJson.remove(StatelessLoginHandler.OAUTH_API);
-				oauthJson.put(StatelessLoginHandler.JWKS_URI, "");
-				oauthJson.remove("tenant");
-				break;
-		}
+
+		boolean isCustomSelected = CUSTOM.equals(provider);
 		authorizationBaseUrlText.setEnabled(isCustomSelected);
 		accessTokenEndpointText.setEnabled(isCustomSelected);
 		refreshTokenEndpointText.setEnabled(isCustomSelected);
 		revokeTokenEndpointText.setEnabled(isCustomSelected);
 		jwksUriText.setEnabled(isCustomSelected);
 
-		getWizard().getContainer().updateButtons();
-	}
-
-	@Override
-	public boolean canFlipToNextPage()
-	{
-		boolean isComplete = !clientIdText.getText().isEmpty() && !clientSecretText.getText().isEmpty();
-		if (isComplete)
+		if (model.getApi() == null && !isCustomSelected)
 		{
-			JSONObject json = ((NewOAuthConfigWizard)getWizard()).getJSON();
-			json.put(StatelessLoginHandler.CLIENT_ID, clientIdText.getText().trim());
-			json.put(StatelessLoginHandler.API_SECRET, clientSecretText.getText().trim());
-			json.put(StatelessLoginHandler.DEFAULT_SCOPE, scopeText.getText().trim());
-			json.put(StatelessLoginHandler.JWKS_URI, jwksUriText.getText().trim());
-			if ("Custom".equals(getApiSelection()))
+			clearFieldsForCustomApi(model);
+		}
+		boolean isAPIChanged = !provider.equals(model.getApi()) || CUSTOM.equals(provider) && model.getApi() != null;
+
+		if (isAPIChanged)
+		{
+			String clientId = clientIdText.getText().trim();
+			String clientSecret = clientSecretText.getText().trim();
+
+			model = new OAuthApiConfiguration();
+			model.setClientId(clientId);
+			model.setClientSecret(clientSecret);
+
+			switch (provider)
 			{
-				json.put(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, accessTokenEndpointText.getText().trim());
-				json.put(StatelessLoginHandler.AUTHORIZATION_BASE_URL, authorizationBaseUrlText.getText().trim());
-				json.put(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT, refreshTokenEndpointText.getText().trim());
-				json.put(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT, revokeTokenEndpointText.getText().trim());
-				updateRefreshTokenEndpoint();
+				case OAuthUtils.GOOGLE :
+					model.setApi(OAuthUtils.GOOGLE);
+					model.setJwksUri(OAuthUtils.GOOGLE_JWKS);
+					model.setScope("openid email");
+					break;
+
+				case "Microsoft" :
+				case OAuthUtils.MICROSOFT_AD :
+					model.setApi(OAuthUtils.MICROSOFT_AD);
+					model.setJwksUri(OAuthUtils.MICROSOFT_JWKS);
+					model.setScope("openid email");
+					model.setCustomParameter("tenant", "common");
+					break;
+
+				case OAuthUtils.APPLE :
+					model.setApi(OAuthUtils.APPLE);
+					model.setJwksUri(OAuthUtils.APPLE_JWKS);
+					model.setScope("name email");
+					model.setAdditionalParameter("response_mode", "form_post");
+					break;
+
+				case OAuthUtils.OKTA :
+					model.setApi(OAuthUtils.OKTA);
+					model.setJwksUri(OAuthUtils.OKTA_JWKS);
+					model.setScope("openid profile email");
+					model.setCustomParameter("domain", "");
+					break;
+
+				case OAuthUtils.LINKED_IN :
+					model.setApi(OAuthUtils.LINKED_IN);
+					model.setJwksUri(OAuthUtils.LINKEDIN_JWKS);
+					model.setScope("openid email");
+					break;
+
+				case CUSTOM :
+					model.setApi(null);
+					model.setJwksUri("");
+					break;
+
+				default :
+					throw new IllegalArgumentException("Unsupported API provider: " + provider);
 			}
-			else
-			{
-				json.remove(StatelessLoginHandler.AUTHORIZATION_BASE_URL);
-				json.remove(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT);
-				json.remove(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT);
-				json.remove(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT);
-			}
 		}
-		return isComplete;
+
+		scopeText.setText(model.getScope() != null ? model.getScope() : "");
+		jwksUriText.setText(model.getJwksUri() != null ? model.getJwksUri() : "");
+		wizard.setModel(model);
+		updateGetRefreshToken();
+		wizard.getContainer().updateButtons();
 	}
 
-	private void updateRefreshTokenEndpoint()
+	private void clearFieldsForCustomApi(OAuthApiConfiguration model)
 	{
-		if (!"".equals(refreshTokenEndpointText.getText().trim()))
-		{
-			wizard.getJSON().put(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT, refreshTokenEndpointText.getText().trim());
-		}
-		else
-		{
-			wizard.getJSON().remove(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT);
-		}
-	}
-
-	private void updateRevokeTokenEndpoint()
-	{
-		if (!"".equals(refreshTokenEndpointText.getText().trim()))
-		{
-			wizard.getJSON().put(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT, revokeTokenEndpointText.getText().trim());
-		}
-		else
-		{
-			wizard.getJSON().remove(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT);
-		}
-	}
-
-
-	public String getApiSelection()
-	{
-		return apiCombo.getText();
+		model.setApi(null);
+		model.setJwksUri(null);
+		model.setAuthorizationBaseUrl(null);
+		model.setAccessTokenEndpoint(null);
+		model.setRefreshTokenEndpoint(null);
+		model.setRevokeTokenEndpoint(null);
+		jwksUriText.setText("");
+		authorizationBaseUrlText.setText("");
+		accessTokenEndpointText.setText("");
+		refreshTokenEndpointText.setText("");
+		revokeTokenEndpointText.setText("");
 	}
 
 	@Override
@@ -345,38 +316,32 @@ public class NewOAuthApiPage extends WizardPage
 		super.setVisible(visible);
 		if (visible)
 		{
-			initValues();
-		}
-	}
+			Optional<OAuthApiConfiguration> optionalModel = wizard.getModel();
+			if (optionalModel.isPresent())
+			{
+				OAuthApiConfiguration model = optionalModel.get();
+				clientIdText.setText(model.getClientId() != null ? model.getClientId() : "");
+				clientSecretText.setText(model.getClientSecret() != null ? model.getClientSecret() : "");
+				scopeText.setText(model.getScope() != null ? model.getScope() : "");
+				apiCombo.setText(model.getApi() != null ? model.getApi() : CUSTOM);
+				jwksUriText.setText(model.getJwksUri() != null ? model.getJwksUri() : "");
 
-	private void initValues()
-	{
-		JSONObject oauthJson = wizard.getJSON();
-		String selected = oauthJson.optString(StatelessLoginHandler.OAUTH_API, "Custom");
-		apiCombo.select(IntStream.range(0, items.length).filter(i -> items[i].equals(selected)).findFirst().orElse(-1));
-		clientIdText.setText(oauthJson.optString(StatelessLoginHandler.CLIENT_ID, ""));
-		clientSecretText.setText(oauthJson.optString(StatelessLoginHandler.API_SECRET, ""));
-		if (oauthJson.has(StatelessLoginHandler.DEFAULT_SCOPE) && !"".equals(oauthJson.get(StatelessLoginHandler.DEFAULT_SCOPE)))
-		{
-			scopeText.setText(oauthJson.getString(StatelessLoginHandler.DEFAULT_SCOPE));
+				if (model.getApi() == null) //custom
+				{
+					authorizationBaseUrlText.setText(
+						model.getAuthorizationBaseUrl() != null ? model.getAuthorizationBaseUrl() : "");
+					accessTokenEndpointText.setText(
+						model.getAccessTokenEndpoint() != null ? model.getAccessTokenEndpoint() : "");
+					refreshTokenEndpointText.setText(
+						model.getRefreshTokenEndpoint() != null ? model.getRefreshTokenEndpoint() : "");
+					revokeTokenEndpointText.setText(
+						model.getRevokeTokenEndpoint() != null ? model.getRevokeTokenEndpoint() : "");
+				}
+			}
+			else
+			{
+				apiCombo.select(0);
+			}
 		}
-		else
-		{
-			scopeText.setText("openid email");
-		}
-		boolean isCustomSelected = "Custom".equals(selected);
-		if (isCustomSelected)
-		{
-			accessTokenEndpointText.setText(oauthJson.optString(StatelessLoginHandler.ACCESS_TOKEN_ENDPOINT, ""));
-			authorizationBaseUrlText.setText(oauthJson.optString(StatelessLoginHandler.AUTHORIZATION_BASE_URL, ""));
-			refreshTokenEndpointText.setText(oauthJson.optString(StatelessLoginHandler.REFRESH_TOKEN_ENDPOINT, ""));
-			revokeTokenEndpointText.setText(oauthJson.optString(StatelessLoginHandler.REVOKE_TOKEN_ENDPOINT, ""));
-		}
-		jwksUriText.setText(oauthJson.optString(StatelessLoginHandler.JWKS_URI, ""));
-		authorizationBaseUrlText.setEnabled(isCustomSelected);
-		accessTokenEndpointText.setEnabled(isCustomSelected);
-		refreshTokenEndpointText.setEnabled(isCustomSelected);
-		revokeTokenEndpointText.setEnabled(isCustomSelected);
-		jwksUriText.setEnabled(isCustomSelected);
 	}
 }

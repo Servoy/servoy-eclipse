@@ -9,10 +9,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.12.0.4020_rc</version>
+		<version>2025.3.0.4040_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.designer.wpm</artifactId>
-	<version>2024.12.0.4020_rc</version>
+	<version>2025.3.0.4040_rc</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
@@ -34,7 +34,7 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
-							<nodeVersion>v20.15.1</nodeVersion>
+							<nodeVersion>v22.11.0</nodeVersion>
 						</configuration>
 					</execution>
 

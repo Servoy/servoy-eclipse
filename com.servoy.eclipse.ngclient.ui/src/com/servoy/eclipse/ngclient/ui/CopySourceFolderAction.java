@@ -34,6 +34,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.util.DeletePathVisitor;
 
 /**
  * @author jcompagner

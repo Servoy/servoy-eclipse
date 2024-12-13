@@ -79,10 +79,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		copyPasteOffsetSpinner = new Spinner(copyPastePanel, SWT.BORDER);
 		copyPasteOffsetSpinner.setValues(0, 0, 100, 0, 1, 5);
 
-		new Label(copyPastePanel, SWT.NONE).setText("Commonly used package size");
+		new Label(copyPastePanel, SWT.NONE).setText("Commonly used package size (zero removes the category)");
 
 		commonlyUsedSizeSpinner = new Spinner(copyPastePanel, SWT.BORDER);
-		commonlyUsedSizeSpinner.setValues(5, 5, 15, 0, 1, 5);
+		commonlyUsedSizeSpinner.setValues(0, 0, 15, 0, 1, 5);
 
 		marqueeSelectOuterCheck = new Button(optionsPanel, SWT.CHECK);
 		marqueeSelectOuterCheck.setText("Marquee selects only elements fully in lasso");

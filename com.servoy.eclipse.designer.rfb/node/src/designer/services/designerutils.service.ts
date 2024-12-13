@@ -258,8 +258,8 @@ export class DesignerUtilsService {
                     const nodeComputedStyle = window.getComputedStyle(node);
                     const top = position.top + parseInt(nodeComputedStyle.paddingTop) + parseInt(computedStyle.marginTop);
                     const left = position.left + parseInt(nodeComputedStyle.paddingLeft) + parseInt(computedStyle.marginLeft);
-                    const height = parseInt(computedStyle.height);
-                    const width = parseInt(computedStyle.width);
+                    const height = parseInt(nodeComputedStyle.height);
+                    const width = parseInt(nodeComputedStyle.width);
                     if (point.y >= top && point.x >= left && point.y <= top + height && point.x <= left + width) {
                         return node;
                     }

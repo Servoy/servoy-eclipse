@@ -955,7 +955,11 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (type == UserNodeType.MENUS)
 					{
-						addMenusNodeChildren(un);
+						addMenusNodeChildren(un, UserNodeType.MENU, true);
+					}
+					else if (type == UserNodeType.MENU_FOUNDSETS)
+					{
+						addMenusNodeChildren(un, UserNodeType.MENU_FOUNDSET, false);
 					}
 					else if (type == UserNodeType.SERVERS)
 					{
@@ -1889,7 +1893,7 @@ public class SolutionExplorerTreeContentProvider
 				{
 					return hasChildren((IFolder)un.getRealObject());
 				}
-				else if (un.getType() == UserNodeType.MENUS)
+				else if (un.getType() == UserNodeType.MENUS || un.getType() == UserNodeType.MENU_FOUNDSETS)
 				{
 					return (((Solution)un.getRealObject()).getMenus(false).hasNext()) ? true : false;
 				}
@@ -2036,7 +2040,7 @@ public class SolutionExplorerTreeContentProvider
 		return false;
 	}
 
-	private void addMenusNodeChildren(PlatformSimpleUserNode menusNode)
+	private void addMenusNodeChildren(PlatformSimpleUserNode menusNode, UserNodeType childType, boolean addChildren)
 	{
 		Solution solution = (Solution)menusNode.getRealObject();
 		List<PlatformSimpleUserNode> menuNodes = new ArrayList<PlatformSimpleUserNode>();
@@ -2044,12 +2048,20 @@ public class SolutionExplorerTreeContentProvider
 		while (it.hasNext())
 		{
 			Menu menu = it.next();
+			String tooltip = "Menu node " + menu.getName() + " for creating a menu";
+			if (childType == UserNodeType.MENU_FOUNDSET)
+			{
+				tooltip = "Menu based datasource: <b>'menu:" + menu.getName() + "'</b>";
+			}
 
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), UserNodeType.MENU, "", "", menu,
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), childType, "", tooltip, menu,
 				uiActivator.loadImageFromBundle("column.png"));
 			menuNodes.add(node);
 			node.parent = menusNode;
-			addMenuItemsChildren(node, menu);
+			if (addChildren)
+			{
+				addMenuItemsChildren(node, menu);
+			}
 		}
 		menusNode.children = menuNodes.toArray(new PlatformSimpleUserNode[menuNodes.size()]);
 	}
@@ -2061,7 +2073,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			if (persist instanceof MenuItem menuItem)
 			{
-				PlatformSimpleUserNode node = new PlatformSimpleUserNode(menuItem.getName(), UserNodeType.MENU_ITEM, "", "", menuItem,
+				PlatformSimpleUserNode node = new PlatformSimpleUserNode(menuItem.getName(), UserNodeType.MENU_ITEM, "", "Menu item", menuItem,
 					uiActivator.loadImageFromBundle("class.png"));
 				menuNodes.add(node);
 				node.parent = parentNode;
@@ -2622,7 +2634,11 @@ public class SolutionExplorerTreeContentProvider
 				servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSViewDataSource.class));
 			viewFoundsets.parent = solutionDataSources;
 
-			solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets };
+			PlatformSimpleUserNode menuFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_MenuFoundsets, UserNodeType.MENU_FOUNDSETS,
+				solution, IconProvider.instance().image(JSDataSources.class));
+			menuFoundsets.parent = solutionDataSources;
+
+			solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets, menuFoundsets };
 
 
 			PlatformSimpleUserNode solutionWebPackages = new PlatformSimpleUserNode(Messages.TreeStrings_Web_Packages,
@@ -3476,8 +3492,19 @@ public class SolutionExplorerTreeContentProvider
 						else if (persist instanceof Menu)
 						{
 							PlatformSimpleUserNode menusNode = findChildNode(node, Messages.TreeStrings_Menus);
-							addMenusNodeChildren(menusNode);
+							addMenusNodeChildren(menusNode, UserNodeType.MENU, true);
 							view.refreshTreeNodeFromModel(menusNode);
+
+							PlatformSimpleUserNode menuFoundsetsNode = findChildNode(node, Messages.TreeStrings_Datasources);
+							if (menuFoundsetsNode != null)
+							{
+								menuFoundsetsNode = findChildNode(menuFoundsetsNode, Messages.TreeStrings_MenuFoundsets);
+								if (menuFoundsetsNode != null)
+								{
+									addMenusNodeChildren(menuFoundsetsNode, UserNodeType.MENU_FOUNDSET, false);
+									view.refreshTreeNodeFromModel(menuFoundsetsNode);
+								}
+							}
 						}
 					}
 				}

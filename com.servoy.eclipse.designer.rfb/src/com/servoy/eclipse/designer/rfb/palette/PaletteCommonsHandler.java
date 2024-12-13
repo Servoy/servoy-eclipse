@@ -332,17 +332,20 @@ public class PaletteCommonsHandler
 
 	private void addComponentKeyToCommonsPercentageList(String key, double usagePercentage)
 	{
-		if (commonsPercentage.size() < prefs.getCommonlyUsedSize())
+		if (prefs.getCommonlyUsedSize() > 0)
 		{
-			boolean added = commonsPercentage.add(Map.entry(key, usagePercentage));
-		}
-		else
-		{
-			if (usagePercentage > commonsPercentage.first().getValue())
+			if (commonsPercentage.size() < prefs.getCommonlyUsedSize())
 			{
-				Map.Entry<String, Double> entry = commonsPercentage.first();
-				commonsPercentage.removeIf(value -> value.getKey().equals(entry.getKey()));
-				commonsPercentage.add(Map.entry(key, usagePercentage));
+				boolean added = commonsPercentage.add(Map.entry(key, usagePercentage));
+			}
+			else
+			{
+				if (usagePercentage > commonsPercentage.first().getValue())
+				{
+					Map.Entry<String, Double> entry = commonsPercentage.first();
+					commonsPercentage.removeIf(value -> value.getKey().equals(entry.getKey()));
+					commonsPercentage.add(Map.entry(key, usagePercentage));
+				}
 			}
 		}
 	}

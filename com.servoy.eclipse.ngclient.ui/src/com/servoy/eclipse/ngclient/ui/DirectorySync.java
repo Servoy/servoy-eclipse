@@ -34,6 +34,7 @@ import java.util.function.Predicate;
 import org.apache.commons.io.FileUtils;
 
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.DeletePathVisitor;
 
 /**
  * @author jcompagner

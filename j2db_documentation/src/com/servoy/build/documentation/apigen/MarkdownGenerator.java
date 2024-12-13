@@ -1000,11 +1000,6 @@ public class MarkdownGenerator
 
 				if (value.getExtendsClass() != null)
 				{
-					if (value.getExtendsClass().equals("Component"))
-					{
-						System.out.println("########## Component requested");
-						continue;
-					}
 					cg.classList(EXTENDS_CLASS_SECTION_IN_TEMPLATE,
 						getUsablePublicNamesFromClassList(Arrays.asList(targetInstallClassLoader.loadClass(value.getExtendsClass()))));
 				}

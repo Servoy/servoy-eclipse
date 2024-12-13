@@ -91,11 +91,11 @@ public class CreateMethodReferenceQuickFix implements IMarkerResolution
 			if (template == null) return;
 
 			MethodArgument signature = template.getSignature();
-			if (signature == null) return;
+			if (signature == null && !(persist instanceof WebComponent)) return;
 
 			Map<String, String> substitutions = null;
 			if (dataSource != null) substitutions = Collections.singletonMap("dataSource", dataSource);
-			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, null, null, substitutions, null, null);
+			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, null, null, substitutions, persist, null);
 			if (method != null)
 			{
 				if (persist instanceof WebComponent)

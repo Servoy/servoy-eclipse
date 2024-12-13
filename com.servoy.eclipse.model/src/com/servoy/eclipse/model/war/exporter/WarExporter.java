@@ -577,7 +577,7 @@ public class WarExporter
 	/**
 	 * @param tmpWarDir
 	 */
-	private void compileLessResources(File tmpWarDir)
+	public static void compileLessResources(File tmpWarDir)
 	{
 		// this only compiles the active solution and modules less stuff in a dir
 		// not from the none active solutions, problem could be that the none active solutions can have duplicate names..

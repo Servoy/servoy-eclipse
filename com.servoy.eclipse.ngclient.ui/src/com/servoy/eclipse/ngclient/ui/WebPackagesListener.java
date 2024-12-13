@@ -86,6 +86,7 @@ import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.SerialRule;
 import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
+import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
@@ -646,7 +647,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// fist create the servoy/public dist if needed
 					String location = Activator.getInstance().getBundle().getLocation();
 					int fromSourceIndex = location.indexOf("file:/");
-					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists())
+					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists() || sourceChanged)
 					{
 						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
 							Arrays.asList("run", "build_lib_debug_nowatch"));

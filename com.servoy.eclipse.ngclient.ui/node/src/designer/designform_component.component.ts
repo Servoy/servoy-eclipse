@@ -278,7 +278,20 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         this.insertedCloneParent = this.formCache.mainStructure;
                     }
                 }
-                if (this.insertedCloneParent) this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+                if (this.insertedCloneParent) {
+                    this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+                    if (event.data.uuids) {
+                        event.data.uuids.forEach(uuid => {
+                            let insertedClone: ComponentCache | StructureCache = this.formCache.getLayoutContainer(uuid); 
+                            if (!insertedClone) {
+                                insertedClone = this.formCache.getComponent(uuid);
+                            }
+                            const insertedCloneParent = insertedClone.parent;
+                            insertedCloneParent.removeChild(insertedClone);
+                            this.insertedCloneParent.addChild(insertedClone, beforeChild);
+                        });
+                    }
+                }
             }
             if (event.data.id === 'removeDragCopy') {
                 if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
@@ -427,6 +440,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
+            if (item.type === 'menu') return;
             if (this[item.type] === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }

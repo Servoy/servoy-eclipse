@@ -17,7 +17,6 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
     @Input() showFocus: boolean;
     @Input() textRotation: number;
     @Input() verticalAlignment: number;
-    @Input() size: {width: number; height: number};
 
     @ViewChild('child') child: ElementRef;
 
@@ -37,7 +36,7 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
                     else this.renderer.removeAttribute(this.elementRef.nativeElement, 'accesskey');
                     break;
                 case 'textRotation':
-                    if (change.currentValue) PropertyUtils.setRotation(this.getNativeElement(), this.renderer, change.currentValue, this.size);
+                    if (change.currentValue) PropertyUtils.setRotation(this.getNativeElement(), this.renderer, change.currentValue);
                     break;
                 case 'verticalAlignment':
                     this.setVerticalAlignment();

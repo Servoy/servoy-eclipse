@@ -143,6 +143,10 @@ import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.IFoundSet;
+import com.servoy.j2db.dataprocessing.IJSBaseFoundSet;
+import com.servoy.j2db.dataprocessing.IJSBaseRecord;
+import com.servoy.j2db.dataprocessing.IJSBaseSQLFoundSet;
+import com.servoy.j2db.dataprocessing.IJSBaseSQLRecord;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.MenuFoundSet;
@@ -463,6 +467,10 @@ public class TypeCreator extends TypeCache
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 		addAnonymousClassType(JSMenu.class);
 		addAnonymousClassType(JSMenuItem.class);
+		addAnonymousClassType("JSBaseSQLRecord", IJSBaseSQLRecord.class);
+		addAnonymousClassType("JSBaseSQLFoundSet", IJSBaseSQLFoundSet.class);
+		addAnonymousClassType("JSBaseRecord", IJSBaseRecord.class);
+		addAnonymousClassType("JSBaseFoundSet", IJSBaseFoundSet.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());

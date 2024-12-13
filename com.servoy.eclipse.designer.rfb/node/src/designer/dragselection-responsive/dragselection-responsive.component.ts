@@ -44,10 +44,6 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
     onMouseDown(event: MouseEvent) {
         if (this.editorSession.getState().dragging || event.buttons !== 1) return; //prevent dnd when dragging from palette
-        if (this.editorSession.getSelection() != null && this.editorSession.getSelection().length > 1) {
-            // do not allow drag of multiple elements in responsive design
-            return;
-        }
         this.dragNode = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC();
       	if (this.dragNode === null) {
 			  this.dragNode = this.designerUtilsService.getNode(event);
@@ -152,7 +148,8 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                 this.editorContentService.sendMessageToIframe({
                     id: 'insertDraggedComponent',
                     dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
-                    insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
+                    insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null,
+                    uuids: this.editorSession.getSelection().length > 1 ? this.editorSession.getSelection().filter(uuid => uuid !== this.dragNode.getAttribute('svy-id')) : null
                 });
             }
         }
@@ -163,35 +160,43 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
     onMouseUp(event: MouseEvent) {
         if (this.dragStartEvent !== null && this.dragNode && this.editorSession.getState().dragging && this.canDrop.dropAllowed) {
-            const obj = (event.ctrlKey || event.metaKey) ? [] : {};
-
+            const components = [];
+            
             if (!this.canDrop.beforeChild && !this.canDrop.append) {
                 this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.dragNode);
             }
-
-            if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute("svy-id") === this.dragNode.getAttribute("svy-id")) {
+            
+            if (this.canDrop.beforeChild && this.canDrop.beforeChild.getAttribute('svy-id') === this.dragNode.getAttribute('svy-id')) {
                 this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop.beforeChild);
             }
-
-            const key = (event.ctrlKey || event.metaKey) && this.dragCopy ? 0 : this.dragNode.getAttribute("svy-id");
-            obj[key] = {};
-            if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
-                obj[key].uuid = this.dragNode.getAttribute('svy-id');
-            }
-
-            if (this.canDrop.dropTarget) {
-                obj[key].dropTargetUUID = this.canDrop.dropTarget.getAttribute("svy-id");
-            }
-
-            if (this.canDrop.beforeChild) {
-                obj[key].rightSibling = this.canDrop.beforeChild.getAttribute("svy-id");
-            }
+            
+            const uuids = this.editorSession.getSelection();
+            uuids.forEach(uuid => {
+                const obj = {}
+                if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
+                    obj['uuid'] = uuid;
+                    if (this.canDrop.dropTarget) {
+                        obj['dropTargetUUID'] = this.canDrop.dropTarget.getAttribute('svy-id');
+                    }
+                    if (this.canDrop.beforeChild) {
+                        obj['rightSibling'] = this.canDrop.beforeChild.getAttribute('svy-id');
+                    }
+                } else {
+                    obj[uuid] = {}
+                    if (this.canDrop.dropTarget) {
+                        obj[uuid].dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
+                    }
+                    if (this.canDrop.beforeChild) {
+                        obj[uuid].rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
+                    }
+                }
+                components.push(obj);
+            });
+            
             if (event.ctrlKey || event.metaKey) {
-                this.editorSession.createComponents({
-                    "components": obj
-                });
+                this.editorSession.createComponents({ 'components': components });
             } else {
-                this.editorSession.getSession().callService('formeditor', 'moveComponent', obj, true);
+                this.editorSession.getSession().callService('formeditor', 'moveComponent', { 'components': components }, true);
             }
         }
 

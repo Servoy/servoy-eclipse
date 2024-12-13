@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.rmi.RemoteException;
 import java.sql.Types;
 import java.util.AbstractSet;
@@ -73,6 +74,7 @@ import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
+import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
@@ -103,9 +105,11 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.AngularFormGenerator;
+import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -474,6 +478,11 @@ public class MobileExporter
 			solutionModel.put("timeout", timeout);
 			solutionModel.put("skipConnect", Boolean.valueOf(skipConnect));
 			solutionModel.put("mustAuthenticate", Boolean.valueOf(solution.getMustAuthenticate()));
+			Media media = flattenedSolution.getMedia(solution.getStyleSheetID());
+			if (media != null)
+			{
+				solutionModel.put("styleSheet", MediaResourcesServlet.SERVOY_SOLUTION_CSS + media.getName().replace(".less", ".css"));
+			}
 
 			int onOpenMethodID = solution.getOnOpenMethodID();
 			if (onOpenMethodID > 0)
@@ -521,6 +530,7 @@ public class MobileExporter
 			return ("var _solutiondata_ = " + jsonObject.toString());
 		}
 		return null;
+
 	}
 
 	/**
@@ -696,6 +706,8 @@ public class MobileExporter
 				return solution.getName();
 			}
 		});
+
+		WarExporter.compileLessResources(tmpWarDir);
 
 		String formJson = doPersistExport();
 		String solutionJavascript = doScriptingExport();
@@ -887,6 +899,8 @@ public class MobileExporter
 					}
 					entry = zipStream.getNextEntry();
 				}
+				Utils.closeInputStream(zipStream);
+
 				addZipEntry(moduleName + "/" + renameMap.get("spec_json.js"), warStream, Utils.getUTF8EncodedStream(specDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("form_json.js"), warStream, Utils.getUTF8EncodedStream(modelDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
@@ -911,8 +925,6 @@ public class MobileExporter
 
 				// add TiNG code to the WAR
 				Arrays.asList(tmpWarDir.listFiles()).forEach(f -> handleWarEntry(f, warStream, tmpWarDir));
-
-				Utils.closeInputStream(zipStream);
 			}
 			catch (IOException e)
 			{
@@ -922,6 +934,15 @@ public class MobileExporter
 			finally
 			{
 				Utils.closeOutputStream(warStream);
+			}
+			try
+			{
+				Files.walkFileTree(tmpWarDir.toPath(), DeletePathVisitor.INSTANCE);
+			}
+			catch (IOException e)
+			{
+				// just catch and log here, no need to fail the export if this dir can't be deleted.
+				ServoyLog.logError(e);
 			}
 		}
 		else
@@ -940,11 +961,11 @@ public class MobileExporter
 		}
 		else
 		{
-			try
+			try (FileInputStream is = new FileInputStream(file))
 			{
 				String name = file.getAbsolutePath();
 				name = name.substring(tmpWarDir.getAbsolutePath().length()).replace('\\', '/');
-				addZipEntry(name, warStream, new FileInputStream(file));
+				addZipEntry(name, warStream, is);
 			}
 			catch (IOException e)
 			{

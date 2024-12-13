@@ -300,7 +300,6 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             this.servoyApiCache = {};
             this.componentCache = {};
 
-            this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
             this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
         }
         this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
