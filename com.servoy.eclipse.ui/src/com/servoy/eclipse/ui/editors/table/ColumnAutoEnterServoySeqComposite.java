@@ -196,9 +196,9 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 					}
 					columnInfo.setSequenceStepSize(step);
 					ISequenceProvider sp = ApplicationServerRegistry.get().getServerManager().getSequenceProvider();
-					if (sp instanceof IColumnInfoBasedSequenceProvider)
+					if (sp instanceof IColumnInfoBasedSequenceProvider columnInfoBasedSequenceProvider)
 					{
-						((IColumnInfoBasedSequenceProvider)sp).setNextSequence(columnInfo);
+						columnInfoBasedSequenceProvider.setNextSequence(column);
 					}
 				}
 				catch (Exception ex)
