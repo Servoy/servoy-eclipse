@@ -102,6 +102,8 @@ public class ColumnComposite extends Composite
 	private CopyColumnNameAction copyColumnNameAction;
 	private SearchForDataProvidersReferencesAction searchForReferences;
 
+	private boolean firstClick = true;
+
 	/**
 	 * Create the composite
 	 *
@@ -179,7 +181,11 @@ public class ColumnComposite extends Composite
 					tabFolder.setVisible(b);
 					if (b) propagateSelection(c);
 					tableViewer.getTable().setToolTipText(c.getNote());
-					//ColumnComposite.this.layout(true, true);
+					if (firstClick)
+					{
+						ColumnComposite.this.layout(true, true);
+						firstClick = false;
+					}
 
 					Display.getDefault().asyncExec(new Runnable()
 					{
@@ -330,6 +336,7 @@ public class ColumnComposite extends Composite
 						tableViewer.setSelection(new StructuredSelection(c), true);
 					}
 					tableViewer.editElement(c, 0);
+					ColumnComposite.this.layout(true, true);
 				}
 				catch (RepositoryException e1)
 				{
