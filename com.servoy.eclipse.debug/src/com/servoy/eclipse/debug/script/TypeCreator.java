@@ -458,9 +458,10 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("ICSSPosition", ICSSPosition.class);
 		addAnonymousClassType("point", JSPoint.class);
 		addAnonymousClassType("dimension", JSDimension.class);
-		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
+		ElementResolver.registerConstantType("JSMenuItem", "JSMenuItem");
 		addAnonymousClassType(JSMenu.class);
 		addAnonymousClassType(JSMenuItem.class);
+		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 		addAnonymousClassType("JSBaseSQLRecord", IJSBaseSQLRecord.class);
 		addAnonymousClassType("JSBaseSQLFoundSet", IJSBaseSQLFoundSet.class);
 		addAnonymousClassType("JSBaseRecord", IJSBaseRecord.class);
@@ -783,6 +784,7 @@ public class TypeCreator extends TypeCache
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
 			registerConstantsForScriptObject(new IReturnedTypesProvider()
