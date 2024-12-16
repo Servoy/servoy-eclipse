@@ -467,6 +467,7 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("JSBaseRecord", IJSBaseRecord.class);
 		addAnonymousClassType("JSBaseFoundSet", IJSBaseFoundSet.class);
 
+
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
 		addScopeType(ViewRecord.VIEW_RECORD, new ViewRecordCreator());
