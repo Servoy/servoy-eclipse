@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dltk.ui.text.HTMLUtils;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -343,6 +344,8 @@ public class Activator extends AbstractUIPlugin
 					showLoginAndStart();
 				}
 			}));
+		// initialize the colors
+		HTMLUtils.getBgColor();
 	}
 
 
