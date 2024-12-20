@@ -179,26 +179,29 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 
 	public static Scriptable getScope(IDebugClient clientState, boolean create)
 	{
-		Pair<String, IRootObject> scopePair = getGlobalScope();
-		String scopeName = scopePair != null ? scopePair.getLeft() : ScriptVariable.GLOBAL_SCOPE;
-		GlobalScope ss = clientState.getScriptEngine().getScopesScope().getGlobalScope(scopeName);
 		Scriptable scope = null;
-		if (ss.has(TEST_SCOPE, ss))
+		if (clientState.isSolutionLoaded())
 		{
-			scope = (Scriptable)ss.get(TEST_SCOPE, ss);
-		}
-		else if (create)
-		{
-			Context cx = Context.enter();
-			try
+			Pair<String, IRootObject> scopePair = getGlobalScope();
+			String scopeName = scopePair != null ? scopePair.getLeft() : ScriptVariable.GLOBAL_SCOPE;
+			GlobalScope ss = clientState.getScriptEngine().getScopesScope().getGlobalScope(scopeName);
+			if (ss.has(TEST_SCOPE, ss))
 			{
-				scope = cx.newObject(ss);
-				ss.putWithoutFireChange(TEST_SCOPE, scope);
-				scope.setParentScope(ss);
+				scope = (Scriptable)ss.get(TEST_SCOPE, ss);
 			}
-			finally
+			else if (create)
 			{
-				Context.exit();
+				Context cx = Context.enter();
+				try
+				{
+					scope = cx.newObject(ss);
+					ss.putWithoutFireChange(TEST_SCOPE, scope);
+					scope.setParentScope(ss);
+				}
+				finally
+				{
+					Context.exit();
+				}
 			}
 		}
 		return scope;
@@ -428,18 +431,21 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 				{
 					this.activeClients = activeDebugClients;
 
-					@SuppressWarnings("unchecked")
-					Map<Scriptable, StringBuilder> clone = (Map<Scriptable, StringBuilder>)previousScripts.clone();
-					previousScripts.clear();
-					for (IDebugClient clientState : activeDebugClients)
+					if (!previousScripts.isEmpty())
 					{
-						Scriptable scope = getScope(clientState, false);
-						if (scope != null)
+						@SuppressWarnings("unchecked")
+						Map<Scriptable, StringBuilder> clone = (Map<Scriptable, StringBuilder>)previousScripts.clone();
+						previousScripts.clear();
+						for (IDebugClient clientState : activeDebugClients)
 						{
-							StringBuilder sb = clone.get(scope);
-							if (sb != null)
+							Scriptable scope = getScope(clientState, false);
+							if (scope != null)
 							{
-								previousScripts.put(scope, sb);
+								StringBuilder sb = clone.get(scope);
+								if (sb != null)
+								{
+									previousScripts.put(scope, sb);
+								}
 							}
 						}
 					}

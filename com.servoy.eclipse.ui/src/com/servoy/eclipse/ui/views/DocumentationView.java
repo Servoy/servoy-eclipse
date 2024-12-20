@@ -418,9 +418,9 @@ public class DocumentationView extends ViewPart implements ISelectionListener, I
 			case PLUGINS_ITEM :
 				return "https://docs.servoy.com/reference/servoyextensions/server-plugins"; // these are also browser plugins i guess.
 			case PROCEDURE :
-				return "https://docs.servoy.com/reference/servoycore/dev-api/spdatasource";
+				return "https://docs.servoy.com/reference/servoycore/dev-api/datasources/spdatasource";
 			case PROCEDURES :
-				return "https://docs.servoy.com/reference/servoycore/dev-api/spdatasources";
+				return "https://docs.servoy.com/reference/servoycore/dev-api/datasources/spdatasources";
 			case REGEXP :
 				break;
 			case RELATION :

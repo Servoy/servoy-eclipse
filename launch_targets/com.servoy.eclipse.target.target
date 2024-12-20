@@ -7,16 +7,16 @@
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/128.0.2/repository"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="128.0.2"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/128.0.5/repository"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="128.0.5"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.2.media/repository"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="128.0.2"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.5.media/repository"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="128.0.5"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.2-arm.media/repository"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="128.0.2"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.5-arm.media/repository"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="128.0.5"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="http://download.eclipse.org/nattable/releases/2.4.0/repository/"/>
@@ -57,7 +57,7 @@
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2024.12"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202410071358"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202412090933"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202412180904"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>

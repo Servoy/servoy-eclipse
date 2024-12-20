@@ -41,8 +41,8 @@ export class WebsocketService {
 
         this.ngZone.runOutsideAngular(() => {
             // When ReconnectingWebSocket gets a function it will call the function to generate the url for each (re)connect.
-            const websocket = env.mobile? new MobileBridge(this.windowRef): new ReconnectingWebSocket(() => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
-                this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri']), this.logFactory);
+            const websocket = env.mobile? new MobileBridge(this.windowRef): new ReconnectingWebSocket((reconnectAttempt:boolean) => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
+                this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri'], reconnectAttempt), this.logFactory);
             this.wsSession = new WebsocketSession(websocket, this, this.windowRef, this.converterService, this.loadingIndicatorService, this.ngZone, this.logFactory );
         });
         //$services.setSession(wsSession);
@@ -123,7 +123,7 @@ export class WebsocketService {
         return this.wsSession.getCurrentRequestInfo();
     }
 
-    private generateURL(context, args, queryArgs?, websocketUri?) {
+    private generateURL(context, args, queryArgs?, websocketUri?, reconnectAttempt? : boolean) {
         let new_uri: string;
         if (this.windowRef.nativeWindow.location.protocol === 'https:') {
             new_uri = 'wss:';
@@ -163,8 +163,17 @@ export class WebsocketService {
             new_uri += 'lastServerMessageNumber=' + this.lastServerMessageNumber + '&';
         }
 
-        const queryString = this.getQueryString();
+        let queryString = this.getQueryString();
         if (queryString) {
+            if (reconnectAttempt){
+                // do not send deep link method for websocket reconnect
+                const queryParams = new URLSearchParams(queryString);
+                queryParams.delete('method');
+                queryParams.delete('m');
+                queryParams.delete('arguments');
+                queryParams.delete('a');
+                queryString = queryParams.toString()
+            }
             new_uri += queryString;
         } else {
             new_uri = new_uri.substring(0, new_uri.length - 1);
