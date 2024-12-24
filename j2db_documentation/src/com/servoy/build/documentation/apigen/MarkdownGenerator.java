@@ -543,6 +543,18 @@ public class MarkdownGenerator
 			docGenerator.writeAggregatedOutput(ngOnly);
 		}
 		while (ngOnly);
+
+		System.out.println(undocumentedReturnTypeFunctions.size() + " functions must be checked in " + uniqueClasses.size() + " classes.");
+		System.out.println("\033[38;5;27mThe followin types are not documented: ");
+		undocumentedTypes.forEach(type -> {
+			System.out.print(type + ", ");
+		});
+		System.out.println("\033[0m");
+		System.out.println("\033[38;5;39mThe following classes contain function having undocumented returns: ");
+		uniqueClasses.forEach(type -> {
+			System.out.print(type + ", ");
+		});
+		System.out.println("\033[0m");
 	}
 
 	private static URL[] findJarURLsFromServoyInstall(String pluginDir) throws IOException
@@ -625,12 +637,6 @@ public class MarkdownGenerator
 				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly, htmlToMarkdownConverter);
 				models.add(ftm);
 			}
-			System.out.println(undocumentedReturnTypeFunctions.size() + " functions must be checked in " + uniqueClasses.size() + " classes.");
-			System.out.println("The followinf types are not documented: ");
-			undocumentedTypes.forEach(type -> {
-				System.out.println(type);
-			});
-
 			root.put(name, models);
 		}
 	}
