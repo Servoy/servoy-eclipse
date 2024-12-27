@@ -115,6 +115,10 @@ public class MarkdownGenerator
 
 	private static Map<String, String> specialTypePaths = new HashMap<>();
 	private static boolean isMacOS = false;
+	private static int missingReturnAnnotationCount = 0;
+	private static Set<String> undocumentedReturnTypeFunctions = new HashSet<>();
+	private static Set<String> uniqueClasses = new HashSet<>();
+	private static Set<String> undocumentedTypes = new HashSet<>();
 	static
 	{
 		// special return types that are used by the maintenance plugin but they are implemented&come from servoy_shared/core classes
@@ -397,25 +401,6 @@ public class MarkdownGenerator
 		targetInstallClassLoader = new URLClassLoader("Target Servoy installation classloader",
 			findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()), // Ensure absolute path is used
 			MarkdownGenerator.class.getClassLoader());
-//
-//		Class< ? > elusiveClass = targetInstallClassLoader.loadClass("com.servoy.extensions.plugins.jwt.client.Builder");
-//		System.out.println("Class that does new instance: " + elusiveClass.getCanonicalName());
-//		System.out.println("Class that does new instance was loaded by class loader: " + elusiveClass.getClassLoader());
-//
-//		elusiveClass = targetInstallClassLoader.loadClass("com.fasterxml.jackson.databind.json.JsonMapper");
-//		System.out.println("\nElusive class is not so elusive: " + elusiveClass.getCanonicalName());
-//		System.out.println("Elusive class was loaded by class loader: " + elusiveClass.getClassLoader());
-//
-//		elusiveClass = targetInstallClassLoader.loadClass("com.auth0.jwt.JWTCreator");
-//		System.out.println("\nElusive class is not so elusive: " + elusiveClass.getCanonicalName());
-//		System.out.println("Elusive class was loaded by class loader: " + elusiveClass.getClassLoader());
-//
-//		System.out.println("\nCan the class that does new instance be loaded by default classloader?");
-//		elusiveClass = MarkdownGenerator.class.getClassLoader().loadClass("com.servoy.extensions.plugins.jwt.client.Builder");
-//		System.out.println("Class that does new instance: " + elusiveClass.getCanonicalName());
-//		System.out.println("Class that does new instance was loaded by class loader: " + elusiveClass.getClassLoader());
-//
-//		System.exit(1);
 
 		boolean ngOnly = false;
 
@@ -429,34 +414,34 @@ public class MarkdownGenerator
 			ngOnly = !ngOnly;
 			final boolean ng = ngOnly;
 
-			System.err.println("Generating core and java plugin content (ngOnly = " + ngOnly + ")");
+			System.out.println("Generating core and java plugin content (ngOnly = " + ngOnly + ")");
 
 			DocumentationManager manager;
 
 			if (!generateForAI)
 			{
 				// TODO when the object model / persists should also be generated for AI, the if can be removed and this code will always execute
-				System.err.println("  - " + jsLibURLObject);
+				System.out.println("  - " + jsLibURLObject);
 				manager = DocumentationManager.fromXML(jsLibURLObject, targetInstallClassLoader);
 				docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
 
 				docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
 			}
 
-			System.err.println("  - " + servoyDocURLObject);
+			System.out.println("  - " + servoyDocURLObject);
 			manager = DocumentationManager.fromXML(servoyDocURLObject, targetInstallClassLoader);
 			docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/dev-api", null);
 			docGenerator.generateDocsFromXML(manager, "/reference/servoycore/dev-api", ngOnly);
 
 			if (!generateForAI)
 			{
-				System.err.println("  - " + designDocURLObject);
+				System.out.println("  - " + designDocURLObject);
 				manager = DocumentationManager.fromXML(designDocURLObject, targetInstallClassLoader);
 				docGenerator.processDocObjectToPathAndOtherMaps(manager, "/reference/servoycore/object-model/solution", null);
 				docGenerator.generateDocsFromXML(manager, "/reference/servoycore/object-model/solution", ngOnly);
 			}
 
-			System.err.println("  - plugins (from " + pluginDir + "):");
+			System.out.println("  - plugins (from " + pluginDir + "):");
 			File file2 = new File(new File(pluginDir).toURI().normalize());
 			if (file2.isDirectory())
 			{
@@ -531,7 +516,7 @@ public class MarkdownGenerator
 									{
 										try
 										{
-											System.err.println("    * " + jar.getName());
+											System.out.println("    * " + jar.getName());
 
 											docGenerator.generateDocsFromXML(pluginDocumentationPreparated.docManager, pluginDocumentationPreparated.pluginPath,
 												ng);
@@ -544,16 +529,32 @@ public class MarkdownGenerator
 								});
 						}
 					}
+					else
+					{
+						System.out.println("JAR EXCLUDED: " + jar.getAbsolutePath());
+					}
 				}
-//				for (String nonDefaultPluginThatShouldHaveBeenFound : nonDefaultPluginJarNamesThatWeDoGenerateDocsFor)
-//					if (!foundJars.contains(nonDefaultPluginThatShouldHaveBeenFound)) throw new RuntimeException(
-//						"Cannot find (explicitly required) plugin '" + nonDefaultPluginThatShouldHaveBeenFound + "' in dir: " + pluginDir +
-//							"\nYou have to manually copy a release of that plugin into the plugins dir...");
+				for (String nonDefaultPluginThatShouldHaveBeenFound : nonDefaultPluginJarNamesThatWeDoGenerateDocsFor)
+					if (!foundJars.contains(nonDefaultPluginThatShouldHaveBeenFound)) throw new RuntimeException(
+						"Cannot find (explicitly required) plugin '" + nonDefaultPluginThatShouldHaveBeenFound + "' in dir: " + pluginDir +
+							"\nYou have to manually copy a release of that plugin into the plugins dir...");
 			}
 
 			docGenerator.writeAggregatedOutput(ngOnly);
 		}
 		while (ngOnly);
+
+		System.out.println(undocumentedReturnTypeFunctions.size() + " functions must be checked in " + uniqueClasses.size() + " classes.");
+		System.out.println("\033[38;5;27mThe followin types are not documented: ");
+		undocumentedTypes.forEach(type -> {
+			System.out.print(type + ", ");
+		});
+		System.out.println("\033[0m");
+		System.out.println("\033[38;5;39mThe following classes contain function having undocumented returns: ");
+		uniqueClasses.forEach(type -> {
+			System.out.print(type + ", ");
+		});
+		System.out.println("\033[0m");
 	}
 
 	private static URL[] findJarURLsFromServoyInstall(String pluginDir) throws IOException
@@ -576,35 +577,6 @@ public class MarkdownGenerator
 		{
 			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "developer", "plugins").normalize().toString(), jarURLsFromInstall);
 		}
-
-//		List<String> listOfJarURLs;/* = jarURLsFromInstall; */ // new File(jarFile.toURI())
-//		String launcherCP = "E:\\GitHome_master\\git\\servoy-eclipse\\j2db_documentation\\bin;E:\\ExportedTargetPlatforms\\master\\plugins\\org.osgi.annotation.versioning_1.1.2.202109301733.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.osgi.annotation.bundle_2.0.0.202202082230.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.osgi.service.component.annotations_1.5.1.202212101352.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.osgi.service.metatype.annotations_1.4.1.202109301733.jar;E:\\GitHome_master\\git\\rhino\\bin;E:\\GitHome_master\\git\\servoy-client\\servoy_base\\bin;E:\\ExportedTargetPlatforms\\master\\plugins\\log4j-api-2.23.1.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\log4j-core-2.23.1.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.apache.commons.codec_1.14.0.v20221112-0806.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\jabsorb-1.3.2.s7.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\commons-fileupload-1.5.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\xstream-1.4.20.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\com.google.guava_33.2.0.jre.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.apache.commons.commons-codec_1.17.0.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.jetty.servlet-api_4.0.6.jar;E:\\GitHome_master\\git\\sablo\\sablo\\bin;E:\\ExportedTargetPlatforms\\master\\plugins\\javax.websocket-1.1.0.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.apache.commons.commons-io_2.16.1.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\slf4j.api_2.0.13.jar;e:\\Maven\\Andrei\\.m2\\repository\\org\\slf4j\\slf4j-api\\2.0.7\\slf4j-api-2.0.7.jar;e:\\Maven\\Andrei\\.m2\\repository\\org\\apache\\logging\\log4j\\log4j-api\\2.22.1\\log4j-api-2.22.1.jar;e:\\Maven\\Andrei\\.m2\\repository\\org\\apache\\logging\\log4j\\log4j-core\\2.22.1\\log4j-core-2.22.1.jar;e:\\Maven\\Andrei\\.m2\\repository\\org\\apache\\logging\\log4j\\log4j-slf4j2-impl\\2.22.1\\log4j-slf4j2-impl-2.22.1.jar;e:\\Maven\\Andrei\\.m2\\repository\\org\\mockito\\mockito-core\\3.12.4\\mockito-core-3.12.4.jar;e:\\Maven\\Andrei\\.m2\\repository\\junit\\junit\\4.13.1\\junit-4.13.1.jar;e:\\Maven\\Andrei\\.m2\\repository\\org\\skyscreamer\\jsonassert\\1.5.1\\jsonassert-1.5.1.jar;e:\\Maven\\Andrei\\.m2\\repository\\org\\hamcrest\\hamcrest-core\\1.3\\hamcrest-core-1.3.jar;e:\\Maven\\Andrei\\.m2\\repository\\net\\bytebuddy\\byte-buddy-agent\\1.12.4\\byte-buddy-agent-1.12.4.jar;e:\\Maven\\Andrei\\.m2\\repository\\org\\objenesis\\objenesis\\3.2\\objenesis-3.2.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\dom4j-2.1.4.jar;E:\\GitHome_master\\git\\servoy-client\\servoy_shared\\bin;E:\\GitHome_master\\git\\servoy-client\\servoy_shared\\lib\\fs-commons.jar;E:\\GitHome_master\\git\\servoy-client\\servoy_shared\\lib\\fs-parser.jar;E:\\GitHome_master\\git\\servoy-client\\servoy_shared\\lib\\PBKDF2.jar;E:\\GitHome_master\\git\\servoy-client\\servoy_smart_client\\bin;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.runtime_3.31.100.v20240524-2010.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.osgi_3.20.0.v20240509-1421.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.osgi.compatibility.state_1.2.1000.v20240213-1057.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.common_3.19.100.v20240524-2011.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.jobs_3.15.300.v20240418-0734.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.registry_3.12.100.v20240524-2011.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.preferences_3.11.100.v20240327-0645.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.osgi.service.prefs_1.1.2.202109301733.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.contenttype_3.9.400.v20240507-1301.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.app_1.7.100.v20240321-1445.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui_3.206.0.v20240524-2010.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.swt_3.126.0.v20240528-0813.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.swt.win32.win32.x86_64_3.126.0.v20240528-0813.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.pde.api.tools.annotations_1.3.0.v20240207-2106.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.commands_3.12.100.v20240424-0956.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.bidi_1.5.100.v20240321-1445.jar;E:\\GitHome_master\\git\\servoy-eclipse\\org.eclipse.jface\\bin;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.workbench_3.132.0.v20240524-2010.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.e4.ui.workbench3_0.17.400.v20240321-1245.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.jsoup_1.18.1.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\uap-java-1.6.1-SERVOY.jar;E:\\GitHome_master\\git\\servoy-client\\servoy_headless_client\\bin;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\bin;E:\\ExportedTargetPlatforms\\master\\plugins\\com.sun.el.javax.el_3.0.4.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\jakarta.servlet.jsp-api-2.3.6.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\annotations-api.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\catalina.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\catalina-ant.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\catalina-ha.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\catalina-ssi.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\catalina-storeconfig.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\catalina-tribes.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\ecj-4.20.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\jasper.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\jasper-el.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\jaspic-api.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-api.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-coyote.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-dbcp.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-i18n-cs.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-i18n-de.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-i18n-es.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-i18n-fr.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-i18n-ja.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-i18n-ko.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-i18n-pt-BR.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-i18n-ru.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-i18n-zh-CN.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-jdbc.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-jni.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-juli.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-util.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-util-scan.jar;E:\\GitHome_master\\git\\servoy-eclipse-tomcat\\org.apache.tomcat\\lib\\tomcat-websocket.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\jlessc-1.10.0.s4.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.apache.commons.lang3_3.15.0.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\commons-text-1.12.0.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\freemarker-2.3.33.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\tus-java-server-2.0.0.s2.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\java-jwt-4.4.0.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\httpclient5-5.3.1.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\httpcore5-5.2.5.jar;E:\\GitHome_master\\git\\servoy-client\\servoy_ngclient\\bin;E:\\GitHome_master\\git\\servoy-client\\servoy_debug\\bin;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.resources_3.20.200.v20240513-1323.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.wst.css.core_1.3.400.v202308160453.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.apache.xerces_2.12.2.v20230928-1306.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.javascript.parser_5.2.0.202407231204.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.core_5.1.1.202407231120.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.ngclient\\bin;E:\\GitHome_master\\git\\server\\j2db_log4j\\bin;E:\\ExportedTargetPlatforms\\master\\plugins\\javax.transaction-1.1.0.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\hibernate-core-5.6.15.Servoy3.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\commons-dbcp2-2.12.0.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\commons-pool2-2.12.0.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\javax.persistence-api-2.2.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\jboss-logging-3.6.0.Final.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\byte-buddy-1.14.18.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\com.google.gson_2.11.0.jar;E:\\GitHome_master\\git\\server\\j2db_server\\bin;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.annotations_5.1.1.202407231120.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.model\\bin;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.javascript.core_5.1.1.202407231204.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.ide_3.22.200.v20240524-2010.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.e4.ui.ide_3.17.200.v20231201-1637.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.filesystem_1.10.400.v20240426-1040.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.intro_3.7.400.v20240414-0828.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.cheatsheets_3.8.400.v20240414-1916.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.help.ui_4.7.0.v20240414-1916.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.help.base_4.4.400.v20240601-0610.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.help_3.10.400.v20240415-0528.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.expressions_3.9.400.v20240413-1529.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.team.core_3.10.400.v20240413-1529.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.workbench.texteditor_3.17.400.v20240524-2010.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.debug.ui_5.1.1.202407231120.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.debug_5.1.1.202407231120.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.debug.core_3.21.400.v20240415-0528.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.wst.css.ui_1.2.200.v202308160453.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.filebuffers_3.8.300.v20240207-1054.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.jface.text_3.25.100.v20240524-2010.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.text_3.14.100.v20240524-2010.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.ui_5.1.1.202407231120.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.views_3.12.300.v20240524-2010.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.javascript.ui_5.1.1.202407231204.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.editors_3.17.300.v20240524-2010.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.forms_3.13.300.v20240424-0956.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.e4.ui.css.swt.theme_0.14.400.v20240424-0956.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.model.exporter.mobile\\bin;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.model.exporter.mobile\\lib\\js.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.model.exporter.mobile\\lib\\jshybugger.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.model.exporter.mobile\\lib\\netty-3.6.5.Final.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.model.exporter.mobile\\lib\\webbit-0.4.15.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\net.sourceforge.sqlexplorer_3.6.2.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\net.sourceforge.sqlexplorer_3.6.2\\sqlexplorer.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\net.sourceforge.sqlexplorer_3.6.2\\lib\\log4j.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\net.sourceforge.sqlexplorer_3.6.2\\lib\\rowset.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\net.sourceforge.sqlexplorer_3.6.2\\lib\\dom4j.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\net.sourceforge.sqlexplorer_3.6.2\\lib\\fw.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\net.sourceforge.sqlexplorer_3.6.2\\lib\\hibernate3.2.4.sp1.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\net.sourceforge.sqlexplorer_3.6.2\\lib\\poi-3.5-FINAL-20090928.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\net.sourceforge.sqlexplorer_3.6.2\\lib\\commons-logging.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\sj.jsonschemavalidation-2.0.1.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\sj.jsonschemavalidation_2.0.1\\lib\\jackson-core-2.4.3.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\sj.jsonschemavalidation_2.0.1\\lib\\jackson-databind-2.4.3.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\sj.jsonschemavalidation_2.0.1\\lib\\json-schema-validator-2.2.5-lib.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\sj.jsonschemavalidation_2.0.1\\lib\\jackson-annotations-2.4.3.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.core.manipulation_5.1.1.202407231120.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.core\\bin;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.console_3.14.100.v20240429-1358.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.debug.ui_3.18.400.v20240516-0857.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.console.ui_5.1.1.202407231120.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.console_5.1.1.202407231120.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.javascript.launching_5.1.1.202407231204.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.launching_5.1.1.202407231120.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.emf.ecore_2.36.0.v20240203-0859.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.emf.common_2.30.0.v20240314-0928.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.javascript.jsjdtdebugger_5.1.1.202407231204.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.javascript.debug_5.1.1.202407231204.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.javascript.debug.ui_5.1.1.202407231204.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\com.ibm.icu_75.1.0.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.search_3.16.200.v20240426-0859.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.search.core_3.16.200.v20240502-1134.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.databinding_1.13.300.v20240424-0444.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.databinding.observable_1.13.300.v20240424-0444.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.core.databinding.beans_1.10.300.v20240321-1245.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.core.databinding.property_1.10.300.v20240424-0444.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.jface.databinding_1.15.300.v20240424-0444.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.javascript.formatter_5.1.1.202407231204.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.dltk.formatter_5.1.1.202407231120.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.wst.sse.ui_1.7.1000.v202404170147.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.wst.sse.core_1.2.1400.v202405130132.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.wst.xml.core_1.2.900.v202405130132.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.wst.xml.ui_1.2.701.v202308160453.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.wst.validation_1.3.0.v202308161955.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.wst.validation.ui_1.3.100.v202405020134.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.wst.html.core_1.4.400.v202308160453.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.wst.html.ui_1.1.801.v202308160453.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.browser_3.8.300.v20240524-2010.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.externaltools_3.6.400.v20240416-0654.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.p2.core_2.12.0.v20240515-1919.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.p2.repository_2.9.100.v20240511-1722.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.p2.metadata_2.9.100.v20240416-0654.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.p2.ui_2.8.400.v20240511-1722.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.p2.operations_2.7.400.v20240425-0751.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.team.ui_3.10.400.v20240416-0654.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ltk.core.refactoring_3.14.400.v20240321-1245.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ltk.ui.refactoring_3.13.400.v20240321-1245.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.maven.ide.eclipse.grouplayout-1.1.0.201005260935.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.external_libraries\\org.maven.ide.eclipse.grouplayout_1.1.0.201005260935\\jars\\swt-grouplayout-7.4.0-r35.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.ui.tweaks\\bin;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.equinox.security_1.4.300.v20240419-2334.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.tukaani.xz_1.9.0.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.ngclient.ui\\bin;E:\\ExportedTargetPlatforms\\master\\plugins\\com.equo.chromium_124.0.1.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.nebula.widgets.nattable.core_2.4.0.202405230453.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.nebula.widgets.nattable.extension.nebula_2.4.0.202405230453.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.e4.ui.css.swt_0.15.400.v20240321-1245.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.nebula.widgets.nattable.extension.e4_2.4.0.202405230453.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.jgit_6.10.0.202406032230-r.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.jgit.gpg.bc_6.10.0.202406032230-r.jar;E:\\ExportedTargetPlatforms\\master\\plugins\\org.eclipse.egit.core_6.10.0.202406032230-r.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.cloud\\bin;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.tm4e.ui_0.12.0.202405210827.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.tm4e.core_0.12.0.202405210827.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.tm4e.languageconfiguration_0.12.0.202405210827.jar;E:\\Workspaces\\master\\.metadata\\.plugins\\org.eclipse.pde.core\\.bundle_pool\\plugins\\org.eclipse.ui.genericeditor_1.3.400.v20240511-1105.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.ui\\bin;E:\\ExportedTargetPlatforms\\master\\plugins\\org.apache.commons.commons-compress_1.26.2.jar;E:\\GitHome_master\\git\\servoy-eclipse\\com.servoy.eclipse.debug\\bin";
-//		String[] entries = launcherCP.split(";");
-//		listOfJarURLs = List.of(entries);
-//		System.out.println(listOfJarURLs);
-//		for (String jarFile : listOfJarURLs)
-//		{
-//			if (new File(jarFile).isFile())
-//			{
-//				ZipFile zip = null;
-//				try
-//				{
-//					zip = new ZipFile(jarFile);
-//					zip.stream().filter((entry) -> entry.isDirectory() && entry.toString()
-//						.contains("com/auth0/jwt"/* "com/fasterxml/jackson/databind/json" */))
-//						.forEach((e) -> System.out.println("Jar " + jarFile + " contains entry: " + e));
-//				}
-//				catch (IOException e)
-//				{
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				finally
-//				{
-//					if (zip != null) zip.close();
-//				}
-//			}
-//		}
 		return jarURLsFromInstall.toArray(new URL[jarURLsFromInstall.size()]);
 	}
 
@@ -626,12 +598,13 @@ public class MarkdownGenerator
 		}
 	}
 
-	private void table(String name, List<IFunctionDocumentation> functions, Class< ? > cls, boolean ngOnly)
+	private void table(String name, List<IFunctionDocumentation> functions, Class< ? > cls, boolean ngOnly, boolean checkReturnAnnotation)
 	{
 		if (functions != null && functions.size() > 0)
 		{
 			List<FunctionTemplateModel> models = new ArrayList<>();
 			ClientSupport fdCs;
+
 			for (IFunctionDocumentation fd : functions)
 			{
 				if (fd.isDeprecated()) continue;
@@ -640,24 +613,42 @@ public class MarkdownGenerator
 				if (fdCs == null) fdCs = ClientSupport.Default;
 
 				if (ngOnly && !fdCs.hasSupport(ClientSupport.ng)) continue;
-				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly,
-					htmlToMarkdownConverter);
+
+				String functionName = fd.getMainName();
+				Class< ? > returnType = fd.getReturnedType();
+				String publicName = MarkdownGenerator.getPublicName(returnType);
+
+				// Check if the function has a return type but is missing a @return annotation
+				if (checkReturnAnnotation && returnType != null && returnType != void.class && !hasReturnAnnotation(fd) &&
+					undocumentedReturnTypeFunctions.add(functionName))
+				{
+					System.err.println("\033[32m" + missingReturnAnnotationCount + " Function " + functionName + " in class " + cls.getName() +
+						" returns " + returnType.getName() + " but is missing @return annotation in JSDoc. \033[0m");
+					uniqueClasses.add(cls.getName());
+				}
+
+				if ("Object".equals(publicName))
+				{
+					System.err.println("Function " + functionName + " in class " + cls.getName() +
+						" has undocumented return type: " + returnType.getName());
+					undocumentedTypes.add(returnType.getName());
+				}
+
+				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly, htmlToMarkdownConverter);
 				models.add(ftm);
-//			if ("void".equals(ftm.getReturnType()) || ftm.getReturnType() == null)
-//			{
-//				start = start.t("void").up(2);
-//			}
-//			else
-//			{
-//				start = start.e(LNK).e(PG).a(CT, ftm.getReturnType()).up(4);
-//			}
-//
-//			String functionName = getFullFunctionName(fd, cls);
-//			start = start.e(MCR).a(NM, "td").e(RTB).e(LNK).a(ANC, functionName).e(PTLB).cdata(functionName).up(4).e(MCR).a(NM, "td").e(RTB).t(
-//				ftm.getSummary()).up(4);
 			}
 			root.put(name, models);
 		}
+	}
+
+	private boolean hasReturnAnnotation(IFunctionDocumentation fd)
+	{
+		String jsDoc = fd.getDescription(fd.getClientSupport());
+		if (jsDoc != null)
+		{
+			return jsDoc.contains("@return");
+		}
+		return false;
 	}
 
 	private void generateClientSupport(IObjectDocumentation value)
@@ -860,7 +851,7 @@ public class MarkdownGenerator
 			String name = qualifiedToName.get(type.getCanonicalName());
 			if (name == null)
 			{
-				System.err.println("public name not found for " + type);
+//				System.err.println("public name not found for " + type);
 				name = "Object";
 			}
 			return name;
@@ -946,7 +937,6 @@ public class MarkdownGenerator
 							System.err.println(" qname not found for " + retCls);
 						}
 					}
-//				returnTypesToParentName.put(doc.getPublicName(), doc.getPublicName());
 				}
 
 				ArrayList<Class< ? >> filteredReturnTypes = null;
@@ -1012,13 +1002,12 @@ public class MarkdownGenerator
 				List<IFunctionDocumentation> commands = getCommands(functions);
 				List<IFunctionDocumentation> events = getEvents(functions);
 				List<IFunctionDocumentation> methods = getMethods(functions);
-				cg.table("constants", constants, cls, ngOnly);
+				cg.table("constants", constants, cls, ngOnly, false);
 				if (properties != null) properties = properties.stream().filter(node -> node.getReturnedType() != void.class).collect(Collectors.toList());
-				cg.table("properties", properties, cls, ngOnly);
-				cg.table("commands", commands, cls, ngOnly);
-				cg.table("events", events, cls, ngOnly);
-				cg.table("methods", methods, cls, ngOnly);
-//			if (events != null && events.size() > 0) System.err.println(events.size() + value.getPublicName());
+				cg.table("properties", properties, cls, ngOnly, false);
+				cg.table("commands", commands, cls, ngOnly, false);
+				cg.table("events", events, cls, ngOnly, false);
+				cg.table("methods", methods, cls, ngOnly, true);
 
 				String output = cg.generate();
 				String parent = cg.getPath().toString();
@@ -1040,26 +1029,6 @@ public class MarkdownGenerator
 					duplicateTracker.trackFile(file.getName(), file.toString());
 					if (aggregatedOutput != null) aggregatedOutput.append(output);
 				}
-
-//			file = new File(userDir, "generated_old/" + value.getPublicName() + ".html");
-//			if (file.exists())
-//			{
-//				if (file.length() == output.length())
-//				{
-//					// check if it is still the same if the number of bytes are equal.
-//					try (FileReader reader = new FileReader(file))
-//					{
-//						char[] buf = new char[(int)file.length()];
-//						reader.read(buf);
-//						String old = new String(buf);
-//						if (old.equals(output))
-//						{
-//							System.out.println("not updating remote content because the file is the same as the old value " + file);
-//							continue;
-//						}
-//					}
-//				}
-//			}
 			}
 		}
 
@@ -1074,6 +1043,10 @@ public class MarkdownGenerator
 					if (publicName != null && !"Object".equals(publicName))
 					{
 						publicNames.add(publicName);
+					}
+					else
+					{
+						System.err.println("Public name not found for type: " + alltype.getName() + " in filtered return types.");
 					}
 				}
 				if (publicNames.size() > 0) return publicNames;
