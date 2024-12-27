@@ -59,11 +59,6 @@ public class SetSelectionHandler implements IServerService
 		this.selectionProvider = selectionProvider;
 	}
 
-	/**
-	 * @param methodName
-	 * @param args
-	 * @throws JSONException
-	 */
 	public Object executeMethod(String methodName, final JSONObject args) throws JSONException
 	{
 		JSONArray json = args.getJSONArray("selection");
