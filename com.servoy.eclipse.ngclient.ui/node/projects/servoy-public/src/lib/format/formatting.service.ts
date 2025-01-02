@@ -128,14 +128,15 @@ export class FormattingService {
             servoyFormat = this.convertFormat(servoyFormat);
             let d = DateTime.fromFormat(data, servoyFormat, { locale: this.servoyService.getLocale() }).toJSDate();
             if (isNaN(d.getTime()) && useHeuristics) {
-				const possibleDates: Array<Date> = [];
+                
+				const possibleDates: Map<string,Date> = new Map();
                 for (const newFormat of this.getHeuristicFormats(servoyFormat, data)) {
                     d = DateTime.fromFormat(data, newFormat, { locale: this.servoyService.getLocale() }).toJSDate();
                     if (!isNaN(d.getTime())) {
-                        possibleDates.push(d);
+                        possibleDates.set(newFormat,d);
                     }
                 }
-				d = this.findClosestDate(possibleDates, new Date());
+				d = this.findClosestDate(possibleDates, servoyFormat);
             }
             // if format has not year/month/day use the one from the current model value
             // because luxon will just use current date
@@ -157,10 +158,19 @@ export class FormattingService {
         return data;
     }
 	
-	private findClosestDate(dateArray: Array<Date>, date: Date): Date {
-		if (dateArray.length === 1) return dateArray[0];
-		const currentDateTime = date.getTime();
-		const dateArrayConverted = dateArray.map(date => date.getTime()).map(time => Math.abs(currentDateTime - time));
+	private findClosestDate(dateArray: Map<string,Date>, servoyFormat: string): Date {
+        // if there is just one return that.
+		if (dateArray.size === 1) return dateArray.values().next().value
+        // else find the one closest to the current format (starts with the same letters)
+        const strippedFormat = servoyFormat.replace(/[^a-zA-Z]/g, '');
+        for (const key of dateArray.keys()) {
+            if (strippedFormat.startsWith(key)){
+                return dateArray.get(key);
+            }
+        }
+        // fallback to closest date
+		const currentDateTime = new Date().getTime();
+		const dateArrayConverted = Array.from(dateArray.values()).map(date => date.getTime()).map(time => Math.abs(currentDateTime - time));
 		const index = dateArrayConverted.indexOf(Math.min(...dateArrayConverted));
 		return dateArray[index];
 	}
