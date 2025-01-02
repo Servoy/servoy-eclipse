@@ -419,8 +419,8 @@ describe('FormattingService', () => {
           date = service.unformat('112', 'dd-MM-yyyy', 'DATETIME', null, true);
           expect(date).toBeDefined();
           expect(date.getFullYear()).toBe(today.getFullYear());
-          expect(date.getMonth()).toBe(11);
-          expect(date.getDate()).toBe(1);
+          expect(date.getMonth()).toBe(1);
+          expect(date.getDate()).toBe(11);
           
           date = service.unformat('1112', 'dd-MM-yyyy', 'DATETIME', null, true);
           expect(date).toBeDefined();
