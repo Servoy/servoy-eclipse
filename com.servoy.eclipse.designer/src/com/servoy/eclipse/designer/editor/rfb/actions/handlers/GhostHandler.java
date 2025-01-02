@@ -62,6 +62,7 @@ import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
@@ -172,7 +173,7 @@ public class GhostHandler implements IServerService
 
 		ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).acceptVisitor(new IPersistVisitor()
 		{
-			private Point getGhostContainerLocation(IBasicWebComponent bean, ArrayList<IBasicWebComponent> parentFormComponentPath)
+			private Point getGhostContainerLocation(ISupportBounds bean, ArrayList<IBasicWebComponent> parentFormComponentPath)
 			{
 				Point location = CSSPositionUtils.getLocation(bean);
 				if (parentFormComponentPath != null)
@@ -461,13 +462,25 @@ public class GhostHandler implements IServerService
 			private void writeGhostForPersist(IPersist o, String parentID, ArrayList<IBasicWebComponent> parentFormComponentPath,
 				HashSet<String> recursiveCheck)
 			{
-				if (o instanceof TabPanel && isInShowedContainer(o))
+				if (o instanceof TabPanel panel && isInShowedContainer(o))
 				{
 					try
 					{
 						writer.object();
+						Point ghostContainerLocation = getGhostContainerLocation(panel, parentFormComponentPath);
+						writer.key("parentCompBounds");
+						{
+							// these will only be useful in anchor forms (in responsive the actual location of the parent component needs to be determined on client)
+							writer.object();
+							writer.key("left").value(ghostContainerLocation.getX());
+							writer.key("top").value(ghostContainerLocation.getY());
+							writer.key("width").value(panel.getSize().width);
+							writer.key("height").value(panel.getSize().height);
+							writer.endObject();
+						}
+						writer.key("containerPositionInComp").value(0);
+						writer.key("totalGhostContainersOfComp").value(1);
 						writer.key("style");
-						TabPanel panel = (TabPanel)o;
 						{
 							writer.object();
 							writer.key("left").value(0);
@@ -485,8 +498,8 @@ public class GhostHandler implements IServerService
 							while (tabIterator.hasNext())
 							{
 								Tab tab = (Tab)tabIterator.next();
-								int x = tab.getLocation().x;
-								int y = tab.getLocation().y;
+								int x = i * 80; //tab.getLocation().x;
+								int y = 0; //tab.getLocation().y;
 								writer.object();
 								writer.key("uuid").value(tab.getUUID());
 								writer.key("type").value(GHOST_TYPE_CONFIGURATION);
@@ -501,8 +514,8 @@ public class GhostHandler implements IServerService
 								writer.endObject();
 								writer.key("size");
 								writer.object();
-								writer.key("width").value(tab.getSize().width);
-								writer.key("height").value(tab.getSize().height);
+								writer.key("width").value(80);
+								writer.key("height").value(20);
 								writer.endObject();
 								writer.endObject();
 								i++;
