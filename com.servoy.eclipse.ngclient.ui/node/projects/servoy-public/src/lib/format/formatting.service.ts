@@ -158,19 +158,20 @@ export class FormattingService {
         return data;
     }
 	
-	private findClosestDate(dateArray: Map<string,Date>, servoyFormat: string): Date {
+	private findClosestDate(dateMap: Map<string,Date>, servoyFormat: string): Date {
         // if there is just one return that.
-		if (dateArray.size === 1) return dateArray.values().next().value
+		if (dateMap.size === 1) return dateMap.values().next().value
         // else find the one closest to the current format (starts with the same letters)
         const strippedFormat = servoyFormat.replace(/[^a-zA-Z]/g, '');
-        for (const key of dateArray.keys()) {
-            if (strippedFormat.startsWith(key)){
-                return dateArray.get(key);
+        for (const key of dateMap.keys()) {
+            if (strippedFormat.startsWith(key) || servoyFormat.startsWith(key)) {
+                return dateMap.get(key);
             }
         }
         // fallback to closest date
 		const currentDateTime = new Date().getTime();
-		const dateArrayConverted = Array.from(dateArray.values()).map(date => date.getTime()).map(time => Math.abs(currentDateTime - time));
+        const dateArray = Array.from(dateMap.values());
+		const dateArrayConverted = dateArray.map(date => date.getTime()).map(time => Math.abs(currentDateTime - time));
 		const index = dateArrayConverted.indexOf(Math.min(...dateArrayConverted));
 		return dateArray[index];
 	}
