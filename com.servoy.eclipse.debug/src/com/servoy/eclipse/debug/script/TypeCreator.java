@@ -2578,9 +2578,7 @@ public class TypeCreator extends TypeCache
 	}
 
 	/**
-	 * RAGTEST doc
-	 * @param getter
-	 * @return
+	 * Get the return type for the method using generics.
 	 */
 	private static Class< ? > getGenericReturnType(Class< ? > cls, java.lang.reflect.Method method)
 	{
@@ -3613,7 +3611,7 @@ public class TypeCreator extends TypeCache
 				cstt = cachedSuperTypeTemplateType = createBaseType(context, superTypeName);
 			}
 			EList<Member> members = cstt.getMembers();
-			List<Member> overwrittenMembers = new ArrayList<Member>();
+			List<Member> overwrittenMembers = new ArrayList<>();
 			for (Member member : members)
 			{
 				Member overridden = createMember(member, context, config);
