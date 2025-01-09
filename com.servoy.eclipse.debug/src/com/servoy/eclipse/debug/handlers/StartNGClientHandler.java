@@ -206,16 +206,18 @@ public class StartNGClientHandler extends StartDebugHandler implements NGClientS
 					if (ewb != null && !ewb.getName().equals(Messages.prefSystemBrowser))
 					{
 						//ext := "org.eclipse.ui.browser." + specifiId
-						ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
-						if (ext != null)
-						{
-							webBrowser = ext.createBrowser(ext.getId(), ewb.getLocation(), ewb.getParameters());
-							if (webBrowser == null) webBrowser = new ExternalBrowserInstance(ext.getId(), ewb);
-						}
+
+						if (ewb.getLocation() != null)
+							webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." + ewb.getName().toLowerCase().replace(" ", "_"), ewb);
 						else
 						{
-							if (ewb.getLocation() != null)
-								webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." + ewb.getName().toLowerCase().replace(" ", "_"), ewb);
+							ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
+
+							if (ext != null)
+							{
+								webBrowser = ext.createBrowser(ext.getId(), ewb.getLocation(), ewb.getParameters());
+								if (webBrowser == null) webBrowser = new ExternalBrowserInstance(ext.getId(), ewb);
+							}
 						}
 					}
 
