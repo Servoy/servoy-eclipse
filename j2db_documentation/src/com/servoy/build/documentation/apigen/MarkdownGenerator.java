@@ -119,6 +119,32 @@ public class MarkdownGenerator
 	private static Set<String> undocumentedReturnTypeFunctions = new HashSet<>();
 	private static Set<String> uniqueClasses = new HashSet<>();
 	private static Set<String> undocumentedTypes = new HashSet<>();
+
+	private static final Set<String> IGNORED_UNDOCUMENTED_TYPES = Set.of(
+		"org.mozilla.javascript.IdScriptableObject",
+		"org.json.JSONObject",
+		"java.util.Map",
+		"com.servoy.j2db.scripting.JSMap",
+		"com.servoy.j2db.documentation.scripting.docs.Object",
+		"java.lang.Object",
+		"com.servoy.j2db.util.ServoyJSONObject",
+		"org.json.JSONArray",
+		"java.awt.print.PrinterJob");
+
+	private static final Set<String> SKIP_MISSING_RETURN_FOR_CLASS = Set.of(
+		"com.servoy.j2db.documentation.scripting.docs.Array",
+		"com.servoy.j2db.documentation.scripting.docs.Date",
+		"com.servoy.j2db.documentation.scripting.docs.JSON",
+		"com.servoy.j2db.documentation.scripting.docs.Math",
+		"com.servoy.j2db.documentation.scripting.docs.Function",
+		"com.servoy.j2db.documentation.scripting.docs.String",
+		"com.servoy.j2db.documentation.scripting.docs.XML",
+		"com.servoy.j2db.documentation.scripting.docs.Map");
+
+	private static final Set<String> STD_DOC_LINKS = Set.of(
+		"https://developer.mozilla.org/",
+		"https://ecma-international.org/");
+
 	static
 	{
 		// special return types that are used by the maintenance plugin but they are implemented&come from servoy_shared/core classes
@@ -545,7 +571,7 @@ public class MarkdownGenerator
 		while (ngOnly);
 
 		System.out.println(undocumentedReturnTypeFunctions.size() + " functions must be checked in " + uniqueClasses.size() + " classes.");
-		System.out.println("\033[38;5;27mThe followin types are not documented: ");
+		System.out.println("\033[38;5;27mThe following types are not documented: ");
 		undocumentedTypes.forEach(type -> {
 			System.out.print(type + ", ");
 		});
@@ -619,7 +645,13 @@ public class MarkdownGenerator
 				String publicName = MarkdownGenerator.getPublicName(returnType);
 
 				// Check if the function has a return type but is missing a @return annotation
-				if (checkReturnAnnotation && returnType != null && returnType != void.class && !hasReturnAnnotation(fd) &&
+				if (!SKIP_MISSING_RETURN_FOR_CLASS.contains(cls.getName()) &&
+					checkReturnAnnotation &&
+					returnType != null &&
+					returnType != void.class &&
+					!hasReturnAnnotation(fd) &&
+					!hasStdDocLinks(fd) &&
+					!fd.isDeprecated() &&
 					undocumentedReturnTypeFunctions.add(functionName))
 				{
 					System.err.println("\033[32m" + missingReturnAnnotationCount + " Function " + functionName + " in class " + cls.getName() +
@@ -627,7 +659,8 @@ public class MarkdownGenerator
 					uniqueClasses.add(cls.getName());
 				}
 
-				if ("Object".equals(publicName))
+				if ("Object".equals(publicName) &&
+					!IGNORED_UNDOCUMENTED_TYPES.contains(returnType.getName()))
 				{
 					System.err.println("Function " + functionName + " in class " + cls.getName() +
 						" has undocumented return type: " + returnType.getName());
@@ -641,14 +674,33 @@ public class MarkdownGenerator
 		}
 	}
 
-	private boolean hasReturnAnnotation(IFunctionDocumentation fd)
+	private boolean hasStdDocLinks(IFunctionDocumentation fd)
 	{
 		String jsDoc = fd.getDescription(fd.getClientSupport());
-		if (jsDoc != null)
+		SortedMap<String, String> links = fd.getLinks();
+
+		if (jsDoc != null && links != null)
 		{
-			return jsDoc.contains("@return");
+			//System.out.println("#######%%%%%%%%%%%%%%links found: " + fd.getMainName());
+			for (Map.Entry<String, String> entry : links.entrySet())
+			{
+				String link = entry.getKey();
+				for (String prefix : STD_DOC_LINKS)
+				{
+					if (link.startsWith(prefix))
+					{
+						return true;
+					}
+				}
+			}
 		}
 		return false;
+	}
+
+	private boolean hasReturnAnnotation(IFunctionDocumentation fd)
+	{
+
+		return fd.getReturnDescription() != null;
 	}
 
 	private void generateClientSupport(IObjectDocumentation value)

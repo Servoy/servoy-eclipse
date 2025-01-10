@@ -1169,7 +1169,7 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 				Element linkElement = linksIter.next();
 				String theLink;
 				String theAlias;
-				Element linkElem = linkElement.element(TAG_LINK);
+				Element linkElem = linkElement.element(TAG_URL);
 				if (linkElem != null)
 				{
 					theLink = linkElem.getText();
@@ -1309,5 +1309,11 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 	public void addSummary(IDescriptionDocumentation summary)
 	{
 		summaries.add(summary);
+	}
+
+	public SortedMap<String, String> getLinks()
+	{
+		return links;
+
 	}
 }
