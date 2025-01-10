@@ -1093,30 +1093,7 @@ public class MarkdownGenerator
 					if (aggregatedOutput != null) aggregatedOutput.append(output);
 				}
 
-				List<String> summaryPaths = new ArrayList<>();
-				try (BufferedReader br = new BufferedReader(new FileReader(summaryMdFilePath, Charset.forName("UTF-8"))))
-				{
-					String line;
-					while ((line = br.readLine()) != null)
-					{
-						// Extract paths ending with .md from markdown links
-						int start = line.indexOf('(');
-						int end = line.indexOf(')');
-						if (start != -1 && end != -1)
-						{
-							String mdPath = line.substring(start + 1, end);
-							if (mdPath.endsWith(".md"))
-							{
-								summaryPaths.add(mdPath);
-							}
-						}
-					}
-				}
-				catch (IOException e)
-				{
-					System.err.println("\033[38;5;202mFailed to load summary file: " + summaryMdFilePath + "\033[0m");
-					e.printStackTrace();
-				}
+				List<String> summaryPaths = loadSummary();
 
 				file.getParentFile().mkdirs();
 				try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
@@ -1133,11 +1110,43 @@ public class MarkdownGenerator
 						// Check if the relative path is in the summary but not in generated files
 						if (!summaryPaths.contains(relativePath))
 						{
-							System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + "\033[0m");
+							System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + " ::: " + cls.getName() + "\033[0m");
 						}
 					}
 				}
 			}
+		}
+
+		private List<String> loadSummary()
+		{
+			List<String> paths = new ArrayList<String>();
+			try (BufferedReader br = new BufferedReader(new FileReader(summaryMdFilePath, Charset.forName("UTF-8"))))
+			{
+				String line;
+				while ((line = br.readLine()) != null)
+				{
+					// Extract paths ending with .md from markdown links
+					int start = line.indexOf("](");
+					int end = line.indexOf(')', start);
+					if (start != -1 && end != -1)
+					{
+						String mdPath = line.substring(start + 2, end).trim(); // Trim leading/trailing spaces
+						if (mdPath.endsWith(".md"))
+						{
+							// Normalize the path to use '/' as separator
+							mdPath = mdPath.replace('\\', '/');
+							paths.add(mdPath);
+						}
+					}
+				}
+			}
+			catch (IOException e)
+			{
+				System.err.println("\033[38;5;202mFailed to load summary file: " + summaryMdFilePath + "\033[0m");
+				e.printStackTrace();
+			}
+			return paths;
+
 		}
 
 		private List<String> getUsablePublicNamesFromClassList(List<Class< ? >> filteredReturnTypes)
