@@ -21,7 +21,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -119,6 +121,8 @@ public class MarkdownGenerator
 	private static Set<String> undocumentedReturnTypeFunctions = new HashSet<>();
 	private static Set<String> uniqueClasses = new HashSet<>();
 	private static Set<String> undocumentedTypes = new HashSet<>();
+
+	private static String summaryMdFilePath;
 
 	private static final Set<String> IGNORED_UNDOCUMENTED_TYPES = Set.of(
 		"org.mozilla.javascript.IdScriptableObject",
@@ -291,7 +295,8 @@ public class MarkdownGenerator
 		String servoyDoc = args[1];
 		String designDoc = args[2];
 		String pluginDir = args[3];
-		boolean generateForAI = "forAI".equals(args[4]);
+		summaryMdFilePath = args[4];
+		boolean generateForAI = "forAI".equals(args[5]);
 
 		duplicateTracker.init(); // avoid init prior to analyze params; you may overwrite unintentionaly some usefull content for analyzing
 
@@ -571,16 +576,22 @@ public class MarkdownGenerator
 		while (ngOnly);
 
 		System.out.println(undocumentedReturnTypeFunctions.size() + " functions must be checked in " + uniqueClasses.size() + " classes.");
-		System.out.println("\033[38;5;27mThe following types are not documented: ");
-		undocumentedTypes.forEach(type -> {
-			System.out.print(type + ", ");
-		});
-		System.out.println("\033[0m");
-		System.out.println("\033[38;5;39mThe following classes contain function having undocumented returns: ");
-		uniqueClasses.forEach(type -> {
-			System.out.print(type + ", ");
-		});
-		System.out.println("\033[0m");
+		if (undocumentedTypes.size() > 0)
+		{
+			System.out.println("\033[38;5;27mThe following types are not documented: ");
+			undocumentedTypes.forEach(type -> {
+				System.out.print(type + ", ");
+			});
+			System.out.println("\033[0m");
+		}
+		if (uniqueClasses.size() > 0)
+		{
+			System.out.println("\033[38;5;39mThe following classes contain function having undocumented returns: ");
+			uniqueClasses.forEach(type -> {
+				System.out.print(type + ", ");
+			});
+			System.out.println("\033[0m");
+		}
 	}
 
 	private static URL[] findJarURLsFromServoyInstall(String pluginDir) throws IOException
@@ -1081,6 +1092,51 @@ public class MarkdownGenerator
 					duplicateTracker.trackFile(file.getName(), file.toString());
 					if (aggregatedOutput != null) aggregatedOutput.append(output);
 				}
+
+				List<String> summaryPaths = new ArrayList<>();
+				try (BufferedReader br = new BufferedReader(new FileReader(summaryMdFilePath, Charset.forName("UTF-8"))))
+				{
+					String line;
+					while ((line = br.readLine()) != null)
+					{
+						// Extract paths ending with .md from markdown links
+						int start = line.indexOf('(');
+						int end = line.indexOf(')');
+						if (start != -1 && end != -1)
+						{
+							String mdPath = line.substring(start + 1, end);
+							if (mdPath.endsWith(".md"))
+							{
+								summaryPaths.add(mdPath);
+							}
+						}
+					}
+				}
+				catch (IOException e)
+				{
+					System.err.println("\033[38;5;202mFailed to load summary file: " + summaryMdFilePath + "\033[0m");
+					e.printStackTrace();
+				}
+
+				file.getParentFile().mkdirs();
+				try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
+				{
+					writer.write(output);
+					duplicateTracker.trackFile(file.getName(), file.toString());
+					if (aggregatedOutput != null) aggregatedOutput.append(output);
+
+					if (ngOnly)
+					{
+						String relativePath = file.getPath().substring(file.getPath().indexOf("ng_generated/") + "ng_generated/".length());
+						relativePath = relativePath.replace('\\', '/');
+
+						// Check if the relative path is in the summary but not in generated files
+						if (!summaryPaths.contains(relativePath))
+						{
+							System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + "\033[0m");
+						}
+					}
+				}
 			}
 		}
 
@@ -1098,7 +1154,7 @@ public class MarkdownGenerator
 					}
 					else
 					{
-						System.err.println("Public name not found for type: " + alltype.getName() + " in filtered return types.");
+						System.err.println("WARN: Public name not found for type: " + alltype.getName() + " in filtered return types.");
 					}
 				}
 				if (publicNames.size() > 0) return publicNames;
