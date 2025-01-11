@@ -17,6 +17,9 @@
 
 package com.servoy.build.documentation.apigen;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
@@ -41,11 +44,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -174,7 +175,7 @@ public class MarkdownGenerator
 	private static final Set<String> doNotStoreAsReadMe = new HashSet<>();
 
 	private static final Set<String> excludedPluginJarNames = Set.of("aibridge.jar");
-	private static final List<String> nonDefaultPluginJarNamesThatWeDoGenerateDocsFor = Arrays.asList("servoy_jasperreports.jar"); // we check that these were found so that we don't forget by mistake to generate the docs for them
+	private static final List<String> nonDefaultPluginJarNamesThatWeDoGenerateDocsFor = Arrays.asList(/* RAGTEST "servoy_jasperreports.jar" */); // we check that these were found so that we don't forget by mistake to generate the docs for them
 
 	static
 	{
@@ -248,10 +249,6 @@ public class MarkdownGenerator
 		}
 	}
 
-	private String getPublicName()
-	{
-		return (String)root.get("classname");
-	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, URISyntaxException, InstantiationException, IllegalAccessException
 	{
@@ -717,7 +714,6 @@ public class MarkdownGenerator
 
 	private String generate()
 	{
-		// TODO Auto-generated method stub
 		StringWriter out = new StringWriter();
 		try
 		{
@@ -1024,38 +1020,51 @@ public class MarkdownGenerator
 		{
 			SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
 
+//			var realClassMapping = objects.values().stream().filter(doc -> doc.getRealClass() != null)
+//				.collect(toMap(IObjectDocumentation::getRealClass, identity(), (doc1, doc2) -> {
+//					System.err.println("Multiple classes (" + doc1.getQualifiedName() +
+//						", " + doc2.getQualifiedName() + ") referring to the same realClass " + doc1.getRealClass());
+//					return doc1;
+//				}));
+			var realClassMapping = objects.values().stream().filter(doc -> doc.getRealClass() != null)
+				.collect(toMap(IObjectDocumentation::getQualifiedName, IObjectDocumentation::getRealClass));
+
 			File userDir = new File(System.getProperty("user.dir"));
-			for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
+			for (IObjectDocumentation doc : objects.values())
 			{
-				IObjectDocumentation value = entry.getValue();
-
-				String description = value.getDescription(value.getClientSupport());
-				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") ||
-					(value.getFunctions().size() == 0 && (description == null || description.trim().length() == 0) && computedReturnTypes.size() == 0))
-					continue;
-				if (ngOnly && !(value.getClientSupport() == null ? ClientSupport.Default : value.getClientSupport()).hasSupport(ClientSupport.ng)) continue;
-
-				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value.getScriptingName(), description,
-					path, computedReturnTypes.get(value.getPublicName()));
-
-				if (!ngOnly) cg.generateClientSupport(value);
-
-				if (value.getExtendsClass() != null)
+				if (doc.getRealClass() != null)
 				{
-					cg.classList(EXTENDS_CLASS_SECTION_IN_TEMPLATE,
-						getUsablePublicNamesFromClassList(Arrays.asList(targetInstallClassLoader.loadClass(value.getExtendsClass()))));
+					// Use documentation of real class
+					continue;
 				}
 
-				Class< ? > cls = targetInstallClassLoader.loadClass(value.getQualifiedName());
+				String description = doc.getDescription(doc.getClientSupport());
+				if (doc.isDeprecated() || doc.getPublicName().equals("PrinterJob") ||
+					(doc.getFunctions().size() == 0 && (description == null || description.trim().length() == 0) && computedReturnTypes.size() == 0))
+					continue;
+				if (ngOnly && !(doc.getClientSupport() == null ? ClientSupport.Default : doc.getClientSupport()).hasSupport(ClientSupport.ng)) continue;
 
-				SortedSet<IFunctionDocumentation> functions = value.getFunctions();
+				MarkdownGenerator cg = new MarkdownGenerator(doc.getPublicName(), doc.getScriptingName(), description,
+					path, computedReturnTypes.get(doc.getPublicName()));
+
+				if (!ngOnly) cg.generateClientSupport(doc);
+
+				if (doc.getExtendsClass() != null)
+				{
+					cg.classList(EXTENDS_CLASS_SECTION_IN_TEMPLATE,
+						getUsablePublicNamesFromClassList(Arrays.asList(targetInstallClassLoader.loadClass(doc.getExtendsClass()))));
+				}
+
+				Class< ? > cls = targetInstallClassLoader.loadClass(doc.getQualifiedName());
+
+				SortedSet<IFunctionDocumentation> functions = doc.getFunctions();
 				List<IFunctionDocumentation> constants = getConstants(functions);
 				List<IFunctionDocumentation> properties = getProperties(functions);
 				List<IFunctionDocumentation> commands = getCommands(functions);
 				List<IFunctionDocumentation> events = getEvents(functions);
 				List<IFunctionDocumentation> methods = getMethods(functions);
 				cg.table("constants", constants, cls, ngOnly, false);
-				if (properties != null) properties = properties.stream().filter(node -> node.getReturnedType() != void.class).collect(Collectors.toList());
+				if (properties != null) properties = properties.stream().filter(node -> node.getReturnedType() != void.class).collect(toList());
 				cg.table("properties", properties, cls, ngOnly, false);
 				cg.table("commands", commands, cls, ngOnly, false);
 				cg.table("events", events, cls, ngOnly, false);
@@ -1063,8 +1072,8 @@ public class MarkdownGenerator
 
 				String output = cg.generate();
 				String parent = cg.getPath().toString();
-				String publicName = value.getPublicName();
-				if (storeAsReadMe.contains(value.getPublicName()))
+				String publicName = doc.getPublicName();
+				if (storeAsReadMe.contains(doc.getPublicName()))
 				{
 					publicName = "README";
 				}

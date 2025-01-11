@@ -17,15 +17,16 @@ ${description}</#if>
     ${client}
 </#list>
 </#if>
-<#if extends??>
 
+<#if extends??>
 ## **Extends**
 
-```
+| Type                                                   |
+| ------------------------------------------------------ | 
 <#list extends as extend>
-${extend}
+| [${MD(extend)}](${instance.getReturnTypePath(extend)}) |
 </#list>
-```
+
 </#if>
 <#if constants??>
 
