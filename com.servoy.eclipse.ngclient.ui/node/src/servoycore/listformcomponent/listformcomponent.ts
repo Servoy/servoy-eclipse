@@ -308,6 +308,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         return;
                     } else if (event.fullValueChanged) {
                         this.foundset = event.fullValueChanged.newValue;
+                        if (this.foundset.serverSize > 0 && this.numberOfCells > 0 && this.page * this.numberOfCells >= this.foundset.serverSize)
+                        {
+                            this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells);
+                        }
                         this.calculateCells();
                         return;
                     }
