@@ -210,7 +210,7 @@ export class ServoyService {
             this.findModeShortCutCallback = (event: KeyboardEvent) => {
                 // perform find on ENTER
                 if (event.keyCode === 13) {
-                    this.sabloService.callService('formService', 'performFind', { formname: formName, clear: true, reduce: true, showDialogOnNoResults: true }, true);
+                    this.sabloService.callService('formService', 'performFind', { formname: formName, clear: true, reduce: true, showDialogOnNoResults: false }, true);
                 }
             };
             this.windowRefService.nativeWindow.addEventListener('keyup', this.findModeShortCutCallback);

@@ -139,9 +139,10 @@ export class TooltipService {
         clearTimeout(this.tipInitialTimeout);
         clearTimeout(this.tipTimeout);
 
-        const tDiv = this.getTooltipDiv();
-        tDiv.style.display = 'none';
-        this.isTooltipActive.next(false);
+        if (this.tooltipDiv){
+            this.tooltipDiv.style.display = 'none';
+            this.isTooltipActive.next(false);
+        }
     }
 }
 

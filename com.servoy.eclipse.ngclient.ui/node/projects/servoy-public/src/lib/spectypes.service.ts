@@ -365,6 +365,7 @@ export interface IJSMenu{
     name: string;
     styleClass: string;
     pushDataProviderValue(category: string, propertyName: string, itemIndex: number, dataproviderValue: any): void;
+    setSelectedItem(itemID: string);
 }
 
 export interface IJSMenuItem{

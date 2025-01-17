@@ -7,7 +7,8 @@ import { DOCUMENT } from '@angular/common';
     selector: 'servoydefault-radiogroup',
     templateUrl: './radiogroup.html',
     styleUrls: ['./radiogroup.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
 

@@ -1,9 +1,10 @@
 import {Component,Input, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
 import {ServoyDefaultBaseComponent} from '../basecomponent';
 @Component({
-  selector: 'servoydefault-rectangle',
-  templateUrl: './rectangle.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'servoydefault-rectangle',
+    templateUrl: './rectangle.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivElement> {
     @Input() lineSize: number;

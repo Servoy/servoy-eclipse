@@ -18,7 +18,8 @@ import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_re
 import { fromEvent, debounceTime, Subscription } from 'rxjs';
 
 @Component({
-    template: ''
+    template: '',
+    standalone: false
 })
 /**
  * This is the definition of a angular component that represents servoy forms.
@@ -177,6 +178,8 @@ export abstract class AbstractFormComponent {
      <!-- component template generate end -->
    `
     /* eslint-enable max-len */
+    ,
+    standalone: false
 })
 
 /**

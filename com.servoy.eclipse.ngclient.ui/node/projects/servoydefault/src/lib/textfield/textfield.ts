@@ -8,7 +8,8 @@ import {ServoyDefaultBaseField} from '../basefield';
 @Component( {
     selector: 'servoydefault-textfield',
     templateUrl: './textfield.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 } )
 export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElement> {
 

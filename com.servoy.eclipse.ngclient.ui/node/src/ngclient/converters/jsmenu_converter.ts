@@ -29,11 +29,16 @@ export class JSMenuType implements IType<any> {
     }
 
     fromClientToServer(newClientData: JSMenu, oldClientData: JSMenu, propertyContext: IPropertyContext): [any, JSMenu] | null {
-       if (newClientData) {
+        if (newClientData) {
             const newDataInternalState = newClientData.getInternalState();
             if (newDataInternalState.pushValueRequest) {
                 const tmp = newDataInternalState.pushValueRequest;
                 delete newDataInternalState.pushValueRequest;
+                return [tmp, newClientData];
+            }
+            if (newDataInternalState.selectedItemRequest) {
+                const tmp = newDataInternalState.selectedItemRequest;
+                delete newDataInternalState.selectedItemRequest;
                 return [tmp, newClientData];
             }
         }
@@ -43,21 +48,21 @@ export class JSMenuType implements IType<any> {
 }
 
 export class JSMenu implements IJSMenu, IChangeAwareValue {
-    items : IJSMenuItem[];
+    items: IJSMenuItem[];
     name: string;
     styleClass: string;
-    
+
     constructor(private serverJSONValue: any, private internalState: MenuState) {
         this.items = serverJSONValue.items;
         this.name = serverJSONValue.name;
         this.styleClass = serverJSONValue.styleClass;
     }
-    
+
     getInternalState(): MenuState {
         return this.internalState;
     }
-    
-     pushDataProviderValue(category: string, propertyName: string, itemIndex: number, dataproviderValue: any): void {
+
+    pushDataProviderValue(category: string, propertyName: string, itemIndex: number, dataproviderValue: any): void {
         this.internalState.pushValueRequest = {
             category,
             propertyName,
@@ -67,18 +72,27 @@ export class JSMenu implements IJSMenu, IChangeAwareValue {
         this.internalState.notifyChangeListener();
     }
 
+    setSelectedItem(itemID: string) {
+        this.internalState.selectedItemRequest = {
+            selectedItemID: itemID
+        };
+        this.internalState.notifyChangeListener();
+    }
+
 }
-    
+
 class MenuState extends ChangeAwareState {
     public pushValueRequest: { category: string; propertyName: string; itemIndex: number; dataproviderValue: any; };
+    public selectedItemRequest: { selectedItemID: string; };
 
     hasChanges(): boolean {
-        return super.hasChanges() || this.pushValueRequest !== undefined;
+        return super.hasChanges() || this.pushValueRequest !== undefined || this.selectedItemRequest !== undefined;
     }
-    
+
     clearChanges(): void {
         super.clearChanges();
         this.pushValueRequest = undefined;
+        this.selectedItemRequest = undefined;
     }
 
 }

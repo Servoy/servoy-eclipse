@@ -5,7 +5,8 @@ import { I18NProvider } from '../i18n_provider.service';
 @Component({
     selector: 'servoycore-file-upload-window',
     templateUrl: './file-upload-window.component.html',
-    styleUrls: ['./file-upload-window.component.css']
+    styleUrls: ['./file-upload-window.component.css'],
+    standalone: false
 })
 export class FileUploadWindowComponent {
 

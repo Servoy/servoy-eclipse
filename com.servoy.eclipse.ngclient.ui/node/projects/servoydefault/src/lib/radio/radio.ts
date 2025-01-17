@@ -8,7 +8,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     selector: 'servoydefault-radio',
     templateUrl: './radio.html',
     styleUrls: ['./radio.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 } )
 export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement> {
     @Input() horizontalAlignment: any;

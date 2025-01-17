@@ -1,6 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe( { name: 'emptyValue'} )
+@Pipe( {
+    name: 'emptyValue',
+    standalone: false
+} )
 export class EmptyValueFilterPipe implements PipeTransform {
 
     transform( input: any): any {

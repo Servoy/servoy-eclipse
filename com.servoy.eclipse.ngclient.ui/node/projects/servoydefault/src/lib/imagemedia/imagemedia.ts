@@ -8,7 +8,8 @@ import { ServoyDefaultBaseField } from '../basefield';
 @Component({
     selector: 'servoydefault-imagemedia',
     templateUrl: './imagemedia.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivElement> {
 
@@ -78,7 +79,7 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
                 this.imageURL = ServoyDefaultImageMedia.NOT_EMPTY;
             }
         } else {
-            this.imageURL = ServoyDefaultImageMedia.NOT_EMPTY;
+            this.imageURL = ServoyDefaultImageMedia.EMPTY;
         }
     }
 

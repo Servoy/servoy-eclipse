@@ -3,7 +3,8 @@ import {LoggerService, LoggerFactory} from '../logger.service';
 import { ServoyBaseComponent } from '../basecomponent';
 
 @Directive({
-  selector: '[svyStartEdit]'
+    selector: '[svyStartEdit]',
+    standalone: false
 })
 export class StartEditDirective {
 

@@ -8,7 +8,8 @@ import {ServoyDefaultBaseField} from  '../basefield';
 @Component( {
     selector: 'servoydefault-htmlview',
     templateUrl: './htmlview.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 } )
 export class ServoyDefaultHTMLView extends ServoyDefaultBaseField<HTMLDivElement> {
 

@@ -82,6 +82,8 @@ import { TypesRegistry} from '../sablo/types_registry';
      <!-- component template generate end -->
    `
     /* eslint-enable max-len */
+    ,
+    standalone: false
 })
 
 export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, IFormComponent {

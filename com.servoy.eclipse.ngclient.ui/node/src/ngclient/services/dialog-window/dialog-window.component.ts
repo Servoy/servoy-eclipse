@@ -7,8 +7,9 @@ import { FormService } from '../../form.service';
 @Component({
     selector: 'servoycore-dialog-window',
     templateUrl: './dialog-window.component.html',
-    styleUrls: ['./dialog-window.component.css']
-  })
+    styleUrls: ['./dialog-window.component.css'],
+    standalone: false
+})
   export class DialogWindowComponent {
 
     window: SvyWindow;

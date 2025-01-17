@@ -4,7 +4,8 @@ import { SabloService } from '../../../sablo/sablo.service';
 
 @Component({
     templateUrl: './default-login-window.component.html',
-    styleUrls: ['./default-login-window.component.css']
+    styleUrls: ['./default-login-window.component.css'],
+    standalone: false
 })
 export class DefaultLoginWindowComponent {
 

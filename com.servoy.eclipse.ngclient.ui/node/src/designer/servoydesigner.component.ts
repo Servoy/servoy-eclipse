@@ -12,7 +12,8 @@ import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'servoy-designer',
-    templateUrl: './servoydesigner.component.html'
+    templateUrl: './servoydesigner.component.html',
+    standalone: false
 })
 export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy, IDesignFormComponent {
 

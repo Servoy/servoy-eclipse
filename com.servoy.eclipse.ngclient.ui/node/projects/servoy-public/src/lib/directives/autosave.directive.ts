@@ -2,7 +2,8 @@ import { Directive , HostListener, ElementRef} from '@angular/core';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Directive({
-  selector: '[svyAutosave]'
+    selector: '[svyAutosave]',
+    standalone: false
 })
 export class AutosaveDirective {
 

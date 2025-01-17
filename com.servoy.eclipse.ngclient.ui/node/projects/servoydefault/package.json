@@ -1,15 +1,15 @@
 {
   "name": "@servoy/servoydefault",
-  "version": "2024.12.0",
+  "version": "2025.3.0",
   "peerDependencies": {
-    "@angular/common": "^18",
-    "@angular/core": "^18",
+    "@angular/common": "^19",
+    "@angular/core": "^19",
     "@servoy/public": "*"
   },
   "dependencies": {
-    "@angular/cdk": "^18",
+    "@angular/cdk": "^19",
     "@eonasdan/tempus-dominus": "^6.9.11",
-    "@ng-bootstrap/ng-bootstrap": "^17",
+    "@ng-bootstrap/ng-bootstrap": "^18",
     "@popperjs/core": "<3",
     "@tinymce/tinymce-angular": "<8",
     "bootstrap": "<6",

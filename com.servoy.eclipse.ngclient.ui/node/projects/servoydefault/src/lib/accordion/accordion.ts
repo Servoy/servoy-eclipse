@@ -5,9 +5,10 @@ import { BaseTabpanel,Tab } from '../tabpanel/basetabpanel';
 import { LoggerFactory } from '@servoy/public';
 
 @Component({
-  selector: 'servoydefault-accordion',
-  templateUrl: './accordion.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'servoydefault-accordion',
+    templateUrl: './accordion.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultAccordion extends BaseTabpanel {
 

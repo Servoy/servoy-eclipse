@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -105,22 +107,36 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 	 * @param id
 	 * @param value
 	 */
-	protected void updateProperty(boolean set, Object id, Object value)
+	protected void updateProperty(final boolean set, Object id, Object value)
 	{
 		// find the editor of this persist and change the value in the editor
-		IEditorPart editor = openPersistEditor(persistProperties, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
-		if (editor == null)
+		final IEditorPart editor = openPersistEditor(persistProperties, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
+		if (editor != null)
 		{
-			return;
-		}
-
-		if (set)
-		{
-			persistProperties.setPropertyValue(id, value);
-		}
-		else
-		{
-			persistProperties.resetPropertyValue(id);
+			Command cmd = new Command()
+			{
+				@Override
+				public void execute()
+				{
+					if (set)
+					{
+						persistProperties.setPropertyValue(id, value);
+					}
+					else
+					{
+						persistProperties.resetPropertyValue(id);
+					}
+				}
+			};
+			CommandStack commandStack = editor.getAdapter(CommandStack.class);
+			if (commandStack != null)
+			{
+				commandStack.execute(cmd);
+			}
+			else
+			{
+				cmd.execute();
+			}
 		}
 	}
 
