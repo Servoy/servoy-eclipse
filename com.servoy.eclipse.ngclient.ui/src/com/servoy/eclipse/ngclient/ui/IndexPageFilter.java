@@ -41,6 +41,8 @@ import org.sablo.security.ContentSecurityPolicyConfig;
 import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
 import com.servoy.j2db.server.ngclient.NGLocalesFilter;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
+import com.servoy.j2db.server.ngclient.auth.CloudStatelessAccessManager;
+import com.servoy.j2db.server.ngclient.auth.OAuthHandler;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -89,16 +91,22 @@ public class IndexPageFilter implements Filter
 		String solutionName = getSolutionNameFromURI(Paths.get(requestURI.replace(':', '_')).normalize());
 		if (indexFile != null && indexFile.exists())
 		{
-			if (AngularIndexPageWriter.handleOauth(request, response))
-			{
-				return;
-			}
-
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
-					requestURI.toLowerCase().endsWith("/index.html")))
+					requestURI.toLowerCase().endsWith("/index.html")) ||
+				requestURI.contains("/svy_oauth/"))
 			{
-				Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
+				Pair<Boolean, String> showLogin = null;
+				if (requestURI.contains("/svy_oauth/"))
+				{
+					showLogin = OAuthHandler.handleOauth(request, response);
+					if (Boolean.FALSE.equals(showLogin.getLeft()) && showLogin.getRight() == null) return;
+				}
+				else
+				{
+					showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
+				}
+
 				if (showLogin.getLeft().booleanValue())
 				{
 					StatelessLoginHandler.writeLoginPage(request, response, solutionName, showLogin.getRight());
@@ -116,7 +124,7 @@ public class IndexPageFilter implements Filter
 					contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
 				return;
 			}
-			else if (solutionName != null && StatelessLoginHandler.handlePossibleCloudRequest(request, response, solutionName, indexFile))
+			else if (solutionName != null && CloudStatelessAccessManager.handlePossibleCloudRequest(request, response, solutionName, indexFile))
 			{
 				return;
 			}
