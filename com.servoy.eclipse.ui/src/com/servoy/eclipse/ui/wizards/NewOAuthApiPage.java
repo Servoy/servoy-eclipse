@@ -1,5 +1,6 @@
 package com.servoy.eclipse.ui.wizards;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,16 +16,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.j2db.server.ngclient.OAuthUtils;
+import com.servoy.j2db.server.ngclient.auth.OAuthUtils.Provider;
 
 /**
  * @author emera
  */
 public class NewOAuthApiPage extends WizardPage
 {
-	private static final String CUSTOM = "Custom";
-	private static final String[] items = new String[] { OAuthUtils.GOOGLE, OAuthUtils.MICROSOFT_AD, OAuthUtils.APPLE, OAuthUtils.OKTA, OAuthUtils.LINKED_IN, CUSTOM };
-
 	private Combo apiCombo;
 	private Text authorizationBaseUrlText;
 	private Text accessTokenEndpointText;
@@ -82,7 +80,7 @@ public class NewOAuthApiPage extends WizardPage
 		label.setText("API:");
 
 		apiCombo = new Combo(container, SWT.DROP_DOWN | SWT.READ_ONLY);
-		apiCombo.setItems(items);
+		apiCombo.setItems(Arrays.stream(Provider.values()).map(Enum::name).toArray(String[]::new));
 
 		wizard.getModel().ifPresentOrElse(model -> {
 			String selectedApi = model.getApi(); // Get API from the existing model
@@ -95,19 +93,19 @@ public class NewOAuthApiPage extends WizardPage
 				}
 				else
 				{
-					apiCombo.select(apiCombo.indexOf(CUSTOM));
+					apiCombo.select(apiCombo.indexOf(Provider.Custom.name()));
 				}
 			}
 			else
 			{
-				apiCombo.select(apiCombo.indexOf(CUSTOM));
+				apiCombo.select(apiCombo.indexOf(Provider.Custom.name()));
 			}
 		}, () -> {
 			// Create a default model with the first API (Google)
 			OAuthApiConfiguration defaultModel = new OAuthApiConfiguration();
-			defaultModel.setApi(OAuthUtils.GOOGLE);
-			defaultModel.setJwksUri(OAuthUtils.GOOGLE_JWKS);
-			defaultModel.setScope("openid email");
+			defaultModel.setApi(Provider.Google.name());
+			defaultModel.setJwksUri(Provider.Google.getJwksUri());
+			defaultModel.setScope(Provider.Google.getDefaultScope());
 			wizard.setModel(defaultModel); // Store the new model
 			apiCombo.select(0); // Default to first item
 		});
@@ -174,13 +172,13 @@ public class NewOAuthApiPage extends WizardPage
 
 	private boolean refreshToken()
 	{
-		String provider = apiCombo.getText();
-		if (OAuthUtils.GOOGLE.equals(provider) || OAuthUtils.MICROSOFT_AD.equals(provider))
+		Provider provider = Provider.valueOf(apiCombo.getText());
+		if (Provider.Google.equals(provider) || Provider.Microsoft.equals(provider))
 		{
 			Map<String, String> additionalParameters = wizard.getModel().get().getAdditionalParameters();
 			return "offline".equals(additionalParameters.get("access_type"));
 		}
-		if (OAuthUtils.APPLE.equals(provider) || CUSTOM.equals(provider) && wizard.getModel().get().getRefreshTokenEndpoint() != null)
+		if (Provider.Apple.equals(provider) || Provider.Custom.equals(provider) && wizard.getModel().get().getRefreshTokenEndpoint() != null)
 		{
 			//Apple always returns the refresh token together with the access token
 			return true;
@@ -192,7 +190,7 @@ public class NewOAuthApiPage extends WizardPage
 	{
 		String provider = apiCombo.getText();
 		//Google and Microsoft need the access_type parameter offline to return the refresh token
-		if (OAuthUtils.GOOGLE.equals(provider) || OAuthUtils.MICROSOFT_AD.equals(provider))
+		if (Provider.Google.equals(provider) || Provider.Microsoft.equals(provider))
 		{
 			if (onlineButton.getSelection())
 			{
@@ -207,7 +205,7 @@ public class NewOAuthApiPage extends WizardPage
 
 	private void updateApiSettings()
 	{
-		String provider = apiCombo.getText();
+		Provider provider = Provider.valueOf(apiCombo.getText());
 		OAuthApiConfiguration model = wizard.getModel().orElseGet(() -> {
 			OAuthApiConfiguration newModel = new OAuthApiConfiguration();
 			wizard.setModel(newModel);
@@ -220,7 +218,7 @@ public class NewOAuthApiPage extends WizardPage
 			return;
 		}
 
-		boolean isCustomSelected = CUSTOM.equals(provider);
+		boolean isCustomSelected = Provider.Custom.equals(provider);
 		authorizationBaseUrlText.setEnabled(isCustomSelected);
 		accessTokenEndpointText.setEnabled(isCustomSelected);
 		refreshTokenEndpointText.setEnabled(isCustomSelected);
@@ -231,7 +229,7 @@ public class NewOAuthApiPage extends WizardPage
 		{
 			clearFieldsForCustomApi(model);
 		}
-		boolean isAPIChanged = !provider.equals(model.getApi()) || CUSTOM.equals(provider) && model.getApi() != null;
+		boolean isAPIChanged = !provider.equals(model.getApi()) || Provider.Custom.equals(provider) && model.getApi() != null;
 
 		if (isAPIChanged)
 		{
@@ -241,55 +239,35 @@ public class NewOAuthApiPage extends WizardPage
 			model = new OAuthApiConfiguration();
 			model.setClientId(clientId);
 			model.setClientSecret(clientSecret);
+			model.setApi(provider.name());
+			model.setJwksUri(provider.getJwksUri());
+			model.setScope(provider.getDefaultScope());
 
 			switch (provider)
 			{
-				case OAuthUtils.GOOGLE :
-					model.setApi(OAuthUtils.GOOGLE);
-					model.setJwksUri(OAuthUtils.GOOGLE_JWKS);
-					model.setScope("openid email");
-					break;
-
-				case "Microsoft" :
-				case OAuthUtils.MICROSOFT_AD :
-					model.setApi(OAuthUtils.MICROSOFT_AD);
-					model.setJwksUri(OAuthUtils.MICROSOFT_JWKS);
-					model.setScope("openid email");
+				case Microsoft :
 					model.setCustomParameter("tenant", "common");
 					break;
 
-				case OAuthUtils.APPLE :
-					model.setApi(OAuthUtils.APPLE);
-					model.setJwksUri(OAuthUtils.APPLE_JWKS);
-					model.setScope("name email");
+				case Apple :
 					model.setAdditionalParameter("response_mode", "form_post");
 					break;
 
-				case OAuthUtils.OKTA :
-					model.setApi(OAuthUtils.OKTA);
-					model.setJwksUri(OAuthUtils.OKTA_JWKS);
-					model.setScope("openid profile email");
+				case Okta :
 					model.setCustomParameter("domain", "");
 					break;
 
-				case OAuthUtils.LINKED_IN :
-					model.setApi(OAuthUtils.LINKED_IN);
-					model.setJwksUri(OAuthUtils.LINKEDIN_JWKS);
-					model.setScope("openid email");
-					break;
-
-				case CUSTOM :
+				case Custom :
 					model.setApi(null);
-					model.setJwksUri("");
 					break;
 
 				default :
-					throw new IllegalArgumentException("Unsupported API provider: " + provider);
+					break;
 			}
 		}
 
-		scopeText.setText(model.getScope() != null ? model.getScope() : "");
-		jwksUriText.setText(model.getJwksUri() != null ? model.getJwksUri() : "");
+		scopeText.setText(Optional.ofNullable(model.getScope()).orElse(""));
+		jwksUriText.setText(Optional.ofNullable(model.getJwksUri()).orElse(""));
 		wizard.setModel(model);
 		updateGetRefreshToken();
 		wizard.getContainer().updateButtons();
@@ -323,7 +301,7 @@ public class NewOAuthApiPage extends WizardPage
 				clientIdText.setText(model.getClientId() != null ? model.getClientId() : "");
 				clientSecretText.setText(model.getClientSecret() != null ? model.getClientSecret() : "");
 				scopeText.setText(model.getScope() != null ? model.getScope() : "");
-				apiCombo.setText(model.getApi() != null ? model.getApi() : CUSTOM);
+				apiCombo.setText(model.getApi() != null ? model.getApi() : Provider.Custom.name());
 				jwksUriText.setText(model.getJwksUri() != null ? model.getJwksUri() : "");
 
 				if (model.getApi() == null) //custom

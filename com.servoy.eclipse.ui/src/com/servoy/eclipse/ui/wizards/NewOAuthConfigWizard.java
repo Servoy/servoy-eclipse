@@ -17,8 +17,8 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.ngclient.OAuthUtils;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
+import com.servoy.j2db.server.ngclient.auth.OAuthUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyJSONObject;
 

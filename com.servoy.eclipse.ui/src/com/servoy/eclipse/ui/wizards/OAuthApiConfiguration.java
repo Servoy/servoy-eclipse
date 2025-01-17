@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.servoy.j2db.server.ngclient.OAuthUtils;
+import com.servoy.j2db.server.ngclient.auth.OAuthUtils.Provider;
 
 /**
  * @author emera
@@ -89,7 +89,7 @@ public class OAuthApiConfiguration
 	{
 		if (jwksUri == null) return null;
 
-		String jwks = OAuthUtils.getJWKS_URI(this.api);
+		String jwks = Provider.valueOf(this.api == null ? Provider.Custom.name() : this.api).getJwksUri();
 		if (jwks != null && jwks.contains("{"))
 		{
 			return replacePlaceholders(jwks);
