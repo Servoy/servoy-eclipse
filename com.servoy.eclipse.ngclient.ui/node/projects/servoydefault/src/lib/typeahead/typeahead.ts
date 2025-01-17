@@ -9,7 +9,8 @@ import { DOCUMENT } from '@angular/common';
 @Component({
     selector: 'servoydefault-typeahead',
     templateUrl: './typeahead.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElement> {
     // this is a hack so that this can be none static access because this references in this component to a conditional template

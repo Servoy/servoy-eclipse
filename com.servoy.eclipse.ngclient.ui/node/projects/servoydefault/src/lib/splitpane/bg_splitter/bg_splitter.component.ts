@@ -5,7 +5,8 @@ import { BGPane } from './bg_pane.component';
     selector: 'bg-splitter',
     template: '<div class="split-panes {{orientation}}" #element><ng-content></ng-content></div>',
     styleUrls: ['./bg_splitter.css'],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 } )
 export class BGSplitter implements AfterContentInit , OnChanges {
 

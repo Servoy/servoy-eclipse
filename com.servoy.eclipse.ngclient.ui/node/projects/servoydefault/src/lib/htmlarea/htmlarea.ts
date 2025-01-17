@@ -7,7 +7,8 @@ import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 @Component({
     selector: 'servoydefault-htmlarea',
     templateUrl: './htmlarea.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 

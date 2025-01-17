@@ -5,7 +5,8 @@ import { PopupFormService } from '../popupform.service';
 
 @Component({
     selector: 'svy-popupform',
-    templateUrl: './popupform.html'
+    templateUrl: './popupform.html',
+    standalone: false
 })
 export class ServoyFormPopupComponent {
 

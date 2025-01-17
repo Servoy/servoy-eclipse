@@ -74,7 +74,8 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
 <!-- structure template generate start -->
 <!-- structure template generate end -->
 
-`
+`,
+    standalone: false
 })
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 

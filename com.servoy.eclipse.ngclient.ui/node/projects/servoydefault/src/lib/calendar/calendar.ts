@@ -13,7 +13,8 @@ import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dom
 @Component({
     selector: 'servoydefault-calendar',
     templateUrl: './calendar.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement> {
 

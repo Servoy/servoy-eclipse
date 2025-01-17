@@ -7,7 +7,8 @@ import { ServoyDefaultBaseChoice } from '../basechoice';
     selector: 'servoydefault-checkgroup',
     templateUrl: './checkgroup.html',
     styleUrls: ['./checkgroup.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
 

@@ -1,9 +1,10 @@
 import { Component, Input, ViewChild, ElementRef, HostListener} from '@angular/core';
 
 @Component({
-  selector: 'servoycore-message-dialog-window',
-  templateUrl: './message-dialog-window.component.html',
-  styleUrls: ['./message-dialog-window.component.css']
+    selector: 'servoycore-message-dialog-window',
+    templateUrl: './message-dialog-window.component.html',
+    styleUrls: ['./message-dialog-window.component.css'],
+    standalone: false
 })
 export class MessageDialogWindowComponent {
 

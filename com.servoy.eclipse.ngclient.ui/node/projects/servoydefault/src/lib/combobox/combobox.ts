@@ -7,7 +7,8 @@ import { ServoyDefaultBaseField } from '../basefield';
 @Component({
     selector: 'servoydefault-combobox',
     templateUrl: './combobox.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputElement> {
 

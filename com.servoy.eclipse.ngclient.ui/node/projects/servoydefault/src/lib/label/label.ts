@@ -5,7 +5,8 @@ import {ServoyDefaultBaseLabel} from  '../baselabel';
 @Component( {
     selector: 'servoydefault-label',
     templateUrl: './label.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 } )
 export class ServoyDefaultLabel extends ServoyDefaultBaseLabel<HTMLDivElement> {
 

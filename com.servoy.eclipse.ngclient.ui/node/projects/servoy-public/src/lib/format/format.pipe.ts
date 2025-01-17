@@ -2,7 +2,10 @@ import { Pipe, PipeTransform} from '@angular/core';
 import { Format, FormattingService } from './formatting.service';
 import { LoggerFactory, LoggerService } from '../logger.service';
 
-@Pipe( { name: 'formatFilter'} )
+@Pipe( {
+    name: 'formatFilter',
+    standalone: false
+} )
 export class FormatFilterPipe implements PipeTransform {
 
     private readonly log: LoggerService;

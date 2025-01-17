@@ -36,14 +36,14 @@ class NumberParser {
   * it uses the {@link FormattingService} for this. 
   */
 @Directive({
-
     // eslint-disable-next-line @angular-eslint/directive-selector
     selector: '[svyFormat]',
     providers: [{
-        provide: NG_VALUE_ACCESSOR,
-        useExisting: forwardRef(() => FormatDirective),
-        multi: true
-    }]
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => FormatDirective),
+            multi: true
+        }],
+    standalone: false
 })
 export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnChanges {
     private static DATETIMEFORMAT: Format = {display:'yyyy-MM-dd\'T\'HH:mm:ss', type:'DATETIME'} as Format;

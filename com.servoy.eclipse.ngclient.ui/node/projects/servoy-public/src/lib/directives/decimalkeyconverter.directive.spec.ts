@@ -6,7 +6,8 @@ import { ServoyPublicServiceTestingImpl, ServoyPublicTestingModule } from '../te
 import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Component({
-    template: '<input type="text" [svyDecimalKeyConverter]="format" #element>'
+    template: '<input type="text" [svyDecimalKeyConverter]="format" #element>',
+    standalone: false
 })
 class TestDecimalKeyConverterComponent {
     @Input() format;

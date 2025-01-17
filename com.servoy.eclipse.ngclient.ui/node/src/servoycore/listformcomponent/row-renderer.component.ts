@@ -5,8 +5,9 @@ import { ICellRendererParams, IAfterGuiAttachedParams } from '@ag-grid-community
 import { ListFormComponent } from './listformcomponent';
 
 @Component({
-  selector: 'svy-row-renderer-component',
-  templateUrl: './row-renderer.component.html'
+    selector: 'svy-row-renderer-component',
+    templateUrl: './row-renderer.component.html',
+    standalone: false
 })
 export class RowRenderer implements AgRendererComponent {
 

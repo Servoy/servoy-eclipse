@@ -3,9 +3,10 @@ import { FormService } from '../../ngclient/form.service';
 import { ComponentCache } from '../../ngclient/types';
 
 @Component({
-  selector: 'svy-default-navigator',
-  templateUrl: './default-navigator.html',
-  styleUrls: ['./default-navigator.css']
+    selector: 'svy-default-navigator',
+    templateUrl: './default-navigator.html',
+    styleUrls: ['./default-navigator.css'],
+    standalone: false
 })
 export class DefaultNavigator {
 

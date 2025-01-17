@@ -7,7 +7,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     selector: 'servoydefault-check',
     templateUrl: './check.html',
     styleUrls: ['./check.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement> {
     @Input() horizontalAlignment: number;

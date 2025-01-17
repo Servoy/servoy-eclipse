@@ -2,7 +2,8 @@ import { Directive , Input , HostListener} from '@angular/core';
 import {IPopupSupportComponent} from '../spectypes.service';
 
 @Directive({
-    selector: '[svyTabFix]'
+    selector: '[svyTabFix]',
+    standalone: false
 })
 export class TabFixDirective {
     // this directive needs to be in a module because of listener priority, so i put it here
