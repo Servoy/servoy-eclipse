@@ -3,7 +3,7 @@ import { Component, Input, Output, OnChanges,SimpleChanges, EventEmitter, HostLi
 import { BGPane } from './bg_pane.component';
 @Component( {
     selector: 'bg-splitter',
-    template: '<div class="split-panes {{orientation}}" #element><ng-content></ng-content></div>',
+    template: '<div class="split-panes" #element><ng-content></ng-content></div>',
     styleUrls: ['./bg_splitter.css'],
     encapsulation: ViewEncapsulation.None,
     standalone: false
@@ -44,6 +44,9 @@ export class BGSplitter implements AfterContentInit , OnChanges {
         }
         if (changes['divLocation'] && changes['divLocation'].currentValue >= 0) {
             this.adjustLocation(null, changes['divLocation'].currentValue);
+        }
+        if (changes['orientation']) {
+            this.renderer.addClass( this.elementRef.nativeElement, this.orientation);
         }
     }
 
