@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { WpmService } from './wpm.service';
 
 @Component({
-  selector: 'app-wpm',
-  templateUrl: './main.component.html',
-  styleUrls: ['./main.component.css']
+    selector: 'app-wpm',
+    templateUrl: './main.component.html',
+    styleUrls: ['./main.component.css'],
+    standalone: false
 })
 export class MainComponent {
   url: URL;
