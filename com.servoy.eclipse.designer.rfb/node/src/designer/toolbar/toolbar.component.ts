@@ -60,7 +60,8 @@ export enum TOOLBAR_CATEGORIES {
 
 @Component({
     selector: 'designer-toolbar',
-    templateUrl: './toolbar.component.html'
+    templateUrl: './toolbar.component.html',
+    standalone: false
 })
 export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 

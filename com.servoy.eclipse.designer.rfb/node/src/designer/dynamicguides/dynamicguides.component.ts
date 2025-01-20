@@ -6,9 +6,10 @@ import { DynamicGuidesService, Guide, SnapData } from '../services/dynamicguides
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'dynamic-guides',
-  templateUrl: './dynamicguides.component.html',
-  styleUrls: ['./dynamicguides.component.css']
+    selector: 'dynamic-guides',
+    templateUrl: './dynamicguides.component.html',
+    styleUrls: ['./dynamicguides.component.css'],
+    standalone: false
 })
 export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
 

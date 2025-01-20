@@ -6,7 +6,8 @@ import { EditorSessionService } from '../services/editorsession.service';
 @Component({
     selector: 'designer-inline-edit',
     templateUrl: './inlineedit.component.html',
-     styleUrls: ['./inlineedit.component.css']
+    styleUrls: ['./inlineedit.component.css'],
+    standalone: false
 })
 export class InlineEditComponent implements AfterViewInit {
 

@@ -5,7 +5,8 @@ import { URLParserService } from 'src/designer/services/urlparser.service';
 @Component({
     selector: 'app-designer',
     templateUrl: './designer.component.html',
-    styleUrls: ['./designer.component.css']
+    styleUrls: ['./designer.component.css'],
+    standalone: false
 })
 export class DesignerComponent implements OnInit {
 

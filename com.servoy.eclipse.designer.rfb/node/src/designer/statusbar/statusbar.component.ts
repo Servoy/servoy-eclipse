@@ -5,7 +5,8 @@ import { EditorSessionService } from '../services/editorsession.service';
 @Component({
     selector: 'designer-status-bar',
     templateUrl: './statusbar.component.html',
-    styleUrls: ['./statusbar.component.css']
+    styleUrls: ['./statusbar.component.css'],
+    standalone: false
 })
 export class StatusBarComponent implements AfterViewInit, OnDestroy {
     statusText = '';

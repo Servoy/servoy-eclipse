@@ -3,8 +3,9 @@ import { ToolbarItemComponent } from './toolbaritem.component';
 
 @Component({
     selector: 'designer-toolbar-spinner',
-    templateUrl: './toolbarspinner.component.html'
-  })
+    templateUrl: './toolbarspinner.component.html',
+    standalone: false
+})
 export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnInit, OnChanges {
 
   @Input() value: number;

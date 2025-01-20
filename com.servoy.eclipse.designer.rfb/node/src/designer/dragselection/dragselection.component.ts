@@ -9,7 +9,8 @@ import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'dragselection',
-    templateUrl: './dragselection.component.html'
+    templateUrl: './dragselection.component.html',
+    standalone: false
 })
 export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDestroy {
     frameRect: { x?: number; y?: number; top?: number; left?: number };

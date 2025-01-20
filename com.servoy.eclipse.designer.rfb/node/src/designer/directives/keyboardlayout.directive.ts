@@ -5,7 +5,8 @@ import { URLParserService } from "../services/urlparser.service";
 import { ElementInfo } from "./resizeknob.directive";
 
 @Directive({
-    selector: '[keyboardlayout]'
+    selector: '[keyboardlayout]',
+    standalone: false
 })
 export class KeyboardLayoutDirective {
 

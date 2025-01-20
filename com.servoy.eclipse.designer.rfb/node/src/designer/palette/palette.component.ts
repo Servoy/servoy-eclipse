@@ -11,7 +11,8 @@ import { Subscription } from 'rxjs';
 @Component({
     selector: 'designer-palette',
     templateUrl: './palette.component.html',
-    styleUrls: ['./palette.component.css']
+    styleUrls: ['./palette.component.css'],
+    standalone: false
 })
 export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit, OnDestroy {
 
@@ -496,7 +497,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 }
 
-@Pipe({ name: 'searchTextFilter' })
+@Pipe({
+    name: 'searchTextFilter',
+    standalone: false
+})
 export class SearchTextPipe implements PipeTransform {
     transform(items: Array<PaletteComp>, text: string): Array<PaletteComp> {
         let sortedItems = items;
@@ -514,7 +518,10 @@ export class SearchTextPipe implements PipeTransform {
     }
 }
 
-@Pipe({ name: 'searchTextFilterDeep' })
+@Pipe({
+    name: 'searchTextFilterDeep',
+    standalone: false
+})
 export class SearchTextDeepPipe implements PipeTransform {
     transform(items: Array<Package>, text: string): Array<Package> {
         if (items)

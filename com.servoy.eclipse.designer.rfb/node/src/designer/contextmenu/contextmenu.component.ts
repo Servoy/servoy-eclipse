@@ -24,7 +24,8 @@ export enum SHORTCUT_IDS {
 @Component({
     selector: 'designer-contextmenu',
     templateUrl: './contextmenu.component.html',
-    styleUrls: ['./contextmenu.component.css']
+    styleUrls: ['./contextmenu.component.css'],
+    standalone: false
 })
 export class ContextMenuComponent implements OnInit {
 
