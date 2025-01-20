@@ -1268,7 +1268,7 @@ public class SpecMarkdownGenerator
 		if (jsDocEquivalent != null)
 		{
 			//at this point all special characters like {,},(,}, ., [, ], etc are getting escaped; the regex must take into account this
-			Pattern pattern = Pattern.compile("^\\s*(\\*{1,2}\\s*)?(\\\\\\{[^}]+\\\\\\})?\\s*(\\\\\\[[^\\]]+\\\\\\])?");
+//			Pattern pattern = Pattern.compile("^\\s*(\\*{1,2}\\s*)?(\\\\\\{[^}]+\\\\\\})?\\s*(\\\\\\[[^\\]]+\\\\\\])?");
 
 			SimpleJSDocParser jsDocParser = new SimpleJSDocParser();
 			JSDocTags jsDocTags = jsDocParser.parse(jsDocEquivalent, 0);
@@ -1284,30 +1284,39 @@ public class SpecMarkdownGenerator
 				{
 					Parameter param = null;
 					if (paramIndex < params.size()) param = params.get(paramIndex);
-					JSONObject tagElements = extractJSTagElements(jsDocTag.value());
-					if (jsDocTag.name().equals(JSDocTag.PARAM) && params != null)
+
+					if (jsDocTag.name().equals(JSDocTag.PARAM))
 					{
-						if (paramIndex > params.size() - 1)
+						Pattern pattern = Pattern.compile("^(?:\\*\\*\\s*)?\\\\\\{([^}]+)\\\\\\}\\s+(\\S+)\\s*(.*)$");
+						JSONObject tagElements = extractParamTagElements(jsDocTag.value(), pattern);
+						if (params != null)
 						{
-							System.err.println("Wrong number of parameters in JSDoc. Please check the documentation and spec for: " + apiDocName);
+							if (paramIndex > params.size() - 1)
+							{
+								System.err.println("Wrong number of parameters in JSDoc. Please check the documentation and spec for: " + apiDocName);
+								paramIndex++;
+								continue;
+							}
+
+
+							Parameter newParam = new Parameter(param.name(), param.type(), tagElements.optString("doc", ""), param.optional());
+							params.set(paramIndex, newParam);
 							paramIndex++;
-							continue;
 						}
-
-
-						Parameter newParam = new Parameter(param.name(), param.type(), tagElements.optString("explanation", ""), param.optional());
-						params.set(paramIndex, newParam);
-						paramIndex++;
 					}
 					else if (jsDocTag.name().equals(JSDocTag.RETURN))
 					{
+						Pattern pattern = Pattern.compile("^(?:\\*\\*\\s*)?\\\\\\{([^}]+)\\\\\\}\\s*(.*)$");
+						JSONObject tagElements = extractReturnTagElements(jsDocTag.value(), pattern);
+
 						if (fullReturnType == null)
 						{
 							fullReturnType = new JSONObject();
 						}
-						fullReturnType.put("description", tagElements.optString("explanation", ""));
+						fullReturnType.put("description", tagElements.optString("doc", ""));
 						fullReturnType.put("type", returnType);
 					}
+
 					try
 					{
 						if (tagStart != -1 && (tagEnd > tagStart))
@@ -2091,14 +2100,16 @@ public class SpecMarkdownGenerator
 					if (tag.name().equals(JSDocTag.RETURN))
 					{
 						//here the extractJSTagElements is considering parameter {Type} name description
-						JSONObject tagElements = extractReturnTagElements(tag.value());
+						Pattern pattern = Pattern.compile("^\\{([^}]+)\\}\\s*(.*)$");
+						JSONObject tagElements = extractReturnTagElements(tag.value(), pattern);
 						returnType = tagElements.optString("type", "void");
 						returnDoc = (tagElements.optString("name", "") + " " + tagElements.optString("doc", "")).trim();
 						returnDoc = returnDoc.length() > 0 ? returnDoc : null;
 					}
 					else if (tag.name().equals(JSDocTag.PARAM))
 					{
-						JSONObject tagElements = extractParamTagElements(tag.value());
+						Pattern pattern = Pattern.compile("\\{([^}]+)\\}\\s+(\\S+)\\s*(.*)");
+						JSONObject tagElements = extractParamTagElements(tag.value(), pattern);
 						parameters.add(new Parameter(
 							tagElements.optString("name"),
 							tagElements.optString("type"),
@@ -2119,10 +2130,13 @@ public class SpecMarkdownGenerator
 		return docFunctions;
 	}
 
-	private JSONObject extractReturnTagElements(String input)
+	private JSONObject extractReturnTagElements(String input, Pattern pattern)
 	{
+
 		// Define a regex pattern to match the optional type and description
-		Pattern pattern = Pattern.compile("^\\{([^}]+)\\}\\s*(.*)$"); // Matches {type} followed by description
+//		 // Matches {type} followed by description
+
+
 		Matcher matcher = pattern.matcher(input.trim());
 
 		String type = "";
@@ -2154,10 +2168,11 @@ public class SpecMarkdownGenerator
 		return result;
 	}
 
-	private JSONObject extractParamTagElements(String input)
+	private JSONObject extractParamTagElements(String input, Pattern pattern)
 	{
 
-		Pattern pattern = Pattern.compile("\\{([^}]+)\\}\\s+(\\S+)\\s*(.*)"); // Match {type} name description
+//		 // Match {type} name description
+
 
 		Matcher matcher = pattern.matcher(input.trim());
 		JSONObject result = new JSONObject();
