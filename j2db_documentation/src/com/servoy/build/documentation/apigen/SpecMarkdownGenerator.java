@@ -1303,7 +1303,6 @@ public class SpecMarkdownGenerator
 					{
 						if (fullReturnType == null)
 						{
-							System.err.println("Wrong return in JSDoc. Please check the documentation and spec for: " + apiDocName);
 							fullReturnType = new JSONObject();
 						}
 						fullReturnType.put("description", tagElements.optString("explanation", ""));
@@ -1865,8 +1864,23 @@ public class SpecMarkdownGenerator
 				Parameter specParam = specParams.get(i);
 				Parameter docParam = docParams.get(i);
 
+				String specParamName = specParam.name();
+				String docParamName = docParam.name();
 				// Use accessor methods provided by the Parameter record
-				if (!specParam.name().equals(docParam.name()))
+				if (specParam.optional)
+				{
+					if (!docParamName.startsWith("[") || !docParamName.endsWith("]"))
+					{
+						functionHasIssues = true;
+						System.err.println(packageName + " ::: " + componentName + " ::: " + functionName +
+							" ::: Parameter optional brackets are missing: " + specParam.name());
+					}
+				}
+				if (specParam.optional && (docParamName.startsWith("[") && docParamName.endsWith("]")))
+				{
+					docParamName = docParamName.substring(1, docParamName.length() - 1);
+				}
+				if (!docParamName.equals(specParamName))
 				{
 					functionHasIssues = true;
 					System.err.println(packageName + " ::: " + componentName + " ::: " + functionName +
@@ -1949,6 +1963,11 @@ public class SpecMarkdownGenerator
 			case "float" :
 			case "double" :
 				return "Number";
+			case "int[]" :
+			case "integer[]" :
+			case "float[]" :
+			case "double[]" :
+				return "Array<Number>";
 			case "boolean" :
 			case "bool" :
 				return "Boolean";
@@ -1956,6 +1975,8 @@ public class SpecMarkdownGenerator
 				return "JSRecord";
 			case "record[]" :
 				return "Array<JSRecord>";
+			case "string[]" :
+				return "Array<String>";
 			case "foundset" :
 				return "JSFoundset";
 			case "foundset[]" :
@@ -1965,6 +1986,12 @@ public class SpecMarkdownGenerator
 			case "event" :
 			case "jsevent" :
 				return "JSEvent";
+			case "object" :
+				return "Object";
+			case "object[]" :
+				return "Array<Object>";
+			case "column[]" :
+				return "Array<Column>";
 			default :
 				return type.toLowerCase();
 		}
@@ -1994,9 +2021,25 @@ public class SpecMarkdownGenerator
 						for (int i = 0; i < paramsArray.length(); i++)
 						{
 							JSONObject param = paramsArray.getJSONObject(i);
+							Object typeObj = param.get("type");
+							String type;
+							if (typeObj instanceof String)
+							{
+								type = (String)typeObj;
+							}
+							else if (typeObj instanceof JSONObject)
+							{
+								// For JSONObject, extract and format as needed (e.g., {"type": "dataset"} becomes "dataset")
+								type = ((JSONObject)typeObj).optString("type", "unknown");
+							}
+							else
+							{
+								type = "unknown"; // Fallback for unexpected formats
+							}
+
 							parameters.add(new Parameter(
 								param.getString("name"),
-								param.getString("type"),
+								type,
 								param.optString("doc", ""),
 								param.optBoolean("optional", false)));
 						}
