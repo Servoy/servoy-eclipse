@@ -496,11 +496,43 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							Map<String, PropertyDescription> extraCategoryProperties = extraProperties.get(categoryName);
 							for (String propertyName : extraCategoryProperties.keySet())
 							{
-								IPropertyDescriptor pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
-									extraCategoryProperties.get(propertyName),
-									form, persistContext,
-									readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
-									flattenedEditingSolution);
+								PropertyDescription propertyDescription = extraCategoryProperties.get(propertyName);
+								IPropertyDescriptor pd;
+								if (propertyDescription.getType() instanceof ValueListPropertyType)
+								{
+									pd = new ValuelistPropertyController<Object>(propertyName, propertyName, persistContext,
+										true)
+									{
+										@Override
+										protected IPropertyConverter<Object, Integer> createConverter()
+										{
+											return new IPropertyConverter<Object, Integer>()
+											{
+												public Integer convertProperty(Object id, Object value)
+												{
+													ValueList vl = flattenedEditingSolution.getValueList(value != null ? value.toString() : null);
+													return Integer.valueOf(vl == null ? ValuelistLabelProvider.VALUELIST_NONE : vl.getID());
+												}
+
+												public Object convertValue(Object id, Integer value)
+												{
+													int vlId = value.intValue();
+													if (vlId == ValuelistLabelProvider.VALUELIST_NONE) return null;
+													ValueList vl = flattenedEditingSolution.getValueList(vlId);
+													return vl == null ? null : vl.getUUID();
+												}
+											};
+										}
+									};
+								}
+								else
+								{
+									pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
+										propertyDescription,
+										form, persistContext,
+										readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
+										flattenedEditingSolution);
+								}
 								if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
 								{
 									((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(categoryName);

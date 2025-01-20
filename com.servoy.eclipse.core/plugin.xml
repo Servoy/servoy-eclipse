@@ -366,6 +366,14 @@
       </content-type>
       <content-type
             default-charset="UTF8"
+            describer="com.servoy.eclipse.core.resource.MenuDescriber"
+            file-extensions="mnu"
+            id="com.servoy.eclipse.core.resource.menu"
+            name="Menu"
+            priority="normal">
+      </content-type>
+      <content-type
+            default-charset="UTF8"
             describer="com.servoy.eclipse.core.resource.FormDescriber"
             file-extensions="frm"
             id="com.servoy.eclipse.core.resource.form"

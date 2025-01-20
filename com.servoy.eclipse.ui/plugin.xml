@@ -310,6 +310,18 @@
                contentTypeId="com.servoy.eclipse.core.resource.relation">
          </contentTypeBinding>
       </editor>
+       <editor
+            class="com.servoy.eclipse.ui.editors.MenuEditor"
+            default="true"
+            extensions="mnu"
+            icon="icons/column.png"
+            id="com.servoy.eclipse.ui.editors.MenuEditor"
+            matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
+            name="Menu Editor">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.menu">
+         </contentTypeBinding>
+      </editor>
       <editor
             class="com.servoy.eclipse.ui.editors.ValueListEditor"
             default="true"

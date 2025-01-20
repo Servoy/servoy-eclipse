@@ -29,10 +29,8 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.persistence.IPersist;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -128,15 +126,7 @@ public class NewMenuWizard extends Wizard implements INewWizard
 				}
 				else
 				{
-					try
-					{
-						servoyProject.saveEditingSolutionNodes(new IPersist[] { menu }, true);
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-						MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Save failed: " + e.getMessage());
-					}
+					EditorUtil.openMenuEditor(menu, true);
 				}
 			}
 		}

@@ -364,29 +364,23 @@ public class EditorUtil
 		{
 			menu = menu.getAncestor(IRepository.MENUS);
 		}
-		if (!(menu instanceof Menu))
+		if (menu instanceof Menu mnu)
 		{
-			return null;
-		}
-		Pair<String, String> formFilePath = SolutionSerializer.getFilePath(menu, false);
-		IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
-		if (file == null || !file.exists()) return null;
-		try
-		{
-			IWorkbenchPage page = getActivePage();
-			if (page != null)
+			try
 			{
-				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-					Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.text"));
-				if (desc != null)
+				IWorkbenchPage activePage = getActivePage();
+				if (activePage != null)
 				{
-					return page.openEditor(new FileEditorInput(file), desc.getId(), activate);
+					return activePage.openEditor(new PersistEditorInput(mnu.getName(), menu.getRootObject().getName(), menu.getUUID()),
+						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+							Platform.getContentTypeManager().getContentType(PersistEditorInput.MENU_RESOURCE_ID)).getId(),
+						activate);
 				}
 			}
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError(ex);
+			catch (PartInitException ex)
+			{
+				ServoyLog.logError(ex);
+			}
 		}
 		return null;
 	}
