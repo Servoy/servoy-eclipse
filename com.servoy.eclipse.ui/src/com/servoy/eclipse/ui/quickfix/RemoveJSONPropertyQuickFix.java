@@ -105,12 +105,17 @@ public class RemoveJSONPropertyQuickFix extends WorkbenchMarkerResolution
 
 	private void removeProperty(IWebComponent webComponent, String propertyName)
 	{
-		JSONObject json = (JSONObject)webComponent.getProperty(
-			StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
-		if (json != null && propertyName != null)
+		if (propertyName == null) return;
+
+		String[] parts = propertyName.split("\\."); //$NON-NLS-1$
+		if (parts.length == 1)
 		{
+			webComponent.clearProperty(propertyName);
+		}
+		else
+		{
+			JSONObject json = (JSONObject)webComponent.getOwnProperty(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
 			JSONObject currentJSON = json;
-			String[] parts = propertyName.split("\\."); //$NON-NLS-1$
 			for (int i = 0; i < parts.length; i++)
 			{
 				if (currentJSON == null)
