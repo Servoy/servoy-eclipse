@@ -353,9 +353,12 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 	}
 
+	private Boolean isMobile = null;
+
 	private boolean isMobile()
 	{
-		return isMobile(getForm());
+		if (isMobile == null) isMobile = Boolean.valueOf(isMobile(getForm()));
+		return isMobile.booleanValue();
 	}
 
 	private static boolean isMobile(Form form)
