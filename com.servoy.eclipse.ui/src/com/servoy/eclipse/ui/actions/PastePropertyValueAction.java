@@ -94,8 +94,16 @@ public class PastePropertyValueAction extends Action
 	public void selectionChanged(IStructuredSelection sel)
 	{
 		this.selection = sel;
-		String value = getClipboardText();
-		setEnabled(!sel.isEmpty() && value != null && value.length() > 0);
+		if (sel.isEmpty())
+		{
+			setEnabled(false);
+		}
+		else
+		{
+			String value = getClipboardText();
+			setEnabled(value != null && value.length() > 0);
+		}
+		;
 	}
 
 	private String getClipboardText()
