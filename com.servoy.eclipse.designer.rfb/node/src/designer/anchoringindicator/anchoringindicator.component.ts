@@ -65,7 +65,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
             this.editorContentService.executeOnlyAfterInit(() => {
                 const element = this.editorContentService.getContentElement(selection[0])
                 if (element) {
-                    if (element.parentElement.closest('.svy-responsivecontainer')) return;
+                    if (element.parentElement.closest('.svy-responsivecontainer') || element.closest('.svy-csspositioncontainer')) return;
                     const elementRect = element.getBoundingClientRect();
                     let wrapperRect: DOMRect = null;
                     let image: string;
