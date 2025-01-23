@@ -47,6 +47,7 @@ import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.util.DesignerUtil;
@@ -195,6 +196,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 
 					Object dialogSelection = dlgSelection;
 					final IStructuredSelection[] newSelection = new IStructuredSelection[1];
+					final boolean[] fullRefreshNeeded = new boolean[] { false };
 					final IPersist[] finalPersist = new IPersist[1];
 					activeEditor.getCommandStack().execute(new BaseRestorableCommand("createLayoutContainer")
 					{
@@ -324,9 +326,11 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										Iterator<IPersist> it = parent.getAllObjects();
 										while (it.hasNext())
 										{
-											// why do we need to override all siblings here ?
-											ElementUtil.getOverridePersist(PersistContext.create(it.next(), activeEditor.getForm()));
+											// parent is overridden, make sure all children are sent to designer
+											changes.add(ElementUtil
+												.getOverridePersist(PersistContext.create(it.next(), activeEditor.getForm())));
 										}
+										fullRefreshNeeded[0] = changes.size() > 2;
 									}
 									else
 									{
@@ -335,7 +339,6 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 									Object[] selection = new Object[] { PersistContext.create(finalPersist[0], persistContext.getContext()) };
 									newSelection[0] = new StructuredSelection(selection);
-
 								}
 							}
 							catch (Exception ex)
@@ -362,6 +365,17 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 							}
 						}
 					});
+					if (fullRefreshNeeded[0])
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								CreateComponentCommand.doFullFormRefresh();
+							}
+						});
+					}
 					if (newSelection[0] != null)
 					{
 						// wait for tree to be refreshed with new element
@@ -375,6 +389,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									@Override
 									public void run()
 									{
+										CreateComponentCommand.doFullFormRefresh();
 										if (DesignerUtil.getContentOutline() != null)
 										{
 											DesignerUtil.getContentOutline().setSelection(newSelection[0]);
@@ -457,7 +472,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										IRepository.WEBCOMPONENTS);
 									component.setLocation(new Point(i + 1, i + 1));
 									component.setTypeName(jsonObject.getString("componentName"));
-									((AbstractBase)container).addChild(component);
+									container.addChild(component);
 								}
 							}
 						} // children and layoutName are special
@@ -491,7 +506,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		{
 			return ((LayoutContainer)parent).getAllObjectsAsList().size();
 		}
-		int i = 1;
+		int maxLocation = 0;
 		if (parent instanceof ISupportFormElements)
 		{
 			Iterator<IPersist> allObjects = ((ISupportFormElements)parent).getAllObjects();
@@ -499,14 +514,15 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			while (allObjects.hasNext())
 			{
 				IPersist child = allObjects.next();
-				if (child instanceof AbstractContainer)
+				if (child instanceof ISupportBounds element)
 				{
-					i++;
+					Point location = element.getLocation();
+					if (location.x > maxLocation) maxLocation = location.x;
+					if (location.y > maxLocation) maxLocation = location.y;
 				}
 			}
-			return i;
 		}
-		return i;
+		return maxLocation + 1;
 	}
 
 	/**

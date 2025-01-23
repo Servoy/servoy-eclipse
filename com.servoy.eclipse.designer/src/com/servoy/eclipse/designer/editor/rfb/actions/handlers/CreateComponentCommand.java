@@ -35,9 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +49,6 @@ import org.sablo.websocket.utils.PropertyUtils;
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -525,7 +521,8 @@ public class CreateComponentCommand extends BaseRestorableCommand
 										((ComponentTypeConfig)property.getConfig()).forFoundset != null)
 									{
 										// list form component
-										FormComponentTreeSelectDialog.setFormComponentProperty(webComponent, form, FormComponentTreeSelectDialog.selectFormComponent(webComponent, form));
+										FormComponentTreeSelectDialog.setFormComponentProperty(webComponent, form,
+											FormComponentTreeSelectDialog.selectFormComponent(webComponent, form));
 									}
 									else
 									{
@@ -960,17 +957,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 
 	public static void doFullFormRefresh()
 	{
-		IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-		for (IEditorReference editorRef : editorRefs)
+		BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
+		if (editor != null)
 		{
-			IEditorPart editor = editorRef.getEditor(false);
-			if (editor instanceof BaseVisualFormEditor)
-			{
-				BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
-				if (activePage instanceof RfbVisualFormEditorDesignPage)
-					((RfbVisualFormEditorDesignPage)activePage).refreshContent();
-				break;
-			}
+			BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
+			if (activePage instanceof RfbVisualFormEditorDesignPage)
+				((RfbVisualFormEditorDesignPage)activePage).refreshContent();
 		}
 	}
 
