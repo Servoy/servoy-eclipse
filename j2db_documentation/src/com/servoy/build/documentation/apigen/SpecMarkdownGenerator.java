@@ -317,7 +317,7 @@ public class SpecMarkdownGenerator
 			}).forEach(generator -> {
 				try
 				{
-					if (!generator.isDeprecated())
+					if (!generator.isDeprecated() && !generator.isEmptyApi())
 					{
 						generator.validateSpecAndDoc(generator.getTypes(), generator.getSpecFile(), generator.getDocFile(), generator.getDisplayName(),
 							generator.getComponentName());
@@ -356,6 +356,7 @@ public class SpecMarkdownGenerator
 	private File myDocFile;
 	private final boolean deprecatedContent;
 	private final JSONObject packageTypes;
+	private boolean emptyApi = false;
 
 	public SpecMarkdownGenerator(String packageName, String packageDisplayName, String packageType,
 		JSONObject jsonObject, File specFile, boolean generateComponentExtendsAsWell,
@@ -367,6 +368,11 @@ public class SpecMarkdownGenerator
 		this.packageTypes = jsonObject.optJSONObject("types");
 
 		deprecatedContent = jsonObject.optBoolean("deprecated", false);
+		JSONObject myApi = jsonObject.optJSONObject("api");
+		if (myApi == null || myApi.keySet().isEmpty())
+		{
+			emptyApi = true;
+		}
 
 		root = new HashMap<>();
 
@@ -485,6 +491,11 @@ public class SpecMarkdownGenerator
 			root.put("designtimeExtends", new Property("JSWebComponent", "JSWebComponent", null, null, null));
 			root.put("runtimeExtends", new Property("RuntimeWebComponent", "RuntimeWebComponent", null, null, null));
 		}
+	}
+
+	public boolean isEmptyApi()
+	{
+		return emptyApi;
 	}
 
 	public JSONObject getTypes()
@@ -1808,7 +1819,7 @@ public class SpecMarkdownGenerator
 
 		boolean componentHasIssues = false;
 		String packageName = root.get("package_name").toString();
-
+		System.out.println("Validate: " + componentName);
 		for (String functionName : specFunctions.keySet())
 		{
 			boolean functionHasIssues = false;
@@ -1856,6 +1867,7 @@ public class SpecMarkdownGenerator
 						specHasIssues = true;
 						System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 							" ::: Parameter optional brackets are missing: " + specParam.name());
+						System.err.flush();
 					}
 				}
 				if (specParam.optional && docParam != null && (docParamName.startsWith("[") && docParamName.endsWith("]")))
@@ -1868,6 +1880,7 @@ public class SpecMarkdownGenerator
 					specHasIssues = true;
 					System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 						" ::: Parameter name mismatch. Spec: " + specParam.name() + ", Doc: " + docParam.name());
+					System.err.flush();
 				}
 
 				if (docParam != null && !areTypesEquivalent(types, specParam.type(), docParam.type(), componentName))
@@ -1876,6 +1889,7 @@ public class SpecMarkdownGenerator
 					specHasIssues = true;
 					System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 						" ::: Parameter type mismatch. Spec: " + specParam.type() + ", Doc: " + docParam.type());
+					System.err.flush();
 				}
 
 				if (docParam != null && (docParam.doc() == null || docParam.doc().isEmpty()))
@@ -1883,7 +1897,8 @@ public class SpecMarkdownGenerator
 					functionHasIssues = true;
 					specHasIssues = true;
 					System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
-						" ::: Parameter description mismatch. Spec: " + specParam.type() + ", Doc: " + docParam.type());
+						" ::: Parameter description mismatch (custom type in doc?). Spec: " + specParam.type() + ", Doc: " + docParam.type());
+					System.err.flush();
 				}
 			}
 
@@ -1900,6 +1915,7 @@ public class SpecMarkdownGenerator
 				returnHasIssues = true;
 				System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 					" ::: return - Missing return type");
+				System.err.flush();
 			}
 			if ((returnType != null) && !"void".equals(returnType) && (returnDescription == null || returnDescription.isEmpty()))
 			{
@@ -1907,14 +1923,15 @@ public class SpecMarkdownGenerator
 				returnHasIssues = true;
 				System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 					" ::: return - Missing return description");
+				System.err.flush();
 			}
-
 			if (!areTypesEquivalent(types, specReturn, returnType, componentName))
 			{
 				functionHasIssues = true;
 				returnHasIssues = true;
 				System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
-					" ::: return type mismatch. Spec: " + specReturn + ", Doc: " + returnType);
+					" ::: return type mismatch (custom type in doc?). Spec: " + specReturn + ", Doc: " + returnType);
+				System.err.flush();
 			}
 
 			if (functionHasIssues)
@@ -1944,7 +1961,55 @@ public class SpecMarkdownGenerator
 
 		String normalizedSpecType = normalizeType(myTypes, specType, componentName);
 
+		if (!normalizedSpecType.contains("CustomType") && docType.contains("|"))
+		{
+			boolean result = true;
+			String normalizedDocType = docType;
+
+			if (normalizedDocType.startsWith("Array<") && normalizedDocType.endsWith(">"))
+			{
+				normalizedDocType = normalizedDocType.substring(6, normalizedDocType.length() - 1);
+				if (!(normalizedSpecType.startsWith("Array<") && normalizedSpecType.endsWith(">")))
+				{
+					return false;
+				}
+				else
+				{
+					normalizedSpecType = normalizedSpecType.substring(6, normalizedSpecType.length() - 1);
+					if (!normalizedSpecType.equals("Object"))
+					{
+						return false; //when doc show multiple object type options (Strin|Number) the (normalized) spec type must be Object
+					}
+				}
+			}
+
+			String[] docTypes = normalizedDocType.split("\\|");
+
+			for (String type : docTypes)
+			{
+				if (!isObject(type))
+				{
+					return false;
+				}
+			}
+			return result;
+		}
 		return normalizedSpecType.equalsIgnoreCase(docType);
+	}
+
+	private boolean isObject(String type)
+	{
+		if (type == null || type.isEmpty())
+		{
+			return false;
+		}
+
+		// List of standard JavaScript object types
+		Set<String> standardTypes = Set.of(
+			"String", "Number", "Boolean", "Object", "Array", "Date", "RegExp", "Function", "Symbol", "BigInt");
+
+		// Check if the type is one of the standard types (case insensitive)
+		return standardTypes.contains(type.trim());
 	}
 
 	private String normalizeType(JSONObject myTypes, String type, String componentName)
@@ -1991,7 +2056,7 @@ public class SpecMarkdownGenerator
 					normalizedSpecType = normalizeTypeForComponent(myTypes, normalizedSpecType, componentName);
 				}
 				else if (type.length() > 1)
-					normalizedSpecType = type.substring(0, 1).toUpperCase() + type.substring(1);
+					normalizedSpecType = normalizedSpecType.substring(0, 1).toUpperCase() + normalizedSpecType.substring(1);
 				else
 					normalizedSpecType = type;
 		}
@@ -2302,7 +2367,7 @@ public class SpecMarkdownGenerator
 			{
 				file.getParentFile().mkdirs();
 				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
-				System.out.println(file.getPath());
+//				System.out.println(file.getPath());
 				componentTemplate.process(root, out);
 				duplicateTracker.trackFile(file.getName(), file.toString());
 			}
