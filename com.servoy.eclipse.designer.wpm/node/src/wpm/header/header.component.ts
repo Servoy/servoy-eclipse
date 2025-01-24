@@ -8,9 +8,10 @@ const ADD_REMOVE_TEXT = 'Add...';
 const SERVOY_DEFAULT= 'Servoy Default';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.css'],
+    standalone: false
 })
 export class HeaderComponent implements OnInit {
 
@@ -179,8 +180,9 @@ export class HeaderComponent implements OnInit {
 }
 
 @Component({
-  selector: 'wpm-add-repository-dialog',
-  templateUrl: 'add-repository-dialog.html',
+    selector: 'wpm-add-repository-dialog',
+    templateUrl: 'add-repository-dialog.html',
+    standalone: false
 })
 export class AddRepositoryDialogComponent {
 
@@ -193,8 +195,9 @@ export class AddRepositoryDialogComponent {
 
 }
 @Component({
-  selector: 'wpm-error-dialog',
-  templateUrl: 'error-dialog.html'
+    selector: 'wpm-error-dialog',
+    templateUrl: 'error-dialog.html',
+    standalone: false
 })
 export class ErrorDialogComponent {
   constructor(

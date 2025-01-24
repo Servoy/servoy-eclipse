@@ -158,12 +158,12 @@ public class NewWebObjectAction extends Action
 
 			folder.create(IResource.FORCE, true, new NullProgressMonitor());
 			Bundle bundle = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle();
-			if (elementType.equals(IPackageReader.WEB_COMPONENT))
-			{
-				in = bundle.getEntry("/component-templates/web-component.html").openStream();
-				createFile(componentOrServiceName + ".html", folder, in);
-				in.close();
-			}
+//			if (elementType.equals(IPackageReader.WEB_COMPONENT))
+//			{
+//				in = bundle.getEntry("/component-templates/web-component.html").openStream();
+//				createFile(componentOrServiceName + ".html", folder, in);
+//				in.close();
+//			}
 			if (!elementType.equals(IPackageReader.WEB_LAYOUT))
 			{
 				if (elementType.equals(IPackageReader.WEB_SERVICE))
@@ -174,17 +174,17 @@ public class NewWebObjectAction extends Action
 				{
 					fullName = packageRoot.getName() + "-" + getDashedName(componentOrServiceName);
 				}
-				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".js")
-					.openStream();
-				String text = IOUtils.toString(in, "UTF-8");
-				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
-				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
-				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
-				createFile(componentOrServiceName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
-				in.close();
+//				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".js")
+//					.openStream();
+//				String text = IOUtils.toString(in, "UTF-8");
+//				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
+//				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
+//				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
+//				createFile(componentOrServiceName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+//				in.close();
 				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".spec")
 					.openStream();
-				text = IOUtils.toString(in, "UTF-8");
+				String text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
 				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName); // IMPORTANT service name from service.spec template should always be built of packagename dash name so that WebObjectSpecification.scriptifyNameIfNeeded() can get the "moduleName" or scripting name out of that
 				text = text.replaceAll("\\$\\{FULLNAME\\}", fullName);

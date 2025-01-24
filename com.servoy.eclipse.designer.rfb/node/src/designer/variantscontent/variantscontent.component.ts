@@ -8,6 +8,7 @@ import { EditorContentService } from '../services/editorcontent.service';
     selector: 'designer-variantscontent',
     templateUrl: './variantscontent.component.html',
     styleUrls: ['./variantscontent.component.css'],
+    standalone: false
 })
 export class VariantsContentComponent implements OnInit {
 

@@ -6,7 +6,8 @@ import {  WpmService } from '../wpm.service';
 @Component({
     selector: 'wpm-update-dialog',
     templateUrl: './update-dialog.component.html',
-    styleUrls: ['./update-dialog.component.css']
+    styleUrls: ['./update-dialog.component.css'],
+    standalone: false
 })
 export class UpdatePackagesDialogComponent {
 

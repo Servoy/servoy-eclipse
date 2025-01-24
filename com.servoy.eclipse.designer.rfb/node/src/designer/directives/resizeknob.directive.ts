@@ -6,7 +6,8 @@ import { DynamicGuidesService, SnapData } from '../services/dynamicguides.servic
 import { Subscription } from 'rxjs';
 
 @Directive({
-    selector: '[resizeKnob]'
+    selector: '[resizeKnob]',
+    standalone: false
 })
 export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 

@@ -13,6 +13,6 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.servoy.build.documentation.apigen.SpecMarkdownGenerator"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="j2db_documentation"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="E:/GitHome/git/gitbook&#13;&#10;./launchers/ng_package_git_repos_for_docs.txt&#13;&#10;true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="c:/Users/lvostinar/git_84x/gitbook&#13;&#10;./launchers/ng_package_git_repos_for_docs.txt&#13;&#10;true"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="j2db_documentation"/>
 </launchConfiguration>

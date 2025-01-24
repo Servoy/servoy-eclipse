@@ -8,7 +8,8 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
 @Component({
     selector: 'selection-decorators',
     templateUrl: './mouseselection.component.html',
-    styleUrls: ['./mouseselection.component.css']
+    styleUrls: ['./mouseselection.component.css'],
+    standalone: false
 })
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
 export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener, OnDestroy, IContentMessageListener {
@@ -526,7 +527,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
 }
 @Directive({
-    selector: '[positionMenu]'
+    selector: '[positionMenu]',
+    standalone: false
 })
 export class PositionMenuDirective implements OnInit {
     @Input('positionMenu') selectionNode: SelectionNode;

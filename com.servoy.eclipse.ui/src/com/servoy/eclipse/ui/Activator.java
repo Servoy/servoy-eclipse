@@ -274,7 +274,7 @@ public class Activator extends AbstractUIPlugin
 												"The packages listed below are missing from the active solution and it's modules.\nPlease select the ones you want to download using Servoy Package Manager:");
 											lsd.setInitialElementSelections(packagesNeeded);
 											lsd.setBlockOnOpen(true);
-											lsd.setTitle("Solution needs packages, install them from wpm/source");
+											lsd.setTitle("Solution needs packages, install them from SPM or from source");
 											int pressedButton = lsd.open();
 											if (pressedButton == 0)
 											{

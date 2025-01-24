@@ -6,7 +6,8 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
 @Component({
     selector: 'designer-highlight',
     templateUrl: './highlight.component.html',
-    styleUrls: ['./highlight.component.css']
+    styleUrls: ['./highlight.component.css'],
+    standalone: false
 })
 export class HighlightComponent implements IShowHighlightChangedListener, OnInit, IContentMessageListener, OnDestroy {
     highlightedComponent: Node;

@@ -3417,6 +3417,8 @@ public class SolutionExplorerView extends ViewPart
 		openActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.VIEW, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
+		openActionInTree.registerAction(UserNodeType.MENU, new OpenMenuAction());
+		openActionInTree.registerAction(UserNodeType.MENU_ITEM, new OpenMenuAction());
 
 		deleteActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("delete.png"), "Delete");
 		IAction deleteForm = new DeletePersistAction(UserNodeType.FORM, "Delete form");

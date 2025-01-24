@@ -11,7 +11,8 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
     selector: 'designer-variantspreview',
     templateUrl: './variantspreview.component.html',
     styleUrls: ['./variantspreview.component.css'],
-	encapsulation: ViewEncapsulation.Emulated
+    encapsulation: ViewEncapsulation.Emulated,
+    standalone: false
 })
 export class VariantsPreviewComponent implements AfterViewInit {
 

@@ -45,6 +45,7 @@ public class PersistEditorInput implements IEditorInput
 	public static final String VALUELIST_RESOURCE_ID = "com.servoy.eclipse.core.resource.valuelist";
 	public static final String RELATION_RESOURCE_ID = "com.servoy.eclipse.core.resource.relation";
 	public static final String MEDIA_RESOURCE_ID = "com.servoy.eclipse.core.resource.media";
+	public static final String MENU_RESOURCE_ID = "com.servoy.eclipse.core.resource.menu";
 
 	private IFile file;
 	private final String name;

@@ -9,7 +9,8 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
 @Component({
     selector: 'designer-editorcontent',
     templateUrl: './editorcontent.component.html',
-    styleUrls: ['./editorcontent.component.css']
+    styleUrls: ['./editorcontent.component.css'],
+    standalone: false
 })
 export class EditorContentComponent implements OnInit, AfterViewInit, IContentMessageListener, OnDestroy {
 

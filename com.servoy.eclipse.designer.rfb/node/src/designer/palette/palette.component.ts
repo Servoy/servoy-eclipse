@@ -11,7 +11,8 @@ import { Subscription } from 'rxjs';
 @Component({
     selector: 'designer-palette',
     templateUrl: './palette.component.html',
-    styleUrls: ['./palette.component.css']
+    styleUrls: ['./palette.component.css'],
+    standalone: false
 })
 export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit, OnDestroy {
 
@@ -217,6 +218,9 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         if (event.target && (event.target as Element).className === 'popover-body') {
             return; // it has a separate handler
         }
+        if (!this.canDrop.dropTarget) {
+            this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);   
+        }
         if (this.dragItem.paletteItemBeingDragged) {
             this.editorSession.setDragging(false);
             this.editorContentService.getBodyElement().removeChild(this.dragItem.paletteItemBeingDragged);
@@ -348,11 +352,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                         //TODO do we need to optimize the calls to insert the dragged component?
                         this.editorContentService.sendMessageToIframe({
                             id: 'insertDraggedComponent',
-                            dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
+                            dropTarget: this.canDrop.dropTarget && !this.canDrop.dropTarget.classList.contains('svy-csspositioncontainer') ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
                             insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
                         });
                     }
-                    if (this.canDrop.dropAllowed && (this.canDrop.dropTarget || !this.urlParser.isAbsoluteFormLayout())) {
+                    if (this.canDrop.dropAllowed && (this.canDrop.dropTarget || !this.urlParser.isAbsoluteFormLayout()) && !this.canDrop?.dropTarget.classList.contains('svy-csspositioncontainer')) {
                         // hide the dragged item and rely on inserted item at specific parent 
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
                         this.renderer.removeClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
@@ -496,7 +500,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 }
 
-@Pipe({ name: 'searchTextFilter' })
+@Pipe({
+    name: 'searchTextFilter',
+    standalone: false
+})
 export class SearchTextPipe implements PipeTransform {
     transform(items: Array<PaletteComp>, text: string): Array<PaletteComp> {
         let sortedItems = items;
@@ -514,7 +521,10 @@ export class SearchTextPipe implements PipeTransform {
     }
 }
 
-@Pipe({ name: 'searchTextFilterDeep' })
+@Pipe({
+    name: 'searchTextFilterDeep',
+    standalone: false
+})
 export class SearchTextDeepPipe implements PipeTransform {
     transform(items: Array<Package>, text: string): Array<Package> {
         if (items)

@@ -9,7 +9,8 @@ import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'dragselection',
-    templateUrl: './dragselection.component.html'
+    templateUrl: './dragselection.component.html',
+    standalone: false
 })
 export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDestroy {
     frameRect: { x?: number; y?: number; top?: number; left?: number };
@@ -324,9 +325,11 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         //for coordinates, can't refer to the parts only since they can be all missing
         //al ghstcontainer coordinates are the same, so processing first
         const container = this.editorContentService.querySelector('.ghostcontainer');
-        this.containerOffset = container.offsetTop; //same for vertical / horizontal positioning
-        this.minimumMargins.bottom = this.containerOffset + container.offsetHeight;
-        this.minimumMargins.right = this.containerOffset + container.offsetWidth;
+        if (container) {
+            this.containerOffset = container.offsetTop; //same for vertical / horizontal positioning
+            this.minimumMargins.bottom = this.containerOffset + container.offsetHeight;
+            this.minimumMargins.right = this.containerOffset + container.offsetWidth;
+        }
 
         //mousedownpoint is relative to editor and scroll position
         //contentarea coordinates are relative to editor
