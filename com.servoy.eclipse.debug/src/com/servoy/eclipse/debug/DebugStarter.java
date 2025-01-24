@@ -249,7 +249,18 @@ public class DebugStarter implements IDebuggerStarter
 		{
 			return project.getProject().getFile(scopes.get(0) + SolutionSerializer.JS_FILE_EXTENSION);
 		}
-		Iterator<Form> it = project.getEditingFlattenedSolution().getForms(false);
+		Iterator<Form> it = project.getSolution().getForms(null, false);
+		while (it.hasNext())
+		{
+			String scriptPath = SolutionSerializer.getScriptPath(it.next(), false);
+			script = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+			if (script.exists())
+			{
+				return script;
+			}
+		}
+
+		it = project.getEditingFlattenedSolution().getForms(false);
 		while (it.hasNext())
 		{
 			String scriptPath = SolutionSerializer.getScriptPath(it.next(), false);
