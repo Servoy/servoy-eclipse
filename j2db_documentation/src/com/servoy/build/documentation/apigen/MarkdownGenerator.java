@@ -179,7 +179,7 @@ public class MarkdownGenerator
 	private static final Set<String> doNotStoreAsReadMe = new HashSet<>();
 
 	private static final Set<String> excludedPluginJarNames = Set.of("aibridge.jar");
-	private static final List<String> nonDefaultPluginJarNamesThatWeDoGenerateDocsFor = Arrays.asList(/* RAGTEST "servoy_jasperreports.jar" */); // we check that these were found so that we don't forget by mistake to generate the docs for them
+	private static final List<String> nonDefaultPluginJarNamesThatWeDoGenerateDocsFor = Arrays.asList("servoy_jasperreports.jar"); // we check that these were found so that we don't forget by mistake to generate the docs for them
 
 	static
 	{
@@ -252,7 +252,6 @@ public class MarkdownGenerator
 			path = Paths.get(generatePathInLauncherOutputDir(publicName));
 		}
 	}
-
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, URISyntaxException, InstantiationException, IllegalAccessException
 	{
@@ -945,6 +944,20 @@ public class MarkdownGenerator
 			// first loop sets the qualifiedToName for all and fixes returnTypes for all
 			for (IObjectDocumentation doc : objects.values())
 			{
+				if (doc.getRealClass() != null)
+				{
+					IObjectDocumentation realDoc = objects.get(doc.getRealClass());
+					if (realDoc != null)
+					{
+						qualifiedToName.put(doc.getQualifiedName(), realDoc.getPublicName());
+					}
+					else
+					{
+						System.err.println("WARN: Real class '" + doc.getRealClass() + "' not found for type '" + doc.getQualifiedName() + "'.");
+					}
+					continue;
+				}
+
 				qualifiedToName.put(doc.getQualifiedName(), doc.getPublicName());
 				if (pluginProviderPublicName != null) publicNameToPluginProviderClassPublicName.put(doc.getPublicName(), pluginProviderPublicName);
 				if (path != null) publicToRootPath.put(doc.getPublicName(), path);
@@ -1030,15 +1043,6 @@ public class MarkdownGenerator
 			throws ClassNotFoundException, IOException
 		{
 			SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
-
-//			var realClassMapping = objects.values().stream().filter(doc -> doc.getRealClass() != null)
-//				.collect(toMap(IObjectDocumentation::getRealClass, identity(), (doc1, doc2) -> {
-//					System.err.println("Multiple classes (" + doc1.getQualifiedName() +
-//						", " + doc2.getQualifiedName() + ") referring to the same realClass " + doc1.getRealClass());
-//					return doc1;
-//				}));
-			var realClassMapping = objects.values().stream().filter(doc -> doc.getRealClass() != null)
-				.collect(toMap(IObjectDocumentation::getQualifiedName, IObjectDocumentation::getRealClass));
 
 			File userDir = new File(System.getProperty("user.dir"));
 			for (IObjectDocumentation doc : objects.values())

@@ -2594,40 +2594,55 @@ public class TypeCreator extends TypeCache
 	{
 		if (returnType == null) return null;
 		if (returnType == Object.class || returnType.isArray()) return returnType;
-		if (!returnType.isAssignableFrom(Void.class) && !returnType.isAssignableFrom(void.class))
+		if (returnType.isAssignableFrom(Void.class) || returnType.isAssignableFrom(void.class))
 		{
-			if (returnType.isAssignableFrom(Record.class))
-			{
-				return Record.class;
-			}
-			else if (returnType.isAssignableFrom(JSDataSet.class))
-			{
-				return JSDataSet.class;
-			}
-			else if (returnType.isAssignableFrom(FoundSet.class))
-			{
-				return FoundSet.class;
-			}
-			else if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType))
-			{
-				if (returnType.isAssignableFrom(boolean.class)) return Boolean.class;
-				if (returnType.isAssignableFrom(byte.class) || returnType == Byte.class)
-				{
-					return byte.class;
-				}
-				return Number.class;
-			}
-			else if (returnType == Object.class || returnType == String.class || Date.class.isAssignableFrom(returnType))
-			{
-				return returnType;
-			}
-			JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(returnType, null);
-			if (javaMembers != null)
-			{
-				return returnType;
-			}
+			return null;
 		}
-		return null;
+
+		if (returnType.isAssignableFrom(Record.class))
+		{
+			return Record.class;
+		}
+
+		if (returnType.isAssignableFrom(JSDataSet.class))
+		{
+			return JSDataSet.class;
+		}
+
+		if (returnType.isAssignableFrom(FoundSet.class))
+		{
+			return FoundSet.class;
+		}
+
+		if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType))
+		{
+			if (returnType.isAssignableFrom(boolean.class)) return Boolean.class;
+			if (returnType.isAssignableFrom(byte.class) || returnType == Byte.class)
+			{
+				return byte.class;
+			}
+			return Number.class;
+		}
+
+		if (returnType == Object.class || returnType == String.class || Date.class.isAssignableFrom(returnType))
+		{
+			return returnType;
+		}
+
+		JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(returnType, null);
+		if (javaMembers == null)
+		{
+			return null;
+		}
+
+		ServoyDocumented sd = returnType.getAnnotation(ServoyDocumented.class);
+		if (sd != null && sd.realClass() != null && sd.realClass() != Object.class)
+		{
+			return sd.realClass();
+		}
+
+
+		return returnType;
 	}
 
 	private final static class MethodSignature
