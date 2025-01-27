@@ -58,7 +58,7 @@ export class ObjectType implements IType<any> {
 				retVal[ConverterService.VALUE_KEY] = this.converterService.convertFromClientToServer(newClientData,
 				        		 dateType , oldClientData, propertyContext)[0];
 			}
-		} else if (typeof newClientData === 'object' && !(newClientData instanceof Event) && !(newClientData instanceof Element)) {
+		} else if (typeof newClientData === 'object' && newClientData != null && !(newClientData instanceof Event) && !(newClientData instanceof Element)) {
             if (alreadyProcessedNestingValues.has(newClientData)) {
                 if (!cyclicDepError) this.log.error(new Error("fromClientToServer: plain 'object' typed data cannot be sent to server (recursive same references will be changed to null) when it contains circular references. One of the circular refs is: " + newClientData));
                 retVal = null;
