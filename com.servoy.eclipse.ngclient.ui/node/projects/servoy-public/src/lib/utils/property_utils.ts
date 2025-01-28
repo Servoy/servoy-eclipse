@@ -31,10 +31,7 @@ export class PropertyUtils {
         renderer.setStyle( element, '-ms-transform', r );
         renderer.setStyle( element, 'transform', r );
         renderer.setStyle( element, 'position', 'absolute' );
-        if (rotation === 90 || rotation === 270) {
-            if (!size) {
-                size = element.getBoundingClientRect();
-            }
+        if ((rotation === 90 || rotation === 270) && size) {
             renderer.setStyle( element, 'width', size.height + 'px' );
             renderer.setStyle( element, 'height', size.width + 'px' );
             renderer.setStyle( element, 'left', (size.width - size.height) / 2 + 'px' );
