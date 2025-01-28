@@ -9,7 +9,7 @@
             <svy-default-navigator [name]="getFormName()" *ngIf="hasDefaultNavigator()"></svy-default-navigator>
             <svy-form [name]="getNavigatorFormName()" *ngIf="getNavigatorFormName() != null"></svy-form>
             <div id="tabStart" [sabloTabseq]="1" (focus)="firstElementFocused($event)"></div>
-            <div [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}" style="height: 100%;">
+            <div [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}" [ngStyle]="{'height': '100%', 'position': 'absolute', 'top': '0px', 'right': '0px', 'bottom': '0px', 'left': this.window.navigatorForm.size.width + 'px'}">
                 <svy-form [name]="getFormName()" *ngIf="getFormName() != null"></svy-form>
             </div>
             <div id="tabStop" [sabloTabseq]="3" (focus)="lastElementFocused($event)"></div>
