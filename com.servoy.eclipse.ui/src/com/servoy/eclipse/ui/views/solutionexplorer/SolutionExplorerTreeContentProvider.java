@@ -303,6 +303,7 @@ public class SolutionExplorerTreeContentProvider
 
 		jslib.children = new PlatformSimpleUserNode[] { //
 			createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_BigInt, UserNodeType.BIGINT, com.servoy.j2db.documentation.scripting.docs.BigInt.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_Date, UserNodeType.DATE, com.servoy.j2db.documentation.scripting.docs.Date.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib, true), //

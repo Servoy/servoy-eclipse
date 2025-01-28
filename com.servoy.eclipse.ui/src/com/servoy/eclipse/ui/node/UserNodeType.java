@@ -168,4 +168,5 @@ public enum UserNodeType
 	MENU_ITEM,
 	MENU_FOUNDSETS,
 	MENU_FOUNDSET,
+	BIGINT,
 }

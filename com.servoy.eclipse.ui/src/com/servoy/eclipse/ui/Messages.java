@@ -182,6 +182,7 @@ public class Messages extends NLS
 	public static String TreeStrings_RegExp;
 	public static String TreeStrings_ViewFoundsets;
 	public static String TreeStrings_MenuFoundsets;
+	public static String TreeStrings_BigInt;
 
 	public static String LabelTemplatesPalette;
 	public static String LabelElementsPalette;
