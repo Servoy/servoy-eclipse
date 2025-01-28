@@ -1867,7 +1867,6 @@ public class SpecMarkdownGenerator
 						specHasIssues = true;
 						System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 							" ::: Parameter optional brackets are missing: " + specParam.name());
-						System.err.flush();
 					}
 				}
 				if (specParam.optional && docParam != null && (docParamName.startsWith("[") && docParamName.endsWith("]")))
@@ -1880,7 +1879,6 @@ public class SpecMarkdownGenerator
 					specHasIssues = true;
 					System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 						" ::: Parameter name mismatch. Spec: " + specParam.name() + ", Doc: " + docParam.name());
-					System.err.flush();
 				}
 
 				if (docParam != null && !areTypesEquivalent(types, specParam.type(), docParam.type(), componentName))
@@ -1889,7 +1887,6 @@ public class SpecMarkdownGenerator
 					specHasIssues = true;
 					System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 						" ::: Parameter type mismatch. Spec: " + specParam.type() + ", Doc: " + docParam.type());
-					System.err.flush();
 				}
 
 				if (docParam != null && (docParam.doc() == null || docParam.doc().isEmpty()))
@@ -1898,7 +1895,6 @@ public class SpecMarkdownGenerator
 					specHasIssues = true;
 					System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 						" ::: Parameter description mismatch (custom type in doc?). Spec: " + specParam.type() + ", Doc: " + docParam.type());
-					System.err.flush();
 				}
 			}
 
@@ -1915,7 +1911,6 @@ public class SpecMarkdownGenerator
 				returnHasIssues = true;
 				System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 					" ::: return - Missing return type");
-				System.err.flush();
 			}
 			if ((returnType != null) && !"void".equals(returnType) && (returnDescription == null || returnDescription.isEmpty()))
 			{
@@ -1923,7 +1918,6 @@ public class SpecMarkdownGenerator
 				returnHasIssues = true;
 				System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 					" ::: return - Missing return description");
-				System.err.flush();
 			}
 			if (!areTypesEquivalent(types, specReturn, returnType, componentName))
 			{
@@ -1931,7 +1925,6 @@ public class SpecMarkdownGenerator
 				returnHasIssues = true;
 				System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 					" ::: return type mismatch (custom type in doc?). Spec: " + specReturn + ", Doc: " + returnType);
-				System.err.flush();
 			}
 
 			if (functionHasIssues)
@@ -1939,6 +1932,7 @@ public class SpecMarkdownGenerator
 				componentHasIssues = true;
 				totalFunctionsWithIssues++;
 			}
+
 		}
 
 		// Increment counters if there were issues
@@ -2006,7 +2000,7 @@ public class SpecMarkdownGenerator
 
 		// List of standard JavaScript object types
 		Set<String> standardTypes = Set.of(
-			"String", "Number", "Boolean", "Object", "Array", "Date", "RegExp", "Function", "Symbol", "BigInt");
+			"String", "Number", "Boolean", "Object", "Array", "Date", "RegExp", "Function", "Symbol", "BigInt", "null");
 
 		// Check if the type is one of the standard types (case insensitive)
 		return standardTypes.contains(type.trim());
