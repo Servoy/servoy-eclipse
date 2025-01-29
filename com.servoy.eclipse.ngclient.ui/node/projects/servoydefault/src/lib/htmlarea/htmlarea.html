@@ -7,7 +7,7 @@
    [init]="tinyConfig"
    (onFocus)="focus()"
    (onBlur)="blur()"
-   (onClick)="click()"
+   (onClick)="click($event)"
    (onInit)="onInit($event)"
    [(ngModel)]="tinyValue"
    style="height: 100%"
