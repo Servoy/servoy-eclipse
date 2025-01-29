@@ -137,6 +137,7 @@ public class MarkdownGenerator
 
 	private static final Set<String> SKIP_MISSING_RETURN_FOR_CLASS = Set.of(
 		"com.servoy.j2db.documentation.scripting.docs.Array",
+		"com.servoy.j2db.documentation.scripting.docs.BigInt",
 		"com.servoy.j2db.documentation.scripting.docs.Date",
 		"com.servoy.j2db.documentation.scripting.docs.JSON",
 		"com.servoy.j2db.documentation.scripting.docs.Math",
