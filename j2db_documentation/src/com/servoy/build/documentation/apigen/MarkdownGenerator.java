@@ -455,11 +455,22 @@ public class MarkdownGenerator
 
 		boolean ngOnly = false;
 
-		URL jsLibURLObject = new File(jsLibURL).toURI().toURL();
-		URL servoyDocURLObject = new File(servoyDocURL).toURI().toURL();
-		URL designDocURLObject = new File(designDocURL).toURI().toURL();
+		URL jsLibURLObject;
+		URL servoyDocURLObject;
+		URL designDocURLObject;
 
-
+		if (isMacOS)
+		{
+			jsLibURLObject = new File(jsLibURL).toURI().toURL();
+			servoyDocURLObject = new File(servoyDocURL).toURI().toURL();
+			designDocURLObject = new File(designDocURL).toURI().toURL();
+		}
+		else
+		{
+			jsLibURLObject = new URL(jsLibURL);
+			servoyDocURLObject = new URL(servoyDocURL);
+			designDocURLObject = new URL(designDocURL);
+		}
 		do
 		{
 			ngOnly = !ngOnly;
@@ -493,7 +504,15 @@ public class MarkdownGenerator
 			}
 
 			System.out.println("  - plugins (from " + pluginDir + "):");
-			File file2 = new File(new File(pluginDir).toURI().normalize());
+			File file2;
+			if (isMacOS)
+			{
+				file2 = new File(new File(pluginDir).toURI().normalize());
+			}
+			else
+			{
+				file2 = new File(new URI(pluginDir).normalize());
+			}
 			if (file2.isDirectory())
 			{
 				// this is an directory with jars
