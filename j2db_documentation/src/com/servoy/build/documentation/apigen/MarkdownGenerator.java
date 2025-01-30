@@ -28,6 +28,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -426,12 +427,30 @@ public class MarkdownGenerator
 		return retValue.size() > 0 ? retValue : null;
 	}
 
+	public static boolean isMacOS()
+	{
+		String os = System.getProperty("os.name").toLowerCase();
+		return os.contains("mac");
+	}
+
 	public static void generateCoreAndPluginDocs(String jsLibURL, String servoyDocURL, String designDocURL, String pluginDir, boolean generateForAI,
 		IDocFromXMLGenerator docGenerator)
 		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException, InstantiationException, IllegalAccessException
 	{
+		URL[] urls;
+
+		if (isMacOS)
+		{
+			System.out.println("Running on MacOS");
+			urls = findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()); // Ensure absolute path is used; this is not working on windows
+		}
+		else
+		{
+			System.out.println("Running on Windows");
+			urls = findJarURLsFromServoyInstall(new File(new URI(pluginDir).normalize()).getAbsolutePath());
+		}
 		targetInstallClassLoader = new URLClassLoader("Target Servoy installation classloader",
-			findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()), // Ensure absolute path is used
+			urls,
 			MarkdownGenerator.class.getClassLoader());
 
 		boolean ngOnly = false;
