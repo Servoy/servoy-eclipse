@@ -117,11 +117,12 @@ public class MarkdownGenerator
 	private static final DuplicateTracker duplicateTracker = DuplicateTracker.getInstance();
 
 	private static Map<String, String> specialTypePaths = new HashMap<>();
-	private static boolean isMacOS = false;
+	private static boolean isWindows = false;
 	private static int missingReturnAnnotationCount = 0;
 	private static Set<String> undocumentedReturnTypeFunctions = new HashSet<>();
 	private static Set<String> uniqueClasses = new HashSet<>();
 	private static Set<String> undocumentedTypes = new HashSet<>();
+	private static List<String> missingMdFiles = new ArrayList<>();
 
 	private static String summaryMdFilePath;
 
@@ -165,9 +166,9 @@ public class MarkdownGenerator
 
 		String osName = System.getProperty("os.name");
 
-		if (osName.equalsIgnoreCase("Mac OS X"))
+		if (osName.equalsIgnoreCase("win"))
 		{
-			isMacOS = true;
+			isWindows = true;
 		}
 	}
 
@@ -252,11 +253,6 @@ public class MarkdownGenerator
 		{
 			path = Paths.get(generatePathInLauncherOutputDir(publicName));
 		}
-	}
-
-	private String getPublicName()
-	{
-		return (String)root.get("classname");
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, URISyntaxException, InstantiationException, IllegalAccessException
@@ -427,27 +423,22 @@ public class MarkdownGenerator
 		return retValue.size() > 0 ? retValue : null;
 	}
 
-	public static boolean isMacOS()
-	{
-		String os = System.getProperty("os.name").toLowerCase();
-		return os.contains("mac");
-	}
-
 	public static void generateCoreAndPluginDocs(String jsLibURL, String servoyDocURL, String designDocURL, String pluginDir, boolean generateForAI,
 		IDocFromXMLGenerator docGenerator)
 		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException, InstantiationException, IllegalAccessException
 	{
 		URL[] urls;
 
-		if (isMacOS)
-		{
-			System.out.println("Running on MacOS");
-			urls = findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()); // Ensure absolute path is used; this is not working on windows
-		}
-		else
+		if (isWindows)
 		{
 			System.out.println("Running on Windows");
 			urls = findJarURLsFromServoyInstall(new File(new URI(pluginDir).normalize()).getAbsolutePath());
+		}
+		else
+		{
+			System.out.println("Running on Mac/Linux");
+			urls = findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()); // Ensure absolute path is used; this is not working on windows
+
 		}
 		targetInstallClassLoader = new URLClassLoader("Target Servoy installation classloader",
 			urls,
@@ -459,18 +450,19 @@ public class MarkdownGenerator
 		URL servoyDocURLObject;
 		URL designDocURLObject;
 
-		if (isMacOS)
-		{
-			jsLibURLObject = new File(jsLibURL).toURI().toURL();
-			servoyDocURLObject = new File(servoyDocURL).toURI().toURL();
-			designDocURLObject = new File(designDocURL).toURI().toURL();
-		}
-		else
+		if (isWindows)
 		{
 			jsLibURLObject = new URL(jsLibURL);
 			servoyDocURLObject = new URL(servoyDocURL);
 			designDocURLObject = new URL(designDocURL);
 		}
+		else
+		{
+			jsLibURLObject = new File(jsLibURL).toURI().toURL();
+			servoyDocURLObject = new File(servoyDocURL).toURI().toURL();
+			designDocURLObject = new File(designDocURL).toURI().toURL();
+		}
+
 		do
 		{
 			ngOnly = !ngOnly;
@@ -505,13 +497,14 @@ public class MarkdownGenerator
 
 			System.out.println("  - plugins (from " + pluginDir + "):");
 			File file2;
-			if (isMacOS)
+			if (isWindows)
 			{
-				file2 = new File(new File(pluginDir).toURI().normalize());
+				file2 = new File(new URI(pluginDir).normalize());
+
 			}
 			else
 			{
-				file2 = new File(new URI(pluginDir).normalize());
+				file2 = new File(new File(pluginDir).toURI().normalize());
 			}
 			if (file2.isDirectory())
 			{
@@ -614,6 +607,11 @@ public class MarkdownGenerator
 		}
 		while (ngOnly);
 
+		printSummary();
+	}
+
+	private static void printSummary()
+	{
 		System.out.println(undocumentedReturnTypeFunctions.size() + " functions must be checked in " + uniqueClasses.size() + " classes.");
 		if (undocumentedTypes.size() > 0)
 		{
@@ -631,6 +629,15 @@ public class MarkdownGenerator
 			});
 			System.out.println("\033[0m");
 		}
+
+		if (missingMdFiles.size() > 0)
+		{
+			System.out.println("\033[38;5;39m\n\nThe following files are missing from summary.md (gitbook): ");
+			missingMdFiles.forEach(filePath -> {
+				System.out.println(filePath + ", ");
+			});
+			System.out.println("\033[0m");
+		}
 	}
 
 	private static URL[] findJarURLsFromServoyInstall(String pluginDir) throws IOException
@@ -644,14 +651,15 @@ public class MarkdownGenerator
 		//         plugins
 		//             *.jar (nested)
 		addAllNestedJarFilesOfDir(pluginDir, jarURLsFromInstall);
-		String osName = System.getProperty("os.name").toLowerCase();
-		if (isMacOS)
+		if (isWindows)
 		{
-			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "eclipse", "plugins").normalize().toString(), jarURLsFromInstall);
+			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "developer", "plugins").normalize().toString(), jarURLsFromInstall);
+
+
 		}
 		else
 		{
-			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "developer", "plugins").normalize().toString(), jarURLsFromInstall);
+			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "eclipse", "plugins").normalize().toString(), jarURLsFromInstall);
 		}
 		return jarURLsFromInstall.toArray(new URL[jarURLsFromInstall.size()]);
 	}
@@ -1075,6 +1083,7 @@ public class MarkdownGenerator
 			SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
 
 			File userDir = new File(System.getProperty("user.dir"));
+			List<String> summaryPaths = loadSummary();
 			for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
 			{
 				IObjectDocumentation value = entry.getValue();
@@ -1132,8 +1141,6 @@ public class MarkdownGenerator
 					if (aggregatedOutput != null) aggregatedOutput.append(output);
 				}
 
-				List<String> summaryPaths = loadSummary();
-
 				file.getParentFile().mkdirs();
 				try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
 				{
@@ -1149,7 +1156,8 @@ public class MarkdownGenerator
 						// Check if the relative path is in the summary but not in generated files
 						if (!summaryPaths.contains(relativePath))
 						{
-							System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + " ::: " + cls.getName() + "\033[0m");
+							missingMdFiles.add(relativePath);
+							// System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + " ::: " + cls.getName() + "\033[0m");
 						}
 					}
 				}
