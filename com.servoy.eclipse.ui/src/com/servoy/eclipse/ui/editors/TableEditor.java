@@ -1049,17 +1049,20 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					}
 
 					disposeDynamicPages();
-					createDynamicPages();
-
-					if (activeOrder != null)
+					if (!getContainer().isDisposed())
 					{
-						int pages = getPageCount();
-						for (int i = 0; i < pages; i++)
+						createDynamicPages();
+
+						if (activeOrder != null)
 						{
-							if (activeOrder.equals(getControl(i).getData("order")))
+							int pages = getPageCount();
+							for (int i = 0; i < pages; i++)
 							{
-								setActivePage(i);
-								break;
+								if (activeOrder.equals(getControl(i).getData("order")))
+								{
+									setActivePage(i);
+									break;
+								}
 							}
 						}
 					}
