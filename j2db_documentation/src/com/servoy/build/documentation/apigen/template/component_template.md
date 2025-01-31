@@ -76,7 +76,8 @@ ${propValue.doc()?trim}
 <#if propValue.parameters()?has_content>
 **Parameters:**  
 <#list propValue.parameters() as param> 
-> - {[${MD(param.type())}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if> <#if param.doc()??>${param.doc()}</#if>
+> - {[${MD(param.docType())}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if> <#if param.doc()??>$
+{param.doc()}</#if>
 </#list>
 </#if>
 
