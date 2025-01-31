@@ -17,7 +17,9 @@
 
 package com.servoy.build.documentation.apigen;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,6 +119,10 @@ public class SpecMarkdownGenerator
 	private static final Set<String> processedComponents = new HashSet<>();
 
 	private static final DuplicateTracker duplicateTracker = DuplicateTracker.getInstance();
+	private static String summaryMdFilePath;
+	private static List<String> summaryPaths;
+	private static List<String> missingMdFiles = new ArrayList<>();
+	private static SimpleJSDocParser jsDocParser = new SimpleJSDocParser();
 
 	private final static java.util.function.Function<String, String> htmlToMarkdownConverter = (initialDescription) -> {
 		if (initialDescription == null) return null;
@@ -158,6 +164,8 @@ public class SpecMarkdownGenerator
 		componentsRootDir = new File(gitBookRepoDir, PATH_TO_NG_COMPONENT_DOCS);
 		servicePackagesDir = new File(gitBookRepoDir, PATH_TO_NG_SERVICE_PACKAGE_DOCS);
 		componentPackagesDir = new File(gitBookRepoDir, PATH_TO_NG_COMPONENT_PACKAGE_DOCS);
+		SpecMarkdownGenerator.summaryMdFilePath = gitBookRepoDir.getAbsolutePath() + "/SUMMARY.md";
+		SpecMarkdownGenerator.summaryPaths = SpecMarkdownGenerator.loadSummary();
 
 		if (!gitBookRepoDir.exists() || !gitBookRepoDir.isDirectory())
 		{
@@ -210,13 +218,54 @@ public class SpecMarkdownGenerator
 		System.out.println("\nDONE.");
 	}
 
+	public static List<String> loadSummary()
+	{
+		List<String> paths = new ArrayList<String>();
+		try (BufferedReader br = new BufferedReader(new FileReader(summaryMdFilePath, Charset.forName("UTF-8"))))
+		{
+			String line;
+			while ((line = br.readLine()) != null)
+			{
+				// Extract paths ending with .md from markdown links
+				int start = line.indexOf("](");
+				int end = line.indexOf(')', start);
+				if (start != -1 && end != -1)
+				{
+					String mdPath = line.substring(start + 2, end).trim(); // Trim leading/trailing spaces
+					if (mdPath.endsWith(".md"))
+					{
+						// Normalize the path to use '/' as separator
+						mdPath = mdPath.replace('\\', '/');
+						paths.add(mdPath);
+					}
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			System.err.println("\033[38;5;202mFailed to load summary file: " + summaryMdFilePath + "\033[0m");
+			e.printStackTrace();
+		}
+		return paths;
+
+	}
+
 	public static void printSummary()
 	{
-		System.out.println("\nSummary:");
+		System.out.println("\033[38;5;39m\n\nSUMMARY:\n");
 		System.out.println(totalFunctionsWithIssues + " functions in " +
 			totalComponentsWithIssues + " components and " +
-			totalPackagesWithIssues + " packages need verifications.\n\n" +
-			totalComponentsWithoutDoc + "components has no associated documents.");
+			totalPackagesWithIssues + " packages need verifications.\n" +
+			totalComponentsWithoutDoc + " components has no associated documents.\n");
+
+		if (missingMdFiles.size() > 0)
+		{
+			System.out.println("\nThe following files are missing from summary.md (gitbook): ");
+			missingMdFiles.forEach(filePath -> {
+				System.out.println(filePath + ", ");
+			});
+		}
+		System.out.println("\033[0m");
 	}
 
 	private static String clearGeneratedDocsDirOnGitbookRepo(File dirWithGeneratedDocs, boolean onlySubDirs) throws IOException
@@ -254,7 +303,7 @@ public class SpecMarkdownGenerator
 			}
 			else
 			{
-				System.out.println("  - NG package dir " + dirname);
+				System.out.println("NG package dir " + dirname);
 			}
 
 			// get package name / display name
@@ -341,7 +390,7 @@ public class SpecMarkdownGenerator
 					new JSONObject(Utils.getTXTFileContent(packageInfoFile)).optString("description", null),
 					packageType, new HashMap<String, Object>(globalRootEntries));
 			}
-			else System.err.println("    * cannot find the package's webpackage.json; skipping information about the package...");
+//			else System.err.println("    * cannot find the package's webpackage.json; skipping information about the package...");
 
 			docGenerator.currentPackageWasProcessed();
 		}
@@ -1305,7 +1354,7 @@ public class SpecMarkdownGenerator
 			//at this point all special characters like {,},(,}, ., [, ], etc are getting escaped; the regex must take into account this
 //			Pattern pattern = Pattern.compile("^\\s*(\\*{1,2}\\s*)?(\\\\\\{[^}]+\\\\\\})?\\s*(\\\\\\[[^\\]]+\\\\\\])?");
 
-			SimpleJSDocParser jsDocParser = new SimpleJSDocParser();
+			jsDocParser = new SimpleJSDocParser();
 			JSDocTags jsDocTags = jsDocParser.parse(jsDocEquivalent, 0);
 			int paramIndex = 0;
 			StringBuilder updatedJsDocEquivalent = new StringBuilder(jsDocEquivalent);
@@ -1333,8 +1382,9 @@ public class SpecMarkdownGenerator
 								continue;
 							}
 
-
-							Parameter newParam = new Parameter(param.name(), param.type(), tagElements.optString("doc", ""), param.optional());
+							//do not get confused at this point param.docType() is the type loaded from _doc.js
+							//after validation that loaded type is correct
+							Parameter newParam = new Parameter(param.name(), param.type(), param.docType(), tagElements.optString("doc", ""), param.optional());
 							params.set(paramIndex, newParam);
 							paramIndex++;
 						}
@@ -1369,7 +1419,7 @@ public class SpecMarkdownGenerator
 					}
 					catch (IndexOutOfBoundsException e)
 					{
-						System.err.println(e.getMessage());
+						e.printStackTrace();
 					}
 				}
 				else if (jsDocTag.name().equals(JSDocTag.EXAMPLE))
@@ -1458,6 +1508,7 @@ public class SpecMarkdownGenerator
 				JSONObject param = (JSONObject)keys.next();
 				String paramName = param.optString("name", "");
 				String type = param.optString("type", "");
+				String docType = param.optString("docType", "");
 				JSONObject fullType = param.optJSONObject("type");
 				if (fullType != null)
 				{
@@ -1465,7 +1516,7 @@ public class SpecMarkdownGenerator
 				}
 				boolean optional = param.optBoolean("optional", false);
 				String doc = param.optString("doc", "");
-				params.add(new Parameter(paramName, type, doc, optional));
+				params.add(new Parameter(paramName, type, docType, doc, optional));
 			}
 			return params;
 		}
@@ -1536,6 +1587,11 @@ public class SpecMarkdownGenerator
 					}
 
 					json = replaceTypes(json);
+					//TODO: still need to add doc types instead spec types in the generated markdowns
+					if (packageTypes != null)
+					{
+						json = updateParametersWithDocType(json, key);
+					}
 					Record record = transformer.apply(key, json);
 
 					map.put(record.toString(), record);
@@ -1552,6 +1608,73 @@ public class SpecMarkdownGenerator
 				else map.put(key, transformer.apply(key, new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString())));
 			}
 			return map;
+		}
+		return null;
+	}
+
+	private JSONObject updateParametersWithDocType(JSONObject apiFunction, String functionName)
+	{
+		JSONArray parametersList = apiFunction.optJSONArray("parameters");
+		String returnValue = apiFunction.optString("returns", null);
+		String jsDoc = apiDoc.get(functionName);
+
+		if (jsDoc != null && jsDoc.trim().length() > 0)
+		{
+			JSDocTags jsDocTags = jsDocParser.parse(jsDoc, 0);
+
+			for (int i = 0; i < jsDocTags.size(); i++)
+			{
+				JSDocTag tag = jsDocTags.get(i);
+				if (returnValue != null && tag.name().equals(JSDocTag.RETURN))
+				{
+					String type = extractType(tag.value());
+					if (type != null && !type.trim().isEmpty())
+						apiFunction.put("docReturns", type);
+				}
+				else if (tag.name().equals(JSDocTag.PARAM))
+				{
+					Pattern pattern = Pattern.compile("\\{([^}]+)\\}\\s+(\\S+)\\s*(.*)");
+					JSONObject tagElements = extractParamTagElements(tag.value(), pattern);
+					String paramType = tagElements.optString("type", null);
+					String paramName = tagElements.optString("name", null);
+
+					paramType = paramType != null ? paramType.replace("\\", "").trim() : null;
+					paramName = paramName != null ? paramName.replace("\\", "").replace("[", "").replace("]", "").trim() : null;
+
+					if (parametersList != null && paramType != null && paramName != null)
+					{
+						for (int index = 0; index < parametersList.length(); index++)
+						{
+							JSONObject param = parametersList.getJSONObject(index);
+							if (paramName.equals(param.optString("name")))
+							{
+								param.put("docType", paramType); // Store docType at parameter level
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return apiFunction;
+
+	}
+
+	//value has the following format: "** \{type\} [name] description"
+	//we need to extract the type
+	private String extractType(String value)
+	{
+		String cleanValue = value.replaceAll("\\\\([{}])", "$1").trim();
+		cleanValue = cleanValue.replace("**", "").trim();
+
+		// Ensure the string starts with { and has a closing }
+		int startIndex = cleanValue.indexOf("{");
+		int endIndex = cleanValue.indexOf("}");
+
+		if (startIndex != -1 && endIndex != -1 && endIndex > startIndex)
+		{
+			return cleanValue.substring(startIndex + 1, endIndex).trim();
 		}
 		return null;
 	}
@@ -1652,6 +1775,7 @@ public class SpecMarkdownGenerator
 			return switch (type.toLowerCase()) // TODO why don't we do an exact case match here? for example "foUnDSET" is allowed or just "foundset"?
 			{
 				case "object" -> "../../../servoycore/dev-api/js-lib/object.md";
+				case "string..." -> "../../../servoycore/dev-api/js-lib/string.md";
 				case "string" -> "../../../servoycore/dev-api/js-lib/string.md";
 				case "boolean" -> "../../../servoycore/dev-api/js-lib/boolean.md";
 				case "int" -> "../../../servoycore/dev-api/js-lib/number.md";
@@ -1715,6 +1839,11 @@ public class SpecMarkdownGenerator
 		return "";
 	}
 
+	public String getDocType(Record rcd)
+	{
+		return "";
+	}
+
 	private void save() throws TemplateException, IOException
 	{
 		File userDir = new File(System.getProperty("user.dir"));
@@ -1757,7 +1886,7 @@ public class SpecMarkdownGenerator
 
 	}
 
-	public record Parameter(String name, String type, String doc, boolean optional)
+	public record Parameter(String name, String type, String docType, String doc, boolean optional)
 	{
 		@Override
 		public String toString()
@@ -1819,7 +1948,7 @@ public class SpecMarkdownGenerator
 
 		boolean componentHasIssues = false;
 		String packageName = root.get("package_name").toString();
-		System.out.println("Validate: " + componentName);
+		System.out.println("    - Validate: " + componentName);
 		for (String functionName : specFunctions.keySet())
 		{
 			boolean functionHasIssues = false;
@@ -1857,14 +1986,12 @@ public class SpecMarkdownGenerator
 					docParamName = docParam.name();
 				}
 				String specParamName = specParam.name();
-				boolean specHasIssues = false;
 				// Use accessor methods provided by the Parameter record
 				if (specParam.optional && docParamName != null)
 				{
 					if (!docParamName.startsWith("[") || !docParamName.endsWith("]"))
 					{
 						functionHasIssues = true;
-						specHasIssues = true;
 						System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 							" ::: Parameter optional brackets are missing: " + specParam.name());
 					}
@@ -1876,7 +2003,6 @@ public class SpecMarkdownGenerator
 				if (docParamName != null && !docParamName.equals(specParamName))
 				{
 					functionHasIssues = true;
-					specHasIssues = true;
 					System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 						" ::: Parameter name mismatch. Spec: " + specParam.name() + ", Doc: " + docParam.name());
 				}
@@ -1884,7 +2010,6 @@ public class SpecMarkdownGenerator
 				if (docParam != null && !areTypesEquivalent(types, specParam.type(), docParam.type(), componentName))
 				{
 					functionHasIssues = true;
-					specHasIssues = true;
 					System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 						" ::: Parameter type mismatch. Spec: " + specParam.type() + ", Doc: " + docParam.type());
 				}
@@ -1892,7 +2017,6 @@ public class SpecMarkdownGenerator
 				if (docParam != null && (docParam.doc() == null || docParam.doc().isEmpty()))
 				{
 					functionHasIssues = true;
-					specHasIssues = true;
 					System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 						" ::: Parameter description mismatch (custom type in doc?). Spec: " + specParam.type() + ", Doc: " + docParam.type());
 				}
@@ -1903,26 +2027,21 @@ public class SpecMarkdownGenerator
 			String returnType = docInfo.getReturnType();
 			String returnDescription = docInfo.getReturnDoc();
 
-			boolean returnHasIssues = false;
-
 			if ((returnType == null || returnType.isEmpty()) && (specReturn != null && !specReturn.isEmpty() && !"void".equals(specReturn)))
 			{
 				functionHasIssues = true;
-				returnHasIssues = true;
 				System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 					" ::: return - Missing return type");
 			}
 			if ((returnType != null) && !"void".equals(returnType) && (returnDescription == null || returnDescription.isEmpty()))
 			{
 				functionHasIssues = true;
-				returnHasIssues = true;
 				System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 					" ::: return - Missing return description");
 			}
 			if (!areTypesEquivalent(types, specReturn, returnType, componentName))
 			{
 				functionHasIssues = true;
-				returnHasIssues = true;
 				System.err.println(packageName + " ::: " + displayName + " ::: " + functionName +
 					" ::: return type mismatch (custom type in doc?). Spec: " + specReturn + ", Doc: " + returnType);
 			}
@@ -1932,7 +2051,6 @@ public class SpecMarkdownGenerator
 				componentHasIssues = true;
 				totalFunctionsWithIssues++;
 			}
-
 		}
 
 		// Increment counters if there were issues
@@ -1955,7 +2073,12 @@ public class SpecMarkdownGenerator
 
 		String normalizedSpecType = normalizeType(myTypes, specType, componentName);
 
-		if (!normalizedSpecType.contains("CustomType") && docType.contains("|"))
+		if ("Object".equalsIgnoreCase(normalizedSpecType) && (isObject(docType) || isJSObject(docType)))
+		{
+			return true;
+		}
+
+		if (!normalizedSpecType.contains("CustomType") && (docType.contains("|")))
 		{
 			boolean result = true;
 			String normalizedDocType = docType;
@@ -2002,7 +2125,24 @@ public class SpecMarkdownGenerator
 		Set<String> standardTypes = Set.of(
 			"String", "Number", "Boolean", "Object", "Array", "Date", "RegExp", "Function", "Symbol", "BigInt", "null");
 
-		// Check if the type is one of the standard types (case insensitive)
+		if (type.startsWith("CustomType")) return true;
+
+		return standardTypes.contains(type.trim());
+	}
+
+
+	private boolean isJSObject(String type)
+	{
+		if (type == null || type.isEmpty())
+		{
+			return false;
+		}
+
+		// List of standard JavaScript object types
+		Set<String> standardTypes = Set.of("JSUpload"); // add other types as needed
+
+		if (type.startsWith("CustomType")) return true;
+
 		return standardTypes.contains(type.trim());
 	}
 
@@ -2043,6 +2183,9 @@ public class SpecMarkdownGenerator
 				break;
 			case "tagstring" :
 				normalizedSpecType = "String";
+				break;
+			case "string..." :
+				normalizedSpecType = "String...";
 				break;
 			default :
 				if (componentName != null && myTypes != null)
@@ -2123,6 +2266,7 @@ public class SpecMarkdownGenerator
 							parameters.add(new Parameter(
 								param.getString("name"),
 								type,
+								null,
 								param.optString("doc", ""),
 								param.optBoolean("optional", false)));
 						}
@@ -2156,7 +2300,6 @@ public class SpecMarkdownGenerator
 			String docContents = FileUtils.readFileToString(docFile, Charset.forName("UTF8"));
 			Pattern functionPattern = Pattern.compile("/\\*\\*([\\s\\S]*?)\\*/\\s*function\\s+(\\w+)\\s*\\(");
 			Matcher matcher = functionPattern.matcher(docContents);
-			SimpleJSDocParser jsDocParser = new SimpleJSDocParser();
 
 			while (matcher.find())
 			{
@@ -2187,6 +2330,7 @@ public class SpecMarkdownGenerator
 						parameters.add(new Parameter(
 							tagElements.optString("name"),
 							tagElements.optString("type"),
+							tagElements.optString("docType"),
 							tagElements.optString("doc", ""),
 							tagElements.optBoolean("optional", false)));
 					}
@@ -2342,7 +2486,7 @@ public class SpecMarkdownGenerator
 			isService = service;
 			if (deprecationString != null || replacementInCaseOfDeprecation != null)
 			{
-				System.err.println("* skipping " + (service ? "service" : "component") + " " + displayName + " because it is deprecated.");
+//				System.err.println("* skipping " + (service ? "service" : "component") + " " + displayName + " because it is deprecated.");
 				return;
 			}
 
@@ -2361,7 +2505,19 @@ public class SpecMarkdownGenerator
 			{
 				file.getParentFile().mkdirs();
 				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
-//				System.out.println(file.getPath());
+				// System.out.println(file.getPath());
+
+				String relativePath = file.getPath().substring(file.getPath().indexOf("reference/"));
+				relativePath = relativePath.replace('\\', '/');
+
+				// Check if the relative path is in the summary but not in generated files
+				if (!summaryPaths.contains(relativePath))
+				{
+					missingMdFiles.add(relativePath);
+					//System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + "\033[0m");
+				}
+
+
 				componentTemplate.process(root, out);
 				duplicateTracker.trackFile(file.getName(), file.toString());
 			}
