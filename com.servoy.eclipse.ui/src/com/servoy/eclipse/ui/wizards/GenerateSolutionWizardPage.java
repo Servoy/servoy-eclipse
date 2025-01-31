@@ -105,7 +105,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private static final String SEARCH = "search";
 	private static final String NAVIGATION = "navigation";
 
-	private static String[] toImport = new String[] { SECURITY, UTILS, SEARCH, NAVIGATION };
+	private static String[] toImport = new String[] { UTILS, SEARCH };
 	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	protected GenerateSolutionWizardPage(String pageName)
