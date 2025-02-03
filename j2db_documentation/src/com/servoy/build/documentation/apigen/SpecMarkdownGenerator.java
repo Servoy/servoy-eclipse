@@ -1314,6 +1314,7 @@ public class SpecMarkdownGenerator
 	private Record createFunction(String name, JSONObject specEntry, String apiDocName)
 	{
 		String returnType = specEntry.optString("returns", null);
+		String docReturnType = specEntry.optString("docReturns", null);
 		JSONArray parameters = specEntry.optJSONArray("parameters");
 		String deprecationString = specEntry.optString("deprecated", null);
 		List<Parameter> params = createParameters(parameters);
@@ -1327,6 +1328,10 @@ public class SpecMarkdownGenerator
 			fullReturnType = new JSONObject();
 			fullReturnType.put("description", "");
 			fullReturnType.put("type", returnType);
+			if (docReturnType != null)
+			{
+				fullReturnType.put("docType", docReturnType.replace("\\", ""));
+			}
 		}
 		String myApiDocName = apiDocName;
 		if (specEntry.optBoolean("overload"))
@@ -1438,6 +1443,7 @@ public class SpecMarkdownGenerator
 			fullReturnType = new JSONObject();
 			fullReturnType.put("description", "");
 			fullReturnType.put("type", "");
+			fullReturnType.put("docType", "");
 		}
 		return new Function(name, params, fullReturnType, jsDocEquivalent, deprecationString);
 	}
@@ -1509,6 +1515,10 @@ public class SpecMarkdownGenerator
 				String paramName = param.optString("name", "");
 				String type = param.optString("type", "");
 				String docType = param.optString("docType", "");
+				if (docType != null)
+				{
+					docType.replace("\\", "");
+				}
 				JSONObject fullType = param.optJSONObject("type");
 				if (fullType != null)
 				{
@@ -1587,11 +1597,7 @@ public class SpecMarkdownGenerator
 					}
 
 					json = replaceTypes(json);
-					//TODO: still need to add doc types instead spec types in the generated markdowns
-					if (packageTypes != null)
-					{
-						json = updateParametersWithDocType(json, key);
-					}
+					json = updateParametersWithDocType(json, key);
 					Record record = transformer.apply(key, json);
 
 					map.put(record.toString(), record);
@@ -1749,6 +1755,63 @@ public class SpecMarkdownGenerator
 			".md";
 	}
 
+	public String getDocType(Object typeContainer, Map<String, Object> customTypes, String packageName)
+	{
+		String type = null;
+		if (typeContainer instanceof Property prop)
+		{
+			type = prop.type();
+		}
+		else if (typeContainer instanceof Parameter param)
+		{
+			type = param.type();
+		}
+		else if (typeContainer instanceof Function func)
+		{
+			type = func.returnValue().getString("docType");
+			if (type != null && type.trim().length() > 0)
+			{
+				return type; //this is the doctype from _doc.js; at this point must be already processed (else the error is signalled prior to this point
+			}
+			type = func.returnValue().getString("type");
+		}
+		else if (typeContainer instanceof JSONObject jsonObj)
+		{
+			type = jsonObj.optString("docType");
+			if (type != null && type.trim().length() > 0)
+			{
+				return type; //this is the doctype from _doc.js; at this point must be already processed (else the error is signalled prior to this point
+			}
+			type = jsonObj.optString("type");
+		}
+		if (type != null)
+		{
+			boolean isArray = false;
+
+
+			if (type.endsWith("[]"))
+			{
+				isArray = true;
+				type = type.substring(0, type.length() - 2);
+			}
+			if (customTypes != null && customTypes.containsKey(type))
+			{
+				type = "CustomType<" + packageName + "." + type + ">";
+			}
+			else
+			{
+				type = type.toLowerCase().substring(0, 1).toUpperCase() + type.substring(1); //capitalize type
+				type = normalizeType(null, type, null);
+			}
+			if (isArray)
+			{
+				type = "Array<" + type + ">";
+			}
+			return type;
+		}
+		return "";
+	}
+
 	public String getReturnTypePath(Record rcd)
 	{
 		String type = null;
@@ -1836,11 +1899,6 @@ public class SpecMarkdownGenerator
 				}
 			};
 		}
-		return "";
-	}
-
-	public String getDocType(Record rcd)
-	{
 		return "";
 	}
 
@@ -2505,7 +2563,6 @@ public class SpecMarkdownGenerator
 			{
 				file.getParentFile().mkdirs();
 				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
-				// System.out.println(file.getPath());
 
 				String relativePath = file.getPath().substring(file.getPath().indexOf("reference/"));
 				relativePath = relativePath.replace('\\', '/');
