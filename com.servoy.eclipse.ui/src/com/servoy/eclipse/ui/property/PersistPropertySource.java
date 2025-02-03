@@ -60,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -81,6 +82,7 @@ import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.SecureStringPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
+import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
@@ -193,6 +195,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
@@ -486,7 +489,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						}
 					}
 				}
-				if (persistContext.getPersist() instanceof MenuItem)
+				if (persistContext.getPersist() instanceof MenuItem menuItem)
 				{
 					Map<String, Map<String, PropertyDescription>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
 					if (extraProperties != null)
@@ -543,6 +546,60 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								}
 							}
 
+						}
+					}
+					Menu menu = menuItem.getAncestor(Menu.class);
+					Map<String, Object> customProperties = menu.getCustomPropertiesDefinition();
+					if (customProperties != null)
+					{
+						for (String propertyName : customProperties.keySet())
+						{
+							PropertyDescription propertyDescription = new PropertyDescriptionBuilder().withName(propertyName)
+								.withType(TypesRegistry.getType(customProperties.get(propertyName).toString(), false)).build();
+							IPropertyDescriptor pd;
+							if (propertyDescription.getType() instanceof ValueListPropertyType)
+							{
+								pd = new ValuelistPropertyController<Object>(propertyName, propertyName, persistContext,
+									true)
+								{
+									@Override
+									protected IPropertyConverter<Object, Integer> createConverter()
+									{
+										return new IPropertyConverter<Object, Integer>()
+										{
+											public Integer convertProperty(Object id, Object value)
+											{
+												ValueList vl = flattenedEditingSolution.getValueList(value != null ? value.toString() : null);
+												return Integer.valueOf(vl == null ? ValuelistLabelProvider.VALUELIST_NONE : vl.getID());
+											}
+
+											public Object convertValue(Object id, Integer value)
+											{
+												int vlId = value.intValue();
+												if (vlId == ValuelistLabelProvider.VALUELIST_NONE) return null;
+												ValueList vl = flattenedEditingSolution.getValueList(vlId);
+												return vl == null ? null : vl.getUUID();
+											}
+										};
+									}
+								};
+							}
+							else
+							{
+								pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
+									propertyDescription,
+									form, persistContext,
+									readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
+									flattenedEditingSolution);
+							}
+							if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
+							{
+								((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(Menu.CUSTOM_PROPERTIES_CATEGORY);
+							}
+							if (pd != null)
+							{
+								propertyDescriptors.put(pd.getId(), pd);
+							}
 						}
 					}
 				}
@@ -2198,10 +2255,25 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
-				Object value = ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
+				boolean isCustomProperty = Menu.CUSTOM_PROPERTIES_CATEGORY.equals(propertyDescriptor.getCategory());
+				Object value = isCustomProperty ? ((MenuItem)persistContext.getPersist()).getCustomPropertyValue(id.toString())
+					: ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
 				if (value != null && value instanceof String && Utils.getAsUUID(value, false) != null)
 				{
-					IPropertyType< ? > propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					IPropertyType< ? > propertyType = null;
+					if (isCustomProperty)
+					{
+						Menu menu = persistContext.getPersist().getAncestor(Menu.class);
+						Object typeName = menu.getCustomPropertiesDefinition().get(id);
+						if (typeName != null)
+						{
+							propertyType = TypesRegistry.getType(typeName.toString(), false);
+						}
+					}
+					else
+					{
+						propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					}
 					if (propertyType instanceof ValueListPropertyType || propertyType instanceof FormPropertyType)
 					{
 						IPersist persist = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
@@ -2747,9 +2819,26 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
+				boolean isCustomProperty = Menu.CUSTOM_PROPERTIES_CATEGORY.equals(propertyDescriptor.getCategory());
 				if (value instanceof Integer)
 				{
-					IPropertyType< ? > propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					IPropertyType< ? > propertyType = null;
+					if (isCustomProperty)
+					{
+						Menu menu = persistContext.getPersist().getAncestor(Menu.class);
+						if (menu != null)
+						{
+							Object typeName = menu.getCustomPropertiesDefinition().get(id);
+							if (typeName != null)
+							{
+								propertyType = TypesRegistry.getType(typeName.toString(), false);
+							}
+						}
+					}
+					else
+					{
+						propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					}
 					if (propertyType instanceof ValueListPropertyType)
 					{
 						ValueList val = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
@@ -2763,7 +2852,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						value = (frm == null) ? null : frm.getUUID().toString();
 					}
 				}
-				((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), id.toString(), value);
+				if (isCustomProperty)
+				{
+					((MenuItem)persistContext.getPersist()).putCustomPropertyValue(id.toString(), value);
+				}
+				else
+				{
+					((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), id.toString(), value);
+				}
 			}
 		}
 	}

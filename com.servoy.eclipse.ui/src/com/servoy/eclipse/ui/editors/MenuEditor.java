@@ -22,26 +22,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
+import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.AcceptAllFilter;
+import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -50,16 +61,21 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 import org.json.JSONException;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.types.BooleanPropertyType;
+import org.sablo.specification.property.types.TypesRegistry;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.core.util.UIUtils.InputAndComboDialog;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -94,9 +110,11 @@ import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.StringComparator;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * @author lvostinar
@@ -104,6 +122,10 @@ import com.servoy.j2db.util.Utils;
  */
 public class MenuEditor extends PersistEditor
 {
+	static final int CI_NAME = 0;
+	static final int CI_TYPE = 1;
+	static final int CI_DELETE = 2;
+
 	private Composite parent;
 	private MenuItem selectedMenuItem;
 	private final List<Consumer<MenuItem>> selectedMenuItemCallbacks = new ArrayList<Consumer<MenuItem>>();
@@ -198,6 +220,147 @@ public class MenuEditor extends PersistEditor
 				flagModified();
 			}
 		});
+
+		Composite tableContainer = new Composite(container, SWT.NONE);
+		tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+		TableViewer customPropertiesViewer = new TableViewer(tableContainer, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		customPropertiesViewer.getTable().setHeaderVisible(true);
+		customPropertiesViewer.getTable().setLinesVisible(true);
+
+		TableColumn nameColumn = new TableColumn(customPropertiesViewer.getTable(), SWT.LEFT, CI_NAME);
+		nameColumn.setText("Custom Property Name");
+
+		final TableColumn typeColumn = new TableColumn(customPropertiesViewer.getTable(), SWT.LEFT, CI_TYPE);
+		typeColumn.setText("Custom Property Type");
+
+		final TableColumn deleteColumn = new TableColumn(customPropertiesViewer.getTable(), SWT.CENTER, CI_DELETE);
+
+		customPropertiesViewer.getTable().addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseDown(MouseEvent event)
+			{
+				Point pt = new Point(event.x, event.y);
+				TableItem item = customPropertiesViewer.getTable().getItem(pt);
+				if (item != null && item.getBounds(CI_DELETE).contains(pt))
+				{
+					Object propertyDefinition = item.getData();
+					if (propertyDefinition instanceof Pair pair &&
+						MessageDialog.openConfirm(getSite().getShell(), "Delete custom property definition",
+							"Are you sure you want to delete property '" + pair.getLeft() + "'?"))
+					{
+						getPersist().clearCustomPropertyDefinition(pair.getLeft().toString());
+						customPropertiesViewer.refresh();
+						parent.layout(true, true);
+						flagModified();
+					}
+
+				}
+			}
+		});
+
+		customPropertiesViewer.setLabelProvider(new ITableLabelProvider()
+		{
+
+			@Override
+			public void removeListener(ILabelProviderListener listener)
+			{
+
+			}
+
+			@Override
+			public boolean isLabelProperty(Object element, String property)
+			{
+				return false;
+			}
+
+			@Override
+			public void dispose()
+			{
+
+			}
+
+			@Override
+			public void addListener(ILabelProviderListener listener)
+			{
+
+			}
+
+			@Override
+			public String getColumnText(Object element, int columnIndex)
+			{
+				Pair<String, String> definition = (Pair<String, String>)element;
+				if (columnIndex == CI_NAME)
+				{
+					return definition.getLeft();
+				}
+				if (columnIndex == CI_TYPE)
+				{
+					return definition.getRight();
+				}
+				return null;
+			}
+
+			@Override
+			public Image getColumnImage(Object element, int columnIndex)
+			{
+				if (columnIndex == CI_DELETE)
+				{
+					return Activator.getDefault().loadImageFromBundle("delete.png");
+				}
+				return null;
+			}
+		});
+		customPropertiesViewer.setContentProvider(new IStructuredContentProvider()
+		{
+			@Override
+			public Object[] getElements(Object inputElement)
+			{
+				Map<String, Object> definitions = getPersist().getCustomPropertiesDefinition();
+				if (definitions != null)
+				{
+					return definitions.keySet().stream().map(key -> new Pair<String, Object>(key, definitions.get(key))).collect(Collectors.toList()).toArray();
+				}
+				return new Object[0];
+			}
+
+		});
+		customPropertiesViewer.setInput(getPersist());
+
+
+		Button addCustomProperty = new Button(container, SWT.NONE);
+		addCustomProperty.setText("Add Menu Custom Property Definition");
+		addCustomProperty.setToolTipText("Adds a new custom property definition that can be defined on each menu item");
+		addCustomProperty.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(final SelectionEvent e)
+			{
+				InputAndComboDialog dialog = new InputAndComboDialog(getSite().getShell(), "Add Menu Custom Property Definition", "Custom Property Name", "",
+					new IInputValidator()
+					{
+						public String isValid(String newText)
+						{
+							boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
+							return valid ? null : (newText.length() == 0 ? "" : "Invalid property name");
+						}
+					}, new String[] { "boolean", "form", "int", "relation", "string", "valuelist" }, "Custom Property Type", 4);
+				if (dialog.open() == Window.OK)
+				{
+					getPersist().putCustomPropertyDefinition(dialog.getValue(), dialog.getExtendedValue());
+					customPropertiesViewer.refresh();
+					parent.layout(true, true);
+					flagModified();
+				}
+			}
+		});
+
+		TableColumnLayout tableLayout = new TableColumnLayout();
+		tableLayout.setColumnData(nameColumn, new ColumnWeightData(20, 50, true));
+		tableLayout.setColumnData(typeColumn, new ColumnWeightData(10, 25, true));
+		tableLayout.setColumnData(deleteColumn, new ColumnPixelData(20, false));
+		tableContainer.setLayout(tableLayout);
 
 		SashForm sashForm = new SashForm(container, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -552,228 +715,304 @@ public class MenuEditor extends PersistEditor
 		Map<String, Map<String, PropertyDescription>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
 		if (extraProperties != null)
 		{
-			FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
 			for (String categoryName : extraProperties.keySet())
 			{
 				Group categoryPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
 				categoryPropertiesGroup.setText("Menu Item - " + categoryName + " Properties");
 				categoryPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 				categoryPropertiesGroup.setLayout(new GridLayout(2, false));
-
-				Map<String, PropertyDescription> extraCategoryProperties = extraProperties.get(categoryName);
-				List<String> propertyNames = new ArrayList<String>(extraCategoryProperties.keySet());
-				propertyNames.sort(StringComparator.INSTANCE);
-				for (String propertyName : propertyNames)
-				{
-					PropertyDescription propertyDescription = extraCategoryProperties.get(propertyName);
-					label = new Label(categoryPropertiesGroup, SWT.NONE);
-					label.setText(propertyDescription.getName());
-					Object config = propertyDescription.getConfig();
-					if (propertyDescription.getType() instanceof BooleanPropertyType)
-					{
-						Button propertyCheckbox = new Button(categoryPropertiesGroup, SWT.CHECK);
-						selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
-							propertyCheckbox.setSelection(menuItem != null ? Utils.getAsBoolean(menuItem.getExtraProperty(categoryName, propertyName)) : false);
-						});
-						propertyCheckbox.addSelectionListener(new SelectionAdapter()
-						{
-							@Override
-							public void widgetSelected(SelectionEvent e)
-							{
-								if (selectedMenuItem != null && !initializingData)
-								{
-									selectedMenuItem.putExtraProperty(categoryName, propertyName, propertyCheckbox.getSelection());
-									flagModified();
-								}
-							}
-						});
-					}
-					else if (propertyDescription.getType() instanceof ValueListPropertyType)
-					{
-						TreeSelectViewer valuelistComponent = new TreeSelectViewer(categoryPropertiesGroup, SWT.NONE,
-							new ValuelistPropertyController.ValueListValueEditor(editingFlattenedSolution));
-						valuelistComponent.setButtonText("Select Valuelist");
-						valuelistComponent.setContentProvider(new ValuelistContentProvider(editingFlattenedSolution, getPersist()));
-						valuelistComponent.setLabelProvider(new ValuelistLabelProvider(editingFlattenedSolution, getPersist()));
-						valuelistComponent.setTitleText("Select valuelist");
-						valuelistComponent.setInput(new ValuelistListOptions(true));
-						valuelistComponent.setEditable(true);
-						valuelistComponent.addSelectionChangedListener(new ISelectionChangedListener()
-						{
-							public void selectionChanged(SelectionChangedEvent event)
-							{
-								if (selectedMenuItem != null && !initializingData)
-								{
-									IStructuredSelection selection = (IStructuredSelection)valuelistComponent.getSelection();
-									ValueList valuelist = null;
-									if (!selection.isEmpty())
-									{
-										valuelist = editingFlattenedSolution.getValueList(Utils.getAsInteger(selection.getFirstElement()));
-									}
-									selectedMenuItem.putExtraProperty(categoryName, propertyName, valuelist != null ? valuelist.getUUID() : null);
-									flagModified();
-								}
-							}
-						});
-						selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
-							Object value = menuItem != null ? menuItem.getExtraProperty(categoryName, propertyName) : "";
-							ValueList valuelist = null;
-							if (value != null)
-							{
-								valuelist = editingFlattenedSolution.getValueList(value.toString());
-							}
-							if (valuelist == null)
-							{
-								valuelistComponent.setSelection(StructuredSelection.EMPTY);
-							}
-							else
-							{
-								valuelistComponent.setSelection(new StructuredSelection(valuelist.getID()));
-							}
-						});
-					}
-					else if (propertyDescription.getType() instanceof RelationPropertyType)
-					{
-						TreeSelectViewer relationSelect = new TreeSelectViewer(categoryPropertiesGroup, SWT.NONE,
-							RelationPropertyController.RelationValueEditor.INSTANCE);
-						relationSelect.setContentProvider(new RelationContentProvider(editingFlattenedSolution, getPersist()));
-						relationSelect.setLabelProvider(RelationLabelProvider.INSTANCE_ALL);
-						relationSelect.setTextLabelProvider(new RelationLabelProvider("", false, false));
-						relationSelect.setSelectionFilter(AcceptAllFilter.getInstance());
-						relationSelect.setTitleText("Select relation");
-						relationSelect.setEditable(true);
-						relationSelect.addSelectionChangedListener(new ISelectionChangedListener()
-						{
-							public void selectionChanged(SelectionChangedEvent event)
-							{
-								if (selectedMenuItem != null && !initializingData)
-								{
-									IStructuredSelection selection = (IStructuredSelection)relationSelect.getSelection();
-									selectedMenuItem.putExtraProperty(categoryName, propertyName, selection.isEmpty() ? null
-										: EclipseDatabaseUtils.getRelationsString(((RelationsWrapper)selection.getFirstElement()).relations));
-									flagModified();
-								}
-							}
-						});
-						relationSelect.setInput(new RelationContentProvider.RelationListOptions(null, null, true, true));
-						selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
-							Object value = menuItem != null ? menuItem.getExtraProperty(categoryName, propertyName) : "";
-							Relation[] relations = null;
-							if (value != null)
-							{
-								relations = editingFlattenedSolution.getRelationSequence(value.toString());
-							}
-							if (relations == null)
-							{
-								relationSelect.setSelection(StructuredSelection.EMPTY);
-							}
-							else
-							{
-								relationSelect.setSelection(new StructuredSelection(new RelationsWrapper(relations)));
-							}
-						});
-					}
-					else if (propertyDescription.getType() instanceof FormPropertyType)
-					{
-						TreeSelectViewer formViewer = new TreeSelectViewer(categoryPropertiesGroup, SWT.NONE, new FormValueEditor(editingFlattenedSolution));
-						formViewer.setTitleText("Select form");
-						formViewer.setContentProvider(new FormContentProvider(editingFlattenedSolution, null));
-						formViewer.setLabelProvider(
-							new SolutionContextDelegateLabelProvider(new FormLabelProvider(editingFlattenedSolution, true),
-								editingFlattenedSolution.getSolution()));
-						formViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false,
-							false, null));
-						formViewer.setEditable(true);
-						formViewer.addSelectionChangedListener(new ISelectionChangedListener()
-						{
-							public void selectionChanged(SelectionChangedEvent event)
-							{
-								if (selectedMenuItem != null && !initializingData)
-								{
-									IStructuredSelection selection = (IStructuredSelection)formViewer.getSelection();
-									Form form = null;
-									if (!selection.isEmpty())
-									{
-										form = editingFlattenedSolution.getForm(Utils.getAsInteger(selection.getFirstElement()));
-									}
-									selectedMenuItem.putExtraProperty(categoryName, propertyName, form != null ? form.getUUID() : null);
-									flagModified();
-								}
-							}
-						});
-						selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
-							Object value = menuItem != null ? menuItem.getExtraProperty(categoryName, propertyName) : "";
-							Form form = null;
-							if (value != null)
-							{
-								form = editingFlattenedSolution.getForm(value.toString());
-							}
-							if (form == null)
-							{
-								formViewer.setSelection(StructuredSelection.EMPTY);
-							}
-							else
-							{
-								formViewer.setSelection(new StructuredSelection(form.getID()));
-							}
-						});
-					}
-					else if (config instanceof ValuesConfig valuesConfig && valuesConfig.getDisplay() != null)
-					{
-						Combo propertyCombobox = new Combo(categoryPropertiesGroup, SWT.READ_ONLY);
-						propertyCombobox.setItems(valuesConfig.getDisplay());
-						selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
-							Object value = menuItem != null ? menuItem.getExtraProperty(categoryName, propertyName) : null;
-							if (value != null)
-							{
-								propertyCombobox.setText(value.toString());
-							}
-							else if (valuesConfig.hasDefault())
-							{
-								propertyCombobox.setText(valuesConfig.getDisplayDefault());
-							}
-						});
-						propertyCombobox.addModifyListener(new ModifyListener()
-						{
-							@Override
-							public void modifyText(ModifyEvent e)
-							{
-								if (selectedMenuItem != null && !initializingData)
-								{
-									selectedMenuItem.putExtraProperty(categoryName, propertyName, propertyCombobox.getText());
-									flagModified();
-								}
-							}
-						});
-					}
-					else
-					{
-						Text propertyTextbox = new Text(categoryPropertiesGroup, SWT.BORDER);
-						propertyTextbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-						selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
-							Object value = menuItem != null ? menuItem.getExtraProperty(categoryName, propertyName) : "";
-							propertyTextbox.setText(value != null ? value.toString() : "");
-						});
-						propertyTextbox.addModifyListener(new ModifyListener()
-						{
-							@Override
-							public void modifyText(ModifyEvent e)
-							{
-								if (selectedMenuItem != null && !initializingData)
-								{
-									selectedMenuItem.putExtraProperty(categoryName, propertyName, propertyTextbox.getText());
-									flagModified();
-								}
-							}
-						});
-					}
-				}
-
+				createGroupedComponents(categoryPropertiesGroup, categoryName, extraProperties.get(categoryName), true);
 			}
+		}
+
+		Group categoryPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
+		categoryPropertiesGroup.setText("Menu Item - Custom Properties");
+		categoryPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		categoryPropertiesGroup.setLayout(new GridLayout(2, false));
+
+		Map<String, Object> definitions = getPersist().getCustomPropertiesDefinition();
+		if (definitions != null)
+		{
+			createGroupedComponents(categoryPropertiesGroup, null,
+				definitions.keySet().stream()
+					.map(key -> new PropertyDescriptionBuilder().withName(key).withType(TypesRegistry.getType(definitions.get(key).toString(), false)).build())
+					.collect(Collectors.toMap(pd -> pd.getName(), pd -> pd)),
+				false);
 		}
 
 		sashForm.setWeights(new int[] { 20, 80 });
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+	}
+
+	private void createGroupedComponents(Group categoryPropertiesGroup, String categoryName, Map<String, PropertyDescription> extraProperties,
+		boolean isExtraProperties)
+	{
+		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
+		List<String> propertyNames = new ArrayList<String>(extraProperties.keySet());
+		propertyNames.sort(StringComparator.INSTANCE);
+		for (String propertyName : propertyNames)
+		{
+
+			PropertyDescription propertyDescription = extraProperties.get(propertyName);
+			Label label = new Label(categoryPropertiesGroup, SWT.NONE);
+			label.setText(propertyName);
+			if (propertyDescription.getType() instanceof BooleanPropertyType)
+			{
+				Button propertyCheckbox = new Button(categoryPropertiesGroup, SWT.CHECK);
+				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
+					Object value = null;
+					if (menuItem != null)
+					{
+						value = isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName);
+					}
+					propertyCheckbox.setSelection(menuItem != null ? Utils.getAsBoolean(value) : false);
+				});
+				propertyCheckbox.addSelectionListener(new SelectionAdapter()
+				{
+					@Override
+					public void widgetSelected(SelectionEvent e)
+					{
+						if (selectedMenuItem != null && !initializingData)
+						{
+							if (isExtraProperties)
+							{
+								selectedMenuItem.putExtraProperty(categoryName, propertyName, propertyCheckbox.getSelection());
+							}
+							else
+							{
+								selectedMenuItem.putCustomPropertyValue(propertyName, propertyCheckbox.getSelection());
+							}
+							flagModified();
+						}
+					}
+				});
+			}
+			else if (propertyDescription.getType() instanceof ValueListPropertyType)
+			{
+				TreeSelectViewer valuelistComponent = new TreeSelectViewer(categoryPropertiesGroup, SWT.NONE,
+					new ValuelistPropertyController.ValueListValueEditor(editingFlattenedSolution));
+				valuelistComponent.setContentProvider(new ValuelistContentProvider(editingFlattenedSolution, getPersist()));
+				valuelistComponent.setLabelProvider(new ValuelistLabelProvider(editingFlattenedSolution, getPersist()));
+				valuelistComponent.setTitleText("Select valuelist");
+				valuelistComponent.setInput(new ValuelistListOptions(true));
+				valuelistComponent.setEditable(true);
+				valuelistComponent.addSelectionChangedListener(new ISelectionChangedListener()
+				{
+					public void selectionChanged(SelectionChangedEvent event)
+					{
+						if (selectedMenuItem != null && !initializingData)
+						{
+							IStructuredSelection selection = (IStructuredSelection)valuelistComponent.getSelection();
+							ValueList valuelist = null;
+							if (!selection.isEmpty())
+							{
+								valuelist = editingFlattenedSolution.getValueList(Utils.getAsInteger(selection.getFirstElement()));
+							}
+							if (isExtraProperties)
+							{
+								selectedMenuItem.putExtraProperty(categoryName, propertyName, valuelist != null ? valuelist.getUUID() : null);
+							}
+							else
+							{
+								selectedMenuItem.putCustomPropertyValue(propertyName, valuelist != null ? valuelist.getUUID() : null);
+							}
+							flagModified();
+						}
+					}
+				});
+				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
+					Object value = "";
+					if (menuItem != null)
+					{
+						value = isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName);
+					}
+					ValueList valuelist = null;
+					if (value != null)
+					{
+						valuelist = editingFlattenedSolution.getValueList(value.toString());
+					}
+					if (valuelist == null)
+					{
+						valuelistComponent.setSelection(StructuredSelection.EMPTY);
+					}
+					else
+					{
+						valuelistComponent.setSelection(new StructuredSelection(valuelist.getID()));
+					}
+				});
+			}
+			else if (propertyDescription.getType() instanceof RelationPropertyType)
+			{
+				TreeSelectViewer relationSelect = new TreeSelectViewer(categoryPropertiesGroup, SWT.NONE,
+					RelationPropertyController.RelationValueEditor.INSTANCE);
+				relationSelect.setContentProvider(new RelationContentProvider(editingFlattenedSolution, getPersist()));
+				relationSelect.setLabelProvider(RelationLabelProvider.INSTANCE_ALL);
+				relationSelect.setTextLabelProvider(new RelationLabelProvider("", false, false));
+				relationSelect.setSelectionFilter(AcceptAllFilter.getInstance());
+				relationSelect.setTitleText("Select relation");
+				relationSelect.setEditable(true);
+				relationSelect.addSelectionChangedListener(new ISelectionChangedListener()
+				{
+					public void selectionChanged(SelectionChangedEvent event)
+					{
+						if (selectedMenuItem != null && !initializingData)
+						{
+							IStructuredSelection selection = (IStructuredSelection)relationSelect.getSelection();
+							Object value = selection.isEmpty() ? null
+								: EclipseDatabaseUtils.getRelationsString(((RelationsWrapper)selection.getFirstElement()).relations);
+							if (isExtraProperties)
+							{
+								selectedMenuItem.putExtraProperty(categoryName, propertyName, value);
+							}
+							else
+							{
+								selectedMenuItem.putCustomPropertyValue(propertyName, value);
+							}
+							flagModified();
+						}
+					}
+				});
+				relationSelect.setInput(new RelationContentProvider.RelationListOptions(null, null, true, true));
+				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
+					Object value = null;
+					if (menuItem != null)
+					{
+						value = isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName);
+					}
+					Relation[] relations = null;
+					if (value != null)
+					{
+						relations = editingFlattenedSolution.getRelationSequence(value.toString());
+					}
+					if (relations == null)
+					{
+						relationSelect.setSelection(StructuredSelection.EMPTY);
+					}
+					else
+					{
+						relationSelect.setSelection(new StructuredSelection(new RelationsWrapper(relations)));
+					}
+				});
+			}
+			else if (propertyDescription.getType() instanceof FormPropertyType)
+			{
+				TreeSelectViewer formViewer = new TreeSelectViewer(categoryPropertiesGroup, SWT.NONE, new FormValueEditor(editingFlattenedSolution));
+				formViewer.setTitleText("Select form");
+				formViewer.setContentProvider(new FormContentProvider(editingFlattenedSolution, null));
+				formViewer.setLabelProvider(
+					new SolutionContextDelegateLabelProvider(new FormLabelProvider(editingFlattenedSolution, true),
+						editingFlattenedSolution.getSolution()));
+				formViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false,
+					false, null));
+				formViewer.setEditable(true);
+				formViewer.addSelectionChangedListener(new ISelectionChangedListener()
+				{
+					public void selectionChanged(SelectionChangedEvent event)
+					{
+						if (selectedMenuItem != null && !initializingData)
+						{
+							IStructuredSelection selection = (IStructuredSelection)formViewer.getSelection();
+							Form form = null;
+							if (!selection.isEmpty())
+							{
+								form = editingFlattenedSolution.getForm(Utils.getAsInteger(selection.getFirstElement()));
+							}
+							if (isExtraProperties)
+							{
+								selectedMenuItem.putExtraProperty(categoryName, propertyName, form != null ? form.getUUID() : null);
+							}
+							else
+							{
+								selectedMenuItem.putCustomPropertyValue(propertyName, form != null ? form.getUUID() : null);
+							}
+							flagModified();
+						}
+					}
+				});
+				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
+					Object value = menuItem != null
+						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : null;
+					Form form = null;
+					if (value != null)
+					{
+						form = editingFlattenedSolution.getForm(value.toString());
+					}
+					if (form == null)
+					{
+						formViewer.setSelection(StructuredSelection.EMPTY);
+					}
+					else
+					{
+						formViewer.setSelection(new StructuredSelection(form.getID()));
+					}
+				});
+			}
+			else if (propertyDescription.getConfig() instanceof ValuesConfig valuesConfig && valuesConfig.getDisplay() != null)
+			{
+				Combo propertyCombobox = new Combo(categoryPropertiesGroup, SWT.READ_ONLY);
+				propertyCombobox.setItems(valuesConfig.getDisplay());
+				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
+					Object value = menuItem != null
+						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : null;
+					if (value != null)
+					{
+						propertyCombobox.setText(value.toString());
+					}
+					else if (valuesConfig.hasDefault())
+					{
+						propertyCombobox.setText(valuesConfig.getDisplayDefault());
+					}
+				});
+				propertyCombobox.addModifyListener(new ModifyListener()
+				{
+					@Override
+					public void modifyText(ModifyEvent e)
+					{
+						if (selectedMenuItem != null && !initializingData)
+						{
+							if (isExtraProperties)
+							{
+								selectedMenuItem.putExtraProperty(categoryName, propertyName, propertyCombobox.getText());
+							}
+							else
+							{
+								selectedMenuItem.putCustomPropertyValue(propertyName, propertyCombobox.getText());
+							}
+							flagModified();
+						}
+					}
+				});
+			}
+			else
+			{
+				Text propertyTextbox = new Text(categoryPropertiesGroup, SWT.BORDER);
+				propertyTextbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
+					Object value = menuItem != null
+						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : "";
+					propertyTextbox.setText(value != null ? value.toString() : "");
+				});
+				propertyTextbox.addModifyListener(new ModifyListener()
+				{
+					@Override
+					public void modifyText(ModifyEvent e)
+					{
+						if (selectedMenuItem != null && !initializingData)
+						{
+							if (isExtraProperties)
+							{
+								selectedMenuItem.putExtraProperty(categoryName, propertyName, propertyTextbox.getText());
+							}
+							else
+							{
+								selectedMenuItem.putCustomPropertyValue(propertyName, propertyTextbox.getText());
+							}
+							flagModified();
+						}
+					}
+				});
+			}
+		}
 	}
 
 	@Override
