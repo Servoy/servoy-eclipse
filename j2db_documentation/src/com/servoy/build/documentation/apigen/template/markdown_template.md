@@ -21,11 +21,10 @@ ${description}</#if>
 
 ## **Extends**
 
-```
 <#list extends as extend>
-${extend}
+[${extend}](${instance.getExtendsPath(classname, extend)})
 </#list>
-```
+
 </#if>
 <#if constants??>
 

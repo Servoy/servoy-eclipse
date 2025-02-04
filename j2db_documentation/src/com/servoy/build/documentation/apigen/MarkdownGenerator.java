@@ -123,6 +123,8 @@ public class MarkdownGenerator
 	private static Set<String> uniqueClasses = new HashSet<>();
 	private static Set<String> undocumentedTypes = new HashSet<>();
 	private static List<String> missingMdFiles = new ArrayList<>();
+	private static Map<String, String> referenceTypes = new HashMap<String, String>();
+	private static Set<String> summaryPaths = new HashSet<String>();
 
 	private static String summaryMdFilePath;
 
@@ -463,6 +465,8 @@ public class MarkdownGenerator
 			designDocURLObject = new File(designDocURL).toURI().toURL();
 		}
 
+		loadSummary();
+
 		do
 		{
 			ngOnly = !ngOnly;
@@ -608,6 +612,47 @@ public class MarkdownGenerator
 		while (ngOnly);
 
 		printSummary();
+	}
+
+	//TODO: investigate the case where
+	private static void loadSummary()
+	{
+		referenceTypes.clear();
+		try (BufferedReader br = new BufferedReader(new FileReader(summaryMdFilePath, Charset.forName("UTF-8"))))
+		{
+			String line;
+			while ((line = br.readLine()) != null)
+			{
+				// Extract paths ending with .md from markdown links
+				int start = line.indexOf("[");
+				int middle = line.indexOf("](", start);
+				int end = line.indexOf(')', middle);
+				if (start != -1 && middle != -1 && end != -1)
+				{
+					String key = line.substring(start + 1, middle).trim();
+					String value = line.substring(middle + 2, end).trim().replace("\\", "");
+					summaryPaths.add(value);
+
+					//types from plugins / extensions, javascript classes may overlap with other references ( [key](reference) ).
+					// For example:
+					// [controller](reference/servoycore/dev-api/forms/runtimeform/controller.md)
+					// [Controller](reference/servoy-developer/solution-explorer/all-solutions/active-solution/forms/form/controller.md)
+					//
+					// The second line will overwrite the first one - leading to incorrect report for this code
+					if ((value.startsWith("reference/servoycore") || value.startsWith("reference/servoyextensions")) && value.endsWith(".md"))
+					{
+						// Normalize the path to use '/' as separator
+						referenceTypes.put(key.toLowerCase(), value);
+					}
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			System.err.println("\033[38;5;202mFailed to load summary file: " + summaryMdFilePath + "\033[0m");
+			e.printStackTrace();
+		}
+		return;
 	}
 
 	private static void printSummary()
@@ -786,6 +831,41 @@ public class MarkdownGenerator
 			e.printStackTrace();
 		}
 		return out.toString();
+	}
+
+	public String getExtendsPath(String childClass, String parentClass)
+	{
+		if (childClass != null && parentClass != null)
+		{
+			String parentPath = referenceTypes.get(parentClass.toLowerCase());
+			if (parentPath == null)
+			{
+				System.err.println("\033[35mPath reference not found for the class: " + parentClass + " (referenced from: " + childClass + ")\033[0m");
+			}
+			String childPath = referenceTypes.get(childClass.toLowerCase());
+			if (childPath == null)
+			{
+				System.err.println("\033[35mPath reference not found for the class: " + childClass + ". Please update the summary.md file...!\033[0m");
+				return "";
+			}
+			try
+			{
+				// Convert to Path objects
+				Path child = Paths.get(childPath).normalize();
+				Path parent = Paths.get(parentPath).normalize();
+
+				// Get relative path from child to parent
+				Path relativePath = child.getParent().relativize(parent);
+				return relativePath.toString();
+			}
+			catch (Exception e)
+			{
+				System.err.println("\033[31mError calculating relative path: " + e.getMessage() + "\033[0m");
+				return "";
+			}
+		}
+		return "";
+
 	}
 
 	public String getReturnTypePath(String publicName)
@@ -1083,7 +1163,7 @@ public class MarkdownGenerator
 			SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
 
 			File userDir = new File(System.getProperty("user.dir"));
-			List<String> summaryPaths = loadSummary();
+
 			for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
 			{
 				IObjectDocumentation value = entry.getValue();
@@ -1162,38 +1242,6 @@ public class MarkdownGenerator
 					}
 				}
 			}
-		}
-
-		private List<String> loadSummary()
-		{
-			List<String> paths = new ArrayList<String>();
-			try (BufferedReader br = new BufferedReader(new FileReader(summaryMdFilePath, Charset.forName("UTF-8"))))
-			{
-				String line;
-				while ((line = br.readLine()) != null)
-				{
-					// Extract paths ending with .md from markdown links
-					int start = line.indexOf("](");
-					int end = line.indexOf(')', start);
-					if (start != -1 && end != -1)
-					{
-						String mdPath = line.substring(start + 2, end).trim(); // Trim leading/trailing spaces
-						if (mdPath.endsWith(".md"))
-						{
-							// Normalize the path to use '/' as separator
-							mdPath = mdPath.replace('\\', '/');
-							paths.add(mdPath);
-						}
-					}
-				}
-			}
-			catch (IOException e)
-			{
-				System.err.println("\033[38;5;202mFailed to load summary file: " + summaryMdFilePath + "\033[0m");
-				e.printStackTrace();
-			}
-			return paths;
-
 		}
 
 		private List<String> getUsablePublicNamesFromClassList(List<Class< ? >> filteredReturnTypes)
