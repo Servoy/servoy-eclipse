@@ -31,7 +31,7 @@ This is a reference page; many components have detailed usage guides [here](http
 ${propValue.doc()}
 
 </#if>
-Type: [${MD(propValue.type())}](${instance.getReturnTypePath(propValue)})  
+Type: [${MD(instance.getDocType(propValue, types, componentinternalname))}](${instance.getReturnTypePath(propValue)})  
 <#if propValue.defaultValue()??>
 Default Value: ${MD(propValue.defaultValue())}  
 </#if>
@@ -52,12 +52,12 @@ ${propValue.doc()?trim}
 <#if propValue.parameters()?has_content>
 **Parameters:**  
 <#list propValue.parameters() as param> 
-> - {[${MD(param.type())}](${instance.getReturnTypePath(param)})} ${MD(param.name())}
+> - {[${MD(instance.getDocType(param, types, componentinternalname))}](${instance.getReturnTypePath(param)})} ${MD(param.name())}
 </#list>
 </#if>
 <#if propValue.returnValue()??>
 
-**Returns:** {[${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)})}
+**Returns:** {[${MD(instance.getDocType(propValue.returnValue(), types, componentinternalname))}](${instance.getReturnTypePath(propValue)})}
 </#if>
 ***
 </#list>
@@ -76,14 +76,13 @@ ${propValue.doc()?trim}
 <#if propValue.parameters()?has_content>
 **Parameters:**  
 <#list propValue.parameters() as param> 
-> - {[${MD(param.docType())}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if> <#if param.doc()??>$
-{param.doc()}</#if>
+> - {[${MD(instance.getDocType(param, types, componentinternalname))}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if> <#if param.doc()??>${param.doc()}</#if>
 </#list>
 </#if>
 
 <#if propValue.returnValue()??>
 
-**Returns:** [${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)}) ${propValue.returnValue().description} 
+**Returns:** [${MD(instance.getDocType(propValue.returnValue(), types, componentinternalname))}](${instance.getReturnTypePath(propValue)}) ${propValue.returnValue().description} 
 </#if>
 ***
  </#list>
