@@ -224,7 +224,7 @@ this.snapToEndEnabled = !event.shiftKey;
 				return new DOMRect(left, top, width, height);
 			}
 		}
-        return this.element?.getBoundingClientRect();
+        return this.element?.classList.contains('svy-csspositioncontainer') ? null : this.element?.getBoundingClientRect();
     }
 
 	private getDraggedElementCategorySet(componentType: string): String[] {

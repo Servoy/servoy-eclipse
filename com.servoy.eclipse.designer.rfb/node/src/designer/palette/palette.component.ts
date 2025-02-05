@@ -218,7 +218,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         if (event.target && (event.target as Element).className === 'popover-body') {
             return; // it has a separate handler
         }
-        if (!this.canDrop.dropTarget) {
+        if (this.canDrop && !this.canDrop.dropTarget) {
             this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);   
         }
         if (this.dragItem.paletteItemBeingDragged) {
