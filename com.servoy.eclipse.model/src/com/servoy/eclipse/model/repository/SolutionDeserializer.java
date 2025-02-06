@@ -1948,10 +1948,6 @@ public class SolutionDeserializer
 				{
 					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, null);
 				}
-				if (obj.has(DECL_KEYWORD))
-				{
-					((ScriptVariable)retval).setKeyword(obj.getString(DECL_KEYWORD));
-				}
 
 			}
 			else if (retval instanceof AbstractScriptProvider)
@@ -2065,6 +2061,10 @@ public class SolutionDeserializer
 			if (obj.has(EXTRA_DOC_COMMENTS))
 			{
 				((AbstractBase)retval).putCustomProperty(new String[] { EXTRA_DOC_COMMENTS }, obj.get(EXTRA_DOC_COMMENTS));
+			}
+			if (retval instanceof ScriptVariable && obj.has(DECL_KEYWORD))
+			{
+				((ScriptVariable)retval).setKeyword(obj.getString(DECL_KEYWORD));
 			}
 			if (useFilesForDirtyMark) handleChanged(obj, retval);
 		}
