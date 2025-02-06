@@ -490,7 +490,11 @@ export class ContextMenuComponent implements OnInit {
 
             entry = new ContextmenuItem(
                 'Anchoring',
-                null
+                () => {
+                    if (this.selection && this.selection.length > 0) {
+                        this.editorSession.setCssAnchoring(this.selection, null);
+                    }
+                }
             );
             entry.getItemClass = () => {
                 if (this.isInResponsiveContainer()) return 'disabled';
