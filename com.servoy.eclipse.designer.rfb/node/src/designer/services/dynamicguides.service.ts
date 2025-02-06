@@ -290,7 +290,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			return;
 		}
 		const resizing = this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
-        let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
+        let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
         const draggedItem = this.editorContentService.getContentElementById('svy_draggedelement');
 		if (!draggedItem && !resizing) {
             this.element = elem;
