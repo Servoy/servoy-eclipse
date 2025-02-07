@@ -15,9 +15,9 @@ import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEv
 import { isEmpty } from 'lodash-es';
 import { DOCUMENT } from '@angular/common';
 import { ServoyApi } from '../../ngclient/servoy_api';
-import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from '@ag-grid-community/core';
+import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { RowRenderer } from './row-renderer.component';
-import { AgGridAngular } from '@ag-grid-community/angular';
+import { AgGridAngular } from 'ag-grid-angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
 
