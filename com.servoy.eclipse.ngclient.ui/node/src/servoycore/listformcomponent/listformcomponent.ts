@@ -396,7 +396,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     return;
                 }
                 if (event.serverFoundsetSizeChanged ) {
-                    this.agGrid.api.setRowCount(event.serverFoundsetSizeChanged.newValue);
+                    this.agGrid.api.setRowCount(Math.ceil(event.serverFoundsetSizeChanged.newValue / this.getNumberOfColumns()));
                 }
                 if (event.viewportRowsUpdated) {
                     // copy the viewport data over to the cell
@@ -408,7 +408,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     });
                     if (insertOrDeletes) {
                         this.agGrid.api.refreshServerSide({ purge: true });
-                        this.agGrid.api.setRowCount(this.foundset.serverSize ? this.foundset.serverSize : 0);
+                        this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
                     }
                     else this.agGrid.api.refreshCells();
                 } else if (event.viewportRowsCompletelyChanged || event.fullValueChanged) {
@@ -424,10 +424,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     private scrollToSelection() {
         if(this.foundset.selectedRowIndexes.length) {
             const rowCount = this.agGrid.api.getDisplayedRowCount();
-            if(this.foundset.selectedRowIndexes[0] > rowCount - AGGRID_CACHE_BLOCK_SIZE) {
-                this.agGrid.api.setRowCount(Math.min(this.foundset.selectedRowIndexes[0] + AGGRID_CACHE_BLOCK_SIZE, this.foundset.serverSize));
+            if(rowCount > 1) {
+                const selectedIdx = Math.ceil(this.foundset.selectedRowIndexes[0] / this.getNumberOfColumns());
+                if(selectedIdx > rowCount - AGGRID_CACHE_BLOCK_SIZE) {
+                    this.agGrid.api.setRowCount(Math.min(selectedIdx + AGGRID_CACHE_BLOCK_SIZE, Math.ceil(this.foundset.serverSize / this.getNumberOfColumns())));
+                }
+                this.agGrid.api.ensureIndexVisible(selectedIdx < rowCount ? selectedIdx : rowCount - 1);
             }
-            this.agGrid.api.ensureIndexVisible(this.foundset.selectedRowIndexes[0]);
         }        
     }
 
