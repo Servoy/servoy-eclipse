@@ -94,8 +94,12 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			Form form = (Form)attribute;
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
+			IValueCollection valueCollection = null;
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-			IValueCollection valueCollection = getValueCollection(file);
+			if (file.exists())
+			{
+				valueCollection = getValueCollection(file);
+			}
 			if (valueCollection == null && form.getExtendsID() > 0)
 			{
 				valueCollection = ValueCollectionFactory.createValueCollection();
@@ -204,7 +208,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						{
 							String fileName = scopeName + SolutionSerializer.JS_FILE_EXTENSION;
 							IFile file = project.getProject().getFile(fileName);
-							IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file);
+							IValueCollection globalsValueCollection = null;
+							if (file.exists()) globalsValueCollection = ValueCollectionProvider.getValueCollection(file);
 
 							if (globalsValueCollection == null && !fileName.equals(SolutionSerializer.GLOBALS_FILE))
 							{
