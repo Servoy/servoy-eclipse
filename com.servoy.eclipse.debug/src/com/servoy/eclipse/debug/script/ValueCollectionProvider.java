@@ -477,6 +477,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				IValueCollection collection = ValueCollectionFactory.createValueCollection(file, true, false, (fl, col) -> {
 					// put in cache for recursion.
 					scriptCache.put(fl, new SoftReference<ValueCollectionCacheItem>(new ValueCollectionCacheItem(depedencies, col)));
+					return !file.getName().equalsIgnoreCase("globals.js");
 				});
 				stack.pop();
 				// we need to do this again because the depedencies did change and ValueCollectionCacheItem needs to recalculate the current timestamp
