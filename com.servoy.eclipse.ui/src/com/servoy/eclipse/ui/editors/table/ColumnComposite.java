@@ -84,6 +84,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
@@ -419,7 +420,8 @@ public class ColumnComposite extends Composite
 
 	public IColumn addColumn(ITable t, String newName, int type, int length) throws RepositoryException
 	{
-		return t.createNewColumn(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName, type, length);
+		return t.createNewColumn(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName,
+			ColumnType.getInstance(type, length, 0));
 	}
 
 	private boolean hasDataProviderSet(ITable table)
@@ -695,7 +697,7 @@ public class ColumnComposite extends Composite
 					keyType = PrimaryKeyType.INTEGER;
 					colname += "_id";
 				}
-				Column id = t.createNewColumn(nameValidator, colname, keyType.getColumnType(), keyType.getLength());
+				Column id = t.createNewColumn(nameValidator, colname, ColumnType.getInstance(keyType.getColumnType(), keyType.getLength(), 0));
 				id.setDatabasePK(true);
 				id.setSequenceType(defaultFirstColumnSequenceType);
 				id.setFlag(IBaseColumn.UUID_COLUMN, keyType.isUUID());
@@ -735,8 +737,8 @@ public class ColumnComposite extends Composite
 
 		public int compare(Column column1, Column column2)
 		{
-			return Column.getDisplayTypeString(column1.getConfiguredColumnType().getSqlType()).compareToIgnoreCase(
-				Column.getDisplayTypeString(column2.getConfiguredColumnType().getSqlType()));
+			return Column.getDisplayTypeString(column1.getConfiguredColumnType()).compareToIgnoreCase(
+				Column.getDisplayTypeString(column2.getConfiguredColumnType()));
 		}
 	}
 

@@ -156,8 +156,7 @@ public final class EclipseDatabaseUtils
 				ColumnInfoDef columnInfoInfo = columnInfoIt.next();
 
 				// Add the column with the appropriate information.
-				Column column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
-					columnInfoInfo.columnType.getLength(), columnInfoInfo.columnType.getScale());
+				Column column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType);
 				column.setDatabasePK((columnInfoInfo.flags & IBaseColumn.PK_COLUMN) != 0);
 				column.setFlags(columnInfoInfo.flags);
 				column.setAllowNull(columnInfoInfo.allowNull);
