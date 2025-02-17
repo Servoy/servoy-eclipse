@@ -97,6 +97,7 @@ public class ElementResolver implements IElementResolver
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_I18N, new SimpleNameTypeNameCreator("JSI18N"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_HISTORY, new SimpleNameTypeNameCreator("HistoryProvider"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_MENUS, new SimpleNameTypeNameCreator("MenuManager"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_EVENTTYPES, new SimpleNameTypeNameCreator("EventsManager"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_UTILS, new SimpleNameTypeNameCreator("JSUtils"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_CLIENTUTILS, new SimpleNameTypeNameCreator("JSClientUtils"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_JSUNIT, new SimpleNameTypeNameCreator("JSUnit"));

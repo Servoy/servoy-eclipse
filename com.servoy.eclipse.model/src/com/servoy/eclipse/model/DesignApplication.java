@@ -48,6 +48,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.IDataRendererFactory;
+import com.servoy.j2db.IEventsManager;
 import com.servoy.j2db.IMenuManager;
 import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.IModeManager;
@@ -1210,5 +1211,11 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			return ((IFormUI)parent).getController().getName();
 		}
 		return "";
+	}
+
+	@Override
+	public IEventsManager getEventsManager()
+	{
+		return getClient().getEventsManager();
 	}
 }

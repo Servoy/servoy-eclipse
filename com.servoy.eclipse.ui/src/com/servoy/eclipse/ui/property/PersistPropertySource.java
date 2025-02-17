@@ -1660,6 +1660,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						return new PermissionsPropertyController(id, displayName);
 					}
+					if (persistContext.getPersist() instanceof Solution && IContentSpecConstants.PROPERTY_EVENTTYPES.equals(id))
+					{
+						return new EventTypesPropertyController(id, displayName);
+					}
 					Object valueTypes = propertyDescription.getTag(PropertyDescription.VALUE_TYPES_TAG_FOR_PROP);
 					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null, propertyType == JSONPropertyType.INSTANCE,
 						valueTypes instanceof JSONObject ? (JSONObject)valueTypes : null);
