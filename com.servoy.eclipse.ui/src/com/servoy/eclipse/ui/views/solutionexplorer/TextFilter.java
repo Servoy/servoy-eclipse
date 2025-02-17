@@ -404,7 +404,7 @@ public class TextFilter extends ViewerFilter
 	 */
 	private boolean match(String text)
 	{
-		return match(text, 0, text.length());
+		return text != null ? match(text, 0, text.length()) : false;
 	}
 
 	/**
