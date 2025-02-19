@@ -59,6 +59,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -448,6 +449,10 @@ public class GhostHandler implements IServerService
 			{
 				IPersist parent = o;
 				AbstractContainer container = ((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getShowedContainer();
+				if (container instanceof IFlattenedPersistWrapper wrapper)
+				{
+					container = (AbstractContainer)wrapper.getWrappedPersist();
+				}
 				if (container != null)
 				{
 					do
