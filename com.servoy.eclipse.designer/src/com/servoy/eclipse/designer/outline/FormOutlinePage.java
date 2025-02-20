@@ -73,6 +73,7 @@ import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
@@ -587,6 +588,43 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			Display.getDefault().asyncExec(x);
 		}
 
+	}
+
+	public void collapseSelection()
+	{
+		expandAll(false);
+	}
+
+	public void expandSelection()
+	{
+		expandAll(true);
+	}
+
+	private void expandAll(boolean expand)
+	{
+		Object selection = ((IStructuredSelection)getTreeViewer().getSelection()).getFirstElement();
+		List<PersistContext> childrenList = new ArrayList<PersistContext>();
+		if (selection instanceof PersistContext persistContext)
+		{
+			childrenList.add(persistContext);
+			addChildren(persistContext.getPersist(), childrenList);
+		}
+		for (PersistContext persistContext : childrenList)
+		{
+			getTreeViewer().setExpandedState(persistContext, expand);
+		}
+	}
+
+	private void addChildren(IPersist parent, List<PersistContext> childrenList)
+	{
+		if (parent instanceof AbstractBase abstractBase)
+		{
+			for (IPersist child : abstractBase.getAllObjectsAsList())
+			{
+				childrenList.add(PersistContext.create(child, form));
+				addChildren(child, childrenList);
+			}
+		}
 	}
 
 	@Override
