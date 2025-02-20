@@ -747,10 +747,11 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.STRING);
 			}
-			if (type.isEnum())
-			{
-				return getTypeRef(context, "enum<" + type.getSimpleName() + '>');
-			}
+// not sure why this is done but this will not work for real java enums coming from Packages.xxxx			
+//			if (type.isEnum())
+//			{
+//				return getTypeRef(context, "enum<" + type.getSimpleName() + '>');
+//			}
 
 			return getTypeRef(context, "Packages." + type.getName());
 		}
