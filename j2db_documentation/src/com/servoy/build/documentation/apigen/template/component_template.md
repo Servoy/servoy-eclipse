@@ -27,12 +27,12 @@ This is a reference page; many components have detailed usage guides [here](http
 
 <#list properties as propName, propValue>
 ### ${MD(propName)}
-<#if propValue.doc()??>
-${propValue.doc()}
+<#if instance.getPropertyDoc(propValue)??>
+${instance.getPropertyDoc(propValue)}
 
 </#if>
 Type: [${MD(instance.getDocType(propValue, types, componentinternalname))}](${instance.getReturnTypePath(propValue)})  
-<#if propValue.defaultValue()??>
+<#if propValue.defaultValue()??> 
 Default Value: ${MD(propValue.defaultValue())}  
 </#if>
 ***
@@ -81,7 +81,6 @@ ${propValue.doc()?trim}
 </#if>
 
 <#if propValue.returnValue()??>
-
 **Returns:** [${MD(instance.getDocType(propValue.returnValue(), types, componentinternalname))}](${instance.getReturnTypePath(propValue)}) ${propValue.returnValue().description} 
 </#if>
 ***
@@ -122,7 +121,6 @@ ${propValue.doc()?trim}
 </#list>
 </#if>
 <#if propValue.returnValue()??>
-
 **Returns:** [${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)}) ${propValue.returnValue().description} 
 </#if>
 ***
