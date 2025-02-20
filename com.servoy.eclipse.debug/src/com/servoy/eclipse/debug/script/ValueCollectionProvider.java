@@ -38,6 +38,7 @@ import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.internal.javascript.ti.IValueProvider;
 import org.eclipse.dltk.internal.javascript.ti.JSVariable;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
+import org.eclipse.dltk.javascript.typeinference.IValueCollectionReference;
 import org.eclipse.dltk.javascript.typeinference.IValueReference;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IMemberEvaluator;
@@ -473,12 +474,14 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			}
 			if (item == null)
 			{
+				if (!file.exists()) return null;
+
 				// its starting, setup the stack for generating the new Set of files.
 				HashSet<IFile> depedencies = new HashSet<>();
 				depedencies.add(file);
 				stack.push(depedencies);
 
-				IValueCollection collection = ValueCollectionFactory.createValueCollection(file, true, false, (fl, col) -> {
+				IValueCollectionReference collection = ValueCollectionFactory.createValueCollection(file, true, false, (fl, col) -> {
 					// put in cache for recursion.
 					scriptCache.put(fl, new ValueCollectionCacheItem(depedencies, col));
 					return !file.getName().equalsIgnoreCase("globals.js");
@@ -486,7 +489,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				stack.pop();
 				// we need to do this again because the depedencies did change and ValueCollectionCacheItem needs to recalculate the current timestamp
 				scriptCache.put(file, new ValueCollectionCacheItem(depedencies, collection));
-				return collection;
+				return collection.getValueCollection();
 			}
 			else
 			{
