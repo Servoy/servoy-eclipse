@@ -885,7 +885,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			{
 				if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
 				{
-					boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
+					boolean add = object.getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
 						!((WebComponent)object).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
 					if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
 					{
@@ -941,6 +941,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 		else if (obj instanceof MenuItem && IContentSpecConstants.PROPERTY_PERMISSIONS.equals(name))
+		{
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(JSONPropertyType.INSTANCE).build();
+		}
+		else if (obj instanceof Solution && IContentSpecConstants.PROPERTY_EVENTTYPES.equals(name))
 		{
 			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(JSONPropertyType.INSTANCE).build();
 		}

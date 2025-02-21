@@ -282,6 +282,8 @@ public class LessPropertiesComposite extends Composite
 					public void expansionStateChanged(ExpansionEvent e)
 					{
 						image.setImage(uiActivator.loadImageFromBundle(e.getState() ? "collapse_tree.png" : "expandall.png"));
+						sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+						sc.layout(true, true);
 					}
 
 				});

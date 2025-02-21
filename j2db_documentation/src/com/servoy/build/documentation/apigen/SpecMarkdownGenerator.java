@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
@@ -50,20 +49,32 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
+import org.eclipse.dltk.javascript.ast.BinaryOperation;
+import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.Expression;
+import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.Identifier;
+import org.eclipse.dltk.javascript.ast.ObjectInitializer;
+import org.eclipse.dltk.javascript.ast.ObjectInitializerPart;
+import org.eclipse.dltk.javascript.ast.PropertyExpression;
+import org.eclipse.dltk.javascript.ast.PropertyInitializer;
+import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.ast.Statement;
+import org.eclipse.dltk.javascript.ast.StatementBlock;
+import org.eclipse.dltk.javascript.ast.ThisExpression;
+import org.eclipse.dltk.javascript.ast.VariableDeclaration;
+import org.eclipse.dltk.javascript.ast.VariableStatement;
+import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTag;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTags;
 import org.eclipse.dltk.javascript.parser.jsdoc.SimpleJSDocParser;
+import org.eclipse.dltk.javascript.parser.rhino.JavaScriptParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.mozilla.javascript.CompilerEnvirons;
-import org.mozilla.javascript.ast.Assignment;
-import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.Comment;
-import org.mozilla.javascript.ast.ExpressionStatement;
-import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.PropertyGet;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.util.ValueReference;
@@ -123,6 +134,8 @@ public class SpecMarkdownGenerator
 	private static List<String> summaryPaths;
 	private static List<String> missingMdFiles = new ArrayList<>();
 	private static SimpleJSDocParser jsDocParser = new SimpleJSDocParser();
+	private static Map<String, String> displayTypesConversionTable = new HashMap<String, String>(); //int -> number, dataset -> JSDataset - for display proper property name
+	private static Map<String, String> referenceTypesConversionTable = new HashMap<String, String>(); //dataset -> JSDataset - for proper reference the data type path
 
 	private final static java.util.function.Function<String, String> htmlToMarkdownConverter = (initialDescription) -> {
 		if (initialDescription == null) return null;
@@ -195,8 +208,6 @@ public class SpecMarkdownGenerator
 		cfg.setLogTemplateExceptions(false);
 		cfg.setWrapUncheckedExceptions(true);
 		cfg.setFallbackOnNullLoopVariable(false);
-//		ConfluenceGenerator.fillStaticParents(returnTypesToParentName);
-
 
 		componentTemplate = cfg.getTemplate("component_template.md");
 		packageTemplate = cfg.getTemplate("package_template.md");
@@ -209,6 +220,9 @@ public class SpecMarkdownGenerator
 			generateComponentExtendsAsWell = false;
 		}
 
+		initConversionTable();
+		initTypeReferencePathTable();
+
 		generateNGComponentOrServicePackageContentForDir(generateComponentExtendsAsWell, ngPackageDirsToScan, new NGPackageMarkdownDocGenerator(),
 			new HashMap<>());
 
@@ -216,6 +230,32 @@ public class SpecMarkdownGenerator
 		printSummary();
 
 		System.out.println("\nDONE.");
+	}
+
+	private static void initConversionTable()
+	{
+		displayTypesConversionTable.put("int", "Number");
+		displayTypesConversionTable.put("integer", "Number");
+		displayTypesConversionTable.put("double", "Number");
+		displayTypesConversionTable.put("float", "Number");
+		displayTypesConversionTable.put("bool", "Boolean");
+		displayTypesConversionTable.put("string", "String");
+		displayTypesConversionTable.put("object", "Object");
+		displayTypesConversionTable.put("dataset", "JSDataset");
+		displayTypesConversionTable.put("clientfunction", "Function");
+		displayTypesConversionTable.put("foundset", "JSFoundset");
+		displayTypesConversionTable.put("record", "JSRecord");
+		displayTypesConversionTable.put("event", "JSEvent");
+		displayTypesConversionTable.put("jsevent", "JSEvent");
+		displayTypesConversionTable.put("tagstring", "String");
+	}
+
+	private static void initTypeReferencePathTable()
+	{
+		referenceTypesConversionTable.put("dataset", "JSDataset");
+		referenceTypesConversionTable.put("foundset", "JSFoundset");
+		referenceTypesConversionTable.put("record", "JSRecord");
+		referenceTypesConversionTable.put("event", "JSEvent");
 	}
 
 	public static List<String> loadSummary()
@@ -397,27 +437,33 @@ public class SpecMarkdownGenerator
 	}
 
 	private final Map<String, Object> root;
-	private final JSONObject jsonObject;
+	private final JSONObject specJson;
 	private final Map<String, String> apiDoc = new HashMap<>();
+	private final Map<String, String> propertyDoc = new HashMap<>();
+	private final Map<String, String> handlersDoc = new HashMap<>();
 	private boolean service;
 	private final INGPackageInfoGenerator docGenerator;
 	private final File mySpecFile;
-	private File myDocFile;
+	private File packageDocFile;
 	private final boolean deprecatedContent;
 	private final JSONObject packageTypes;
 	private boolean emptyApi = false;
+	private final String packageName;
+	private Comment packageComment = null;
+	private boolean packageCommentProcessed = false;
 
 	public SpecMarkdownGenerator(String packageName, String packageDisplayName, String packageType,
-		JSONObject jsonObject, File specFile, boolean generateComponentExtendsAsWell,
+		JSONObject specJson, File specFile, boolean generateComponentExtendsAsWell,
 		INGPackageInfoGenerator docGenerator, Map<String, Object> globalRootEntries)
 	{
 		this.mySpecFile = specFile;
-		this.jsonObject = jsonObject;
+		this.specJson = specJson;
 		this.docGenerator = docGenerator;
-		this.packageTypes = jsonObject.optJSONObject("types");
+		this.packageTypes = specJson.optJSONObject("types");
+		this.packageName = packageName;
 
-		deprecatedContent = jsonObject.optBoolean("deprecated", false);
-		JSONObject myApi = jsonObject.optJSONObject("api");
+		deprecatedContent = specJson.optBoolean("deprecated", false);
+		JSONObject myApi = specJson.optJSONObject("api");
 		if (myApi == null || myApi.keySet().isEmpty())
 		{
 			emptyApi = true;
@@ -432,7 +478,7 @@ public class SpecMarkdownGenerator
 
 		if (globalRootEntries != null) root.putAll(globalRootEntries);
 
-		String docFileName = jsonObject.optString("doc", null);
+		String docFileName = specJson.optString("doc", null);
 		if (docFileName != null)
 		{
 			File parent = specFile.getParentFile();
@@ -449,58 +495,203 @@ public class SpecMarkdownGenerator
 			}
 			if (docFile.exists())
 			{
-				myDocFile = docFile;
+				packageDocFile = docFile;
 				try
 				{
 					String docContents = FileUtils.readFileToString(docFile, Charset.forName("UTF8"));
 					CompilerEnvirons env = new CompilerEnvirons();
 					env.setRecordingComments(true);
-					env.setRecordingLocalJsDocComments(true);
-					org.mozilla.javascript.Parser parser = new org.mozilla.javascript.Parser(env);
-					AstRoot parse = parser.parse(docContents, "", 0);
-					SortedSet<Comment> comments = parse.getComments();
-					Comment prevComment = null;
-					if (comments != null) for (Comment comment : comments)
+//					env.setRecordingLocalJsDocComments(true);
+//					org.mozilla.javascript.Parser parser = new org.mozilla.javascript.Parser(env);
+//					AstRoot parse = parser.parse(docContents, "", 0);
+					JavaScriptParser parser = new JavaScriptParser();
+					Script script = parser.parse(docContents, null);
+					List<Comment> comments = script.getComments();
+					if (comments != null && !comments.isEmpty())
 					{
-						if (comment.getNext() instanceof FunctionNode fn)
-						{
-							String name = fn.getFunctionName().toSource();
-							apiDoc.put(name, processFunctionJSDoc(comment.toSource()));
-							if (fn.getBody().hasChildren())
-							{
-								fn.getBody().forEach(node -> {
-									if (node instanceof ExpressionStatement es && es.getExpression() instanceof Assignment as &&
-										as.getLeft() instanceof PropertyGet pg)
-									{
-										String jsDoc = as.getJsDoc();
-										if (jsDoc != null)
-										{
-											String propName = pg.getRight().toSource();
-											apiDoc.put(name + "." + propName, processFunctionJSDoc(jsDoc));
-										}
-
-									}
-								});
-							}
-						}
-						else if (prevComment == null)
-						{
-							// it's the top-most comment that gives a short description of the purpose of the whole component/service
-							apiDoc.put(WEB_OBJECT_OVERVIEW_KEY, processFunctionJSDoc(comment.toSource()));
-						}
-						prevComment = comment;
+						packageComment = comments.get(0); // Save the first comment for validation
 					}
 
+					script.visitAll(new AbstractNavigationVisitor<Void>()
+					{
+						@Override
+						public Void visitFunctionStatement(FunctionStatement node)
+						{
+							String constructorName = node.getFunctionName();
+							Comment constructorComment = node.getDocumentation();
+							if (constructorComment != null)
+							{
+								String docText = constructorComment.getText();
+								validatePackageCommentIfNeeded(constructorComment);
+								apiDoc.put(constructorName, processFunctionJSDoc(docText));
+							}
 
+							StatementBlock body = node.getBody();
+							if (body != null)
+							{
+								for (Statement statement : body.getStatements())
+								{
+									if (statement instanceof VoidExpression voidExpr && voidExpr.getExpression() instanceof BinaryOperation assignment)
+									{
+										Expression left = assignment.getLeftExpression();
+										if (left instanceof PropertyExpression propertyExpr)
+										{
+											String objectName = (propertyExpr.getObject() instanceof ThisExpression) ? "this"
+												: propertyExpr.getObject().toSourceString(null);
+											String propertyName = propertyExpr.getProperty().toSourceString(null);
+											String fullMethodName = objectName + "." + propertyName;
+											Comment docComment = propertyExpr.getDocumentation();
+											if (docComment != null)
+											{
+												validatePackageCommentIfNeeded(docComment);
+												apiDoc.put(fullMethodName, processFunctionJSDoc(docComment.getText()));
+											}
+										}
+									}
+								}
+							}
+							return visit(body);
+						}
+
+						@Override
+						public Void visitVariableStatement(VariableStatement node)
+						{
+							for (VariableDeclaration declaration : node.getVariables())
+							{
+								if (declaration.getIdentifier() != null)
+								{
+									String varName = declaration.getIdentifier().getName();
+									Comment docContent = declaration.getDocumentation();
+									if (varName != null && docContent != null)
+									{
+										validatePackageCommentIfNeeded(docContent);
+										propertyDoc.put(varName, docContent.getText());
+									}
+								}
+								if (declaration.getInitializer() != null)
+								{
+									visit(declaration.getInitializer());
+								}
+							}
+							return null;
+						}
+
+						@Override
+						public Void visitObjectInitializer(ObjectInitializer node)
+						{
+							for (ObjectInitializerPart part : node.getInitializers())
+							{
+								if (part instanceof PropertyInitializer)
+								{
+									PropertyInitializer property = (PropertyInitializer)part;
+									String handlerName = property.getNameAsString();
+									if (property.getName() instanceof Identifier identifier)
+									{
+										Comment docContent = identifier.getDocumentation();
+										if (docContent != null)
+										{
+											handlersDoc.put(handlerName, docContent.getText());
+										}
+									}
+								}
+							}
+							return null;
+						}
+
+						private void validatePackageCommentIfNeeded(Comment doc)
+						{
+							if (packageCommentProcessed || packageComment == null) return;
+							if (doc != null && packageComment.end() < doc.start())
+							{
+								apiDoc.put(WEB_OBJECT_OVERVIEW_KEY, processFunctionJSDoc(packageComment.getText()));
+								packageCommentProcessed = true; // Mark as processed
+							}
+						}
+					});
+
+//					SortedSet<Comment> comments = parse.getComments();
+//					Comment prevComment = null;
+//					if (comments != null) for (Comment comment : comments)
+//					{
+//						Object nextNode = comment.getNext();
+//						if (nextNode instanceof FunctionNode fn)
+//						{
+//							String name = fn.getFunctionName().toSource();
+//							apiDoc.put(name, processFunctionJSDoc(comment.toSource()));
+//							if (fn.getBody().hasChildren())
+//							{
+//								fn.getBody().forEach(node -> {
+//									if (node instanceof ExpressionStatement es && es.getExpression() instanceof Assignment as &&
+//										as.getLeft() instanceof PropertyGet pg)
+//									{
+//										String jsDoc = as.getJsDoc();
+//										if (jsDoc != null)
+//										{
+//											String propName = pg.getRight().toSource();
+//											apiDoc.put(name + "." + propName, processFunctionJSDoc(jsDoc));
+//										}
+//
+//									}
+//								});
+//							}
+//						}
+//						else if (nextNode instanceof VariableDeclaration vd) //properties of the spec's model
+//						{
+//							VariableInitializer varInit = vd.getVariables().get(0);
+//							if (varInit.getTarget() instanceof Name nameNode)
+//							{
+//								String variableName = nameNode.getIdentifier(); // Extract the variable name
+//								String doc = vd.getJsDoc();
+//								if (doc != null && doc.trim().length() > 0)
+//									propertyDoc.put(variableName, doc);
+//							}
+//						}
+//						else if (nextNode instanceof ExpressionStatement es)
+//						{
+//							//var handler.test = function(param);
+//							//this is creating an assignment with left side as Property and right side as Function
+//							if (es.getExpression() instanceof Assignment assignment)
+//							{
+//								AstNode left = assignment.getLeft();
+//								AstNode right = assignment.getRight();
+//
+//								// Check if it’s a function assigned to a property (handlers.test1 = function() { ... })
+//								if (left instanceof PropertyGet propertyGet && right instanceof FunctionNode)
+//								{
+//									String functionName = propertyGet.toSource(); // e.g., "handlers.test1"
+//									if (functionName.startsWith("handlers.")) // windows_doc.js, ... contain also this type of declarations so we need filtering
+//									{
+//										String doc = comment.toSource();
+//										handlersDoc.put(functionName, doc);
+//									}
+//									else
+//									{
+//										// If it's an instance method (see this.function_mames: this.y_y, this.showbackdropt ... in windows_doc.js)
+//										// Do we need to declare instance methods in doc api?
+//										String doc = comment.toSource();
+//										apiDoc.put(functionName, doc);
+//									}
+//								}
+//							}
+//						}
+//						else if (prevComment == null)
+//						{
+//							// it's the top-most comment that gives a short description of the purpose of the whole component/service
+//							apiDoc.put(WEB_OBJECT_OVERVIEW_KEY, processFunctionJSDoc(comment.toSource()));
+//						}
+//						prevComment = comment;
+//					}
 				}
-				catch (IOException e)
+				catch (
+
+				IOException e)
 				{
 					throw new RuntimeException("Cannot parse docfile: " + docFileName, e);
 				}
 			}
 			else
 			{
-				myDocFile = null;
+				packageDocFile = null;
 				System.err
 					.println("\u001B[32m    * docfile: " + docFileName + " doesn't exist in the parent structure of the spec file " + specFile + " !\u001B[0m");
 			}
@@ -509,21 +700,21 @@ public class SpecMarkdownGenerator
 		root.put("package_name", packageName);
 		root.put("package_display_name", packageDisplayName);
 		root.put("package_type", packageType);
-		root.put("componentname", jsonObject.optString("displayName"));
-		root.put("componentinternalname", jsonObject.optString("name"));
-		root.put("componentname_nospace", jsonObject.optString("displayName").replace(" ", "%20"));
-		root.put("category_name", jsonObject.optString("categoryName", null));
+		root.put("componentname", specJson.optString("displayName"));
+		root.put("componentinternalname", specJson.optString("name"));
+		root.put("componentname_nospace", specJson.optString("displayName").replace(" ", "%20"));
+		root.put("category_name", specJson.optString("categoryName", null));
 		root.put("instance", this);
 		root.put("overview", apiDoc.get(WEB_OBJECT_OVERVIEW_KEY));
-		root.put("properties", makeMap(jsonObject.optJSONObject("model"), this::createProperty));
-		root.put("events", makeMap(jsonObject.optJSONObject("handlers"), this::createFunction));
-		Map<String, Object> api = makeMap(jsonObject.optJSONObject("api"), this::createFunction);
+		root.put("properties", makeMap(specJson.optJSONObject("model"), this::createProperty));
+		root.put("events", makeMap(specJson.optJSONObject("handlers"), this::createFunction));
+		Map<String, Object> api = makeMap(specJson.optJSONObject("api"), this::createFunction);
 		root.put("api", api);
-		Object types = makeTypes(jsonObject.optJSONObject("types"));
+		Object types = makeTypes(specJson.optJSONObject("types"));
 		root.put("types", types);
 
 		service = false;
-		JSONObject ng2Config = jsonObject.optJSONObject("ng2Config");
+		JSONObject ng2Config = specJson.optJSONObject("ng2Config");
 		if (ng2Config != null)
 		{
 			service = ng2Config.has("serviceName");
@@ -532,13 +723,55 @@ public class SpecMarkdownGenerator
 		{
 			service = true;
 			if (api != null && api.size() > 0)
-				root.put("service_scripting_name", ClientService.convertToJSName(jsonObject.optString("name")));
+				root.put("service_scripting_name", ClientService.convertToJSName(specJson.optString("name")));
 		}
 		root.put("service", Boolean.valueOf(service));
 		if (generateComponentExtendsAsWell && !service)
 		{
 			root.put("designtimeExtends", new Property("JSWebComponent", "JSWebComponent", null, null, null));
 			root.put("runtimeExtends", new Property("RuntimeWebComponent", "RuntimeWebComponent", null, null, null));
+		}
+	}
+
+	private void processPackageComment(Script script)
+	{
+		if (packageCommentProcessed) return; // Exit if already processed
+
+		List<Comment> comments = script.getComments();
+		List<Statement> statements = script.getStatements();
+
+		if (comments == null || comments.isEmpty() || statements == null || statements.isEmpty())
+		{
+			return; // No comments or statements to process
+		}
+
+		// Get the first comment
+		Comment firstComment = comments.get(0);
+
+		// Find the first statement with non-null documentation
+		Statement firstDocStatement = null;
+		for (Statement statement : statements)
+		{
+			if (statement.getDocumentation() != null)
+			{
+				firstDocStatement = statement;
+				break;
+			}
+		}
+
+		if (firstDocStatement != null)
+		{
+			// Compare positions: if the comment ends before the first documented statement starts
+			if (firstComment.end() < firstDocStatement.getDocumentation().start())
+			{
+				// This is the package-level comment
+				String packageCommentText = firstComment.getText();
+				apiDoc.put(WEB_OBJECT_OVERVIEW_KEY, processFunctionJSDoc(packageCommentText)); // Store the comment
+			}
+			else
+			{
+				System.err.println("Package comment is missing or located incorrectly.");
+			}
 		}
 	}
 
@@ -549,7 +782,7 @@ public class SpecMarkdownGenerator
 
 	public JSONObject getTypes()
 	{
-		return packageTypes;
+		return this.packageTypes;
 	}
 
 	public boolean isDeprecated()
@@ -564,17 +797,17 @@ public class SpecMarkdownGenerator
 
 	public File getDocFile()
 	{
-		return myDocFile;
+		return packageDocFile;
 	}
 
 	public String getDisplayName()
 	{
-		return jsonObject.optString("displayName");
+		return specJson.optString("displayName");
 	}
 
 	public String getComponentName()
 	{
-		return jsonObject.optString("name");
+		return specJson.optString("name");
 	}
 
 	private String processFunctionJSDoc(String jsDocComment)
@@ -1218,9 +1451,12 @@ public class SpecMarkdownGenerator
 			if (doc != null)
 			{
 				doc = processDescription(indentLevel, doc);
+				if (!propertyDoc.containsKey(name))
+				{
+					propertyDoc.put(name, doc);
+				}
 			}
 		}
-
 		return new Property(name, type, dflt, doc, deprecationString);
 	}
 
@@ -1596,10 +1832,9 @@ public class SpecMarkdownGenerator
 						if ("private".equals(scope)) continue;
 					}
 
-					json = replaceTypes(json);
+					json = convertTypes(json);
 					json = updateParametersWithDocType(json, key);
 					Record record = transformer.apply(key, json);
-
 					map.put(record.toString(), record);
 					JSONArray overloads = json.optJSONArray("overloads");
 					if (overloads != null)
@@ -1685,7 +1920,8 @@ public class SpecMarkdownGenerator
 		return null;
 	}
 
-	private JSONObject replaceTypes(JSONObject inputJson)
+	//convert spectype to javascript type
+	private JSONObject convertTypes(JSONObject inputJson)
 	{
 		// Replace types in "parameters"
 		JSONArray parameters = inputJson.optJSONArray("parameters");
@@ -1694,7 +1930,7 @@ public class SpecMarkdownGenerator
 			for (int i = 0; i < parameters.length(); i++)
 			{
 				JSONObject param = parameters.getJSONObject(i);
-				replaceType(param, "type");
+				convertType(param);
 			}
 		}
 
@@ -1702,57 +1938,102 @@ public class SpecMarkdownGenerator
 		JSONObject returns = inputJson.optJSONObject("returns");
 		if (returns != null)
 		{
-			replaceType(returns, "type");
+			convertType(returns);
 		}
 
 		return inputJson;
 	}
 
-	private void replaceType(JSONObject obj, String key)
+	//convert
+	private void convertType(JSONObject obj)
 	{
-		Object type = obj.opt(key);
+		Object type = obj.opt("type");
 		if (type instanceof String s)
 		{
-			obj.put(key, getReplacedType(s));
+			obj.put("type", convertSpecType(s));
 		}
 		else if (type instanceof JSONObject nestedObj)
 		{
 			String nestedType = nestedObj.optString("type", null);
 			if (nestedType != null)
 			{
-				nestedObj.put("type", getReplacedType(nestedType));
+				nestedObj.put("type", convertSpecType(nestedType));
 			}
 		}
 		else if (type != null)
 		{
 			System.err.println("Unknown type: " + type);
 		}
+
 	}
 
-	private String getReplacedType(String originalType)
+	/**
+	 * Converts a spec type into its _doc.js equivalent.
+	 * Examples:
+	 *   "int[]"      -> "Array<Number>"
+	 *   "column"     -> "CustomType<aggrid-datasettable.column>"
+	 *
+	 * @param specType the original type from the spec
+	 * @return the converted type string
+	 * @throws ConversionException if no conversion rule exists for the given type
+	 */
+	private String convertSpecType(String specType)
 	{
-		boolean isArray = originalType.endsWith("[]");
-		String baseType = isArray ? originalType.substring(0, originalType.length() - 2) : originalType;
 
-		return isArray ? "Array<" + mapType(baseType) + ">" : mapType(baseType);
-	}
-
-	private String mapType(String baseType)
-	{
-		return switch (baseType)
+		boolean isArray = false;
+		String convertedType = specType;
+		if (convertedType.endsWith("[]"))
 		{
-			case "record" -> "JSRecord";
-			case "dataset" -> "JSDataset";
-			case "foundset" -> "JSFoundset";
-			case "event" -> "JSEvent";
-			default -> baseType;
-		};
+			isArray = true;
+			convertedType = convertedType.substring(0, convertedType.length() - 2);
+		}
+
+		if (displayTypesConversionTable.get(convertedType) != null)
+		{
+			convertedType = displayTypesConversionTable.get(convertedType);
+		}
+		else if (normalizeTypeForComponent(this.packageTypes, convertedType, this.packageName) != null)
+		{
+			convertedType = normalizeTypeForComponent(this.packageTypes, convertedType, this.packageName);
+		}
+		else if (convertedType.length() > 1)
+		{//safety; capitalize the type
+			convertedType = convertedType.substring(0, 1).toUpperCase() + convertedType.substring(1);
+		}
+
+		return specType;
+	}
+
+	private String normalizeTypeForComponent(JSONObject myTypes, String type, String componentName)
+	{
+		if (myTypes == null || componentName == null) return null;
+
+		JSONObject customType = myTypes.optJSONObject(type);
+		if (customType != null)
+		{
+			return "CustomType<" + componentName + "." + type + ">";
+		}
+		return type;
 	}
 
 	public String getPackagePath(String packageDisplayName)
 	{
 		return "../../packages/" + (service ? "services/" : "components/") + packageDisplayName.trim().replace("&", "and").replace(' ', '-').toLowerCase() +
 			".md";
+	}
+
+	public String getPropertyDoc(Object prop)
+	{
+		if (prop instanceof Property p)
+		{
+			String pName = p.name();
+			if (propertyDoc.containsKey(pName))
+				if (p.doc() != null)
+					return propertyDoc.get(pName);
+
+
+		}
+		return null;
 	}
 
 	public String getDocType(Object typeContainer, Map<String, Object> customTypes, String packageName)
@@ -1835,7 +2116,9 @@ public class SpecMarkdownGenerator
 			@SuppressWarnings("unchecked")
 			Map<String, Record> types = (Map<String, Record>)root.get("types");
 			if (types != null && types.get(type) != null) return "#" + type.toLowerCase();
-			return switch (type.toLowerCase()) // TODO why don't we do an exact case match here? for example "foUnDSET" is allowed or just "foundset"?
+			String convertedType = referenceTypesConversionTable.get(type.toLowerCase()) != null ? referenceTypesConversionTable.get(type.toLowerCase())
+				: type.toLowerCase();
+			return switch (convertedType.toLowerCase()) // TODO why don't we do an exact case match here? for example "foUnDSET" is allowed or just "foundset"?
 			{
 				case "object" -> "../../../servoycore/dev-api/js-lib/object.md";
 				case "string..." -> "../../../servoycore/dev-api/js-lib/string.md";
@@ -1905,11 +2188,11 @@ public class SpecMarkdownGenerator
 	private void save() throws TemplateException, IOException
 	{
 		File userDir = new File(System.getProperty("user.dir"));
-		String displayName = jsonObject.optString("displayName", "component");
-		String categoryName = jsonObject.optString("categoryName", null);
+		String displayName = specJson.optString("displayName", "component");
+		String categoryName = specJson.optString("categoryName", null);
 
-		docGenerator.generateComponentOrServiceInfo(root, userDir, displayName, categoryName, service, jsonObject.optString("deprecated", null),
-			jsonObject.optString("replacement", null));
+		docGenerator.generateComponentOrServiceInfo(root, userDir, displayName, categoryName, service, specJson.optString("deprecated", null),
+			specJson.optString("replacement", null));
 	}
 
 	/**
@@ -2269,16 +2552,6 @@ public class SpecMarkdownGenerator
 		return normalizedSpecType;
 	}
 
-	private String normalizeTypeForComponent(JSONObject myTypes, String type, String componentName)
-	{
-		JSONObject customType = myTypes.optJSONObject(type);
-		if (customType != null)
-		{
-			return "CustomType<" + componentName + "." + type + ">";
-		}
-		return type;
-	}
-
 	private Map<String, FunctionInfo> getSpecFunctions(File specFile)
 	{
 		Map<String, FunctionInfo> specFunctions = new HashMap<>();
@@ -2529,6 +2802,14 @@ public class SpecMarkdownGenerator
 		public String toString()
 		{
 			return "Parameters: " + parameters + ", Return Type: " + returnType + ", Return Doc: " + returnDoc;
+		}
+	}
+
+	public class ConversionException extends Exception
+	{
+		public ConversionException(String message)
+		{
+			super(message);
 		}
 	}
 

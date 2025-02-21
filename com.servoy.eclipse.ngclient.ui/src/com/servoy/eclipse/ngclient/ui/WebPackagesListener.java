@@ -1418,7 +1418,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					"Titanium NG Client build failed",
 					"Details are available in the 'Titanium NG Build Console'.\nIt could be due an incorrect version or error in some service/component package that the solution uses, but there are multiple other possible causes.\n\nYou can either check what went wrong in the 'Titanium NG Build Console' or start a full/clean client build.",
 					SWT.NONE, "Show 'Titanium NG Build Console'", "Retry; start a full/clean build");
-				if (usersChoice == 0)
+				if (usersChoice <= 0)
 				{
 					ConsoleFactory.openTiNGBuildConsole();
 				}
