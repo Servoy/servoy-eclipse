@@ -609,12 +609,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 										{
 											IPersist child = it.next();
 											IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, form));
-											if (!overridePersist.getUUID().equals(child.getUUID()))
-											{
-												parent.removeChild(child);
-												// do not add the override again, the getOverridePersist should already create it in the right place (probably directly on form)
-												//parent.addChild(overridePersist);
-											}
 											// parent is overridden, make sure all children are sent to designer
 											if (!extraChangedPersists.contains(overridePersist))
 											{
