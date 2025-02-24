@@ -88,6 +88,7 @@ import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
@@ -137,6 +138,13 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				else
 				{
 					toRun = "build";
+				}
+			}
+			else
+			{
+				if (Boolean.valueOf(Settings.getInstance().getProperty("servoy.ngclient.testingMode", "false")).booleanValue())
+				{
+					toRun = "build_sourcemap";
 				}
 			}
 			whatToRun = toRun;
