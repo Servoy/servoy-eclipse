@@ -248,6 +248,7 @@ public class FormElementDeleteCommand extends Command
 							});
 							ServoyLog.logError(new Exception("Cannot delete custom type " + custom.getUUID() +
 								" because is inherited from the parent component " + parentComponent.getUUID()));
+							return;
 						}
 					}
 				}
