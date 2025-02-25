@@ -57,7 +57,7 @@
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.03/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202502131640"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202502201615"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202502251746"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
