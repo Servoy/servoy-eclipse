@@ -871,7 +871,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.value(-1);
 				}
 				writer.key("formIndex");
-				if (p instanceof IFormElement && !form.isResponsiveLayout())
+				if (p instanceof IFormElement)
 				{
 					writer.value(((IFormElement)p).getFormIndex());
 				}

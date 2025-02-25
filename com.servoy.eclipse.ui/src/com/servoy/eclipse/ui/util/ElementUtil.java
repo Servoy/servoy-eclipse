@@ -671,6 +671,17 @@ public class ElementUtil
 		HashMap<UUID, IFormElement> returnList = null;
 
 		Iterator<IPersist> it = form.getAllObjects();
+		if (form.isResponsiveLayout())
+		{
+			if (elementsToVisit.size() == 1)
+			{
+				IFormElement element = elementsToVisit.values().iterator().next();
+				if (element.getParent() instanceof LayoutContainer lc && "csspositioncontainer".equals(lc.getSpecName()))
+				{
+					it = lc.getAllObjects();
+				}
+			}
+		}
 		while (it.hasNext())
 		{
 			IPersist element = it.next();
