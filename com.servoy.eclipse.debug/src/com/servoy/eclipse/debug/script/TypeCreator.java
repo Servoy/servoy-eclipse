@@ -83,6 +83,7 @@ import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
+import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
@@ -735,6 +736,10 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.BOOLEAN);
 			}
+			if (type == NativePromise.class)
+			{
+				return getTypeRef(context, ITypeNames.PROMISE);
+			}
 			if (type == Byte.class || type == byte.class)
 			{
 				return getTypeRef(context, "byte");
@@ -747,7 +752,7 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.STRING);
 			}
-// not sure why this is done but this will not work for real java enums coming from Packages.xxxx			
+// not sure why this is done but this will not work for real java enums coming from Packages.xxxx
 //			if (type.isEnum())
 //			{
 //				return getTypeRef(context, "enum<" + type.getSimpleName() + '>');
