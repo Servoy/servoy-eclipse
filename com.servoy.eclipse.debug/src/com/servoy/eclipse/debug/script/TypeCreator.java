@@ -398,6 +398,8 @@ public class TypeCreator extends TypeCache
 		BASE_TYPES.add("RegExp");
 		BASE_TYPES.add("Error");
 		BASE_TYPES.add("Math");
+		BASE_TYPES.add("BigInt");
+		BASE_TYPES.add("Promise");
 	}
 
 	/*
