@@ -27,8 +27,8 @@ This is a reference page; many components have detailed usage guides [here](http
 
 <#list properties as propName, propValue>
 ### ${MD(propName)}
-<#if instance.getPropertyDoc(propValue)??>
-${instance.getPropertyDoc(propValue)}
+<#if propValue.doc()??>
+${propValue.doc()?trim}
 
 </#if>
 Type: [${MD(instance.getDocType(propValue, types, componentinternalname))}](${instance.getReturnTypePath(propValue)})  
@@ -52,12 +52,15 @@ ${propValue.doc()?trim}
 <#if propValue.parameters()?has_content>
 **Parameters:**  
 <#list propValue.parameters() as param> 
-> - {[${MD(instance.getDocType(param, types, componentinternalname))}](${instance.getReturnTypePath(param)})} ${MD(param.name())}
+> - {[${MD(instance.getDocType(param, types, componentinternalname))}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if><#if param.doc()??>${param.doc()}</#if>
 </#list>
 </#if>
 <#if propValue.returnValue()??>
 
 **Returns:** {[${MD(instance.getDocType(propValue.returnValue(), types, componentinternalname))}](${instance.getReturnTypePath(propValue)})}
+<#if (propValue.returnValue()?keys)?seq_contains("description") && propValue.returnValue()["description"]?has_content>
+${propValue.returnValue()["description"]}
+</#if>
 </#if>
 ***
 </#list>
