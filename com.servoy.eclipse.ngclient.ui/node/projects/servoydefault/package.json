@@ -13,7 +13,7 @@
     "@popperjs/core": "<3",
     "@tinymce/tinymce-angular": "<8",
     "bootstrap": "<6",
-    "tinymce": "^6",
+    "tinymce": "^6.8.4",
     "tinymce-i18n": ">=24",
     "tslib": "*"
   },
