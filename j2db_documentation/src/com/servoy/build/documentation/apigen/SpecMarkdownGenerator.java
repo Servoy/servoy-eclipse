@@ -121,7 +121,8 @@ public class SpecMarkdownGenerator
 	private static File componentPackagesDir;
 
 	private static int totalFunctionsWithIssues = 0;
-	private static int totalUndocumentedProperties = 0;
+	private static int jsDocUndocumentedProperties = 0;
+	private static int specUndocumentedProperties = 0;
 	private static int totalUndocumentedFunctions = 0;
 
 	private static final DuplicateTracker duplicateTracker = DuplicateTracker.getInstance();
@@ -288,7 +289,8 @@ public class SpecMarkdownGenerator
 	public static void printSummary()
 	{
 		System.out.println("\033[38;5;39m\n\nSUMMARY:\n");
-		System.out.println(totalUndocumentedProperties + " properties has no documentation\n" +
+		System.out.println(jsDocUndocumentedProperties + " properties have no JS DOCS\n" +
+			specUndocumentedProperties + " properties has no SPEC docs\n" +
 			totalFunctionsWithIssues + " functions or handlers failed validation\n" +
 			totalUndocumentedFunctions + " functions or handlers has no documentation\n\n");
 
@@ -1326,7 +1328,8 @@ public class SpecMarkdownGenerator
 		String doc = specEntry.optString("jsDoc", null);
 		if (doc == null)
 		{
-			totalUndocumentedProperties++;
+
+			jsDocUndocumentedProperties++;
 			System.out.println("\033[38;5;215mWarning: jsDoc was not found for: " + name + "\033[0m");
 			JSONObject optJSONObject = specEntry.optJSONObject("tags");
 			if (optJSONObject != null)
@@ -1335,6 +1338,11 @@ public class SpecMarkdownGenerator
 				if (doc != null)
 				{ //spec docs need processing
 					doc = processDescription(indentLevel, doc);
+				}
+				else
+				{
+					specUndocumentedProperties++;
+					System.out.println("\033[38;5;215mWarning: specification doc was not found for: " + name + "\033[0m");
 				}
 			}
 		}
@@ -1640,6 +1648,14 @@ public class SpecMarkdownGenerator
 							normalizeType(getTypes(), specParamType, getComponentName()));
 					}
 				}
+
+				//validate parameter description
+				String docParamDoc = jsDocParam.optString("doc", null);
+				if (docParamDoc == null || docParamDoc.length() == 0)
+				{
+					isValidFunction = false;
+					System.err.println(apiDocName + ": missing parameter description in the doc file.");
+				}
 			}
 		}
 
@@ -1660,8 +1676,16 @@ public class SpecMarkdownGenerator
 				System.err.println(apiDocName + ": Return type mismatch: " + docReturnType + " ...! Must be: " +
 					normalizeType(getTypes(), specReturnType, getComponentName()));
 			}
-
 		}
+
+		//validate return description
+		String docReturnDoc = jsDocReturn != null ? jsDocReturn.optString("doc", null) : null;
+		if (specReturnType != null && (docReturnDoc == null || docReturnDoc.length() == 0))
+		{
+			isValidFunction = false;
+			System.err.println(apiDocName + ": missing return description in the doc file.");
+		}
+
 		if (!isValidFunction)
 		{
 			totalFunctionsWithIssues++;
