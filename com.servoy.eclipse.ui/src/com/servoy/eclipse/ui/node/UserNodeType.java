@@ -169,4 +169,5 @@ public enum UserNodeType
 	MENU_FOUNDSETS,
 	MENU_FOUNDSET,
 	BIGINT,
+	PROMISE,
 }

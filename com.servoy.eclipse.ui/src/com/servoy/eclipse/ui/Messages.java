@@ -121,6 +121,7 @@ public class Messages extends NLS
 	public static String TreeStrings_Application;
 	public static String TreeStrings_Array;
 	public static String TreeStrings_Object;
+	public static String TreeStrings_Promise;
 	public static String TreeStrings_Map;
 	public static String TreeStrings_Set;
 	public static String TreeStrings_Iterator;
