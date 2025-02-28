@@ -669,6 +669,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = TreeBuilder.createJSBigInt(this);
 			}
+			else if (type == UserNodeType.PROMISE)
+			{
+				lm = TreeBuilder.createJSPromise(this);
+			}
 			else if (type == UserNodeType.OBJECT)
 			{
 				lm = TreeBuilder.createJSObject(this);

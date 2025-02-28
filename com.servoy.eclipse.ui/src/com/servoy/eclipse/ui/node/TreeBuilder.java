@@ -82,6 +82,11 @@ public class TreeBuilder
 		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Array.class, UserNodeType.ARRAY, null);
 	}
 
+	public static UserNode[] createJSPromise(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Promise.class, UserNodeType.PROMISE, null);
+	}
+
 	public static UserNode[] createJSBigInt(IImageLookup imageLookup)
 	{
 		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.BigInt.class, UserNodeType.BIGINT, null);
