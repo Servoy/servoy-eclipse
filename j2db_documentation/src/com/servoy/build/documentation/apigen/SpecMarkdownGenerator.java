@@ -168,7 +168,38 @@ public class SpecMarkdownGenerator
 			System.exit(1);
 		}
 
-		File gitBookRepoDir = new File(args[0]);
+		Map<String, String> params = new HashMap<>();
+		for (String arg : args)
+		{
+			// Expecting something like "gitRepo=/path/to/repo"
+			int eqPos = arg.indexOf('=');
+			if (eqPos > 0)
+			{
+				String key = arg.substring(0, eqPos);
+				String value = arg.substring(eqPos + 1);
+				params.put(key, value);
+			}
+			else
+			{
+				// If you want to handle args without '='
+				// or throw an error if the format is unexpected
+				System.err.println("Ignoring malformed argument: " + arg);
+			}
+		}
+
+		// 2) Retrieve arguments by name
+		String gitRepoPath = params.get("gitRepoPath");
+		String scanPackagesPath = params.get("scanPackagesPath");
+		String generateExtent = params.get("generateExtent");
+		String clearDirs = params.get("clearDirs");
+		String mergeSpecAndDoc = params.get("mergeSpecAndDoc");
+
+		// 3) Convert from String if necessary, or use defaults if null
+		boolean doGenerateExtent = Boolean.parseBoolean(generateExtent);
+		boolean doClearDirs = Boolean.parseBoolean(clearDirs);
+		boolean doMergeSpecAndDoc = Boolean.parseBoolean(mergeSpecAndDoc);
+
+		File gitBookRepoDir = new File(gitRepoPath);
 		servicesRootDir = new File(gitBookRepoDir, PATH_TO_NG_SERVICE_DOCS);
 		componentsRootDir = new File(gitBookRepoDir, PATH_TO_NG_COMPONENT_DOCS);
 		servicePackagesDir = new File(gitBookRepoDir, PATH_TO_NG_SERVICE_PACKAGE_DOCS);
@@ -182,7 +213,7 @@ public class SpecMarkdownGenerator
 			System.exit(1);
 		}
 
-		if (args.length > 3 && "true".equals(args[3]))
+		if (doClearDirs)
 		{
 			String err = clearGeneratedDocsDirOnGitbookRepo(servicesRootDir, true);
 			if (err == null) err = clearGeneratedDocsDirOnGitbookRepo(componentsRootDir, true);
@@ -210,16 +241,14 @@ public class SpecMarkdownGenerator
 
 		boolean generateComponentExtendsAsWell = true;
 		// ng package dirs listed in text file ngPackagesFileLocationsURI -> info source text (to be embedded)
-		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(args[1]).normalize());
-		if ("false".equals(args[2]))
-		{
-			generateComponentExtendsAsWell = false;
-		}
+		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(scanPackagesPath).normalize());
+		generateComponentExtendsAsWell = doGenerateExtent;
 
 		initConversionTable();
 		initTypeReferencePathTable();
 
-		generateNGComponentOrServicePackageContentForDir(generateComponentExtendsAsWell, ngPackageDirsToScan, new NGPackageMarkdownDocGenerator(),
+		generateNGComponentOrServicePackageContentForDir(generateComponentExtendsAsWell, doMergeSpecAndDoc, ngPackageDirsToScan,
+			new NGPackageMarkdownDocGenerator(),
 			new HashMap<>());
 
 		// Print the summary after all validations
@@ -325,7 +354,8 @@ public class SpecMarkdownGenerator
 		return null;
 	}
 
-	public static void generateNGComponentOrServicePackageContentForDir(boolean generateComponentExtendsAsWell, List<String> webPackageDirs,
+	public static void generateNGComponentOrServicePackageContentForDir(boolean generateComponentExtendsAsWell, boolean doMergeSpecAndDoc,
+		List<String> webPackageDirs,
 		INGPackageInfoGenerator docGenerator, Map<String, Object> globalRootEntries)
 		throws JSONException, TemplateException, IOException
 	{
@@ -392,7 +422,8 @@ public class SpecMarkdownGenerator
 				{
 					return new SpecMarkdownGenerator(packageName, packageDisplayName, packageType, new JSONObject(contents.getRight()), contents.getLeft(),
 						generateComponentExtendsAsWell,
-						docGenerator, globalRootEntries);
+						docGenerator, globalRootEntries,
+						doMergeSpecAndDoc);
 				}
 				catch (RuntimeException e)
 				{
@@ -441,7 +472,8 @@ public class SpecMarkdownGenerator
 
 	public SpecMarkdownGenerator(String packageName, String packageDisplayName, String packageType,
 		JSONObject specJson, File specFile, boolean generateComponentExtendsAsWell,
-		INGPackageInfoGenerator docGenerator, Map<String, Object> globalRootEntries)
+		INGPackageInfoGenerator docGenerator, Map<String, Object> globalRootEntries,
+		boolean doMergeSpecAndDoc)
 	{
 
 		final Map<String, String> apiDoc = new HashMap<>();
@@ -488,6 +520,11 @@ public class SpecMarkdownGenerator
 			}
 			if (docFile.exists())
 			{
+				if (doMergeSpecAndDoc)
+				{
+					JSDocGenerator jsDocGenerator = new JSDocGenerator(specJson, docFile);
+					jsDocGenerator.runGenerator();
+				}
 				packageDocFile = docFile;
 				try
 				{
@@ -1330,7 +1367,7 @@ public class SpecMarkdownGenerator
 		{
 
 			jsDocUndocumentedProperties++;
-			System.out.println("\033[38;5;215mWarning: jsDoc was not found for: " + name + "\033[0m");
+//			System.out.println("\033[38;5;215mWarning: jsDoc was not found for: " + name + "\033[0m");
 			JSONObject optJSONObject = specEntry.optJSONObject("tags");
 			if (optJSONObject != null)
 			{
@@ -1342,7 +1379,7 @@ public class SpecMarkdownGenerator
 				else
 				{
 					specUndocumentedProperties++;
-					System.out.println("\033[38;5;215mWarning: specification doc was not found for: " + name + "\033[0m");
+//					System.out.println("\033[38;5;215mWarning: specification doc was not found for: " + name + "\033[0m");
 				}
 			}
 		}
@@ -1576,7 +1613,7 @@ public class SpecMarkdownGenerator
 		if (isSpecDoc)
 		{
 			totalUndocumentedFunctions++;
-			System.out.println("\033[38;5;215mWarning: JSDoc was not found for: " + apiDocName + "\033[0m");
+//			System.out.println("\033[38;5;215mWarning: JSDoc was not found for: " + apiDocName + "\033[0m");
 			return;
 		}
 
@@ -1699,6 +1736,7 @@ public class SpecMarkdownGenerator
 	private String createFunctionDocFromSpec(JSONObject specEntry, List<Parameter> params, String returnType, JSONObject fullReturnType,
 		boolean shouldSetJSDocGeneratedFromSpecEvenIfThereIsNoDescriptionInIt)
 	{
+		//TODO: this is not working okay. See for example the generated doc in data-grid.md for getViewColumnById method which is not existing in doc but in the spec only
 		boolean someDocEntryFromSpecWasWritten = false;
 		boolean somethingWasWritten = false;
 		StringBuilder generatedJSDocCommentFromSpec = new StringBuilder("/**");
