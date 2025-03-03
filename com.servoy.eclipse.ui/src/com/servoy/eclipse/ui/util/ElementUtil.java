@@ -99,6 +99,8 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
@@ -379,6 +381,25 @@ public class ElementUtil
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
 			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());
+			if (persist instanceof WebComponent webComponent && newPersist instanceof WebComponent newWebComponent)
+			{
+				List<WebCustomType> customTypes = new ArrayList<>();
+				for (IPersist child : webComponent.getAllObjectsAsList())
+				{
+					if (child instanceof WebCustomType custom)
+					{
+						customTypes.add(custom);
+					}
+				}
+				Iterator<WebCustomType> customTypeIterator = customTypes.iterator();
+				for (IPersist child : newWebComponent.getAllObjectsAsList())
+				{
+					if (child instanceof WebCustomType custom && customTypeIterator.hasNext())
+					{
+						custom.setExtendsID(customTypeIterator.next().getID());
+					}
+				}
+			}
 			if (CSSPositionUtils.useCSSPosition(persist))
 			{
 				ISupportBounds iSupportBounds = (ISupportBounds)persist;

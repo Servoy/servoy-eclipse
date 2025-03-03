@@ -233,24 +233,9 @@ public class FormElementDeleteCommand extends Command
 			if (child instanceof WebCustomType custom)
 			{
 				IBasicWebComponent component = custom.getParentComponent();
-				if (component.getExtendsID() > 0)
+				if (component.getExtendsID() > 0 && isInherited(custom, component))
 				{
-					IPersist parentComponent = PersistHelper.getSuperPersist(component);
-					if (parentComponent instanceof IBasicWebObject indexed)
-					{
-						Object value = indexed.getProperty(custom.getJsonKey());
-						if (value instanceof IChildWebObject[] arrayValue && custom.getIndex() < arrayValue.length)
-						{
-							Display.getDefault().asyncExec(() -> {
-								String message = "Canot delete inherited " + custom.getJsonKey() + ", check the log for more details.";
-								MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-									"Cannot delete", message);
-							});
-							ServoyLog.logError(new Exception("Cannot delete custom type " + custom.getUUID() +
-								" because is inherited from the parent component " + parentComponent.getUUID()));
-							return;
-						}
-					}
+					return;
 				}
 			}
 			List<IPersist> overriding = new ArrayList<IPersist>();
@@ -295,6 +280,28 @@ public class FormElementDeleteCommand extends Command
 		}
 		setLabel(label);
 		if (children.length > 0) redo();
+	}
+
+	private boolean isInherited(WebCustomType custom, IBasicWebComponent component)
+	{
+		if (custom.getExtendsID() > 0) return true;
+		IPersist parentComponent = PersistHelper.getSuperPersist(component);
+		if (parentComponent instanceof IBasicWebObject indexed)
+		{
+			Object value = indexed.getProperty(custom.getJsonKey());
+			if (value instanceof IChildWebObject[] arrayValue && custom.getIndex() < arrayValue.length)
+			{
+				Display.getDefault().asyncExec(() -> {
+					String message = "Canot delete inherited " + custom.getJsonKey() + ", check the log for more details.";
+					MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+						"Cannot delete", message);
+				});
+				ServoyLog.logError(new Exception("Cannot delete custom type " + custom.getUUID() +
+					" because is inherited from the parent component " + parentComponent.getUUID()));
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
