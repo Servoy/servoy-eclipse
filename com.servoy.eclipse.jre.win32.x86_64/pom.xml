@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.3.0.4040_rc</version>
+		<version>2025.6.0.4080_rc</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.jre.win32.x86_64</artifactId>
