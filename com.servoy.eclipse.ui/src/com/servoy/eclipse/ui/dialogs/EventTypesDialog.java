@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -40,6 +41,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -78,9 +80,17 @@ public class EventTypesDialog extends Dialog
 	{
 		getShell().setText("Edit Application Event Types");
 
-		Composite composite = (Composite)super.createDialogArea(parent);
+		ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		myScrolledComposite.setExpandHorizontal(true);
+		myScrolledComposite.setExpandVertical(true);
 
-		Composite tableContainer = new Composite(composite, SWT.NONE);
+		Composite container = new Composite(myScrolledComposite, SWT.NONE);
+		myScrolledComposite.setContent(container);
+		container.setLayout(new GridLayout(1, false));
+
+		Composite tableContainer = new Composite(container, SWT.NONE);
+
+		myScrolledComposite.setContent(container);
 
 		GridData gd = new GridData();
 		gd.horizontalAlignment = SWT.FILL;
@@ -89,7 +99,7 @@ public class EventTypesDialog extends Dialog
 		gd.grabExcessVerticalSpace = true;
 		tableContainer.setLayoutData(gd);
 
-		TableViewer tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+		TableViewer tableViewer = new TableViewer(tableContainer, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		Table columnTable = tableViewer.getTable();
 		columnTable.setLinesVisible(true);
 		columnTable.setHeaderVisible(true);
@@ -115,7 +125,7 @@ public class EventTypesDialog extends Dialog
 					{
 						model.remove(eType);
 						tableViewer.refresh();
-						parent.layout(true, true);
+						getShell().layout(true, true);
 					}
 
 				}
@@ -165,7 +175,7 @@ public class EventTypesDialog extends Dialog
 		tableViewer.setContentProvider(new ArrayContentProvider());
 		tableViewer.setInput(model);
 
-		Button addEventType = new Button(composite, SWT.NONE);
+		Button addEventType = new Button(container, SWT.NONE);
 		addEventType.setText("Add New Event Type");
 		addEventType.setToolTipText("Adds a new event type");
 		addEventType.addSelectionListener(new SelectionAdapter()
@@ -186,11 +196,15 @@ public class EventTypesDialog extends Dialog
 				{
 					model.add(new EventType(dialog.getValue()));
 					tableViewer.refresh();
-					parent.layout(true, true);
+					Point size = getShell().getSize();
+					size.y += tableViewer.getTable().getItemHeight();
+					getShell().setSize(size);
+					getShell().layout(true, true);
 				}
 			}
 		});
-		return composite;
+		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		return myScrolledComposite;
 	}
 
 	private List<EventType> fromJSONToModel()
