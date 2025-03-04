@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.json.JSONObject;
 
@@ -33,11 +34,27 @@ public class EventTypesPropertyController extends PropertyController<JSONObject,
 	public EventTypesPropertyController(Object id, String displayName)
 	{
 		super(id, displayName);
+		setLabelProvider(EventTypesLabelProvider.LABEL_INSTANCE);
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
 		return new EventTypesCellEditor(parent);
+	}
+
+	public static class EventTypesLabelProvider extends LabelProvider
+	{
+		public static EventTypesLabelProvider LABEL_INSTANCE = new EventTypesLabelProvider();
+
+		@Override
+		public String getText(Object element)
+		{
+			if (element instanceof JSONObject jsonObject)
+			{
+				return "[" + String.join(", ", jsonObject.keySet()) + "]";
+			}
+			return super.getText(element);
+		}
 	}
 }
