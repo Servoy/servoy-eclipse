@@ -609,9 +609,13 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			childrenList.add(persistContext);
 			addChildren(persistContext.getPersist(), childrenList);
 		}
-		else
+		else if (selection == FormOutlineContentProvider.ELEMENTS)
 		{
 			childrenList.add(selection);
+			ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getAllObjectsAsList().forEach(persist -> {
+				childrenList.add(PersistContext.create(persist, form));
+				addChildren(persist, childrenList);
+			});
 		}
 		for (Object child : childrenList)
 		{
