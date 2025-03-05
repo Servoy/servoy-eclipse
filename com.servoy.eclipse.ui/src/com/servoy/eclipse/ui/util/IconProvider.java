@@ -31,6 +31,7 @@ import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
+import com.servoy.j2db.scripting.JSEventsManager;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
@@ -75,6 +76,7 @@ public class IconProvider
 
 		c2i.put(JSApplication.class, "application.png");
 		c2i.put(JSDatabaseManager.class, "database_manager.png");
+		c2i.put(JSEventsManager.class, "events_manager.png");
 		c2i.put(JSDataSources.class, "datasources.png");
 		c2i.put(JSViewDataSource.class, "viewfs.png");
 		c2i.put(JSUtils.class, "utils.png");

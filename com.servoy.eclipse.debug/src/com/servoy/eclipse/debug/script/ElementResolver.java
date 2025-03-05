@@ -93,11 +93,12 @@ public class ElementResolver implements IElementResolver
 	public ElementResolver()
 	{
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_APPLICATION, new SimpleNameTypeNameCreator("JSApplication"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_EVENTS_MANAGER, new SimpleNameTypeNameCreator("JSEventsManager"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_SECURITY, new SimpleNameTypeNameCreator("JSSecurity"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_I18N, new SimpleNameTypeNameCreator("JSI18N"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_HISTORY, new SimpleNameTypeNameCreator("HistoryProvider"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_MENUS, new SimpleNameTypeNameCreator("MenuManager"));
-		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_EVENTTYPES, new SimpleNameTypeNameCreator("EventsManager"));
+//		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_EVENTTYPES, new SimpleNameTypeNameCreator("EventType"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_UTILS, new SimpleNameTypeNameCreator("JSUtils"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_CLIENTUTILS, new SimpleNameTypeNameCreator("JSClientUtils"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_JSUNIT, new SimpleNameTypeNameCreator("JSUnit"));
@@ -135,6 +136,8 @@ public class ElementResolver implements IElementResolver
 
 		deprecated.add("alldataproviders");
 		deprecated.add("currentcontroller");
+
+		constantTypeNames.put("EventType", "EventType");
 	}
 
 

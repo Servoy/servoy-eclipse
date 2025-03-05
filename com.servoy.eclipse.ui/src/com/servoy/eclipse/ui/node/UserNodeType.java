@@ -170,4 +170,5 @@ public enum UserNodeType
 	MENU_FOUNDSET,
 	BIGINT,
 	PROMISE,
+	EVENTS_MANAGER,
 }
