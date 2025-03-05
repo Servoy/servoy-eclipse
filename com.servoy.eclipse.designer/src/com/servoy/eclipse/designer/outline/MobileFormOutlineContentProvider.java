@@ -30,9 +30,9 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -41,7 +41,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Content provider for Servoy mobile form in outline view.
- * 
+ *
  * @author gboros
  */
 
@@ -84,9 +84,10 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 							nodes.add(MobileListModel.create(form, (Portal)persist));
 							continue;
 						}
-						if (parentElement == ELEMENTS && persist instanceof IFormElement && ((IFormElement)persist).getGroupID() != null)
+						if (parentElement == ELEMENTS && persist instanceof ISupportFormElement && ((ISupportFormElement)persist).getGroupID() != null)
 						{
-							FormElementGroup group = new FormElementGroup(((IFormElement)persist).getGroupID(), ModelUtils.getEditingFlattenedSolution(form),
+							FormElementGroup group = new FormElementGroup(((ISupportFormElement)persist).getGroupID(),
+								ModelUtils.getEditingFlattenedSolution(form),
 								form);
 							if (groups.add(group))
 							{
@@ -161,10 +162,10 @@ public class MobileFormOutlineContentProvider extends FormOutlineContentProvider
 		return null;
 	}
 
-	static IFormElement getGroupMainComponent(FormElementGroup formElementGroup)
+	static ISupportFormElement getGroupMainComponent(FormElementGroup formElementGroup)
 	{
-		IFormElement component = null;
-		for (IFormElement fe : Utils.iterate(formElementGroup.getElements()))
+		ISupportFormElement component = null;
+		for (ISupportFormElement fe : Utils.iterate(formElementGroup.getElements()))
 		{
 			if (fe instanceof AbstractBase && ((AbstractBase)fe).getCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName) != null) continue;
 			else component = fe;

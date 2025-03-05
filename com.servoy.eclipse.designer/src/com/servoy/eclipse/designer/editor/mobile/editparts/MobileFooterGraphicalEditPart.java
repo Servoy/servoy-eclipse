@@ -26,7 +26,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.Utils;
 
@@ -44,24 +44,25 @@ public class MobileFooterGraphicalEditPart extends MobilePartGraphicalEditPart
 	}
 
 	@Override
-	protected List<IFormElement> getModelChildren()
+	protected List<ISupportFormElement> getModelChildren()
 	{
 		return getFooterModelChildren(application, getEditorPart().getForm());
 	}
 
-	public static List<IFormElement> getFooterModelChildren(IApplication application, Form form)
+	public static List<ISupportFormElement> getFooterModelChildren(IApplication application, Form form)
 	{
-		List<IFormElement> list = new ArrayList<IFormElement>(5);
+		List<ISupportFormElement> list = new ArrayList<ISupportFormElement>(5);
 
-		for (IFormElement persist : Utils.iterate(new Form.FormTypeIterator(application.getFlattenedSolution().getFlattenedForm(form).getAllObjectsAsList(),
-			new Comparator<IFormElement>()
-			{
-				// sort elements by x position
-				public int compare(IFormElement element1, IFormElement element2)
+		for (ISupportFormElement persist : Utils
+			.iterate(new Form.FormTypeIterator(application.getFlattenedSolution().getFlattenedForm(form).getAllObjectsAsList(),
+				new Comparator<ISupportFormElement>()
 				{
-					return element1.getLocation().x - element2.getLocation().x;
-				}
-			})))
+					// sort elements by x position
+					public int compare(ISupportFormElement element1, ISupportFormElement element2)
+					{
+						return element1.getLocation().x - element2.getLocation().x;
+					}
+				})))
 		{
 			if (persist instanceof AbstractBase && ((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.FOOTER_ITEM.propertyName) != null)
 			{

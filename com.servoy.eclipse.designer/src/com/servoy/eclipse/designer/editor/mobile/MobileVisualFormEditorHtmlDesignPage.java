@@ -103,12 +103,12 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -474,7 +474,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					{
 						snapType = null;
 						// check for existing header buttons
-						for (IFormElement headerItem : MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
+						for (ISupportFormElement headerItem : MobileHeaderGraphicalEditPart.getHeaderModelChildren(
+							Activator.getDefault().getDesignClient(),
 							editorPart.getForm()))
 						{
 							if (headerItem instanceof AbstractBase)
@@ -932,7 +933,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 				if (PersistUtils.isHeaderPart(((Part)child).getPartType()))
 				{
-					for (IFormElement headerChild : MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
+					for (ISupportFormElement headerChild : MobileHeaderGraphicalEditPart.getHeaderModelChildren(
+						Activator.getDefault().getDesignClient(),
 						editorPart.getForm()))
 					{
 						if (modelId.equals(getModelId(headerChild)))
@@ -960,7 +962,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				else if (PersistUtils.isFooterPart(((Part)child).getPartType()))
 				{
 					int footerIndex = 0;
-					for (IFormElement footerChild : MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(),
+					for (ISupportFormElement footerChild : MobileFooterGraphicalEditPart.getFooterModelChildren(
+						Activator.getDefault().getDesignClient(),
 						editorPart.getForm()))
 					{
 						if (modelId.equals(getModelId(footerChild)))
@@ -1055,10 +1058,10 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	{
 		if (PersistUtils.isHeaderPart(headerPart.getPartType()))
 		{
-			List<IFormElement> partModelChildren = MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
+			List<ISupportFormElement> partModelChildren = MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
 				editorPart.getForm());
 
-			for (IFormElement el : partModelChildren)
+			for (ISupportFormElement el : partModelChildren)
 			{
 				if (el instanceof GraphicalComponent && ((GraphicalComponent)el).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
 				{
@@ -1112,7 +1115,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				{
 					elements.put(element);
 
-					List<IFormElement> partModelChildren = null;
+					List<ISupportFormElement> partModelChildren = null;
 					if (PersistUtils.isHeaderPart(((Part)child).getPartType()))
 					{
 						partModelChildren = MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
@@ -1136,7 +1139,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					{
 						ServoyJSONArray partChildren = new ServoyJSONArray();
 						element.put(CHILDREN_KEY, partChildren);
-						for (IFormElement partItem : partModelChildren)
+						for (ISupportFormElement partItem : partModelChildren)
 						{
 							partChildren.put(getChildJson(partItem));
 						}
@@ -1261,9 +1264,9 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			return MobileListModel.create(form, form);
 		}
 
-		if (persist instanceof IFormElement)
+		if (persist instanceof ISupportFormElement)
 		{
-			String groupid = ((IFormElement)persist).getGroupID();
+			String groupid = ((ISupportFormElement)persist).getGroupID();
 			if (groupid != null)
 			{
 				FormElementGroup group = new FormElementGroup(groupid, ModelUtils.getEditingFlattenedSolution(form), form);
@@ -1609,7 +1612,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 	private Pair<BaseComponent, GraphicalComponent> getComponentWithTitle(FormElementGroup group)
 	{
-		List<IFormElement> formElements = MobileFormLayout.getGroupElements(group);
+		List<ISupportFormElement> formElements = MobileFormLayout.getGroupElements(group);
 		if (formElements.size() == 1 && formElements.get(0) instanceof BaseComponent)
 		{
 			// no label

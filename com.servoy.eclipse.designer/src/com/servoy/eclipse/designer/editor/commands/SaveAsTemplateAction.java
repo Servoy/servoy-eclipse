@@ -29,7 +29,6 @@ import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 import org.json.JSONException;
@@ -46,12 +45,12 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
@@ -184,7 +183,7 @@ public class SaveAsTemplateAction extends SelectionAction
 				}
 				else if (model instanceof FormElementGroup)
 				{
-					Iterator<IFormElement> elements = ((FormElementGroup)model).getElements();
+					Iterator<ISupportFormElement> elements = ((FormElementGroup)model).getElements();
 					while (elements.hasNext())
 					{
 						persists.add(elements.next());

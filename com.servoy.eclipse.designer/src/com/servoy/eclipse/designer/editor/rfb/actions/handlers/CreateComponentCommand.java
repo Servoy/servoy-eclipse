@@ -87,6 +87,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.IWebComponent;
@@ -646,12 +647,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									{
 										if (applyTemplate[0] instanceof FormElementGroup)
 										{
-											Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
+											Iterator<ISupportFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
 											//convert iterator to []
-											ArrayList<IFormElement> list = new ArrayList<>();
+											ArrayList<ISupportFormElement> list = new ArrayList<>();
 											while (elements.hasNext())
 											{
-												IFormElement next = elements.next();
+												ISupportFormElement next = elements.next();
 												list.add(next);
 											}
 											return list.toArray(new IPersist[list.size()]);

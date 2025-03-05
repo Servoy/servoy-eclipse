@@ -30,15 +30,15 @@ import com.servoy.eclipse.ui.property.RetargetingPropertySource;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Utils;
 
 /**
  * Property source for a group that combines a text label with a component.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -68,9 +68,9 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 	protected void fillPropertyDescriptors()
 	{
 		// determine title and component
-		IFormElement title = null;
-		IFormElement component = null;
-		for (IFormElement element : Utils.iterate(getModel().getElements()))
+		ISupportFormElement title = null;
+		ISupportFormElement component = null;
+		for (ISupportFormElement element : Utils.iterate(getModel().getElements()))
 		{
 			if (element instanceof AbstractBase && ((AbstractBase)element).getCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName) != null)
 			{
@@ -86,7 +86,7 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 		if (title == null)
 		{
 			component = null;
-			IFormElement[] asArray = Utils.asArray(getModel().getElements(), IFormElement.class);
+			ISupportFormElement[] asArray = Utils.asArray(getModel().getElements(), ISupportFormElement.class);
 			Arrays.sort(asArray, PositionComparator.XY_PERSIST_COMPARATOR);
 			if (asArray.length > 0) title = asArray[0];
 			if (asArray.length > 1) component = asArray[1];
@@ -112,7 +112,8 @@ public class MobileComponentWithTitlePropertySource extends RetargetingPropertyS
 		if (component != null)
 		{
 			// show all properties for the component
-			elementPropertySources.put(prefix = null, elementPropertySource = PersistPropertySource.createPersistPropertySource(component, getContext(), false));
+			elementPropertySources.put(prefix = null,
+				elementPropertySource = PersistPropertySource.createPersistPropertySource(component, getContext(), false));
 			String propertyName;
 			for (IPropertyDescriptor desc : elementPropertySource.getPropertyDescriptors())
 			{

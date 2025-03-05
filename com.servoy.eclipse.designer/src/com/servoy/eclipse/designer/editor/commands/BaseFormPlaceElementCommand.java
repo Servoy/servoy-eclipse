@@ -73,6 +73,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
@@ -748,7 +749,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 			else if (model instanceof FormElementGroup)
 			{
-				Iterator<IFormElement> elements = ((FormElementGroup)model).getElements();
+				Iterator<ISupportFormElement> elements = ((FormElementGroup)model).getElements();
 				while (elements.hasNext())
 				{
 					toDelete.add(elements.next());
