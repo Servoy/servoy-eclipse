@@ -134,7 +134,6 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.BasicFormController.JSForm;
-import com.servoy.j2db.EventsManager;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
@@ -253,6 +252,7 @@ import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSDimension;
+import com.servoy.j2db.scripting.JSEventsManager;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSMenu;
 import com.servoy.j2db.scripting.JSMenuItem;
@@ -447,6 +447,7 @@ public class TypeCreator extends TypeCache
 
 		addAnonymousClassType("Controller", JSForm.class);
 		addAnonymousClassType(JSApplication.class);
+		addAnonymousClassType(JSEventsManager.class);
 		addAnonymousClassType(JSI18N.class);
 		addAnonymousClassType(HistoryProvider.class);
 		addAnonymousClassType(MenuManager.class);
@@ -471,7 +472,7 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("JSBaseSQLFoundSet", IJSBaseSQLFoundSet.class);
 		addAnonymousClassType("JSBaseRecord", IJSBaseRecord.class);
 		addAnonymousClassType("JSBaseFoundSet", IJSBaseFoundSet.class);
-		addAnonymousClassType(EventType.class);
+//		addAnonymousClassType(EventType.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
@@ -543,7 +544,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 		addScopeType(JSViewDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSViewDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSMenuDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSMenuDataSource.class, ClientSupport.ng_wc_sc));
-		addScopeType(EventsManager.class.getSimpleName(), new EventTypesCreator());
+		addScopeType(EventType.class.getSimpleName(), new EventTypesCreator());
 	}
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
@@ -795,6 +796,7 @@ public class TypeCreator extends TypeCache
 		synchronized (this)
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSEventsManager.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
@@ -5170,10 +5172,22 @@ public class TypeCreator extends TypeCache
 
 	private class EventTypesCreator implements IScopeTypeCreator
 	{
+		Type superType;
+
+		EventTypesCreator()
+		{
+		}
+
 		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
+
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "EventType", EventType.class);
+			}
+			type.setSuperType(superType);
 			type.setKind(TypeKind.JAVA);
 			EList<Member> members = type.getMembers();
 			FlattenedSolution fs = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
@@ -5185,13 +5199,14 @@ public class TypeCreator extends TypeCache
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(eventType.getDisplayName());
 					property.setVisible(true);
-					property.setType(getTypeRef(context, EventType.class.getSimpleName()));
+					property.setStatic(true);
+					property.setType(TypeUtil.ref(type));
 					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
 					property.setDescription(eventType.isDefaultEvent() ? "Default Form level event" : "Custom event added from solution eventTypes property");
 					members.add(property);
 				}
 			}
-			return type;
+			return addType(null, type);
 		}
 
 		public ClientSupport getClientSupport()

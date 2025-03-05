@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Control;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.EventTypesDialog;
+import com.servoy.eclipse.ui.property.EventTypesPropertyController.EventTypesLabelProvider;
 
 /**
  * @author lvostinar
@@ -33,7 +34,7 @@ public class EventTypesCellEditor extends DialogCellEditor
 {
 	public EventTypesCellEditor(Composite parent)
 	{
-		super(parent, null, null, false, SWT.NONE);
+		super(parent, EventTypesLabelProvider.LABEL_INSTANCE, null, false, SWT.NONE);
 	}
 
 	@Override
