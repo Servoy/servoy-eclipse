@@ -196,14 +196,12 @@ public class EventTypesDialog extends Dialog
 				{
 					model.add(new EventType(dialog.getValue()));
 					tableViewer.refresh();
-					Point size = getShell().getSize();
-					size.y += tableViewer.getTable().getItemHeight();
-					getShell().setSize(size);
 					getShell().layout(true, true);
 				}
 			}
 		});
-		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		// make sure dialog is big enough to clearly see the table items
+		myScrolledComposite.setMinSize(500, 500);
 		return myScrolledComposite;
 	}
 
