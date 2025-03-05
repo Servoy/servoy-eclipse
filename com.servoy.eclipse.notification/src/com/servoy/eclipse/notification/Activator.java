@@ -105,7 +105,7 @@ public class Activator extends AbstractUIPlugin
 		{
 			forumNotificationJob = new RSSNotificationJob(
 				"Forum notification",
-				"https://forum.servoy.com/rss.php",
+				"https://forum.servoy.com/latest.rss",
 				true,
 				60000 * 20, // 20 min
 				"forumLastNotificationTimestampV2"
@@ -128,6 +128,7 @@ public class Activator extends AbstractUIPlugin
 									ServoyLog.logError(ex);
 								}
 							}
+							return super.getNotificationTimestamp(feed, notification);
 						}
 						return notificationTimestamp;
 					}				
