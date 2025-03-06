@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -164,6 +165,17 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								((RfbVisualFormEditorDesignPage)activePage).showContainer((LayoutContainer)newPersist[0]);
 						}
 					}
+				}
+				if (form.getExtendsID() > 0 && changedPersists.size() >= 2)
+				{
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							doFullFormRefresh();
+						}
+					});
 				}
 			}
 		}
@@ -590,8 +602,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									}
 								}
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
-									initialDropTarget.getParent() instanceof Form;
 								// this is a fix for dropping the responsive container on csspos
 								List<IPersist> res = createLayoutContainer(form, parentSupportingElements, layoutSpec, sameTypeChildContainer, config,
 									args.getRightSibling() != null
@@ -616,6 +626,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 												extraChangedPersists.add(overridePersist);
 											}
 										}
+
 									}
 								}
 //								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
@@ -627,10 +638,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 //									fullRefreshNeeded = !layoutContainer.getUUID().equals(children.get(children.size() - 1).getUUID());
 //								}
 								IPersist[] result = res.toArray(new IPersist[0]);
-								if (fullRefreshNeeded)
-								{
-									doFullFormRefresh();
-								}
 								return result;
 							}
 						}
