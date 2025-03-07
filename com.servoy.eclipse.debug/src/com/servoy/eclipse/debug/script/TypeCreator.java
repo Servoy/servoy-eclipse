@@ -797,6 +797,8 @@ public class TypeCreator extends TypeCache
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSEventsManager.class), null);
+			// special case  EventType should be a scope creator
+			classTypes.remove(EventType.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
@@ -5197,7 +5199,7 @@ public class TypeCreator extends TypeCache
 				for (EventType eventType : eventTypes)
 				{
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-					property.setName(eventType.getDisplayName());
+					property.setName(eventType.getName());
 					property.setVisible(true);
 					property.setStatic(true);
 					property.setType(TypeUtil.ref(type));
