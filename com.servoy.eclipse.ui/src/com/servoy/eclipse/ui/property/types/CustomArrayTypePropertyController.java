@@ -91,12 +91,12 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			if (id instanceof ArrayPropertyChildId)
 			{
 				String parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
-				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), true, false);
+				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), null, false);
 			}
 			else
 			{
 				String parentKey = String.valueOf(id);
-				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), true, false);
+				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), null, false);
 				cellEditor.applyValue(persistPropertySource.getPropertyValue(parentKey));
 			}
 		});
@@ -209,15 +209,17 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 							callHandler(handler -> {
 								Object id = getId();
 								String parentKey;
-								if (id instanceof ArrayPropertyChildId)
+								Integer idx = null;
+								if (id instanceof ArrayPropertyChildId arrayPropertyChildId)
 								{
-									parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+									idx = Integer.valueOf(arrayPropertyChildId.idx + 1);
+									parentKey = String.valueOf(arrayPropertyChildId.arrayPropId);
 								}
 								else
 								{
 									parentKey = String.valueOf(id);
 								}
-								handler.createComponent(persistPropertySource, persist.getParent().getUUID(), parentKey, getTypeName(), false, true);
+								handler.createComponent(persistPropertySource, persist.getParent().getUUID(), parentKey, getTypeName(), idx, true);
 							});
 						}
 					}
