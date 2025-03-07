@@ -468,10 +468,10 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType(JSMenu.class);
 		addAnonymousClassType(JSMenuItem.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
-		addAnonymousClassType("JSBaseSQLRecord", IJSBaseSQLRecord.class);
-		addAnonymousClassType("JSBaseSQLFoundSet", IJSBaseSQLFoundSet.class);
-		addAnonymousClassType("JSBaseRecord", IJSBaseRecord.class);
-		addAnonymousClassType("JSBaseFoundSet", IJSBaseFoundSet.class);
+		addType("JSBaseSQLRecord", IJSBaseSQLRecord.class);
+		addType("JSBaseSQLFoundSet", IJSBaseSQLFoundSet.class);
+		addType("JSBaseRecord", IJSBaseRecord.class);
+		addType("JSBaseFoundSet", IJSBaseFoundSet.class);
 //		addAnonymousClassType(EventType.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
