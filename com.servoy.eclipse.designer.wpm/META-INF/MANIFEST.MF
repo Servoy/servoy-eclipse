@@ -4,7 +4,7 @@ Bundle-Name: Servoy Web Package Manager
 Bundle-SymbolicName: com.servoy.eclipse.designer.wpm;singleton:=true
 Bundle-Version: 2025.6.0.4080_rc
 Bundle-Vendor: Servoy
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: javax.servlet;version="[4.0.0,5.0.0)",
  javax.servlet.annotation;version="[4.0.0,5.0.0)",
  javax.servlet.http;version="[4.0.0,5.0.0)",

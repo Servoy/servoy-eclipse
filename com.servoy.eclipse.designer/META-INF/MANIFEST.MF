@@ -37,7 +37,7 @@ Require-Bundle: org.eclipse.core.databinding,
  com.equo.chromium;resolution:=optional
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.resource,org.eclipse.ui.plugin,org.osgi.framework"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.designer
 Import-Package: com.servoy.eclipse.ngclient.ui,
  javax.servlet.http;version="[4.0.0,5.0.0)",

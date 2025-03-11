@@ -42,7 +42,7 @@ Bundle-ClassPath: .
 Export-Package: com.servoy.eclipse.debug,
  com.servoy.eclipse.debug.actions,
  com.servoy.eclipse.debug.handlers
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: com.servoy.eclipse.ngclient.ui,
  com.servoy.eclipse.ngclient.ui.utils,
  org.apache.commons.compress.archivers.tar;version="1.25.0",

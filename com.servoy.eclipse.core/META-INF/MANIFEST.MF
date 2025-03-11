@@ -63,7 +63,7 @@ Export-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.util,
  com.servoy.eclipse.dnd
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.core
 Import-Package: javax.servlet;version="4.0.0",
  javax.servlet.annotation;version="4.0.0",

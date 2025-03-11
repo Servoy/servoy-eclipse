@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Document Plug-in
 Bundle-SymbolicName: j2db_documentation;singleton:=true
 Bundle-Version: 2025.6.0.4080_rc
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-Vendor: Servoy
 Require-Bundle: com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.17.1",
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.17.1",

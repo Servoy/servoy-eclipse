@@ -7,6 +7,6 @@ Bundle-Vendor: Servoy
 Fragment-Host: com.servoy.eclipse.designer;bundle-version="2024.6.0.3980_rc"
 Import-Package: org.apache.commons.io;version="2.8.0",
  org.junit
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: com.servoy.eclipse.designer.util
 Automatic-Module-Name: com.servoy.eclipse.tests

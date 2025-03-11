@@ -135,5 +135,5 @@ Import-Package: com.fasterxml.jackson.annotation;version="2.18.0",
  org.apache.hc.core5.http.io.entity;version="5.2.3",
  org.apache.hc.core5.http.message;version="5.2.3"
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.ui

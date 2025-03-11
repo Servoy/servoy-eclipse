@@ -17,6 +17,6 @@ Require-Bundle: org.eclipse.core.resources,
  servoy_ngclient,
  sablo,
  com.servoy.eclipse.ngclient.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: com.servoy.eclipse.exporter.solution
