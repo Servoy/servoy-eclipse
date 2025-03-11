@@ -37,6 +37,18 @@ public class JSDocGenerator
 	private final JSONObject spec;
 	private final File doc;
 
+	//Note that processing steps are intended to run only once on a given spec and _doc.js file.
+	//Enabling multiple processing steps may lead to broken doc files.
+	//For any changes, enable tempTarget to true to avoid overriding the original, and check the output.
+	//Only when you're ABSOLUTELY SURE that the output is correct, set tempTarget to false to overwrite the original.
+	// Then run the generator again ONLY ONCE.
+
+	private final boolean processProperties = false;
+	private final boolean processHandlers = false;
+	private final boolean processTypes = false;
+
+	private final boolean tempTarget = true;
+
 	public JSDocGenerator(JSONObject spec, File doc)
 	{
 		this.spec = spec;
@@ -47,16 +59,36 @@ public class JSDocGenerator
 	{
 		// Read original file content.
 		String originalContent = readOriginalContent();
+		String propertiesDocs = null;
+		String handlersDocs = null;
+		String typesDocs = null;
 
 		// Generate documentation for properties and handlers.
-		String propertiesDocs = generatePropertiesDocs();
-		String handlersDocs = generateHandlersDocs();
+		if (processProperties)
+		{
+			propertiesDocs = generatePropertiesDocs();
+		}
+		if (processHandlers)
+		{
+			handlersDocs = generateHandlersDocs();
+		}
+		if (processTypes)
+		{
+			typesDocs = generateTypesDocs();
+		}
 
 		// Combine the two sections.
 		String combinedDocs = combineDocs(propertiesDocs, handlersDocs);
 
+
 		// Merge combined docs with the original file content.
-		String mergedContent = insertPropertiesDocs(originalContent, combinedDocs);
+		String mergedContent = mergeDocs(originalContent, combinedDocs);
+
+		// Append types docs at the very end.
+		if (processTypes)
+		{
+			mergedContent = mergedContent + "\n" + typesDocs;
+		}
 
 		// Write the merged content to a new file.
 		writeMergedContent(mergedContent);
@@ -72,6 +104,119 @@ public class JSDocGenerator
 		{
 			throw new RuntimeException("Error reading doc file: " + doc.getAbsolutePath(), e);
 		}
+	}
+
+	private String generateTypesDocs()
+	{
+		StringBuilder overall = new StringBuilder();
+		JSONObject typesObj = spec.optJSONObject("types");
+		if (typesObj != null && typesObj.keySet().size() > 0)
+		{
+			overall.append("var types = {\n\n");
+			for (String typeName : typesObj.keySet())
+			{
+				JSONObject typeDef = typesObj.optJSONObject(typeName);
+				if (typeDef == null) continue;
+
+				// Check type-level tags; if scope is private, skip this type.
+				JSONObject typeTags = typeDef.optJSONObject("tags");
+				if (typeTags != null && "private".equals(typeTags.optString("scope", "")))
+				{
+					continue;
+				}
+
+				// Build the type block in a temporary builder.
+				StringBuilder typeBlock = new StringBuilder();
+				String header = "    " + typeName + ": {\n\n";
+				typeBlock.append(header);
+
+				// Process the properties: if there's a "model" property use that; otherwise iterate over keys.
+				JSONObject model = typeDef.optJSONObject("model");
+				if (model != null)
+				{
+					for (String propName : model.keySet())
+					{
+						Object propValue = model.opt(propName);
+						processTypeProperty(typeBlock, propName, propValue, typeName);
+					}
+				}
+				else
+				{
+					Iterator<String> keys = typeDef.keys();
+					while (keys.hasNext())
+					{
+						String propName = keys.next();
+						if ("tags".equals(propName)) continue;
+						Object propValue = typeDef.opt(propName);
+						processTypeProperty(typeBlock, propName, propValue, typeName);
+					}
+				}
+
+				// If no properties were added (i.e. typeBlock equals header), skip this type.
+				if (typeBlock.toString().equals(header))
+				{
+					continue;
+				}
+				else
+				{
+					typeBlock.append("    },\n\n");
+					overall.append(typeBlock);
+				}
+			}
+			// Remove the trailing comma and newline.
+			int lastComma = overall.lastIndexOf(",\n\n");
+			if (lastComma != -1)
+			{
+				overall.delete(lastComma, overall.length());
+			}
+			overall.append("\n}\n");
+		}
+		return overall.toString();
+	}
+
+	private void processTypeProperty(StringBuilder sb, String propName, Object propValue, String typeName)
+	{
+		if (propValue instanceof JSONObject)
+		{
+			JSONObject propObj = (JSONObject)propValue;
+			JSONObject tags = propObj.optJSONObject("tags");
+			// Skip if the property is private.
+			if (tags != null && "private".equals(tags.optString("scope", "")))
+			{
+				return;
+			}
+			String docContent = (tags != null) ? tags.optString("doc", "").trim() : "";
+			if (!docContent.isEmpty())
+			{
+				sb.append("        /**\n");
+				sb.append("         * ").append(docContent).append("\n");
+				sb.append("         */\n");
+			}
+			sb.append("        ").append(propName).append(" : null,\n\n");
+		}
+		else if (propValue instanceof String)
+		{
+			sb.append("        ").append(propName).append(" : null,\n\n");
+		}
+		else
+		{
+			sb.append("        ").append(propName).append(" : null,\n\n");
+		}
+	}
+
+	private String generatePropertyDoc(String propName, JSONObject propObj)
+	{
+		StringBuilder sb = new StringBuilder();
+		JSONObject tags = propObj.optJSONObject("tags");
+		String docContent = (tags != null) ? tags.optString("doc", "").trim() : "";
+		sb.append("/**\n");
+		if (!docContent.isEmpty())
+		{
+			sb.append(" * ").append(docContent).append("\n");
+		}
+		sb.append(" */\n");
+		sb.append("var ").append(propName).append(";");
+		return sb.toString();
 	}
 
 	private String generatePropertiesDocs()
@@ -241,11 +386,11 @@ public class JSDocGenerator
 	{
 		StringBuilder combined = new StringBuilder();
 		String myHandlersDocs = handlersDocs;
-		if (!propertiesDocs.isEmpty())
+		if (propertiesDocs != null && !propertiesDocs.isEmpty())
 		{
 			combined.append(propertiesDocs);
 		}
-		if (!handlersDocs.isEmpty())
+		if (handlersDocs != null && !handlersDocs.isEmpty())
 		{
 			// Check if there is a handlers-level doc.
 			JSONObject handlersObj = spec.optJSONObject("handlers");
@@ -270,8 +415,26 @@ public class JSDocGenerator
 	{
 		try
 		{
-			FileUtils.writeStringToFile(doc, mergedContent, Charset.forName("UTF8"));
-			System.out.println("Merged doc saved to: " + doc.getAbsolutePath());
+			File targetFile;
+			if (tempTarget)
+			{
+				String fileName = doc.getName();
+				if (fileName.endsWith("_doc.js"))
+				{
+					fileName = fileName.substring(0, fileName.length() - "_doc.js".length()) + "_doc_temp.js";
+				}
+				else
+				{
+					fileName = fileName + ".tmp";
+				}
+				targetFile = new File(doc.getParent(), fileName);
+			}
+			else
+			{
+				targetFile = doc;
+			}
+			FileUtils.writeStringToFile(targetFile, mergedContent, Charset.forName("UTF8"));
+			System.out.println("Merged doc saved to: " + targetFile.getAbsolutePath());
 		}
 		catch (IOException e)
 		{
@@ -279,7 +442,7 @@ public class JSDocGenerator
 		}
 	}
 
-	private String insertPropertiesDocs(String originalContent, String propertiesDocs)
+	private String mergeDocs(String originalContent, String combinedDocs)
 	{
 		String trimmedContent = originalContent.trim();
 		if (trimmedContent.startsWith("/*"))
@@ -296,7 +459,7 @@ public class JSDocGenerator
 					{
 						if (trimmedLine.startsWith("function"))
 						{
-							return propertiesDocs + "\n" + originalContent;
+							return combinedDocs + "\n" + originalContent;
 						}
 						break;
 					}
@@ -304,10 +467,10 @@ public class JSDocGenerator
 				int insertionIndex = endCommentIndex + 2;
 				String before = originalContent.substring(0, insertionIndex);
 				String after = originalContent.substring(insertionIndex);
-				return before + "\n\n" + propertiesDocs + after;
+				return before + "\n" + combinedDocs + after;
 			}
 		}
-		return propertiesDocs + "\n" + originalContent;
+		return combinedDocs + "\n" + originalContent;
 	}
 
 	private String normalizeType(JSONObject myTypes, String type, String componentName)
@@ -324,46 +487,55 @@ public class JSDocGenerator
 			case "int" :
 			case "integer" :
 			case "float" :
+			case "byte" :
 			case "double" :
 				normalizedSpecType = "Number";
 				break;
-			case "boolean" :
 			case "bool" :
 				normalizedSpecType = "Boolean";
 				break;
 			case "record" :
+			case "jsrecord" :
 				normalizedSpecType = "JSRecord";
 				break;
 			case "foundset" :
+			case "jsfoundset" :
 				normalizedSpecType = "JSFoundset";
 				break;
 			case "dataset" :
+			case "jsdataset" :
 				normalizedSpecType = "JSDataset";
 				break;
 			case "event" :
 			case "jsevent" :
 				normalizedSpecType = "JSEvent";
 				break;
-			case "tagstring" :
-				normalizedSpecType = "String";
+			case "jsupload" :
+				normalizedSpecType = "JSUpload";
 				break;
+			case "jsmenu" :
+				normalizedSpecType = "JSMenu";
+				break;
+			case "object" :
 			case "string..." :
-				normalizedSpecType = "String...";
+			case "string" :
+			case "boolean" :
+			case "number" :
+			case "json" :
+			case "dimension" :
+			case "point" :
+			case "date" :
+			case "form" :
+			case "function" :
+				normalizedSpecType = normalizedSpecType.toLowerCase().substring(0, 1).toUpperCase() + normalizedSpecType.toLowerCase().substring(1);
 				break;
 			default :
 				if (componentName != null && myTypes != null)
 				{
 					normalizedSpecType = normalizeTypeForComponent(myTypes, normalizedSpecType, componentName);
 				}
-				else if (type.length() > 1)
-					normalizedSpecType = normalizedSpecType.substring(0, 1).toUpperCase() + normalizedSpecType.substring(1);
 				else
 					normalizedSpecType = type;
-		}
-
-		if (!normalizedSpecType.startsWith("CustomType"))
-		{
-			normalizedSpecType = normalizedSpecType.substring(0, 1).toUpperCase() + normalizedSpecType.substring(1);
 		}
 		if (isArray)
 		{
