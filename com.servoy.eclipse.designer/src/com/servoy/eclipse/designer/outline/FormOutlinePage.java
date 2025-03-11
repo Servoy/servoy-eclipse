@@ -592,15 +592,15 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 	public void collapseSelection()
 	{
-		expandAll(false);
+		setExpandedState(false);
 	}
 
 	public void expandSelection()
 	{
-		expandAll(true);
+		setExpandedState(true);
 	}
 
-	private void expandAll(boolean expand)
+	private void setExpandedState(boolean expand)
 	{
 		Object selection = ((IStructuredSelection)getTreeViewer().getSelection()).getFirstElement();
 		List<Object> childrenList = new ArrayList<Object>();
