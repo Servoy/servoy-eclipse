@@ -192,7 +192,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     const layout = { width: variant.width + 'px', height: variant.height + 'px' };
 
                     const variantElement = new ComponentCache(null, event.data.name, undefined, [], layout, typesRegistry);
-                    variantElement.initForDesigner(JSON.parse(JSON.stringify(event.data.model).slice()));
+                    variantElement.initForDesignerIsVariant(JSON.parse(JSON.stringify(event.data.model).slice()), true);
 
                     const componentModel = variantElement.model;
                     componentModel.variant = variant.classes; // this is hardcoded property name "variant" should be changed to really get the variant property

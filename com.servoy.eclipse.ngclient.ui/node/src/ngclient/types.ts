@@ -246,6 +246,14 @@ export class ComponentCache implements IComponentCache {
         }
         return this;
     }
+	
+	initForDesignerIsVariant(initialModelProperties: { [property: string]: unknown }, isComponentVariant: boolean ): ComponentCache {
+	      // set initial model contents
+	      for (const key of Object.keys(initialModelProperties)) {
+			if(isComponentVariant && key!='styleClass') this.model[key] = initialModelProperties[key];
+	      }
+	      return this;
+	  }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sendChanges(_propertyName: string, _newValue: unknown, _oldValue: unknown, _rowId?: string, _isDataprovider?: boolean) {
