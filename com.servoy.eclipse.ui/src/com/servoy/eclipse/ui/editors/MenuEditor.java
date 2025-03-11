@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.editors;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +29,7 @@ import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.AcceptAllFilter;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -37,6 +39,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -64,6 +67,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IEditorPart;
 import org.json.JSONException;
 import org.sablo.specification.PropertyDescription;
@@ -80,6 +85,11 @@ import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
+import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
@@ -97,19 +107,24 @@ import com.servoy.eclipse.ui.property.ValuelistPropertyController;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMenuItemAction;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.FormAndTableDataProviderLookup;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.StringComparator;
@@ -122,15 +137,20 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
  */
 public class MenuEditor extends PersistEditor
 {
+	public static final Object ROOT = new Object();
+
 	static final int CI_NAME = 0;
 	static final int CI_TYPE = 1;
 	static final int CI_DELETE = 2;
+
+	static final int CI_ADD = 1;
 
 	private Composite parent;
 	private MenuItem selectedMenuItem;
 	private final List<Consumer<MenuItem>> selectedMenuItemCallbacks = new ArrayList<Consumer<MenuItem>>();
 	private TreeViewer menuViewer;
 	private boolean initializingData = false;
+	private Group customPropertiesGroup;
 
 	@Override
 	protected void doRefresh()
@@ -345,11 +365,20 @@ public class MenuEditor extends PersistEditor
 							boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
 							return valid ? null : (newText.length() == 0 ? "" : "Invalid property name");
 						}
-					}, new String[] { "boolean", "form", "int", "relation", "string", "valuelist" }, "Custom Property Type", 4);
+					}, new String[] { "boolean", "dataprovider", "form", "int", "relation", "string", "valuelist" }, "Custom Property Type", 5);
 				if (dialog.open() == Window.OK)
 				{
 					getPersist().putCustomPropertyDefinition(dialog.getValue(), dialog.getExtendedValue());
 					customPropertiesViewer.refresh();
+					Map<String, PropertyDescription> newPropertyMap = new HashMap<String, PropertyDescription>();
+					newPropertyMap.put(dialog.getValue(),
+						new PropertyDescriptionBuilder().withName(dialog.getValue()).withType(TypesRegistry.getType(dialog.getExtendedValue(), false))
+							.build());
+					createGroupedComponents(customPropertiesGroup, null,
+						newPropertyMap,
+						false);
+					myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+					parent.requestLayout();
 					parent.layout(true, true);
 					flagModified();
 				}
@@ -369,87 +398,34 @@ public class MenuEditor extends PersistEditor
 		leftComposite.setLayout(new GridLayout(1, false));
 		leftComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
-		Button addMenuItem = new Button(leftComposite, SWT.NONE);
-		addMenuItem.setText("Add Menu Item");
-		addMenuItem.setToolTipText("Adds a new Menu Item to the Menu or to selected Menu Item");
-		addMenuItem.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(final SelectionEvent e)
-			{
-				String name = NewMenuItemAction.askMenuItemName(getSite().getShell());
-				if (name != null)
-				{
-					IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-					try
-					{
-						MenuItem menuItem = selectedMenuItem != null ? selectedMenuItem.createNewMenuItem(validator, name)
-							: getPersist().createNewMenuItem(validator, name);
-						menuViewer.refresh();
-						menuViewer.setSelection(new StructuredSelection(menuItem), true);
-						flagModified();
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logError(ex);
-						MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Save failed: " + ex.getMessage());
-					}
-				}
-			}
-		});
-
-		Button deleteMenuItem = new Button(leftComposite, SWT.NONE);
-		deleteMenuItem.setText("Delete Menu Item");
-		deleteMenuItem.setToolTipText("Deletes selected Menu Item");
-		deleteMenuItem.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(final SelectionEvent e)
-			{
-				if (selectedMenuItem != null)
-				{
-					if (UIUtils.askConfirmation(getSite().getShell(), "Delete Menu Item '" + selectedMenuItem.getName() + "'",
-						"Are you sure you want to delete menu item '" + selectedMenuItem.getName() + "'"))
-						try
-					{
-						((EclipseRepository)getPersist().getRootObject().getRepository()).deleteObject(selectedMenuItem);
-						menuViewer.refresh();
-						getPersist().flagChanged();
-						flagModified();
-						ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, selectedMenuItem, false);
-						selectedMenuItem = null;
-					}
-					catch (RepositoryException e1)
-					{
-						ServoyLog.logError(e1);
-						UIUtils.reportError("Delete failed", e1.getMessage());
-					}
-				}
-				else
-				{
-					UIUtils.reportWarning("No Menu Item Selected", "Should select a menu item in the tree before trying to delete");
-				}
-			}
-		});
-
 		Label menuItemsLabel = new Label(leftComposite, SWT.NONE);
 		menuItemsLabel.setText("Menu Items");
 		menuItemsLabel.setToolTipText("Select a menu item to edit its properties");
 
-		menuViewer = new TreeViewer(leftComposite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		Composite treeContainer = new Composite(leftComposite, SWT.NONE);
+		treeContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+
+		menuViewer = new TreeViewer(treeContainer, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		menuViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		menuViewer.getTree().setToolTipText("Select a menu item to edit its properties");
+
+		menuViewer.getTree().setLinesVisible(true);
+		menuViewer.getTree().setHeaderVisible(true);
+
+		TreeColumn menuItemNameColumn = new TreeColumn(menuViewer.getTree(), SWT.LEFT, CI_NAME);
+		menuItemNameColumn.setText("Menu Item Name");
+
+		TreeColumn menuItemAddColumn = new TreeColumn(menuViewer.getTree(), SWT.LEFT, CI_ADD);
+
+		TreeColumn menuItemDeleteColumn = new TreeColumn(menuViewer.getTree(), SWT.LEFT, CI_DELETE);
+
 		menuViewer.setContentProvider(new ITreeContentProvider()
 		{
 
 			@Override
 			public Object[] getElements(Object inputElement)
 			{
-				if (inputElement instanceof Menu menu)
-				{
-					return menu.getAllObjectsAsList().toArray();
-				}
-				return null;
+				return new Object[] { getPersist() };
 			}
 
 			@Override
@@ -504,34 +480,38 @@ public class MenuEditor extends PersistEditor
 			@Override
 			public Image getColumnImage(Object element, int columnIndex)
 			{
+				if (element instanceof MenuItem && columnIndex == CI_DELETE)
+				{
+					return Activator.getDefault().loadImageFromBundle("delete.png");
+				}
+				if (columnIndex == CI_ADD)
+				{
+					return Activator.getDefault().loadImageFromBundle("new.png");
+				}
 				return null;
 			}
 
 			@Override
 			public String getColumnText(Object element, int columnIndex)
 			{
-				if (element instanceof MenuItem menuItem)
+				if (columnIndex == CI_NAME && element instanceof ISupportName nameElement)
 				{
-					return menuItem.getName();
-				}
-				if (element instanceof Menu menu)
-				{
-					return menu.getName();
+					return nameElement.getName();
 				}
 				return null;
 			}
 
 		});
-		menuViewer.setInput(getPersist());
+		menuViewer.setInput(ROOT);
 		menuViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
 			public void selectionChanged(SelectionChangedEvent event)
 			{
 				StructuredSelection newSelection = (StructuredSelection)event.getSelection();
 				selectedMenuItem = null;
-				if (newSelection != null && !newSelection.isEmpty())
+				if (newSelection != null && !newSelection.isEmpty() && newSelection.getFirstElement() instanceof MenuItem menuItem)
 				{
-					selectedMenuItem = (MenuItem)newSelection.getFirstElement();
+					selectedMenuItem = menuItem;
 				}
 				getSite().getSelectionProvider().setSelection(selectedMenuItem != null ? new StructuredSelection(selectedMenuItem) : StructuredSelection.EMPTY);
 				try
@@ -545,6 +525,70 @@ public class MenuEditor extends PersistEditor
 				}
 			}
 		});
+
+		menuViewer.getTree().addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseDown(MouseEvent event)
+			{
+				Point pt = new Point(event.x, event.y);
+				// why doesn't this work
+				//TreeItem item = menuViewer.getTree().getItem(pt);
+				TreeItem item = findTreeItem(menuViewer.getTree().getItems(), pt);
+				if (item != null)
+				{
+					Object menuItemData = item.getData();
+					if (item.getBounds(CI_DELETE).contains(pt) && menuItemData instanceof MenuItem menuItem)
+					{
+						if (UIUtils.askConfirmation(getSite().getShell(), "Delete Menu Item '" + menuItem.getName() + "'",
+							"Are you sure you want to delete menu item '" + menuItem.getName() + "'"))
+							try
+						{
+							((EclipseRepository)getPersist().getRootObject().getRepository()).deleteObject(menuItem);
+							menuViewer.refresh();
+							getPersist().flagChanged();
+							flagModified();
+							ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, menuItem, false);
+						}
+						catch (RepositoryException e1)
+						{
+							ServoyLog.logError(e1);
+							UIUtils.reportError("Delete failed", e1.getMessage());
+						}
+					}
+					else
+						if (item.getBounds(CI_ADD).contains(pt))
+					{
+						String name = NewMenuItemAction.askMenuItemName(getSite().getShell());
+						if (name != null)
+						{
+							IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+							try
+							{
+								MenuItem childMenuItem = menuItemData instanceof MenuItem menuItem ? menuItem.createNewMenuItem(validator, name)
+									: getPersist().createNewMenuItem(validator, name);
+								menuViewer.refresh();
+								menuViewer.setSelection(new StructuredSelection(childMenuItem), true);
+								flagModified();
+							}
+							catch (Exception ex)
+							{
+								ServoyLog.logError(ex);
+								MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Save failed: " + ex.getMessage());
+							}
+						}
+					}
+
+				}
+			}
+		});
+
+		TreeColumnLayout treeLayout = new TreeColumnLayout();
+		treeLayout.setColumnData(menuItemNameColumn, new ColumnWeightData(20, 50, true));
+		treeLayout.setColumnData(menuItemAddColumn, new ColumnPixelData(20, false));
+		treeLayout.setColumnData(menuItemDeleteColumn, new ColumnPixelData(20, false));
+		treeContainer.setLayout(treeLayout);
+		menuViewer.expandAll();
 
 		Composite propertiesComposite = new Composite(sashForm, SWT.NONE);
 		GridLayout layout = new GridLayout(2, false);
@@ -725,15 +769,15 @@ public class MenuEditor extends PersistEditor
 			}
 		}
 
-		Group categoryPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
-		categoryPropertiesGroup.setText("Menu Item - Custom Properties");
-		categoryPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		categoryPropertiesGroup.setLayout(new GridLayout(2, false));
+		customPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
+		customPropertiesGroup.setText("Menu Item - Custom Properties");
+		customPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		customPropertiesGroup.setLayout(new GridLayout(2, false));
 
 		Map<String, Object> definitions = getPersist().getCustomPropertiesDefinition();
 		if (definitions != null)
 		{
-			createGroupedComponents(categoryPropertiesGroup, null,
+			createGroupedComponents(customPropertiesGroup, null,
 				definitions.keySet().stream()
 					.map(key -> new PropertyDescriptionBuilder().withName(key).withType(TypesRegistry.getType(definitions.get(key).toString(), false)).build())
 					.collect(Collectors.toMap(pd -> pd.getName(), pd -> pd)),
@@ -948,6 +992,101 @@ public class MenuEditor extends PersistEditor
 					}
 				});
 			}
+			else if (propertyDescription.getType() instanceof DataproviderPropertyType)
+			{
+				TreeSelectViewer dataSourceViewer = new TreeSelectViewer(categoryPropertiesGroup, SWT.NONE);
+				dataSourceViewer.setTitleText("Select dataprovider");
+				dataSourceViewer.setContentProvider(new DataProviderContentProvider(null, editingFlattenedSolution, null));
+				dataSourceViewer.setLabelProvider(new LabelProvider()
+				{
+					@Override
+					public Image getImage(Object element)
+					{
+						return null;
+					}
+
+					@Override
+					public String getText(Object element)
+					{
+						if (element == null || element == DataProviderContentProvider.NONE)
+						{
+							return Messages.LabelNone;
+						}
+						if (element instanceof IDataProvider dataProvider) return dataProvider.getDataProviderID();
+						if (element instanceof DataProviderNodeWrapper wrapper) return wrapper.node;
+						return Messages.LabelUnresolved;
+					}
+				});
+				dataSourceViewer
+					.setInput(new DataProviderTreeViewer.DataProviderOptions(true, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NO, true, true,
+						null));
+				dataSourceViewer.setEditable(false);
+				dataSourceViewer.setTextLabelProvider(new LabelProvider()
+				{
+					@Override
+					public Image getImage(Object element)
+					{
+						return null;
+					}
+
+					@Override
+					public String getText(Object element)
+					{
+						if (element instanceof IDataProvider) return ((IDataProvider)element).getDataProviderID();
+						return "";
+					}
+				});
+
+				dataSourceViewer.addSelectionChangedListener(new ISelectionChangedListener()
+				{
+					public void selectionChanged(SelectionChangedEvent event)
+					{
+						if (selectedMenuItem != null && !initializingData)
+						{
+							IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
+							String dpID = null;
+							if (!selection.isEmpty())
+							{
+								dpID = selection.getFirstElement().toString();
+							}
+							if (isExtraProperties)
+							{
+								selectedMenuItem.putExtraProperty(categoryName, propertyName, dpID);
+							}
+							else
+							{
+								selectedMenuItem.putCustomPropertyValue(propertyName, dpID);
+							}
+							flagModified();
+						}
+					}
+				});
+				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
+					Object value = menuItem != null
+						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : null;
+					FormAndTableDataProviderLookup dpLookup = new FormAndTableDataProviderLookup(editingFlattenedSolution, null, null);
+					IDataProvider dp = null;
+					if (value != null)
+					{
+						try
+						{
+							dp = dpLookup.getDataProvider(value.toString());
+						}
+						catch (RepositoryException e)
+						{
+							Debug.error(e);
+						}
+					}
+					if (dp == null)
+					{
+						dataSourceViewer.setSelection(StructuredSelection.EMPTY);
+					}
+					else
+					{
+						dataSourceViewer.setSelection(new StructuredSelection(dp));
+					}
+				});
+			}
 			else if (propertyDescription.getConfig() instanceof ValuesConfig valuesConfig && valuesConfig.getDisplay() != null)
 			{
 				Combo propertyCombobox = new Combo(categoryPropertiesGroup, SWT.READ_ONLY);
@@ -1045,5 +1184,27 @@ public class MenuEditor extends PersistEditor
 			}
 		});
 		PersistPropertySource.refreshPropertiesView();
+	}
+
+	private TreeItem findTreeItem(TreeItem[] items, Point pt)
+	{
+		if (items != null)
+		{
+			for (TreeItem item : items)
+			{
+				if (item.getBounds(CI_ADD).contains(pt) || item.getBounds(CI_DELETE).contains(pt))
+				{
+					return item;
+				}
+				TreeItem found = findTreeItem(item.getItems(), pt);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+		}
+
+		return null;
+
 	}
 }
