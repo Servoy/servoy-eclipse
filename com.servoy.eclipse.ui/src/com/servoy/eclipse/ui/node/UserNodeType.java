@@ -171,4 +171,5 @@ public enum UserNodeType
 	BIGINT,
 	PROMISE,
 	EVENTS_MANAGER,
+	EVENTS_MANAGER_ITEM,
 }
