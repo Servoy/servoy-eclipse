@@ -384,11 +384,10 @@ public class NewMethodWizard extends Wizard implements INewWizard
 			if (0 == scopeNames.length)
 			{
 				checkButton.setEnabled(false);
-			}
-
-			if (formNameList.get(0).equals(NO_FORM_PRESENT) && 0 == scopeNames.length)
-			{
-				setPageComplete(validatePage());
+				if (formNameList.get(0).equals(NO_FORM_PRESENT))
+				{
+					setPageComplete(validatePage());
+				}
 			}
 		}
 
@@ -459,12 +458,9 @@ public class NewMethodWizard extends Wizard implements INewWizard
 				{
 					error = "Name error encountered due to following reason: " + errMessage;
 				}
-				if (!globalSelected && formName.equals(NO_FORM_PRESENT))
+				if (!checkButton.isEnabled() && formName.equals(NO_FORM_PRESENT))
 				{
-					if (-1 == scopesCombo.getSelectionIndex())
-					{
-						error = "Create a form";
-					}
+					error = "Create a form";
 				}
 
 			}
