@@ -685,7 +685,8 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		String prefix = "component";
 		if (type instanceof String str)
 		{
-			prefix = str.toLowerCase().replaceAll("-", "_");
+
+			prefix = str.replaceAll("\\s", "").toLowerCase().replaceAll("-", "_");
 		}
 		String compName = null;
 		while (compName == null || !PersistFinder.INSTANCE.checkName(form, compName))
