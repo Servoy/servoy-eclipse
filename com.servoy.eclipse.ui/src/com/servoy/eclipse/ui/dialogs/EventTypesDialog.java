@@ -78,9 +78,10 @@ public class EventTypesDialog extends Dialog
 	@Override
 	protected Control createDialogArea(Composite parent)
 	{
+		Composite composite = (Composite)super.createDialogArea(parent);
 		getShell().setText("Edit Application Event Types");
 
-		ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		ScrolledComposite myScrolledComposite = new ScrolledComposite(composite, SWT.H_SCROLL | SWT.V_SCROLL);
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
 
