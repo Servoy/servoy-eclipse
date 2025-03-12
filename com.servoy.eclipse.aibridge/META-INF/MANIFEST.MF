@@ -60,6 +60,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide;bundle-version="3.21.0",
  org.eclipse.ui.editors;bundle-version="3.16.0",
  com.servoy.eclipse.ui.tweaks;bundle-version="2023.12.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.aibridge
 Bundle-ActivationPolicy: lazy
