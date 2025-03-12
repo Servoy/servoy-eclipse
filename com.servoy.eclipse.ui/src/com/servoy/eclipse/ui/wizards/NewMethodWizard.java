@@ -201,11 +201,11 @@ public class NewMethodWizard extends Wizard implements INewWizard
 		{
 			String selectedSolutionName = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
 			String selectedFormName = formsCombo.getItem(formsCombo.getSelectionIndex());
-			String selectedScopeName = scopesCombo.getItem(scopesCombo.getSelectionIndex());
 			String selectedMethodName = methodNameText.getText();
 			boolean globalSelected = checkButton.getSelection();
 			if (globalSelected || selectedFormName.equals(NO_FORM_PRESENT))
 			{
+				String selectedScopeName = scopesCombo.getItem(scopesCombo.getSelectionIndex());
 				return new SelectedMethod(false, selectedSolutionName, selectedScopeName, selectedMethodName);
 			}
 			return new SelectedMethod(true, selectedSolutionName, selectedFormName, selectedMethodName);
@@ -377,8 +377,19 @@ public class NewMethodWizard extends Wizard implements INewWizard
 			formsCombo.select(0);
 
 			// update scopes combo
-			scopesCombo.setItems(servoyProject.getEditingSolution().getRuntimeProperty(Solution.SCOPE_NAMES));
+			String scopeNames[] = servoyProject.getEditingSolution().getRuntimeProperty(Solution.SCOPE_NAMES);
+			scopesCombo.setItems(scopeNames);
 			scopesCombo.select(0);
+
+			if (0 == scopeNames.length)
+			{
+				checkButton.setEnabled(false);
+			}
+
+			if (formNameList.get(0).equals(NO_FORM_PRESENT) && 0 == scopeNames.length)
+			{
+				setPageComplete(validatePage());
+			}
 		}
 
 		@Override
@@ -441,12 +452,19 @@ public class NewMethodWizard extends Wizard implements INewWizard
 			{
 				String methodName = methodNameText.getText();
 				String solutionName = solutionsCombo.getItem(solutionsCombo.getSelectionIndex());
-				String formName = checkButton.getSelection() ? "" : formsCombo.getItem(formsCombo.getSelectionIndex());
-
+				boolean globalSelected = checkButton.getSelection();
+				String formName = globalSelected ? "" : formsCombo.getItem(formsCombo.getSelectionIndex());
 				String errMessage = methodExists(methodName, solutionName, formName);
 				if (!errMessage.equals(""))
 				{
 					error = "Name error encountered due to following reason: " + errMessage;
+				}
+				if (!globalSelected && formName.equals(NO_FORM_PRESENT))
+				{
+					if (-1 == scopesCombo.getSelectionIndex())
+					{
+						error = "Create a form";
+					}
 				}
 
 			}
