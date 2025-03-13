@@ -1111,13 +1111,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 				}
-
-				// import hook modules should not contain other modules
-				if (SolutionMetaData.isPreImportHook(servoyProject.getSolution()) && modulesNames.length > 0)
-				{
-					String message = "Module " + servoyProject.getSolution().getName() + " is a solution import hook, so it should not contain any modules.";
-					addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
-				}
 			}
 		}
 	}
