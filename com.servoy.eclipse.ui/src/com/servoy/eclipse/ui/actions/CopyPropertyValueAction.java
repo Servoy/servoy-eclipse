@@ -25,9 +25,11 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.views.properties.IPropertySheetEntry;
 
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
 
 /**
  * @author lvostinar
@@ -74,7 +76,17 @@ public class CopyPropertyValueAction extends Action
 		// Assume single selection
 		IPropertySheetEntry entry = (IPropertySheetEntry)selection
 			.getFirstElement();
-		String text = entry.getValueAsString();
+		String text;
+		if (entry instanceof PropertySheetEntry propertySheetEntry &&
+			propertySheetEntry.getValues() != null && propertySheetEntry.getValues().length > 0 &&
+			propertySheetEntry.getValues()[0] instanceof IDataSourceWrapper dataSourceWrapper)
+		{
+			text = dataSourceWrapper.getDataSource();
+		}
+		else
+		{
+			text = entry.getValueAsString();
+		}
 		if (text != null)
 		{
 			if (text.endsWith(Messages.LabelInherited + ")") || text.endsWith(Messages.LabelOverride + ")"))
