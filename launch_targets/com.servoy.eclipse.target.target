@@ -55,9 +55,9 @@
             <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.14.1.202501052236"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.03/"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202502131640"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202502251746"/>
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.06/"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202503121308"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202503121310"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
