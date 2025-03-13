@@ -191,7 +191,8 @@ IEclipsePreferences#org-eclipse-ui-editors:com-servoy-eclipse-servoydarktheme{
 }
 
 IEclipsePreferences#org-eclipse-debug-ui:com-servoy-eclipse-servoydarktheme {
-  preferences: 'org.eclipse.debug.ui.outColor=255,255,255';
+  preferences: 'org.eclipse.debug.ui.outColor=255,255,255'
+  'org.eclipse.debug.ui.PREF_CHANGED_VALUE_BACKGROUND=150,80,115';
 }
 
 IEclipsePreferences#org-eclipse-ui-workbench:com-servoy-eclipse-servoydarktheme {
