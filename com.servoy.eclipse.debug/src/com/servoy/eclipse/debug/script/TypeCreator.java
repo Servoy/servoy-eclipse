@@ -2448,6 +2448,7 @@ public class TypeCreator extends TypeCache
 
 				if (sampleDoc != null && sampleDoc.trim().length() != 0)
 				{
+					docBuilder.append("<br/><b>@sample</b>");
 					docBuilder.append("<pre>");
 					docBuilder.append(HtmlUtils.escapeMarkup(sampleDoc));
 					docBuilder.append("</pre><br/>");
