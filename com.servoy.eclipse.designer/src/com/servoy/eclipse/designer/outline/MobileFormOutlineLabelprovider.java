@@ -32,15 +32,15 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 
 /**
  * Label provider for Servoy mobile form in outline view.
- * 
+ *
  * @author gboros
  */
 
@@ -152,7 +152,7 @@ public class MobileFormOutlineLabelprovider extends FormOutlineLabelprovider
 		}
 		if (element instanceof FormElementGroup)
 		{
-			IFormElement component = MobileFormOutlineContentProvider.getGroupMainComponent((FormElementGroup)element);
+			ISupportFormElement component = MobileFormOutlineContentProvider.getGroupMainComponent((FormElementGroup)element);
 			String name = component != null ? component.getName() : null;
 			return name == null ? Messages.LabelAnonymous : name;
 		}

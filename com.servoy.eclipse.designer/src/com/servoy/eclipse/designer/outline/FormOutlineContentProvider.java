@@ -49,6 +49,7 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -144,7 +145,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		else if (parentElement instanceof FormElementGroup)
 		{
 			List<PersistContext> list = new ArrayList<PersistContext>();
-			Iterator<IFormElement> elements = ((FormElementGroup)parentElement).getElements();
+			Iterator<ISupportFormElement> elements = ((FormElementGroup)parentElement).getElements();
 			while (elements.hasNext())
 			{
 				list.add(PersistContext.create(elements.next(), form));

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 2025.3.0.4040_rc
+Bundle-Version: 2025.6.0.4080_rc
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -135,5 +135,5 @@ Import-Package: com.fasterxml.jackson.annotation;version="2.18.0",
  org.apache.hc.core5.http.io.entity;version="5.2.3",
  org.apache.hc.core5.http.message;version="5.2.3"
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.ui

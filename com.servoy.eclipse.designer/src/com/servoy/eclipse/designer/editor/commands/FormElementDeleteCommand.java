@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -38,6 +39,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -50,6 +52,9 @@ import com.servoy.eclipse.ui.wizards.ICheckBoxView;
 import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
@@ -60,6 +65,7 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
@@ -109,9 +115,9 @@ public class FormElementDeleteCommand extends Command
 			{
 				throw new IllegalArgumentException();
 			}
-			else if (child instanceof IFlattenedPersistWrapper)
+			else if (child instanceof IFlattenedPersistWrapper wp)
 			{
-				children[i] = ((IFlattenedPersistWrapper)child).getWrappedPersist();
+				children[i] = wp.getWrappedPersist();
 			}
 		}
 		this.children = children;
@@ -224,6 +230,14 @@ public class FormElementDeleteCommand extends Command
 			{
 				childStructure.addAll(((LayoutContainer)child).getFlattenedFormElementsAndLayoutContainers());
 			}
+			if (child instanceof WebCustomType custom)
+			{
+				IBasicWebComponent component = custom.getParentComponent();
+				if (component.getExtendsID() > 0 && isInherited(custom, component))
+				{
+					return;
+				}
+			}
 			List<IPersist> overriding = new ArrayList<IPersist>();
 			for (IPersist currentPersist : childStructure)
 			{
@@ -266,6 +280,28 @@ public class FormElementDeleteCommand extends Command
 		}
 		setLabel(label);
 		if (children.length > 0) redo();
+	}
+
+	private boolean isInherited(WebCustomType custom, IBasicWebComponent component)
+	{
+		if (custom.getExtendsID() > 0) return true;
+		IPersist parentComponent = PersistHelper.getSuperPersist(component);
+		if (parentComponent instanceof IBasicWebObject indexed)
+		{
+			Object value = indexed.getProperty(custom.getJsonKey());
+			if (value instanceof IChildWebObject[] arrayValue && custom.getIndex() < arrayValue.length)
+			{
+				Display.getDefault().asyncExec(() -> {
+					String message = "Canot delete inherited " + custom.getJsonKey() + ", check the log for more details.";
+					MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+						"Cannot delete", message);
+				});
+				ServoyLog.logError(new Exception("Cannot delete custom type " + custom.getUUID() +
+					" because is inherited from the parent component " + parentComponent.getUUID()));
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

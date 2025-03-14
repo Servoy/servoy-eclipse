@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in For Various Look and Feel Tweaks (like changing any icon in developer)
 Bundle-SymbolicName: com.servoy.eclipse.ui.tweaks;singleton:=true
-Bundle-Version: 2025.3.0.4040_rc
+Bundle-Version: 2025.6.0.4080_rc
 Bundle-Activator: com.servoy.eclipse.ui.tweaks.Activator
 Bundle-Vendor: Servoy
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.ui.tweaks
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.preferences,
  org.eclipse.emf.common.util,

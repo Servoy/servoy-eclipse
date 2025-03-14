@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Cloud
 Bundle-SymbolicName: com.servoy.eclipse.cloud;singleton:=true
-Bundle-Version: 2025.3.0.4040_rc
+Bundle-Version: 2025.6.0.4080_rc
 Export-Package: com.servoy.eclipse.cloud
 Import-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.util,
@@ -25,6 +25,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources,
  org.eclipse.jgit,
  org.eclipse.jface
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.cloud
 Bundle-ActivationPolicy: lazy

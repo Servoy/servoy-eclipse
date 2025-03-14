@@ -192,6 +192,7 @@ import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
+import com.servoy.j2db.scripting.JSEventsManager;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSMenu;
 import com.servoy.j2db.scripting.JSMenuItem;
@@ -669,6 +670,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = TreeBuilder.createJSBigInt(this);
 			}
+			else if (type == UserNodeType.PROMISE)
+			{
+				lm = TreeBuilder.createJSPromise(this);
+			}
 			else if (type == UserNodeType.OBJECT)
 			{
 				lm = TreeBuilder.createJSObject(this);
@@ -705,6 +710,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.FOUNDSET_MANAGER)
 			{
 				lm = getJSMethods(JSDatabaseManager.class, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null,
+					null);
+			}
+			else if (type == UserNodeType.EVENTS_MANAGER)
+			{
+				lm = getJSMethods(JSEventsManager.class, IExecutingEnviroment.TOPLEVEL_EVENTS_MANAGER, null, UserNodeType.EVENTS_MANAGER_ITEM, null,
 					null);
 			}
 			else if (type == UserNodeType.DATASOURCES)

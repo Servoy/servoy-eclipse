@@ -44,7 +44,7 @@ public class EditorActionsRegistry
 
 	public interface EditorComponentActionHandler
 	{
-		void createComponent(IPropertySource persistPropertySource, UUID uuid, String propertyName, String type, boolean prepend, boolean dropTargetIsSibling);
+		void createComponent(IPropertySource persistPropertySource, UUID uuid, String propertyName, String type, Integer index, boolean dropTargetIsSibling);
 
 		void deleteComponent(IPropertySource propertySource, UUID uuid);
 

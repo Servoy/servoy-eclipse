@@ -44,7 +44,7 @@ import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
-import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -76,19 +76,19 @@ public class ZOrderAction extends DesignerSelectionAction
 				element = ((IFlattenedPersistWrapper)element).getWrappedPersist();
 			}
 			this.element = element;
-			if (element instanceof IFormElement)
+			if (element instanceof ISupportFormElement)
 			{
-				this.zIndex = ((IFormElement)element).getFormIndex();
-				id = ((IFormElement)element).getUUID();
+				this.zIndex = ((ISupportFormElement)element).getFormIndex();
+				id = ((ISupportFormElement)element).getUUID();
 				nrOfSubElements = 1;
 			}
 			else if (element instanceof FormElementGroup)
 			{
-				Iterator<IFormElement> groupElementIterator = ((FormElementGroup)element).getElements();
+				Iterator<ISupportFormElement> groupElementIterator = ((FormElementGroup)element).getElements();
 				this.zIndex = -10000000;
 				while (groupElementIterator.hasNext())
 				{
-					IFormElement fe = groupElementIterator.next();
+					ISupportFormElement fe = groupElementIterator.next();
 					if (fe.getFormIndex() > zIndex)
 					{
 						this.zIndex = fe.getFormIndex();
@@ -103,28 +103,29 @@ public class ZOrderAction extends DesignerSelectionAction
 		@Override
 		public boolean equals(Object o)
 		{
-			if (o instanceof IFormElement && element instanceof IFormElement) return ((IFormElement)element).getUUID().equals(((IFormElement)o).getUUID());
+			if (o instanceof ISupportFormElement && element instanceof ISupportFormElement)
+				return ((ISupportFormElement)element).getUUID().equals(((ISupportFormElement)o).getUUID());
 			else if (o instanceof FormElementGroup && element instanceof FormElementGroup) return ((FormElementGroup)element).getGroupID().equals(
 				((FormElementGroup)o).getGroupID());
 			else if (o instanceof OrderableElement) return Utils.equalObjects(element, ((OrderableElement)o).element);
 			return false;
 		}
 
-		public HashMap<UUID, IFormElement> getElements()
+		public HashMap<UUID, ISupportFormElement> getElements()
 		{
-			HashMap<UUID, IFormElement> returnList = null;
-			if (element instanceof IFormElement)
+			HashMap<UUID, ISupportFormElement> returnList = null;
+			if (element instanceof ISupportFormElement)
 			{
-				returnList = new HashMap<UUID, IFormElement>(1);
-				returnList.put(((IFormElement)element).getUUID(), (IFormElement)element);
+				returnList = new HashMap<UUID, ISupportFormElement>(1);
+				returnList.put(((ISupportFormElement)element).getUUID(), (ISupportFormElement)element);
 			}
 			else if (element instanceof FormElementGroup)
 			{
-				returnList = new HashMap<UUID, IFormElement>();
-				Iterator<IFormElement> it = ((FormElementGroup)element).getElements();
+				returnList = new HashMap<UUID, ISupportFormElement>();
+				Iterator<ISupportFormElement> it = ((FormElementGroup)element).getElements();
 				while (it.hasNext())
 				{
-					IFormElement fe = it.next();
+					ISupportFormElement fe = it.next();
 					returnList.put(fe.getUUID(), fe);
 				}
 			}
@@ -132,16 +133,16 @@ public class ZOrderAction extends DesignerSelectionAction
 			return returnList;
 		}
 
-		public IFormElement getFormElement()
+		public ISupportFormElement getFormElement()
 		{
-			if (element instanceof IFormElement)
+			if (element instanceof ISupportFormElement)
 			{
-				return (IFormElement)element;
+				return (ISupportFormElement)element;
 			}
 			else if (element instanceof FormElementGroup)
 			{
-				IFormElement returnElement = null;
-				Iterator<IFormElement> elements = ((FormElementGroup)element).getElements();
+				ISupportFormElement returnElement = null;
+				Iterator<ISupportFormElement> elements = ((FormElementGroup)element).getElements();
 				while (elements.hasNext())
 				{
 					returnElement = elements.next();
@@ -158,7 +159,7 @@ public class ZOrderAction extends DesignerSelectionAction
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
 		public int compare(OrderableElement o1, OrderableElement o2)
@@ -265,7 +266,7 @@ public class ZOrderAction extends DesignerSelectionAction
 
 		for (Object o : models)
 		{
-			if (o instanceof IFormElement || o instanceof FormElementGroup)
+			if (o instanceof ISupportFormElement || o instanceof FormElementGroup)
 			{
 				OrderableElement oe = new OrderableElement(o, true);
 				elementsToAdjust.put(oe.id, oe);
@@ -300,7 +301,7 @@ public class ZOrderAction extends DesignerSelectionAction
 			for (OrderableElement ae : tmpAdjustedElements)
 			{
 				if (elementsToAdjust.containsKey(ae.id)) ae.needsAdjustement = false;
-				if (ae.element instanceof IFormElement) ae.zIndex = index++;
+				if (ae.element instanceof ISupportFormElement) ae.zIndex = index++;
 				else
 				{
 					ae.zIndex = index + ae.nrOfSubElements - 1;
@@ -313,9 +314,10 @@ public class ZOrderAction extends DesignerSelectionAction
 		return adjustedElements;
 	}
 
-	private static ArrayList<OrderableElement> getNeighbours(Form form, OrderableElement oe, HashMap<UUID, OrderableElement> elementsToAdjust, boolean recursive)
+	private static ArrayList<OrderableElement> getNeighbours(Form form, OrderableElement oe, HashMap<UUID, OrderableElement> elementsToAdjust,
+		boolean recursive)
 	{
-		HashMap<UUID, IFormElement> neighbours = ElementUtil.getNeighbours(form, oe.getElements(), oe.getElements(), recursive);
+		HashMap<UUID, ISupportFormElement> neighbours = ElementUtil.getNeighbours(form, oe.getElements(), oe.getElements(), recursive);
 
 		ArrayList<OrderableElement> unorderedNeighbours = groupElements(neighbours, form);
 		Collections.sort(unorderedNeighbours, OrdarableElementZOrderComparator.INSTANCE);
@@ -327,16 +329,16 @@ public class ZOrderAction extends DesignerSelectionAction
 		return unorderedNeighbours;
 	}
 
-	private static ArrayList<OrderableElement> groupElements(HashMap<UUID, IFormElement> elementList, Form form)
+	private static ArrayList<OrderableElement> groupElements(HashMap<UUID, ISupportFormElement> elementList, Form form)
 	{
 		if (elementList == null) return null;
 
 		ArrayList<OrderableElement> returnList = new ArrayList<OrderableElement>();
 
-		List<IFormElement> simpleElements = new ArrayList<IFormElement>();
+		List<ISupportFormElement> simpleElements = new ArrayList<ISupportFormElement>();
 		Set<String> groupsSet = new LinkedHashSet<String>();
 
-		for (IFormElement bc : elementList.values())
+		for (ISupportFormElement bc : elementList.values())
 		{
 			String groupID = bc.getGroupID();
 			if (groupID == null) simpleElements.add(bc);
@@ -346,7 +348,7 @@ public class ZOrderAction extends DesignerSelectionAction
 			}
 		}
 
-		for (IFormElement bc : simpleElements)
+		for (ISupportFormElement bc : simpleElements)
 		{
 			OrderableElement oe = new OrderableElement(bc, false);
 			returnList.add(oe);
@@ -403,14 +405,15 @@ public class ZOrderAction extends DesignerSelectionAction
 				{
 					requests = new HashMap<EditPart, Request>();
 				}
-				if (oe.element instanceof IFormElement) requests.put(editPartMap.get(oe.element), new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY,
-					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(oe.zIndex), ""));
+				if (oe.element instanceof ISupportFormElement)
+					requests.put(editPartMap.get(oe.element), new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY,
+						StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(oe.zIndex), ""));
 				else
 				{
-					ArrayList<IFormElement> groupElements = new ArrayList<IFormElement>(oe.getElements().values());
+					ArrayList<ISupportFormElement> groupElements = new ArrayList<ISupportFormElement>(oe.getElements().values());
 					Collections.sort(groupElements, Form.FORM_INDEX_COMPARATOR);
 					int index = oe.zIndex - oe.nrOfSubElements + 1;
-					for (IFormElement bc : groupElements)
+					for (ISupportFormElement bc : groupElements)
 					{
 						requests.put(editPartMap.get(bc), new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY,
 							StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), Integer.valueOf(index++), ""));

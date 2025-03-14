@@ -85,6 +85,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
@@ -99,6 +100,8 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
@@ -379,6 +382,25 @@ public class ElementUtil
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
 			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());
+			if (persist instanceof WebComponent webComponent && newPersist instanceof WebComponent newWebComponent)
+			{
+				List<WebCustomType> customTypes = new ArrayList<>();
+				for (IPersist child : webComponent.getAllObjectsAsList())
+				{
+					if (child instanceof WebCustomType custom)
+					{
+						customTypes.add(custom);
+					}
+				}
+				Iterator<WebCustomType> customTypeIterator = customTypes.iterator();
+				for (IPersist child : newWebComponent.getAllObjectsAsList())
+				{
+					if (child instanceof WebCustomType custom && customTypeIterator.hasNext())
+					{
+						custom.setExtendsID(customTypeIterator.next().getID());
+					}
+				}
+			}
 			if (CSSPositionUtils.useCSSPosition(persist))
 			{
 				ISupportBounds iSupportBounds = (ISupportBounds)persist;
@@ -586,7 +608,7 @@ public class ElementUtil
 		if (model instanceof FormElementGroup)
 		{
 			// find persist class for component in component-with-title
-			for (IFormElement elem : Utils.iterate(((FormElementGroup)model).getElements()))
+			for (ISupportFormElement elem : Utils.iterate(((FormElementGroup)model).getElements()))
 			{
 				if (elem instanceof AbstractBase && ((AbstractBase)elem).getCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName) == null)
 				{
@@ -659,33 +681,45 @@ public class ElementUtil
 		return overlappingElements;
 	}
 
-	public static HashMap<UUID, IFormElement> getNeighbours(Form form, HashMap<UUID, IFormElement> foundList, HashMap<UUID, IFormElement> elementsToVisit,
+	public static HashMap<UUID, ISupportFormElement> getNeighbours(Form form, HashMap<UUID, ISupportFormElement> foundList,
+		HashMap<UUID, ISupportFormElement> elementsToVisit,
 		boolean recursive)
 	{
 		if (form == null || foundList == null || elementsToVisit == null || elementsToVisit.isEmpty()) return null;
 
-		HashMap<UUID, IFormElement> newFoundList = new HashMap<UUID, IFormElement>(foundList);
+		HashMap<UUID, ISupportFormElement> newFoundList = new HashMap<UUID, ISupportFormElement>(foundList);
 
-		HashMap<UUID, IFormElement> newElements = new HashMap<UUID, IFormElement>();
+		HashMap<UUID, ISupportFormElement> newElements = new HashMap<UUID, ISupportFormElement>();
 
-		HashMap<UUID, IFormElement> returnList = null;
+		HashMap<UUID, ISupportFormElement> returnList = null;
 
 		Iterator<IPersist> it = form.getAllObjects();
+		if (form.isResponsiveLayout())
+		{
+			if (elementsToVisit.size() == 1)
+			{
+				ISupportFormElement element = elementsToVisit.values().iterator().next();
+				if (element.getParent() instanceof LayoutContainer lc && "csspositioncontainer".equals(lc.getSpecName()))
+				{
+					it = lc.getAllObjects();
+				}
+			}
+		}
 		while (it.hasNext())
 		{
 			IPersist element = it.next();
-			if (element instanceof IFormElement)
+			if (element instanceof ISupportFormElement)
 			{
 				if (newFoundList.containsKey(element.getUUID())) continue;
-				for (IFormElement bc : elementsToVisit.values())
+				for (ISupportFormElement bc : elementsToVisit.values())
 				{
 					if (elementsIntersect(element, bc))
 					{
-						newFoundList.put(element.getUUID(), (IFormElement)element);
-						newElements.put(element.getUUID(), (IFormElement)element);
-						List<IFormElement> groupMemebers = getGroupMembers(form, (IFormElement)element);
+						newFoundList.put(element.getUUID(), (ISupportFormElement)element);
+						newElements.put(element.getUUID(), (ISupportFormElement)element);
+						List<ISupportFormElement> groupMemebers = getGroupMembers(form, (ISupportFormElement)element);
 						if (groupMemebers == null) break;
-						for (IFormElement neighbour : groupMemebers)
+						for (ISupportFormElement neighbour : groupMemebers)
 						{
 							if (!newFoundList.containsKey(neighbour.getUUID()))
 							{
@@ -705,11 +739,11 @@ public class ElementUtil
 		return returnList;
 	}
 
-	public static HashMap<UUID, IFormElement> getImmediateNeighbours(Form form, HashMap<UUID, IFormElement> elementsToVisit)
+	public static HashMap<UUID, ISupportFormElement> getImmediateNeighbours(Form form, HashMap<UUID, IFormElement> elementsToVisit)
 	{
 		if (elementsToVisit == null || form == null || elementsToVisit.isEmpty()) return null;
 
-		HashMap<UUID, IFormElement> returnList = new HashMap<UUID, IFormElement>(elementsToVisit);
+		HashMap<UUID, ISupportFormElement> returnList = new HashMap<UUID, ISupportFormElement>(elementsToVisit);
 
 		Iterator<IPersist> it = form.getAllObjects();
 		while (it.hasNext())
@@ -717,15 +751,15 @@ public class ElementUtil
 			IPersist element = it.next();
 			if (element instanceof IFormElement)
 			{
-				for (IFormElement bc : elementsToVisit.values())
+				for (ISupportFormElement bc : elementsToVisit.values())
 				{
 					if (elementsIntersect(element, bc))
 					{
 						if (!returnList.containsKey(element.getUUID())) returnList.put(element.getUUID(), (IFormElement)element);
-						List<IFormElement> groupMemebers = getGroupMembers(form, (IFormElement)element);
+						List<ISupportFormElement> groupMemebers = getGroupMembers(form, (ISupportFormElement)element);
 						if (groupMemebers != null)
 						{
-							for (IFormElement neighbour : groupMemebers)
+							for (ISupportFormElement neighbour : groupMemebers)
 							{
 								if (!returnList.containsKey(neighbour.getUUID())) returnList.put(neighbour.getUUID(), neighbour);
 							}
@@ -738,20 +772,20 @@ public class ElementUtil
 		return returnList;
 	}
 
-	public static List<IFormElement> getGroupMembers(Form form, IFormElement element)
+	public static List<ISupportFormElement> getGroupMembers(Form form, ISupportFormElement element)
 	{
 		String groupID = element.getGroupID();
 		if (groupID == null) return null;
 
-		ArrayList<IFormElement> returnList = new ArrayList<IFormElement>();
+		ArrayList<ISupportFormElement> returnList = new ArrayList<ISupportFormElement>();
 
 		Iterator<IPersist> it = form.getAllObjects();
 		while (it.hasNext())
 		{
 			IPersist currentElement = it.next();
-			if (currentElement instanceof IFormElement)
+			if (currentElement instanceof ISupportFormElement)
 			{
-				String currentGroupID = ((IFormElement)currentElement).getGroupID();
+				String currentGroupID = ((ISupportFormElement)currentElement).getGroupID();
 				if (currentGroupID != null && !currentElement.getUUID().equals(element) && currentGroupID.equals(groupID))
 					returnList.add((BaseComponent)currentElement);
 			}
@@ -762,11 +796,11 @@ public class ElementUtil
 
 	public static boolean elementsIntersect(IPersist e1, IPersist e2)
 	{
-		IFormElement element1;
-		IFormElement element2;
-		if (e1 instanceof IFormElement) element1 = (IFormElement)e1;
+		ISupportFormElement element1;
+		ISupportFormElement element2;
+		if (e1 instanceof ISupportFormElement) element1 = (ISupportFormElement)e1;
 		else return false;
-		if (e2 instanceof IFormElement) element2 = (IFormElement)e2;
+		if (e2 instanceof ISupportFormElement) element2 = (ISupportFormElement)e2;
 		else return false;
 
 		Rectangle element1Rectangle = new Rectangle(CSSPositionUtils.getSize(element1));

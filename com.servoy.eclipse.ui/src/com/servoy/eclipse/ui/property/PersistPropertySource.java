@@ -562,6 +562,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								pd = new ValuelistPropertyController<Object>(propertyName, propertyName, persistContext,
 									true)
 								{
+
 									@Override
 									protected IPropertyConverter<Object, Integer> createConverter()
 									{
@@ -586,11 +587,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							}
 							else
 							{
-								pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
-									propertyDescription,
-									form, persistContext,
-									readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
-									flattenedEditingSolution);
+								pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName, propertyDescription, form, persistContext, readOnly,
+									new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this, flattenedEditingSolution);
 							}
 							if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
 							{
@@ -609,8 +607,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				// bean: use size, location and name descriptors from the persist (Bean)
 				try
 				{
-					for (java.beans.PropertyDescriptor element : java.beans.Introspector.getBeanInfo(
-						persistContext.getPersist().getClass()).getPropertyDescriptors())
+					for (
+
+					java.beans.PropertyDescriptor element : java.beans.Introspector.getBeanInfo(persistContext.getPersist().getClass())
+						.getPropertyDescriptors())
 					{
 						try
 						{ //if this is a IWebComponent, then only register the 'name' property
@@ -1338,6 +1338,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					return new ValuelistPropertyController<String>(id, displayName, persistContext,
 						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)))
 					{
+
 						@Override
 						protected IPropertyConverter<String, Integer> createConverter()
 						{
@@ -1364,6 +1365,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.media && beanHandler.getPropertyType() == String.class)
 				{
+
 					// String property, select an image
 					MediaPropertyControllerConfig config = null;
 					if (propertyDescription != null && propertyDescription.getConfig() instanceof MediaPropertyControllerConfig)
@@ -1378,7 +1380,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					Object option = propertyEditorHint.getOption(PropertyEditorOption.styleLookupName);
 					if (option instanceof String)
 					{
-						return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, (String)option, form);
+						return
+
+						createStyleClassPropertyController(persistContext.getPersist(), id, displayName, (String)option, form);
 					}
 				}
 			}
@@ -1625,6 +1629,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					resultingPropertyDescriptor = new PropertyController<Integer, Object>(id, displayName,
 						new ComplexProperty.ComplexPropertyConverter<Integer>()
 						{
+
 							@Override
 							public Object convertProperty(Object property, Integer value)
 							{
@@ -1728,6 +1733,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						resultingPropertyDescriptor = new PropertyController<Object, Object>(id, displayName, new IPropertyConverter<Object, Object>()
 						{
+
 							public Object convertProperty(Object id, Object value)
 							{
 								return value == null ? "" : value;
@@ -1748,6 +1754,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 					else
 					{
+
 						final int type;
 						if (propertyType == BytePropertyType.INSTANCE)
 						{
@@ -2669,6 +2676,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 	}
 
+	private boolean isSameAsInheritedValue(Object id, Object value, Object beanPropertyPersist)
+	{
+		Object inheritedValue = getInheritedValue(id, beanPropertyPersist);
+		return Utils.equalObjects(value, inheritedValue);
+	}
+
 	public void setPersistPropertyValue(Object id, Object value)
 	{
 		init();
@@ -2685,6 +2698,16 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 
 				Object beanPropertyPersist = beanPropertyDescriptor.valueObject;
+
+				if (isSameAsInheritedValue(id, value, beanPropertyPersist))
+				{
+					// if the value is the same as the inherited value, clear the property
+					if (beanPropertyPersist instanceof AbstractBase)
+					{
+						((AbstractBase)beanPropertyPersist).clearProperty((String)id);
+						return;
+					}
+				}
 
 				boolean isDefaultValue = (value == null); // most properties have null as a default value
 				Object defaultSpecValue = null;

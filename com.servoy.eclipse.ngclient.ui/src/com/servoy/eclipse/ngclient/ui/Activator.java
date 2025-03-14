@@ -180,14 +180,19 @@ public class Activator extends Plugin
 		IPath stateLocation = plugin.getStateLocation();
 		File baseDir = stateLocation.toFile();
 		File file = new File(baseDir, path);
-		if (!file.exists())
+		File fullyGenerated = new File(baseDir, ".fullygenerated");
+		if (!file.exists() || !fullyGenerated.exists())
 		{
 			String archive = element.getAttribute("archive");
 			URL archiveUrl = Platform.getBundle(pluginId).getResource(archive);
 			if (archiveUrl != null)
 			{
-				if (deletePreviousPaths)
+				if (deletePreviousPaths || !fullyGenerated.exists())
 				{
+					if (fullyGenerated.exists())
+					{
+						fullyGenerated.delete();
+					}
 					File[] dirs = baseDir.listFiles(oldFile -> oldFile.isDirectory() && !oldFile.getName().equals(NG2_FOLDER));
 					if (dirs != null)
 					{
@@ -217,6 +222,10 @@ public class Activator extends Plugin
 					else if (ZipUtils.isTarXZFile(archiveUrl))
 					{
 						ZipUtils.extractTarXZ(archiveUrl, baseDir);
+					}
+					if (!fullyGenerated.exists())
+					{
+						fullyGenerated.createNewFile();
 					}
 				}
 				catch (IOException e)

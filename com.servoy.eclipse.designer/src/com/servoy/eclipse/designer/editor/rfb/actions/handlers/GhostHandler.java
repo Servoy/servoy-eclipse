@@ -309,7 +309,8 @@ public class GhostHandler implements IServerService
 												: basicWebComponent.getUUID() + ghostWebObject.getJsonKey();
 											String ghostID = parentID != null ? parentID + "#" + ghostWebObject.getUUID() : ghostWebObject.getUUID().toString();
 											writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID, ghostWebObject.getIndex(),
-												ghostWebObject.getTypeName(), inherited);
+												ghostWebObject.getTypeName(),
+												inherited || ghostWebObject instanceof WebCustomType custom && custom.getExtendsID() > 0);
 										}
 										catch (JSONException e1)
 										{

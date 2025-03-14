@@ -92,6 +92,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportSize;
@@ -1014,8 +1015,9 @@ public class ElementFactory
 			String tabpanelName = null;
 			while (true)
 			{
-				Iterator<IFormElement> it = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent).getFlattenedForm(
-					parent).getFormElementsSortedByFormIndex();
+				Iterator<ISupportFormElement> it = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent)
+					.getFlattenedForm(parent)
+					.getFormElementsSortedByFormIndex();
 				tabpanelName = tabpanelNameHint + (counter == 0 ? "" : ("_" + counter));
 				boolean duplicate = false;
 				while (it.hasNext() && !duplicate)

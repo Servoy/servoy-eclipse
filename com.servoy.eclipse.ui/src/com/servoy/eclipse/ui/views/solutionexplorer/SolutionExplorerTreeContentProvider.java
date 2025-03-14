@@ -165,6 +165,7 @@ import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
+import com.servoy.j2db.scripting.JSEventsManager;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
@@ -222,6 +223,8 @@ public class SolutionExplorerTreeContentProvider
 	private final PlatformSimpleUserNode allWebPackagesNode;
 
 	private final PlatformSimpleUserNode databaseManager;
+
+	private final PlatformSimpleUserNode eventsManager;
 
 	private final PlatformSimpleUserNode solutionModel;
 
@@ -281,6 +284,7 @@ public class SolutionExplorerTreeContentProvider
 
 	private final ISpecReloadListener specReloadListener = new SpecReloadListener();
 
+
 	private static PlatformSimpleUserNode createTypeNode(String displayName, UserNodeType type, Class< ? > realType, PlatformSimpleUserNode parent,
 		boolean isJSLibNode)
 	{
@@ -305,21 +309,22 @@ public class SolutionExplorerTreeContentProvider
 			createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_BigInt, UserNodeType.BIGINT, com.servoy.j2db.documentation.scripting.docs.BigInt.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_Date, UserNodeType.DATE, com.servoy.j2db.documentation.scripting.docs.Date.class, jslib, true), //
-			createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib, true), //
-			createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib, true), //
-			createTypeNode(Messages.TreeStrings_Object, UserNodeType.OBJECT, com.servoy.j2db.documentation.scripting.docs.Object.class, jslib, true), //
-			createTypeNode(Messages.TreeStrings_Map, UserNodeType.MAP, com.servoy.j2db.documentation.scripting.docs.Map.class, jslib, true), //
-			createTypeNode(Messages.TreeStrings_Set, UserNodeType.SET, com.servoy.j2db.documentation.scripting.docs.Set.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_Iterator, UserNodeType.ITERATOR, com.servoy.j2db.documentation.scripting.docs.Iterator.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_Iterablevalue, UserNodeType.ITERABELVALUE, com.servoy.j2db.documentation.scripting.docs.IterableValue.class,
 				jslib, true), //
-			createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Map, UserNodeType.MAP, com.servoy.j2db.documentation.scripting.docs.Map.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Object, UserNodeType.OBJECT, com.servoy.j2db.documentation.scripting.docs.Object.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Promise, UserNodeType.PROMISE, com.servoy.j2db.documentation.scripting.docs.Promise.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, com.servoy.j2db.documentation.scripting.docs.RegExp.class, jslib, true), //
-			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib,
-				true), //
+			createTypeNode(Messages.TreeStrings_Set, UserNodeType.SET, com.servoy.j2db.documentation.scripting.docs.Set.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib, true), //
-			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib,
+				true), //
+			createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
 				jslib, true) };
@@ -388,6 +393,11 @@ public class SolutionExplorerTreeContentProvider
 		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, apiexplorer, false);
 		addReturnTypeNodesPlaceHolder(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 
+
+		eventsManager = createTypeNode(Messages.TreeStrings_EventsManager, UserNodeType.EVENTS_MANAGER, JSEventsManager.class, apiexplorer, false);
+		addReturnTypeNodesPlaceHolder(eventsManager, ScriptObjectRegistry.getScriptObjectForClass(JSEventsManager.class).getAllReturnedTypes());
+
+
 		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, apiexplorer, false);
 
 		PlatformSimpleUserNode clientutils = createTypeNode(Messages.TreeStrings_ClientUtils, UserNodeType.CLIENT_UTILS, JSClientUtils.class, apiexplorer,
@@ -454,6 +464,7 @@ public class SolutionExplorerTreeContentProvider
 		apiexplorerChildren.add(application);
 		apiexplorerChildren.add(solutionModel);
 		apiexplorerChildren.add(databaseManager);
+		apiexplorerChildren.add(eventsManager);
 		apiexplorerChildren.add(clientutils);
 		apiexplorerChildren.add(utils);
 		apiexplorerChildren.add(history);
@@ -470,10 +481,10 @@ public class SolutionExplorerTreeContentProvider
 
 		apiexplorerNodes = new PlatformSimpleUserNode[] { apiexplorer };
 
-		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, clientutils, utils, history, security, i18n, /*
-																																							 * exceptions
-																																							 * ,
-																																							 */jsunit, plugins };
+		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, eventsManager, clientutils, utils, history, security, i18n, /*
+																																										 * exceptions
+																																										 * ,
+																																										 */jsunit, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
 
 		Job job = Job.create("Background loading of database connections", (ICoreRunnable)monitor -> {

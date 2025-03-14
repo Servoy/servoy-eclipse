@@ -25,13 +25,13 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.Part;
 
 /**
  * Edit part for header in mobile form editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -43,29 +43,29 @@ public class MobileHeaderGraphicalEditPart extends MobilePartGraphicalEditPart
 	}
 
 	@Override
-	protected List<IFormElement> getModelChildren()
+	protected List<ISupportFormElement> getModelChildren()
 	{
 		return getHeaderModelChildren(application, getEditorPart().getForm());
 	}
 
-	public static List<IFormElement> getHeaderModelChildren(IApplication application, Form form)
+	public static List<ISupportFormElement> getHeaderModelChildren(IApplication application, Form form)
 	{
-		List<IFormElement> list = new ArrayList<IFormElement>(3);
+		List<ISupportFormElement> list = new ArrayList<ISupportFormElement>(3);
 		for (IPersist persist : application.getFlattenedSolution().getFlattenedForm(form).getAllObjectsAsList())
 		{
-			if (persist instanceof IFormElement && persist instanceof AbstractBase)
+			if (persist instanceof ISupportFormElement && persist instanceof AbstractBase)
 			{
 				if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName) != null)
 				{
-					list.add((IFormElement)persist);
+					list.add((ISupportFormElement)persist);
 				}
 				else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_RIGHT_BUTTON.propertyName) != null)
 				{
-					list.add((IFormElement)persist);
+					list.add((ISupportFormElement)persist);
 				}
 				else if (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
 				{
-					list.add((IFormElement)persist);
+					list.add((ISupportFormElement)persist);
 				}
 			}
 		}

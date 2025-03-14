@@ -39,10 +39,10 @@ import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.Solution;
 
 /**
@@ -98,10 +98,10 @@ class PasteToSupportChildsEditPolicy extends AbstractEditPolicy
 				}
 				else if (editPart.getModel() instanceof FormElementGroup)
 				{
-					Iterator<IFormElement> elements = ((FormElementGroup)editPart.getModel()).getElements();
+					Iterator<ISupportFormElement> elements = ((FormElementGroup)editPart.getModel()).getElements();
 					while (elements.hasNext())
 					{
-						IFormElement element = elements.next();
+						ISupportFormElement element = elements.next();
 						if (element instanceof IPersist)
 						{
 							models.add(element);

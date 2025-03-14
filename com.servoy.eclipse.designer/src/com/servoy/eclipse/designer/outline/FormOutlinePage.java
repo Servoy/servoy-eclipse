@@ -592,30 +592,38 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 	public void collapseSelection()
 	{
-		expandAll(false);
+		setExpandedState(false);
 	}
 
 	public void expandSelection()
 	{
-		expandAll(true);
+		setExpandedState(true);
 	}
 
-	private void expandAll(boolean expand)
+	private void setExpandedState(boolean expand)
 	{
 		Object selection = ((IStructuredSelection)getTreeViewer().getSelection()).getFirstElement();
-		List<PersistContext> childrenList = new ArrayList<PersistContext>();
+		List<Object> childrenList = new ArrayList<Object>();
 		if (selection instanceof PersistContext persistContext)
 		{
 			childrenList.add(persistContext);
 			addChildren(persistContext.getPersist(), childrenList);
 		}
-		for (PersistContext persistContext : childrenList)
+		else if (selection == FormOutlineContentProvider.ELEMENTS)
 		{
-			getTreeViewer().setExpandedState(persistContext, expand);
+			childrenList.add(selection);
+			ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getAllObjectsAsList().forEach(persist -> {
+				childrenList.add(PersistContext.create(persist, form));
+				addChildren(persist, childrenList);
+			});
+		}
+		for (Object child : childrenList)
+		{
+			getTreeViewer().setExpandedState(child, expand);
 		}
 	}
 
-	private void addChildren(IPersist parent, List<PersistContext> childrenList)
+	private void addChildren(IPersist parent, List<Object> childrenList)
 	{
 		if (parent instanceof AbstractBase abstractBase)
 		{

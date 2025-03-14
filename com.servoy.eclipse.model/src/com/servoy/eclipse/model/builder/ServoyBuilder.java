@@ -108,7 +108,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -123,6 +122,7 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportMedia;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
@@ -1111,13 +1111,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 				}
-
-				// import hook modules should not contain other modules
-				if (SolutionMetaData.isPreImportHook(servoyProject.getSolution()) && modulesNames.length > 0)
-				{
-					String message = "Module " + servoyProject.getSolution().getName() + " is a solution import hook, so it should not contain any modules.";
-					addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
-				}
 			}
 		}
 	}
@@ -1413,7 +1406,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				if ((form.isResponsiveLayout() != extendsForm.isResponsiveLayout()) || (form.getUseCssPosition() != extendsForm.getUseCssPosition()))
 				{
-					Iterator<IFormElement> uiElements = extendsForm.getFormElementsSortedByFormIndex();
+					Iterator<ISupportFormElement> uiElements = extendsForm.getFormElementsSortedByFormIndex();
 					// do now show if no ui is present
 					if (uiElements.hasNext())
 					{
@@ -3320,12 +3313,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
 				Path path = new Path(pathPair.getLeft() + pathPair.getRight());
 				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-				if (persist instanceof IFormElement)
+				if (persist instanceof ISupportFormElement)
 				{
 					Form parent = persist.getAncestor(Form.class);
 					if (parent != null && parent.isFormComponent())
 					{
-						String name = ((IFormElement)persist).getName();
+						String name = ((ISupportFormElement)persist).getName();
 						if (name != null)
 						{
 							String[] nameParts = name.split("\\$");
