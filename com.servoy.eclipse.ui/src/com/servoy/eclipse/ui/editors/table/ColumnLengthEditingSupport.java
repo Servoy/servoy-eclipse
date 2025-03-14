@@ -57,7 +57,7 @@ public class ColumnLengthEditingSupport extends EditingSupport
 			}
 
 			ColumnType columnType = column.getConfiguredColumnType();
-			ColumnType newColumnType = ColumnType.getInstance(columnType.getSqlType(), length, columnType.getScale());
+			ColumnType newColumnType = ColumnType.getInstance(columnType.getSqlType(), length, columnType.getScale(), columnType.getSubType());
 			column.getColumnInfo().setConfiguredColumnType(newColumnType);
 			if (!column.getExistInDB()) column.updateColumnType(newColumnType);
 			getViewer().update(column, null);
