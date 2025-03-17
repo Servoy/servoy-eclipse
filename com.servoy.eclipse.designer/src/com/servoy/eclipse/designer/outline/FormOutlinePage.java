@@ -343,14 +343,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				}
 
 			});
-			if (form.isResponsiveLayout())
-			{
-				getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 4);
-			}
-			else
-			{
-				getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 3);
-			}
+			defaultExpand();
 		}
 
 		// when the outline view is reparented to another shell, you cannot use the form editor context menu here
@@ -550,6 +543,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			if (parentForm != null && (formHierarchy.contains(parentForm) || ((Form)parentForm).isFormComponent().booleanValue()))
 			{
 				refresh();
+				Display.getDefault().asyncExec(() -> defaultExpand());
 				return;
 			}
 		}
@@ -632,6 +626,18 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				childrenList.add(PersistContext.create(child, form));
 				addChildren(child, childrenList);
 			}
+		}
+	}
+
+	private void defaultExpand()
+	{
+		if (form.isResponsiveLayout())
+		{
+			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 4);
+		}
+		else
+		{
+			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 3);
 		}
 	}
 
