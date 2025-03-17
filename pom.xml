@@ -79,6 +79,11 @@
 							<ws>win32</ws>
 							<arch>x86_64</arch>
 						</environment>
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>aarch64</arch>
+                        </environment>
 						<environment>
 							<os>macosx</os>
 							<ws>cocoa</ws>
@@ -343,10 +348,12 @@
 				<module>com.servoy.eclipse.jre.macosx.x86_64</module>
 				<module>com.servoy.eclipse.jre.macosx.aarch64</module>
 				<module>com.servoy.eclipse.jre.win32.x86_64</module>
+				<module>com.servoy.eclipse.jre.win32.aarch64</module>
 				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>
 				<module>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</module>
 				<module>com.servoy.eclipse.nodejs.macosx.cocoa.aarch64</module>
 				<module>com.servoy.eclipse.nodejs.win32.win32.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.win32.win32.aarch64</module>
 				<module>com.servoy.eclipse.feature</module>
 				<module>com.servoy.eclipse.product</module>
 			</modules>

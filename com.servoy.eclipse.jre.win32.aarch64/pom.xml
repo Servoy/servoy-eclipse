@@ -6,16 +6,17 @@
     <prerequisites>
         <maven>3.9.0</maven>
     </prerequisites>
-    <parent>
+
+	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.6.0.4080_rc</version>
+		<version>2025.3.0.4041_rc2</version>
 	</parent>
 
-	<artifactId>com.servoy.eclipse.jre.macosx.aarch64</artifactId>
+	<artifactId>com.servoy.eclipse.jre.win32.aarch64</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<version>21.0.6</version>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -41,10 +42,11 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://developer.servoy.com/jre/jre210_6_osx_aarch64.zip</url>
+							<url>https://developer.servoy.com/jre/jre210_6_win_aarch64.zip</url>
 							<outputFileName>jre.zip</outputFileName>
+							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
 							<unpack>true</unpack>
-                            <outputDirectory>${basedir}/jre</outputDirectory>
+							<outputDirectory>${basedir}/jre</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
