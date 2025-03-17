@@ -7,16 +7,16 @@
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/128.0.7/repository"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="128.0.7"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/128.0.9/repository"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="128.0.9"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.7.media/repository"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="128.0.7"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.9.media/repository"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="128.0.9"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.7-arm.media/repository"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="128.0.7"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.9-arm.media/repository"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="128.0.9"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="http://download.eclipse.org/nattable/releases/2.5.0/repository/"/>
