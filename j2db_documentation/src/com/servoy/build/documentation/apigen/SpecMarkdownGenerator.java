@@ -130,7 +130,6 @@ public class SpecMarkdownGenerator
 	private static List<String> summaryPaths;
 	private static List<String> missingMdFiles = new ArrayList<>();
 	private static SimpleJSDocParser jsDocParser = new SimpleJSDocParser();
-	private static Map<String, String> displayTypesConversionTable = new HashMap<String, String>(); //int -> number, dataset -> JSDataset - for display proper property name
 	private static Map<String, String> referenceTypesConversionTable = new HashMap<String, String>(); //dataset -> JSDataset - for proper reference the data type path
 
 	private final static java.util.function.Function<String, String> htmlToMarkdownConverter = (initialDescription) -> {
@@ -244,7 +243,6 @@ public class SpecMarkdownGenerator
 		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(scanPackagesPath).normalize());
 		generateComponentExtendsAsWell = doGenerateExtent;
 
-		initConversionTable();
 		initTypeReferencePathTable();
 
 		generateNGComponentOrServicePackageContentForDir(generateComponentExtendsAsWell, doMergeSpecAndDoc, ngPackageDirsToScan,
@@ -255,24 +253,6 @@ public class SpecMarkdownGenerator
 		printSummary();
 
 		System.out.println("\nDONE.");
-	}
-
-	private static void initConversionTable()
-	{
-		displayTypesConversionTable.put("int", "Number");
-		displayTypesConversionTable.put("integer", "Number");
-		displayTypesConversionTable.put("double", "Number");
-		displayTypesConversionTable.put("float", "Number");
-		displayTypesConversionTable.put("bool", "Boolean");
-		displayTypesConversionTable.put("string", "String");
-		displayTypesConversionTable.put("object", "Object");
-		displayTypesConversionTable.put("dataset", "JSDataset");
-		displayTypesConversionTable.put("clientfunction", "Function");
-		displayTypesConversionTable.put("foundset", "JSFoundset");
-		displayTypesConversionTable.put("record", "JSRecord");
-		displayTypesConversionTable.put("event", "JSEvent");
-		displayTypesConversionTable.put("jsevent", "JSEvent");
-		displayTypesConversionTable.put("tagstring", "String");
 	}
 
 	private static void initTypeReferencePathTable()
@@ -479,6 +459,7 @@ public class SpecMarkdownGenerator
 		final Map<String, String> apiDoc = new HashMap<>();
 		final Map<String, String> handlersDoc = new HashMap<>();
 		final Map<String, String> propertiesDoc = new HashMap<>();
+		final JSONObject typesDoc = new JSONObject();
 
 		this.mySpecFile = specFile;
 		this.specJson = specJson;
@@ -595,14 +576,73 @@ public class SpecMarkdownGenerator
 								if (declaration.getIdentifier() != null)
 								{
 									String varName = declaration.getIdentifier().getName();
-									Comment docContent = declaration.getDocumentation();
-									if (varName != null && docContent != null)
+
+									if ("svy_types".equals(varName))
 									{
-										validatePackageCommentIfNeeded(docContent);
-										propertiesDoc.put(varName, processJSDocDescription(docContent.getText()));
+										Expression initializer = declaration.getInitializer();
+										if (initializer instanceof ObjectInitializer)
+										{
+											ObjectInitializer typesInitializer = (ObjectInitializer)initializer;
+											for (ObjectInitializerPart part : typesInitializer.getInitializers())
+											{
+												PropertyInitializer typeProp = (PropertyInitializer)part;
+												String customTypeName = typeProp.getNameAsString();
+
+												// Optionally, process any JSDoc comment for the custom type itself
+												Comment typeDocComment = typeProp.getDocumentation();
+												String typeDocText = typeDocComment != null ? processJSDocDescription(typeDocComment.getText()) : "";
+
+												// Prepare a map for the properties of this custom type
+												Map<String, String> customTypePropertiesDoc = new TreeMap<>();
+
+												// Process the initializer for the custom type
+												Expression customTypeInitializerExpr = typeProp.getValue();
+												if (customTypeInitializerExpr instanceof ObjectInitializer)
+												{
+													ObjectInitializer customTypeInitializer = (ObjectInitializer)customTypeInitializerExpr;
+													for (ObjectInitializerPart customPart : customTypeInitializer.getInitializers())
+													{
+														if (customPart instanceof PropertyInitializer)
+														{
+															PropertyInitializer propInit = (PropertyInitializer)customPart;
+															String propertyName = propInit.getNameAsString();
+
+															if (propInit.getName() instanceof Identifier identifier)
+															{
+																Comment propDocComment = identifier.getDocumentation();
+																if (propDocComment != null)
+																{
+																	customTypePropertiesDoc.put(propertyName,
+																		processJSDocDescription(propDocComment.getText()));
+																}
+															}
+
+														}
+													}
+												}
+												// Optionally, you might want to prepend the custom type's own documentation as a special entry.
+												if (!typeDocText.isEmpty())
+												{
+													customTypePropertiesDoc.put("_doc", typeDocText);
+												}
+												if (!customTypePropertiesDoc.isEmpty())
+												{
+													typesDoc.put(customTypeName, customTypePropertiesDoc);
+												}
+											}
+										}
+									}
+									else
+									{
+										Comment docContent = declaration.getDocumentation();
+										if (varName != null && docContent != null)
+										{
+											validatePackageCommentIfNeeded(docContent);
+											propertiesDoc.put(varName, processJSDocDescription(docContent.getText()));
+										}
 									}
 								}
-								if (declaration.getInitializer() != null)
+								if (declaration.getInitializer() != null && !"types".equals(declaration.getIdentifier().getName()))
 								{
 									visit(declaration.getInitializer());
 								}
@@ -667,11 +707,11 @@ public class SpecMarkdownGenerator
 		root.put("category_name", specJson.optString("categoryName", null));
 		root.put("instance", this);
 		root.put("overview", apiDoc.get(WEB_OBJECT_OVERVIEW_KEY));
-		root.put("properties", makeMap(specJson.optJSONObject("model"), propertiesDoc, this::createProperty, null));
-		root.put("events", makeMap(specJson.optJSONObject("handlers"), handlersDoc, this::createFunction, null));
-		Map<String, Object> api = makeMap(specJson.optJSONObject("api"), apiDoc, this::createFunction, null);
+		root.put("properties", makeMap(specJson.optJSONObject("model"), propertiesDoc, this::createProperty, null, null));
+		root.put("events", makeMap(specJson.optJSONObject("handlers"), handlersDoc, this::createFunction, null, null));
+		Map<String, Object> api = makeMap(specJson.optJSONObject("api"), apiDoc, this::createFunction, null, null);
 		root.put("api", api);
-		Object types = makeTypes(specJson.optJSONObject("types"), apiDoc);
+		Object types = makeTypes(specJson.optJSONObject("types"), apiDoc, typesDoc);
 		root.put("types", types);
 
 		service = false;
@@ -1578,7 +1618,7 @@ public class SpecMarkdownGenerator
 					}
 					catch (IndexOutOfBoundsException e)
 					{
-						e.printStackTrace();
+						System.err.println(e.getMessage());
 					}
 				}
 				else if (jsDocTag.name().equals(JSDocTag.EXAMPLE))
@@ -1816,7 +1856,7 @@ public class SpecMarkdownGenerator
 		return Collections.emptyList();
 	}
 
-	private Object makeTypes(JSONObject types, Map<String, String> jsDocs)
+	private Object makeTypes(JSONObject types, Map<String, String> jsDocs, JSONObject jsDocTypes)
 	{
 		if (types != null)
 		{
@@ -1825,6 +1865,7 @@ public class SpecMarkdownGenerator
 			while (keys.hasNext())
 			{
 				String type = keys.next();
+				JSONObject jsDocType = jsDocTypes.optJSONObject(type);
 				JSONObject typeObject = types.optJSONObject(type);
 				if (typeObject.has("tags") && "private".equals(typeObject.getJSONObject("tags").optString("scope"))) continue;
 
@@ -1836,7 +1877,7 @@ public class SpecMarkdownGenerator
 						extend = '[' + extend + "](#" + extend.toLowerCase() + ')';
 					}
 					else extend = "";
-					Map<String, Object> modelMap = makeMap(typeObject.getJSONObject("model"), jsDocs, this::createPropertyIndented, null);
+					Map<String, Object> modelMap = makeMap(typeObject.getJSONObject("model"), jsDocs, this::createPropertyIndented, null, jsDocType);
 					if (typeObject.has("serversideapi"))
 					{
 						var x = new BiFunction<String, JSONObject, Record>()
@@ -1847,12 +1888,15 @@ public class SpecMarkdownGenerator
 								return createFunction(functionName, object, type + "." + functionName);
 							}
 						};
-						Map<String, Object> apiMap = makeMap(typeObject.getJSONObject("serversideapi"), jsDocs, x, type);
+						Map<String, Object> apiMap = makeMap(typeObject.getJSONObject("serversideapi"), jsDocs, x, type, null);
 						map.put(type, Map.of("model", modelMap, "serversideapi", apiMap, "extends", extend));
 					}
 					else map.put(type, Map.of("model", modelMap, "extends", extend));
 				}
-				else map.put(type, Map.of("model", makeMap(typeObject, jsDocs, this::createPropertyIndented, null)));
+				else
+				{
+					map.put(type, Map.of("model", makeMap(typeObject, jsDocs, this::createPropertyIndented, null, jsDocType)));
+				}
 			}
 			return map.size() > 0 ? map : null;
 		}
@@ -1860,7 +1904,7 @@ public class SpecMarkdownGenerator
 	}
 
 	private Map<String, Object> makeMap(JSONObject properties, Map<String, String> jsDocs, BiFunction<String, JSONObject, Record> transformer,
-		String containerName)
+		String containerName, JSONObject jsDocType)
 	{
 		if (properties != null)
 		{
@@ -1872,6 +1916,7 @@ public class SpecMarkdownGenerator
 				if ("size".equals(key)) continue;
 
 				Object value = properties.get(key);
+				String jsDocTypeDescription = jsDocType != null ? jsDocType.optString(key, null) : null;
 
 				if (value instanceof JSONObject json)
 				{
@@ -1884,6 +1929,11 @@ public class SpecMarkdownGenerator
 
 					String prefix = containerName != null ? containerName + "." : "";
 					String jsDoc = jsDocs != null ? jsDocs.get(prefix + key) : null;
+					if (jsDoc == null && jsDocTypeDescription != null)
+					{
+						jsDoc = jsDocTypeDescription;
+					}
+
 					json.put("jsDoc", jsDoc);
 
 					Record record = transformer.apply(key, json);
@@ -2277,39 +2327,53 @@ public class SpecMarkdownGenerator
 			case "int" :
 			case "integer" :
 			case "float" :
+			case "byte" :
 			case "double" :
 				normalizedSpecType = "Number";
 				break;
-			case "boolean" :
 			case "bool" :
 				normalizedSpecType = "Boolean";
 				break;
 			case "record" :
+			case "jsrecord" :
 				normalizedSpecType = "JSRecord";
 				break;
 			case "foundset" :
+			case "jsfoundset" :
 				normalizedSpecType = "JSFoundset";
 				break;
 			case "dataset" :
+			case "jsdataset" :
 				normalizedSpecType = "JSDataset";
 				break;
 			case "event" :
 			case "jsevent" :
 				normalizedSpecType = "JSEvent";
 				break;
-			case "tagstring" :
-				normalizedSpecType = "String";
+			case "jsupload" :
+				normalizedSpecType = "JSUpload";
 				break;
+			case "jsmenu" :
+				normalizedSpecType = "JSMenu";
+				break;
+			case "object" :
 			case "string..." :
-				normalizedSpecType = "String...";
+			case "string" :
+			case "boolean" :
+			case "number" :
+			case "json" :
+			case "dimension" :
+			case "point" :
+			case "date" :
+			case "form" :
+			case "function" :
+				normalizedSpecType = normalizedSpecType.toLowerCase().substring(0, 1).toUpperCase() + normalizedSpecType.toLowerCase().substring(1);
 				break;
 			default :
 				if (componentName != null && myTypes != null)
 				{
 					normalizedSpecType = normalizeTypeForComponent(myTypes, normalizedSpecType, componentName);
 				}
-				else if (type.length() > 1)
-					normalizedSpecType = normalizedSpecType.substring(0, 1).toUpperCase() + normalizedSpecType.substring(1);
 				else
 					normalizedSpecType = type;
 		}

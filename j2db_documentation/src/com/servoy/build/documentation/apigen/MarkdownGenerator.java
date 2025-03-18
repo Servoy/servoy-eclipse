@@ -58,6 +58,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.base.scripting.api.IJSController;
@@ -920,7 +921,11 @@ public class MarkdownGenerator
 	{
 		if (type != null)
 		{
-			if (type == boolean.class || type == Boolean.class)
+			if (type == NativePromise.class)
+			{
+				return "Promise";
+			}
+			else if (type == boolean.class || type == Boolean.class)
 			{
 				return "Boolean";
 			}

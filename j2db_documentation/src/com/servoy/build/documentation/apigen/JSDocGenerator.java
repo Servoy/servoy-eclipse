@@ -37,6 +37,8 @@ public class JSDocGenerator
 	private final JSONObject spec;
 	private final File doc;
 
+	private final boolean ALLOW_EXECUTION = false; // Set to true to allow execution of the generator.
+
 	//Note that processing steps are intended to run only once on a given spec and _doc.js file.
 	//Enabling multiple processing steps may lead to broken doc files.
 	//For any changes, enable tempTarget to true to avoid overriding the original, and check the output.
@@ -47,7 +49,9 @@ public class JSDocGenerator
 	private final boolean processHandlers = false;
 	private final boolean processTypes = false;
 
-	private final boolean tempTarget = true;
+	private final boolean changeTypesName = false;
+
+	private final boolean tempTarget = false;
 
 	public JSDocGenerator(JSONObject spec, File doc)
 	{
@@ -57,6 +61,13 @@ public class JSDocGenerator
 
 	public void runGenerator()
 	{
+
+		if (!ALLOW_EXECUTION)
+		{
+			System.out.println("JSDocGenerator execution is disabled.");
+			return;
+		}
+
 		// Read original file content.
 		String originalContent = readOriginalContent();
 		String propertiesDocs = null;
@@ -88,6 +99,11 @@ public class JSDocGenerator
 		if (processTypes)
 		{
 			mergedContent = mergedContent + "\n" + typesDocs;
+		}
+
+		if (changeTypesName)
+		{
+			mergedContent = mergedContent.replaceFirst("var\\s+types\\s*=\\s*\\{", "var svy_types = {");
 		}
 
 		// Write the merged content to a new file.
@@ -137,7 +153,7 @@ public class JSDocGenerator
 					for (String propName : model.keySet())
 					{
 						Object propValue = model.opt(propName);
-						processTypeProperty(typeBlock, propName, propValue, typeName);
+						processTypeProperty(typeBlock, propName, propValue);
 					}
 				}
 				else
@@ -148,7 +164,7 @@ public class JSDocGenerator
 						String propName = keys.next();
 						if ("tags".equals(propName)) continue;
 						Object propValue = typeDef.opt(propName);
-						processTypeProperty(typeBlock, propName, propValue, typeName);
+						processTypeProperty(typeBlock, propName, propValue);
 					}
 				}
 
@@ -174,7 +190,7 @@ public class JSDocGenerator
 		return overall.toString();
 	}
 
-	private void processTypeProperty(StringBuilder sb, String propName, Object propValue, String typeName)
+	private void processTypeProperty(StringBuilder sb, String propName, Object propValue)
 	{
 		if (propValue instanceof JSONObject)
 		{
@@ -202,21 +218,6 @@ public class JSDocGenerator
 		{
 			sb.append("        ").append(propName).append(" : null,\n\n");
 		}
-	}
-
-	private String generatePropertyDoc(String propName, JSONObject propObj)
-	{
-		StringBuilder sb = new StringBuilder();
-		JSONObject tags = propObj.optJSONObject("tags");
-		String docContent = (tags != null) ? tags.optString("doc", "").trim() : "";
-		sb.append("/**\n");
-		if (!docContent.isEmpty())
-		{
-			sb.append(" * ").append(docContent).append("\n");
-		}
-		sb.append(" */\n");
-		sb.append("var ").append(propName).append(";");
-		return sb.toString();
 	}
 
 	private String generatePropertiesDocs()
@@ -469,6 +470,10 @@ public class JSDocGenerator
 				String after = originalContent.substring(insertionIndex);
 				return before + "\n" + combinedDocs + after;
 			}
+		}
+		if (combinedDocs.isEmpty())
+		{
+			return originalContent;
 		}
 		return combinedDocs + "\n" + originalContent;
 	}
