@@ -152,6 +152,8 @@ public class MenuEditor extends PersistEditor
 	private boolean initializingData = false;
 	private Group customPropertiesGroup;
 
+	private TableViewer customPropertiesViewer;
+
 	@Override
 	protected void doRefresh()
 	{
@@ -201,7 +203,7 @@ public class MenuEditor extends PersistEditor
 		Composite container = new Composite(myScrolledComposite, SWT.NONE);
 		myScrolledComposite.setContent(container);
 		container.setLayout(new GridLayout(2, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+//		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		Label menuNameLabel = new Label(container, SWT.NONE);
 		menuNameLabel.setText("Menu Name");
@@ -241,10 +243,47 @@ public class MenuEditor extends PersistEditor
 			}
 		});
 
+		Button addCustomProperty = new Button(container, SWT.NONE);
+		addCustomProperty.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false, 2, 1));
+		addCustomProperty.setText("Add Custom Property");
+		addCustomProperty.setToolTipText("Adds a new custom property definition that can be defined on each menu item");
+		addCustomProperty.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(final SelectionEvent e)
+			{
+				InputAndComboDialog dialog = new InputAndComboDialog(getSite().getShell(), "Add Menu Custom Property Definition", "Custom Property Name", "",
+					new IInputValidator()
+					{
+						public String isValid(String newText)
+						{
+							boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
+							return valid ? null : (newText.length() == 0 ? "" : "Invalid property name");
+						}
+					}, new String[] { "boolean", "dataprovider", "form", "int", "relation", "string", "valuelist" }, "Custom Property Type", 5);
+				if (dialog.open() == Window.OK)
+				{
+					getPersist().putCustomPropertyDefinition(dialog.getValue(), dialog.getExtendedValue());
+					customPropertiesViewer.refresh();
+					Map<String, PropertyDescription> newPropertyMap = new HashMap<String, PropertyDescription>();
+					newPropertyMap.put(dialog.getValue(),
+						new PropertyDescriptionBuilder().withName(dialog.getValue()).withType(TypesRegistry.getType(dialog.getExtendedValue(), false))
+							.build());
+					createGroupedComponents(customPropertiesGroup, null,
+						newPropertyMap,
+						false);
+					myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+					parent.requestLayout();
+					parent.layout(true, true);
+					flagModified();
+				}
+			}
+		});
+
 		Composite tableContainer = new Composite(container, SWT.NONE);
 		tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
-		TableViewer customPropertiesViewer = new TableViewer(tableContainer, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		customPropertiesViewer = new TableViewer(tableContainer, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		customPropertiesViewer.getTable().setHeaderVisible(true);
 		customPropertiesViewer.getTable().setLinesVisible(true);
 
@@ -349,42 +388,6 @@ public class MenuEditor extends PersistEditor
 		customPropertiesViewer.setInput(getPersist());
 
 
-		Button addCustomProperty = new Button(container, SWT.NONE);
-		addCustomProperty.setText("Add Menu Custom Property Definition");
-		addCustomProperty.setToolTipText("Adds a new custom property definition that can be defined on each menu item");
-		addCustomProperty.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(final SelectionEvent e)
-			{
-				InputAndComboDialog dialog = new InputAndComboDialog(getSite().getShell(), "Add Menu Custom Property Definition", "Custom Property Name", "",
-					new IInputValidator()
-					{
-						public String isValid(String newText)
-						{
-							boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
-							return valid ? null : (newText.length() == 0 ? "" : "Invalid property name");
-						}
-					}, new String[] { "boolean", "dataprovider", "form", "int", "relation", "string", "valuelist" }, "Custom Property Type", 5);
-				if (dialog.open() == Window.OK)
-				{
-					getPersist().putCustomPropertyDefinition(dialog.getValue(), dialog.getExtendedValue());
-					customPropertiesViewer.refresh();
-					Map<String, PropertyDescription> newPropertyMap = new HashMap<String, PropertyDescription>();
-					newPropertyMap.put(dialog.getValue(),
-						new PropertyDescriptionBuilder().withName(dialog.getValue()).withType(TypesRegistry.getType(dialog.getExtendedValue(), false))
-							.build());
-					createGroupedComponents(customPropertiesGroup, null,
-						newPropertyMap,
-						false);
-					myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-					parent.requestLayout();
-					parent.layout(true, true);
-					flagModified();
-				}
-			}
-		});
-
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableLayout.setColumnData(nameColumn, new ColumnWeightData(20, 50, true));
 		tableLayout.setColumnData(typeColumn, new ColumnWeightData(10, 25, true));
@@ -409,8 +412,8 @@ public class MenuEditor extends PersistEditor
 		menuViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		menuViewer.getTree().setToolTipText("Select a menu item to edit its properties");
 
-		menuViewer.getTree().setLinesVisible(true);
-		menuViewer.getTree().setHeaderVisible(true);
+		menuViewer.getTree().setLinesVisible(false);
+		menuViewer.getTree().setHeaderVisible(false);
 
 		TreeColumn menuItemNameColumn = new TreeColumn(menuViewer.getTree(), SWT.LEFT, CI_NAME);
 		menuItemNameColumn.setText("Menu Item Name");
@@ -512,6 +515,11 @@ public class MenuEditor extends PersistEditor
 				if (newSelection != null && !newSelection.isEmpty() && newSelection.getFirstElement() instanceof MenuItem menuItem)
 				{
 					selectedMenuItem = menuItem;
+				}
+				else if (newSelection.getFirstElement() instanceof Menu menu && menu.getAllObjectsAsList().size() > 0)
+				{
+					menuViewer.setSelection(new StructuredSelection(menu.getAllObjectsAsList().get(0)), true);
+					return;
 				}
 				getSite().getSelectionProvider().setSelection(selectedMenuItem != null ? new StructuredSelection(selectedMenuItem) : StructuredSelection.EMPTY);
 				try
