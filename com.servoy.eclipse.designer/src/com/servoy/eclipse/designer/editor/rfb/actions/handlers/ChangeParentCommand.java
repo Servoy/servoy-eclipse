@@ -127,6 +127,10 @@ public class ChangeParentCommand extends Command
 		{
 			try
 			{
+				if (newParent == initialParent)
+				{
+					sameParent = true;
+				}
 				newParent = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(newParent, form));
 				changes.add(newParent);
 			}
@@ -288,7 +292,7 @@ public class ChangeParentCommand extends Command
 					{
 						((IChildWebObject)persist).setIndex(i);
 					}
-					if (!changes.contains(newParent)) changes.add(persist);
+					if (!changes.contains(persist)) changes.add(persist);
 				}
 				if (flattenedNewParent instanceof IBasicWebObject && child instanceof WebCustomType)
 				{

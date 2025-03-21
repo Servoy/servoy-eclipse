@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+    <prerequisites>
+        <maven>3.9.0</maven>
+    </prerequisites>
+
+	<parent>
+		<groupId>com.servoy</groupId>
+		<artifactId>servoy-eclipse</artifactId>
+		<version>2025.3.0.4041_rc2</version>
+	</parent>
+
+	<artifactId>com.servoy.eclipse.jre.win32.aarch64</artifactId>
+	<packaging>eclipse-plugin</packaging>
+	<version>21.0.6</version>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.3.2</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}/jre</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				 <version>1.8.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<url>https://developer.servoy.com/jre/jre210_6_win_aarch64.zip</url>
+							<outputFileName>jre.zip</outputFileName>
+							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
+							<unpack>true</unpack>
+							<outputDirectory>${basedir}/jre</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
