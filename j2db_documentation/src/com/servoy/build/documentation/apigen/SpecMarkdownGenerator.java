@@ -122,7 +122,6 @@ public class SpecMarkdownGenerator
 
 	private static int totalFunctionsWithIssues = 0;
 	private static int jsDocUndocumentedProperties = 0;
-	private static int specUndocumentedProperties = 0;
 	private static int totalUndocumentedFunctions = 0;
 
 	private static final DuplicateTracker duplicateTracker = DuplicateTracker.getInstance();
@@ -299,7 +298,6 @@ public class SpecMarkdownGenerator
 	{
 		System.out.println("\033[38;5;39m\n\nSUMMARY:\n");
 		System.out.println(jsDocUndocumentedProperties + " properties have no JS DOCS\n" +
-			specUndocumentedProperties + " properties has no SPEC docs\n" +
 			totalFunctionsWithIssues + " functions or handlers failed validation\n" +
 			totalUndocumentedFunctions + " functions or handlers has no documentation\n\n");
 
@@ -1416,11 +1414,6 @@ public class SpecMarkdownGenerator
 				{ //spec docs need processing
 					doc = processDescription(indentLevel, doc);
 				}
-				else
-				{
-					specUndocumentedProperties++;
-//					System.out.println("\033[38;5;215mWarning: specification doc was not found for: " + name + "\033[0m");
-				}
 			}
 		}
 
@@ -1970,13 +1963,22 @@ public class SpecMarkdownGenerator
 
 	private String normalizeTypeForComponent(JSONObject myTypes, String type, String componentName)
 	{
-		if (myTypes == null || componentName == null) return null;
+		if (myTypes == null || componentName == null || type == null) return null;
 
 		JSONObject customType = myTypes.optJSONObject(type);
 		if (customType != null)
 		{
 			return "CustomType<" + componentName + "." + type + ">";
 		}
+
+		for (String key : myTypes.keySet())
+		{
+			if (key.equalsIgnoreCase(type))
+			{
+				return "CustomType<" + componentName + "." + key + ">";
+			}
+		}
+
 		return type;
 	}
 
@@ -2312,10 +2314,28 @@ public class SpecMarkdownGenerator
 		return standardTypes.contains(type.trim());
 	}
 
-	private String normalizeType(JSONObject myTypes, String type, String componentName)
+	private String getSpecType(String specType)
+	{
+		try
+		{
+			String result = new JSONObject(specType).optString("type", null);
+			if (result != null)
+			{
+				return result;
+			}
+		}
+		catch (JSONException e)
+		{
+			// Ignore
+		}
+		return specType;
+	}
+
+
+	private String normalizeType(JSONObject myTypes, String specType, String componentName)
 	{
 		boolean isArray = false;
-		String normalizedSpecType = type;
+		String normalizedSpecType = getSpecType(specType).toLowerCase();
 		if (normalizedSpecType.endsWith("[]"))
 		{
 			isArray = true;
@@ -2375,7 +2395,7 @@ public class SpecMarkdownGenerator
 					normalizedSpecType = normalizeTypeForComponent(myTypes, normalizedSpecType, componentName);
 				}
 				else
-					normalizedSpecType = type;
+					normalizedSpecType = specType;
 		}
 
 

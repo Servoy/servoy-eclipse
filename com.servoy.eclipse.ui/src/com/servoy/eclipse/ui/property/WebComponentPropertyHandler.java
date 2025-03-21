@@ -53,6 +53,7 @@ import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONArrayType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
@@ -114,8 +115,20 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			if (type instanceof IYieldingType) type = ((IYieldingType< ? , ? >)type).getPossibleYieldType();
 
 			if (type instanceof FunctionPropertyType || type instanceof ValueListPropertyType || type instanceof FormPropertyType ||
-				type instanceof MediaPropertyType || type instanceof FormComponentPropertyType)
+				type instanceof MediaPropertyType || type instanceof FormComponentPropertyType || type instanceof NGCustomJSONArrayType)
 			{
+				if (type instanceof NGCustomJSONArrayType)
+				{
+					Integer[] newConvertedValue = new Integer[((Object[])value).length];
+					int i = 0;
+					for (Object each : (Object[])value)
+					{
+						String valueOfMedia = (String)each;
+						IPersist persist = ModelUtils.getEditingFlattenedSolution(webObject, persistContext.getContext()).searchPersist(valueOfMedia);
+						newConvertedValue[i++] = (persist == null) ? null : Integer.valueOf(persist.getID());
+					}
+					return newConvertedValue;
+				}
 				if (type instanceof FormComponentPropertyType && value instanceof JSONObject)
 				{
 					value = ((JSONObject)value).optString(FormComponentPropertyType.SVY_FORM);
@@ -275,6 +288,18 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 					convertedValue = null;
 				}
 			}
+		}
+		else if (type instanceof NGCustomJSONArrayType)
+		{
+			String[] newConvertedValue = new String[((Object[])convertedValue).length];
+			int i = 0;
+			for (Object each : (Object[])convertedValue)
+			{
+				Integer valueOfMedia = (Integer)each;
+				Media media = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getMedia(valueOfMedia.intValue());
+				newConvertedValue[i++] = (media == null) ? null : media.getUUID().toString();
+			}
+			convertedValue = newConvertedValue;
 		}
 		bean.setProperty(getName(), convertedValue);
 	}
