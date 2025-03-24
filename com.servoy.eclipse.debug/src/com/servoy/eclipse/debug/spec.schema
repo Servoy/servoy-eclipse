@@ -104,9 +104,6 @@
                 },
                 "deprecated": {
                     "type": "string"
-                },
-                "setter": {
-                    "type": "string"
                 }
            },
            "additionalProperties": false
