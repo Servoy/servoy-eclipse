@@ -1657,7 +1657,8 @@ public class SpecMarkdownGenerator
 		JSONArray jsDocParams = jsDocEntry.optJSONArray("params");
 		JSONObject jsDocReturn = jsDocEntry.optJSONObject("returns");
 		String docReturnType = jsDocReturn != null ? jsDocReturn.optString("type", null) : null;
-		String prefix = getComponentName() + "." + apiDocName;
+		String componentName = getComponentName();
+		String prefix = componentName + "." + apiDocName;
 
 		//validate parameters count
 		if (specParams != null && jsDocParams != null && specParams.length() != jsDocParams.length())
@@ -1694,7 +1695,8 @@ public class SpecMarkdownGenerator
 					if (!docParamName.equals(specParamName))
 					{
 						isValidFunction = false;
-						System.err.println(apiDocName + ": Param name mismatch: " + docParamName + " ...! Must be: " + specParamName);
+						System.err
+							.println(componentName + "." + apiDocName + ": Param name mismatch: " + docParamName + " ...! Must be: " + specParamName);
 					}
 				}
 
@@ -1711,11 +1713,11 @@ public class SpecMarkdownGenerator
 				{
 					//at this point docParamType is markdownified
 					docParamType = docParamType.replaceAll("\\\\+", "").trim();
-					if (!areTypesEquivalent(getTypes(), specParamType, docParamType, getComponentName()))
+					if (!areTypesEquivalent(getTypes(), specParamType, docParamType, componentName))
 					{
 						isValidFunction = false;
-						System.err.println(apiDocName + ": Param type mismatch: " + docParamType + " ...! Must be: " +
-							normalizeType(getTypes(), specParamType, getComponentName()));
+						System.err.println(componentName + "." + apiDocName + ": Param type mismatch: " + docParamType + " ...! Must be: " +
+							normalizeType(getTypes(), specParamType, componentName));
 					}
 				}
 
@@ -1724,7 +1726,7 @@ public class SpecMarkdownGenerator
 				if (docParamDoc == null || docParamDoc.length() == 0)
 				{
 					isValidFunction = false;
-					System.err.println(apiDocName + ": missing parameter description in the doc file.");
+					System.err.println(componentName + "." + apiDocName + ": missing parameter description in the doc file.");
 				}
 			}
 		}
@@ -1733,18 +1735,18 @@ public class SpecMarkdownGenerator
 		if (specReturnType == null && docReturnType != null)
 		{
 			isValidFunction = false;
-			System.err.println(apiDocName + ": missing return type in the spec file. Doc has: " + docReturnType);
+			System.err.println(componentName + "." + apiDocName + ": missing return type in the spec file. Doc has: " + docReturnType);
 		}
 		else if (specReturnType != null && docReturnType != null)
 		{
 
 			//at this point docReturn is markdownified
 			docReturnType = docReturnType.replaceAll("\\\\+", "").trim();
-			if (!areTypesEquivalent(getTypes(), specReturnType, docReturnType, getComponentName()))
+			if (!areTypesEquivalent(getTypes(), specReturnType, docReturnType, componentName))
 			{
 				isValidFunction = false;
-				System.err.println(apiDocName + ": Return type mismatch: " + docReturnType + " ...! Must be: " +
-					normalizeType(getTypes(), specReturnType, getComponentName()));
+				System.err.println(componentName + "." + apiDocName + ": Return type mismatch: " + docReturnType + " ...! Must be: " +
+					normalizeType(getTypes(), specReturnType, componentName));
 			}
 		}
 
@@ -1753,7 +1755,7 @@ public class SpecMarkdownGenerator
 		if (specReturnType != null && (docReturnDoc == null || docReturnDoc.length() == 0))
 		{
 			isValidFunction = false;
-			System.err.println(apiDocName + ": missing return description in the doc file.");
+			System.err.println(componentName + "." + apiDocName + ": missing return description in the doc file.");
 		}
 
 		if (!isValidFunction)
@@ -2279,6 +2281,8 @@ public class SpecMarkdownGenerator
 			}
 			return result;
 		}
+		//some specTypes may be embraced into "${}" which need to be removed; for example "${dataprovidertype}" is equivalent to "dataprovidertype"
+		normalizedSpecType = normalizedSpecType.replace("${", "").replace("}", "");
 		return normalizedSpecType.equalsIgnoreCase(docType);
 	}
 
