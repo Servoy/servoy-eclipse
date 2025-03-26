@@ -587,7 +587,7 @@ public class SpecMarkdownGenerator
 												String customTypeName = typeProp.getNameAsString();
 
 												// Optionally, process any JSDoc comment for the custom type itself
-												Comment typeDocComment = typeProp.getDocumentation();
+												Comment typeDocComment = typeProp.getName().getDocumentation();
 												String typeDocText = typeDocComment != null ? processJSDocDescription(typeDocComment.getText()) : "";
 
 												// Prepare a map for the properties of this custom type
@@ -640,7 +640,7 @@ public class SpecMarkdownGenerator
 										}
 									}
 								}
-								if (declaration.getInitializer() != null && !"types".equals(declaration.getIdentifier().getName()))
+								if (declaration.getInitializer() != null && !"svy_types".equals(declaration.getIdentifier().getName()))
 								{
 									visit(declaration.getInitializer());
 								}
@@ -1861,6 +1861,7 @@ public class SpecMarkdownGenerator
 			{
 				String type = keys.next();
 				JSONObject jsDocType = jsDocTypes.optJSONObject(type);
+				String _docValue = jsDocType != null ? jsDocType.optString("_doc", "") : "";
 				JSONObject typeObject = types.optJSONObject(type);
 				if (typeObject.has("tags") && "private".equals(typeObject.getJSONObject("tags").optString("scope"))) continue;
 
@@ -1884,13 +1885,23 @@ public class SpecMarkdownGenerator
 							}
 						};
 						Map<String, Object> apiMap = makeMap(typeObject.getJSONObject("serversideapi"), jsDocs, x, type, null);
-						map.put(type, Map.of("model", modelMap, "serversideapi", apiMap, "extends", extend));
+						map.put(type, Map.of(
+							"model", modelMap,
+							"serversideapi", apiMap,
+							"extends", extend,
+							"_doc", _docValue));
+
 					}
-					else map.put(type, Map.of("model", modelMap, "extends", extend));
+					else map.put(type, Map.of(
+						"model", modelMap,
+						"extends", extend,
+						"_doc", _docValue));
 				}
 				else
 				{
-					map.put(type, Map.of("model", makeMap(typeObject, jsDocs, this::createPropertyIndented, null, jsDocType)));
+					map.put(type, Map.of(
+						"model", makeMap(typeObject, jsDocs, this::createPropertyIndented, null, jsDocType),
+						"_doc", _docValue));
 				}
 			}
 			return map.size() > 0 ? map : null;
