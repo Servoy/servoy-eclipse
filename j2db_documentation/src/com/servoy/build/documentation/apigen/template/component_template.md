@@ -105,8 +105,7 @@ ${propValue.doc()?trim}
   scripting type: CustomType<${componentinternalname}.${typeName}>
 
 <#if typeValue.extends?has_content>
-  extends: ${typeValue.extends}
- 
+  extends: ${typeValue.extends} 
 </#if>
 <#list typeValue.model as propName, propValue>
  - ${MD(propName)}
@@ -116,7 +115,6 @@ ${propValue.doc()?trim}
      - **Type**: [${MD(propValue.type())}](${instance.getReturnTypePath(propValue)})
 <#if propValue.defaultValue()??>
      - **Default Value**: ${MD(propValue.defaultValue())}
-     
 </#if>
 </#list>
 <#if typeValue.serversideapi??>

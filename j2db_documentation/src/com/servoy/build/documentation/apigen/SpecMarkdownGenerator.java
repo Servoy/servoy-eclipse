@@ -1967,7 +1967,20 @@ public class SpecMarkdownGenerator
 						});
 					}
 				}
-				else map.put(key, transformer.apply(key, new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString())));
+				else if (jsDocTypeDescription != null)
+				{
+					map.put(key, transformer.apply(key, new JSONObject(
+						new JSONStringer()
+							.object()
+							.key("type").value(value)
+							.key("jsDoc").value(jsDocTypeDescription)
+							.endObject()
+							.toString())));
+				}
+				else
+				{
+					map.put(key, transformer.apply(key, new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString())));
+				}
 			}
 			return map;
 		}
