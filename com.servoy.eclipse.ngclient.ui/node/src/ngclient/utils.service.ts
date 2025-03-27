@@ -67,6 +67,9 @@ export class SvyUtilsService {
         jsEvent.x = event['pageX'];//TODO check
         jsEvent.y = event['pageY'];
         jsEvent.formName = form;
+		if (event.detail) {
+			jsEvent.data = event.detail;
+		}
         for (const chain of targetElNameChain) {
             if (!this.formService || this.formService.getFormCacheByName(form).getComponent(chain)) {
                 jsEvent['elementName'] = chain;
