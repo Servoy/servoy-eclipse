@@ -5206,7 +5206,8 @@ public class TypeCreator extends TypeCache
 					property.setType(TypeUtil.ref(type));
 					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
 					property.setDescription(eventType.isDefaultEvent() ? "Default Form level event"
-						: (eventType.getDescription() != null ? eventType.getDescription() : "Custom event added from solution eventTypes property"));
+						: (eventType.getDescription() != null ? HtmlUtils.applyDescriptionMagic(eventType.getDescription())
+							: "Custom event added from solution eventTypes property"));
 					members.add(property);
 				}
 			}

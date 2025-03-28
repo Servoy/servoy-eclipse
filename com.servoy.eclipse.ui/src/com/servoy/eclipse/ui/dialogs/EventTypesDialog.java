@@ -44,11 +44,12 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -92,20 +93,21 @@ public class EventTypesDialog extends Dialog
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
 
-		Composite container = new Composite(myScrolledComposite, SWT.NONE);
-		myScrolledComposite.setContent(container);
-		container.setLayout(new GridLayout(1, false));
-
-		Composite tableContainer = new Composite(container, SWT.NONE);
-
-		myScrolledComposite.setContent(container);
-
 		GridData gd = new GridData();
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.FILL;
 		gd.grabExcessHorizontalSpace = true;
 		gd.grabExcessVerticalSpace = true;
-		tableContainer.setLayoutData(gd);
+		myScrolledComposite.setLayoutData(gd);
+		myScrolledComposite.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_RED));
+
+		Composite tableContainer = new Composite(myScrolledComposite, SWT.NONE);
+
+		tableContainer.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_GREEN));
+
+
+		myScrolledComposite.setContent(tableContainer);
+
 
 		TableViewer tableViewer = new TableViewer(tableContainer, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		Table columnTable = tableViewer.getTable();
@@ -265,7 +267,7 @@ public class EventTypesDialog extends Dialog
 		tableViewer.setContentProvider(new ArrayContentProvider());
 		tableViewer.setInput(model);
 
-		Button addEventType = new Button(container, SWT.NONE);
+		Button addEventType = new Button(composite, SWT.NONE);
 		addEventType.setText("Add New Event Type");
 		addEventType.setToolTipText("Adds a new event type");
 		addEventType.addSelectionListener(new SelectionAdapter()
@@ -291,7 +293,7 @@ public class EventTypesDialog extends Dialog
 			}
 		});
 		// make sure dialog is big enough to clearly see the table items
-		myScrolledComposite.setMinSize(500, 500);
+		myScrolledComposite.setSize(600, 400);
 		return myScrolledComposite;
 	}
 
@@ -319,6 +321,23 @@ public class EventTypesDialog extends Dialog
 			}
 		}
 		return json;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
+	 */
+	@Override
+	protected void configureShell(Shell shell)
+	{
+		super.configureShell(shell);
+		shell.setSize(400, 400);
+		// Center the dialog
+		Rectangle screenSize = Display.getDefault().getBounds();
+		int x = (screenSize.width - shell.getSize().x) / 2;
+		int y = (screenSize.height - shell.getSize().y) / 2;
+		shell.setLocation(x, y);
 	}
 
 	/**
