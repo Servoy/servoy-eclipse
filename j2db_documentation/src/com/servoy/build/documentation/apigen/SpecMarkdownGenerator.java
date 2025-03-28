@@ -122,7 +122,6 @@ public class SpecMarkdownGenerator
 
 	private static int totalFunctionsWithIssues = 0;
 	private static int jsDocUndocumentedProperties = 0;
-	private static int specUndocumentedProperties = 0;
 	private static int totalUndocumentedFunctions = 0;
 
 	private static final DuplicateTracker duplicateTracker = DuplicateTracker.getInstance();
@@ -299,7 +298,6 @@ public class SpecMarkdownGenerator
 	{
 		System.out.println("\033[38;5;39m\n\nSUMMARY:\n");
 		System.out.println(jsDocUndocumentedProperties + " properties have no JS DOCS\n" +
-			specUndocumentedProperties + " properties has no SPEC docs\n" +
 			totalFunctionsWithIssues + " functions or handlers failed validation\n" +
 			totalUndocumentedFunctions + " functions or handlers has no documentation\n\n");
 
@@ -589,7 +587,7 @@ public class SpecMarkdownGenerator
 												String customTypeName = typeProp.getNameAsString();
 
 												// Optionally, process any JSDoc comment for the custom type itself
-												Comment typeDocComment = typeProp.getDocumentation();
+												Comment typeDocComment = typeProp.getName().getDocumentation();
 												String typeDocText = typeDocComment != null ? processJSDocDescription(typeDocComment.getText()) : "";
 
 												// Prepare a map for the properties of this custom type
@@ -642,7 +640,7 @@ public class SpecMarkdownGenerator
 										}
 									}
 								}
-								if (declaration.getInitializer() != null && !"types".equals(declaration.getIdentifier().getName()))
+								if (declaration.getInitializer() != null && !"svy_types".equals(declaration.getIdentifier().getName()))
 								{
 									visit(declaration.getInitializer());
 								}
@@ -1416,11 +1414,6 @@ public class SpecMarkdownGenerator
 				{ //spec docs need processing
 					doc = processDescription(indentLevel, doc);
 				}
-				else
-				{
-					specUndocumentedProperties++;
-//					System.out.println("\033[38;5;215mWarning: specification doc was not found for: " + name + "\033[0m");
-				}
 			}
 		}
 
@@ -1664,7 +1657,8 @@ public class SpecMarkdownGenerator
 		JSONArray jsDocParams = jsDocEntry.optJSONArray("params");
 		JSONObject jsDocReturn = jsDocEntry.optJSONObject("returns");
 		String docReturnType = jsDocReturn != null ? jsDocReturn.optString("type", null) : null;
-		String prefix = getComponentName() + "." + apiDocName;
+		String componentName = getComponentName();
+		String prefix = componentName + "." + apiDocName;
 
 		//validate parameters count
 		if (specParams != null && jsDocParams != null && specParams.length() != jsDocParams.length())
@@ -1701,7 +1695,8 @@ public class SpecMarkdownGenerator
 					if (!docParamName.equals(specParamName))
 					{
 						isValidFunction = false;
-						System.err.println(apiDocName + ": Param name mismatch: " + docParamName + " ...! Must be: " + specParamName);
+						System.err
+							.println(componentName + "." + apiDocName + ": Param name mismatch: " + docParamName + " ...! Must be: " + specParamName);
 					}
 				}
 
@@ -1718,11 +1713,11 @@ public class SpecMarkdownGenerator
 				{
 					//at this point docParamType is markdownified
 					docParamType = docParamType.replaceAll("\\\\+", "").trim();
-					if (!areTypesEquivalent(getTypes(), specParamType, docParamType, getComponentName()))
+					if (!areTypesEquivalent(getTypes(), specParamType, docParamType, componentName))
 					{
 						isValidFunction = false;
-						System.err.println(apiDocName + ": Param type mismatch: " + docParamType + " ...! Must be: " +
-							normalizeType(getTypes(), specParamType, getComponentName()));
+						System.err.println(componentName + "." + apiDocName + ": Param type mismatch: " + docParamType + " ...! Must be: " +
+							normalizeType(getTypes(), specParamType, componentName));
 					}
 				}
 
@@ -1731,7 +1726,7 @@ public class SpecMarkdownGenerator
 				if (docParamDoc == null || docParamDoc.length() == 0)
 				{
 					isValidFunction = false;
-					System.err.println(apiDocName + ": missing parameter description in the doc file.");
+					System.err.println(componentName + "." + apiDocName + ": missing parameter description in the doc file.");
 				}
 			}
 		}
@@ -1740,18 +1735,18 @@ public class SpecMarkdownGenerator
 		if (specReturnType == null && docReturnType != null)
 		{
 			isValidFunction = false;
-			System.err.println(apiDocName + ": missing return type in the spec file. Doc has: " + docReturnType);
+			System.err.println(componentName + "." + apiDocName + ": missing return type in the spec file. Doc has: " + docReturnType);
 		}
 		else if (specReturnType != null && docReturnType != null)
 		{
 
 			//at this point docReturn is markdownified
 			docReturnType = docReturnType.replaceAll("\\\\+", "").trim();
-			if (!areTypesEquivalent(getTypes(), specReturnType, docReturnType, getComponentName()))
+			if (!areTypesEquivalent(getTypes(), specReturnType, docReturnType, componentName))
 			{
 				isValidFunction = false;
-				System.err.println(apiDocName + ": Return type mismatch: " + docReturnType + " ...! Must be: " +
-					normalizeType(getTypes(), specReturnType, getComponentName()));
+				System.err.println(componentName + "." + apiDocName + ": Return type mismatch: " + docReturnType + " ...! Must be: " +
+					normalizeType(getTypes(), specReturnType, componentName));
 			}
 		}
 
@@ -1760,7 +1755,7 @@ public class SpecMarkdownGenerator
 		if (specReturnType != null && (docReturnDoc == null || docReturnDoc.length() == 0))
 		{
 			isValidFunction = false;
-			System.err.println(apiDocName + ": missing return description in the doc file.");
+			System.err.println(componentName + "." + apiDocName + ": missing return description in the doc file.");
 		}
 
 		if (!isValidFunction)
@@ -1866,6 +1861,7 @@ public class SpecMarkdownGenerator
 			{
 				String type = keys.next();
 				JSONObject jsDocType = jsDocTypes.optJSONObject(type);
+				String _docValue = jsDocType != null ? jsDocType.optString("_doc", "") : "";
 				JSONObject typeObject = types.optJSONObject(type);
 				if (typeObject.has("tags") && "private".equals(typeObject.getJSONObject("tags").optString("scope"))) continue;
 
@@ -1889,13 +1885,23 @@ public class SpecMarkdownGenerator
 							}
 						};
 						Map<String, Object> apiMap = makeMap(typeObject.getJSONObject("serversideapi"), jsDocs, x, type, null);
-						map.put(type, Map.of("model", modelMap, "serversideapi", apiMap, "extends", extend));
+						map.put(type, Map.of(
+							"model", modelMap,
+							"serversideapi", apiMap,
+							"extends", extend,
+							"_doc", _docValue));
+
 					}
-					else map.put(type, Map.of("model", modelMap, "extends", extend));
+					else map.put(type, Map.of(
+						"model", modelMap,
+						"extends", extend,
+						"_doc", _docValue));
 				}
 				else
 				{
-					map.put(type, Map.of("model", makeMap(typeObject, jsDocs, this::createPropertyIndented, null, jsDocType)));
+					map.put(type, Map.of(
+						"model", makeMap(typeObject, jsDocs, this::createPropertyIndented, null, jsDocType),
+						"_doc", _docValue));
 				}
 			}
 			return map.size() > 0 ? map : null;
@@ -1961,7 +1967,20 @@ public class SpecMarkdownGenerator
 						});
 					}
 				}
-				else map.put(key, transformer.apply(key, new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString())));
+				else if (jsDocTypeDescription != null)
+				{
+					map.put(key, transformer.apply(key, new JSONObject(
+						new JSONStringer()
+							.object()
+							.key("type").value(value)
+							.key("jsDoc").value(jsDocTypeDescription)
+							.endObject()
+							.toString())));
+				}
+				else
+				{
+					map.put(key, transformer.apply(key, new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString())));
+				}
 			}
 			return map;
 		}
@@ -1970,13 +1989,22 @@ public class SpecMarkdownGenerator
 
 	private String normalizeTypeForComponent(JSONObject myTypes, String type, String componentName)
 	{
-		if (myTypes == null || componentName == null) return null;
+		if (myTypes == null || componentName == null || type == null) return null;
 
 		JSONObject customType = myTypes.optJSONObject(type);
 		if (customType != null)
 		{
 			return "CustomType<" + componentName + "." + type + ">";
 		}
+
+		for (String key : myTypes.keySet())
+		{
+			if (key.equalsIgnoreCase(type))
+			{
+				return "CustomType<" + componentName + "." + key + ">";
+			}
+		}
+
 		return type;
 	}
 
@@ -2277,6 +2305,8 @@ public class SpecMarkdownGenerator
 			}
 			return result;
 		}
+		//some specTypes may be embraced into "${}" which need to be removed; for example "${dataprovidertype}" is equivalent to "dataprovidertype"
+		normalizedSpecType = normalizedSpecType.replace("${", "").replace("}", "");
 		return normalizedSpecType.equalsIgnoreCase(docType);
 	}
 
@@ -2312,10 +2342,28 @@ public class SpecMarkdownGenerator
 		return standardTypes.contains(type.trim());
 	}
 
-	private String normalizeType(JSONObject myTypes, String type, String componentName)
+	private String getSpecType(String specType)
+	{
+		try
+		{
+			String result = new JSONObject(specType).optString("type", null);
+			if (result != null)
+			{
+				return result;
+			}
+		}
+		catch (JSONException e)
+		{
+			// Ignore
+		}
+		return specType;
+	}
+
+
+	private String normalizeType(JSONObject myTypes, String specType, String componentName)
 	{
 		boolean isArray = false;
-		String normalizedSpecType = type;
+		String normalizedSpecType = getSpecType(specType).toLowerCase();
 		if (normalizedSpecType.endsWith("[]"))
 		{
 			isArray = true;
@@ -2375,7 +2423,7 @@ public class SpecMarkdownGenerator
 					normalizedSpecType = normalizeTypeForComponent(myTypes, normalizedSpecType, componentName);
 				}
 				else
-					normalizedSpecType = type;
+					normalizedSpecType = specType;
 		}
 
 

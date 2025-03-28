@@ -18,9 +18,17 @@ package com.servoy.eclipse.ui.property;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.MouseAdapter;
@@ -37,18 +45,43 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.dialogs.MethodDialog;
+import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
+import com.servoy.eclipse.ui.editors.AddMethodButtonsComposite;
 import com.servoy.eclipse.ui.editors.IValueEditor;
+import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
+import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
+import com.servoy.eclipse.ui.wizards.NewModuleWizard;
 import com.servoy.eclipse.ui.wizards.NewOAuthConfigWizard;
+import com.servoy.j2db.persistence.ArgumentType;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Solution.AUTHENTICATOR_TYPE;
+import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.SafeArrayList;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController<T>
 {
+	/**
+	 *
+	 */
+	private static final String OAUTH_CONFIG_METHOD_PROPERTY = "getOAuthConfig";
 	public static final String CLOUD_BASE_URL = System.getProperty("servoy.cloud_base.url", "https://admin.servoy-cloud.eu");
 
 	public ComboboxPropertyAuthenticator(Object id, String displayName, IComboboxPropertyModel<T> model, String unresolved)
@@ -77,7 +110,8 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 				setItems(model.getDisplayValues());
 				doSetValue(value);
 				AUTHENTICATOR_TYPE servoyCloud = AUTHENTICATOR_TYPE.SERVOY_CLOUD;
-				openButton.setEnabled(value.equals(servoyCloud.getValue()) || value.equals(AUTHENTICATOR_TYPE.OAUTH.getValue()));
+				openButton.setEnabled(value.equals(servoyCloud.getValue()) || value.equals(AUTHENTICATOR_TYPE.OAUTH.getValue()) ||
+					value.equals(AUTHENTICATOR_TYPE.OAUTH_AUTHENTICATOR.getValue()));
 
 				super.activate();
 			}
@@ -125,12 +159,12 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 					@Override
 					public void mouseDown(MouseEvent e)
 					{
-						Integer value = (Integer)doGetValue();
-						if (value.intValue() == AUTHENTICATOR_TYPE.SERVOY_CLOUD.getValue())
+						int value = ((Integer)doGetValue()).intValue();
+						if (value == AUTHENTICATOR_TYPE.SERVOY_CLOUD.getValue())
 						{
 							redirectToTheCloud();
 						}
-						else if (value.intValue() == AUTHENTICATOR_TYPE.OAUTH.getValue())
+						else if (value == AUTHENTICATOR_TYPE.OAUTH.getValue())
 						{
 							Display.getDefault().asyncExec(() -> {
 								OpenWizardAction action = new OpenWizardAction(NewOAuthConfigWizard.class, null,
@@ -138,6 +172,124 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 								action.run();
 							});
 						}
+						else if (value == AUTHENTICATOR_TYPE.OAUTH_AUTHENTICATOR.getValue())
+						{
+							Display.getDefault().asyncExec(() -> {
+								selectGetOAuthConfigMethod();
+							});
+						}
+					}
+
+					public void selectGetOAuthConfigMethod()
+					{
+						try
+						{
+							ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+							Solution mainSolution = activeProject.getSolution();
+							Solution authenticatorModule = findOrCreateAuthenticatorModule(mainSolution);
+							if (authenticatorModule == null)
+							{
+								return;
+							}
+							PersistContext persistContext = PersistContext.create(authenticatorModule);
+							JSONObject properties = new ServoyJSONObject(mainSolution.getCustomProperties(), true);
+							MethodWithArguments m = new MethodWithArguments(properties.optInt(OAUTH_CONFIG_METHOD_PROPERTY, -1), null);
+
+							MethodDialog dialog = new MethodDialog(Display.getDefault().getActiveShell(),
+								new MethodLabelProvider(persistContext, false, true, true),
+								new MethodDialog.MethodTreeContentProvider(
+									persistContext),
+								new StructuredSelection(new Object[] { m.methodId == -1 ? MethodWithArguments.METHOD_NONE : m }),
+								new MethodListOptions(false, false, false, true, false, null), SWT.NONE, "Select Method", null);
+							dialog.setOptionsAreaFactory(new IControlFactory()
+							{
+								public Control createControl(Composite comp)
+								{
+									final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(comp, SWT.NONE)
+									{
+										@Override
+										protected Object getSelectionObject(ScriptMethod method)
+										{
+											SafeArrayList<String> paramNames = new SafeArrayList<>();
+											paramNames.add("arg");
+											paramNames.add("queryParams");
+											SafeArrayList<Object> arguments = new SafeArrayList<>();
+											arguments.add(new MethodArgument("arg", ArgumentType.String, "The value of oauthconfigrequest."));
+											arguments.add(new MethodArgument("queryParams", ArgumentType.Object, "All the query parameters."));
+											return new MethodWithArguments(method.getID(), paramNames, arguments, null);
+										}
+									};
+									buttons.setContext(persistContext, OAUTH_CONFIG_METHOD_PROPERTY);
+									buttons.setDialog(dialog);
+									buttons.searchSelectedScope((IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
+									dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()
+									{
+										public void selectionChanged(SelectionChangedEvent event)
+										{
+											buttons.searchSelectedScope((IStructuredSelection)event.getSelection());
+										}
+									});
+									return buttons;
+								}
+
+							});
+							dialog.open();
+
+							if (dialog.getReturnCode() == Window.CANCEL)
+							{
+								return;
+							}
+
+							MethodWithArguments selected = (MethodWithArguments)((StructuredSelection)dialog.getSelection()).getFirstElement();
+							properties.put(OAUTH_CONFIG_METHOD_PROPERTY, selected.methodId);
+							activeProject.getEditingSolution().setCustomProperties(ServoyJSONObject.toString(properties, true, true, true));
+							EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
+							repository.updateNodesInWorkspace(new IPersist[] { activeProject.getEditingSolution() }, false);
+						}
+						catch (RepositoryException ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+
+					public Solution findOrCreateAuthenticatorModule(Solution mainSolution) throws RepositoryException
+					{
+						Solution authenticatorModule = null;
+						// Assuming getModules() returns a list of modules in the solution
+						IRepository localRepository = ApplicationServerRegistry.get().getLocalRepository();
+						List<String> modulesList = Arrays.asList(mainSolution.getModulesNames().split(","));
+						for (String moduleName : modulesList)
+						{
+							Solution module = (Solution)localRepository.getActiveRootObject(moduleName, IRepository.SOLUTIONS);
+							if (module != null && module.getSolutionType() == SolutionMetaData.AUTHENTICATOR)
+							{
+								authenticatorModule = module;
+								break;
+							}
+						}
+						if (authenticatorModule == null)
+						{
+							IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("module.png"),
+								"Create new module");
+							newModule.run();
+
+							String newModuleName = null;
+							for (String moduleName : Arrays.asList(mainSolution.getModulesNames().split(",")))
+							{
+								if (!modulesList.contains(moduleName))
+								{
+									newModuleName = moduleName;
+									break;
+								}
+							}
+							if (newModuleName == null)
+							{
+								return null;
+							}
+							authenticatorModule = (Solution)localRepository.getActiveRootObject(newModuleName, IRepository.SOLUTIONS);
+							authenticatorModule.setSolutionType(SolutionMetaData.AUTHENTICATOR);
+						}
+						return authenticatorModule;
 					}
 
 					private void redirectToTheCloud()
@@ -184,14 +336,20 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 					{
 						// the selection is already updated at this point using the SelectionAdapter created in super.createControl()
 						String selection = ((CCombo)event.getSource()).getItems()[((CCombo)event.getSource()).getSelectionIndex()];
-						openButton.setEnabled("SERVOY_CLOUD".equals(selection) || "OAUTH".equals(selection));
-						if ("SERVOY_CLOUD".equals(selection))
+						openButton.setEnabled("SERVOY_CLOUD".equals(selection) || "OAUTH".equals(selection) || "OAUTH_AUTHENTICATOR".equals(selection));
+						switch (selection)
 						{
-							openButton.setToolTipText("Go to Servoy Cloud");
-						}
-						else if ("OAUTH".equals(selection))
-						{
-							openButton.setToolTipText("Configure Stateless Login with an OAuth provider");
+							case "SERVOY_CLOUD" :
+								openButton.setToolTipText("Go to Servoy Cloud");
+								break;
+							case "OAUTH" :
+								openButton.setToolTipText("Configure Stateless Login with an OAuth provider");
+								break;
+							case "OAUTH_AUTHENTICATOR" :
+								openButton.setToolTipText("Select the configuration method");
+								break;
+							default :
+								openButton.setToolTipText("");
 						}
 						fireApplyEditorValue();
 					}

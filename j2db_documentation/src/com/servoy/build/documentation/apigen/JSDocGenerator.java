@@ -20,7 +20,9 @@ package com.servoy.build.documentation.apigen;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
@@ -51,7 +53,19 @@ public class JSDocGenerator
 
 	private final boolean changeTypesName = false;
 
+	private final boolean processList = false;
+
 	private final boolean tempTarget = false;
+
+	private final List<String> list = Arrays.asList(
+		"bootstrapcomponents-floatlabelcalendar",
+		"bootstrapcomponents-floatlabelcombobox",
+		"bootstrapcomponents-floatlabeltextarea",
+		"bootstrapcomponents-floatlabeltextbox",
+		"bootstrapcomponents-floatlabeltypeahead",
+		"bootstrapcomponents-formcomponent",
+		"bootstrapcomponents-progressbar",
+		"bootstrapcomponents-table");
 
 	public JSDocGenerator(JSONObject spec, File doc)
 	{
@@ -64,7 +78,6 @@ public class JSDocGenerator
 
 		if (!ALLOW_EXECUTION)
 		{
-			System.out.println("JSDocGenerator execution is disabled.");
 			return;
 		}
 
@@ -357,7 +370,7 @@ public class JSDocGenerator
 						if (!returnType.isEmpty())
 						{
 							String normalizedReturnType = normalizeType(spec.optJSONObject("types"), returnType, spec.optString("name"));
-							sb.append(indentation).append(" * @returns {").append(normalizedReturnType).append("}");
+							sb.append(indentation).append(" * @return {").append(normalizedReturnType).append("}");
 							if (returnDoc != null && !returnDoc.isEmpty())
 							{
 								sb.append(" ").append(returnDoc);

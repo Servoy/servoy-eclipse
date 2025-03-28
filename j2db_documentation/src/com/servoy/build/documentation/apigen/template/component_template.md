@@ -28,16 +28,13 @@ This is a reference page; many components have detailed usage guides [here](http
 
 <#list properties as propName, propValue>
 ### ${MD(propName)}
-
 <#if propValue.doc()??>
 ${propValue.doc()?trim}
-
 </#if>
 Type: [${MD(instance.getDocType(propValue, types, componentinternalname))}](${instance.getReturnTypePath(propValue)})
 <#if propValue.defaultValue()??> 
 Default Value: ${MD(propValue.defaultValue())}
 </#if>
-
 ***
 
 </#list>
@@ -47,8 +44,8 @@ Default Value: ${MD(propValue.defaultValue())}
 
 <#list events as propName, propValue>
 ### ${MD(propName)}
-<#if propValue.doc()??>
 
+<#if propValue.doc()??>
 ${propValue.doc()?trim}
 </#if>
 <#if propValue.parameters()?has_content>
@@ -56,7 +53,7 @@ ${propValue.doc()?trim}
 **Parameters:**
 
 <#list propValue.parameters() as param> 
-> - {[${MD(instance.getDocType(param, types, componentinternalname))}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if><#if param.doc()??>${param.doc()}</#if>
+> - {[${MD(instance.getDocType(param, types, componentinternalname))}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if><#if param.doc()??> ${param.doc()}</#if>
 </#list>
 </#if>
 <#if propValue.returnValue()??>
@@ -66,7 +63,6 @@ ${propValue.doc()?trim}
 ${propValue.returnValue()["description"]}
 </#if>
 </#if>
-
 ***
 
 </#list>
@@ -92,7 +88,6 @@ ${propValue.doc()?trim}
 </#if>
 <#if propValue.returnValue()??>
 **Returns:** [${MD(instance.getDocType(propValue.returnValue(), types, componentinternalname))}](${instance.getReturnTypePath(propValue)}) ${propValue.returnValue().description} 
-
 </#if>
 ***
 
@@ -104,9 +99,14 @@ ${propValue.doc()?trim}
 
 <#list types as typeName, typeValue>
 ## ${MD(typeName)} 
+  <#if typeValue._doc?? && typeValue._doc?trim?length gt 0>
+  ${typeValue._doc}
+  </#if>
   scripting type: CustomType<${componentinternalname}.${typeName}>
-<#if typeValue.extends?has_content>  extends: ${typeValue.extends}</#if>
-  
+
+<#if typeValue.extends?has_content>
+  extends: ${typeValue.extends} 
+</#if>
 <#list typeValue.model as propName, propValue>
  - ${MD(propName)}
 <#if propValue.doc()??>
@@ -118,13 +118,11 @@ ${propValue.doc()?trim}
 </#if>
 </#list>
 <#if typeValue.serversideapi??>
-
 <#list typeValue.serversideapi as propName, propValue>
 ### ${MD(propName)}
 <#if propValue.doc()??>
 
 ${propValue.doc()?trim}
-
 </#if>
 <#if propValue.parameters()?has_content>
 **Parameters:**  

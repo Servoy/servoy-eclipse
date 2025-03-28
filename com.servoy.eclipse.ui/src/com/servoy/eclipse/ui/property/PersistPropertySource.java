@@ -501,9 +501,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							{
 								PropertyDescription propertyDescription = extraCategoryProperties.get(propertyName);
 								IPropertyDescriptor pd;
+								String uniqueName = categoryName + "." + propertyName;
 								if (propertyDescription.getType() instanceof ValueListPropertyType)
 								{
-									pd = new ValuelistPropertyController<Object>(propertyName, propertyName, persistContext,
+									pd = new ValuelistPropertyController<Object>(uniqueName, propertyName, persistContext,
 										true)
 									{
 										@Override
@@ -530,7 +531,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								}
 								else
 								{
-									pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
+									pd = createOtherPropertyDescriptorIfAppropriate(uniqueName, propertyName,
 										propertyDescription,
 										form, persistContext,
 										readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
@@ -2268,7 +2269,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				boolean isCustomProperty = Menu.CUSTOM_PROPERTIES_CATEGORY.equals(propertyDescriptor.getCategory());
 				Object value = isCustomProperty ? ((MenuItem)persistContext.getPersist()).getCustomPropertyValue(id.toString())
-					: ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
+					: ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), propertyDescriptor.getDisplayName());
 				if (value != null && value instanceof String && Utils.getAsUUID(value, false) != null)
 				{
 					IPropertyType< ? > propertyType = null;
@@ -2283,7 +2284,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 					else
 					{
-						propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+						propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory())
+							.get(propertyDescriptor.getDisplayName()).getType();
 					}
 					if (propertyType instanceof ValueListPropertyType || propertyType instanceof FormPropertyType)
 					{
@@ -2864,7 +2866,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 					else
 					{
-						propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+						propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory())
+							.get(propertyDescriptor.getDisplayName()).getType();
 					}
 					if (propertyType instanceof ValueListPropertyType)
 					{
@@ -2885,7 +2888,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 				else
 				{
-					((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), id.toString(), value);
+					((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), propertyDescriptor.getDisplayName(), value);
 				}
 			}
 		}

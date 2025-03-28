@@ -72,11 +72,15 @@ import com.servoy.j2db.util.Utils;
 public class MapEntriesPropertyController extends PropertyController<Map<String, Object>, Object>
 {
 	private final Map<String, PropertyDescription> attributesMap;
-	public static LabelProvider CLICK_TO_ADD = new LabelProvider()
+	public static LabelProvider MAP_LABEL_PROVIDER = new LabelProvider()
 	{
 		@Override
 		public String getText(Object element)
 		{
+			if (element instanceof Map map)
+			{
+				return map.keySet().toString();
+			}
 			return "click to add";
 		}
 	};
@@ -92,7 +96,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		JSONObject valueTypes)
 	{
 		super(id, displayName);
-		setLabelProvider(CLICK_TO_ADD);
+		setLabelProvider(MAP_LABEL_PROVIDER);
 		this.attributesMap = map;
 		this.addDialogCellEditor = addDialogCellEditor;
 		this.valueTypes = valueTypes;
