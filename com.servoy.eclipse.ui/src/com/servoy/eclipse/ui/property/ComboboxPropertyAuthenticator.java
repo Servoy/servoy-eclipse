@@ -61,7 +61,7 @@ import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
-import com.servoy.eclipse.ui.wizards.NewModuleWizard;
+import com.servoy.eclipse.ui.wizards.NewAuthenticatorWizard;
 import com.servoy.eclipse.ui.wizards.NewOAuthConfigWizard;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -105,6 +105,7 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 				Object value = doGetValue();
 				setItems(model.getDisplayValues());
 				doSetValue(value);
+				setTooltip(((Integer)doGetValue()).intValue());
 				AUTHENTICATOR_TYPE servoyCloud = AUTHENTICATOR_TYPE.SERVOY_CLOUD;
 				openButton.setEnabled(value.equals(servoyCloud.getValue()) || value.equals(AUTHENTICATOR_TYPE.OAUTH.getValue()) ||
 					value.equals(AUTHENTICATOR_TYPE.OAUTH_AUTHENTICATOR.getValue()));
@@ -132,10 +133,6 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 
 				openButton.setText("...");
 				openButton.setEnabled(false);
-				String tooltipText = ((Integer)doGetValue()).intValue() == AUTHENTICATOR_TYPE.OAUTH.getValue()
-					? "Configure Stateless Login with an OAuth provider"
-					: "Go to Servoy Cloud";
-				openButton.setToolTipText(tooltipText);
 
 				GroupLayout groupLayout = new GroupLayout(composite);
 				SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
@@ -174,111 +171,6 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 								selectGetOAuthConfigMethod();
 							});
 						}
-					}
-
-					public void selectGetOAuthConfigMethod()
-					{
-						try
-						{
-							ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-							Solution mainSolution = activeProject.getSolution();
-							Solution authenticatorModule = findOrCreateAuthenticatorModule(mainSolution);
-							if (authenticatorModule == null)
-							{
-								return;
-							}
-							PersistContext persistContext = PersistContext.create(authenticatorModule);
-							JSONObject properties = new ServoyJSONObject(mainSolution.getCustomProperties(), true);
-							MethodWithArguments m = new MethodWithArguments(properties.optInt(OAUTH_CONFIG_METHOD_PROPERTY, -1), null);
-
-							MethodDialog dialog = new MethodDialog(Display.getDefault().getActiveShell(),
-								new MethodLabelProvider(persistContext, false, true, true),
-								new MethodDialog.MethodTreeContentProvider(
-									persistContext),
-								new StructuredSelection(new Object[] { m.methodId == -1 ? MethodWithArguments.METHOD_NONE : m }),
-								new MethodListOptions(false, false, false, true, false, null), SWT.NONE, "Select Method", null);
-							dialog.setOptionsAreaFactory(new IControlFactory()
-							{
-								public Control createControl(Composite comp)
-								{
-									final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(comp, SWT.NONE);
-									buttons.setContext(persistContext, OAUTH_CONFIG_METHOD_PROPERTY);
-									buttons.setDialog(dialog);
-									buttons.searchSelectedScope((IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
-									dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()
-									{
-										public void selectionChanged(SelectionChangedEvent event)
-										{
-											buttons.searchSelectedScope((IStructuredSelection)event.getSelection());
-										}
-									});
-									return buttons;
-								}
-
-							});
-							dialog.open();
-
-							if (dialog.getReturnCode() == Window.CANCEL)
-							{
-								return;
-							}
-
-							MethodWithArguments selected = (MethodWithArguments)((StructuredSelection)dialog.getSelection()).getFirstElement();
-							properties.put(OAUTH_CONFIG_METHOD_PROPERTY, selected.methodId);
-							activeProject.getEditingSolution().setCustomProperties(ServoyJSONObject.toString(properties, true, true, true));
-							EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
-							repository.updateNodesInWorkspace(new IPersist[] { activeProject.getEditingSolution() }, false);
-						}
-						catch (RepositoryException ex)
-						{
-							ServoyLog.logError(ex);
-						}
-					}
-
-					public Solution findOrCreateAuthenticatorModule(Solution mainSolution) throws RepositoryException
-					{
-						Solution authenticatorModule = null;
-						// Assuming getModules() returns a list of modules in the solution
-						IRepository localRepository = ApplicationServerRegistry.get().getLocalRepository();
-						List<String> modulesList = Arrays.asList(mainSolution.getModulesNames().split(","));
-						for (String moduleName : modulesList)
-						{
-							Solution module = (Solution)localRepository.getActiveRootObject(moduleName, IRepository.SOLUTIONS);
-							if (module != null && module.getSolutionType() == SolutionMetaData.AUTHENTICATOR)
-							{
-								authenticatorModule = module;
-								break;
-							}
-						}
-						if (authenticatorModule == null)
-						{
-							String newModuleName = null;
-							boolean createModule = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
-								"Create Authenticator Module",
-								"The authenticator module is missing. Do you want to create a new one?");
-							if (createModule)
-							{
-								IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("module.png"),
-									"Create new module");
-								newModule.run();
-
-								for (String moduleName : Arrays.asList(mainSolution.getModulesNames().split(",")))
-								{
-									if (!modulesList.contains(moduleName))
-									{
-										newModuleName = moduleName;
-										break;
-									}
-								}
-							}
-							if (newModuleName == null)
-							{
-								return null;
-							}
-							authenticatorModule = (Solution)localRepository.getActiveRootObject(newModuleName, IRepository.SOLUTIONS);
-							authenticatorModule.setSolutionType(SolutionMetaData.AUTHENTICATOR);
-						}
-						return authenticatorModule;
 					}
 
 					private void redirectToTheCloud()
@@ -326,26 +218,151 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 						// the selection is already updated at this point using the SelectionAdapter created in super.createControl()
 						String selection = ((CCombo)event.getSource()).getItems()[((CCombo)event.getSource()).getSelectionIndex()];
 						openButton.setEnabled("SERVOY_CLOUD".equals(selection) || "OAUTH".equals(selection) || "OAUTH_AUTHENTICATOR".equals(selection));
-						switch (selection)
+						setTooltip(((Integer)doGetValue()).intValue());
+						if ("OAUTH_AUTHENTICATOR".equals(selection))
 						{
-							case "SERVOY_CLOUD" :
-								openButton.setToolTipText("Go to Servoy Cloud");
-								break;
-							case "OAUTH" :
-								openButton.setToolTipText("Configure Stateless Login with an OAuth provider");
-								break;
-							case "OAUTH_AUTHENTICATOR" :
-								openButton.setToolTipText("Select the configuration method");
-								break;
-							default :
-								openButton.setToolTipText("");
+							Display.getDefault().asyncExec(() -> {
+								selectGetOAuthConfigMethod();
+							});
 						}
 						fireApplyEditorValue();
 					}
 				});
 				return composite;
 			}
+
+			public void setTooltip(int intValue)
+			{
+				AUTHENTICATOR_TYPE authenticatorType = Arrays.stream(AUTHENTICATOR_TYPE.values())
+					.filter(type -> type.getValue() == intValue)
+					.findFirst()
+					.orElse(null);
+				openButton.setToolTipText(switch (authenticatorType)
+				{
+					case SERVOY_CLOUD -> "Go to Servoy Cloud";
+					case OAUTH -> "Configure Stateless Login with an OAuth provider";
+					case OAUTH_AUTHENTICATOR -> "Select the configuration method";
+					default -> "";
+				});
+			}
 		};
 		return editor;
+	}
+
+	public void selectGetOAuthConfigMethod()
+	{
+		try
+		{
+			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+			Solution mainSolution = activeProject.getSolution();
+			Solution authenticatorModule = findOrCreateAuthenticatorModule(mainSolution);
+			if (authenticatorModule == null)
+			{
+				return;
+			}
+			PersistContext persistContext = PersistContext.create(authenticatorModule);
+			JSONObject properties = new ServoyJSONObject(mainSolution.getCustomProperties(), true);
+			MethodWithArguments m = new MethodWithArguments(properties.optInt(OAUTH_CONFIG_METHOD_PROPERTY, -1), null);
+
+			MethodDialog dialog = new MethodDialog(Display.getDefault().getActiveShell(),
+				new MethodLabelProvider(persistContext, false, true, true),
+				new MethodDialog.MethodTreeContentProvider(
+					persistContext),
+				new StructuredSelection(new Object[] { m.methodId == -1 ? MethodWithArguments.METHOD_NONE : m }),
+				new MethodListOptions(false, false, false, true, false, null), SWT.NONE, "Select Method", null);
+			dialog.setOptionsAreaFactory(new IControlFactory()
+			{
+				public Control createControl(Composite comp)
+				{
+					final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(comp, SWT.NONE);
+					buttons.setContext(persistContext, OAUTH_CONFIG_METHOD_PROPERTY);
+					buttons.setDialog(dialog);
+					buttons.searchSelectedScope((IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
+					dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()
+					{
+						public void selectionChanged(SelectionChangedEvent event)
+						{
+							buttons.searchSelectedScope((IStructuredSelection)event.getSelection());
+						}
+					});
+					return buttons;
+				}
+
+			});
+			dialog.open();
+
+			if (dialog.getReturnCode() == Window.CANCEL)
+			{
+				return;
+			}
+
+			MethodWithArguments selected = (MethodWithArguments)((StructuredSelection)dialog.getSelection()).getFirstElement();
+			properties.put(OAUTH_CONFIG_METHOD_PROPERTY, selected.methodId);
+			activeProject.getEditingSolution().setCustomProperties(ServoyJSONObject.toString(properties, true, true, true));
+			EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
+			repository.updateNodesInWorkspace(new IPersist[] { activeProject.getEditingSolution() }, false);
+		}
+		catch (RepositoryException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+	}
+
+	public Solution findOrCreateAuthenticatorModule(Solution mainSolution) throws RepositoryException
+	{
+		Solution authenticatorModule = null;
+		// Assuming getModules() returns a list of modules in the solution
+		IRepository localRepository = ApplicationServerRegistry.get().getLocalRepository();
+		String modulesNames = mainSolution.getModulesNames();
+		List<String> modulesList = null;
+		if (modulesNames != null)
+		{
+			modulesList = Arrays.asList(modulesNames.split(","));
+			for (String moduleName : modulesList)
+			{
+				Solution module = (Solution)localRepository.getActiveRootObject(moduleName, IRepository.SOLUTIONS);
+				if (module != null && module.getSolutionType() == SolutionMetaData.AUTHENTICATOR)
+				{
+					authenticatorModule = module;
+					break;
+				}
+			}
+		}
+		if (authenticatorModule == null)
+		{
+			String newModuleName = null;
+			boolean createModule = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+				"Create Authenticator Module",
+				"The authenticator module is missing. Do you want to create a new one?");
+			if (createModule)
+			{
+				IAction newModule = new OpenWizardAction(NewAuthenticatorWizard.class, Activator.loadImageDescriptorFromBundle("module.png"),
+					"Create Authenticator module");
+				newModule.run();
+
+				String newModuleNames = mainSolution.getModulesNames();
+				if (modulesNames != null && newModuleNames != null)
+				{
+					for (String moduleName : Arrays.asList(newModuleNames.split(",")))
+					{
+						if (!modulesList.contains(moduleName))
+						{
+							newModuleName = moduleName;
+							break;
+						}
+					}
+				}
+				else
+				{
+					newModuleName = newModuleNames;
+				}
+			}
+			if (newModuleName == null)
+			{
+				return null;
+			}
+			authenticatorModule = (Solution)localRepository.getActiveRootObject(newModuleName, IRepository.SOLUTIONS);
+		}
+		return authenticatorModule;
 	}
 }
