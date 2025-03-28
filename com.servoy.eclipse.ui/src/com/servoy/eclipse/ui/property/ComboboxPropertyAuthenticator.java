@@ -63,17 +63,13 @@ import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
 import com.servoy.eclipse.ui.wizards.NewModuleWizard;
 import com.servoy.eclipse.ui.wizards.NewOAuthConfigWizard;
-import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Solution.AUTHENTICATOR_TYPE;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController<T>
@@ -205,20 +201,7 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 							{
 								public Control createControl(Composite comp)
 								{
-									final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(comp, SWT.NONE)
-									{
-										@Override
-										protected Object getSelectionObject(ScriptMethod method)
-										{
-											SafeArrayList<String> paramNames = new SafeArrayList<>();
-											paramNames.add("arg");
-											paramNames.add("queryParams");
-											SafeArrayList<Object> arguments = new SafeArrayList<>();
-											arguments.add(new MethodArgument("arg", ArgumentType.String, "The value of oauthconfigrequest."));
-											arguments.add(new MethodArgument("queryParams", ArgumentType.Object, "All the query parameters."));
-											return new MethodWithArguments(method.getID(), paramNames, arguments, null);
-										}
-									};
+									final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(comp, SWT.NONE);
 									buttons.setContext(persistContext, OAUTH_CONFIG_METHOD_PROPERTY);
 									buttons.setDialog(dialog);
 									buttons.searchSelectedScope((IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
@@ -269,17 +252,23 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 						}
 						if (authenticatorModule == null)
 						{
-							IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("module.png"),
-								"Create new module");
-							newModule.run();
-
 							String newModuleName = null;
-							for (String moduleName : Arrays.asList(mainSolution.getModulesNames().split(",")))
+							boolean createModule = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+								"Create Authenticator Module",
+								"The authenticator module is missing. Do you want to create a new one?");
+							if (createModule)
 							{
-								if (!modulesList.contains(moduleName))
+								IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("module.png"),
+									"Create new module");
+								newModule.run();
+
+								for (String moduleName : Arrays.asList(mainSolution.getModulesNames().split(",")))
 								{
-									newModuleName = moduleName;
-									break;
+									if (!modulesList.contains(moduleName))
+									{
+										newModuleName = moduleName;
+										break;
+									}
 								}
 							}
 							if (newModuleName == null)
