@@ -36,6 +36,7 @@ public class TextFieldDialog extends MessageDialog
 	private Text text;
 	private final String defaultText;
 	private String selectedText;
+	private final boolean isTextArea;
 
 	public TextFieldDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType,
 		String[] dialogButtonLabels)
@@ -46,19 +47,29 @@ public class TextFieldDialog extends MessageDialog
 	public TextFieldDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType,
 		String[] dialogButtonLabels, String defaultText)
 	{
+		this(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, defaultText, false);
+	}
+
+	public TextFieldDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType,
+		String[] dialogButtonLabels, String defaultText, boolean isTextArea)
+	{
 		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, 0);
 		setBlockOnOpen(true);
 		this.defaultText = defaultText;
+		this.isTextArea = isTextArea;
 	}
-
 
 	@Override
 	protected Control createCustomArea(Composite parent)
 	{
-		text = new Text(parent, SWT.BORDER);
+		text = new Text(parent, isTextArea ? SWT.BORDER | SWT.MULTI | SWT.WRAP : SWT.BORDER);
 		text.setText(defaultText);
 		if (defaultText != null && defaultText.length() > 0) text.selectAll();
 		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		if (isTextArea)
+		{
+			gridData.heightHint = 300;
+		}
 		text.setLayoutData(gridData);
 		return text;
 	}
