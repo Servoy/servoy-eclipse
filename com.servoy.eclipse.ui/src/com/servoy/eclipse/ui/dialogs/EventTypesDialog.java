@@ -99,12 +99,8 @@ public class EventTypesDialog extends Dialog
 		gd.grabExcessHorizontalSpace = true;
 		gd.grabExcessVerticalSpace = true;
 		myScrolledComposite.setLayoutData(gd);
-		myScrolledComposite.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_RED));
 
 		Composite tableContainer = new Composite(myScrolledComposite, SWT.NONE);
-
-		tableContainer.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_GREEN));
-
 
 		myScrolledComposite.setContent(tableContainer);
 
@@ -163,7 +159,7 @@ public class EventTypesDialog extends Dialog
 				protected Object openDialogBox(Control cellEditorWindow)
 				{
 					return UIUtils.showTextFieldDialog(getParentShell(), "Edit Event Description", "Description",
-						getValue() != null ? getValue().toString() : "");
+						getValue() != null ? getValue().toString() : "", true);
 				}
 
 			};
@@ -224,8 +220,8 @@ public class EventTypesDialog extends Dialog
 
 		TableColumnLayout layout = new TableColumnLayout();
 		tableContainer.setLayout(layout);
-		layout.setColumnData(nameColumn, new ColumnWeightData(1, 100, true));
-		layout.setColumnData(descriptionColumn, new ColumnWeightData(1, 350, true));
+		layout.setColumnData(nameColumn, new ColumnWeightData(1, 50, true));
+		layout.setColumnData(descriptionColumn, new ColumnWeightData(3, 100, true));
 		layout.setColumnData(deleteColumn, new ColumnPixelData(20, false));
 
 		tableViewer.setLabelProvider(new ITableLabelProvider()
@@ -292,8 +288,6 @@ public class EventTypesDialog extends Dialog
 				}
 			}
 		});
-		// make sure dialog is big enough to clearly see the table items
-		myScrolledComposite.setSize(600, 400);
 		return myScrolledComposite;
 	}
 
@@ -332,7 +326,7 @@ public class EventTypesDialog extends Dialog
 	protected void configureShell(Shell shell)
 	{
 		super.configureShell(shell);
-		shell.setSize(400, 400);
+		shell.setSize(500, 500);
 		// Center the dialog
 		Rectangle screenSize = Display.getDefault().getBounds();
 		int x = (screenSize.width - shell.getSize().x) / 2;
