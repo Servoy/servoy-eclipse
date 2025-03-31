@@ -82,6 +82,7 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 	 */
 	private static final String OAUTH_CONFIG_METHOD_PROPERTY = "getOAuthConfig";
 	public static final String CLOUD_BASE_URL = System.getProperty("servoy.cloud_base.url", "https://admin.servoy-cloud.eu");
+	int previousValue = -1;
 
 	public ComboboxPropertyAuthenticator(Object id, String displayName, IComboboxPropertyModel<T> model, String unresolved)
 	{
@@ -112,7 +113,7 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 				AUTHENTICATOR_TYPE servoyCloud = AUTHENTICATOR_TYPE.SERVOY_CLOUD;
 				openButton.setEnabled(value.equals(servoyCloud.getValue()) || value.equals(AUTHENTICATOR_TYPE.OAUTH.getValue()) ||
 					value.equals(AUTHENTICATOR_TYPE.OAUTH_AUTHENTICATOR.getValue()));
-
+				previousValue = ((Integer)value).intValue();
 				super.activate();
 			}
 
@@ -221,7 +222,22 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 						// the selection is already updated at this point using the SelectionAdapter created in super.createControl()
 						String selection = ((CCombo)event.getSource()).getItems()[((CCombo)event.getSource()).getSelectionIndex()];
 						openButton.setEnabled("SERVOY_CLOUD".equals(selection) || "OAUTH".equals(selection) || "OAUTH_AUTHENTICATOR".equals(selection));
-						setTooltip(((Integer)doGetValue()).intValue());
+						int value = ((Integer)doGetValue()).intValue();
+						setTooltip(value);
+						if (previousValue == AUTHENTICATOR_TYPE.OAUTH_AUTHENTICATOR.getValue())
+						{
+							clearProperty(OAUTH_CONFIG_METHOD_PROPERTY);
+						}
+						else if (previousValue == AUTHENTICATOR_TYPE.OAUTH.getValue())
+						{
+							boolean clear = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+								"Clear Config", "Do you want to clear the oauth config?");
+							if (clear)
+							{
+								clearProperty(AUTHENTICATOR_TYPE.OAUTH.name().toLowerCase());
+							}
+						}
+
 						if ("OAUTH_AUTHENTICATOR".equals(selection))
 						{
 							Display.getDefault().asyncExec(() -> {
@@ -229,9 +245,21 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 							});
 						}
 						fireApplyEditorValue();
+						previousValue = value;
 					}
 				});
 				return composite;
+			}
+
+			private void clearProperty(String property)
+			{
+				ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+				Solution mainSolution = activeProject.getSolution();
+				JSONObject properties = new ServoyJSONObject(mainSolution.getCustomProperties(), true);
+				properties.remove(property);
+				activeProject.getEditingSolution().setCustomProperties(ServoyJSONObject.toString(properties, true, true, true));
+				EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
+				repository.updateNodesInWorkspace(new IPersist[] { activeProject.getEditingSolution() }, false);
 			}
 
 			public void setTooltip(int intValue)
