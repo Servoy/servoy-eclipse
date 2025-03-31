@@ -254,12 +254,10 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 			private void clearProperty(String property)
 			{
 				ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-				Solution mainSolution = activeProject.getSolution();
-				JSONObject properties = new ServoyJSONObject(mainSolution.getCustomProperties(), true);
-				properties.remove(property);
-				activeProject.getEditingSolution().setCustomProperties(ServoyJSONObject.toString(properties, true, true, true));
+				Solution editingSolution = activeProject.getEditingSolution();
+				editingSolution.clearCustomProperty(new String[] { property });
 				EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
-				repository.updateNodesInWorkspace(new IPersist[] { activeProject.getEditingSolution() }, false);
+				repository.updateNodesInWorkspace(new IPersist[] { editingSolution }, false);
 			}
 
 			public void setTooltip(int intValue)
@@ -292,7 +290,8 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 				return;
 			}
 			PersistContext persistContext = PersistContext.create(authenticatorModule);
-			JSONObject properties = new ServoyJSONObject(mainSolution.getCustomProperties(), true);
+			Solution editingSolution = activeProject.getEditingSolution();
+			JSONObject properties = new ServoyJSONObject(editingSolution.getCustomProperties(), true);
 			MethodWithArguments m = MethodWithArguments.METHOD_NONE;
 			if (properties.has(OAUTH_CONFIG_METHOD_PROPERTY))
 			{
@@ -344,7 +343,7 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 			{
 				properties.put(OAUTH_CONFIG_METHOD_PROPERTY, scriptMethod.getUUID());
 			}
-			activeProject.getEditingSolution().setCustomProperties(ServoyJSONObject.toString(properties, true, true, true));
+			editingSolution.setCustomProperties(ServoyJSONObject.toString(properties, true, true, true));
 			EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 			repository.updateNodesInWorkspace(new IPersist[] { activeProject.getEditingSolution() }, false);
 		}
