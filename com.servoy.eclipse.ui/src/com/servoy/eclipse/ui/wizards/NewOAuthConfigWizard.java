@@ -54,11 +54,13 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 		Object service = OAuthUtils.createOauthService(json, new HashMap<>(), "http://");
 		if (service != null)
 		{
-			JSONObject original = new ServoyJSONObject(solution.getCustomProperties(), true);
+			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+			Solution editingSolution = activeProject.getEditingSolution();
+			JSONObject original = new ServoyJSONObject(editingSolution.getCustomProperties(), true);
 			original.put("oauth", json);
-			solution.setCustomProperties(ServoyJSONObject.toString(original, true, true, true));
+			editingSolution.setCustomProperties(ServoyJSONObject.toString(original, true, true, true));
 			EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
-			repository.updateNodesInWorkspace(new IPersist[] { solution }, false);
+			repository.updateNodesInWorkspace(new IPersist[] { editingSolution }, false);
 			return true;
 		}
 		((WizardPage)getContainer().getCurrentPage()).setErrorMessage("The configuration is wrong. Please check if it follows the documentation.");
