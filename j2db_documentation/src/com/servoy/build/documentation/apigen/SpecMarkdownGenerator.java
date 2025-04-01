@@ -143,11 +143,6 @@ public class SpecMarkdownGenerator
 	/**
 	 * It will generate the reference docs markdown for NG components and services.
 	 *
-	 * @param args 0 -> required; path to the "gitbook" repository
-	 *             1 -> required; path to the text file that contains on each line one location of one component/service/layout (ng) package dir - to generate the info for; it can start at the dir that has the webpackage.json
-	 *             2 -> optional; default: true; "generateComponentExtendsAsWell" if it should add the runtime extends and designtime extends lines in component docs
-	 *             3 -> optional; default: false; try to clear/delete generated content; review changes carefully before pushing if you use this option.
-	 *
 	 * @throws TemplateNotFoundException
 	 * @throws MalformedTemplateNameException
 	 * @throws ParseException
@@ -466,7 +461,8 @@ public class SpecMarkdownGenerator
 		this.packageComment = null;
 		this.packageCommentProcessed = false;
 
-		deprecatedContent = specJson.optBoolean("deprecated", false);
+		deprecatedContent = specJson.optBoolean("deprecated", false) || specJson.optString("deprecated", null) != null;
+
 		JSONObject myApi = specJson.optJSONObject("api");
 		if (myApi == null || myApi.keySet().isEmpty())
 		{
@@ -1405,7 +1401,7 @@ public class SpecMarkdownGenerator
 		{
 
 			jsDocUndocumentedProperties++;
-//			System.out.println("\033[38;5;215mWarning: jsDoc was not found for: " + name + "\033[0m");
+			System.out.println("\033[38;5;215mWarning: jsDoc was not found for: " + name + "\033[0m");
 			JSONObject optJSONObject = specEntry.optJSONObject("tags");
 			if (optJSONObject != null)
 			{
@@ -1979,7 +1975,14 @@ public class SpecMarkdownGenerator
 				}
 				else
 				{
-					map.put(key, transformer.apply(key, new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString())));
+					JSONObject myJSON = new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString());
+					String jsDoc = jsDocs != null ? jsDocs.get(key) : null;
+					if (jsDoc != null)
+					{
+						myJSON.put("jsDoc", jsDoc);
+					}
+					System.out.println(mySpecFile.getName());
+					map.put(key, transformer.apply(key, myJSON));
 				}
 			}
 			return map;
@@ -2608,7 +2611,7 @@ public class SpecMarkdownGenerator
 				if (!summaryPaths.contains(relativePath))
 				{
 					missingMdFiles.add(relativePath);
-					//System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + "\033[0m");
+					System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + "\033[0m");
 				}
 
 				componentTemplate.process(root, out);
