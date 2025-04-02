@@ -422,16 +422,11 @@ export class ApplicationService {
         return this.windowRefService.nativeWindow.navigator.clipboard.readText();
     }
 
-	public replaceUrlState(path?: string): void {
-	    const currentUrl = this.windowRefService.nativeWindow.location.href;
-	    const baseUrl = currentUrl.split('?')[0];
-
-	    if (path && baseUrl.indexOf(path) !== -1) {
-	        const pathIndex = baseUrl.indexOf(path);
-	        history.replaceState({}, '',  baseUrl.substring(0, pathIndex) + '/index.html');
-	    } else {
-	        history.replaceState({}, '', baseUrl);
-	    }
+	public replaceUrlState(): void {
+		const currentUrl = this.windowRefService.nativeWindow.location.href;
+		const baseUrl = currentUrl.split('?')[0];
+		const cleanedUrl = baseUrl.replace('/svylogin', '').replace('/svy_oauth', '');
+		history.replaceState({}, '', cleanedUrl);
 	}
 
     private showDefaultLoginWindow() {
