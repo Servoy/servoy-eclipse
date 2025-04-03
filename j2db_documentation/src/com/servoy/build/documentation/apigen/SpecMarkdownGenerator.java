@@ -1918,7 +1918,8 @@ public class SpecMarkdownGenerator
 				if ("size".equals(key)) continue;
 
 				Object value = properties.get(key);
-				String jsDocTypeDescription = jsDocType != null ? jsDocType.optString(key, null) : null;
+				String myKey = key.equals("class") ? "_class" : key;
+				String jsDocTypeDescription = jsDocType != null ? jsDocType.optString(myKey, null) : null;
 
 				if (value instanceof JSONObject json)
 				{
@@ -1965,23 +1966,25 @@ public class SpecMarkdownGenerator
 				}
 				else if (jsDocTypeDescription != null)
 				{
-					map.put(key, transformer.apply(key, new JSONObject(
+					Record r = transformer.apply(key, new JSONObject(
 						new JSONStringer()
 							.object()
 							.key("type").value(value)
 							.key("jsDoc").value(jsDocTypeDescription)
 							.endObject()
-							.toString())));
+							.toString()));
+
+					map.put(key, r);
 				}
 				else
 				{
 					JSONObject myJSON = new JSONObject(new JSONStringer().object().key("type").value(value).endObject().toString());
-					String jsDoc = jsDocs != null ? jsDocs.get(key) : null;
+					myKey = key.equals("class") ? "_class" : key;
+					String jsDoc = jsDocs != null ? jsDocs.get(myKey) : null;
 					if (jsDoc != null)
 					{
 						myJSON.put("jsDoc", jsDoc);
 					}
-					System.out.println(mySpecFile.getName());
 					map.put(key, transformer.apply(key, myJSON));
 				}
 			}
