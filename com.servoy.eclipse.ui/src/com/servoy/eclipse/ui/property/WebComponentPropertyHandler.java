@@ -118,15 +118,12 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			IPropertyType< ? > type = pd.getType();
 			if (type instanceof IYieldingType) type = ((IYieldingType< ? , ? >)type).getPossibleYieldType();
-			if (value != null && type instanceof NGCustomJSONArrayType caType)
+			if (type instanceof NGCustomJSONArrayType caType && value instanceof Object[] array)
 			{
-				Object[] newConvertedValue = new Object[((Object[])value).length];
-				int i = 0;
-				for (Object each : (Object[])value)
+				for (int i = 0; i < array.length; i++)
 				{
-					newConvertedValue[i++] = getValueInternal(each, caType.getCustomJSONTypeDefinition(), webObject, context);
+					array[i] = getValueInternal(array[i], caType.getCustomJSONTypeDefinition(), webObject, context);
 				}
-				return newConvertedValue;
 			}
 			if (type instanceof FunctionPropertyType || type instanceof ValueListPropertyType || type instanceof FormPropertyType ||
 				type instanceof MediaPropertyType || type instanceof FormComponentPropertyType)
@@ -301,15 +298,12 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				}
 			}
 		}
-		if (value != null && type instanceof NGCustomJSONArrayType caType)
+		else if (type instanceof NGCustomJSONArrayType caType && convertedValue instanceof Object[] array)
 		{
-			Object[] newConvertedValue = new Object[((Object[])convertedValue).length];
-			int i = 0;
-			for (Object each : (Object[])convertedValue)
+			for (int i = 0; i < array.length; i++)
 			{
-				newConvertedValue[i++] = setValueInternal(bean, each, persistContext, caType.getCustomJSONTypeDefinition());
+				array[i] = setValueInternal(bean, array[i], persistContext, caType.getCustomJSONTypeDefinition());
 			}
-			convertedValue = newConvertedValue;
 		}
 		return convertedValue;
 	}
