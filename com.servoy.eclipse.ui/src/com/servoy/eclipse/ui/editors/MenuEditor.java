@@ -92,8 +92,10 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrap
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
+import com.servoy.eclipse.ui.dialogs.PermissionsDialog;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
+import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog;
 import com.servoy.eclipse.ui.dialogs.ValuelistContentProvider;
 import com.servoy.eclipse.ui.dialogs.ValuelistContentProvider.ValuelistListOptions;
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
@@ -101,6 +103,7 @@ import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.property.FormValueEditor;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.RelationPropertyController;
 import com.servoy.eclipse.ui.property.ValuelistPropertyController;
@@ -605,13 +608,15 @@ public class MenuEditor extends PersistEditor
 
 		Group generalPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
 		generalPropertiesGroup.setText("Menu Item - General Properties");
-		generalPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		generalPropertiesGroup.setLayout(new GridLayout(2, false));
+		generalPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		generalPropertiesGroup.setLayout(new GridLayout(3, false));
 
 		Label label = new Label(generalPropertiesGroup, SWT.NONE);
 		label.setText("Name");
 		Text txtName = new Text(generalPropertiesGroup, SWT.BORDER);
-		txtName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
+		data.horizontalSpan = 2;
+		txtName.setLayoutData(data);
 		selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
 			txtName.setText(Objects.requireNonNullElse(menuItem != null ? menuItem.getName() : "", ""));
 		});
@@ -654,7 +659,30 @@ public class MenuEditor extends PersistEditor
 				}
 			}
 		});
+		Button btnText = new Button(generalPropertiesGroup, SWT.NONE);
+		btnText.setText("...");
+		btnText.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (selectedMenuItem != null)
+				{
+					TagsAndI18NTextDialog dialog = new TagsAndI18NTextDialog(getSite().getShell(), PersistContext.create(selectedMenuItem),
+						ModelUtils.getEditingFlattenedSolution(getPersist()), null, selectedMenuItem.getText(), "Edit Text",
+						com.servoy.eclipse.core.Activator.getDefault().getDesignClient(), false);
+					dialog.open();
 
+					if (dialog.getReturnCode() != Window.CANCEL)
+					{
+						selectedMenuItem.setText(dialog.getValue().toString());
+						flagModified();
+						txtText.setText(Objects.requireNonNullElse(selectedMenuItem.getText(), ""));
+					}
+				}
+			}
+		});
+		
 		label = new Label(generalPropertiesGroup, SWT.NONE);
 		label.setText("Enabled");
 		Button chkEnabled = new Button(generalPropertiesGroup, SWT.CHECK);
@@ -673,11 +701,12 @@ public class MenuEditor extends PersistEditor
 				}
 			}
 		});
+		chkEnabled.setLayoutData(data);
 
 		label = new Label(generalPropertiesGroup, SWT.NONE);
 		label.setText("Icon StyleClass");
 		Text txtIconStyleClass = new Text(generalPropertiesGroup, SWT.BORDER);
-		txtIconStyleClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		txtIconStyleClass.setLayoutData(data);
 		selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
 			txtIconStyleClass.setText(Objects.requireNonNullElse(menuItem != null ? menuItem.getIconStyleClass() : "", ""));
 		});
@@ -697,7 +726,7 @@ public class MenuEditor extends PersistEditor
 		label = new Label(generalPropertiesGroup, SWT.NONE);
 		label.setText("StyleClass");
 		Text txtStyleClass = new Text(generalPropertiesGroup, SWT.BORDER);
-		txtStyleClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		txtStyleClass.setLayoutData(data);
 		selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
 			txtStyleClass.setText(Objects.requireNonNullElse(menuItem != null ? menuItem.getStyleClass() : "", ""));
 		});
@@ -733,6 +762,29 @@ public class MenuEditor extends PersistEditor
 				}
 			}
 		});
+		Button btnTootipText = new Button(generalPropertiesGroup, SWT.NONE);
+		btnTootipText.setText("...");
+		btnTootipText.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (selectedMenuItem != null)
+				{
+					TagsAndI18NTextDialog dialog = new TagsAndI18NTextDialog(getSite().getShell(), PersistContext.create(selectedMenuItem),
+						ModelUtils.getEditingFlattenedSolution(getPersist()), null, selectedMenuItem.getToolTipText(), "Edit Tooltip Text",
+						com.servoy.eclipse.core.Activator.getDefault().getDesignClient(), false);
+					dialog.open();
+
+					if (dialog.getReturnCode() != Window.CANCEL)
+					{
+						selectedMenuItem.setToolTipText(dialog.getValue().toString());
+						flagModified();
+						txtTooltipText.setText(Objects.requireNonNullElse(selectedMenuItem.getToolTipText(), ""));
+					}
+				}
+			}
+		});
 
 		label = new Label(generalPropertiesGroup, SWT.NONE);
 		label.setText("Permissions");
@@ -763,7 +815,31 @@ public class MenuEditor extends PersistEditor
 				}
 			}
 		});
+		Button btnPermissions = new Button(generalPropertiesGroup, SWT.NONE);
+		btnPermissions.setText("...");
+		btnPermissions.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (selectedMenuItem != null)
+				{
+					PermissionsDialog dialog = new PermissionsDialog(getSite().getShell(), selectedMenuItem.getPermissions());
+					dialog.open();
 
+					if (dialog.getReturnCode() != Window.CANCEL)
+					{
+						selectedMenuItem.setPermissions(dialog.getValue());
+						flagModified();
+						txtPermissions
+							.setText(Objects.requireNonNullElse(
+								selectedMenuItem != null && selectedMenuItem.getPermissions() != null
+									? ServoyJSONObject.toString(selectedMenuItem.getPermissions(), false, false, false) : "",
+								""));
+					}
+				}
+			}
+		});
 		Map<String, Map<String, PropertyDescription>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
 		if (extraProperties != null)
 		{

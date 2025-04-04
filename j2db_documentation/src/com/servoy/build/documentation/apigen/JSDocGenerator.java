@@ -47,25 +47,39 @@ public class JSDocGenerator
 	//Only when you're ABSOLUTELY SURE that the output is correct, set tempTarget to false to overwrite the original.
 	// Then run the generator again ONLY ONCE.
 
-	private final boolean processProperties = false;
-	private final boolean processHandlers = false;
-	private final boolean processTypes = false;
+	private final boolean processProperties = true; //add properties from the model section
+	private final boolean processHandlers = true; //add handlers from the events section
+	private final boolean processTypes = true; // add types from the types section as svy_types
 
-	private final boolean changeTypesName = false;
+	private final boolean changeTypesName = false; //used once to change "types" name to "svy_types" name in the already processed files
 
-	private final boolean processList = false;
+	private final boolean processList = true; // process only the spec files specifid in the spec_list
 
-	private final boolean tempTarget = false;
+	private final boolean tempTarget = false; // set to true to write the output to a temp file first; set to false when you;re sure the output is correct; temp files need to be manually deleted
 
-	private final List<String> list = Arrays.asList(
-		"bootstrapcomponents-floatlabelcalendar",
-		"bootstrapcomponents-floatlabelcombobox",
-		"bootstrapcomponents-floatlabeltextarea",
-		"bootstrapcomponents-floatlabeltextbox",
-		"bootstrapcomponents-floatlabeltypeahead",
+	private String packageDeprecationString;
+	private String packageReplacementString;;
+
+	private final List<String> spec_list = Arrays.asList(
 		"bootstrapcomponents-formcomponent",
 		"bootstrapcomponents-progressbar",
-		"bootstrapcomponents-table");
+		"bootstrapcomponents-table",
+		"servoyextra-fontawesome",
+		"servoyextra-gauge",
+		"servoyextra-imagelabel",
+		"servoyextra-listformcomponent",
+		"servoyextra-onrenderlabel",
+		"servoyextra-youtubevideoembedder",
+		"customrenderedcomponents-listcomponent",
+		"servoycore-errorbean",
+		"servoycore-formcomponent",
+		"servoycore-formcontainer",
+		"servoycore-listformcomponent",
+		"servoycore-responsivecontainer",
+		"servoycore-navigator",
+		"servoycore-slider",
+		"ngdesktopui");
+
 
 	public JSDocGenerator(JSONObject spec, File doc)
 	{
@@ -80,6 +94,14 @@ public class JSDocGenerator
 		{
 			return;
 		}
+
+		if (processList && !spec_list.contains(spec.optString("name")))
+		{
+			return;
+		}
+
+		packageDeprecationString = spec.optString("deprecated", null);
+		packageReplacementString = spec.optString("replacement", null);
 
 		// Read original file content.
 		String originalContent = readOriginalContent();
@@ -117,6 +139,15 @@ public class JSDocGenerator
 		if (changeTypesName)
 		{
 			mergedContent = mergedContent.replaceFirst("var\\s+types\\s*=\\s*\\{", "var svy_types = {");
+		}
+
+		if (packageDeprecationString != null && packageReplacementString != null)
+		{
+			mergedContent = "/**\n * DEPRECATED: " + packageDeprecationString + "\n * REPLACEMENT: " + packageReplacementString + "\n */\n" + mergedContent;
+		}
+		else if (packageDeprecationString != null)
+		{
+			mergedContent = "/**\n * DEPRECATED: " + packageDeprecationString + "\n */\n" + mergedContent;
 		}
 
 		// Write the merged content to a new file.

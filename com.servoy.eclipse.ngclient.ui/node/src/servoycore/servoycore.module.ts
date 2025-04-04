@@ -9,7 +9,7 @@ import { SessionView } from './session-view/session-view';
 import { ServoyCoreFormContainer } from './formcontainer/formcontainer';
 import { AddAttributeDirective } from './addattribute.directive';
 import { ServoyPublicModule } from '@servoy/public';
-import { provideGlobalGridOptions, ModuleRegistry, ClientSideRowModelModule, RowAutoHeightModule, RowApiModule, ScrollApiModule, ValidationModule } from 'ag-grid-community';
+import { provideGlobalGridOptions, ModuleRegistry, ClientSideRowModelModule, RowAutoHeightModule, RowApiModule, ScrollApiModule, ValidationModule, RenderApiModule } from 'ag-grid-community';
 import { LicenseManager, ServerSideRowModelModule, ServerSideRowModelApiModule } from 'ag-grid-enterprise';
 import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-responsive-container/formcomponent-responsive-container';
 
@@ -51,6 +51,7 @@ export class ServoyCoreComponentsModule {
             ServerSideRowModelApiModule,
             RowApiModule,
             ScrollApiModule,
-            ValidationModule]);
+            ValidationModule,
+            RenderApiModule]);
     }
 }

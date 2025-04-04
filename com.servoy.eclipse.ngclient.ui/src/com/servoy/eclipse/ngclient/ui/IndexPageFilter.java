@@ -43,6 +43,7 @@ import com.servoy.j2db.server.ngclient.NGLocalesFilter;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
 import com.servoy.j2db.server.ngclient.auth.CloudStatelessAccessManager;
 import com.servoy.j2db.server.ngclient.auth.OAuthHandler;
+import com.servoy.j2db.server.ngclient.auth.StatelessLoginUtils;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -112,15 +113,20 @@ public class IndexPageFilter implements Filter
 					StatelessLoginHandler.writeLoginPage(request, response, solutionName, showLogin.getRight());
 					return;
 				}
+
+				HttpServletRequest req = request;
 				if (showLogin.getRight() != null)
 				{
 					((HttpServletRequest)servletRequest).getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
+
+					//could be oauth + deeplink (need to wrap the request to add the parameters)
+					req = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
 				}
 
 				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
 
-				ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(request, response, false); // for NG2 remove the unsafe-eval
-				AngularIndexPageWriter.writeIndexPage(indexHtml, request, response, solutionName,
+				ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(req, response, false); // for NG2 remove the unsafe-eval
+				AngularIndexPageWriter.writeIndexPage(indexHtml, req, response, solutionName,
 					contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
 				return;
 			}

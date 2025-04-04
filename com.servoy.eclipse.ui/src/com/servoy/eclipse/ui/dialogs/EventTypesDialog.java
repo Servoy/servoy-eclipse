@@ -26,11 +26,15 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -40,18 +44,21 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.j2db.scripting.info.EventType;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -62,7 +69,8 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 public class EventTypesDialog extends Dialog
 {
 	public static final int CI_EVENT_TYPE_NAME = 0;
-	public static final int CI_DELETE = 1;
+	public static final int CI_EVENT_TYPE_DESCRIPTION = 1;
+	public static final int CI_DELETE = 2;
 
 	private final Object value;
 	private final List<EventType> model;
@@ -85,20 +93,17 @@ public class EventTypesDialog extends Dialog
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
 
-		Composite container = new Composite(myScrolledComposite, SWT.NONE);
-		myScrolledComposite.setContent(container);
-		container.setLayout(new GridLayout(1, false));
-
-		Composite tableContainer = new Composite(container, SWT.NONE);
-
-		myScrolledComposite.setContent(container);
-
 		GridData gd = new GridData();
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.FILL;
 		gd.grabExcessHorizontalSpace = true;
 		gd.grabExcessVerticalSpace = true;
-		tableContainer.setLayoutData(gd);
+		myScrolledComposite.setLayoutData(gd);
+
+		Composite tableContainer = new Composite(myScrolledComposite, SWT.NONE);
+
+		myScrolledComposite.setContent(tableContainer);
+
 
 		TableViewer tableViewer = new TableViewer(tableContainer, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		Table columnTable = tableViewer.getTable();
@@ -107,6 +112,86 @@ public class EventTypesDialog extends Dialog
 
 		TableColumn nameColumn = new TableColumn(columnTable, SWT.LEFT, CI_EVENT_TYPE_NAME);
 		nameColumn.setText("Event Type");
+		TableViewerColumn nameViewerColumn = new TableViewerColumn(tableViewer, nameColumn);
+		nameViewerColumn.setEditingSupport(new EditingSupport(tableViewer)
+		{
+			private final TextCellEditor editor = new TextCellEditor(tableViewer.getTable());
+
+			@Override
+			protected CellEditor getCellEditor(Object element)
+			{
+				return editor;
+			}
+
+			@Override
+			protected boolean canEdit(Object element)
+			{
+				return true;
+			}
+
+			@Override
+			protected Object getValue(Object element)
+			{
+				return ((EventType)element).getName();
+			}
+
+			@Override
+			protected void setValue(Object element, Object value)
+			{
+				if (IdentDocumentValidator.isJavaIdentifier(value.toString()))
+				{
+					((EventType)element).updateName(value.toString());
+				}
+				getViewer().update(element, null);
+			}
+
+		});
+
+		TableColumn descriptionColumn = new TableColumn(columnTable, SWT.LEFT, CI_EVENT_TYPE_DESCRIPTION);
+		descriptionColumn.setText("Event Description");
+		TableViewerColumn descriptionViewerColumn = new TableViewerColumn(tableViewer, descriptionColumn);
+		descriptionViewerColumn.setEditingSupport(new EditingSupport(tableViewer)
+		{
+			private final DialogCellEditor editor = new DialogCellEditor(tableViewer.getTable(), null, null, false, SWT.NONE)
+			{
+
+				@Override
+				protected Object openDialogBox(Control cellEditorWindow)
+				{
+					return UIUtils.showTextFieldDialog(getParentShell(), "Edit Event Description", "Description",
+						getValue() != null ? getValue().toString() : "", true);
+				}
+
+			};
+
+			@Override
+			protected CellEditor getCellEditor(Object element)
+			{
+				editor.setValue(((EventType)element).getDescription());
+				return editor;
+			}
+
+			@Override
+			protected boolean canEdit(Object element)
+			{
+				return true;
+			}
+
+			@Override
+			protected Object getValue(Object element)
+			{
+				if (((EventType)element).getDescription() == null) return "";
+				return ((EventType)element).getDescription();
+			}
+
+			@Override
+			protected void setValue(Object element, Object value)
+			{
+				((EventType)element).setDescription(value.toString());
+				getViewer().update(element, null);
+			}
+
+		});
 
 		final TableColumn deleteColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
 
@@ -135,7 +220,8 @@ public class EventTypesDialog extends Dialog
 
 		TableColumnLayout layout = new TableColumnLayout();
 		tableContainer.setLayout(layout);
-		layout.setColumnData(nameColumn, new ColumnWeightData(1, 350, true));
+		layout.setColumnData(nameColumn, new ColumnWeightData(1, 50, true));
+		layout.setColumnData(descriptionColumn, new ColumnWeightData(3, 100, true));
 		layout.setColumnData(deleteColumn, new ColumnPixelData(20, false));
 
 		tableViewer.setLabelProvider(new ITableLabelProvider()
@@ -152,6 +238,7 @@ public class EventTypesDialog extends Dialog
 			public String getColumnText(Object element, int columnIndex)
 			{
 				if (columnIndex == CI_EVENT_TYPE_NAME) return ((EventType)element).getName();
+				if (columnIndex == CI_EVENT_TYPE_DESCRIPTION) return ((EventType)element).getDescription();
 				return null;
 			}
 
@@ -176,7 +263,7 @@ public class EventTypesDialog extends Dialog
 		tableViewer.setContentProvider(new ArrayContentProvider());
 		tableViewer.setInput(model);
 
-		Button addEventType = new Button(container, SWT.NONE);
+		Button addEventType = new Button(composite, SWT.NONE);
 		addEventType.setText("Add New Event Type");
 		addEventType.setToolTipText("Adds a new event type");
 		addEventType.addSelectionListener(new SelectionAdapter()
@@ -195,14 +282,12 @@ public class EventTypesDialog extends Dialog
 					});
 				if (dialog.open() == Window.OK)
 				{
-					model.add(new EventType(dialog.getValue()));
+					model.add(new EventType(dialog.getValue(), null));
 					tableViewer.refresh();
 					getShell().layout(true, true);
 				}
 			}
 		});
-		// make sure dialog is big enough to clearly see the table items
-		myScrolledComposite.setMinSize(500, 500);
 		return myScrolledComposite;
 	}
 
@@ -211,7 +296,7 @@ public class EventTypesDialog extends Dialog
 		List<EventType> retValue = new ArrayList<EventType>();
 		if (value instanceof JSONObject json)
 		{
-			json.keySet().stream().forEach(name -> retValue.add(new EventType(name)));
+			json.keySet().stream().forEach(name -> retValue.add(new EventType(name, json.getJSONObject(name).optString("description", null))));
 		}
 		return retValue;
 	}
@@ -225,10 +310,28 @@ public class EventTypesDialog extends Dialog
 			{
 				JSONObject value = new JSONObject();
 				value.put("name", eventType.getName());
+				value.put("description", eventType.getDescription());
 				json.put(eventType.getName(), value);
 			}
 		}
 		return json;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
+	 */
+	@Override
+	protected void configureShell(Shell shell)
+	{
+		super.configureShell(shell);
+		shell.setSize(500, 500);
+		// Center the dialog
+		Rectangle screenSize = Display.getDefault().getBounds();
+		int x = (screenSize.width - shell.getSize().x) / 2;
+		int y = (screenSize.height - shell.getSize().y) / 2;
+		shell.setLocation(x, y);
 	}
 
 	/**

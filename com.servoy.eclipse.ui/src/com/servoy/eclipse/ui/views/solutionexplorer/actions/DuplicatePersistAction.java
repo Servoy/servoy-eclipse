@@ -110,7 +110,20 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 		//ExtendedInputDialog<String> dialog = createDialog(persist, nameValidator, solutionNames, initialSolutionName);
 		String newName = null;
 		String oldName = getName(persist);
-		if (persist instanceof Media) newName = "copy_" + oldName;
+		if (persist instanceof Media)
+		{
+			if (oldName.contains("/"))
+			{
+				// find the file name and add a prefix to it
+				String[] arr = oldName.split("/");
+				arr[arr.length - 1] = "copy_" + arr[arr.length - 1];
+				newName = String.join("/", arr);
+			}
+			else
+			{
+				newName = "copy_" + oldName;
+			}
+		}
 		else newName = oldName + "_copy";
 		final String[] workingSetName = new String[] { null };
 		// prepare dialog
