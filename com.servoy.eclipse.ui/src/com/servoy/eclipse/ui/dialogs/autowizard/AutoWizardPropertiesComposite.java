@@ -42,6 +42,7 @@ import org.eclipse.nebula.widgets.nattable.layer.AbstractLayer;
 import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
 import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
+import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.cell.AggregateConfigLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnOverrideLabelAccumulator;
@@ -57,6 +58,7 @@ import com.servoy.eclipse.ui.dialogs.autowizard.nattable.LinkClickConfiguration;
 import com.servoy.eclipse.ui.dialogs.autowizard.nattable.PainterConfiguration;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author emera
@@ -75,6 +77,7 @@ public class AutoWizardPropertiesComposite
 
 	private IDataProvider bodyDataProvider;
 	private static final String CSS_CLASS_NAME_KEY = "org.eclipse.e4.ui.css.CssClassName";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
+	private boolean initialDisplay = true;
 
 
 	public AutoWizardPropertiesComposite(final ScrolledComposite parent, PersistContext persistContext, FlattenedSolution flattenedSolution,
@@ -111,9 +114,8 @@ public class AutoWizardPropertiesComposite
 		BodyLayerStack bodyLayer = new BodyLayerStack(bodyDataProvider);
 		ColumnHeaderLayerStack columnHeaderLayer = new ColumnHeaderLayerStack(
 			colHeaderDataProvider, bodyLayer);
-		CompositeLayer composeLayer = new CompositeLayer(1, 2);
-		composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 0);
-		composeLayer.setChildLayer(GridRegion.BODY, bodyLayer.getSelectionLayer(), 0, 1);
+
+		CompositeLayer composeLayer = getComposeLayer(bodyLayer, columnHeaderLayer);
 		natTable = new NatTable(parent, SWT.NONE, composeLayer, false);
 		ConfigRegistry configRegistry = new ConfigRegistry();
 		natTable.setConfigRegistry(configRegistry);
@@ -151,6 +153,79 @@ public class AutoWizardPropertiesComposite
 			parent.setMinSize(natTable.getWidth(), natTable.getHeight());
 			parent.update();
 		});
+	}
+
+	private CompositeLayer getComposeLayer(BodyLayerStack bodyLayer, ColumnHeaderLayerStack columnHeaderLayer)
+	{
+
+		CompositeLayer composeLayer = null;
+		if (Utils.isAppleMacOS())
+		{
+			// Create a dummy header data provider with empty strings for each column
+			String[] dummyHeaders = new String[propertyNames.size()];
+			for (int i = 0; i < propertyNames.size(); i++)
+			{
+				dummyHeaders[i] = "";
+			}
+			DefaultColumnHeaderDataProvider dummyHeaderDataProvider = new DefaultColumnHeaderDataProvider(dummyHeaders);
+
+			// Create a DataLayer for the dummy header and force a fixed row height (e.g., 35 pixels)
+			int realHeaderHeight = (columnHeaderLayer.getDataLayer().getPreferredHeight() - 1) * 2;
+			DataLayer dummyHeaderDataLayer = new DataLayer(dummyHeaderDataProvider);
+			dummyHeaderDataLayer.setDefaultRowHeight(realHeaderHeight);
+
+			// Wrap the dummy header data layer in a ColumnHeaderLayer to ensure it aligns with the body
+			ColumnHeaderLayer dummyHeaderColumnLayer = new ColumnHeaderLayer(dummyHeaderDataLayer, bodyLayer, bodyLayer.getSelectionLayer());
+
+			// Assemble the composite layer with three rows:
+			// Row 0: Dummy header, Row 1: Real header, Row 2: Body.
+			composeLayer = new CompositeLayer(1, 3);
+			composeLayer.setChildLayer("DUMMY_HEADER", dummyHeaderColumnLayer, 0, 0);
+
+
+			composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 1);
+			composeLayer.setChildLayer(GridRegion.BODY, bodyLayer.getSelectionLayer(), 0, 2);
+		}
+		else
+		{
+			composeLayer = new CompositeLayer(1, 2);
+			composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 0);
+			composeLayer.setChildLayer(GridRegion.BODY, bodyLayer.getSelectionLayer(), 0, 1);
+		}
+
+		return composeLayer;
+	}
+
+	public void resetMacOSNatTableView()
+	{
+
+		if (!Utils.isAppleMacOS()) return;
+		if (initialDisplay)
+		{
+			initialDisplay = false;
+			return;
+		}
+		if (natTable != null)
+		{
+			ILayer layer = natTable.getLayer();
+			if (layer instanceof CompositeLayer)
+			{
+				CompositeLayer compositeLayer = (CompositeLayer)layer;
+				// Try to retrieve the dummy header layer by key "DUMMY_HEADER"
+				ILayer dummyHeaderLayer = compositeLayer.getChildLayerByLayoutCoordinate(0, 0);
+				if (dummyHeaderLayer instanceof ColumnHeaderLayer)
+				{
+					ILayer underlying = ((ColumnHeaderLayer)dummyHeaderLayer).getUnderlyingLayerByPosition(0, 0);
+					if (underlying instanceof DataLayer)
+					{
+						DataLayer dummyDataLayer = (DataLayer)underlying;
+						dummyDataLayer.setDefaultRowHeight(1);
+						// Refresh the table so the new height is applied
+						natTable.refresh();
+					}
+				}
+			}
+		}
 	}
 
 	private IDataProvider setupBodyDataProvider()
@@ -290,12 +365,19 @@ public class AutoWizardPropertiesComposite
 
 	public class ColumnHeaderLayerStack extends AbstractLayerTransform
 	{
+		private final DataLayer dataLayer;
+
 		public ColumnHeaderLayerStack(IDataProvider dataProvider, BodyLayerStack bodyLayer)
 		{
-			DataLayer dataLayer = new DataLayer(dataProvider);
+			dataLayer = new DataLayer(dataProvider);
 			ColumnHeaderLayer colHeaderLayer = new ColumnHeaderLayer(dataLayer,
 				bodyLayer, bodyLayer.getSelectionLayer());
 			setUnderlyingLayer(colHeaderLayer);
+		}
+
+		public DataLayer getDataLayer()
+		{
+			return dataLayer;
 		}
 	}
 

@@ -116,6 +116,10 @@ public class PropertyWizardDialog extends Dialog
 		form.setWeights(initialW, 1000 - initialW);
 		form2.addListener(SWT.Resize, e -> {
 			settings.put("weight", form.getWeights()[0]);
+			if (tableComposite != null)
+			{
+				tableComposite.resetMacOSNatTableView();
+			}
 		});
 
 		if (configurator.getDataproviderProperties().size() > 0)
