@@ -134,7 +134,16 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				{
 					String message = null;
 					String checkText = newText;
-					if (persist instanceof Media) checkText = checkText.replace(".", "");
+					if (checkText.startsWith(".") || checkText.endsWith(".") || checkText.contains("/.") || checkText.contains("./") ||
+						checkText.contains("//"))
+					{
+						return "Invalid name";
+					}
+					if (persist instanceof Media)
+					{
+						checkText = checkText.replace(".", "");
+						checkText = checkText.replace("/", "");
+					}
 					message = IdentDocumentValidator.isJavaIdentifier(checkText) ? null : (newText.length() == 0 ? "" : "Invalid name");
 					if (message == null)
 					{

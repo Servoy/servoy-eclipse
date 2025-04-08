@@ -198,7 +198,7 @@ public class CreateMediaFileAction extends Action implements ISelectionChangedLi
 					return "Name cannot be empty";
 				}
 				Pattern pattern = Pattern.compile(regex);
-				if (!pattern.matcher(newText).matches())
+				if (!pattern.matcher(newText).matches() || newText.endsWith(".") || newText.startsWith("."))
 				{
 					return "Invalid new media name";
 				}
