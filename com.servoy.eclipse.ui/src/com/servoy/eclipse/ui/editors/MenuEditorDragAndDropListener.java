@@ -174,7 +174,7 @@ public class MenuEditorDragAndDropListener extends ViewerDropAdapter implements 
 			try
 			{
 				// remove all child nodes so they can be reverted to their original position
-				List<IPersist> firstLevelChildren = this.menuEditor.getPersist().getAllObjectsAsList();
+				List<IPersist> firstLevelChildren = new ArrayList<>(this.menuEditor.getPersist().getAllObjectsAsList());
 				for (IPersist child : firstLevelChildren)
 				{
 					((EclipseRepository)this.menuEditor.getPersist().getRootObject().getRepository()).deleteObject(child);
