@@ -337,13 +337,12 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 			ScriptMethod scriptMethod = authenticatorModule.getScriptMethod(selected.methodId);
 			if (scriptMethod == null)
 			{
-				properties.remove(OAUTH_CONFIG_METHOD_PROPERTY);
+				editingSolution.clearCustomProperty(new String[] { OAUTH_CONFIG_METHOD_PROPERTY });
 			}
 			else
 			{
-				properties.put(OAUTH_CONFIG_METHOD_PROPERTY, scriptMethod.getUUID());
+				editingSolution.putCustomProperty(new String[] { OAUTH_CONFIG_METHOD_PROPERTY }, scriptMethod.getUUID());
 			}
-			editingSolution.setCustomProperties(ServoyJSONObject.toString(properties, true, true, true));
 			EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 			repository.updateNodesInWorkspace(new IPersist[] { activeProject.getEditingSolution() }, false);
 		}
