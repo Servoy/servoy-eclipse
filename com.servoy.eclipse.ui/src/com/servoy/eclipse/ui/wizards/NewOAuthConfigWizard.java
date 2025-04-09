@@ -20,7 +20,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
 import com.servoy.j2db.server.ngclient.auth.OAuthUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Wizard to setup an oauth configuration for stateless login.
@@ -56,9 +55,7 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 		{
 			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 			Solution editingSolution = activeProject.getEditingSolution();
-			JSONObject original = new ServoyJSONObject(editingSolution.getCustomProperties(), true);
-			original.put("oauth", json);
-			editingSolution.setCustomProperties(ServoyJSONObject.toString(original, true, true, true));
+			editingSolution.putCustomProperty(new String[] { StatelessLoginHandler.OAUTH_CUSTOM_PROPERTIES }, json.toString());
 			EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 			repository.updateNodesInWorkspace(new IPersist[] { editingSolution }, false);
 			return true;
@@ -75,13 +72,12 @@ public class NewOAuthConfigWizard extends Wizard implements IWorkbenchWizard
 		if (activeProject != null)
 		{
 			solution = activeProject.getEditingSolution();
-			JSONObject original = new ServoyJSONObject(solution.getCustomProperties(), true);
-			JSONObject jsonConfig = original.optJSONObject(StatelessLoginHandler.OAUTH_CUSTOM_PROPERTIES);
-			if (jsonConfig != null)
+			Object property = solution.getCustomProperty(new String[] { StatelessLoginHandler.OAUTH_CUSTOM_PROPERTIES });
+			if (property instanceof String)
 			{
 				try
 				{
-					this.model = (new ObjectMapper()).readValue(jsonConfig.toString(), OAuthApiConfiguration.class);
+					this.model = (new ObjectMapper()).readValue((String)property, OAuthApiConfiguration.class);
 				}
 				catch (Exception e)
 				{

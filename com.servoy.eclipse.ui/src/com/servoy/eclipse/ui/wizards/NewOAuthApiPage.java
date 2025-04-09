@@ -229,7 +229,8 @@ public class NewOAuthApiPage extends WizardPage
 		{
 			clearFieldsForCustomApi(model);
 		}
-		boolean isAPIChanged = !provider.equals(model.getApi()) || Provider.Custom.equals(provider) && model.getApi() != null;
+		boolean isAPIChanged = !provider.equals(Provider.valueOf(model.getApi())) ||
+			Provider.Custom.equals(Provider.valueOf(model.getApi())) && model.getApi() != null;
 
 		if (isAPIChanged)
 		{
