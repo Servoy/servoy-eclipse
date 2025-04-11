@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -48,6 +49,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -81,6 +84,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.EclipseDatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.InputAndComboDialog;
+import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -156,6 +160,7 @@ public class MenuEditor extends PersistEditor
 	private Group customPropertiesGroup;
 
 	private TableViewer customPropertiesViewer;
+	private MenuEditorDragAndDropListener menuEditorDragAndDropListener;
 
 	@Override
 	protected void doRefresh()
@@ -594,6 +599,12 @@ public class MenuEditor extends PersistEditor
 			}
 		});
 
+		menuEditorDragAndDropListener = new MenuEditorDragAndDropListener(menuViewer, this);
+		menuViewer.addDragSupport(DND.DROP_MOVE,
+			new Transfer[] { FormElementTransfer.getInstance() }, menuEditorDragAndDropListener);
+		menuViewer.addDropSupport(DND.DROP_MOVE | DND.DROP_DEFAULT,
+			new Transfer[] { FormElementTransfer.getInstance() }, menuEditorDragAndDropListener);
+
 		TreeColumnLayout treeLayout = new TreeColumnLayout();
 		treeLayout.setColumnData(menuItemNameColumn, new ColumnWeightData(20, 50, true));
 		treeLayout.setColumnData(menuItemAddColumn, new ColumnPixelData(20, false));
@@ -607,7 +618,7 @@ public class MenuEditor extends PersistEditor
 		propertiesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		Group generalPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
-		generalPropertiesGroup.setText("Menu Item - General Properties");
+		generalPropertiesGroup.setText("General Properties");
 		generalPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		generalPropertiesGroup.setLayout(new GridLayout(3, false));
 
@@ -682,7 +693,7 @@ public class MenuEditor extends PersistEditor
 				}
 			}
 		});
-		
+
 		label = new Label(generalPropertiesGroup, SWT.NONE);
 		label.setText("Enabled");
 		Button chkEnabled = new Button(generalPropertiesGroup, SWT.CHECK);
@@ -846,7 +857,7 @@ public class MenuEditor extends PersistEditor
 			for (String categoryName : extraProperties.keySet())
 			{
 				Group categoryPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
-				categoryPropertiesGroup.setText("Menu Item - " + categoryName + " Properties");
+				categoryPropertiesGroup.setText(categoryName + " Properties");
 				categoryPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 				categoryPropertiesGroup.setLayout(new GridLayout(2, false));
 				createGroupedComponents(categoryPropertiesGroup, categoryName, extraProperties.get(categoryName), true);
@@ -854,7 +865,7 @@ public class MenuEditor extends PersistEditor
 		}
 
 		customPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
-		customPropertiesGroup.setText("Menu Item - Custom Properties");
+		customPropertiesGroup.setText("Custom Properties");
 		customPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		customPropertiesGroup.setLayout(new GridLayout(2, false));
 
@@ -1256,6 +1267,23 @@ public class MenuEditor extends PersistEditor
 	{
 		super.dispose();
 		selectedMenuItemCallbacks.clear();
+	}
+
+	@Override
+	public void doSave(IProgressMonitor monitor)
+	{
+		super.doSave(monitor);
+		if (!isDirty())
+		{
+			this.menuEditorDragAndDropListener.saveDragAndDrops();
+		}
+	}
+
+	@Override
+	public void revert(boolean force)
+	{
+		this.menuEditorDragAndDropListener.revertDragAndDrops();
+		super.revert(force);
 	}
 
 	public void flagModified()

@@ -45,7 +45,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -71,7 +70,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Solution.AUTHENTICATOR_TYPE;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -291,11 +289,11 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 			}
 			PersistContext persistContext = PersistContext.create(authenticatorModule);
 			Solution editingSolution = activeProject.getEditingSolution();
-			JSONObject properties = new ServoyJSONObject(editingSolution.getCustomProperties(), true);
+			Object property = editingSolution.getCustomProperty(new String[] { OAUTH_CONFIG_METHOD_PROPERTY });
 			MethodWithArguments m = MethodWithArguments.METHOD_NONE;
-			if (properties.has(OAUTH_CONFIG_METHOD_PROPERTY))
+			if (property != null)
 			{
-				UUID uuid = Utils.getAsUUID(properties.get(OAUTH_CONFIG_METHOD_PROPERTY), false);
+				UUID uuid = Utils.getAsUUID(property, false);
 				ScriptMethod sm = (ScriptMethod)authenticatorModule.getAllObjectsAsList().stream().filter(persist -> persist.getUUID().equals(uuid))
 					.findFirst().orElse(null);
 				m = new MethodWithArguments(sm != null ? sm.getID() : -1, null);
@@ -337,13 +335,12 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 			ScriptMethod scriptMethod = authenticatorModule.getScriptMethod(selected.methodId);
 			if (scriptMethod == null)
 			{
-				properties.remove(OAUTH_CONFIG_METHOD_PROPERTY);
+				editingSolution.clearCustomProperty(new String[] { OAUTH_CONFIG_METHOD_PROPERTY });
 			}
 			else
 			{
-				properties.put(OAUTH_CONFIG_METHOD_PROPERTY, scriptMethod.getUUID());
+				editingSolution.putCustomProperty(new String[] { OAUTH_CONFIG_METHOD_PROPERTY }, scriptMethod.getUUID());
 			}
-			editingSolution.setCustomProperties(ServoyJSONObject.toString(properties, true, true, true));
 			EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 			repository.updateNodesInWorkspace(new IPersist[] { activeProject.getEditingSolution() }, false);
 		}
