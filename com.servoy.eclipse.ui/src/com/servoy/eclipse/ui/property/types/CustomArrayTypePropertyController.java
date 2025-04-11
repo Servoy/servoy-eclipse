@@ -33,6 +33,8 @@ import org.sablo.specification.property.ICustomType;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.ReturnValueSnippet;
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.EditorActionsRegistry;
@@ -188,6 +190,11 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 						if (oldValue instanceof IPersist)
 						{
 							callHandler(handler -> handler.deleteComponent(persistPropertySource, ((IPersist)oldValue).getUUID()));
+						}
+						else if (oldValue == null)
+						{  	// if the property value item is null, you cannot delete it, first create a new empty one, then you can delete it
+							ServoyMessageDialog.openError(UIUtils.getActiveShell(), "Error",
+								"Click the '+' button to create a new empty property value, then you can delete it.");
 						}
 					}
 
