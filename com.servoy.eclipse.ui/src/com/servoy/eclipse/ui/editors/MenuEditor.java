@@ -604,7 +604,7 @@ public class MenuEditor extends PersistEditor
 		propertiesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		Group generalPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
-		generalPropertiesGroup.setText("Menu Item - General Properties");
+		generalPropertiesGroup.setText("General Properties");
 		generalPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		generalPropertiesGroup.setLayout(new GridLayout(2, false));
 
@@ -770,7 +770,7 @@ public class MenuEditor extends PersistEditor
 			for (String categoryName : extraProperties.keySet())
 			{
 				Group categoryPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
-				categoryPropertiesGroup.setText("Menu Item - " + categoryName + " Properties");
+				categoryPropertiesGroup.setText(categoryName + " Properties");
 				categoryPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 				categoryPropertiesGroup.setLayout(new GridLayout(2, false));
 				createGroupedComponents(categoryPropertiesGroup, categoryName, extraProperties.get(categoryName), true);
@@ -778,7 +778,7 @@ public class MenuEditor extends PersistEditor
 		}
 
 		customPropertiesGroup = new Group(propertiesComposite, SWT.NONE);
-		customPropertiesGroup.setText("Menu Item - Custom Properties");
+		customPropertiesGroup.setText("Custom Properties");
 		customPropertiesGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		customPropertiesGroup.setLayout(new GridLayout(2, false));
 
