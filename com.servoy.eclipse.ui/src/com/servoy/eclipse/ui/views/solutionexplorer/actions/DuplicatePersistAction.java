@@ -134,7 +134,8 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				{
 					String message = null;
 					String checkText = newText;
-					if (checkText.startsWith(".") || checkText.endsWith(".") || checkText.contains("/.") || checkText.contains("./") ||
+					if (checkText.startsWith(".") || checkText.endsWith(".") || checkText.startsWith("/") || checkText.contains("/.") ||
+						checkText.contains("./") ||
 						checkText.contains("//"))
 					{
 						return "Invalid name";
