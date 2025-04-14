@@ -1322,6 +1322,7 @@
                         <iterate
                               operator="and">
                            <test
+                                 args="add"
                                  property="com.servoy.eclipse.designer.editor.rfb.iscontainer">
                            </test>
                         </iterate>
