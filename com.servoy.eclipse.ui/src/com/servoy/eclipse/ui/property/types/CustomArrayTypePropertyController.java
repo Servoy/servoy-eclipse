@@ -30,11 +30,10 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.ReturnValueSnippet;
-import com.servoy.eclipse.core.util.ServoyMessageDialog;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.EditorActionsRegistry;
@@ -57,7 +56,9 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -176,6 +177,8 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 
 				cellEditor.setCellEditor2(new ComposedCellEditor(new ButtonCellEditor()
 				{
+					private WebCustomType newPropertyValue;
+
 					@Override
 					protected void updateButtonState(Button buttonWidget, Object value)
 					{
@@ -192,10 +195,40 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 							callHandler(handler -> handler.deleteComponent(persistPropertySource, ((IPersist)oldValue).getUUID()));
 						}
 						else if (oldValue == null)
-						{  	// if the property value item is null, you cannot delete it, first create a new empty one, then you can delete it
-							ServoyMessageDialog.openError(UIUtils.getActiveShell(), "Error",
-								"Click the '+' button to create a new empty property value, then you can delete it.");
+						{
+							// if the property value item is null, you cannot delete it, first create a new empty one, then you can delete it
+							applyValue(getValueToSetOnClick());
+							callHandler(handler -> handler.deleteComponent(persistPropertySource, newPropertyValue.getUUID()));
 						}
+					}
+
+					private Object getValueToSetOnClick()
+					{
+						String typeName = null;
+						Object id = getId();
+
+						String parentKey;
+						int indexInArray;
+						if (id instanceof ArrayPropertyChildId arrayPropertyChildId)
+						{
+							parentKey = String.valueOf(arrayPropertyChildId.arrayPropId);
+							indexInArray = arrayPropertyChildId.idx;
+						}
+						else
+						{
+							parentKey = String.valueOf(id);
+							indexInArray = -1;
+						}
+
+						IBasicWebObject parent1 = (IBasicWebObject)persistContext.getPersist();
+
+						newPropertyValue = WebCustomType.createNewInstance(parent1, webComponentPropertyDescription, parentKey,
+							indexInArray, true);
+						typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(getTypeName());
+						newPropertyValue.setTypeName(typeName);
+						((ISupportsIndexedChildren)parent1).setChild(newPropertyValue);
+
+						return newPropertyValue;
 					}
 
 				}, new ButtonCellEditor()
@@ -225,6 +258,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 								else
 								{
 									parentKey = String.valueOf(id);
+									idx = Integer.valueOf(-1);
 								}
 								handler.createComponent(persistPropertySource, persist.getParent().getUUID(), parentKey, getTypeName(), idx, true);
 							});
