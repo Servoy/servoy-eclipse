@@ -29,6 +29,7 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.util.FileUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.ListDialog;
@@ -158,6 +159,7 @@ public class Activator extends AbstractUIPlugin {
 						CloneCommand cloneRepository = Git.cloneRepository();
 						cloneRepository.setURI(uri);
 						File tmpDir = new File(workspaceFile, ".servoy_tmp");
+						tmpDir.deleteOnExit();
 						cloneRepository.setDirectory(tmpDir);
 						cloneRepository.setBranch(branch);
 						Git git = cloneRepository.call();
@@ -168,7 +170,9 @@ public class Activator extends AbstractUIPlugin {
 							Files.move(file.toPath(), new File(workspaceFile, file.getName()).toPath(),
 									StandardCopyOption.ATOMIC_MOVE);
 						}
-						tmpDir.delete();
+						if (!tmpDir.delete()) {
+							FileUtils.delete(workspaceFile, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.IGNORE_ERRORS);
+						}
 						monitor.subTask("Importing the solution");
 						List<File> projectsFiles = new ArrayList<>();
 						Files.list(workspaceFile.toPath()).filter(
