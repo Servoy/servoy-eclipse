@@ -300,10 +300,12 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		else if (type instanceof NGCustomJSONArrayType caType && convertedValue instanceof Object[] array)
 		{
+			array = array.clone();
 			for (int i = 0; i < array.length; i++)
 			{
 				array[i] = setValueInternal(bean, array[i], persistContext, caType.getCustomJSONTypeDefinition());
 			}
+			return array;
 		}
 		return convertedValue;
 	}
