@@ -33,7 +33,7 @@
 
    <plugin
          id="org.eclipse.wst.common.emf"
-         version="1.2.700.v202007161535"/>
+         version="1.2.800.v202503020719"/>
 
    <plugin
          id="org.eclipse.wst.common.emfworkbench.integration"
@@ -57,7 +57,7 @@
 
    <plugin
          id="org.eclipse.wst.common.project.facet.core"
-         version="1.5.0.v202308161955"/>
+         version="1.5.0.v202501090237"/>
 
    <plugin
          id="org.eclipse.wst.common.snippets"

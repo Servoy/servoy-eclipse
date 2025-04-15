@@ -28,26 +28,10 @@
             <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.source.feature.group" version="2.5.0.202411280718"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/eclipse/updates/4.34/"/>
+            <repository location="https://download.eclipse.org/eclipse/updates/4.35/"/>
             <unit id="org.eclipse.emf.ecore.feature.group" version="2.39.0.v20241018-1213"/>
-            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.2700.v20240929-1145"/>
-            <unit id="org.eclipse.sdk.ide" version="4.34.0.I20241120-1800"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/releases/2024-12"/>
-            <unit id="org.eclipse.egit.feature.group" version="7.1.0.202411261347-r"/>
-            <unit id="org.eclipse.epp.mpc.feature.group" version="1.11.0.v20240709-1650"/>
-            <unit id="org.eclipse.jgit.feature.group" version="7.1.0.202411261347-r"/>
-            <unit id="org.eclipse.jgit.lfs.feature.group" version="7.1.0.202411261347-r"/>
-            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.35.0.v202408150414"/>
-            <unit id="org.eclipse.jgit.http.apache.feature.group" version="7.1.0.202411261347-r"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.22.0"/>
-            <unit id="org.eclipse.draw2d.feature.group" version="3.22.0.202411181923"/>
-            <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.22.0.202411181923"/>
-            <unit id="org.eclipse.gef.feature.group" version="3.22.0.202411181923"/>
-            <unit id="org.eclipse.gef.sdk.feature.group" version="3.22.0.202411181923"/>
+            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.2800.v20250227-1734"/>
+            <unit id="org.eclipse.sdk.ide" version="4.35.0.I20250228-0140"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/tm4e/releases/0.14.1/"/>
@@ -58,6 +42,22 @@
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.06/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202503121308"/>
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202503121310"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/releases/2025-03"/>
+            <unit id="org.eclipse.egit.feature.group" version="7.2.0.202503040940-r"/>
+            <unit id="org.eclipse.epp.mpc.feature.group" version="1.12.0.v20250130-1529"/>
+            <unit id="org.eclipse.jgit.feature.group" version="7.2.0.202503040940-r"/>
+            <unit id="org.eclipse.jgit.http.apache.feature.group" version="7.2.0.202503040940-r"/>
+            <unit id="org.eclipse.jgit.lfs.feature.group" version="7.2.0.202503040940-r"/>
+            <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.37.0.v202502280419"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.23.0"/>
+            <unit id="org.eclipse.draw2d.feature.group" version="3.23.0.202502242203"/>
+            <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.23.0.202502242203"/>
+            <unit id="org.eclipse.gef.feature.group" version="3.23.0.202502242203"/>
+            <unit id="org.eclipse.gef.sdk.feature.group" version="3.23.0.202502242203"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
@@ -76,19 +76,19 @@
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-annotations</artifactId>
-                    <version>2.18.2</version>
+                    <version>2.18.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
-                    <version>2.18.2</version>
+                    <version>2.18.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
-                    <version>2.18.2</version>
+                    <version>2.18.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -208,7 +208,7 @@
                 <dependency>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex</artifactId>
-                    <version>3.2.3</version>
+                    <version>3.3.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -238,7 +238,7 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.17.0</version>
+                    <version>1.17.5</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -274,25 +274,31 @@
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-text</artifactId>
-                    <version>1.13.0</version>
+                    <version>1.13.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.httpcomponents.client5</groupId>
                     <artifactId>httpclient5</artifactId>
-                    <version>5.3.1</version>
+                    <version>5.4.3</version>
                     <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.httpcomponents.client5</groupId>
+                    <artifactId>httpclient5-win</artifactId>
+                    <version>5.2.3</version>
+                    <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.httpcomponents.core5</groupId>
                     <artifactId>httpcore5-h2</artifactId>
-                    <version>5.2.5</version>
+                    <version>5.3.4</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.httpcomponents.core5</groupId>
                     <artifactId>httpcore5</artifactId>
-                    <version>5.2.5</version>
+                    <version>5.3.4</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -388,13 +394,13 @@
                 <dependency>
                     <groupId>org.jsoup</groupId>
                     <artifactId>jsoup</artifactId>
-                    <version>1.18.3</version>
+                    <version>1.19.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.yaml</groupId>
                     <artifactId>snakeyaml</artifactId>
-                    <version>2.3</version>
+                    <version>2.4</version>
                     <type>jar</type>
                 </dependency>
             </dependencies>
