@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -163,6 +164,21 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								((RfbVisualFormEditorDesignPage)activePage).showContainer((LayoutContainer)newPersist[0]);
 						}
 					}
+				}
+				if (form.getExtendsID() > 0 && changedPersists.size() >= 2)
+				{
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						LayoutContainer container = newPersist[newPersist.length - 1] instanceof LayoutContainer
+							? (LayoutContainer)newPersist[newPersist.length - 1]
+							: (LayoutContainer)newPersist[newPersist.length - 1].getParent();
+
+						@Override
+						public void run()
+						{
+							doFullFormRefresh(container);
+						}
+					});
 				}
 			}
 		}
@@ -599,7 +615,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								IPersist[] result = res.toArray(new IPersist[0]);
 								if (fullRefreshNeeded)
 								{
-									doFullFormRefresh();
+									doFullFormRefresh(null);
 								}
 								return result;
 							}
@@ -914,7 +930,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() > 0)
 						{
 							// very likely a complex inheritance situation that won't refresh correctly, just reinitialize form designer
-							doFullFormRefresh();
+							doFullFormRefresh(null);
 							break;
 						}
 					}
@@ -927,14 +943,21 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 	}
 
-	public static void doFullFormRefresh()
+	public static void doFullFormRefresh(LayoutContainer container)
 	{
 		BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
 		if (editor != null)
 		{
 			BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
 			if (activePage instanceof RfbVisualFormEditorDesignPage)
+			{
+				if (container != null)
+				{
+					((RfbVisualFormEditorDesignPage)activePage).zoomOut();
+					((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
+				}
 				((RfbVisualFormEditorDesignPage)activePage).refreshContent();
+			}
 		}
 	}
 
