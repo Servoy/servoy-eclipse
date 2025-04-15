@@ -170,10 +170,14 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				{
 					Display.getDefault().asyncExec(new Runnable()
 					{
+						LayoutContainer container = newPersist[newPersist.length - 1] instanceof LayoutContainer
+							? (LayoutContainer)newPersist[newPersist.length - 1]
+							: (LayoutContainer)newPersist[newPersist.length - 1].getParent();
+
 						@Override
 						public void run()
 						{
-							doFullFormRefresh();
+							doFullFormRefresh(container);
 						}
 					});
 				}
@@ -922,7 +926,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() > 0)
 						{
 							// very likely a complex inheritance situation that won't refresh correctly, just reinitialize form designer
-							doFullFormRefresh();
+							doFullFormRefresh(null);
 							break;
 						}
 					}
@@ -935,14 +939,21 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 	}
 
-	public static void doFullFormRefresh()
+	public static void doFullFormRefresh(LayoutContainer container)
 	{
 		BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
 		if (editor != null)
 		{
 			BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
 			if (activePage instanceof RfbVisualFormEditorDesignPage)
+			{
+				if (container != null)
+				{
+					((RfbVisualFormEditorDesignPage)activePage).zoomOut();
+					((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
+				}
 				((RfbVisualFormEditorDesignPage)activePage).refreshContent();
+			}
 		}
 	}
 
