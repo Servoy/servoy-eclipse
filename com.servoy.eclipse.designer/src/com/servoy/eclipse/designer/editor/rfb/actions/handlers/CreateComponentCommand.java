@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.PlatformUI;
@@ -164,6 +165,21 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								((RfbVisualFormEditorDesignPage)activePage).showContainer((LayoutContainer)newPersist[0]);
 						}
 					}
+				}
+				if (editorPart.getForm().getExtendsID() > 0 && changedPersists.size() >= 2)
+				{
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						LayoutContainer container = newPersist[newPersist.length - 1] instanceof LayoutContainer
+							? (LayoutContainer)newPersist[newPersist.length - 1]
+							: (LayoutContainer)newPersist[newPersist.length - 1].getParent();
+
+						@Override
+						public void run()
+						{
+							doFullFormRefresh(container);
+						}
+					});
 				}
 			}
 		}
@@ -929,6 +945,24 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError("Could not undo create elements", e);
+		}
+	}
+
+	public static void doFullFormRefresh(LayoutContainer container)
+	{
+		BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
+		if (editor != null)
+		{
+			BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
+			if (activePage instanceof RfbVisualFormEditorDesignPage)
+			{
+				if (container != null)
+				{
+					((RfbVisualFormEditorDesignPage)activePage).zoomOut();
+					((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
+				}
+				((RfbVisualFormEditorDesignPage)activePage).refreshContent();
+			}
 		}
 	}
 
