@@ -157,7 +157,7 @@ public class Activator extends AbstractUIPlugin {
 						File workspaceFile = workspaceRoot.toFile();
 						CloneCommand cloneRepository = Git.cloneRepository();
 						cloneRepository.setURI(uri);
-						File tmpDir = new File(workspaceFile, ".tmp");
+						File tmpDir = new File(workspaceFile, ".servoy_tmp");
 						cloneRepository.setDirectory(tmpDir);
 						cloneRepository.setBranch(branch);
 						Git git = cloneRepository.call();
