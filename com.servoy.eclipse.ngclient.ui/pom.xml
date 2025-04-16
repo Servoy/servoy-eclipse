@@ -10,10 +10,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.3.5.3948_LTS</version>
+		<version>2024.3.6.3949_LTS</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
-	<version>2024.3.5.3948_LTS</version>
+	<version>2024.3.6.3949_LTS</version>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
 		<test.script>test_headless</test.script>

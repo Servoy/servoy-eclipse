@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.servoy</groupId>
-  <version>2024.3.5.3948_LTS</version>
+  <version>2024.3.6.3949_LTS</version>
   <artifactId>com.servoy.eclipse.target</artifactId>
   <packaging>eclipse-target-definition</packaging>
     <properties>
