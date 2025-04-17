@@ -267,6 +267,8 @@ import com.servoy.j2db.util.Utils;
 
 public class PersistPropertySource implements ISetterAwarePropertySource, IAdaptable, IModelSavePropertySource, HasPersistContext
 {
+	public static String CUSTOM_EVENTS_CATEGORY = "Custom Events";
+
 	protected PersistContext persistContext;
 	protected boolean readOnly;
 
@@ -639,6 +641,31 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					ServoyLog.logError(e);
 				}
 			}
+			flattenedEditingSolution.getEventTypes().forEach(eventType -> {
+				if (eventType.isUIEvent(persistContext.getPersist()))
+				{
+					try
+					{
+						IPropertyDescriptor pd = createFunctionPropertyDescriptorIfAppropriate(eventType.getName(), eventType.getName(),
+							new PropertyDescriptionBuilder().withName(eventType.getName()).withType(TypesRegistry.getType(FunctionPropertyType.TYPE_NAME))
+								.withConfig(
+									Boolean.valueOf(false))
+								.withTags(new JSONObject().put(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS, eventType.getDescription()))
+								.build(),
+							form, persistContext);
+						if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor descriptor)
+						{
+							descriptor.setCategory(CUSTOM_EVENTS_CATEGORY);
+							propertyDescriptors.put(pd.getId(), pd);
+						}
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+
+				}
+			});
 		}
 	}
 
@@ -2300,6 +2327,24 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				return value;
 			}
 		}
+		else
+		{
+			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
+			if (propertyDescriptor != null && CUSTOM_EVENTS_CATEGORY.equals(propertyDescriptor.getCategory()))
+			{
+				Object value = ((AbstractBase)persistContext.getPersist()).getCustomEventValue(id.toString());
+				if (value != null && value instanceof String && Utils.getAsUUID(value, false) != null)
+				{
+					IPersist persist = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+						.searchPersist((String)value);
+					if (persist != null)
+					{
+						return Integer.valueOf(persist.getID());
+					}
+				}
+				return Integer.valueOf(0);
+			}
+		}
 		return null;
 	}
 
@@ -2891,6 +2936,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), propertyDescriptor.getDisplayName(), value);
 				}
 			}
+		}
+		else
+		{
+			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
+			if (propertyDescriptor != null && CUSTOM_EVENTS_CATEGORY.equals(propertyDescriptor.getCategory()))
+			{
+				if (value instanceof Integer)
+				{
+					ScriptMethod scriptMethod = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+						.getScriptMethod(((Integer)value).intValue());
+					value = (scriptMethod == null) ? null : scriptMethod.getUUID().toString();
+				}
+				((AbstractBase)persistContext.getPersist()).putCustomEventValue(id.toString(), value);
+			}
+
 		}
 	}
 
