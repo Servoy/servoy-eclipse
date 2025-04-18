@@ -315,20 +315,19 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter)
+	public <T> T getAdapter(Class<T> adapter)
 	{
-		if (!isMobile() && adapter.equals(CommandStack.class) && getActivePage() >= 0 && getControl(getActivePage()).equals(seceditor))
-		{
-			return dummyCommandStack;
-		}
 		if (adapter.equals(CommandStack.class))
 		{
-			return getCommandStack();
+			if (getActiveEditor() == graphicaleditor)
+				return (T)getCommandStack();
+			else return (T)dummyCommandStack;
 		}
 		if (adapter.equals(IContextProvider.class))
 		{
-			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_editor");
+			return (T)new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_editor");
 		}
 		return super.getAdapter(adapter);
 	}

@@ -280,16 +280,28 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		if (graphicaleditor != null) graphicaleditor.commandStackChanged(new EventObject(this));
 	}
 
+
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter)
+	public <T> T getAdapter(Class<T> adapter)
 	{
+		IEditorPart activeEditor = getActiveEditor();
+		if (activeEditor != null)
+		{
+			// If the active inner part can provide the adapter, return it
+			T returnValue = activeEditor.getAdapter(adapter);
+			if (returnValue != null)
+			{
+				return returnValue;
+			}
+		}
 		if (adapter.equals(IPersist.class))
 		{
-			return form;
+			return (T)form;
 		}
 		if (adapter.equals(IGotoMarker.class))
 		{
-			return new IGotoMarker()
+			return (T)new IGotoMarker()
 			{
 				public void gotoMarker(IMarker marker)
 				{
@@ -336,19 +348,19 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		}
 		if (adapter == IPropertySourceProvider.class)
 		{
-			return new UndoablePersistPropertySourceProvider(this);
+			return (T)new UndoablePersistPropertySourceProvider(this);
 		}
 		Object result = super.getAdapter(adapter);
-		if (result == null && graphicaleditor != null)
+		if (result == null && graphicaleditor != null && graphicaleditor == getActiveEditor())
 		{
 			result = graphicaleditor.getAdapter(adapter);
 		}
 		if (result == null && adapter.equals(ActionRegistry.class))
 		{
 			// dummy return, this prevents a NPE when form editor is opened for form that is not part of the active solution
-			return getDummyActionRegistry();
+			return (T)getDummyActionRegistry();
 		}
-		return result;
+		return (T)result;
 	}
 
 	private ActionRegistry dummyActionRegistry;
