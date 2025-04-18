@@ -20,16 +20,25 @@ package com.servoy.eclipse.designer.editor;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -38,11 +47,13 @@ import com.servoy.eclipse.designer.editor.rfb.ChromiumVisualFormEditorDesignPage
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.SystemVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -50,6 +61,7 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.IContextProvider;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 
@@ -92,6 +104,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	private VisualFormEditorPartsPage partseditor = null;
 	private VisualFormEditorTabSequencePage tabseditor = null;
 	private VisualFormEditorSecurityPage seceditor = null;
+	private TextEditor cssEditor;
 
 	private final CommandStack dummyCommandStack = new CommandStack()
 	{
@@ -137,6 +150,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 					createTabsPage();
 				}
 				createSecPage(); // MultiPageEditorPart wants at least 1 page
+				createCSSPage();
 			}
 		}
 		else
@@ -162,6 +176,48 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	{
 		seceditor = new VisualFormEditorSecurityPage(this, getContainer(), SWT.NONE);
 		setPageText(addPage(seceditor), "Security");
+	}
+
+	private void createCSSPage()
+	{
+		cssEditor = new ExtensionBasedTextEditor();
+		try
+		{
+			Pair<String, String> formFilePath = SolutionSerializer.getFilePath(getForm(), false);
+			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + getForm().getName() + ".less"));
+			if (file.exists())
+			{
+				setPageText(addPage(cssEditor, FileEditorInputFactory.createFileEditorInput(file)), "Less");
+			}
+			else
+			{
+				Composite control = new Composite(getContainer(), SWT.NONE);
+				control.setLayout(new RowLayout());
+				Button button = new Button(control, SWT.PUSH);
+				button.setText("Create Form Less file");
+				final int page = addPage(control);
+				setPageText(page, "Less");
+				button.addListener(SWT.Selection, selection -> {
+					try
+					{
+						removePage(page);
+						file.create(new byte[0], true, false, null);
+						int page2 = addPage(cssEditor, FileEditorInputFactory.createFileEditorInput(file));
+						setPageText(page2, "Less");
+						setActivePage(page2);
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+
+				});
+			}
+		}
+		catch (PartInitException e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 
 	@Override
@@ -277,8 +333,13 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	@Override
 	public void doSave(IProgressMonitor monitor)
 	{
+		if (cssEditor != null && cssEditor.isDirty())
+		{
+			cssEditor.doSave(monitor);
+		}
 		if (!isMobile() && seceditor != null) seceditor.saveSecurityElements();
 		super.doSave(monitor);
+
 
 		try
 		{
@@ -315,20 +376,19 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter)
+	public <T> T getAdapter(Class<T> adapter)
 	{
-		if (!isMobile() && adapter.equals(CommandStack.class) && getActivePage() >= 0 && getControl(getActivePage()).equals(seceditor))
-		{
-			return dummyCommandStack;
-		}
 		if (adapter.equals(CommandStack.class))
 		{
-			return getCommandStack();
+			if (getActiveEditor() == graphicaleditor)
+				return (T)getCommandStack();
+			else return (T)dummyCommandStack;
 		}
 		if (adapter.equals(IContextProvider.class))
 		{
-			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_editor");
+			return (T)new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_editor");
 		}
 		return super.getAdapter(adapter);
 	}
