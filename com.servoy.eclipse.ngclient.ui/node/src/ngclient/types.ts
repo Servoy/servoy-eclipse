@@ -9,7 +9,6 @@ export class FormSettings {
 /** Cache for a Servoy form (data/model instances, no UI). Also keeps the component caches, Servoy form component caches etc. */
 export class FormCache implements IFormCache {
     public navigatorForm: FormSettings;
-    public size: Dimension;
     public partComponentsCache: Array<ComponentCache | StructureCache | FormComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
     public formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
@@ -17,11 +16,12 @@ export class FormCache implements IFormCache {
 
     private _mainStructure: StructureCache;
     private _parts: Array<PartCache>;
-    private responsive: boolean;
 
-    constructor(readonly formname: string, size: Dimension, responsive: boolean, public readonly url: string, private readonly typesRegistry: TypesRegistry) {
-        this.size = size;
-        this.responsive = responsive;
+    constructor(readonly formname: string, 
+                public size: Dimension, 
+                readonly responsive: boolean, 
+                readonly url: string, 
+                private readonly typesRegistry: TypesRegistry) {
         this.componentCache = new Map();
         this.partComponentsCache = [];
         this._parts = [];
