@@ -11,7 +11,7 @@
          point="org.eclipse.ui.editors">
       <editor
             class="com.servoy.eclipse.designer.editor.VisualFormEditor"
-            contributorClass="com.servoy.eclipse.designer.editor.ActionBarContributor"
+            contributorClass="com.servoy.eclipse.designer.editor.VisualFormEditorActionBarContributor"
             default="true"
             extensions="frm"
             icon="icons/designer.png"

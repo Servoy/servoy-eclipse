@@ -278,6 +278,8 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	{
 		super.pageChange(newPageIndex);
 		if (graphicaleditor != null) graphicaleditor.commandStackChanged(new EventObject(this));
+
+		activateEditorContext();
 	}
 
 
@@ -1013,13 +1015,16 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				activateContext = null;
 			}
 
-			if (getGraphicaleditor().getDesignPagetype() == DesignPagetype.Rfb)
+			if (getActiveEditor() == graphicaleditor && graphicaleditor != null)
 			{
-				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT);
-			}
-			else
-			{
-				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+				if (getGraphicaleditor().getDesignPagetype() == DesignPagetype.Rfb)
+				{
+					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT);
+				}
+				else
+				{
+					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+				}
 			}
 		}
 	}
