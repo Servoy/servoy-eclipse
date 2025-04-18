@@ -290,11 +290,6 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					{
 						hardcodedText = "Set z-index of the element.";
 					}
-					else if (StaticContentSpecLoader.PROPERTY_ROLLOVERCURSOR.getPropertyName().equals(item.getText(0)) ||
-						StaticContentSpecLoader.PROPERTY_ROLLOVERIMAGEMEDIAID.getPropertyName().replace("ID", "").equals(item.getText(0)))
-					{
-						hardcodedText = "Not supported in smart client for listview/tableview";
-					}
 					else if ("min-width".equals(item.getText(0)) || "min-height".equals(item.getText(0)))
 					{
 						ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite()

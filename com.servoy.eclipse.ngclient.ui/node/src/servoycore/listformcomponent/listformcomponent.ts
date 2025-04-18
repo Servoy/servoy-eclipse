@@ -117,6 +117,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     parent: AbstractFormComponent;
     agGridOptions: GridOptions;
     numberOfColumns = 1;
+    resizeObserver: ResizeObserver;
+    resizeTimeout: any;
 
     // used for paging
     page = 0;
@@ -434,14 +436,39 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }        
     }
 
+    private calculateNumberOfColumns(): number
+    {
+        const parentWidth = this.elementRef.nativeElement.offsetWidth;
+        const width = this.containedForm.formWidth;
+        return (this.pageLayout === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
+    }
+
     ngAfterViewInit() {
         this.calculateCells();
         if (this.useScrolling) {
             this.agGrid.api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
+            if(!this.servoyApi.isInAbsoluteLayout()) {
+                this.resizeObserver = new ResizeObserver(() => {
+                    if(this.resizeTimeout) {
+                        clearTimeout(this.resizeTimeout);
+                    }
+                    this.resizeTimeout = setTimeout(() => {
+                        this.numberOfColumns = this.calculateNumberOfColumns();
+                        this.resizeTimeout = null;
+                        this.agGrid.api.refreshServerSide({ purge: true });
+                        this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
+                        setTimeout(() => {
+                            this.scrollToSelection();
+                        }, 200);
+                    }, 200);
+                });
+                this.resizeObserver.observe(this.elementRef.nativeElement);
+            }
         }
     }
 
     ngOnDestroy() {
+        if (this.resizeObserver) this.resizeObserver.unobserve(this.elementRef.nativeElement);
         if (this.removeListenerFunction != null) {
             this.removeListenerFunction();
             this.removeListenerFunction = null;
@@ -475,9 +502,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     getRowWidth(): string {
         if (this.pageLayout === 'listview') {
             return '100%';
-        }
-        if (!this.containedForm.absoluteLayout) {
-            return null;
         }
         return this.containedForm.formWidth + 'px';
     }
@@ -680,31 +704,30 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             this.numberOfCells = 1;
             return;
         }
-        this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout ? 0 : this.responsivePageSize;
-        if (this.numberOfCells <= 0) {
-            if (this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout) {
-                const parentWidth = this.elementRef.nativeElement.offsetWidth;
-                const parentHeight = this.elementRef.nativeElement.offsetHeight;
-                const height = this.containedForm.formHeight;
-                const width = this.containedForm.formWidth;
-                this.numberOfColumns = (this.pageLayout === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
-                const numberOfRows = Math.floor(parentHeight / height);
-                this.numberOfCells = numberOfRows * this.numberOfColumns;
-                // always just render 1
-                if (this.numberOfCells < 1) this.numberOfCells = 1;
-            } else if (!this.useScrolling) {
-                if (!this.servoyApi.isInAbsoluteLayout()) {
-                    this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
-                } else if (this.containedForm && !this.containedForm.absoluteLayout) {
-                    this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because its containedForm is a responsive form');
-                }
-            }
-
-        } else {
-            this.numberOfColumns = this.pageLayout === 'listview' ? 1 : this.responsivePageSize;
-        }
 
         if (!this.useScrolling) {
+            this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout ? 0 : this.responsivePageSize;
+            if (this.numberOfCells <= 0) {
+                if (this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout) {
+                    const parentWidth = this.elementRef.nativeElement.offsetWidth;
+                    const parentHeight = this.elementRef.nativeElement.offsetHeight;
+                    const height = this.containedForm.formHeight;
+                    const width = this.containedForm.formWidth;
+                    const nrColumns = (this.pageLayout === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
+                    const numberOfRows = Math.floor(parentHeight / height);
+                    this.numberOfCells = numberOfRows * nrColumns;
+                    // always just render 1
+                    if (this.numberOfCells < 1) this.numberOfCells = 1;
+                } else {
+                    if (!this.servoyApi.isInAbsoluteLayout()) {
+                        this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
+                    } else if (this.containedForm && !this.containedForm.absoluteLayout) {
+                        this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because its containedForm is a responsive form');
+                    }
+                }
+    
+            }
+
             const startIndex = this.page * this.numberOfCells;
             const foundset = this.foundset;
             if (foundset.viewPort.startIndex !== startIndex) {
@@ -724,6 +747,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             this.updatePagingControls();
             foundset.setPreferredViewportSize(this.numberOfCells);
             this.cdRef.detectChanges();
+        } else {
+            this.numberOfColumns = this.calculateNumberOfColumns();
         }
     }
 
