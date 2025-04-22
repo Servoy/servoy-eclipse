@@ -1998,7 +1998,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						{
 							if (node.getDocumentation() != null)
 							{
-								WebObjectFunctionDefinition api = apis.get(node.getFunctionName());
+								String fullName = node.getFunctionName();
+								String[] nameParts = fullName.split("_");
+								String baseName = nameParts[0];
+								WebObjectFunctionDefinition api = apis.get(baseName);
 								if (api != null)
 								{
 									String doc = node.getDocumentation().getText();
@@ -2009,6 +2012,40 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 										if (!example.isBlank())
 										{
 											doc = doc.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+										}
+									}
+									if (nameParts.length > 1 && (api instanceof WebObjectApiFunctionDefinition apiWithOverloads))
+									{
+
+										List<WebObjectApiFunctionDefinition> overloads = apiWithOverloads.getOverloads();
+										if (overloads != null)
+										{
+											for (WebObjectApiFunctionDefinition overload : overloads)
+											{
+												IFunctionParameters params = overload.getParameters();
+												if (params == null) continue;
+												List<String> paramNames = new ArrayList<>();
+												params.forEach(pd -> paramNames.add(pd.getName()));
+
+												if (paramNames.size() == nameParts.length - 1)
+												{
+													boolean match = true;
+													for (int i = 0; i < paramNames.size(); i++)
+													{
+														if (!paramNames.get(i).equals(nameParts[i + 1]))
+														{
+															match = false;
+															break;
+														}
+													}
+													if (match)
+													{
+														overload.setDocumentation(doc);
+														return super.visitFunctionStatement(node);
+													}
+												}
+
+											}
 										}
 									}
 									api.setDocumentation(doc);
