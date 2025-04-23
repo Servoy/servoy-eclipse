@@ -190,7 +190,7 @@ export class EditorContentService {
                                     reorderLayoutContainers.push(parent);
                                 }
                             }
-                        } else if (formCache.absolute) {
+                        } else if (formCache.absolute && !fcc.name.includes('containedForm')) {
                             formCache.partComponentsCache.push(fcc);
                         }
                         const containers = data?.formComponentContainers?.[elem.name];
@@ -257,8 +257,10 @@ export class EditorContentService {
                                         container.removeChild(formComponentComponent);
                                         container.addChild(formComponentComponent);
                                     } else {
-                                        formComponent.removeChild(formComponentComponent);
-                                        formComponent.addChild(formComponentComponent);
+                                        if ((this.countWords(formComponent.name, 'containedForm', '$') + 1) === this.countWords(child, 'containedForm', '$')) {
+                                            formComponent.removeChild(formComponentComponent);
+                                            formComponent.addChild(formComponentComponent);
+                                        }
                                     }
                                 }
                             });
@@ -418,6 +420,11 @@ export class EditorContentService {
 
     setDirty() {
 
+    }
+    
+    countWords(text: string, searchWord: string, split: string): number {
+        const words = text.split(split);
+        return words.filter(word => word === searchWord).length;
     }
     
     private findStructureCache(items: Array<StructureCache | ComponentCache | FormComponentCache>, id: string): StructureCache {
