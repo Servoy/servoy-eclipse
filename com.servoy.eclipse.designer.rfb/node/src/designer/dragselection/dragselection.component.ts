@@ -25,6 +25,9 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 
     glasspane: HTMLElement;
     contentArea: HTMLElement;
+	
+	formComponentBoundary: HTMLElement;
+	listFormComponentBoundary: HTMLElement;
 
     scroll = { x: 0, y: 0 };
 
@@ -103,7 +106,10 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         if (event.button == 0 && this.dragNode) {
             this.dragStartEvent = event;
         }
-
+		
+		this.formComponentBoundary = this.findAncestor(this.dragNode, 'svy-formcomponent');
+		this.listFormComponentBoundary = this.findAncestor(this.dragNode, 'svy-listformcomponent');
+		
         this.mousedownpoint.x = event.pageX;
         this.mousedownpoint.y = event.pageY;
         this.editorSession.registerAutoscroll(this);
@@ -190,18 +196,42 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             this.initSelectionToDrag(selection);
         }
 
-        if (this.selectionToDrag.length > 0) {
-            const changeX = event.clientX - this.dragStartEvent.clientX;
-            const changeY = event.clientY - this.dragStartEvent.clientY;
+		if (this.selectionToDrag.length > 0) {
+			let changeX = event.clientX - this.dragStartEvent.clientX;
+			let changeY = event.clientY - this.dragStartEvent.clientY;
+			
+			//restrict dragging to only allow inside the form component or list form component
+			if (this.formComponentBoundary || this.listFormComponentBoundary) {
+				const formRect = (this.formComponentBoundary ? this.formComponentBoundary : this.listFormComponentBoundary).getBoundingClientRect();
 
-            if (this.canMove(changeX, changeY)) {
-                this.updateLocation(changeX, changeY);
-            }
-            this.dragStartEvent = event;
-        }
-    }
+				const draggedElement = this.dragNode;
+				const dragRect = draggedElement.getBoundingClientRect();
 
-    private initSelectionToDrag(selection: string[]) {
+				const projectedRight = dragRect.right + changeX;
+				const projectedBottom = dragRect.bottom + changeY;
+
+				const overflowX = projectedRight - formRect.right;
+				const overflowY = projectedBottom - formRect.bottom;
+
+				// Clamp X
+				if (overflowX > 0) {
+					changeX -= overflowX;
+				}
+
+				// Clamp Y
+				if (overflowY > 0) {
+					changeY -= overflowY;
+				}
+			}
+
+			if (this.canMove(changeX, changeY)) {
+				this.updateLocation(changeX, changeY);
+			}
+			this.dragStartEvent = event;
+		}
+	}
+
+	private initSelectionToDrag(selection: string[]) {
         this.selectionToDrag = [];
         for (let i = 0; i < selection.length; i++) {
             let node = this.editorContentService.getContentElement(selection[i]);
@@ -461,5 +491,10 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             }
         }
         return canMove;
+    }
+
+    private findAncestor(el: HTMLElement, cls: string): HTMLElement {
+        while ((el = el.parentElement) && !el.classList.contains(cls));
+        return el !== undefined && el !== null && el.classList.contains(cls) ? el : null;
     }
 }
