@@ -810,7 +810,7 @@
         <key
               commandId="com.servoy.eclipse.ui.search"
               schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-              sequence="M2+M3+K">
+              sequence="M2+M4+K">
         </key>
         <key
               commandId="com.servoy.eclipse.ui.OpenFormJsAction"

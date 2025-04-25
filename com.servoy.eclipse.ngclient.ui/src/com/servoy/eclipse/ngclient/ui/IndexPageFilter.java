@@ -134,11 +134,11 @@ public class IndexPageFilter implements Filter
 			{
 				return;
 			}
-			else if (solutionName != null && requestURI.toLowerCase().endsWith("/startup.js"))
-			{
-				AngularIndexPageWriter.writeStartupJs(request, (HttpServletResponse)servletResponse, solutionName);
-				return;
-			}
+//			else if (solutionName != null && requestURI.toLowerCase().endsWith("/startup.js"))
+//			{
+//				AngularIndexPageWriter.writeStartupJs(request, (HttpServletResponse)servletResponse, solutionName);
+//				return;
+//			}
 			else if (AngularIndexPageWriter.handleDeeplink(request, (HttpServletResponse)servletResponse))
 			{
 				return;

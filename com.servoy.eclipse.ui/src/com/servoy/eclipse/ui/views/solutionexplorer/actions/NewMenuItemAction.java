@@ -17,6 +17,11 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -43,7 +48,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
- * Action to create a new valuelist depending on the selection of a solution view.
+ * Action to create a new menu or menu item depending on the selection of a solution view.
  *
  * @author jcompagner
  */
@@ -97,7 +102,17 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 			{
 				return;
 			}
-			String name = askMenuItemName(viewer.getViewSite().getShell());
+			Set<String> existingNames = new HashSet<>();
+			if (parent instanceof Menu menu)
+			{
+				setExistingNames(existingNames, menu, null);
+			}
+			else if (parent instanceof MenuItem menuItem)
+			{
+				setExistingNames(existingNames, null, menuItem);
+			}
+
+			String name = askMenuItemName(viewer.getViewSite().getShell(), existingNames);
 			if (name != null)
 			{
 				IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
@@ -116,14 +131,21 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 		}
 	}
 
-	public static String askMenuItemName(Shell shell)
+	public static String askMenuItemName(Shell shell, Collection<String> existingNames)
 	{
 		InputDialog nameDialog = new InputDialog(shell, "Create menu item", "Supply menu item name(id)", "", new IInputValidator()
 		{
 			public String isValid(String newText)
 			{
-				boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
-				return valid ? null : (newText.length() == 0 ? "" : "Invalid menu item name(id)");
+				if (!IdentDocumentValidator.isJavaIdentifier(newText))
+				{
+					return newText.length() == 0 ? "" : "Invalid menu item name(id)";
+				}
+				if (existingNames.contains(newText))
+				{
+					return "This name already exists.";
+				}
+				return null;
 			}
 		});
 		int res = nameDialog.open();
@@ -133,5 +155,31 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 			return name;
 		}
 		return null;
+	}
+
+	/**
+	 * @param existingNames
+	 * @param menu
+	 */
+	private void setExistingNames(Set<String> existingNames, Menu menu, MenuItem menuItem)
+	{
+		try
+		{
+			Iterator<IPersist> children = (menu != null ? menu : menuItem).getAllObjects();
+			while (children.hasNext())
+			{
+				IPersist child = children.next();
+				if (child instanceof MenuItem)
+				{
+					existingNames.add(((MenuItem)child).getName());
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+			MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Failed to retrieve existing menu item names.");
+			return;
+		}
 	}
 }

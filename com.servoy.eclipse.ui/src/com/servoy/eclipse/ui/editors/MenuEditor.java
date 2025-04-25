@@ -19,9 +19,12 @@ package com.servoy.eclipse.ui.editors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -572,10 +575,18 @@ public class MenuEditor extends PersistEditor
 							UIUtils.reportError("Delete failed", e1.getMessage());
 						}
 					}
-					else
-						if (item.getBounds(CI_ADD).contains(pt))
+					else if (item.getBounds(CI_ADD).contains(pt))
 					{
-						String name = NewMenuItemAction.askMenuItemName(getSite().getShell());
+						Set<String> existingNames = new HashSet<>();
+						if (menuItemData instanceof Menu menu)
+						{
+							setExistingNames(existingNames, menu, null);
+						}
+						else if (menuItemData instanceof MenuItem menuItem)
+						{
+							setExistingNames(existingNames, null, menuItem);
+						}
+						String name = NewMenuItemAction.askMenuItemName(getSite().getShell(), existingNames);
 						if (name != null)
 						{
 							IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
@@ -595,6 +606,32 @@ public class MenuEditor extends PersistEditor
 						}
 					}
 
+				}
+			}
+
+			/**
+			 * @param existingNames
+			 * @param menu
+			 */
+			private void setExistingNames(Set<String> existingNames, Menu menu, MenuItem menuItem)
+			{
+				try
+				{
+					Iterator<IPersist> children = (menu != null ? menu : menuItem).getAllObjects();
+					while (children.hasNext())
+					{
+						IPersist child = children.next();
+						if (child instanceof MenuItem)
+						{
+							existingNames.add(((MenuItem)child).getName());
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+					MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Failed to retrieve existing menu item names.");
+					return;
 				}
 			}
 		});

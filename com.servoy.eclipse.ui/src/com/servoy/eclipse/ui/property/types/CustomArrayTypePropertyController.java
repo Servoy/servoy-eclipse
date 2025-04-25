@@ -91,15 +91,15 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	{
 		callHandler(handler -> {
 			Object id = getId();
-			if (id instanceof ArrayPropertyChildId)
+			if (id instanceof ArrayPropertyChildId arrayPropertyChildId)
 			{
-				String parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
-				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), null, false);
+				String parentKey = String.valueOf(arrayPropertyChildId.arrayPropId);
+				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), Integer.valueOf(0), false);
 			}
 			else
 			{
 				String parentKey = String.valueOf(id);
-				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), null, false);
+				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), Integer.valueOf(0), false);
 				cellEditor.applyValue(persistPropertySource.getPropertyValue(parentKey));
 			}
 		});

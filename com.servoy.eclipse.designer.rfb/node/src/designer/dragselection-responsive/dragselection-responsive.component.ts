@@ -51,24 +51,31 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 		}
         if (!this.dragNode) return;
 
-        // do not allow moving elements inside css position container in responsive layout
-        if (this.dragNode && this.findAncestor(this.dragNode, '.svy-csspositioncontainer') !== null)
-            return;
-        
-        if (this.urlParser.isAbsoluteFormLayout() && !this.dragNode.parentElement.closest('.svy-responsivecontainer')){
-             // only use this for responsive container
-            this.dragNode = null;
-            return;
-        }
-      
-        // skip dragging if it is an child element of a form reference
-        if (event.button == 0 && this.dragNode) {
-            this.dragStartEvent = event;
-            this.initialParent = null;
+		// do not allow moving elements inside css position container in responsive layout
+		if (this.dragNode && this.findAncestor(this.dragNode, '.svy-csspositioncontainer') !== null)
+			return;
 
-            if (this.dragNode.classList.contains("formComponentChild")) {//do not grab if this is a form component element
-                this.dragStartEvent = null;
-            }
+		if (this.urlParser.isAbsoluteFormLayout() && !this.dragNode.parentElement.closest('.svy-responsivecontainer')) {
+			// only use this for responsive container
+			this.dragNode = null;
+			return;
+		}
+
+		// skip dragging if it is an child element of a formcomponent component in a responsive form
+		const formComponentAncestor = this.findAncestor(this.dragNode, 'svy-formcomponent');
+		const listFormComponentAncestor = this.findAncestor(this.dragNode, 'svy-listformcomponent');
+		if (!this.urlParser.isAbsoluteFormLayout() && (formComponentAncestor !== null|| listFormComponentAncestor !== null)) {
+			return;
+		}
+
+		// skip dragging if it is an child element of a form reference
+		if (event.button == 0 && this.dragNode) {
+			this.dragStartEvent = event;
+			this.initialParent = null;
+
+			if (this.dragNode.classList.contains("formComponentChild")) {//do not grab if this is a form component element
+				this.dragStartEvent = null;
+			}
             this.initialParent = this.designerUtilsService.getParent(this.dragNode, this.dragNode.getAttribute("svy-layoutname") ? "layout" : "component");
 
             this.highlightEl = this.dragNode.cloneNode(true) as HTMLElement;
