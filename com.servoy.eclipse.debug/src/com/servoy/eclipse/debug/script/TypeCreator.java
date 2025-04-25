@@ -4508,6 +4508,10 @@ public class TypeCreator extends TypeCache
 						property.setType(getTypeRef(context, "String"));
 						break;
 
+					case Types.ARRAY :
+						property.setType(getTypeRef(context, "Array"));
+						break;
+
 					case IColumnTypes.MEDIA :
 						// Just return the Any type, because a media can hold anything.
 						// should be in sync with TypeCreater.getDataProviderType

@@ -125,7 +125,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 			{
 				return info.getNativeTypename() + " (native type)";
 			}
-			return Column.getDisplayTypeString(columnType.getSqlType());
+			return Column.getDisplayTypeString(columnType);
 		}
 		if (columnIndex == ColumnComposite.CI_LENGTH + delta)
 		{

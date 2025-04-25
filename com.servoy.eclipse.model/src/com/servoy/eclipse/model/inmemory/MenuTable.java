@@ -37,6 +37,7 @@ import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.SortedList;
@@ -54,13 +55,14 @@ public class MenuTable implements ITable
 	{
 		// should we share the columns for all tables?
 		this.menuName = menuName;
-		columns.put("itemID", new Column(this, "itemID", IColumnTypes.TEXT, 50, 0, true));
-		columns.put("menuText", new Column(this, "menuText", IColumnTypes.TEXT, 50, 0, true));
-		columns.put("styleClass", new Column(this, "styleClass", IColumnTypes.TEXT, 50, 0, true));
-		columns.put("iconStyleClass", new Column(this, "iconStyleClass", IColumnTypes.TEXT, 50, 0, true));
-		columns.put("tooltipText", new Column(this, "tooltipText", IColumnTypes.TEXT, 50, 0, true));
-		columns.put("enabled", new Column(this, "enabled", IColumnTypes.INTEGER, 10, 0, true));
-		columns.put("callbackArguments", new Column(this, "callbackArguments", IColumnTypes.MEDIA, 100, 0, true));
+		var textColumnType = ColumnType.getInstance(IColumnTypes.TEXT, 50, 0);
+		columns.put("itemID", new Column(this, "itemID", textColumnType, true));
+		columns.put("menuText", new Column(this, "menuText", textColumnType, true));
+		columns.put("styleClass", new Column(this, "styleClass", textColumnType, true));
+		columns.put("iconStyleClass", new Column(this, "iconStyleClass", textColumnType, true));
+		columns.put("tooltipText", new Column(this, "tooltipText", textColumnType, true));
+		columns.put("enabled", new Column(this, "enabled", ColumnType.getInstance(IColumnTypes.INTEGER, 10, 0), true));
+		columns.put("callbackArguments", new Column(this, "callbackArguments", ColumnType.getInstance(IColumnTypes.MEDIA, 100, 0), true));
 		for (Map<String, PropertyDescription> propertiesMap : MenuPropertyType.INSTANCE.getExtraProperties().values())
 		{
 			for (PropertyDescription propertyDescription : propertiesMap.values())
@@ -74,7 +76,7 @@ public class MenuTable implements ITable
 				{
 					type = IColumnTypes.DATETIME;
 				}
-				columns.put(propertyDescription.getName(), new Column(this, propertyDescription.getName(), type, 100, 0, true));
+				columns.put(propertyDescription.getName(), new Column(this, propertyDescription.getName(), ColumnType.getInstance(type, 100, 0), true));
 			}
 		}
 
@@ -304,26 +306,20 @@ public class MenuTable implements ITable
 	}
 
 	@Override
-	public Column createNewColumn(IValidateName validator, String name, int sqlType, int length, int scale) throws RepositoryException
+	public Column createNewColumn(IValidateName validator, String colname, ColumnType columnType, boolean allowNull) throws RepositoryException
 	{
 		return null;
 	}
 
 	@Override
-	public Column createNewColumn(IValidateName validator, String colname, int type, int length, int scale, boolean allowNull, boolean pkColumn)
+	public Column createNewColumn(IValidateName validator, String colname, ColumnType columnType, boolean allowNull, boolean pkColumn)
 		throws RepositoryException
 	{
 		return null;
 	}
 
 	@Override
-	public Column createNewColumn(IValidateName validator, String colname, int type, int length, int scale, boolean allowNull) throws RepositoryException
-	{
-		return null;
-	}
-
-	@Override
-	public Column createNewColumn(IValidateName nameValidator, String colname, int type, int length) throws RepositoryException
+	public Column createNewColumn(IValidateName validator, String name, ColumnType columnType) throws RepositoryException
 	{
 		return null;
 	}

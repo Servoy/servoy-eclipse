@@ -948,6 +948,7 @@ public class DataModelManager implements IServerInfoManager
 			obj.put(ColumnInfoDef.DATA_TYPE, cid.columnType.getSqlType());
 			if (cid.columnType.getLength() != 0) obj.put(ColumnInfoDef.LENGTH, cid.columnType.getLength());
 			if (cid.columnType.getScale() != 0) obj.put(ColumnInfoDef.SCALE, cid.columnType.getScale());
+			if (cid.columnType.getSubType() != 0) obj.put(ColumnInfoDef.SUB_TYPE, cid.columnType.getSubType());
 			String compatibleColumnTypesStr = XMLUtils.serializeColumnTypeArray(cid.compatibleColumnTypes);
 			if (compatibleColumnTypesStr != null)
 			{

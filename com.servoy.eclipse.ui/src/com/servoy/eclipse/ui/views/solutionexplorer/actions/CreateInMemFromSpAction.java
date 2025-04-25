@@ -234,8 +234,7 @@ public class CreateInMemFromSpAction extends Action implements ISelectionChanged
 									columnType = ColumnType.getColumnType(IColumnTypes.TEXT);
 									converterName = JSONSerializerWrapper.STRING_SERIALIZER_NAME;
 								}
-								Column column = table.createNewColumn(validator, procColumn.getName(), columnType.getSqlType(), columnType.getLength(),
-									columnType.getScale());
+								Column column = table.createNewColumn(validator, procColumn.getName(), columnType);
 								if (converterName != null)
 								{
 									DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
