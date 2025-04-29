@@ -82,9 +82,9 @@ public class PropertyWizardDialog extends Dialog
 
 	@Override
 	protected Control createDialogArea(Composite parent)
-	{	
+	{
 		getShell().setText("Property configurator for " + property.getName());
-		
+
 		Composite area = (Composite)super.createDialogArea(parent);
 		// first check what the main thing must be (dataproviders, forms, relations?)
 
@@ -110,11 +110,10 @@ public class PropertyWizardDialog extends Dialog
 
 		//sc is the direct parent on the nattable in AutowizardPropertiesComposite
 		//make sure to add the border here (if any)
-		//wrapping it inside another composite with a border is causing a wrong very first rendering of the nattable
+		//wrapping it inside another composite with a border is causing a wrong (very first) rendering of the nattable
 		// basically the nat table is sitting "behind" the border widget's client area until resize
 		ScrolledComposite sc = new ScrolledComposite(hSash, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
 

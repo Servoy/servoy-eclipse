@@ -77,8 +77,6 @@ public class AutoWizardPropertiesComposite
 
 	private IDataProvider bodyDataProvider;
 	private static final String CSS_CLASS_NAME_KEY = "org.eclipse.e4.ui.css.CssClassName";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
-	private final boolean initialDisplay = true;
-
 
 	public AutoWizardPropertiesComposite(final ScrolledComposite parent, PersistContext persistContext, FlattenedSolution flattenedSolution,
 		PropertyWizardDialogConfigurator configurator)
@@ -155,12 +153,12 @@ public class AutoWizardPropertiesComposite
 		});
 
 
-		// On MacOS, it seems that NatTable is lays itself only on the first rendering.
-		// When this happens in a dialog, on MacOS, rendering could happen before to al the layers has been hooked up.
-		// We need to force a one time redraw on the first show in order to enforce a redraw
+		// On MacOS, it seems that NatTable it lays itself only on the first rendering.
+		// When this happens in a dialog (on MacOS) rendering could happen before to all the layers has been hooked up.
+		// We need to force a one time redraw on the first show
 		// async display on the table is also working
-		// Note: hiding the table in a parent with a border (see the comment in the PropertyWizardDialog -> createDialogArea())
-		// make this  fix to apparently not work
+		// Note: hiding the table's direct parent in another parent with a border (see the comment in the PropertyWizardDialog -> createDialogArea())
+		// make this fix to apparently not work
 		Listener showListener = new Listener()
 		{
 			@Override
@@ -176,17 +174,6 @@ public class AutoWizardPropertiesComposite
 			}
 		};
 		parent.getShell().addListener(SWT.Show, showListener);
-
-//		natTable.getDisplay().asyncExec(() -> {
-//			if (!natTable.isDisposed())
-//			{
-//				// ensure the composite is laid out
-//				parent.layout(true, true);
-//				// ask NatTable to redraw its header + body
-//				natTable.redraw();
-//				natTable.refresh();
-//			}
-//		});
 	}
 
 	private CompositeLayer getComposeLayer(BodyLayerStack bodyLayer, ColumnHeaderLayerStack columnHeaderLayer)
