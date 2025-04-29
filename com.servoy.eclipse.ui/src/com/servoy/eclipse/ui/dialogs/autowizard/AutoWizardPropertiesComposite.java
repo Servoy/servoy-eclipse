@@ -42,7 +42,6 @@ import org.eclipse.nebula.widgets.nattable.layer.AbstractLayer;
 import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
 import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
-import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.cell.AggregateConfigLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnOverrideLabelAccumulator;
@@ -50,6 +49,8 @@ import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.config.DefaultSelectionLayerConfiguration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
@@ -58,7 +59,6 @@ import com.servoy.eclipse.ui.dialogs.autowizard.nattable.LinkClickConfiguration;
 import com.servoy.eclipse.ui.dialogs.autowizard.nattable.PainterConfiguration;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.util.Utils;
 
 /**
  * @author emera
@@ -77,7 +77,7 @@ public class AutoWizardPropertiesComposite
 
 	private IDataProvider bodyDataProvider;
 	private static final String CSS_CLASS_NAME_KEY = "org.eclipse.e4.ui.css.CssClassName";//did not import it to avoid adding dependencies for using one constant from CSSSWTConstants
-	private boolean initialDisplay = true;
+	private final boolean initialDisplay = true;
 
 
 	public AutoWizardPropertiesComposite(final ScrolledComposite parent, PersistContext persistContext, FlattenedSolution flattenedSolution,
@@ -153,79 +153,50 @@ public class AutoWizardPropertiesComposite
 			parent.setMinSize(natTable.getWidth(), natTable.getHeight());
 			parent.update();
 		});
+
+
+		// On MacOS, it seems that NatTable is lays itself only on the first rendering.
+		// When this happens in a dialog, on MacOS, rendering could happen before to al the layers has been hooked up.
+		// We need to force a one time redraw on the first show in order to enforce a redraw
+		// async display on the table is also working
+		// Note: hiding the table in a parent with a border (see the comment in the PropertyWizardDialog -> createDialogArea())
+		// make this  fix to apparently not work
+		Listener showListener = new Listener()
+		{
+			@Override
+			public void handleEvent(Event event)
+			{
+				if (!natTable.isDisposed())
+				{
+					parent.layout(true, true);
+					natTable.redraw();
+					natTable.refresh();
+				}
+				parent.getShell().removeListener(SWT.Show, this);
+			}
+		};
+		parent.getShell().addListener(SWT.Show, showListener);
+
+//		natTable.getDisplay().asyncExec(() -> {
+//			if (!natTable.isDisposed())
+//			{
+//				// ensure the composite is laid out
+//				parent.layout(true, true);
+//				// ask NatTable to redraw its header + body
+//				natTable.redraw();
+//				natTable.refresh();
+//			}
+//		});
 	}
 
 	private CompositeLayer getComposeLayer(BodyLayerStack bodyLayer, ColumnHeaderLayerStack columnHeaderLayer)
 	{
 
-		CompositeLayer composeLayer = null;
-		if (Utils.isAppleMacOS())
-		{
-			// Create a dummy header data provider with empty strings for each column
-			String[] dummyHeaders = new String[propertyNames.size()];
-			for (int i = 0; i < propertyNames.size(); i++)
-			{
-				dummyHeaders[i] = "";
-			}
-			DefaultColumnHeaderDataProvider dummyHeaderDataProvider = new DefaultColumnHeaderDataProvider(dummyHeaders);
 
-			// Create a DataLayer for the dummy header and force a fixed row height (e.g., 35 pixels)
-			int realHeaderHeight = (columnHeaderLayer.getDataLayer().getPreferredHeight() - 1) * 2;
-			DataLayer dummyHeaderDataLayer = new DataLayer(dummyHeaderDataProvider);
-			dummyHeaderDataLayer.setDefaultRowHeight(realHeaderHeight);
-
-			// Wrap the dummy header data layer in a ColumnHeaderLayer to ensure it aligns with the body
-			ColumnHeaderLayer dummyHeaderColumnLayer = new ColumnHeaderLayer(dummyHeaderDataLayer, bodyLayer, bodyLayer.getSelectionLayer());
-
-			// Assemble the composite layer with three rows:
-			// Row 0: Dummy header, Row 1: Real header, Row 2: Body.
-			composeLayer = new CompositeLayer(1, 3);
-			composeLayer.setChildLayer("DUMMY_HEADER", dummyHeaderColumnLayer, 0, 0);
-
-
-			composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 1);
-			composeLayer.setChildLayer(GridRegion.BODY, bodyLayer.getSelectionLayer(), 0, 2);
-		}
-		else
-		{
-			composeLayer = new CompositeLayer(1, 2);
-			composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 0);
-			composeLayer.setChildLayer(GridRegion.BODY, bodyLayer.getSelectionLayer(), 0, 1);
-		}
-
+		CompositeLayer composeLayer = new CompositeLayer(1, 2);
+		composeLayer.setChildLayer(GridRegion.COLUMN_HEADER, columnHeaderLayer, 0, 0);
+		composeLayer.setChildLayer(GridRegion.BODY, bodyLayer.getSelectionLayer(), 0, 1);
 		return composeLayer;
-	}
-
-	public void resetMacOSNatTableView()
-	{
-
-		if (!Utils.isAppleMacOS()) return;
-		if (initialDisplay)
-		{
-			initialDisplay = false;
-			return;
-		}
-		if (natTable != null)
-		{
-			ILayer layer = natTable.getLayer();
-			if (layer instanceof CompositeLayer)
-			{
-				CompositeLayer compositeLayer = (CompositeLayer)layer;
-				// Try to retrieve the dummy header layer by key "DUMMY_HEADER"
-				ILayer dummyHeaderLayer = compositeLayer.getChildLayerByLayoutCoordinate(0, 0);
-				if (dummyHeaderLayer instanceof ColumnHeaderLayer)
-				{
-					ILayer underlying = ((ColumnHeaderLayer)dummyHeaderLayer).getUnderlyingLayerByPosition(0, 0);
-					if (underlying instanceof DataLayer)
-					{
-						DataLayer dummyDataLayer = (DataLayer)underlying;
-						dummyDataLayer.setDefaultRowHeight(1);
-						// Refresh the table so the new height is applied
-						natTable.refresh();
-					}
-				}
-			}
-		}
 	}
 
 	private IDataProvider setupBodyDataProvider()
