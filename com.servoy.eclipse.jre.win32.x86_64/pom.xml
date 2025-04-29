@@ -15,7 +15,7 @@
 
 	<artifactId>com.servoy.eclipse.jre.win32.x86_64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>21.0.6</version>
+	<version>21.0.7</version>
 
 	<build>
 		<plugins>
@@ -42,7 +42,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://developer.servoy.com/jre/jre210_6_win.zip</url>
+							<url>https://developer.servoy.com/jre/jre210_7_win.zip</url>
 							<outputFileName>jre.zip</outputFileName>
 							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
 							<unpack>true</unpack>
