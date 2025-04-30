@@ -3464,7 +3464,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else
 			{
-				toolTip = tmp + "<br><pre>" + toolTip + "</pre>";
+				toolTip = tmp + "<br><p>" + toolTip.replace("\n\n", "\n<p>\n") + "</p>";
 			}
 			return toolTip;
 		}

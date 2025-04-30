@@ -133,7 +133,7 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 		}
 		Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
 		float systemDPI = Utils.isLinuxOS() ? 96f : 72f;
-		int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
+		int pxHeight = Math.round((f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI) * 0.9f);
 
 
 		String bgColor = "#fffff6";
@@ -160,6 +160,8 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 		data.verticalAlignment = GridData.FILL;
 		data.grabExcessHorizontalSpace = true;
 		data.grabExcessVerticalSpace = true;
+		data.widthHint = 700; // Desired minimum width
+		data.heightHint = 300; // Desired minimum height
 		browser.setLayoutData(data);
 
 		return comp;
