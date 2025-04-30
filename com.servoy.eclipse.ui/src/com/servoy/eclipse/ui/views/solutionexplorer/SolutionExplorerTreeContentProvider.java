@@ -2551,17 +2551,29 @@ public class SolutionExplorerTreeContentProvider
 					n.parent = node;
 				}
 			}
-
-			PlatformSimpleUserNode constants = null;
-			if (constantsChildren.size() > 0)
+			// first sort the normal stuff
+			if (children.size() > 0)
 			{
-				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT, null,
-					uiActivator.loadImageFromBundle("constant.png")));
-				constants.parent = node;
+				Collections.sort(children, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 			}
 
-			if (constants != null)
+			// then insert execptions to the top
+			if (exceptionsChildren.size() > 0)
 			{
+				PlatformSimpleUserNode exceptions = null;
+				children.add(0, exceptions = new PlatformSimpleUserNode(Messages.TreeStrings_ServoyException, UserNodeType.EXCEPTIONS, null, null));
+				Collections.sort(exceptionsChildren, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
+				exceptions.children = exceptionsChildren.toArray(new PlatformSimpleUserNode[exceptionsChildren.size()]);
+			}
+
+			// and then insert constants before that again so that constant are always the first.
+			if (constantsChildren.size() > 0)
+			{
+				PlatformSimpleUserNode constants = null;
+				children.add(0, constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT, null,
+					uiActivator.loadImageFromBundle("constant.png")));
+				constants.parent = node;
+				Collections.sort(constantsChildren, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 				constants.children = constantsChildren.toArray(new PlatformSimpleUserNode[constantsChildren.size()]);
 				for (SimpleUserNode c : constants.children)
 				{
@@ -2570,26 +2582,7 @@ public class SolutionExplorerTreeContentProvider
 				constants.checkClientSupportInChildren();
 			}
 
-			PlatformSimpleUserNode exceptions = null;
-			if (exceptionsChildren.size() > 0)
-			{
-				children.add(exceptions = new PlatformSimpleUserNode(Messages.TreeStrings_ServoyException, UserNodeType.EXCEPTIONS, null, null));
-			}
 
-			if (exceptions != null)
-			{
-				exceptions.children = exceptionsChildren.toArray(new PlatformSimpleUserNode[exceptionsChildren.size()]);
-			}
-			if (children.size() > 0)
-			{
-				Collections.sort(children, new Comparator<PlatformSimpleUserNode>()
-				{
-					public int compare(PlatformSimpleUserNode o1, PlatformSimpleUserNode o2)
-					{
-						return o1.getName().compareTo(o2.getName());
-					}
-				});
-			}
 			node.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 		}
 	}
