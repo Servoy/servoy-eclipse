@@ -357,6 +357,7 @@
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             default-charset="UTF8"
             describer="com.servoy.eclipse.core.resource.RelationDescriber"
             file-extensions="rel"
@@ -365,6 +366,7 @@
             priority="normal">
       </content-type>
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             default-charset="UTF8"
             describer="com.servoy.eclipse.core.resource.MenuDescriber"
             file-extensions="mnu"
@@ -373,6 +375,7 @@
             priority="normal">
       </content-type>
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             default-charset="UTF8"
             describer="com.servoy.eclipse.core.resource.FormDescriber"
             file-extensions="frm"
@@ -381,6 +384,7 @@
             priority="normal">
       </content-type>
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             default-charset="UTF8"
             describer="com.servoy.eclipse.core.resource.ValuelistDescriber"
             file-extensions="val"
@@ -394,11 +398,13 @@
             priority="normal">
       </content-type>
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             id="com.servoy.eclipse.core.resource.server"
             name="Server"
             priority="normal">
       </content-type>
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             default-charset="UTF8"
             describer="com.servoy.eclipse.core.resource.TableDescriber"
             file-extensions="tbl"
@@ -407,6 +413,7 @@
             priority="normal">
       </content-type>
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             describer="com.servoy.eclipse.core.resource.ValidDescriber"
             file-extensions="dbi"
             id="com.servoy.eclipse.core.resource.table"
@@ -414,6 +421,7 @@
             priority="normal">
       </content-type>
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             default-charset="UTF-8"
             file-extensions="sec"
             id="com.servoy.eclipse.core.resource.security"
@@ -421,6 +429,7 @@
             priority="normal">
       </content-type>
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             default-charset="UTF-8"
             file-extensions="dbi"
             id="com.servoy.eclipse.core.resource.dbsecurity"
@@ -428,6 +437,7 @@
             priority="normal">
       </content-type>
       <content-type
+            base-type="org.eclipse.core.runtime.text"
             default-charset="UTF-8"
             file-extensions="properties"
             id="com.servoy.eclipse.core.resource.i18n"
