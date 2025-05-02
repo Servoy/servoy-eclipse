@@ -57,7 +57,7 @@ public class NewOAuthApiPage extends WizardPage
 			apiConfiguration.getClientId());
 		clientSecretText = createField(container, "Client Secret:", true, value -> wizard.getModel().get().setClientSecret(value),
 			apiConfiguration.getClientSecret());
-		scopeText = createField(container, "Scope:", true, value -> wizard.getModel().get().getScope(), apiConfiguration.getScope());
+		scopeText = createField(container, "Scope:", true, value -> wizard.getModel().get().setScope(value), apiConfiguration.getScope());
 		createAccessTypeRadios(container);
 		authorizationBaseUrlText = createField(container, "Authorization Base URL:", false,
 			value -> wizard.getModel().get().setAuthorizationBaseUrl(value), apiConfiguration.getAuthorizationBaseUrl());
@@ -229,8 +229,7 @@ public class NewOAuthApiPage extends WizardPage
 		{
 			clearFieldsForCustomApi(model);
 		}
-		boolean isAPIChanged = !provider.equals(Provider.valueOf(model.getApi())) ||
-			Provider.Custom.equals(Provider.valueOf(model.getApi())) && model.getApi() != null;
+		boolean isAPIChanged = !provider.equals(Provider.valueOf(model.getApi() != null ? model.getApi() : Provider.Custom.name()));
 
 		if (isAPIChanged)
 		{
