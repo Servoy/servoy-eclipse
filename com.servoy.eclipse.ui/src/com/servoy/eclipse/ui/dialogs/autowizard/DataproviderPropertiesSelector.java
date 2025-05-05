@@ -104,7 +104,7 @@ public class DataproviderPropertiesSelector
 		Label datasourceLabel = new Label(datasourceComposite, SWT.NONE);
 		datasourceLabel.setText("&Datasource");
 
-		dataSourceViewer = new TreeSelectViewer(datasourceComposite, SWT.NONE)
+		dataSourceViewer = new TreeSelectViewer(datasourceComposite, SWT.NONE, 10)
 		{
 			@Override
 			protected IStructuredSelection openDialogBox(Control control)
@@ -152,7 +152,7 @@ public class DataproviderPropertiesSelector
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
-		gridData.minimumWidth = 400;
+		gridData.minimumWidth = 10;
 		gridData.heightHint = 450;
 
 		dataproviderTreeViewer.setLayoutData(gridData);

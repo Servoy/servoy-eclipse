@@ -49,8 +49,6 @@ import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.config.DefaultSelectionLayerConfiguration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
@@ -156,24 +154,16 @@ public class AutoWizardPropertiesComposite
 		// On MacOS, it seems that NatTable it lays itself only on the first rendering.
 		// When this happens in a dialog (on MacOS) rendering could happen before to all the layers has been hooked up.
 		// We need to force a one time redraw on the first show
-		// async display on the table is also working
 		// Note: hiding the table's direct parent in another parent with a border (see the comment in the PropertyWizardDialog -> createDialogArea())
 		// make this fix to apparently not work
-		Listener showListener = new Listener()
-		{
-			@Override
-			public void handleEvent(Event event)
+		natTable.getDisplay().asyncExec(() -> {
+			if (!natTable.isDisposed())
 			{
-				if (!natTable.isDisposed())
-				{
-					parent.layout(true, true);
-					natTable.redraw();
-					natTable.refresh();
-				}
-				parent.getShell().removeListener(SWT.Show, this);
+				parent.layout(true, true);
+				natTable.redraw();
+				natTable.refresh();
 			}
-		};
-		parent.getShell().addListener(SWT.Show, showListener);
+		});
 	}
 
 	private CompositeLayer getComposeLayer(BodyLayerStack bodyLayer, ColumnHeaderLayerStack columnHeaderLayer)

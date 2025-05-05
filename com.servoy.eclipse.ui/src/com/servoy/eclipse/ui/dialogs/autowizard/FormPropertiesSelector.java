@@ -101,7 +101,7 @@ public class FormPropertiesSelector
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
-		gridData.minimumWidth = 400;
+		gridData.minimumWidth = 10;
 		gridData.heightHint = 450;
 
 		formPicker.setLayoutData(gridData);

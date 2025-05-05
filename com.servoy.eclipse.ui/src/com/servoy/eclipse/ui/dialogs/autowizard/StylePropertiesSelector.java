@@ -67,7 +67,7 @@ public class StylePropertiesSelector
 			gridData.grabExcessHorizontalSpace = true;
 			gridData.grabExcessVerticalSpace = true;
 			gridData.horizontalAlignment = GridData.FILL;
-			gridData.minimumWidth = 300;
+			gridData.minimumWidth = 10;
 			gridData.heightHint = 250;
 
 			stylePropertiesViewer = new TableViewer(listParent);
