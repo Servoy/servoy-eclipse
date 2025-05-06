@@ -55,6 +55,9 @@ public class OAuthApiConfiguration
 	@JsonProperty("revokeTokenEndpoint")
 	private String revokeTokenEndpoint;
 
+	@JsonProperty("login_failed_url")
+	private String loginFailedUrl;
+
 	public String getApi()
 	{
 		return api;
@@ -256,6 +259,16 @@ public class OAuthApiConfiguration
 		{
 			throw new RuntimeException("Failed to parse JSON", e);
 		}
+	}
+
+	public void setLoginFailedUrl(String value)
+	{
+		loginFailedUrl = value;
+	}
+
+	public String getLoginFailedUrl()
+	{
+		return loginFailedUrl;
 	}
 
 	@Override

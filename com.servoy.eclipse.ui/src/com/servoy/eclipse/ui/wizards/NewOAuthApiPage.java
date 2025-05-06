@@ -30,6 +30,7 @@ public class NewOAuthApiPage extends WizardPage
 	private Text revokeTokenEndpointText;
 	private Text jwksUriText;
 	private Text scopeText;
+	private Text loginFailedUrlText;
 	private Button offlineButton;
 	private Button onlineButton;
 
@@ -69,6 +70,8 @@ public class NewOAuthApiPage extends WizardPage
 			value -> wizard.getModel().get().setRevokeTokenEndpoint(value), apiConfiguration.getRevokeTokenEndpoint());
 		jwksUriText = createField(container, "JWKS URI:", false, value -> wizard.getModel().get().setJwksUri(value),
 			apiConfiguration.getJwksUri());
+		loginFailedUrlText = createField(container, "Login failed URL:", true, value -> wizard.getModel().get().setLoginFailedUrl(value),
+			apiConfiguration.getLoginFailedUrl());
 
 		setControl(container);
 		updateApiSettings();
@@ -286,6 +289,7 @@ public class NewOAuthApiPage extends WizardPage
 		accessTokenEndpointText.setText("");
 		refreshTokenEndpointText.setText("");
 		revokeTokenEndpointText.setText("");
+		loginFailedUrlText.setText("");
 	}
 
 	@Override
@@ -303,6 +307,8 @@ public class NewOAuthApiPage extends WizardPage
 				scopeText.setText(model.getScope() != null ? model.getScope() : "");
 				apiCombo.setText(model.getApi() != null ? model.getApi() : Provider.Custom.name());
 				jwksUriText.setText(model.getJwksUri() != null ? model.getJwksUri() : "");
+				loginFailedUrlText.setText(
+					model.getLoginFailedUrl() != null ? model.getLoginFailedUrl() : "");
 
 				if (model.getApi() == null) //custom
 				{
