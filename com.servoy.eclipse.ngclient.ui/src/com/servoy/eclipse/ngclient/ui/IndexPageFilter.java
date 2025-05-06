@@ -90,7 +90,7 @@ public class IndexPageFilter implements Filter
 			indexFile = new File(distFolder, "index.html");
 		}
 		String solutionName = getSolutionNameFromURI(Paths.get(requestURI.replace(':', '_')).normalize());
-		if (indexFile != null && indexFile.exists())
+		if (indexFile != null && indexFile.exists() && !requestURI.toLowerCase().contains("rfb/angular2"))
 		{
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
