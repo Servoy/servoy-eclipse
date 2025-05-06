@@ -356,7 +356,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                             insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
                         });
                     }
-                    if (this.canDrop.dropAllowed && (this.canDrop.dropTarget || !this.urlParser.isAbsoluteFormLayout()) && !this.canDrop?.dropTarget.classList.contains('svy-csspositioncontainer')) {
+                    if (this.canDrop.dropAllowed && (this.canDrop.dropTarget || !this.urlParser.isAbsoluteFormLayout()) && !this.canDrop.dropTarget?.classList.contains('svy-csspositioncontainer')) {
                         // hide the dragged item and rely on inserted item at specific parent 
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
                         this.renderer.removeClass(this.dragItem.contentItemBeingDragged, 'highlight_element');
