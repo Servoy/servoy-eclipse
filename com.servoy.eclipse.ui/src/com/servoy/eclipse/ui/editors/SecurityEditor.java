@@ -383,7 +383,6 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 								flagModified();
 							}
 							text.dispose();
-							usersTree.setFocus();
 						}
 					});
 
