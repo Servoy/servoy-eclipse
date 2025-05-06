@@ -17,10 +17,8 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -32,6 +30,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -45,6 +44,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -91,7 +91,8 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 			IPersist parent = (IPersist)node.getRealObject();
 			Solution realSolution = (Solution)parent.getRootObject();
 
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(realSolution.getName());
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			ServoyProject servoyProject = servoyModel.getServoyProject(realSolution.getName());
 			Solution editingSolution = servoyProject.getEditingSolution();
 			if (editingSolution == null)
 			{
@@ -102,17 +103,7 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 			{
 				return;
 			}
-			Set<String> existingNames = new HashSet<>();
-			if (parent instanceof Menu menu)
-			{
-				setExistingNames(existingNames, menu, null);
-			}
-			else if (parent instanceof MenuItem menuItem)
-			{
-				setExistingNames(existingNames, null, menuItem);
-			}
-
-			String name = askMenuItemName(viewer.getViewSite().getShell(), existingNames);
+			String name = askMenuItemName(viewer.getViewSite().getShell(), servoyModel, servoyProject, parent);
 			if (name != null)
 			{
 				IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
@@ -131,21 +122,19 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 		}
 	}
 
-	public static String askMenuItemName(Shell shell, Collection<String> existingNames)
+	public static String askMenuItemName(Shell shell, IDeveloperServoyModel servoyModel, ServoyProject servoyProject, IPersist parent)
 	{
 		InputDialog nameDialog = new InputDialog(shell, "Create menu item", "Supply menu item name(id)", "", new IInputValidator()
 		{
 			public String isValid(String newText)
 			{
+				if (newText.length() == 0) return "";
+
 				if (!IdentDocumentValidator.isJavaIdentifier(newText))
 				{
-					return newText.length() == 0 ? "" : "Invalid menu item name(id)";
+					return "Invalid Java identifier";
 				}
-				if (existingNames.contains(newText))
-				{
-					return "This name already exists.";
-				}
-				return null;
+				return validateMethodName(servoyModel, servoyProject, newText, parent);
 			}
 		});
 		int res = nameDialog.open();
@@ -161,25 +150,31 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 	 * @param existingNames
 	 * @param menu
 	 */
-	private void setExistingNames(Set<String> existingNames, Menu menu, MenuItem menuItem)
+	private static String validateMethodName(IDeveloperServoyModel servoyModel, ServoyProject servoyProject, String newText, IPersist parent)
 	{
+
+		ValidatorSearchContext validatorSearchContext;
+		if (parent != null)
+		{
+			List<Object> objectsForValidator = new ArrayList<Object>();
+			objectsForValidator.add(servoyProject.getEditingSolution());
+			objectsForValidator.add(parent);
+			validatorSearchContext = new ValidatorSearchContext(objectsForValidator, IRepository.MENU_ITEMS);
+		}
+		else
+		{
+			validatorSearchContext = new ValidatorSearchContext(servoyProject.getEditingSolution(), IRepository.MENU_ITEMS);
+		}
+
+		IValidateName validator = servoyModel.getNameValidator();
 		try
 		{
-			Iterator<IPersist> children = (menu != null ? menu : menuItem).getAllObjects();
-			while (children.hasNext())
-			{
-				IPersist child = children.next();
-				if (child instanceof MenuItem)
-				{
-					existingNames.add(((MenuItem)child).getName());
-				}
-			}
+			validator.checkName(newText, 0, validatorSearchContext, false);
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError(e);
-			MessageDialog.openError(UIUtils.getActiveShell(), "Error", "Failed to retrieve existing menu item names.");
-			return;
+			return e.getMessage();
 		}
+		return null;
 	}
 }
