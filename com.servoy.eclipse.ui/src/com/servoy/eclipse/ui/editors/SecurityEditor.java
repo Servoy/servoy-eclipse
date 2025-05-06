@@ -383,6 +383,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 								flagModified();
 							}
 							text.dispose();
+							usersTree.setFocus();
 						}
 					});
 
@@ -402,6 +403,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 									}
 								case SWT.ESC :
 									text.dispose();
+									usersTree.setFocus();
 									break;
 							}
 						}
