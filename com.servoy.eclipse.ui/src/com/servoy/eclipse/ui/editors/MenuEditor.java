@@ -121,12 +121,13 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -157,7 +158,7 @@ public class MenuEditor extends PersistEditor
 	private Composite parent;
 	private MenuItem selectedMenuItem;
 	private final List<Consumer<MenuItem>> selectedMenuItemCallbacks = new ArrayList<Consumer<MenuItem>>();
-	private TreeViewer menuViewer;
+	private static TreeViewer menuViewer;
 	private boolean initializingData = false;
 	private Group customPropertiesGroup;
 
@@ -578,16 +579,16 @@ public class MenuEditor extends PersistEditor
 					{
 						IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 						ServoyProject servoyProject = servoyModel.getActiveProject();
+						//checks for duplicate in askMenuItemName, no need to check again in createNewMenuItem
 						String name = NewMenuItemAction.askMenuItemName(getSite().getShell(), servoyModel, servoyProject,
 							menuItemData instanceof IPersist persist ? persist : null);
 
 						if (name != null)
 						{
-							IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 							try
 							{
-								MenuItem childMenuItem = menuItemData instanceof MenuItem menuItem ? menuItem.createNewMenuItem(validator, name)
-									: getPersist().createNewMenuItem(validator, name);
+								MenuItem childMenuItem = menuItemData instanceof MenuItem menuItem ? menuItem.createNewMenuItem(name)
+									: getPersist().createNewMenuItem(name);
 								menuViewer.refresh();
 								menuViewer.setSelection(new StructuredSelection(childMenuItem), true);
 								flagModified();
@@ -645,7 +646,23 @@ public class MenuEditor extends PersistEditor
 				{
 					if (selectedMenuItem != null && !initializingData)
 					{
-						selectedMenuItem.updateName(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), txtName.getText());
+
+						IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+						ServoyProject servoyProject = servoyModel.getActiveProject();
+						ValidatorSearchContext validatorSearchContext;
+						if (getPersist() != null)
+						{
+							List<Object> objectsForValidator = new ArrayList<Object>();
+							objectsForValidator.add(servoyProject.getEditingSolution());
+							objectsForValidator.add(getPersist());
+							validatorSearchContext = new ValidatorSearchContext(objectsForValidator, IRepository.MENU_ITEMS);
+						}
+						else
+						{
+							validatorSearchContext = new ValidatorSearchContext(servoyProject.getEditingSolution(), IRepository.MENU_ITEMS);
+						}
+						selectedMenuItem.updateName(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), txtName.getText(),
+							validatorSearchContext);
 						flagModified();
 					}
 				}
@@ -1298,6 +1315,7 @@ public class MenuEditor extends PersistEditor
 			public void run()
 			{
 				firePropertyChange(IEditorPart.PROP_DIRTY);
+				menuViewer.refresh();
 			}
 		});
 		PersistPropertySource.refreshPropertiesView();
@@ -1323,5 +1341,14 @@ public class MenuEditor extends PersistEditor
 
 		return null;
 
+	}
+
+	/**
+	 * @param mn
+	 * @param b
+	 */
+	public static void refreshEditor()
+	{
+		menuViewer.refresh();
 	}
 }
