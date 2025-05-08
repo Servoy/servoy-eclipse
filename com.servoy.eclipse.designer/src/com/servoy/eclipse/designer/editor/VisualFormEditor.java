@@ -184,7 +184,8 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		try
 		{
 			Pair<String, String> formFilePath = SolutionSerializer.getFilePath(getForm(), false);
-			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + getForm().getName() + ".less"));
+			IFile file = ServoyModel.getWorkspace().getRoot()
+				.getFile(new Path(formFilePath.getLeft() + getForm().getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
 			if (file.exists())
 			{
 				setPageText(addPage(cssEditor, FileEditorInputFactory.createFileEditorInput(file)), "Less");

@@ -747,8 +747,9 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 								}
 							}
 
-							if (o.getTypeID() == IRepository.FORMS) // move form security file
+							if (o.getTypeID() == IRepository.FORMS)
 							{
+								// move form security file
 								String oldSecFileRelativePath = fileRelativePath.substring(0,
 									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT;
 								if (wsa.exists(oldSecFileRelativePath))
@@ -756,6 +757,15 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 									wsa.move(oldSecFileRelativePath,
 										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
 											DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT);
+								}
+								// move form less file
+								String oldLessFileRelativePath = fileRelativePath.substring(0,
+									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + SolutionSerializer.FORM_LESS_FILE_EXTENSION;
+								if (wsa.exists(oldLessFileRelativePath))
+								{
+									wsa.move(oldLessFileRelativePath,
+										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
+											SolutionSerializer.FORM_LESS_FILE_EXTENSION);
 								}
 							}
 						}
