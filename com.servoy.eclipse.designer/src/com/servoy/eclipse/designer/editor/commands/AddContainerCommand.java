@@ -398,6 +398,15 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										{
 											selectionProvider.setSelection(newSelection[0]);
 										}
+
+										IStructuredSelection contentOutlineSelection = (IStructuredSelection)DesignerUtil.getContentOutline().getSelection();
+										IStructuredSelection selectionProviderSelection = (IStructuredSelection)selectionProvider.getSelection();
+										if (contentOutlineSelection.size() == selectionProviderSelection.size() &&
+											contentOutlineSelection.getFirstElement() != selectionProviderSelection.getFirstElement())
+										{
+											selectionProvider.setSelection(newSelection[0]);
+										}
+
 										if (finalPersist[0] instanceof LayoutContainer &&
 											CSSPositionUtils.isCSSPositionContainer((LayoutContainer)finalPersist[0]))
 										{
