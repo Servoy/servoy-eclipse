@@ -83,7 +83,8 @@ export class WindowPluginService {
                                 //$sabloTestability.block(true);
                                 setTimeout((clb: { script: string; formname?: string }, clbArgs: Array<any>) => {
                                     let formName = clbArgs[0].formName;
-                                    if (!formName) formName = clb.formname;
+                                    if (!formName && clb) formName = clb.formname;
+									if (!clb) throw new Error('No callback script found for shortcut: ' + newvalue.shortcut);
                                     this.servoyService.executeInlineScript(formName, clb.script, clbArgs);
                                     //$sabloTestability.block(false);
                                 }, 10, callback, argsWithEvent);
