@@ -1054,7 +1054,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							catch (CoreException e)
 							{
-								// ignore
+								ServoyLog.logError(e);
 							}
 						}
 					}
@@ -1440,7 +1440,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						catch (CoreException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 				}
@@ -2442,8 +2442,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							String datasource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
 							if (!dataSourceCollectorVisitor.getDataSources().contains(datasource))
 							{
-								Object markerSeverity = marker.getAttribute(IMarker.SEVERITY);
-								if (markerSeverity == null || (markerSeverity != null && ((Integer)markerSeverity).intValue() > IMarker.SEVERITY_WARNING))
+								int markerSeverity = marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+								if (markerSeverity > IMarker.SEVERITY_WARNING)
 								{
 									marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
 								}
@@ -2649,7 +2649,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
-							final ITable table = server.getTable(tableName);
+							ITable table = server.getTable(tableName);
 							IResource res = project;
 							if (getServoyModel().getDataModelManager() != null &&
 								getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
@@ -2659,8 +2659,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							if (table.isTableInvalidInDeveloperBecauseNoPk())
 							{
 
-								final ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
-								final IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
+								ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
+								IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
 									IMarker.PRIORITY_HIGH, null, null);
 								try
 								{
@@ -2669,7 +2669,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								catch (CoreException e)
 								{
-									Debug.error(e);
+									ServoyLog.logError(e);
 								}
 							}
 							Map<String, Column> columnsByName = new HashMap<String, Column>();
@@ -3144,7 +3144,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						catch (CoreException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 				}
@@ -3198,7 +3198,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								catch (CoreException e)
 								{
-									Debug.error(e);
+									ServoyLog.logError(e);
 								}
 							}
 						}
@@ -3225,7 +3225,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										catch (CoreException e)
 										{
-											Debug.error(e);
+											ServoyLog.logError(e);
 										}
 										return CONTINUE_TRAVERSAL;
 									}

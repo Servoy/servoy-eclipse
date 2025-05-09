@@ -836,9 +836,8 @@ public class ServoyFormBuilder
 						}
 						catch (CoreException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
-
 
 					}
 					ServoyBuilderUtils.addScriptMethodErrorMarkers(markerResource, scriptMethod);

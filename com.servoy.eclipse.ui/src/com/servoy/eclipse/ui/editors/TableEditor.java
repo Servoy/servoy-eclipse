@@ -25,7 +25,6 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.help.IContextProvider;
@@ -502,21 +501,14 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 				public void gotoMarker(IMarker marker)
 				{
-					try
+					String columnName = marker.getAttribute("columnName", null);
+					if (columnName != null)
 					{
-						String columnName = (String)marker.getAttribute("columnName");
-						if (columnName != null)
+						IColumn column = getTable().getColumn(columnName);
+						if (column != null && columnComposite != null)
 						{
-							IColumn column = getTable().getColumn(columnName);
-							if (column != null && columnComposite != null)
-							{
-								columnComposite.selectColumn(column);
-							}
+							columnComposite.selectColumn(column);
 						}
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
 					}
 				}
 			};

@@ -72,7 +72,6 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
-import com.servoy.j2db.util.Utils;
 
 /**
  * Class that gives the list of quick-fixes (available in the core plugin) for Servoy markers.
@@ -108,12 +107,12 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			else if (type.equals(ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE))
 			{
-				String uuid = (String)marker.getAttribute("Uuid");
-				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = marker.getAttribute("Uuid", null);
+				String solName = marker.getAttribute("SolutionName", null);
 				IFile file = null;
 				if (uuid != null && solName != null)
 				{
-					final UUID id = UUID.fromString(uuid);
+					UUID id = UUID.fromString(uuid);
 					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
 					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
 					Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, false);
@@ -124,159 +123,191 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			else if (type.equals(ServoyBuilder.INVALID_TABLE_NODE_PROBLEM) || type.equals(ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE))
 			{
-				String name = null;
-				String solName = null;
-				String uuid = null;
-				name = (String)marker.getAttribute("Name");
-				solName = (String)marker.getAttribute("SolutionName");
-				uuid = (String)marker.getAttribute("Uuid");
-				fixes = new IMarkerResolution[] { new DeleteOrphanPersistQuickFix(name, uuid, solName) };
+				String name = marker.getAttribute("Name", null);
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (name != null && solName != null && uuid != null)
+				{
+					fixes = new IMarkerResolution[] { new DeleteOrphanPersistQuickFix(name, uuid, solName) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.DUPLICATE_UUID))
 			{
-				final String uuid = (String)marker.getAttribute("Uuid");
-				String solName = (String)marker.getAttribute("SolutionName");
-				final UUID id = UUID.fromString(uuid);
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				List<ServoyProject> projects = new ArrayList<ServoyProject>();
-				projects.add(servoyProject);
-				projects.addAll(Arrays.asList(ServoyBuilder.getSolutionModules(servoyProject)));
-				final List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>();
-				for (final ServoyProject project : projects)
+				String uuid = marker.getAttribute("Uuid", null);
+				String solName = marker.getAttribute("SolutionName", null);
+				if (uuid != null && solName != null)
 				{
-					project.getSolution().acceptVisitor(new IPersistVisitor()
+					UUID id = UUID.fromString(uuid);
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+
+					List<ServoyProject> projects = new ArrayList<ServoyProject>();
+					projects.add(servoyProject);
+					projects.addAll(Arrays.asList(ServoyBuilder.getSolutionModules(servoyProject)));
+					List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>();
+					for (final ServoyProject project : projects)
 					{
-						public Object visit(IPersist o)
+						project.getSolution().acceptVisitor(new IPersistVisitor()
 						{
-							if (o.getUUID().equals(id))
+							public Object visit(IPersist o)
 							{
-								resolutions.add(new DuplicateUuidQuickFix(o, uuid, project.getSolution().getName()));
+								if (o.getUUID().equals(id))
+								{
+									resolutions.add(new DuplicateUuidQuickFix(o, uuid, project.getSolution().getName()));
+								}
+								return IPersistVisitor.CONTINUE_TRAVERSAL;
 							}
-							return IPersistVisitor.CONTINUE_TRAVERSAL;
-						}
-					});
+						});
+					}
+					fixes = resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 				}
-				fixes = resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 			}
 			else if (type.equals(ServoyBuilder.DUPLICATE_SIBLING_UUID))
 			{
-				String uuid = (String)marker.getAttribute("Uuid");
-				String solName = (String)marker.getAttribute("SolutionName");
-				final UUID id = UUID.fromString(uuid);
+				String uuid = marker.getAttribute("Uuid", null);
+				String solName = marker.getAttribute("SolutionName", null);
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
-				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, false);
-				Path path = new Path(pathPair.getLeft());
-				IFolder folder = ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
-				java.io.File file = new File(folder.getLocation().toOSString());
-				File[] files = file.listFiles(new FileFilter()
+				if (servoyProject != null && uuid != null)
 				{
-					public boolean accept(File pathname)
+					UUID id = UUID.fromString(uuid);
+
+					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
+					Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, false);
+					Path path = new Path(pathPair.getLeft());
+					IFolder folder = ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
+					java.io.File file = new File(folder.getLocation().toOSString());
+					File[] files = file.listFiles(new FileFilter()
 					{
-						return pathname.isFile() && SolutionSerializer.isJSONFile(pathname.getName());
-					}
-				});
-				List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>();
-				for (File f : files)
-				{
-					UUID newUUID = SolutionDeserializer.getUUID(f);
-					if (newUUID != null && newUUID.equals(id))
+						public boolean accept(File pathname)
+						{
+							return pathname.isFile() && SolutionSerializer.isJSONFile(pathname.getName());
+						}
+					});
+					List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>();
+					for (File f : files)
 					{
-						IFile fileForLocation = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
-							Path.fromPortableString(f.getAbsolutePath().replace('\\', '/')));
-						resolutions.add(new DuplicateSiblingUuidQuickFix(fileForLocation.getFullPath().toString()));
+						UUID newUUID = SolutionDeserializer.getUUID(f);
+						if (newUUID != null && newUUID.equals(id))
+						{
+							IFile fileForLocation = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
+								Path.fromPortableString(f.getAbsolutePath().replace('\\', '/')));
+							resolutions.add(new DuplicateSiblingUuidQuickFix(fileForLocation.getFullPath().toString()));
+						}
 					}
+					fixes = resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 				}
-				fixes = resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 			}
 			else if (type.equals(ServoyBuilder.MISSING_MODULES_MARKER_TYPE))
 			{
-				String moduleName = (String)marker.getAttribute("moduleName");
-				String solutionName = (String)marker.getAttribute("solutionName");
+				String moduleName = marker.getAttribute("moduleName", null);
+				String solutionName = marker.getAttribute("solutionName", null);
 				fixes = new IMarkerResolution[] { new MissingModuleQuickFix(solutionName, moduleName) };
 			}
 			else if (type.equals(ServoyBuilder.MISSING_SERVER))
 			{
-				String serverName = (String)marker.getAttribute("missingServer");
-				String uuid = (String)marker.getAttribute("Uuid");
-				final UUID id = UUID.fromString(uuid);
-				String solName = (String)marker.getAttribute("SolutionName");
+				String serverName = marker.getAttribute("missingServer", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				String solName = marker.getAttribute("SolutionName", null);
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				if (servoyProject.isSolutionLoaded())
+				if (serverName != null && uuid != null && servoyProject != null && servoyProject.isSolutionLoaded())
 				{
+					UUID id = UUID.fromString(uuid);
 					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
 					if (serverName != null)
+					{
 						fixes = new IMarkerResolution[] { new MissingServerQuickFix(serverName), new DeletePersistQuickFix(persist, servoyProject) };
-					else fixes = new IMarkerResolution[0];
+					}
 				}
 				else fixes = new IMarkerResolution[0];
 			}
 			else if (type.equals(ServoyBuilder.BAD_STRUCTURE_MARKER_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				fixes = new IMarkerResolution[] { new DeleteOrphanPersistQuickFix("invalid element: " + uuid, uuid, solName) };
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (solName != null && uuid != null)
+				{
+					fixes = new IMarkerResolution[] { new DeleteOrphanPersistQuickFix("invalid element: " + uuid, uuid, solName) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.EVENT_METHOD_MARKER_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				String eventName = (String)marker.getAttribute("EventName");
-				fixes = new IMarkerResolution[] { new AddTemplateArgumentsQuickFix(uuid, solName,
-					Utils.getAsInteger(marker.getAttribute(IMarker.LINE_NUMBER), false), eventName) };
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				String eventName = marker.getAttribute("EventName", null);
+				if (solName != null && uuid != null && eventName != null)
+				{
+					fixes = new IMarkerResolution[] { new AddTemplateArgumentsQuickFix(uuid, solName, marker.getAttribute(IMarker.LINE_NUMBER, 0), eventName) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.WRONG_OVERRIDE_PARENT))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
+				String solName = marker.getAttribute("SolutionName", null);
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				String uuid = (String)marker.getAttribute("Uuid");
-				IPersist persist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), UUID.fromString(uuid));
-				fixes = new IMarkerResolution[] { new MoveElementOverride(persist, servoyProject) };
+				String uuid = marker.getAttribute("Uuid", null);
+				if (servoyProject != null && uuid != null)
+				{
+					IPersist persist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), UUID.fromString(uuid));
+					fixes = new IMarkerResolution[] { new MoveElementOverride(persist, servoyProject) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				fixes = new IMarkerResolution[] { new ModifyRelationNameQuickfix(uuid, solName, true), new ModifyRelationNameQuickfix(uuid, solName, false) };
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (solName != null && uuid != null)
+				{
+					fixes = new IMarkerResolution[] { new ModifyRelationNameQuickfix(uuid, solName, true), new ModifyRelationNameQuickfix(uuid, solName,
+						false) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.OBSOLETE_ELEMENT) || type.equals(ServoyBuilder.FORM_DUPLICATE_PART_MARKER_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				final UUID id = UUID.fromString(uuid);
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
-				fixes = new IMarkerResolution[] { new DeletePersistQuickFix(persist, servoyProject) };
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (solName != null && uuid != null)
+				{
+					UUID id = UUID.fromString(uuid);
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
+					fixes = new IMarkerResolution[] { new DeletePersistQuickFix(persist, servoyProject) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.MISSING_STYLE))
 			{
 				boolean clearStyle = marker.getAttribute("clearStyle", false);
-				String uuid = (String)marker.getAttribute("Uuid");
-				String styleClass = (String)marker.getAttribute("styleClass");
-				fixes = new IMarkerResolution[] { new ClearOrModifyToCaseSensitiveMissingStyleQuickFix(uuid, clearStyle, styleClass) };
+				String uuid = marker.getAttribute("Uuid", null);
+				String styleClass = marker.getAttribute("styleClass", null);
+				if (uuid != null && styleClass != null)
+				{
+					fixes = new IMarkerResolution[] { new ClearOrModifyToCaseSensitiveMissingStyleQuickFix(uuid, clearStyle, styleClass) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.DUPLICATE_NAME_MARKER_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
 				if (solName != null && uuid != null)
 				{
-					fixes = new IMarkerResolution[] { new RenamePersistQuickFix(uuid, solName) };
+					if (solName != null && uuid != null)
+					{
+						fixes = new IMarkerResolution[] { new RenamePersistQuickFix(uuid, solName) };
+					}
 				}
 			}
 			else if (type.equals(ServoyBuilder.LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE))
 			{
-				String uuid = (String)marker.getAttribute("elementUuid");
-				String solName = (String)marker.getAttribute("SolutionName");
-				fixes = new IMarkerResolution[] { new ClearLabelForElementProperty(uuid, solName) };
+				String uuid = marker.getAttribute("elementUuid", null);
+				String solName = marker.getAttribute("SolutionName", null);
+				if (solName != null && uuid != null)
+				{
+					fixes = new IMarkerResolution[] { new ClearLabelForElementProperty(uuid, solName) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.MISPLACED_MODULES_MARKER_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				Object solType = marker.getAttribute("SolutionType");
+				String solName = marker.getAttribute("SolutionName", null);
 				if (solName != null)
 				{
-					if (solType != null && (Integer)solType == SolutionMetaData.MOBILE)
+					if (marker.getAttribute("SolutionType", -1) == SolutionMetaData.MOBILE)
 					{
 						fixes = new IMarkerResolution[] { new ChangeSolutionTypeQuickFix(solName,
 							SolutionMetaData.MOBILE_MODULE), new ChangeSolutionTypeQuickFix(solName,
@@ -292,18 +323,24 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			else if (type.equals(ServoyBuilder.LINGERING_TABLE_FILES_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				final UUID id = UUID.fromString(uuid);
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
-				fixes = new IMarkerResolution[] { new ClearLingeringTableFilesQuickFix(persist, servoyProject) };
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (solName != null && uuid != null)
+				{
+					UUID id = UUID.fromString(uuid);
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
+					fixes = new IMarkerResolution[] { new ClearLingeringTableFilesQuickFix(persist, servoyProject) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.INVALID_TABLE_NO_PRIMARY_KEY_TYPE))
 			{
-				final String serverName = (String)marker.getAttribute("serverName");
-				final String tableName = (String)marker.getAttribute("tableName");
-				fixes = new IMarkerResolution[] { new InvalidTableBecauseNoPrimaryKeyQuickFix(serverName, tableName) };
+				String serverName = marker.getAttribute("serverName", null);
+				String tableName = marker.getAttribute("tableName", null);
+				if (serverName != null && tableName != null)
+				{
+					fixes = new IMarkerResolution[] { new InvalidTableBecauseNoPrimaryKeyQuickFix(serverName, tableName) };
+				}
 			}
 			else if (type.equals(ServoyBuilder.MISSING_PROJECT_REFERENCE))
 			{
@@ -323,7 +360,13 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 		if (possibleSecurityFixes == null)
 		{
 			new DiscardExistingSecurityInfo();
-			possibleSecurityFixes = new SecurityQuickFix[] { RemoveAllButOneOfTheAccessMasksForElement.getInstance(), RemoveAccessMaskForMissingElement.getInstance(), RenameGroupWithInvalidNameInUserListAndAdd.getInstance(), RenameGroupWithInvalidName.getInstance(), RemoveGroupWithInvalidName.getInstance(), RenameSomeDuplicateUsers.getInstance(), RemoveSomeOfDuplicateUsers.getInstance(), ReplaceUUIDForOneOfUsersWithDuplicateUUID.getInstance(), RemoveSomeUsersWithDuplicateUUID.getInstance(), RemoveGroupWithInvalidNameFromUserList.getInstance(), DeclareGroupReferencedInPermissions.getInstance(), RemoveGroupReferencedInPermission.getInstance(), CreateUserFromGroupReferenceUUID.getInstance(), RemoveUserReferenceInGroup.getInstance(), CorrectInvalidUser.getInstance(), RemoveInvalidUser.getInstance(), DiscardExistingSecurityInfo.getInstance() };
+			possibleSecurityFixes = new SecurityQuickFix[] { RemoveAllButOneOfTheAccessMasksForElement.getInstance(), RemoveAccessMaskForMissingElement
+				.getInstance(), RenameGroupWithInvalidNameInUserListAndAdd.getInstance(), RenameGroupWithInvalidName.getInstance(), RemoveGroupWithInvalidName
+					.getInstance(), RenameSomeDuplicateUsers.getInstance(), RemoveSomeOfDuplicateUsers.getInstance(), ReplaceUUIDForOneOfUsersWithDuplicateUUID
+						.getInstance(), RemoveSomeUsersWithDuplicateUUID.getInstance(), RemoveGroupWithInvalidNameFromUserList
+							.getInstance(), DeclareGroupReferencedInPermissions.getInstance(), RemoveGroupReferencedInPermission
+								.getInstance(), CreateUserFromGroupReferenceUUID.getInstance(), RemoveUserReferenceInGroup.getInstance(), CorrectInvalidUser
+									.getInstance(), RemoveInvalidUser.getInstance(), DiscardExistingSecurityInfo.getInstance() };
 		}
 		List<IMarkerResolution> fixes = new ArrayList<IMarkerResolution>();
 		fixes.add(new OpenUsingEditor(null, "Open file in text editor in order to manually fix the problem.", null));
@@ -342,7 +385,10 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 	{
 		if (possibleTableFixes == null)
 		{
-			possibleTableFixes = new TableDifferenceQuickFix[] { DBIQuickFixRenameInfoFromColumn.getInstance(), DBIQuickFixCreateColumnInDB.getInstance(), DBIQuickFixDeleteInfoForColumn.getInstance(), DBIQuickFixCreateInfoForColumn.getInstance(), DBIQuickFixDeleteColumnFromDB.getInstance(), DBIQuickFixUpdateInfoFromColumn.getInstance(), DBIQuickFixUpdateColumnFromInfo.getInstance(), DBIQuickFixChangeInfoPkIntoUserRowIdent.getInstance(), DBIQuickFixIgnoreColumnDifference.getInstance() };
+			possibleTableFixes = new TableDifferenceQuickFix[] { DBIQuickFixRenameInfoFromColumn.getInstance(), DBIQuickFixCreateColumnInDB
+				.getInstance(), DBIQuickFixDeleteInfoForColumn.getInstance(), DBIQuickFixCreateInfoForColumn.getInstance(), DBIQuickFixDeleteColumnFromDB
+					.getInstance(), DBIQuickFixUpdateInfoFromColumn.getInstance(), DBIQuickFixUpdateColumnFromInfo
+						.getInstance(), DBIQuickFixChangeInfoPkIntoUserRowIdent.getInstance(), DBIQuickFixIgnoreColumnDifference.getInstance() };
 		}
 		List<IMarkerResolution> fixes = new ArrayList<IMarkerResolution>();
 		TableDifference difference = TableDifferenceQuickFix.getTableDifference(marker);

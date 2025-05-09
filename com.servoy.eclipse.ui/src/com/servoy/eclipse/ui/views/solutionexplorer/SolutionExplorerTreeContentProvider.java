@@ -1562,7 +1562,7 @@ public class SolutionExplorerTreeContentProvider
 			}
 			catch (CoreException e)
 			{
-				Debug.log(e);
+				ServoyLog.logError(e);
 			}
 		}
 		return children;
@@ -1811,7 +1811,7 @@ public class SolutionExplorerTreeContentProvider
 							}
 							catch (CoreException e)
 							{
-								Debug.log(e);
+								ServoyLog.logError(e);
 							}
 						}
 					}
@@ -1838,7 +1838,7 @@ public class SolutionExplorerTreeContentProvider
 							}
 							catch (CoreException e)
 							{
-								Debug.log(e);
+								ServoyLog.logError(e);
 							}
 						}
 					}
@@ -1857,7 +1857,7 @@ public class SolutionExplorerTreeContentProvider
 						}
 						catch (CoreException e)
 						{
-							Debug.log(e);
+							ServoyLog.logError(e);
 						}
 					}
 					return false;
@@ -1972,7 +1972,7 @@ public class SolutionExplorerTreeContentProvider
 					}
 					catch (CoreException e)
 					{
-						Debug.log(e);
+						ServoyLog.logError(e);
 						allReferencedProjects = new ArrayList<IProject>(1);
 						allReferencedProjects.add(eclipseProject);
 					}
@@ -2045,7 +2045,7 @@ public class SolutionExplorerTreeContentProvider
 				}
 				catch (CoreException e)
 				{
-					Debug.log(e);
+					ServoyLog.logError(e);
 				}
 			}
 		}

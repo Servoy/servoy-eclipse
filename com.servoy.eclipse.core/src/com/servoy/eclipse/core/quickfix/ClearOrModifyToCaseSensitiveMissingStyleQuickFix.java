@@ -140,8 +140,8 @@ public class ClearOrModifyToCaseSensitiveMissingStyleQuickFix extends WorkbenchM
 			{
 				try
 				{
-					String solName = (String)marker.getAttribute("SolutionName");
-					if (!solutions.contains(solName)) solutions.add(solName);
+					String solName = marker.getAttribute("SolutionName", null);
+					if (solName != null && !solutions.contains(solName)) solutions.add(solName);
 				}
 				catch (Exception ex)
 				{
@@ -179,7 +179,7 @@ public class ClearOrModifyToCaseSensitiveMissingStyleQuickFix extends WorkbenchM
 					try
 					{
 						if (marker.exists() &&
-							!Utils.equalObjects(marker.getAttribute("Uuid"), this.uuid) && marker.getType().equals(ServoyBuilder.MISSING_STYLE) &&
+							!Utils.equalObjects(marker.getAttribute("Uuid", null), this.uuid) && marker.getType().equals(ServoyBuilder.MISSING_STYLE) &&
 							marker.getAttribute("styleClass", null) != null) similar.add(marker);
 					}
 					catch (CoreException e)

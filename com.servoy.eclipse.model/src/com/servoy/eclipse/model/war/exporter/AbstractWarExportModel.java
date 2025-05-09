@@ -284,11 +284,11 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			}
 			catch (CoreException e)
 			{
-				Debug.error(e);
+				ServoyLog.logError(e);
 			}
 			catch (IOException e)
 			{
-				Debug.error(e);
+				ServoyLog.logError(e);
 			}
 			catch (StackOverflowError e)
 			{

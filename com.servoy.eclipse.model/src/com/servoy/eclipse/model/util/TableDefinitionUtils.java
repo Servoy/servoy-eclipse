@@ -352,8 +352,7 @@ public class TableDefinitionUtils
 	{
 		try
 		{
-			if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR) &&
-				ServoyBuilder.MISSING_SERVER.equals(marker.getType()))
+			if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR && ServoyBuilder.MISSING_SERVER.equals(marker.getType()))
 			{
 				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager()
 					.getServer((String)marker.getAttribute("missingServer"), false, false);

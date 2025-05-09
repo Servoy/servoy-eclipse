@@ -125,7 +125,7 @@ public class WebPackageUpgradeAction extends Action implements ISelectionChanged
 			}
 			catch (CoreException e)
 			{
-				// ignore
+				ServoyLog.logError(e);
 			}
 		}
 

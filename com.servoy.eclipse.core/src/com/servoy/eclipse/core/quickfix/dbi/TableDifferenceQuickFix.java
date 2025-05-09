@@ -47,35 +47,28 @@ public abstract class TableDifferenceQuickFix extends WorkbenchMarkerResolution 
 		if (!marker.exists()) return null;
 
 		TableDifference difference = null;
-		try
-		{
-			String serverName = (String)marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME);
-			if (serverName != null)
-			{
-				DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
-				if (dmm != null)
-				{
-					String tableName = null;
-					String columnName = null;
-					tableName = (String)marker.getAttribute(TableDifference.ATTRIBUTE_TABLENAME);
-					columnName = (String)marker.getAttribute(TableDifference.ATTRIBUTE_COLUMNNAME);
 
-					difference = dmm.getColumnDifference(serverName, tableName, columnName);
-				}
-				else
-				{
-					ServoyLog.logError("dmm is null but table difference marker exists", null);
-				}
+		String serverName = marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME, null);
+		if (serverName != null)
+		{
+			DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+			if (dmm != null)
+			{
+				String tableName = marker.getAttribute(TableDifference.ATTRIBUTE_TABLENAME, null);
+				String columnName = marker.getAttribute(TableDifference.ATTRIBUTE_COLUMNNAME, null);
+
+				difference = dmm.getColumnDifference(serverName, tableName, columnName);
 			}
 			else
 			{
-				ServoyLog.logError("serverName is null for table difference marker", null);
+				ServoyLog.logError("dmm is null but table difference marker exists", null);
 			}
 		}
-		catch (CoreException e)
+		else
 		{
-			ServoyLog.logError(e);
+			ServoyLog.logError("serverName is null for table difference marker", null);
 		}
+
 		return difference;
 	}
 

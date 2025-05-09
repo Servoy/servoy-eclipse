@@ -17,8 +17,9 @@
 
 package com.servoy.eclipse.ui.quickfix;
 
+import static java.util.Arrays.stream;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -223,11 +224,14 @@ public class DeprecatedSpecQuickFix extends WorkbenchMarkerResolution
 		try
 		{
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-				(String)marker.getAttribute("solutionName"));
-			return Arrays.stream(servoyProject.getProject().findMarkers(ServoyBuilder.DEPRECATED_SPEC, false, IResource.DEPTH_INFINITE)).filter(
-				mk -> mk.getId() != marker.getId() && mk.getAttribute("replacement", null) != null &&
-					mk.getAttribute("replacement", "").equals(marker.getAttribute("replacement", "")))
-				.toArray(IMarker[]::new);
+				marker.getAttribute("solutionName", null));
+			if (servoyProject != null)
+			{
+				return stream(servoyProject.getProject().findMarkers(ServoyBuilder.DEPRECATED_SPEC, false, IResource.DEPTH_INFINITE)).filter(
+					mk -> mk.getId() != marker.getId() && mk.getAttribute("replacement", null) != null &&
+						mk.getAttribute("replacement", "").equals(marker.getAttribute("replacement", "")))
+					.toArray(IMarker[]::new);
+			}
 		}
 		catch (CoreException e)
 		{

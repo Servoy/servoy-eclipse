@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackEvent;
@@ -307,31 +306,16 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			{
 				public void gotoMarker(IMarker marker)
 				{
-					String elementUuid = null;
-					try
+					String elementUuid = marker.getAttribute("elementUuid", null);
+					int start = marker.getAttribute(IMarker.CHAR_START, -1);
+					if (start != -1)
 					{
-						elementUuid = (String)marker.getAttribute("elementUuid");
+						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), start);
 					}
-					catch (CoreException e)
+					String name = marker.getAttribute("Name", null);
+					if (name != null && name.indexOf('$') >= 0)
 					{
-						ServoyLog.logError(e);
-					}
-					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
-					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
-							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
-					}
-					try
-					{
-						String name = (String)marker.getAttribute("Name");
-						if (name != null && name.indexOf('$') >= 0)
-						{
-							elementUuid = name;
-						}
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
+						elementUuid = name;
 					}
 					if (elementUuid != null)
 					{
