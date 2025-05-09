@@ -394,8 +394,35 @@ public class SnapToComponentUtil
 			}
 			else
 			{
-				CSSValue size = computedHigherPropertyValue.minus(sourceLowerPropertyValue);
-				setCssValue(newPosition, sizeProperty, size);
+				if (start != null && start.isSet())
+				{
+					if (lowerPropertyValue.getPercentage() > 0)
+					{
+						CSSValue siblingHigherPropertyValue = getCssValue(siblingCssPosition, higherProperty, siblingParentSize);
+						if (!siblingHigherPropertyValue.isSet())
+						{
+							siblingHigherPropertyValue = getOrComputeValue(siblingCssPosition, lowerProperty, siblingParentSize)
+								.plus(getOrComputeValue(siblingCssPosition, sizeProperty, siblingParentSize));
+						}
+						CSSValue space = start.minus(siblingHigherPropertyValue);
+						sourceLowerPropertyValue = siblingHigherPropertyValue.plus(space);
+						CSSValue size = computedHigherPropertyValue.minus(sourceLowerPropertyValue);
+
+						setCssValue(newPosition, lowerProperty, sourceLowerPropertyValue);
+						setCssValue(newPosition, sizeProperty, size);
+					}
+					else
+					{
+						CSSValue size = computedHigherPropertyValue.minus(start != null && start.isSet() ? start : sourceLowerPropertyValue);
+						setCssValue(newPosition, lowerProperty, start);
+						setCssValue(newPosition, sizeProperty, size);
+					}
+				}
+				else
+				{
+					CSSValue size = computedHigherPropertyValue.minus(sourceLowerPropertyValue);
+					setCssValue(newPosition, sizeProperty, size);
+				}
 				setCssValue(newPosition, higherProperty, CSSValue.NOT_SET);
 			}
 		}
