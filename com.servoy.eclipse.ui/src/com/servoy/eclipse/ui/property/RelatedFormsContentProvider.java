@@ -302,7 +302,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 			// form under relation
 			return new RelatedForm(rf.relations, null);
 		}
-		if (element instanceof ITable)
+		if (element instanceof ITable || Messages.LabelNoTable == element)
 		{
 			return Messages.LabelUnrelated;
 		}
