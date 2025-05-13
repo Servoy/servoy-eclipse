@@ -243,7 +243,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							ISupportChilds realParentOfInput = inputPersist instanceof ISupportExtendsID ? ((ISupportExtendsID)inputPersist).getRealParent()
 								: inputPersist.getParent();
 							//here it checks if the real parent is also a child web object. This can happen for a kanban.
-							//a board can have an array of board items, this board items can also have an array of items inside.
+							//a kanban can have an array of board items, each board item can also have an array of items inside.
 							if (realParentOfInput instanceof IChildWebObject)
 							{
 								dropTargetComponent = inputPersist;
