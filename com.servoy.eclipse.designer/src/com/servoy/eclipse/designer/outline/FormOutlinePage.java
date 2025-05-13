@@ -228,9 +228,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					dropTarget = null;
 					Object input = (getCurrentTarget() == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput()
 						: getCurrentTarget();
-					if (input instanceof PersistContext)
+					if (input instanceof PersistContext inputPersistContext)
 					{
-						IPersist inputPersist = ((PersistContext)input).getPersist();
+						IPersist inputPersist = inputPersistContext.getPersist();
 						ISupportChilds targetLayoutContainer = null;
 						if (!form.isResponsiveLayout() && !(inputPersist instanceof IChildWebObject) &&
 							!(inputPersist.getParent() instanceof LayoutContainer))
@@ -238,9 +238,21 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							// in absolute layout only drag ghost components
 							return false;
 						}
-						if (inputPersist instanceof IChildWebObject)
+						if (inputPersist instanceof IChildWebObject iChildWebObject)
 						{
-							IBasicWebComponent customTypeParent = ((IChildWebObject)inputPersist).getParentComponent();
+							ISupportChilds realParentOfInput = inputPersist instanceof ISupportExtendsID ? ((ISupportExtendsID)inputPersist).getRealParent()
+								: inputPersist.getParent();
+							//here it checks if the real parent is also a child web object. This can happen for a kanban.
+							//a board can have an array of board items, this board items can also have an array of items inside.
+							if (realParentOfInput instanceof IChildWebObject)
+							{
+								dropTargetComponent = inputPersist;
+								dropTarget = realParentOfInput;
+
+								return true;
+							}
+
+							IBasicWebComponent customTypeParent = iChildWebObject.getParentComponent();
 							for (IPersist p : dragObjects)
 							{
 								if (!(p instanceof IChildWebObject) || ((IChildWebObject)p).getParentComponent() != customTypeParent)
@@ -252,9 +264,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							dropTarget = customTypeParent;
 							return true;
 						}
-						else if (inputPersist instanceof WebComponent)
+						else if (inputPersist instanceof WebComponent wc)
 						{
-							WebComponent wc = (WebComponent)inputPersist;
 							if (wc.getParent() instanceof LayoutContainer)
 							{
 								targetLayoutContainer = wc.getRealParent();
