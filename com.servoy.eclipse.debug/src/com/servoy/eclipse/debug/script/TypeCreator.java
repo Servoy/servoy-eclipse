@@ -141,6 +141,7 @@ import com.servoy.j2db.MenuManager;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IJSBaseFoundSet;
 import com.servoy.j2db.dataprocessing.IJSBaseRecord;
@@ -266,6 +267,7 @@ import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.info.EventType;
+import com.servoy.j2db.scripting.info.JSPermission;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
@@ -545,6 +547,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSViewDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSViewDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSMenuDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSMenuDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(EventType.class.getSimpleName(), new EventTypesCreator());
+		addScopeType(JSPermission.class.getSimpleName(), new JSPermissionCreator());
 	}
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
@@ -799,6 +802,7 @@ public class TypeCreator extends TypeCache
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSEventsManager.class), null);
 			// special case  EventType should be a scope creator
 			classTypes.remove(EventType.class.getSimpleName());
+			classTypes.remove(JSPermission.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
@@ -5213,6 +5217,60 @@ public class TypeCreator extends TypeCache
 						: (eventType.getDescription() != null ? HtmlUtils.applyDescriptionMagic(eventType.getDescription())
 							: "Custom event added from solution eventTypes property"));
 					members.add(property);
+				}
+			}
+			return addType(null, type);
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+	private class JSPermissionCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		JSPermissionCreator()
+		{
+		}
+
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "JSPermission", JSPermission.class);
+			}
+			type.setSuperType(superType);
+			type.setKind(TypeKind.JAVA);
+			EList<Member> members = type.getMembers();
+			IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager()
+				.getGroups(ApplicationServerRegistry.get().getClientId());
+			if (groups != null)
+			{
+				for (int i = 0; i < groups.getRowCount(); i++)
+				{
+					String groupName = groups.getRow(i)[1].toString();
+					if (!IRepository.ADMIN_GROUP.equals(groupName))
+					{
+						Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+						property.setName(groupName);
+						property.setVisible(true);
+						property.setStatic(true);
+						property.setType(TypeUtil.ref(type));
+						property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("userandgroupsecurity.png"));
+						property.setDescription("Permission to be used by security manager(JSSecurity) in scripting.");
+						members.add(property);
+					}
 				}
 			}
 			return addType(null, type);

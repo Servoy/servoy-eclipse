@@ -138,6 +138,7 @@ public class ElementResolver implements IElementResolver
 		deprecated.add("currentcontroller");
 
 		constantTypeNames.put("EventType", "EventType");
+		constantTypeNames.put("JSPermission", "JSPermission");
 	}
 
 
