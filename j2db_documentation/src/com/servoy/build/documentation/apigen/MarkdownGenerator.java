@@ -129,6 +129,9 @@ public class MarkdownGenerator
 
 	private static String summaryMdFilePath;
 
+	//this is generating output data used for further processing
+	private static final boolean TRACK_REFERENCES = true; //TURN ON/OFF TRACKING OF REFERENCES
+
 	private static final Set<String> IGNORED_UNDOCUMENTED_TYPES = Set.of(
 		"org.mozilla.javascript.IdScriptableObject",
 		"org.json.JSONObject",
@@ -430,6 +433,15 @@ public class MarkdownGenerator
 		IDocFromXMLGenerator docGenerator)
 		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException, InstantiationException, IllegalAccessException
 	{
+		// Ensure we start with a fresh references.json
+		File refFile = new File("references.json");
+		if (refFile.exists())
+		{
+			if (refFile.delete())
+			{
+				System.out.println("Deleted old references.json: " + refFile.getAbsolutePath());
+			}
+		}
 		URL[] urls;
 
 		if (isWindows)
@@ -602,10 +614,10 @@ public class MarkdownGenerator
 						System.out.println("JAR EXCLUDED: " + jar.getAbsolutePath());
 					}
 				}
-				for (String nonDefaultPluginThatShouldHaveBeenFound : nonDefaultPluginJarNamesThatWeDoGenerateDocsFor)
-					if (!foundJars.contains(nonDefaultPluginThatShouldHaveBeenFound)) throw new RuntimeException(
-						"Cannot find (explicitly required) plugin '" + nonDefaultPluginThatShouldHaveBeenFound + "' in dir: " + pluginDir +
-							"\nYou have to manually copy a release of that plugin into the plugins dir...");
+//				for (String nonDefaultPluginThatShouldHaveBeenFound : nonDefaultPluginJarNamesThatWeDoGenerateDocsFor)
+//					if (!foundJars.contains(nonDefaultPluginThatShouldHaveBeenFound)) throw new RuntimeException(
+//						"Cannot find (explicitly required) plugin '" + nonDefaultPluginThatShouldHaveBeenFound + "' in dir: " + pluginDir +
+//							"\nYou have to manually copy a release of that plugin into the plugins dir...");
 			}
 
 			docGenerator.writeAggregatedOutput(ngOnly);
@@ -613,9 +625,10 @@ public class MarkdownGenerator
 		while (ngOnly);
 
 		printSummary();
+		// Write out all collected reference links to JSON
+		ReferencesTracker.getInstance().writeResults("references.json");
 	}
 
-	//TODO: investigate the case where
 	private static void loadSummary()
 	{
 		referenceTypes.clear();
@@ -1168,6 +1181,11 @@ public class MarkdownGenerator
 			SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
 
 			File userDir = new File(System.getProperty("user.dir"));
+
+			if (TRACK_REFERENCES)
+			{
+				ReferencesTracker.getInstance().trackReferences(manager, summaryPaths, referenceTypes, ngOnly, computedReturnTypes);
+			}
 
 			for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
 			{
