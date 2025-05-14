@@ -43,6 +43,10 @@ import java.util.concurrent.ConcurrentMap;
 import javax.swing.Icon;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -123,6 +127,7 @@ import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.MenuFoundsetServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -802,8 +807,8 @@ public class TypeCreator extends TypeCache
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSEventsManager.class), null);
 			// special case  EventType should be a scope creator
 			classTypes.remove(EventType.class.getSimpleName());
-			classTypes.remove(JSPermission.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
+			classTypes.remove(JSPermission.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
@@ -1011,6 +1016,33 @@ public class TypeCreator extends TypeCache
 					public void serverAdded(IServerInternal s)
 					{
 						s.addTableListener(tableListener);
+					}
+				});
+				servoyModel.addResourceChangeListener(new IResourceChangeListener()
+				{
+
+					@Override
+					public void resourceChanged(IResourceChangeEvent event)
+					{
+						if (event.getDelta() != null)
+						{
+							List<IResourceDelta> changedFiles = new ArrayList<IResourceDelta>();
+							ServoyModel.findChangedFiles(event.getDelta(), changedFiles);
+							boolean permissionsChanged = false;
+							for (IResourceDelta changedDelta : changedFiles)
+							{
+								IResource res = changedDelta.getResource();
+								if (res instanceof IFile file && file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT))
+								{
+									permissionsChanged = true;
+									break;
+								}
+							}
+							if (permissionsChanged)
+							{
+								runClearCacheJob();
+							}
+						}
 					}
 				});
 			}
