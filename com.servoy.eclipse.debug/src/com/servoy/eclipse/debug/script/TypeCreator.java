@@ -5120,6 +5120,11 @@ public class TypeCreator extends TypeCache
 				Type type = TypeInfoModelFactory.eINSTANCE.createType();
 				type.setName(ElementUtil.CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
 				type.setKind(TypeKind.JAVA);
+				if (iPropertyType instanceof ICustomType< ? >)
+				{
+					String extendsName = ((ICustomType< ? >)iPropertyType).getExtends();
+					if (extendsName != null) type.setSuperType(getType(context, extendsName));
+				}
 				EList<Member> members = type.getMembers();
 				if (iPropertyType instanceof ICustomType< ? > customType)
 				{
