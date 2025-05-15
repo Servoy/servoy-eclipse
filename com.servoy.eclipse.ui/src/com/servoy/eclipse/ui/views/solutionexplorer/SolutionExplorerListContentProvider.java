@@ -2001,51 +2001,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								String fullName = node.getFunctionName();
 								String[] nameParts = fullName.split("_");
 								String baseName = nameParts[0];
-								WebObjectFunctionDefinition api = apis.get(baseName);
+								WebObjectApiFunctionDefinition api = apis.get(baseName);
 								if (api != null)
 								{
-									String doc = node.getDocumentation().getText();
-									String[] split = doc.split("@example");
-									if (split.length > 1)
-									{
-										String example = split[1].split("@")[0];
-										if (!example.isBlank())
-										{
-											doc = doc.replace(example, "\n<pre>" + example + "</pre><br/>\n");
-										}
-									}
-									if (nameParts.length > 1 && (api instanceof WebObjectApiFunctionDefinition apiWithOverloads))
+									String doc = parseDoc(node.getDocumentation().getText());
+
+									if (nameParts.length > 1)
 									{
 
-										List<WebObjectApiFunctionDefinition> overloads = apiWithOverloads.getOverloads();
-										if (overloads != null)
+										WebObjectApiFunctionDefinition overload = getOverLoad(api, nameParts);
+										if (overload != null)
 										{
-											for (WebObjectApiFunctionDefinition overload : overloads)
-											{
-												IFunctionParameters params = overload.getParameters();
-												if (params == null) continue;
-												List<String> paramNames = new ArrayList<>();
-												params.forEach(pd -> paramNames.add(pd.getName()));
-
-												if (paramNames.size() == nameParts.length - 1)
-												{
-													boolean match = true;
-													for (int i = 0; i < paramNames.size(); i++)
-													{
-														if (!paramNames.get(i).equals(nameParts[i + 1]))
-														{
-															match = false;
-															break;
-														}
-													}
-													if (match)
-													{
-														overload.setDocumentation(doc);
-														return super.visitFunctionStatement(node);
-													}
-												}
-
-											}
+											overload.setDocumentation(doc);
+											return super.visitFunctionStatement(node);
 										}
 									}
 									api.setDocumentation(doc);
@@ -2056,7 +2024,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 									if (customType != null)
 									{
 										String text = node.getDocumentation().getText();
-										customType.setDocumentation(text);
+										customType.setDocumentation(parseDoc(text));
 										try
 										{
 											return super.visitFunctionStatement(node);
@@ -2076,14 +2044,81 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								if (parent instanceof BinaryOperation bo && bo.getLeftExpression() instanceof PropertyExpression pe &&
 									pe.getDocumentation() != null)
 								{
-									WebObjectApiFunctionDefinition apiFunction = customType.getApiFunction(pe.getProperty().toString());
+									String doc = parseDoc(pe.getDocumentation().getText());
+									String fullName = pe.getProperty().toString();
+									WebObjectApiFunctionDefinition apiFunction = customType.getApiFunction(fullName);
 									if (apiFunction != null)
 									{
-										apiFunction.setDocumentation(pe.getDocumentation().getText());
+										apiFunction.setDocumentation(doc);
+									}
+									else
+									{
+										String[] nameParts = fullName.split("_");
+										if (nameParts.length > 1)
+										{
+											String baseName = nameParts[0];
+											apiFunction = customType.getApiFunction(baseName);
+											if (apiFunction != null)
+											{
+												WebObjectApiFunctionDefinition overLoad = getOverLoad(apiFunction, nameParts);
+												if (overLoad != null)
+												{
+													overLoad.setDocumentation(doc);
+												}
+											}
+										}
 									}
 								}
 							}
 							return super.visitFunctionStatement(node);
+						}
+
+						String parseDoc(String doc)
+						{
+							String[] split = doc.split("@example");
+							if (split.length > 1)
+							{
+								String example = split[1].split("@")[0];
+								if (!example.isBlank())
+								{
+									doc = doc.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+								}
+							}
+							return doc;
+						}
+
+						WebObjectApiFunctionDefinition getOverLoad(WebObjectApiFunctionDefinition api, String[] nameParts)
+						{
+							List<WebObjectApiFunctionDefinition> overloads = api.getOverloads();
+							if (overloads != null)
+							{
+								for (WebObjectApiFunctionDefinition overload : overloads)
+								{
+									IFunctionParameters params = overload.getParameters();
+									if (params == null) continue;
+									List<String> paramNames = new ArrayList<>();
+									params.forEach(pd -> paramNames.add(pd.getName()));
+
+									if (paramNames.size() == nameParts.length - 1)
+									{
+										boolean match = true;
+										for (int i = 0; i < paramNames.size(); i++)
+										{
+											if (!paramNames.get(i).equals(nameParts[i + 1]))
+											{
+												match = false;
+												break;
+											}
+										}
+										if (match)
+										{
+											return overload;
+										}
+									}
+
+								}
+							}
+							return null;
 						}
 
 						@Override
