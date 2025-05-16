@@ -733,7 +733,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 		else
 		{
-			container.setLocation(new Point(location.x, location.x));
+			container.setLocation(new Point(location.x, location.y));
 			if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
 		}
 		newPersists.add(container);
