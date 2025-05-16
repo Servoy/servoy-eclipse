@@ -24,7 +24,7 @@
                 ngbDropdownItem 
                 class="svy-ngbdropdownitem input-sm" 
                 [ngClass]="{active:valueComparator(value)}" 
-                (click)="updateValue(value.realValue)">
+                (click)="updateValue(value.realValue, $event)">
                  <!-- do not break the next line -->
                 {{getRemainingValueBefore(value.displayValue | formatFilter:format | emptyValue)}}<strong>{{getStrongValue(value.displayValue | formatFilter:format | emptyValue)}}</strong>{{getRemainingValueAfter(value.displayValue | formatFilter:format | emptyValue)}}
             </button>

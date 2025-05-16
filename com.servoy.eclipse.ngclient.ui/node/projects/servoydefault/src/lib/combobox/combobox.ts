@@ -191,9 +191,12 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         super.svyOnChanges(changes);
     }
 
-    updateValue(realValue: any) {
+    updateValue(realValue: any, event: Event) {
         this.dataProviderID = realValue;
         this.dataProviderIDChange.emit(this.dataProviderID);
+        if (this.onActionMethodID) {
+            this.onActionMethodID(event);
+        }
     }
     
     getRemainingValueBefore(value: any): any {
