@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
+import org.eclipse.dltk.javascript.typeinference.IValueCollectionReference;
 
 /**
  * @author jcompagner
@@ -31,10 +32,10 @@ import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 public class ValueCollectionCacheItem
 {
 	private final Set<IFile> files;
-	private final IValueCollection collection;
+	private final IValueCollectionReference collection;
 	private final long timestamp;
 
-	public ValueCollectionCacheItem(Set<IFile> files, IValueCollection collection)
+	public ValueCollectionCacheItem(Set<IFile> files, IValueCollectionReference collection)
 	{
 		this.files = new HashSet<IFile>(files);
 		this.collection = collection;
@@ -50,7 +51,7 @@ public class ValueCollectionCacheItem
 	{
 		if (files.stream().mapToLong(file -> file.getModificationStamp()).sum() == timestamp)
 		{
-			return collection;
+			return collection.getValueCollection();
 		}
 		return null;
 	}

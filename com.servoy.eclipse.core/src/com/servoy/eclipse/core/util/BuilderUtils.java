@@ -50,7 +50,7 @@ public class BuilderUtils
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the HAS_ERROR_MARKERS constant for errors, HAS_WARNING_MARKERS constant for warnings, HAS_NO_MARKERS for no markers
 	 */
 	public static int getMarkers(String[] projects)
@@ -68,11 +68,11 @@ public class BuilderUtils
 						IMarker[] markers = project.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 						for (IMarker marker : markers)
 						{
-							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR))
+							if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR)
 							{
 								return HAS_ERROR_MARKERS;
 							}
-							if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_WARNING))
+							if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_WARNING)
 							{
 								hasWarnings = true;
 							}

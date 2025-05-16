@@ -107,25 +107,14 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		}
 		if (columnIndex == ColumnComposite.CI_TYPE + delta)
 		{
-			if (info.hasFlag(IBaseColumn.UUID_COLUMN))
+			if (columnType.isArray())
 			{
-				if (info.hasFlag(IBaseColumn.NATIVE_COLUMN))
-				{
-					return UUID_NATIVE;
-				}
-				int type = Column.mapToDefaultType(info.getConfiguredColumnType().getSqlType());
-				if (type == IColumnTypes.MEDIA)
-				{
-					return UUID_MEDIA_16;
-				}
-				return UUID_TEXT_36;
+				return "ARRAY<" + getColumnTypeText(info, ColumnType.getColumnType(columnType.getSubType())) + ">";
 			}
-			if ((columnType.getSqlType() == Types.OTHER || columnType.getSqlType() == Types.JAVA_OBJECT) &&
-				!Utils.stringIsEmpty(info.getNativeTypename()))
+			else
 			{
-				return info.getNativeTypename() + " (native type)";
+				return getColumnTypeText(info, columnType);
 			}
-			return Column.getDisplayTypeString(columnType.getSqlType());
 		}
 		if (columnIndex == ColumnComposite.CI_LENGTH + delta)
 		{
@@ -154,6 +143,29 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 			return info.getDataProviderID();
 		}
 		return columnIndex + ": " + element;
+	}
+
+	private String getColumnTypeText(Column info, ColumnType columnType)
+	{
+		if (info.hasFlag(IBaseColumn.UUID_COLUMN))
+		{
+			if (info.hasFlag(IBaseColumn.NATIVE_COLUMN))
+			{
+				return UUID_NATIVE;
+			}
+			int type = Column.mapToDefaultType(info.getConfiguredColumnType().getSqlType());
+			if (type == IColumnTypes.MEDIA)
+			{
+				return UUID_MEDIA_16;
+			}
+			return UUID_TEXT_36;
+		}
+		if ((columnType.getSqlType() == Types.OTHER || columnType.getSqlType() == Types.JAVA_OBJECT) &&
+			!Utils.stringIsEmpty(info.getNativeTypename()))
+		{
+			return info.getNativeTypename() + " (native type)";
+		}
+		return Column.getDisplayTypeString(columnType);
 	}
 
 	public Color getBackground(Object element, int columnIndex)

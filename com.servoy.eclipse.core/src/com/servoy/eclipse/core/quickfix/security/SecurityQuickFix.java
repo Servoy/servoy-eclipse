@@ -296,13 +296,13 @@ public abstract class SecurityQuickFix implements IMarkerResolution
 			String[] wv = new String[l];
 			for (int i = 0; i < l; i++)
 			{
-				wv[i] = marker.getAttribute(WorkspaceUserManager.MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY + i, (String)null);
+				wv[i] = marker.getAttribute(WorkspaceUserManager.MARKER_ATTRIBUTE_WRONG_VALUE_ARRAY + i, null);
 			}
 			return wv;
 		}
 		else
 		{
-			return marker.getAttribute(WorkspaceUserManager.MARKER_ATTRIBUTE_WRONG_VALUE, (String)null);
+			return marker.getAttribute(WorkspaceUserManager.MARKER_ATTRIBUTE_WRONG_VALUE, null);
 		}
 	}
 

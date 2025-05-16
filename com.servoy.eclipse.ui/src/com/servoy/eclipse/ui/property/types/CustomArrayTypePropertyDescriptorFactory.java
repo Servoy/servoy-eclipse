@@ -37,10 +37,10 @@ public class CustomArrayTypePropertyDescriptorFactory implements ITypePropertyDe
 	public IPropertyDescriptor createPropertyDescriptor(Object id, IPropertySource persistPropertySource, String displayName,
 		FlattenedSolution flattenedEditingSolution, PersistContext persistContext, PropertyDescription propertyDescription)
 	{
-		if (propertyDescription.getType() instanceof ICustomType< ? > &&
-			((ICustomType< ? >)propertyDescription.getType()).getCustomJSONTypeDefinition().getType().isPrimitive())
+		if (propertyDescription.getType() instanceof ICustomType< ? > customType &&
+			customType.getCustomJSONTypeDefinition().getType().isBuiltinType())
 		{
-			return new PrimitiveArrayTypePropertyController(id, displayName, persistContext, propertyDescription);
+			return new BuiltinTypeArrayTypePropertyController(id, displayName, persistContext, propertyDescription);
 		}
 		return new CustomArrayTypePropertyController(id, displayName, persistPropertySource, persistContext, propertyDescription);
 	}

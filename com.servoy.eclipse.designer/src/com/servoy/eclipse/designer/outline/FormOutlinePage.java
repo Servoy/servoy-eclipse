@@ -73,6 +73,7 @@ import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
@@ -227,9 +228,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					dropTarget = null;
 					Object input = (getCurrentTarget() == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput()
 						: getCurrentTarget();
-					if (input instanceof PersistContext)
+					if (input instanceof PersistContext inputPersistContext)
 					{
-						IPersist inputPersist = ((PersistContext)input).getPersist();
+						IPersist inputPersist = inputPersistContext.getPersist();
 						ISupportChilds targetLayoutContainer = null;
 						if (!form.isResponsiveLayout() && !(inputPersist instanceof IChildWebObject) &&
 							!(inputPersist.getParent() instanceof LayoutContainer))
@@ -237,9 +238,21 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							// in absolute layout only drag ghost components
 							return false;
 						}
-						if (inputPersist instanceof IChildWebObject)
+						if (inputPersist instanceof IChildWebObject iChildWebObject)
 						{
-							IBasicWebComponent customTypeParent = ((IChildWebObject)inputPersist).getParentComponent();
+							ISupportChilds realParentOfInput = inputPersist instanceof ISupportExtendsID ? ((ISupportExtendsID)inputPersist).getRealParent()
+								: inputPersist.getParent();
+							//here it checks if the real parent is also a child web object. This can happen for a kanban.
+							//a kanban can have an array of board items, each board item can also have an array of items inside.
+							if (realParentOfInput instanceof IChildWebObject)
+							{
+								dropTargetComponent = inputPersist;
+								dropTarget = realParentOfInput;
+
+								return true;
+							}
+
+							IBasicWebComponent customTypeParent = iChildWebObject.getParentComponent();
 							for (IPersist p : dragObjects)
 							{
 								if (!(p instanceof IChildWebObject) || ((IChildWebObject)p).getParentComponent() != customTypeParent)
@@ -251,9 +264,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							dropTarget = customTypeParent;
 							return true;
 						}
-						else if (inputPersist instanceof WebComponent)
+						else if (inputPersist instanceof WebComponent wc)
 						{
-							WebComponent wc = (WebComponent)inputPersist;
 							if (wc.getParent() instanceof LayoutContainer)
 							{
 								targetLayoutContainer = wc.getRealParent();
@@ -342,14 +354,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				}
 
 			});
-			if (form.isResponsiveLayout())
-			{
-				getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 4);
-			}
-			else
-			{
-				getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 3);
-			}
+			defaultExpand();
 		}
 
 		// when the outline view is reparented to another shell, you cannot use the form editor context menu here
@@ -549,6 +554,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			if (parentForm != null && (formHierarchy.contains(parentForm) || ((Form)parentForm).isFormComponent().booleanValue()))
 			{
 				refresh();
+				Display.getDefault().asyncExec(this::defaultExpand);
 				return;
 			}
 		}
@@ -587,6 +593,63 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			Display.getDefault().asyncExec(x);
 		}
 
+	}
+
+	public void collapseSelection()
+	{
+		setExpandedState(false);
+	}
+
+	public void expandSelection()
+	{
+		setExpandedState(true);
+	}
+
+	private void setExpandedState(boolean expand)
+	{
+		Object selection = ((IStructuredSelection)getTreeViewer().getSelection()).getFirstElement();
+		List<Object> childrenList = new ArrayList<Object>();
+		if (selection instanceof PersistContext persistContext)
+		{
+			childrenList.add(persistContext);
+			addChildren(persistContext.getPersist(), childrenList);
+		}
+		else if (selection == FormOutlineContentProvider.ELEMENTS)
+		{
+			childrenList.add(selection);
+			ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form).getAllObjectsAsList().forEach(persist -> {
+				childrenList.add(PersistContext.create(persist, form));
+				addChildren(persist, childrenList);
+			});
+		}
+		for (Object child : childrenList)
+		{
+			getTreeViewer().setExpandedState(child, expand);
+		}
+	}
+
+	private void addChildren(IPersist parent, List<Object> childrenList)
+	{
+		if (parent instanceof AbstractBase abstractBase)
+		{
+			for (IPersist child : abstractBase.getAllObjectsAsList())
+			{
+				childrenList.add(PersistContext.create(child, form));
+				addChildren(child, childrenList);
+			}
+		}
+	}
+
+	private void defaultExpand()
+	{
+		if (form.isResponsiveLayout())
+		{
+			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 4);
+		}
+		else
+		{
+			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 3);
+		}
 	}
 
 	@Override

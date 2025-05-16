@@ -40,6 +40,7 @@ import com.servoy.eclipse.debug.DebugStarter;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -84,6 +85,7 @@ public abstract class StartDebugHandler extends AbstractHandler implements IHand
 			}
 			catch (CoreException e)
 			{
+				ServoyLog.logError(e);
 			}
 			if (markers != null && markers.length > 0)
 			{
@@ -96,6 +98,7 @@ public abstract class StartDebugHandler extends AbstractHandler implements IHand
 			}
 			catch (CoreException e)
 			{
+				ServoyLog.logError(e);
 			}
 			if (markers != null && markers.length > 0)
 			{
@@ -114,14 +117,12 @@ public abstract class StartDebugHandler extends AbstractHandler implements IHand
 						StartupPreferences.DEFAULT_WARNING_CONFIRMATION);
 					for (IMarker marker : markers)
 					{
-						if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR) &&
-							confirmErrors)
+						if (confirmErrors && marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR)
 						{
 							hasErrors = true;
 							break;
 						}
-						if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_WARNING) &&
-							confirmWarnings)
+						if (confirmWarnings && marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_WARNING)
 						{
 							hasErrors = true;
 							break;
@@ -131,6 +132,7 @@ public abstract class StartDebugHandler extends AbstractHandler implements IHand
 			}
 			catch (CoreException e)
 			{
+				ServoyLog.logError(e);
 			}
 		}
 		if (hasErrors)

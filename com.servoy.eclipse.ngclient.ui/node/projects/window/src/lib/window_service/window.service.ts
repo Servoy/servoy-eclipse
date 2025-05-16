@@ -83,7 +83,8 @@ export class WindowPluginService {
                                 //$sabloTestability.block(true);
                                 setTimeout((clb: { script: string; formname?: string }, clbArgs: Array<any>) => {
                                     let formName = clbArgs[0].formName;
-                                    if (!formName) formName = clb.formname;
+                                    if (!formName && clb) formName = clb.formname;
+									if (!clb) throw new Error('No callback script found for shortcut: ' + newvalue.shortcut);
                                     this.servoyService.executeInlineScript(formName, clb.script, clbArgs);
                                     //$sabloTestability.block(false);
                                 }, 10, callback, argsWithEvent);
@@ -105,7 +106,7 @@ export class WindowPluginService {
 
     set popupMenuShowCommand(popupMenuShowCommand: PopupMenuShowCommand) {
         this._popupMenuShowCommand = popupMenuShowCommand;
-        this.showPopupMenu();
+        this.showPopupMenuInternal();
     }
 
     get popupMenus(): Popup[] {
@@ -114,11 +115,23 @@ export class WindowPluginService {
 
     set popupMenus(popupmenus: Popup[]) {
         this._popupmenus = popupmenus;
-        this.showPopupMenu();
+        this.showPopupMenuInternal();
     }
     
     private checkModifierKey(str: string) {
         return ['ctrl', 'alt', 'meta'].some(item => str.toLowerCase().startsWith(item));
+    }
+    
+    private timeoutId: ReturnType<typeof setTimeout> | number | null = null;
+    private showPopupMenuInternal() {
+        if (this.timeoutId !== null) {
+            clearTimeout(this.timeoutId);
+        }
+
+        this.timeoutId = setTimeout(() => {
+            this.showPopupMenu();
+            this.timeoutId = null;
+        }, 0);
     }
 
     private showPopupMenu() {

@@ -178,7 +178,7 @@ public class HandleDBIMarkersWizard extends Wizard
 					IMarkerResolutionGenerator generator = new ServoyQuickFixGenerator();
 					for (IMarker marker : markers)
 					{
-						String serverName = (String)marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME);
+						String serverName = marker.getAttribute(TableDifference.ATTRIBUTE_SERVERNAME, null);
 						if (serverName != null)
 						{
 							for (IServerInternal server : servers)
@@ -213,7 +213,6 @@ public class HandleDBIMarkersWizard extends Wizard
 		private final Map<IMarkerResolution, List<IMarker>> resolutions;
 		private Group resolutionsList;
 		private CheckboxTableViewer markersTable;
-		private final IWorkbenchPartSite site;
 
 		/**
 		 * Create a new instance of the receiver.
@@ -230,7 +229,6 @@ public class HandleDBIMarkersWizard extends Wizard
 		{
 			super(problemDescription);
 			this.resolutions = resolutions;
-			this.site = site;
 			setTitle(MarkerMessages.resolveMarkerAction_dialogTitle);
 			setMessage(problemDescription);
 		}
@@ -240,7 +238,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 			initializeDialogUnits(parent);
 
-			// Create a new composite as there is the title bar seperator
+			// Create a new composite as there is the title bar separator
 			// to deal with
 			Composite control = new Composite(parent, SWT.NONE);
 			control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

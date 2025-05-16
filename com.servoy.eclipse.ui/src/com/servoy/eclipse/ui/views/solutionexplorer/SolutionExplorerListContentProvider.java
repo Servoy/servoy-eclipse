@@ -192,6 +192,7 @@ import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
+import com.servoy.j2db.scripting.JSEventsManager;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSMenu;
 import com.servoy.j2db.scripting.JSMenuItem;
@@ -665,6 +666,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = TreeBuilder.createJSArray(this);
 			}
+			else if (type == UserNodeType.BIGINT)
+			{
+				lm = TreeBuilder.createJSBigInt(this);
+			}
+			else if (type == UserNodeType.PROMISE)
+			{
+				lm = TreeBuilder.createJSPromise(this);
+			}
 			else if (type == UserNodeType.OBJECT)
 			{
 				lm = TreeBuilder.createJSObject(this);
@@ -701,6 +710,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.FOUNDSET_MANAGER)
 			{
 				lm = getJSMethods(JSDatabaseManager.class, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null,
+					null);
+			}
+			else if (type == UserNodeType.EVENTS_MANAGER)
+			{
+				lm = getJSMethods(JSEventsManager.class, IExecutingEnviroment.TOPLEVEL_EVENTS_MANAGER, null, UserNodeType.EVENTS_MANAGER_ITEM, null,
 					null);
 			}
 			else if (type == UserNodeType.DATASOURCES)
@@ -1984,17 +1998,22 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						{
 							if (node.getDocumentation() != null)
 							{
-								WebObjectFunctionDefinition api = apis.get(node.getFunctionName());
+								String fullName = node.getFunctionName();
+								String[] nameParts = fullName.split("_");
+								String baseName = nameParts[0];
+								WebObjectApiFunctionDefinition api = apis.get(baseName);
 								if (api != null)
 								{
-									String doc = node.getDocumentation().getText();
-									String[] split = doc.split("@example");
-									if (split.length > 1)
+									String doc = parseDoc(node.getDocumentation().getText());
+
+									if (nameParts.length > 1)
 									{
-										String example = split[1].split("@")[0];
-										if (!example.isBlank())
+
+										WebObjectApiFunctionDefinition overload = getOverLoad(api, nameParts);
+										if (overload != null)
 										{
-											doc = doc.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+											overload.setDocumentation(doc);
+											return super.visitFunctionStatement(node);
 										}
 									}
 									api.setDocumentation(doc);
@@ -2005,7 +2024,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 									if (customType != null)
 									{
 										String text = node.getDocumentation().getText();
-										customType.setDocumentation(text);
+										customType.setDocumentation(parseDoc(text));
 										try
 										{
 											return super.visitFunctionStatement(node);
@@ -2025,14 +2044,81 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								if (parent instanceof BinaryOperation bo && bo.getLeftExpression() instanceof PropertyExpression pe &&
 									pe.getDocumentation() != null)
 								{
-									WebObjectApiFunctionDefinition apiFunction = customType.getApiFunction(pe.getProperty().toString());
+									String doc = parseDoc(pe.getDocumentation().getText());
+									String fullName = pe.getProperty().toString();
+									WebObjectApiFunctionDefinition apiFunction = customType.getApiFunction(fullName);
 									if (apiFunction != null)
 									{
-										apiFunction.setDocumentation(pe.getDocumentation().getText());
+										apiFunction.setDocumentation(doc);
+									}
+									else
+									{
+										String[] nameParts = fullName.split("_");
+										if (nameParts.length > 1)
+										{
+											String baseName = nameParts[0];
+											apiFunction = customType.getApiFunction(baseName);
+											if (apiFunction != null)
+											{
+												WebObjectApiFunctionDefinition overLoad = getOverLoad(apiFunction, nameParts);
+												if (overLoad != null)
+												{
+													overLoad.setDocumentation(doc);
+												}
+											}
+										}
 									}
 								}
 							}
 							return super.visitFunctionStatement(node);
+						}
+
+						String parseDoc(String doc)
+						{
+							String[] split = doc.split("@example");
+							if (split.length > 1)
+							{
+								String example = split[1].split("@")[0];
+								if (!example.isBlank())
+								{
+									doc = doc.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+								}
+							}
+							return doc;
+						}
+
+						WebObjectApiFunctionDefinition getOverLoad(WebObjectApiFunctionDefinition api, String[] nameParts)
+						{
+							List<WebObjectApiFunctionDefinition> overloads = api.getOverloads();
+							if (overloads != null)
+							{
+								for (WebObjectApiFunctionDefinition overload : overloads)
+								{
+									IFunctionParameters params = overload.getParameters();
+									if (params == null) continue;
+									List<String> paramNames = new ArrayList<>();
+									params.forEach(pd -> paramNames.add(pd.getName()));
+
+									if (paramNames.size() == nameParts.length - 1)
+									{
+										boolean match = true;
+										for (int i = 0; i < paramNames.size(); i++)
+										{
+											if (!paramNames.get(i).equals(nameParts[i + 1]))
+											{
+												match = false;
+												break;
+											}
+										}
+										if (match)
+										{
+											return overload;
+										}
+									}
+
+								}
+							}
+							return null;
 						}
 
 						@Override
@@ -2268,6 +2354,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private SimpleUserNode[] getJSMethods(Class clz, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
+		return getJSMethods(clz, elementName, prefix, actionType, real, excludeMethodNames, false, false);
+	}
+
+	private SimpleUserNode[] getJSMethods(Class clz, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames,
+		boolean skipFields, boolean skipMethods)
+	{
 		if (clz == null)
 		{
 			return null;
@@ -2317,15 +2409,22 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			// if the class is a scriptable an the javamembers is not a instance java members, just return nothing.
 			return new SimpleUserNode[0];
 		}
-		return getJSMethodsViaJavaMembers(ijm, clz, o, elementName, prefix, actionType, real, excludeMethodNames);
+		return getJSMethodsViaJavaMembers(ijm, clz, o, elementName, prefix, actionType, real, excludeMethodNames, skipFields, skipMethods);
 	}
 
 	private SimpleUserNode[] getJSMethodsViaJavaMembers(JavaMembers ijm, Class< ? > originalClass, IScriptObject scriptObject, String elementName,
 		String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
+		return getJSMethodsViaJavaMembers(ijm, originalClass, scriptObject, elementName,
+			prefix, actionType, real, excludeMethodNames, false, false);
+	}
+
+	private SimpleUserNode[] getJSMethodsViaJavaMembers(JavaMembers ijm, Class< ? > originalClass, IScriptObject scriptObject, String elementName,
+		String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames, boolean skipFields, boolean skipMethods)
+	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		IScriptObject adapter = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
-		if (real instanceof IConstantsObject || (real instanceof Class< ? > && IConstantsObject.class.isAssignableFrom((Class< ? >)real)))
+		if (!skipFields && (real instanceof IConstantsObject || (real instanceof Class< ? > && IConstantsObject.class.isAssignableFrom((Class< ? >)real))))
 		{
 			String constantsElementName = null;
 			if (real instanceof IPrefixedConstantsObject)
@@ -2379,130 +2478,137 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		ITagResolver resolver = new TagResolver(elementName, (prefix == null ? "" : prefix));
 		if (!elementName.endsWith(".")) elementName = elementName + ".";
 
-
-		List fields = ijm.getFieldIds(false);
-
-		if (excludeMethodNames != null) fields.removeAll(Arrays.asList(excludeMethodNames));
-
-		Object[] arrays = new Object[fields.size()];
-		arrays = fields.toArray(arrays);
-		Arrays.sort(arrays);
-
-		for (Object element : arrays)
+		Object[] arrays;
+		if (!skipFields)
 		{
-			String name = (String)element;
+			List fields = ijm.getFieldIds(false);
 
-			Image pIcon = propertiesIcon;
-			if (adapter != null)
+			if (excludeMethodNames != null) fields.removeAll(Arrays.asList(excludeMethodNames));
+
+			arrays = new Object[fields.size()];
+			arrays = fields.toArray(arrays);
+			Arrays.sort(arrays);
+
+			for (Object element : arrays)
 			{
-				if (adapter.isDeprecated(name)) continue;
-				if (adapter.isDeprecated(elementName + name)) continue;
-				if (adapter instanceof ITypedScriptObject)
-				{
-					if (((ITypedScriptObject)adapter).isSpecial(name))
-					{
-						pIcon = specialPropertiesIcon;
-					}
-				}
-			}
-			Object bp = ijm.getField(name, false);
-			if (bp == null) continue;
-			String codePrefix = "";
-			if (actionType != UserNodeType.RETURNTYPE_ELEMENT)
-			{
-				codePrefix = elementName;
-			}
+				String name = (String)element;
 
-			UserNode node = new UserNode(name, actionType, new FieldFeedback(name, codePrefix, resolver, scriptObject, ijm), real, pIcon);
-			if (bp instanceof JavaMembers.BeanProperty)
-			{
-				node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(((JavaMembers.BeanProperty)bp).getGetter(), originalClass,
-					ClientSupport.Default));
-			}
-			dlm.add(node);
-		}
-
-		List names = ijm.getMethodIds(false);
-
-		if (ijm instanceof InstanceJavaMembers)
-		{
-			names.removeAll(((InstanceJavaMembers)ijm).getGettersAndSettersToHide());
-		}
-
-		arrays = new Object[names.size()];
-		arrays = names.toArray(arrays);
-		Arrays.sort(arrays);
-
-		for (Object element : arrays)
-		{
-			String id = (String)element;
-
-			if (!(ijm instanceof InstanceJavaMembers))
-			{
-				// check if method from Object itself..
-				if (ignoreMethods.contains(id)) continue;
-
-				// don't list the methods from IPrefixedConstantsObject
-				if ((real instanceof IPrefixedConstantsObject) && ignoreMethodsFromPrefixedConstants.contains(id))
-				{
-					continue;
-				}
-			}
-
-			NativeJavaMethod njm = ijm.getMethod(id, false);
-			if (njm == null) continue;
-
-			for (MemberBox method : njm.getMethods())
-			{
-				String displayName = null;
-
-				Class[] parameterTypes = method.getParameterTypes();
-				Class returnType = method.getReturnType();
-				JSSignature annotation = method.method().getAnnotation(JSSignature.class);
-				if (annotation != null)
-				{
-					if (annotation.arguments().length > 0) parameterTypes = annotation.arguments();
-					if (annotation.returns() != Object.class) returnType = annotation.returns();
-				}
-
+				Image pIcon = propertiesIcon;
 				if (adapter != null)
 				{
+					if (adapter.isDeprecated(name)) continue;
+					if (adapter.isDeprecated(elementName + name)) continue;
 					if (adapter instanceof ITypedScriptObject)
 					{
-						if (((ITypedScriptObject)adapter).isDeprecated(id, parameterTypes)) continue;
-						displayName = ((ITypedScriptObject)adapter).getJSTranslatedSignature(id, parameterTypes);
-					}
-					else
-					{
-						if (adapter.isDeprecated(id)) continue;
-						if (adapter.isDeprecated(elementName + id)) continue;
+						if (((ITypedScriptObject)adapter).isSpecial(name))
+						{
+							pIcon = specialPropertiesIcon;
+						}
 					}
 				}
-
-				if (displayName == null)
-				{
-					String paramTypes = "";
-					for (Class param : parameterTypes)
-					{
-						paramTypes += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(param) + ", ";
-					}
-					paramTypes = "(" + (parameterTypes.length > 0 ? paramTypes.substring(0, paramTypes.length() - 2) : "") + ")";
-					displayName = id + paramTypes + " - " + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType);
-				}
+				Object bp = ijm.getField(name, false);
+				if (bp == null) continue;
 				String codePrefix = "";
 				if (actionType != UserNodeType.RETURNTYPE_ELEMENT)
 				{
 					codePrefix = elementName;
 				}
 
-				SimpleUserNode node = new UserNode(displayName, actionType,
-					new MethodFeedback(id, parameterTypes, codePrefix, resolver, scriptObject, njm, null), (Object)null, functionIcon);
-
-				node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(method.method(), originalClass, ClientSupport.Default));
-
+				UserNode node = new UserNode(name, actionType, new FieldFeedback(name, codePrefix, resolver, scriptObject, ijm), real, pIcon);
+				if (bp instanceof JavaMembers.BeanProperty)
+				{
+					node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(((JavaMembers.BeanProperty)bp).getGetter(), originalClass,
+						ClientSupport.Default));
+				}
 				dlm.add(node);
 			}
 		}
+
+		if (!skipMethods)
+		{
+			List names = ijm.getMethodIds(false);
+
+			if (ijm instanceof InstanceJavaMembers)
+			{
+				names.removeAll(((InstanceJavaMembers)ijm).getGettersAndSettersToHide());
+			}
+
+			arrays = new Object[names.size()];
+			arrays = names.toArray(arrays);
+			Arrays.sort(arrays);
+
+			for (Object element : arrays)
+			{
+				String id = (String)element;
+
+				if (!(ijm instanceof InstanceJavaMembers))
+				{
+					// check if method from Object itself..
+					if (ignoreMethods.contains(id)) continue;
+
+					// don't list the methods from IPrefixedConstantsObject
+					if ((real instanceof IPrefixedConstantsObject) && ignoreMethodsFromPrefixedConstants.contains(id))
+					{
+						continue;
+					}
+				}
+
+				NativeJavaMethod njm = ijm.getMethod(id, false);
+				if (njm == null) continue;
+
+				for (MemberBox method : njm.getMethods())
+				{
+					String displayName = null;
+
+					Class[] parameterTypes = method.getParameterTypes();
+					Class returnType = method.getReturnType();
+					JSSignature annotation = method.method().getAnnotation(JSSignature.class);
+					if (annotation != null)
+					{
+						if (annotation.arguments().length > 0) parameterTypes = annotation.arguments();
+						if (annotation.returns() != Object.class) returnType = annotation.returns();
+					}
+
+					if (adapter != null)
+					{
+						if (adapter instanceof ITypedScriptObject)
+						{
+							if (((ITypedScriptObject)adapter).isDeprecated(id, parameterTypes)) continue;
+							displayName = ((ITypedScriptObject)adapter).getJSTranslatedSignature(id, parameterTypes);
+						}
+						else
+						{
+							if (adapter.isDeprecated(id)) continue;
+							if (adapter.isDeprecated(elementName + id)) continue;
+						}
+					}
+
+					if (displayName == null)
+					{
+						String paramTypes = "";
+						for (Class param : parameterTypes)
+						{
+							paramTypes += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(param) + ", ";
+						}
+						paramTypes = "(" + (parameterTypes.length > 0 ? paramTypes.substring(0, paramTypes.length() - 2) : "") + ")";
+						displayName = id + paramTypes + " - " + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnType);
+					}
+					String codePrefix = "";
+					if (actionType != UserNodeType.RETURNTYPE_ELEMENT)
+					{
+						codePrefix = elementName;
+					}
+
+					SimpleUserNode node = new UserNode(displayName, actionType,
+						new MethodFeedback(id, parameterTypes, codePrefix, resolver, scriptObject, njm, null), (Object)null, functionIcon);
+
+					node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(method.method(), originalClass, ClientSupport.Default));
+
+					dlm.add(node);
+				}
+			}
+		}
+
 		SimpleUserNode[] nodes = new SimpleUserNode[dlm.size()];
 		return dlm.toArray(nodes);
 	}
@@ -2642,6 +2748,22 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 			}, properties.values());
 
+			String extendsScriptClass = customType.getExtends();
+
+			if (extendsScriptClass != null)
+			{
+				try
+				{
+					nodes.addAll(Arrays.asList(
+						getJSMethods(Class.forName("com.servoy.j2db.scripting." + extendsScriptClass), ".", null, UserNodeType.RETURNTYPE_ELEMENT, null, null,
+							false, true)));
+				}
+				catch (ClassNotFoundException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+
 			for (PropertyDescription pd : sortedProperties)
 			{
 				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
@@ -2650,6 +2772,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS,
 					new WebObjectFieldFeedback(pd, name, name), customType,
 					propertiesIcon));
+			}
+
+			if (extendsScriptClass != null)
+			{
+				try
+				{
+					nodes.addAll(Arrays.asList(getJSMethods(Class.forName("com.servoy.j2db.scripting." + extendsScriptClass), ".", null,
+						UserNodeType.RETURNTYPE_ELEMENT, null, null, true, false)));
+				}
+				catch (ClassNotFoundException ex)
+				{
+					ServoyLog.logError(ex);
+				}
 			}
 
 			Collection<WebObjectApiFunctionDefinition> apiFunctions = new SortedList<WebObjectApiFunctionDefinition>(StringComparator.INSTANCE,
@@ -2696,11 +2831,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							{
 								return "/** @type {" + ElementUtil.getDecoratedCustomTypeName(entry.getValue()) + "} */";
 							}
+
 						});
 						return node;
-					})
-					.sorted((node1, node2) -> node1.getName().compareTo(node2.getName()))
-					.collect(Collectors.toList());
+					}).sorted((node1, node2) -> node1.getName().compareTo(node2.getName())).collect(Collectors.toList());
 			}
 		}
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
@@ -3413,7 +3547,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else
 			{
-				toolTip = tmp + "<br><pre>" + toolTip + "</pre>";
+				toolTip = tmp + "<br><p>" + toolTip.replace("\n\n", "\n<p>\n") + "</p>";
 			}
 			return toolTip;
 		}

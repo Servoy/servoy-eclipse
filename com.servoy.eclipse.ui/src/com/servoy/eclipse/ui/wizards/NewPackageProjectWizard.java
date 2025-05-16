@@ -150,7 +150,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		}
 		catch (CoreException e)
 		{
-			// ignore
+			ServoyLog.logError(e);
 		}
 	}
 
@@ -296,11 +296,11 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			}
 			catch (CoreException e)
 			{
-				Debug.log(e);
+				ServoyLog.logError(e);
 			}
 			catch (IOException e)
 			{
-				Debug.log(e);
+				ServoyLog.logError(e);
 			}
 
 			return Status.OK_STATUS;
@@ -383,6 +383,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					}
 					catch (CoreException e)
 					{
+						ServoyLog.logError(e);
 					}
 				}
 				IPackageReader[] readers = WebComponentSpecProvider.getSpecProviderState().getAllPackageReaders();

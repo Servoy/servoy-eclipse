@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy JSUnit Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.jsunit;singleton:=true
-Bundle-Version: 2025.3.0.4040_rc
+Bundle-Version: 2025.6.0.4080_rc
 Bundle-Activator: com.servoy.eclipse.jsunit.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.dltk.javascript.rhino,
@@ -33,7 +33,7 @@ Require-Bundle: org.eclipse.dltk.javascript.rhino,
  org.eclipse.core.expressions,
  servoy_headless_client
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ClassPath: jsunit-1.3.jar,
  .
 Export-Package: com.servoy.eclipse.jsunit,

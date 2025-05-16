@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackEvent;
@@ -278,46 +277,45 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	{
 		super.pageChange(newPageIndex);
 		if (graphicaleditor != null) graphicaleditor.commandStackChanged(new EventObject(this));
+
+		activateEditorContext();
 	}
 
+
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter)
+	public <T> T getAdapter(Class<T> adapter)
 	{
+		IEditorPart activeEditor = getActiveEditor();
+		if (activeEditor != null)
+		{
+			// If the active inner part can provide the adapter, return it
+			T returnValue = activeEditor.getAdapter(adapter);
+			if (returnValue != null)
+			{
+				return returnValue;
+			}
+		}
 		if (adapter.equals(IPersist.class))
 		{
-			return form;
+			return (T)form;
 		}
 		if (adapter.equals(IGotoMarker.class))
 		{
-			return new IGotoMarker()
+			return (T)new IGotoMarker()
 			{
 				public void gotoMarker(IMarker marker)
 				{
-					String elementUuid = null;
-					try
+					String elementUuid = marker.getAttribute("elementUuid", null);
+					int start = marker.getAttribute(IMarker.CHAR_START, -1);
+					if (start != -1)
 					{
-						elementUuid = (String)marker.getAttribute("elementUuid");
+						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), start);
 					}
-					catch (CoreException e)
+					String name = marker.getAttribute("Name", null);
+					if (name != null && name.indexOf('$') >= 0)
 					{
-						ServoyLog.logError(e);
-					}
-					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
-					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
-							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
-					}
-					try
-					{
-						String name = (String)marker.getAttribute("Name");
-						if (name != null && name.indexOf('$') >= 0)
-						{
-							elementUuid = name;
-						}
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
+						elementUuid = name;
 					}
 					if (elementUuid != null)
 					{
@@ -336,19 +334,19 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		}
 		if (adapter == IPropertySourceProvider.class)
 		{
-			return new UndoablePersistPropertySourceProvider(this);
+			return (T)new UndoablePersistPropertySourceProvider(this);
 		}
 		Object result = super.getAdapter(adapter);
-		if (result == null && graphicaleditor != null)
+		if (result == null && graphicaleditor != null && graphicaleditor == getActiveEditor())
 		{
 			result = graphicaleditor.getAdapter(adapter);
 		}
 		if (result == null && adapter.equals(ActionRegistry.class))
 		{
 			// dummy return, this prevents a NPE when form editor is opened for form that is not part of the active solution
-			return getDummyActionRegistry();
+			return (T)getDummyActionRegistry();
 		}
-		return result;
+		return (T)result;
 	}
 
 	private ActionRegistry dummyActionRegistry;
@@ -1001,13 +999,16 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				activateContext = null;
 			}
 
-			if (getGraphicaleditor().getDesignPagetype() == DesignPagetype.Rfb)
+			if (getActiveEditor() == graphicaleditor && graphicaleditor != null)
 			{
-				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT);
-			}
-			else
-			{
-				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+				if (getGraphicaleditor().getDesignPagetype() == DesignPagetype.Rfb)
+				{
+					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT);
+				}
+				else
+				{
+					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+				}
 			}
 		}
 	}

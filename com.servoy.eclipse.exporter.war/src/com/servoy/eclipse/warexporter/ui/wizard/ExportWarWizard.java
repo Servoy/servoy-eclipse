@@ -739,7 +739,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -tables", exportModel.isExportAllTablesFromReferencedServers());
 
 		appendToBuilder(sb, " -overwriteGroups", exportModel.isOverwriteGroups());
-		appendToBuilder(sb, " -allowSQLKeywords", exportModel.isExportSampleData());
+		appendToBuilder(sb, " -allowSQLKeywords", exportModel.isAllowSQLKeywords());
 		appendToBuilder(sb, " -allowDataModelChanges ", exportModel.getAllowDataModelChanges());
 		appendToBuilder(sb, " -skipDatabaseViewsUpdate", exportModel.isSkipDatabaseViewsUpdate());
 		appendToBuilder(sb, " -overrideSequenceTypes", exportModel.isOverrideSequenceTypes());

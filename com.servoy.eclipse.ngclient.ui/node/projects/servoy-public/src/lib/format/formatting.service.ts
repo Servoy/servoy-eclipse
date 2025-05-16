@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import numbro from 'numbro';
+import BigNumber from "bignumber.js";
 import { DateTime } from 'luxon';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
@@ -280,6 +281,14 @@ export class FormattingService {
                 }
             }
         }
+        // first try it with the BigNumber library
+        // and test if this number can be represented as a javascript number without loosing precision
+        // if not, return the string representation of the number
+        const stripped = data.replaceAll(numbro.languageData().delimiters.thousands, '').replace(numbro.languageData().delimiters.decimal, '.');
+        const bigNumber = BigNumber(stripped);
+        if (!bigNumber.isNaN() && !bigNumber.isEqualTo(bigNumber.toNumber())) {
+            return bigNumber.toString();
+        }
         let ret = numbro(data).value();
         ret *= multFactor;
         return ret;
@@ -371,8 +380,16 @@ export class FormattingService {
         if (data === '')
             return data;
 
-        data = Number(data); // just to make sure that if it was a string representing a number we turn it into a number
-        if (typeof data === 'number' && isNaN(data)) return ''; // cannot format something that is not a number
+        let nmbr = Number(data);
+        if (typeof data === 'string' && nmbr.toString() != data) {
+           // this is very likely a bignumber.
+           data = BigNumber(data);
+           if (data.isNaN()) return '';
+        }
+        else {
+            data = Number(data); // just to make sure that if it was a string representing a number we turn it into a number
+            if (typeof data === 'number' && isNaN(data)) return ''; // cannot format something that is not a number
+        }
 
         const initialData = data;
         let patchedFormat = servoyFormat; // patched format for numbro format
@@ -455,7 +472,7 @@ export class FormattingService {
                     fractionalDigits++;
                 }
             }
-            ret = Number(data).toExponential(integerDigits + fractionalDigits);
+            ret = BigNumber(data).toExponential(integerDigits + fractionalDigits);
         } else {
 
             let leftFormat = '';
@@ -514,14 +531,23 @@ export class FormattingService {
             } else {
                 mantissaLength = minLenMantissa + optionalDigitsMantissa;
             }
-            ret = numbro(data).format({
-                thousandSeparated: data > 999 && patchedFormat.includes(',') ? true : false,
-                mantissa: mantissaLength,
-                optionalMantissa: minLenMantissa === 0,
-                trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
-                characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
-                optionalCharacteristic: rightDataMantissaLength === 0 && minLenMantissa === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0
-            });
+            if (data instanceof BigNumber) {
+                ret = data.toFormat(mantissaLength, BigNumber.ROUND_HALF_UP, {
+                    decimalSeparator: numbro.languageData().delimiters.decimal,
+                    groupSeparator: numbro  .languageData().delimiters.thousands,
+                    groupSize: patchedFormat.includes(',') ? 3 : 0,
+                });
+            }
+            else {
+                ret = numbro(data).format({
+                    thousandSeparated: data > 999 && patchedFormat.includes(',') ? true : false,
+                    mantissa: mantissaLength,
+                    optionalMantissa: minLenMantissa === 0,
+                    trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
+                    characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
+                    optionalCharacteristic: rightDataMantissaLength === 0 && minLenMantissa === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0
+                });
+            }
         }
 
         return prefix + ret + sufix;

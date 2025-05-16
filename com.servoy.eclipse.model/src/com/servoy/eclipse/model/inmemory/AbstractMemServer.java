@@ -849,7 +849,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		for (Column c : selectedTable.getColumns())
 		{
 			ColumnInfo columnInfo = c.getColumnInfo();
-			Column newColumn = table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
+			Column newColumn = table.createNewColumn(validator, c.getSQLName(), c.getColumnType(), c.getAllowNull(),
 				(c.getFlags() & IBaseColumn.PK_COLUMN) != 0);
 			if (columnInfo != null)
 			{

@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -80,7 +81,6 @@ import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.DatabaseUtils;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -542,7 +542,7 @@ public class DataModelManager implements IServerInfoManager
 				}
 				catch (CoreException e)
 				{
-					Debug.error(e);
+					ServoyLog.logError(e);
 				}
 			}
 		}
@@ -555,7 +555,7 @@ public class DataModelManager implements IServerInfoManager
 			}
 			catch (CoreException e)
 			{
-				Debug.error(e);
+				ServoyLog.logError(e);
 			}
 		}
 	}
@@ -948,6 +948,7 @@ public class DataModelManager implements IServerInfoManager
 			obj.put(ColumnInfoDef.DATA_TYPE, cid.columnType.getSqlType());
 			if (cid.columnType.getLength() != 0) obj.put(ColumnInfoDef.LENGTH, cid.columnType.getLength());
 			if (cid.columnType.getScale() != 0) obj.put(ColumnInfoDef.SCALE, cid.columnType.getScale());
+			if (cid.columnType.getSubType() != 0) obj.put(ColumnInfoDef.SUB_TYPE, cid.columnType.getSubType());
 			String compatibleColumnTypesStr = XMLUtils.serializeColumnTypeArray(cid.compatibleColumnTypes);
 			if (compatibleColumnTypesStr != null)
 			{
@@ -1666,7 +1667,7 @@ public class DataModelManager implements IServerInfoManager
 					{
 						severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
 					}
-					else
+					else if (t1 != Types.ARRAY || t2 != Types.ARRAY) // ignore difference of array length, db reports as MAXINT
 					{
 						boolean compatibleLengths = (t1 == t2) && (t1 == IColumnTypes.MEDIA || t1 == IColumnTypes.TEXT) &&
 							(Math.abs(colColumnType.getLength() - (float)dbiColumnType.getLength()) > (Integer.MAX_VALUE / 2));

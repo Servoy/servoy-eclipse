@@ -427,7 +427,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 		}
 		catch (CoreException e)
 		{
-			Debug.log(e);
+			ServoyLog.logError(e);
 		}
 	}
 

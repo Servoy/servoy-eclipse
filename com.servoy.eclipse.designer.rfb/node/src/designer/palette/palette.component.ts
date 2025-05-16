@@ -218,7 +218,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         if (event.target && (event.target as Element).className === 'popover-body') {
             return; // it has a separate handler
         }
-        if (!this.canDrop.dropTarget) {
+        if (this.canDrop && !this.canDrop.dropTarget) {
             this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);   
         }
         if (this.dragItem.paletteItemBeingDragged) {
@@ -356,7 +356,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                             insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null
                         });
                     }
-                    if (this.canDrop.dropAllowed && (this.canDrop.dropTarget || !this.urlParser.isAbsoluteFormLayout()) && !this.canDrop?.dropTarget.classList.contains('svy-csspositioncontainer')) {
+                    if (this.canDrop.dropAllowed && (this.canDrop.dropTarget || !this.urlParser.isAbsoluteFormLayout()) && !this.canDrop.dropTarget?.classList.contains('svy-csspositioncontainer')) {
                         // hide the dragged item and rely on inserted item at specific parent 
                         this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '0');
                         this.renderer.removeClass(this.dragItem.contentItemBeingDragged, 'highlight_element');

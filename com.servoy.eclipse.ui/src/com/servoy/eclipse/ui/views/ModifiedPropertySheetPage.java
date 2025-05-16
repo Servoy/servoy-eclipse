@@ -278,18 +278,17 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					{
 						hardcodedText = "Warning: Do not use dialogs, as a dialog will interfere with focus";
 					}
+					else if ("authenticator".equals(item.getText(0)))
+					{
+						hardcodedText = "This can set various options for the stateless login page, see <a href='https://docs.servoy.com/guides/develop/security/authentication'>authenciation</a> for more information";
+					}
 					else if (StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName().equals(item.getText(0)))
 					{
-						hardcodedText = "Set value <empty> for no title text";
+						hardcodedText = "Set value &lt;empty> for no title text";
 					}
 					else if (StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(item.getText(0)))
 					{
 						hardcodedText = "Set z-index of the element.";
-					}
-					else if (StaticContentSpecLoader.PROPERTY_ROLLOVERCURSOR.getPropertyName().equals(item.getText(0)) ||
-						StaticContentSpecLoader.PROPERTY_ROLLOVERIMAGEMEDIAID.getPropertyName().replace("ID", "").equals(item.getText(0)))
-					{
-						hardcodedText = "Not supported in smart client for listview/tableview";
 					}
 					else if ("min-width".equals(item.getText(0)) || "min-height".equals(item.getText(0)))
 					{

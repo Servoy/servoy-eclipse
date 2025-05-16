@@ -108,7 +108,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -123,6 +122,7 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportMedia;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
@@ -1054,7 +1054,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							catch (CoreException e)
 							{
-								// ignore
+								ServoyLog.logError(e);
 							}
 						}
 					}
@@ -1110,13 +1110,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ServoyLog.logError(e);
 						}
 					}
-				}
-
-				// import hook modules should not contain other modules
-				if (SolutionMetaData.isPreImportHook(servoyProject.getSolution()) && modulesNames.length > 0)
-				{
-					String message = "Module " + servoyProject.getSolution().getName() + " is a solution import hook, so it should not contain any modules.";
-					addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
 				}
 			}
 		}
@@ -1413,7 +1406,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				if ((form.isResponsiveLayout() != extendsForm.isResponsiveLayout()) || (form.getUseCssPosition() != extendsForm.getUseCssPosition()))
 				{
-					Iterator<IFormElement> uiElements = extendsForm.getFormElementsSortedByFormIndex();
+					Iterator<ISupportFormElement> uiElements = extendsForm.getFormElementsSortedByFormIndex();
 					// do now show if no ui is present
 					if (uiElements.hasNext())
 					{
@@ -1447,7 +1440,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						catch (CoreException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 				}
@@ -2449,8 +2442,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							String datasource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
 							if (!dataSourceCollectorVisitor.getDataSources().contains(datasource))
 							{
-								Object markerSeverity = marker.getAttribute(IMarker.SEVERITY);
-								if (markerSeverity == null || (markerSeverity != null && ((Integer)markerSeverity).intValue() > IMarker.SEVERITY_WARNING))
+								int markerSeverity = marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+								if (markerSeverity > IMarker.SEVERITY_WARNING)
 								{
 									marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
 								}
@@ -2656,7 +2649,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
-							final ITable table = server.getTable(tableName);
+							ITable table = server.getTable(tableName);
 							IResource res = project;
 							if (getServoyModel().getDataModelManager() != null &&
 								getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
@@ -2666,8 +2659,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							if (table.isTableInvalidInDeveloperBecauseNoPk())
 							{
 
-								final ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
-								final IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
+								ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
+								IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
 									IMarker.PRIORITY_HIGH, null, null);
 								try
 								{
@@ -2676,7 +2669,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								catch (CoreException e)
 								{
-									Debug.error(e);
+									ServoyLog.logError(e);
 								}
 							}
 							Map<String, Column> columnsByName = new HashMap<String, Column>();
@@ -3151,7 +3144,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						catch (CoreException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 				}
@@ -3205,7 +3198,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								catch (CoreException e)
 								{
-									Debug.error(e);
+									ServoyLog.logError(e);
 								}
 							}
 						}
@@ -3232,7 +3225,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										catch (CoreException e)
 										{
-											Debug.error(e);
+											ServoyLog.logError(e);
 										}
 										return CONTINUE_TRAVERSAL;
 									}
@@ -3320,12 +3313,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
 				Path path = new Path(pathPair.getLeft() + pathPair.getRight());
 				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-				if (persist instanceof IFormElement)
+				if (persist instanceof ISupportFormElement)
 				{
 					Form parent = persist.getAncestor(Form.class);
 					if (parent != null && parent.isFormComponent())
 					{
-						String name = ((IFormElement)persist).getName();
+						String name = ((ISupportFormElement)persist).getName();
 						if (name != null)
 						{
 							String[] nameParts = name.split("\\$");

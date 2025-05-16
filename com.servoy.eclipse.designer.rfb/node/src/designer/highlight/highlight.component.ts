@@ -103,6 +103,12 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
                     this.renderer.removeClass(node, 'highlight_element');
                 }
             });
+
+            if (showHighlight) {
+                setTimeout(() => {
+                    this.highlightChanged(showHighlight);
+                }, 0);
+            }
         });
     }
 }

@@ -30,6 +30,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         allowInputToggle: false,
         useCurrent: false,
         display: {
+            keyboardNavigation: true,
             components: {
 				calendar: true,
                 decades: true,

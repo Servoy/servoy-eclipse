@@ -45,16 +45,16 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Utils;
 
 /**
- * Property controller to be used in properties view for arrays of primitive types.
+ * Property controller to be used in properties view for arrays of builtin types.
  *
  * @author rgansevles
  */
-public class PrimitiveArrayTypePropertyController extends JSONArrayTypePropertyController
+public class BuiltinTypeArrayTypePropertyController extends JSONArrayTypePropertyController
 {
 	protected final PropertyDescription webComponentPropertyDescription;
 	protected final PersistContext persistContext;
 
-	public PrimitiveArrayTypePropertyController(Object id, String displayName, PersistContext persistContext,
+	public BuiltinTypeArrayTypePropertyController(Object id, String displayName, PersistContext persistContext,
 		PropertyDescription webComponentPropertyDescription)
 	{
 		super(id, displayName);
@@ -181,7 +181,7 @@ public class PrimitiveArrayTypePropertyController extends JSONArrayTypePropertyC
 		// but NGCustomJSONArrayType does not - because all indexes of an array (up to length) are always defined; on objects/direct props of components some properties might not be defined => they look at defaults from .spec and property type
 		PropertyDescription elementDef = ((ICustomType< ? >)webComponentPropertyDescription.getType()).getCustomJSONTypeDefinition();
 
-		// the following are all primitives, so I don't think we need to worry about conversions (is what we choose below a design value, a sablo value etc.)
+		// the following are all builtin, so I don't think we need to worry about conversions (is what we choose below a design value, a sablo value etc.)
 		Object valueToSetOnNewElements = elementDef.getInitialValue();
 		if (valueToSetOnNewElements == null) valueToSetOnNewElements = elementDef.getDefaultValue();
 		if (valueToSetOnNewElements == null && (elementDef.getType() instanceof DefaultPropertyType dpt))
@@ -194,15 +194,17 @@ public class PrimitiveArrayTypePropertyController extends JSONArrayTypePropertyC
 	protected Object getValueForReset()
 	{
 		Object defaultValue = webComponentPropertyDescription.getDefaultValue();
-		if (defaultValue == null) return null;
-		else if (defaultValue instanceof JSONArray jsonArray)
+		if (defaultValue instanceof JSONArray jsonArray)
 		{
 			Object[] javaArray = new Object[jsonArray.length()];
 			for (int i = 0; i < javaArray.length; i++)
-				javaArray[i] = jsonArray.get(i); // this should work as this class deals with arrays of primitives
+			{
+				javaArray[i] = jsonArray.get(i); // this should work as this class deals with arrays of builtin types
+			}
 			return javaArray;
 		}
-		else return null; // should never end up here, only if the .spec file is incorrect (it gives a default value for array which is not an array)
+
+		return null;
 	}
 
 }

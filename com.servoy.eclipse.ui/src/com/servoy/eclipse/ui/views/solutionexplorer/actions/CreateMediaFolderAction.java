@@ -86,7 +86,8 @@ public class CreateMediaFolderAction extends Action implements ISelectionChanged
 				{
 					return "Name cannot be empty";
 				}
-				else if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
+				else if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0 || newText.endsWith(".") ||
+					newText.startsWith("."))
 				{
 					return "Invalid new media name";
 				}

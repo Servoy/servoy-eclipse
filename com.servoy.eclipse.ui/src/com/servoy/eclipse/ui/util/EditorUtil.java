@@ -106,13 +106,13 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
@@ -1181,7 +1181,7 @@ public class EditorUtil
 		boolean hideDefault = !PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.show.default.package");
 		if (form != null && !form.isResponsiveLayout() && hideDefault)
 		{
-			Iterator<IFormElement> elements = form.getFormElementsSortedByFormIndex();
+			Iterator<ISupportFormElement> elements = form.getFormElementsSortedByFormIndex();
 			while (elements.hasNext() && hideDefault)
 			{
 				hideDefault = hideDefault && (elements.next() instanceof WebComponent);

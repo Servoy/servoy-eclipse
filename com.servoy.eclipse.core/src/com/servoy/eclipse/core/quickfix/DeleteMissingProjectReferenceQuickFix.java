@@ -64,7 +64,7 @@ public class DeleteMissingProjectReferenceQuickFix implements IMarkerResolution
 			final List<IProject> newReferencedProjectsList = new ArrayList<>();
 			for (IProject p : referencedProjects)
 			{
-				if (!p.getName().equalsIgnoreCase((String)marker.getAttribute(ServoyBuilder.PROJECT_REFERENCE_NAME)))
+				if (!p.getName().equalsIgnoreCase(marker.getAttribute(ServoyBuilder.PROJECT_REFERENCE_NAME, null)))
 				{
 					newReferencedProjectsList.add(p);
 				}

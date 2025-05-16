@@ -400,8 +400,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 												String columnName = updateColumnNames.get(i);
 												if (tableColumnNames.indexOf(columnName) == -1)
 												{
-													memTable.createNewColumn(DummyValidator.INSTANCE, columnName, columnTypes[i].getSqlType(),
-														columnTypes[i].getLength());
+													memTable.createNewColumn(DummyValidator.INSTANCE, columnName, columnTypes[i]);
 												}
 												else if (memTable.getColumn(columnName).getColumnType().getSqlType() != columnTypes[i].getSqlType())
 												{

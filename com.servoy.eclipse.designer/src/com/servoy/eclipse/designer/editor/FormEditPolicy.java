@@ -46,9 +46,9 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
@@ -121,10 +121,10 @@ public class FormEditPolicy extends ComponentEditPolicy
 					}
 					if (((EditPart)editPart).getModel() instanceof FormElementGroup)
 					{
-						Iterator<IFormElement> elements = ((FormElementGroup)((EditPart)editPart).getModel()).getElements();
+						Iterator<ISupportFormElement> elements = ((FormElementGroup)((EditPart)editPart).getModel()).getElements();
 						while (elements.hasNext())
 						{
-							IFormElement next = elements.next();
+							ISupportFormElement next = elements.next();
 							if (next instanceof IPersist)
 							{
 								models.add(next);

@@ -15,8 +15,8 @@ import { MessageDialogWindowComponent } from './message-dialog-window/message-di
 import { LocaleService } from '../locale.service';
 import { ServerDataService } from './serverdata.service';
 import { AlertWindowComponent } from "./alert-window/alert-window.component";
-import { resolve } from 'path';
-import { reject } from 'lodash-es';
+
+import numbro from 'numbro';
 
 @Injectable()
 export class ApplicationService {
@@ -92,6 +92,10 @@ export class ApplicationService {
             this.setIcon(value, '192x192');
         } else if (key === ClientPropertyConstants.FIRST_DAY_OF_WEEK) {
             setFirstDayOfWeek(value);
+        } else if (key === ClientPropertyConstants.FORMAT_DECIMAL_SYMBOL) {
+            this.localeService.isLoaded().then(() => numbro.languageData().delimiters.decimal = value);
+        } else if (key === ClientPropertyConstants.FORMAT_GROUPING_SYMBOL) {
+            this.localeService.isLoaded().then(() => numbro.languageData().delimiters.thousands = value);
         }
 
     }
@@ -422,16 +426,11 @@ export class ApplicationService {
         return this.windowRefService.nativeWindow.navigator.clipboard.readText();
     }
 
-	public replaceUrlState(path?: string): void {
-	    const currentUrl = this.windowRefService.nativeWindow.location.href;
-	    const baseUrl = currentUrl.split('?')[0];
-
-	    if (path && baseUrl.indexOf(path) !== -1) {
-	        const pathIndex = baseUrl.indexOf(path);
-	        history.replaceState({}, '',  baseUrl.substring(0, pathIndex) + '/index.html');
-	    } else {
-	        history.replaceState({}, '', baseUrl);
-	    }
+	public replaceUrlState(): void {
+		const currentUrl = this.windowRefService.nativeWindow.location.href;
+		const baseUrl = currentUrl.split('?')[0];
+		const cleanedUrl = baseUrl.replace('/svylogin', '').replace('/svy_oauth', '');
+		history.replaceState({}, '', cleanedUrl);
 	}
 
     private showDefaultLoginWindow() {
@@ -470,4 +469,6 @@ class ClientPropertyConstants {
     public static WINDOW_BRANDING_ICON_32 = 'window.branding.icon.32';
     public static WINDOW_BRANDING_ICON_192 = 'window.branding.icon.192';
     public static FIRST_DAY_OF_WEEK = 'firstDayOfWeek';
+    public static FORMAT_GROUPING_SYMBOL = 'ngFormatGroupingSymbol';
+    public static FORMAT_DECIMAL_SYMBOL = 'ngFormatDecimalSymbol';
 }

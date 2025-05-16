@@ -1,9 +1,9 @@
 <div *ngIf="!labelFor" style='width:100%;height:100%;overflow:hidden;position:absolute' class='svy-label'  [id]="servoyApi.getMarkupId()" [svyTooltip]="toolTipText" [sabloTabseq]="tabSeq"
-	#element [ngStyle]="{pointerEvents: enabled ? 'unset': 'none'}">  	 
+	#element [ngStyle]="{pointerEvents: enabled ? 'unset': 'none', opacity: enabled ? '': '0.5'}">  	 
 <ng-container [ngTemplateOutlet]="template"></ng-container>
 </div>
 <label *ngIf="labelFor"  for='{{labelFor}}' style='width:100%;height:100%;overflow:hidden;position:absolute' [id]="servoyApi.getMarkupId()" class='svy-label' 
-	[svyTooltip]="toolTipText" #element [ngStyle]="{pointerEvents: enabled ? 'unset': 'none'}">
+	[svyTooltip]="toolTipText" #element [ngStyle]="{pointerEvents: enabled ? 'unset': 'none', opacity: enabled ? '': '0.5'}">
 <ng-container [ngTemplateOutlet]="template"></ng-container>	
 </label>
 

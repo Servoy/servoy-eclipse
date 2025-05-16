@@ -9,10 +9,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.3.0.4040_rc</version>
+		<version>2025.6.0.4080_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</artifactId>
-	<version>22.12.0</version>
+	<version>22.15.0</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>

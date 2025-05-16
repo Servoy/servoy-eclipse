@@ -59,6 +59,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -308,7 +309,8 @@ public class GhostHandler implements IServerService
 												: basicWebComponent.getUUID() + ghostWebObject.getJsonKey();
 											String ghostID = parentID != null ? parentID + "#" + ghostWebObject.getUUID() : ghostWebObject.getUUID().toString();
 											writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID, ghostWebObject.getIndex(),
-												ghostWebObject.getTypeName(), inherited);
+												ghostWebObject.getTypeName(),
+												inherited || ghostWebObject instanceof WebCustomType custom && custom.getExtendsID() > 0);
 										}
 										catch (JSONException e1)
 										{
@@ -448,6 +450,10 @@ public class GhostHandler implements IServerService
 			{
 				IPersist parent = o;
 				AbstractContainer container = ((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getShowedContainer();
+				if (container instanceof IFlattenedPersistWrapper wrapper)
+				{
+					container = (AbstractContainer)wrapper.getWrappedPersist();
+				}
 				if (container != null)
 				{
 					do

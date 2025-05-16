@@ -109,7 +109,8 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 					{
 						return "";
 					}
-					if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
+					if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0 || newText.endsWith(".") ||
+						newText.startsWith("."))
 					{
 						return "Invalid new media name";
 					}

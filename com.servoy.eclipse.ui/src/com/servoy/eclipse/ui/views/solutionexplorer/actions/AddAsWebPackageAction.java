@@ -34,10 +34,10 @@ import org.sablo.specification.Package.IPackageReader;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.j2db.util.Debug;
 
 /**
  * @author gganea@servoy.com
@@ -77,7 +77,7 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 			}
 			catch (CoreException e)
 			{
-				Debug.log(e);
+				ServoyLog.logError(e);
 			}
 		}
 	}

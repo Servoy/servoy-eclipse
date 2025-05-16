@@ -66,7 +66,6 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
-import com.servoy.j2db.IForm;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -837,9 +836,8 @@ public class ServoyFormBuilder
 						}
 						catch (CoreException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
-
 
 					}
 					ServoyBuilderUtils.addScriptMethodErrorMarkers(markerResource, scriptMethod);
@@ -1398,29 +1396,6 @@ public class ServoyFormBuilder
 					ServoyMarker mk = MarkerMessages.ImageMediaNotSet.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
 					ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.IMAGE_MEDIA_NOT_SET, IMarker.PRIORITY_NORMAL, null,
 						o);
-				}
-				if (o instanceof GraphicalComponent &&
-					(((GraphicalComponent)o).getRolloverImageMediaID() > 0 || ((GraphicalComponent)o).getRolloverCursor() > 0))
-				{
-					ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
-					if (activeProject != null && (activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY ||
-						activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SOLUTION))
-					{
-						Form parentForm = (Form)context;
-						if (parentForm != null &&
-							(parentForm.getView() == FormController.LOCKED_TABLE_VIEW || parentForm.getView() == FormController.LOCKED_LIST_VIEW ||
-								parentForm.getView() == FormController.TABLE_VIEW || parentForm.getView() == IForm.LIST_VIEW))
-						{
-							Part part = parentForm.getPartAt(((GraphicalComponent)o).getLocation().y);
-							if (part != null && part.getPartType() == Part.BODY)
-							{
-								ServoyMarker mk = MarkerMessages.RolloverImageAndCursorNotWorking.fill();
-								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.ROLLOVER_NOT_WORKING,
-									IMarker.PRIORITY_NORMAL, null, o);
-							}
-						}
-					}
-
 				}
 				if (o instanceof GraphicalComponent)
 				{

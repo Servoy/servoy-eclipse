@@ -43,6 +43,10 @@ import java.util.concurrent.ConcurrentMap;
 import javax.swing.Icon;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -83,6 +87,7 @@ import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
+import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
@@ -124,6 +129,7 @@ import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.MenuFoundsetServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -142,6 +148,7 @@ import com.servoy.j2db.MenuManager;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IJSBaseFoundSet;
 import com.servoy.j2db.dataprocessing.IJSBaseRecord;
@@ -257,6 +264,7 @@ import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSDimension;
+import com.servoy.j2db.scripting.JSEventsManager;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSMenu;
 import com.servoy.j2db.scripting.JSMenuItem;
@@ -269,6 +277,8 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
+import com.servoy.j2db.scripting.info.EventType;
+import com.servoy.j2db.scripting.info.JSPermission;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
@@ -401,6 +411,8 @@ public class TypeCreator extends TypeCache
 		BASE_TYPES.add("RegExp");
 		BASE_TYPES.add("Error");
 		BASE_TYPES.add("Math");
+		BASE_TYPES.add("BigInt");
+		BASE_TYPES.add("Promise");
 	}
 
 	/*
@@ -448,6 +460,7 @@ public class TypeCreator extends TypeCache
 
 		addAnonymousClassType("Controller", JSForm.class);
 		addAnonymousClassType(JSApplication.class);
+		addAnonymousClassType(JSEventsManager.class);
 		addAnonymousClassType(JSI18N.class);
 		addAnonymousClassType(HistoryProvider.class);
 		addAnonymousClassType(MenuManager.class);
@@ -468,11 +481,11 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType(JSMenu.class);
 		addAnonymousClassType(JSMenuItem.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
-		addAnonymousClassType("JSBaseSQLRecord", IJSBaseSQLRecord.class);
-		addAnonymousClassType("JSBaseSQLFoundSet", IJSBaseSQLFoundSet.class);
-		addAnonymousClassType("JSBaseRecord", IJSBaseRecord.class);
-		addAnonymousClassType("JSBaseFoundSet", IJSBaseFoundSet.class);
-
+		addType("JSBaseSQLRecord", IJSBaseSQLRecord.class);
+		addType("JSBaseSQLFoundSet", IJSBaseSQLFoundSet.class);
+		addType("JSBaseRecord", IJSBaseRecord.class);
+		addType("JSBaseFoundSet", IJSBaseFoundSet.class);
+//		addAnonymousClassType(EventType.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
@@ -549,6 +562,8 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 		addScopeType(JSViewDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSViewDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSMenuDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSMenuDataSource.class, ClientSupport.ng_wc_sc));
+		addScopeType(EventType.class.getSimpleName(), new EventTypesCreator());
+		addScopeType(JSPermission.class.getSimpleName(), new JSPermissionCreator());
 	}
 
 	private void addQueryBuilderScopeType(Class< ? > clazz)
@@ -754,6 +769,10 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.BOOLEAN);
 			}
+			if (type == NativePromise.class)
+			{
+				return getTypeRef(context, ITypeNames.PROMISE);
+			}
 			if (type == Byte.class || type == byte.class)
 			{
 				return getTypeRef(context, "byte");
@@ -766,10 +785,11 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.STRING);
 			}
-			if (type.isEnum())
-			{
-				return getTypeRef(context, "enum<" + type.getSimpleName() + '>');
-			}
+// not sure why this is done but this will not work for real java enums coming from Packages.xxxx
+//			if (type.isEnum())
+//			{
+//				return getTypeRef(context, "enum<" + type.getSimpleName() + '>');
+//			}
 
 			return getTypeRef(context, "Packages." + type.getName());
 		}
@@ -806,7 +826,11 @@ public class TypeCreator extends TypeCache
 		synchronized (this)
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSEventsManager.class), null);
+			// special case  EventType should be a scope creator
+			classTypes.remove(EventType.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
+			classTypes.remove(JSPermission.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
@@ -910,18 +934,31 @@ public class TypeCreator extends TypeCache
 
 						public void persistChanges(Collection<IPersist> changes)
 						{
-							Job job = new Job("clearing cache")
+							boolean fullChange = false;
+							for (IPersist changed : changes)
 							{
-
-								@Override
-								public IStatus run(IProgressMonitor monitor)
+								if (changed instanceof Solution)
 								{
-									flushCache();
-									return Status.OK_STATUS;
+									fullChange = true;
+									runClearCacheJob();
+									break;
 								}
-							};
-							job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-							job.schedule();
+							}
+							if (!fullChange)
+							{
+								Job job = new Job("clearing cache")
+								{
+
+									@Override
+									public IStatus run(IProgressMonitor monitor)
+									{
+										flushCache();
+										return Status.OK_STATUS;
+									}
+								};
+								job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+								job.schedule();
+							}
 						}
 					});
 					((ServoyModel)servoyModel).addSolutionMetaDataChangeListener(new ISolutionMetaDataChangeListener()
@@ -1001,6 +1038,33 @@ public class TypeCreator extends TypeCache
 					public void serverAdded(IServerInternal s)
 					{
 						s.addTableListener(tableListener);
+					}
+				});
+				servoyModel.addResourceChangeListener(new IResourceChangeListener()
+				{
+
+					@Override
+					public void resourceChanged(IResourceChangeEvent event)
+					{
+						if (event.getDelta() != null)
+						{
+							List<IResourceDelta> changedFiles = new ArrayList<IResourceDelta>();
+							ServoyModel.findChangedFiles(event.getDelta(), changedFiles);
+							boolean permissionsChanged = false;
+							for (IResourceDelta changedDelta : changedFiles)
+							{
+								IResource res = changedDelta.getResource();
+								if (res instanceof IFile file && file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT))
+								{
+									permissionsChanged = true;
+									break;
+								}
+							}
+							if (permissionsChanged)
+							{
+								runClearCacheJob();
+							}
+						}
 					}
 				});
 			}
@@ -2454,6 +2518,7 @@ public class TypeCreator extends TypeCache
 
 				if (sampleDoc != null && sampleDoc.trim().length() != 0)
 				{
+					docBuilder.append("<br/><b>@sample</b>");
 					docBuilder.append("<pre>");
 					docBuilder.append(HtmlUtils.escapeMarkup(sampleDoc));
 					docBuilder.append("</pre><br/>");
@@ -4452,6 +4517,10 @@ public class TypeCreator extends TypeCache
 						property.setType(getTypeRef(context, "String"));
 						break;
 
+					case Types.ARRAY :
+						property.setType(getTypeRef(context, "Array"));
+						break;
+
 					case IColumnTypes.MEDIA :
 						// Just return the Any type, because a media can hold anything.
 						// should be in sync with TypeCreater.getDataProviderType
@@ -5009,6 +5078,11 @@ public class TypeCreator extends TypeCache
 				Type type = TypeInfoModelFactory.eINSTANCE.createType();
 				type.setName(ElementUtil.CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
 				type.setKind(TypeKind.JAVA);
+				if (iPropertyType instanceof ICustomType< ? >)
+				{
+					String extendsName = ((ICustomType< ? >)iPropertyType).getExtends();
+					if (extendsName != null) type.setSuperType(getType(context, extendsName));
+				}
 				EList<Member> members = type.getMembers();
 				if (iPropertyType instanceof ICustomType< ? > customType)
 				{
@@ -5092,6 +5166,111 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	private class EventTypesCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		EventTypesCreator()
+		{
+		}
+
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "EventType", EventType.class);
+			}
+			type.setSuperType(superType);
+			type.setKind(TypeKind.JAVA);
+			EList<Member> members = type.getMembers();
+			FlattenedSolution fs = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+			if (fs != null)
+			{
+				Collection<EventType> eventTypes = fs.getEventTypes();
+				for (EventType eventType : eventTypes)
+				{
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(eventType.getName());
+					property.setVisible(true);
+					property.setStatic(true);
+					property.setType(TypeUtil.ref(type));
+					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
+					property.setDescription(eventType.isDefaultEvent() ? "Default Form level event"
+						: (eventType.getDescription() != null ? HtmlUtils.applyDescriptionMagic(eventType.getDescription())
+							: "Custom event added from solution eventTypes property"));
+					members.add(property);
+				}
+			}
+			return addType(null, type);
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+	private class JSPermissionCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		JSPermissionCreator()
+		{
+		}
+
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "JSPermission", JSPermission.class);
+			}
+			type.setSuperType(superType);
+			type.setKind(TypeKind.JAVA);
+			EList<Member> members = type.getMembers();
+			IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager()
+				.getGroups(ApplicationServerRegistry.get().getClientId());
+			if (groups != null)
+			{
+				for (int i = 0; i < groups.getRowCount(); i++)
+				{
+					String groupName = groups.getRow(i)[1].toString();
+					if (!IRepository.ADMIN_GROUP.equals(groupName))
+					{
+						Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+						property.setName(groupName);
+						property.setVisible(true);
+						property.setStatic(true);
+						property.setType(TypeUtil.ref(type));
+						property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("userandgroupsecurity.png"));
+						property.setDescription("Permission to be used by security manager(JSSecurity) in scripting.");
+						members.add(property);
+					}
+				}
+			}
+			return addType(null, type);
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
 
 	/**
 	 * @param context

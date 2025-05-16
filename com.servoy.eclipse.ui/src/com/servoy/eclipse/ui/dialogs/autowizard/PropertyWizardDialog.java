@@ -26,7 +26,6 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -103,43 +102,53 @@ public class PropertyWizardDialog extends Dialog
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
 		c.setLayoutData(gridData);
-		SashForm form = new SashForm(c, SWT.HORIZONTAL);
-		form.setLayout(layout);
-		form.setLayoutData(gridData);
-		SashForm form2 = new SashForm(form, SWT.VERTICAL);
-		Composite tableParentComposite = new Composite(form, SWT.BORDER);
-		tableParentComposite.setLayout(new FillLayout());
-		ScrolledComposite sc = new ScrolledComposite(tableParentComposite, SWT.V_SCROLL | SWT.H_SCROLL);
+
+		SashForm hSash = new SashForm(c, SWT.HORIZONTAL);
+		hSash.setLayout(layout);
+		hSash.setLayoutData(gridData);
+		SashForm vSash = new SashForm(hSash, SWT.VERTICAL);
+
+		//sc is the direct parent on the nattable in AutowizardPropertiesComposite
+		//make sure to add the border here (if any)
+		//wrapping it inside another composite with a border is causing a wrong (very first) rendering of the nattable
+		// basically the nat table is sitting "behind" the border widget's client area until resize
+		ScrolledComposite sc = new ScrolledComposite(hSash, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
+
 		int initialW = settings.get("weight") != null ? settings.getInt("weight") : 400;
-		form.setWeights(initialW, 1000 - initialW);
-		form2.addListener(SWT.Resize, e -> {
-			settings.put("weight", form.getWeights()[0]);
+		hSash.setWeights(initialW, 1000 - initialW);
+		vSash.addListener(SWT.Resize, e -> {
+			settings.put("weight", hSash.getWeights()[0]);
 		});
 
 		if (configurator.getDataproviderProperties().size() > 0)
 		{
-			dataprovidersSelector = new DataproviderPropertiesSelector(this, form2, persistContext, configurator, flattenedSolution,
+			dataprovidersSelector = new DataproviderPropertiesSelector(this, vSash, persistContext, configurator, flattenedSolution,
 				table, settings, getShell());
 		}
 
 		if (configurator.getStyleProperties().size() > 0) // should really be always 1 size..
 		{
-			stylePropertiesSelector = new StylePropertiesSelector(this, form2, configurator.getStyleProperties());
+			stylePropertiesSelector = new StylePropertiesSelector(this, vSash, configurator.getStyleProperties());
 		}
 
 		if (dataprovidersSelector != null && stylePropertiesSelector.stylePropertiesViewer != null)
-			form2.setWeights(70, 30);
+			vSash.setWeights(70, 30);
 
 		if (configurator.getFormProperties().size() > 0)
 		{
-			formPropertiesSelector = new FormPropertiesSelector(this, form2, configurator.getFormProperties(), configurator.getRelationProperties(),
+			formPropertiesSelector = new FormPropertiesSelector(this, vSash, configurator.getFormProperties(), configurator.getRelationProperties(),
 				persistContext, settings, flattenedSolution);
 		}
 
-		tableComposite = new AutoWizardPropertiesComposite(sc, persistContext, flattenedSolution,
+		tableComposite = new AutoWizardPropertiesComposite(
+			sc,
+			persistContext,
+			flattenedSolution,
 			configurator);
+
 		return area;
 	}
 

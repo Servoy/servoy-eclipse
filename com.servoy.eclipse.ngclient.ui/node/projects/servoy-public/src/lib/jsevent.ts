@@ -18,4 +18,5 @@ export interface EventLike {
     metaKey?: boolean;
     pageX? : number;
     pageY? : number;
+	detail? : any;
 }

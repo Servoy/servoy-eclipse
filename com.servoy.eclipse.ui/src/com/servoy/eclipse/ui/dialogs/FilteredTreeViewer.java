@@ -30,6 +30,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.SafeRunnable;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -351,7 +352,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 						recursiveExpand(null, items, monitor, lst);
 						for (TreePath treePath : lst)
 						{
-							treeViewer.expandToLevel(treePath, 1);
+							treeViewer.expandToLevel(treePath, AbstractTreeViewer.ALL_LEVELS);
 						}
 						// enabled toolbar - there is text to clear
 						// and the list is currently being filtered

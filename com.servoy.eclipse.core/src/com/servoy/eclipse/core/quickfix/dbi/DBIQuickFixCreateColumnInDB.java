@@ -114,7 +114,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 						}
 					};
 					// create the new column in memory
-					Column c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
+					Column c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType);
 					c.setDatabasePK((dbiFileDefinition.flags & IBaseColumn.PK_COLUMN) != 0);
 					c.setFlags(dbiFileDefinition.flags);
 					c.setAllowNull(dbiFileDefinition.allowNull);

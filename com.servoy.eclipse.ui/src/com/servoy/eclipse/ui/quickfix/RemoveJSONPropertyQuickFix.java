@@ -52,35 +52,20 @@ public class RemoveJSONPropertyQuickFix extends WorkbenchMarkerResolution
 
 	public String getLabel()
 	{
-		String propertyName;
-		try
+		String propertyName = marker.getAttribute("PropertyName", null);
+		if (propertyName != null)
 		{
-			propertyName = (String)marker.getAttribute("PropertyName");
 			String[] parts = propertyName.split("\\.");
 			return "Clear property " + parts[parts.length - 1];
-		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError(e);
 		}
 		return "Clear property";
 	}
 
 	public void run(IMarker marker)
 	{
-		String propertyName = null;
-		String solutionName = null;
-		String uuid = null;
-		try
-		{
-			propertyName = (String)marker.getAttribute("PropertyName");
-			solutionName = (String)marker.getAttribute("SolutionName");
-			uuid = (String)marker.getAttribute("Uuid");
-		}
-		catch (CoreException e1)
-		{
-			ServoyLog.logError(e1);
-		}
+		String propertyName = marker.getAttribute("PropertyName", null);
+		String solutionName = marker.getAttribute("SolutionName", null);
+		String uuid = marker.getAttribute("Uuid", null);
 		if (solutionName != null && uuid != null && propertyName != null)
 		{
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);

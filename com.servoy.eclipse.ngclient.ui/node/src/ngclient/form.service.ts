@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
-import { LoggerService, LogLevel, LoggerFactory, Deferred, RequestInfoPromise } from '@servoy/public';
+import { LoggerService, LogLevel, LoggerFactory, Deferred, RequestInfoPromise, WindowRefService } from '@servoy/public';
 import { ConverterService, IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged, instanceOfUIDestroyAwareValue } from '../sablo/converter.service';
 import { ServoyService } from './servoy.service';
 import { get, set } from 'lodash-es';
@@ -28,7 +28,8 @@ export class FormService {
     private isInDesigner = false;
 
     constructor(private sabloService: SabloService, private converterService: ConverterService<unknown>, websocketService: WebsocketService, logFactory: LoggerFactory,
-        private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry, private utils: SvyUtilsService) {
+        private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry, private utils: SvyUtilsService,
+        private windowRefService: WindowRefService) {
 
         this.log = logFactory.getLogger('FormService');
         this.formsCache = new Map();
@@ -408,8 +409,11 @@ export class FormService {
     }
 
     public createFormCache(formName: string, jsonData: any, url: string) {
-        const formCache = new FormCache(formName, jsonData.size, jsonData.responsive, url, this.typesRegistry);
+        const formCache = new FormCache(formName, jsonData.size, jsonData.responsive,url, this.typesRegistry);
 
+        if (jsonData.formCss) {
+            this.createFormStyleSheet(jsonData.formCss);
+        }
         this.walkOverChildren(jsonData.children, formCache);
 
         this.clientFunctionService.waitForLoading().finally(() => {
@@ -578,6 +582,23 @@ export class FormService {
     public setDesignerMode() {
         this.isInDesigner = true;
     }
+
+    private createFormStyleSheet(formCss: { [key: string]: string }) {
+        for (const formName of Object.keys(formCss)) {
+            const styleElementId = `form-style-${formName}`;
+            let styleElement = this.windowRefService.nativeWindow.document.getElementById(styleElementId) as HTMLStyleElement;
+        
+            if (!styleElement) {
+                styleElement = this.windowRefService.nativeWindow.document.createElement('style');
+                styleElement.nonce = this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes['ngCspNonce'].value;
+                styleElement.id = styleElementId;
+                this.windowRefService.nativeWindow.document.head.appendChild(styleElement);
+            }
+        
+            styleElement.innerHTML = formCss[formName];
+        }
+    }
+    
 
     private setChangeListenerIfSmartProperty(propertyValue: any, formName: string, componentName: string, propertyName: string) {
         if (instanceOfChangeAwareValue(propertyValue)) {

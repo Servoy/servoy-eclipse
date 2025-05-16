@@ -160,7 +160,7 @@ public class PermissionsDialog extends Dialog
 	/**
 	 * @return
 	 */
-	public Object getValue()
+	public JSONObject getValue()
 	{
 		return model.getValue();
 	}

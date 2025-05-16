@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,6 +88,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.IWebComponent;
@@ -164,6 +166,19 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						}
 					}
 				}
+				if (form.getExtendsID() > 0 && changedPersists.size() >= 2)
+				{
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						LayoutContainer container = (LayoutContainer)newPersist[newPersist.length - 1].getAncestor(IRepository.LAYOUTCONTAINERS);
+
+						@Override
+						public void run()
+						{
+							doFullFormRefresh(container);
+						}
+					});
+				}
 			}
 		}
 		catch (JSONException | RepositoryException ex)
@@ -186,9 +201,9 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				arrayIndex = ((IChildWebObject)webObject).getIndex() + 1; // add after sibling
 				webObject = webObject.getParent();
 			}
-			else if (args.isPrepend())
+			else if (args.getIndex() != null)
 			{
-				arrayIndex = 0;
+				arrayIndex = args.getIndex().intValue();
 			}
 
 			if (webObject instanceof IBasicWebObject)
@@ -199,11 +214,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					WebObjectSpecification componentSpec = WebComponentSpecProvider.getSpecProviderState()
 						.getWebObjectSpecification(webComponent.getTypeName());
 					String propertyName = args.getGhostPropertyName();
-					String compName = "component_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(form, compName))
-					{
-						compName = "component_" + id.incrementAndGet();
-					}
+					String compName = uniqueName(form, args.getType());
 					webObject = ElementUtil.getOverridePersist(PersistContext.create(webObject, form));
 					WebCustomType bean = AddContainerCommand.addCustomType(componentSpec, (IBasicWebObject)webObject, propertyName, compName, arrayIndex, null);
 					AddContainerCommand.showDataproviderDialog(bean.getPropertyDescription().getProperties(), bean, form);
@@ -212,15 +223,9 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			}
 			else if (webObject instanceof ISupportChilds && args.getType().equals("tab"))
 			{
-				ISupportChilds iSupportChilds = (ISupportChilds)webObject;
-				iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(iSupportChilds, form));
+				ISupportChilds iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(webObject, form));
 				Tab newTab = (Tab)form.getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
-				String tabName = "tab_" + id.incrementAndGet();
-				while (!PersistFinder.INSTANCE.checkName(form, tabName))
-				{
-					tabName = "tab_" + id.incrementAndGet();
-				}
-				newTab.setText(tabName);
+				newTab.setText(uniqueName(form, "tab"));
 				newTab.setLocation(args.getLocation());
 				iSupportChilds.addChild(newTab);
 				return new IPersist[] { newTab };
@@ -373,15 +378,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				}
 				else if ("servoydefault-tabpanel".equals(name))
 				{
-					String compName = "tabpanel_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(form, compName))
+					String compName = uniqueName(form, "tabpanel");
+					TabPanel tabPanel;
+					if (parentSupportingElements instanceof AbstractContainer container)
 					{
-						compName = "tabpanel_" + id.incrementAndGet();
-					}
-					TabPanel tabPanel = null;
-					if (parentSupportingElements instanceof AbstractContainer)
-					{
-						tabPanel = ((AbstractContainer)parentSupportingElements).createNewTabPanel(compName);
+						tabPanel = container.createNewTabPanel(compName);
 					}
 					else
 					{
@@ -391,15 +392,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				}
 				else if ("servoydefault-splitpane".equals(name))
 				{
-					String compName = "tabpanel_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(form, compName))
+					String compName = uniqueName(form, "tabpanel");
+					TabPanel tabPanel;
+					if (parentSupportingElements instanceof AbstractContainer container)
 					{
-						compName = "tabpanel_" + id.incrementAndGet();
-					}
-					TabPanel tabPanel = null;
-					if (parentSupportingElements instanceof AbstractContainer)
-					{
-						tabPanel = ((AbstractContainer)parentSupportingElements).createNewTabPanel(compName);
+						tabPanel = container.createNewTabPanel(compName);
 					}
 					else
 					{
@@ -410,15 +407,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				}
 				else if ("servoycore-portal".equals(name))
 				{
-					String compName = "portal_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(form, compName))
+					String compName = uniqueName(form, "portal");
+					Portal portal;
+					if (parentSupportingElements instanceof AbstractContainer container)
 					{
-						compName = "portal_" + id.incrementAndGet();
-					}
-					Portal portal = null;
-					if (parentSupportingElements instanceof AbstractContainer)
-					{
-						portal = ((AbstractContainer)parentSupportingElements).createNewPortal(compName, args.getLocation());
+						portal = container.createNewPortal(compName, args.getLocation());
 					}
 					else
 					{
@@ -437,14 +430,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(name);
 					if (spec != null)
 					{
-						String compName = null;
-						String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
-						componentName = componentName.replaceAll("-", "_");
-						compName = componentName + "_" + id.incrementAndGet();
-						while (!PersistFinder.INSTANCE.checkName(form, compName))
-						{
-							compName = componentName + "_" + id.incrementAndGet();
-						}
+						String compName = uniqueName(form, spec.getDisplayName());
 
 						WebComponent webComponent = null;
 						if (parentSupportingElements instanceof Portal)
@@ -589,8 +575,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									}
 								}
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
-									initialDropTarget.getParent() instanceof Form;
 								// this is a fix for dropping the responsive container on csspos
 								List<IPersist> res = createLayoutContainer(form, parentSupportingElements, layoutSpec, sameTypeChildContainer, config,
 									args.getRightSibling() != null
@@ -609,18 +593,13 @@ public class CreateComponentCommand extends BaseRestorableCommand
 										{
 											IPersist child = it.next();
 											IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, form));
-											if (!overridePersist.getUUID().equals(child.getUUID()))
-											{
-												parent.removeChild(child);
-												// do not add the override again, the getOverridePersist should already create it in the right place (probably directly on form)
-												//parent.addChild(overridePersist);
-											}
 											// parent is overridden, make sure all children are sent to designer
 											if (!extraChangedPersists.contains(overridePersist))
 											{
 												extraChangedPersists.add(overridePersist);
 											}
 										}
+
 									}
 								}
 //								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
@@ -632,10 +611,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 //									fullRefreshNeeded = !layoutContainer.getUUID().equals(children.get(children.size() - 1).getUUID());
 //								}
 								IPersist[] result = res.toArray(new IPersist[0]);
-								if (fullRefreshNeeded)
-								{
-									doFullFormRefresh();
-								}
 								return result;
 							}
 						}
@@ -652,12 +627,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									{
 										if (applyTemplate[0] instanceof FormElementGroup)
 										{
-											Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
+											Iterator<ISupportFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
 											//convert iterator to []
-											ArrayList<IFormElement> list = new ArrayList<>();
+											ArrayList<ISupportFormElement> list = new ArrayList<>();
 											while (elements.hasNext())
 											{
-												IFormElement next = elements.next();
+												ISupportFormElement next = elements.next();
 												list.add(next);
 											}
 											return list.toArray(new IPersist[list.size()]);
@@ -707,6 +682,22 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		return null;
 	}
 
+	private static String uniqueName(Form form, Object type)
+	{
+		String prefix = "component";
+		if (type instanceof String str)
+		{
+
+			prefix = str.replaceAll("\\s", "").toLowerCase().replaceAll("-", "_");
+		}
+		String compName = null;
+		while (compName == null || !PersistFinder.INSTANCE.checkName(form, compName))
+		{
+			compName = prefix + "_" + id.incrementAndGet();
+		}
+		return compName;
+	}
+
 	private static IPersist[] createField(ISupportFormElements parentSupportingElements, int displayType, CreateComponentOptions args)
 		throws RepositoryException
 	{
@@ -742,7 +733,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 		else
 		{
-			container.setLocation(new Point(location.x, location.x));
+			container.setLocation(new Point(location.x, location.y));
 			if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
 		}
 		newPersists.add(container);
@@ -773,7 +764,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						}
 						else if (jsonObject.has("componentName"))
 						{
-							String compName = "component_" + id.incrementAndGet();
+							String compName = uniqueName(form, "component");
 							WebComponent component = container.createNewWebComponent(compName, jsonObject.getString("componentName"));
 							newPersists.add(component);
 							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
@@ -810,15 +801,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentSpecName);
 		if (spec != null)
 		{
-			String compName = null;
-			String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
-			componentName = componentName.replaceAll("-", "_");
-			compName = componentName + "_" + id.incrementAndGet();
-			while (!PersistFinder.INSTANCE.checkName(form, compName))
-			{
-				compName = componentName + "_" + id.incrementAndGet();
-			}
-
 			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWebComponent, pd, propertyName, indexIfInArray);
 			webComponent.setTypeName(componentSpecName);
 
@@ -942,7 +924,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() > 0)
 						{
 							// very likely a complex inheritance situation that won't refresh correctly, just reinitialize form designer
-							doFullFormRefresh();
+							doFullFormRefresh(null);
 							break;
 						}
 					}
@@ -955,14 +937,21 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 	}
 
-	public static void doFullFormRefresh()
+	public static void doFullFormRefresh(LayoutContainer container)
 	{
 		BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
 		if (editor != null)
 		{
 			BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
 			if (activePage instanceof RfbVisualFormEditorDesignPage)
+			{
+				if (container != null && ((RfbVisualFormEditorDesignPage)activePage).getShowedContainer() != null)
+				{
+					((RfbVisualFormEditorDesignPage)activePage).zoomOut();
+					((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
+				}
 				((RfbVisualFormEditorDesignPage)activePage).refreshContent();
+			}
 		}
 	}
 
@@ -982,7 +971,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		private String dropTargetUUID;
 		private boolean keepOldSelection;
 		private boolean dropTargetIsSibling;
-		private boolean prepend;
+		private Integer index;
 
 		public CreateComponentOptions()
 		{
@@ -1104,11 +1093,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 
 		/**
-		 * @param prepend the prepend to set
+		 * @param index the index to set
 		 */
-		public void setPrepend(boolean prepend)
+		public void setIndex(Integer index)
 		{
-			this.prepend = prepend;
+			this.index = index;
 		}
 
 		/**
@@ -1182,9 +1171,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			return dropTargetIsSibling;
 		}
 
-		public boolean isPrepend()
+		/**
+		 * @return the index
+		 */
+		public Integer getIndex()
 		{
-			return prepend;
+			return index;
 		}
 
 		public boolean isKeepOldSelection()
@@ -1210,7 +1202,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			options.ghostPropertyName = args.optString("ghostPropertyName", null);
 			options.dropTargetUUID = args.optString("dropTargetUUID", null);
 			options.dropTargetIsSibling = args.optBoolean("dropTargetIsSibling", false);
-			options.prepend = args.optBoolean("prepend", false);
+			Object index = args.opt("index");
+			if (index != null)
+			{
+				options.index = Integer.valueOf(index.toString());
+			}
+
 			options.keepOldSelection = args.optBoolean("keepOldSelection", false);
 
 			options.location = new Point(args.optInt("x"), args.optInt("y"));

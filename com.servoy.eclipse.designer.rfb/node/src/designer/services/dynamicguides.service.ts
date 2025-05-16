@@ -63,7 +63,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			const contentElements = this.editorContentService.getContentElementsFromPoint(point);
 			if (this.editorSession.getSelection().length == 1) {
 				this.element = this.editorContentService.getContentElementById(this.editorSession.getSelection()[0]);
-				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id'));
+				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
 			}
 			let parent = contentElements.find(e => e.classList.contains('svy-formcomponent'));
             this.uuid = this.element?.getAttribute('svy-id');
@@ -290,7 +290,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			return;
 		}
 		const resizing = this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
-        let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
+        let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
         const draggedItem = this.editorContentService.getContentElementById('svy_draggedelement');
 		if (!draggedItem && !resizing) {
             this.element = elem;

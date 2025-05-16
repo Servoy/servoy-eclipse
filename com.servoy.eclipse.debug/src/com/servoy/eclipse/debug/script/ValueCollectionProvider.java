@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.debug.script;
 
-import java.lang.ref.SoftReference;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +38,7 @@ import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.internal.javascript.ti.IValueProvider;
 import org.eclipse.dltk.internal.javascript.ti.JSVariable;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
+import org.eclipse.dltk.javascript.typeinference.IValueCollectionReference;
 import org.eclipse.dltk.javascript.typeinference.IValueReference;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IMemberEvaluator;
@@ -71,7 +71,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	public static final String PRIVATE = "PRIVATE";
 	public static final String SUPER_SCOPE = "SUPER_SCOPE";
 
-	private static final Map<IFile, SoftReference<ValueCollectionCacheItem>> scriptCache = new ConcurrentHashMap<>();
+	private static final Map<IFile, ValueCollectionCacheItem> scriptCache = new ConcurrentHashMap<>();
 
 	private static final ThreadLocal<Deque<Set<IFile>>> depedencyStack = new ThreadLocal<Deque<Set<IFile>>>()
 	{
@@ -95,8 +95,12 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			Form form = (Form)attribute;
 			String scriptPath = SolutionSerializer.getScriptPath(form, false);
+			IValueCollection valueCollection = null;
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-			IValueCollection valueCollection = getValueCollection(file);
+			if (file.exists())
+			{
+				valueCollection = getValueCollection(file);
+			}
 			if (valueCollection == null && form.getExtendsID() > 0)
 			{
 				valueCollection = ValueCollectionFactory.createValueCollection();
@@ -205,7 +209,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						{
 							String fileName = scopeName + SolutionSerializer.JS_FILE_EXTENSION;
 							IFile file = project.getProject().getFile(fileName);
-							IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file);
+							IValueCollection globalsValueCollection = null;
+							if (file.exists()) globalsValueCollection = ValueCollectionProvider.getValueCollection(file);
 
 							if (globalsValueCollection == null && !fileName.equals(SolutionSerializer.GLOBALS_FILE))
 							{
@@ -321,16 +326,16 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	public Collection<IFile> getDependencies(ISourceModule sourceModule)
 	{
 		IResource resource = sourceModule.getResource();
-		SoftReference<ValueCollectionCacheItem> sr = scriptCache.get(resource);
+		ValueCollectionCacheItem sr = scriptCache.get(resource);
 		if ((sr == null || sr.get() == null) && resource instanceof IFile && resource.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 		{
 			// quicky create it.
 			getValueCollection((IFile)resource);
 			sr = scriptCache.get(resource);
 		}
-		if (sr != null && sr.get() != null)
+		if (sr != null && sr.files() != null)
 		{
-			Set<IFile> files = sr.get().files();
+			Set<IFile> files = sr.files();
 			// this includes its own so we need to strip that.
 			Set<IFile> collect = files.stream().filter(file -> !file.equals(resource)).collect(Collectors.toSet());
 			return collect;
@@ -469,19 +474,22 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			}
 			if (item == null)
 			{
+				if (!file.exists()) return null;
+
 				// its starting, setup the stack for generating the new Set of files.
 				HashSet<IFile> depedencies = new HashSet<>();
 				depedencies.add(file);
 				stack.push(depedencies);
 
-				IValueCollection collection = ValueCollectionFactory.createValueCollection(file, true, false, (fl, col) -> {
+				IValueCollectionReference collection = ValueCollectionFactory.createValueCollection(file, true, false, (fl, col) -> {
 					// put in cache for recursion.
-					scriptCache.put(fl, new SoftReference<ValueCollectionCacheItem>(new ValueCollectionCacheItem(depedencies, col)));
+					scriptCache.put(fl, new ValueCollectionCacheItem(depedencies, col));
+					return !file.getName().equalsIgnoreCase("globals.js");
 				});
 				stack.pop();
 				// we need to do this again because the depedencies did change and ValueCollectionCacheItem needs to recalculate the current timestamp
-				scriptCache.put(file, new SoftReference<ValueCollectionCacheItem>(new ValueCollectionCacheItem(depedencies, collection)));
-				return collection;
+				scriptCache.put(file, new ValueCollectionCacheItem(depedencies, collection));
+				return collection.getValueCollection();
 			}
 			else
 			{
@@ -501,8 +509,15 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	 */
 	private static ValueCollectionCacheItem getFromScriptCache(IResource resource)
 	{
-		SoftReference<ValueCollectionCacheItem> sr = scriptCache.get(resource);
-		return sr != null && sr.get() != null && sr.get().get() != null ? sr.get() : null;
+		ValueCollectionCacheItem sr = scriptCache.get(resource);
+		if (sr != null && sr.get() == null)
+		{
+			// if the cache is found but not valid anymore, the we need to also flush all depedencies, the once that uses this file.
+			scriptCache.values().removeIf(item -> item.files().contains(resource));
+			scriptCache.remove(resource);
+			sr = null;
+		}
+		return sr;
 	}
 
 	private static final ThreadLocal<Boolean> fullGlobalScope = new ThreadLocal<Boolean>()

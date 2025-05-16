@@ -318,7 +318,7 @@ public class SimpleUserNode implements IAdaptable
 		if (toolTip != null)
 		{
 			if (toolTip.startsWith("<")) return toolTip;
-			return "<pre>" + toolTip + "</pre>";
+			return "<p>" + toolTip.replace("\n\n", "\n<p>\n") + "</p>";
 		}
 		return developerFeedback.getCode();
 	}

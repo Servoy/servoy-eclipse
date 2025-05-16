@@ -18,17 +18,17 @@
  	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.3.0.4040_rc</version>
+		<version>2025.6.0.4080_rc</version>
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.35.0.v20240820-2045</version>
+  <version>3.36.0.v20250129-1243</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
     <code.ignoredWarnings>-warn:-deprecation,raw,unchecked</code.ignoredWarnings>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
   </properties>
 	<build>
 		<plugins>

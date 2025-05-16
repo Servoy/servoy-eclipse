@@ -29,7 +29,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.util.Debug;
 
 /**
  * @author jcompagner
@@ -57,7 +56,7 @@ public class RemoveWebPackageHandler implements IDeveloperService
 			}
 			catch (CoreException e)
 			{
-				Debug.error(e);
+				ServoyLog.logError(e);
 			}
 		}
 		return null;

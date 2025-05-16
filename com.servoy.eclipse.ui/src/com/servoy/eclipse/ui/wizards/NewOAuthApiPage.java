@@ -30,6 +30,7 @@ public class NewOAuthApiPage extends WizardPage
 	private Text revokeTokenEndpointText;
 	private Text jwksUriText;
 	private Text scopeText;
+	private Text loginFailedUrlText;
 	private Button offlineButton;
 	private Button onlineButton;
 
@@ -57,7 +58,7 @@ public class NewOAuthApiPage extends WizardPage
 			apiConfiguration.getClientId());
 		clientSecretText = createField(container, "Client Secret:", true, value -> wizard.getModel().get().setClientSecret(value),
 			apiConfiguration.getClientSecret());
-		scopeText = createField(container, "Scope:", true, value -> wizard.getModel().get().getScope(), apiConfiguration.getScope());
+		scopeText = createField(container, "Scope:", true, value -> wizard.getModel().get().setScope(value), apiConfiguration.getScope());
 		createAccessTypeRadios(container);
 		authorizationBaseUrlText = createField(container, "Authorization Base URL:", false,
 			value -> wizard.getModel().get().setAuthorizationBaseUrl(value), apiConfiguration.getAuthorizationBaseUrl());
@@ -69,6 +70,8 @@ public class NewOAuthApiPage extends WizardPage
 			value -> wizard.getModel().get().setRevokeTokenEndpoint(value), apiConfiguration.getRevokeTokenEndpoint());
 		jwksUriText = createField(container, "JWKS URI:", false, value -> wizard.getModel().get().setJwksUri(value),
 			apiConfiguration.getJwksUri());
+		loginFailedUrlText = createField(container, "Login failed URL:", true, value -> wizard.getModel().get().setLoginFailedUrl(value),
+			apiConfiguration.getLoginFailedUrl());
 
 		setControl(container);
 		updateApiSettings();
@@ -229,7 +232,7 @@ public class NewOAuthApiPage extends WizardPage
 		{
 			clearFieldsForCustomApi(model);
 		}
-		boolean isAPIChanged = !provider.equals(model.getApi()) || Provider.Custom.equals(provider) && model.getApi() != null;
+		boolean isAPIChanged = !provider.equals(Provider.valueOf(model.getApi() != null ? model.getApi() : Provider.Custom.name()));
 
 		if (isAPIChanged)
 		{
@@ -286,6 +289,7 @@ public class NewOAuthApiPage extends WizardPage
 		accessTokenEndpointText.setText("");
 		refreshTokenEndpointText.setText("");
 		revokeTokenEndpointText.setText("");
+		loginFailedUrlText.setText("");
 	}
 
 	@Override
@@ -303,6 +307,8 @@ public class NewOAuthApiPage extends WizardPage
 				scopeText.setText(model.getScope() != null ? model.getScope() : "");
 				apiCombo.setText(model.getApi() != null ? model.getApi() : Provider.Custom.name());
 				jwksUriText.setText(model.getJwksUri() != null ? model.getJwksUri() : "");
+				loginFailedUrlText.setText(
+					model.getLoginFailedUrl() != null ? model.getLoginFailedUrl() : "");
 
 				if (model.getApi() == null) //custom
 				{

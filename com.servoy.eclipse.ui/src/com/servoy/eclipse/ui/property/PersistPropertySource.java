@@ -60,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -81,6 +82,7 @@ import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.SecureStringPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
+import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
@@ -193,6 +195,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
@@ -264,6 +267,8 @@ import com.servoy.j2db.util.Utils;
 
 public class PersistPropertySource implements ISetterAwarePropertySource, IAdaptable, IModelSavePropertySource, HasPersistContext
 {
+	public static String CUSTOM_EVENTS_CATEGORY = "Custom Events";
+
 	protected PersistContext persistContext;
 	protected boolean readOnly;
 
@@ -486,7 +491,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						}
 					}
 				}
-				if (persistContext.getPersist() instanceof MenuItem)
+				if (persistContext.getPersist() instanceof MenuItem menuItem)
 				{
 					Map<String, Map<String, PropertyDescription>> extraProperties = MenuPropertyType.INSTANCE.getExtraProperties();
 					if (extraProperties != null)
@@ -498,9 +503,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							{
 								PropertyDescription propertyDescription = extraCategoryProperties.get(propertyName);
 								IPropertyDescriptor pd;
+								String uniqueName = categoryName + "." + propertyName;
 								if (propertyDescription.getType() instanceof ValueListPropertyType)
 								{
-									pd = new ValuelistPropertyController<Object>(propertyName, propertyName, persistContext,
+									pd = new ValuelistPropertyController<Object>(uniqueName, propertyName, persistContext,
 										true)
 									{
 										@Override
@@ -527,7 +533,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								}
 								else
 								{
-									pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName,
+									pd = createOtherPropertyDescriptorIfAppropriate(uniqueName, propertyName,
 										propertyDescription,
 										form, persistContext,
 										readOnly, new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this,
@@ -545,6 +551,58 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 						}
 					}
+					Menu menu = menuItem.getAncestor(Menu.class);
+					Map<String, Object> customProperties = menu.getCustomPropertiesDefinition();
+					if (customProperties != null)
+					{
+						for (String propertyName : customProperties.keySet())
+						{
+							PropertyDescription propertyDescription = new PropertyDescriptionBuilder().withName(propertyName)
+								.withType(TypesRegistry.getType(customProperties.get(propertyName).toString(), false)).build();
+							IPropertyDescriptor pd;
+							if (propertyDescription.getType() instanceof ValueListPropertyType)
+							{
+								pd = new ValuelistPropertyController<Object>(propertyName, propertyName, persistContext,
+									true)
+								{
+
+									@Override
+									protected IPropertyConverter<Object, Integer> createConverter()
+									{
+										return new IPropertyConverter<Object, Integer>()
+										{
+											public Integer convertProperty(Object id, Object value)
+											{
+												ValueList vl = flattenedEditingSolution.getValueList(value != null ? value.toString() : null);
+												return Integer.valueOf(vl == null ? ValuelistLabelProvider.VALUELIST_NONE : vl.getID());
+											}
+
+											public Object convertValue(Object id, Integer value)
+											{
+												int vlId = value.intValue();
+												if (vlId == ValuelistLabelProvider.VALUELIST_NONE) return null;
+												ValueList vl = flattenedEditingSolution.getValueList(vlId);
+												return vl == null ? null : vl.getUUID();
+											}
+										};
+									}
+								};
+							}
+							else
+							{
+								pd = createOtherPropertyDescriptorIfAppropriate(propertyName, propertyName, propertyDescription, form, persistContext, readOnly,
+									new PropertyDescriptorWrapper(new PseudoPropertyHandler(propertyName), valueObject), this, flattenedEditingSolution);
+							}
+							if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor)
+							{
+								((org.eclipse.ui.views.properties.PropertyDescriptor)pd).setCategory(Menu.CUSTOM_PROPERTIES_CATEGORY);
+							}
+							if (pd != null)
+							{
+								propertyDescriptors.put(pd.getId(), pd);
+							}
+						}
+					}
 				}
 			}
 			else
@@ -552,8 +610,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				// bean: use size, location and name descriptors from the persist (Bean)
 				try
 				{
-					for (java.beans.PropertyDescriptor element : java.beans.Introspector.getBeanInfo(
-						persistContext.getPersist().getClass()).getPropertyDescriptors())
+					for (
+
+					java.beans.PropertyDescriptor element : java.beans.Introspector.getBeanInfo(persistContext.getPersist().getClass())
+						.getPropertyDescriptors())
 					{
 						try
 						{ //if this is a IWebComponent, then only register the 'name' property
@@ -581,6 +641,31 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					ServoyLog.logError(e);
 				}
 			}
+			flattenedEditingSolution.getEventTypes().forEach(eventType -> {
+				if (eventType.isUIEvent(persistContext.getPersist()))
+				{
+					try
+					{
+						IPropertyDescriptor pd = createFunctionPropertyDescriptorIfAppropriate(eventType.getName(), eventType.getName(),
+							new PropertyDescriptionBuilder().withName(eventType.getName()).withType(TypesRegistry.getType(FunctionPropertyType.TYPE_NAME))
+								.withConfig(
+									Boolean.valueOf(false))
+								.withTags(new JSONObject().put(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS, eventType.getDescription()))
+								.build(),
+							form, persistContext);
+						if (pd instanceof org.eclipse.ui.views.properties.PropertyDescriptor descriptor)
+						{
+							descriptor.setCategory(CUSTOM_EVENTS_CATEGORY);
+							propertyDescriptors.put(pd.getId(), pd);
+						}
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+
+				}
+			});
 		}
 	}
 
@@ -1281,6 +1366,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					return new ValuelistPropertyController<String>(id, displayName, persistContext,
 						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)))
 					{
+
 						@Override
 						protected IPropertyConverter<String, Integer> createConverter()
 						{
@@ -1307,6 +1393,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.media && beanHandler.getPropertyType() == String.class)
 				{
+
 					// String property, select an image
 					MediaPropertyControllerConfig config = null;
 					if (propertyDescription != null && propertyDescription.getConfig() instanceof MediaPropertyControllerConfig)
@@ -1321,7 +1408,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					Object option = propertyEditorHint.getOption(PropertyEditorOption.styleLookupName);
 					if (option instanceof String)
 					{
-						return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, (String)option, form);
+						return
+
+						createStyleClassPropertyController(persistContext.getPersist(), id, displayName, (String)option, form);
 					}
 				}
 			}
@@ -1568,6 +1657,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					resultingPropertyDescriptor = new PropertyController<Integer, Object>(id, displayName,
 						new ComplexProperty.ComplexPropertyConverter<Integer>()
 						{
+
 							@Override
 							public Object convertProperty(Object property, Integer value)
 							{
@@ -1602,6 +1692,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					if (persistContext.getPersist() instanceof MenuItem && IContentSpecConstants.PROPERTY_PERMISSIONS.equals(id))
 					{
 						return new PermissionsPropertyController(id, displayName);
+					}
+					if (persistContext.getPersist() instanceof Solution && IContentSpecConstants.PROPERTY_EVENTTYPES.equals(id))
+					{
+						return new EventTypesPropertyController(id, displayName);
 					}
 					Object valueTypes = propertyDescription.getTag(PropertyDescription.VALUE_TYPES_TAG_FOR_PROP);
 					MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null, propertyType == JSONPropertyType.INSTANCE,
@@ -1667,6 +1761,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						resultingPropertyDescriptor = new PropertyController<Object, Object>(id, displayName, new IPropertyConverter<Object, Object>()
 						{
+
 							public Object convertProperty(Object id, Object value)
 							{
 								return value == null ? "" : value;
@@ -1687,6 +1782,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 					else
 					{
+
 						final int type;
 						if (propertyType == BytePropertyType.INSTANCE)
 						{
@@ -2198,10 +2294,26 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
-				Object value = ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), id.toString());
+				boolean isCustomProperty = Menu.CUSTOM_PROPERTIES_CATEGORY.equals(propertyDescriptor.getCategory());
+				Object value = isCustomProperty ? ((MenuItem)persistContext.getPersist()).getCustomPropertyValue(id.toString())
+					: ((MenuItem)persistContext.getPersist()).getExtraProperty(propertyDescriptor.getCategory(), propertyDescriptor.getDisplayName());
 				if (value != null && value instanceof String && Utils.getAsUUID(value, false) != null)
 				{
-					IPropertyType< ? > propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					IPropertyType< ? > propertyType = null;
+					if (isCustomProperty)
+					{
+						Menu menu = persistContext.getPersist().getAncestor(Menu.class);
+						Object typeName = menu.getCustomPropertiesDefinition().get(id);
+						if (typeName != null)
+						{
+							propertyType = TypesRegistry.getType(typeName.toString(), false);
+						}
+					}
+					else
+					{
+						propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory())
+							.get(propertyDescriptor.getDisplayName()).getType();
+					}
 					if (propertyType instanceof ValueListPropertyType || propertyType instanceof FormPropertyType)
 					{
 						IPersist persist = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
@@ -2213,6 +2325,24 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 				}
 				return value;
+			}
+		}
+		else
+		{
+			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
+			if (propertyDescriptor != null && CUSTOM_EVENTS_CATEGORY.equals(propertyDescriptor.getCategory()))
+			{
+				Object value = ((AbstractBase)persistContext.getPersist()).getCustomEventValue(id.toString());
+				if (value != null && value instanceof String && Utils.getAsUUID(value, false) != null)
+				{
+					IPersist persist = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+						.searchPersist((String)value);
+					if (persist != null)
+					{
+						return Integer.valueOf(persist.getID());
+					}
+				}
+				return Integer.valueOf(0);
 			}
 		}
 		return null;
@@ -2593,6 +2723,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 	}
 
+	private boolean isSameAsInheritedValue(Object id, Object value, Object beanPropertyPersist)
+	{
+		Object inheritedValue = getInheritedValue(id, beanPropertyPersist);
+		return Utils.equalObjects(value, inheritedValue);
+	}
+
 	public void setPersistPropertyValue(Object id, Object value)
 	{
 		init();
@@ -2609,6 +2745,16 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 
 				Object beanPropertyPersist = beanPropertyDescriptor.valueObject;
+
+				if (isSameAsInheritedValue(id, value, beanPropertyPersist))
+				{
+					// if the value is the same as the inherited value, clear the property
+					if (beanPropertyPersist instanceof AbstractBase)
+					{
+						((AbstractBase)beanPropertyPersist).clearProperty((String)id);
+						return;
+					}
+				}
 
 				boolean isDefaultValue = (value == null); // most properties have null as a default value
 				Object defaultSpecValue = null;
@@ -2747,9 +2893,27 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null)
 			{
+				boolean isCustomProperty = Menu.CUSTOM_PROPERTIES_CATEGORY.equals(propertyDescriptor.getCategory());
 				if (value instanceof Integer)
 				{
-					IPropertyType< ? > propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory()).get(id).getType();
+					IPropertyType< ? > propertyType = null;
+					if (isCustomProperty)
+					{
+						Menu menu = persistContext.getPersist().getAncestor(Menu.class);
+						if (menu != null)
+						{
+							Object typeName = menu.getCustomPropertiesDefinition().get(id);
+							if (typeName != null)
+							{
+								propertyType = TypesRegistry.getType(typeName.toString(), false);
+							}
+						}
+					}
+					else
+					{
+						propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory())
+							.get(propertyDescriptor.getDisplayName()).getType();
+					}
 					if (propertyType instanceof ValueListPropertyType)
 					{
 						ValueList val = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
@@ -2763,8 +2927,30 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						value = (frm == null) ? null : frm.getUUID().toString();
 					}
 				}
-				((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), id.toString(), value);
+				if (isCustomProperty)
+				{
+					((MenuItem)persistContext.getPersist()).putCustomPropertyValue(id.toString(), value);
+				}
+				else
+				{
+					((MenuItem)persistContext.getPersist()).putExtraProperty(propertyDescriptor.getCategory(), propertyDescriptor.getDisplayName(), value);
+				}
 			}
+		}
+		else
+		{
+			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
+			if (propertyDescriptor != null && CUSTOM_EVENTS_CATEGORY.equals(propertyDescriptor.getCategory()))
+			{
+				if (value instanceof Integer)
+				{
+					ScriptMethod scriptMethod = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
+						.getScriptMethod(((Integer)value).intValue());
+					value = (scriptMethod == null) ? null : scriptMethod.getUUID().toString();
+				}
+				((AbstractBase)persistContext.getPersist()).putCustomEventValue(id.toString(), value);
+			}
+
 		}
 	}
 

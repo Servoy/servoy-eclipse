@@ -354,14 +354,15 @@ public class SolutionDeserializer
 	{
 		if (dir != null && dir.exists())
 		{
-			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
-			Map<JSONObject, File> fileMap = new HashMap<JSONObject, File>();
-			List<File> scriptFiles = new ArrayList<File>();
-			List<File> subdirs = new ArrayList<File>();
+			List<JSONObject> jsonObjects = new ArrayList<>();
+			Map<JSONObject, File> fileMap = new HashMap<>();
+			Map<File, String> formCssMap = new HashMap<>();
+			List<File> scriptFiles = new ArrayList<>();
+			List<File> subdirs = new ArrayList<>();
 			String[] files = dir.list();
 			Arrays.sort(files, new ObjBeforeJSExtensionComparator());
-			Map<File, List<JSONObject>> childrenJSObjectMap = new HashMap<File, List<JSONObject>>(); // js objects from Form & TableNode
-			Map<File, ISupportChilds> jsParentFileMap = new HashMap<File, ISupportChilds>(); // keep which js files belong to which parent
+			Map<File, List<JSONObject>> childrenJSObjectMap = new HashMap<>(); // js objects from Form & TableNode
+			Map<File, ISupportChilds> jsParentFileMap = new HashMap<>(); // keep which js files belong to which parent
 
 			for (final String file : files)
 			{
@@ -440,6 +441,12 @@ public class SolutionDeserializer
 								}
 								recognized = true;
 							}
+							else if (file.endsWith(".less") && f.getParentFile().getName().equals(SolutionSerializer.FORMS_DIR))
+							{
+								formCssMap.put(new File(f.getParentFile(), f.getName().replace(".less", SolutionSerializer.FORM_FILE_EXTENSION)),
+									Utils.getTXTFileContent(f, Charset.forName("UTF8")));
+								recognized = true;
+							}
 							if (changedFiles != null && recognized)
 							{
 								changedFiles.remove(f);
@@ -487,6 +494,17 @@ public class SolutionDeserializer
 					{
 						persistFileMap.put(file, persist);
 					}
+				}
+			}
+
+			for (Entry<File, String> entry : formCssMap.entrySet())
+			{
+				File file = entry.getKey();
+				IPersist persist = persistFileMap.get(file);
+				if (persist instanceof Form form)
+				{
+					String css = entry.getValue();
+					form.setFormCss(css);
 				}
 			}
 
@@ -832,9 +850,9 @@ public class SolutionDeserializer
 	{
 		if (file.getName().endsWith(SolutionSerializer.FORM_FILE_EXTENSION))
 		{
-			return containsPath(
-				file.getPath().substring(0, file.getPath().length() - SolutionSerializer.FORM_FILE_EXTENSION.length()) + SolutionSerializer.JS_FILE_EXTENSION,
-				files);
+			String basePath = file.getPath().substring(0, file.getPath().length() - SolutionSerializer.FORM_FILE_EXTENSION.length());
+			return containsPath(basePath + SolutionSerializer.JS_FILE_EXTENSION, files) ||
+				containsPath(basePath + ".less", files);
 		}
 
 		if (file.getName().endsWith(SolutionSerializer.TABLENODE_FILE_EXTENSION))
@@ -1948,10 +1966,6 @@ public class SolutionDeserializer
 				{
 					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, null);
 				}
-				if (obj.has(DECL_KEYWORD))
-				{
-					((ScriptVariable)retval).setKeyword(obj.getString(DECL_KEYWORD));
-				}
 
 			}
 			else if (retval instanceof AbstractScriptProvider)
@@ -2065,6 +2079,10 @@ public class SolutionDeserializer
 			if (obj.has(EXTRA_DOC_COMMENTS))
 			{
 				((AbstractBase)retval).putCustomProperty(new String[] { EXTRA_DOC_COMMENTS }, obj.get(EXTRA_DOC_COMMENTS));
+			}
+			if (retval instanceof ScriptVariable && obj.has(DECL_KEYWORD))
+			{
+				((ScriptVariable)retval).setKeyword(obj.getString(DECL_KEYWORD));
 			}
 			if (useFilesForDirtyMark) handleChanged(obj, retval);
 		}

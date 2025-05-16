@@ -129,6 +129,7 @@ public class SolutionSerializer
 	public static final int JSON_FILE_EXTENSION_SIZE = 4;
 	public static final String JSON_DEFAULT_FILE_EXTENSION = ".obj";
 	public static final String FORM_FILE_EXTENSION = ".frm";
+	public static final String FORM_LESS_FILE_EXTENSION = ".less";
 	public static final String RELATION_FILE_EXTENSION = ".rel";
 	public static final String VALUELIST_FILE_EXTENSION = ".val";
 	public static final String MENU_FILE_EXTENSION = ".mnu";

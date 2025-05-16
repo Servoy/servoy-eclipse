@@ -17,6 +17,9 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -27,10 +30,12 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.editors.MenuEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -40,10 +45,11 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
- * Action to create a new valuelist depending on the selection of a solution view.
+ * Action to create a new menu or menu item depending on the selection of a solution view.
  *
  * @author jcompagner
  */
@@ -86,7 +92,8 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 			IPersist parent = (IPersist)node.getRealObject();
 			Solution realSolution = (Solution)parent.getRootObject();
 
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(realSolution.getName());
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			ServoyProject servoyProject = servoyModel.getServoyProject(realSolution.getName());
 			Solution editingSolution = servoyProject.getEditingSolution();
 			if (editingSolution == null)
 			{
@@ -97,15 +104,16 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 			{
 				return;
 			}
-			String name = askMenuItemName(viewer.getViewSite().getShell());
+			String name = askMenuItemName(viewer.getViewSite().getShell(), servoyModel, servoyProject, parent);
 			if (name != null)
 			{
-				IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 				try
 				{
-					MenuItem mn = parent instanceof Menu ? ((Menu)parent).createNewMenuItem(validator, name)
-						: ((MenuItem)parent).createNewMenuItem(validator, name);
+					MenuItem mn = parent instanceof Menu ? ((Menu)parent).createNewMenuItem(name)
+						: ((MenuItem)parent).createNewMenuItem(name);
 					servoyProject.saveEditingSolutionNodes(new IPersist[] { mn.getAncestor(IRepository.MENUS) }, true);
+					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(true, mn, false);
+					MenuEditor.refreshEditor();
 				}
 				catch (Exception e)
 				{
@@ -116,14 +124,19 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 		}
 	}
 
-	public static String askMenuItemName(Shell shell)
+	public static String askMenuItemName(Shell shell, IDeveloperServoyModel servoyModel, ServoyProject servoyProject, IPersist parent)
 	{
 		InputDialog nameDialog = new InputDialog(shell, "Create menu item", "Supply menu item name(id)", "", new IInputValidator()
 		{
 			public String isValid(String newText)
 			{
-				boolean valid = IdentDocumentValidator.isJavaIdentifier(newText);
-				return valid ? null : (newText.length() == 0 ? "" : "Invalid menu item name(id)");
+				if (newText.length() == 0) return "";
+
+				if (!IdentDocumentValidator.isJavaIdentifier(newText))
+				{
+					return "Invalid Java identifier";
+				}
+				return validateMethodName(servoyModel, servoyProject, newText, parent);
 			}
 		});
 		int res = nameDialog.open();
@@ -131,6 +144,38 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 		{
 			String name = nameDialog.getValue();
 			return name;
+		}
+		return null;
+	}
+
+	/**
+	 * @param existingNames
+	 * @param menu
+	 */
+	private static String validateMethodName(IDeveloperServoyModel servoyModel, ServoyProject servoyProject, String newText, IPersist parent)
+	{
+
+		ValidatorSearchContext validatorSearchContext;
+		if (parent != null)
+		{
+			List<Object> objectsForValidator = new ArrayList<Object>();
+			objectsForValidator.add(servoyProject.getEditingSolution());
+			objectsForValidator.add(parent);
+			validatorSearchContext = new ValidatorSearchContext(objectsForValidator, IRepository.MENU_ITEMS);
+		}
+		else
+		{
+			validatorSearchContext = new ValidatorSearchContext(servoyProject.getEditingSolution(), IRepository.MENU_ITEMS);
+		}
+
+		IValidateName validator = servoyModel.getNameValidator();
+		try
+		{
+			validator.checkName(newText, 0, validatorSearchContext, false);
+		}
+		catch (Exception e)
+		{
+			return e.getMessage();
 		}
 		return null;
 	}

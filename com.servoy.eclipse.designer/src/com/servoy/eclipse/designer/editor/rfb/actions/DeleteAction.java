@@ -50,18 +50,33 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 		setEnabled(true);
 	}
 
+	/**
+	 * Returns <code>true</code> if the selected objects can be deleted. Returns
+	 * <code>false</code> if there are no objects selected
+	 *
+	 * @return <code>true</code> if the command should be enabled
+	 */
+	protected boolean calculateEnabledOldImplementation()
+	{
+		Command cmd = createDeleteCommand(getSelectedObjects());
+		if (cmd == null)
+		{
+			return false;
+		}
+		return cmd.canExecute();
+	}
+
 	@Override
 	public boolean calculateEnabled()
 	{
-		return super.calculateEnabled() && !DesignerUtil.containsInheritedElement(getSelectedObjects()) &&
+		return calculateEnabledOldImplementation() && !DesignerUtil.containsInheritedElement(getSelectedObjects()) &&
 			!DesignerUtil.containsFormComponentElement(getSelectedObjects());
 	}
 
 	/**
 	 * Create a command to remove the selected objects.
 	 *
-	 * @param objects
-	 *            The objects to be deleted.
+	 * @param objects The objects to be deleted.
 	 * @return The command to remove the selected objects.
 	 */
 	@Override
@@ -90,5 +105,14 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 			return null;
 		}
 		return new FormElementDeleteCommand(toDelete.toArray(new IPersist[toDelete.size()]));
+	}
+
+	/**
+	 * Performs the delete action on the selected objects.
+	 */
+	@Override
+	public void run()
+	{
+		execute(createDeleteCommand(getSelectedObjects()));
 	}
 }

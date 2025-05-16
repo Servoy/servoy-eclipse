@@ -769,7 +769,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	{
 		// if our descriptor is changing, we have to get rid
 		// of our current editor if there is one
-		if (descriptor != newDescriptor && editor != null)
+		if (descriptor != null && descriptor.getId() != newDescriptor.getId() && editor != null)
 		{
 			editor.dispose();
 			editor = null;

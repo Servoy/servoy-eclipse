@@ -17,9 +17,6 @@
 
 package com.servoy.build.documentation.apigen;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
@@ -31,6 +28,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -46,9 +44,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -58,6 +58,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.Scriptable;
 
 import com.servoy.base.scripting.api.IJSController;
@@ -117,13 +118,19 @@ public class MarkdownGenerator
 	private static final DuplicateTracker duplicateTracker = DuplicateTracker.getInstance();
 
 	private static Map<String, String> specialTypePaths = new HashMap<>();
-	private static boolean isMacOS = false;
+	private static boolean isWindows = false;
 	private static int missingReturnAnnotationCount = 0;
 	private static Set<String> undocumentedReturnTypeFunctions = new HashSet<>();
 	private static Set<String> uniqueClasses = new HashSet<>();
 	private static Set<String> undocumentedTypes = new HashSet<>();
+	private static List<String> missingMdFiles = new ArrayList<>();
+	private static Map<String, String> referenceTypes = new HashMap<String, String>();
+	private static Set<String> summaryPaths = new HashSet<String>();
 
 	private static String summaryMdFilePath;
+
+	//this is generating output data used for further processing
+	private static final boolean TRACK_REFERENCES = true; //TURN ON/OFF TRACKING OF REFERENCES
 
 	private static final Set<String> IGNORED_UNDOCUMENTED_TYPES = Set.of(
 		"org.mozilla.javascript.IdScriptableObject",
@@ -138,6 +145,7 @@ public class MarkdownGenerator
 
 	private static final Set<String> SKIP_MISSING_RETURN_FOR_CLASS = Set.of(
 		"com.servoy.j2db.documentation.scripting.docs.Array",
+		"com.servoy.j2db.documentation.scripting.docs.BigInt",
 		"com.servoy.j2db.documentation.scripting.docs.Date",
 		"com.servoy.j2db.documentation.scripting.docs.JSON",
 		"com.servoy.j2db.documentation.scripting.docs.Math",
@@ -164,9 +172,9 @@ public class MarkdownGenerator
 
 		String osName = System.getProperty("os.name");
 
-		if (osName.equalsIgnoreCase("Mac OS X"))
+		if (osName.equalsIgnoreCase("win"))
 		{
-			isMacOS = true;
+			isWindows = true;
 		}
 	}
 
@@ -425,16 +433,52 @@ public class MarkdownGenerator
 		IDocFromXMLGenerator docGenerator)
 		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException, InstantiationException, IllegalAccessException
 	{
+		// Ensure we start with a fresh references.json
+		File refFile = new File("references.json");
+		if (refFile.exists())
+		{
+			if (refFile.delete())
+			{
+				System.out.println("Deleted old references.json: " + refFile.getAbsolutePath());
+			}
+		}
+		URL[] urls;
+
+		if (isWindows)
+		{
+			System.out.println("Running on Windows");
+			urls = findJarURLsFromServoyInstall(new File(new URI(pluginDir).normalize()).getAbsolutePath());
+		}
+		else
+		{
+			System.out.println("Running on Mac/Linux");
+			urls = findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()); // Ensure absolute path is used; this is not working on windows
+
+		}
 		targetInstallClassLoader = new URLClassLoader("Target Servoy installation classloader",
-			findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()), // Ensure absolute path is used
+			urls,
 			MarkdownGenerator.class.getClassLoader());
 
 		boolean ngOnly = false;
 
-		URL jsLibURLObject = new File(jsLibURL).toURI().toURL();
-		URL servoyDocURLObject = new File(servoyDocURL).toURI().toURL();
-		URL designDocURLObject = new File(designDocURL).toURI().toURL();
+		URL jsLibURLObject;
+		URL servoyDocURLObject;
+		URL designDocURLObject;
 
+		if (isWindows)
+		{
+			jsLibURLObject = new URL(jsLibURL);
+			servoyDocURLObject = new URL(servoyDocURL);
+			designDocURLObject = new URL(designDocURL);
+		}
+		else
+		{
+			jsLibURLObject = new File(jsLibURL).toURI().toURL();
+			servoyDocURLObject = new File(servoyDocURL).toURI().toURL();
+			designDocURLObject = new File(designDocURL).toURI().toURL();
+		}
+
+		loadSummary();
 
 		do
 		{
@@ -469,7 +513,16 @@ public class MarkdownGenerator
 			}
 
 			System.out.println("  - plugins (from " + pluginDir + "):");
-			File file2 = new File(new File(pluginDir).toURI().normalize());
+			File file2;
+			if (isWindows)
+			{
+				file2 = new File(new URI(pluginDir).normalize());
+
+			}
+			else
+			{
+				file2 = new File(new File(pluginDir).toURI().normalize());
+			}
 			if (file2.isDirectory())
 			{
 				// this is an directory with jars
@@ -561,16 +614,63 @@ public class MarkdownGenerator
 						System.out.println("JAR EXCLUDED: " + jar.getAbsolutePath());
 					}
 				}
-				for (String nonDefaultPluginThatShouldHaveBeenFound : nonDefaultPluginJarNamesThatWeDoGenerateDocsFor)
-					if (!foundJars.contains(nonDefaultPluginThatShouldHaveBeenFound)) throw new RuntimeException(
-						"Cannot find (explicitly required) plugin '" + nonDefaultPluginThatShouldHaveBeenFound + "' in dir: " + pluginDir +
-							"\nYou have to manually copy a release of that plugin into the plugins dir...");
+//				for (String nonDefaultPluginThatShouldHaveBeenFound : nonDefaultPluginJarNamesThatWeDoGenerateDocsFor)
+//					if (!foundJars.contains(nonDefaultPluginThatShouldHaveBeenFound)) throw new RuntimeException(
+//						"Cannot find (explicitly required) plugin '" + nonDefaultPluginThatShouldHaveBeenFound + "' in dir: " + pluginDir +
+//							"\nYou have to manually copy a release of that plugin into the plugins dir...");
 			}
 
 			docGenerator.writeAggregatedOutput(ngOnly);
 		}
 		while (ngOnly);
 
+		printSummary();
+		// Write out all collected reference links to JSON
+		ReferencesTracker.getInstance().writeResults("references.json");
+	}
+
+	private static void loadSummary()
+	{
+		referenceTypes.clear();
+		try (BufferedReader br = new BufferedReader(new FileReader(summaryMdFilePath, Charset.forName("UTF-8"))))
+		{
+			String line;
+			while ((line = br.readLine()) != null)
+			{
+				// Extract paths ending with .md from markdown links
+				int start = line.indexOf("[");
+				int middle = line.indexOf("](", start);
+				int end = line.indexOf(')', middle);
+				if (start != -1 && middle != -1 && end != -1)
+				{
+					String key = line.substring(start + 1, middle).trim();
+					String value = line.substring(middle + 2, end).trim().replace("\\", "");
+					summaryPaths.add(value);
+
+					//types from plugins / extensions, javascript classes may overlap with other references ( [key](reference) ).
+					// For example:
+					// [controller](reference/servoycore/dev-api/forms/runtimeform/controller.md)
+					// [Controller](reference/servoy-developer/solution-explorer/all-solutions/active-solution/forms/form/controller.md)
+					//
+					// The second line will overwrite the first one - leading to incorrect report for this code
+					if ((value.startsWith("reference/servoycore") || value.startsWith("reference/servoyextensions")) && value.endsWith(".md"))
+					{
+						// Normalize the path to use '/' as separator
+						referenceTypes.put(key.toLowerCase(), value);
+					}
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			System.err.println("\033[38;5;202mFailed to load summary file: " + summaryMdFilePath + "\033[0m");
+			e.printStackTrace();
+		}
+		return;
+	}
+
+	private static void printSummary()
+	{
 		System.out.println(undocumentedReturnTypeFunctions.size() + " functions must be checked in " + uniqueClasses.size() + " classes.");
 		if (undocumentedTypes.size() > 0)
 		{
@@ -588,6 +688,15 @@ public class MarkdownGenerator
 			});
 			System.out.println("\033[0m");
 		}
+
+		if (missingMdFiles.size() > 0)
+		{
+			System.out.println("\033[38;5;39m\n\nThe following files are missing from summary.md (gitbook): ");
+			missingMdFiles.forEach(filePath -> {
+				System.out.println(filePath + ", ");
+			});
+			System.out.println("\033[0m");
+		}
 	}
 
 	private static URL[] findJarURLsFromServoyInstall(String pluginDir) throws IOException
@@ -601,14 +710,15 @@ public class MarkdownGenerator
 		//         plugins
 		//             *.jar (nested)
 		addAllNestedJarFilesOfDir(pluginDir, jarURLsFromInstall);
-		String osName = System.getProperty("os.name").toLowerCase();
-		if (isMacOS)
+		if (isWindows)
 		{
-			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "eclipse", "plugins").normalize().toString(), jarURLsFromInstall);
+			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "developer", "plugins").normalize().toString(), jarURLsFromInstall);
+
+
 		}
 		else
 		{
-			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "developer", "plugins").normalize().toString(), jarURLsFromInstall);
+			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "eclipse", "plugins").normalize().toString(), jarURLsFromInstall);
 		}
 		return jarURLsFromInstall.toArray(new URL[jarURLsFromInstall.size()]);
 	}
@@ -724,6 +834,7 @@ public class MarkdownGenerator
 
 	private String generate()
 	{
+		// TODO Auto-generated method stub
 		StringWriter out = new StringWriter();
 		try
 		{
@@ -734,6 +845,41 @@ public class MarkdownGenerator
 			e.printStackTrace();
 		}
 		return out.toString();
+	}
+
+	public String getExtendsPath(String childClass, String parentClass)
+	{
+		if (childClass != null && parentClass != null)
+		{
+			String parentPath = referenceTypes.get(parentClass.toLowerCase());
+			if (parentPath == null)
+			{
+				System.err.println("\033[35mPath reference not found for the class: " + parentClass + " (referenced from: " + childClass + ")\033[0m");
+			}
+			String childPath = referenceTypes.get(childClass.toLowerCase());
+			if (childPath == null)
+			{
+				System.err.println("\033[35mPath reference not found for the class: " + childClass + ". Please update the summary.md file...!\033[0m");
+				return "";
+			}
+			try
+			{
+				// Convert to Path objects
+				Path child = Paths.get(childPath).normalize();
+				Path parent = Paths.get(parentPath).normalize();
+
+				// Get relative path from child to parent
+				Path relativePath = child.getParent().relativize(parent);
+				return relativePath.toString();
+			}
+			catch (Exception e)
+			{
+				System.err.println("\033[31mError calculating relative path: " + e.getMessage() + "\033[0m");
+				return "";
+			}
+		}
+		return "";
+
 	}
 
 	public String getReturnTypePath(String publicName)
@@ -788,7 +934,11 @@ public class MarkdownGenerator
 	{
 		if (type != null)
 		{
-			if (type == boolean.class || type == Boolean.class)
+			if (type == NativePromise.class)
+			{
+				return "Promise";
+			}
+			else if (type == boolean.class || type == Boolean.class)
 			{
 				return "Boolean";
 			}
@@ -944,20 +1094,6 @@ public class MarkdownGenerator
 			// first loop sets the qualifiedToName for all and fixes returnTypes for all
 			for (IObjectDocumentation doc : objects.values())
 			{
-				if (doc.getRealClass() != null)
-				{
-					IObjectDocumentation realDoc = objects.get(doc.getRealClass());
-					if (realDoc != null)
-					{
-						qualifiedToName.put(doc.getQualifiedName(), realDoc.getPublicName());
-					}
-					else
-					{
-						System.err.println("WARN: Real class '" + doc.getRealClass() + "' not found for type '" + doc.getQualifiedName() + "'.");
-					}
-					continue;
-				}
-
 				qualifiedToName.put(doc.getQualifiedName(), doc.getPublicName());
 				if (pluginProviderPublicName != null) publicNameToPluginProviderClassPublicName.put(doc.getPublicName(), pluginProviderPublicName);
 				if (path != null) publicToRootPath.put(doc.getPublicName(), path);
@@ -1045,41 +1181,43 @@ public class MarkdownGenerator
 			SortedMap<String, IObjectDocumentation> objects = manager.getObjects();
 
 			File userDir = new File(System.getProperty("user.dir"));
-			for (IObjectDocumentation doc : objects.values())
+
+			if (TRACK_REFERENCES)
 			{
-				if (doc.getRealClass() != null)
-				{
-					// Use documentation of real class
+				ReferencesTracker.getInstance().trackReferences(manager, summaryPaths, referenceTypes, ngOnly, computedReturnTypes);
+			}
+
+			for (Entry<String, IObjectDocumentation> entry : objects.entrySet())
+			{
+				IObjectDocumentation value = entry.getValue();
+
+				String description = value.getDescription(value.getClientSupport());
+				if (value.isDeprecated() || value.getPublicName().equals("PrinterJob") ||
+					(value.getFunctions().size() == 0 && (description == null || description.trim().length() == 0) && computedReturnTypes.size() == 0))
 					continue;
-				}
+				if (ngOnly && !(value.getClientSupport() == null ? ClientSupport.Default : value.getClientSupport()).hasSupport(ClientSupport.ng)) continue;
 
-				String description = doc.getDescription(doc.getClientSupport());
-				if (doc.isDeprecated() || doc.getPublicName().equals("PrinterJob") ||
-					(doc.getFunctions().size() == 0 && (description == null || description.trim().length() == 0) && computedReturnTypes.size() == 0))
-					continue;
-				if (ngOnly && !(doc.getClientSupport() == null ? ClientSupport.Default : doc.getClientSupport()).hasSupport(ClientSupport.ng)) continue;
+				MarkdownGenerator cg = new MarkdownGenerator(value.getPublicName(), value.getScriptingName(), description,
+					path, computedReturnTypes.get(value.getPublicName()));
 
-				MarkdownGenerator cg = new MarkdownGenerator(doc.getPublicName(), doc.getScriptingName(), description,
-					path, computedReturnTypes.get(doc.getPublicName()));
+				if (!ngOnly) cg.generateClientSupport(value);
 
-				if (!ngOnly) cg.generateClientSupport(doc);
-
-				if (doc.getExtendsClass() != null)
+				if (value.getExtendsClass() != null)
 				{
 					cg.classList(EXTENDS_CLASS_SECTION_IN_TEMPLATE,
-						getUsablePublicNamesFromClassList(Arrays.asList(targetInstallClassLoader.loadClass(doc.getExtendsClass()))));
+						getUsablePublicNamesFromClassList(Arrays.asList(targetInstallClassLoader.loadClass(value.getExtendsClass()))));
 				}
 
-				Class< ? > cls = targetInstallClassLoader.loadClass(doc.getQualifiedName());
+				Class< ? > cls = targetInstallClassLoader.loadClass(value.getQualifiedName());
 
-				SortedSet<IFunctionDocumentation> functions = doc.getFunctions();
+				SortedSet<IFunctionDocumentation> functions = value.getFunctions();
 				List<IFunctionDocumentation> constants = getConstants(functions);
 				List<IFunctionDocumentation> properties = getProperties(functions);
 				List<IFunctionDocumentation> commands = getCommands(functions);
 				List<IFunctionDocumentation> events = getEvents(functions);
 				List<IFunctionDocumentation> methods = getMethods(functions);
 				cg.table("constants", constants, cls, ngOnly, false);
-				if (properties != null) properties = properties.stream().filter(node -> node.getReturnedType() != void.class).collect(toList());
+				if (properties != null) properties = properties.stream().filter(node -> node.getReturnedType() != void.class).collect(Collectors.toList());
 				cg.table("properties", properties, cls, ngOnly, false);
 				cg.table("commands", commands, cls, ngOnly, false);
 				cg.table("events", events, cls, ngOnly, false);
@@ -1087,8 +1225,8 @@ public class MarkdownGenerator
 
 				String output = cg.generate();
 				String parent = cg.getPath().toString();
-				String publicName = doc.getPublicName();
-				if (storeAsReadMe.contains(doc.getPublicName()))
+				String publicName = value.getPublicName();
+				if (storeAsReadMe.contains(value.getPublicName()))
 				{
 					publicName = "README";
 				}
@@ -1106,8 +1244,6 @@ public class MarkdownGenerator
 					if (aggregatedOutput != null) aggregatedOutput.append(output);
 				}
 
-				List<String> summaryPaths = loadSummary();
-
 				file.getParentFile().mkdirs();
 				try (FileWriter writer = new FileWriter(file, Charset.forName("UTF-8")))
 				{
@@ -1123,43 +1259,12 @@ public class MarkdownGenerator
 						// Check if the relative path is in the summary but not in generated files
 						if (!summaryPaths.contains(relativePath))
 						{
-							System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + " ::: " + cls.getName() + "\033[0m");
+							missingMdFiles.add(relativePath);
+							// System.err.println("\033[38;5;214mMissing file in summary: " + relativePath + " ::: " + cls.getName() + "\033[0m");
 						}
 					}
 				}
 			}
-		}
-
-		private List<String> loadSummary()
-		{
-			List<String> paths = new ArrayList<String>();
-			try (BufferedReader br = new BufferedReader(new FileReader(summaryMdFilePath, Charset.forName("UTF-8"))))
-			{
-				String line;
-				while ((line = br.readLine()) != null)
-				{
-					// Extract paths ending with .md from markdown links
-					int start = line.indexOf("](");
-					int end = line.indexOf(')', start);
-					if (start != -1 && end != -1)
-					{
-						String mdPath = line.substring(start + 2, end).trim(); // Trim leading/trailing spaces
-						if (mdPath.endsWith(".md"))
-						{
-							// Normalize the path to use '/' as separator
-							mdPath = mdPath.replace('\\', '/');
-							paths.add(mdPath);
-						}
-					}
-				}
-			}
-			catch (IOException e)
-			{
-				System.err.println("\033[38;5;202mFailed to load summary file: " + summaryMdFilePath + "\033[0m");
-				e.printStackTrace();
-			}
-			return paths;
-
 		}
 
 		private List<String> getUsablePublicNamesFromClassList(List<Class< ? >> filteredReturnTypes)

@@ -9,12 +9,12 @@
     <parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.3.0.4040_rc</version>
+		<version>2025.6.0.4080_rc</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.jre.macosx.aarch64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>21.0.5</version>
+	<version>21.0.7</version>
 	
 	<build>
 		<plugins>
@@ -41,7 +41,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://developer.servoy.com/jre/jre210_4_osx_aarch64.zip</url>
+							<url>https://developer.servoy.com/jre/jre210_7_osx_aarch64.zip</url>
 							<outputFileName>jre.zip</outputFileName>
 							<unpack>true</unpack>
                             <outputDirectory>${basedir}/jre</outputDirectory>
