@@ -121,7 +121,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     }
 
     private onMouseMove(event: MouseEvent): void {
-	  if (this.editorSession.getSelection()?.length !==1 || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
+	  if (this.editorSession.getSelection()?.length > 1 || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
 	  let guidesEnabled = this.guidesEnabled;
 	  let statusText = '';
 	  if (event.altKey) {
