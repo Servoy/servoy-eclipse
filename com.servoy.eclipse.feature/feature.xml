@@ -311,7 +311,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.commons.commons-collections4"
-         version="4.4.0"/>
+         version="4.5.0"/>
 
    <plugin
          id="org.apache.commons.commons-pool2"
