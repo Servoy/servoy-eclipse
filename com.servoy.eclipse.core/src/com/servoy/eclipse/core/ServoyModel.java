@@ -2500,7 +2500,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			}
 		}
 		// if the boolean is set to false then the module changed code was called and needs to be called once.
-		if (skipModuleChanged.booleanValue() == false)
+		if (skipModuleChanged != null && skipModuleChanged.booleanValue() == false)
 		{
 			// it is called
 			skipModuleChanged = null;
