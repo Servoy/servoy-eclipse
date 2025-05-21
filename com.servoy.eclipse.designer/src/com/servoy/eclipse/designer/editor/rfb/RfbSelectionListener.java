@@ -94,6 +94,18 @@ public class RfbSelectionListener implements ISelectionListener
 						}
 					});
 				}
+				else if (uuids == null)
+				{ //the components were deleted so the current selection is null; we also need to update the selection to empty
+					editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
+								new Object[] { new String[0] });
+						}
+					});
+				}
 			}
 		});
 	}

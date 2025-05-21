@@ -221,15 +221,32 @@ export class ContextMenuComponent implements OnInit {
 
             let left = bounds.left;
             let top = bounds.top;
+            
+            const toolbarHeight = this.editorContentService.querySelector('.toolbar-area').offsetHeight;
+            const statusBarHeight = this.editorContentService.querySelector('.statusbar-area').offsetHeight;
+            const paletteWidth = this.editorContentService.getPallete().offsetWidth;
+            
+            const minTop = viewport.top + toolbarHeight;
+            const maxTop = viewport.bottom - nativeElement.offsetHeight - statusBarHeight;
+            const maxLeft = viewport.right - paletteWidth + 45;
 
             if (bounds.bottom > viewport.bottom) {
                 //-10 to make it closer to the cursor
                 top -= nativeElement.offsetHeight - 10;
             }
+            if (top > maxTop) {
+                top = maxTop;
+            }
+            if (top < minTop) {
+                top = minTop;
+            }
             if (bounds.right > viewport.right) {
                 left -= nativeElement.offsetWidth - 10;
             }
-
+            if (left > maxLeft) {
+                left = maxLeft;
+            }
+            
             this.element.nativeElement.style.left = left + 'px';
             this.element.nativeElement.style.top = top + 'px';
         }
