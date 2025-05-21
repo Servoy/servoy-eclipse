@@ -199,7 +199,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			if (webObject instanceof IChildWebObject && args.isDropTargetIsSibling())
 			{
 				arrayIndex = ((IChildWebObject)webObject).getIndex() + 1; // add after sibling
-				webObject = webObject.getParent();
 			}
 			else if (args.getIndex() != null)
 			{
