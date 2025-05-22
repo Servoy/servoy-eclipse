@@ -31,6 +31,7 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
@@ -46,6 +47,7 @@ import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesig
 import com.servoy.eclipse.designer.editor.rfb.ChromiumVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.SystemVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IEditorRefresh;
@@ -151,6 +153,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 				}
 				createSecPage(); // MultiPageEditorPart wants at least 1 page
 				createCSSPage();
+				if (DesignerUtil.getContentOutline() != null)
+				{
+					Display.getDefault().asyncExec(() -> getSite().getPage().activate(this));
+				}
 			}
 		}
 		else
