@@ -8,10 +8,10 @@
   <parent>
     <groupId>com.servoy</groupId>
     <artifactId>servoy-eclipse</artifactId>
-    <version>2025.6.0.4080_rc</version>
+    <version>2025.9.0.4100_rc</version>
   </parent>
   <artifactId>com.servoy.eclipse.core</artifactId>
-  <version>2025.6.0.4080_rc</version>
+  <version>2025.9.0.4100_rc</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 		<plugins>
