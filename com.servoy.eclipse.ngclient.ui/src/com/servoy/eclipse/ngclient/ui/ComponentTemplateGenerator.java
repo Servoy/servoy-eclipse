@@ -75,6 +75,11 @@ public class ComponentTemplateGenerator
 		Map<String, Boolean> ng2Compatible = new HashMap<String, Boolean>();
 		for (WebObjectSpecification spec : specs)
 		{
+			if (spec.getName().equals("servoycore-formcomponent") || spec.getName().equals("servoycore-navigator") ||
+				spec.getName().equals("servoycore-portal"))
+			{
+				continue; // special case for some old core components, shouldn't be generated
+			}
 			if (model == null || model.getAllExportedComponents().contains(spec.getName()))
 			{
 				String packageName = spec.getPackageName();
@@ -138,7 +143,7 @@ public class ComponentTemplateGenerator
 		for (PropertyDescription pd : specProperties)
 		{
 			String name = pd.getName();
-			if (name.equals("anchors") || name.equals("formIndex") || name.equals("size") || name.equals("location")) continue;
+			if (pd.isInternal()) continue; // size,location,formindex,anchors and the visible enabled dataproviders are all marked as internal, see DefaultComponentPropertiesProvider
 			if (name.equals(IContentSpecConstants.PROPERTY_ATTRIBUTES))
 			{
 				name = "servoyAttributes";
