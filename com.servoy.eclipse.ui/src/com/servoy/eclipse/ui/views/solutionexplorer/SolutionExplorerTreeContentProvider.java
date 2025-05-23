@@ -3556,6 +3556,7 @@ public class SolutionExplorerTreeContentProvider
 							PlatformSimpleUserNode elements = findChildNode(node, Messages.TreeStrings_elements);
 							if (elements != null)
 							{
+								elements.setChildren(null);
 								addFormElementsChildren(elements);
 								view.refreshTreeNodeFromModel(elements);
 							}

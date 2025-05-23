@@ -3,8 +3,10 @@
 	<div class="window-body svy-upload-body">
 	<table class="svy-upload-table" *ngIf="isFileSelected()">
 		<caption>{{ i18n_selectedFiles }}</caption>
-		<thead><tr><th>{{ i18n_name }}</th><th></th></tr></thead>
-		<tr *ngFor="let f of getUploadFiles()"><td>{{ f.name }}</td><td><button class="svy-btn svy-btn-danger svy-upload-btn-remove" (click)="doRemove(f)" [attr.disabled]="isUploading ? '' : null">{{ i18n_remove }}</button></td></tr>
+		<tr *ngFor="let f of getUploadFiles()" [class.oversized-file]="!isFileValidForUpload(f)">
+			<td>{{ getDisplayName(f) }}</td>
+			<td><button class="svy-btn svy-btn-danger svy-upload-btn-remove" (click)="doRemove(f)" [attr.disabled]="isUploading ? '' : null">{{ i18n_remove }}</button></td>
+		</tr>
 	</table>
 	<div *ngIf="!isFileSelected()"><span>{{ i18n_nothingSelected }}</span></div>
   <br>

@@ -7,16 +7,16 @@
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/128.0.11/repository"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="128.0.11"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/128.0.12/repository"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="128.0.12"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.11.media/repository"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="128.0.11"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.12.media/repository"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="128.0.12"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.11-arm.media/repository"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="128.0.11"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.12-arm.media/repository"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="128.0.12"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="http://download.eclipse.org/nattable/releases/2.5.0/repository/"/>
@@ -40,8 +40,8 @@
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.06/"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202504150757"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202504150758"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202505211504"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202505211506"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/releases/2025-03"/>
@@ -76,19 +76,19 @@
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-annotations</artifactId>
-                    <version>2.18.3</version>
+                    <version>2.19.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
-                    <version>2.18.3</version>
+                    <version>2.19.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
-                    <version>2.18.3</version>
+                    <version>2.19.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -194,6 +194,12 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                    <version>1.18.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
                     <groupId>commons-fileupload</groupId>
                     <artifactId>commons-fileupload</artifactId>
                     <version>1.5</version>
@@ -208,7 +214,7 @@
                 <dependency>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.3.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -242,14 +248,9 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
-                    <groupId>commons-codec</groupId>
-                    <artifactId>commons-codec</artifactId>
-                    <version>1.18.0</version>
-                </dependency>
-                <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-collections4</artifactId>
-                    <version>4.4</version>
+                    <version>4.5.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -291,7 +292,7 @@
                 <dependency>
                     <groupId>org.apache.httpcomponents.client5</groupId>
                     <artifactId>httpclient5</artifactId>
-                    <version>5.4.3</version>
+                    <version>5.4.4</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -399,7 +400,7 @@
                 <dependency>
                     <groupId>org.jsoup</groupId>
                     <artifactId>jsoup</artifactId>
-                    <version>1.19.1</version>
+                    <version>1.20.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>

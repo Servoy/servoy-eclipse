@@ -844,7 +844,8 @@ public class TypeCreator extends TypeCache
 					IReturnedTypesProvider datasourceReturns = ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class);
 					for (Class< ? > cls : datasourceReturns.getAllReturnedTypes())
 					{
-						if (cls != DBDataSource.class && cls != MemDataSource.class && cls != ViewDataSource.class && cls != MenuDataSource.class)
+						if (cls != DBDataSource.class && cls != MemDataSource.class && cls != ViewDataSource.class && cls != MenuDataSource.class &&
+							cls != SPDataSource.class)
 						{
 							clsses.add(cls);
 						}

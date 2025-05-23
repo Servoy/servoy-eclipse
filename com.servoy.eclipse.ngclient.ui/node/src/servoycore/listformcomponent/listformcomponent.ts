@@ -611,6 +611,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         const thisLFC = this;
         const idx = rowIndex;
+		let elementReadOnly = rowItem.model.readOnly;
         Object.defineProperty(rowItem.model, 'readOnly', {
             configurable: true,
             get() {
@@ -618,8 +619,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 if (thisLFC.rowEditableDataprovider && thisLFC.rowEditableDataprovider.length > idx) {
                     rowReadOnly = !thisLFC.rowEditableDataprovider[idx];
                 }
-                return rowReadOnly || thisLFC.readOnly || !thisLFC.editable;
+                return elementReadOnly || rowReadOnly || thisLFC.readOnly || !thisLFC.editable;
             },
+			set(value: boolean) {
+				elementReadOnly = value;
+			}
         });
         if (this.rowEnableDataprovider && this.rowEnableDataprovider.length > idx) {
             Object.defineProperty(rowItem.model, 'enabled', {

@@ -197,8 +197,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
             this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
 
-            this.lassostarted = true;
-            this.mousedownpoint = { x: event.pageX, y: event.pageY };
+            if (event.button !== 2) {
+                this.lassostarted = true;
+                this.mousedownpoint = { x: event.pageX, y: event.pageY };
+            }
         }
     }
 

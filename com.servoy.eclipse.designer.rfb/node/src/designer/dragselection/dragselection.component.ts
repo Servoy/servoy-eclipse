@@ -494,7 +494,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     }
 
     private findAncestor(el: HTMLElement, cls: string): HTMLElement {
-        while ((el = el.parentElement) && !el.classList.contains(cls));
+        while (el && (el = el.parentElement) && !el.classList.contains(cls));
         return el !== undefined && el !== null && el.classList.contains(cls) ? el : null;
     }
 }
