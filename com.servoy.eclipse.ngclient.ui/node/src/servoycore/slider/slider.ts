@@ -15,10 +15,13 @@ export class ServoyCoreSlider extends ServoyBaseComponent<HTMLInputElement> {
     @Input() onStartMethodID;
     @Input() onStopMethodID;
 
+    @Input() enabled: boolean;
+
     @Input() min;
     @Input() max;
     @Input() orientation;
     @Input() step;
+    @Input() range;
 
     @Input() dataProviderID: any;
     @Output() dataProviderIDChange = new EventEmitter();
