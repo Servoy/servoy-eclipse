@@ -2,8 +2,6 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 import { MainComponent } from './main.component';
 
-import { FormComponent } from './form/form_component.component';
-
 import { DefaultLoginWindowComponent } from './services/default-login-window/default-login-window.component';
 import { FileUploadWindowComponent } from './services/file-upload-window/file-upload-window.component';
 import { DialogWindowComponent } from './services/dialog-window/dialog-window.component';
@@ -25,7 +23,6 @@ import { ServoyPublicService } from '@servoy/public';
 @NgModule( {
     declarations: [
         MainComponent,
-        FormComponent,
         DefaultLoginWindowComponent,
         FileUploadWindowComponent,
         DialogWindowComponent,
