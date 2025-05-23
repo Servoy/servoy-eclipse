@@ -18,9 +18,12 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -40,6 +43,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -65,7 +69,11 @@ import org.eclipse.swt.widgets.Text;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.scripting.info.EventType;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -77,7 +85,11 @@ public class EventTypesDialog extends Dialog
 	public static final int CI_EVENT_TYPE_NAME = 0;
 	public static final int CI_DELETE = 1;
 
-	private static final String[] BASIC_TYPES = new String[] { "Boolean", "Date", "Number", "String" };
+	public static final int CI_PARAMETER_NAME = 0;
+	public static final int CI_PARAMETER_TYPE = 1;
+	public static final int CI_PARAMETER_DELETE = 2;
+
+	private static final String[] BASIC_TYPES = new String[] { "Object", "Boolean", "Date", "Number", "String" };
 
 	private boolean initializingData = false;
 	private final Object value;
@@ -87,12 +99,7 @@ public class EventTypesDialog extends Dialog
 	private Text txtDescription;
 	private Combo returnTypeCombo;
 	private Text txtReturnDescription;
-	private Combo parameterTypeCombo1;
-	private Combo parameterTypeCombo2;
-	private Combo parameterTypeCombo3;
-	private Text txtParameterName1;
-	private Text txtParameterName2;
-	private Text txtParameterName3;
+	private TableViewer argumentsTableViewer;
 
 	public EventTypesDialog(Shell shell, Object value)
 	{
@@ -171,7 +178,7 @@ public class EventTypesDialog extends Dialog
 
 		});
 
-		final TableColumn deleteColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
+		TableColumn deleteColumn = new TableColumn(tableViewer.getTable(), SWT.CENTER, CI_DELETE);
 
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
@@ -313,7 +320,7 @@ public class EventTypesDialog extends Dialog
 			}
 		});
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		data.heightHint = 200;
+		data.heightHint = 100;
 		data.horizontalSpan = 3;
 		txtDescription.setLayoutData(data);
 
@@ -328,7 +335,7 @@ public class EventTypesDialog extends Dialog
 			}
 		});
 		label = new Label(generalPropertiesGroup, SWT.NONE);
-		label.setText("Name");
+		label.setText("Description");
 
 		txtReturnDescription = new Text(generalPropertiesGroup, SWT.BORDER);
 		txtReturnDescription.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -340,67 +347,235 @@ public class EventTypesDialog extends Dialog
 		});
 
 		label = new Label(generalPropertiesGroup, SWT.NONE);
-		label.setText("Argument1 Type");
-		parameterTypeCombo1 = new Combo(generalPropertiesGroup, SWT.BORDER);
-		parameterTypeCombo1.setItems(BASIC_TYPES);
-		parameterTypeCombo1.addModifyListener(e -> {
-			if (selectedEventType != null && !initializingData)
-			{
-				selectedEventType.setArgumentType(0, parameterTypeCombo1.getText());
-			}
-		});
-		label = new Label(generalPropertiesGroup, SWT.NONE);
-		label.setText("Name");
-		txtParameterName1 = new Text(generalPropertiesGroup, SWT.BORDER);
-		txtParameterName1.addModifyListener(e -> {
-			if (selectedEventType != null && !initializingData)
-			{
-				selectedEventType.setArgumentName(0, txtParameterName1.getText());
-			}
-		});
-		txtParameterName1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		label.setText("Arguments");
 
-		label = new Label(generalPropertiesGroup, SWT.NONE);
-		label.setText("Argument2 Type");
-		parameterTypeCombo2 = new Combo(generalPropertiesGroup, SWT.BORDER);
-		parameterTypeCombo2.setItems(BASIC_TYPES);
-		parameterTypeCombo2.addModifyListener(e -> {
-			if (selectedEventType != null && !initializingData)
-			{
-				selectedEventType.setArgumentType(1, parameterTypeCombo2.getText());
-			}
-		});
-		label = new Label(generalPropertiesGroup, SWT.NONE);
-		label.setText("Name");
-		txtParameterName2 = new Text(generalPropertiesGroup, SWT.BORDER);
-		txtParameterName2.addModifyListener(e -> {
-			if (selectedEventType != null && !initializingData)
-			{
-				selectedEventType.setArgumentName(1, txtParameterName2.getText());
-			}
-		});
-		txtParameterName2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		tableContainer = new Composite(generalPropertiesGroup, SWT.NONE);
+		tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 
-		label = new Label(generalPropertiesGroup, SWT.NONE);
-		label.setText("Argument3 Type");
-		parameterTypeCombo3 = new Combo(generalPropertiesGroup, SWT.BORDER);
-		parameterTypeCombo3.setItems(BASIC_TYPES);
-		parameterTypeCombo3.addModifyListener(e -> {
-			if (selectedEventType != null && !initializingData)
+		argumentsTableViewer = new TableViewer(tableContainer, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+		columnTable = argumentsTableViewer.getTable();
+		columnTable.setLinesVisible(true);
+		columnTable.setHeaderVisible(true);
+
+		nameColumn = new TableColumn(columnTable, SWT.LEFT, CI_PARAMETER_NAME);
+		nameColumn.setText("Name");
+		nameViewerColumn = new TableViewerColumn(argumentsTableViewer, nameColumn);
+		nameViewerColumn.setEditingSupport(new EditingSupport(argumentsTableViewer)
+		{
+			private final TextCellEditor editor = new TextCellEditor(argumentsTableViewer.getTable());
+
+			@Override
+			protected CellEditor getCellEditor(Object element)
 			{
-				selectedEventType.setArgumentType(2, parameterTypeCombo3.getText());
+				return editor;
+			}
+
+			@Override
+			protected boolean canEdit(Object element)
+			{
+				return selectedEventType != null && selectedEventType.getArguments().indexOf(element) > 0;
+			}
+
+			@Override
+			protected Object getValue(Object element)
+			{
+				return ((Pair<String, String>)element).getLeft();
+			}
+
+			@Override
+			protected void setValue(Object element, Object value)
+			{
+				if (value == null || value.toString().length() == 0)
+				{
+					MessageDialog.openError(getShell(), "Invalid Argument Name", "Argument name can't be empty");
+					return;
+				}
+				if (!IdentDocumentValidator.isJavaIdentifier(value.toString()))
+				{
+					MessageDialog.openError(getShell(), "Invalid Argument Name", "Must be valid identifier");
+					return;
+				}
+				if (selectedEventType.getArguments().stream().anyMatch(arg -> value.toString().equals(arg.getLeft())))
+				{
+					MessageDialog.openError(getShell(), "Invalid Argument Name", "Argument name already exists");
+					return;
+				}
+				((Pair<String, String>)element).setLeft(value.toString());
+				getViewer().update(element, null);
+			}
+
+		});
+
+		TableColumn typeColumn = new TableColumn(columnTable, SWT.LEFT, CI_PARAMETER_TYPE);
+		typeColumn.setText("Type");
+		TableViewerColumn typeViewerColumn = new TableViewerColumn(argumentsTableViewer, typeColumn);
+		typeViewerColumn.setEditingSupport(new EditingSupport(argumentsTableViewer)
+		{
+			private final FixedComboBoxCellEditor editor = new FixedComboBoxCellEditor(argumentsTableViewer.getTable(), BASIC_TYPES, SWT.BORDER);
+
+			@Override
+			protected CellEditor getCellEditor(Object element)
+			{
+				CCombo combo = (CCombo)editor.getControl();
+				combo.setItems(BASIC_TYPES);
+				return editor;
+			}
+
+			@Override
+			protected boolean canEdit(Object element)
+			{
+				return selectedEventType != null && selectedEventType.getArguments().indexOf(element) > 0;
+			}
+
+			@Override
+			protected Object getValue(Object element)
+			{
+				String argumentType = ((Pair<String, String>)element).getRight();
+				if (argumentType != null && argumentType.length() > 0)
+				{
+					int index = Arrays.asList(BASIC_TYPES).indexOf(argumentType);
+					if (index >= 0)
+					{
+						return Integer.valueOf(index);
+					}
+					else
+					{
+						List<String> resultList = new ArrayList<>(BASIC_TYPES.length + 1);
+						Collections.addAll(resultList, new String[] { argumentType });
+						Collections.addAll(resultList, BASIC_TYPES);
+						CCombo combo = (CCombo)editor.getControl();
+						combo.setItems(resultList.toArray(new String[resultList.size()]));
+					}
+				}
+				return Integer.valueOf(0);
+			}
+
+			@Override
+			protected void setValue(Object element, Object value)
+			{
+				CCombo combo = (CCombo)editor.getControl();
+				String selectedType = combo.getText();
+				if (!IdentDocumentValidator.isJavaIdentifier(selectedType))
+				{
+					MessageDialog.openError(getShell(), "Invalid Argument Type", "Must be valid identifier");
+					return;
+				}
+				((Pair<String, String>)element).setRight(selectedType);
+				getViewer().update(element, null);
+			}
+
+		});
+
+		deleteColumn = new TableColumn(argumentsTableViewer.getTable(), SWT.CENTER, CI_PARAMETER_DELETE);
+
+		argumentsTableViewer.getTable().addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseDown(MouseEvent event)
+			{
+				Point pt = new Point(event.x, event.y);
+				TableItem item = argumentsTableViewer.getTable().getItem(pt);
+				if (selectedEventType != null && item != null && item.getBounds(CI_PARAMETER_DELETE).contains(pt))
+				{
+					Object argument = item.getData();
+					if (argument instanceof Pair && selectedEventType.getArguments().indexOf(argument) > 0 &&
+						MessageDialog.openConfirm(getShell(), "Delete event type",
+							"Are you sure you want to delete argument ?"))
+					{
+						selectedEventType.getArguments().remove(argument);
+						argumentsTableViewer.refresh();
+						getShell().layout(true, true);
+					}
+
+				}
 			}
 		});
-		label = new Label(generalPropertiesGroup, SWT.NONE);
-		label.setText("Name");
-		txtParameterName3 = new Text(generalPropertiesGroup, SWT.BORDER);
-		txtParameterName3.addModifyListener(e -> {
-			if (selectedEventType != null && !initializingData)
+
+		layout = new TableColumnLayout();
+		tableContainer.setLayout(layout);
+		layout.setColumnData(nameColumn, new ColumnWeightData(1, 50, true));
+		layout.setColumnData(typeColumn, new ColumnWeightData(1, 50, true));
+		layout.setColumnData(deleteColumn, new ColumnPixelData(20, false));
+
+		argumentsTableViewer.setLabelProvider(new ITableLabelProvider()
+		{
+			public Image getColumnImage(Object element, int columnIndex)
 			{
-				selectedEventType.setArgumentName(2, txtParameterName3.getText());
+				if (columnIndex == CI_PARAMETER_DELETE && selectedEventType != null && selectedEventType.getArguments().indexOf(element) > 0)
+				{
+					return Activator.getDefault().loadImageFromBundle("delete.png");
+				}
+				return null;
+			}
+
+			public String getColumnText(Object element, int columnIndex)
+			{
+				if (columnIndex == CI_PARAMETER_NAME) return ((Pair<String, String>)element).getLeft();
+				if (columnIndex == CI_PARAMETER_TYPE) return ((Pair<String, String>)element).getRight();
+				return null;
+			}
+
+			public void addListener(ILabelProviderListener listener)
+			{
+			}
+
+			public void dispose()
+			{
+			}
+
+			public boolean isLabelProperty(Object element, String property)
+			{
+				return false;
+			}
+
+			public void removeListener(ILabelProviderListener listener)
+			{
+			}
+
+		});
+		argumentsTableViewer.setContentProvider(new ArrayContentProvider());
+		argumentsTableViewer.setInput(selectedEventType != null ? selectedEventType.getArguments() : new ArrayList<Pair<String, String>>());
+
+		Button addArgument = new Button(generalPropertiesGroup, SWT.NONE);
+		addArgument.setText("Add Argument");
+		addArgument.setToolTipText("Adds a new argument to method signature");
+		addArgument.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(final SelectionEvent e)
+			{
+				if (selectedEventType == null)
+				{
+					return;
+				}
+				InputDialog dialog = new InputDialog(getShell(), "Add Argument", "Argument Name", "",
+					new IInputValidator()
+					{
+						public String isValid(String newText)
+						{
+							if (newText == null || newText.length() == 0)
+							{
+								return "Please enter an argument name";
+							}
+							if (!IdentDocumentValidator.isJavaIdentifier(newText))
+							{
+								return "Invalid argument name";
+							}
+							if (selectedEventType.getArguments().stream().anyMatch(arg -> Utils.equalObjects(arg.getLeft(), newText)))
+							{
+								return "Argument name already exists";
+							}
+							return null;
+						}
+					});
+				if (dialog.open() == Window.OK)
+				{
+					selectedEventType.getArguments().add(new Pair<String, String>(dialog.getValue(), ""));
+					argumentsTableViewer.refresh();
+					getShell().layout(true, true);
+				}
 			}
 		});
-		txtParameterName3.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		return composite;
 	}
 
@@ -411,12 +586,6 @@ public class EventTypesDialog extends Dialog
 		txtDescription.setText("");
 		returnTypeCombo.setText("");
 		txtReturnDescription.setText("");
-		parameterTypeCombo1.setText("");
-		txtParameterName1.setText("");
-		parameterTypeCombo2.setText("");
-		txtParameterName2.setText("");
-		parameterTypeCombo3.setText("");
-		txtParameterName3.setText("");
 		if (selectedEventType != null)
 		{
 			if (selectedEventType.getPersistLink() != null)
@@ -435,31 +604,8 @@ public class EventTypesDialog extends Dialog
 			{
 				txtReturnDescription.setText(selectedEventType.getReturnTypeDescription());
 			}
-			if (selectedEventType.getArgumentType(0) != null)
-			{
-				parameterTypeCombo1.setText(selectedEventType.getArgumentType(0));
-			}
-			if (selectedEventType.getArgumentName(0) != null)
-			{
-				txtParameterName1.setText(selectedEventType.getArgumentName(0));
-			}
-			if (selectedEventType.getArgumentType(1) != null)
-			{
-				parameterTypeCombo2.setText(selectedEventType.getArgumentType(1));
-			}
-			if (selectedEventType.getArgumentName(1) != null)
-			{
-				txtParameterName2.setText(selectedEventType.getArgumentName(1));
-			}
-			if (selectedEventType.getArgumentType(2) != null)
-			{
-				parameterTypeCombo3.setText(selectedEventType.getArgumentType(2));
-			}
-			if (selectedEventType.getArgumentName(2) != null)
-			{
-				txtParameterName3.setText(selectedEventType.getArgumentName(2));
-			}
 		}
+		argumentsTableViewer.setInput(selectedEventType != null ? selectedEventType.getArguments() : new ArrayList<Pair<String, String>>());
 		initializingData = false;
 	}
 
@@ -495,12 +641,26 @@ public class EventTypesDialog extends Dialog
 	protected void configureShell(Shell shell)
 	{
 		super.configureShell(shell);
-		shell.setSize(800, 550);
 		// Center the dialog
 		Rectangle screenSize = Display.getDefault().getBounds();
 		int x = (screenSize.width - shell.getSize().x) / 2;
 		int y = (screenSize.height - shell.getSize().y) / 2;
 		shell.setLocation(x, y);
+	}
+
+	@Override
+	protected IDialogSettings getDialogBoundsSettings()
+	{
+		IDialogSettings settings = EditorUtil.getDialogSettings("EventTypesDialog");
+		if (settings.get("DIALOG_WIDTH") == null)
+		{
+			settings.put("DIALOG_WIDTH", 800);
+		}
+		if (settings.get("DIALOG_HEIGHT") == null)
+		{
+			settings.put("DIALOG_HEIGHT", 550);
+		}
+		return settings;
 	}
 
 	/**
