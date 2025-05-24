@@ -27,6 +27,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -48,6 +50,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipException;
@@ -87,7 +91,9 @@ import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.JSMap;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
+import com.servoy.j2db.server.servlets.ConfigServlet;
 import com.servoy.j2db.solutionmodel.ISMPart;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -126,11 +132,11 @@ public class MarkdownGenerator
 	private static List<String> missingMdFiles = new ArrayList<>();
 	private static Map<String, String> referenceTypes = new HashMap<String, String>();
 	private static Set<String> summaryPaths = new HashSet<String>();
-
 	private static String summaryMdFilePath;
+	private static Map<String, String> classNameMap = null;
 
-	//this is generating output data used for further processing
-	private static final boolean TRACK_REFERENCES = true; //TURN ON/OFF TRACKING OF REFERENCES
+	private static final boolean TRACK_REFERENCES = false; //used to turn relative references to full urls toward docs.servoy.com
+	private static final boolean GENERATE_PGADMIN_DOCS = false; //properties from admin page
 
 	private static final Set<String> IGNORED_UNDOCUMENTED_TYPES = Set.of(
 		"org.mozilla.javascript.IdScriptableObject",
@@ -429,6 +435,448 @@ public class MarkdownGenerator
 		return retValue.size() > 0 ? retValue : null;
 	}
 
+	/**
+	 * Loads import statements from ConfigServlet to build a mapping of simple class names to fully qualified names.
+	 *
+	 * @param map The map to populate with class name mappings
+	 */
+	private static void loadImportsFromConfigServlet(Map<String, String> map)
+	{
+		try
+		{
+			// Get the location of the ConfigServlet class file
+			Class< ? > configServletClass = ConfigServlet.class;
+			String className = configServletClass.getName();
+			String classAsPath = className.replace('.', '/') + ".java";
+
+			// Try to find the source file
+			String sourceRoot = "/Users/marianvid/Servoy/git/master/server/j2db_server/src/";
+			File sourceFile = new File(sourceRoot, classAsPath);
+
+			if (!sourceFile.exists())
+			{
+				// Fallback to hardcoded mappings if source file not found
+				map.put("Settings", "com.servoy.j2db.util.Settings");
+				map.put("ContentSecurityPolicyConfig", "org.sablo.security.ContentSecurityPolicyConfig");
+				System.out.println("Using fallback class mappings as ConfigServlet source file not found");
+			}
+			else
+			{
+				// Parse the source file to extract imports
+				BufferedReader reader = new BufferedReader(new FileReader(sourceFile));
+				String line;
+				Pattern importPattern = Pattern.compile("import\\s+([\\w\\.]+)\\.([\\w]+);\\s*$");
+
+				while ((line = reader.readLine()) != null)
+				{
+					Matcher matcher = importPattern.matcher(line);
+					if (matcher.matches())
+					{
+						String packageName = matcher.group(1);
+						String simpleClassName = matcher.group(2);
+						String fullClassName = packageName + "." + simpleClassName;
+
+						// Add to map
+						map.put(simpleClassName, fullClassName);
+					}
+				}
+				reader.close();
+
+				// Add the classes from the same package as ConfigServlet
+				String configServletPackage = configServletClass.getPackage().getName();
+				File packageDir = new File(sourceRoot, configServletPackage.replace('.', '/'));
+				if (packageDir.exists() && packageDir.isDirectory())
+				{
+					for (File file : packageDir.listFiles())
+					{
+						if (file.isFile() && file.getName().endsWith(".java"))
+						{
+							String simpleClassName = file.getName().substring(0, file.getName().length() - 5);
+							map.put(simpleClassName, configServletPackage + "." + simpleClassName);
+						}
+					}
+				}
+			}
+
+			// Add common classes that might be referenced without imports
+			map.put("String", "java.lang.String");
+			map.put("Object", "java.lang.Object");
+			map.put("Integer", "java.lang.Integer");
+			map.put("Boolean", "java.lang.Boolean");
+		}
+		catch (Exception e)
+		{
+			System.err.println("Error loading imports from ConfigServlet: " + e.getMessage());
+
+			// Fallback to hardcoded mappings if an error occurs
+			map.put("Settings", "com.servoy.j2db.util.Settings");
+			map.put("ContentSecurityPolicyConfig", "org.sablo.security.ContentSecurityPolicyConfig");
+		}
+	}
+
+	/**
+	 * Resolves a static field reference to its actual value using reflection.
+	 * Uses a dynamic approach to find the fully qualified class name based on imports from ConfigServlet.
+	 *
+	 * @param fieldReference The reference in the format "ClassName.FIELD_NAME"
+	 * @return The actual value of the static field, or the original reference if it couldn't be resolved
+	 */
+	private static String resolveStaticFieldReference(String fieldReference)
+	{
+		if (fieldReference == null || !fieldReference.contains("."))
+		{
+			return fieldReference;
+		}
+
+		// Initialize class name map if needed
+		if (classNameMap == null)
+		{
+			classNameMap = new HashMap<>();
+			loadImportsFromConfigServlet(classNameMap);
+		}
+
+		try
+		{
+			String[] parts = fieldReference.split("\\.", 2);
+			String className = parts[0];
+			String fieldName = parts[1];
+
+			// Look up the fully qualified class name in our map
+			String fullClassName = classNameMap.get(className);
+
+			if (fullClassName == null)
+			{
+				// If not found in map, try common packages as a fallback
+				String[] commonPackages = { "com.servoy.j2db.util", "com.servoy.j2db", "org.sablo.security", "com.servoy.j2db.server", "java.lang"
+				};
+
+				for (String pkg : commonPackages)
+				{
+					try
+					{
+						String tryClassName = pkg + "." + className;
+						Class.forName(tryClassName);
+						// If we get here, the class exists
+						fullClassName = tryClassName;
+						// Add it to our map for future use
+						classNameMap.put(className, fullClassName);
+						break;
+					}
+					catch (ClassNotFoundException e)
+					{
+						// Class not found in this package, continue to next
+					}
+				}
+			}
+
+			if (fullClassName != null)
+			{
+				Class< ? > clazz = Class.forName(fullClassName);
+				Field field = clazz.getField(fieldName);
+				Object value = field.get(null); // null for static fields
+				return value != null ? value.toString() : fieldReference;
+			}
+		}
+		catch (Exception e)
+		{
+			System.err.println("Error resolving static field reference: " + fieldReference + " - " + e.getMessage());
+		}
+
+		return fieldReference;
+	}
+
+	/**
+	 * Process a method call string and extract the appropriate value for documentation.
+	 * This uses reflection to dynamically invoke the method in the ConfigServlet class.
+	 *
+	 * @param methodCall The method call string to process
+	 * @return The processed value suitable for documentation
+	 */
+	private static String processMethodCall(String methodCall)
+	{
+		if (methodCall == null)
+		{
+			return "";
+		}
+
+		// Extract the method name and arguments
+		int openParenIndex = methodCall.indexOf('(');
+		int closeParenIndex = methodCall.lastIndexOf(')');
+
+		if (openParenIndex == -1 || closeParenIndex == -1 || openParenIndex >= closeParenIndex)
+		{
+			// Invalid method call format
+			return methodCall;
+		}
+
+		String methodName = methodCall.substring(0, openParenIndex).trim();
+		String argsString = methodCall.substring(openParenIndex + 1, closeParenIndex).trim();
+
+		try
+		{
+			// Parse the arguments
+			List<Object> args = new ArrayList<>();
+			List<Class< ? >> argTypes = new ArrayList<>();
+
+			if (!argsString.isEmpty())
+			{
+				String[] argStrings = argsString.split(",");
+				for (String arg : argStrings)
+				{
+					arg = arg.trim();
+
+					// Check if the argument is a static field reference
+					if (arg.contains("."))
+					{
+						arg = resolveStaticFieldReference(arg);
+					}
+
+					// Determine the argument type and convert the string value
+					if (arg.equals("true") || arg.equals("false"))
+					{
+						args.add(Boolean.parseBoolean(arg));
+						argTypes.add(boolean.class);
+					}
+					else if (arg.matches("-?\\d+"))
+					{
+						try
+						{
+							args.add(Integer.parseInt(arg));
+							argTypes.add(int.class);
+						}
+						catch (NumberFormatException e)
+						{
+							// If it's too large for an int, try long
+							args.add(Long.parseLong(arg));
+							argTypes.add(long.class);
+						}
+					}
+					else if (arg.matches("-?\\d+\\.\\d+"))
+					{
+						args.add(Double.parseDouble(arg));
+						argTypes.add(double.class);
+					}
+					else
+					{
+						// Remove quotes if present
+						if (arg.startsWith("\"") && arg.endsWith("\""))
+						{
+							arg = arg.substring(1, arg.length() - 1);
+						}
+						args.add(arg);
+						argTypes.add(String.class);
+					}
+				}
+			}
+
+			// Try to find the method in ConfigServlet
+			Class< ? > configServletClass = ConfigServlet.class;
+			Method method = null;
+
+			try
+			{
+				// First try to find the exact method with matching parameter types
+				method = configServletClass.getDeclaredMethod(methodName, argTypes.toArray(new Class< ? >[0]));
+			}
+			catch (NoSuchMethodException e)
+			{
+				// If exact match not found, try to find a method with the same name and number of parameters
+				for (Method m : configServletClass.getDeclaredMethods())
+				{
+					if (m.getName().equals(methodName) && m.getParameterCount() == args.size())
+					{
+						method = m;
+						break;
+					}
+				}
+			}
+
+			if (method != null)
+			{
+				// Make the method accessible if it's private
+				method.setAccessible(true);
+
+				// Invoke the method
+				Object result = method.invoke(null, args.toArray());
+
+				// Convert the result to a string for documentation
+				if (result != null)
+				{
+					return result.toString();
+				}
+				else
+				{
+					return "null";
+				}
+			}
+			else
+			{
+				// Method not found, just return the original method call for documentation
+				return methodCall;
+			}
+		}
+		catch (Exception e)
+		{
+			// Log the error but don't fail the documentation generation
+			Debug.error("Error processing method call " + methodCall, e);
+
+			// For documentation purposes, just return a representation of the method call
+			return methodName + "(" + argsString + ")";
+		}
+	}
+
+	/**
+	 * Processes a description string to resolve any static field references within it.
+	 *
+	 * @param description The description string that might contain static field references
+	 * @return The processed description with resolved references
+	 */
+	private static String processDescription(String description)
+	{
+		if (description == null)
+		{
+			return null;
+		}
+
+		// Replace escaped newlines with HTML breaks
+		description = description.replace("\\n", "<br/>");
+
+		// Find and replace patterns like escape(ContentSecurityPolicyConfig.DEFAULT_FRAME_SRC_DIRECTIVE_VALUE)
+		java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("escape\\(([\\w\\.]+)\\)");
+		java.util.regex.Matcher matcher = pattern.matcher(description);
+		StringBuffer sb = new StringBuffer();
+
+		while (matcher.find())
+		{
+			String fieldReference = matcher.group(1);
+			String resolvedValue = resolveStaticFieldReference(fieldReference);
+			matcher.appendReplacement(sb, "'" + resolvedValue + "'");
+		}
+		matcher.appendTail(sb);
+
+		return sb.toString();
+	}
+
+	/**
+	 * Generates documentation for server configuration properties from ConfigServlet.generalProperties.
+	 *
+	 * @param outputPath The path where the configuration documentation should be saved
+	 * @throws IOException If there's an error writing the file
+	 * @throws TemplateException If there's an error processing the template
+	 */
+	public static void generateConfigurationDocumentation(String outputPath) throws IOException, TemplateException
+	{
+		System.out.println("Generating server configuration properties documentation");
+
+		// Create data structure for the template
+		Map<String, Object> root = new HashMap<>();
+		List<Map<String, Object>> sections = new ArrayList<>();
+
+		String currentSectionTitle = null;
+		List<Map<String, Object>> currentSectionProperties = null;
+
+		// Process generalProperties
+		for (String[] property : ConfigServlet.generalProperties)
+		{
+			if (property[0] == null && property.length > 1)
+			{
+				// This is a section header
+				if (currentSectionTitle != null && currentSectionProperties != null && !currentSectionProperties.isEmpty())
+				{
+					// Add the previous section
+					Map<String, Object> section = new HashMap<>();
+					section.put("title", currentSectionTitle);
+					section.put("properties", currentSectionProperties);
+					sections.add(section);
+				}
+
+				// Start a new section
+				currentSectionTitle = property[1];
+				currentSectionProperties = new ArrayList<>();
+			}
+			else if (property.length >= 3)
+			{
+				// This is a property entry
+				Map<String, Object> prop = new HashMap<>();
+
+				// Resolve any static field references in the property name
+				String propertyName = resolveStaticFieldReference(property[0]);
+				prop.put("name", propertyName);
+
+				// Handle the default value which might be null or a method call result
+				String defaultValue = null;
+				if (property[1] != null)
+				{
+					// Check if the value is a method call (contains parentheses)
+					if (property[1].contains("(") && property[1].contains(")"))
+					{
+						defaultValue = processMethodCall(property[1]);
+					}
+					else
+					{
+						// Check if this is a result from getBooleanOptions that was already processed
+						if (property[1].startsWith("=+"))
+						{
+							// Format is like "=+true|false|" or "=+false|true|"
+							String[] parts = property[1].substring(2).split("\\|");
+							if (parts.length > 0)
+							{
+								defaultValue = parts[0]; // First part is the default value
+							}
+							else
+							{
+								defaultValue = property[1];
+							}
+						}
+						else
+						{
+							defaultValue = property[1];
+						}
+					}
+				}
+				prop.put("defaultValue", defaultValue);
+
+				// Process the description to resolve any static field references
+				String description = processDescription(property[2]);
+				prop.put("description", description);
+
+				if (currentSectionProperties != null)
+				{
+					currentSectionProperties.add(prop);
+				}
+			}
+		}
+
+		// Add the last section
+		if (currentSectionTitle != null && currentSectionProperties != null && !currentSectionProperties.isEmpty())
+		{
+			Map<String, Object> section = new HashMap<>();
+			section.put("title", currentSectionTitle);
+			section.put("properties", currentSectionProperties);
+			sections.add(section);
+		}
+
+		root.put("sections", sections);
+
+		// Apply template
+		Template template = cfg.getTemplate("config_properties_template.md");
+
+		// Ensure directory exists - prepend "ng_generated/" to the output path
+		// String fullOutputPath = "ng_generated/" + outputPath;
+		File dir = new File(outputPath);
+		if (!dir.exists())
+		{
+			dir.mkdirs();
+		}
+
+		// Write output file
+		try (FileWriter writer = new FileWriter(new File(dir, "README.md")))
+		{
+			template.process(root, writer);
+			System.out.println("Server configuration properties documentation generated at: " + new File(dir, "README.md").getAbsolutePath());
+		}
+	}
+
 	public static void generateCoreAndPluginDocs(String jsLibURL, String servoyDocURL, String designDocURL, String pluginDir, boolean generateForAI,
 		IDocFromXMLGenerator docGenerator)
 		throws MalformedURLException, ClassNotFoundException, IOException, URISyntaxException, ZipException, InstantiationException, IllegalAccessException
@@ -623,6 +1071,20 @@ public class MarkdownGenerator
 			docGenerator.writeAggregatedOutput(ngOnly);
 		}
 		while (ngOnly);
+
+		// Generate server configuration properties documentation
+		if (GENERATE_PGADMIN_DOCS)
+		{
+			try
+			{
+				generateConfigurationDocumentation("ng_generated/reference/servoycore/server-api/configuration");
+			}
+			catch (Exception e)
+			{
+				System.err.println("Error generating admin page documentation: " + e.getMessage());
+				e.printStackTrace();
+			}
+		}
 
 		printSummary();
 		// Write out all collected reference links to JSON
@@ -1312,5 +1774,4 @@ public class MarkdownGenerator
 	private static record PluginDocumentationPreparated(DocumentationManager docManager, String pluginPath)
 	{
 	}
-
 }
