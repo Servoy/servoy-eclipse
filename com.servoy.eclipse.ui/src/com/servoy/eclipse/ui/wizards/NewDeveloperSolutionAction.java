@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.wizards;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -30,8 +31,13 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
+import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -68,8 +74,27 @@ public class NewDeveloperSolutionAction extends Action
 				newDeveloperProject.create(null);
 				newDeveloperProject.open(null);
 				IProjectDescription developerProjectDescription = newDeveloperProject.getDescription();
-				developerProjectDescription.setNatureIds(new String[] { ServoyDeveloperProject.NATURE_ID });
+				developerProjectDescription.setNatureIds(new String[] { ServoyDeveloperProject.NATURE_ID, JavaScriptNature.NATURE_ID });
 				newDeveloperProject.setDescription(developerProjectDescription, null);
+				if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
+				{
+					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().addDeveloperProject(newDeveloperProject);
+				}
+				EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
+				try
+				{
+					Solution solution = (Solution)repository.createNewRootObject(name, IRepository.SOLUTIONS);
+
+					solution.setVersion("1.0");
+					solution.setSolutionType(SolutionMetaData.SOLUTION);
+
+					// serialize Solution object to given project
+					repository.updateRootObject(solution);
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 			catch (CoreException e)
 			{

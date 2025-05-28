@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.nature;
 import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -819,6 +820,56 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 	{
 		if (viewServer == null) viewServer = new ViewFoundsetsServer(this);
 		else viewServer.init();
+	}
+
+	/**
+	 * @return
+	 */
+	public String[] getDeveloperProjectNames()
+	{
+		if (project.exists() && project.isOpen())
+		{
+			try
+			{
+				final IProject[] referencedProjects = project.getDescription().getReferencedProjects();
+				final ArrayList<String> developerProjects = new ArrayList<String>();
+				for (IProject p : referencedProjects)
+				{
+					if (p.exists() && p.isOpen() && p.hasNature(ServoyDeveloperProject.NATURE_ID))
+					{
+						developerProjects.add(p.getName());
+					}
+				}
+				return developerProjects.toArray(new String[developerProjects.size()]);
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError("Exception while reading referenced projects for " + project.getName(), e);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @param newDeveloperProject
+	 */
+	public void addDeveloperProject(IProject newDeveloperProject)
+	{
+		try
+		{
+			IProjectDescription description = project.getDescription();
+			IProject[] referencedProjects = description.getReferencedProjects();
+			ArrayList<IProject> newProjects = new ArrayList<IProject>(Arrays.asList(referencedProjects));
+			newProjects.add(newDeveloperProject);
+			description.setReferencedProjects(
+				newProjects.toArray(new IProject[newProjects.size()]));
+			project.setDescription(description, null);
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError("Exception while adding developer project " + newDeveloperProject.getName() + " to " + project.getName(), e);
+		}
+
 	}
 
 }

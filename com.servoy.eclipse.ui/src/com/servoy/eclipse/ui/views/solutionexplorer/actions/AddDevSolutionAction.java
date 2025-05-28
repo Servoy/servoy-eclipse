@@ -17,15 +17,34 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.extensions.AbstractServoyModel;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
+import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
+import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
+import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
+import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 
@@ -45,86 +64,64 @@ public class AddDevSolutionAction extends Action implements ISelectionChangedLis
 	@Override
 	public void run()
 	{
-//		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-//		List<String> availableSolutions = new ArrayList<String>();
-//		try
-//		{
-//			for (RootObjectMetaData rootObject : ApplicationServerRegistry.get().getDeveloperRepository().getRootObjectMetaDatas())
-//			{
-//				if (rootObject.getObjectTypeId() == IRepository.SOLUTIONS &&
-//					!rootObject.getName().equals(servoyModel.getActiveProject().getSolution().getName()))
-//				{
-//					availableSolutions.add(rootObject.getName());
-//				}
-//			}
-//		}
-//		catch (Exception ex)
-//		{
-//			Debug.error(ex);
-//		}
-//
-//		StringTokenizerConverter converter = new StringTokenizerConverter(",", true);
-//		List<String> allSolutions = new ArrayList<String>(availableSolutions);
-//
-//		String[] modulesNames = converter.convertProperty("moduleNames", servoyModel.getActiveProject().getSolution().getModulesNames());
-//
-//		StructuredSelection theSelection = null;
-//		if (modulesNames == null) theSelection = StructuredSelection.EMPTY;
-//		else
-//		{
-//			theSelection = new StructuredSelection(modulesNames);
-//			for (String module : modulesNames)
-//			{
-//				if (!allSolutions.contains(module))
-//				{
-//					allSolutions.add(module);
-//				}
-//			}
-//		}
-//		Collections.sort(allSolutions, String.CASE_INSENSITIVE_ORDER);
-//
-//		ILabelProvider labelProvider;
-//		if (allSolutions.size() == availableSolutions.size())
-//		{
-//			labelProvider = new ArrayLabelProvider(converter);
-//		}
-//		else
-//		{
-//			labelProvider = new ValidvalueDelegatelabelProvider(new ArrayLabelProvider(converter), availableSolutions, null,
-//				FontResource.getDefaultFont(SWT.ITALIC, 0));
-//		}
-//
-//		ITreeContentProvider contentProvider = FlatTreeContentProvider.INSTANCE;
-//		IFilter selectionFilter = new LeafnodesSelectionFilter(contentProvider);
-//
-//		int treeStyle = SWT.MULTI | SWT.CHECK;
-//
-//		TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, labelProvider, null,
-//			selectionFilter, treeStyle, "Select modules", allSolutions.toArray(), theSelection, true, "Select modules", null, false);
-//
-//		dialog.open();
-//
-//		if (dialog.getReturnCode() == Window.CANCEL) return;
-//
-//		Object[] selectedProjsArray = ((IStructuredSelection)dialog.getSelection()).toArray();
-//
-//		ServoyProject activeSolution = servoyModel.getActiveProject();
-//		if (activeSolution == null) return;
-//
-//		Solution editingSolution = activeSolution.getEditingSolution();
-//		if (editingSolution != null)
-//		{
-//			String modulesTokenized = ModelUtils.getTokenValue(selectedProjsArray, ",");
-//			editingSolution.setModulesNames(modulesTokenized);
-//			try
-//			{
-//				activeSolution.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
-//			}
-//			catch (RepositoryException e)
-//			{
-//				ServoyLog.logError("Cannot save new module list for active module " + activeSolution.getProject().getName(), e);
-//			}
-//		}
+		AbstractServoyModel servoyModel = (AbstractServoyModel)ServoyModelManager.getServoyModelManager().getServoyModel();
+
+
+		List<String> alldevProjectsNames = servoyModel.getDeveloperProjectNames();
+		String[] projectNames = servoyModel.getActiveProject().getDeveloperProjectNames(); // make sure the active project is loaded
+
+		StructuredSelection theSelection = null;
+		if (projectNames == null) theSelection = StructuredSelection.EMPTY;
+		else
+		{
+			theSelection = new StructuredSelection(projectNames);
+		}
+		Collections.sort(alldevProjectsNames, String.CASE_INSENSITIVE_ORDER);
+
+		ITreeContentProvider contentProvider = FlatTreeContentProvider.INSTANCE;
+
+		int treeStyle = SWT.MULTI | SWT.CHECK;
+
+		TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, new ArrayLabelProvider(null),
+			null,
+			new LeafnodesSelectionFilter(contentProvider), treeStyle, "Select developer solutions", alldevProjectsNames.toArray(), theSelection, true,
+			"Select developer solutions",
+			null, false);
+
+		dialog.open();
+
+		if (dialog.getReturnCode() == Window.CANCEL) return;
+
+		Object[] selectedProjsArray = ((IStructuredSelection)dialog.getSelection()).toArray();
+
+		ServoyProject activeSolution = servoyModel.getActiveProject();
+		if (activeSolution == null) return;
+		List<IProject> referencedProjects = new ArrayList<IProject>();
+		if (selectedProjsArray != null)
+		{
+			for (Object selectedProj : selectedProjsArray)
+			{
+				referencedProjects.add(ResourcesPlugin.getWorkspace().getRoot().getProject(selectedProj.toString()));
+			}
+		}
+		try
+		{
+			IProject[] oldProjects = activeSolution.getProject().getDescription().getReferencedProjects();
+			for (IProject oldProject : oldProjects)
+			{
+				if (!referencedProjects.contains(oldProject) && !oldProject.hasNature(ServoyDeveloperProject.NATURE_ID))
+				{
+					referencedProjects.add(oldProject); // keep the old projects
+				}
+			}
+			activeSolution.getProject().getDescription().setReferencedProjects(referencedProjects.toArray(new IProject[referencedProjects.size()]));
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+			return;
+		}
+
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

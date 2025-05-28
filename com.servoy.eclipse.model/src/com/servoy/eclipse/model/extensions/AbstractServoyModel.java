@@ -383,6 +383,26 @@ public abstract class AbstractServoyModel implements IServoyModel
 		return null;
 	}
 
+	public List<String> getDeveloperProjectNames()
+	{
+		List<String> retval = new ArrayList<String>();
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects())
+		{
+			try
+			{
+				if (project.isOpen() && project.hasNature(ServoyDeveloperProject.NATURE_ID))
+				{
+					retval.add(project.getName());
+				}
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return retval;
+	}
+
 	public AbstractServoyModel refreshServoyProjects()
 	{
 		servoyProjectCache = null;
