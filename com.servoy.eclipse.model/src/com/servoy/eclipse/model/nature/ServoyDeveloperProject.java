@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * Project nature for Resources Servoy projects.
  *
- * @author acostescu
+ * @author lvostinar
  */
 public class ServoyDeveloperProject implements IProjectNature
 {
