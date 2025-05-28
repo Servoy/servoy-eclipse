@@ -15,15 +15,16 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.core.developersolution;
+package com.servoy.eclipse.developersolution;
 
 import java.io.IOException;
 
 import org.sablo.specification.property.IBrowserConverterContext;
-import org.sablo.websocket.BaseWindow;
 import org.sablo.websocket.IToJSONWriter;
-import org.sablo.websocket.IWebsocketSession;
 import org.sablo.websocket.utils.JSONUtils.IToJSONConverter;
+
+import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
+import com.servoy.j2db.server.ngclient.NGClientWindow;
 
 /**
  * @author jcompagner
@@ -31,14 +32,14 @@ import org.sablo.websocket.utils.JSONUtils.IToJSONConverter;
  * @since 2025.06
  *
  */
-public class DeveloperWindow extends BaseWindow
+public class DeveloperWindow extends NGClientWindow
 {
 	/**
 	 * @param session
 	 * @param nr
 	 * @param name
 	 */
-	public DeveloperWindow(IWebsocketSession session, int nr, String name)
+	public DeveloperWindow(INGClientWebsocketSession session, int nr, String name)
 	{
 		super(session, nr, name);
 	}
@@ -58,6 +59,22 @@ public class DeveloperWindow extends BaseWindow
 			return false; // if endpoint is null, then the developr ngclient doesn't have ui (yet)
 		}
 		return super.sendMessageInternal(dataWriter, converter, smsgidOptional);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.sablo.websocket.BaseWindow#sendOnlyThisMessageInternal(org.sablo.websocket.IToJSONWriter, org.sablo.websocket.utils.JSONUtils.IToJSONConverter)
+	 */
+	@Override
+	protected String sendOnlyThisMessageInternal(IToJSONWriter<IBrowserConverterContext> dataWriter, IToJSONConverter<IBrowserConverterContext> converter)
+		throws IOException
+	{
+		if (getEndpoint() == null)
+		{
+			return null; // if endpoint is null, then the developr ngclient doesn't have ui (yet)
+		}
+		return super.sendOnlyThisMessageInternal(dataWriter, converter);
 	}
 
 }

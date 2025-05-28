@@ -15,13 +15,16 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.core.developersolution;
+package com.servoy.eclipse.developersolution;
+
+import java.util.List;
 
 import org.mozilla.javascript.NativeJavaObject;
 
-import com.servoy.eclipse.core.JSDeveloperSolutionModel;
+import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.debug.DebugNGClient;
+import com.servoy.j2db.debug.DebugNGFormMananger;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.SolutionScope;
@@ -58,10 +61,24 @@ public class DeveloperNGClient extends DebugNGClient
 	{
 		IExecutingEnviroment engine = super.createScriptEngine();
 		SolutionScope scope = engine.getSolutionScope();
-		scope.put("servoyDeveloper", scope,
-			new NativeJavaObject(scope, new JSDeveloperSolutionModel(this), new InstanceJavaMembers(scope, JSDeveloperSolutionModel.class)));
+		scope.put("developerBridge", scope,
+			new NativeJavaObject(scope, new DeveloperBridge(this), new InstanceJavaMembers(scope, DeveloperBridge.class)));
 
 		return engine;
+	}
+
+
+	@Override
+	protected IBasicFormManager createFormManager()
+	{
+		return new DebugNGFormMananger(this)
+		{
+			@Override
+			protected void wrapInShowLoadingIndicator(List<Runnable> invokeLaterRunnables)
+			{
+				// ignore
+			}
+		};
 	}
 
 }

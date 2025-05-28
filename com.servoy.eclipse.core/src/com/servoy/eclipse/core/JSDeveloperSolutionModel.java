@@ -35,14 +35,8 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.mozilla.javascript.Function;
 
-import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.inmemory.MemServer;
@@ -55,7 +49,6 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.IDebugClient;
-import com.servoy.j2db.IForm;
 import com.servoy.j2db.dataprocessing.BufferedDataSetInternal;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
@@ -81,7 +74,6 @@ import com.servoy.j2db.scripting.solutionmodel.JSMedia;
 import com.servoy.j2db.scripting.solutionmodel.JSRelation;
 import com.servoy.j2db.scripting.solutionmodel.JSValueList;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel;
-import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -524,6 +516,27 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 		}
 	}
 
+	private Map<UUID, Integer> loadForeignElementsIDs(final IPersist rootObject)
+	{
+		rootObject.acceptVisitor(new IPersistVisitor()
+		{
+			public Object visit(IPersist o)
+			{
+				foreignElementUUIDs.put(o.getUUID(), Integer.valueOf(o.getID()));
+				Map<UUID, Integer> map = ((AbstractBase)o).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
+				if (map != null)
+				{
+					for (Entry<UUID, Integer> entry : map.entrySet())
+					{
+						foreignElementUUIDs.put(entry.getKey(), entry.getValue());
+					}
+				}
+				return IPersistVisitor.CONTINUE_TRAVERSAL;
+			}
+		});
+		return foreignElementUUIDs;
+	}
+
 	/**
 	 * @param persist
 	 */
@@ -545,99 +558,5 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 				}
 			}
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_openForm(java.lang.Object)
-	 */
-	@Override
-	public void openForm(Object form)
-	{
-		String name = null;
-		if (form instanceof String)
-		{
-			name = (String)form;
-		}
-		else if (form instanceof JSForm)
-		{
-			name = ((JSForm)form).getName();
-		}
-		else if (form instanceof IForm)
-		{
-			name = ((IForm)form).getName();
-		}
-		if (name != null)
-		{
-			final Form frm = ServoyModelFinder.getServoyModel().getFlattenedSolution().getForm(name);
-			if (frm != null)
-			{
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						try
-						{
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-								PersistEditorInput.createFormEditorInput(frm).setNew(false),
-								PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-									Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
-						}
-						catch (PartInitException ex)
-						{
-							ServoyLog.logError(ex);
-						}
-					}
-				});
-			}
-			else
-			{
-				throw new IllegalArgumentException("form " + name + " is not a workspace stored (blueprint) form");
-			}
-		}
-	}
-
-	private Map<UUID, Integer> loadForeignElementsIDs(final IPersist rootObject)
-	{
-		rootObject.acceptVisitor(new IPersistVisitor()
-		{
-			public Object visit(IPersist o)
-			{
-				foreignElementUUIDs.put(o.getUUID(), new Integer(o.getID()));
-				Map<UUID, Integer> map = ((AbstractBase)o).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
-				if (map != null)
-				{
-					for (Entry<UUID, Integer> entry : map.entrySet())
-					{
-						foreignElementUUIDs.put(entry.getKey(), entry.getValue());
-					}
-				}
-				return IPersistVisitor.CONTINUE_TRAVERSAL;
-			}
-		});
-		return foreignElementUUIDs;
-	}
-
-	@Override
-	public void showForm(String formName)
-	{
-		System.err.println("Showing a this form: " + formName);
-	}
-
-	@Override
-	public JSDeveloperMenu createMenu(String text)
-	{
-		return null;
-	}
-
-	@Override
-	public void registerMenuItem(JSDeveloperMenu menu, int location, Function callback)
-	{
-	}
-
-	@Override
-	public void registerMenuItem(JSDeveloperMenu menu, int location, Function callback, Function enabler)
-	{
 	}
 }
