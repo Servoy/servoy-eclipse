@@ -317,7 +317,9 @@ public class SimpleUserNode implements IAdaptable
 		}
 		if (toolTip != null)
 		{
-			if (toolTip.startsWith("<")) return toolTip;
+			if (toolTip.contains("<") &&
+				(toolTip.contains("/>") || toolTip.contains("</") || /* wrong tag, but it is present in a few places */toolTip.contains("<br>")))
+				return toolTip;
 			return "<p>" + toolTip.replace("\n\n", "\n<p>\n") + "</p>";
 		}
 		return developerFeedback.getCode();
