@@ -1364,7 +1364,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 											IProject[] referencedProjects = project.getProject().getReferencedProjects();
 											for (IProject ref : referencedProjects)
 											{
-												IProjectNature nature = ref.isOpen() ? ref.getNature("servoy.developer.nature") : null;
+												IProjectNature nature = ref.isOpen() ? ref.getNature(ServoyDeveloperProject.NATURE_ID) : null;
 												if (nature instanceof ServoyDeveloperProject)
 												{
 													// for now just take the first one that has this nature
