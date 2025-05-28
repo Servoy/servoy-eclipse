@@ -372,6 +372,7 @@ public class SolutionExplorerView extends ViewPart
 	private RemovePackageProjectReferenceAction removePackageProjectAction;
 
 	private AddModuleAction addModuleAction;
+	private AddDevSolutionAction addDevSolutionAction;
 	private AddRemovePackageProjectAction addRemovePackageProjectAction;
 
 	private MoveTextAction moveCode;
@@ -2807,6 +2808,7 @@ public class SolutionExplorerView extends ViewPart
 		if (removeModuleAction.isEnabled()) manager.add(removeModuleAction);
 		if (removePackageProjectAction.isEnabled()) manager.add(removePackageProjectAction);
 		if (addModuleAction.isEnabled()) manager.add(addModuleAction);
+		if (addDevSolutionAction.isEnabled()) manager.add(addDevSolutionAction);
 		if (addRemovePackageProjectAction.isEnabled()) manager.add(addRemovePackageProjectAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
@@ -3232,6 +3234,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreeSecondary.registerAction(UserNodeType.WORKING_SET, newFormComponent);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
+		//newActionInTreePrimary.registerAction(UserNodeType.DEVELOPER_SOLUTIONS, newDevSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newDeveloperSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
@@ -3476,6 +3479,7 @@ public class SolutionExplorerView extends ViewPart
 		removeModuleAction = new RemoveModuleAction(shell);
 		removePackageProjectAction = new RemovePackageProjectReferenceAction(shell);
 		addModuleAction = new AddModuleAction(shell);
+		addDevSolutionAction = new AddDevSolutionAction(shell);
 		addRemovePackageProjectAction = new AddRemovePackageProjectAction(shell);
 
 		expandNodeAction = new ExpandNodeAction(tree);
@@ -3527,6 +3531,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(removeModuleAction);
 		addTreeSelectionChangedListener(removePackageProjectAction);
 		addTreeSelectionChangedListener(addModuleAction);
+		addTreeSelectionChangedListener(addDevSolutionAction);
 		addTreeSelectionChangedListener(addRemovePackageProjectAction);
 		addTreeSelectionChangedListener(setActive);
 		addTreeSelectionChangedListener(replaceActionInTree);

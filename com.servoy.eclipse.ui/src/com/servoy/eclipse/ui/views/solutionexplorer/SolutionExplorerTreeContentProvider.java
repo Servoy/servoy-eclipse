@@ -268,6 +268,8 @@ public class SolutionExplorerTreeContentProvider
 
 	private final PlatformSimpleUserNode modulesOfActiveSolution;
 
+	private final PlatformSimpleUserNode devSolutionOfActiveSolution;
+
 	private final Object servicesSpecProviderLock = new Object();
 	private final Object pluginsLoadLock = new Object();
 	private ArrayList<PlatformSimpleUserNode> loadedJavaPluginNodes;
@@ -381,6 +383,10 @@ public class SolutionExplorerTreeContentProvider
 		modulesOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_Modules, UserNodeType.MODULES, null,
 			uiActivator.loadImageFromBundle("modules.png"));
 		modulesOfActiveSolution.parent = activeSolutionNode;
+
+		devSolutionOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_DeveloperSolutions, UserNodeType.DEVELOPER_SOLUTIONS, null,
+			uiActivator.loadImageFromBundle("modules.png"));
+		devSolutionOfActiveSolution.parent = activeSolutionNode;
 
 		allSolutionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllSolutions, UserNodeType.ALL_SOLUTIONS, null,
 			uiActivator.loadImageFromBundle("solutions.png"));
@@ -928,12 +934,13 @@ public class SolutionExplorerTreeContentProvider
 							if (un.isEnabled()) addSolutionNodeChildren(un);
 							if (un.children != null)
 							{
-								PlatformSimpleUserNode activeSolutionChildren[] = new PlatformSimpleUserNode[un.children.length + 1];
+								PlatformSimpleUserNode activeSolutionChildren[] = new PlatformSimpleUserNode[un.children.length + 2];
 								for (int i = un.children.length - 1; i >= 0; i--)
 								{
 									activeSolutionChildren[i] = (PlatformSimpleUserNode)un.children[i];
 								}
-								activeSolutionChildren[activeSolutionChildren.length - 1] = modulesOfActiveSolution;
+								activeSolutionChildren[activeSolutionChildren.length - 2] = modulesOfActiveSolution;
+								activeSolutionChildren[activeSolutionChildren.length - 1] = devSolutionOfActiveSolution;
 								un.children = activeSolutionChildren;
 							}
 							else

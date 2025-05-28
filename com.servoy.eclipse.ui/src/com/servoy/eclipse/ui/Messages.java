@@ -164,6 +164,7 @@ public class Messages extends NLS
 	public static String TreeStrings_ServoyException;
 	public static String TreeStrings_NoActiveSolution;
 	public static String TreeStrings_Modules;
+	public static String TreeStrings_DeveloperSolutions;
 	public static String TreeStrings_String;
 	public static String TreeStrings_Styles;
 	public static String TreeStrings_Components;
