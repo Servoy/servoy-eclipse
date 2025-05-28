@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -106,7 +107,8 @@ public class AddDevSolutionAction extends Action implements ISelectionChangedLis
 		}
 		try
 		{
-			IProject[] oldProjects = activeSolution.getProject().getDescription().getReferencedProjects();
+			IProjectDescription developerProjectDescription = activeSolution.getProject().getDescription();
+			IProject[] oldProjects = developerProjectDescription.getReferencedProjects();
 			for (IProject oldProject : oldProjects)
 			{
 				if (!referencedProjects.contains(oldProject) && !oldProject.hasNature(ServoyDeveloperProject.NATURE_ID))
@@ -114,7 +116,8 @@ public class AddDevSolutionAction extends Action implements ISelectionChangedLis
 					referencedProjects.add(oldProject); // keep the old projects
 				}
 			}
-			activeSolution.getProject().getDescription().setReferencedProjects(referencedProjects.toArray(new IProject[referencedProjects.size()]));
+			developerProjectDescription.setReferencedProjects(referencedProjects.toArray(new IProject[referencedProjects.size()]));
+			activeSolution.getProject().setDescription(developerProjectDescription, null);
 		}
 		catch (Exception e)
 		{
