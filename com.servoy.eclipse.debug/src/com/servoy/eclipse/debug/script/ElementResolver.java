@@ -64,7 +64,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
-import com.servoy.j2db.scripting.solutionmodel.IJSDeveloperSolutionModel;
+import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
