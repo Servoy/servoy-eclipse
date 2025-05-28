@@ -431,6 +431,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			};
 		}
 
+		IRunnableWithProgress genSolRunnable = genAISol(jobName);
+
 		try
 		{
 			IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
@@ -438,6 +440,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
 			progressService.run(true, false, solutionActivationRunnable);
 			progressService.run(true, false, importSolutionsRunnable);
+			if (genSolRunnable != null) progressService.run(true, false, genSolRunnable);
 		}
 		catch (Exception e)
 		{
@@ -463,6 +466,33 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		});
 		return true;
+	}
+
+	private IRunnableWithProgress genAISol(final String jobName)
+	{
+		IRunnableWithProgress genSolRunnable = null;
+		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+		{
+			genSolRunnable = new IRunnableWithProgress()
+			{
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+				{
+					monitor.beginTask(jobName, 1);
+					try
+					{
+						final ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+						AISolutionGenerator.generateSolutionFromAIContent(activeProject);
+						monitor.worked(1);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+					monitor.done();
+				}
+			};
+		}
+		return genSolRunnable;
 	}
 
 	public static IRunnableWithProgress importSolutions(final Map<String, SolutionPackageInstallInfo> solutions, final String jobName, String newSolutionName,
