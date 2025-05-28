@@ -22,7 +22,11 @@ import java.io.File;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -61,13 +65,20 @@ public class AISolutionGenerator
 	}
 
 
-	public static Solution createSolutionFromAIContent(String templateAndAiGeneratedDir)
+	public static Solution createSolutionFromAIContent(String templateAndAiGeneratedDir) throws Exception
 	{
 		JSONObject aiGeneratedContent = getAIGeneratedJSON(templateAndAiGeneratedDir);
-
+		EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 		Solution solution = null;
-		// TODO CREATE A NEW SOLUTION with name given by productApp.json, similar to how create new solution wizard does it
-
+		try
+		{
+			solution = (Solution)repository.createNewRootObject(aiGeneratedContent.optString("projectName", "new_ai_gen_solution"),
+				IRepository.SOLUTIONS);
+		}
+		catch (RepositoryException e)
+		{
+			throw new Exception("Error creating new solution from AI generated content", e);
+		}
 		return solution;
 	}
 

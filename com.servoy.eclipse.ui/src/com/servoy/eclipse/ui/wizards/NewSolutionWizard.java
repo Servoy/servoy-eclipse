@@ -81,6 +81,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaWebAppManifest;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
@@ -110,6 +111,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 {
 	public static final String ID = "com.servoy.eclipse.ui.NewSolutionWizard";
 	protected GenerateSolutionWizardPage configPage;
+	private String solutionName;
 
 	/**
 	 * Creates a new wizard.
@@ -145,7 +147,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final boolean mustAuthenticate = configPage.mustAuthenticate();
 		IRunnableWithProgress newSolutionRunnable = new IRunnableWithProgress()
 		{
-
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
 				monitor.beginTask("Creating solution and writing files to disk", 4);
@@ -153,7 +154,16 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 				try
 				{
-					Solution solution = (Solution)repository.createNewRootObject(configPage.getNewSolutionName(), IRepository.SOLUTIONS);
+					Solution solution = null;
+					if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+					{
+						solution = AISolutionGenerator.createSolutionFromAIContent(configPage.getSvyGenPath());
+					}
+					else
+					{
+						solution = (Solution)repository.createNewRootObject(solutionName, IRepository.SOLUTIONS);
+					}
+					solutionName = solution.getName();
 
 					String modulesTokenized = ModelUtils.getTokenValue(solutions.toArray(new String[] { }), ",");
 					solution.setModulesNames(modulesTokenized);
@@ -195,13 +205,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					monitor.setTaskName("Creating and opening project");
 					// as the serialization is done using java.io, we must make sure the Eclipse resource structure
 					// stays up to date; we create a project, then we must open it and add servoy solution nature
-					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(configPage.getNewSolutionName());
+					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(solutionName);
 					String location = configPage.getProjectLocation();
-					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(configPage.getNewSolutionName());
+					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(solutionName);
 					if (location != null)
 					{
 						IPath path = new Path(location);
-						path = path.append(configPage.getNewSolutionName());
+						path = path.append(solution.getName());
 						description.setLocation(path);
 					}
 					newProject.create(description, null);
@@ -270,7 +280,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				if (configPage.shouldAddDefaultWAM())
 				{
-					addMediaFile(solution, CreateMediaWebAppManifest.createManifest(solution.getName()), CreateMediaWebAppManifest.FILE_NAME);
+					addMediaFile(solution, CreateMediaWebAppManifest.createManifest(solutionName), CreateMediaWebAppManifest.FILE_NAME);
 					addMediaFile(solution, CreateMediaWebAppManifest.getIcon(), CreateMediaWebAppManifest.ICON_NAME);
 					repository.updateRootObject(solution);
 				}
@@ -306,11 +316,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				monitor.beginTask(jobName, 1);
 				servoyModel.refreshServoyProjects();
 				// set this solution as the new active solution or add it as a module
-				ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+				ServoyProject newProject = servoyModel.getServoyProject(solutionName);
 				if (newProject == null)
 				{
 					servoyModel.refreshServoyProjects();
-					newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+					newProject = servoyModel.getServoyProject(solutionName);
 				}
 				if (newProject != null)
 				{
@@ -365,7 +375,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			Pair<String, File> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
 			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
 		}
-		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false, false);
+		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, solutionName, false, false);
 
 		IRunnableWithProgress importPackagesRunnable = null;
 		final List<String> packs = configPage.getWebPackagesToImport();
@@ -375,11 +385,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 				{
-					ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+					ServoyProject newProject = servoyModel.getServoyProject(solutionName);
 					if (newProject == null)
 					{
 						servoyModel.refreshServoyProjects();
-						newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+						newProject = servoyModel.getServoyProject(solutionName);
 					}
 					if (newProject != null)
 					{
