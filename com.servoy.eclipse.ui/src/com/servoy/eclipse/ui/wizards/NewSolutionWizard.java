@@ -213,6 +213,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						int solutionType = configPage.getSolutionType();
 						solution.setSolutionType(solutionType);
 
+						solution.putCustomProperty(new String[] { "svygen_path" }, configPage.getSvyGenPath());
+
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
 
@@ -809,7 +811,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	@Override
 	public boolean canFinish()
 	{
-		return super.canFinish() && (searchMissingServers(configPage.getSolutionsToImport()).isEmpty() || canCreateMissingServers());
+		return super.canFinish() && ((searchMissingServers(configPage.getSolutionsToImport()).isEmpty() || canCreateMissingServers()) ||
+			configPage.getSvyGenPath().isEmpty());
 	}
 
 
