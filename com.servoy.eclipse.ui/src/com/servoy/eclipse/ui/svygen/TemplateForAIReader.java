@@ -20,6 +20,8 @@ package com.servoy.eclipse.ui.svygen;
 import java.io.File;
 
 /**
+ * Reads and provides the template mappings (components, ...) that the AI can use when generating the solution.
+ *
  * @author acostescu
  */
 public class TemplateForAIReader

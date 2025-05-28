@@ -31,6 +31,8 @@ import com.servoy.j2db.util.Utils;
 public class AISolutionGenerator
 {
 
+	private static final String SERVOY_PRIMITIVES_TEMPLATE_DIR = "servoy-primitives";
+	private static final String TEMPLATES_DIR = "templates";
 	private static final String SVYGEN_PATH_CUSTOM_SOLUTION_PROP = "svygen_path";
 	private static final String PRODUCT_APP_JSON = "productApp.json";
 
@@ -74,7 +76,7 @@ public class AISolutionGenerator
 
 	private static TemplateForAIReader getTemplateReader(String templateAndAiGeneratedDir)
 	{
-		return new TemplateForAIReader(new File(new File(templateAndAiGeneratedDir, "templates"), "servoy-primitives"));
+		return new TemplateForAIReader(new File(new File(templateAndAiGeneratedDir, TEMPLATES_DIR), SERVOY_PRIMITIVES_TEMPLATE_DIR));
 	}
 
 	private static void generateSolutionSubContent(Solution solution, JSONObject aiGeneratedContent, TemplateForAIReader templateForAIReader)
