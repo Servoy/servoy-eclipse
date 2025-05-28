@@ -619,53 +619,25 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 		return foreignElementUUIDs;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel#showForm(java.lang.String)
-	 */
 	@Override
 	public void showForm(String formName)
 	{
-		// TODO Auto-generated method stub
-
+		System.err.println("Showing a this form: " + formName);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel#createMenu(java.lang.String)
-	 */
 	@Override
 	public JSDeveloperMenu createMenu(String text)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel#registerMenuItem(com.servoy.j2db.scripting.solutionmodel.developer.
-	 * JSDeveloperMenu, int, org.mozilla.javascript.Function)
-	 */
 	@Override
 	public void registerMenuItem(JSDeveloperMenu menu, int location, Function callback)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel#registerMenuItem(com.servoy.j2db.scripting.solutionmodel.developer.
-	 * JSDeveloperMenu, int, org.mozilla.javascript.Function, org.mozilla.javascript.Function)
-	 */
 	@Override
 	public void registerMenuItem(JSDeveloperMenu menu, int location, Function callback, Function enabler)
 	{
-		// TODO Auto-generated method stub
-
 	}
 }

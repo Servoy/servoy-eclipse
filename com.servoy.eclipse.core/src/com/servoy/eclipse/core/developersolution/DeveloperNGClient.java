@@ -17,15 +17,23 @@
 
 package com.servoy.eclipse.core.developersolution;
 
+import org.mozilla.javascript.NativeJavaObject;
+
+import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.j2db.IDesignerCallback;
+import com.servoy.j2db.debug.DebugNGClient;
+import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.scripting.InstanceJavaMembers;
+import com.servoy.j2db.scripting.SolutionScope;
 import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
-import com.servoy.j2db.server.ngclient.NGClient;
 
 /**
- * @author jcomp
+ * @author jcompagner
+ *
+ * @since 2025.09
  *
  */
-public class DeveloperNGClient extends NGClient
+public class DeveloperNGClient extends DebugNGClient
 {
 
 	/**
@@ -43,6 +51,17 @@ public class DeveloperNGClient extends NGClient
 	{
 		// just call the run because no need to show or hide the loading indicator
 		r.run();
+	}
+
+	@Override
+	protected IExecutingEnviroment createScriptEngine()
+	{
+		IExecutingEnviroment engine = super.createScriptEngine();
+		SolutionScope scope = engine.getSolutionScope();
+		scope.put("servoyDeveloper", scope,
+			new NativeJavaObject(scope, new JSDeveloperSolutionModel(this), new InstanceJavaMembers(scope, JSDeveloperSolutionModel.class)));
+
+		return engine;
 	}
 
 }
