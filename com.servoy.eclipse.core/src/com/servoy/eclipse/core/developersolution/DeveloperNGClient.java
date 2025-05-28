@@ -38,4 +38,11 @@ public class DeveloperNGClient extends NGClient
 		super(wsSession, designerCallback);
 	}
 
+	@Override
+	protected void runWhileShowingLoadingIndicator(Runnable r)
+	{
+		// just call the run because no need to show or hide the loading indicator
+		r.run();
+	}
+
 }

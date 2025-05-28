@@ -108,6 +108,7 @@ import org.jshybugger.proxy.DebugWebAppService;
 import org.jshybugger.proxy.ScriptSourceProvider;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
+import org.sablo.websocket.CurrentWindow;
 import org.sablo.websocket.WebsocketSessionKey;
 import org.webbitserver.HttpControl;
 import org.webbitserver.HttpHandler;
@@ -115,6 +116,7 @@ import org.webbitserver.HttpRequest;
 import org.webbitserver.HttpResponse;
 
 import com.servoy.eclipse.core.developersolution.DeveloperNGClient;
+import com.servoy.eclipse.core.developersolution.DeveloperWindow;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
@@ -1379,7 +1381,16 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 												// start the DeveloperNGClient
 												developerNGClient = new DeveloperNGClient(session, null);
 												session.setClient(developerNGClient);
-												developerNGClient.loadSolution(devSolutionName);
+												DeveloperWindow window = new DeveloperWindow(session, 1, "1");
+												CurrentWindow.set(window);
+												try
+												{
+													developerNGClient.loadSolution(devSolutionName);
+												}
+												finally
+												{
+													CurrentWindow.set(null);
+												}
 											}
 										}
 										catch (Exception e)
