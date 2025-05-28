@@ -41,6 +41,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.inmemory.MenuTable;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
@@ -363,6 +364,23 @@ public abstract class AbstractServoyModel implements IServoyModel
 			}
 		}
 		return retval.toArray(new ServoyResourcesProject[retval.size()]);
+	}
+
+	public ServoyDeveloperProject getDeveloperProject(String projectName)
+	{
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		try
+		{
+			if (project.isOpen() && project.hasNature(ServoyDeveloperProject.NATURE_ID))
+			{
+				return (ServoyDeveloperProject)project.getNature(ServoyDeveloperProject.NATURE_ID);
+			}
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return null;
 	}
 
 	public AbstractServoyModel refreshServoyProjects()
