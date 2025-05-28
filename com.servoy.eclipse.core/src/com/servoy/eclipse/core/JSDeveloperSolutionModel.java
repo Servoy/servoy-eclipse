@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.mozilla.javascript.Function;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
@@ -75,11 +76,12 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.query.ColumnType;
-import com.servoy.j2db.scripting.solutionmodel.IJSDeveloperSolutionModel;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.scripting.solutionmodel.JSMedia;
 import com.servoy.j2db.scripting.solutionmodel.JSRelation;
 import com.servoy.j2db.scripting.solutionmodel.JSValueList;
+import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel;
+import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -109,9 +111,9 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save()
 	 */
 	@Override
-	public void js_save()
+	public void save()
 	{
-		js_save(false);
+		save(false);
 	}
 
 	/*
@@ -120,7 +122,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(boolean)
 	 */
 	@Override
-	public void js_save(final boolean override)
+	public void save(final boolean override)
 	{
 		IWorkspaceRunnable saveJob = new IWorkspaceRunnable()
 		{
@@ -256,9 +258,9 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(java.lang.Object)
 	 */
 	@Override
-	public void js_save(Object obj)
+	public void save(Object obj)
 	{
-		js_save(obj, false);
+		save(obj, false);
 	}
 
 	/*
@@ -267,7 +269,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(java.lang.Object, boolean)
 	 */
 	@Override
-	public void js_save(Object obj, final boolean override)
+	public void save(Object obj, final boolean override)
 	{
 		save(obj, null, override, null, null);
 	}
@@ -278,7 +280,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(java.lang.Object, java.lang.String)
 	 */
 	@Override
-	public void js_save(Object obj, String solutionName)
+	public void save(Object obj, String solutionName)
 	{
 		save(obj, solutionName, false, null, null);
 	}
@@ -290,7 +292,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * java.lang.Object)
 	 */
 	@Override
-	public void js_updateInMemDataSource(Object dataSource, JSDataSet dataSet, Object types)
+	public void updateInMemDataSource(Object dataSource, JSDataSet dataSet, Object types)
 	{
 		save(dataSource, null, true, dataSet, types);
 	}
@@ -551,7 +553,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_openForm(java.lang.Object)
 	 */
 	@Override
-	public void js_openForm(Object form)
+	public void openForm(Object form)
 	{
 		String name = null;
 		if (form instanceof String)
@@ -615,5 +617,55 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 			}
 		});
 		return foreignElementUUIDs;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel#showForm(java.lang.String)
+	 */
+	@Override
+	public void showForm(String formName)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel#createMenu(java.lang.String)
+	 */
+	@Override
+	public JSDeveloperMenu createMenu(String text)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel#registerMenuItem(com.servoy.j2db.scripting.solutionmodel.developer.
+	 * JSDeveloperMenu, int, org.mozilla.javascript.Function)
+	 */
+	@Override
+	public void registerMenuItem(JSDeveloperMenu menu, int location, Function callback)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel#registerMenuItem(com.servoy.j2db.scripting.solutionmodel.developer.
+	 * JSDeveloperMenu, int, org.mozilla.javascript.Function, org.mozilla.javascript.Function)
+	 */
+	@Override
+	public void registerMenuItem(JSDeveloperMenu menu, int location, Function callback, Function enabler)
+	{
+		// TODO Auto-generated method stub
+
 	}
 }

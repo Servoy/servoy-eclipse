@@ -49,6 +49,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -107,11 +108,13 @@ import org.jshybugger.proxy.DebugWebAppService;
 import org.jshybugger.proxy.ScriptSourceProvider;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
+import org.sablo.websocket.WebsocketSessionKey;
 import org.webbitserver.HttpControl;
 import org.webbitserver.HttpHandler;
 import org.webbitserver.HttpRequest;
 import org.webbitserver.HttpResponse;
 
+import com.servoy.eclipse.core.developersolution.DeveloperNGClient;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
@@ -124,6 +127,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -192,6 +196,7 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
 import com.servoy.j2db.server.servlets.RootIndexPageFilter;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -263,6 +268,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	private Boolean skipModuleChanged = null;
 
 	private volatile boolean doneFired = false;
+
+	private DeveloperNGClient developerNGClient;
 
 	protected ServoyModel()
 	{
@@ -1340,6 +1347,55 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						progress.worked(1);
 
 						fireLoadingDone();
+
+						// active solution is loaded, now see if this solutionj has a developerSolution and start the DeveleperNGClient
+						Job startDevClientJon = new Job("Starting DeveloperNGClient")
+						{
+							@Override
+							protected IStatus run(IProgressMonitor monitor)
+							{
+								try
+								{
+									if (project != null && project.getSolution() != null)
+									{
+										try
+										{
+											String devSolutionName = null;
+											IProject[] referencedProjects = project.getProject().getReferencedProjects();
+											for (IProject ref : referencedProjects)
+											{
+												IProjectNature nature = ref.isOpen() ? ref.getNature("servoy.developer.nature") : null;
+												if (nature instanceof ServoyDeveloperProject)
+												{
+													// for now just take the first one that has this nature
+													// the project should be the solution name
+													devSolutionName = ref.getName();
+													break;
+												}
+											}
+											if (devSolutionName != null)
+											{
+												NGClientWebsocketSession session = new NGClientWebsocketSession(new WebsocketSessionKey("1", 1), null);
+												// start the DeveloperNGClient
+												developerNGClient = new DeveloperNGClient(session, null);
+												session.setClient(developerNGClient);
+												developerNGClient.loadSolution(devSolutionName);
+											}
+										}
+										catch (Exception e)
+										{
+											ServoyLog.logError("Error starting dev solution", e);
+										}
+									}
+								}
+								catch (Exception e)
+								{
+									ServoyLog.logError(e);
+								}
+								return Status.OK_STATUS;
+							}
+						};
+						startDevClientJon.schedule();
 					}
 				}
 				finally
