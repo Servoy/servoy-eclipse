@@ -3234,7 +3234,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreeSecondary.registerAction(UserNodeType.WORKING_SET, newFormComponent);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
-		//newActionInTreePrimary.registerAction(UserNodeType.DEVELOPER_SOLUTIONS, newDevSolution);
+		newActionInTreePrimary.registerAction(UserNodeType.DEVELOPER_SOLUTIONS, newDeveloperSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newDeveloperSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
