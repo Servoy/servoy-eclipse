@@ -25,6 +25,7 @@ import org.eclipse.jface.action.Action;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeletePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScopeAction;
 import com.servoy.j2db.persistence.IPersist;
@@ -50,6 +51,7 @@ public class RegenerateSoluitonFromAISourcesAction extends Action
 		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
 		if (activeProject != null)
 		{
+			// delete old unneeded content
 			Solution solution = activeProject.getEditingSolution();
 			List<IPersist> allPersistsToDelete = new ArrayList<>();
 			solution.getAllObjects().forEachRemaining((p) -> {
@@ -60,9 +62,13 @@ public class RegenerateSoluitonFromAISourcesAction extends Action
 			});
 
 			DeletePersistAction.performDeletionStatic(allPersistsToDelete);
-
 			solution.getScopeNames().forEach((sn) -> DeleteScopeAction.deleteScript(activeProject, sn));
+
+			// now (re)generate new content
+			AISolutionGenerator.regenerateSolutionFromAIContent(activeProject);
 		}
+
+
 	}
 
 }
