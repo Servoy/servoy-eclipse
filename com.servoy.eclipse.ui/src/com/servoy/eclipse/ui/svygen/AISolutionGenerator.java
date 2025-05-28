@@ -39,7 +39,7 @@ public class AISolutionGenerator
 	/**
 	 * Regenerates based on AI output on the existing project. Might also need to rename the solution.
 	 */
-	public static void regenerateSolutionFromAIContent(ServoyProject activeProject)
+	public static void generateSolutionFromAIContent(ServoyProject activeProject)
 	{
 		Solution editingSolution = activeProject.getEditingSolution();
 		String templateAndAiGeneratedDir = (String)editingSolution.getCustomProperty(new String[] { SVYGEN_PATH_CUSTOM_SOLUTION_PROP });
@@ -65,12 +65,8 @@ public class AISolutionGenerator
 	{
 		JSONObject aiGeneratedContent = getAIGeneratedJSON(templateAndAiGeneratedDir);
 
-		// TODO CREATE A NEW SOLUTION with name given by productApp.json, similar to how create new solution wizard does it
 		Solution solution = null;
-
-		// start generating solution content
-		generateSolutionSubContent(solution, aiGeneratedContent,
-			getTemplateReader(templateAndAiGeneratedDir));
+		// TODO CREATE A NEW SOLUTION with name given by productApp.json, similar to how create new solution wizard does it
 
 		return solution;
 	}

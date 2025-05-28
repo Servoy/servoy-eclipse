@@ -65,7 +65,7 @@ public class RegenerateSolutionFromAISourcesAction extends Action
 			solution.getScopeNames().forEach((sn) -> DeleteScopeAction.deleteScript(activeProject, sn));
 
 			// now (re)generate new content
-			AISolutionGenerator.regenerateSolutionFromAIContent(activeProject);
+			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
 		}
 
 
