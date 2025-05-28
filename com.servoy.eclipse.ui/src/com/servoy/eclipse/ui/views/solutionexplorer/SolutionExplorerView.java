@@ -344,6 +344,8 @@ public class SolutionExplorerView extends ViewPart
 
 	private ContextAction newActionInTreeTertiary;
 
+	private RegenerateSoluitonFromAISourcesAction regenerateSolutionFromAIAction;
+
 	private ReplaceTableAction replaceActionInTree;
 	private ReplaceServerAction replaceServerAction;
 	private ConvertAllFormsToCSSPosition convertFormsToCSSPosition;
@@ -2008,15 +2010,14 @@ public class SolutionExplorerView extends ViewPart
 
 	private void handleActiveProjectChanged(final ServoyProject activeProject)
 	{
+		newActionInTreeTertiary.unregisterAction(regenerateSolutionFromAIAction);
 		if (activeProject != null)
 		{
 			Solution editingSolution = activeProject.getSolution();
 			Object property = editingSolution.getCustomProperty(new String[] { "svygen_path" });
 			if (property != null)
 			{
-				IAction regenerateSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution.png"),
-					"Generate new solution");
-				newActionInTreeTertiary.registerAction(UserNodeType.SOLUTION, regenerateSolution);
+				newActionInTreeTertiary.registerAction(UserNodeType.SOLUTION, regenerateSolutionFromAIAction);
 			}
 		}
 
@@ -3417,6 +3418,8 @@ public class SolutionExplorerView extends ViewPart
 		editVariableAction = new EditVariableAction(this);
 
 		debugMethodAction = new DebugMethodAction(this);
+
+		regenerateSolutionFromAIAction = new RegenerateSoluitonFromAISourcesAction();
 
 		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		IAction openRelation = new OpenRelationAction(); // must be another instance

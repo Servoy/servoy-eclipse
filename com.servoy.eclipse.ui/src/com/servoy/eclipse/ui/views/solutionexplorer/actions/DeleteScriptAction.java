@@ -109,9 +109,6 @@ public class DeleteScriptAction extends DeletePersistAction
 		return edited;
 	}
 
-	/**
-	 * @see com.servoy.eclipse.ui.views.actions.DeletePersistAction#performDeletion(java.util.List)
-	 */
 	@Override
 	protected void performDeletion(List<IPersist> selectedPersists)
 	{
@@ -201,10 +198,6 @@ public class DeleteScriptAction extends DeletePersistAction
 		super.performDeletion(selectedPersists);
 	}
 
-	/**
-	 * @param substring
-	 * @return
-	 */
 	private int countLines(String txt)
 	{
 		int lines = 0;
