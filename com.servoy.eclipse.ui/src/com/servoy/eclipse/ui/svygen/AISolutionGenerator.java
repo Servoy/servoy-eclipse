@@ -61,7 +61,7 @@ public class AISolutionGenerator
 	}
 
 
-	public static void createSolutionFromAIContent(String templateAndAiGeneratedDir)
+	public static Solution createSolutionFromAIContent(String templateAndAiGeneratedDir)
 	{
 		JSONObject aiGeneratedContent = getAIGeneratedJSON(templateAndAiGeneratedDir);
 
@@ -71,6 +71,8 @@ public class AISolutionGenerator
 		// start generating solution content
 		generateSolutionSubContent(solution, aiGeneratedContent,
 			getTemplateReader(templateAndAiGeneratedDir));
+
+		return solution;
 	}
 
 
