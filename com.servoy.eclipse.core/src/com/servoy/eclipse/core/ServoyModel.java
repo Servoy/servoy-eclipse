@@ -124,6 +124,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
