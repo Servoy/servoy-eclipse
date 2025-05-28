@@ -366,11 +366,11 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		}
 
 		String error = null;
-		if (solutionNameField.getText().trim().length() == 0)
+		if (solutionNameField.getText().trim().length() == 0 && svyGenLocationText.getText().length() == 0)
 		{
 			error = "Please give a name for the new solution";
 		}
-		if (error == null)
+		if (error == null && svyGenLocationText.getText().length() == 0)
 		{
 			// see if solution name is OK
 			if (!IdentDocumentValidator.isJavaIdentifier(solutionName))
@@ -771,6 +771,13 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		svyGenLocationText.setText(chosenFileName);
 		svyGenLocation = chosenFileName;
 		preferences.put(wizard.getSettingsPrefix() + ".svygenlocation", svyGenLocation);
+
+		solutionNameField.setEnabled(chosenFileName.length() == 0);
+		if (chosenFileName.length() > 0)
+		{
+			solutionNameField.setText("");
+			solutionName = null;
+		}
 	}
 
 	public String getSvyGenPath()
