@@ -96,6 +96,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.inmemory.AbstractMemServer;
 import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -755,6 +756,7 @@ public class SolutionExplorerTreeContentProvider
 
 		List<PlatformSimpleUserNode> modulesNodeChildren = new ArrayList<PlatformSimpleUserNode>();
 		List<PlatformSimpleUserNode> allSolutionChildren = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> developerSolutionNodeChildren = new ArrayList<PlatformSimpleUserNode>();
 
 		activeSolutionNode.children = null;
 		activeSolutionNode.setEnabled(false); // this node will be accessible even if it is not enabled;
@@ -857,6 +859,17 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 
+		if (servoyModel.getActiveProject() != null)
+		{
+			servoyModel.getActiveProject().getDeveloperProjects().forEach((project) -> {
+				String displayValue = project.getProject().getName();
+				PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.DEVELOPER_SOLUTION, project,
+					uiActivator.loadImageFromBundle(IMG_SOLUTION_MODULE, false));
+				node.setEnabled(true);
+				developerSolutionNodeChildren.add(node);
+				node.parent = devSolutionOfActiveSolution;
+			});
+		}
 		// set active solution node to usable/unusable
 		activeSolutionNode.setRealObject(servoyModel.getActiveProject());
 		if (activeSolutionNode.getRealObject() != null && ((ServoyProject)activeSolutionNode.getRealObject()).getSolution() != null)
@@ -890,6 +903,7 @@ public class SolutionExplorerTreeContentProvider
 
 		// add children to nodes...
 		modulesOfActiveSolution.children = modulesNodeChildren.toArray(new PlatformSimpleUserNode[modulesNodeChildren.size()]);
+		devSolutionOfActiveSolution.children = developerSolutionNodeChildren.toArray(new PlatformSimpleUserNode[developerSolutionNodeChildren.size()]);
 		allSolutionsNode.children = allSolutionChildren.toArray(new PlatformSimpleUserNode[allSolutionChildren.size()]);
 		Arrays.sort(modulesOfActiveSolution.children, StringComparator.INSTANCE);
 		Arrays.sort(allSolutionsNode.children, StringComparator.INSTANCE);
@@ -949,7 +963,7 @@ public class SolutionExplorerTreeContentProvider
 							}
 						}
 					}
-					else if (type == UserNodeType.SOLUTION_ITEM)
+					else if (type == UserNodeType.SOLUTION_ITEM || type == UserNodeType.DEVELOPER_SOLUTION)
 					{
 						if (un.isEnabled())
 						{
@@ -1707,7 +1721,7 @@ public class SolutionExplorerTreeContentProvider
 				{
 					return un.getRealObject() != null;
 				}
-				else if (un.getType() == UserNodeType.SOLUTION_ITEM)
+				else if (un.getType() == UserNodeType.SOLUTION_ITEM || un.getType() == UserNodeType.DEVELOPER_SOLUTION)
 				{
 					return un.isEnabled();
 				}
@@ -2610,78 +2624,86 @@ public class SolutionExplorerTreeContentProvider
 				uiActivator.loadImageFromBundle("forms.png"));
 			forms.parent = projectNode;
 
-			PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_FormComponents, UserNodeType.COMPONENT_FORMS, solution,
-				uiActivator.loadImageFromBundle("form_component.png"));
-			formReferences.parent = projectNode;
-			PlatformSimpleUserNode allRelations = null;
-			if (solutionOfCalculation == null)
+			if (!(servoyProject instanceof ServoyDeveloperProject))
 			{
-				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
-					uiActivator.loadImageFromBundle("relations.png"));
-				allRelations.parent = projectNode;
-			}
-			PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
-				uiActivator.loadImageFromBundle("valuelists.png"));
-			valuelists.parent = projectNode;
+				PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_FormComponents, UserNodeType.COMPONENT_FORMS, solution,
+					uiActivator.loadImageFromBundle("form_component.png"));
+				formReferences.parent = projectNode;
+				PlatformSimpleUserNode allRelations = null;
+				if (solutionOfCalculation == null)
+				{
+					allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
+						uiActivator.loadImageFromBundle("relations.png"));
+					allRelations.parent = projectNode;
+				}
+				PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
+					uiActivator.loadImageFromBundle("valuelists.png"));
+				valuelists.parent = projectNode;
 
-			PlatformSimpleUserNode menus = new PlatformSimpleUserNode(Messages.TreeStrings_Menus, UserNodeType.MENUS, solution,
-				uiActivator.loadImageFromBundle("column.png"));
-			menus.parent = projectNode;
+				PlatformSimpleUserNode menus = new PlatformSimpleUserNode(Messages.TreeStrings_Menus, UserNodeType.MENUS, solution,
+					uiActivator.loadImageFromBundle("column.png"));
+				menus.parent = projectNode;
 
-			PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
-				uiActivator.loadImageFromBundle("media.png"));
-			media.parent = projectNode;
-			addMediaFolderChildrenNodes(media, solution);
+				PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
+					uiActivator.loadImageFromBundle("media.png"));
+				media.parent = projectNode;
+				addMediaFolderChildrenNodes(media, solution);
 
-			PlatformSimpleUserNode solutionDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionDataSources, UserNodeType.SOLUTION_DATASOURCES,
-				solution, IconProvider.instance().image(JSDataSources.class));
-			solutionDataSources.parent = projectNode;
-
-
-			PlatformSimpleUserNode solutionMemoryDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_InMemory, UserNodeType.INMEMORY_DATASOURCES,
-				servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));
-			solutionMemoryDataSources.parent = solutionDataSources;
-
-			PlatformSimpleUserNode viewFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_ViewFoundsets, UserNodeType.VIEW_FOUNDSETS,
-				servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSViewDataSource.class));
-			viewFoundsets.parent = solutionDataSources;
-
-			PlatformSimpleUserNode menuFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_MenuFoundsets, UserNodeType.MENU_FOUNDSETS,
-				solution, IconProvider.instance().image(JSDataSources.class));
-			menuFoundsets.parent = solutionDataSources;
-
-			solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets, menuFoundsets };
+				PlatformSimpleUserNode solutionDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionDataSources,
+					UserNodeType.SOLUTION_DATASOURCES,
+					solution, IconProvider.instance().image(JSDataSources.class));
+				solutionDataSources.parent = projectNode;
 
 
-			PlatformSimpleUserNode solutionWebPackages = new PlatformSimpleUserNode(Messages.TreeStrings_Web_Packages,
-				UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, solution, uiActivator.loadImageFromBundle("all_packages.png"));
-			solutionWebPackages.parent = projectNode;
+				PlatformSimpleUserNode solutionMemoryDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_InMemory, UserNodeType.INMEMORY_DATASOURCES,
+					servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));
+				solutionMemoryDataSources.parent = solutionDataSources;
 
-			if (solutionOfCalculation != null)
-			{
-				// in case of calculation editor
-				PlatformSimpleUserNode dataProvidersNode = new PlatformSimpleUserNode(Messages.TreeStrings_DataProviders, UserNodeType.TABLE_COLUMNS,
-					tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.png"));
-				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS, tableOfCalculation,
-					uiActivator.loadImageFromBundle("relations.png"));
-				addRelationsNodeChildren(allRelations, solution, tableOfCalculation, UserNodeType.CALC_RELATION);
+				PlatformSimpleUserNode viewFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_ViewFoundsets, UserNodeType.VIEW_FOUNDSETS,
+					servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSViewDataSource.class));
+				viewFoundsets.parent = solutionDataSources;
 
-				dataProvidersNode.parent = projectNode;
-				allRelations.parent = projectNode;
-				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, dataProvidersNode, forms, formReferences, allRelations, valuelists, menus, media, solutionDataSources, solutionWebPackages };
-				forms.hide();
-				formReferences.hide();
+				PlatformSimpleUserNode menuFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_MenuFoundsets, UserNodeType.MENU_FOUNDSETS,
+					solution, IconProvider.instance().image(JSDataSources.class));
+				menuFoundsets.parent = solutionDataSources;
+
+				solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets, menuFoundsets };
+
+
+				PlatformSimpleUserNode solutionWebPackages = new PlatformSimpleUserNode(Messages.TreeStrings_Web_Packages,
+					UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, solution, uiActivator.loadImageFromBundle("all_packages.png"));
+				solutionWebPackages.parent = projectNode;
+
+				if (solutionOfCalculation != null)
+				{
+					// in case of calculation editor
+					PlatformSimpleUserNode dataProvidersNode = new PlatformSimpleUserNode(Messages.TreeStrings_DataProviders, UserNodeType.TABLE_COLUMNS,
+						tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.png"));
+					allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS, tableOfCalculation,
+						uiActivator.loadImageFromBundle("relations.png"));
+					addRelationsNodeChildren(allRelations, solution, tableOfCalculation, UserNodeType.CALC_RELATION);
+
+					dataProvidersNode.parent = projectNode;
+					allRelations.parent = projectNode;
+					projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, dataProvidersNode, forms, formReferences, allRelations, valuelists, menus, media, solutionDataSources, solutionWebPackages };
+					forms.hide();
+					formReferences.hide();
+				}
+				else
+				{
+					projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms, formReferences, allRelations, valuelists, menus, media, solutionDataSources, solutionWebPackages };
+					// solution's allRelations not allowed in login solutions
+					if (activeSolutionNode != null &&
+						((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+						allRelations != null)
+					{
+						allRelations.hide();
+					}
+				}
 			}
 			else
 			{
-				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms, formReferences, allRelations, valuelists, menus, media, solutionDataSources, solutionWebPackages };
-				// solution's allRelations not allowed in login solutions
-				if (activeSolutionNode != null &&
-					((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
-					allRelations != null)
-				{
-					allRelations.hide();
-				}
+				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms };
 			}
 		}
 	}

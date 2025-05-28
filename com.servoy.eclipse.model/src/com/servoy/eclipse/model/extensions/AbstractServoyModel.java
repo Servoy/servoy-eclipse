@@ -266,7 +266,8 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	public boolean isProjectActive(ServoyProject servoyProject)
 	{
-		return Arrays.asList(getModulesOfActiveProject()).contains(servoyProject);
+		return Arrays.asList(getModulesOfActiveProject()).contains(servoyProject) ||
+			(activeProject != null && activeProject.getDeveloperProjects().contains(servoyProject));
 	}
 
 	/**
@@ -419,9 +420,10 @@ public abstract class AbstractServoyModel implements IServoyModel
 			{
 				try
 				{
-					if (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
+					if (project.isOpen() && (project.hasNature(ServoyProject.NATURE_ID) || project.hasNature(ServoyDeveloperProject.NATURE_ID)))
 					{
-						ServoyProject sp = (ServoyProject)project.getNature(ServoyProject.NATURE_ID);
+						ServoyProject sp = (ServoyProject)project
+							.getNature(project.hasNature(ServoyProject.NATURE_ID) ? ServoyProject.NATURE_ID : ServoyDeveloperProject.NATURE_ID);
 						if (activeProject != null && activeProject.getProject().equals(project))
 						{
 							// in case active project was replaced/overwritten we must update the reference as well (so we don't have trouble when comparing IProject or ServoyProject instances...)

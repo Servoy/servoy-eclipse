@@ -69,7 +69,8 @@ public class AddDevSolutionAction extends Action implements ISelectionChangedLis
 
 
 		List<String> alldevProjectsNames = servoyModel.getDeveloperProjectNames();
-		String[] projectNames = servoyModel.getActiveProject().getDeveloperProjectNames(); // make sure the active project is loaded
+		String[] projectNames = servoyModel.getActiveProject().getDeveloperProjects().stream().map(project -> project.getProject().getName())
+			.toArray(String[]::new);
 
 		StructuredSelection theSelection = null;
 		if (projectNames == null) theSelection = StructuredSelection.EMPTY;

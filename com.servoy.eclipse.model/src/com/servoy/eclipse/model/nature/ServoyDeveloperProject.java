@@ -17,22 +17,19 @@
 package com.servoy.eclipse.model.nature;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.runtime.CoreException;
 
 /**
  * Project nature for Resources Servoy projects.
  *
  * @author lvostinar
  */
-public class ServoyDeveloperProject implements IProjectNature
+public class ServoyDeveloperProject extends ServoyProject
 {
 	/**
 	 * ID of this project nature
 	 */
 	public static final String NATURE_ID = "com.servoy.eclipse.core.ServoyDeveloper";
 
-	private IProject project;
 
 	public ServoyDeveloperProject()
 	{
@@ -40,31 +37,8 @@ public class ServoyDeveloperProject implements IProjectNature
 
 	public ServoyDeveloperProject(IProject project)
 	{
-		this.project = project;
+		super(project);
 	}
 
-	public void configure() throws CoreException
-	{
-	}
-
-	public void deconfigure() throws CoreException
-	{
-	}
-
-	public IProject getProject()
-	{
-		return project;
-	}
-
-	public void setProject(IProject project)
-	{
-		this.project = project;
-	}
-
-	@Override
-	public String toString()
-	{
-		return (project != null ? project.getName() : null);
-	}
 
 }

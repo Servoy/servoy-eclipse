@@ -1154,7 +1154,15 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 				modules = mobileModules.toArray(new ServoyProject[mobileModules.size()]);
 			}
-
+			else
+			{
+				List<ServoyProject> servoyProjects = new ArrayList(Arrays.asList(modules));
+				if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
+				{
+					servoyProjects.addAll(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getDeveloperProjects());
+				}
+				modules = servoyProjects.toArray(new ServoyProject[servoyProjects.size()]);
+			}
 			projectCombo.setInput(modules);
 			if (servoyProject != null)
 			{

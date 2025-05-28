@@ -825,22 +825,22 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 	/**
 	 * @return
 	 */
-	public String[] getDeveloperProjectNames()
+	public List<ServoyDeveloperProject> getDeveloperProjects()
 	{
 		if (project.exists() && project.isOpen())
 		{
 			try
 			{
 				final IProject[] referencedProjects = project.getDescription().getReferencedProjects();
-				final ArrayList<String> developerProjects = new ArrayList<String>();
+				final ArrayList<ServoyDeveloperProject> developerProjects = new ArrayList<ServoyDeveloperProject>();
 				for (IProject p : referencedProjects)
 				{
 					if (p.exists() && p.isOpen() && p.hasNature(ServoyDeveloperProject.NATURE_ID))
 					{
-						developerProjects.add(p.getName());
+						developerProjects.add((ServoyDeveloperProject)p.getNature(ServoyDeveloperProject.NATURE_ID));
 					}
 				}
-				return developerProjects.toArray(new String[developerProjects.size()]);
+				return developerProjects;
 			}
 			catch (CoreException e)
 			{
