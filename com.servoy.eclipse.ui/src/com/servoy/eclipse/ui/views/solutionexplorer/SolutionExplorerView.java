@@ -344,7 +344,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private ContextAction newActionInTreeTertiary;
 
-	private RegenerateSoluitonFromAISourcesAction regenerateSolutionFromAIAction;
+	private RegenerateSolutionFromAISourcesAction regenerateSolutionFromAIAction;
 
 	private ReplaceTableAction replaceActionInTree;
 	private ReplaceServerAction replaceServerAction;
@@ -3419,7 +3419,7 @@ public class SolutionExplorerView extends ViewPart
 
 		debugMethodAction = new DebugMethodAction(this);
 
-		regenerateSolutionFromAIAction = new RegenerateSoluitonFromAISourcesAction();
+		regenerateSolutionFromAIAction = new RegenerateSolutionFromAISourcesAction();
 
 		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		IAction openRelation = new OpenRelationAction(); // must be another instance

@@ -35,10 +35,10 @@ import com.servoy.j2db.persistence.Solution;
 /**
  * @author acostescu
  */
-public class RegenerateSoluitonFromAISourcesAction extends Action
+public class RegenerateSolutionFromAISourcesAction extends Action
 {
 
-	public RegenerateSoluitonFromAISourcesAction()
+	public RegenerateSolutionFromAISourcesAction()
 	{
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("refresh.png"));
 		setText("(re)Generate solution from AI");
