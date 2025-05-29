@@ -93,18 +93,21 @@ public class BrowserDialog extends Dialog
 	 */
 	public BrowserDialog(Shell parentShell, String url, boolean modal, boolean showSkipNextTime)
 	{
-		super(parentShell, modal ? SWT.PRIMARY_MODAL : SWT.MODELESS);
+		this(parentShell, url, modal, showSkipNextTime, false);
+	}
+
+	/**
+	 * @param parentShell
+	 */
+	public BrowserDialog(Shell parentShell, String url, boolean modal, boolean showSkipNextTime, boolean resize)
+	{
+		super(parentShell, (resize ? SWT.RESIZE : SWT.NONE) | (modal ? SWT.PRIMARY_MODAL : SWT.MODELESS));
 		this.url = url;
 		this.showSkipNextTime = showSkipNextTime;
 	}
 
 
 	public Object open()
-	{
-		return this.open(false);
-	}
-
-	public Object open(boolean useChromiumHint)
 	{
 		Shell parent = getParent();
 
@@ -122,10 +125,28 @@ public class BrowserDialog extends Dialog
 		locationX = (size.width < newWidth ? size.width : size.width - newWidth) / 2 + size.x;
 		locationY = (size.height < newHeight ? size.height : size.height - newHeight) / 2 + size.y;
 
-		return this.open(new Point(locationX, locationY), newSize, useChromiumHint);
+		return this.open(new Point(locationX, locationY), newSize);
 	}
 
-	public Object open(Point location, Dimension size, boolean useChromiumHint)
+	public Object open(Dimension size)
+	{
+		Shell parent = getParent();
+
+		while (parent.getParent() instanceof Shell)
+		{
+			parent = (Shell)parent.getParent();
+		}
+
+		Rectangle parentSize = parent.getBounds();
+
+		int locationX, locationY;
+		locationX = (parentSize.width < size.width ? parentSize.width : parentSize.width - size.width) / 2 + parentSize.x;
+		locationY = (parentSize.height < size.height ? parentSize.height : parentSize.height - size.height) / 2 + parentSize.y;
+
+		return this.open(new Point(locationX, locationY), size);
+	}
+
+	public Object open(Point location, Dimension size)
 	{
 		Shell parent = getParent();
 		shell = new Shell(parent, SWT.DIALOG_TRIM | getStyle());

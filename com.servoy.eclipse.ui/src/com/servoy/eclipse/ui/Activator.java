@@ -512,7 +512,7 @@ public class Activator extends AbstractUIPlugin
 				{
 					BrowserDialog dialog = new BrowserDialog(activeShell,
 						TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, true);
-					dialog.open(true);
+					dialog.open();
 				}
 
 			}
