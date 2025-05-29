@@ -54,6 +54,12 @@ public class DeveloperNGClient extends DebugNGClient
 	}
 
 	@Override
+	protected void showInfoPanel()
+	{
+		// ignore
+	}
+
+	@Override
 	protected void runWhileShowingLoadingIndicator(Runnable r)
 	{
 		// just call the run because no need to show or hide the loading indicator
