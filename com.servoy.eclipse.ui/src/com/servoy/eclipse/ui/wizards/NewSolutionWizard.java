@@ -158,7 +158,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 			toImportSolutions.put("svyGenCore", new SolutionPackageInstallInfo("1.0", getSvyGenTemplates(), true, false));
 			solutions.add("svyGenCore");
+			solutionName = AISolutionGenerator.getAIGeneratedJSON(configPage.getSvyGenPath()).optString("projectName", "new_ai_gen_solution");
 		}
+		else
+		{
+			solutionName = configPage.getNewSolutionName();
+		}
+
 		final boolean mustAuthenticate = configPage.mustAuthenticate();
 		IRunnableWithProgress newSolutionRunnable = new IRunnableWithProgress()
 		{
@@ -178,7 +184,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					{
 						solution = (Solution)repository.createNewRootObject(solutionName, IRepository.SOLUTIONS);
 					}
-					solutionName = solution.getName();
 
 					String modulesTokenized = ModelUtils.getTokenValue(solutions.toArray(new String[] { }), ",");
 					solution.setModulesNames(modulesTokenized);
@@ -718,11 +723,21 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 		if (project == null && packageInfo.forceActivateResourcesProject)
 		{
-			newResourceProjectName = "resources";
-			int counter = 1;
-			while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+			ServoyProject sol = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
+			final String selectedResourceProjectName = sol.getResourcesProject() != null ? sol.getResourcesProject().getProject().getName() : "resources";
+			newResourceProjectName = selectedResourceProjectName;
+			if (project == null && ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
 			{
-				newResourceProjectName = "resources" + counter++;
+				project = Arrays.stream(ServoyModelManager.getServoyModelManager().getServoyModel().getResourceProjects())
+					.filter(p -> p.getProject().getName().equals(selectedResourceProjectName)).findFirst().orElse(null);
+			}
+			else
+			{
+				int counter = 1;
+				while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+				{
+					newResourceProjectName = "resources" + counter++;
+				}
 			}
 		}
 		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, project, false, false, false, null, null,
