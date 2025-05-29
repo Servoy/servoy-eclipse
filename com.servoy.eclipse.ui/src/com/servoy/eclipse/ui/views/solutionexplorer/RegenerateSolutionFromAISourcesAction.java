@@ -20,14 +20,17 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeletePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScopeAction;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
@@ -58,10 +61,21 @@ public class RegenerateSolutionFromAISourcesAction extends Action
 				if (!(p instanceof Media))
 				{
 					allPersistsToDelete.add(p);
+					if (p instanceof Form frm)
+					{
+						try
+						{
+							AISolutionGenerator.getFormCSSFile(frm).delete(true, null);
+						}
+						catch (CoreException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
 				}
 			});
 
-			DeletePersistAction.performDeletionStatic(allPersistsToDelete);
+			DeletePersistAction.performDeletionStatic(allPersistsToDelete, "Regenerating will delete most of the previous solution content");
 			solution.getScopeNames().forEach((sn) -> DeleteScopeAction.deleteScript(activeProject, sn));
 
 			// now (re)generate new content

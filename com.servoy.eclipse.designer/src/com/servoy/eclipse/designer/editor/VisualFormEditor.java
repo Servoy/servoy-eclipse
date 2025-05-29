@@ -23,7 +23,6 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -39,7 +38,6 @@ import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -49,13 +47,13 @@ import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.SystemVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.repository.EclipseMessages;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
+import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -63,7 +61,6 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.IContextProvider;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 
@@ -189,9 +186,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		cssEditor = new ExtensionBasedTextEditor();
 		try
 		{
-			Pair<String, String> formFilePath = SolutionSerializer.getFilePath(getForm(), false);
-			IFile file = ServoyModel.getWorkspace().getRoot()
-				.getFile(new Path(formFilePath.getLeft() + getForm().getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
+			IFile file = AISolutionGenerator.getFormCSSFile(getForm());
 			if (file.exists())
 			{
 				setPageText(addPage(cssEditor, FileEditorInputFactory.createFileEditorInput(file)), "Less");

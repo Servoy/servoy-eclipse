@@ -17,16 +17,37 @@
 
 package com.servoy.eclipse.ui.svygen;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.ui.PlatformUI;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ResourcesUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameSolutionAction;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -50,12 +71,28 @@ public class AISolutionGenerator
 		JSONObject aiGeneratedContent = getAIGeneratedJSON(templateAndAiGeneratedDir);
 
 		// check to see if we need to rename the solution
-		// TODO
+		String solutionNameFromJSON = aiGeneratedContent.getString("projectName");
+		if (!editingSolution.getName().equals(solutionNameFromJSON))
+		{
+			RenameSolutionAction.renameSolution(activeProject, solutionNameFromJSON, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), true);
+			activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+			editingSolution = activeProject.getEditingSolution();
+		}
 
 		// start generating solution content
-		generateSolutionSubContent(editingSolution, aiGeneratedContent, getTemplateReader(templateAndAiGeneratedDir));
+		generateSolutionSubContent(editingSolution, aiGeneratedContent, getTemplateReader(templateAndAiGeneratedDir),
+			activeProject.getEditingFlattenedSolution());
 
-		// TODO save editing solution changes to disk
+		// save editing solution changes to disk
+		List<IPersist> allGeneratedPersists = editingSolution.getAllObjectsAsList();
+		try
+		{
+			activeProject.saveEditingSolutionNodes(allGeneratedPersists.toArray(new IPersist[allGeneratedPersists.size()]), true, true);
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 
 
@@ -88,10 +125,76 @@ public class AISolutionGenerator
 		return new TemplateForAIReader(new File(new File(templateAndAiGeneratedDir, TEMPLATES_DIR), SERVOY_PRIMITIVES_TEMPLATE_DIR));
 	}
 
-	private static void generateSolutionSubContent(Solution solution, JSONObject aiGeneratedContent, TemplateForAIReader templateForAIReader)
+	private static void generateSolutionSubContent(Solution solution, JSONObject aiGeneratedContent, TemplateForAIReader templateForAIReader,
+		FlattenedSolution flattenedSolution)
 	{
-		// TODO
+		JSONArray formsJSON = aiGeneratedContent.getJSONArray("forms");
+		formsJSON.forEach((formJ) -> {
+			JSONObject formJSON = (JSONObject)formJ;
+			String formName = formJSON.getString("name");
+			String formDatasource = formJSON.getString("datasource");
+			String formClassName = formJSON.optString("styleClass", null);
+			String styleToBeAddedToFormCssOrLess = formJSON.getJSONObject("style").getString("inline");
+			JSONArray usedTemplates = formJSON.getJSONArray("children");
 
+			try
+			{
+				Form form = solution.createNewForm(new ScriptNameValidator(flattenedSolution), null, formName, formDatasource, false, null);
+				form.setResponsiveLayout(true);
+				form.setStyleClass(formClassName);
+
+				LayoutContainer rootLayoutContainer = form.createNewLayoutContainer();
+				rootLayoutContainer.setPackageName("12grid");
+				rootLayoutContainer.setSpecName("div");
+
+				form.setFormCss(styleToBeAddedToFormCssOrLess);
+				ResourcesUtils.createFileAndParentContainers(getFormCSSFile(form), new ByteArrayInputStream(styleToBeAddedToFormCssOrLess.getBytes("UTF8")),
+					true);
+
+				usedTemplates.forEach((tJSON) -> {
+					JSONObject templateJSON = (JSONObject)tJSON;
+					String templateRef = templateJSON.getString("templateRef");
+					String templateName = templateJSON.getString("name");
+
+					TemplateDefinition templateDef = templateForAIReader.getTemplateDefinition(templateRef);
+
+					try
+					{
+						LayoutContainer templateLayoutContainer = rootLayoutContainer.createNewLayoutContainer();
+						templateLayoutContainer.setPackageName("12grid");
+						templateLayoutContainer.setSpecName("div");
+						templateLayoutContainer.setName(templateName + "Div");
+
+						WebComponent component = templateLayoutContainer.createNewWebComponent(templateName, templateDef.getRealSpecType());
+						component.setStyleClass(templateDef.getStyleHookRoot());
+
+						JSONObject propertiesJSON = templateJSON.getJSONObject("properties");
+
+						propertiesJSON.keySet().forEach(aiPropertyName -> {
+							String realPropertyName = templateDef.getRealPropertyFor(aiPropertyName);
+							component.setProperty(realPropertyName, propertiesJSON.get(aiPropertyName));
+						});
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+
+				});
+			}
+			catch (RepositoryException | CoreException | UnsupportedEncodingException e)
+			{
+				ServoyLog.logError(e);
+			}
+		});
+	}
+
+	public static IFile getFormCSSFile(Form form)
+	{
+		Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
+		IFile file = ServoyModel.getWorkspace().getRoot()
+			.getFile(new Path(formFilePath.getLeft() + form.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
+		return file;
 	}
 
 }

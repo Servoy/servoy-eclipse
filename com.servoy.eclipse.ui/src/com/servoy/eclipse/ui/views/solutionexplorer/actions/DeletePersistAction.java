@@ -140,10 +140,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 	protected void performDeletion(List<IPersist> selectedPersistItems)
 	{
-		performDeletionStatic(selectedPersistItems);
+		performDeletionStatic(selectedPersistItems, RefactoringUIMessages.DeleteResourcesHandler_title);
 	}
 
-	public static void performDeletionStatic(List<IPersist> selectedPersistItems)
+	public static void performDeletionStatic(List<IPersist> selectedPersistItems, String formDeleteDialogTitle)
 	{
 		List<IPersist> toDelete = selectedPersistItems;
 		List<IPersist> refItems = selectedPersistItems;
@@ -246,7 +246,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 					RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(wizard);
 					try
 					{
-						op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), RefactoringUIMessages.DeleteResourcesHandler_title);
+						op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), formDeleteDialogTitle);
 					}
 					catch (InterruptedException e)
 					{

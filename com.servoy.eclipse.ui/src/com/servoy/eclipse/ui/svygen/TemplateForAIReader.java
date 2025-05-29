@@ -18,6 +18,10 @@
 package com.servoy.eclipse.ui.svygen;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.servoy.j2db.util.Utils;
 
 /**
  * Reads and provides the template mappings (components, ...) that the AI can use when generating the solution.
@@ -27,9 +31,24 @@ import java.io.File;
 public class TemplateForAIReader
 {
 
+	private final Map<String, TemplateDefinition> templateDefinitions = new HashMap<>();
+
 	public TemplateForAIReader(File templatesDir)
 	{
+		File[] templateDirs = templatesDir.listFiles();
+		for (File templateDir : templateDirs)
+		{
+			String templateStyleToAddToSolution = Utils.getTXTFileContent(new File(templateDir, "style.less"));
+			String templateJSON = Utils.getTXTFileContent(new File(templateDir, "template.json"));
 
+			TemplateDefinition td = new TemplateDefinition(templateStyleToAddToSolution, templateJSON);
+			templateDefinitions.put(td.getName(), td);
+		}
+	}
+
+	public TemplateDefinition getTemplateDefinition(String templateRef)
+	{
+		return templateDefinitions.get(templateRef);
 	}
 
 }
