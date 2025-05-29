@@ -257,9 +257,9 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.persistence.TableNode;<<<<<<<Upstream,based on branch'master'of https://github.com/Servoy/servoy-eclipse.git
-import com.servoy.j2db.scripting.solutionmodel.JSForm;=======
-import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;>>>>>>>961122f SVY-20274 servoy developer module
+import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.scripting.solutionmodel.JSForm;
+import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
