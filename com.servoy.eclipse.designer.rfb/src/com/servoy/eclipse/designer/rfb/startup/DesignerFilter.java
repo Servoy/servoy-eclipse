@@ -65,6 +65,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
 import com.servoy.eclipse.designer.rfb.palette.PaletteFavoritesHandler;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -118,14 +120,28 @@ public class DesignerFilter implements Filter
 			{
 				SpecProviderState specProvider = WebComponentSpecProvider.getSpecProviderState();
 
-				((HttpServletResponse)servletResponse).setContentType("application/json");
+				servletResponse.setContentType("application/json");
 
 				if (servletResponse instanceof HttpServletResponse) HTTPUtils.setNoCacheHeaders((HttpServletResponse)servletResponse);
 
 				try
 				{
-					FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+					ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+
+					FlattenedSolution fl = activeProject.getEditingFlattenedSolution();
 					Form form = fl.getForm(formName);
+
+					if (form == null)
+					{
+						// try to find it in the developer project(s) from the active project
+						for (ServoyDeveloperProject developerProjectsList : activeProject.getDeveloperProjects())
+						{
+							FlattenedSolution devSol = developerProjectsList.getEditingFlattenedSolution();
+							form = devSol.getForm(formName);
+							if (form != null) break;
+						}
+					}
+
 					if (form == null)
 					{
 						ServoyLog.logInfo(
@@ -540,7 +556,7 @@ public class DesignerFilter implements Filter
 				if (servletResponse instanceof HttpServletResponse)
 				{
 					HTTPUtils.setNoCacheHeaders((HttpServletResponse)servletResponse);
-					((HttpServletResponse)servletResponse).setContentType("text/html");
+					servletResponse.setContentType("text/html");
 				}
 				String width = "350px";
 				String height = "200px";
