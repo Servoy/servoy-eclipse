@@ -276,6 +276,7 @@ import com.servoy.j2db.scripting.info.JSPermission;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
+import com.servoy.j2db.scripting.solutionmodel.developer.Location;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
@@ -466,6 +467,7 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType(JSDatabaseManager.class);
 		addAnonymousClassType("servoyDeveloper", JSDeveloperSolutionModel.class);
 		addAnonymousClassType("developerBridge", IJSDeveloperBridge.class);
+		addType("Location", Location.class);
 		addAnonymousClassType(JSSecurity.class);
 		addAnonymousClassType("servoyApi", ServoyApiObject.class);
 		addAnonymousClassType("console", ConsoleObject.class);

@@ -257,10 +257,10 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.scripting.solutionmodel.JSForm;
+import com.servoy.j2db.persistence.TableNode;<<<<<<<Upstream,based on branch'master'of https://github.com/Servoy/servoy-eclipse.git
+import com.servoy.j2db.scripting.solutionmodel.JSForm;=======
+import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;>>>>>>>961122f SVY-20274 servoy developer module
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
-import com.servoy.j2db.scripting.solutionmodel.developer.Location;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -2712,12 +2712,12 @@ public class SolutionExplorerView extends ViewPart
 				Object[] args = new Object[1];
 				if (realObject instanceof Solution sol)
 				{
-					selectedType = Location.SOLUTION;
+					selectedType = IJSDeveloperBridge.LOCATION.getSOLUTION();
 					args[0] = sol.getName();
 				}
 				else if (realObject instanceof Form frm)
 				{
-					selectedType = Location.FORM;
+					selectedType = IJSDeveloperBridge.LOCATION.getFORM();
 					args[0] = new JSForm(DeveloperNGClient.INSTANCE, frm, false);
 				}
 

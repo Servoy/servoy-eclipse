@@ -149,7 +149,14 @@ public class ElementResolver implements IElementResolver
 		Set<String> typeNames = Collections.emptySet();
 		FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 		IResource resource = context.getModelElement().getResource();
-		if (resource != null && fs != null)
+		String projectName = getProjectName(context);
+		if (projectName != null &&
+			ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(projectName) instanceof ServoyDeveloperProject)
+		{
+			typeNames = new HashSet<String>();
+			typeNames.add("developerBridge");
+		}
+		else if (resource != null && fs != null)
 		{
 			typeNames = getTypeNames(prefix);
 
@@ -280,16 +287,6 @@ public class ElementResolver implements IElementResolver
 						}
 					}
 				}
-			}
-		}
-		else
-		{
-			String projectName = getProjectName(context);
-			if (projectName != null &&
-				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(projectName) instanceof ServoyDeveloperProject)
-			{
-				typeNames = new HashSet<String>();
-				typeNames.add("developerBridge");
 			}
 		}
 		try

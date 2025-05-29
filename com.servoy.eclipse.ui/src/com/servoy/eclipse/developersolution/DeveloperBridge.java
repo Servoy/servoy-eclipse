@@ -29,6 +29,7 @@ import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
+import com.servoy.j2db.scripting.solutionmodel.developer.Location;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.UUID;
 
@@ -87,5 +88,11 @@ public class DeveloperBridge implements IJSDeveloperBridge
 	@Override
 	public void registerMenuItem(JSDeveloperMenu menu, Function callback, Function enabler)
 	{
+	}
+
+	@Override
+	public Location getLOCATION()
+	{
+		return LOCATION;
 	}
 }
