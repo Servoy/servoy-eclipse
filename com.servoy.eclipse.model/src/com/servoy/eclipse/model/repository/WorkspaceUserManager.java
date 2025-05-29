@@ -1408,7 +1408,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				for (String group : groups)
 				{
 					GroupSecurityInfo gsi = getGroupSecurityInfo(group);
-					if (solution != null)
+					if (solution != null && gsi != null)
 					{
 						for (Entry<UUID, List<SecurityInfo>> formSecurityEntry : gsi.formSecurity.entrySet())
 						{
@@ -1448,32 +1448,35 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		for (String group : groups)
 		{
 			GroupSecurityInfo gsi = getGroupSecurityInfo(group);
-			for (Entry<String, List<SecurityInfo>> entry : gsi.tableSecurity.entrySet())
+			if (gsi != null)
 			{
-				String s_t = entry.getKey();
-				List<SecurityInfo> lsi = entry.getValue();
-				for (SecurityInfo si : lsi)
+				for (Entry<String, List<SecurityInfo>> entry : gsi.tableSecurity.entrySet())
 				{
-					String cid = Utils.getDotQualitfied(s_t, si.element_uid);
-					Object value = retval.get(cid);
-					if (value instanceof Integer)
+					String s_t = entry.getKey();
+					List<SecurityInfo> lsi = entry.getValue();
+					for (SecurityInfo si : lsi)
 					{
-						value = new Integer(((Integer)value).intValue() | si.access);
+						String cid = Utils.getDotQualitfied(s_t, si.element_uid);
+						Object value = retval.get(cid);
+						if (value instanceof Integer)
+						{
+							value = new Integer(((Integer)value).intValue() | si.access);
+						}
+						else
+						{
+							value = new Integer(si.access);
+						}
+						Integer old = groupsWithNonDefaultAccess.get(cid);
+						if (old == null)
+						{
+							groupsWithNonDefaultAccess.put(cid, Integer.valueOf(1));
+						}
+						else
+						{
+							groupsWithNonDefaultAccess.put(cid, Integer.valueOf(old.intValue() + 1));
+						}
+						retval.put(cid, (Integer)value); //server.table.column -> int
 					}
-					else
-					{
-						value = new Integer(si.access);
-					}
-					Integer old = groupsWithNonDefaultAccess.get(cid);
-					if (old == null)
-					{
-						groupsWithNonDefaultAccess.put(cid, Integer.valueOf(1));
-					}
-					else
-					{
-						groupsWithNonDefaultAccess.put(cid, Integer.valueOf(old.intValue() + 1));
-					}
-					retval.put(cid, (Integer)value); //server.table.column -> int
 				}
 			}
 		}
