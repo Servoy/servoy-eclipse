@@ -258,6 +258,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
+import com.servoy.j2db.scripting.solutionmodel.developer.Location;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -2700,10 +2701,28 @@ public class SolutionExplorerView extends ViewPart
 		manager.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
 		if (DeveloperBridge.menus.size() > 0)
 		{
-			manager.add(new Separator());
-			for (Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+			IStructuredSelection selection = (IStructuredSelection)tree.getSelection();
+			Object selectedObject = selection.getFirstElement();
+			if (selectedObject instanceof SimpleUserNode un)
 			{
-				manager.add(new DeveloperSolutionAction(entry.getKey(), entry.getValue()));
+				Object realObject = un.getRealObject();
+				int selectedType = realObject instanceof Solution ? Location.SOLUTION : realObject instanceof Form ? Location.FORM : 0;
+				if (selectedType > 0)
+				{
+					boolean seperatedAdded = false;
+					for (Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+					{
+						if ((entry.getKey().getLocation() & selectedType) > 0)
+						{
+							if (!seperatedAdded)
+							{
+								manager.add(new Separator());
+								seperatedAdded = true;
+							}
+							manager.add(new DeveloperSolutionAction(entry.getKey(), entry.getValue()));
+						}
+					}
+				}
 			}
 		}
 		manager.add(new Separator());
