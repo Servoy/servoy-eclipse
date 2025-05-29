@@ -71,12 +71,16 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.CurrentWindow;
+import org.sablo.websocket.IWebsocketSession;
+import org.sablo.websocket.IWebsocketSessionFactory;
 import org.sablo.websocket.WebsocketSessionKey;
+import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.developersolution.DeveloperNGClient;
+import com.servoy.eclipse.developersolution.DeveloperNGClientEndpoint;
 import com.servoy.eclipse.developersolution.DeveloperWindow;
 import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
@@ -361,7 +365,14 @@ public class Activator extends AbstractUIPlugin
 										}
 										if (devSolutionName != null)
 										{
-											NGClientWebsocketSession session = new NGClientWebsocketSession(new WebsocketSessionKey("1", 1), null);
+											NGClientWebsocketSession session = new NGClientWebsocketSession(new WebsocketSessionKey("1", 1), null)
+											{
+												@Override
+												public org.sablo.websocket.IWindow getOrCreateWindow(int windowNr, String windowName)
+												{
+													return super.getOrCreateWindow(1, "1");
+												};
+											};
 											// start the DeveloperNGClient
 											DeveloperNGClient developerNGClient = new DeveloperNGClient(session, null);
 											session.setClient(developerNGClient);
@@ -375,6 +386,18 @@ public class Activator extends AbstractUIPlugin
 											{
 												CurrentWindow.set(null);
 											}
+
+											com.servoy.eclipse.ngclient.startup.Activator.setDeveloperNGClient(developerNGClient);
+
+											WebsocketSessionManager.setWebsocketSessionFactory(DeveloperNGClientEndpoint.DEVELOPER_ENDPOINT,
+												new IWebsocketSessionFactory()
+												{
+													@Override
+													public IWebsocketSession createSession(WebsocketSessionKey sessionKey) throws Exception
+													{
+														return session;
+													}
+												});
 										}
 									}
 									catch (Exception e)

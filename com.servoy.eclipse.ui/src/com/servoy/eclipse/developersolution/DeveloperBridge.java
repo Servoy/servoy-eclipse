@@ -20,11 +20,14 @@ package com.servoy.eclipse.developersolution;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Display;
 import org.mozilla.javascript.Function;
 
+import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -35,6 +38,8 @@ import com.servoy.j2db.util.UUID;
  */
 public class DeveloperBridge implements IJSDeveloperBridge
 {
+	public static Map<JSDeveloperMenu, Function> menus = new HashMap<>();
+
 
 	private final IDebugClient state;
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
@@ -48,18 +53,27 @@ public class DeveloperBridge implements IJSDeveloperBridge
 	@Override
 	public void showForm(String formName)
 	{
-		System.err.println("Showing a this form: " + formName);
+		Display display = Display.getDefault();
+		display.asyncExec(() -> {
+			BrowserDialog dialog = new BrowserDialog(Display.getDefault().getActiveShell(),
+				"http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solution/" + state.getSolutionName() +
+					"/index.html?svy_developer=true",
+				true, false);
+			state.getFormManager().showFormInCurrentContainer(formName);
+			dialog.open(false);
+		});
 	}
 
 	@Override
 	public JSDeveloperMenu createMenu(String text)
 	{
-		return null;
+		return new JSDeveloperMenu(text);
 	}
 
 	@Override
 	public void registerMenuItem(JSDeveloperMenu menu, int location, Function callback)
 	{
+		menus.put(menu, callback);
 	}
 
 	@Override

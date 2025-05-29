@@ -25,6 +25,8 @@ import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.debug.DebugNGClient;
 import com.servoy.j2db.debug.DebugNGFormMananger;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.SolutionScope;
@@ -38,6 +40,7 @@ import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
  */
 public class DeveloperNGClient extends DebugNGClient
 {
+	public static DeveloperNGClient INSTANCE;
 
 	/**
 	 * @param wsSession
@@ -47,6 +50,7 @@ public class DeveloperNGClient extends DebugNGClient
 	public DeveloperNGClient(INGClientWebsocketSession wsSession, IDesignerCallback designerCallback) throws Exception
 	{
 		super(wsSession, designerCallback);
+		INSTANCE = this;
 	}
 
 	@Override
@@ -65,6 +69,26 @@ public class DeveloperNGClient extends DebugNGClient
 			new NativeJavaObject(scope, new DeveloperBridge(this), new InstanceJavaMembers(scope, DeveloperBridge.class)));
 
 		return engine;
+	}
+
+	@Override
+	protected void loadSolution(SolutionMetaData solutionMeta) throws RepositoryException
+	{
+		if (getSolution() != null) return;
+		super.loadSolution(solutionMeta);
+	}
+
+	@Override
+	public boolean closeSolution(boolean force, Object[] args)
+	{
+		// never let it close it
+		return false;
+	}
+
+	@Override
+	public synchronized void shutDown(boolean force)
+	{
+		return;
 	}
 
 

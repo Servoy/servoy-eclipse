@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -168,6 +169,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
+import org.mozilla.javascript.Function;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 
@@ -180,6 +182,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyUpdatingProject;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.developersolution.DeveloperBridge;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -254,6 +257,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -2694,6 +2698,14 @@ public class SolutionExplorerView extends ViewPart
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		// extra open actions contributions
 		manager.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
+		if (DeveloperBridge.menus.size() > 0)
+		{
+			manager.add(new Separator());
+			for (Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+			{
+				manager.add(new DeveloperSolutionAction(entry.getKey(), entry.getValue()));
+			}
+		}
 		manager.add(new Separator());
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SERVERS)
 		{
