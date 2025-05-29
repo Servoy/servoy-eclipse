@@ -92,6 +92,7 @@ public class ScriptColorProvider
 		createKeyword("elements");
 		createKeyword("controller");
 		createKeyword("currentcontroller");
+		createKeyword("developerBridge");
 		createKeyword(IExecutingEnviroment.TOPLEVEL_APPLICATION);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_DATASOURCES);
