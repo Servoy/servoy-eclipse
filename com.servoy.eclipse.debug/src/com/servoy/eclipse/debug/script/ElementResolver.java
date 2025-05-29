@@ -530,6 +530,7 @@ public class ElementResolver implements IElementResolver
 		}
 		else if ("developerBridge".equals(name))
 		{
+			if (ServoyModelFinder.getServoyModel().getActiveProject() == null) return null; // in this case TypeCreator would not create the needed type; avoid generating a resolve stack overflow
 			String projectName = getProjectName(context);
 			if (projectName != null &&
 				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(projectName) instanceof ServoyDeveloperProject)
