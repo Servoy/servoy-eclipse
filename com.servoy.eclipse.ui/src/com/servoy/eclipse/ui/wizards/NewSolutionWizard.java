@@ -22,7 +22,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -144,6 +147,18 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
+		Map<String, SolutionPackageInstallInfo> toImportSolutions = new HashMap<>();
+		for (String name : solutions)
+		{
+			Pair<String, File> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
+		}
+		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+		{
+
+			toImportSolutions.put("svyGenCore", new SolutionPackageInstallInfo("1.0", getSvyGenTemplates(), true, false));
+			solutions.add("svyGenCore");
+		}
 		final boolean mustAuthenticate = configPage.mustAuthenticate();
 		IRunnableWithProgress newSolutionRunnable = new IRunnableWithProgress()
 		{
@@ -358,6 +373,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					else
 					{
 						servoyModel.setActiveProject(newProject, true);
+						genAISol(newProject);
 					}
 				}
 				else
@@ -369,12 +385,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
-		Map<String, SolutionPackageInstallInfo> toImportSolutions = new HashMap<>();
-		for (String name : solutions)
-		{
-			Pair<String, File> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
-			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
-		}
 		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, solutionName, false, false);
 
 		IRunnableWithProgress importPackagesRunnable = null;
@@ -431,16 +441,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			};
 		}
 
-		IRunnableWithProgress genSolRunnable = genAISol(jobName);
 
 		try
 		{
 			IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 			progressService.run(true, false, newSolutionRunnable);
 			if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
-			progressService.run(true, false, solutionActivationRunnable);
 			progressService.run(true, false, importSolutionsRunnable);
-			if (genSolRunnable != null) progressService.run(true, false, genSolRunnable);
+			progressService.run(true, false, solutionActivationRunnable);
 		}
 		catch (Exception e)
 		{
@@ -468,31 +476,16 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return true;
 	}
 
-	private IRunnableWithProgress genAISol(final String jobName)
+	private void genAISol(ServoyProject activeProject)
 	{
-		IRunnableWithProgress genSolRunnable = null;
 		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
 		{
-			genSolRunnable = new IRunnableWithProgress()
+			if (activeProject == null)
 			{
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-				{
-					monitor.beginTask(jobName, 1);
-					try
-					{
-						final ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-						AISolutionGenerator.generateSolutionFromAIContent(activeProject);
-						monitor.worked(1);
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-					monitor.done();
-				}
-			};
+				throw new RuntimeException("No active project found to generate solution from AI content.");
+			}
+			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
 		}
-		return genSolRunnable;
 	}
 
 	public static IRunnableWithProgress importSolutions(final Map<String, SolutionPackageInstallInfo> solutions, final String jobName, String newSolutionName,
@@ -928,6 +921,28 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			this.data = data;
 			this.forceActivateResourcesProject = forceActivateResourcesProject;
 			this.keepResourcesProjectOpen = keepResourcesProjectOpen;
+		}
+	}
+
+	//TODO use the SPM in the future?
+	public static File getSvyGenTemplates()
+	{
+		try (InputStream in = NewSolutionWizard.class.getResourceAsStream("resources/solutions/svyGenCore.servoy"))
+		{
+			if (in == null)
+			{
+				throw new FileNotFoundException("Resource svyGenCore not found: ");
+			}
+
+			File tempFile = File.createTempFile("svyGenCore", ".servoy");
+			tempFile.deleteOnExit();
+
+			Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			return tempFile;
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Cannot get svyGenCore templates", e);
 		}
 	}
 }
