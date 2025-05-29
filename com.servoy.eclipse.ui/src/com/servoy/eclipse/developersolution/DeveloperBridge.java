@@ -25,7 +25,6 @@ import org.mozilla.javascript.Function;
 
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.j2db.IDebugClient;
-import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -37,7 +36,7 @@ import com.servoy.j2db.util.UUID;
  * @since 2025.09
  *
  */
-public class DeveloperBridge implements IJSDeveloperBridge, IConstantsObject
+public class DeveloperBridge implements IJSDeveloperBridge
 {
 	public static Map<JSDeveloperMenu, Function> menus = new HashMap<>();
 
