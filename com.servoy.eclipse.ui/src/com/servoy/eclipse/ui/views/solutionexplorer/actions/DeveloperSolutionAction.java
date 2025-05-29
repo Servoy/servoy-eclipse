@@ -62,8 +62,8 @@ public class DeveloperSolutionAction extends Action
 		DeveloperNGClient.INSTANCE.getWebsocketSession().getEventDispatcher().addEvent(() -> {
 			try
 			{
-				DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, args, false, false);
-				if (args[0] instanceof JSForm jsform)
+				Object retValue = DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, args, false, false);
+				if (retValue instanceof Boolean b && b.booleanValue() && args[0] instanceof JSForm jsform)
 				{
 					Display.getDefault().asyncExec(() -> {
 						ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, jsform.getContainer(), true);
