@@ -18,10 +18,16 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.ui.IEditorPart;
 import org.mozilla.javascript.Function;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.developersolution.DeveloperNGClient;
+import com.servoy.eclipse.ui.editors.IFlagChangeEditor;
+import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.scripting.SolutionScope;
+import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 
 /**
@@ -56,6 +62,15 @@ public class DeveloperSolutionAction extends Action
 			try
 			{
 				DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, args, false, false);
+				if (args[0] instanceof JSForm jsform)
+				{
+					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, jsform.getContainer(), true);
+					IEditorPart editorPart = EditorUtil.openFormDesignEditor((Form)jsform.getContainer());
+					if (editorPart instanceof IFlagChangeEditor formEditor)
+					{
+						formEditor.flagModified();
+					}
+				}
 			}
 			catch (Exception e)
 			{

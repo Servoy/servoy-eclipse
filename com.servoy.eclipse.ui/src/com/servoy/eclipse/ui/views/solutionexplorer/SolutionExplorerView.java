@@ -185,6 +185,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.developersolution.DeveloperBridge;
 import com.servoy.eclipse.developersolution.DeveloperNGClient;
 import com.servoy.eclipse.dnd.FormElementTransfer;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -2718,7 +2719,9 @@ public class SolutionExplorerView extends ViewPart
 				else if (realObject instanceof Form frm)
 				{
 					selectedType = IJSDeveloperBridge.LOCATION.getFORM();
-					args[0] = new JSForm(DeveloperNGClient.INSTANCE, frm, false);
+					args[0] = new JSForm(DeveloperNGClient.INSTANCE,
+						(Form)ServoyModelFinder.getServoyModel().getActiveProject().getEditingPersist(frm.getUUID()),
+						true);
 				}
 
 				if (selectedType > 0)
