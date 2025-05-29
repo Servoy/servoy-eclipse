@@ -183,6 +183,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyUpdatingProject;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.developersolution.DeveloperBridge;
+import com.servoy.eclipse.developersolution.DeveloperNGClient;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -257,6 +258,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.scripting.solutionmodel.developer.Location;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -2706,7 +2708,19 @@ public class SolutionExplorerView extends ViewPart
 			if (selectedObject instanceof SimpleUserNode un)
 			{
 				Object realObject = un.getRealObject();
-				int selectedType = realObject instanceof Solution ? Location.SOLUTION : realObject instanceof Form ? Location.FORM : 0;
+				int selectedType = 0;
+				Object[] args = new Object[1];
+				if (realObject instanceof Solution sol)
+				{
+					selectedType = Location.SOLUTION;
+					args[0] = sol.getName();
+				}
+				else if (realObject instanceof Form frm)
+				{
+					selectedType = Location.FORM;
+					args[0] = new JSForm(DeveloperNGClient.INSTANCE, frm, false);
+				}
+
 				if (selectedType > 0)
 				{
 					boolean seperatedAdded = false;
@@ -2719,7 +2733,8 @@ public class SolutionExplorerView extends ViewPart
 								manager.add(new Separator());
 								seperatedAdded = true;
 							}
-							manager.add(new DeveloperSolutionAction(entry.getKey(), entry.getValue()));
+
+							manager.add(new DeveloperSolutionAction(entry.getKey(), entry.getValue(), args));
 						}
 					}
 				}

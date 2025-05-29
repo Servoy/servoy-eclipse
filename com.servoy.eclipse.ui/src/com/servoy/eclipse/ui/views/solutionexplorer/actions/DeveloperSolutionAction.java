@@ -34,14 +34,16 @@ public class DeveloperSolutionAction extends Action
 {
 
 	private final Function function;
+	private final Object[] args;
 
 	/**
 	 * @param key
 	 * @param value
 	 */
-	public DeveloperSolutionAction(JSDeveloperMenu key, Function function)
+	public DeveloperSolutionAction(JSDeveloperMenu key, Function function, Object[] args)
 	{
 		this.function = function;
+		this.args = args;
 		setText(key.getText());
 	}
 
@@ -52,7 +54,7 @@ public class DeveloperSolutionAction extends Action
 		SolutionScope solutionScope = DeveloperNGClient.INSTANCE.getScriptEngine().getSolutionScope();
 		try
 		{
-			DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, null, false, false);
+			DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, args, false, false);
 		}
 		catch (Exception e)
 		{
