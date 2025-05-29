@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.developersolution;
 
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import org.mozilla.javascript.Function;
 
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.j2db.IDebugClient;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -41,12 +43,12 @@ public class DeveloperBridge implements IJSDeveloperBridge
 	public static Map<JSDeveloperMenu, Function> menus = new HashMap<>();
 
 
-	private final IDebugClient state;
+	private final IDebugClient client;
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
 
-	public DeveloperBridge(IDebugClient state)
+	public DeveloperBridge(IDebugClient client)
 	{
-		this.state = state;
+		this.client = client;
 	}
 
 
@@ -56,11 +58,17 @@ public class DeveloperBridge implements IJSDeveloperBridge
 		Display display = Display.getDefault();
 		display.asyncExec(() -> {
 			BrowserDialog dialog = new BrowserDialog(Display.getDefault().getActiveShell(),
-				"http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solution/" + state.getSolutionName() +
+				"http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solution/" + client.getSolutionName() +
 					"/index.html?svy_developer=true",
-				true, false);
-			state.getFormManager().showFormInCurrentContainer(formName);
-			dialog.open(false);
+				false, false, true);
+			client.getFormManager().showFormInCurrentContainer(formName);
+			Form form = client.getFlattenedSolution().getForm(formName);
+			Dimension size = form.getSize();
+
+			float systemDPI = 96f;
+			size.height = Math.round(size.height * Display.getDefault().getDPI().y / systemDPI);
+			size.width = Math.round(size.width * Display.getDefault().getDPI().x / systemDPI);
+			dialog.open(size);
 		});
 	}
 
