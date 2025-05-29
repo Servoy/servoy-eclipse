@@ -155,6 +155,7 @@ public class ElementResolver implements IElementResolver
 		{
 			typeNames = new HashSet<String>();
 			typeNames.add("developerBridge");
+			typeNames.add("forms");
 		}
 		else if (resource != null && fs != null)
 		{

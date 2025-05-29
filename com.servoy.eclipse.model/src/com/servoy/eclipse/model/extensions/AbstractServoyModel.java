@@ -636,6 +636,10 @@ public abstract class AbstractServoyModel implements IServoyModel
 			{
 				if (hasModuleName(solution, name)) return true;
 			}
+			if (activeProject.getDeveloperProjects().stream().anyMatch(p -> p.getProject().getName().equals(name)))
+			{
+				return true;
+			}
 		}
 		return false;
 	}
