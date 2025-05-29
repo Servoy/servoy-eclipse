@@ -52,15 +52,16 @@ public class DeveloperSolutionAction extends Action
 	public void run()
 	{
 		SolutionScope solutionScope = DeveloperNGClient.INSTANCE.getScriptEngine().getSolutionScope();
-		try
-		{
-			DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, args, false, false);
-		}
-		catch (Exception e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		DeveloperNGClient.INSTANCE.getWebsocketSession().getEventDispatcher().addEvent(() -> {
+			try
+			{
+				DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, args, false, false);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		});
 	}
 
 }

@@ -22,10 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.mozilla.javascript.Function;
 
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
-import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
@@ -44,10 +44,10 @@ public class DeveloperBridge implements IJSDeveloperBridge
 	public static Map<JSDeveloperMenu, Function> menus = new HashMap<>();
 
 
-	private final IDebugClient client;
+	private final DeveloperNGClient client;
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
 
-	public DeveloperBridge(IDebugClient client)
+	public DeveloperBridge(DeveloperNGClient client)
 	{
 		this.client = client;
 	}
@@ -56,20 +56,23 @@ public class DeveloperBridge implements IJSDeveloperBridge
 	@Override
 	public void showForm(String formName)
 	{
-		Display display = Display.getDefault();
-		display.asyncExec(() -> {
-			BrowserDialog dialog = new BrowserDialog(Display.getDefault().getActiveShell(),
-				"http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solution/" + client.getSolutionName() +
-					"/index.html?svy_developer=true",
-				false, false, true);
+		client.getWebsocketSession().getEventDispatcher().addEvent(() -> {
+			client.getRuntimeWindowManager().setCurrentWindowName("1");
 			client.getFormManager().showFormInCurrentContainer(formName);
-			Form form = client.getFlattenedSolution().getForm(formName);
-			Dimension size = form.getSize();
-
-			float systemDPI = 96f;
-			size.height = Math.round(size.height * Display.getDefault().getDPI().y / systemDPI);
-			size.width = Math.round(size.width * Display.getDefault().getDPI().x / systemDPI);
-			dialog.open(size);
+			Display display = Display.getDefault();
+			display.asyncExec(() -> {
+				Shell activeShell = Display.getDefault().getActiveShell();
+				BrowserDialog dialog = new BrowserDialog(activeShell,
+					"http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solution/" + client.getSolutionName() +
+						"/index.html?svy_developer=true",
+					false, false, true);
+				Form form = client.getFlattenedSolution().getForm(formName);
+				Dimension size = form.getSize();
+				float systemDPI = 96f;
+				size.height = Math.round(size.height * Display.getDefault().getDPI().y / systemDPI);
+				size.width = Math.round(size.width * Display.getDefault().getDPI().x / systemDPI);
+				dialog.open(size);
+			});
 		});
 	}
 

@@ -367,10 +367,12 @@ public class Activator extends AbstractUIPlugin
 										{
 											NGClientWebsocketSession session = new NGClientWebsocketSession(new WebsocketSessionKey("1", 1), null)
 											{
+												private final org.sablo.websocket.IWindow window = createWindow(1, "1");
+
 												@Override
 												public org.sablo.websocket.IWindow getOrCreateWindow(int windowNr, String windowName)
 												{
-													return super.getOrCreateWindow(1, "1");
+													return window;
 												};
 											};
 											// start the DeveloperNGClient
