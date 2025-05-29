@@ -84,7 +84,10 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.WebPackagesListener;
+import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.NameComparator;
@@ -462,6 +465,18 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), resourcesProjectName, existingProject, monitor,
 						doActivateSolution,
 						isCleanImport, projectLocation, reportImportFail, forceActivateResourcesProject, keepResourcesProjectOpen, projectsToDeleteAfterImport);
+
+					userChannel.getFormCss().forEach((k, v) -> {
+						if (rootObjects[0] instanceof Solution sol)
+						{
+							IPersist frm = sol.getChild(Utils.getAsUUID(k, false));
+							if (frm instanceof Form form)
+							{
+								AISolutionGenerator.createFormCSS(form, v);
+							}
+						}
+					});
+
 					if (rootObjects != null)
 					{
 						title = "Solution imported";

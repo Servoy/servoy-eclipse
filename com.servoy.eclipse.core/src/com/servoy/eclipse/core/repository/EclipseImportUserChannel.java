@@ -79,6 +79,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	private final StringBuffer allImportantMSGes;
 	private final Shell shell;
 	private final HashMap<String, Integer> rootObjectsMap = new HashMap();
+	private final Map<String, String> formCss = new HashMap<String, String>();
 
 	public EclipseImportUserChannel(boolean displayDataModelChanges, Shell shell)
 	{
@@ -827,5 +828,20 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				}
 			}
 		});
+	}
+
+	@Override
+	public void addFormCss(String uuid, String css)
+	{
+		if (css != null && css.length() > 0)
+		{
+			formCss.put(uuid, css);
+		}
+	}
+
+	@Override
+	public Map<String, String> getFormCss()
+	{
+		return formCss;
 	}
 }

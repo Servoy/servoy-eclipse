@@ -255,4 +255,17 @@ public class AISolutionGenerator
 		return file;
 	}
 
+	public static void createFormCSS(Form frm, String css)
+	{
+		try
+		{
+			ResourcesUtils.createFileAndParentContainers(getFormCSSFile(frm), new ByteArrayInputStream(css.getBytes("UTF8")),
+				true);
+		}
+		catch (UnsupportedEncodingException | CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
 }
