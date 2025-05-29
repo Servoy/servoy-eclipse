@@ -18,7 +18,9 @@
 package com.servoy.eclipse.ui.svygen;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.servoy.j2db.util.Utils;
@@ -49,6 +51,11 @@ public class TemplateForAIReader
 	public TemplateDefinition getTemplateDefinition(String templateRef)
 	{
 		return templateDefinitions.get(templateRef);
+	}
+
+	public List<TemplateDefinition> getAllTemplateDefinitions()
+	{
+		return new ArrayList<>(templateDefinitions.values());
 	}
 
 }

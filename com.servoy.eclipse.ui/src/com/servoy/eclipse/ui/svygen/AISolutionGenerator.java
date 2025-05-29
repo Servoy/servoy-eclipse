@@ -20,9 +20,11 @@ package com.servoy.eclipse.ui.svygen;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.PlatformUI;
@@ -42,6 +44,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
@@ -56,10 +59,12 @@ import com.servoy.j2db.util.Utils;
 public class AISolutionGenerator
 {
 
+	private static final String AI_GENERATION_TEMPLATE_PROVIDED_CONTENT_FOLLOWS = "\n\n// AI Generation template-provided content follows; DO NOT ADD ANY CUSTOM CSS AFTER THIS LINE AS IT WILL BE REMOVED when regenerating solution content";
+
 	private static final String SERVOY_PRIMITIVES_TEMPLATE_DIR = "servoy-primitives";
 	private static final String TEMPLATES_DIR = "templates";
 	private static final String SVYGEN_PATH_CUSTOM_SOLUTION_PROP = "svygen_path";
-	private static final String PRODUCT_APP_JSON = "productApp.json";
+	private static final String AI_GENERATED_APP_JSON = "application.json";
 
 	/**
 	 * Regenerates based on AI output on the existing project. Might also need to rename the solution.
@@ -98,7 +103,7 @@ public class AISolutionGenerator
 
 	private static JSONObject getAIGeneratedJSON(String templateAndAiGeneratedDir)
 	{
-		return new JSONObject(Utils.getTXTFileContent(new File(templateAndAiGeneratedDir, PRODUCT_APP_JSON)));
+		return new JSONObject(Utils.getTXTFileContent(new File(templateAndAiGeneratedDir, AI_GENERATED_APP_JSON)));
 	}
 
 
@@ -128,6 +133,9 @@ public class AISolutionGenerator
 	private static void generateSolutionSubContent(Solution solution, JSONObject aiGeneratedContent, TemplateForAIReader templateForAIReader,
 		FlattenedSolution flattenedSolution)
 	{
+		// add css/less from templates into solution level css/less
+		addSolutionCSSorLessContributionsFromTemplates(solution, templateForAIReader);
+
 		JSONArray formsJSON = aiGeneratedContent.getJSONArray("forms");
 		formsJSON.forEach((formJ) -> {
 			JSONObject formJSON = (JSONObject)formJ;
@@ -187,6 +195,56 @@ public class AISolutionGenerator
 				ServoyLog.logError(e);
 			}
 		});
+	}
+
+	private static void addSolutionCSSorLessContributionsFromTemplates(Solution solution, TemplateForAIReader templateForAIReader)
+	{
+		int solutionCSSOrLessMediaID = solution.getStyleSheetID();
+		Media solutionCSSOrLessMedia = solution.getMedia(solutionCSSOrLessMediaID);
+		String oldCssOrLessContent;
+		if (solutionCSSOrLessMedia == null)
+		{
+			try
+			{
+				solutionCSSOrLessMedia = solution.createNewMedia(new ScriptNameValidator(), solution.getName() + ".less");
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+			solutionCSSOrLessMedia.setMimeType("text/css");
+			oldCssOrLessContent = "";
+			solution.setStyleSheetID(solutionCSSOrLessMedia.getID());
+		}
+		else
+		{
+			oldCssOrLessContent = new String(solutionCSSOrLessMedia.getMediaData(), Charset.forName("UTF-8"));
+		}
+
+		int previousAIGeneratedTemplatePRovidedContentStartIndex = oldCssOrLessContent.indexOf(AI_GENERATION_TEMPLATE_PROVIDED_CONTENT_FOLLOWS);
+		if (previousAIGeneratedTemplatePRovidedContentStartIndex >= 0)
+			oldCssOrLessContent = oldCssOrLessContent.substring(0, previousAIGeneratedTemplatePRovidedContentStartIndex);
+
+		StringBuilder newCssOrLessContent = new StringBuilder(oldCssOrLessContent);
+		newCssOrLessContent.append(AI_GENERATION_TEMPLATE_PROVIDED_CONTENT_FOLLOWS);
+
+		templateForAIReader.getAllTemplateDefinitions().forEach(td -> {
+			String templateCssOrLess = td.getTemplateStyleToAddToSolution();
+			if (templateCssOrLess != null) newCssOrLessContent.append("\n" + templateCssOrLess);
+		});
+
+		solutionCSSOrLessMedia.setPermMediaData(newCssOrLessContent.toString().getBytes(Charset.forName("UTF-8")));
+		Pair<String, String> mfp = SolutionSerializer.getFilePath(solutionCSSOrLessMedia, false);
+		IFile mediaIFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(mfp.getLeft() + mfp.getRight()));
+		try
+		{
+			ResourcesUtils.createOrWriteFile(mediaIFile, new ByteArrayInputStream(newCssOrLessContent.toString().getBytes("UTF8")),
+				true);
+		}
+		catch (UnsupportedEncodingException | CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 
 	public static IFile getFormCSSFile(Form form)

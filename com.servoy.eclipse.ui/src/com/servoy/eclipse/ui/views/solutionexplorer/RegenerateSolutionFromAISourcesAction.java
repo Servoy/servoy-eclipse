@@ -22,12 +22,14 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeletePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScopeAction;
 import com.servoy.j2db.persistence.Form;
@@ -54,9 +56,12 @@ public class RegenerateSolutionFromAISourcesAction extends Action
 		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
 		if (activeProject != null)
 		{
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeAllEditors(true);
+
 			// delete old unneeded content
 			Solution solution = activeProject.getEditingSolution();
 			List<IPersist> allPersistsToDelete = new ArrayList<>();
+			solution.setFirstFormID(-1);
 			solution.getAllObjects().forEachRemaining((p) -> {
 				if (!(p instanceof Media))
 				{
@@ -80,9 +85,12 @@ public class RegenerateSolutionFromAISourcesAction extends Action
 
 			// now (re)generate new content
 			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
+
+			Solution aps = ServoyModelFinder.getServoyModel().getActiveProject().getSolution();
+			int ffid = aps.getFirstFormID();
+			if (ffid > 0) EditorUtil.openFormDesignEditor(aps.getForm(ffid));
+			else EditorUtil.openFormDesignEditor(aps.getAllNormalForms(true).next());
 		}
-
-
 	}
 
 }
