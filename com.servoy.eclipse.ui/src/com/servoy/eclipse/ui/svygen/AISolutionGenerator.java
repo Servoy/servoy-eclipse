@@ -40,6 +40,7 @@ import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameSolutionAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -48,6 +49,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.WebComponent;
@@ -136,6 +138,13 @@ public class AISolutionGenerator
 	private static void generateSolutionSubContent(Solution solution, JSONObject aiGeneratedContent, TemplateForAIReader templateForAIReader,
 		FlattenedSolution flattenedSolution)
 	{
+		NewMethodAction.createNewMethod(PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell(),
+			solution, "onSolutionOpen", true, "onSolutionOpen", "mainSol",
+			null);
+		ScriptMethod onSolutionOpen = solution.getScriptMethod("mainSol", "onSolutionOpen");
+		onSolutionOpen.setDeclaration("function onSolutionOpen() { scopes.core.onSolutionOpen(); }");
+		solution.setOnOpenMethodID(onSolutionOpen.getID());
+
 		// add css/less from templates into solution level css/less
 		addSolutionCSSorLessContributionsFromTemplates(solution, templateForAIReader);
 
