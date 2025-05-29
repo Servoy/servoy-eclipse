@@ -17,44 +17,33 @@
 
 package com.servoy.eclipse.ui.svygen;
 
-import java.util.HashMap;
-
 import org.json.JSONObject;
 
 /**
- * The definition that maps an AI template to real components or forms... etc. in Servoy.
+ * The definition that maps an AI template to real forms in Servoy.
  *
  * @author acostescu
  */
-public class TemplateDefinition
+public class BaseFormTemplateDefinition extends TemplateDefinition
 {
 
-	private HashMap<String, String> propertyAIToRealMap;
-	private String name;
+	private String formRef;
 
-	public TemplateDefinition(String templateJSONString)
+	public BaseFormTemplateDefinition(String templateJSONString)
 	{
-		JSONObject templateJSON = new JSONObject(templateJSONString);
-		init(templateJSON);
+		super(templateJSONString);
 	}
 
+	@Override
 	protected void init(JSONObject templateJSON)
 	{
-		this.name = templateJSON.getString("name");
-
-		JSONObject propertyMapJSON = templateJSON.getJSONObject("propertyMap");
-		this.propertyAIToRealMap = new HashMap<>();
-		propertyMapJSON.keys().forEachRemaining(aiProp -> this.propertyAIToRealMap.put(aiProp, propertyMapJSON.getString(aiProp)));
+		super.init(templateJSON);
+		this.formRef = templateJSON.getString("formRef");
 	}
 
-	public String getRealPropertyFor(String aiPropertyName)
+	public String getRealFormName()
 	{
-		return propertyAIToRealMap.get(aiPropertyName);
-	}
-
-	public String getName()
-	{
-		return name;
+		return formRef;
 	}
 
 }

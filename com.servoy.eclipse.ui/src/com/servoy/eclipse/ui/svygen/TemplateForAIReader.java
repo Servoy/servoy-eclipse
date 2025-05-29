@@ -33,29 +33,46 @@ import com.servoy.j2db.util.Utils;
 public class TemplateForAIReader
 {
 
-	private final Map<String, TemplateDefinition> templateDefinitions = new HashMap<>();
+	private final Map<String, ComponentTemplateDefinition> componentTemplateDefinitions = new HashMap<>();
+	private final Map<String, BaseFormTemplateDefinition> baseFormTemplateDefinitions = new HashMap<>();
 
 	public TemplateForAIReader(File templatesDir)
 	{
-		File[] templateDirs = templatesDir.listFiles();
+		// read component templates
+		File[] templateDirs = new File(templatesDir, AISolutionGenerator.SERVOY_COMPONENT_TEMPLATE_DIR).listFiles();
 		for (File templateDir : templateDirs)
 		{
 			String templateStyleToAddToSolution = Utils.getTXTFileContent(new File(templateDir, "style.less"));
 			String templateJSON = Utils.getTXTFileContent(new File(templateDir, "template.json"));
 
-			TemplateDefinition td = new TemplateDefinition(templateStyleToAddToSolution, templateJSON);
-			templateDefinitions.put(td.getName(), td);
+			ComponentTemplateDefinition td = new ComponentTemplateDefinition(templateStyleToAddToSolution, templateJSON);
+			componentTemplateDefinitions.put(td.getName(), td);
+		}
+
+		// read base form templates
+		templateDirs = new File(templatesDir, AISolutionGenerator.SERVOY_BASE_FORMS_TEMPLATE_DIR).listFiles();
+		for (File templateDir : templateDirs)
+		{
+			String templateJSON = Utils.getTXTFileContent(new File(templateDir, "template.json"));
+
+			BaseFormTemplateDefinition td = new BaseFormTemplateDefinition(templateJSON);
+			baseFormTemplateDefinitions.put(td.getName(), td);
 		}
 	}
 
-	public TemplateDefinition getTemplateDefinition(String templateRef)
+	public ComponentTemplateDefinition getComponentTemplateDefinition(String templateRef)
 	{
-		return templateDefinitions.get(templateRef);
+		return componentTemplateDefinitions.get(templateRef);
 	}
 
-	public List<TemplateDefinition> getAllTemplateDefinitions()
+	public List<ComponentTemplateDefinition> getAllComponentTemplateDefinitions()
 	{
-		return new ArrayList<>(templateDefinitions.values());
+		return new ArrayList<>(componentTemplateDefinitions.values());
+	}
+
+	public BaseFormTemplateDefinition getBaseFormTemplateDefinition(String extendedFormTemplateRef)
+	{
+		return baseFormTemplateDefinitions.get(extendedFormTemplateRef);
 	}
 
 }

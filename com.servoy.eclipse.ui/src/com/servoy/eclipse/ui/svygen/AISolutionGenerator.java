@@ -38,6 +38,8 @@ import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameSolutionAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -58,10 +60,11 @@ import com.servoy.j2db.util.Utils;
  */
 public class AISolutionGenerator
 {
+	public static final String SERVOY_COMPONENT_TEMPLATE_DIR = "servoy-primitives";
+	public static final String SERVOY_BASE_FORMS_TEMPLATE_DIR = "base-forms";
 
 	private static final String AI_GENERATION_TEMPLATE_PROVIDED_CONTENT_FOLLOWS = "\n\n// AI Generation template-provided content follows; DO NOT ADD ANY CUSTOM CSS AFTER THIS LINE AS IT WILL BE REMOVED when regenerating solution content";
 
-	private static final String SERVOY_PRIMITIVES_TEMPLATE_DIR = "servoy-primitives";
 	private static final String TEMPLATES_DIR = "templates";
 	private static final String SVYGEN_PATH_CUSTOM_SOLUTION_PROP = "svygen_path";
 	private static final String AI_GENERATED_APP_JSON = "application.json";
@@ -101,7 +104,7 @@ public class AISolutionGenerator
 	}
 
 
-	private static JSONObject getAIGeneratedJSON(String templateAndAiGeneratedDir)
+	public static JSONObject getAIGeneratedJSON(String templateAndAiGeneratedDir)
 	{
 		return new JSONObject(Utils.getTXTFileContent(new File(templateAndAiGeneratedDir, AI_GENERATED_APP_JSON)));
 	}
@@ -127,7 +130,7 @@ public class AISolutionGenerator
 
 	private static TemplateForAIReader getTemplateReader(String templateAndAiGeneratedDir)
 	{
-		return new TemplateForAIReader(new File(new File(templateAndAiGeneratedDir, TEMPLATES_DIR), SERVOY_PRIMITIVES_TEMPLATE_DIR));
+		return new TemplateForAIReader(new File(templateAndAiGeneratedDir, TEMPLATES_DIR));
 	}
 
 	private static void generateSolutionSubContent(Solution solution, JSONObject aiGeneratedContent, TemplateForAIReader templateForAIReader,
@@ -142,57 +145,139 @@ public class AISolutionGenerator
 			String formName = formJSON.getString("name");
 			String formDatasource = formJSON.getString("datasource");
 			String formClassName = formJSON.optString("styleClass", null);
-			String styleToBeAddedToFormCssOrLess = formJSON.getJSONObject("style").getString("inline");
-			JSONArray usedTemplates = formJSON.getJSONArray("children");
+			String extendedFormTemplateRef = formJSON.optString("templateRef", null);
+			JSONObject styleToBeAdded = formJSON.optJSONObject("style");
+			String inlineStyleToBeAddedToFormCssOrLess = styleToBeAdded != null ? styleToBeAdded.getString("inline") : null;
 
 			try
 			{
 				Form form = solution.createNewForm(new ScriptNameValidator(flattenedSolution), null, formName, formDatasource, false, null);
 				form.setResponsiveLayout(true);
 				form.setStyleClass(formClassName);
+				if (inlineStyleToBeAddedToFormCssOrLess != null)
+				{
+					form.setFormCss(inlineStyleToBeAddedToFormCssOrLess);
+					ResourcesUtils.createFileAndParentContainers(getFormCSSFile(form),
+						new ByteArrayInputStream(inlineStyleToBeAddedToFormCssOrLess.getBytes("UTF8")),
+						true);
+				}
 
-				LayoutContainer rootLayoutContainer = form.createNewLayoutContainer();
-				rootLayoutContainer.setPackageName("12grid");
-				rootLayoutContainer.setSpecName("div");
+				if (extendedFormTemplateRef == null)
+				{
+					JSONArray usedTemplates = formJSON.getJSONArray("children");
 
-				form.setFormCss(styleToBeAddedToFormCssOrLess);
-				ResourcesUtils.createFileAndParentContainers(getFormCSSFile(form), new ByteArrayInputStream(styleToBeAddedToFormCssOrLess.getBytes("UTF8")),
-					true);
+					// fresh new form; not extending anything
+					LayoutContainer rootLayoutContainer = form.createNewLayoutContainer();
+					rootLayoutContainer.setPackageName("12grid");
+					rootLayoutContainer.setSpecName("div");
 
-				usedTemplates.forEach((tJSON) -> {
-					JSONObject templateJSON = (JSONObject)tJSON;
-					String templateRef = templateJSON.getString("templateRef");
-					String templateName = templateJSON.getString("name");
-					String wrapperDivClass = templateJSON.optString("wrapperStyleClass", null);
+					populateWithChildTemplates(templateForAIReader, usedTemplates, rootLayoutContainer);
+				}
+				else
+				{
+					// extends template form from predefined modules
+					BaseFormTemplateDefinition formTemplateDef = templateForAIReader.getBaseFormTemplateDefinition(extendedFormTemplateRef);
+					Form extendedForm = flattenedSolution.getForm(formTemplateDef.getRealFormName());
+					form.setExtendsForm(extendedForm);
+					form.setExtendsID(extendedForm.getID());
 
-					TemplateDefinition templateDef = templateForAIReader.getTemplateDefinition(templateRef);
-
-					try
+					// see if AI wants to insert some new components in available slots
+					JSONObject slots = formJSON.optJSONObject("slots");
+					if (slots != null)
 					{
-						LayoutContainer templateLayoutContainer = rootLayoutContainer.createNewLayoutContainer();
-						templateLayoutContainer.setPackageName("12grid");
-						templateLayoutContainer.setSpecName("div");
-						templateLayoutContainer.setName(templateName + "Div");
-						if (wrapperDivClass != null) templateLayoutContainer.setCssClasses(wrapperDivClass);
+						slots.keySet().forEach(slotRef -> {
+							JSONArray slotChildren = slots.getJSONArray(slotRef);
+							LayoutContainer slotLayoutContainer = null;
+							Form currentFormInHierarchy = extendedForm;
+							do
+							{
+								slotLayoutContainer = (LayoutContainer)currentFormInHierarchy.findChild(slotRef, IRepository.LAYOUTCONTAINERS);
+								currentFormInHierarchy = currentFormInHierarchy.getExtendsForm();
+							}
+							while (slotLayoutContainer == null && currentFormInHierarchy != null);
 
-						WebComponent component = templateLayoutContainer.createNewWebComponent(templateName, templateDef.getRealSpecType());
-						component.setStyleClass(templateDef.getStyleHookRoot());
+							try
+							{
+								slotLayoutContainer = (LayoutContainer)ElementUtil.getOverridePersist(PersistContext.create(slotLayoutContainer, form));
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError(e);
+							}
 
-						JSONObject propertiesJSON = templateJSON.getJSONObject("properties");
-
-						propertiesJSON.keySet().forEach(aiPropertyName -> {
-							String realPropertyName = templateDef.getRealPropertyFor(aiPropertyName);
-							component.setProperty(realPropertyName, propertiesJSON.get(aiPropertyName));
+							populateWithChildTemplates(templateForAIReader, slotChildren, slotLayoutContainer);
 						});
 					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
 
-				});
+					// update properties
+					JSONObject propertiesJSON = formJSON.optJSONObject("properties");
+
+					if (propertiesJSON != null)
+					{
+						propertiesJSON.keySet().forEach(aiPropertyName -> {
+							String realPropertyName = formTemplateDef.getRealPropertyFor(aiPropertyName);
+							String[] elementsDotElNameDotPropName = realPropertyName.split("\\.");
+
+							WebComponent component = null;
+							Form currentFormInHierarchy = extendedForm;
+							do
+							{
+								component = (WebComponent)currentFormInHierarchy.findChild(elementsDotElNameDotPropName[1], IRepository.WEBCOMPONENTS);
+								currentFormInHierarchy = currentFormInHierarchy.getExtendsForm();
+							}
+							while (component == null && currentFormInHierarchy != null);
+
+							try
+							{
+								component = (WebComponent)ElementUtil.getOverridePersist(PersistContext.create(component, form));
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError(e);
+							}
+
+							component.setProperty(elementsDotElNameDotPropName[2], propertiesJSON.get(aiPropertyName));
+						});
+					}
+				}
 			}
 			catch (RepositoryException | CoreException | UnsupportedEncodingException e)
+			{
+				ServoyLog.logError(e);
+			}
+		});
+	}
+
+
+	private static void populateWithChildTemplates(TemplateForAIReader templateForAIReader, JSONArray usedTemplates, LayoutContainer rootLayoutContainer)
+	{
+		usedTemplates.forEach((tJSON) -> {
+			JSONObject templateJSON = (JSONObject)tJSON;
+			String templateRef = templateJSON.getString("templateRef");
+			String templateName = templateJSON.getString("name");
+			String wrapperDivClass = templateJSON.optString("wrapperStyleClass", null);
+
+			ComponentTemplateDefinition templateDef = templateForAIReader.getComponentTemplateDefinition(templateRef);
+
+			try
+			{
+				LayoutContainer templateLayoutContainer = rootLayoutContainer.createNewLayoutContainer();
+				templateLayoutContainer.setPackageName("12grid");
+				templateLayoutContainer.setSpecName("div");
+				templateLayoutContainer.setName(templateName + "Div");
+				if (wrapperDivClass != null) templateLayoutContainer.setCssClasses(wrapperDivClass);
+
+				WebComponent component = templateLayoutContainer.createNewWebComponent(templateName, templateDef.getRealSpecType());
+				component.setStyleClass(templateDef.getStyleHookRoot());
+
+				JSONObject propertiesJSON = templateJSON.getJSONObject("properties");
+
+				propertiesJSON.keySet().forEach(aiPropertyName -> {
+					String realPropertyName = templateDef.getRealPropertyFor(aiPropertyName);
+					component.setProperty(realPropertyName, propertiesJSON.get(aiPropertyName));
+				});
+			}
+			catch (RepositoryException e)
 			{
 				ServoyLog.logError(e);
 			}
@@ -230,7 +315,7 @@ public class AISolutionGenerator
 		StringBuilder newCssOrLessContent = new StringBuilder(oldCssOrLessContent);
 		newCssOrLessContent.append(AI_GENERATION_TEMPLATE_PROVIDED_CONTENT_FOLLOWS);
 
-		templateForAIReader.getAllTemplateDefinitions().forEach(td -> {
+		templateForAIReader.getAllComponentTemplateDefinitions().forEach(td -> {
 			String templateCssOrLess = td.getTemplateStyleToAddToSolution();
 			if (templateCssOrLess != null) newCssOrLessContent.append("\n" + templateCssOrLess);
 		});

@@ -17,44 +17,49 @@
 
 package com.servoy.eclipse.ui.svygen;
 
-import java.util.HashMap;
-
 import org.json.JSONObject;
 
 /**
- * The definition that maps an AI template to real components or forms... etc. in Servoy.
+ * The definition that maps an AI template to real components in Servoy.
  *
  * @author acostescu
  */
-public class TemplateDefinition
+public class ComponentTemplateDefinition extends TemplateDefinition
 {
 
-	private HashMap<String, String> propertyAIToRealMap;
-	private String name;
+	private String realSpecType;
+	private final String templateStyleToAddToSolution;
+	private String styleHookRoot;
 
-	public TemplateDefinition(String templateJSONString)
+	public ComponentTemplateDefinition(String templateStyleToAddToSolution, String templateJSONString)
 	{
-		JSONObject templateJSON = new JSONObject(templateJSONString);
-		init(templateJSON);
+		super(templateJSONString);
+		this.templateStyleToAddToSolution = templateStyleToAddToSolution;
 	}
 
+	@Override
 	protected void init(JSONObject templateJSON)
 	{
-		this.name = templateJSON.getString("name");
+		super.init(templateJSON);
 
-		JSONObject propertyMapJSON = templateJSON.getJSONObject("propertyMap");
-		this.propertyAIToRealMap = new HashMap<>();
-		propertyMapJSON.keys().forEachRemaining(aiProp -> this.propertyAIToRealMap.put(aiProp, propertyMapJSON.getString(aiProp)));
+		this.realSpecType = templateJSON.getString("componentRef");
+		JSONObject styleHooks = templateJSON.optJSONObject("styleHooks");
+		this.styleHookRoot = ((styleHooks != null) ? styleHooks.optString("root", null) : null);
 	}
 
-	public String getRealPropertyFor(String aiPropertyName)
+	public String getRealSpecType()
 	{
-		return propertyAIToRealMap.get(aiPropertyName);
+		return realSpecType;
 	}
 
-	public String getName()
+	public String getTemplateStyleToAddToSolution()
 	{
-		return name;
+		return templateStyleToAddToSolution;
+	}
+
+	public String getStyleHookRoot()
+	{
+		return styleHookRoot;
 	}
 
 }
