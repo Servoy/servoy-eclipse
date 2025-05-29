@@ -163,6 +163,7 @@ public class AISolutionGenerator
 					JSONObject templateJSON = (JSONObject)tJSON;
 					String templateRef = templateJSON.getString("templateRef");
 					String templateName = templateJSON.getString("name");
+					String wrapperDivClass = templateJSON.optString("wrapperStyleClass", null);
 
 					TemplateDefinition templateDef = templateForAIReader.getTemplateDefinition(templateRef);
 
@@ -172,6 +173,7 @@ public class AISolutionGenerator
 						templateLayoutContainer.setPackageName("12grid");
 						templateLayoutContainer.setSpecName("div");
 						templateLayoutContainer.setName(templateName + "Div");
+						if (wrapperDivClass != null) templateLayoutContainer.setCssClasses(wrapperDivClass);
 
 						WebComponent component = templateLayoutContainer.createNewWebComponent(templateName, templateDef.getRealSpecType());
 						component.setStyleClass(templateDef.getStyleHookRoot());
