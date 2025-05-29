@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.mozilla.javascript.Function;
 
@@ -64,12 +65,14 @@ public class DeveloperSolutionAction extends Action
 				DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, args, false, false);
 				if (args[0] instanceof JSForm jsform)
 				{
-					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, jsform.getContainer(), true);
-					IEditorPart editorPart = EditorUtil.openFormDesignEditor((Form)jsform.getContainer());
-					if (editorPart instanceof IFlagChangeEditor formEditor)
-					{
-						formEditor.flagModified();
-					}
+					Display.getDefault().asyncExec(() -> {
+						ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, jsform.getContainer(), true);
+						IEditorPart editorPart = EditorUtil.openFormDesignEditor((Form)jsform.getContainer());
+						if (editorPart instanceof IFlagChangeEditor formEditor)
+						{
+							formEditor.flagModified();
+						}
+					});
 				}
 			}
 			catch (Exception e)

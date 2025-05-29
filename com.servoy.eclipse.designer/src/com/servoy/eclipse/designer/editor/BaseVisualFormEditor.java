@@ -75,6 +75,7 @@ import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
+import com.servoy.eclipse.ui.editors.IFlagChangeEditor;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -115,7 +116,7 @@ import com.servoy.j2db.util.Utils;
  */
 
 public abstract class BaseVisualFormEditor extends MultiPageEditorPart
-	implements IActiveProjectListener, IPersistChangeListener, IShowEditorInput, ISupportCheatSheetActions
+	implements IActiveProjectListener, IPersistChangeListener, IShowEditorInput, ISupportCheatSheetActions, IFlagChangeEditor
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
 	private static final String COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.rfb.context";
