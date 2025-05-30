@@ -43,6 +43,7 @@ public class KeywordProvider implements IKeywordProvider
 			"elements", //
 			"controller", //
 			"currentcontroller", //
+			"developerBridge", //
 			IExecutingEnviroment.TOPLEVEL_APPLICATION, //
 			IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, //
 			IExecutingEnviroment.TOPLEVEL_DATASOURCES, //

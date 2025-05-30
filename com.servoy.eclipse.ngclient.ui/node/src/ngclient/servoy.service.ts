@@ -129,18 +129,22 @@ export class ServoyService {
         if (!solName) this.solutionSettings.solutionName = /.*\/([\$\w]+)\/.*/.exec(this.websocketService.getPathname())[1];
         else this.solutionSettings.solutionName = solName;
         this.solutionSettings.windowName = this.sabloService.getWindownr();
-        let recordingPrefix: string;
-        if (this.windowRefService.nativeWindow.location.search.indexOf('svy_record=true') > -1) {
-            recordingPrefix = '/recording/websocket';
-
+        let socketPrefix: string;
+        const recording = this.windowRefService.nativeWindow.location.search.indexOf('svy_record=true') > -1;
+        if (recording) {
+            socketPrefix = '/recording/websocket';
         }
+        else if (this.windowRefService.nativeWindow.location.search.indexOf('svy_developer=true') > -1) {
+            socketPrefix = '/developer/websocket';
+        }
+        
         const wsSession = this.sabloService.connect('/solution/' + this.solutionSettings.solutionName,
-            { solution: this.solutionSettings.solutionName, clienttype: 2 }, recordingPrefix);
+            { solution: this.solutionSettings.solutionName, clienttype: 2 }, socketPrefix);
         // TODO find mode and anchors handling (anchors should be handles completely at the server side,
         // css positioning should go over the line)
         wsSession.onMessageObject((msg: {clientnr?: number; windownr?: string}) => {
 
-            if (msg.clientnr && recordingPrefix) {
+            if (msg.clientnr && recording) {
                 const btn = this.windowRefService.nativeWindow.document.createElement('A')  as HTMLAnchorElement;      // Create a <button> element
                 btn.href = 'solutions/' + msg.clientnr + '.recording';
                 btn.target = '_blank';

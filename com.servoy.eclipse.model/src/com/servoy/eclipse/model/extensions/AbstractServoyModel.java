@@ -41,6 +41,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.inmemory.MenuTable;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
@@ -265,7 +266,8 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	public boolean isProjectActive(ServoyProject servoyProject)
 	{
-		return Arrays.asList(getModulesOfActiveProject()).contains(servoyProject);
+		return Arrays.asList(getModulesOfActiveProject()).contains(servoyProject) ||
+			(activeProject != null && activeProject.getDeveloperProjects().contains(servoyProject));
 	}
 
 	/**
@@ -365,6 +367,43 @@ public abstract class AbstractServoyModel implements IServoyModel
 		return retval.toArray(new ServoyResourcesProject[retval.size()]);
 	}
 
+	public ServoyDeveloperProject getDeveloperProject(String projectName)
+	{
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		try
+		{
+			if (project.isOpen() && project.hasNature(ServoyDeveloperProject.NATURE_ID))
+			{
+				return (ServoyDeveloperProject)project.getNature(ServoyDeveloperProject.NATURE_ID);
+			}
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return null;
+	}
+
+	public List<String> getDeveloperProjectNames()
+	{
+		List<String> retval = new ArrayList<String>();
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects())
+		{
+			try
+			{
+				if (project.isOpen() && project.hasNature(ServoyDeveloperProject.NATURE_ID))
+				{
+					retval.add(project.getName());
+				}
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return retval;
+	}
+
 	public AbstractServoyModel refreshServoyProjects()
 	{
 		servoyProjectCache = null;
@@ -381,9 +420,10 @@ public abstract class AbstractServoyModel implements IServoyModel
 			{
 				try
 				{
-					if (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
+					if (project.isOpen() && (project.hasNature(ServoyProject.NATURE_ID) || project.hasNature(ServoyDeveloperProject.NATURE_ID)))
 					{
-						ServoyProject sp = (ServoyProject)project.getNature(ServoyProject.NATURE_ID);
+						ServoyProject sp = (ServoyProject)project
+							.getNature(project.hasNature(ServoyProject.NATURE_ID) ? ServoyProject.NATURE_ID : ServoyDeveloperProject.NATURE_ID);
 						if (activeProject != null && activeProject.getProject().equals(project))
 						{
 							// in case active project was replaced/overwritten we must update the reference as well (so we don't have trouble when comparing IProject or ServoyProject instances...)
@@ -595,6 +635,10 @@ public abstract class AbstractServoyModel implements IServoyModel
 			for (Solution solution : modules)
 			{
 				if (hasModuleName(solution, name)) return true;
+			}
+			if (activeProject.getDeveloperProjects().stream().anyMatch(p -> p.getProject().getName().equals(name)))
+			{
+				return true;
 			}
 		}
 		return false;

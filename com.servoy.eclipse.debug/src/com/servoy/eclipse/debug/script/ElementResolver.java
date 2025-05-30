@@ -45,6 +45,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -64,7 +65,8 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
-import com.servoy.j2db.scripting.solutionmodel.IJSDeveloperSolutionModel;
+import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
+import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
@@ -147,7 +149,15 @@ public class ElementResolver implements IElementResolver
 		Set<String> typeNames = Collections.emptySet();
 		FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 		IResource resource = context.getModelElement().getResource();
-		if (resource != null && fs != null)
+		String projectName = getProjectName(context);
+		if (projectName != null &&
+			ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(projectName) instanceof ServoyDeveloperProject)
+		{
+			typeNames = new HashSet<String>();
+			typeNames.add("developerBridge");
+			typeNames.add("forms");
+		}
+		else if (resource != null && fs != null)
 		{
 			typeNames = getTypeNames(prefix);
 
@@ -280,7 +290,6 @@ public class ElementResolver implements IElementResolver
 				}
 			}
 		}
-
 		try
 		{
 			if (resource != null && resource.getProject() != null && resource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID) &&
@@ -518,6 +527,21 @@ public class ElementResolver implements IElementResolver
 			if (ServoyModelFinder.getServoyModel().getActiveProject() == null) return null; // in this case TypeCreator would not create the needed type; avoid generating a resolve stack overflow
 			typeName = name;
 			description = TypeCreator.getTopLevelDoc(IJSDeveloperSolutionModel.class);
+		}
+		else if ("developerBridge".equals(name))
+		{
+			if (ServoyModelFinder.getServoyModel().getActiveProject() == null) return null; // in this case TypeCreator would not create the needed type; avoid generating a resolve stack overflow
+			String projectName = getProjectName(context);
+			if (projectName != null &&
+				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(projectName) instanceof ServoyDeveloperProject)
+			{
+				typeName = name;
+				description = TypeCreator.getTopLevelDoc(IJSDeveloperBridge.class);
+			}
+			else
+			{
+				typeName = null;
+			}
 		}
 		else
 		{

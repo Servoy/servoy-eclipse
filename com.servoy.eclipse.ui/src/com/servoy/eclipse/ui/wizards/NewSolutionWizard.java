@@ -22,7 +22,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,6 +84,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaWebAppManifest;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
@@ -110,6 +114,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 {
 	public static final String ID = "com.servoy.eclipse.ui.NewSolutionWizard";
 	protected GenerateSolutionWizardPage configPage;
+	private String solutionName;
 
 	/**
 	 * Creates a new wizard.
@@ -142,10 +147,27 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
+		Map<String, SolutionPackageInstallInfo> toImportSolutions = new HashMap<>();
+		for (String name : solutions)
+		{
+			Pair<String, File> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
+		}
+		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+		{
+
+			toImportSolutions.put("svyGenCore", new SolutionPackageInstallInfo("1.0", getSvyGenTemplates(), true, false));
+			solutions.add("svyGenCore");
+			solutionName = AISolutionGenerator.getAIGeneratedJSON(configPage.getSvyGenPath()).optString("projectName", "new_ai_gen_solution");
+		}
+		else
+		{
+			solutionName = configPage.getNewSolutionName();
+		}
+
 		final boolean mustAuthenticate = configPage.mustAuthenticate();
 		IRunnableWithProgress newSolutionRunnable = new IRunnableWithProgress()
 		{
-
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
 				monitor.beginTask("Creating solution and writing files to disk", 4);
@@ -153,7 +175,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 				try
 				{
-					Solution solution = (Solution)repository.createNewRootObject(configPage.getNewSolutionName(), IRepository.SOLUTIONS);
+					Solution solution = null;
+					if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+					{
+						solution = AISolutionGenerator.createSolutionFromAIContent(configPage.getSvyGenPath());
+					}
+					else
+					{
+						solution = (Solution)repository.createNewRootObject(solutionName, IRepository.SOLUTIONS);
+					}
 
 					String modulesTokenized = ModelUtils.getTokenValue(solutions.toArray(new String[] { }), ",");
 					solution.setModulesNames(modulesTokenized);
@@ -195,13 +225,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					monitor.setTaskName("Creating and opening project");
 					// as the serialization is done using java.io, we must make sure the Eclipse resource structure
 					// stays up to date; we create a project, then we must open it and add servoy solution nature
-					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(configPage.getNewSolutionName());
+					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(solutionName);
 					String location = configPage.getProjectLocation();
-					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(configPage.getNewSolutionName());
+					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(solutionName);
 					if (location != null)
 					{
 						IPath path = new Path(location);
-						path = path.append(configPage.getNewSolutionName());
+						path = path.append(solution.getName());
 						description.setLocation(path);
 					}
 					newProject.create(description, null);
@@ -212,6 +242,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					{
 						int solutionType = configPage.getSolutionType();
 						solution.setSolutionType(solutionType);
+
+						solution.putCustomProperty(new String[] { "svygen_path" }, configPage.getSvyGenPath());
 
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
@@ -268,7 +300,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				if (configPage.shouldAddDefaultWAM())
 				{
-					addMediaFile(solution, CreateMediaWebAppManifest.createManifest(solution.getName()), CreateMediaWebAppManifest.FILE_NAME);
+					addMediaFile(solution, CreateMediaWebAppManifest.createManifest(solutionName), CreateMediaWebAppManifest.FILE_NAME);
 					addMediaFile(solution, CreateMediaWebAppManifest.getIcon(), CreateMediaWebAppManifest.ICON_NAME);
 					repository.updateRootObject(solution);
 				}
@@ -304,11 +336,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				monitor.beginTask(jobName, 1);
 				servoyModel.refreshServoyProjects();
 				// set this solution as the new active solution or add it as a module
-				ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+				ServoyProject newProject = servoyModel.getServoyProject(solutionName);
 				if (newProject == null)
 				{
 					servoyModel.refreshServoyProjects();
-					newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+					newProject = servoyModel.getServoyProject(solutionName);
 				}
 				if (newProject != null)
 				{
@@ -346,6 +378,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					else
 					{
 						servoyModel.setActiveProject(newProject, true);
+						genAISol(newProject);
 					}
 				}
 				else
@@ -357,13 +390,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
-		Map<String, SolutionPackageInstallInfo> toImportSolutions = new HashMap<>();
-		for (String name : solutions)
-		{
-			Pair<String, File> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
-			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
-		}
-		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false, false);
+		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, solutionName, false, false);
 
 		IRunnableWithProgress importPackagesRunnable = null;
 		final List<String> packs = configPage.getWebPackagesToImport();
@@ -373,11 +400,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 				{
-					ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+					ServoyProject newProject = servoyModel.getServoyProject(solutionName);
 					if (newProject == null)
 					{
 						servoyModel.refreshServoyProjects();
-						newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+						newProject = servoyModel.getServoyProject(solutionName);
 					}
 					if (newProject != null)
 					{
@@ -419,13 +446,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			};
 		}
 
+
 		try
 		{
 			IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 			progressService.run(true, false, newSolutionRunnable);
 			if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
-			progressService.run(true, false, solutionActivationRunnable);
 			progressService.run(true, false, importSolutionsRunnable);
+			progressService.run(true, false, solutionActivationRunnable);
 		}
 		catch (Exception e)
 		{
@@ -451,6 +479,18 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		});
 		return true;
+	}
+
+	private void genAISol(ServoyProject activeProject)
+	{
+		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+		{
+			if (activeProject == null)
+			{
+				throw new RuntimeException("No active project found to generate solution from AI content.");
+			}
+			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
+		}
 	}
 
 	public static IRunnableWithProgress importSolutions(final Map<String, SolutionPackageInstallInfo> solutions, final String jobName, String newSolutionName,
@@ -683,11 +723,21 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 		if (project == null && packageInfo.forceActivateResourcesProject)
 		{
-			newResourceProjectName = "resources";
-			int counter = 1;
-			while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+			ServoyProject sol = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
+			final String selectedResourceProjectName = sol.getResourcesProject() != null ? sol.getResourcesProject().getProject().getName() : "resources";
+			newResourceProjectName = selectedResourceProjectName;
+			if (project == null && ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
 			{
-				newResourceProjectName = "resources" + counter++;
+				project = Arrays.stream(ServoyModelManager.getServoyModelManager().getServoyModel().getResourceProjects())
+					.filter(p -> p.getProject().getName().equals(selectedResourceProjectName)).findFirst().orElse(null);
+			}
+			else
+			{
+				int counter = 1;
+				while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+				{
+					newResourceProjectName = "resources" + counter++;
+				}
 			}
 		}
 		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, project, false, false, false, null, null,
@@ -809,7 +859,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	@Override
 	public boolean canFinish()
 	{
-		return super.canFinish() && (searchMissingServers(configPage.getSolutionsToImport()).isEmpty() || canCreateMissingServers());
+		return super.canFinish() && ((searchMissingServers(configPage.getSolutionsToImport()).isEmpty() || canCreateMissingServers()) ||
+			configPage.getSvyGenPath().isEmpty());
 	}
 
 
@@ -885,6 +936,28 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			this.data = data;
 			this.forceActivateResourcesProject = forceActivateResourcesProject;
 			this.keepResourcesProjectOpen = keepResourcesProjectOpen;
+		}
+	}
+
+	//TODO use the SPM in the future?
+	public static File getSvyGenTemplates()
+	{
+		try (InputStream in = NewSolutionWizard.class.getResourceAsStream("resources/solutions/svyGenCore.servoy"))
+		{
+			if (in == null)
+			{
+				throw new FileNotFoundException("Resource svyGenCore not found: ");
+			}
+
+			File tempFile = File.createTempFile("svyGenCore", ".servoy");
+			tempFile.deleteOnExit();
+
+			Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			return tempFile;
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Cannot get svyGenCore templates", e);
 		}
 	}
 }

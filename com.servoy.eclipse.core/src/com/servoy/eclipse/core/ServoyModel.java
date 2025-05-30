@@ -124,6 +124,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -1340,6 +1341,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						progress.worked(1);
 
 						fireLoadingDone();
+
+
 					}
 				}
 				finally
@@ -2284,7 +2287,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					EclipseRepository eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 
 					// DO STUFF RELATED TO SOLUTION PROJECTS
-					if (element.getKind() != IResourceDelta.REMOVED && project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
+					if (element.getKind() != IResourceDelta.REMOVED && project.isOpen() &&
+						(project.hasNature(ServoyProject.NATURE_ID) || project.hasNature(ServoyDeveloperProject.NATURE_ID)))
 					{
 						// so the project is a Servoy project, still exists and is open
 						// refresh cached project list if necessary
@@ -2516,7 +2520,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	private void refreshGlobalScopes(boolean fireChange)
 	{
 		boolean realSolutionScopnamesChanged = false;
-		for (ServoyProject project : getModulesOfActiveProject())
+		List<ServoyProject> servoyProjects = new ArrayList(Arrays.asList(getModulesOfActiveProject()));
+		if (activeProject != null)
+		{
+			servoyProjects.addAll(activeProject.getDeveloperProjects());
+		}
+		for (ServoyProject project : servoyProjects)
 		{
 			List<String> globalScopenames = project.getGlobalScopenames();
 			String[] scopeNames = globalScopenames.toArray(new String[globalScopenames.size()]);

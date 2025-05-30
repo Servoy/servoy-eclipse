@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -168,6 +169,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
+import org.mozilla.javascript.Function;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 
@@ -180,7 +182,10 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyUpdatingProject;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.developersolution.DeveloperBridge;
+import com.servoy.eclipse.developersolution.DeveloperNGClient;
 import com.servoy.eclipse.dnd.FormElementTransfer;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -219,6 +224,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.*;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.eclipse.ui.wizards.IExportSolutionWizardProvider;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
+import com.servoy.eclipse.ui.wizards.NewDeveloperSolutionAction;
 import com.servoy.eclipse.ui.wizards.NewFormComponentWizard;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewModuleWizard;
@@ -253,6 +259,9 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.scripting.solutionmodel.JSForm;
+import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
+import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -341,6 +350,10 @@ public class SolutionExplorerView extends ViewPart
 
 	private ContextAction newActionInTreeSecondary;
 
+	private ContextAction newActionInTreeTertiary;
+
+	private RegenerateSolutionFromAISourcesAction regenerateSolutionFromAIAction;
+
 	private ReplaceTableAction replaceActionInTree;
 	private ReplaceServerAction replaceServerAction;
 	private ConvertAllFormsToCSSPosition convertFormsToCSSPosition;
@@ -371,6 +384,7 @@ public class SolutionExplorerView extends ViewPart
 	private RemovePackageProjectReferenceAction removePackageProjectAction;
 
 	private AddModuleAction addModuleAction;
+	private AddDevSolutionAction addDevSolutionAction;
 	private AddRemovePackageProjectAction addRemovePackageProjectAction;
 
 	private MoveTextAction moveCode;
@@ -2004,6 +2018,17 @@ public class SolutionExplorerView extends ViewPart
 
 	private void handleActiveProjectChanged(final ServoyProject activeProject)
 	{
+		newActionInTreeTertiary.unregisterAction(regenerateSolutionFromAIAction);
+		if (activeProject != null)
+		{
+			Solution editingSolution = activeProject.getSolution();
+			Object property = editingSolution.getCustomProperty(new String[] { "svygen_path" });
+			if (property != null)
+			{
+				newActionInTreeTertiary.registerAction(UserNodeType.SOLUTION, regenerateSolutionFromAIAction);
+			}
+		}
+
 		boolean showFirstForm = this.loadFirstForm;
 		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(activeProject));
 		refreshTreeCompletely();
@@ -2677,6 +2702,47 @@ public class SolutionExplorerView extends ViewPart
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		// extra open actions contributions
 		manager.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
+		if (DeveloperBridge.menus.size() > 0)
+		{
+			IStructuredSelection selection = (IStructuredSelection)tree.getSelection();
+			Object selectedObject = selection.getFirstElement();
+			if (selectedObject instanceof SimpleUserNode un)
+			{
+				Object realObject = un.getRealObject();
+				int selectedType = 0;
+				Object[] args = new Object[1];
+				if (realObject instanceof Solution sol)
+				{
+					selectedType = IJSDeveloperBridge.LOCATION.getSOLUTION();
+					args[0] = sol.getName();
+				}
+				else if (realObject instanceof Form frm)
+				{
+					selectedType = IJSDeveloperBridge.LOCATION.getFORM();
+					args[0] = new JSForm(DeveloperNGClient.INSTANCE,
+						(Form)ServoyModelFinder.getServoyModel().getActiveProject().getEditingPersist(frm.getUUID()),
+						true);
+				}
+
+				if (selectedType > 0)
+				{
+					boolean seperatedAdded = false;
+					for (Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+					{
+						if ((entry.getKey().getLocation() & selectedType) > 0)
+						{
+							if (!seperatedAdded)
+							{
+								manager.add(new Separator());
+								seperatedAdded = true;
+							}
+
+							manager.add(new DeveloperSolutionAction(entry.getKey(), entry.getValue(), args));
+						}
+					}
+				}
+			}
+		}
 		manager.add(new Separator());
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SERVERS)
 		{
@@ -2691,6 +2757,8 @@ public class SolutionExplorerView extends ViewPart
 		{
 			if (newActionInTreePrimary.isEnabled()) manager.add(newActionInTreePrimary);
 			if (newActionInTreeSecondary.isEnabled()) manager.add(newActionInTreeSecondary);
+			if (newActionInTreeTertiary.isEnabled()) manager.add(newActionInTreeTertiary);
+
 			if (createActionInTree.isEnabled()) manager.add(createActionInTree);
 		}
 
@@ -2806,6 +2874,7 @@ public class SolutionExplorerView extends ViewPart
 		if (removeModuleAction.isEnabled()) manager.add(removeModuleAction);
 		if (removePackageProjectAction.isEnabled()) manager.add(removePackageProjectAction);
 		if (addModuleAction.isEnabled()) manager.add(addModuleAction);
+		if (addDevSolutionAction.isEnabled()) manager.add(addDevSolutionAction);
 		if (addRemovePackageProjectAction.isEnabled()) manager.add(addRemovePackageProjectAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
@@ -3114,6 +3183,8 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.setId("com.servoy.action.new");
 		newActionInTreeSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");
+		newActionInTreeTertiary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
+			"New");
 		createActionInTree = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"Create");
 		newActionInListSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
@@ -3149,6 +3220,7 @@ public class SolutionExplorerView extends ViewPart
 		IAction newForm = new OpenNewFormWizardAction();
 		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution.png"),
 			"Create new solution");
+		IAction newDeveloperSolution = new NewDeveloperSolutionAction(this);
 		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("module.png"), "Create new module");
 		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.png"), "Create new style")
 		{
@@ -3230,6 +3302,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreeSecondary.registerAction(UserNodeType.WORKING_SET, newFormComponent);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
+		newActionInTreePrimary.registerAction(UserNodeType.DEVELOPER_SOLUTIONS, newDeveloperSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, importComponentInSolution);
@@ -3395,6 +3468,8 @@ public class SolutionExplorerView extends ViewPart
 
 		debugMethodAction = new DebugMethodAction(this);
 
+		regenerateSolutionFromAIAction = new RegenerateSolutionFromAISourcesAction();
+
 		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		IAction openRelation = new OpenRelationAction(); // must be another instance
 		// (in order to use only
@@ -3473,6 +3548,7 @@ public class SolutionExplorerView extends ViewPart
 		removeModuleAction = new RemoveModuleAction(shell);
 		removePackageProjectAction = new RemovePackageProjectReferenceAction(shell);
 		addModuleAction = new AddModuleAction(shell);
+		addDevSolutionAction = new AddDevSolutionAction(shell);
 		addRemovePackageProjectAction = new AddRemovePackageProjectAction(shell);
 
 		expandNodeAction = new ExpandNodeAction(tree);
@@ -3508,6 +3584,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(loadRelationsAction);
 		addTreeSelectionChangedListener(newActionInTreePrimary);
 		addTreeSelectionChangedListener(newActionInTreeSecondary);
+		addTreeSelectionChangedListener(newActionInTreeTertiary);
 		addTreeSelectionChangedListener(createActionInTree);
 		addTreeSelectionChangedListener(newComponentsPackageProjectAction);
 		addTreeSelectionChangedListener(newServicesPackageProjectAction);
@@ -3524,6 +3601,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(removeModuleAction);
 		addTreeSelectionChangedListener(removePackageProjectAction);
 		addTreeSelectionChangedListener(addModuleAction);
+		addTreeSelectionChangedListener(addDevSolutionAction);
 		addTreeSelectionChangedListener(addRemovePackageProjectAction);
 		addTreeSelectionChangedListener(setActive);
 		addTreeSelectionChangedListener(replaceActionInTree);

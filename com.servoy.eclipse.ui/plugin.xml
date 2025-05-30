@@ -1352,4 +1352,11 @@
           id="com.servoy.eclipse.ui.views.TutorialView">
     </excludeSources>
  </extension>
+    <extension
+         point="org.apache.tomcat.serviceprovider">
+      <serviceprovider
+            class="com.servoy.eclipse.developersolution.ServicesProvider"
+            id="servoy_ngclient.servicesprovider">
+      </serviceprovider>
+   </extension>
 </plugin>

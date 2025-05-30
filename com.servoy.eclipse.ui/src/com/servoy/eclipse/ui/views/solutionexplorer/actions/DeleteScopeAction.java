@@ -20,7 +20,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -100,19 +99,23 @@ public class DeleteScopeAction extends Action implements ISelectionChangedListen
 			}
 
 			Pair<Solution, String> pair = (Pair<Solution, String>)node.getRealObject();
-			String scopeName = pair.getRight();
-
-			WorkspaceFileAccess wsfa = new WorkspaceFileAccess(((IProjectNature)project.getRealObject()).getProject().getWorkspace());
-			String scriptPath = SolutionSerializer.getRelativePath(((((ServoyProject)project.getRealObject()).getSolution())), false) + scopeName +
-				SolutionSerializer.JS_FILE_EXTENSION;
-			try
-			{
-				wsfa.delete(scriptPath);
-			}
-			catch (IOException e)
-			{
-				ServoyLog.logError("Could not delete scope '" + scopeName + "' from project '" + project.getName() + "'", e);
-			}
+			deleteScript(((ServoyProject)project.getRealObject()), pair.getRight());
 		}
 	}
+
+	public static void deleteScript(ServoyProject project, String scopeName)
+	{
+		WorkspaceFileAccess wsfa = new WorkspaceFileAccess(project.getProject().getWorkspace());
+		String scriptPath = SolutionSerializer.getRelativePath(((project.getSolution())), false) + scopeName +
+			SolutionSerializer.JS_FILE_EXTENSION;
+		try
+		{
+			wsfa.delete(scriptPath);
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError("Could not delete scope '" + scopeName + "' from project '" + project.getProject().getName() + "'", e);
+		}
+	}
+
 }

@@ -49,7 +49,7 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 			boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
 			BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
 				Activator.TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, false);
-			dialog.open(true);
+			dialog.open();
 		}
 	}
 

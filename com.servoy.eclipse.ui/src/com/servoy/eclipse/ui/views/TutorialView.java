@@ -317,7 +317,7 @@ public class TutorialView extends ViewPart
 									{
 										BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
 											Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + tutorialID, true, false);
-										tutorialDialog.open(true);
+										tutorialDialog.open();
 									}
 								}
 							}
@@ -394,7 +394,7 @@ public class TutorialView extends ViewPart
 						final String currentTutorialID = dataModel.optString("tutorialID");
 						BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
 							Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + currentTutorialID, true, false);
-						tutorialDialog.open(true);
+						tutorialDialog.open();
 					}
 				}
 			});
@@ -549,7 +549,7 @@ public class TutorialView extends ViewPart
 					{
 						dialog = new BrowserDialog(parent.getShell(),
 							rowData.optString("gifURL"), false, false);
-						dialog.open(location, size, false);
+						dialog.open(location, size);
 					}
 					else
 					{

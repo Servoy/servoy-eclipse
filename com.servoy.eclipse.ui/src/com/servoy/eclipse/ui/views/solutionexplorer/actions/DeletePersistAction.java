@@ -78,7 +78,6 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 	/**
 	 * Creates a new "delete persist" action for the given solution view.
-	 *
 	 */
 	public DeletePersistAction(UserNodeType type, String text)
 	{
@@ -139,11 +138,12 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		setEnabled(state);
 	}
 
-	/**
-	 *
-	 * @param selectedPersistItems
-	 */
 	protected void performDeletion(List<IPersist> selectedPersistItems)
+	{
+		performDeletionStatic(selectedPersistItems, RefactoringUIMessages.DeleteResourcesHandler_title);
+	}
+
+	public static void performDeletionStatic(List<IPersist> selectedPersistItems, String formDeleteDialogTitle)
 	{
 		List<IPersist> toDelete = selectedPersistItems;
 		List<IPersist> refItems = selectedPersistItems;
@@ -246,7 +246,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 					RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(wizard);
 					try
 					{
-						op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), RefactoringUIMessages.DeleteResourcesHandler_title);
+						op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), formDeleteDialogTitle);
 					}
 					catch (InterruptedException e)
 					{
