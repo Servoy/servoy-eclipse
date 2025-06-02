@@ -642,6 +642,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 	private void defaultExpand()
 	{
+		if (getTreeViewer().getTree().isDisposed())
+			return;
 		if (form.isResponsiveLayout())
 		{
 			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 4);
