@@ -152,7 +152,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			if (toDelete.size() > 0)
 			{
-				List<IPersist> formsToDelete = new ArrayList<IPersist>();
+				List<Form> formsToDelete = new ArrayList<>();
 				boolean isTemplateChange = false;
 				for (IPersist persist : refItems)
 				{
@@ -161,10 +161,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 					if (rootObject instanceof Solution)
 					{
-						if (persist instanceof Form)
+						if (persist instanceof Form frm)
 						{
 							//make a list of forms to delete them all at once using Delete Resources Wizard
-							formsToDelete.add(persist);
+							formsToDelete.add(frm);
 							closeEditor = false;
 						}
 						else
@@ -227,10 +227,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 				if (!formsToDelete.isEmpty())
 				{
 					EclipseRepository rep = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
-					HashMap<IPersist, List<String>> persists = rep.getAllFilesForPersists(formsToDelete);
+					HashMap<Form, List<String>> persists = rep.getAllFilesForPersists(formsToDelete);
 
-					Set<IPersist> keys = persists.keySet();
-					Iterator it = keys.iterator();
+					Set<Form> keys = persists.keySet();
+					Iterator<Form> it = keys.iterator();
 					ArrayList<IFile> resources = new ArrayList<IFile>();
 					while (it.hasNext())
 					{

@@ -57,6 +57,7 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractRootObject;
 import com.servoy.j2db.persistence.ChangeHandler;
 import com.servoy.j2db.persistence.ContentSpec;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -845,10 +846,10 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		}
 	}
 
-	public HashMap<IPersist, List<String>> getAllFilesForPersists(List<IPersist> persists)
+	public <T extends IPersist> HashMap<T, List<String>> getAllFilesForPersists(List<T> persists)
 	{
-		HashMap<IPersist, List<String>> allFiles = new HashMap<IPersist, List<String>>();
-		for (IPersist persist : persists)
+		HashMap<T, List<String>> allFiles = new HashMap<>();
+		for (T persist : persists)
 		{
 			ArrayList<String> files = new ArrayList<String>();
 			Pair<String, String> filePath = SolutionSerializer.getFilePath(persist, true);
@@ -869,6 +870,13 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 								if (wsa.exists(scriptPath)) files.add(scriptPath);
 							}
 						}
+
+						if (persist instanceof Form frm)
+						{
+							String lessPath = filePath.getLeft() + frm.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION;
+							if (wsa.exists(lessPath)) files.add(lessPath);
+						}
+
 					}
 				}
 			}
