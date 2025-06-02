@@ -22,10 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -147,17 +144,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
-		Map<String, SolutionPackageInstallInfo> toImportSolutions = new HashMap<>();
-		for (String name : solutions)
-		{
-			Pair<String, File> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
-			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
-		}
 		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
 		{
-
-			toImportSolutions.put("svyGenCore", new SolutionPackageInstallInfo("1.0", getSvyGenTemplates(), true, false));
-			solutions.add("svyGenCore");
+			solutions.add(NewSolutionWizardDefaultPackages.SVYGEN_TEMPLATES);
 			solutionName = AISolutionGenerator.getAIGeneratedJSON(configPage.getSvyGenPath()).optString("projectName", "new_ai_gen_solution");
 		}
 		else
@@ -390,6 +379,12 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
+		Map<String, SolutionPackageInstallInfo> toImportSolutions = new HashMap<>();
+		for (String name : solutions)
+		{
+			Pair<String, File> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
+		}
 		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, solutionName, false, false);
 
 		IRunnableWithProgress importPackagesRunnable = null;
@@ -936,28 +931,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			this.data = data;
 			this.forceActivateResourcesProject = forceActivateResourcesProject;
 			this.keepResourcesProjectOpen = keepResourcesProjectOpen;
-		}
-	}
-
-	//TODO use the SPM in the future?
-	public static File getSvyGenTemplates()
-	{
-		try (InputStream in = NewSolutionWizard.class.getResourceAsStream("resources/solutions/svyGenCore.servoy"))
-		{
-			if (in == null)
-			{
-				throw new FileNotFoundException("Resource svyGenCore not found: ");
-			}
-
-			File tempFile = File.createTempFile("svyGenCore", ".servoy");
-			tempFile.deleteOnExit();
-
-			Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			return tempFile;
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException("Cannot get svyGenCore templates", e);
 		}
 	}
 }
