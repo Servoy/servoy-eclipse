@@ -41,12 +41,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -82,6 +84,8 @@ import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.IFunctionDocumentation;
 import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.plugins.IPlugin;
+import com.servoy.j2db.plugins.IServerPlugin;
 import com.servoy.j2db.querybuilder.IQueryBuilderColumn;
 import com.servoy.j2db.querybuilder.IQueryBuilderCondition;
 import com.servoy.j2db.querybuilder.IQueryBuilderLogicalCondition;
@@ -137,6 +141,7 @@ public class MarkdownGenerator
 
 	private static final boolean TRACK_REFERENCES = false; //used to turn relative references to full urls toward docs.servoy.com
 	private static final boolean GENERATE_PGADMIN_DOCS = false; //properties from admin page
+	private static final boolean GENERATE_SERVER_DOCS = true; //properties from server plugins
 
 	private static final Set<String> IGNORED_UNDOCUMENTED_TYPES = Set.of(
 		"org.mozilla.javascript.IdScriptableObject",
@@ -1086,9 +1091,180 @@ public class MarkdownGenerator
 			}
 		}
 
+		if (GENERATE_SERVER_DOCS)
+		{
+			try
+			{
+				findServerPlugins(pluginDir);
+			}
+			catch (IOException | TemplateException e)
+			{
+				System.err.println("Error generating server plugin documentation: " + e.getMessage());
+				e.printStackTrace();
+			}
+		}
+
 		printSummary();
 		// Write out all collected reference links to JSON
 		ReferencesTracker.getInstance().writeResults("references.json");
+	}
+
+	/**
+	 * Scans for server plugins using ServiceLoader and generates Markdown documentation.
+	 * This follows the approach used in WarServerPluginManager for plugin discovery.
+	 *
+	 * @param pluginsDir The directory containing plugin JAR files
+	 * @return True if documentation was successfully generated, false otherwise
+	 * @throws IOException If there's an error writing the documentation file
+	 * @throws TemplateException If there's an error processing the template
+	 */
+	public static boolean findServerPlugins(String pluginsDir) throws IOException, TemplateException
+	{
+		System.out.println("Scanning for server plugins in: " + pluginsDir);
+
+		try
+		{
+			// Create a list to collect JAR URLs
+			List<URL> jarUrls = new ArrayList<>();
+
+			// Find all JAR files in the plugins directory
+			File pluginsSourceDir = new File(pluginsDir);
+			if (!pluginsSourceDir.exists() || !pluginsSourceDir.isDirectory())
+			{
+				System.err.println("Plugin source directory does not exist or is not a directory: " + pluginsDir);
+				return false;
+			}
+
+			// Collect all JAR files recursively
+			java.nio.file.Files.walk(pluginsSourceDir.toPath())
+				.filter(path -> path.toString().toLowerCase().endsWith(".jar"))
+				.forEach(path -> {
+					try
+					{
+						jarUrls.add(path.toUri().toURL());
+					}
+					catch (MalformedURLException e)
+					{
+						System.err.println("Error creating URL for JAR: " + path + ": " + e.getMessage());
+					}
+				});
+
+			// Create a ClassLoader with all the JAR files
+			URL[] urls = jarUrls.toArray(new URL[0]);
+			URLClassLoader classLoader = new URLClassLoader(urls, MarkdownGenerator.class.getClassLoader());
+
+			// Use ServiceLoader to find all IPlugin implementations
+			ServiceLoader<IPlugin> pluginsLoader = ServiceLoader.load(IPlugin.class, classLoader);
+
+			// Collect server plugins
+			List<Map<String, Object>> pluginDataList = new ArrayList<>();
+
+			// Iterate through the plugins
+			for (IPlugin plugin : pluginsLoader)
+			{
+				try
+				{
+					if (plugin instanceof IServerPlugin)
+					{
+						IServerPlugin serverPlugin = (IServerPlugin)plugin;
+						String pluginClassName = plugin.getClass().getName();
+
+						// Create a data structure for this plugin
+						Map<String, Object> pluginData = new HashMap<>();
+
+						// Extract just the simple class name (last part after the last dot)
+						String simpleName = pluginClassName.substring(pluginClassName.lastIndexOf('.') + 1);
+						pluginData.put("name", simpleName);
+
+						// Get the plugin's properties
+						Map<String, String> properties = serverPlugin.getRequiredPropertyNames();
+						if (properties != null && !properties.isEmpty())
+						{
+							pluginData.put("properties", properties);
+						}
+						else
+						{
+							// Use null instead of empty map to indicate no properties
+							pluginData.put("properties", null);
+						}
+
+						// Add this plugin's data to our list
+						pluginDataList.add(pluginData);
+					}
+				}
+				catch (Exception e)
+				{
+					System.err.println("Error processing plugin: " + e.getMessage());
+				}
+			}
+
+			System.out.println("Found " + pluginDataList.size() + " server plugins");
+
+			// Generate documentation if we found any plugins
+			if (!pluginDataList.isEmpty())
+			{
+				generateServerPluginDocumentation(pluginDataList);
+			}
+
+			// Close the classloader when done
+			classLoader.close();
+
+			return !pluginDataList.isEmpty();
+		}
+		catch (Exception e)
+		{
+			System.err.println("Error scanning for plugins: " + e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+		finally
+		{
+			System.out.println("Server plugin scanning complete");
+		}
+	}
+
+	/**
+	 * Generates Markdown documentation for server plugins using the server_plugins_template.md template.
+	 *
+	 * @param pluginDataList List of plugin data maps containing name, description, and properties
+	 * @throws IOException If there's an error writing the documentation file
+	 * @throws TemplateException If there's an error processing the template
+	 */
+	private static void generateServerPluginDocumentation(List<Map<String, Object>> pluginDataList) throws IOException, TemplateException
+	{
+		System.out.println("Generating server plugin documentation");
+
+		// Process the plugin data to handle empty properties and add separators
+		for (Map<String, Object> pluginData : pluginDataList)
+		{
+			// If properties is null, replace with empty map so the template can still process it
+			if (pluginData.get("properties") == null)
+			{
+				pluginData.put("properties", Collections.emptyMap());
+			}
+		}
+
+		// Create the root data structure for the template
+		Map<String, Object> root = new HashMap<>();
+		root.put("plugins", pluginDataList);
+
+		// Get the custom template for server plugins
+		Template template = cfg.getTemplate("server_plugins_template.md");
+
+		// Determine output directory and ensure it exists
+		String outputDir = "ng_generated/reference/servoycore/server-plugins";
+		File dir = new File(outputDir);
+		if (!dir.exists())
+		{
+			dir.mkdirs();
+		}
+
+		// Write the documentation file
+		try (FileWriter writer = new FileWriter(new File(dir, "README.md")))
+		{
+			template.process(root, writer);
+			System.out.println("Server plugin documentation generated at: " + new File(dir, "README.md").getAbsolutePath());
+		}
 	}
 
 	private static void loadSummary()
