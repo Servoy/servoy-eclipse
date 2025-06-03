@@ -901,7 +901,7 @@ public class MenuEditor extends PersistEditor
 				false);
 		}
 
-		sashForm.setWeights(new int[] { 20, 80 });
+		sashForm.setWeights(new int[] { 25, 70 });
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		parent.requestLayout();
 	}
