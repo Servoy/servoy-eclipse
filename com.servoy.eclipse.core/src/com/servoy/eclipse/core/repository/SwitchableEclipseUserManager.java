@@ -235,6 +235,13 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 		else switchedTo.setFormSecurityAccess(clientId, groupName, accessMask, elementUUID, solutionName);
 	}
 
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID formUUID, UUID elementUUID, String solutionName)
+		throws ServoyException, RemoteException
+	{
+		if (switchedTo == null) eclipseUserManger.setFormSecurityAccess(clientId, groupName, accessMask, formUUID, elementUUID, solutionName);
+		else switchedTo.setFormSecurityAccess(clientId, groupName, accessMask, formUUID, elementUUID, solutionName);
+	}
+
 	public void setTableSecurityAccess(String clientId, String groupName, Integer accessMask, String connectionName, String tableName, String columnName)
 		throws ServoyException, RemoteException
 	{
