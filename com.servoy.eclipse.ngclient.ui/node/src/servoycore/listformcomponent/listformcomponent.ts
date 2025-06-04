@@ -80,6 +80,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 
     @Input() containedForm: FormComponentValue;
+    @Input() containedFormMargin: any;
     @Input() foundset: IFoundset;
     @Input() selectionClass: string;
     @Input() styleClass: string;
@@ -119,6 +120,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     numberOfColumns = 1;
     resizeObserver: ResizeObserver;
     resizeTimeout: any;
+    previousWidth = 0;
 
     // used for paging
     page = 0;
@@ -394,7 +396,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             });
         } else {
             this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
-                if (event.requestInfos && event.requestInfos.includes('AGGridDatasourceGetRows')) {
+                if ((event.requestInfos && event.requestInfos.includes('AGGridDatasourceGetRows')) || this.agGrid.api.isDestroyed()) {
                     return;
                 }
                 if (event.serverFoundsetSizeChanged ) {
@@ -424,7 +426,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     private scrollToSelection() {
-        if(this.foundset.selectedRowIndexes.length) {
+        if(this.foundset.selectedRowIndexes.length && !this.agGrid.api.isDestroyed()) {
             const rowCount = this.agGrid.api.getDisplayedRowCount();
             if(rowCount > 1) {
                 const selectedIdx = Math.ceil(this.foundset.selectedRowIndexes[0] / this.getNumberOfColumns());
@@ -439,7 +441,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     private calculateNumberOfColumns(): number
     {
         const parentWidth = this.elementRef.nativeElement.offsetWidth;
-        const width = this.containedForm.formWidth;
+        let width = this.containedForm.formWidth;
+        if(this.containedFormMargin) {
+            let left = parseInt(this.containedFormMargin.paddingLeft, 10);
+            let right = parseInt(this.containedFormMargin.paddingRight, 10);
+            width += (left + right);
+        }
         return (this.pageLayout === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
     }
 
@@ -448,19 +455,25 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.useScrolling) {
             this.agGrid.api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
             if(!this.servoyApi.isInAbsoluteLayout()) {
-                this.resizeObserver = new ResizeObserver(() => {
-                    if(this.resizeTimeout) {
-                        clearTimeout(this.resizeTimeout);
-                    }
-                    this.resizeTimeout = setTimeout(() => {
-                        this.numberOfColumns = this.calculateNumberOfColumns();
-                        this.resizeTimeout = null;
-                        this.agGrid.api.refreshServerSide({ purge: true });
-                        this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
-                        setTimeout(() => {
-                            this.scrollToSelection();
+                this.resizeObserver = new ResizeObserver((entries) => {
+                    const newWidth = entries[0].contentRect.width;
+                    if(newWidth !== this.previousWidth) {
+                        if(this.resizeTimeout) {
+                            clearTimeout(this.resizeTimeout);
+                        }
+                        this.resizeTimeout = setTimeout(() => {
+                            if(!this.agGrid.api.isDestroyed()) {
+                                this.numberOfColumns = this.calculateNumberOfColumns();
+                                this.resizeTimeout = null;
+                                this.agGrid.api.refreshServerSide({ purge: true });
+                                this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
+                                setTimeout(() => {
+                                    this.scrollToSelection();
+                                }, 200);
+                            }
                         }, 200);
-                    }, 200);
+                        this.previousWidth = newWidth;
+                    }
                 });
                 this.resizeObserver.observe(this.elementRef.nativeElement);
             }
@@ -493,6 +506,20 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             classes.push(this.styleClass);
         }
         return classes;
+    }
+
+    getRowStyle(includeHeight: boolean): any {
+        const rowStyle = {
+            'width': this.getRowWidth()
+        };
+        if(this.containedFormMargin) {
+            rowStyle['margin-left'] = this.containedFormMargin.paddingLeft;
+            rowStyle['margin-right'] = this.containedFormMargin.paddingRight;
+            rowStyle['margin-top'] = this.containedFormMargin.paddingTop;
+            rowStyle['margin-bottom'] = this.containedFormMargin.paddingBottom;
+        }
+        if(includeHeight) rowStyle['height.px'] = this.getRowHeight();
+        return rowStyle;
     }
 
     getRowHeight(): number {
