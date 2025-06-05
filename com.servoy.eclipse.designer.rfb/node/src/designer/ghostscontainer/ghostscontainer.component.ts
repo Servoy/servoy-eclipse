@@ -377,7 +377,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     onMouseMove(event: MouseEvent) {
-		if (this.draggingGhost?.class.indexOf('inherited_element') >= 0) {
+		const className = this.draggingGhost?.class;
+		if (typeof className === 'string' && className.indexOf('inherited_element') >= 0) {
 			this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
 			return;  // prevent movement for inherited ghosts
 		}
