@@ -35,13 +35,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -141,7 +141,7 @@ public class MarkdownGenerator
 
 	private static final boolean TRACK_REFERENCES = false; //used to turn relative references to full urls toward docs.servoy.com
 	private static final boolean GENERATE_PGADMIN_DOCS = false; //properties from admin page
-	private static final boolean GENERATE_SERVER_DOCS = true; //properties from server plugins
+	private static final boolean GENERATE_SERVER_DOCS = false; //properties from server plugins
 
 	private static final Set<String> IGNORED_UNDOCUMENTED_TYPES = Set.of(
 		"org.mozilla.javascript.IdScriptableObject",
@@ -198,7 +198,41 @@ public class MarkdownGenerator
 	private static final Set<String> doNotStoreAsReadMe = new HashSet<>();
 
 	private static final Set<String> excludedPluginJarNames = Set.of("aibridge.jar");
-	private static final List<String> nonDefaultPluginJarNamesThatWeDoGenerateDocsFor = Arrays.asList("servoy_jasperreports.jar"); // we check that these were found so that we don't forget by mistake to generate the docs for them
+	private static final List<String> nonDefaultPluginJarNamesThatWeDoGenerateDocsFor = Arrays.asList("servoy_jasperreports.jar");
+	private static String gitLocation;
+
+	/**
+	 * Mapping between server plugin class names and their documentation provider class names.
+	 * Key: Full class name of the plugin
+	 * Value: Full class name of the documentation provider
+	 */
+	private static final Map<String, String> PLUGIN_TO_DOCUMENTATION_PROVIDER = new HashMap<>();
+
+	static
+	{
+		// Initialize the plugin to documentation provider mapping
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.clientmanager.ClientManagerServer",
+			"com.servoy.extensions.plugins.clientmanager.ClientManagerProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.mail.MailServer", "com.servoy.extensions.plugins.mail.client.MailProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.maintenance.MaintenanceServer",
+			"com.servoy.extensions.plugins.maintenance.MaintenanceProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.pdf_output.PDFFormsPlugin",
+			"com.servoy.extensions.plugins.pdf_output.PDFFormsPlugin");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.file.FileServerPlugin", "com.servoy.extensions.plugins.file.FileProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.oauth.OAuthPlugin", "com.servoy.extensions.plugins.oauth.OAuthProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.scheduler.SchedulerServerPlugin",
+			"com.servoy.extensions.plugins.scheduler.SchedulerProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.mobile.service.MobileServicePlugin",
+			"com.servoy.extensions.plugins.mobile.service.MobileProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.mobile.MobilePlugin", "com.servoy.extensions.plugins.mobile.MobileMockupProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.headlessclient.HeadlessServerPlugin",
+			"com.servoy.extensions.plugins.headlessclient.HeadlessClientProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.rawSQL.SQLProcessor", "com.servoy.extensions.plugins.rawSQL.RawSQLProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.rest_ws.RestWSPlugin", "com.servoy.extensions.plugins.rest_ws.RestWSPlugin");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.jwt.JWTServer", "com.servoy.extensions.plugins.jwt.client.JWTProvider");
+		PLUGIN_TO_DOCUMENTATION_PROVIDER.put("com.servoy.extensions.plugins.broadcaster.DataNotifyBroadCaster",
+			"com.servoy.extensions.plugins.broadcaster.DataNotifyBroadCaster");
+	}
 
 	static
 	{
@@ -310,7 +344,8 @@ public class MarkdownGenerator
 		String servoyDoc = args[1];
 		String designDoc = args[2];
 		String pluginDir = args[3];
-		summaryMdFilePath = args[4];
+		gitLocation = args[4];
+		summaryMdFilePath = gitLocation + "/gitbook/SUMMARY.md";
 		boolean generateForAI = "forAI".equals(args[5]);
 
 		duplicateTracker.init(); // avoid init prior to analyze params; you may overwrite unintentionaly some usefull content for analyzing
@@ -1093,15 +1128,7 @@ public class MarkdownGenerator
 
 		if (GENERATE_SERVER_DOCS)
 		{
-			try
-			{
-				findServerPlugins(pluginDir);
-			}
-			catch (IOException | TemplateException e)
-			{
-				System.err.println("Error generating server plugin documentation: " + e.getMessage());
-				e.printStackTrace();
-			}
+			findServerPlugins(pluginDir);
 		}
 
 		printSummary();
@@ -1110,17 +1137,15 @@ public class MarkdownGenerator
 	}
 
 	/**
-	 * Scans for server plugins using ServiceLoader and generates Markdown documentation.
+	 * Scans for server plugins using ServiceLoader and finds their source file locations.
 	 * This follows the approach used in WarServerPluginManager for plugin discovery.
 	 *
 	 * @param pluginsDir The directory containing plugin JAR files
-	 * @return True if documentation was successfully generated, false otherwise
-	 * @throws IOException If there's an error writing the documentation file
-	 * @throws TemplateException If there's an error processing the template
 	 */
-	public static boolean findServerPlugins(String pluginsDir) throws IOException, TemplateException
+	public static void findServerPlugins(String pluginsDir)
 	{
 		System.out.println("Scanning for server plugins in: " + pluginsDir);
+		System.out.println("Git location: " + gitLocation);
 
 		try
 		{
@@ -1132,7 +1157,7 @@ public class MarkdownGenerator
 			if (!pluginsSourceDir.exists() || !pluginsSourceDir.isDirectory())
 			{
 				System.err.println("Plugin source directory does not exist or is not a directory: " + pluginsDir);
-				return false;
+				return;
 			}
 
 			// Collect all JAR files recursively
@@ -1156,8 +1181,8 @@ public class MarkdownGenerator
 			// Use ServiceLoader to find all IPlugin implementations
 			ServiceLoader<IPlugin> pluginsLoader = ServiceLoader.load(IPlugin.class, classLoader);
 
-			// Collect server plugins
-			List<Map<String, Object>> pluginDataList = new ArrayList<>();
+			// Counter for found plugins
+			int pluginCount = 0;
 
 			// Iterate through the plugins
 			for (IPlugin plugin : pluginsLoader)
@@ -1169,53 +1194,64 @@ public class MarkdownGenerator
 						IServerPlugin serverPlugin = (IServerPlugin)plugin;
 						String pluginClassName = plugin.getClass().getName();
 
-						// Create a data structure for this plugin
-						Map<String, Object> pluginData = new HashMap<>();
-
 						// Extract just the simple class name (last part after the last dot)
 						String simpleName = pluginClassName.substring(pluginClassName.lastIndexOf('.') + 1);
-						pluginData.put("name", simpleName);
+
+						// Find the source file location
+						String sourceLocation = findSourceFileLocation(gitLocation, pluginClassName);
+
+						// Print plugin name and source location
+						System.out.println("\n----------------------------------------");
+						System.out.println(simpleName + " -> " + (sourceLocation != null ? sourceLocation : "Source file not found"));
 
 						// Get the plugin's properties
 						Map<String, String> properties = serverPlugin.getRequiredPropertyNames();
 						if (properties != null && !properties.isEmpty())
 						{
-							pluginData.put("properties", properties);
-						}
-						else
-						{
-							// Use null instead of empty map to indicate no properties
-							pluginData.put("properties", null);
+							// Find the documentation provider class for this plugin
+							String docProviderClassName = PLUGIN_TO_DOCUMENTATION_PROVIDER.get(pluginClassName);
+							if (docProviderClassName != null)
+							{
+								// Find the source file for the documentation provider
+								String docProviderSourceLocation = findSourceFileLocation(gitLocation, docProviderClassName);
+								if (docProviderSourceLocation != null)
+								{
+									System.out.println("Updating documentation for: " + docProviderClassName);
+									updatePluginDocumentationWithProperties(docProviderSourceLocation, properties);
+								}
+								else
+								{
+									System.out.println("Documentation provider source not found for: " + docProviderClassName);
+								}
+							}
+							else if (sourceLocation != null)
+							{
+								// If the plugin is its own documentation provider
+								System.out.println("Updating documentation for: " + pluginClassName);
+								updatePluginDocumentationWithProperties(sourceLocation, properties);
+							}
 						}
 
-						// Add this plugin's data to our list
-						pluginDataList.add(pluginData);
+						pluginCount++;
 					}
 				}
 				catch (Exception e)
 				{
 					System.err.println("Error processing plugin: " + e.getMessage());
+					e.printStackTrace();
 				}
 			}
 
-			System.out.println("Found " + pluginDataList.size() + " server plugins");
-
-			// Generate documentation if we found any plugins
-			if (!pluginDataList.isEmpty())
-			{
-				generateServerPluginDocumentation(pluginDataList);
-			}
+			System.out.println("\n----------------------------------------");
+			System.out.println("Found " + pluginCount + " server plugins");
 
 			// Close the classloader when done
 			classLoader.close();
-
-			return !pluginDataList.isEmpty();
 		}
 		catch (Exception e)
 		{
 			System.err.println("Error scanning for plugins: " + e.getMessage());
 			e.printStackTrace();
-			return false;
 		}
 		finally
 		{
@@ -1224,47 +1260,149 @@ public class MarkdownGenerator
 	}
 
 	/**
-	 * Generates Markdown documentation for server plugins using the server_plugins_template.md template.
+	 * Updates the class-level documentation of a plugin provider class to include its properties.
 	 *
-	 * @param pluginDataList List of plugin data maps containing name, description, and properties
-	 * @throws IOException If there's an error writing the documentation file
-	 * @throws TemplateException If there's an error processing the template
+	 * @param sourceFilePath The path to the source file
+	 * @param properties The properties map with keys and descriptions
 	 */
-	private static void generateServerPluginDocumentation(List<Map<String, Object>> pluginDataList) throws IOException, TemplateException
+	private static void updatePluginDocumentationWithProperties(String sourceFilePath, Map<String, String> properties)
 	{
-		System.out.println("Generating server plugin documentation");
-
-		// Process the plugin data to handle empty properties and add separators
-		for (Map<String, Object> pluginData : pluginDataList)
+		if (!GENERATE_SERVER_DOCS || properties == null || properties.isEmpty())
 		{
-			// If properties is null, replace with empty map so the template can still process it
-			if (pluginData.get("properties") == null)
+			return;
+		}
+
+		try
+		{
+			// Read the source file
+			String content = new String(Files.readAllBytes(Paths.get(sourceFilePath)), StandardCharsets.UTF_8);
+
+			// Find the class-level JavaDoc comment
+			Pattern pattern = Pattern.compile("/\\*\\*(.*?)\\*/", Pattern.DOTALL);
+			Matcher matcher = pattern.matcher(content);
+
+			if (matcher.find())
 			{
-				pluginData.put("properties", Collections.emptyMap());
+				String javadoc = matcher.group(1);
+
+				// Check if the properties section already exists
+				Pattern propertiesSectionPattern = Pattern.compile("<p><b>Configuration Properties:</b></p>(.*?)(\\n\\s*\\*\\s*@|\\n\\s*\\*\\s*\\*/)",
+					Pattern.DOTALL);
+				Matcher propertiesSectionMatcher = propertiesSectionPattern.matcher(javadoc);
+
+				// Build the properties section
+				StringBuilder propertiesSection = new StringBuilder();
+				propertiesSection.append("\n *\n * <p><b>Configuration Properties:</b></p>\n *\n * <ul>");
+				for (Map.Entry<String, String> entry : properties.entrySet())
+				{
+					propertiesSection.append("\n * <li><code>").append(entry.getKey()).append("</code>: ").append(entry.getValue()).append("</li>");
+				}
+				propertiesSection.append("\n * </ul>\n *");
+
+				String updatedJavadoc;
+
+				// First, remove any existing properties section
+				String cleanedJavadoc = javadoc;
+				if (propertiesSectionMatcher.find())
+				{
+					// Get the content before and after the properties section
+					String beforeSection = javadoc.substring(0, propertiesSectionMatcher.start());
+					String afterSection = javadoc.substring(propertiesSectionMatcher.end() - propertiesSectionMatcher.group(2).length());
+
+					// Normalize whitespace - remove excess empty lines
+					beforeSection = beforeSection.replaceAll("(\\n\\s*\\*\\s*)(\\n\\s*\\*\\s*)+$", "$1");
+
+					// Remove the existing properties section with normalized whitespace
+					cleanedJavadoc = beforeSection + afterSection;
+				}
+
+				// Now find where to insert the properties section
+
+				// Look for @author tags
+				Pattern authorPattern = Pattern.compile("\\n\\s*\\*\\s*@author");
+				Matcher authorMatcher = authorPattern.matcher(cleanedJavadoc);
+
+				if (authorMatcher.find())
+				{
+					// Insert before the first @author tag
+					int insertPosition = authorMatcher.start();
+					updatedJavadoc = cleanedJavadoc.substring(0, insertPosition) +
+						propertiesSection.toString() +
+						cleanedJavadoc.substring(insertPosition);
+				}
+				else
+				{
+					// Look for any other JavaDoc tags
+					Pattern anyTagPattern = Pattern.compile("\\n\\s*\\*\\s*@");
+					Matcher anyTagMatcher = anyTagPattern.matcher(cleanedJavadoc);
+
+					if (anyTagMatcher.find())
+					{
+						// Insert before the first tag found
+						int insertPosition = anyTagMatcher.start();
+						updatedJavadoc = cleanedJavadoc.substring(0, insertPosition) +
+							propertiesSection.toString() +
+							cleanedJavadoc.substring(insertPosition);
+					}
+					else
+					{
+						// No tags found, append at the end of the comment
+						updatedJavadoc = cleanedJavadoc + propertiesSection.toString();
+					}
+				}
+
+				// Replace the JavaDoc in the source file
+				String updatedContent = content.substring(0, matcher.start()) +
+					"/**" + updatedJavadoc + "*/" +
+					content.substring(matcher.end());
+
+				// Write the updated content back to the file
+				Files.write(Paths.get(sourceFilePath), updatedContent.getBytes(StandardCharsets.UTF_8));
+				System.out.println("Updated documentation with properties in: " + sourceFilePath);
+			}
+			else
+			{
+				System.out.println("Could not find class-level JavaDoc in: " + sourceFilePath);
 			}
 		}
-
-		// Create the root data structure for the template
-		Map<String, Object> root = new HashMap<>();
-		root.put("plugins", pluginDataList);
-
-		// Get the custom template for server plugins
-		Template template = cfg.getTemplate("server_plugins_template.md");
-
-		// Determine output directory and ensure it exists
-		String outputDir = "ng_generated/reference/servoycore/server-plugins";
-		File dir = new File(outputDir);
-		if (!dir.exists())
+		catch (IOException e)
 		{
-			dir.mkdirs();
+			System.err.println("Error updating documentation in file: " + sourceFilePath);
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Finds the source file location for a plugin class.
+	 *
+	 * @param gitLocation The git repository root location
+	 * @param pluginClassName The fully qualified class name of the plugin
+	 * @return The source file location or null if not found
+	 */
+	private static String findSourceFileLocation(String gitLocation, String pluginClassName)
+	{
+		// Convert the class name to a path
+		String classPath = pluginClassName.replace('.', File.separatorChar) + ".java";
+
+		// Check in servoy-extensions (with intermediary com.servoy.extensions directory)
+		String extensionsPath = gitLocation + File.separator + "servoy-extensions" + File.separator + "com.servoy.extensions" + File.separator + "src" +
+			File.separator + classPath;
+		File extensionsFile = new File(extensionsPath);
+		if (extensionsFile.exists())
+		{
+			return extensionsPath;
 		}
 
-		// Write the documentation file
-		try (FileWriter writer = new FileWriter(new File(dir, "README.md")))
+		// Check in servoy-plugins/j2db_plugins
+		String pluginsPath = gitLocation + File.separator + "servoy-plugins" + File.separator + "j2db_plugins" + File.separator + "src" + File.separator +
+			classPath;
+		File pluginsFile = new File(pluginsPath);
+		if (pluginsFile.exists())
 		{
-			template.process(root, writer);
-			System.out.println("Server plugin documentation generated at: " + new File(dir, "README.md").getAbsolutePath());
+			return pluginsPath;
 		}
+
+		return null;
 	}
 
 	private static void loadSummary()
