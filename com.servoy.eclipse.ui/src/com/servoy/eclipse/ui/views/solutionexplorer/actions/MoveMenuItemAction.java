@@ -31,7 +31,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.editors.MenuEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -117,7 +116,6 @@ public class MoveMenuItemAction extends Action implements ISelectionChangedListe
 					try
 					{
 						servoyProject.saveEditingSolutionNodes(new IPersist[] { editingMenuItem.getAncestor(IRepository.MENUS) }, true);
-						MenuEditor.refreshEditor();
 					}
 					catch (Exception e)
 					{

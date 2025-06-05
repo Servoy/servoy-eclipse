@@ -50,7 +50,6 @@ import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.editors.MenuEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -178,7 +177,6 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 							if (editingNode instanceof MenuItem)
 							{
 								editingNode = editingNode.getAncestor(IRepository.MENUS);
-								MenuEditor.refreshEditor();
 							}
 							servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
 						}
