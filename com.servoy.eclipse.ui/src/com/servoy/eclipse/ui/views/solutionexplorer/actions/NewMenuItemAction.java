@@ -35,7 +35,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.editors.MenuEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -107,13 +106,12 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 			String name = askMenuItemName(viewer.getViewSite().getShell(), servoyModel, servoyProject, parent);
 			if (name != null)
 			{
+				IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 				try
 				{
-					MenuItem mn = parent instanceof Menu ? ((Menu)parent).createNewMenuItem(name)
-						: ((MenuItem)parent).createNewMenuItem(name);
+					MenuItem mn = parent instanceof Menu ? ((Menu)parent).createNewMenuItem(validator, name)
+						: ((MenuItem)parent).createNewMenuItem(validator, name);
 					servoyProject.saveEditingSolutionNodes(new IPersist[] { mn.getAncestor(IRepository.MENUS) }, true);
-					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(true, mn, false);
-					MenuEditor.refreshEditor();
 				}
 				catch (Exception e)
 				{
