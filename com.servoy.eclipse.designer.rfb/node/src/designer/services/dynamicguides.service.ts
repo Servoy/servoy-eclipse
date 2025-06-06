@@ -64,7 +64,6 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			if (this.editorSession.getSelection().length == 1) {
 				this.element = this.editorContentService.getContentElementById(this.editorSession.getSelection()[0]);
 				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
-				if (!this.element) return;
 			}
 			let parent = contentElements.find(e => e.classList.contains('svy-formcomponent'));
             this.uuid = this.element?.getAttribute('svy-id');

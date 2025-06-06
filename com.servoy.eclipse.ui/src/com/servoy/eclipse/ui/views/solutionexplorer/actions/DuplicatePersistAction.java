@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -283,6 +285,20 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				{
 					IPersist duplicate = PersistCloner.intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator,
 						true);
+					IWorkspaceRoot root = ServoyModel.getWorkspace().getRoot();
+					Pair<String, String> duplicatePath = SolutionSerializer.getFilePath(duplicate, false);
+					if (persist instanceof Form frm)
+					{
+						Pair<String, String> persitPath = SolutionSerializer.getFilePath(frm, false);
+						IFile lessFile = root.getFile(new Path(persitPath.getLeft() + frm.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
+						if (lessFile.exists())
+						{
+							IFile duplicateLessFile = root
+								.getFile(new Path(duplicatePath.getLeft() + ((Form)duplicate).getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
+							duplicateLessFile.create(lessFile.getContents(), true, null);
+						}
+					}
+
 					String parentWorkingSet = location.getWorkingSetName();
 					if (parentWorkingSet != null)
 					{
@@ -290,15 +306,14 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 						if (ws != null)
 						{
 							List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
-							Pair<String, String> formFilePath = SolutionSerializer.getFilePath(duplicate, false);
-							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+							IFile file = root.getFile(new Path(duplicatePath.getLeft() + duplicatePath.getRight()));
 							files.add(file);
 							ws.setElements(files.toArray(new IAdaptable[0]));
 						}
 					}
 					EditorUtil.openPersistEditor(duplicate);
 				}
-				catch (RepositoryException e)
+				catch (RepositoryException | CoreException e)
 				{
 					ServoyLog.logError(e);
 					MessageDialog.openError(shell, "Cannot duplicate form",

@@ -590,7 +590,7 @@ export class FormService {
         
             if (!styleElement) {
                 styleElement = this.windowRefService.nativeWindow.document.createElement('style');
-                styleElement.nonce = this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes['ngCspNonce'].value;
+                styleElement.nonce = this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes['ngCspNonce']?.value;
                 styleElement.id = styleElementId;
                 this.windowRefService.nativeWindow.document.head.appendChild(styleElement);
             }

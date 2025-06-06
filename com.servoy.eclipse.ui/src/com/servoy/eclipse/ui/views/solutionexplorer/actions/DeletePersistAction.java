@@ -50,7 +50,6 @@ import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.editors.MenuEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -152,7 +151,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			if (toDelete.size() > 0)
 			{
-				List<IPersist> formsToDelete = new ArrayList<IPersist>();
+				List<Form> formsToDelete = new ArrayList<>();
 				boolean isTemplateChange = false;
 				for (IPersist persist : refItems)
 				{
@@ -161,10 +160,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 					if (rootObject instanceof Solution)
 					{
-						if (persist instanceof Form)
+						if (persist instanceof Form frm)
 						{
 							//make a list of forms to delete them all at once using Delete Resources Wizard
-							formsToDelete.add(persist);
+							formsToDelete.add(frm);
 							closeEditor = false;
 						}
 						else
@@ -178,7 +177,6 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 							if (editingNode instanceof MenuItem)
 							{
 								editingNode = editingNode.getAncestor(IRepository.MENUS);
-								MenuEditor.refreshEditor();
 							}
 							servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
 						}
@@ -227,10 +225,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 				if (!formsToDelete.isEmpty())
 				{
 					EclipseRepository rep = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
-					HashMap<IPersist, List<String>> persists = rep.getAllFilesForPersists(formsToDelete);
+					HashMap<Form, List<String>> persists = rep.getAllFilesForPersists(formsToDelete);
 
-					Set<IPersist> keys = persists.keySet();
-					Iterator it = keys.iterator();
+					Set<Form> keys = persists.keySet();
+					Iterator<Form> it = keys.iterator();
 					ArrayList<IFile> resources = new ArrayList<IFile>();
 					while (it.hasNext())
 					{

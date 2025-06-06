@@ -158,7 +158,7 @@ public class MenuEditor extends PersistEditor
 	private Composite parent;
 	private MenuItem selectedMenuItem;
 	private final List<Consumer<MenuItem>> selectedMenuItemCallbacks = new ArrayList<Consumer<MenuItem>>();
-	private static TreeViewer menuViewer;
+	private TreeViewer menuViewer;
 	private boolean initializingData = false;
 	private Group customPropertiesGroup;
 
@@ -901,7 +901,7 @@ public class MenuEditor extends PersistEditor
 				false);
 		}
 
-		sashForm.setWeights(new int[] { 20, 80 });
+		sashForm.setWeights(new int[] { 25, 70 });
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		parent.requestLayout();
 	}
@@ -1341,14 +1341,5 @@ public class MenuEditor extends PersistEditor
 
 		return null;
 
-	}
-
-	/**
-	 * @param mn
-	 * @param b
-	 */
-	public static void refreshEditor()
-	{
-		menuViewer.refresh();
 	}
 }

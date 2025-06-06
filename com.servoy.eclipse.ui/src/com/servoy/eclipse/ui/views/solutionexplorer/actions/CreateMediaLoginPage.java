@@ -45,6 +45,6 @@ public class CreateMediaLoginPage extends CreateMediaFileAction
 	@Override
 	protected InputStream getContentInputStream()
 	{
-		return StatelessLoginHandler.class.getResourceAsStream("login.html");
+		return StatelessLoginHandler.class.getResourceAsStream("auth/login.html");
 	}
 }

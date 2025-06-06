@@ -1837,6 +1837,45 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 	}
 
+	@Override
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID formUUID, UUID elementUUID, String solutionName)
+		throws ServoyException, RemoteException
+	{
+
+		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUUID == null || (!isOperational()))
+		{
+			ServoyLog.logError("Invalid parameters received, or manager is not operational - setFormSecurityAccess(...)", null);
+			return;
+		}
+
+		checkForAdminUser(clientId, null);
+
+		GroupSecurityInfo gsi = getGroupSecurityInfo(groupName);
+
+		if (gsi != null)
+		{
+			// now we must find the form from the UUID
+			Form form = getForm(formUUID);
+
+			if (form != null)
+			{
+				addFormSecurityAccess(groupName, accessMask, elementUUID, form.getUUID());
+				if (writeMode == WRITE_MODE_AUTOMATIC)
+				{
+					writeSecurityInfo(form, false);
+				}
+			}
+			else
+			{
+				ServoyLog.logWarning("setFormSecurityAccess(...) cannot find element with given UUID or not form element!", null);
+			}
+		}
+		else
+		{
+			ServoyLog.logWarning("setFormSecurityAccess(...) cannot find the group with the given name!", null);
+		}
+	}
+
 	public void addFormSecurityAccess(String groupName, Integer accessMask, UUID elementUUID, UUID formUuid)
 	{
 		GroupSecurityInfo gsi = getGroupSecurityInfo(groupName);

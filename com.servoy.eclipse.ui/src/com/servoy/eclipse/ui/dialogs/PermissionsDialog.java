@@ -33,8 +33,12 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -61,6 +65,7 @@ public class PermissionsDialog extends Dialog
 
 	private final Object value;
 	private PermissionsModel model;
+	private TableViewer tableViewer;
 
 	public PermissionsDialog(Shell shell, Object value)
 	{
@@ -76,6 +81,33 @@ public class PermissionsDialog extends Dialog
 
 		Composite composite = (Composite)super.createDialogArea(parent);
 
+		Composite buttonsContainer = new Composite(composite, SWT.NONE);
+		buttonsContainer.setLayout(new GridLayout(2, false));
+
+		Button btnSelectAll = new Button(buttonsContainer, SWT.NONE);
+		btnSelectAll.setText("Select all permissions");
+		btnSelectAll.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(final SelectionEvent e)
+			{
+				model.changeAll(true);
+				tableViewer.refresh();
+			}
+		});
+
+		Button btnDeselectAll = new Button(buttonsContainer, SWT.NONE);
+		btnDeselectAll.setText("Deselect all permissions");
+		btnDeselectAll.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(final SelectionEvent e)
+			{
+				model.changeAll(false);
+				tableViewer.refresh();
+			}
+		});
+
 		Composite tableContainer = new Composite(composite, SWT.NONE);
 
 		GridData gd = new GridData();
@@ -85,7 +117,7 @@ public class PermissionsDialog extends Dialog
 		gd.grabExcessVerticalSpace = true;
 		tableContainer.setLayoutData(gd);
 
-		TableViewer tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+		tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		Table columnTable = tableViewer.getTable();
 		columnTable.setLinesVisible(true);
 		columnTable.setHeaderVisible(true);
@@ -199,11 +231,29 @@ public class PermissionsDialog extends Dialog
 		public JSONObject getValue()
 		{
 			JSONObject json = new JSONObject();
+			boolean defaultValue = true;
 			for (Pair<String, Integer> pair : tableColumns)
 			{
-				json.put(pair.getLeft(), pair.getRight());
+				if (pair.getRight() > 0)
+				{
+					// 0 is default value for custom json, do not write it
+					json.put(pair.getLeft(), pair.getRight());
+				}
+				defaultValue = defaultValue && (pair.getRight() == (MenuItem.VIEWABLE + MenuItem.ENABLED));
+			}
+			if (defaultValue)
+			{
+				return null;
 			}
 			return json;
+		}
+
+		public void changeAll(boolean select)
+		{
+			for (Pair<String, Integer> pair : tableColumns)
+			{
+				pair.setRight(select ? MenuItem.VIEWABLE + MenuItem.ENABLED : 0);
+			}
 		}
 	}
 
