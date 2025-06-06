@@ -227,6 +227,7 @@ import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.querybuilder.impl.QBAggregates;
+import com.servoy.j2db.querybuilder.impl.QBArrayColumn;
 import com.servoy.j2db.querybuilder.impl.QBColumn;
 import com.servoy.j2db.querybuilder.impl.QBColumns;
 import com.servoy.j2db.querybuilder.impl.QBCondition;
@@ -522,6 +523,7 @@ public class TypeCreator extends TypeCache
 		addQueryBuilderScopeType(QBNumberColumn.class);
 		addQueryBuilderScopeType(QBMediaColumn.class);
 		addQueryBuilderScopeType(QBTextColumn.class);
+		addQueryBuilderScopeType(QBArrayColumn.class);
 		addQueryBuilderScopeType(QBCondition.class);
 		addQueryBuilderScopeType(QBFactory.class);
 		addQueryBuilderScopeType(QBGroupBy.class);
@@ -3817,43 +3819,35 @@ public class TypeCreator extends TypeCache
 			}
 			if (table != null)
 			{
-				addDataProviders(context, table.getColumns().iterator(), type.getMembers(), table.getDataSource());
+				addColumns(context, table.getColumns(), type.getMembers(), table.getDataSource());
 			}
 
 			return type;
 		}
 
-		private void addDataProviders(String context, Iterator< ? extends IDataProvider> dataproviders, EList<Member> members, String dataSource)
+		private void addColumns(String context, Collection< ? extends Column> columns, EList<Member> members, String dataSource)
 		{
-			while (dataproviders.hasNext())
+			for (Column column : columns)
 			{
-				IDataProvider provider = dataproviders.next();
-				if (provider.hasFlag(IBaseColumn.EXCLUDED_COLUMN))
+				if (column.hasFlag(IBaseColumn.EXCLUDED_COLUMN))
 				{
 					continue;
 				}
 
 				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-				property.setName(provider.getDataProviderID());
-				property.setAttribute(RESOURCE, provider);
+				property.setName(column.getDataProviderID());
+				property.setAttribute(RESOURCE, column);
 				property.setVisible(true);
-				property.setType(getTypeRef(context, determineColumnClass(provider).getSimpleName() + '<' + dataSource + '>'));
-				ImageDescriptor image = COLUMN_IMAGE;
-				String description = "Column";
-				if (provider instanceof ScriptCalculation scriptCalculation)
-				{
-					image = COLUMN_CALC_IMAGE;
-					description = "Calculation (" + scriptCalculation.getRootObject().getName() + ")";
-				}
-				property.setAttribute(IMAGE_DESCRIPTOR, image);
-				property.setDescription(description.intern());
+				property.setType(getTypeRef(context, determineColumnClass(column).getSimpleName() + '<' + dataSource + '>'));
+				property.setAttribute(IMAGE_DESCRIPTOR, COLUMN_IMAGE);
+				property.setDescription("Column");
 				members.add(property);
 			}
 		}
 
-		private static Class< ? > determineColumnClass(IDataProvider provider)
+		private static Class< ? > determineColumnClass(Column column)
 		{
-			switch (provider.getDataProviderType())
+			switch (column.getDataProviderType())
 			{
 				case IColumnTypeConstants.DATETIME :
 					return QBDatetimeColumn.class;
@@ -3866,6 +3860,10 @@ public class TypeCreator extends TypeCache
 				case IColumnTypeConstants.MEDIA :
 					return QBMediaColumn.class;
 				default :
+					if (column.getColumnType().isArray())
+					{
+						return QBArrayColumn.class;
+					}
 					return QBColumn.class;
 			}
 		}
