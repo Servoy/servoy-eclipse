@@ -521,6 +521,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private MovePersistAction movePersistAction;
 	private DuplicatePersistAction duplicatePersistAction;
+	private NewBackwardsRelationAction newBackwardsRelationAction;
 
 	private IAction selectAllActionInTree;
 
@@ -2990,6 +2991,7 @@ public class SolutionExplorerView extends ViewPart
 		if (renameMediaAction.isEnabled()) manager.add(renameMediaAction);
 		if (movePersistAction.isEnabled()) manager.add(movePersistAction);
 		if (duplicatePersistAction.isEnabled()) manager.add(duplicatePersistAction);
+		if (newBackwardsRelationAction.isEnabled()) manager.add(newBackwardsRelationAction);
 		if (deleteActionInList.isEnabled()) manager.add(deleteActionInList);
 		if (hideUnhideTablesAction.isEnabled()) manager.add(hideUnhideTablesAction);
 		if (synchronizeTableDataAction.isEnabled()) manager.add(synchronizeTableDataAction);
@@ -3167,6 +3169,7 @@ public class SolutionExplorerView extends ViewPart
 
 		moveFormAction = new MovePersistAction(shell);
 		duplicateFormAction = new DuplicatePersistAction(shell);
+		newBackwardsRelationAction = new NewBackwardsRelationAction();
 		changeResourcesProjectAction = new ChangeResourcesProjectAction(shell);
 		removeSolutionProtectionAction = new RemoveSolutionProtectionAction(shell);
 		reloadTablesOfServerAction = new ReloadTablesAction();
@@ -3572,6 +3575,7 @@ public class SolutionExplorerView extends ViewPart
 		addListSelectionChangedListener(searchListAction);
 		addListSelectionChangedListener(movePersistAction);
 		addListSelectionChangedListener(duplicatePersistAction);
+		addListSelectionChangedListener(newBackwardsRelationAction);
 		addListSelectionChangedListener(copyTable);
 		addListSelectionChangedListener(overrideMethod);
 		addListSelectionChangedListener(openSqlEditorAction);
