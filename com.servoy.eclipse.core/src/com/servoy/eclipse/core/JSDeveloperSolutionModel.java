@@ -459,7 +459,21 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 									throw new IllegalArgumentException("Solution name should not be specified for existing persists. The object '" + objName +
 										"' already exists in solution '" + solution.getName() + "'");
 								}
+								Iterator<Media> medias = solutionCopy.getMedias(false);
 								solutionCopy = eclipseRepository.createSolutionCopy(solution);
+								if (obj instanceof JSMedia)
+								{
+									Iterator<Media> oldMedias = solution.getMedias(false);
+									while (oldMedias.hasNext())
+									{
+										eclipseRepository.copyPersistIntoSolution(oldMedias.next(), solutionCopy, false);
+									}
+									while (medias.hasNext())
+									{
+										eclipseRepository.copyPersistIntoSolution(medias.next(), solutionCopy, false);
+									}
+
+								}
 							}
 						}
 
@@ -467,7 +481,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 						checkParent(saveObj);
 
 						eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(saveObj));
-						SolutionSerializer.writePersist(saveObj, wfa, ApplicationServerRegistry.get().getDeveloperRepository(), !(saveObj instanceof Media),
+						SolutionSerializer.writePersist(saveObj, wfa, ApplicationServerRegistry.get().getDeveloperRepository(), true,
 							false, true);
 					}
 					catch (RepositoryException | SQLException e)
@@ -489,7 +503,8 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 						Solution solution = servoyProject.getSolution();
 						if (saveObj instanceof Form && solution.getForm(saveObj.getName()) != null ||
 							saveObj instanceof ValueList && solution.getValueList(saveObj.getName()) != null ||
-							saveObj instanceof Relation && solution.getRelation(saveObj.getName()) != null)
+							saveObj instanceof Relation && solution.getRelation(saveObj.getName()) != null ||
+							saveObj instanceof Media && solution.getMedia(saveObj.getName()) != null)
 						{
 							return solution;
 						}
