@@ -84,6 +84,9 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public getLocaleObject(): Locale {
         return this.locale? this.locale: {language:'en', country: 'US', full: 'en-US'};
     }
+    public getAGGridLocale(): { [key: string]: string; } {
+        return null;
+    }
     public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
         const ev = new JSEvent();
         ev.eventType = eventType;

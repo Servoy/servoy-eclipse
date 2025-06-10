@@ -34,6 +34,10 @@ export abstract class ServoyPublicService {
      */
     public abstract getLocaleObject(): Locale;
     /**
+     * Returns ag grid's locale map for the current locale
+     */
+    public abstract getAGGridLocale(): { [key: string]: string; };
+    /**
      * Internal api, directives can use this to call server side registered services. (this is internal Servoy services).
      * Do not try to use this instead of callServiceServerSideApi() - which has to be used for calling server side JS scripting of custom services from packages.
      */

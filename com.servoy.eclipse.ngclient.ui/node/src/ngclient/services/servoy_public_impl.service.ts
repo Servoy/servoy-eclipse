@@ -54,6 +54,10 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         return this.localeService.getLocale();
     }
 
+    getAGGridLocale(): { [key: string]: string; } {
+        return this.localeService.getAgGridLocale();
+    }
+
     getLocaleObject(): Locale {
         return this.sabloService.getLocale();
     }

@@ -55,6 +55,7 @@
     "@servoy/public": "file:dist-public",
     "ag-grid-angular": "33.3.0",
     "ag-grid-enterprise": "33.3.0",
+    "@ag-grid-community/locale": "~33.3.0",
     "bignumber.js": "^9.3.0",
     "core-js": "3.42.0",
     "custom-event-polyfill": "1.0.7",

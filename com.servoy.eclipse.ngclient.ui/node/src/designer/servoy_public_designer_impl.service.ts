@@ -47,6 +47,9 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
     getLocaleObject(): Locale {
         return this.localeService.getLocaleObject();
     }
+    getAGGridLocale(): { [key: string]: string; } {
+        return this.localeService.getAgGridLocale();
+    }
     createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
         return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement);
     }
