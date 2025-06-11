@@ -171,7 +171,13 @@ export class FileUploadWindowComponent {
             formData.append('uploads[]', file, file.name);
         }
 
-        this.http.post(this.url, formData, { reportProgress: true, observe: 'events' })
+        const headers = this.maxUploadFileSize >= 0 ? { 'X-Max-Upload-Size': this.maxUploadFileSize.toString() } : {};
+
+        this.http.post(this.url, formData, {
+            headers,
+            reportProgress: true,
+            observe: 'events'
+        })
             .subscribe(
                 data => {
                     const r: any = data as any;
