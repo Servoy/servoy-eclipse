@@ -114,6 +114,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.DefaultComponentPropertiesProvider;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -218,7 +219,7 @@ public class ElementFactory
 	public static void placeElementOnTop(IFormElement element)
 	{
 		int maxFormIndex = 0;
-		Iterator<IPersist> bros = ((IPersist)element).getParent().getAllObjects();
+		Iterator<IPersist> bros = element.getParent().getAllObjects();
 		while (bros.hasNext())
 		{
 			IPersist bro = bros.next();
@@ -361,10 +362,10 @@ public class ElementFactory
 
 	private static void updateName(ISupportChilds parent, WebComponent oWC, WebComponent cWC, IValidateName validator) throws RepositoryException
 	{
-		String name = createUniqueName(parent, IRepository.ELEMENTS, ((ISupportUpdateableName)oWC).getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR);
+		String name = createUniqueName(parent, IRepository.ELEMENTS, oWC.getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR);
 		if (name != null)
 		{
-			((ISupportUpdateableName)cWC).updateName(validator, name);
+			cWC.updateName(validator, name);
 			cWC.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
 		}
 	}
@@ -586,10 +587,8 @@ public class ElementFactory
 		{
 			IDataProvider dp = pair.getLeft();
 			Object o = dp;
-			if (o instanceof IDataProvider)
+			if (o instanceof IDataProvider dataProvider)
 			{
-				IDataProvider dataProvider = (IDataProvider)o;
-
 				int fieldSpacing = configuration.getFieldSpacing() >= 0 ? configuration.getFieldSpacing() : 10;
 				if (loc == null)
 				{
@@ -972,6 +971,11 @@ public class ElementFactory
 			Collection<PropertyDescription> properties = wos.getProperties(DataproviderPropertyType.INSTANCE);
 			for (PropertyDescription pd : properties)
 			{
+				// skip the enabled and visible data providers when creating the component from newForm wizard
+				if (pd.getName().equals(DefaultComponentPropertiesProvider.ENABLED_DATAPROVIDER_NAME) ||
+					pd.getName().equals(DefaultComponentPropertiesProvider.VISIBLE_DATAPROVIDER_NAME))
+					continue;
+				// set the data provider id for the component
 				webComp.setProperty(pd.getName(), dp.getDataProviderID());
 			}
 			return webComp;
