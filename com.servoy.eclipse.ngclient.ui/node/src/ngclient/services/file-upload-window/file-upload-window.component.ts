@@ -137,9 +137,6 @@ export class FileUploadWindowComponent {
             // Update filter without the maxUploadFileSize entry
             this.filter = cleanedFilter.join(',');
         }
-        
-		console.log('Max upload file size set to:', this.maxUploadFileSize, 'KB');
-		console.log('Accept filter:', this.filter);
 		
         return this.filter;
     }
