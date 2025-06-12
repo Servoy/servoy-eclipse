@@ -801,6 +801,12 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		return Collections.emptySet();
 	}
 
+	@Override
+	public Procedure getProcedure(String name, Object[] args) throws RepositoryException, RemoteException
+	{
+		return null;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
