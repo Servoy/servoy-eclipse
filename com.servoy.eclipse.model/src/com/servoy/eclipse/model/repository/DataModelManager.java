@@ -974,8 +974,8 @@ public class DataModelManager implements IServerInfoManager
 			obj.putOpt(ColumnInfoDef.DESCRIPTION, cid.description);
 			obj.putOpt(ColumnInfoDef.FOREIGN_TYPE, cid.foreignType);
 			obj.putOpt(ColumnInfoDef.CONVERTER_NAME, cid.converterName);
-			obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES, cid.converterProperties);
-			obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES, cid.validatorProperties);
+			obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES, cid.converterProperties != null ? new ServoyJSONObject(cid.converterProperties, false) : null);
+			obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES, cid.validatorProperties != null ? new ServoyJSONObject(cid.validatorProperties, false) : null);
 			obj.putOpt(ColumnInfoDef.VALIDATOR_NAME, cid.validatorName);
 			obj.putOpt(ColumnInfoDef.DEFAULT_FORMAT, cid.defaultFormat);
 			obj.putOpt(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES, cid.elementTemplateProperties);
@@ -992,7 +992,7 @@ public class DataModelManager implements IServerInfoManager
 			carray.put(obj);
 		}
 		tobj.put(TableDef.PROP_COLUMNS, carray);
-		return tobj.toString(true);
+		return tobj.toString(false);
 	}
 
 	public static String getDBIFileName(String tableName)

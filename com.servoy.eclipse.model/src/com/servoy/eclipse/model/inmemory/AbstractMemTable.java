@@ -361,7 +361,7 @@ public abstract class AbstractMemTable extends AbstractTable
 		try
 		{
 			TableNode tableNode = memServer.getServoyProject().getEditingSolution().getOrCreateTableNode(getDataSource(getName()));
-			tableNode.setColumns(new ServoyJSONObject(contents, true));
+			tableNode.setColumns(new ServoyJSONObject(contents, false));
 			tableNode.setTable(this);
 			setExistInDB(true);
 		}

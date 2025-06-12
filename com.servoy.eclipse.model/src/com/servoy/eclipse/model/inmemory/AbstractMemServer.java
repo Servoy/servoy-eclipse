@@ -435,10 +435,10 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 					is.close();
 					if (tn.getColumns() != null && file.getName().equals(t.getName() + ".tbl"))
 					{
-						ServoyJSONObject json = new ServoyJSONObject(content, true);
+						ServoyJSONObject json = new ServoyJSONObject(content, false);
 						json.getJSONObject("columns").put("name", newName);
 						json.put("dataSource", newTable.getDataSource());
-						content = json.toString(true);
+						content = json.toString(false);
 					}
 
 					IFile newFile = folder.getFile(file.getName().replace(t.getName(), newName));
@@ -1271,7 +1271,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 			JSONObject driveColumns = (JSONObject)next.getPropertiesMap().get(IContentSpecConstants.PROPERTY_COLUMNS);
 			DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
 			String mem = dmm.serializeTable(abstractMemTable, false);
-			ServoyJSONObject memoryVersion = new ServoyJSONObject(mem, true);
+			ServoyJSONObject memoryVersion = new ServoyJSONObject(mem, false, false, true);
 			return !memoryVersion.equals(driveColumns);
 		}
 		else return true;

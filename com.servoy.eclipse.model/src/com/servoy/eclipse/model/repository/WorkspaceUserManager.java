@@ -136,7 +136,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		public ServoyJSONObject toJSON() throws JSONException
 		{
-			ServoyJSONObject obj = new ServoyJSONObject(true, false);
+			ServoyJSONObject obj = new ServoyJSONObject(false, true);
 			obj.put(NAME, name);
 			obj.put(PASSWORD_HASH, passwordHash);
 			obj.put(USER_UID, userUid);
@@ -596,7 +596,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			}
 		}
 		obj.put(JSON_USERGROUPS, jsonUsersForGroups);
-		return obj.toString(true);
+		return obj.toString(false);
 	}
 
 	/**
@@ -814,7 +814,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				obj.put(groupName, jinfos);
 			}
 		}
-		return obj.toString(true);
+		return obj.toString(false);
 	}
 
 	protected String serializeSecurityInfo(Form f) throws JSONException
@@ -892,7 +892,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		throws JSONException
 	{
 		// read JSON contents into the objects above (that can be easily altered)
-		ServoyJSONObject oldContent = new ServoyJSONObject(jsonContent, true);
+		ServoyJSONObject oldContent = new ServoyJSONObject(jsonContent, false);
 		if (oldContent.length() == 0) return; // allow empty content
 
 		JSONArray oldGroups = oldContent.getJSONArray(WorkspaceUserManager.JSON_GROUPS);
@@ -1180,7 +1180,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public static Map<String, List<SecurityInfo>> deserializeSecurityPermissionInfo(String jsonContent) throws JSONException
 	{
 		Map<String, List<SecurityInfo>> access = new HashMap<String, List<SecurityInfo>>();
-		ServoyJSONObject obj = new ServoyJSONObject(jsonContent, true);
+		ServoyJSONObject obj = new ServoyJSONObject(jsonContent, false);
 
 		Iterator<String> keys = obj.keys();
 		while (keys.hasNext())
@@ -2266,7 +2266,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 								if (file.exists())
 								{
 									String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
-									ServoyJSONObject obj = new ServoyJSONObject(fileContent, true);
+									ServoyJSONObject obj = new ServoyJSONObject(fileContent, false);
 									boolean changed = false;
 									for (String groupName : groupNames)
 									{

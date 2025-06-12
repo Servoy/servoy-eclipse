@@ -595,7 +595,7 @@ public class SolutionSerializer
 		obj.put(PROP_FILE_VERSION, AbstractRepository.repository_version);
 		obj.put("solutionType", new Integer(smd.getSolutionType()));
 		obj.put("mustAuthenticate", Boolean.valueOf(smd.getMustAuthenticate()));
-		return obj.toString(true);
+		return obj.toString(false);
 	}
 
 	private static String serializeMediaInfo(Solution s) throws JSONException
@@ -892,7 +892,7 @@ public class SolutionSerializer
 			ServoyJSONObject obj;
 			try
 			{
-				obj = generateJSONObject(persist, forceRecursive, false, repository, false, null);
+				obj = generateJSONObject(persist, forceRecursive, false, repository, true, null);
 			}
 			catch (RepositoryException e)
 			{
@@ -982,7 +982,7 @@ public class SolutionSerializer
 			}
 			else
 			{
-				sb.append(obj.toString(true));
+				sb.append(obj.toString(false));
 			}
 			return sb;
 		}
@@ -1157,10 +1157,15 @@ public class SolutionSerializer
 			Object propertyObjectValue = property_values.get(propertyName);
 			boolean isBoolean = (propertyObjectValue instanceof Boolean);
 			boolean isNumber = (propertyObjectValue instanceof Number && element.getTypeID() != IRepository.ELEMENTS);//element_id for elements type becomes uuid
-			boolean isJSON = propertyObjectValue instanceof JSONObject;
+			boolean isJSON = propertyObjectValue instanceof JSONObject || element.getTypeID() == IRepository.JSON ||
+				StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName().equals(propertyName);
 
 			String propertyValue = repository.convertObjectToArgumentString(element.getTypeID(), propertyObjectValue);//, persist.getID(), persist.getRevisionNumber(), element.contentID, resolver);
 
+			if (isJSON)
+			{
+				property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, false, true)); // always store as pure json
+			}
 			if (persist instanceof AbstractBase && element.getTypeID() == IRepository.ELEMENTS &&
 				((Integer)propertyObjectValue).intValue() == IRepository.UNRESOLVED_ELEMENT)
 			{
@@ -1258,9 +1263,9 @@ public class SolutionSerializer
 				property_values.put(PROP_ITEMS, items);
 			}
 		}
-		else if (persist instanceof RelationItem) // Relation items have always been written with newlines=false, for other composites (like forms) use newlines
+		else if (persist instanceof RelationItem)
 		{
-			return new ServoyJSONObject(property_values, true, false);
+			return new ServoyJSONObject(property_values, false, true);
 		}
 
 		return new ServoyJSONObject(property_values, !useQuotesForKey, true);

@@ -171,7 +171,7 @@ public class SolutionDeserializer
 	{
 		try
 		{
-			return new ServoyJSONObject(content, true);
+			return new ServoyJSONObject(content, false);
 		}
 		catch (JSONException e)
 		{
@@ -389,7 +389,7 @@ public class SolutionDeserializer
 							boolean recognized = false;
 							if (SolutionSerializer.isJSONFile(file))
 							{
-								JSONObject json_obj = new ServoyJSONObject(Utils.getTXTFileContent(f, Charset.forName("UTF8")), true);
+								JSONObject json_obj = new ServoyJSONObject(Utils.getTXTFileContent(f, Charset.forName("UTF8")), false);
 								if (json_obj.length() == 0)
 								{
 									// empty file just skip this one.
@@ -2172,7 +2172,7 @@ public class SolutionDeserializer
 		UUID uuid = null;
 		try
 		{
-			JSONObject obj = new ServoyJSONObject(Utils.getTXTFileContent(file), true);
+			JSONObject obj = new ServoyJSONObject(Utils.getTXTFileContent(file), false);
 			if (obj.has(SolutionSerializer.PROP_UUID))
 			{
 				uuid = UUID.fromString(obj.getString(SolutionSerializer.PROP_UUID));
@@ -2339,7 +2339,7 @@ public class SolutionDeserializer
 			if (solutionmetadata == null) return null;
 
 			int fileVersion;
-			JSONObject obj = new ServoyJSONObject(solutionmetadata, true);
+			JSONObject obj = new ServoyJSONObject(solutionmetadata, false);
 			if (!obj.has(SolutionSerializer.PROP_FILE_VERSION))
 			{
 				throw new RepositoryException("Cannot handle files with unknown version");

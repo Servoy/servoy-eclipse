@@ -174,7 +174,7 @@ public class ValuelistConfigPropertySource extends ComplexPropertySourceWithStan
 			}
 			try
 			{
-				ServoyJSONObject json = new ServoyJSONObject(value, true);
+				ServoyJSONObject json = new ServoyJSONObject(value, false);
 				return json;
 			}
 			catch (JSONException ex)
@@ -198,7 +198,7 @@ public class ValuelistConfigPropertySource extends ComplexPropertySourceWithStan
 			{
 				return "";
 			}
-			return ServoyJSONObject.toString((JSONObject)value, true, false, true);
+			return ServoyJSONObject.toString((JSONObject)value, false, false, false);
 		}
 
 	}

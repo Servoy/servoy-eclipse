@@ -30,7 +30,7 @@ import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Quick fix for correcting an user with invalid name or password.
- * 
+ *
  * @author acostescu
  */
 public class CorrectInvalidUser extends AlterUserGroupSecFileQuickFix
@@ -65,7 +65,7 @@ public class CorrectInvalidUser extends AlterUserGroupSecFileQuickFix
 		boolean altered = false;
 		try
 		{
-			invalidUser = User.fromJSON(new ServoyJSONObject((String)wrongValue, true));
+			invalidUser = User.fromJSON(new ServoyJSONObject((String)wrongValue, false));
 			if (users.contains(invalidUser))
 			{
 				final User newUser = new User(invalidUser.name, invalidUser.passwordHash, invalidUser.userUid);

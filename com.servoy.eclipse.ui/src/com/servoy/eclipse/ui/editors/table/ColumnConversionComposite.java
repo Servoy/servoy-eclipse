@@ -44,7 +44,7 @@ public class ColumnConversionComposite extends ConvertersComposite<IColumnConver
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
@@ -112,7 +112,7 @@ public class ColumnConversionComposite extends ConvertersComposite<IColumnConver
 				Map<String, String> properties = getProperties();
 				if (properties != null && properties.size() > 0)
 				{
-					ServoyJSONObject json = new ServoyJSONObject(true, false);
+					ServoyJSONObject json = new ServoyJSONObject(false, false);
 					Map<String, String> defaults = conv.getDefaultProperties();
 
 					//subtract defaults, makes save smaller
@@ -133,7 +133,7 @@ public class ColumnConversionComposite extends ConvertersComposite<IColumnConver
 
 					if (json.length() > 0)
 					{
-						props = Utils.stringReplace(json.toString().trim(), System.getProperty("line.separator"), "\n");// to avoid conflicts on different developer OSes with team when it's actually the same content
+						props = Utils.stringReplace(json.toString(false).trim(), System.getProperty("line.separator"), "\n");// to avoid conflicts on different developer OSes with team when it's actually the same content
 					}
 				}
 			}
