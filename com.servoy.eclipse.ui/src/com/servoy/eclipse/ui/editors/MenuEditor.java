@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.editors;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
@@ -121,6 +123,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Menu;
@@ -162,6 +165,8 @@ public class MenuEditor extends PersistEditor
 	private boolean initializingData = false;
 	private Group customPropertiesGroup;
 
+	private IPersistChangeListener persistChangeListener;
+
 	private TableViewer customPropertiesViewer;
 	private MenuEditorDragAndDropListener menuEditorDragAndDropListener;
 
@@ -196,6 +201,25 @@ public class MenuEditor extends PersistEditor
 		{
 			init();
 		}
+		persistChangeListener = new IPersistChangeListener()
+		{
+			@Override
+			public void persistChanges(Collection<IPersist> changes)
+			{
+				if (changes != null && !changes.isEmpty())
+				{
+					for (IPersist persist : changes)
+					{
+						if (persist instanceof MenuItem || persist instanceof Menu)
+						{
+							Display.getDefault().asyncExec(() -> refreshEditor());
+							break;
+						}
+					}
+				}
+			}
+		};
+		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, persistChangeListener);
 	}
 
 	@Override
@@ -1289,6 +1313,8 @@ public class MenuEditor extends PersistEditor
 	{
 		super.dispose();
 		selectedMenuItemCallbacks.clear();
+		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, persistChangeListener);
+		persistChangeListener = null;
 	}
 
 	@Override
@@ -1341,5 +1367,13 @@ public class MenuEditor extends PersistEditor
 
 		return null;
 
+	}
+
+	private void refreshEditor()
+	{
+		if (menuViewer != null && !menuViewer.getTree().isDisposed())
+		{
+			menuViewer.refresh();
+		}
 	}
 }
