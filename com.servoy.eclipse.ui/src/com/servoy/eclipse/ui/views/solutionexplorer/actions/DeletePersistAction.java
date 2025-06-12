@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
+import static java.util.Arrays.asList;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -179,6 +181,8 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 								editingNode = editingNode.getAncestor(IRepository.MENUS);
 							}
 							servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+							ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(true,
+								asList(new IPersist[] { editingNode }));
 						}
 					}
 					else if (rootObject instanceof StringResource)
