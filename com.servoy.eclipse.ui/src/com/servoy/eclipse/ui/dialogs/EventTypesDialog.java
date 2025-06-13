@@ -279,8 +279,10 @@ public class EventTypesDialog extends Dialog
 					});
 				if (dialog.open() == Window.OK)
 				{
-					model.add(new EventType(dialog.getValue(), null));
+					EventType newEventType = new EventType(dialog.getValue(), null);
+					model.add(newEventType);
 					tableViewer.refresh();
+					tableViewer.setSelection(new StructuredSelection(newEventType));
 					getShell().layout(true, true);
 				}
 			}
@@ -385,23 +387,26 @@ public class EventTypesDialog extends Dialog
 			@Override
 			protected void setValue(Object element, Object value)
 			{
-				if (value == null || value.toString().length() == 0)
+				if (!Utils.equalObjects(((Pair<String, String>)element).getLeft(), value))
 				{
-					MessageDialog.openError(getShell(), "Invalid Argument Name", "Argument name can't be empty");
-					return;
+					if (value == null || value.toString().length() == 0)
+					{
+						MessageDialog.openError(getShell(), "Invalid Argument Name", "Argument name can't be empty");
+						return;
+					}
+					if (!IdentDocumentValidator.isJavaIdentifier(value.toString()))
+					{
+						MessageDialog.openError(getShell(), "Invalid Argument Name", "Must be valid identifier");
+						return;
+					}
+					if (selectedEventType.getArguments().stream().anyMatch(arg -> value.toString().equals(arg.getLeft())))
+					{
+						MessageDialog.openError(getShell(), "Invalid Argument Name", "Argument name already exists");
+						return;
+					}
+					((Pair<String, String>)element).setLeft(value.toString());
+					getViewer().update(element, null);
 				}
-				if (!IdentDocumentValidator.isJavaIdentifier(value.toString()))
-				{
-					MessageDialog.openError(getShell(), "Invalid Argument Name", "Must be valid identifier");
-					return;
-				}
-				if (selectedEventType.getArguments().stream().anyMatch(arg -> value.toString().equals(arg.getLeft())))
-				{
-					MessageDialog.openError(getShell(), "Invalid Argument Name", "Argument name already exists");
-					return;
-				}
-				((Pair<String, String>)element).setLeft(value.toString());
-				getViewer().update(element, null);
 			}
 
 		});
@@ -576,6 +581,10 @@ public class EventTypesDialog extends Dialog
 				}
 			}
 		});
+		if (model.size() > 0)
+		{
+			tableViewer.setSelection(new StructuredSelection(model.get(0)));
+		}
 		return composite;
 	}
 
