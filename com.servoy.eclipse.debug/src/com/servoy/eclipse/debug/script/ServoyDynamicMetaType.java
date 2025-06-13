@@ -48,7 +48,10 @@ public class ServoyDynamicMetaType extends DefaultMetaType
 		if (type.getName().startsWith("JSFoundSet") && type.findDirectMember("getSelectedRecord") != null)
 		{
 			Type recordType = type.findDirectMember("getSelectedRecord").getDirectType();
-			return new ServoyDynamicArrayRuntimeType(typeSystem, type, recordType.toRType(typeSystem));
+			if (recordType != null)
+			{
+				return new ServoyDynamicArrayRuntimeType(typeSystem, type, recordType.toRType(typeSystem));
+			}
 		}
 		// for a dataset we need to look at the record type that a dataset can have and use that one.
 		if (type.getName().startsWith("JSDataSet<"))

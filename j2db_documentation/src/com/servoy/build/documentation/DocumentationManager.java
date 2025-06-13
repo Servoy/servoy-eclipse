@@ -57,10 +57,10 @@ public class DocumentationManager implements IAggregatedDocumentation, IDocument
 		return new FunctionDocumentation(mainName, argsTypes, type, deprecated, varargs, state);
 	}
 
-	public IObjectDocumentation createObjectDocumentation(String category, String qualifiedName, String publicName, String scriptingName,
+	public IObjectDocumentation createObjectDocumentation(String category, String qualifiedName, String publicName, String scriptingName, String realClass,
 		String extendsComponent, String[] parentClasses)
 	{
-		return new ObjectDocumentation(category, qualifiedName, publicName, scriptingName, extendsComponent, parentClasses);
+		return new ObjectDocumentation(category, qualifiedName, publicName, scriptingName, realClass, extendsComponent, parentClasses);
 	}
 
 	public SortedMap<String, IObjectDocumentation> getObjects()
@@ -426,7 +426,6 @@ public class DocumentationManager implements IAggregatedDocumentation, IDocument
 		return docManager;
 	}
 
-	@SuppressWarnings("unchecked")
 	private static void fromXMLByCategory(String category, Element parent, DocumentationManager docManager, ClassLoader loader)
 	{
 		Element runtimeElement = parent.element(category);

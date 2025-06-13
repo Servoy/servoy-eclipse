@@ -45,6 +45,7 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 	// top level attributes
 	private static final String ATTR_PUBLICNAME = "publicName";
 	private static final String ATTR_SCRIPTINGNAME = "scriptingName";
+	private static final String ATTR_REALCLASS = "realClass";
 	private static final String ATTR_QUALIFIEDNAME = "qualifiedName";
 	private static final String ATTR_DEPRECATED = "deprecated";
 	private static final String ATTR_NAME = "name";
@@ -69,19 +70,21 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 	private final String category;
 	private final String qualifiedName;
 	private final String publicName;
-	private String scriptingName;
+	private final String scriptingName;
+	private final String realClass;
 	private String extendsComponent;
 	private String description;
 	private boolean deprecated;
 	private final String[] parentClasses;
-	private final SortedSet<IFunctionDocumentation> functions;
-	private final SortedSet<String> returnedTypes;
+	private final SortedSet<IFunctionDocumentation> functions = new TreeSet<>();
+	private final SortedSet<String> returnedTypes = new TreeSet<>();
 	private boolean hide = false;
 	private ClientSupport clientSupport = null;
 
 	private final SortedMap<String, String> serverProperties = new TreeMap<String, String>();
 
-	public ObjectDocumentation(String category, String qualifiedName, String publicName, String scriptingName, String extendsComponent, String[] parentClasses,
+	public ObjectDocumentation(String category, String qualifiedName, String publicName, String scriptingName, String realClass, String extendsComponent,
+		String[] parentClasses,
 		ClientSupport csp)
 	{
 		if (category == null) throw new IllegalArgumentException("The category cannot be null.");
@@ -90,17 +93,18 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 		this.qualifiedName = qualifiedName;
 		this.publicName = publicName;
 		this.scriptingName = scriptingName;
+		this.realClass = realClass;
 		this.extendsComponent = extendsComponent;
 		this.parentClasses = parentClasses;
 		this.deprecated = false;
-		functions = new TreeSet<IFunctionDocumentation>();
-		returnedTypes = new TreeSet<String>();
+
 		this.clientSupport = csp;
 	}
 
-	public ObjectDocumentation(String category, String qualifiedName, String publicName, String scriptingName, String extendsComponent, String[] parentClasses)
+	public ObjectDocumentation(String category, String qualifiedName, String publicName, String scriptingName, String realClass, String extendsComponent,
+		String[] parentClasses)
 	{
-		this(category, qualifiedName, publicName, scriptingName, extendsComponent, parentClasses, null);
+		this(category, qualifiedName, publicName, scriptingName, realClass, extendsComponent, parentClasses, null);
 	}
 
 	public void runResolver(ITagResolver resolver)
@@ -153,9 +157,9 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 		return scriptingName;
 	}
 
-	public void setScriptingName(String scriptingName)
+	public String getRealClass()
 	{
-		this.scriptingName = scriptingName;
+		return realClass;
 	}
 
 	public String getDescription(ClientSupport csp)
@@ -444,6 +448,7 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 
 		String publicName = objectElement.attributeValue(ATTR_PUBLICNAME);
 		String scriptingName = objectElement.attributeValue(ATTR_SCRIPTINGNAME);
+		String realClass = objectElement.attributeValue(ATTR_REALCLASS);
 		String qualifiedName = objectElement.attributeValue(ATTR_QUALIFIEDNAME);
 		String extendsFrom = objectElement.attributeValue(ATTR_EXTENDS_COMPONENT);
 		String deprecated = objectElement.attributeValue(ATTR_DEPRECATED);
@@ -455,7 +460,7 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 			clientSupport = ClientSupport.mc_wc_sc;
 		}
 
-		ObjectDocumentation objDoc = new ObjectDocumentation(category, qualifiedName, publicName, scriptingName, extendsFrom, null);
+		ObjectDocumentation objDoc = new ObjectDocumentation(category, qualifiedName, publicName, scriptingName, realClass, extendsFrom, null);
 
 		Node descriptionNode = objectElement.element("description");
 		if (descriptionNode != null)
@@ -511,7 +516,6 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 		this.description = description;
 	}
 
-	@SuppressWarnings("unchecked")
 	private static void loadFunctions(Element objectElement, ObjectDocumentation objDoc, String holderTag, ClassLoader loader)
 	{
 		Element functionsElement = objectElement.element(holderTag);

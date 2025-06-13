@@ -17,6 +17,8 @@
 
 package com.servoy.build.documentation.apigen;
 
+import static com.servoy.build.documentation.apigen.MarkdownGenerator.Platform.detectPlatform;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
@@ -116,6 +118,18 @@ import freemarker.template.utility.DeepUnwrap;
  */
 public class MarkdownGenerator
 {
+	enum Platform
+	{
+		Windows, MacOS, Linux;
+
+		static Platform detectPlatform()
+		{
+			var osName = System.getProperty("os.name");
+			if ("win".equalsIgnoreCase(osName)) return Windows;
+			if ("linux".equalsIgnoreCase(osName)) return Linux;
+			return MacOS;
+		}
+	}
 
 	private static final String EXTENDS_CLASS_SECTION_IN_TEMPLATE = "extends";
 	private static final String RETURN_TYPES_SECTION_IN_TEMPLATE = "returnTypes";
@@ -128,7 +142,7 @@ public class MarkdownGenerator
 	private static final DuplicateTracker duplicateTracker = DuplicateTracker.getInstance();
 
 	private static Map<String, String> specialTypePaths = new HashMap<>();
-	private static boolean isWindows = false;
+	private static Platform platform = detectPlatform();
 	private static int missingReturnAnnotationCount = 0;
 	private static Set<String> undocumentedReturnTypeFunctions = new HashSet<>();
 	private static Set<String> uniqueClasses = new HashSet<>();
@@ -180,13 +194,6 @@ public class MarkdownGenerator
 		// the following ones are not generated .md files; they were manually created at that path; so we have to hardcode them
 		specialTypePaths.put("enum", "/reference/servoycore/dev-api/");
 		specialTypePaths.put("Exception", "/reference/servoycore/dev-api/");
-
-		String osName = System.getProperty("os.name");
-
-		if (osName.equalsIgnoreCase("win"))
-		{
-			isWindows = true;
-		}
 	}
 
 	private static final HashMap<String, String> qualifiedToName = new HashMap<>();
@@ -930,41 +937,40 @@ public class MarkdownGenerator
 				System.out.println("Deleted old references.json: " + refFile.getAbsolutePath());
 			}
 		}
+
 		URL[] urls;
+		URL jsLibURLObject;
+		URL servoyDocURLObject;
+		URL designDocURLObject;
 
-		if (isWindows)
+		switch (platform)
 		{
-			System.out.println("Running on Windows");
-			urls = findJarURLsFromServoyInstall(new File(new URI(pluginDir).normalize()).getAbsolutePath());
-		}
-		else
-		{
-			System.out.println("Running on Mac/Linux");
-			urls = findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()); // Ensure absolute path is used; this is not working on windows
+			case Windows :
+				System.out.println("Running on Windows");
+				urls = findJarURLsFromServoyInstall(new File(new URI(pluginDir).normalize()).getAbsolutePath());
 
+				jsLibURLObject = new URL(jsLibURL);
+				servoyDocURLObject = new URL(servoyDocURL);
+				designDocURLObject = new URL(designDocURL);
+				break;
+
+			case MacOS :
+			case Linux :
+			default :
+				System.out.println("Running on Mac/Linux");
+				urls = findJarURLsFromServoyInstall(new File(pluginDir).toURI().normalize().getPath()); // Ensure absolute path is used; this is not working on windows
+
+				jsLibURLObject = new File(jsLibURL).toURI().toURL();
+				servoyDocURLObject = new File(servoyDocURL).toURI().toURL();
+				designDocURLObject = new File(designDocURL).toURI().toURL();
+				break;
 		}
+
 		targetInstallClassLoader = new URLClassLoader("Target Servoy installation classloader",
 			urls,
 			MarkdownGenerator.class.getClassLoader());
 
 		boolean ngOnly = false;
-
-		URL jsLibURLObject;
-		URL servoyDocURLObject;
-		URL designDocURLObject;
-
-		if (isWindows)
-		{
-			jsLibURLObject = new URL(jsLibURL);
-			servoyDocURLObject = new URL(servoyDocURL);
-			designDocURLObject = new URL(designDocURL);
-		}
-		else
-		{
-			jsLibURLObject = new File(jsLibURL).toURI().toURL();
-			servoyDocURLObject = new File(servoyDocURL).toURI().toURL();
-			designDocURLObject = new File(designDocURL).toURI().toURL();
-		}
 
 		loadSummary();
 
@@ -1002,15 +1008,20 @@ public class MarkdownGenerator
 
 			System.out.println("  - plugins (from " + pluginDir + "):");
 			File file2;
-			if (isWindows)
+			switch (platform)
 			{
-				file2 = new File(new URI(pluginDir).normalize());
+				case Windows :
+					file2 = new File(new URI(pluginDir).normalize());
+					break;
 
+				case MacOS :
+				case Linux :
+				default :
+					file2 = new File(new File(pluginDir).toURI().normalize());
+					break;
 			}
-			else
-			{
-				file2 = new File(new File(pluginDir).toURI().normalize());
-			}
+
+
 			if (file2.isDirectory())
 			{
 				// this is an directory with jars
@@ -1486,15 +1497,17 @@ public class MarkdownGenerator
 		//         plugins
 		//             *.jar (nested)
 		addAllNestedJarFilesOfDir(pluginDir, jarURLsFromInstall);
-		if (isWindows)
+		switch (platform)
 		{
-			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "developer", "plugins").normalize().toString(), jarURLsFromInstall);
+			case Windows :
+			case Linux :
+				addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "developer", "plugins").normalize().toString(), jarURLsFromInstall);
+				break;
 
+			case MacOS :
+				addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "eclipse", "plugins").normalize().toString(), jarURLsFromInstall);
+				break;
 
-		}
-		else
-		{
-			addAllNestedJarFilesOfDir(Path.of(pluginDir, "..", "..", "eclipse", "plugins").normalize().toString(), jarURLsFromInstall);
 		}
 		return jarURLsFromInstall.toArray(new URL[jarURLsFromInstall.size()]);
 	}
