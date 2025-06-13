@@ -37,7 +37,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -155,7 +154,7 @@ public class MarkdownGenerator
 
 	private static final boolean TRACK_REFERENCES = false; //used to turn relative references to full urls toward docs.servoy.com
 	private static final boolean GENERATE_PGADMIN_DOCS = false; //properties from admin page
-	private static final boolean GENERATE_SERVER_DOCS = false; //properties from server plugins
+	private static final boolean GENERATE_SERVER_DOCS = true; //properties from server plugins
 
 	private static final Set<String> IGNORED_UNDOCUMENTED_TYPES = Set.of(
 		"org.mozilla.javascript.IdScriptableObject",
@@ -214,6 +213,13 @@ public class MarkdownGenerator
 	 * Value: Full class name of the documentation provider
 	 */
 	private static final Map<String, String> PLUGIN_TO_DOCUMENTATION_PROVIDER = new HashMap<>();
+
+	/**
+	 * Stores plugin configuration properties for documentation generation.
+	 * Key: Full class name of the documentation provider
+	 * Value: Map of property names to their descriptions
+	 */
+	private static final Map<String, Map<String, String>> PLUGIN_PROPERTIES = new HashMap<>();
 
 	static
 	{
@@ -294,6 +300,9 @@ public class MarkdownGenerator
 		}
 		root.put("classname_nospace", classNoSpace);
 		root.put("instance", this);
+
+		// Check if this is a plugin provider class and inject plugin properties if available
+		injectPluginProperties(scriptingName);
 
 		if ("/reference/servoycore/object-model/solution".equals(parentPath))
 		{
@@ -974,6 +983,12 @@ public class MarkdownGenerator
 
 		loadSummary();
 
+		// Scan for server plugins first to ensure plugin properties are available for documentation generation
+		if (GENERATE_SERVER_DOCS)
+		{
+			findServerPlugins(pluginDir);
+		}
+
 		do
 		{
 			ngOnly = !ngOnly;
@@ -1137,11 +1152,6 @@ public class MarkdownGenerator
 			}
 		}
 
-		if (GENERATE_SERVER_DOCS)
-		{
-			findServerPlugins(pluginDir);
-		}
-
 		printSummary();
 		// Write out all collected reference links to JSON
 		ReferencesTracker.getInstance().writeResults("references.json");
@@ -1192,7 +1202,6 @@ public class MarkdownGenerator
 			// Use ServiceLoader to find all IPlugin implementations
 			ServiceLoader<IPlugin> pluginsLoader = ServiceLoader.load(IPlugin.class, classLoader);
 
-			// Counter for found plugins
 			int pluginCount = 0;
 
 			// Iterate through the plugins
@@ -1221,26 +1230,11 @@ public class MarkdownGenerator
 						{
 							// Find the documentation provider class for this plugin
 							String docProviderClassName = PLUGIN_TO_DOCUMENTATION_PROVIDER.get(pluginClassName);
-							if (docProviderClassName != null)
-							{
-								// Find the source file for the documentation provider
-								String docProviderSourceLocation = findSourceFileLocation(gitLocation, docProviderClassName);
-								if (docProviderSourceLocation != null)
-								{
-									System.out.println("Updating documentation for: " + docProviderClassName);
-									updatePluginDocumentationWithProperties(docProviderSourceLocation, properties);
-								}
-								else
-								{
-									System.out.println("Documentation provider source not found for: " + docProviderClassName);
-								}
-							}
-							else if (sourceLocation != null)
-							{
-								// If the plugin is its own documentation provider
-								System.out.println("Updating documentation for: " + pluginClassName);
-								updatePluginDocumentationWithProperties(sourceLocation, properties);
-							}
+							String targetClassName = docProviderClassName != null ? docProviderClassName : pluginClassName;
+
+							// Store properties in the map for later use during documentation generation
+							PLUGIN_PROPERTIES.put(targetClassName, new HashMap<>(properties));
+							System.out.println("Stored " + properties.size() + " properties for: " + targetClassName);
 						}
 
 						pluginCount++;
@@ -1276,111 +1270,80 @@ public class MarkdownGenerator
 	 * @param sourceFilePath The path to the source file
 	 * @param properties The properties map with keys and descriptions
 	 */
-	private static void updatePluginDocumentationWithProperties(String sourceFilePath, Map<String, String> properties)
+	/**
+	 * Injects plugin configuration properties into the documentation model.
+	 * This method checks if the current class has associated properties in the PLUGIN_PROPERTIES map
+	 * and adds them to the documentation model.
+	 *
+	 * @param scriptingName The scripting name of the class being documented
+	 */
+	private void injectPluginProperties(String scriptingName)
 	{
-		if (!GENERATE_SERVER_DOCS || properties == null || properties.isEmpty())
+		if (!GENERATE_SERVER_DOCS || scriptingName == null)
 		{
 			return;
 		}
 
-		try
+		// Try to find properties for this class by its scripting name
+		Map<String, String> properties = null;
+		String matchedClassName = null;
+
+		// First try with the scripting name directly
+		for (Map.Entry<String, Map<String, String>> entry : PLUGIN_PROPERTIES.entrySet())
 		{
-			// Read the source file
-			String content = new String(Files.readAllBytes(Paths.get(sourceFilePath)), StandardCharsets.UTF_8);
-
-			// Find the class-level JavaDoc comment
-			Pattern pattern = Pattern.compile("/\\*\\*(.*?)\\*/", Pattern.DOTALL);
-			Matcher matcher = pattern.matcher(content);
-
-			if (matcher.find())
+			String className = entry.getKey();
+			if (className.endsWith(scriptingName))
 			{
-				String javadoc = matcher.group(1);
-
-				// Check if the properties section already exists
-				Pattern propertiesSectionPattern = Pattern.compile("<p><b>Configuration Properties:</b></p>(.*?)(\\n\\s*\\*\\s*@|\\n\\s*\\*\\s*\\*/)",
-					Pattern.DOTALL);
-				Matcher propertiesSectionMatcher = propertiesSectionPattern.matcher(javadoc);
-
-				// Build the properties section
-				StringBuilder propertiesSection = new StringBuilder();
-				propertiesSection.append("\n *\n * <p><b>Configuration Properties:</b></p>\n *\n * <ul>");
-				for (Map.Entry<String, String> entry : properties.entrySet())
-				{
-					propertiesSection.append("\n * <li><code>").append(entry.getKey()).append("</code>: ").append(entry.getValue()).append("</li>");
-				}
-				propertiesSection.append("\n * </ul>\n *");
-
-				String updatedJavadoc;
-
-				// First, remove any existing properties section
-				String cleanedJavadoc = javadoc;
-				if (propertiesSectionMatcher.find())
-				{
-					// Get the content before and after the properties section
-					String beforeSection = javadoc.substring(0, propertiesSectionMatcher.start());
-					String afterSection = javadoc.substring(propertiesSectionMatcher.end() - propertiesSectionMatcher.group(2).length());
-
-					// Normalize whitespace - remove excess empty lines
-					beforeSection = beforeSection.replaceAll("(\\n\\s*\\*\\s*)(\\n\\s*\\*\\s*)+$", "$1");
-
-					// Remove the existing properties section with normalized whitespace
-					cleanedJavadoc = beforeSection + afterSection;
-				}
-
-				// Now find where to insert the properties section
-
-				// Look for @author tags
-				Pattern authorPattern = Pattern.compile("\\n\\s*\\*\\s*@author");
-				Matcher authorMatcher = authorPattern.matcher(cleanedJavadoc);
-
-				if (authorMatcher.find())
-				{
-					// Insert before the first @author tag
-					int insertPosition = authorMatcher.start();
-					updatedJavadoc = cleanedJavadoc.substring(0, insertPosition) +
-						propertiesSection.toString() +
-						cleanedJavadoc.substring(insertPosition);
-				}
-				else
-				{
-					// Look for any other JavaDoc tags
-					Pattern anyTagPattern = Pattern.compile("\\n\\s*\\*\\s*@");
-					Matcher anyTagMatcher = anyTagPattern.matcher(cleanedJavadoc);
-
-					if (anyTagMatcher.find())
-					{
-						// Insert before the first tag found
-						int insertPosition = anyTagMatcher.start();
-						updatedJavadoc = cleanedJavadoc.substring(0, insertPosition) +
-							propertiesSection.toString() +
-							cleanedJavadoc.substring(insertPosition);
-					}
-					else
-					{
-						// No tags found, append at the end of the comment
-						updatedJavadoc = cleanedJavadoc + propertiesSection.toString();
-					}
-				}
-
-				// Replace the JavaDoc in the source file
-				String updatedContent = content.substring(0, matcher.start()) +
-					"/**" + updatedJavadoc + "*/" +
-					content.substring(matcher.end());
-
-				// Write the updated content back to the file
-				Files.write(Paths.get(sourceFilePath), updatedContent.getBytes(StandardCharsets.UTF_8));
-				System.out.println("Updated documentation with properties in: " + sourceFilePath);
-			}
-			else
-			{
-				System.out.println("Could not find class-level JavaDoc in: " + sourceFilePath);
+				properties = entry.getValue();
+				matchedClassName = className;
+				break;
 			}
 		}
-		catch (IOException e)
+
+		// If no properties found and this is a provider class, try with the class name
+		if (properties == null)
 		{
-			System.err.println("Error updating documentation in file: " + sourceFilePath);
-			e.printStackTrace();
+			for (String className : PLUGIN_PROPERTIES.keySet())
+			{
+				if (className.contains(scriptingName))
+				{
+					properties = PLUGIN_PROPERTIES.get(className);
+					matchedClassName = className;
+					break;
+				}
+			}
 		}
+
+		// If properties were found, add them to the documentation model
+		if (properties != null && !properties.isEmpty())
+		{
+			// Create a list of property entries for the template
+			List<Map<String, String>> propertyList = new ArrayList<>();
+			for (Map.Entry<String, String> entry : properties.entrySet())
+			{
+				Map<String, String> propertyMap = new HashMap<>();
+				propertyMap.put("name", entry.getKey());
+				propertyMap.put("description", entry.getValue());
+				propertyList.add(propertyMap);
+			}
+
+			// Add the properties to the template model
+			root.put("configProperties", propertyList);
+		}
+	}
+
+	/**
+	 * This method is kept for backward compatibility but no longer modifies source files.
+	 * Instead, properties are stored in memory and injected during documentation generation.
+	 *
+	 * @param sourceFilePath The path to the source file (not used)
+	 * @param properties The properties map with keys and descriptions (not used)
+	 */
+	private static void updatePluginDocumentationWithProperties(String sourceFilePath, Map<String, String> properties)
+	{
+		// This method is kept for backward compatibility but no longer does anything
+		// Properties are now stored in the PLUGIN_PROPERTIES map and injected during documentation generation
+		System.out.println("Source files are no longer modified. Properties will be injected during documentation generation.");
 	}
 
 	/**
@@ -2039,6 +2002,12 @@ public class MarkdownGenerator
 					writer.write(output);
 					duplicateTracker.trackFile(file.getName(), file.toString());
 					if (aggregatedOutput != null) aggregatedOutput.append(output);
+
+					// Log plugin documentation file generation if it contains config properties
+					if (GENERATE_SERVER_DOCS && cg.root.containsKey("configProperties"))
+					{
+						System.out.println("[PLUGIN DOCS] Generated markdown file with properties: " + file.getAbsolutePath());
+					}
 
 					if (ngOnly)
 					{

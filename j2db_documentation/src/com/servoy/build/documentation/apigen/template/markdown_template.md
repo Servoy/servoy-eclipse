@@ -5,6 +5,16 @@
 ## Overview
 
 ${description}</#if>
+<#if configProperties??>
+
+## Properties
+
+| Property | Description |
+| -------- | ----------- |
+<#list configProperties as prop>
+| `${prop.name}` | ${prop.description} |
+</#list>
+</#if>
 <#if returnTypes??>
 
 ## **Returned Types**
