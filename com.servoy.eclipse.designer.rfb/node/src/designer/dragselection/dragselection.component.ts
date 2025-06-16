@@ -125,6 +125,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 
             this.resizeGlasspane();
         }
+        this.editorContentService.getGlassPane().style.cursor = 'default';
         this.selectionToDrag = null;
         this.editorSession.setDragging(false);
         this.currentElementsInfo = null;
@@ -178,6 +179,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
                 //this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds();
             } else return;
         }
+        
+        this.editorContentService.getGlassPane().style.cursor = 'pointer';
 
         if ((event.ctrlKey || event.metaKey) && this.selectionToDrag == null) {
             this.dragCopy = true;

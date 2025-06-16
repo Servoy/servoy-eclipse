@@ -327,7 +327,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 
     onMouseUp(event: MouseEvent) {
         this.editorSession.getState().ghosthandle = false;
-		this.editorContentService.getGlassPane().style.cursor = 'pointer';
         if (this.draggingGhost) {
             if (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX) {
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
@@ -369,6 +368,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             this.draggingClone.remove();
             this.draggingClone = null;
         }
+        this.editorContentService.getGlassPane().style.cursor = 'default';
         this.draggingGhost = null;
         this.draggingInGhostContainer = null;
         this.draggingGhostComponent = null;
@@ -382,6 +382,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 			return;  // prevent movement for inherited ghosts
 		}
         if (this.draggingGhost && (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX)) {
+            this.editorContentService.getGlassPane().style.cursor = 'pointer';
             if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
                 if (!this.draggingClone.parentNode) {
                     this.editorContentService.getBodyElement().appendChild(this.draggingClone);
