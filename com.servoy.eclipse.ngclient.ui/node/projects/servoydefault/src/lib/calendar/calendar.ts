@@ -7,7 +7,7 @@ import { ServoyDefaultBaseField } from '../basefield';
 import { DateTime as LuxonDateTime } from 'luxon';
 
 import { DOCUMENT } from '@angular/common';
-import { LoggerFactory, LoggerService } from '@servoy/public';
+import { FormatDirective, LoggerFactory, LoggerService } from '@servoy/public';
 import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dominus';
 
 @Component({
@@ -19,6 +19,8 @@ import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dom
 export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement> {
 
     @ViewChild('inputElement') inputElementRef: ElementRef;
+    
+    @ViewChild(FormatDirective) svyFormat: FormatDirective;
 
     private log: LoggerService;
     private picker: TempusDominus;
@@ -164,6 +166,11 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         if (this.findmode) {
             this.dataProviderID = event;
             super.pushUpdate();
+        }
+        else  if (event === undefined ||
+            event.toString() === 'Invalid Date') {
+                // revert to old value
+                this.svyFormat.writeValue(this.dataProviderID);
         }
     }
 
