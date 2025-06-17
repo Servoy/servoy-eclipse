@@ -24,6 +24,7 @@ export class EditorSessionService implements ServiceProvider {
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
     private allowedChildren: { [key: string]: string[] }  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
     private wizardProperties: { [key: string]: string[] } = {};
+    private developerMenus: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
     private lockAutoscrollId = '';
@@ -65,6 +66,9 @@ export class EditorSessionService implements ServiceProvider {
         this.wsSession.callService('formeditor', 'getWizardProperties').then((result: { [key: string]: string[] }) => {
             this.wizardProperties = result;
         }).catch(e => console.log(e));
+        this.wsSession.callService('formeditor', 'getDeveloperMenus').then((result: { [key: string]: string[] }) => {
+            this.developerMenus = result;
+        }).catch(e => console.log(e));        
     }
 
     activated() {
@@ -127,6 +131,10 @@ export class EditorSessionService implements ServiceProvider {
 
     openConfigurator(property: string) {
         return this.wsSession.callService('formeditor', 'openConfigurator', { name: property }, false);
+    }
+
+    executeDeveloperMenu(property: string) {
+        return this.wsSession.callService('formeditor', 'executeDeveloperMenu', { name: property }, false);
     }
 
     setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
@@ -361,6 +369,13 @@ export class EditorSessionService implements ServiceProvider {
     getWizardProperties(spec: string): string[] {
         if (this.wizardProperties) {
             return this.wizardProperties[spec];
+        }
+        return null;
+    }
+    
+    getDeveloperMenus(spec: string): string[] {
+        if (this.developerMenus) {
+            return this.developerMenus[spec];
         }
         return null;
     }

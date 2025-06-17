@@ -162,6 +162,21 @@ export class ContextMenuComponent implements OnInit {
                             this.menuItems.splice(insertIndex, 0, menuItem);
                         }
                     }
+                    const developerMenus = this.editorSession.getDeveloperMenus(node.getAttribute('svy-formelement-type'));
+                    if (developerMenus) {
+                        // Remove previously inserted developer menu items
+                        this.menuItems = this.menuItems.filter(
+                            item => !developerMenus.includes(item.text)
+                        );
+                        const insertIndex = this.menuItems.findIndex(item => item.text.startsWith("Delete"));//insert above delete
+                        const devMenus = developerMenus.map(value =>
+                            new ContextmenuItem(value, () => {
+                                this.hide()
+                                this.editorSession.executeDeveloperMenu(value);
+                            })
+                        );
+                        this.menuItems.splice(insertIndex, 0, ...devMenus);
+                    }                    
                 }
             }
 

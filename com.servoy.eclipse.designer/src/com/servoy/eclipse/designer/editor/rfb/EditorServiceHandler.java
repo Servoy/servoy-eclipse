@@ -46,6 +46,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupComm
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.UngroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentsHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ExecuteDeveloperMenu;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GetPartStylesHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.KeyPressedHandler;
@@ -573,6 +574,9 @@ public class EditorServiceHandler implements IServerService
 
 		configuredHandlers.put("openConfigurator", new OpenPropertiesWizardHandler(selectionProvider));
 		configuredHandlers.put("getWizardProperties", new GetWizardProperties());
+
+		configuredHandlers.put("getDeveloperMenus", new GetDeveloperMenus());
+		configuredHandlers.put("executeDeveloperMenu", new ExecuteDeveloperMenu(selectionProvider));
 
 		configuredHandlers.put("getVariantsForCategory", new IServerService()
 		{

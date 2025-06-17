@@ -95,6 +95,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,
+ com.servoy.eclipse.developersolution,
  com.servoy.eclipse.ui,
  com.servoy.eclipse.ui.actions,
  com.servoy.eclipse.ui.browser,

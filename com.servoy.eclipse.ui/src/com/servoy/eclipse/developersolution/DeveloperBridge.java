@@ -19,6 +19,7 @@ package com.servoy.eclipse.developersolution;
 
 import java.awt.Dimension;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Display;
@@ -41,7 +42,7 @@ import com.servoy.j2db.util.UUID;
  */
 public class DeveloperBridge implements IJSDeveloperBridge
 {
-	public static Map<JSDeveloperMenu, Function> menus = new HashMap<>();
+	public static Map<JSDeveloperMenu, Function> menus = new LinkedHashMap<>();
 
 
 	private final DeveloperNGClient client;
@@ -80,6 +81,12 @@ public class DeveloperBridge implements IJSDeveloperBridge
 	public JSDeveloperMenu createMenu(String text, int location)
 	{
 		return new JSDeveloperMenu(text, location);
+	}
+
+	@Override
+	public JSDeveloperMenu createComponentMenu(String text, String[] componentNames)
+	{
+		return new JSDeveloperMenu(text, componentNames);
 	}
 
 	@Override
