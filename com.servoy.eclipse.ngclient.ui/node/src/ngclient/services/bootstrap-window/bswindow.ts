@@ -327,8 +327,8 @@ export class BSWindow {
             this.renderer.removeClass(this.element, 'east');
             this.renderer.removeClass(this.element, 'north');
             this.renderer.removeClass(this.element, 'south');
-            const width = this.element.getBoundingClientRect().width;
-            const height = this.element.getBoundingClientRect().height;
+            const width = this.element.querySelector(this.options.selectors.body).getBoundingClientRect().width;
+            const height = this.element.querySelector(this.options.selectors.body).getBoundingClientRect().height;
 
             const size = { width, height };
             // before: this.element.trigger('bswin.resize',size);
