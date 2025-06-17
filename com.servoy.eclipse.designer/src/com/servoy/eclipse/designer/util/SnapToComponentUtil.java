@@ -467,7 +467,8 @@ public class SnapToComponentUtil
 		}
 		Assert.isTrue(sizeValue.isSet());
 
-		if (targetSizeValue.isSet())
+		boolean bothLowerHigherSet = lowerPropertyValue.isSet() && higherPropertyValue.isSet();
+		if (targetSizeValue.isSet() && !bothLowerHigherSet)
 		{
 			if (lowerPropertyValue.isSet())
 			{
