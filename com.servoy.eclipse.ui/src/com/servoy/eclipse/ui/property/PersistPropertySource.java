@@ -449,6 +449,26 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return null;
 	}
 
+	private List<String> getImportantProperties()
+	{
+		List<String> importantProps = new ArrayList<String>();
+		if (this instanceof WebComponentPropertySource wps)
+		{
+			PropertyDescription desc = wps.getPropertyDescription();
+			Map<String, PropertyDescription> props = desc.getProperties();
+			for (String name : props.keySet())
+			{
+				Object tagValue = props.get(name).getTag("basic");
+				if (Boolean.TRUE.equals(tagValue))
+				{
+					importantProps.add(name);
+				}
+			}
+		}
+		return importantProps;
+	}
+
+
 	private void init()
 	{
 		if (propertyDescriptors == null)
@@ -853,10 +873,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	public IPropertyDescriptor[] getPropertyDescriptors()
 	{
 		init();
+		List<String> important = getImportantProperties();
 		IPropertyDescriptor[] descs = propertyDescriptors.values().toArray(new IPropertyDescriptor[propertyDescriptors.size()]);
 		if (persistContext.getPersist() instanceof Bean)
 		{
 			return PropertyController.applySequencePropertyComparator(descs);
+		}
+		for (IPropertyDescriptor d : descs)
+		{
+			if (important.contains(d.getId().toString()))
+			{
+				if (d instanceof PropertyDescriptor)
+				{
+					((PropertyDescriptor)d).setCategory("Basic");
+				}
+			}
 		}
 		return descs;
 	}
