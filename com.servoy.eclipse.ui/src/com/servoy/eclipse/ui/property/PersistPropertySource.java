@@ -459,7 +459,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			for (String name : props.keySet())
 			{
 				Object tagValue = props.get(name).getTag("basic");
-				if (Boolean.TRUE.equals(tagValue))
+				if (tagValue != null)
 				{
 					importantProps.add(name);
 				}
