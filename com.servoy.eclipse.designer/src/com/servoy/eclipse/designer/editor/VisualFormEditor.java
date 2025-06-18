@@ -25,6 +25,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.commands.CommandStack;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -62,6 +64,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.IContextProvider;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -342,6 +345,15 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	{
 		if (cssEditor != null && cssEditor.isDirty())
 		{
+			IDocument document = cssEditor.getDocumentProvider().getDocument(cssEditor.getEditorInput());
+			try
+			{
+				AngularFormGenerator.parseLess(document.get(), getForm().getName());
+			}
+			catch (Exception e)
+			{
+				MessageDialog.openError(getSite().getShell(), "Error saving Less", "There is an error saving the less content:" + e.getMessage());
+			}
 			cssEditor.doSave(monitor);
 		}
 		if (!isMobile() && seceditor != null) seceditor.saveSecurityElements();
