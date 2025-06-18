@@ -406,8 +406,28 @@ public class TestSnapCSSPosition
 		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.bottom));
 		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
 
-		assertEquals("css pos right should be set to the bottom value computed from the target", "calc(20% + 105px)", newPosition.bottom);
+		assertEquals("css pos bottom should be set to the bottom value computed from the target", "calc(20% + 105px)", newPosition.bottom);
 		assertEquals("css pos height should not be changed", "30", newPosition.height);
+	}
+	
+	@Test
+	public void testSnapToMiddleVertically2() throws Exception
+	{
+		CSSPosition old = new CSSPosition("162", "-1", "288", "323", "80", "30");
+		CSSPosition newPosition = new CSSPosition("225", "-1", "225", "323", "80", "30");
+		CSSPosition targetPosition = new CSSPosition("15", "50%", "15", "40", "100", "200"); //top, bottom, min-height set
+
+		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480);
+		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
+		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, null, "top", "bottom", "height");
+
+		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
+		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.bottom));
+		assertFalse("css pos height NOT should be set", CSSPositionUtils.isSet(newPosition.height));
+
+		assertEquals("css pos top should be set to the bottom value computed from the target", "225", newPosition.top);
+		assertEquals("css pos bottom should be set to the bottom value computed from the target", "225", newPosition.bottom);
+		assertEquals("css pos height should be unset", "-1", newPosition.height);
 	}
 	
 	@Test
