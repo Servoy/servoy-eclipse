@@ -2531,12 +2531,20 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 */
 	public void setResourcesProject(IProject project)
 	{
+		setResourcesProject(project, true);
+	}
+
+	public void setResourcesProject(IProject project, boolean reloadAllSecurityInformation)
+	{
 		if (project != resourcesProject)
 		{
 			resourcesProject = project;
 			dataModelManager = new DataModelManager(resourcesProject, ApplicationServerRegistry.get().getServerManager());
 
-			reloadAllSecurityInformation();
+			if (reloadAllSecurityInformation)
+			{
+				reloadAllSecurityInformation();
+			}
 		}
 	}
 

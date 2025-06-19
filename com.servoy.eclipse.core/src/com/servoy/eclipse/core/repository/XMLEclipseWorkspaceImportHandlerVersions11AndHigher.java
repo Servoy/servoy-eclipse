@@ -179,7 +179,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					m.worked(1);
 					try
 					{
-						if (resourcesProject == null) userManager.setResourcesProject(rProject[0]);
+						if (resourcesProject == null) userManager.setResourcesProject(rProject[0], false);
 						userManager.writeAllSecurityInformation(true);
 //						if (!activateSolution)
 //						{
