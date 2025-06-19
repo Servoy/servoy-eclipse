@@ -1325,18 +1325,23 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 	protected void createNodeFolderAndCheckPackages()
 	{
-		Activator.getInstance().setActiveSolution(ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName());
-		NodeFolderCreatorJob job = new NodeFolderCreatorJob(Activator.getInstance().getSolutionProjectFolder(), true, false);
+		final String activeProjectName = ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName();
+		Activator.getInstance().setActiveSolution(null);
+		NodeFolderCreatorJob job = new NodeFolderCreatorJob(new File(Activator.getInstance().getMainTargetFolder(), activeProjectName), true, false);
 		job.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override
 			public void done(IJobChangeEvent event)
 			{
-				if (event.getResult().getSeverity() == IStatus.OK) checkPackages(false);
-				else
+				if (Utils.equalObjects(activeProjectName, ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName()))
 				{
-					// else npm install gave an error...
-					handleTitaniumNGClientBuildFailure();
+					Activator.getInstance().setActiveSolution(ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName());
+					if (event.getResult().getSeverity() == IStatus.OK) checkPackages(false);
+					else
+					{
+						// else npm install gave an error...
+						handleTitaniumNGClientBuildFailure();
+					}
 				}
 			}
 		});

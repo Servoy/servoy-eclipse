@@ -106,7 +106,14 @@ public class Activator extends Plugin
 
 	public void setActiveSolution(String solutionName)
 	{
-		this.solutionProjectFolder = new File(mainTargetFolder, solutionName);
+		if (solutionName == null)
+		{
+			solutionProjectFolder = null;
+		}
+		else
+		{
+			this.solutionProjectFolder = new File(mainTargetFolder, solutionName);
+		}
 	}
 
 	private String getSystemOrEvironmentProperty(String propertyName)
