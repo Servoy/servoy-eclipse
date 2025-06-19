@@ -317,6 +317,17 @@ public class ColumnInfoBean
 		columnInfo.flagChanged();
 	}
 
+	public boolean getNoDataLogFlag()
+	{
+		return (columnInfo.getFlags() & IBaseColumn.NO_DATA_LOG_COLUMN) == IBaseColumn.NO_DATA_LOG_COLUMN;
+	}
+
+	public void setNoDataLogFlag(boolean noDataLog)
+	{
+		columnInfo.setFlag(IBaseColumn.NO_DATA_LOG_COLUMN, noDataLog);
+		columnInfo.flagChanged();
+	}
+
 	public boolean getUuidFlag()
 	{
 		return (columnInfo.getFlags() & IBaseColumn.UUID_COLUMN) == IBaseColumn.UUID_COLUMN;
