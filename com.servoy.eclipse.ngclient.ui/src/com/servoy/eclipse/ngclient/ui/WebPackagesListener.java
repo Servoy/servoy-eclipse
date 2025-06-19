@@ -1352,7 +1352,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 	public static boolean isBuildRunning()
 	{
-		return scheduled.get() > 1;
+		return scheduled.get() > 1 || Job.getJobManager().find(CopySourceFolderAction.JOB_FAMILY).length > 0;
 	}
 
 	/**
