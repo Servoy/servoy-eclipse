@@ -170,7 +170,7 @@ public class WarExporter
 		"org.apache.james.apache-mime4j_*.jar", //
 		"xstream_*.jar", //
 		"org.jsoup_*.jar", //
-		"javax.persistence-api_*.jar", //
+		"jakarta.persistence-api_*.jar", //
 		"com.sun.mail.jakarta.mail_*.jar", //
 		"com.sun.activation.jakarta.activation_*.jar", //
 		"com.github.ua-parser.uap-java_*.jar", //

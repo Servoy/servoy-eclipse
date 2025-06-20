@@ -381,8 +381,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="21.0.7"/>
 
    <plugin
-         id="javax.persistence-api"
-         version="2.2.0"/>
+         id="jakarta.persistence-api"
+         version="3.2.0"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.aarch64"
