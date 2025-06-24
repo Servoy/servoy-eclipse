@@ -238,7 +238,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     }
 
     private getDropNode(type: string, topContainer: boolean, layoutName: string, event: MouseEvent, svyId: string) {
-        const canDrop = this.designerUtilsService.getDropNode(false, type, topContainer, layoutName, event, undefined, svyId);
+        const canDrop = this.designerUtilsService.getDropNode(false, type, topContainer, layoutName, event, undefined, svyId, this.dragNode);
         canDrop.dropAllowed = canDrop.dropAllowed && this.dragNode.classList.contains("inheritedElement")
             && this.initialParent !== null && this.initialParent.getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
         return canDrop;
