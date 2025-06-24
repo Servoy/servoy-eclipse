@@ -133,8 +133,8 @@ export class EditorSessionService implements ServiceProvider {
         return this.wsSession.callService('formeditor', 'openConfigurator', { name: property }, false);
     }
 
-    executeDeveloperMenu(property: string) {
-        return this.wsSession.callService('formeditor', 'executeDeveloperMenu', { name: property }, false);
+    executeDeveloperMenu(isForm: boolean, property: string) {
+        return this.wsSession.callService('formeditor', 'executeDeveloperMenu', { isForm, name: property }, false);
     }
 
     setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
@@ -373,11 +373,22 @@ export class EditorSessionService implements ServiceProvider {
         return null;
     }
     
-    getDeveloperMenus(spec: string): string[] {
+    getDeveloperMenus(isForm: boolean, formElementType: string): string[] {
+        let devMenus = null;
         if (this.developerMenus) {
-            return this.developerMenus[spec];
+            if(isForm)
+                devMenus = this.developerMenus["FORM"];
+            else {
+                const compMenus = this.developerMenus["COMPONENT"];
+                if(compMenus)
+                {
+                    const allCompMenus = compMenus[""];
+                    const specMenus = compMenus[formElementType];
+                    devMenus = [...(allCompMenus ?? []), ...(specMenus ?? [])];
+                }
+            }
         }
-        return null;
+        return devMenus && devMenus.length > 0 ? devMenus : null;
     }
 
     getSuperForms() {

@@ -56,9 +56,10 @@ export class ContextMenuComponent implements OnInit {
         const contentArea = this.editorContentService.getContentArea();
         contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
             let node: HTMLElement;
+            let isFormNode = false;
             const selectionChanged = this.selection !== this.editorSession.getSelection();
             this.selection = this.editorSession.getSelection();
-            if (this.selection && this.selection.length == 1) {
+            if (this.selection && this.selection.length > 0) {
                 node = contentArea.querySelector("[svy-id='" + this.selection[0] + "']")
                 if (node && node.hasAttribute('svy-ghosttype') && node.getAttribute('svy-ghosttype') === GHOST_TYPES.GHOST_TYPE_PART) {
                     event.preventDefault();
@@ -69,9 +70,25 @@ export class ContextMenuComponent implements OnInit {
                 if (node && node.hasAttribute('svy-anchors')) {
                     this.selectionAnchor = parseInt(node.getAttribute('svy-anchors'));
                 }
+
+                let isValidSelect = true;
+                if(this.selection.length > 1) {
+                    const formElementType = node.getAttribute('svy-formelement-type');
+                    if(formElementType) {
+                        for(let i = 1; i < this.selection.length; i++) {
+                            let nextNode = this.editorContentService.getContentElement(this.selection[i]);
+                            if(nextNode && formElementType !== nextNode.getAttribute('svy-formelement-type')) {
+                                isValidSelect = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(!isValidSelect) node = null;
             }
             if (!node) {
                 node = this.editorContentService.getContentForm();
+                isFormNode = !this.selection || this.selection.length == 0;
             }
             if (node) {
                 for (let i = 0; i < this.menuItems.length; i++) {
@@ -162,18 +179,19 @@ export class ContextMenuComponent implements OnInit {
                             this.menuItems.splice(insertIndex, 0, menuItem);
                         }
                     }
-                    const developerMenus = this.editorSession.getDeveloperMenus(node.getAttribute('svy-formelement-type'));
+
+                    // Remove previously inserted developer menu items
+                    this.menuItems = this.menuItems.filter(
+                        item => !item.isDevMenu
+                    );
+                    const developerMenus = this.editorSession.getDeveloperMenus(isFormNode, node.getAttribute('svy-formelement-type'));
                     if (developerMenus) {
-                        // Remove previously inserted developer menu items
-                        this.menuItems = this.menuItems.filter(
-                            item => !developerMenus.includes(item.text)
-                        );
                         const insertIndex = this.menuItems.findIndex(item => item.text.startsWith("Delete"));//insert above delete
                         const devMenus = developerMenus.map(value =>
                             new ContextmenuItem(value, () => {
                                 this.hide()
-                                this.editorSession.executeDeveloperMenu(value);
-                            })
+                                this.editorSession.executeDeveloperMenu(isFormNode, value);
+                            }, true)
                         );
                         this.menuItems.splice(insertIndex, 0, ...devMenus);
                     }                    
@@ -898,7 +916,8 @@ export class ContextmenuItem {
 
     constructor(
         public text: string,
-        private functionToExecute: () => void) {
+        private functionToExecute: () => void,
+        public isDevMenu?: boolean) {
     }
 
     public execute() {

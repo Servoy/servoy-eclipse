@@ -576,7 +576,7 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("getWizardProperties", new GetWizardProperties());
 
 		configuredHandlers.put("getDeveloperMenus", new GetDeveloperMenus());
-		configuredHandlers.put("executeDeveloperMenu", new ExecuteDeveloperMenu(selectionProvider));
+		configuredHandlers.put("executeDeveloperMenu", new ExecuteDeveloperMenu(editorPart.getForm().getUUID(), selectionProvider));
 
 		configuredHandlers.put("getVariantsForCategory", new IServerService()
 		{

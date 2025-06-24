@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.developersolution.DeveloperBridge;
+import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 
 /**
  * @author gabi
@@ -42,17 +43,44 @@ public class GetDeveloperMenus implements IServerService
 	{
 		JSONObject result = new JSONObject();
 		DeveloperBridge.menus.keySet().forEach(jsDeveloperMenu -> {
-			String[] componentNames = jsDeveloperMenu.getComponentNames();
-			if (componentNames != null)
+			int location = jsDeveloperMenu.getLocation();
+			if ((location & IJSDeveloperBridge.LOCATION.getCOMPONENT()) > 0)
 			{
-				Arrays.asList(componentNames).forEach(componentName -> {
-					if (!result.has(componentName))
+				if (!result.has("COMPONENT"))
+				{
+					result.put("COMPONENT", new JSONObject());
+				}
+				JSONObject components = result.getJSONObject("COMPONENT");
+				String[] componentNames = jsDeveloperMenu.getComponentNames();
+				if (componentNames != null && componentNames.length > 0)
+				{
+					Arrays.asList(componentNames).forEach(componentName -> {
+						if (!components.has(componentName))
+						{
+							components.put(componentName, new JSONArray());
+						}
+						JSONArray menusForComponent = components.getJSONArray(componentName);
+						menusForComponent.put(jsDeveloperMenu.getText());
+					});
+				}
+				else
+				{
+					if (!components.has(""))
 					{
-						result.put(componentName, new JSONArray());
+						components.put("", new JSONArray());
 					}
-					JSONArray menusForComponent = result.getJSONArray(componentName);
+					JSONArray menusForComponent = components.getJSONArray("");
 					menusForComponent.put(jsDeveloperMenu.getText());
-				});
+				}
+			}
+			if ((location & IJSDeveloperBridge.LOCATION.getFORM()) > 0)
+			{
+				if (!result.has("FORM"))
+				{
+					result.put("FORM", new JSONArray());
+				}
+				JSONArray menusForForm = result.getJSONArray("FORM");
+				menusForForm.put(jsDeveloperMenu.getText());
 			}
 		});
 		return result;

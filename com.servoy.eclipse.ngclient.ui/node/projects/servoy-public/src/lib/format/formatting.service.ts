@@ -285,7 +285,7 @@ export class FormattingService {
         // and test if this number can be represented as a javascript number without loosing precision
         // if not, return the string representation of the number
         const stripped = data.replaceAll(numbro.languageData().delimiters.thousands, '').replace(numbro.languageData().delimiters.decimal, '.');
-        const bigNumber = BigNumber(stripped);
+        const bigNumber = new BigNumber(stripped);
         if (!bigNumber.isNaN() && !bigNumber.isEqualTo(bigNumber.toNumber())) {
             return bigNumber.toString();
         }
@@ -383,7 +383,7 @@ export class FormattingService {
         let nmbr = Number(data);
         if (typeof data === 'string' && nmbr.toString() != data) {
            // this is very likely a bignumber.
-           data = BigNumber(data);
+           data = new BigNumber(data);
            if (data.isNaN()) return '';
         }
         else {
@@ -472,7 +472,7 @@ export class FormattingService {
                     fractionalDigits++;
                 }
             }
-            ret = BigNumber(data).toExponential(integerDigits + fractionalDigits);
+            ret = new BigNumber(data).toExponential(integerDigits + fractionalDigits);
         } else {
 
             let leftFormat = '';
