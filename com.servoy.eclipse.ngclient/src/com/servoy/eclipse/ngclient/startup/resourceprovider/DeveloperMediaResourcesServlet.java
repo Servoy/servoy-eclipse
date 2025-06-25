@@ -17,13 +17,13 @@
 
 package com.servoy.eclipse.ngclient.startup.resourceprovider;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * MediaServlet used only in the developer.

@@ -17,11 +17,11 @@
 
 package com.servoy.eclipse.developersolution;
 
-import javax.websocket.server.ServerEndpoint;
-
 import org.sablo.websocket.GetHttpSessionConfigurator;
 
 import com.servoy.j2db.server.ngclient.endpoint.NGClientEndpoint;
+
+import jakarta.websocket.server.ServerEndpoint;
 
 /**
  * @author jcompagner
