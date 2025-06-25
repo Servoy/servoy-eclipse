@@ -3837,6 +3837,10 @@ public class SolutionExplorerView extends ViewPart
 					// execute open option
 					openActionInTree.run();
 				}
+				else if (doubleClickedItem.getType() == UserNodeType.MENU && doubleClickedItem.getRealObject() instanceof IPersist menu)
+				{
+					EditorUtil.openMenuEditor(menu, true);
+				}
 				else if (expandable)
 				{
 					// expand/collapse anyway - if we cannot open
