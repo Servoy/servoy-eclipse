@@ -239,7 +239,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.tomcat"
-         version="9.0.91"/>
+         version="11.0.8"/>
 
    <plugin
          id="sablo"
@@ -248,10 +248,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    <plugin
          id="servoy_ngclient"
          version="2025.9.0.4100_rc"/>
-
-   <plugin
-         id="javax.websocket"
-         version="1.1.0"/>
 
    <plugin
          id="org.maven.ide.eclipse.grouplayout"
@@ -271,7 +267,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="jabsorb"
-         version="1.3.2.s7"/>
+         version="1.3.3.s1"/>
 
    <plugin
          id="com.servoy.eclipse.designer.wpm"
@@ -287,19 +283,19 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.logging.log4j.api"
-         version="2.24.3"/>
+         version="2.25.0"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
-         version="2.24.3"/>
+         version="2.25.0"/>
 
    <plugin
          id="org.apache.logging.log4j.web"
-         version="2.24.3"/>
+         version="2.25.0"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j2.impl"
-         version="2.24.3"/>
+         version="2.25.0"/>
 
    <plugin
          id="javax.transaction"
@@ -320,10 +316,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    <plugin
          id="org.hibernate.orm.core"
          version="5.6.15.Servoy3"/>
-
-   <plugin
-         id="jaxb-api"
-         version="2.3.1"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
@@ -396,14 +388,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          ws="cocoa"
          arch="aarch64"
          version="22.15.1"/>
-
-   <plugin
-         id="com.sun.activation.jakarta.activation"
-         version="1.2.2"/>
-
-   <plugin
-         id="com.sun.mail.jakarta.mail"
-         version="1.6.7"/>
 
    <plugin
          id="slf4j.api"
