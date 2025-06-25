@@ -6,7 +6,7 @@ Bundle-Version: 2025.9.0.4100_rc
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.apache.tomcat,
+Require-Bundle: org.apache.tomcat;bundle-version="11.0.8",
  servoy_ngclient,
  servoy_shared,
  sablo,
@@ -31,9 +31,9 @@ Export-Package: com.servoy.eclipse.ngclient.ui;
    org.eclipse.jface.resource,
    org.eclipse.core.resources",
  com.servoy.eclipse.ngclient.ui.utils
-Import-Package: jakarta.servlet;version="[6.1.0,7.0.0)",
- jakarta.servlet.annotation;version="[6.1.0,7.0.0)",
- jakarta.servlet.http;version="[6.1.0,7.0.0)",
+Import-Package: jakarta.servlet;version="6.1.0",
+ jakarta.servlet.annotation;version="6.1.0",
+ jakarta.servlet.http;version="6.1.0",
  org.apache.commons.io;version="2.8.0",
  org.apache.commons.io.file;version="2.8.0",
  org.apache.commons.io.filefilter;version="2.8.0",
