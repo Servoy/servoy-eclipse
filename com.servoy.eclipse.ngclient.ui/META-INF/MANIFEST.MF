@@ -31,9 +31,9 @@ Export-Package: com.servoy.eclipse.ngclient.ui;
    org.eclipse.jface.resource,
    org.eclipse.core.resources",
  com.servoy.eclipse.ngclient.ui.utils
-Import-Package: jakarta.servlet;version="6.1.0",
- jakarta.servlet.annotation;version="6.1.0",
- jakarta.servlet.http;version="6.1.0",
+Import-Package: jakarta.servlet;version="[6.1.0,8.0.0)",
+ jakarta.servlet.annotation;version="[6.1.0,8.0.0)",
+ jakarta.servlet.http;version="[6.1.0,8.0.0)",
  org.apache.commons.io;version="2.8.0",
  org.apache.commons.io.file;version="2.8.0",
  org.apache.commons.io.filefilter;version="2.8.0",
