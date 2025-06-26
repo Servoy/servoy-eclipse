@@ -1484,6 +1484,16 @@
                   style="push">
             </command>
             <command
+     			 commandId="com.servoy.eclipse.designer.rfb.delete"
+     			 label="Delete (Cannot be undone)"
+      			 style="push">
+  			   <visibleWhen>
+      				<iterate>
+         				<instanceof value="com.servoy.j2db.persistence.FormElementGroup"/>
+      				</iterate>
+   			   </visibleWhen>
+			</command>
+            <command
                   commandId="com.servoy.eclipse.designer.rfb.delete"
                   label="Delete"
                   style="push">
@@ -1491,12 +1501,12 @@
                      checkEnabled="false">
 		          <iterate>
 		              <or>
-		                    <instanceof
-		                           value="com.servoy.j2db.persistence.IPersist">
-		                    </instanceof>
-		                    <instanceof
-		                          value="com.servoy.eclipse.ui.property.PersistContext">
-		                    </instanceof>
+		                <instanceof
+		                      value="com.servoy.j2db.persistence.IPersist">
+	                    </instanceof>
+		                <instanceof
+		                      value="com.servoy.eclipse.ui.property.PersistContext">
+		                </instanceof>
 		              </or>
 		         </iterate>
                </visibleWhen>
