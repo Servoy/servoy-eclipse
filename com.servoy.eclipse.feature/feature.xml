@@ -290,10 +290,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="2.25.0"/>
 
    <plugin
-         id="org.apache.logging.log4j.web"
-         version="2.25.0"/>
-
-   <plugin
          id="org.apache.logging.log4j.slf4j2.impl"
          version="2.25.0"/>
 
@@ -421,5 +417,9 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          ws="win32"
          arch="aarch64"
          version="22.15.1"/>
+
+   <plugin
+         id="org.apache.logging.log4j.jakarta.web"
+         version="2.25.0"/>
 
 </feature>

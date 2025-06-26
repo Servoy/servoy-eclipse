@@ -351,9 +351,9 @@
                 </dependency>
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-web</artifactId>
+                    <artifactId>log4j-jakarta-web</artifactId>
                     <version>2.25.0</version>
-                    <type>jar</type>
+                    <scope>runtime</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>

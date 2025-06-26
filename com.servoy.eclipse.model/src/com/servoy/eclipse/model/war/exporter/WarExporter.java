@@ -163,22 +163,22 @@ public class WarExporter
 		"org.apache.logging.log4j.api_*.jar", //
 		"org.apache.logging.log4j.core_*.jar", //
 		"org.apache.logging.log4j.slf4j2.impl_*.jar", //
-		"org.apache.logging.log4j.web_*.jar", //
+		"org.apache.logging.log4j.jakarta.web_*.jar", //
 //		"org.apache.logging.log4j.jcl_*.jar", //
 		"org.antlr.runtime_*.jar", //
 		"javax.transaction_*.jar", //
+		"javax.persistence-api_*.jar", //
+		"jakarta.mail-api_*.jar", //
+		"jakarta.activation-api_*.jar", //
 		"org.apache.james.apache-mime4j_*.jar", //
 		"xstream_*.jar", //
 		"org.jsoup_*.jar", //
-		"javax.persistence-api_*.jar", //
-		"com.sun.mail.jakarta.mail_*.jar", //
-		"com.sun.activation.jakarta.activation_*.jar", //
 		"com.github.ua-parser.uap-java_*.jar", //
 		"org.yaml.snakeyaml_*.jar", //
 		"org.jboss.logging.jboss-logging_*.jar", //
 		"net.bytebuddy.byte-buddy_*.jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
-		"de.inetsoftware.jlessc_*.jar", "tus-java-server_*.jar", //
+		"de.inetsoftware.jlessc_*.jar", "wrapped.com.servoy.tus-java-server_*.jar", //
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
 		"wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
