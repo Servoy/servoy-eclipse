@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.developersolution.DeveloperBridge;
 import com.servoy.eclipse.developersolution.DeveloperNGClient;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeveloperSolutionAction;
 import com.servoy.j2db.persistence.Form;
@@ -35,6 +37,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.scripting.solutionmodel.JSWebComponent;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
+import com.servoy.j2db.util.UUID;
 
 /**
  * @author gabi
@@ -43,10 +46,12 @@ import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 public class ExecuteDeveloperMenu implements IServerService
 {
 
+	private final UUID formUUID;
 	private final ISelectionProvider selectionProvider;
 
-	public ExecuteDeveloperMenu(ISelectionProvider selectionProvider)
+	public ExecuteDeveloperMenu(UUID formUUID, ISelectionProvider selectionProvider)
 	{
+		this.formUUID = formUUID;
 		this.selectionProvider = selectionProvider;
 	}
 
@@ -58,30 +63,48 @@ public class ExecuteDeveloperMenu implements IServerService
 	@Override
 	public Object executeMethod(String methodName, JSONObject args) throws Exception
 	{
-		if (selectionProvider != null && args.has("name"))
+		if (args.has("isForm") && args.has("name"))
 		{
-			PersistContext[] selection = null;
-			selection = (PersistContext[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new PersistContext[0]);
-			if (selection.length > 0 && selection[0].getContext() instanceof Form && selection[0].getPersist() instanceof WebComponent)
+			JSForm form = null;
+			ArrayList<JSWebComponent> wc = new ArrayList<>();
+
+			if (args.getBoolean("isForm"))
 			{
-				JSForm form = new JSForm(DeveloperNGClient.INSTANCE, (Form)selection[0].getContext(), true);
-				JSWebComponent wc = new JSWebComponent(form, (WebComponent)selection[0].getPersist(), DeveloperNGClient.INSTANCE, true); // new JSWebComponent(form, selection[0].getPersist(), DeveloperNGClient.INSTANCE, true);
-
-				String menuName = args.getString("name");
-				String wcType = wc.getTypeName();
-
-				for (Map.Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+				form = new JSForm(DeveloperNGClient.INSTANCE, (Form)ServoyModelFinder.getServoyModel().getActiveProject().getEditingPersist(formUUID), true);
+			}
+			else if (selectionProvider != null)
+			{
+				PersistContext[] selection = null;
+				selection = (PersistContext[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new PersistContext[0]);
+				if (selection.length > 0 && selection[0].getContext() instanceof Form && selection[0].getPersist() instanceof WebComponent)
 				{
-					if (menuName.equals(entry.getKey().getText()))
+					form = new JSForm(DeveloperNGClient.INSTANCE, (Form)selection[0].getContext(), true);
+					wc.add(new JSWebComponent(form, (WebComponent)selection[0].getPersist(), DeveloperNGClient.INSTANCE, true));
+
+					for (int i = 1; i < selection.length; i++)
 					{
-						String[] componentNames = entry.getKey().getComponentNames();
-						if (componentNames != null && Arrays.asList(componentNames).contains(wcType))
+						if (selection[i].getPersist() instanceof WebComponent)
 						{
-							DeveloperSolutionAction devSolAction = new DeveloperSolutionAction(entry.getKey(), entry.getValue(),
-								new Object[] { form, wc });
-							devSolAction.run();
-							break;
+							wc.add(new JSWebComponent(form, (WebComponent)selection[i].getPersist(), DeveloperNGClient.INSTANCE, true));
 						}
+					}
+				}
+			}
+
+			String menuName = args.getString("name");
+			for (Map.Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+			{
+				if (menuName.equals(entry.getKey().getText()))
+				{
+					String[] componentNames = entry.getKey().getComponentNames();
+
+					if (args.getBoolean("isForm") || componentNames == null || componentNames.length == 0 ||
+						(wc.size() > 0 && Arrays.asList(componentNames).contains(wc.get(0).getTypeName())))
+					{
+						DeveloperSolutionAction devSolAction = new DeveloperSolutionAction(entry.getKey(), entry.getValue(),
+							new Object[] { form, wc.toArray(new JSWebComponent[wc.size()]) });
+						devSolAction.run();
+						break;
 					}
 				}
 			}

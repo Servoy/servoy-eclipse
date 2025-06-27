@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.IHandler;
@@ -36,6 +37,7 @@ import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
@@ -75,6 +77,14 @@ public abstract class ContentOutlineCommand extends AbstractHandler implements I
 			return ((IStructuredSelection)viewSelection).toList();
 		}
 		return new ArrayList<Object>();
+	}
+
+	protected List<Object> getMixedSelection()
+	{
+		return getSelectionList().stream()
+			.filter(obj -> (obj instanceof IPersist && !(obj instanceof WebFormComponentChildType)) || obj instanceof PersistContext ||
+				obj instanceof FormElementGroup)
+			.collect(Collectors.toList());
 	}
 
 	protected ISelection getViewSelection()

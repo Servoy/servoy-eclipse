@@ -29,7 +29,6 @@ Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.core.expressions,
  com.servoy.eclipse.designer.rfb,
  org.maven.ide.eclipse.grouplayout,
- javax.websocket,
  servoy_headless_client,
  org.eclipse.ui.browser,
  org.eclipse.dltk.javascript.rhino,
@@ -40,7 +39,9 @@ Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.resource,or
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.designer
 Import-Package: com.servoy.eclipse.ngclient.ui,
- javax.servlet.http;version="[4.0.0,5.0.0)",
+ jakarta.servlet.http;version="[6.1.0,8.0.0)",
+ jakarta.websocket;version="[2.2.0,4.0.0)",
+ jakarta.websocket.server;version="[2.2.0,4.0.0)",
  org.apache.commons.text;version="1.11.0",
  org.eclipse.jface.text,
  org.eclipse.ui.internal.genericeditor

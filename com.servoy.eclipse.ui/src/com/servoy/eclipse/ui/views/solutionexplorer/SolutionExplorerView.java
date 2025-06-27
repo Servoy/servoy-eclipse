@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.awt.Dimension;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -259,7 +260,9 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
+import com.servoy.j2db.scripting.solutionmodel.JSWebComponent;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -2703,47 +2706,6 @@ public class SolutionExplorerView extends ViewPart
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		// extra open actions contributions
 		manager.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
-		if (DeveloperBridge.menus.size() > 0)
-		{
-			IStructuredSelection selection = (IStructuredSelection)tree.getSelection();
-			Object selectedObject = selection.getFirstElement();
-			if (selectedObject instanceof SimpleUserNode un)
-			{
-				Object realObject = un.getRealObject();
-				int selectedType = 0;
-				Object[] args = new Object[1];
-				if (realObject instanceof Solution sol)
-				{
-					selectedType = IJSDeveloperBridge.LOCATION.getSOLUTION();
-					args[0] = sol.getName();
-				}
-				else if (realObject instanceof Form frm)
-				{
-					selectedType = IJSDeveloperBridge.LOCATION.getFORM();
-					args[0] = new JSForm(DeveloperNGClient.INSTANCE,
-						(Form)ServoyModelFinder.getServoyModel().getActiveProject().getEditingPersist(frm.getUUID()),
-						true);
-				}
-
-				if (selectedType > 0)
-				{
-					boolean seperatedAdded = false;
-					for (Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
-					{
-						if ((entry.getKey().getLocation() & selectedType) > 0)
-						{
-							if (!seperatedAdded)
-							{
-								manager.add(new Separator());
-								seperatedAdded = true;
-							}
-
-							manager.add(new DeveloperSolutionAction(entry.getKey(), entry.getValue(), args));
-						}
-					}
-				}
-			}
-		}
 		manager.add(new Separator());
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SERVERS)
 		{
@@ -2896,6 +2858,108 @@ public class SolutionExplorerView extends ViewPart
 		{
 			manager.add(new Separator());
 			manager.add(addComponentIcon);
+		}
+
+		if (DeveloperBridge.menus.size() > 0)
+		{
+			IStructuredSelection selection = (IStructuredSelection)tree.getSelection();
+			Object selectedObject = selection.getFirstElement();
+			if (selectedObject instanceof SimpleUserNode un)
+			{
+				Object realObject = un.getRealObject();
+				if (realObject != null && realObject.getClass().isArray())
+				{
+					realObject = Array.get(realObject, 0);
+				}
+				int selectedType = 0;
+				Object[] args = null;
+				if (realObject instanceof ServoyProject servoyProject)
+				{
+					selectedType = IJSDeveloperBridge.LOCATION.getSOLUTION();
+					args = new Object[1];
+					args[0] = servoyProject.getSolution().getName();
+				}
+				else if (realObject instanceof Form frm)
+				{
+					selectedType = IJSDeveloperBridge.LOCATION.getFORM();
+					ArrayList<JSForm> selectedForms = new ArrayList<JSForm>();
+					Object[] selectionObj = selection.toArray();
+					for (Object element : selectionObj)
+					{
+						if (element instanceof SimpleUserNode unForm)
+						{
+							Object formObject = unForm.getRealObject();
+							if (formObject instanceof Form)
+							{
+								selectedForms.add(new JSForm(DeveloperNGClient.INSTANCE,
+									(Form)ServoyModelFinder.getServoyModel().getActiveProject().getEditingPersist(((Form)formObject).getUUID()),
+									true));
+							}
+						}
+					}
+					args = new Object[1];
+					args[0] = selectedForms.toArray();
+
+				}
+				else if (realObject instanceof WebComponent)
+				{
+					Form frm = (Form)((WebComponent)realObject).getAncestor(IRepository.FORMS);
+					selectedType = IJSDeveloperBridge.LOCATION.getCOMPONENT();
+					args = new Object[2];
+					args[0] = new JSForm(DeveloperNGClient.INSTANCE,
+						(Form)ServoyModelFinder.getServoyModel().getActiveProject().getEditingPersist(frm.getUUID()),
+						true);
+					ArrayList<JSWebComponent> selectedWebComponents = new ArrayList<JSWebComponent>();
+					Object[] selectionObj = selection.toArray();
+					for (Object element : selectionObj)
+					{
+						if (element instanceof SimpleUserNode unComponent)
+						{
+							Object webComponentObject = unComponent.getRealObject();
+							if (webComponentObject != null && webComponentObject.getClass().isArray())
+							{
+								webComponentObject = Array.get(webComponentObject, 0);
+							}
+
+							if (webComponentObject instanceof WebComponent)
+							{
+								Form parentFrm = (Form)((WebComponent)webComponentObject).getAncestor(IRepository.FORMS);
+								if (frm == parentFrm)
+								{
+									selectedWebComponents
+										.add(new JSWebComponent((JSForm)args[0], (WebComponent)webComponentObject, DeveloperNGClient.INSTANCE, true));
+								}
+							}
+						}
+					}
+					args[1] = selectedWebComponents.toArray();
+				}
+
+				if (selectedType > 0)
+				{
+					boolean seperatedAdded = false;
+					for (Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+					{
+						int location = entry.getKey().getLocation();
+						if ((location & selectedType) > 0)
+						{
+							if (!seperatedAdded)
+							{
+								manager.add(new Separator());
+								seperatedAdded = true;
+							}
+
+							if ((location & IJSDeveloperBridge.LOCATION.getCOMPONENT()) > 0 && realObject instanceof WebComponent)
+							{
+								String componentTypeName = ((WebComponent)realObject).getTypeName();
+								String[] componentNames = entry.getKey().getComponentNames();
+								if (componentNames != null && componentNames.length > 0 && !Arrays.asList(componentNames).contains(componentTypeName)) continue;
+							}
+							manager.add(new DeveloperSolutionAction(entry.getKey(), entry.getValue(), args));
+						}
+					}
+				}
+			}
 		}
 
 		manager.add(new Separator());
@@ -3772,6 +3836,10 @@ public class SolutionExplorerView extends ViewPart
 				{
 					// execute open option
 					openActionInTree.run();
+				}
+				else if (doubleClickedItem.getType() == UserNodeType.MENU && doubleClickedItem.getRealObject() instanceof IPersist menu)
+				{
+					EditorUtil.openMenuEditor(menu, true);
 				}
 				else if (expandable)
 				{

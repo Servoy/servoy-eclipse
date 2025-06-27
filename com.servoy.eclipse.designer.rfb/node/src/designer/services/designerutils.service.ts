@@ -62,7 +62,7 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
+    getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string, dragNode?: HTMLElement): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget: Element = null;
         if (type == 'layout' || ((type == 'component' || type === 'jsmenu') && !absoluteLayout)) {
             const realName = layoutName ? layoutName : 'component';
@@ -101,6 +101,13 @@ export class DesignerUtilsService {
                             break;
 
                     }
+                }
+                if (this.isSameElement(dragNode, beforeNode)) {
+                    return {
+                        dropAllowed: true,
+                        dropTarget: null,
+                        beforeChild: null
+                    };
                 }
                 return {
                     dropAllowed: true,
@@ -141,10 +148,23 @@ export class DesignerUtilsService {
                     if (dropTarget && !dropTarget.getAttribute('svy-id')) {
                         dropTarget = this.getNextElementSibling(dropTarget);
                     }
+                    if (this.isSameElement(dragNode, realDropTarget)) {
+                        return {
+                            dropAllowed: true,
+                            dropTarget: dropTarget,
+                            beforeChild: null
+                        }
+                    }
                     return {
                         dropAllowed: true,
                         dropTarget: realDropTarget,
                         beforeChild: dropTarget
+                    };
+                } else if (this.isSameElement(dragNode, realDropTarget)) {
+                    return {
+                        dropAllowed: true,
+                        dropTarget: null,
+                        beforeChild: null,
                     };
                 }
                 else {
@@ -170,6 +190,13 @@ export class DesignerUtilsService {
                                 break;
 
                         }
+                    }
+                    if (this.isSameElement(dragNode, realDropTarget)) {
+                        return {
+                            dropAllowed: true,
+                            dropTarget: null,
+                            beforeChild: beforeNode
+                        };
                     }
                     return {
                         dropAllowed: true,
@@ -205,6 +232,15 @@ export class DesignerUtilsService {
             dropAllowed: true,
             dropTarget: dropTarget
         };
+    }
+    
+    
+    isSameElement(elem1: HTMLElement, elem2: Element): boolean {
+        if (!elem1 || !elem2) return false;
+        if (elem1.getAttribute('svy-id') === elem2.getAttribute('svy-id')) {
+            return true;
+        }
+        return false;
     }
 
     public getParent(dt: Element, realName?: string): Element {
@@ -286,6 +322,21 @@ export class DesignerUtilsService {
                 for (let j = 0; j < packages[i].components.length; j++) {
                     if (packages[i].components[j].topContainer && packages[i].packageName + '.' + packages[i].components[j].layoutName === layoutName) {
                         return true;
+                    }
+                }
+            }
+            
+            // loop over categories as well
+            if (packages[i].categories) {
+                const keys = Object.keys(packages[i].categories);
+                for (let j = 0; j < keys.length; j++) {
+                    const category = packages[i].categories[keys[j]];
+                    if (category[0] && category[0].componentType === 'layout') {
+                        for (let k = 0; k < category.length; k++) {
+                            if (category[k].topContainer && packages[i].packageName + '.' + category[k].layoutName === layoutName) {
+                                return true;
+                            }
+                        }
                     }
                 }
             }

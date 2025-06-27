@@ -44,6 +44,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.GroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.UngroupCommand;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ConvertComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentsHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ExecuteDeveloperMenu;
@@ -130,6 +131,7 @@ public class EditorServiceHandler implements IServerService
 
 		configuredHandlers.put("keyPressed", new KeyPressedHandler(editorPart, selectionProvider));
 		configuredHandlers.put("setProperties", new SetPropertiesHandler(editorPart));
+		configuredHandlers.put("convertComponent", new ConvertComponentHandler(editorPart, selectionProvider));
 		configuredHandlers.put("moveComponent", new MoveInResponsiveLayoutHandler(editorPart));
 		configuredHandlers.put("createComponent", new CreateComponentHandler(editorPart, selectionProvider));
 		configuredHandlers.put("getPartsStyles", new GetPartStylesHandler(editorPart));
@@ -576,7 +578,7 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("getWizardProperties", new GetWizardProperties());
 
 		configuredHandlers.put("getDeveloperMenus", new GetDeveloperMenus());
-		configuredHandlers.put("executeDeveloperMenu", new ExecuteDeveloperMenu(selectionProvider));
+		configuredHandlers.put("executeDeveloperMenu", new ExecuteDeveloperMenu(editorPart.getForm().getUUID(), selectionProvider));
 
 		configuredHandlers.put("getVariantsForCategory", new IServerService()
 		{
