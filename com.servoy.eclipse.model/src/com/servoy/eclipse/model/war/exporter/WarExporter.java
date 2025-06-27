@@ -157,7 +157,8 @@ public class WarExporter
 		"org.apache.commons.commons-collections4_*.jar", //
 		"org.apache.commons.commons-dbcp2_*.jar", //
 		"org.apache.commons.commons-pool2_*.jar", //
-		"org.apache.commons.commons-fileupload_*.jar", //
+		"org.apache.commons.commons-fileupload2-core_*.jar", //
+		"org.apache.commons.commons-fileupload2-jakarta-servlet6_*.jar", //
 		"com.google.guava_*.jar", //
 		"org.hibernate.orm.core_*.jar", //
 		"org.apache.logging.log4j.api_*.jar", //
