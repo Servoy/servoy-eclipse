@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<target includeMode="feature" name="eclipse_local">
+	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk18"/>
+	<locations>
+		<location path="${workspace_loc}/launchtarget-hibernate7" type="Directory"/>
+	</locations>
+</target>
