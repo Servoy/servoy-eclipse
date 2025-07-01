@@ -259,7 +259,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.eclipse.equinox.concurrent"
-         version="1.3.200.v20250130-0530"/>
+         version="1.3.300.v20250516-0535"/>
 
    <plugin
          id="sj.jsonschemavalidation"
