@@ -49,6 +49,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -296,6 +297,14 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 							IFile duplicateLessFile = root
 								.getFile(new Path(duplicatePath.getLeft() + ((Form)duplicate).getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
 							duplicateLessFile.create(lessFile.getContents(), true, null);
+						}
+
+						IFile secFile = root.getFile(new Path(persitPath.getLeft() + frm.getName() + DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT));
+						if (secFile.exists())
+						{
+							IFile duplicateSecFile = root
+								.getFile(new Path(duplicatePath.getLeft() + ((Form)duplicate).getName() + DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT));
+							duplicateSecFile.create(secFile.getContents(), true, null);
 						}
 					}
 
