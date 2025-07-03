@@ -75,9 +75,10 @@ import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.IVariableStatement;
+import org.eclipse.dltk.javascript.ast.JSNode;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.Statement;
-import org.eclipse.dltk.javascript.ast.VariableDeclaration;
+import org.eclipse.dltk.javascript.ast.VariableBinding;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -3723,19 +3724,25 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		{
 			if (statement instanceof VoidExpression)
 			{
-				IPersist persist = null;
 				Expression expression = ((VoidExpression)statement).getExpression();
+				IPersist persist = null;
 				if (expression instanceof IVariableStatement)
 				{
-					VariableDeclaration decl = ((IVariableStatement)expression).getVariables().get(0);
-
+					VariableBinding decl = ((IVariableStatement)expression).getBindings().get(0);
+					List<String> variableNames = decl.getVariableNames();
+					//in case there are more variables (destructuring), only the first one has the comment
+					String variableName = variableNames.get(0);
 					if (parent instanceof Form)
 					{
-						persist = ((Form)parent).getScriptVariable(decl.getVariableName());
+						persist = ((Form)parent).getScriptVariable(variableName);
 					}
 					else if (parent instanceof Solution && scopeName != null)
 					{
-						persist = ((Solution)parent).getScriptVariable(scopeName, decl.getVariableName());
+						persist = ((Solution)parent).getScriptVariable(scopeName, variableName);
+					}
+					if (persist != null)
+					{
+						addChildToMultiTextEdit(textEdit, statement, persist, expression, scriptFile);
 					}
 				}
 				else if (expression instanceof FunctionStatement)
@@ -3757,42 +3764,47 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							persist = ((TableNode)parent).getFoundsetMethod(name);
 						}
 					}
-				}
-				if (persist != null)
-				{
-					Comment documentation = expression.getDocumentation();
-
-					JSDocScriptTemplates prefs = JSDocScriptTemplates.getTemplates(scriptFile.getProject(), true);
-					String userTemplate = (persist instanceof IVariable) ? prefs.getVariableTemplate() : prefs.getMethodTemplate();
-					String comment = null;
-					try
+					if (persist != null)
 					{
-						comment = SolutionSerializer.getComment(persist, userTemplate, ApplicationServerRegistry.get().getDeveloperRepository());
-					}
-					catch (RuntimeException e)
-					{
-					}
-					if (comment == null) continue;
-					if (documentation == null || !documentation.getText().equals(comment.trim()))
-					{
-						// if the jsdoc didn't match make sure that the persist is flagged as changed, because it needs to be regenerated.
-						persist.flagChanged();
-						if (documentation == null)
-						{
-							if (!comment.endsWith("\n")) comment += "\n";
-							textEdit.addChild(new InsertEdit(statement.sourceStart(), comment));
-						}
-						else
-						{
-							textEdit.addChild(
-								new ReplaceEdit(documentation.sourceStart(), documentation.sourceEnd() - documentation.sourceStart(), comment.trim()));
-						}
+						addChildToMultiTextEdit(textEdit, statement, persist, expression, scriptFile);
 					}
 				}
 
 			}
 		}
 		return textEdit;
+	}
+
+	private void addChildToMultiTextEdit(MultiTextEdit textEdit, Statement statement, IPersist persist, JSNode expression, IResource scriptFile)
+	{
+		Comment documentation = expression.getDocumentation();
+
+		JSDocScriptTemplates prefs = JSDocScriptTemplates.getTemplates(scriptFile.getProject(), true);
+		String userTemplate = (persist instanceof IVariable) ? prefs.getVariableTemplate() : prefs.getMethodTemplate();
+		String comment = null;
+		try
+		{
+			comment = SolutionSerializer.getComment(persist, userTemplate, ApplicationServerRegistry.get().getDeveloperRepository());
+		}
+		catch (RuntimeException e)
+		{
+		}
+		if (comment == null) return;
+		if (documentation == null || !documentation.getText().equals(comment.trim()))
+		{
+			// if the jsdoc didn't match make sure that the persist is flagged as changed, because it needs to be regenerated.
+			persist.flagChanged();
+			if (documentation == null)
+			{
+				if (!comment.endsWith("\n")) comment += "\n";
+				textEdit.addChild(new InsertEdit(statement.sourceStart(), comment));
+			}
+			else
+			{
+				textEdit.addChild(
+					new ReplaceEdit(documentation.sourceStart(), documentation.sourceEnd() - documentation.sourceStart(), comment.trim()));
+			}
+		}
 	}
 
 	private final List<File> ignoreOnceFiles = Collections.synchronizedList(new ArrayList<File>());
