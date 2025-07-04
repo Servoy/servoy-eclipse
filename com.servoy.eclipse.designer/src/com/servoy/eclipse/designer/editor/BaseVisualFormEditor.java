@@ -338,7 +338,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			return (T)new UndoablePersistPropertySourceProvider(this);
 		}
 		Object result = super.getAdapter(adapter);
-		if (result == null && graphicaleditor != null && graphicaleditor == getActiveEditor())
+		if (result == null && graphicaleditor != null && (graphicaleditor == getActiveEditor() || getActiveEditor() == null))
 		{
 			result = graphicaleditor.getAdapter(adapter);
 		}
