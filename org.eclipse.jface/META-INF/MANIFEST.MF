@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jface;singleton:=true
-Bundle-Version: 3.36.0.v20250129-1243
+Bundle-Version: 3.37.0.v20250522-1428
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: org.eclipse.jface,
@@ -44,3 +44,4 @@ Import-Package: javax.xml.parsers,
  org.w3c.dom,
  org.xml.sax
 Automatic-Module-Name: org.eclipse.jface
+Require-Capability: eclipse.swt;filter:="(image.format=svg)"

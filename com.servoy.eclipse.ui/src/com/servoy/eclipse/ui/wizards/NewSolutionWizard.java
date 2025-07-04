@@ -719,7 +719,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		if (project == null && packageInfo.forceActivateResourcesProject)
 		{
 			ServoyProject sol = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
-			final String selectedResourceProjectName = sol.getResourcesProject() != null ? sol.getResourcesProject().getProject().getName() : "resources";
+			final String selectedResourceProjectName = sol != null && sol.getResourcesProject() != null ? sol.getResourcesProject().getProject().getName()
+				: "resources";
 			newResourceProjectName = selectedResourceProjectName;
 			if (project == null && ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
 			{

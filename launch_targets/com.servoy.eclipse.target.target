@@ -7,16 +7,16 @@
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/128.0.12/repository"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="128.0.12"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/swt/128.0.15/repository"/>
+            <unit id="com.equo.chromium.feature.feature.group" version="128.0.15"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.12.media/repository"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="128.0.12"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.15.media/repository"/>
+            <unit id="com.equo.chromium.cef.feature.feature.group" version="128.0.15"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.12-arm.media/repository"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="128.0.12"/>
+            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/cef/128.0.15-arm.media/repository"/>
+            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="128.0.15"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="http://download.eclipse.org/nattable/releases/2.5.0/repository/"/>
@@ -28,36 +28,36 @@
             <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.source.feature.group" version="2.5.0.202411280718"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/eclipse/updates/4.35/"/>
-            <unit id="org.eclipse.emf.ecore.feature.group" version="2.39.0.v20241018-1213"/>
-            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.2800.v20250227-1734"/>
-            <unit id="org.eclipse.sdk.ide" version="4.35.0.I20250228-0140"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tm4e/releases/0.14.1/"/>
-            <unit id="org.eclipse.tm4e.feature.feature.group" version="0.14.1.202501141527"/>
-            <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.14.1.202501052236"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.09/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202506191440"/>
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202506191442"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/releases/2025-03"/>
-            <unit id="org.eclipse.egit.feature.group" version="7.2.0.202503040940-r"/>
-            <unit id="org.eclipse.epp.mpc.feature.group" version="1.12.0.v20250130-1529"/>
-            <unit id="org.eclipse.jgit.feature.group" version="7.2.0.202503040940-r"/>
-            <unit id="org.eclipse.jgit.http.apache.feature.group" version="7.2.0.202503040940-r"/>
-            <unit id="org.eclipse.jgit.lfs.feature.group" version="7.2.0.202503040940-r"/>
+            <repository location="https://download.eclipse.org/eclipse/updates/4.36/"/>
+            <unit id="org.eclipse.emf.ecore.feature.group" version="2.40.0.v20250414-1351"/>
+            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.2900.v20250519-0528"/>
+            <unit id="org.eclipse.sdk.ide" version="4.36.0.I20250528-1830"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/releases/2025-06"/>
+            <unit id="org.eclipse.egit.feature.group" version="7.3.0.202506031305-r"/>
+            <unit id="org.eclipse.epp.mpc.feature.group" version="1.12.1.v20250508-2126"/>
+            <unit id="org.eclipse.jgit.feature.group" version="7.3.0.202506031305-r"/>
+            <unit id="org.eclipse.jgit.http.apache.feature.group" version="7.3.0.202506031305-r"/>
+            <unit id="org.eclipse.jgit.lfs.feature.group" version="7.3.0.202506031305-r"/>
             <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.37.0.v202502280419"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.23.0"/>
-            <unit id="org.eclipse.draw2d.feature.group" version="3.23.0.202502242203"/>
-            <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.23.0.202502242203"/>
-            <unit id="org.eclipse.gef.feature.group" version="3.23.0.202502242203"/>
-            <unit id="org.eclipse.gef.sdk.feature.group" version="3.23.0.202502242203"/>
+            <repository location="https://download.eclipse.org/tm4e/releases/0.15.0/"/>
+            <unit id="org.eclipse.tm4e.feature.feature.group" version="0.15.0.202506111431"/>
+            <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.15.0.202506111431"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.24.0"/>
+            <unit id="org.eclipse.draw2d.feature.group" version="3.24.0.202505280821"/>
+            <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.24.0.202505280821"/>
+            <unit id="org.eclipse.gef.feature.group" version="3.24.0.202505280821"/>
+            <unit id="org.eclipse.gef.sdk.feature.group" version="3.24.0.202505280821"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
@@ -70,25 +70,25 @@
                 <dependency>
                     <groupId>com.auth0</groupId>
                     <artifactId>jwks-rsa</artifactId>
-                    <version>0.22.1</version>
+                    <version>0.22.2</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-annotations</artifactId>
-                    <version>2.19.0</version>
+                    <version>2.19.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
-                    <version>2.19.0</version>
+                    <version>2.19.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
-                    <version>2.19.0</version>
+                    <version>2.19.1</version>
                     <type>jar</type>
                 </dependency>
 				<dependency>
@@ -145,6 +145,18 @@
                 </dependency>
                 <dependency>
                     <groupId>com.servoy</groupId>
+                    <artifactId>javax.transaction</artifactId>
+                    <version>1.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.servoy</groupId>
+                    <artifactId>log4j-jakarta-web</artifactId>
+                    <version>2.25.0.s1</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.servoy</groupId>
                     <artifactId>org.maven.ide.eclipse.grouplayout</artifactId>
                     <version>1.1.0.201005260935</version>
                     <type>jar</type>
@@ -174,27 +186,6 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
-                    <groupId>jakarta.activation</groupId>
-                    <artifactId>jakarta.activation-api</artifactId>
-                    <version>2.1.3</version>
-                </dependency>
-                <dependency>
-                    <groupId>jakarta.mail</groupId>
-                    <artifactId>jakarta.mail-api</artifactId>
-                    <version>2.1.3</version>
-                </dependency>
-                <dependency>
-                    <groupId>jakarta.inject</groupId>
-                    <artifactId>jakarta.inject-api</artifactId>
-                    <version>1.0.5</version>
-                </dependency>
-                 <dependency>
-                    <groupId>com.servoy</groupId>
-                    <artifactId>javax.transaction</artifactId>
-                    <version>1.1.0</version>
-                    <type>jar</type>
-                </dependency>               
-                <dependency>
                     <groupId>com.thoughtworks.xstream</groupId>
                     <artifactId>xstream</artifactId>
                     <version>1.4.21</version>
@@ -206,16 +197,6 @@
                     <version>1.18.0</version>
                     <type>jar</type>
                 </dependency>
-                <dependency>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-fileupload2-core</artifactId>
-                    <version>2.0.0-M4</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-fileupload2-jakarta-servlet6</artifactId>
-                    <version>2.0.0-M4</version>
-                </dependency>                
                 <dependency>
                     <groupId>de.inetsoftware</groupId>
                     <artifactId>jlessc</artifactId>
@@ -229,9 +210,33 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>jakarta.activation</groupId>
+                    <artifactId>jakarta.activation-api</artifactId>
+                    <version>2.1.3</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
                     <groupId>jakarta.annotation</groupId>
                     <artifactId>jakarta.annotation-api</artifactId>
                     <version>3.0.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>jakarta.el</groupId>
+                    <artifactId>jakarta.el-api</artifactId>
+                    <version>6.0.1</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>jakarta.inject</groupId>
+                    <artifactId>jakarta.inject-api</artifactId>
+                    <version>1.0.5</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>jakarta.mail</groupId>
+                    <artifactId>jakarta.mail-api</artifactId>
+                    <version>2.1.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -240,11 +245,6 @@
                     <version>4.0.0</version>
                     <type>jar</type>
                 </dependency>
-                <dependency>
-                    <groupId>jakarta.el</groupId>
-                    <artifactId>jakarta.el-api</artifactId>
-                    <version>6.0.1</version>
-                </dependency>                
                 <dependency>
                     <groupId>jakarta.websocket</groupId>
                     <artifactId>jakarta.websocket-api</artifactId>
@@ -295,6 +295,18 @@
                 </dependency>
                 <dependency>
                     <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-fileupload2-core</artifactId>
+                    <version>2.0.0-M4</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-fileupload2-jakarta-servlet6</artifactId>
+                    <version>2.0.0-M4</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.commons</groupId>
                     <artifactId>commons-lang3</artifactId>
                     <version>3.17.0</version>
                     <type>jar</type>
@@ -309,30 +321,6 @@
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-text</artifactId>
                     <version>1.13.1</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents.client5</groupId>
-                    <artifactId>httpclient5-win</artifactId>
-                    <version>5.2.3</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents.client5</groupId>
-                    <artifactId>httpclient5</artifactId>
-                    <version>5.5</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents.core5</groupId>
-                    <artifactId>httpcore5-h2</artifactId>
-                    <version>5.3.4</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents.core5</groupId>
-                    <artifactId>httpcore5</artifactId>
-                    <version>5.3.4</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -358,12 +346,6 @@
                     <artifactId>log4j-slf4j2-impl</artifactId>
                     <version>2.25.0</version>
                     <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.servoy</groupId>
-                    <artifactId>log4j-jakarta-web</artifactId>
-                    <version>2.25.0.s1</version>
-                    <scope>runtime</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
@@ -392,7 +374,7 @@
                 <dependency>
                     <groupId>org.dom4j</groupId>
                     <artifactId>dom4j</artifactId>
-                    <version>2.1.4</version>
+                    <version>2.2.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -433,7 +415,7 @@
                 <dependency>
                     <groupId>org.jsoup</groupId>
                     <artifactId>jsoup</artifactId>
-                    <version>1.20.1</version>
+                    <version>1.21.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>

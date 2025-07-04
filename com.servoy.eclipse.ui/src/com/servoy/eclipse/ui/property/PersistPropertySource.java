@@ -2783,6 +2783,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					if (beanPropertyPersist instanceof AbstractBase)
 					{
 						((AbstractBase)beanPropertyPersist).clearProperty((String)id);
+						ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(), true);
 						return;
 					}
 				}

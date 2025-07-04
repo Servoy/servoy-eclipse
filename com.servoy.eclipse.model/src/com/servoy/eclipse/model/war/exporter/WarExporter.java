@@ -157,7 +157,8 @@ public class WarExporter
 		"org.apache.commons.commons-collections4_*.jar", //
 		"org.apache.commons.commons-dbcp2_*.jar", //
 		"org.apache.commons.commons-pool2_*.jar", //
-		"org.apache.commons.commons-fileupload_*.jar", //
+		"org.apache.commons.commons-fileupload2-core_*.jar", //
+		"org.apache.commons.commons-fileupload2-jakarta-servlet6_*.jar", //
 		"com.google.guava_*.jar", //
 		"org.hibernate.orm.core_*.jar", //
 		"org.apache.logging.log4j.api_*.jar", //
@@ -183,8 +184,8 @@ public class WarExporter
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
 		"wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
 		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar", //
-		"wrapped.org.apache.httpcomponents.core5.httpcore5_*.jar", "wrapped.org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
-		"wrapped.org.apache.httpcomponents.client5.httpclient5_*.jar" };
+		"org.apache.httpcomponents.core5.httpcore5_*.jar", "org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
+		"org.apache.httpcomponents.client5.httpclient5_*.jar" };
 
 	private static final Set<String> HTTP_PLUGIN_FILES = Set.of("httpclient5.jar", "httpcore5-h2.jar", "httpcore5.jar");
 
@@ -446,11 +447,6 @@ public class WarExporter
 							ServoyLog.logWarning("Duplicate '" + jar + "' jars with unknown versions " + dependenciesVersions.get(jar).values(), null);
 						}
 						List<File> listToRemove = dependenciesVersions.get(jar).get(version);
-						String reason = "a higher";
-						if (latest.equals(version))
-						{
-							reason = "the same";
-						}
 						for (File file : listToRemove)
 						{
 							if (latestJar.equals(file)) continue;
@@ -460,25 +456,6 @@ public class WarExporter
 								properties.remove(file.getPath().substring(file.getPath().indexOf("plugins") + "plugins/".length()).replace('\\', '/'));
 								removedJar = true;
 							}
-
-							if (messageBuilder.length() == 0)
-							{
-								messageBuilder.append(
-									"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
-							}
-							if (latestJarPath.startsWith(File.separator + "lib"))
-							{
-								messageBuilder.append("\nDependency '" + path +
-									"' is not exported because '" + latestJar.getName().replace("-" + version, "") +
-									"' is already present in the lib folder. \n");
-							}
-							else
-							{
-								messageBuilder.append("\nDependency '" + path +
-									"' is not exported because another " + latestJar.getName().replace("-" + version, "") + " with " + reason + " version (" +
-									latest +
-									") is already present in '" + latestJarPath + "'. \n");
-							}
 							String name = file.getName().substring(0, file.getName().indexOf(".jar")).replaceAll("-|_|\\d|\\.", "");
 							possibleDuplicates.get(name).remove(file);
 							File parent = file.getParentFile();
@@ -486,6 +463,19 @@ public class WarExporter
 							if (parent.list().length == 0)
 							{
 								parent.delete();
+							}
+
+							if (!latest.equals(version))
+							{
+								if (messageBuilder.length() == 0)
+								{
+									messageBuilder.append(
+										"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
+								}
+								messageBuilder.append("\nDependency '" + path +
+									"' is not exported because another " + latestJar.getName().replace("-" + version, "") + " with a higher version (" +
+									latest +
+									") is already present in '" + latestJarPath + "'. \n");
 							}
 						}
 					}
@@ -509,8 +499,6 @@ public class WarExporter
 		}
 		if (messageBuilder.length() > 0)
 		{
-			messageBuilder.append(
-				"\n If you use a smartclient, then the jnlp's files version could be needed to also have a version update.");
 			messageBuilder.append(
 				"\n If you are not using the latest versions of the exported plugins, an upgrade might fix the warnings. Otherwise, no action is required.");
 			userChannel.displayWarningMessage("Plugin dependencies problem", messageBuilder.toString(), true);
