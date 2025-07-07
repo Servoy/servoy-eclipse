@@ -6,7 +6,7 @@ Bundle-Version: 2025.6.0.4082
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.apache.tomcat,
+Require-Bundle: org.apache.tomcat;bundle-version="[9.0.91,10.0.0)",
  servoy_ngclient,
  servoy_shared,
  sablo,
