@@ -55,4 +55,10 @@ public class PropertyDescriptorWithTooltip extends PropertyDescriptor implements
 		this.tooltipProvider = tooltipProvider;
 	}
 
+	@Override
+	public String toString()
+	{
+		return "PropertyDescriptorWithTooltip:" + getId() + " - " + getDisplayName();
+	}
+
 }

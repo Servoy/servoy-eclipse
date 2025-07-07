@@ -35,6 +35,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.ICustomType;
 
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.Record;
@@ -232,7 +233,7 @@ public class TypeProvider implements ITypeProvider
 					}
 				}
 			}
-			if (TypeCreator.CUSTOM_TYPE.toLowerCase().startsWith(prefixLower))
+			if (ElementUtil.CUSTOM_TYPE.toLowerCase().startsWith(prefixLower))
 			{
 				WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 				WebObjectSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
@@ -245,7 +246,7 @@ public class TypeProvider implements ITypeProvider
 					Map<String, ICustomType< ? >> foundTypes = webComponentSpecification.getDeclaredCustomObjectTypes();
 					for (ICustomType< ? > type : foundTypes.values())
 					{
-						names.add(TypeCreator.CUSTOM_TYPE + '<' + type.getName() + '>');
+						names.add(ElementUtil.CUSTOM_TYPE + '<' + type.getName() + '>');
 					}
 				}
 			}

@@ -13,7 +13,7 @@
   <button *ngIf="isFileSelected()" class="svy-btn svy-btn-success svy-upload-btn-upload" (click)="doUpload()" [attr.disabled]="isUploading || getUploadFiles().length == 0 ? '' : null">{{ i18n_upload }}</button>
   <button class="svy-btn svy-btn-info svy-upload-btn-cancel" (click)="dismiss()" [attr.disabled]="isUploading ? '' : null">{{ i18n_cancel }}</button>
   <br><br>
-  <div class="svy-progress">
+  <div *ngIf="isFileSelected()" class="svy-progress">
   <div class="svy-progress-bar" role="progressbar" [attr.aria-valuenow]="getProgress('')" aria-valuemin="0" aria-valuemax="100" [style.width]="getProgress('%')">
    {{ getProgress('%') }}
   </div>

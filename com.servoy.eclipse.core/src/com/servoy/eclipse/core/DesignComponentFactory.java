@@ -180,9 +180,6 @@ public class DesignComponentFactory extends ComponentFactory
 						applyBasicComponentProperties(application, tabs, (BaseComponent)meta,
 							getStyleForBasicComponent(application, (BaseComponent)meta, form));
 						tabs.setAllTabsAlignment(((TabPanel)meta).getHorizontalAlignment());
-						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.LEFT));
-						tabs.addTab("position 2", new JLabel("another form showup here", SwingConstants.CENTER));
-						tabs.addTab("position 3", new JLabel("another form showup here", SwingConstants.CENTER));
 						retval = tabs;
 					}
 					else

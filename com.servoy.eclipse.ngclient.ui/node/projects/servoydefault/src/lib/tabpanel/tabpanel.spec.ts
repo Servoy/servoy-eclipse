@@ -1,6 +1,6 @@
 import { SimpleChanges, SimpleChange } from '@angular/core';
 import { TestBed, fakeAsync, tick, waitForAsync, discardPeriodicTasks } from '@angular/core/testing';
-import { ServoyDefaultTabpanel } from './tabpanel';
+import { ServoyDefaultTabpanel, DefaultTabpanelActiveTabVisibilityListener } from './tabpanel';
 import { Tab } from './basetabpanel';
 
 import { ServoyApi, ServoyPublicTestingModule, LoggerFactory, WindowRefService } from '@servoy/public';
@@ -9,15 +9,22 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
+    let mockMO;
+    let observerTarget;
     beforeEach( waitForAsync(() => {
-        servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm', 'trustAsHtml','registerComponent','unRegisterComponent'] );
+        mockMO = spyOn(window, "MutationObserver");
+        mockMO.and.returnValue( { observe: (param) => {observerTarget=param }, disconnect: () => { },takeRecords: () => [] } );
+       
+        servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm', 'isInAbsoluteLayout', 'trustAsHtml','registerComponent','unRegisterComponent'] );
         servoyApi.getMarkupId.and.returnValue( '1' );
+        servoyApi.isInAbsoluteLayout.and.returnValue( true );
         servoyApi.formWillShow.and.returnValue( Promise.resolve( true ) );
         servoyApi.hideForm.and.returnValue( Promise.resolve( true ) );
-        servoyApi.trustAsHtml.and.returnValue( Promise.resolve( true ) );
+        servoyApi.trustAsHtml.and.returnValue(  true );
         TestBed.configureTestingModule( {
             declarations: [
-                ServoyDefaultTabpanel
+                ServoyDefaultTabpanel,
+                DefaultTabpanelActiveTabVisibilityListener
             ],
             imports: [NgbModule, ServoyPublicTestingModule],
             providers: [WindowRefService, LoggerFactory]
@@ -58,6 +65,9 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
 
         fixture.detectChanges();
+        
+        mockMO.calls.mostRecent().args[0]([{attributeName:'class', target: observerTarget}]);
+        fixture.detectChanges();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_0' );
         expect( fixture.componentInstance.tabIndex ).toBe( 1 );
 
@@ -81,6 +91,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
 
         fixture.detectChanges();
+        tick(250);
 		discardPeriodicTasks();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
@@ -96,6 +107,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
 
         fixture.detectChanges();
+        tick(250);
 		discardPeriodicTasks();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );

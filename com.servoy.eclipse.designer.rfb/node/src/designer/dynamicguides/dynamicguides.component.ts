@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, OnDestroy, ElementRef, Input } from '@angular/core';
+import { Component, AfterViewInit, Renderer2, OnDestroy, ElementRef, Input } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -6,11 +6,12 @@ import { DynamicGuidesService, Guide, SnapData } from '../services/dynamicguides
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'dynamic-guides',
-  templateUrl: './dynamicguides.component.html',
-  styleUrls: ['./dynamicguides.component.css']
+    selector: 'dynamic-guides',
+    templateUrl: './dynamicguides.component.html',
+    styleUrls: ['./dynamicguides.component.css'],
+    standalone: false
 })
-export class DynamicGuidesComponent implements OnInit, OnDestroy {
+export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
 
   @Input() guides: Guide[] = [];
 
@@ -31,7 +32,7 @@ export class DynamicGuidesComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
     this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
       this.setGuides(value);
     })

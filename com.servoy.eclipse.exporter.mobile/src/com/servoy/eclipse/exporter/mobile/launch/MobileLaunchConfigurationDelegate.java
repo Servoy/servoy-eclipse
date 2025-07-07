@@ -44,7 +44,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	{
 		String browserID = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "");
 
-		MobileExporter exporter = new MobileExporter();
+		MobileExporter exporter = new MobileExporter(null);
 
 		File tmpExportFolder = null;
 		try
@@ -70,7 +70,7 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 
 			if (monitor != null) monitor.subTask("exporting mobile solution");
 
-			exporter.doExport(false);
+			exporter.doExport(false, monitor);
 
 			if (monitor != null && monitor.isCanceled()) return;
 			if (monitor != null) monitor.subTask("deploying mobile solution)");

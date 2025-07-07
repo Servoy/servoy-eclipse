@@ -18,10 +18,22 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
-import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
+import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author lvostinar
@@ -29,6 +41,9 @@ import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
  */
 public class CreateMediaWebAppManifest extends CreateMediaFileAction
 {
+	public static final String FILE_NAME = "manifest.json";
+	public static final String ICON_NAME = "webapp144.png";
+
 	public CreateMediaWebAppManifest(SolutionExplorerView viewer)
 	{
 		super(viewer);
@@ -40,25 +55,66 @@ public class CreateMediaWebAppManifest extends CreateMediaFileAction
 	@Override
 	protected String getFileName(String pathString)
 	{
-		return "manifest.json";
+		return FILE_NAME;
+	}
+
+	@Override
+	public void run()
+	{
+		Solution thisSolution = getSolution();
+		if (thisSolution != null)
+		{
+			WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+			try
+			{
+				wsa.createFolder(thisSolution.getName() + "/" + SolutionSerializer.MEDIAS_DIR);
+				IPath path = new Path(thisSolution.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + ICON_NAME);
+				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+				if (file != null && !file.exists())
+				{
+					InputStream inputStream = new ByteArrayInputStream(getIcon());
+					file.create(inputStream, false, null);
+					inputStream.close();
+				}
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		super.run();
 	}
 
 	@Override
 	protected InputStream getContentInputStream()
 	{
+		return new ByteArrayInputStream(createManifest(solution.getName()));
+	}
+
+	public static byte[] createManifest(String solutionName)
+	{
 		StringBuffer initialContent = new StringBuffer();
 		initialContent.append("{\n");
-		initialContent.append("\t\"name\": \"Servoy Web Application Manifest Example\",\n");
-		initialContent.append("\t\"short_name\": \"SvyApp\",\n");
+		initialContent.append("\t\"name\": \"Servoy Web Application\",\n");
+		initialContent.append("\t\"short_name\": \"" + solutionName + "\",\n");
 		initialContent.append("\t\"display\": \"standalone\",\n");
 		initialContent.append("\t\"orientation\": \"portrait\",\n");
 		initialContent.append("\t\"icons\": [{\n");
-		String url = "/resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + solution.getName() + "/bigicon.png";
-		initialContent.append("\t\t\"src\": \"" + url + "\",\n");
-		initialContent.append("\t\t\"sizes\": \"192x192\",\n");
+		initialContent.append("\t\t\"src\": \"" + ICON_NAME + "\",\n");
+		initialContent.append("\t\t\"sizes\": \"144x144\",\n");
 		initialContent.append("\t\t\"type\": \"image/png\"\n");
-		initialContent.append("\t}]\n");
+		initialContent.append("\t}],\n");
+		initialContent.append("\t\"start_url\": \"../../../\"\n");
 		initialContent.append("}\n");
-		return new ByteArrayInputStream(initialContent.toString().getBytes());
+		return initialContent.toString().getBytes();
+	}
+
+	public static byte[] getIcon() throws IOException
+	{
+		return Utils.getBytesFromInputStream(Activator.getDefault().getBundle().getResource("/icons/" + ICON_NAME).openStream());
 	}
 }

@@ -39,12 +39,9 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 public class WarArgumentChest extends AbstractArgumentChest
 {
 	private String plugins;
-	private String beans;
-	private String lafs;
 	private String drivers;
 	private boolean isExportActiveSolution;
 	private String exportNG2Mode;
-	private boolean exportNG1;
 	private String pluginLocations;
 	private String selectedComponents;
 	private String selectedServices;
@@ -153,18 +150,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Default: true\n"
 			+ "        -pfw <properties_file> ... path & name of properties file to be included in the war.\n"
 			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n"
-			+ "        -b <bean_names> ... the space separated list of (smart / web client) beans to export\n"
-			+ "             Default: all beans from application_server/beans are exported.\n"
-			+ "             You can use '-b <none>' to avoid exporting beans.\n"
-			+ "        -" + excludeBeans + " <bean_names> ... the  list of beans to excluded from  the export e.g.:\n"
-			+ "             -" + excludeBeans + " bean1.jar bean2.zip\n"
-			+ "             Default: none is excluded.\n"
-			+ "        -l <lafs_names> ... the space separated list of look-and-feels (smart cl.) to export\n"
-			+ "             Default: all lafs from application_server/lafs are exported.\n"
-			+ "             You can use '-l <none>' to avoid exporting lafs.\n"
-			+ "        -" + excludeLafs + " <lafs_names> ... the list of lafs to be excluded  from  the export e.g:\n"
-			+ "             -" + excludeLafs + " laf1.jar laf2.zip\n"
-			+ "             Default: none is excluded.\n"
 			+ "        -d <jdbc_drivers> ... the space separated list of  jdbc (database) drivers to export\n"
 			+ "             Default: all drivers from application_server/drivers are exported.\n"
 			+ "             You can use '-d <none>' to avoid exporting drivers.\n"
@@ -283,7 +268,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -ng2 true / false / sourcemaps ... export Titanium NG2 binaries.  If 'sourcemaps' is\n"
 			+ "             given, sourcemaps will be generated for .ts files - useful for debugging.\n"
 			+ "             Default: true\n"
-			+ "        -ng1 ... export NG1 client resources; not exported by default.\n"
 			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}
@@ -295,18 +279,12 @@ public class WarArgumentChest extends AbstractArgumentChest
 		warSettingsFile = parseArg("pfw", "Properties file was not specified after '-pfw' argument.", argsMap, false);
 		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap, false);
 		excludedPlugins = parseArg(excludePlugins, null, argsMap, false);
-		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap, false);
-		excludedBeans = parseArg(excludeBeans, null, argsMap, false);
-		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap, false);
-		excludedLafs = parseArg(excludeLafs, null, argsMap, false);
 		drivers = parseArg("d", "Driver name(s) was(were) not specified after '-d' argument.", argsMap, false);
 		excludedDrivers = parseArg(excludeDrivers, null, argsMap, false);
 		isExportActiveSolution = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolution = false;
 		exportNG2Mode = "true";
 		if (argsMap.containsKey("ng2")) exportNG2Mode = argsMap.get("ng2");
-		exportNG1 = false;
-		if (argsMap.containsKey("ng1")) exportNG1 = true;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
 		if (pluginLocations == null) pluginLocations = "../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
@@ -477,19 +455,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return excludedPlugins;
 	}
 
-	public String getBeans()
-	{
-		return beans;
-	}
-
 	public String getExcludedBeans()
 	{
 		return excludedBeans;
-	}
-
-	public String getLafs()
-	{
-		return lafs;
 	}
 
 	public String getExcludedLafs()
@@ -515,11 +483,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String exportNG2Mode()
 	{
 		return exportNG2Mode;
-	}
-
-	public boolean exportNG1()
-	{
-		return exportNG1;
 	}
 
 	public String getPluginLocations()

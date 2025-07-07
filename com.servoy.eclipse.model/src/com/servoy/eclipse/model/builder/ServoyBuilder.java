@@ -50,6 +50,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -1038,6 +1039,25 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				for (String name : modulesNames)
 				{
 					ServoyProject module = getServoyModel().getServoyProject(name);
+					if (module == null)
+					{
+						// test if the project is not really there (but closed)
+						IProject prj = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+						if (prj != null && prj.exists() && !prj.isOpen())
+						{
+							try
+							{
+								// if it is closed then just open it and try to get the servoy project again.
+								prj.open(new NullProgressMonitor());
+								getServoyModel().refreshServoyProjects();
+								module = getServoyModel().getServoyProject(name);
+							}
+							catch (CoreException e)
+							{
+								// ignore
+							}
+						}
+					}
 					if (module == null)
 					{
 						ServoyMarker mk = MarkerMessages.ModuleNotFound.fill(name, servoyProject.getSolution().getName());
@@ -2159,6 +2179,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								case IRepository.VALUELISTS :
 								case IRepository.SCRIPTVARIABLES :
 								case IRepository.METHODS :
+								case IRepository.MENUS :
 									break;
 								default :
 									addBadStructureMarker(o, servoyProject, project);
@@ -3474,7 +3495,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		try
 		{
-			if (file.getProject().isOpen()) file.deleteMarkers(type, true, IResource.DEPTH_INFINITE);
+			if (file.getProject().isOpen() && file.exists()) file.deleteMarkers(type, true, IResource.DEPTH_INFINITE);
 		}
 		catch (CoreException e)
 		{

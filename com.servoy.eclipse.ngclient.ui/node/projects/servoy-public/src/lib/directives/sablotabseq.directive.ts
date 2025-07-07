@@ -1,7 +1,8 @@
 import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, ChangeDetectorRef, SimpleChanges, OnChanges } from '@angular/core';
 
 @Directive({
-    selector: '[sabloTabseq]'
+    selector: '[sabloTabseq]',
+    standalone: false
 })
 export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 

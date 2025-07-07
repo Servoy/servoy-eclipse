@@ -18,8 +18,6 @@
 package com.servoy.eclipse.model.war.exporter;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,9 +25,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.Writer;
@@ -37,7 +33,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -52,8 +47,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -69,21 +66,11 @@ import java.util.zip.ZipOutputStream;
 import javax.crypto.Cipher;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -93,7 +80,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.Version;
-import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
@@ -101,9 +87,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -126,23 +110,17 @@ import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.IBeanManagerInternal;
-import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
-import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
-import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.JarManager;
-import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Settings;
@@ -163,12 +141,48 @@ public class WarExporter
 {
 	private static final String[] WAR_LIBS = new String[] { "org.freemarker*.jar", //
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"servoy_base_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"servoy_shared_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"servoy_smart_client_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"servoy_headless_client_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"j2db_server_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"org.eclipse.dltk.javascript.rhino_*.jar", //
+		"slf4j.api_*.jar", //
+		"jabsorb_*.jar", //
+		"org.apache.commons.commons-codec_*.jar", //
+		"org.apache.commons.commons-io_*.jar", //
+		"org.apache.commons.logging_*.jar", //
+		"org.apache.commons.commons-collections4_*.jar", //
+		"org.apache.commons.commons-dbcp2_*.jar", //
+		"org.apache.commons.commons-pool2_*.jar", //
+		"org.apache.commons.commons-fileupload_*.jar", //
+		"com.google.guava_*.jar", //
+		"org.hibernate.orm.core_*.jar", //
+		"org.apache.logging.log4j.api_*.jar", //
+		"org.apache.logging.log4j.core_*.jar", //
+		"org.apache.logging.log4j.slf4j2.impl_*.jar", //
+		"org.apache.logging.log4j.web_*.jar", //
+//		"org.apache.logging.log4j.jcl_*.jar", //
+		"org.antlr.runtime_*.jar", //
+		"javax.transaction_*.jar", //
+		"org.apache.james.apache-mime4j_*.jar", //
+		"xstream_*.jar", //
+		"org.jsoup_*.jar", //
+		"javax.persistence-api_*.jar", //
+		"com.sun.mail.jakarta.mail_*.jar", //
+		"com.sun.activation.jakarta.activation_*.jar", //
+		"com.github.ua-parser.uap-java_*.jar", //
+		"org.yaml.snakeyaml_*.jar", //
+		"org.jboss.logging.jboss-logging_*.jar", //
+		"net.bytebuddy.byte-buddy_*.jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
-		"de.inetsoftware.jlessc_*.jar", "org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", //
+		"de.inetsoftware.jlessc_*.jar", "tus-java-server_*.jar", //
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
+		"wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
+		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar", //
 		"wrapped.org.apache.httpcomponents.core5.httpcore5_*.jar", "wrapped.org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
 		"wrapped.org.apache.httpcomponents.client5.httpclient5_*.jar" };
 
@@ -209,8 +223,8 @@ public class WarExporter
 
 	private final IWarExportModel exportModel;
 	private final IXMLExportUserChannel userChannel;
-	private SpecProviderState componentsSpecProviderState;
-	private SpecProviderState servicesSpecProviderState;
+	private final SpecProviderState componentsSpecProviderState;
+	private final SpecProviderState servicesSpecProviderState;
 	private Set<File> pluginFiles = new HashSet<>();
 
 	public WarExporter(IWarExportModel exportModel, IXMLExportUserChannel userChannel)
@@ -218,11 +232,8 @@ public class WarExporter
 		this.exportModel = exportModel;
 		this.userChannel = userChannel;
 
-		if (exportModel.isNGExport())
-		{
-			this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-			this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
-		}
+		this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+		this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 	}
 
 	/**
@@ -232,7 +243,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 46);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 42);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -241,23 +252,14 @@ public class WarExporter
 		monitor.subTask("Copy root webapp files (" + SDF.format(new Date()) + ")");
 		copyRootWebappFiles(tmpWarDir, appServerDir);
 		monitor.worked(2);
-		monitor.subTask("Copy beans");
-		copyBeans(tmpWarDir, appServerDir);
-		monitor.worked(2);
 		monitor.subTask("Copy plugins");
 		copyPlugins(tmpWarDir, appServerDir);
-		monitor.worked(2);
-		monitor.subTask("Copy lafs");
-		copyLafs(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		monitor.subTask("Copy all standard libraries (" + SDF.format(new Date()) + ")");
 		final File targetLibDir = copyStandardLibs(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		monitor.subTask("Copy Drivers");
 		copyDrivers(appServerDir, targetLibDir);
-		monitor.worked(2);
-		monitor.subTask("Copy images");
-		copyLibImages(tmpWarDir, appServerDir);
 		monitor.worked(2);
 		moveSlf4j(tmpWarDir, targetLibDir);
 		monitor.worked(2);
@@ -286,52 +288,34 @@ public class WarExporter
 
 		exportAdminUser(tmpWarDir);
 
-		monitor.setWorkRemaining(exportModel.isNGExport() ? 11 : 4);
-		if (exportModel.isNGExport())
+		monitor.setWorkRemaining(11);
+		monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
+		copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir);
+		if (monitor.isCanceled()) return;
+
+		monitor.setWorkRemaining(5);
+		monitor.subTask("Copy exported components");
+		copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
+		monitor.worked(2);
+		if (exportModel.exportNG2Mode() == null || !exportModel.exportNG2Mode().equals("false"))
 		{
-			monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
-			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, !exportModel.exportNG1());
-			if (monitor.isCanceled()) return;
-			if (exportModel.exportNG1())
+			monitor.subTask("Copy Titanium NGClient resources (" + SDF.format(new Date()) + ")");
+			try
 			{
-				monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
-				copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, false);
+				copyNGClient2(tmpWarDir, monitor);
+			}
+			catch (RuntimeException e)
+			{
 				if (monitor.isCanceled()) return;
-				monitor.setWorkRemaining(6);
-				monitor.subTask("Copy exported components (" + SDF.format(new Date()) + ")");
-				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
-				monitor.worked(2);
-				monitor.subTask("Grouping JS and CSS resources (" + SDF.format(new Date()) + ")");
-				copyMinifiedAndGrouped(tmpWarDir, monitor);
-				if (monitor.isCanceled()) return;
+				throw new ExportException("could not create/copy Titanium NGClient resources", e);
 			}
-			else
-			{
-				monitor.setWorkRemaining(5);
-				monitor.subTask("Copy exported components");
-				copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
-				monitor.worked(2);
-			}
-			if (exportModel.exportNG2Mode() == null || !exportModel.exportNG2Mode().equals("false"))
-			{
-				monitor.subTask("Copy Titanium NGClient resources (" + SDF.format(new Date()) + ")");
-				try
-				{
-					copyNGClient2(tmpWarDir, monitor);
-				}
-				catch (RuntimeException e)
-				{
-					if (monitor.isCanceled()) return;
-					throw new ExportException("could not create/copy Titanium NGClient resources", e);
-				}
-			}
-			monitor.worked(1);
 		}
+		monitor.worked(1);
 		try
 		{
 			// just always copy the nglibs to it even if it is just pure smart client
 			// the log4j libs are always needed.
-			copyWARLibs(targetLibDir, exportModel.isNGExport());
+			copyWARLibs(targetLibDir);
 		}
 		catch (IOException e)
 		{
@@ -593,7 +577,7 @@ public class WarExporter
 	/**
 	 * @param tmpWarDir
 	 */
-	private void compileLessResources(File tmpWarDir)
+	public static void compileLessResources(File tmpWarDir)
 	{
 		// this only compiles the active solution and modules less stuff in a dir
 		// not from the none active solutions, problem could be that the none active solutions can have duplicate names..
@@ -635,273 +619,6 @@ public class WarExporter
 				}
 			}
 		}
-	}
-
-	/**
-	 * Group and minify (if checked) the JS and CSS resources.
-	 * @param tmpWarDir
-	 * @throws ExportException
-	 */
-	private void copyMinifiedAndGrouped(File tmpWarDir, IProgressMonitor monitor) throws ExportException
-	{
-		try
-		{
-			String id = Long.toHexString(System.currentTimeMillis());
-			try
-			{
-				File groupProperties = new File(tmpWarDir, "WEB-INF/groupid.properties");
-				Properties prop = new Properties();
-				prop.setProperty("groupid", id);
-
-				try (FileWriter writer = new FileWriter(groupProperties))
-				{
-					prop.store(writer, "group properties");
-				}
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
-
-			//generate servoy-components.js
-			File componentsFile = new File(tmpWarDir, "js/servoy-components.js");
-			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule(exportModel.getAllExportedServicesWithoutSabloServices(),
-				exportModel.getAllExportedComponents());
-			FileUtils.copyInputStreamToFile(new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), componentsFile);
-
-			//generate wro.xml
-			String warDirPath = tmpWarDir.getAbsolutePath();
-			File wroFile = generateWroXml(tmpWarDir, id);
-
-			//copy the wro4j command line runner to the war
-			File jarFile = new File(tmpWarDir, WRO4J_RUNNER);
-			FileUtils.copyInputStreamToFile(WarExporter.class.getResource("resources/" + WRO4J_RUNNER).openStream(), jarFile);
-			File wroPropertiesFile = new File(tmpWarDir, "wro.properties");
-			FileUtils.copyInputStreamToFile(WarExporter.class.getResource("resources/wro.properties").openStream(), wroPropertiesFile);
-
-			String pathSeparator = System.getProperty("file.separator");
-			String path = System.getProperty("java.home");
-			if (!path.endsWith(pathSeparator)) path += pathSeparator;
-			String java = path + "bin" + pathSeparator + "java";
-			File javaFile = new File(java);
-			if (!javaFile.exists())
-			{
-				javaFile = new File(java + ".exe");//windows
-				java = javaFile.exists() ? java + ".exe" : "java";
-			}
-
-			List<String> args = new ArrayList<String>();
-			args.add(java);
-			args.add("-jar");
-			args.add(jarFile.getAbsolutePath());
-			args.add("--contextFolder");
-			args.add(warDirPath);
-			args.add("--destinationFolder");
-			File dest = new File(tmpWarDir, "wro");
-			args.add(dest.getAbsolutePath());
-			args.add("--wroFile");
-			args.add(wroFile.getAbsolutePath());
-			args.add("--wroConfigurationFile");
-			args.add(wroPropertiesFile.getAbsolutePath());
-			args.add("-m");
-			args.add("-c");
-			String processors = "semicolonAppender,cssDataUri";
-			args.add(processors);
-
-			ProcessBuilder builder = new ProcessBuilder(args);
-			builder.redirectErrorStream(true);
-			Process proc = builder.start();
-
-			String line = null;
-			BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			StringBuilder message = new StringBuilder();
-			while ((line = in.readLine()) != null)
-			{
-				if (monitor.isCanceled()) break;
-				message.append(line).append("\n");
-			}
-			in.close();
-			synchronized (this)
-			{
-				while (proc.isAlive())
-				{
-					wait(1000);
-					if (monitor.isCanceled())
-					{
-						proc.destroy();
-					}
-
-				}
-				if (!monitor.isCanceled() && proc.exitValue() != 0)
-				{
-					ServoyLog.logError("Could not group and minify JS and CSS resources.", new RuntimeException(message.toString()));
-					throw new ExportException(
-						"Could not group and minify JS and CSS resources. See workspace log for more details and servoy wiki Specification (.spec) file page - on how to exclude Servoy package js or css libraries from grouping using the group property - if needed: " +
-							message.toString());
-				}
-			}
-
-			//delete unneeded files
-			try
-			{
-				Files.delete(wroFile.toPath());
-			}
-			catch (Exception e)
-			{
-				// ignore will try to delete on exit later on.
-			}
-			try
-			{
-				Files.delete(jarFile.toPath());
-			}
-			catch (Exception e)
-			{
-				// ignore will try to delete on exit later on.
-			}
-			try
-			{
-				Files.delete(wroPropertiesFile.toPath());
-			}
-			catch (Exception e)
-			{
-				// ignore will try to delete on exit later on.
-			}
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
-			throw new ExportException(e.getMessage(), e);
-		}
-	}
-
-	private File generateWroXml(File tmpWarDir, String id)
-		throws ParserConfigurationException, TransformerFactoryConfigurationError, TransformerConfigurationException, TransformerException
-	{
-		File wroFile = new File(tmpWarDir, "wro.xml");
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
-		// root elements
-		Document doc = docBuilder.newDocument();
-		Element rootElement = doc.createElement("groups");
-		doc.appendChild(rootElement);
-		Attr attr = doc.createAttribute("xmlns");
-		attr.setValue("http://www.isdc.ro/wro");
-		rootElement.setAttributeNode(attr);
-
-		Set<String> exportedWebObjects = null;
-		if (exportModel.getAllExportedComponents() != null || exportModel.getAllExportedServicesWithoutSabloServices() != null)
-		{
-			exportedWebObjects = new HashSet<>();
-			if (exportModel.getAllExportedComponents() != null) exportedWebObjects.addAll(exportModel.getAllExportedComponents());
-			if (exportModel.getAllExportedServicesWithoutSabloServices() != null)
-				exportedWebObjects.addAll(exportModel.getAllExportedServicesWithoutSabloServices());
-		}
-		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, exportModel.getExportedPackagesExceptSablo(), Boolean.TRUE,
-			NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
-		Element group = doc.createElement("group");
-		rootElement.appendChild(group);
-		attr = doc.createAttribute("name");
-		attr.setValue(NGClientEntryFilter.SERVOY_THIRDPARTY_SVYGRP + id);
-		group.setAttributeNode(attr);
-		for (String relativePath : NGClientEntryFilter.INDEX_3RD_PARTY_JS)
-		{
-			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "js");
-		}
-
-		group = doc.createElement("group");
-		rootElement.appendChild(group);
-		attr = doc.createAttribute("name");
-		attr.setValue(NGClientEntryFilter.SERVOY_APP_SVYGRP + id);
-		group.setAttributeNode(attr);
-		for (String relativePath : NGClientEntryFilter.INDEX_SERVOY_JS)
-		{
-			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "js");
-		}
-
-		@SuppressWarnings("unchecked")
-		Collection<String> jsContributions = (Collection<String>)allContributions[1];
-		if (jsContributions != null)
-		{
-			group = doc.createElement("group");
-			rootElement.appendChild(group);
-			attr = doc.createAttribute("name");
-			attr.setValue(NGClientEntryFilter.SERVOY_CONTRIBUTIONS_SVYGRP + id);
-			group.setAttributeNode(attr);
-			for (String relativePath : jsContributions)
-			{
-				if (relativePath.startsWith("sablo")) continue;//exclude sablo from group, is used from .jar
-				addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "js");
-			}
-		}
-
-		group = doc.createElement("group");
-		rootElement.appendChild(group);
-		attr = doc.createAttribute("name");
-		attr.setValue(NGClientEntryFilter.SERVOY_CSS_THIRDPARTY_SVYGRP + id);
-		group.setAttributeNode(attr);
-		for (String relativePath : NGClientEntryFilter.INDEX_3RD_PARTY_CSS)
-		{
-			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "css");
-		}
-
-		@SuppressWarnings("unchecked")
-		Collection<String> cssContributions = (Collection<String>)allContributions[0];
-		cssContributions.add(NGClientEntryFilter.SERVOY_CSS);
-		if (cssContributions != null)
-		{
-			group = doc.createElement("group");
-			rootElement.appendChild(group);
-			attr = doc.createAttribute("name");
-			attr.setValue(NGClientEntryFilter.SERVOY_CSS_CONTRIBUTIONS_SVYGRP + id);
-			group.setAttributeNode(attr);
-			for (String relativePath : cssContributions)
-			{
-				addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "css");
-			}
-		}
-
-		TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
-		DOMSource source = new DOMSource(doc);
-		StreamResult result = new StreamResult(wroFile);
-		transformer.transform(source, result);
-		return wroFile;
-	}
-
-	private void addGroupElement(Document doc, Element group, File tmpWarDir, String relativePath, String suffix)
-	{
-		String path = relativePath;
-		boolean minFound = false;
-		if (path.contains("."))
-		{
-			String currentSuffix = path.substring(path.lastIndexOf("."));
-			String minSuffix = (".min" + currentSuffix).toLowerCase();
-			minFound = path.toLowerCase().endsWith(minSuffix);
-			if (!minFound)
-			{
-				//the minified version is preferred if it exists
-				File file = new File(tmpWarDir, path);
-				File parent = file.getParentFile();
-				String[] list = parent.list(new WildcardFileFilter(file.getName().substring(0, file.getName().lastIndexOf(".") + 1) + "*", IOCase.INSENSITIVE));
-				if (list != null)
-				{
-					for (String name : list)
-					{
-						if (name.toLowerCase().endsWith(minSuffix))
-						{
-							minFound = true;
-							File f = new File(parent, name);
-							path = f.getAbsolutePath().replace(tmpWarDir.getAbsolutePath(), "").replaceAll("\\\\", "/");
-							break;
-						}
-					}
-				}
-			}
-		}
-		Element element = doc.createElement(suffix);
-		group.appendChild(element);
-		element.setTextContent(path);
 	}
 
 	/**
@@ -968,7 +685,7 @@ public class WarExporter
 	/**
 	 * Copy to the war all NG components and services (default and user-defined), as well as the jars required by the NGClient.
 	 */
-	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor, File tmpWarDir, boolean exportNG2Only) throws ExportException
+	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor, File tmpWarDir) throws ExportException
 	{
 		try
 		{
@@ -977,7 +694,7 @@ public class WarExporter
 
 			Map<String, File> allTemplates = new HashMap<String, File>();
 			Set<String> exportedPackages = exportModel.getExportedPackagesExceptSablo();
-			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportedPackages, allTemplates, exportNG2Only);
+			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportedPackages, allTemplates);
 
 			componentLocations.append(ComponentResourcesExporter.getDefaultComponentDirectoryNames(exportedPackages));
 			servicesLocations.append(ComponentResourcesExporter.getDefaultServicesDirectoryNames(exportedPackages));
@@ -1032,7 +749,7 @@ public class WarExporter
 								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
 								excludes.add(entryDir);
 							}
-							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, excludes, exportNG2Only);
+							copyDir(resource, new File(tmpWarDir, name), true, allTemplates, excludes, true);
 						}
 						else
 						{
@@ -1042,7 +759,7 @@ public class WarExporter
 								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
 								excludes.add(entryDir + '/'); // extractaJar is startsWith because of the jar entries.
 							}
-							extractJar(name, resource, tmpWarDir, allTemplates, excludes, exportNG2Only);
+							extractJar(name, resource, tmpWarDir, allTemplates, excludes);
 						}
 					}
 				}
@@ -1052,42 +769,12 @@ public class WarExporter
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), componentLocations.toString());
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), servicesLocations.toString());
 
-			if (!exportNG2Only)
-			{
-				copyAllHtmlTemplates(tmpWarDir, allTemplates);
-			}
 			monitor.worked(1);
 		}
 		catch (IOException e)
 		{
 			throw new ExportException("Could not copy the components", e);
 		}
-	}
-
-	private void copyAllHtmlTemplates(File tmpWarDir, Map<String, File> allTemplates)
-	{
-		File allTemplatesFile = new File(tmpWarDir, "js/servoy_alltemplates.js");
-
-		StringBuilder allTemplatesContent = new StringBuilder();
-		allTemplatesContent.append("angular.module(\"servoyalltemplates\",[]).run([\"$templateCache\", function($templateCache) {\n");
-
-		for (String path : allTemplates.keySet())
-		{
-			allTemplatesContent.append("$templateCache.put(\"");
-			allTemplatesContent.append(path);
-			allTemplatesContent.append("\",\"");
-
-			String htmlContent = Utils.getTXTFileContent(allTemplates.get(path));
-			htmlContent = htmlContent.trim();
-			htmlContent = htmlContent.replaceAll("\r", "");
-			htmlContent = htmlContent.replaceAll("\n", "");
-			htmlContent = htmlContent.replaceAll("\"", "\\\\\"");
-			allTemplatesContent.append(htmlContent);
-			allTemplatesContent.append("\");\n");
-		}
-
-		allTemplatesContent.append("}]);");
-		Utils.writeTXTFile(allTemplatesFile, allTemplatesContent.toString());
 	}
 
 	/**
@@ -1097,7 +784,7 @@ public class WarExporter
 	 * @throws ExportException
 	 * @throws IOException
 	 */
-	private void copyWARLibs(File targetLibDir, boolean includeNGClientLib) throws ExportException, IOException
+	private void copyWARLibs(File targetLibDir) throws ExportException, IOException
 	{
 		if (pluginFiles.isEmpty())
 		{
@@ -1106,7 +793,6 @@ public class WarExporter
 		}
 		for (File file : pluginFiles)
 		{
-			if (!includeNGClientLib && file.getName().toLowerCase().startsWith("servoy_ngclient_")) continue;
 			copyFile(file, new File(targetLibDir, file.getName()));
 		}
 	}
@@ -1130,8 +816,7 @@ public class WarExporter
 		}
 	}
 
-	private void extractJar(String dirName, File file, File tmpWarDir, Map<String, File> allTemplates, Set<String> excludedResourcesByName,
-		boolean specFilesOnly)
+	private void extractJar(String dirName, File file, File tmpWarDir, Map<String, File> allTemplates, Set<String> excludedResourcesByName)
 	{
 		try (JarFile jarfile = new JarFile(file))
 		{
@@ -1141,7 +826,7 @@ public class WarExporter
 				String destdir = tmpWarDir + "/" + dirName;
 				JarEntry je = enu.nextElement();
 				if (excludedResourcesByName != null && excludedResourcesByName.stream().anyMatch(item -> je.getName().startsWith(item))) continue;
-				if (specFilesOnly && !je.getName().endsWith(".spec") && !je.getName().endsWith("MANIFEST.MF") && !je.getName().endsWith(".json")) continue;
+				if (!je.getName().endsWith(".spec") && !je.getName().endsWith("MANIFEST.MF") && !je.getName().endsWith(".json")) continue;
 				File fl = Paths.get(destdir, je.getName()).normalize().toFile();
 				if (!fl.exists())
 				{
@@ -1162,7 +847,7 @@ public class WarExporter
 				{
 					allTemplates.put(dirName + "/" + je.getName(), fl);
 				}
-				if (specFilesOnly && je.getName().endsWith(".spec"))
+				if (je.getName().endsWith(".spec"))
 				{
 					JSONObject json = new JSONObject(Utils.getTXTFileContent(jarfile.getInputStream(je), Charset.forName("UTF8"), true));
 					List<String> scripts = new ArrayList<String>();
@@ -1663,20 +1348,6 @@ public class WarExporter
 	}
 
 	/**
-	 * @param tmpWarDir
-	 * @param appServerDir
-	 * @throws ExportException
-	 */
-	private void copyLibImages(File tmpWarDir, String appServerDir) throws ExportException
-	{
-		// copy lib/images dir
-		File libImagesDir = new File(appServerDir, "lib/images");
-		File targetLibImagesDir = new File(tmpWarDir, "lib/images");
-		targetLibImagesDir.mkdirs();
-		copyDir(libImagesDir, targetLibImagesDir, false);
-	}
-
-	/**
 	 * @param monitor
 	 * @param appServerDir
 	 * @param targetLibDir
@@ -1710,49 +1381,6 @@ public class WarExporter
 		new File(targetLibDir, "server-bootstrap.jar").delete();
 		new File(targetLibDir, "tomcat-juli.jar").delete();
 		return targetLibDir;
-	}
-
-	private void copyLafs(File tmpWarDir, String appServerDir) throws ExportException
-	{
-
-		// copy the lafs
-		File lafSourceDir = new File(appServerDir, "lafs");
-		File lafTargetDir = new File(tmpWarDir, "lafs");
-		lafTargetDir.mkdirs();
-		ILAFManagerInternal lafManager = ApplicationServerRegistry.get().getLafManager();
-		Map<String, List<ExtensionResource>> loadedLafDefs = lafManager.getLoadedLAFDefs();
-		List<String> lafs = exportModel.getLafs();
-		File lafProperties = new File(lafTargetDir, "lafs.properties");
-		try (Writer fw = new FileWriter(lafProperties))
-		{
-			Set<File> writtenFiles = new HashSet<File>();
-			for (String lafName : lafs)
-			{
-				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedLafDefs, lafName);
-				ArrayList<String> files = new ArrayList<String>();
-				if (fileNames != null)
-				{
-					for (ExtensionResource ext : fileNames)
-					{
-						files.add(ext.jarFileName);
-					}
-				}
-				else
-				{
-					files.add(lafName);
-				}
-				for (String f : files)
-				{
-					File sourceFile = new File(lafSourceDir, f);
-					copyFile(sourceFile, new File(lafTargetDir, f));
-					writeFileEntry(fw, sourceFile, f, writtenFiles);
-				}
-			}
-		}
-		catch (IOException e2)
-		{
-			throw new ExportException("Error creating lafs properties file " + lafProperties.getAbsolutePath(), e2);
-		}
 	}
 
 	private void copyPlugins(File tmpWarDir, String appServerDir) throws ExportException
@@ -1826,61 +1454,12 @@ public class WarExporter
 		}
 	}
 
-	private void copyBeans(File tmpWarDir, String appServerDir) throws ExportException
-	{
-		// copy the beans
-		File beanSourceDir = new File(appServerDir, "beans");
-		File beanTargetDir = new File(tmpWarDir, "beans");
-		beanTargetDir.mkdirs();
-		IBeanManagerInternal beanManager = ApplicationServerRegistry.get().getBeanManager();
-		Map<String, List<ExtensionResource>> loadedBeanDefs = beanManager.getLoadedBeanDefs();
-		List<String> beans = exportModel.getBeans();
-		File beanProperties = new File(beanTargetDir, "beans.properties");
-		try (Writer fw = new FileWriter(beanProperties))
-		{
-			Set<File> writtenFiles = new HashSet<File>();
-			for (String beanName : beans)
-			{
-				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedBeanDefs, beanName);
-				if (fileNames != null)
-				{
-					for (ExtensionResource ext : fileNames)
-					{
-						File sourceFile = new File(beanSourceDir, ext.jarFileName);
-						copyFile(sourceFile, new File(beanTargetDir, ext.jarFileName));
-						writeFileEntry(fw, sourceFile, ext.jarFileName, writtenFiles);
-					}
-				}
-			}
-		}
-		catch (IOException e2)
-		{
-			throw new ExportException("Error creating beans dir", e2);
-		}
-	}
-
 	private void copyRootWebappFiles(File tmpWarDir, String appServerDir) throws ExportException
 	{
 		File webAppDir = new File(appServerDir, "server/webapps/ROOT");
 		// copy first the standard webapp dir of the app server
 		copyDir(webAppDir, tmpWarDir, true);
 
-		File defaultCss = new File(tmpWarDir, "/servoy-webclient/templates/default/servoy_web_client_default.css");
-		if (!defaultCss.exists())
-		{
-			try
-			{
-				defaultCss.getParentFile().mkdirs();
-				String styleCSS = TemplateGenerator.getStyleCSS("servoy_web_client_default.css");
-				OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(defaultCss), "utf8");
-				fw.write(styleCSS);
-				fw.close();
-			}
-			catch (Exception e)
-			{
-				throw new ExportException("Error default servoy css file (servoy_web_client_default.css)", e);
-			}
-		}
 	}
 
 	private void changeAndWritePropertiesFile(File tmpWarDir, File sourceFile) throws ExportException
@@ -2315,7 +1894,7 @@ public class WarExporter
 					allTemplates.put(path, newFile);
 				}
 				writtenFiles.add(file);
-				if (specFilesOnly && file.getName().endsWith(".spec"))
+				if (file.getName().endsWith(".spec"))
 				{
 					JSONObject json = new JSONObject(Utils.getTXTFileContent(file));
 					List<String> scripts = new ArrayList<String>();
@@ -2409,6 +1988,8 @@ public class WarExporter
 	{
 		pluginFiles = new HashSet<File>();
 		List<String> pluginLocations = new ArrayList<String>();
+		pluginLocations.addAll(exportModel.getPluginLocations());
+
 		File eclipseParent = null;
 		File userDir = new File(System.getProperty("user.dir"));
 		if (System.getProperty("eclipse.home.location") != null)
@@ -2420,34 +2001,47 @@ public class WarExporter
 				pluginLocations.add(new File(eclipseParent, "/plugins").getAbsolutePath().toString());
 			}
 		}
-		pluginLocations.addAll(exportModel.getPluginLocations());
-		for (String libName : WAR_LIBS)
-		{
-			int i = 0;
-			boolean found = false;
-			while (!found && i < pluginLocations.size())
+
+		LinkedHashMap<File, String[]> dirListings = new LinkedHashMap<>();
+		pluginLocations.forEach(location -> {
+			File pluginLocation = new File(location);
+			if (!pluginLocation.exists())
 			{
-				File pluginLocation = new File(pluginLocations.get(i));
+				if (!pluginLocation.isAbsolute() && !pluginLocation.exists())
+				{
+					pluginLocation = new File(userDir, location);
+				}
 				if (!pluginLocation.exists())
 				{
-					if (!pluginLocation.isAbsolute() && !pluginLocation.exists())
-					{
-						pluginLocation = new File(userDir, pluginLocations.get(i));
-					}
-					if (!pluginLocation.exists())
-					{
-						System.err.println("Trying userDir " + userDir + " as parent for " + pluginLocations.get(i) + " but is not found");
-					}
+					System.err.println("Trying userDir " + userDir + " as parent for " + location + " but is not found");
 				}
+			}
 
-				if (!pluginLocation.isDirectory())
+			if (!pluginLocation.isDirectory())
+			{
+				System.err.println(pluginLocation.getAbsolutePath() + " is not a directory.");
+			}
+			else
+			{
+				dirListings.put(pluginLocation, pluginLocation.list());
+			}
+		});
+		for (String libName : WAR_LIBS)
+		{
+			boolean found = false;
+			Iterator<Entry<File, String[]>> listings = dirListings.entrySet().iterator();
+			while (!found && listings.hasNext())
+			{
+				Collection<File> libs = new ArrayList<File>();
+				Entry<File, String[]> entry = listings.next();
+				String[] value = entry.getValue();
+				for (String name : value)
 				{
-					System.err.println(pluginLocation.getAbsolutePath() + " is not a directory.");
-					i++;
-					continue;
+					if (FilenameUtils.wildcardMatch(name, libName, IOCase.INSENSITIVE))
+					{
+						libs.add(new File(entry.getKey(), name));
+					}
 				}
-
-				Collection<File> libs = FileUtils.listFiles(pluginLocation, new WildcardFileFilter(libName), TrueFileFilter.INSTANCE);
 				Iterator<File> iterator = libs.iterator();
 				if (libs != null && libs.size() > 0)
 				{
@@ -2471,7 +2065,6 @@ public class WarExporter
 					found = true;
 					break;
 				}
-				i++;
 			}
 			if (!found) return libName;
 		}
@@ -2487,6 +2080,12 @@ public class WarExporter
 		properties.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
 		properties.setProperty("serverBuildDate", String.valueOf(System.currentTimeMillis()));
 		properties.setProperty("zoneId", ZoneId.systemDefault().getId());
+		if (exportModel.isExportActiveSolution())
+		{
+			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+			FlattenedSolution solution = servoyModel.getFlattenedSolution();
+			properties.setProperty("mainsolution", solution.getName());
+		}
 		try (FileOutputStream fos = new FileOutputStream(deployPropertiesFile))
 		{
 			properties.store(fos, "");

@@ -8,7 +8,8 @@ import { URLParserService } from '../services/urlparser.service';
 @Component({
     selector: 'designer-anchoring-indicator',
     templateUrl: './anchoringindicator.component.html',
-    styleUrls: ['./anchoringindicator.component.css']
+    styleUrls: ['./anchoringindicator.component.css'],
+    standalone: false
 })
 export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener {
     TOP_LEFT_IMAGE = 'designer/assets/images/anchoringtopleft.png';
@@ -64,8 +65,9 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
             this.editorContentService.executeOnlyAfterInit(() => {
                 const element = this.editorContentService.getContentElement(selection[0])
                 if (element) {
-                    if (element.parentElement.closest('.svy-responsivecontainer')) return;
+                    if (element.parentElement.closest('.svy-responsivecontainer') || element.closest('.svy-csspositioncontainer')) return;
                     const elementRect = element.getBoundingClientRect();
+                    let wrapperRect: DOMRect = null;
                     let image: string;
                     if (!this.urlParser.isCSSPositionFormLayout()) {
                         const selectionAnchor = parseInt(element.getAttribute('svy-anchors'));
@@ -99,6 +101,9 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                     }
                     else {
                         const wrapper: HTMLDivElement = element.closest('.svy-wrapper');
+                        if (element.classList.contains('svy-formcomponent')) {
+							wrapperRect = wrapper.getBoundingClientRect();
+						}
                         if (wrapper.style.top) {
                             if (wrapper.style.left) {
                                 if (wrapper.style.bottom) {
@@ -141,7 +146,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                             }
                         }
                     }
-                    this.indicator = new SameSizeIndicator(image, this.editorContentService.getGlasspaneTopDistance() + elementRect.top + 1, elementRect.left + this.editorContentService.getGlasspaneLeftDistance() + elementRect.width + 2);
+                    this.indicator = new SameSizeIndicator(image, this.editorContentService.getGlasspaneTopDistance() + (wrapperRect ? wrapperRect.top : elementRect.top) + 1, (wrapperRect ? wrapperRect.left : elementRect.left) + this.editorContentService.getGlasspaneLeftDistance() + (wrapperRect ? wrapperRect.width : elementRect.width) + 2);
                 }
             });
         }

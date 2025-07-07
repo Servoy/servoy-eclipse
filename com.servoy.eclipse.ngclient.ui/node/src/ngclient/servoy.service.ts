@@ -23,7 +23,8 @@ import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
 import { SvyUtilsService } from './utils.service';
 import { ClientFunctionType } from './converters/clientfunction_converter';
-import { ClientFunctionService } from './services/clientfunction.service';
+import { JSMenuType } from './converters/jsmenu_converter';
+import { ClientFunctionService } from '../sablo/clientfunction.service';
 import { UIBlockerService } from './services/ui_blocker.service';
 import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
 import { ServerFunctionType } from './converters/serverfunction_converter';
@@ -119,6 +120,7 @@ export class ServoyService {
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
         typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this, this.utils));
         typesRegistry.registerGlobalType(ServerFunctionType.NATIVE_FUNCTION_TYPE_NAME, new ServerFunctionType(this, this.utils));
+        typesRegistry.registerGlobalType(JSMenuType.TYPE_NAME, new JSMenuType(converterService));
     }
 
     public connect() {
@@ -208,7 +210,7 @@ export class ServoyService {
             this.findModeShortCutCallback = (event: KeyboardEvent) => {
                 // perform find on ENTER
                 if (event.keyCode === 13) {
-                    this.sabloService.callService('formService', 'performFind', { formname: formName, clear: true, reduce: true, showDialogOnNoResults: true }, true);
+                    this.sabloService.callService('formService', 'performFind', { formname: formName, clear: true, reduce: true, showDialogOnNoResults: false }, true);
                 }
             };
             this.windowRefService.nativeWindow.addEventListener('keyup', this.findModeShortCutCallback);

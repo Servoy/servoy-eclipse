@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import static com.servoy.eclipse.core.util.UIUtils.runInUI;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventObject;
@@ -56,6 +58,7 @@ import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
@@ -89,13 +92,17 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
@@ -219,7 +226,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removeActiveProjectListener(this);
 		servoyModel.removePersistChangeListener(false, this);
-		revert(false);
+		revert(false, false);
 
 		if (dummyActionRegistry != null)
 		{
@@ -233,7 +240,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	 *
 	 * @param force
 	 */
-	public void revert(boolean force)
+	public void revert(boolean force, boolean refresh)
 	{
 		if (force || isDirty())
 		{
@@ -241,6 +248,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel().revertEditingPersist(servoyProject, form);
 				getCommandStack().flush();
+				if (refresh)
+				{
+					this.refresh(new ArrayList<IPersist>(), true);
+				}
 			}
 			catch (RepositoryException e)
 			{
@@ -312,7 +323,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					{
 						try
 						{
-							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this, elementUuid));
+							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this.getForm(), elementUuid));
 						}
 						catch (IllegalArgumentException e)
 						{
@@ -649,14 +660,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						if (selectionWasOverriden)
 						{
 							// set the correct selection on form editor and outline page when override the persist for the first time
-							Display.getCurrent().asyncExec(new Runnable()
-							{
-								public void run()
-								{
-									graphicaleditor.getSite().getSelectionProvider().setSelection(new StructuredSelection(arrSelections));
-									((SelectionService)getSite().getWorkbenchWindow().getSelectionService()).notifyListeners(BaseVisualFormEditor.this);
-								}
-							});
+							runInUI(() -> {
+								graphicaleditor.getSite().getSelectionProvider().setSelection(new StructuredSelection(arrSelections));
+								((SelectionService)getSite().getWorkbenchWindow().getSelectionService()).notifyListeners(BaseVisualFormEditor.this);
+							}, false);
 						}
 					}
 				}
@@ -689,6 +696,38 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				if (hasFormReference(flattenedSolution, getForm(), formParent, new HashSet<String>()))
 				{
 					full_refresh = true;
+				}
+			}
+			else if (changed instanceof MenuItem menuItem)
+			{
+				Menu menu = (Menu)menuItem.getAncestor(IRepository.MENUS);
+				if (menu != null)
+				{
+					form.acceptVisitor(new IPersistVisitor()
+					{
+						@Override
+						public Object visit(IPersist o)
+						{
+							if (o instanceof WebComponent webComponent)
+							{
+								WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+									.getWebObjectSpecification(((WebComponent)o).getTypeName());
+								if (spec != null)
+								{
+
+									for (PropertyDescription pd : spec.getProperties(MenuPropertyType.INSTANCE))
+									{
+										if (Utils.equalObjects(webComponent.getFlattenedJson().opt(pd.getName()), menu.getUUID()))
+										{
+											changedChildren.add(o);
+											break;
+										}
+									}
+								}
+							}
+							return IPersistVisitor.CONTINUE_TRAVERSAL;
+						}
+					});
 				}
 			}
 

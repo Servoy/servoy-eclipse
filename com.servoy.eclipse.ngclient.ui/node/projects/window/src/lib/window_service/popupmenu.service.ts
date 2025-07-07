@@ -18,11 +18,13 @@ export class PopupMenuService {
     previousActiveMenuItem: HTMLElement = null;
     visibleSubMenuPath: HTMLElement[] = [];
     hideSubMenusetTimeout: any = null;
+    
+    parentNode: HTMLElement[] = [];
 
     menuZIndex = 15000;
 
     hoverMenuItemListener = (event: MouseEvent) => {
-        let targetElement = event.target as HTMLElement;
+        const targetElement = event.target as HTMLElement;
         const subMenu = this.menuItemTosubMenuMap.get(targetElement);
         if(event.type == 'mouseenter') {
             if(this.previousActiveMenuItem && this.previousActiveMenuItem !== targetElement) {
@@ -61,6 +63,37 @@ export class PopupMenuService {
             this.hideSubMenus();
         }
     }
+    
+    handleMobileDevice = (event: PointerEvent) => {
+		const isTouchScreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0));
+		if (isTouchScreen) {
+			const targetElement = (event.target as HTMLElement).closest('div');
+			const parentNode = targetElement.parentNode as HTMLElement;
+			const prevActiveMenu = this.activeMenu;
+			const subMenu = this.menuItemTosubMenuMap.get(targetElement);
+			if (subMenu) {
+				event.preventDefault();
+				this.activeMenu = subMenu;
+				if (this.shouldHideMenuMobile(this.activeMenu, prevActiveMenu)) {
+					this.hideSubMenuMobile(this.activeMenu);
+					const idx = this.parentNode.indexOf(parentNode);
+					(idx > -1) && this.parentNode.splice(idx);
+					this.activeMenu = this.visibleSubMenuPath.length > 1 ? prevActiveMenu : null;
+				} else {
+					if (this.visibleSubMenuPath.includes(prevActiveMenu) && this.parentNode.includes(parentNode)) {
+						if (this.visibleSubMenuPath.length > 1 && this.visibleSubMenuPath.indexOf(this.activeMenu) === -1) {
+							this.hideSubMenuMobile(this.visibleSubMenuPath[this.parentNode.indexOf(parentNode) + 1]);
+							this.parentNode.splice(this.parentNode.indexOf(parentNode) + 1);
+						}
+					}
+					this.showSubMenu(this.activeMenu);
+					(!this.parentNode.includes(parentNode)) && this.parentNode.push(parentNode);
+				}
+			} else {
+				this.activeMenu = null;
+			}
+		}
+	}
 
     constructor(private domSanitizer: DomSanitizer, private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document) {
 
@@ -76,6 +109,24 @@ export class PopupMenuService {
             }
             this.visibleSubMenuPath.push(subMenu);
         }
+    }
+    
+    private shouldHideMenuMobile(activeMenu: HTMLElement, previousActiveMenu: HTMLElement) {
+		if (activeMenu === null || previousActiveMenu === null) return false;
+		if ((activeMenu === previousActiveMenu && this.visibleSubMenuPath.includes(activeMenu)) || this.visibleSubMenuPath.includes(activeMenu)) {
+			return true;
+		}
+		return false;
+	}
+    
+    private hideSubMenuMobile(menu: HTMLElement) {
+        const idx = this.visibleSubMenuPath.indexOf(menu);
+        if(idx > -1) {
+            for(let i = idx; i < this.visibleSubMenuPath.length; i++) {
+                this.visibleSubMenuPath[i].style.visibility = 'hidden';
+            }
+            this.visibleSubMenuPath.splice(idx);
+        }        
     }
 
     private hideSubMenus() {
@@ -108,6 +159,7 @@ export class PopupMenuService {
             if(event.target instanceof HTMLDivElement && event.target.classList.contains('dropdown-menu')) return;
             this.hideSubMenusOf(this.menu);
             this.visibleSubMenuPath.splice(0, this.visibleSubMenuPath.length);
+            this.parentNode.splice(0, this.parentNode.length);
             this.menuItemTosubMenuMap.clear();
             this.subMenuToPopperMap.forEach((popper) => {
                 popper.destroy();
@@ -121,9 +173,9 @@ export class PopupMenuService {
             if (handler) {
                 handler();
             }
-            this.doc.removeEventListener('mouseup', listener);
+            this.doc.removeEventListener('mousedown', listener);
         };
-        this.doc.addEventListener('mouseup', listener);
+        this.doc.addEventListener('mousedown', listener);
     }
 
     public getMenuRect(popup: Popup) {
@@ -148,6 +200,7 @@ export class PopupMenuService {
         this.menu.style.display = 'block';
 
         this.doc.body.appendChild(this.menu);
+        this.menu.addEventListener('pointerdown', this.handleMobileDevice);
         this.menu.addEventListener('mouseenter', this.hoverMenuListener);
         this.menu.addEventListener('mouseleave', this.hoverMenuListener);
     }
@@ -223,6 +276,7 @@ export class PopupMenuService {
             }));
             parent.addEventListener('mouseenter', this.hoverMenuItemListener);
             parent.addEventListener('mouseleave', this.hoverMenuItemListener);
+            subMenu.addEventListener('pointerdown', this.handleMobileDevice);
             subMenu.addEventListener('mouseenter', this.hoverMenuListener);
             subMenu.addEventListener('mouseleave', this.hoverMenuListener);
             parent = subMenu;
@@ -236,7 +290,7 @@ export class PopupMenuService {
             if (item) {
                 if (item.enabled === false) link.classList.add('disabled');
                 if (item.callback && item.enabled !== false) {
-                    menuItem.addEventListener('mouseup', (event) => {
+                    menuItem.addEventListener('mousedown', (event) => {
                         if (event.button == 0) this.servoyService.callServiceServerSideApi("window","executeMenuItem",[item.id, index, -1, item.selected, null, item.text]);
                     });
                 }

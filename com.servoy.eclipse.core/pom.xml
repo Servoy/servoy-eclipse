@@ -8,17 +8,17 @@
   <parent>
     <groupId>com.servoy</groupId>
     <artifactId>servoy-eclipse</artifactId>
-    <version>2024.3.6.3949_LTS</version>
+    <version>2025.3.1.4043</version>
   </parent>
   <artifactId>com.servoy.eclipse.core</artifactId>
-  <version>2024.3.6.3949_LTS</version>
+  <version>2025.3.1.4043</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 		<plugins>
 			<plugin>
 	         <groupId>org.apache.maven.plugins</groupId>
 	         <artifactId>maven-dependency-plugin</artifactId>
-	         <version>3.6.1</version>
+	         <version>3.8.0</version>
 	         <executions>
 	           <execution>
 	             <id>unpack</id>

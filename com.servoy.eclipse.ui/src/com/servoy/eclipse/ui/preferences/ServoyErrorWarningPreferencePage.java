@@ -41,7 +41,6 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -51,7 +50,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbenchPropertyPage;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -62,7 +60,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
-import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -295,16 +292,6 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 		ExpandableComposite excomposite = new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
 		excomposite.setText(label);
 		excomposite.setExpanded(false);
-		if (IconPreferences.getInstance().getUseDarkThemeIcons())
-		{
-			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
-				.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
-			if (darkFGColor != null)
-			{
-				excomposite.setTitleBarForeground(darkFGColor);
-				excomposite.setActiveToggleColor(darkFGColor);
-			}
-		}
 		excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 		excomposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, nColumns, 1));
 		excomposite.addExpansionListener(new ExpansionAdapter()

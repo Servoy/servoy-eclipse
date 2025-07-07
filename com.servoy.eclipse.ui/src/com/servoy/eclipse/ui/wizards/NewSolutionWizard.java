@@ -82,6 +82,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaWebAppManifest;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -218,6 +219,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						//disable must authenticate for now, until we include login form generation, users creation
 						//solution.setMustAuthenticate(mustAuthenticate);
 						addDefaultThemeIfNeeded(repository, solution);
+						addDefaultWAMIfNeeded(repository, solution);
 					}
 					monitor.worked(1);
 
@@ -258,6 +260,16 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					addMediaFile(solution, ThemeResourceLoader.getVariantsFile(), ThemeResourceLoader.VARIANTS_JSON);
 
 					solution.setStyleSheetID(defaultTheme.getID());
+					repository.updateRootObject(solution);
+				}
+			}
+
+			private void addDefaultWAMIfNeeded(EclipseRepository repository, Solution solution) throws RepositoryException, IOException
+			{
+				if (configPage.shouldAddDefaultWAM())
+				{
+					addMediaFile(solution, CreateMediaWebAppManifest.createManifest(solution.getName()), CreateMediaWebAppManifest.FILE_NAME);
+					addMediaFile(solution, CreateMediaWebAppManifest.getIcon(), CreateMediaWebAppManifest.ICON_NAME);
 					repository.updateRootObject(solution);
 				}
 			}
@@ -456,13 +468,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 					HashSet<IProject> projectsToDeleteAfterImport = new HashSet<IProject>();
 					IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+					Boolean[] importDatasources = new Boolean[] { null };
 					for (String name : solutions.keySet())
 					{
 						boolean shouldAskOverwrite = (sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name));
 						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
 						{
 							importSolution(solutions.get(name), name, newSolutionName, monitor, true,
-								shouldAskOverwrite, activateSolution, overwriteModules, projectsToDeleteAfterImport);
+								shouldAskOverwrite, activateSolution, overwriteModules, importDatasources, projectsToDeleteAfterImport);
 							monitor.worked(1);
 						}
 					}
@@ -589,12 +602,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		for (String server_name : missingServerNames)
 		{
 			action.createDatabase(server, server_name, monitor);
-			final ServerConfig serverConfig = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
-				EclipseDatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
-				origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
-				origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getPrefixTables(),
-				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
-				origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
+			final ServerConfig serverConfig = origConfig.newBuilder()
+				.setServerName(server_name)
+				.setServerUrl(EclipseDatabaseUtils.getPostgresServerUrl(origConfig, server_name))
+				.setSchema(null)
+				.setDataModelCloneFrom(null)
+				.setEnabled(true).setSkipSysTables(false)
+				.setIdleTimeout(-1)
+				.build();
 			try
 			{
 				serverManager.testServerConfigConnection(serverConfig, 0);
@@ -629,10 +644,12 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 
 		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, configPage.shouldAddDefaultTheme());
+		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_WAM_SETTING, configPage.shouldAddDefaultWAM());
 	}
 
 	public static void importSolution(SolutionPackageInstallInfo packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
-		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules, Set<IProject> projectsToDeleteAfterImport)
+		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules, Boolean[] importDatasources,
+		Set<IProject> projectsToDeleteAfterImport)
 		throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
@@ -658,6 +675,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setSkipModulesImport(!shouldAskOverwrite);
 		importSolutionWizard.setAllowDataModelChanges(true);
 		importSolutionWizard.setImportSampleData(true);
+		importSolutionWizard.setImportDatasources(importDatasources[0]);
 		importSolutionWizard.shouldAllowSQLKeywords(true);
 		importSolutionWizard.showFinishDialog(false);
 
@@ -674,6 +692,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, project, false, false, false, null, null,
 			monitor, packageInfo.forceActivateResourcesProject, packageInfo.keepResourcesProjectOpen, projectsToDeleteAfterImport);
+		importDatasources[0] = importSolutionWizard.shouldImportDatasources();
 		// write the wpm version into the new solution project
 		String solutionVersion = packageInfo.version;
 		if (solutionVersion.length() > 0)
@@ -806,12 +825,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				ServerConfig origConfig = getValidServerConfig();
 				for (String server_name : searchMissingServers)
 				{
-					ServerConfig config = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
-						origConfig.getServerUrl().replace(origConfig.getServerName(), server_name), origConfig.getConnectionProperties(),
-						origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
-						origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
-						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
-						origConfig.getDialectClass(), origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
+					final ServerConfig config = origConfig.newBuilder()
+						.setServerName(server_name)
+						.setSchema(null)
+						.setDataModelCloneFrom(null)
+						.setEnabled(true).setSkipSysTables(false)
+						.setIdleTimeout(-1)
+						.build();
 
 					EditorUtil.openServerEditor(config, ServerSettings.DEFAULT, true);
 				}

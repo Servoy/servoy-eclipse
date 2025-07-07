@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2024.3.6.3949_LTS" type="features" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2025.3.1.4043" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
@@ -94,7 +94,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="2024.3.6.3949_LTS"/>
+      <feature id="com.servoy.eclipse.feature" version="2025.3.1.4043"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -120,7 +120,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.apache.felix.scr" autoStart="true" startLevel="2" />
       <plugin id="org.apache.logging.log4j.api" autoStart="true" startLevel="3" />
       <plugin id="org.apache.logging.log4j.core" autoStart="true" startLevel="3" />
-      <plugin id="org.apache.logging.log4j.jcl" autoStart="true" startLevel="3" />
       <plugin id="org.apache.logging.log4j.slf4j2-impl" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
@@ -132,11 +131,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </configurations>
 
    <repositories>
-      <repository location="https://download.servoy.com/developer/latest/" name="Servoy Latest Releases" enabled="false" />
-      <repository location="https://download.servoy.com/developer/lts" name="Servoy LTS Releases" enabled="true" />
-      <repository location="https://download.servoy.com/developer/latest/releasecandidate" name="Servoy Latest Release Candidates" enabled="false" />
-      <repository location="https://download.eclipse.org/eclipse/updates/4.30" name="Eclipse Release" enabled="true" />
-      <repository location="https://download.eclipse.org/releases/2023-12" name="Eclipse Updates" enabled="true" />
+      <repository location="https://download.servoy.com/developer/latest/" name="Servoy Latest Releases" enabled="true" />
+      <repository location="https://download.servoy.com/developer/lts" name="Servoy LTS Releases" enabled="false" />
+      <repository location="https://download.servoy.com/developer/latest/releasecandidate" name="Servoy Latest Release Candidates" enabled="true" />
+      <repository location="https://download.eclipse.org/eclipse/updates/4.32" name="Eclipse Release" enabled="true" />
+      <repository location="https://download.eclipse.org/releases/2024-06" name="Eclipse Updates" enabled="true" />
       <repository location="https://developer.servoy.com/sqlexplorer/" name="SQLExplorer" enabled="true" />
    </repositories>
 

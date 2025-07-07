@@ -48,8 +48,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.javascript.ast.Comment;
-import org.eclipse.dltk.javascript.ast.MultiLineComment;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,6 +79,8 @@ import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Portal;
@@ -118,6 +118,7 @@ public class SolutionSerializer
 	public static final String FORMS_DIR = "forms";
 	public static final String WORKINGSETS_DIR = "workingsets";
 	public static final String VALUELISTS_DIR = "valuelists";
+	public static final String MENUS_DIR = "menus";
 	public static final String RELATIONS_DIR = "relations";
 	public static final String COMPONENTS_DIR_NAME = "components";
 	public static final String SERVICES_DIR_NAME = "services";
@@ -130,6 +131,7 @@ public class SolutionSerializer
 	public static final String FORM_FILE_EXTENSION = ".frm";
 	public static final String RELATION_FILE_EXTENSION = ".rel";
 	public static final String VALUELIST_FILE_EXTENSION = ".val";
+	public static final String MENU_FILE_EXTENSION = ".mnu";
 	public static final String TABLENODE_FILE_EXTENSION = ".tbl";
 	public static final String JS_FILE_EXTENSION_WITHOUT_DOT = "js";
 	public static final String JS_FILE_EXTENSION = '.' + JS_FILE_EXTENSION_WITHOUT_DOT;
@@ -145,7 +147,7 @@ public class SolutionSerializer
 	public static boolean isJSONFile(String fileName)
 	{
 		return fileName.endsWith(JSON_DEFAULT_FILE_EXTENSION) || fileName.endsWith(FORM_FILE_EXTENSION) || fileName.endsWith(RELATION_FILE_EXTENSION) ||
-			fileName.endsWith(VALUELIST_FILE_EXTENSION) || fileName.endsWith(TABLENODE_FILE_EXTENSION);
+			fileName.endsWith(VALUELIST_FILE_EXTENSION) || fileName.endsWith(TABLENODE_FILE_EXTENSION) || fileName.endsWith(MENU_FILE_EXTENSION);
 	}
 
 	private static Comparator<Object> PERSIST_COMPARATOR = new Comparator<Object>()
@@ -235,12 +237,12 @@ public class SolutionSerializer
 		final String userTemplate)
 	{
 		final Map<IPersist, Object> fileContents = new HashMap<IPersist, Object>(); // map(persist -> contents)
-		final TreeSet<Comment> comments = new TreeSet<Comment>(new Comparator<Comment>()
+		final TreeSet<JSONObject> comments = new TreeSet<JSONObject>(new Comparator<JSONObject>()
 		{
 			@Override
-			public int compare(Comment o1, Comment o2)
+			public int compare(JSONObject o1, JSONObject o2)
 			{
-				return o1.sourceStart() - o2.sourceStart();
+				return o1.getInt("start") - o2.getInt("start");
 			}
 		});
 		parent.acceptVisitor(new IPersistVisitor()
@@ -263,12 +265,7 @@ public class SolutionSerializer
 								JSONArray array = new JSONArray((String)prop);
 								for (int i = 0; i < array.length(); i++)
 								{
-									JSONObject jsonObject = array.getJSONObject(i);
-									MultiLineComment multiLineComment = new MultiLineComment();
-									multiLineComment.setStart(jsonObject.getInt("start"));
-									multiLineComment.setEnd(jsonObject.getInt("end"));
-									multiLineComment.setText(jsonObject.getString("text"));
-									comments.add(multiLineComment);
+									comments.add(array.getJSONObject(i));
 								}
 							}
 							catch (JSONException e)
@@ -297,23 +294,40 @@ public class SolutionSerializer
 				{
 					if (!comments.isEmpty())
 					{
-						Comment nextComment = comments.first();
-						while (nextComment.sourceStart() <= (sb.length() + ((CharSequence)content).length()))
+						JSONObject nextComment = comments.first();
+						while (nextComment.getInt("start") <= (sb.length() + ((CharSequence)content).length() - 1))
 						{
-							sb.append(nextComment.getText());
+							sb.append(nextComment.getString("text"));
 							sb.append('\n');
 							sb.append('\n');
 							comments.remove(nextComment);
+							if (comments.isEmpty()) break;
 							nextComment = comments.first();
 						}
 					}
 					sb.append(((CharSequence)content).toString());
+					if (!comments.isEmpty())
+					{
+						JSONObject nextComment = comments.first();
+						if (nextComment.has("linenr") && ((IScriptElement)persist).getLineNumberOffset() == nextComment.getInt("linenr"))
+						{
+							String currentContent = sb.toString();
+							if (currentContent.lastIndexOf("\n") == currentContent.length() - 1)
+							{
+								sb.deleteCharAt(currentContent.length() - 1);
+								sb.append(' ');
+							}
+							sb.append(nextComment.getString("text"));
+							sb.append('\n');
+							comments.remove(nextComment);
+						}
+					}
 				}
 			}
 
-			for (Comment comment : comments)
+			for (JSONObject comment : comments)
 			{
-				sb.append(comment.getText());
+				sb.append(comment.getString("text"));
 				sb.append('\n');
 				sb.append('\n');
 			}
@@ -346,7 +360,7 @@ public class SolutionSerializer
 			}
 
 			final Map<Pair<String, String>, Map<IPersist, Object>> projectContents = new HashMap<Pair<String, String>, Map<IPersist, Object>>();//filepathname -> map(persist -> contents)
-			final Map<Pair<String, String>, TreeSet<Comment>> projectComments = new HashMap<Pair<String, String>, TreeSet<Comment>>();//filepathname -> map(persist -> contents)
+			final Map<Pair<String, String>, TreeSet<JSONObject>> projectComments = new HashMap<Pair<String, String>, TreeSet<JSONObject>>();//filepathname -> map(persist -> contents)
 			IPersist compositeWithItems = node;
 			while (compositeWithItems != null && SolutionSerializer.isCompositeItem(compositeWithItems))
 			{
@@ -379,15 +393,15 @@ public class SolutionSerializer
 									Object prop = ((AbstractBase)p).getCustomProperty(new String[] { SolutionDeserializer.EXTRA_DOC_COMMENTS });
 									if (prop != null)
 									{
-										TreeSet<Comment> comments = projectComments.get(filepathname);
+										TreeSet<JSONObject> comments = projectComments.get(filepathname);
 										if (comments == null)
 										{
-											comments = new TreeSet<Comment>(new Comparator<Comment>()
+											comments = new TreeSet<JSONObject>(new Comparator<JSONObject>()
 											{
 												@Override
-												public int compare(Comment o1, Comment o2)
+												public int compare(JSONObject o1, JSONObject o2)
 												{
-													return o1.sourceStart() - o2.sourceStart();
+													return o1.getInt("start") - o2.getInt("start");
 												}
 											});
 											projectComments.put(filepathname, comments);
@@ -397,12 +411,7 @@ public class SolutionSerializer
 											JSONArray array = new JSONArray((String)prop);
 											for (int i = 0; i < array.length(); i++)
 											{
-												JSONObject jsonObject = array.getJSONObject(i);
-												MultiLineComment multiLineComment = new MultiLineComment();
-												multiLineComment.setStart(jsonObject.getInt("start"));
-												multiLineComment.setEnd(jsonObject.getInt("end"));
-												multiLineComment.setText(jsonObject.getString("text"));
-												comments.add(multiLineComment);
+												comments.add(array.getJSONObject(i));
 											}
 										}
 										catch (JSONException e)
@@ -438,7 +447,7 @@ public class SolutionSerializer
 
 				if (persistArray.length > 0)
 				{
-					TreeSet<Comment> comments = projectComments.get(filepathname);
+					TreeSet<JSONObject> comments = projectComments.get(filepathname);
 					OutputStream fos = fileAccess.getOutputStream(fileRelativePath);
 					int written = 0;
 					for (int i = 0; i < persistArray.length; i++)
@@ -453,11 +462,11 @@ public class SolutionSerializer
 						{
 							if (comments != null && comments.size() > 0)
 							{
-								Comment first = comments.first();
-								while (first != null && first.sourceStart() <= (written + ((CharSequence)content).length()))
+								JSONObject first = comments.first();
+								while (first != null && first.getInt("start") <= (written + ((CharSequence)content).length()))
 								{
-									written += first.getText().length();
-									fos.write(first.getText().getBytes("UTF8"));
+									written += first.getString("text").length();
+									fos.write(first.getString("text").getBytes("UTF8"));
 									fos.write('\n');
 									fos.write('\n');
 									comments.remove(first);
@@ -465,15 +474,33 @@ public class SolutionSerializer
 								}
 							}
 							written += ((CharSequence)content).length();
-							fos.write(content.toString().getBytes("UTF8"));
+							String contentString = content.toString();
+							if (comments != null && comments.size() > 0)
+							{
+								JSONObject nextComment = comments.first();
+								if (nextComment.has("linenr") && persistArray[i] instanceof IScriptElement &&
+									((IScriptElement)persistArray[i]).getLineNumberOffset() == nextComment.getInt("linenr"))
+								{
+									if (contentString.lastIndexOf("\n") == contentString.length() - 1)
+									{
+										contentString = contentString.substring(0, contentString.length() - 1);
+										contentString += ' ';
+									}
+									contentString += nextComment.getString("text");
+									written += nextComment.getString("text").length();
+									contentString += "\n";
+									comments.remove(nextComment);
+								}
+							}
+							fos.write(contentString.getBytes("UTF8"));
 							if (i < persistArray.length - 1) fos.write('\n');
 						}
 					}
 					if (comments != null && comments.size() > 0)
 					{
-						for (Comment comment : comments)
+						for (JSONObject comment : comments)
 						{
-							fos.write(comment.getText().getBytes("UTF8"));
+							fos.write(comment.getString("text").getBytes("UTF8"));
 							fos.write('\n');
 							fos.write('\n');
 						}
@@ -661,7 +688,8 @@ public class SolutionSerializer
 		}
 
 		return p instanceof Relation || p instanceof TableNode || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
-			p instanceof LayoutContainer; // can only return true for objects containing SolutionSerializer.PROP_ITEMS
+			p instanceof LayoutContainer || p instanceof Menu ||
+			p instanceof MenuItem; // can only return true for objects containing SolutionSerializer.PROP_ITEMS
 	}
 
 	/**
@@ -680,7 +708,8 @@ public class SolutionSerializer
 			}
 		}
 
-		return p instanceof Solution || p instanceof Relation || p instanceof TableNode || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
+		return p instanceof Solution || p instanceof Relation || p instanceof TableNode || p instanceof Menu ||
+			p instanceof MenuItem || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
 			p instanceof LayoutContainer;
 	}
 
@@ -689,7 +718,7 @@ public class SolutionSerializer
 	 */
 	public static boolean isCompositeItem(IPersist p)
 	{
-		return !(p instanceof Media || p instanceof IRootObject || p instanceof Relation || p instanceof ValueList || p instanceof Form ||
+		return !(p instanceof Media || p instanceof IRootObject || p instanceof Relation || p instanceof ValueList || p instanceof Menu || p instanceof Form ||
 			p instanceof TableNode || p instanceof IScriptElement);
 	}
 
@@ -936,7 +965,7 @@ public class SolutionSerializer
 					}
 					else if (type == IColumnTypes.NUMBER)
 					{
-						if (val != null)
+						if (val != null && !val.contains("("))
 						{
 							val = val.replace(",", "."); // you cannot have comma as decimal separator inside JS code
 						}
@@ -1144,7 +1173,7 @@ public class SolutionSerializer
 
 			if (valueFilter != null)
 			{
-				String filteredValue = valueFilter.getFilteredValue(persist, property_values, propertyName, propertyValue);
+				Object filteredValue = valueFilter.getFilteredValue(persist, property_values, propertyName, propertyValue);
 				if (filteredValue != null)
 				{
 					if (!(filteredValue.equals(propertyValue) && (isBoolean || isNumber)))
@@ -1203,22 +1232,25 @@ public class SolutionSerializer
 			if (itemsArrayList.size() > 0)
 			{
 				ServoyJSONObject[] itemsArray = itemsArrayList.toArray(new ServoyJSONObject[itemsArrayList.size()]);
-				Arrays.sort(itemsArray, new Comparator<ServoyJSONObject>()
+				if (!(persist instanceof Menu) && !(persist instanceof MenuItem))
 				{
-					public int compare(ServoyJSONObject o1, ServoyJSONObject o2)
+					Arrays.sort(itemsArray, new Comparator<ServoyJSONObject>()
 					{
-						try
+						public int compare(ServoyJSONObject o1, ServoyJSONObject o2)
 						{
-							return ((String)o1.get(PROP_UUID)).compareTo((String)o2.get(PROP_UUID));
+							try
+							{
+								return ((String)o1.get(PROP_UUID)).compareTo((String)o2.get(PROP_UUID));
+							}
+							catch (JSONException ex)
+							{
+								ServoyLog.logWarning("Cannot compare json objects based on uuid", ex);
+								return 0;
+							}
 						}
-						catch (JSONException ex)
-						{
-							ServoyLog.logWarning("Cannot compare json objects based on uuid", ex);
-							return 0;
-						}
-					}
 
-				});
+					});
+				}
 				JSONArray items = new ServoyJSONArray();
 				for (ServoyJSONObject o : itemsArray)
 					items.put(o);
@@ -1309,6 +1341,11 @@ public class SolutionSerializer
 			return name + VALUELIST_FILE_EXTENSION;
 		}
 
+		if (persistTypeID == IRepository.MENUS)
+		{
+			return name + MENU_FILE_EXTENSION;
+		}
+
 		if (persistTypeID == IRepository.TABLENODES)
 		{
 			return name + TABLENODE_FILE_EXTENSION;
@@ -1358,6 +1395,10 @@ public class SolutionSerializer
 		else if (persist instanceof ValueList)
 		{
 			name = VALUELISTS_DIR;
+		}
+		else if (persist instanceof Menu)
+		{
+			name = MENUS_DIR;
 		}
 		else if (persist instanceof Form)
 		{

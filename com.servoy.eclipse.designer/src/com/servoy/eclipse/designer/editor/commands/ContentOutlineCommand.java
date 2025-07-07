@@ -28,9 +28,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -84,6 +86,20 @@ public abstract class ContentOutlineCommand extends AbstractHandler implements I
 			selection = contentOutline.getSelection();
 		}
 		return selection;
+	}
+
+	protected FormOutlinePage getFormOutline()
+	{
+		ContentOutline contentOutline = DesignerUtil.getContentOutline();
+		if (contentOutline != null)
+		{
+			IPage outline = contentOutline.getCurrentPage();
+			if (outline instanceof FormOutlinePage formOutlinePage)
+			{
+				return formOutlinePage;
+			}
+		}
+		return null;
 	}
 
 	protected BaseVisualFormEditor getEditorPart()

@@ -25,33 +25,44 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.rmi.RemoteException;
 import java.sql.Types;
+import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.IOUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jshybugger.instrumentation.DebugInstrumentator;
 import org.jshybugger.instrumentation.JsCodeLoader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectHandlerFunctionDefinition;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.nongwt.test.LineMapper;
 import com.servoy.base.persistence.constants.IComponentConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.base.util.I18NProvider;
 import com.servoy.eclipse.model.Activator;
+import com.servoy.eclipse.model.ING2WarExportModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -62,6 +73,8 @@ import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
+import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
@@ -89,13 +102,19 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.scripting.ScriptEngine;
+import com.servoy.j2db.server.ngclient.AngularFormGenerator;
+import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -165,9 +184,64 @@ public class MobileExporter
 
 	private List<String> mediaOrder;
 
+	private final ITiNGExportModel model;
+
 	public static String getDefaultServerURL()
 	{
 		return "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort();
+	}
+
+	public MobileExporter(ITiNGExportModel model)
+	{
+		this.model = model != null ? model : new ITiNGExportModel()
+		{
+			// a bit of hack that we have a set that just says true for contains so the ting export will build with all component and services (just like if the model was null)
+			AbstractSet<String> set = new AbstractSet<String>()
+			{
+				@Override
+				public boolean contains(Object o)
+				{
+					return true;
+				}
+
+				@Override
+				public int size()
+				{
+					return 0;
+				}
+
+				@Override
+				public Iterator<String> iterator()
+				{
+					return Collections.emptyIterator();
+				}
+			};
+
+			@Override
+			public String exportNG2Mode()
+			{
+				// with a null this is in developer so run it in debug mode.
+				return "build_mobile_debug";
+			}
+
+			@Override
+			public Set<String> getExportedPackagesExceptSablo()
+			{
+				return set;
+			}
+
+			@Override
+			public Set<String> getAllExportedComponents()
+			{
+				return set;
+			}
+
+			@Override
+			public Set<String> getAllExportedServicesWithoutSabloServices()
+			{
+				return set;
+			}
+		};
 	}
 
 	private Pair<String, Boolean> doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
@@ -236,7 +310,7 @@ public class MobileExporter
 						ApplicationServerRegistry.get().getDeveloperRepository(), true, new IValueFilter()
 						{
 
-							public String getFilteredValue(IPersist persist, Map<String, Object> property_values, String key, String value)
+							public Object getFilteredValue(IPersist persist, Map<String, Object> property_values, String key, String value)
 							{
 								Element contentSpec = StaticContentSpecLoader.getContentSpec().getPropertyForObjectTypeByName(persist.getTypeID(), key);
 								if (contentSpec != null && contentSpec.getTypeID() == IRepository.ELEMENTS &&
@@ -246,9 +320,9 @@ public class MobileExporter
 									{
 										Object methodID = ApplicationServerRegistry.get().getDeveloperRepository().convertArgumentStringToObject(
 											contentSpec.getTypeID(), value);
-										if (methodID instanceof Integer)
+										if (methodID instanceof Integer i)
 										{
-											return generateMethodCall(form, persist, key, ((Integer)methodID).intValue());
+											return generateMethodCall(form, persist, key, i.intValue());
 										}
 									}
 									catch (Exception e)
@@ -256,15 +330,14 @@ public class MobileExporter
 										ServoyLog.logError(e);
 									}
 								}
-								if (persist instanceof GraphicalComponent && !property_values.containsKey(IComponentConstants.VIEW_TYPE_ATTR))
+								if (persist instanceof GraphicalComponent gc && !property_values.containsKey(IComponentConstants.VIEW_TYPE_ATTR))
 								{
-									property_values.put(IComponentConstants.VIEW_TYPE_ATTR, ComponentFactory.isButton(((GraphicalComponent)persist))
+									property_values.put(IComponentConstants.VIEW_TYPE_ATTR, ComponentFactory.isButton(gc)
 										? IComponentConstants.VIEW_TYPE_BUTTON : IComponentConstants.VIEW_TYPE_LABEL);
 								}
-								if (value != null)
+								if (value != null && contentSpec != null)
 								{
-									if (contentSpec != null &&
-										contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()))
+									if (contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()))
 									{
 										try
 										{
@@ -275,7 +348,41 @@ public class MobileExporter
 										{
 											ServoyLog.logError(ex);
 										}
+
 									}
+									else if (contentSpec.getName().equals(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName()))
+								{
+									try
+									{
+										ServoyJSONObject json = new ServoyJSONObject(value, false, false, false);
+
+										if (persist instanceof WebComponent wc)
+										{
+											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+												.getWebObjectSpecification(wc.getTypeName());
+											if (spec != null)
+											{
+												Map<String, WebObjectHandlerFunctionDefinition> handlers = spec.getHandlers();
+												for (WebObjectHandlerFunctionDefinition handler : handlers.values())
+												{
+													String name = handler.getName();
+													String handlerValue = json.optString(name, null);
+													if (handlerValue != null)
+													{
+														String call = generateMethodCall(form, persist, name, handlerValue);
+														json.put(name, call);
+													}
+												}
+											}
+										}
+
+										return json;
+									}
+									catch (Exception ex)
+									{
+										ServoyLog.logError(ex);
+									}
+								}
 								}
 								return value;
 							}
@@ -371,6 +478,11 @@ public class MobileExporter
 			solutionModel.put("timeout", timeout);
 			solutionModel.put("skipConnect", Boolean.valueOf(skipConnect));
 			solutionModel.put("mustAuthenticate", Boolean.valueOf(solution.getMustAuthenticate()));
+			Media media = flattenedSolution.getMedia(solution.getStyleSheetID());
+			if (media != null)
+			{
+				solutionModel.put("styleSheet", MediaResourcesServlet.SERVOY_SOLUTION_CSS + media.getName().replace(".less", ".css"));
+			}
 
 			int onOpenMethodID = solution.getOnOpenMethodID();
 			if (onOpenMethodID > 0)
@@ -389,10 +501,8 @@ public class MobileExporter
 			i18nModel.setLanguage(Locale.GERMANY);
 			Map<String, I18NMessagesModelEntry> defaultProperties = i18nModel.getDefaultMap();
 			TreeMap<String, String> allI18nData = new TreeMap<String, String>();
-			Iterator<Map.Entry<String, I18NMessagesModelEntry>> it = defaultProperties.entrySet().iterator();
-			while (it.hasNext())
+			for (Entry<String, I18NMessagesModelEntry> entry : defaultProperties.entrySet())
 			{
-				Map.Entry<String, I18NMessagesModelEntry> entry = it.next();
 				if (entry.getKey().toLowerCase().startsWith(I18NProvider.MOBILE_KEY_PREFIX))
 				{
 					allI18nData.put("." + entry.getKey(), (entry.getValue().defaultvalue == null ? "" : entry.getValue().defaultvalue));
@@ -420,6 +530,7 @@ public class MobileExporter
 			return ("var _solutiondata_ = " + jsonObject.toString());
 		}
 		return null;
+
 	}
 
 	/**
@@ -550,11 +661,125 @@ public class MobileExporter
 		return null;
 	}
 
-	public File doExport(boolean exportAsZip) throws IOException
+	private File createTempDir() throws IOException
+	{
+		File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+
+		File tmpWarDir = new File(tmpDir, "warexport" + System.currentTimeMillis() + "/");
+		if (!tmpWarDir.mkdirs())
+		{
+			throw new IOException("Can't create the temp dir  " + tmpWarDir);
+		}
+		return tmpWarDir;
+	}
+
+	public File doExport(boolean exportAsZip, IProgressMonitor monitor) throws IOException
 	{
 		lineMapper = useTestWar ? new LineMapper() : null;
+		// first generate the dist TiNG folder:
+		File tmpWarDir = createTempDir();
+		Activator.getDefault().exportNG2ToWar(new ING2WarExportModel()
+		{
+
+			@Override
+			public IProgressMonitor getProgressMonitor()
+			{
+				return monitor;
+			}
+
+			@Override
+			public ITiNGExportModel getModel()
+			{
+				return model;
+			}
+
+			@Override
+			public File getExportLocation()
+			{
+				return tmpWarDir;
+			}
+
+			public String getSolutionName()
+			{
+				IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+				FlattenedSolution solution = servoyModel.getFlattenedSolution();
+				return solution.getName();
+			}
+		});
+
+		WarExporter.compileLessResources(tmpWarDir);
+
 		String formJson = doPersistExport();
 		String solutionJavascript = doScriptingExport();
+
+		StringBuilder modelData = new StringBuilder();
+		modelData.append("var _formdata_ = [");
+		FlattenedSolution flattenedSolution = getFlattenedSolution();
+
+		String prevValue = Settings.getInstance().getProperty("servoy.ngclient.testingMode", "false");
+		try
+		{
+			Settings.getInstance().setProperty("servoy.ngclient.testingMode", "true");
+			flattenedSolution.getForms(false).forEachRemaining(form -> {
+				AngularFormGenerator generator = new AngularFormGenerator(flattenedSolution, form, form.getName(), false, null);
+				try
+				{
+					String formModel = generator.generateJS();
+					modelData.append(formModel);
+					modelData.append(",\n");
+				}
+				catch (IOException e)
+				{
+					Debug.error("Can't generate angular model for form " + form, e);
+				}
+			});
+			modelData.append("]");
+		}
+		finally
+		{
+			Settings.getInstance().setProperty("servoy.ngclient.testingMode", prevValue);
+		}
+		String modelDataString = modelData.toString();
+
+		JSONObject spec = new JSONObject();
+
+		WebObjectSpecification[] allWebObjectSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
+		for (WebObjectSpecification webObjectSpecification : allWebObjectSpecifications)
+		{
+			try (InputStream stream = webObjectSpecification.getSpecURL().openStream())
+			{
+				String content = IOUtils.toString(stream, Charset.forName("UTF8"));
+				JSONObject json = new JSONObject(content);
+				JSONObject properties = json.getJSONObject("model");
+				// strip it a bit
+				properties.keys().forEachRemaining(key -> {
+					if (properties.get(key) instanceof JSONObject property)
+					{
+						property.remove("default");
+						property.remove("tags");
+						property.remove("values");
+					}
+					else
+					{
+						// replace the type string with a json object for easer use in the client
+						JSONObject property = new JSONObject();
+						property.put("type", properties.get(key));
+						properties.put(key, property);
+					}
+				});
+
+
+				JSONObject api = json.optJSONObject("api");
+				JSONObject component = new JSONObject();
+				component.put("model", properties);
+				component.put("api", api);
+
+				spec.put(webObjectSpecification.getName(), component);
+			}
+		}
+
+		String specDataString = "var _specdata_ = " + spec.toString();
+
 
 		// Write files for running from java source
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
@@ -569,24 +794,30 @@ public class MobileExporter
 			outputFile = new File(tmpP, "solution_json.js");
 			Utils.writeTXTFile(outputFile, formJson);
 			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/solution_json.js"), formJson);
+
+			outputFile = new File(tmpP, "form_json.js");
+			Utils.writeTXTFile(outputFile, modelDataString);
+			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/form_json.js"), modelDataString);
+
+			outputFile = new File(tmpP, "spec_json.js");
+			Utils.writeTXTFile(outputFile, modelDataString);
+			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/spec_json.js"), specDataString);
 		}
 
 		File exportedFile = null;
 		InputStream is = this.getClass().getResourceAsStream(useTestWar ? RELATIVE_TEST_WAR_PATH : RELATIVE_WAR_PATH);
 		if (is != null)
 		{
-			ZipOutputStream warStream = null;
+			String moduleName = useTestWar ? MOBILE_TEST_MODULE_NAME : MOBILE_MODULE_NAME;
+			String htmlFile = useTestWar ? HTML_TEST_FILE : HTML_FILE;
+			Map<String, String> renameMap = new HashMap<String, String>();
+			buildRenameEntriesList(renameMap);
+			String fileNameWithoutExtension = solutionName + (useTestWar ? "_TEST" : "");
+			exportedFile = new File(outputFolder, fileNameWithoutExtension + (exportAsZip ? ".zip" : ".war"));
+			exportedFile.getParentFile().mkdirs();
+			final ZipOutputStream warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
 			try
 			{
-				String moduleName = useTestWar ? MOBILE_TEST_MODULE_NAME : MOBILE_MODULE_NAME;
-				String htmlFile = useTestWar ? HTML_TEST_FILE : HTML_FILE;
-				Map<String, String> renameMap = new HashMap<String, String>();
-				buildRenameEntriesList(renameMap);
-				String fileNameWithoutExtension = solutionName + (useTestWar ? "_TEST" : "");
-				exportedFile = new File(outputFolder, fileNameWithoutExtension + (exportAsZip ? ".zip" : ".war"));
-				exportedFile.getParentFile().mkdirs();
-				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
-
 				Pair<String, Boolean> doMediaExportReturn = doMediaExport(warStream, developmentWorkspaceExport ? outputFolder : null);
 				String mediaExport = doMediaExportReturn.getLeft();
 				boolean isJqueryThemeOverwriten = doMediaExportReturn.getRight().booleanValue();
@@ -623,16 +854,26 @@ public class MobileExporter
 						}
 						if (entryName.equals(htmlFile))
 						{
+							String angularIndex = Utils.getTXTFileContent(new File(tmpWarDir, "WEB-INF/angular-index.html"), Charset.forName("UTF8"));
+
+							angularIndex = angularIndex.replaceAll("<base href=\"/\">", "");
+							int headIndex = angularIndex.indexOf("</head>");
+
+
+							fileContent = fileContent.replace("<!--SOLUTION_NAME-->", solutionName);
 							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_JS_PLACEHOLDER-->"), mediaExport);
 							fileContent = fileContent.replaceAll(Pattern.quote("<!--PHONEGAP_JS_PLACEHOLDER-->"),
 								exportAsZip ? "<script src=\"cordova.js\"></script>" : "");
+							fileContent = angularIndex.substring(0, headIndex) + fileContent + angularIndex.substring(headIndex);
 							if (developmentWorkspaceExport)
 							{
 								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(outputFolder, htmlFile)), Charset.forName("UTF8"),
 									false);
 								File outputFile = new File(outputFolder, "index.html");
+								indexContent = indexContent.replace("<!--SOLUTION_NAME-->", solutionName);
 								indexContent = indexContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_JS_PLACEHOLDER-->"), mediaExport);
 								indexContent = indexContent.replaceAll(Pattern.quote("<!--PHONEGAP_JS_PLACEHOLDER-->"), "");
+								indexContent = angularIndex.substring(0, headIndex) + indexContent + angularIndex.substring(headIndex);
 								Utils.writeTXTFile(outputFile, indexContent);
 							}
 						}
@@ -658,6 +899,10 @@ public class MobileExporter
 					}
 					entry = zipStream.getNextEntry();
 				}
+				Utils.closeInputStream(zipStream);
+
+				addZipEntry(moduleName + "/" + renameMap.get("spec_json.js"), warStream, Utils.getUTF8EncodedStream(specDataString));
+				addZipEntry(moduleName + "/" + renameMap.get("form_json.js"), warStream, Utils.getUTF8EncodedStream(modelDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
 				addZipEntry(moduleName + "/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
 
@@ -677,7 +922,9 @@ public class MobileExporter
 					addZipEntry("config.xml", warStream, configStream);
 					Utils.closeInputStream(configStream);
 				}
-				Utils.closeInputStream(zipStream);
+
+				// add TiNG code to the WAR
+				Arrays.asList(tmpWarDir.listFiles()).forEach(f -> handleWarEntry(f, warStream, tmpWarDir));
 			}
 			catch (IOException e)
 			{
@@ -688,6 +935,15 @@ public class MobileExporter
 			{
 				Utils.closeOutputStream(warStream);
 			}
+			try
+			{
+				Files.walkFileTree(tmpWarDir.toPath(), DeletePathVisitor.INSTANCE);
+			}
+			catch (IOException e)
+			{
+				// just catch and log here, no need to fail the export if this dir can't be deleted.
+				ServoyLog.logError(e);
+			}
 		}
 		else
 		{
@@ -697,6 +953,27 @@ public class MobileExporter
 		return exportedFile;
 	}
 
+	private void handleWarEntry(File file, ZipOutputStream warStream, File tmpWarDir)
+	{
+		if (file.isDirectory())
+		{
+			Arrays.asList(file.listFiles()).forEach(f -> handleWarEntry(f, warStream, tmpWarDir));
+		}
+		else
+		{
+			try (FileInputStream is = new FileInputStream(file))
+			{
+				String name = file.getAbsolutePath();
+				name = name.substring(tmpWarDir.getAbsolutePath().length()).replace('\\', '/');
+				addZipEntry(name, warStream, is);
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+	}
+
 	private void buildRenameEntriesList(Map<String, String> renameMap)
 	{
 		String moduleName = useTestWar ? MOBILE_TEST_MODULE_NAME : MOBILE_MODULE_NAME;
@@ -704,6 +981,8 @@ public class MobileExporter
 		String htmlFile = useTestWar ? HTML_TEST_FILE : HTML_FILE;
 		renameMap.put(htmlFile, "index.html");
 
+		addRenameEntries(renameMap, moduleName + "/", "form_json", ".js");
+		addRenameEntries(renameMap, moduleName + "/", "spec_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "servoy_utils", ".js");
@@ -719,7 +998,7 @@ public class MobileExporter
 
 	private void addRenameEntries(Map<String, String> renameMap, String prefixLocation, String name, String subfix)
 	{
-		String mobileClientFileName = name + '_' + System.currentTimeMillis() + subfix;
+		String mobileClientFileName = name + /* '_' + System.currentTimeMillis() + */ subfix;
 		renameMap.put(prefixLocation + name + subfix, prefixLocation + mobileClientFileName); // for zip entry path replace
 		renameMap.put(name + subfix, mobileClientFileName); // for content replacement
 	}
@@ -903,7 +1182,7 @@ public class MobileExporter
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				ServoyLog.logError(e);
 			}
 			scriptResult.append(code);
 		}
@@ -1025,6 +1304,30 @@ public class MobileExporter
 	private String generateMethodCall(final IPersist parent, IPersist persist, String key, int methodID)
 	{
 		IScriptProvider sm = ModelUtils.getScriptMethod(parent, parent, null, methodID);
+		return generateMethodCall(persist, key, sm);
+	}
+
+	/**
+	 * @param form
+	 * @param persist
+	 * @param key
+	 * @param methodID
+	 * @return
+	 */
+	private String generateMethodCall(final IPersist parent, IPersist persist, String key, String methodUUID)
+	{
+		IScriptProvider sm = getFlattenedSolution().getScriptMethod(methodUUID);
+		return generateMethodCall(persist, key, sm);
+	}
+
+	/**
+	 * @param persist
+	 * @param key
+	 * @param sm
+	 * @return
+	 */
+	private String generateMethodCall(IPersist persist, String key, IScriptProvider sm)
+	{
 		if (sm != null)
 		{
 			List<Object> arguments = ((AbstractBase)persist).getFlattenedMethodArguments(key);

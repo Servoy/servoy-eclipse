@@ -13,6 +13,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.cheatsheets.AbstractItemExtensionElement;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+
 public class HyperlinkCheatSheetExtension extends AbstractItemExtensionElement
 {
 	private String type;
@@ -58,15 +60,9 @@ public class HyperlinkCheatSheetExtension extends AbstractItemExtensionElement
 						//  Open default external browser
 						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(e.text));
 					}
-					catch (PartInitException ex)
+					catch (PartInitException | MalformedURLException ex)
 					{
-						// TODO Auto-generated catch block
-						ex.printStackTrace();
-					}
-					catch (MalformedURLException ex)
-					{
-						// TODO Auto-generated catch block
-						ex.printStackTrace();
+						ServoyLog.logError(ex);
 					}
 				}
 			});

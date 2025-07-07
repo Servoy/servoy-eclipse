@@ -3,6 +3,7 @@ import { SabloService } from '../sablo/sablo.service';
 import { Deferred, SessionStorageService, LoggerFactory, LoggerService, Locale } from '@servoy/public';
 import { registerLocaleData } from '@angular/common';
 import { DOCUMENT } from '@angular/common';
+import { environment as env} from '../environments/environment';
 
 import numbro from 'numbro';
 import { Settings } from 'luxon';
@@ -164,8 +165,15 @@ export class LocaleService {
         // angular locales are either <language lowercase> or <language lowercase> - <country uppercase>
         const localeId = country !== undefined && country.length > 0 ?
             language.toLowerCase() + '-' + country.toUpperCase() : language.toLowerCase();
-        const index = this.doc.baseURI.indexOf('/',8);
-        const context = index > 0 ? this.doc.baseURI.substring(index) : '/';
+        let context: string;
+        if (env.mobile) {
+            const index = this.doc.baseURI.indexOf('index.html');
+            context = index > 0 ? this.doc.baseURI.substring(0,index) : '/';
+            
+        } else {
+            const index = this.doc.baseURI.indexOf('/',8);
+            context = index > 0 ? this.doc.baseURI.substring(index) : '/';
+        }
         
         return new Promise<string>((resolve, reject) => {
             return import(

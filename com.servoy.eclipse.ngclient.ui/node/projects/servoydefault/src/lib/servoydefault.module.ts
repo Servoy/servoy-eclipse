@@ -11,7 +11,7 @@ import { ServoyDefaultTextField } from './textfield/textfield';
 import { ServoyDefaultTextArea } from './textarea/textarea';
 import { ServoyDefaultButton } from './button/button';
 import { ServoyDefaultLabel } from './label/label';
-import { ServoyDefaultTabpanel } from './tabpanel/tabpanel';
+import { DefaultTabpanelActiveTabVisibilityListener, ServoyDefaultTabpanel } from './tabpanel/tabpanel';
 import { ServoyDefaultAccordion } from './accordion/accordion';
 import { ServoyDefaultTablesspanel } from './tabpanel/tablesspanel';
 import { ServoyDefaultSplitpane } from './splitpane/splitpane';
@@ -44,6 +44,7 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
     ServoyDefaultButton,
     ServoyDefaultLabel,
     ServoyDefaultTabpanel,
+    DefaultTabpanelActiveTabVisibilityListener,
     ServoyDefaultTablesspanel,
     ServoyDefaultSplitpane,
     ServoyDefaultAccordion,

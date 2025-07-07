@@ -56,7 +56,6 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 
 		/**
 		 * Create a new instance of the receiver.
-		 *
 		 */
 		public VirtualManager() {
 			addTableListener();
@@ -82,8 +81,7 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 					// Keep looking if it is not in the cache.
 					IContentProvider contentProvider = getContentProvider();
 					// If we are building lazily then request lookup now
-					if (contentProvider instanceof ILazyContentProvider) {
-						ILazyContentProvider lazyProvider = (ILazyContentProvider) contentProvider;
+					if (contentProvider instanceof ILazyContentProvider lazyProvider) {
 						if (!isBusy()) {
 							lazyProvider.updateElement(index);
 						} else {
@@ -109,7 +107,6 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 		/**
 		 * Get the element at index.Resolve it lazily if this is available.
 		 *
-		 * @param index
 		 * @return Object or <code>null</code> if it could not be found
 		 */
 		protected Object resolveElement(int index) {
@@ -124,9 +121,6 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 
 		/**
 		 * A non visible item has been added.
-		 *
-		 * @param element
-		 * @param index
 		 */
 		public void notVisibleAdded(Object element, int index) {
 
@@ -147,8 +141,6 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 		/**
 		 * The elements with the given indices need to be removed from the
 		 * cache.
-		 *
-		 * @param indices
 		 */
 		public void removeIndices(int[] indices) {
 			if (indices.length == 1) {
@@ -173,9 +165,6 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 		/**
 		 * The elements between the given indices (inclusive) need to be removed
 		 * from the cache.
-		 *
-		 * @param from
-		 * @param to
 		 */
 		public void removeIndicesFromTo(int from, int to) {
 			int indexAfterTo = to + 1;
@@ -189,16 +178,12 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 		}
 
 		/**
-		 * @param element
 		 * @return the index of the element in the cache, or null
 		 */
 		public int find(Object element) {
 			return Arrays.asList(cachedElements).indexOf(element);
 		}
 
-		/**
-		 * @param count
-		 */
 		public void adjustCacheSize(int count) {
 			if (count == cachedElements.length) {
 				return;
@@ -240,8 +225,6 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 	/**
 	 * Initialize the virtual manager to manage the virtual state if the table
 	 * is VIRTUAL. If not use the default no-op version.
-	 *
-	 * @param style
 	 */
 	private void initializeVirtualManager(int style) {
 		if ((style & SWT.VIRTUAL) == 0) {
@@ -292,7 +275,6 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 	/**
 	 * Create a new TableItem at index if required.
 	 *
-	 * @param element
 	 * @param index
 	 *
 	 * @since 3.1
@@ -367,9 +349,7 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 		boolean oldBusy = isBusy();
 		setBusy(true);
 		try {
-			if (widget instanceof Item) {
-				final Item item = (Item) widget;
-
+			if (widget instanceof Item item) {
 				// remember element we are showing
 				if (fullMap) {
 					associate(element, item);
@@ -504,8 +484,7 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 
 		List<Object> result = new ArrayList<>();
 		int[] selectionIndices = doGetSelectionIndices();
-		if (getContentProvider() instanceof ILazyContentProvider) {
-			ILazyContentProvider lazy = (ILazyContentProvider) getContentProvider();
+		if (getContentProvider() instanceof ILazyContentProvider lazy) {
 			for (int selectionIndex : selectionIndices) {
 				lazy.updateElement(selectionIndex);// Start the update
 				// check for the case where the content provider changed the number of items
@@ -787,8 +766,7 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 				if (index != -1) {
 					indices[count++] = index;
 				}
-			} else if (w instanceof Item) {
-				Item item = (Item) w;
+			} else if (w instanceof Item item) {
 				disassociate(item);
 				indices[count++] = doIndexOf(item);
 			}
@@ -896,8 +874,8 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 			}
 		}
 
-		if (w instanceof Item) {
-			doShowItem((Item) w);
+		if (w instanceof Item item) {
+			doShowItem(item);
 		}
 	}
 
@@ -922,8 +900,7 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 			for (int i = 0; i < size; ++i) {
 				Object o = list.get(i);
 				Widget w = findItem(o);
-				if (w instanceof Item) {
-					Item item = (Item) w;
+				if (w instanceof Item item) {
 					items[count++] = item;
 				}
 			}
@@ -961,7 +938,7 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 						&& getLastElement() instanceof ExpandableNode expNode) {
 
 					// extract only non found items already.
-					List<Object> notFoundItems = new ArrayList<Object>(list);
+					List<Object> notFoundItems = new ArrayList<>(list);
 					for (int index : indices) {
 						notFoundItems.remove(doGetItem(index).getData());
 					}
@@ -1003,8 +980,7 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 		for (int i = 0; i < size; ++i) {
 			Object o = list.get(i);
 			Widget w = findItem(o);
-			if (w instanceof Item) {
-				Item item = (Item) w;
+			if (w instanceof Item item) {
 				indices[count++] = doIndexOf(item);
 				if (firstItem == null) {
 					firstItem = item;
@@ -1014,15 +990,13 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 			}
 		}
 
-		if (getContentProvider() instanceof ILazyContentProvider) {
-			ILazyContentProvider provider = (ILazyContentProvider) getContentProvider();
-
+		if (getContentProvider() instanceof ILazyContentProvider provider) {
 			// Now go through it again until all is done or we are no longer
 			// virtual
 			// This may create all items so it is not a good
 			// idea in general.
 			// Use #setSelection (int [] indices,boolean reveal) instead
-			for (int i = 0; virtualElements.size() > 0 && i < doGetItemCount(); i++) {
+			for (int i = 0; !virtualElements.isEmpty() && i < doGetItemCount(); i++) {
 				provider.updateElement(i);
 				Item item = doGetItem(i);
 				if (virtualElements.contains(item.getData())) {
@@ -1489,7 +1463,6 @@ public abstract class AbstractTableViewer extends ColumnViewer {
 	 * @param indices the array of indices for the items to select
 	 *
 	 * @exception IllegalArgumentException - if the array of indices is null
-	 *
 	 */
 	protected abstract void doSelect(int[] indices);
 

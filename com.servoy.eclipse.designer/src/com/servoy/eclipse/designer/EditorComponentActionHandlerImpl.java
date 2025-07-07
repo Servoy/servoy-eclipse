@@ -17,21 +17,25 @@
 
 package com.servoy.eclipse.designer;
 
-import static com.servoy.eclipse.designer.util.DesignerUtil.getActiveEditor;
-
 import java.util.function.Function;
 
 import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.commands.CommandStack;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.CreateOverrideIfNeeededCommandWrapper;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
+import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentCommand.CreateComponentOptions;
 import com.servoy.eclipse.ui.EditorActionsRegistry.EditorComponentActionHandler;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.j2db.persistence.IPersist;
+import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
+import com.servoy.j2db.dataprocessing.IModificationSubject;
+import com.servoy.j2db.dataprocessing.ModificationEvent;
+import com.servoy.j2db.dataprocessing.ModificationSubject;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -41,56 +45,70 @@ import com.servoy.j2db.util.UUID;
  */
 public class EditorComponentActionHandlerImpl implements EditorComponentActionHandler
 {
-	public static EditorComponentActionHandlerImpl EDITOR_COMPONENT_ACTION_HANDLER = new EditorComponentActionHandlerImpl();
+	public static EditorComponentActionHandler EDITOR_COMPONENT_ACTION_HANDLER = new EditorComponentActionHandlerImpl();
+
+	private final IModificationSubject modificationSubject = new ModificationSubject();
 
 	private EditorComponentActionHandlerImpl()
 	{
 	}
 
 	@Override
-	public void createComponent(IPropertySource persistPropertySource, UUID uuid, String propertyName, String type, boolean prepend,
+	public void createComponent(IPropertySource propertySource, UUID uuid, String propertyName, String type, Integer index,
 		boolean dropTargetIsSibling)
 	{
-		executeCommandOnForm(formEditor -> {
-			if (persistPropertySource instanceof PersistPropertySource)
-			{
-				var commandCreater = commandCreater(formEditor, propertyName, type, prepend, dropTargetIsSibling);
-				return new CreateOverrideIfNeeededCommandWrapper((PersistPropertySource)persistPropertySource, uuid, commandCreater);
-			}
-			return null;
-		});
+		if (propertySource instanceof PersistPropertySource persistPropertySource && persistPropertySource.getContext() instanceof Form form)
+		{
+			var commandCreater = createCommandCreater(form, propertyName, type, index, dropTargetIsSibling);
+			executeCommandOnForm(propertySource, new CreateOverrideIfNeeededCommandWrapper(persistPropertySource, uuid, commandCreater), "createComponent");
+		}
 	}
 
 	/**
 	 * Create a command to create the component, the uuid may be different from the one supplied above
 	 */
-	private static Function<UUID, Command> commandCreater(BaseVisualFormEditor formEditor, String propertyName, String type,
-		boolean prepend, boolean dropTargetIsSibling)
+	private static Function<UUID, Command> createCommandCreater(Form form, String propertyName, String type,
+		Integer index, boolean dropTargetIsSibling)
 	{
 		return (uuid) -> {
 			CreateComponentOptions args = new CreateComponentOptions();
 			args.setDropTargetUUID(uuid.toString());
 			args.setGhostPropertyName(propertyName);
 			args.setDropTargetIsSibling(dropTargetIsSibling);
-			args.setPrepend(prepend);
+			args.setIndex(index);
 			args.setType(type);
-			return new CreateComponentCommand(formEditor, args, null);
+			return new CreateComponentCommand(form, args, null);
 		};
 	}
 
 	@Override
-	public void deleteComponent(IPersist persist)
+	public void deleteComponent(IPropertySource propertySource, UUID uuid)
 	{
-		executeCommandOnForm(formEditor -> new FormElementDeleteCommand(persist));
+		if (propertySource instanceof PersistPropertySource persistPropertySource)
+		{
+			// only delete an element when it can be found in the context (form), otherwise it is a override
+			persistPropertySource.getContext().searchChild(uuid).map(FormElementDeleteCommand::new)
+				.ifPresent(command -> executeCommandOnForm(propertySource, command, "deleteComponent"));
+		}
 	}
 
-	private static void executeCommandOnForm(Function<BaseVisualFormEditor, Command> buildCommand)
+	@Override
+	public IModificationSubject getModificationSubject()
 	{
-		BaseVisualFormEditor formEditor = getActiveEditor();
-		if (formEditor != null)
+		return modificationSubject;
+	}
+
+	private void executeCommandOnForm(IPropertySource persistPropertySource, Command command, String eventName)
+	{
+		IEditorPart editor = RetargetToEditorPersistProperties.openPersistEditor(persistPropertySource, false);
+		if (editor != null)
 		{
-			Command command = buildCommand.apply(formEditor);
-			formEditor.getCommandStack().execute(command);
+			CommandStack commandStack = editor.getAdapter(CommandStack.class);
+			if (commandStack != null)
+			{
+				commandStack.execute(new RefreshingCommand<>(command,
+					() -> modificationSubject.fireModificationEvent(new ModificationEvent(eventName, null, persistPropertySource))));
+			}
 		}
 	}
 }

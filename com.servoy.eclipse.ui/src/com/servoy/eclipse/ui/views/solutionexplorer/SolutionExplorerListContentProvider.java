@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -61,11 +62,13 @@ import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.ConstStatement;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.IVariableStatement;
+import org.eclipse.dltk.javascript.ast.JSNode;
 import org.eclipse.dltk.javascript.ast.ObjectInitializer;
 import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.PropertyInitializer;
 import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.ast.ThisExpression;
 import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.ast.v4.LetStatement;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
@@ -91,8 +94,8 @@ import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecification.SourceOfCodeExtractedDocs;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
-import org.sablo.util.TextUtils;
 
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -127,10 +130,13 @@ import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.MenuManager;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
+import com.servoy.j2db.dataprocessing.datasource.JSMenuDataSource;
+import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
@@ -159,6 +165,8 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
@@ -184,7 +192,10 @@ import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
+import com.servoy.j2db.scripting.JSEventsManager;
 import com.servoy.j2db.scripting.JSI18N;
+import com.servoy.j2db.scripting.JSMenu;
+import com.servoy.j2db.scripting.JSMenuItem;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
@@ -209,7 +220,9 @@ import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
+import com.servoy.j2db.util.StringComparator;
 import com.servoy.j2db.util.Text;
+import com.servoy.j2db.util.TextUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -482,6 +495,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createViewFoundsets(((ViewFoundsetsServer)un.getRealObject()).getServoyProject(), includeModules);
 			}
+			else if (type == UserNodeType.MENU_FOUNDSETS)
+			{
+				lm = createMenuFoundsets((Solution)un.getRealObject());
+			}
+			else if (type == UserNodeType.MENU_FOUNDSET)
+			{
+				String prefix = ".menu." + ((Menu)un.getRealObject()).getName();
+				lm = getJSMethods(JSMenuDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.MENU_FOUNDSET, null, null);
+			}
 			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
 				lm = createViews((IServerInternal)un.getRealObject());
@@ -593,6 +615,37 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = TreeBuilder.docToNodes(Forms.class, this, UserNodeType.ARRAY, "forms.", null);
 			}
+			else if (type == UserNodeType.MENUS)
+			{
+				lm = getJSMethods(MenuManager.class, IExecutingEnviroment.TOPLEVEL_MENUS, null, UserNodeType.MENUS, null, null);
+			}
+			else if (type == UserNodeType.MENU)
+			{
+				String prefix = ".getMenu('" + ((Menu)un.getRealObject()).getName() + "')";
+				lm = getJSMethods(JSMenu.class, IExecutingEnviroment.TOPLEVEL_MENUS + prefix, null, UserNodeType.MENU, null, null);
+			}
+			else if (type == UserNodeType.MENU_ITEM)
+			{
+				MenuItem item = (MenuItem)un.getRealObject();
+				List<MenuItem> menuItemsHierarchy = new ArrayList<>();
+				menuItemsHierarchy.add(item);
+				while (item.getParent() instanceof MenuItem mi)
+				{
+					menuItemsHierarchy.add(mi);
+					item = mi;
+				}
+				StringBuilder prefix = new StringBuilder();
+				prefix.append(".getMenu('");
+				prefix.append(((Menu)item.getParent()).getName());
+				for (int i = menuItemsHierarchy.size(); --i >= 0;)
+				{
+					prefix.append("').getMenuItem('");
+					prefix.append(menuItemsHierarchy.get(i).getName());
+				}
+				prefix.append("')");
+				;
+				lm = getJSMethods(JSMenuItem.class, IExecutingEnviroment.TOPLEVEL_MENUS + prefix, null, UserNodeType.MENU_ITEM, null, null);
+			}
 			else if (type == UserNodeType.PLUGINS)
 			{
 				lm = TreeBuilder.createLengthAndArray(this, PLUGIN_PREFIX);
@@ -612,6 +665,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.ARRAY)
 			{
 				lm = TreeBuilder.createJSArray(this);
+			}
+			else if (type == UserNodeType.BIGINT)
+			{
+				lm = TreeBuilder.createJSBigInt(this);
+			}
+			else if (type == UserNodeType.PROMISE)
+			{
+				lm = TreeBuilder.createJSPromise(this);
 			}
 			else if (type == UserNodeType.OBJECT)
 			{
@@ -651,6 +712,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				lm = getJSMethods(JSDatabaseManager.class, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null,
 					null);
 			}
+			else if (type == UserNodeType.EVENTS_MANAGER)
+			{
+				lm = getJSMethods(JSEventsManager.class, IExecutingEnviroment.TOPLEVEL_EVENTS_MANAGER, null, UserNodeType.EVENTS_MANAGER_ITEM, null,
+					null);
+			}
 			else if (type == UserNodeType.DATASOURCES)
 			{
 				lm = getJSMethods(JSDataSources.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
@@ -659,6 +725,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				String prefix = '.' + DataSourceUtils.INMEM_DATASOURCE + '.' + ((IDataSourceWrapper)un.getRealObject()).getTableName();
 				lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+			}
+			else if (type == UserNodeType.VIEW_FOUNDSET)
+			{
+				String prefix = '.' + DataSourceUtils.VIEW_DATASOURCE + '.' + ((IDataSourceWrapper)un.getRealObject()).getTableName();
+				lm = getJSMethods(JSViewDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null,
+					null);
 			}
 			else if (type == UserNodeType.TABLE)
 			{
@@ -735,7 +807,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						if (model instanceof Bean)
 						{
 							IApplication application = Activator.getDefault().getDesignClient();
-							beanClass = application.getBeanManager().getClassLoader().loadClass(((Bean)model).getBeanClassName());
+							beanClass = application.getPluginManager().getClassLoader().loadClass(((Bean)model).getBeanClassName());
 						}
 						lm = getAllMethods(beanClass, specificClass, prefix, null, UserNodeType.FORM_ELEMENTS_ITEM_METHOD);
 					}
@@ -744,6 +816,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						ServoyLog.logError(ex);
 					}
 				}
+			}
+			else if (type == UserNodeType.CUSTOM_TYPE)
+			{
+				lm = getCustomTypeMembers(un.getRealObject());
 			}
 			// else if (type == UserNodeType.CALCULATIONS)
 			// {
@@ -1340,6 +1416,24 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return createTables(servoyProject, bIncludeModules, UserNodeType.VIEW_FOUNDSET);
 	}
 
+
+	public static SimpleUserNode[] createMenuFoundsets(Solution solution)
+	{
+		List<SimpleUserNode> menuNodes = new ArrayList<>();
+		Iterator<Menu> it = solution.getMenus(true);
+		while (it.hasNext())
+		{
+			Menu menu = it.next();
+
+			SimpleUserNode node = new SimpleUserNode(menu.getName(), UserNodeType.MENU_FOUNDSET,
+				new DataSourceFeedback(DataSourceUtils.createMenuDataSource(menu.getName()), false), (Object)menu,
+				uiActivator.loadImageFromBundle("column.png"));
+			menuNodes.add(node);
+		}
+		return menuNodes.toArray(new SimpleUserNode[menuNodes.size()]);
+	}
+
+
 	private static SimpleUserNode[] createTables(ServoyProject servoyProject, boolean bIncludeModules, UserNodeType nodeType)
 	{
 		ArrayList<SimpleUserNode> serverNodeChildren = new ArrayList<SimpleUserNode>();
@@ -1419,7 +1513,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			modulesOfSolution.put(solution.getName(), solution);
 		}
 
-		Iterator<Column> cols = EditorUtil.getTableColumns(table);
+		Iterator<Column> cols = EditorUtil.getTableColumns(table, false);
 		while (cols.hasNext())
 		{
 			IColumn c = cols.next();
@@ -1833,18 +1927,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						// it has to be a stand-alone comment, not a comment of some method / variable
 						// and it has to be the first comment in the file (should we limit it to be the first thing in the file?)
 						if (!firstComment.isDocumentation())
-							spec.setDocumentation(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(firstComment.getText())));
+							spec.setDescription(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(firstComment.getText())));
 					}
 
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
 					{
+						private ICustomType< ? > customType;
 
 						@Override
 						public ASTNode visitBinaryOperation(BinaryOperation node)
 						{
 							if (node.getOperationText().trim().equals("=") && node.getLeftExpression() instanceof PropertyExpression)
 							{
-								String expr = ((PropertyExpression)node.getLeftExpression()).toString();
+								String expr = node.getLeftExpression().toString();
 								if (expr.startsWith("$scope.api") || expr.startsWith("scope.api"))
 								{
 									WebObjectFunctionDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
@@ -1901,10 +1996,55 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						@Override
 						public ASTNode visitFunctionStatement(FunctionStatement node)
 						{
-							WebObjectFunctionDefinition api = apis.get(node.getFunctionName());
-							if (api != null && node.getDocumentation() != null)
+							if (node.getDocumentation() != null)
 							{
-								api.setDocumentation(node.getDocumentation().getText());
+								WebObjectFunctionDefinition api = apis.get(node.getFunctionName());
+								if (api != null)
+								{
+									String doc = node.getDocumentation().getText();
+									String[] split = doc.split("@example");
+									if (split.length > 1)
+									{
+										String example = split[1].split("@")[0];
+										if (!example.isBlank())
+										{
+											doc = doc.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+										}
+									}
+									api.setDocumentation(doc);
+								}
+								else
+								{
+									customType = spec.getDeclaredCustomObjectTypes().get(node.getFunctionName());
+									if (customType != null)
+									{
+										String text = node.getDocumentation().getText();
+										customType.setDocumentation(text);
+										try
+										{
+											return super.visitFunctionStatement(node);
+										}
+										finally
+										{
+											customType = null;
+										}
+									}
+
+								}
+							}
+							else if (customType != null)
+							{
+								// we hit a function node when parsing a custom type.
+								JSNode parent = node.getParent();
+								if (parent instanceof BinaryOperation bo && bo.getLeftExpression() instanceof PropertyExpression pe &&
+									pe.getDocumentation() != null)
+								{
+									WebObjectApiFunctionDefinition apiFunction = customType.getApiFunction(pe.getProperty().toString());
+									if (apiFunction != null)
+									{
+										apiFunction.setDocumentation(pe.getDocumentation().getText());
+									}
+								}
 							}
 							return super.visitFunctionStatement(node);
 						}
@@ -1923,6 +2063,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							return super.visitLetStatement(node);
 						}
 
+						/*
+						 * (non-Javadoc)
+						 *
+						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitThisExpression(org.eclipse.dltk.javascript.ast.ThisExpression)
+						 */
+						@Override
+						public ASTNode visitThisExpression(ThisExpression node)
+						{
+							return super.visitThisExpression(node);
+						}
+
 						@Override
 						public ASTNode visitConstDeclaration(ConstStatement node)
 						{
@@ -1937,7 +2088,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								PropertyDescription pd = properties.get(node.getVariables().get(0).getVariableName());
 								if (pd != null)
 								{
-									pd.setDocumentation(node.getDocumentation().getText());
+									pd.setDescription(node.getDocumentation().getText());
 								}
 							}
 						}
@@ -1970,10 +2121,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			c = c.replaceAll(separator, "<br/>");
 		}
 		if (elementName != null) c = c.replaceAll("%%elementName%%", elementName);
+
+		String[] splitExample = c.split("@example");
+		if (splitExample.length > 1)
+		{
+			String example = splitExample[1].split("@")[0];
+			if (!example.isBlank())
+			{
+				c = c.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+			}
+		}
+
 		if (!toHTML) return c;
 
-		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(c));
-		try
+		try (JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(c)))
 		{
 			return reader.getString().replaceAll(System.getProperty("line.separator"), "<br/>");
 		}
@@ -2025,19 +2186,26 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					Image icon = propertiesIcon;
 					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebObjectSpecification)o).getScriptingName() + ".";
 					IDeveloperFeedback feedback;
-
+					String displayParams = "";
 					if (spec.getApiFunction(id) != null)
 					{
 						final WebObjectFunctionDefinition api = spec.getApiFunction(id);
 						if (api.isDeprecated()) continue;
+						displayParams = "(";
 						icon = functionIcon;
 						final List<String> parNames = new ArrayList<String>();
 						List<String> parTypes = new ArrayList<String>();
-						for (PropertyDescription pd : api.getParameters())
+						for (int i = 0; i < api.getParameters().getDefinedArgsCount(); i++)
 						{
+							PropertyDescription pd = api.getParameters().getParameterDefinition(i);
 							parNames.add(pd.getName());
-							parTypes.add(pd.getType().getName());
+							parTypes.add(ElementUtil.getDecoratedCustomTypeName(pd.getType()));
+							displayParams += pd.getName();
+							if (i < api.getParameters().getDefinedArgsCount() - 1) displayParams += ", ";
 						}
+						displayParams += ")";
+						String returnString = api.getReturnType() != null ? ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()) : "void";
+						displayParams += " - " + returnString;
 						feedback = new MethodFeedback(id, parTypes.toArray(new String[0]), pluginsPrefix, null, new IScriptObject()
 						{
 
@@ -2071,11 +2239,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
 							}
 
-						}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
+						}, null, returnString);
 					}
 					else feedback = new WebObjectFieldFeedback(spec.getProperty(id), elementName, pluginsPrefix + id);
 
-					UserNode node = new UserNode(id, actionType, feedback, real, icon);
+					UserNode node = new UserNode(id + displayParams, actionType, feedback, real, icon);
 					node.setClientSupport(ClientSupport.ng);
 					serviceIds.add(node);
 				}
@@ -2397,57 +2565,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
 			for (final WebObjectApiFunctionDefinition api : apis.values())
 			{
-				String name = api.getName();
-				String displayParams = "(";
-				IFunctionParameters parameters = api.getParameters();
-				final List<String> parNames = new ArrayList<String>();
-				List<String> parTypes = new ArrayList<String>();
-
-				for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
-				{
-					displayParams += parameters.getParameterDefinition(i).getName();
-					parNames.add(parameters.getParameterDefinition(i).getName());
-					parTypes.add(parameters.getParameterDefinition(i).getType().getName());
-					if (i < parameters.getDefinedArgsCount() - 1) displayParams += ", ";
-				}
-				displayParams += ")";
-
-				MethodFeedback feedback = new MethodFeedback(name, parTypes.toArray(new String[0]), prefixForWebComponentMembers, null, new IScriptObject()
-				{
-
-					@Override
-					public Class< ? >[] getAllReturnedTypes()
-					{
-						return null;
-					}
-
-					@Override
-					public String getSample(String methodName)
-					{
-						return getParsedSample(webcomponent.getName(), api.getDocumentation());
-					}
-
-					@Override
-					public String getToolTip(String methodName)
-					{
-						return getParsedComment(api.getDocumentation(), webcomponent.getName(), false);
-					}
-
-					@Override
-					public String[] getParameterNames(String methodName)
-					{
-						return parNames.toArray(new String[0]);
-					}
-
-					@Override
-					public boolean isDeprecated(String methodName)
-					{
-						return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
-					}
-
-				}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
-
-				sortedApis.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
+				sortedApis.add(this.getApiNode(api, prefixForWebComponentMembers, webcomponent.getName(), webcomponent));
 			}
 			if (spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
 				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0)
@@ -2463,6 +2581,143 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		nodes.addAll(sortedApis);
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 
+	}
+
+	private UserNode getApiNode(WebObjectApiFunctionDefinition api, String prefix, String elementName, Object realObject)
+	{
+		String name = api.getName();
+		String displayParams = "(";
+		IFunctionParameters parameters = api.getParameters();
+		final List<String> parNames = new ArrayList<String>();
+		List<String> parTypes = new ArrayList<String>();
+
+		for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
+		{
+			displayParams += parameters.getParameterDefinition(i).getName();
+			parNames.add(parameters.getParameterDefinition(i).getName());
+			parTypes.add(ElementUtil.getDecoratedCustomTypeName(parameters.getParameterDefinition(i).getType()));
+			if (i < parameters.getDefinedArgsCount() - 1) displayParams += ", ";
+		}
+		displayParams += ")";
+		String returnString = api.getReturnType() != null ? ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()) : "void";
+		displayParams += " - " + returnString;
+		MethodFeedback feedback = new MethodFeedback(name, parTypes.toArray(new String[0]), prefix, null, new IScriptObject()
+		{
+
+			@Override
+			public Class< ? >[] getAllReturnedTypes()
+			{
+				return null;
+			}
+
+			@Override
+			public String getSample(String methodName)
+			{
+				return getParsedSample(elementName, api.getDocumentation());
+			}
+
+			@Override
+			public String getToolTip(String methodName)
+			{
+				return getParsedComment(api.getDocumentation(), elementName, false);
+			}
+
+			@Override
+			public String[] getParameterNames(String methodName)
+			{
+				return parNames.toArray(new String[0]);
+			}
+
+			@Override
+			public boolean isDeprecated(String methodName)
+			{
+				return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
+			}
+
+		}, null, returnString);
+
+		return new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, realObject, functionIcon);
+	}
+
+	private SimpleUserNode[] getCustomTypeMembers(Object realObject)
+	{
+		List<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+		if (realObject instanceof ICustomType< ? > customType)
+		{
+			PropertyDescription customJSONTypeDefinition = customType.getCustomJSONTypeDefinition();
+			Map<String, PropertyDescription> properties = customJSONTypeDefinition.getProperties();
+			SortedList<PropertyDescription> sortedProperties = new SortedList<PropertyDescription>(new Comparator<PropertyDescription>()
+			{
+
+				@Override
+				public int compare(PropertyDescription o1, PropertyDescription o2)
+				{
+					return o1.getName().toString().compareToIgnoreCase(o2.getName().toString());
+				}
+			}, properties.values());
+
+			for (PropertyDescription pd : sortedProperties)
+			{
+				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
+
+				String name = pd.getName();
+				nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS,
+					new WebObjectFieldFeedback(pd, name, name), customType,
+					propertiesIcon));
+			}
+
+			Collection<WebObjectApiFunctionDefinition> apiFunctions = new SortedList<WebObjectApiFunctionDefinition>(StringComparator.INSTANCE,
+				customType.getApiFunctions());
+			for (WebObjectApiFunctionDefinition apiFunction : apiFunctions)
+			{
+				nodes.add(this.getApiNode(apiFunction, null, null, null));
+				if (apiFunction.getOverloads().size() > 0)
+				{
+					for (WebObjectApiFunctionDefinition overload : apiFunction.getOverloads())
+					{
+						nodes.add(this.getApiNode(overload, null, null, null));
+					}
+				}
+			}
+
+		}
+		else if (realObject instanceof WebObjectSpecification spec)
+		{
+			Map<String, ICustomType< ? >> customTypes = spec.getDeclaredCustomObjectTypes();
+			if (customTypes != null && customTypes.size() > 0)
+			{
+				nodes = customTypes.entrySet().stream()
+					.map(entry -> {
+						UserNode node = new UserNode(entry.getKey(), UserNodeType.CUSTOM_TYPE, entry.getValue(),
+							uiActivator.loadImageFromBundle("js.png"));
+						node.setDeveloperFeedback(new IDeveloperFeedback()
+						{
+
+							@Override
+							public String getToolTipText()
+							{
+								return ElementUtil.CUSTOM_TYPE + "&lt;" + entry.getValue().getName() + "&gt;";
+							}
+
+							@Override
+							public String getSample()
+							{
+								return "/** @type {" + ElementUtil.getDecoratedCustomTypeName(entry.getValue()) + "} */\nvar myvar;";
+							}
+
+							@Override
+							public String getCode()
+							{
+								return "/** @type {" + ElementUtil.getDecoratedCustomTypeName(entry.getValue()) + "} */";
+							}
+						});
+						return node;
+					})
+					.sorted((node1, node2) -> node1.getName().compareTo(node2.getName()))
+					.collect(Collectors.toList());
+			}
+		}
+		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 	}
 
 	private List<SimpleUserNode> getJSMethodsFromClass(String prefix, final IBasicWebComponent webcomponent, Class< ? > clazz)
@@ -2841,7 +3096,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else
 			{
-				tooltip = tmp.toString() + "<pre>" + tooltip + "</pre>";
+				tooltip = tmp.toString() + "<br/><br/>" + tooltip;
 			}
 			return tooltip;
 		}
@@ -3204,12 +3459,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getSample()
 		{
-			return getParsedSample(elementName, pd.getDocumentation());
+			return getParsedSample(elementName, pd.getDescriptionRaw());
 		}
 
 		public String getToolTipText()
 		{
-			return getParsedComment(pd.getDocumentation(), elementName, false);
+			return getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic), elementName, false);
 		}
 	}
 

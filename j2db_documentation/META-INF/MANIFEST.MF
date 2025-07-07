@@ -2,30 +2,30 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Document Plug-in
 Bundle-SymbolicName: j2db_documentation;singleton:=true
-Bundle-Version: 2024.3.6.3949_LTS
+Bundle-Version: 2025.3.1.4043
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Vendor: Servoy
-Require-Bundle: servoy_shared,
+Require-Bundle: com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.17.1",
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.17.1",
+ com.fasterxml.jackson.core.jackson-databind;bundle-version="2.17.1",
+ servoy_shared,
  org.eclipse.dltk.javascript.rhino,
  servoy_smart_client,
  com.servoy.eclipse.core,
  com.servoy.eclipse.debug,
  j2db_server,
- sablo
+ sablo,
+ org.eclipse.dltk.javascript.parser;bundle-version="5.2.0",
+ org.eclipse.dltk.core;bundle-version="5.1.1"
 Export-Package: com.servoy.build.documentation
-Import-Package: freemarker.cache;version="2.3.31.stable",
- freemarker.core;version="2.3.31.stable",
- freemarker.template;version="2.3.31.stable",
- org.apache.commons.io;version="2.11.0",
- org.apache.commons.io.filefilter;version="2.11.0",
- org.apache.http,
- org.apache.http.auth,
- org.apache.http.client,
- org.apache.http.client.methods,
- org.apache.http.client.protocol,
- org.apache.http.entity,
- org.apache.http.impl.auth,
- org.apache.http.impl.client,
- org.apache.http.message;version="4.4.16",
- org.apache.http.util
+Import-Package: freemarker.cache,
+ freemarker.core,
+ freemarker.template,
+ freemarker.template.utility,
+ org.apache.commons.io,
+ org.apache.commons.io.filefilter,
+ org.apache.commons.lang3,
+ org.apache.commons.text,
+ org.dom4j,
+ org.dom4j.io
 Automatic-Module-Name: j2db_documentation

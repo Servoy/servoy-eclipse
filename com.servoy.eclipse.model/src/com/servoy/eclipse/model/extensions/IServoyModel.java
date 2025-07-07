@@ -37,6 +37,7 @@ import com.servoy.j2db.persistence.IServerInternal;
  */
 public interface IServoyModel
 {
+	AbstractServoyModel refreshServoyProjects();
 
 	ServoyProject getServoyProject(String name);
 

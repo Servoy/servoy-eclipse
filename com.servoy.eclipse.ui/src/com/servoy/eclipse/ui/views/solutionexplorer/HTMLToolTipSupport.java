@@ -27,6 +27,8 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
@@ -42,6 +44,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.util.Utils;
 
 public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
@@ -74,6 +77,26 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 
 		comp.setLayout(l);
 		final Browser browser = new Browser(comp, SWT.BORDER);
+		browser.addLocationListener(new LocationAdapter()
+		{
+			@Override
+			public void changing(LocationEvent event)
+			{
+				if (event.location != null && (event.location.startsWith("http:") || event.location.startsWith("https:")))
+				{
+					event.doit = false;
+					try
+					{
+						EditorUtil.openURL(PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser(), event.location);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logInfo("Could not launch browser for location : " + event.location);
+					}
+					toolTip.hide();
+				}
+			}
+		});
 		browser.setJavascriptEnabled(false);
 		if (hideIfMouseOnRightSide) browser.addListener(SWT.MouseMove, new Listener()
 		{
@@ -100,8 +123,7 @@ public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 
 		});
 		String text = toolTipText;
-		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(text));
-		try
+		try (JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(text)))
 		{
 			text = reader.getString();
 		}

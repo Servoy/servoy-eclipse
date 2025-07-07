@@ -49,7 +49,6 @@ import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.eclipse.ngclient.ui.Activator;
 import com.servoy.eclipse.ngclient.ui.StringOutputStream;
 import com.servoy.eclipse.ngclient.ui.WebPackagesListener;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.ILogLevel;
@@ -148,9 +147,9 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		private final WarArgumentChest cmdLineArguments;
 		private Set<String> exportedPackages;
 
-		private CommandLineWarExportModel(WarArgumentChest configuration, boolean isNGExport)
+		private CommandLineWarExportModel(WarArgumentChest configuration)
 		{
-			super(isNGExport);
+			super();
 			this.cmdLineArguments = configuration;
 			searchForComponentsAndServicesBothDefaultAndInSolution();
 		}
@@ -250,13 +249,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public List<String> getLafs()
-		{
-			return getFilteredFileNames(ApplicationServerRegistry.get().getLafManager().getLAFDir(), cmdLineArguments.getExcludedLafs(),
-				cmdLineArguments.getLafs());
-		}
-
-		@Override
 		public String getWarFileName()
 		{
 			String warFileName = cmdLineArguments.getWarFileName();
@@ -274,13 +266,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		{
 			return getFilteredFileNames(ApplicationServerRegistry.get().getServerManager().getDriversDir(), cmdLineArguments.getExcludedDrivers(),
 				cmdLineArguments.getDrivers());
-		}
-
-		@Override
-		public List<String> getBeans()
-		{
-			return getFilteredFileNames(ApplicationServerRegistry.get().getBeanManager().getBeansDir(), cmdLineArguments.getExcludedBeans(),
-				cmdLineArguments.getBeans());
 		}
 
 		@Override
@@ -439,12 +424,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		public String exportNG2Mode()
 		{
 			return cmdLineArguments.exportNG2Mode();
-		}
-
-		@Override
-		public boolean exportNG1()
-		{
-			return cmdLineArguments.exportNG1();
 		}
 
 		@Override
@@ -742,17 +721,9 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	@Override
 	protected void exportActiveSolution(final WarArgumentChest configuration)
 	{
-		boolean isNGExport = false;
-		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
-		if (activeProject != null)
-		{
-			int solutionType = activeProject.getSolutionMetaData().getSolutionType();
-			isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
-		}
-
 		try
 		{
-			CommandLineWarExportModel exportModel = new CommandLineWarExportModel(configuration, isNGExport);
+			CommandLineWarExportModel exportModel = new CommandLineWarExportModel(configuration);
 			if (exportModel.isExportNonActiveSolutions() &&
 				(Utils.stringIsEmpty(configuration.getSelectedComponents()) || Utils.stringIsEmpty(configuration.getSelectedServices())))
 			{

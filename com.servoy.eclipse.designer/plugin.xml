@@ -21,16 +21,14 @@
             <contentTypeBinding
                contentTypeId="com.servoy.eclipse.core.resource.form"/>
       </editor>
-       <editor
-            class="com.servoy.eclipse.designer.editor.ComponentVariantsEditor"
-            default="false"
-            icon="icons/componentvariantsmanager.png"
-            id="com.servoy.eclipse..designer.editor.componentvariantseditor"
-            name="Component Variants Editor">
-      </editor>
    </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.ui.part.ViewPart"
+            class="com.servoy.eclipse.designer.property.ServoyViewPropertySheetPageAdapterFactory">
+            <adapter type="org.eclipse.ui.views.properties.IPropertySheetPage"/>
+      </factory>
       <factory
             adaptableType="java.awt.Dimension"
             class="com.servoy.eclipse.designer.property.DesignerPropertyAdapterFactory">
@@ -962,6 +960,16 @@
             id="com.servoy.eclipse.designer.rfb.showcontainer"
             name="ShowContainer">
       </command>
+       <command
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ExpandAllCommand"
+            id="com.servoy.eclipse.designer.rfb.expandall"
+            name="ExpandContainer">
+      </command>
+       <command
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.CollapseAllCommand"
+            id="com.servoy.eclipse.designer.rfb.collapseall"
+            name="CollapseContainer">
+      </command>
    </extension>
       <extension
          point="org.eclipse.ui.preferencePages">
@@ -1540,6 +1548,50 @@
             <command
                   commandId="com.servoy.eclipse.designer.rfb.showcontainer"
                   label="Zoom in Form Editor"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with  
+                        variable="activeMenuSelection">  
+                     <and>
+                        <iterate
+                              operator="and">
+                           <test
+                                 property="com.servoy.eclipse.designer.editor.rfb.iscontainer">
+                           </test>
+                        </iterate>
+                        <count
+                              value="1">
+                        </count>
+                     </and>  
+                  </with>  
+               </visibleWhen>
+            </command>
+             <command
+                  commandId="com.servoy.eclipse.designer.rfb.expandall"
+                  label="Expand All"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with  
+                        variable="activeMenuSelection">  
+                     <and>
+                        <iterate
+                              operator="and">
+                           <test
+                                 property="com.servoy.eclipse.designer.editor.rfb.iscontainer">
+                           </test>
+                        </iterate>
+                        <count
+                              value="1">
+                        </count>
+                     </and>  
+                  </with>  
+               </visibleWhen>
+            </command>
+             <command
+                  commandId="com.servoy.eclipse.designer.rfb.collapseall"
+                  label="Collapse All"
                   style="push">
                <visibleWhen
                      checkEnabled="false">

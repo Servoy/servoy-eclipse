@@ -37,6 +37,7 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.part.EditorPart;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Settings;
 
 /**
@@ -161,13 +162,9 @@ public class MainConceptsPageBrowserEditor extends EditorPart
 					{
 						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
 					}
-					catch (PartInitException e)
+					catch (PartInitException | MalformedURLException e)
 					{
-						e.printStackTrace();
-					}
-					catch (MalformedURLException e)
-					{
-						e.printStackTrace();
+						ServoyLog.logError(e);
 					}
 				}
 			}

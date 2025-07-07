@@ -3,11 +3,11 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.servoy</groupId>
-  <version>2024.3.6.3949_LTS</version>
+  <version>2025.3.1.4043</version>
   <artifactId>com.servoy.eclipse.target</artifactId>
   <packaging>eclipse-target-definition</packaging>
     <properties>
-        <tycho.version>4.0.0</tycho.version>
+        <tycho.version>4.0.9</tycho.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

@@ -52,7 +52,7 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 		try
 		{
 			boolean[] gained = new boolean[] { false };
-			browser = new Browser(parent, SWT.CHROMIUM)
+			browser = new Browser(parent, SWT.NONE)
 			{
 				// hack for https://bugs.eclipse.org/bugs/show_bug.cgi?id=567629
 				// because the internal browser does say "true" but the system didn't really know that that its own view had the focus now

@@ -59,7 +59,6 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -97,6 +96,7 @@ import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -128,6 +128,7 @@ import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -1489,9 +1490,8 @@ public class ServoyFormBuilder
 							else if (o instanceof Part) styleClass = ((Part)o).getStyleClass();
 							if (styleClass != null)
 							{
-								Ng2DesignerPreferences prefs = new Ng2DesignerPreferences();
 								List<String> styleClasses = Arrays.asList(ModelUtils.getStyleClasses(fs, form, o,
-									StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o), prefs.showNG2Designer())
+									StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o))
 									.getLeft());
 								if (!styleClasses.contains(styleClass))
 								{
@@ -1766,6 +1766,18 @@ public class ServoyFormBuilder
 								BuilderDependencies.getInstance().addDependency(form, frm);
 							}
 							else
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
+									form);
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, wc);
+							}
+						}
+						else if (pd.getType() instanceof MenuPropertyType)
+						{
+							Menu menu = flattenedSolution.getMenu(value.toString());
+							if (menu == null)
 							{
 								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(pd.getName(), wc.getName(),
 									form);

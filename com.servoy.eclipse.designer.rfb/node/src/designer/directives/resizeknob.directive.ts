@@ -6,7 +6,8 @@ import { DynamicGuidesService, SnapData } from '../services/dynamicguides.servic
 import { Subscription } from 'rxjs';
 
 @Directive({
-    selector: '[resizeKnob]'
+    selector: '[resizeKnob]',
+    standalone: false
 })
 export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
@@ -33,6 +34,45 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
         this.topContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
         this.leftContentAreaAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
+
+        //set initial glasspane size
+        this.setGlasspaneSize();
+    }
+
+    private setGlasspaneSize(): void {
+        // Get all component elements
+        const componentElements = this.editorContentService.getAllContentElements();
+        let maxWidth = 0;
+        let maxHeight = 0;
+    
+        // Calculate maximum dimensions based on components
+        componentElements.forEach(element => {
+            const componentRect = element.getBoundingClientRect();
+            maxWidth = Math.max(maxWidth, componentRect.left + componentRect.width);
+            maxHeight = Math.max(maxHeight, componentRect.top + componentRect.height);
+        });
+    
+        // Get visible dimensions of the designer
+        const contentArea = this.editorContentService.getContentArea();
+        const visibleWidth = contentArea.clientWidth;
+        const visibleHeight = contentArea.clientHeight;
+    
+        // Get dimensions from the content form
+        const contentForm = this.editorContentService.getContentForm();
+        const formRect = contentForm.getBoundingClientRect();
+        const formWidth = formRect.width;
+        const formHeight = formRect.height;
+    
+        // Determine the greater dimensions
+        const finalWidth = Math.max(maxWidth, visibleWidth, formWidth) + 100;
+        const finalHeight = Math.max(maxHeight, visibleHeight, formHeight) + 100;
+    
+        // Set the glasspane size to cover all components, visible area, and content form
+        const glasspane = this.editorContentService.getGlassPane();
+        if (glasspane) {
+            glasspane.style.width = `${finalWidth}px`;
+            glasspane.style.height = `${finalHeight}px`;
+        }
     }
 
     ngAfterViewInit(): void {
@@ -163,6 +203,14 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
             let deltaY = event.clientY - this.lastresizeStartPosition.y;
 
             for(const elementInfo of this.currentElementInfo.values()) {
+				let parentX = 0;
+				let parentY = 0;
+				const parentFC = elementInfo.element.closest('.svy-formcomponent');
+				if (parentFC && !elementInfo.element.classList.contains('svy-formcomponent')) {
+					const parentRect = parentFC.getBoundingClientRect();
+					parentX = parentRect.x;
+					parentY = parentRect.y;
+				}
                 elementInfo.y = elementInfo.y + deltaY* this.resizeInfo.top;
                 if(elementInfo.y < 0) {
                     elementInfo.y = 0;
@@ -180,8 +228,8 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
                 elementInfo.element.style.top = elementInfo.y + 'px';
                 elementInfo.element.style.left =  elementInfo.x + 'px';
-                this.resizeInfo.node.style.top = elementInfo.y + this.topContentAreaAdjust + 'px';
-                this.resizeInfo.node.style.left = elementInfo.x + this.leftContentAreaAdjust + 'px';
+                this.resizeInfo.node.style.top = elementInfo.y + parentY + this.topContentAreaAdjust + 'px';
+                this.resizeInfo.node.style.left = elementInfo.x + parentX + this.leftContentAreaAdjust + 'px';
 
 
                 this.resizeInfo.node.style.width = elementInfo.element.style.width = elementInfo.width + 'px';
@@ -202,11 +250,11 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
                 const elementInfo = elementInfos.get(nodeId);
                 if (this.snapData && elementInfos.size == 1) {
                     changes[nodeId] = {
-                        x: this.snapData?.width ? this.snapData?.left : elementInfo.x,
-                        y: this.snapData?.height ? this.snapData?.top : elementInfo.y,
-                        width: this.snapData?.width ? this.snapData?.width : elementInfo.width,
-                        height: this.snapData?.height ? this.snapData?.height : elementInfo.height,
-                        cssPos: this.snapData.cssPosition //TODO remove?
+                        x: this.snapData?.width ? Math.round(this.snapData.left) : elementInfo.x,
+                        y: this.snapData?.height ? Math.round(this.snapData.top) : elementInfo.y,
+                        width: this.snapData?.width ? Math.round(this.snapData.width) : elementInfo.width,
+                        height: this.snapData?.height ? Math.round(this.snapData.height) : elementInfo.height,
+                        cssPos: this.snapData.cssPosition
                     }
                 }
                 else {

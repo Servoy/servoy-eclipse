@@ -27,7 +27,7 @@ import { ServoyTestingModule } from '../../testing/servoytesting.module';
 import { PopupFormService } from '../services/popupform.service';
 import { AddAttributeDirective } from '../../servoycore/addattribute.directive';
 
-import { ClientFunctionService } from '../../ngclient/services/clientfunction.service';
+import { ClientFunctionService } from '../../sablo/clientfunction.service';
 import { ObjectType } from '../../sablo/converters/object_converter';
 
 import { By } from '@angular/platform-browser';
@@ -35,7 +35,7 @@ import { By } from '@angular/platform-browser';
 // this test will create a Form (component) (inside a TestHostComponent) that contains a test Servoy component
 
 @Component({
-  template: `
+    template: `
     <svy-form [name]="'aForm'" [injectedComponentRefs]="getCustomTestComponentTemplates()"></svy-form>
     <ng-template #customTestComponent let-callback="callback" let-state="state">
         <testcomponents-custom-component
@@ -54,7 +54,8 @@ import { By } from '@angular/platform-browser';
             [cssPosition]="state.model.cssPosition"
             [name]="state.name" #cmp>
         </testcomponents-custom-component>
-    </ng-template>`
+    </ng-template>`,
+    standalone: false
 })
 class TestHostComponent {
     @ViewChild('customTestComponent', { static: true }) readonly customTestComponentTemplate: TemplateRef<any>;
@@ -78,7 +79,8 @@ class TestHostComponent {
                 {{divLocation}}
             </button>
         </div>`,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class TestComponentsCustomComponent extends ServoyBaseComponent<HTMLButtonElement> {
 
@@ -198,7 +200,7 @@ describe('FormComponentComponentTest', () => {
         converterService = TestBed.inject(ConverterService);
         specTypesService = TestBed.inject(SpecTypesService);
 
-        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService));
+        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService, logFactory));
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory('JSON_arr', new CustomArrayTypeFactory(typesRegistry, converterService, logFactory));
         typesRegistry.getTypeFactoryRegistry().contributeTypeFactory('JSON_obj', new CustomObjectTypeFactory(typesRegistry, converterService, specTypesService, logFactory));
 

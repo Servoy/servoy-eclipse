@@ -38,7 +38,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
     private waitingForServerVisibility = {};
     private lastSelectedTab: Tab;
 
-    private log: LoggerService;
+    protected log: LoggerService;
 
     constructor(private windowRefService: WindowRefService, logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
@@ -115,12 +115,12 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                             return;
                         }
                         if (ok) {
-                            this.setFormVisible(tab, selectEvent);
+                            this.setFormVisible(tab, selectEvent, false);
                         }
                     });
                 }
             } else {
-                this.setFormVisible(tab, selectEvent);
+                this.setFormVisible(tab, selectEvent, true);
             }
         }
     }
@@ -138,8 +138,8 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         return null;
     }
     
-    protected setFormVisible(tab: Tab, event) {
-        if (tab.containsFormId)
+    protected setFormVisible(tab: Tab, event, callShow: boolean) {
+        if (callShow && tab.containsFormId)
             this.servoyApi.formWillShow(tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1).finally(() => this.cdRef.markForCheck());
         this.log.debug(this.log.buildMessage(() => ('svy * selectedTab = \'' + tab.containsFormId + '\' -- ' + new Date().getTime())));
         const oldSelected = this.selectedTab;
@@ -184,7 +184,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         return false;
     }
 
-    private getTabIndex(tab: Tab) {
+    getTabIndex(tab: Tab) {
         if (tab) {
             for (let i = 0; i < this.tabs.length; i++) {
                 if (this.tabs[i] === tab) {

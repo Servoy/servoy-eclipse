@@ -23,7 +23,6 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -38,7 +37,6 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
 import com.servoy.eclipse.ui.editors.MediaComposite;
-import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.MediaNode;
 
 /**
@@ -92,16 +90,6 @@ public class MediaPreview extends Composite implements ISelectionChangedListener
 			ExpandableComposite.TWISTIE);
 		excomposite.setText("Preview");
 		excomposite.setExpanded(true);
-		if (IconPreferences.getInstance().getUseDarkThemeIcons())
-		{
-			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
-				.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
-			if (darkFGColor != null)
-			{
-				excomposite.setTitleBarForeground(darkFGColor);
-				excomposite.setActiveToggleColor(darkFGColor);
-			}
-		}
 
 		// First and only item
 		mediaComposite = new MediaComposite(excomposite, SWT.V_SCROLL);

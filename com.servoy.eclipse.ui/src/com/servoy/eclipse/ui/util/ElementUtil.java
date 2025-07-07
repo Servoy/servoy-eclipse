@@ -32,6 +32,9 @@ import javax.swing.SwingUtilities;
 import org.eclipse.swt.graphics.Image;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.property.CustomJSONArrayType;
+import org.sablo.specification.property.CustomJSONObjectType;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -68,6 +71,7 @@ import com.servoy.j2db.documentation.persistence.docs.DocsTextField;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -137,6 +141,23 @@ import com.servoy.j2db.util.Utils;
 
 public class ElementUtil
 {
+	public static final String CUSTOM_TYPE = "CustomType";
+
+	public static String getDecoratedCustomTypeName(IPropertyType< ? > type)
+	{
+		if (type == null) return "void";
+		if (type instanceof CustomJSONObjectType || (type instanceof CustomJSONArrayType &&
+			((CustomJSONArrayType< ? , ? >)type).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+		{
+
+			return ElementUtil.CUSTOM_TYPE + '<' + type.getName() + '>';
+		}
+		else
+		{
+			return type.getName();
+		}
+	}
+
 	public static Pair<String, Image> getPersistNameAndImage(IPersist persist)
 	{
 		String name = getPersistImageName(persist);
@@ -335,7 +356,8 @@ public class ElementUtil
 		{
 			// override does not exist yet, create it
 			ISupportChilds parent = (Form)context;
-			if (!((Form)ancestorForm).isResponsiveLayout() && !(parentPersist.getParent() instanceof Form))
+			if (!((Form)ancestorForm).isResponsiveLayout() && !(parentPersist.getParent() instanceof Form) &&
+				!(parentPersist.getParent() instanceof CSSPositionLayoutContainer))
 			{
 				parent = null;
 				parent = (ISupportChilds)context.acceptVisitor(o -> {
@@ -493,7 +515,7 @@ public class ElementUtil
 			}
 			if (beanClass == null)
 			{
-				ClassLoader bcl = application.getBeanManager().getClassLoader();
+				ClassLoader bcl = application.getPluginManager().getClassLoader();
 				try
 				{
 					beanClass = bcl.loadClass(beanClassName);
@@ -649,6 +671,17 @@ public class ElementUtil
 		HashMap<UUID, IFormElement> returnList = null;
 
 		Iterator<IPersist> it = form.getAllObjects();
+		if (form.isResponsiveLayout())
+		{
+			if (elementsToVisit.size() == 1)
+			{
+				IFormElement element = elementsToVisit.values().iterator().next();
+				if (element.getParent() instanceof LayoutContainer lc && "csspositioncontainer".equals(lc.getSpecName()))
+				{
+					it = lc.getAllObjects();
+				}
+			}
+		}
 		while (it.hasNext())
 		{
 			IPersist element = it.next();

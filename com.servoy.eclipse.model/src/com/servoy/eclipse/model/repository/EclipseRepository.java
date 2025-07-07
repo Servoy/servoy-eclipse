@@ -19,7 +19,6 @@ package com.servoy.eclipse.model.repository;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -285,7 +285,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		return rootObject;
 	}
 
-	public byte[] getMediaBlob(int blob_id) throws RemoteException, RepositoryException
+	public byte[] getMediaBlob(int blob_id) throws RepositoryException
 	{
 		return null;//should never be called
 	}
@@ -295,7 +295,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		//should never be called
 	}
 
-	public long[] getActiveRootObjectsLastModified(int[] rootObjectIds) throws RemoteException, RepositoryException
+	public long[] getActiveRootObjectsLastModified(int[] rootObjectIds) throws RepositoryException
 	{
 		long[] retval = new long[rootObjectIds.length];
 		for (int i = 0; i < rootObjectIds.length; i++)
@@ -439,10 +439,8 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 				Map<UUID, Integer> map = ((AbstractBase)o).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
 				if (map != null)
 				{
-					Iterator<Map.Entry<UUID, Integer>> it = map.entrySet().iterator();
-					while (it.hasNext())
+					for (Entry<UUID, Integer> entry : map.entrySet())
 					{
-						Map.Entry<UUID, Integer> entry = it.next();
 						foreignElementUUIDs.put(entry.getKey(), entry.getValue());
 					}
 				}

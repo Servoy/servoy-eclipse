@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.rmi.RemoteException;
 import java.sql.Types;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,7 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.swing.Icon;
-import javax.swing.SwingUtilities;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -53,6 +53,7 @@ import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
+import org.eclipse.dltk.javascript.typeinfo.JSDocTypeParser;
 import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
@@ -82,6 +83,7 @@ import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
+import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
@@ -91,6 +93,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.CustomJSONObjectType;
+import org.sablo.specification.property.CustomVariableArgsType;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
@@ -121,9 +124,11 @@ import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
+import com.servoy.eclipse.model.util.MenuFoundsetServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
+import com.servoy.eclipse.ui.node.TreeBuilder;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
@@ -132,13 +137,19 @@ import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.IServoyBeanFactory;
+import com.servoy.j2db.MenuManager;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.IFoundSet;
+import com.servoy.j2db.dataprocessing.IJSBaseFoundSet;
+import com.servoy.j2db.dataprocessing.IJSBaseRecord;
+import com.servoy.j2db.dataprocessing.IJSBaseSQLFoundSet;
+import com.servoy.j2db.dataprocessing.IJSBaseSQLRecord;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
+import com.servoy.j2db.dataprocessing.MenuFoundSet;
+import com.servoy.j2db.dataprocessing.MenuItemRecord;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
 import com.servoy.j2db.dataprocessing.ViewFoundSet;
@@ -147,13 +158,16 @@ import com.servoy.j2db.dataprocessing.datasource.DBDataSource;
 import com.servoy.j2db.dataprocessing.datasource.DBDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
+import com.servoy.j2db.dataprocessing.datasource.JSMenuDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.dataprocessing.datasource.MemDataSource;
+import com.servoy.j2db.dataprocessing.datasource.MenuDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.ViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
+import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.ScriptParameter;
 import com.servoy.j2db.documentation.ServoyDocumented;
@@ -202,7 +216,6 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.plugins.IClientPlugin;
-import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.querybuilder.impl.QBAggregate;
@@ -239,7 +252,10 @@ import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
 import com.servoy.j2db.scripting.JSClientUtils;
 import com.servoy.j2db.scripting.JSDimension;
+import com.servoy.j2db.scripting.JSEventsManager;
 import com.servoy.j2db.scripting.JSI18N;
+import com.servoy.j2db.scripting.JSMenu;
+import com.servoy.j2db.scripting.JSMenuItem;
 import com.servoy.j2db.scripting.JSPoint;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
@@ -249,6 +265,7 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
+import com.servoy.j2db.scripting.info.EventType;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
@@ -256,6 +273,7 @@ import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ModifiablePropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RecordPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RuntimeComponentPropertyType;
@@ -311,7 +329,6 @@ public class TypeCreator extends TypeCache
 {
 	static final String WEB_SERVICE = "WebService";
 	static final String RUNTIME_WEB_COMPONENT = "RuntimeWebComponent";
-	static final String CUSTOM_TYPE = "CustomType";
 	private static final String STANDARD_ELEMENT_NAME = "elements.elem";
 	static final String HIDDEN_IN_RELATED = "HIDDEN_IN_RELATED";
 
@@ -381,6 +398,8 @@ public class TypeCreator extends TypeCache
 		BASE_TYPES.add("RegExp");
 		BASE_TYPES.add("Error");
 		BASE_TYPES.add("Math");
+		BASE_TYPES.add("BigInt");
+		BASE_TYPES.add("Promise");
 	}
 
 	/*
@@ -399,8 +418,6 @@ public class TypeCreator extends TypeCache
 	private volatile boolean initialized;
 	protected static final List<String> objectMethods = Arrays.asList(
 		new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
-
-	private boolean jfxInitialized = false;
 
 	private final TypeSystemImpl servoyStaticTypeSystem = new TypeSystemImpl()
 	{
@@ -430,8 +447,10 @@ public class TypeCreator extends TypeCache
 
 		addAnonymousClassType("Controller", JSForm.class);
 		addAnonymousClassType(JSApplication.class);
+		addAnonymousClassType(JSEventsManager.class);
 		addAnonymousClassType(JSI18N.class);
 		addAnonymousClassType(HistoryProvider.class);
+		addAnonymousClassType(MenuManager.class);
 		addAnonymousClassType(JSUtils.class);
 		addAnonymousClassType(JSClientUtils.class);
 		addAnonymousClassType("JSUnit", JSUnitAssertFunctions.class);
@@ -445,13 +464,22 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("ICSSPosition", ICSSPosition.class);
 		addAnonymousClassType("point", JSPoint.class);
 		addAnonymousClassType("dimension", JSDimension.class);
+		ElementResolver.registerConstantType("JSMenuItem", "JSMenuItem");
+		addAnonymousClassType(JSMenu.class);
+		addAnonymousClassType(JSMenuItem.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
-
+		addType("JSBaseSQLRecord", IJSBaseSQLRecord.class);
+		addType("JSBaseSQLFoundSet", IJSBaseSQLFoundSet.class);
+		addType("JSBaseRecord", IJSBaseRecord.class);
+		addType("JSBaseFoundSet", IJSBaseFoundSet.class);
+//		addAnonymousClassType(EventType.class);
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
 		addScopeType(ViewRecord.VIEW_RECORD, new ViewRecordCreator());
 		addScopeType(ViewFoundSet.VIEW_FOUNDSET, new ViewFoundSetCreator());
+		addScopeType(MenuItemRecord.MENUITEM_RECORD, new MenuItemRecordCreator());
+		//addScopeType(MenuFoundSet.MENU_FOUNDSET, new MenuFoundSetCreator());
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("RuntimeForm", new FormScopeCreator());
@@ -468,7 +496,7 @@ public class TypeCreator extends TypeCache
 		addScopeType("Scope", new ScopeScopeCreator());
 		addScopeType("FormComponentType", new FormComponentTypeCreator());
 		addScopeType(RUNTIME_WEB_COMPONENT, new WebComponentTypeCreator());
-		addScopeType(CUSTOM_TYPE, new CustomTypeCreator());
+		addScopeType(ElementUtil.CUSTOM_TYPE, new CustomTypeCreator());
 		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
@@ -491,6 +519,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBAggregates.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
+		addScopeType(MenuDataSource.class.getSimpleName(), new MenuDataSourceCreator());
 		addScopeType(ViewDataSource.class.getSimpleName(), new ViewDataSourceCreator());
 		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class)
 		{
@@ -514,6 +543,8 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 		addScopeType(JSViewDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSViewDataSource.class, ClientSupport.ng_wc_sc));
+		addScopeType(JSMenuDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSMenuDataSource.class, ClientSupport.ng_wc_sc));
+		addScopeType(EventType.class.getSimpleName(), new EventTypesCreator());
 	}
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
@@ -558,41 +589,10 @@ public class TypeCreator extends TypeCache
 					}
 				}
 				Class< ? > clz = null;
-				try
-				{
-					if (!jfxInitialized && name.startsWith("javafx."))
-					{
-						jfxInitialized = true;
-						try
-						{
-							// special supprt for jfx because classes can't be loaded before jfx is initialzied correctly.
-							DesignApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
-							IServoyBeanFactory factory = (IServoyBeanFactory)application.getBeanManager()
-								.createInstance("com.servoy.extensions.beans.jfxpanel.JFXPanel");
-							if (factory != null)
-							{
-								SwingUtilities.invokeAndWait(() -> {
-									factory.getBeanInstance(IClientPluginAccess.CLIENT, (IClientPluginAccess)application.getPluginAccess(), null);
-								});
-							}
-						}
-						catch (Throwable e)
-						{
-							// ignores
-						}
 
-					}
-					clz = Class.forName(name);
-				}
-				catch (Exception e)
-				{
-				}
-				if (clz == null)
-				{
-					ClassLoader cl = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getBeanManager().getClassLoader();
-					if (cl == null) cl = Thread.currentThread().getContextClassLoader();
-					clz = Class.forName(name, false, cl);
-				}
+				ClassLoader cl = com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getPluginManager().getClassLoader();
+				if (cl == null) cl = Thread.currentThread().getContextClassLoader();
+				clz = Class.forName(name, false, cl);
 				type = getClassType(context, clz, name);
 			}
 			catch (ClassNotFoundException e)
@@ -739,6 +739,10 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.BOOLEAN);
 			}
+			if (type == NativePromise.class)
+			{
+				return getTypeRef(context, ITypeNames.PROMISE);
+			}
 			if (type == Byte.class || type == byte.class)
 			{
 				return getTypeRef(context, "byte");
@@ -751,10 +755,11 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.STRING);
 			}
-			if (type.isEnum())
-			{
-				return getTypeRef(context, "enum<" + type.getSimpleName() + '>');
-			}
+// not sure why this is done but this will not work for real java enums coming from Packages.xxxx
+//			if (type.isEnum())
+//			{
+//				return getTypeRef(context, "enum<" + type.getSimpleName() + '>');
+//			}
 
 			return getTypeRef(context, "Packages." + type.getName());
 		}
@@ -791,7 +796,11 @@ public class TypeCreator extends TypeCache
 		synchronized (this)
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSEventsManager.class), null);
+			// special case  EventType should be a scope creator
+			classTypes.remove(EventType.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
+			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
 			registerConstantsForScriptObject(new IReturnedTypesProvider()
@@ -804,7 +813,7 @@ public class TypeCreator extends TypeCache
 					IReturnedTypesProvider datasourceReturns = ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class);
 					for (Class< ? > cls : datasourceReturns.getAllReturnedTypes())
 					{
-						if (cls != DBDataSource.class && cls != MemDataSource.class && cls != ViewDataSource.class)
+						if (cls != DBDataSource.class && cls != MemDataSource.class && cls != ViewDataSource.class && cls != MenuDataSource.class)
 						{
 							clsses.add(cls);
 						}
@@ -894,18 +903,31 @@ public class TypeCreator extends TypeCache
 
 						public void persistChanges(Collection<IPersist> changes)
 						{
-							Job job = new Job("clearing cache")
+							boolean fullChange = false;
+							for (IPersist changed : changes)
 							{
-
-								@Override
-								public IStatus run(IProgressMonitor monitor)
+								if (changed instanceof Solution)
 								{
-									flushCache();
-									return Status.OK_STATUS;
+									fullChange = true;
+									runClearCacheJob();
+									break;
 								}
-							};
-							job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-							job.schedule();
+							}
+							if (!fullChange)
+							{
+								Job job = new Job("clearing cache")
+								{
+
+									@Override
+									public IStatus run(IProgressMonitor monitor)
+									{
+										flushCache();
+										return Status.OK_STATUS;
+									}
+								};
+								job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+								job.schedule();
+							}
 						}
 					});
 					((ServoyModel)servoyModel).addSolutionMetaDataChangeListener(new ISolutionMetaDataChangeListener()
@@ -1006,7 +1028,7 @@ public class TypeCreator extends TypeCache
 	public final Set<String> getTypeNames(String prefix)
 	{
 		Set<String> names = new HashSet<String>(classTypes.keySet());
-		names.add(CUSTOM_TYPE);
+		names.add(ElementUtil.CUSTOM_TYPE);
 		if (prefix != null && !"".equals(prefix.trim()))
 		{
 			String lowerCasePrefix = prefix.toLowerCase();
@@ -1237,7 +1259,7 @@ public class TypeCreator extends TypeCache
 						((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
 					{
 
-						memberType = getTypeRef(null, CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
+						memberType = getTypeRef(null, ElementUtil.CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
 					}
 					else
 					{
@@ -1250,8 +1272,10 @@ public class TypeCreator extends TypeCache
 					memberType = TypeUtil.arrayOf(memberType);
 				}
 				if (name.endsWith("ID")) name = name.substring(0, name.length() - 2);
-				Property property = createProperty(name, false, memberType, SolutionExplorerListContentProvider.getParsedComment(pd.getDocumentation(),
-					STANDARD_ELEMENT_NAME, true), null);
+				Property property = createProperty(name, false, memberType,
+					SolutionExplorerListContentProvider.getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic),
+						STANDARD_ELEMENT_NAME, true),
+					null);
 				property.setDeprecated(pd.isDeprecated());
 				members.add(property);
 			}
@@ -1259,62 +1283,7 @@ public class TypeCreator extends TypeCache
 		Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
 		for (WebObjectApiFunctionDefinition api : apis.values())
 		{
-			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
-			method.setName(api.getName());
-			if (api.getDocumentation() != null)
-			{
-				StringBuilder description = new StringBuilder(api.getDocumentation());
-				if (!api.getDocumentation().contains("@deprecated")) description.append(api.getDeprecatedMessage());
-				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(description.toString(),
-					STANDARD_ELEMENT_NAME, true));
-				method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
-			}
-			else
-			{
-				if (!"".equals(api.getDeprecatedMessage())) method.setDescription(api.getDeprecatedMessage());
-				method.setDeprecated(api.isDeprecated());
-			}
-
-			PropertyDescription pd = api.getReturnType();
-			JSType returnType = getType(context, pd);
-			if (returnType == null && pd != null)
-			{
-				if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
-					((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
-				{
-
-					returnType = getTypeRef(null, CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
-				}
-				else
-				{
-					returnType = getTypeRef(null, ("object".equals(pd.getType().getName())) ? "Object" : pd.getType().getName());
-				}
-			}
-			if (api.getReturnType() != null && PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
-			{
-				returnType = TypeUtil.arrayOf(returnType);
-			}
-			method.setType(returnType);
-			EList<Parameter> parameters = method.getParameters();
-			for (PropertyDescription paramDesc : api.getParameters())
-			{
-				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
-				param.setName(paramDesc.getName());
-				if (paramDesc.isOptional()) param.setKind(ParameterKind.OPTIONAL);
-
-				JSType paramType = getType(context, paramDesc);
-				if (paramType == null)
-				{
-					paramType = getTypeRef(null, paramDesc.getType().getName());
-				}
-				if (paramType != null && PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
-				{
-					paramType = TypeUtil.arrayOf(paramType);
-				}
-				param.setType(paramType);
-				parameters.add(param);
-			}
-			members.add(method);
+			members.addAll(createMethods(context, api));
 		}
 		if (!fullTypeName.startsWith(WEB_SERVICE))
 		{
@@ -1365,6 +1334,98 @@ public class TypeCreator extends TypeCache
 		return addType(bucket, type);
 	}
 
+	/**
+	 * This will create the method of the give FunctionDefinition but will also create the overloads if they exist
+	 *
+	 * @param context
+	 * @param api
+	 * @return
+	 */
+	private Collection<Method> createMethods(String context, WebObjectApiFunctionDefinition api)
+	{
+		Method method = createMethod(context, api);
+		if (api.getOverloads().size() > 0)
+		{
+			ArrayList<Method> overloads = new ArrayList<>();
+			overloads.add(method);
+			for (WebObjectApiFunctionDefinition overload : api.getOverloads())
+			{
+				overloads.add(createMethod(context, overload));
+			}
+			return overloads;
+		}
+		return Arrays.asList(method);
+	}
+
+	/**
+	 * @param context
+	 * @param api
+	 * @return
+	 */
+	private Method createMethod(String context, WebObjectApiFunctionDefinition api)
+	{
+		Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+		method.setName(api.getName());
+		if (api.getDocumentation() != null)
+		{
+			StringBuilder description = new StringBuilder(api.getDocumentation());
+			if (!api.getDocumentation().contains("@deprecated")) description.append(api.getDeprecatedMessage());
+			method.setDescription(SolutionExplorerListContentProvider.getParsedComment(description.toString(),
+				STANDARD_ELEMENT_NAME, true));
+			method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
+		}
+		else
+		{
+			if (!"".equals(api.getDeprecatedMessage())) method.setDescription(api.getDeprecatedMessage());
+			method.setDeprecated(api.isDeprecated());
+		}
+
+		PropertyDescription pd = api.getReturnType();
+		JSType returnType = getType(context, pd);
+		if (returnType == null && pd != null)
+		{
+			if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
+				((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+			{
+
+				returnType = getTypeRef(null, ElementUtil.CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
+			}
+			else
+			{
+				returnType = getTypeRef(null, ("object".equals(pd.getType().getName())) ? "Object" : pd.getType().getName());
+			}
+		}
+		if (api.getReturnType() != null && PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
+		{
+			returnType = TypeUtil.arrayOf(returnType);
+		}
+		method.setType(returnType);
+		EList<Parameter> parameters = method.getParameters();
+		for (PropertyDescription paramDesc : api.getParameters())
+		{
+			Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setName(paramDesc.getName());
+			if (paramDesc.isOptional()) param.setKind(ParameterKind.OPTIONAL);
+
+			JSType paramType = getType(context, paramDesc);
+			if (paramType == null)
+			{
+				paramType = getTypeRef(null, paramDesc.getType().getName());
+			}
+			if (paramType != null && PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
+			{
+				paramType = TypeUtil.arrayOf(paramType);
+			}
+			if (paramDesc.getType() instanceof CustomVariableArgsType)
+			{
+				param.setKind(ParameterKind.VARARGS);
+			}
+			param.setType(paramType);
+			parameters.add(param);
+		}
+		return method;
+	}
+
 	private Method fillParameter(Method method, Parameter... params)
 	{
 
@@ -1400,7 +1461,7 @@ public class TypeCreator extends TypeCache
 		if (pd == null) return null;
 		IPropertyType< ? > type = pd.getType();
 		if (type == BooleanPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.BOOLEAN);
-		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE)
+		if (type instanceof IntPropertyType || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE)
 			return getTypeRef(context, ITypeNames.NUMBER);
 		if (type == SecureStringPropertyType.INSTANCE || type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE ||
 			type == ModifiablePropertyType.INSTANCE ||
@@ -1434,6 +1495,12 @@ public class TypeCreator extends TypeCache
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 			property.setName("foundset");
 			property.setType(getTypeRef(context, FoundSet.JS_FOUNDSET));
+			members.add(property);
+			property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName("relationname");
+			property.setType(getTypeRef(context, "String"));
+			property.setDescription(
+				"The relation name for creating the foundset, will be the same as setting this at design time. It is prefferred to set the foundset object directly, so only use this if foundset object is not available yet.");
 			members.add(property);
 			Object cfg = pd.getConfig();
 			if (cfg instanceof FoundsetPropertyTypeConfig)
@@ -1482,12 +1549,6 @@ public class TypeCreator extends TypeCache
 		return null;
 	}
 
-	/**
-	 * @param context
-	 * @param typeName
-	 * @param cls
-	 * @return
-	 */
 	protected final Type createType(String context, String typeName, Class< ? > cls)
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
@@ -1501,6 +1562,13 @@ public class TypeCreator extends TypeCache
 			ImageDescriptor desc = IconProvider.instance().descriptor(cls);
 			type.setAttribute(IMAGE_DESCRIPTOR, desc);
 		}
+
+		if (cls != null)
+		{
+			String description = TypeCreator.getTopLevelDoc(cls);
+			if (description != null) type.setDescription(description);
+		}
+
 		if (IDeprecated.class.isAssignableFrom(cls) || cls.isAnnotationPresent(Deprecated.class) ||
 			(prefixedTypes.containsKey(cls) && typeName.equals(cls.getSimpleName())))
 		{
@@ -1579,11 +1647,6 @@ public class TypeCreator extends TypeCache
 		return type;
 	}
 
-	/**
-	 * @param typeName
-	 * @param members
-	 * @param class1
-	 */
 	@SuppressWarnings("deprecation")
 	private final void fill(String context, EList<Member> membersList, Class< ? > scriptObjectClass, String typeName)
 	{
@@ -2308,12 +2371,6 @@ public class TypeCreator extends TypeCache
 
 	private static final ConcurrentMap<MethodSignature, String> docCache = new ConcurrentHashMap<MethodSignature, String>(64, 0.9f, 16);
 
-	/**
-	 * @param key
-	 * @param scriptObject
-	 * @param name
-	 * @return
-	 */
 	@SuppressWarnings("deprecation")
 	public static String getDoc(String name, Class< ? > scriptObjectClass, Class< ? >[] parameterTypes)
 	{
@@ -2341,7 +2398,7 @@ public class TypeCreator extends TypeCache
 						if (deprecatedText != null)
 						{
 							docBuilder.append("<br/><b>@deprecated</b>&nbsp;");
-							docBuilder.append(deprecatedText);
+							docBuilder.append(HtmlUtils.applyDescriptionMagic(deprecatedText));
 							docBuilder.append("<br/>");
 						}
 						else
@@ -2353,7 +2410,7 @@ public class TypeCreator extends TypeCache
 					if (toolTip != null && toolTip.trim().length() != 0)
 					{
 						docBuilder.append("<br/>");
-						docBuilder.append(toolTip.replace("\r\n", "<br/>").replace("\n", "<br/>"));
+						docBuilder.append(HtmlUtils.applyDescriptionMagic(toolTip));
 						docBuilder.append("<br/>");
 					}
 					sampleDoc = ((ITypedScriptObject)scriptObject).getSample(name, parameterTypes, clientType);
@@ -2370,7 +2427,7 @@ public class TypeCreator extends TypeCache
 						returnText = "<b>@return</b> ";
 						if (returnedType != null)
 							returnText += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType) + ' ';
-						if (returnDescription != null) returnText += returnDescription;
+						if (returnDescription != null) returnText += HtmlUtils.applyDescriptionMagic(returnDescription);
 					}
 				}
 				else
@@ -2383,7 +2440,7 @@ public class TypeCreator extends TypeCache
 					if (toolTip != null && toolTip.trim().length() != 0)
 					{
 						docBuilder.append("<br/>");
-						docBuilder.append(toolTip);
+						docBuilder.append(HtmlUtils.applyDescriptionMagic(toolTip));
 						docBuilder.append("<br/>");
 					}
 					sampleDoc = scriptObject.getSample(name);
@@ -2391,6 +2448,7 @@ public class TypeCreator extends TypeCache
 
 				if (sampleDoc != null && sampleDoc.trim().length() != 0)
 				{
+					docBuilder.append("<br/><b>@sample</b>");
 					docBuilder.append("<pre>");
 					docBuilder.append(HtmlUtils.escapeMarkup(sampleDoc));
 					docBuilder.append("</pre><br/>");
@@ -2417,7 +2475,7 @@ public class TypeCreator extends TypeCache
 							if (parameter.getDescription() != null)
 							{
 								sb.append(" ");
-								sb.append(parameter.getDescription());
+								sb.append(HtmlUtils.applyDescriptionMagic(parameter.getDescription()));
 							}
 							sb.append("<br/>");
 						}
@@ -2434,6 +2492,56 @@ public class TypeCreator extends TypeCache
 			}
 			docCache.putIfAbsent(cacheKey, doc);
 		}
+		return doc;
+	}
+
+	/**
+	 * Can return null if the is no such doc available.
+	 */
+	@SuppressWarnings("deprecation")
+	public static String getTopLevelDoc(Class< ? > scriptObjectClass)
+	{
+		if (scriptObjectClass == null) return null;
+
+		// probably we don't create these basic Javascript types; they are already present from DLTK and documentation comes from DLTK directly
+		// so isJSLib will probably always be false...
+		boolean isJSLib = "com.servoy.j2db.documentation.scripting.docs".equals(scriptObjectClass.getPackageName());
+
+		MethodSignature cacheKey = new MethodSignature(scriptObjectClass, null, null);
+		String doc = docCache.get(cacheKey);
+		if (doc == null)
+		{
+			IObjectDocumentation objectDocumentation = null;
+			if (isJSLib) objectDocumentation = TreeBuilder.getDocObjectForJSLibClass(scriptObjectClass);
+			else
+			{
+				IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(scriptObjectClass);
+				if (scriptObject instanceof ITypedScriptObject)
+					objectDocumentation = ((ITypedScriptObject)scriptObject).getObjectDocumentation();
+			}
+
+			if (objectDocumentation != null)
+			{
+				StringBuilder docBuilder = new StringBuilder(200);
+
+				if (objectDocumentation.isDeprecated())
+				{
+					docBuilder.append("<br/><b>@deprecated</b><br/>");
+				}
+				String description = objectDocumentation
+					.getDescription(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
+				if (description != null && description.trim().length() != 0)
+				{
+					docBuilder.append("<br/>");
+					docBuilder.append(HtmlUtils.applyDescriptionMagic(description));
+					docBuilder.append("<br/>");
+				}
+				if (docBuilder.length() > 0) doc = docBuilder.toString();
+			}
+			docCache.putIfAbsent(cacheKey, doc == null ? "" : doc);
+		}
+		else if (doc.length() == 0) doc = null;
+
 		return doc;
 	}
 
@@ -2800,7 +2908,8 @@ public class TypeCreator extends TypeCache
 			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
 				memberType.getName().equals(QBJoin.class.getSimpleName()) ||
 				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
-				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()))
+				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()) ||
+				memberType.getName().equals(MenuFoundSet.class.getSimpleName()) || memberType.getName().equals(MenuItemRecord.class.getSimpleName()))
 			{
 				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
 			}
@@ -3078,7 +3187,61 @@ public class TypeCreator extends TypeCache
 		}
 
 	}
+	private class MenuItemRecordCreator implements IScopeTypeCreator
+	{
 
+		@Override
+		public Type createType(String context, String fullTypeName)
+		{
+			Type type = TypeCreator.this.createType(context, fullTypeName, MenuItemRecord.class);
+			ImageDescriptor desc = IconProvider.instance().descriptor(MenuItemRecord.class);
+			type.setAttribute(IMAGE_DESCRIPTOR, desc);
+			EList<Member> members = type.getMembers();
+			members.add(createProperty("itemID", true, getTypeRef(context, "String"), "Menu Item name.", PROPERTY));
+			members.add(createProperty("menuText", true, getTypeRef(context, "String"), "Menu Item text.", PROPERTY));
+			members.add(createProperty("styleClass", true, getTypeRef(context, "String"), "Menu Item styleclass.", PROPERTY));
+			members.add(createProperty("iconStyleClass", true, getTypeRef(context, "String"), "Menu Item icon styleclass.", PROPERTY));
+			members.add(createProperty("tooltipText", true, getTypeRef(context, "String"), "Menu Item tooltip text.", PROPERTY));
+			members.add(createProperty("enabled", true, getTypeRef(context, "Boolean"), "Menu Item enabled.", PROPERTY));
+			members.add(createProperty("tooltipText", true, getTypeRef(context, "String"), "Menu Item tooltip text.", PROPERTY));
+			members.add(createProperty("callbackArguments", true, getTypeRef(context, "Object"), "Menu Item onAction callback arguments.", PROPERTY));
+			for (String category : MenuPropertyType.INSTANCE.getExtraProperties().keySet())
+			{
+				Map<String, PropertyDescription> propertiesMap = MenuPropertyType.INSTANCE.getExtraProperties().get(category);
+				for (PropertyDescription propertyDescription : propertiesMap.values())
+				{
+					String extraPropertyType = "String";
+					if (propertyDescription.getType() instanceof BooleanPropertyType || propertyDescription.getType() instanceof IntPropertyType)
+					{
+						extraPropertyType = "Boolean";
+					}
+					if (propertyDescription.getType() instanceof DatePropertyType)
+					{
+						extraPropertyType = "Date";
+					}
+					members.add(createProperty(propertyDescription.getName(), true, getTypeRef(context, extraPropertyType),
+						"Menu Item " + propertyDescription.getName() + " extra property, from '" + category + "' category", PROPERTY));
+				}
+			}
+			members
+				.add(createProperty(MenuItemRecord.MENUITEM_RELATION_NAME, true, getTypeRef(context, "MenuFoundSet"), "Menu Item children.", RELATION_IMAGE));
+			members.add(createProperty("foundset", true, getTypeRef(context, "MenuFoundSet"), "Menu Item parent foundset.", PROPERTY));
+			return addType(null, type);
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+
+		}
+
+	}
 
 	private class JSDataSetCreator implements IScopeTypeCreator
 	{
@@ -3193,6 +3356,10 @@ public class TypeCreator extends TypeCache
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(clientPlugin.getName());
 					property.setReadOnly(true);
+
+					String description = TypeCreator.getTopLevelDoc(scriptObject.getClass());
+					if (description != null) property.setDescription(description);
+
 					addAnonymousClassType("Plugin<" + clientPlugin.getName() + '>', scriptObject.getClass());
 					property.setType(getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'));
 
@@ -3264,6 +3431,7 @@ public class TypeCreator extends TypeCache
 						String name = spec.getScriptingName();
 						property.setName(name);
 						property.setReadOnly(true);
+						property.setDescription(spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic));
 						wcServices.put("WebService<" + name + '>', spec);
 						property.setType(getTypeRef(context, "WebService<" + name + '>'));
 						members.add(property);
@@ -3325,7 +3493,8 @@ public class TypeCreator extends TypeCache
 				String foundsetType = FoundSet.JS_FOUNDSET;
 				if (ds != null)
 				{
-					foundsetType = ds.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON) ? ViewFoundSet.VIEW_FOUNDSET : FoundSet.JS_FOUNDSET;
+					foundsetType = ds.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON) ? ViewFoundSet.VIEW_FOUNDSET
+						: (ds.startsWith(DataSourceUtils.MENU_DATASOURCE_SCHEME_COLON) ? MenuFoundSet.MENU_FOUNDSET : FoundSet.JS_FOUNDSET);
 					foundsetType += '<' + ds + '>';
 				}
 				Member clone = TypeCreator.clone(getMember("foundset", baseType), getTypeRef(context, foundsetType));
@@ -3366,7 +3535,7 @@ public class TypeCreator extends TypeCache
 
 			clone = TypeCreator.clone(getMember("containers", baseType), getTypeRef(context, "RuntimeContainers<" + config + '>'));
 			overwrittenMembers.add(clone);
-			if (form.isResponsiveLayout())
+			if (form.isResponsiveLayout() || formToUse.containsResponsiveLayout())
 			{
 				clone.setVisible(!PersistEncapsulation.hideContainers(formToUse));
 			}
@@ -3414,7 +3583,7 @@ public class TypeCreator extends TypeCache
 			Form form = fs.getForm(config);
 			if (form == null) return type;
 			Form ff = fs.getFlattenedForm(form);
-			if (ff == null || !ff.isResponsiveLayout())
+			if (ff == null || (!ff.isResponsiveLayout() && !ff.containsResponsiveLayout()))
 			{
 				return type;
 			}
@@ -3488,11 +3657,12 @@ public class TypeCreator extends TypeCache
 
 			String config = fullTypeName.substring(indexOf + 1, fullTypeName.length() - 1);
 			String superTypeName = fullTypeName.substring(0, indexOf);
-			if (cachedSuperTypeTemplateType == null)
+			Type cstt = cachedSuperTypeTemplateType;
+			if (cstt == null)
 			{
-				cachedSuperTypeTemplateType = createBaseType(context, superTypeName);
+				cstt = cachedSuperTypeTemplateType = createBaseType(context, superTypeName);
 			}
-			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+			EList<Member> members = cstt.getMembers();
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
@@ -3507,6 +3677,7 @@ public class TypeCreator extends TypeCache
 			type.getMembers().addAll(overwrittenMembers);
 			type.setName(fullTypeName);
 			type.setKind(TypeKind.JAVA);
+			type.setDescription(cstt.getDescription());
 //			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
 			type.setSuperType(getType(context, superTypeName));
 			return type;
@@ -3521,11 +3692,6 @@ public class TypeCreator extends TypeCache
 			return createOverrideMember(member, context, config);
 		}
 
-		/**
-		 * @param context
-		 * @param fullTypeName
-		 * @return
-		 */
 		protected Type createBaseType(String context, String fullTypeName)
 		{
 			Class< ? > cls = QUERY_BUILDER_CLASSES.get(fullTypeName);
@@ -3849,7 +4015,41 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	private class MenuDataSourceCreator implements IScopeTypeCreator
+	{
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setSuperType(createArrayLookupType(context, JSMenuDataSource.class));
+			MenuFoundsetServerWrapper wrapper = new MenuFoundsetServerWrapper();
+			Collection<String> tableNames = wrapper.getTableNames();
+			EList<Member> members = type.getMembers();
+			for (String name : tableNames)
+			{
+				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+				property.setName(name);
+				property.setVisible(true);
+				property.setType(getTypeRef(context, JSMenuDataSource.class.getSimpleName() + '<' + DataSourceUtils.createMenuDataSource(name) + '>'));
+				property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
+				property.setDescription("Menu datasource");
+				members.add(property);
+			}
 
+			return type;
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
 	private class SPDataSourceServerCreator implements IScopeTypeCreator
 	{
 		public Type createType(String context, String fullTypeName)
@@ -4878,12 +5078,11 @@ public class TypeCreator extends TypeCache
 				if (iPropertyType == null) return null;
 
 				Type type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setName(CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
+				type.setName(ElementUtil.CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
 				type.setKind(TypeKind.JAVA);
 				EList<Member> members = type.getMembers();
-				if (iPropertyType instanceof ICustomType< ? >)
+				if (iPropertyType instanceof ICustomType< ? > customType)
 				{
-					ICustomType< ? > customType = (ICustomType< ? >)iPropertyType;
 					PropertyDescription customJSONTypeDefinition = customType.getCustomJSONTypeDefinition();
 					Map<String, PropertyDescription> properties = customJSONTypeDefinition.getProperties();
 					for (PropertyDescription pd : properties.values())
@@ -4903,7 +5102,7 @@ public class TypeCreator extends TypeCache
 								((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
 							{
 
-								memberType = getTypeRef(null, CUSTOM_TYPE + '<' + pdTypeName + '>');
+								memberType = getTypeRef(null, ElementUtil.CUSTOM_TYPE + '<' + pdTypeName + '>');
 							}
 							else
 							{
@@ -4914,9 +5113,14 @@ public class TypeCreator extends TypeCache
 						{
 							memberType = TypeUtil.arrayOf(memberType);
 						}
-						Property property = createProperty(name, false, memberType, "", null);
+						Property property = createProperty(name, false, memberType, pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic), null);
 						property.setDeprecated(pd.isDeprecated());
 						members.add(property);
+					}
+					Collection<WebObjectApiFunctionDefinition> apiFunctions = customType.getApiFunctions();
+					for (WebObjectApiFunctionDefinition apiFunction : apiFunctions)
+					{
+						members.addAll(createMethods(context, apiFunction));
 					}
 				}
 				return addType(null, type);
@@ -4969,6 +5173,57 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	private class EventTypesCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		EventTypesCreator()
+		{
+		}
+
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "EventType", EventType.class);
+			}
+			type.setSuperType(superType);
+			type.setKind(TypeKind.JAVA);
+			EList<Member> members = type.getMembers();
+			FlattenedSolution fs = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+			if (fs != null)
+			{
+				Collection<EventType> eventTypes = fs.getEventTypes();
+				for (EventType eventType : eventTypes)
+				{
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(eventType.getName());
+					property.setVisible(true);
+					property.setStatic(true);
+					property.setType(TypeUtil.ref(type));
+					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
+					property.setDescription(eventType.isDefaultEvent() ? "Default Form level event"
+						: (eventType.getDescription() != null ? HtmlUtils.applyDescriptionMagic(eventType.getDescription())
+							: "Custom event added from solution eventTypes property"));
+					members.add(property);
+				}
+			}
+			return addType(null, type);
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
 
 	/**
 	 * @param context
@@ -5300,7 +5555,24 @@ public class TypeCreator extends TypeCache
 						MethodArgument returnTypeArgument = method.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
 						if (returnTypeArgument != null)
 						{
-							m.setType(getTypeRef(context, returnTypeArgument.getType().getName()));
+							String typeName = returnTypeArgument.getType().getName();
+							if (typeName.startsWith("{"))
+							{
+								// we must create the org.eclipse.dltk.javascript.typeinfo.model.RecordType here
+								try
+								{
+									JSDocTypeParser typeParser = new JSDocTypeParser();
+									m.setType(typeParser.parse(typeName));
+								}
+								catch (ParseException e)
+								{
+									ServoyLog.logError(e);
+								}
+							}
+							else
+							{
+								m.setType(getTypeRef(context, typeName));
+							}
 						}
 						// use this to suppress hides predefined identifier warning, see todo's in ElementResolver
 						m.setHideAllowed(true);

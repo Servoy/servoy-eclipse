@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.awt.Point;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -60,7 +61,6 @@ import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
@@ -81,6 +81,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.ChildrenJSONGenerator;
 import com.servoy.j2db.server.ngclient.FormElement;
@@ -134,15 +135,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (int i = 0; i < styleSheets.size(); i++)
 			{
 				String stylesheetName = styleSheets.get(i);
-				if (new Ng2DesignerPreferences().showNG2Designer())
+				int lastPoint = stylesheetName.lastIndexOf('.');
+				String ng2StylesheetName = stylesheetName.substring(0, lastPoint) + "_ng2" + stylesheetName.substring(lastPoint);
+				Media media = fs.getMedia(ng2StylesheetName);
+				if (media != null)
 				{
-					int lastPoint = stylesheetName.lastIndexOf('.');
-					String ng2StylesheetName = stylesheetName.substring(0, lastPoint) + "_ng2" + stylesheetName.substring(lastPoint);
-					Media media = fs.getMedia(ng2StylesheetName);
-					if (media != null)
-					{
-						stylesheetName = ng2StylesheetName;
-					}
+					stylesheetName = ng2StylesheetName;
 				}
 				styleSheets.set(i, "resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + fs.getSolution().getName() + "/" +
 					stylesheetName + "?t=" + Long.toHexString(System.currentTimeMillis()));
@@ -157,7 +155,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		if (EDITOR_CONTENT_SERVICE.equals(name))
 		{
-			return new ClientService(EDITOR_CONTENT_SERVICE, EDITOR_CONTENT_SERVICE_SPECIFICATION);
+			return new ClientService(EDITOR_CONTENT_SERVICE, EDITOR_CONTENT_SERVICE_SPECIFICATION, this);
 		}
 		return super.createClientService(name);
 	}
@@ -496,6 +494,15 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				ghost = true;
 			}
+			if (!form.isResponsiveLayout())
+			{
+				int formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
+				Point location = CSSPositionUtils.getLocation(persist);
+				if (((location.x > form.getWidth()) || (location.y > formHeight)))
+				{
+					ghost = true;
+				}
+			}
 			boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
 				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>(), formContainers, childParentMap);
 			if (fcGhosts) ghost = fcGhosts;
@@ -564,7 +571,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				boolean newRenderGhosts = parseIFormElement((IFormElement)persist, baseComponents, compAttributes, deletedComponents, formComponentChild,
 					refreshTemplate,
 					updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, formComponentContainers, childParentMap);
-				renderGhosts = renderGhosts || newRenderGhosts;
+				renderGhosts = renderGhosts || newRenderGhosts || formHasGhosts(persist);
 			}
 			else if (persist instanceof Part)
 			{
@@ -583,7 +590,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						compAttributes, deletedComponents,
 						formComponentChild,
 						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, childParentMap, false);
-					renderGhosts = renderGhosts || newRenderGhosts;
+					renderGhosts = renderGhosts || newRenderGhosts || formHasGhosts(persist);
 				}
 				else
 				{
@@ -604,9 +611,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				// do add the child base component so that it gets this new update
 				while (parent != null && !(parent instanceof Form))
 				{
-					if (parent instanceof BaseComponent)
+					if (parent instanceof BaseComponent baseComponentParent)
 					{
-						baseComponents.add((BaseComponent)parent);
+						baseComponents.add(baseComponentParent);
+						IPersist superPersist = PersistHelper.getSuperPersist(baseComponentParent);
+						if (superPersist instanceof IFormElement superPersistFormElement)
+						{
+							deletedComponents.add(superPersistFormElement);
+						}
 						parent = null;
 					}
 					else parent = parent.getParent();
@@ -859,7 +871,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.value(-1);
 				}
 				writer.key("formIndex");
-				if (p instanceof IFormElement && !form.isResponsiveLayout())
+				if (p instanceof IFormElement)
 				{
 					writer.value(((IFormElement)p).getFormIndex());
 				}
@@ -874,6 +886,40 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 		writer.endObject();
 		return writer.toString();
+	}
+
+	private boolean formHasGhosts(IPersist persist)
+	{
+		Form frm = null;
+		IPersist parent = persist.getParent();
+		while (parent != null && frm == null)
+		{
+			if (parent instanceof Form) frm = (Form)parent;
+			parent = parent.getParent();
+		}
+		if (frm == null) return false;
+
+		boolean hasGhost = false;
+		List<IFormElement> allElements = frm.getFlattenedFormElementsAndLayoutContainers()
+			.stream()
+			.filter(IFormElement.class::isInstance)
+			.map(IFormElement.class::cast)
+			.toList();
+		for (IFormElement element : allElements)
+		{
+			if (element instanceof WebComponent webComponent)
+			{
+				Iterator<IPersist> it = webComponent.getAllObjects();
+				while (it.hasNext() && !hasGhost)
+				{
+					IPersist child = it.next();
+					if (child instanceof WebCustomType) hasGhost = true;
+				}
+			}
+			if (hasGhost) break;
+		}
+
+		return hasGhost;
 	}
 
 	private boolean checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,

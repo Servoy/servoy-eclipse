@@ -128,12 +128,15 @@ export class FormattingService {
             servoyFormat = this.convertFormat(servoyFormat);
             let d = DateTime.fromFormat(data, servoyFormat, { locale: this.servoyService.getLocale() }).toJSDate();
             if (isNaN(d.getTime()) && useHeuristics) {
-                for (var newFormat of this.getHeuristicFormats(servoyFormat)) {
+                
+				const possibleDates: Map<string,Date> = new Map();
+                for (const newFormat of this.getHeuristicFormats(servoyFormat, data)) {
                     d = DateTime.fromFormat(data, newFormat, { locale: this.servoyService.getLocale() }).toJSDate();
                     if (!isNaN(d.getTime())) {
-                        break;
+                        possibleDates.set(newFormat,d);
                     }
                 }
+				d = this.findClosestDate(possibleDates, servoyFormat);
             }
             // if format has not year/month/day use the one from the current model value
             // because luxon will just use current date
@@ -154,6 +157,24 @@ export class FormattingService {
         }
         return data;
     }
+	
+	private findClosestDate(dateMap: Map<string,Date>, servoyFormat: string): Date {
+        // if there is just one return that.
+		if (dateMap.size === 1) return dateMap.values().next().value
+        // else find the one closest to the current format (starts with the same letters)
+        const strippedFormat = servoyFormat.replace(/[^a-zA-Z]/g, '');
+        for (const key of dateMap.keys()) {
+            if (strippedFormat.startsWith(key) || servoyFormat.startsWith(key)) {
+                return dateMap.get(key);
+            }
+        }
+        // fallback to closest date
+		const currentDateTime = new Date().getTime();
+        const dateArray = Array.from(dateMap.values());
+		const dateArrayConverted = dateArray.map(date => date.getTime()).map(time => Math.abs(currentDateTime - time));
+		const index = dateArrayConverted.indexOf(Math.min(...dateArrayConverted));
+		return dateArray[index];
+	}
 
     private addToFormats(formats: Array<string>,formatLetters: Array<string>, newChar: string, isSeparator: boolean) {
         const size = formats.length;
@@ -185,8 +206,8 @@ export class FormattingService {
         }
     }
 
-    private containsAllLetters(newFormat: String, formatLetters: Array<string>): boolean{
-        for (let formatLetter of  formatLetters){
+    private containsAllLetters(newFormat: string, formatLetters: Array<string>): boolean{
+        for (const formatLetter of  formatLetters){
             if (newFormat.indexOf(formatLetter) < 0){
                 return false;
             }
@@ -194,28 +215,35 @@ export class FormattingService {
         return true;
     }
     
-    private getHeuristicFormats(servoyFormat: string): Array<string> {
+    private getHeuristicFormats(servoyFormat: string, input?: string): Array<string> {
         const formats = new Array<string>();
         const formatLetters = new Array<string>();
-        let separator;
         if (servoyFormat) {
             for (let index = 0; index < servoyFormat.length; index++) {
                 const currentChar = servoyFormat.charAt(index);
                 if (currentChar.match(/[a-zA-Z]/)) {
                     this.addToFormats(formats,formatLetters, currentChar, false);
-                }
-                else if (!separator || separator == currentChar) {
-                    separator = currentChar;
+                } else {
                     this.addToFormats(formats,formatLetters, currentChar, true);
-                }
-                else {
-                    // another separator?
-                    break;
                 }
             }
         }
+		if (input) {
+			return formats.filter(format => format.length === input.length && this.compareInputWithFormat(input, format));
+		} 
         return formats;
     }
+	
+	private compareInputWithFormat(input: string, format: string): boolean {
+		for (let i = 0; i < input.length; i ++) {
+			const inputChar = input[i];
+			const formatChar = format[i];
+			if ((!inputChar.match(/[0-9]/) || !formatChar.match(/[a-zA-Z]/)) && inputChar !== formatChar) {
+				return false;
+			}
+		}
+		return true;
+	}
 
     private unformatNumbers(data: any, format: string) { // todo throw error when not coresponding to format (reimplement with state machine)
         if (data === '') return data;
@@ -567,22 +595,66 @@ export class FormattingService {
     }
 
     private convertFormat(dateFormat: string): string {
-        if (!dateFormat) dateFormat = 'F'; // long date format of luxon
-        // adjust to luxon js formatting (from java simple date format)
-        dateFormat = dateFormat.replace(new RegExp('Y', 'g'), 'y');
-        dateFormat = dateFormat.replace(new RegExp('aa', 'g'), 'a');
-        if (dateFormat.indexOf('EE') === -1)
-            dateFormat = dateFormat.replace(new RegExp('E', 'g'), 'EEE');
-        dateFormat = dateFormat.replace(new RegExp('u', 'g'), 'E');
-        dateFormat = dateFormat.replace(new RegExp('w', 'g'), 'W');
-        // no equivalent for K, just put h for now
-        dateFormat = dateFormat.replace(new RegExp('K', 'g'), 'h');
-        dateFormat = dateFormat.replace(new RegExp('k', 'g'), 'H');
-        dateFormat = dateFormat.replace(new RegExp('D', 'g'), 'o');
-        // if week is found then the year must be 'k' for luxon (iso week year)
-        if (dateFormat.indexOf('W') !== -1) {
-            dateFormat = dateFormat.replace(new RegExp('y', 'g'), 'k');
+        let result = '';
+        let inSingleQuotes = false;
+        let containsEE = dateFormat.includes('EE');
+    
+        for (let i = 0; i < dateFormat.length; i++) {
+            if (dateFormat[i] === "'") {
+                inSingleQuotes = !inSingleQuotes;
+                result += dateFormat[i];
+                continue;
+            }
+    
+            if (inSingleQuotes) {
+                result += dateFormat[i];
+                continue;
+            }
+    
+            if (!containsEE && dateFormat[i] === 'E') {
+                result += 'EEE';
+                continue;
+            }
+    
+            if (dateFormat[i] === 'a' && i < dateFormat.length - 1 && dateFormat[i + 1] === 'a') {
+                result += 'a'; 
+                i++; 
+                continue;
+            }
+    
+            switch (dateFormat[i]) {
+                case 'Y': result += 'y'; break;
+                case 'u': result += 'E'; break;
+                case 'w': result += 'W'; break;
+                case 'K': result += 'h'; break;
+                case 'k': result += 'H'; break;
+                case 'D': result += 'o'; break;
+
+                default: result += dateFormat[i]; 
+            }
         }
-        return dateFormat;
-    }
+    
+        if (result.includes('W')) {
+            let tempResult = '';
+            inSingleQuotes = false;
+    
+            for (let i = 0; i < result.length; i++) {
+                if (result[i] === "'") {
+                    inSingleQuotes = !inSingleQuotes;
+                    tempResult += result[i];
+                    continue;
+                }
+    
+                if (!inSingleQuotes && result[i] === 'y') {
+                    tempResult += 'k';
+                } else {
+                    tempResult += result[i];
+                }
+            }
+    
+            result = tempResult;
+        }
+    
+        return result;
+    }    
 }

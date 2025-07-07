@@ -18,11 +18,11 @@
  	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.3.6.3949_LTS</version>
+		<version>2025.3.1.4043</version>
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.32.0.v20231107-0834</version>
+  <version>3.35.100.v20241003-1431</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
@@ -32,11 +32,15 @@
   </properties>
 	<build>
 		<plugins>
-
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-apitools-plugin</artifactId>
+                <version>${tycho.version}</version>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.8.0</version>
 				<executions>
 					<execution>
 						<id>adjust the p2 osgi area to overwrite the eclipse plugin</id>

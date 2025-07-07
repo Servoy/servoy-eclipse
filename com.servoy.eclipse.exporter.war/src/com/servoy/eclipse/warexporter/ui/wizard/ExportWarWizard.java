@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.DialogSettings;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -65,10 +63,8 @@ import com.servoy.eclipse.ui.wizards.DirtySaveExportWizard;
 import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 import com.servoy.eclipse.ui.wizards.exportsolution.pages.ExportConfirmationPage;
-import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
@@ -90,7 +86,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	private FileSelectionPage fileSelectionPage;
 
 	private DirectorySelectionPage pluginSelectionPage;
-	private DirectorySelectionPage beanSelectionPage;
 
 	private ExportWarModel exportModel;
 
@@ -104,10 +99,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	private ServoyPropertiesSelectionPage servoyPropertiesSelectionPage;
 
-	private DirectorySelectionPage lafSelectionPage;
-
-	private ServoyPropertiesConfigurationPage servoyPropertiesConfigurationPage;
-
 	private AbstractWebObjectSelectionPage componentsSelectionPage;
 
 	private WizardPage errorPage;
@@ -117,8 +108,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	private LicensePage licenseConfigurationPage;
 
 	private DeployConfigurationPage userHomeSelectionPage;
-
-	private boolean isNGExport;
 
 	private ListSelectionPage nonActiveSolutionPage;
 
@@ -135,18 +124,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export");
-		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
-		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		if (activeProject != null)
-		{
-			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
-			setDialogSettings(section);
-		}
-		else
-		{
-			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard");
-			setDialogSettings(section);
-		}
+		setDialogSettings(ExportWarModel.getDialogSettings());
 		setNeedsProgressMonitor(true);
 	}
 
@@ -161,8 +139,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		}
 
 		int solutionType = activeProject.getSolutionMetaData().getSolutionType();
-		isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
-		exportModel = new ExportWarModel(getDialogSettings(), isNGExport);
+		exportModel = new ExportWarModel(getDialogSettings());
 		exportNonActiveSolutionsDialog = true;
 		disableFinishButton = false;
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null)
@@ -221,8 +198,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
-		if (beanSelectionPage.hasElements()) beanSelectionPage.storeInput();
-		if (lafSelectionPage.hasElements()) lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
 		exportModel.waitForSearchJobToFinish();
@@ -347,32 +322,35 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				try
 				{
 					final WarExporter exporter = new WarExporter(exportModel, new EclipseExportUserChannel(exportModel, monitor));
-					final boolean[] cancel = new boolean[] { false };
-					Display.getDefault().syncExec(new Runnable()
+					final boolean[] cancel = { false };
+					monitor.setTaskName("Scanning for plugins in the developer directory");
+					String missingJarName = exporter.searchExportedPlugins();
+					while (missingJarName != null)
 					{
-						public void run()
+						String jarName = missingJarName;
+						Display.getDefault().syncExec(new Runnable()
 						{
-							String missingJarName = exporter.searchExportedPlugins();
-							while (missingJarName != null)
+							public void run()
 							{
 								MessageDialog.openWarning(getShell(), "Warning",
-									"Please select the directory where " + missingJarName + " is located (usually your servoy developer/plugins directory)");
+									"Please select the directory where " + jarName + " is located (usually your servoy developer/plugins directory)");
 								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
 								String chosenDirName = dialog.open();
 								if (chosenDirName != null)
 								{
 									exportModel.addPluginLocations(chosenDirName);
-									missingJarName = exporter.searchExportedPlugins();
 								}
 								else
 								{
 									cancel[0] = true;
 									return;
 								}
+								exportModel.saveSettings(getDialogSettings());
 							}
-							exportModel.saveSettings(getDialogSettings());
-						}
-					});
+						});
+						if (!cancel[0]) missingJarName = exporter.searchExportedPlugins();
+						else missingJarName = null;
+					}
 					if (!cancel[0]) exporter.doExport(monitor);
 				}
 				catch (final ExportException e)
@@ -403,12 +381,9 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	private void storeInputForComponentAndServicePages()
 	{
-		if (isNGExport)
-		{
-			ensureComponentAndServicePagesAreInitialized();
-			componentsSelectionPage.storeInput();
-			servicesSelectionPage.storeInput();
-		}
+		ensureComponentAndServicePagesAreInitialized();
+		componentsSelectionPage.storeInput();
+		servicesSelectionPage.storeInput();
 	}
 
 	private String checkAndAutoUpgradeLicenses()
@@ -468,45 +443,37 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
 			licenseConfigurationPage = new LicensePage("licensepage", "Enter license key",
 				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
-			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel);
 			userHomeSelectionPage = new DeployConfigurationPage("userhomepage", exportModel);
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel);
-			if (isNGExport)
-			{
-				componentsSelectionPage = new ComponentsSelectionPage(exportModel, WebComponentSpecProvider.getSpecProviderState(), "componentspage",
-					"Select components to export", "View the components used and select others which you want to export.");
-				servicesSelectionPage = new ServicesSelectionPage(exportModel, WebServiceSpecProvider.getSpecProviderState(), "servicespage",
-					"Select services to export", "View the services used and select others which you want to export.");
-			}
+			componentsSelectionPage = new ComponentsSelectionPage(exportModel, WebComponentSpecProvider.getSpecProviderState(), "componentspage",
+				"Select components to export", "View the components used and select others which you want to export.");
+			servicesSelectionPage = new ServicesSelectionPage(exportModel, WebServiceSpecProvider.getSpecProviderState(), "servicespage",
+				"Select services to export", "View the services used and select others which you want to export.");
 			defaultAdminConfigurationPage = new DefaultAdminConfigurationPage("defaultAdminPage", exportModel);
 			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
 				getDialogSettings().get("export.drivers") == null, false, "export_war_drivers");
-			lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
-				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null,
-				false,
-				"export_war_lafs");
-			beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
-				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null,
-				getDialogSettings().get("export.beans") == null,
-				false, "export_war_beans");
 			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
 				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
 				getDialogSettings().get("export.plugins") == null, true, "export_war_plugins");
 
 			ArrayList<String> tmp = new ArrayList<>();
 			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			String activeResourcesProjectName = servoyModel.getActiveResourcesProject().getProject().getName();
+			String activeResourcesProjectName = servoyModel.getActiveResourcesProject() != null ? servoyModel.getActiveResourcesProject().getProject().getName()
+				: null;
 			List<ServoyProject> activeProjects = Arrays.asList(servoyModel.getModulesOfActiveProject());
 
 			ServoyProject[] servoyProjects = servoyModel.getServoyProjects();
-			for (ServoyProject servoyProject : servoyProjects)
+			if (activeResourcesProjectName != null)
 			{
-				if (!activeProjects.contains(servoyProject) && servoyProject.getResourcesProject() != null &&
-					servoyProject.getResourcesProject().getProject().getName().equals(activeResourcesProjectName))
+				for (ServoyProject servoyProject : servoyProjects)
 				{
-					tmp.add(servoyProject.getProject().getName());
+					if (!activeProjects.contains(servoyProject) && servoyProject.getResourcesProject() != null &&
+						servoyProject.getResourcesProject().getProject().getName().equals(activeResourcesProjectName))
+					{
+						tmp.add(servoyProject.getProject().getName());
+					}
 				}
 			}
 			nonActiveSolutionPage = new ListSelectionPage("noneactivesolutions", "Choose the non-active solutions",
@@ -521,17 +488,11 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			addPage(nonActiveSolutionPage);
 			addPage(userHomeSelectionPage);
 			addPage(pluginSelectionPage);
-			if (beanSelectionPage.hasElements()) addPage(beanSelectionPage);
-			if (lafSelectionPage.hasElements()) addPage(lafSelectionPage);
 			addPage(driverSelectionPage);
-			if (isNGExport)
-			{
-				addPage(componentsSelectionPage);
-				addPage(servicesSelectionPage);
-			}
+			addPage(componentsSelectionPage);
+			addPage(servicesSelectionPage);
 			addPage(defaultAdminConfigurationPage);
 			addPage(servoyPropertiesSelectionPage);
-			addPage(servoyPropertiesConfigurationPage);
 			addPage(licenseConfigurationPage);
 			addPage(serversSelectionPage);
 
@@ -652,8 +613,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
-		if (beanSelectionPage.hasElements()) beanSelectionPage.storeInput();
-		if (lafSelectionPage.hasElements()) lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
 		storeInputForComponentAndServicePages();
@@ -730,8 +689,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 		if (!exportModel.isExportActiveSolution()) appendToBuilder(sb, " -active ", exportModel.isExportActiveSolution());
 
-		if (beanSelectionPage.hasElements()) appendToBuilder(sb, " -b", exportModel.getBeans(), beanSelectionPage.getCheckboxesNumber());
-		if (lafSelectionPage.hasElements()) appendToBuilder(sb, " -l", exportModel.getLafs(), lafSelectionPage.getCheckboxesNumber());
 		appendToBuilder(sb, " -d", exportModel.getDrivers(), driverSelectionPage.getCheckboxesNumber());
 		appendToBuilder(sb, " -pi", exportModel.getPlugins(), pluginSelectionPage.getCheckboxesNumber());
 
@@ -782,7 +739,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -tables", exportModel.isExportAllTablesFromReferencedServers());
 
 		appendToBuilder(sb, " -overwriteGroups", exportModel.isOverwriteGroups());
-		appendToBuilder(sb, " -allowSQLKeywords", exportModel.isExportSampleData());
+		appendToBuilder(sb, " -allowSQLKeywords", exportModel.isAllowSQLKeywords());
 		appendToBuilder(sb, " -allowDataModelChanges ", exportModel.getAllowDataModelChanges());
 		appendToBuilder(sb, " -skipDatabaseViewsUpdate", exportModel.isSkipDatabaseViewsUpdate());
 		appendToBuilder(sb, " -overrideSequenceTypes", exportModel.isOverrideSequenceTypes());
@@ -828,8 +785,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -overwriteAllProperties", exportModel.isOverwriteDeployedServoyProperties());
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
-		appendToBuilder(sb, " -ng2", exportModel.exportNG2Mode());
-		appendToBuilder(sb, " -ng1", exportModel.exportNG1());
 		sb.append("\"");
 
 		StringSelection selection = new StringSelection(sb.toString());

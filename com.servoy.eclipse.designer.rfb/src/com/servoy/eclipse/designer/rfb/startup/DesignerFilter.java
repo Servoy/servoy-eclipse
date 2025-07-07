@@ -63,6 +63,7 @@ import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
+import com.servoy.eclipse.designer.rfb.palette.PaletteFavoritesHandler;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -78,6 +79,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
@@ -132,6 +134,7 @@ public class DesignerFilter implements Filter
 					}
 
 					boolean skipDefault = EditorUtil.hideDefaultComponents(form);
+					boolean hasMenuProperty = false;
 
 					TreeMap<String, Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>> componentCategories = new TreeMap<>();
 					for (Entry<String, PackageSpecification<WebObjectSpecification>> entry : specProvider.getWebObjectSpecifications().entrySet())
@@ -155,6 +158,10 @@ public class DesignerFilter implements Filter
 								componentCategories.put(categoryName, pair);
 							}
 							pair.getRight().add(spec);
+							if (spec.getProperties(MenuPropertyType.INSTANCE).size() > 0)
+							{
+								hasMenuProperty = true;
+							}
 						}
 					}
 
@@ -165,6 +172,10 @@ public class DesignerFilter implements Filter
 					// Step 1: create a list with all keys containing first the layout and then the component packages
 					List<String> orderedKeys = new ArrayList<String>();
 					orderedKeys.add("Templates");
+					if (hasMenuProperty && fl.getMenus(false).hasNext())
+					{
+						orderedKeys.add("Servoy Menu");
+					}
 					orderedKeys.addAll(specProvider.getLayoutSpecifications().keySet());
 
 					for (String category : componentCategories.keySet())
@@ -295,6 +306,30 @@ public class DesignerFilter implements Filter
 								jsonWriter.endArray();
 								jsonWriter.endObject();
 							}
+						}
+						else if (key.equals("Servoy Menu"))
+						{
+							jsonWriter.object();
+							jsonWriter.key("packageName").value("Servoy Menu");
+							jsonWriter.key("packageDisplayname").value("Servoy Menu");
+							jsonWriter.key("components");
+							jsonWriter.array();
+							fl.getMenus(true).forEachRemaining(menu -> {
+								jsonWriter.object();
+								jsonWriter.key("name").value("servoymenu-" + menu.getName());
+								jsonWriter.key("componentType").value("jsmenu");
+								jsonWriter.key("displayName").value(menu.getName());
+								jsonWriter.key("icon").value("rfb/angular/images/column.png");
+								Map<String, Object> model = new HashMap<String, Object>();
+								HashMap<String, Number> size = new HashMap<String, Number>();
+								size.put("height", Integer.valueOf(30));
+								size.put("width", Integer.valueOf(30));
+								model.put("size", size);
+								jsonWriter.key("model").value(new JSONObject(model));
+								jsonWriter.endObject();
+							});
+							jsonWriter.endArray();
+							jsonWriter.endObject();
 						}
 						if (startedArray && specProvider.getLayoutSpecifications().containsKey(key))
 						{
@@ -481,9 +516,8 @@ public class DesignerFilter implements Filter
 					}
 					jsonWriter.endArray();
 					JSONArray jsonArray = new JSONArray(sw.toString());
-					jsonArray = PaletteCommonsHandler.getInstance()
-						.insertcommonsCategory(jsonArray);
-					;
+					jsonArray = PaletteCommonsHandler.getInstance().insertcommonsCategory(jsonArray);
+					jsonArray = PaletteFavoritesHandler.getInstance().insertFavoritesCategory(jsonArray);
 					servletResponse.getWriter().write(jsonArray.toString());
 				}
 				catch (JSONException ex)

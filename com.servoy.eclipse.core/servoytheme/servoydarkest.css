@@ -23,6 +23,10 @@ CTabItem{
   color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
 }
 
+Sash{
+    background-color: #252525;
+}
+
 .MPartStack {
     swt-tab-renderer: url('bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.CTabRendering');
 }
@@ -34,15 +38,15 @@ CTabFolder, Shell CTabFolder {
     swt-tab-outline: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR'; /* border color for selected tab */
     swt-outer-keyline-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR'; /* border color for whole tabs container */
     swt-unselected-tabs-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR' '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR' 100% 100%; /* title background for unselected tab */
-    swt-selected-tab-fill: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR'; /* title background for selected tab */
+    swt-selected-tab-fill: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR'; /* title background for selected tab */
     swt-shadow-visible: false;
     swt-unselected-hot-tab-color-background: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
     swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
 }
 
-CTabFolder.active {
-    swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
-    swt-selected-highlight-top: false;
+CTabItem:selected,
+CTabItem:selected CLabel {
+    color: white;
 }
 
 ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageBook > Tree,
@@ -54,8 +58,22 @@ ContributedPartRenderer-1#org-eclipse-ui-views-PropertySheet > Composite > PageB
     swt-lines-visible: false;
 }
 
+.DragFeedback {
+    background-color: #0078D4;
+}
+
+.ModifiedDragFeedback {
+    background-color: #0078D4;
+} 
+
 ExpandBar {
     color: #330099;
+}
+
+ExpandableComposite {
+    swt-titlebar-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
+    tb-toggle-hover-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
+    tb-toggle-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
 }
 
 #svyeditor * {
@@ -76,7 +94,6 @@ ExpandBar {
     swt-shadow-visible: false;
     swt-unselected-hot-tab-color-background: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
     swt-selected-tab-highlight: '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR';
-    swt-selected-highlight-top: false;
 }
 
 .Editor *{
@@ -89,6 +106,10 @@ ExpandBar {
 
 #svydialog Table, #svydialog Tree {
     swt-header-background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
+}
+
+Shell > Composite > Table {
+  background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
 
 .svyNatTable {
@@ -175,7 +196,14 @@ IEclipsePreferences#org-eclipse-debug-ui:com-servoy-eclipse-servoydarktheme {
 
 IEclipsePreferences#org-eclipse-ui-workbench:com-servoy-eclipse-servoydarktheme {
   preferences: 'org.eclipse.search.ui.match.highlight=206,92,0'
-  'org.eclipse.egit.ui.UncommittedChangeForegroundColor=114,157,186';
+  'org.eclipse.egit.ui.UncommittedChangeForegroundColor=114,157,186'
+  'ERROR_COLOR=247,68,117'
+  'CONFLICTING_COLOR=240,15,66'
+  'HYPERLINK_COLOR=111,197,238'
+  'INCOMING_COLOR=31,179,235'
+  'OUTGOING_COLOR=238,238,238'
+  'RESOLVED_COLOR=108,210,17'
+  'EDITION_COLOR=238,238,238';
 }
 
 ThemesExtension {
@@ -211,4 +239,13 @@ ColorDefinition#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR {
   category: '#com-servoy-themes-darktheme-themeCategory';
   label: 'Editor Background Color';
   description: 'The editing zones background color.';
+}
+
+Composite#org-eclipse-ui-main-toolbar, 
+Composite#org-eclipse-ui-main-toolbar ImageBasedFrame, 
+Composite#org-eclipse-ui-main-toolbar Composite, 
+Composite#org-eclipse-ui-main-toolbar ToolBar, 
+Composite#org-eclipse-ui-main-toolbar LayoutModifierToolControl-1#PerspectiveSpacer, 
+Composite#org-eclipse-ui-main-toolbar ToolItem{
+	background-color: #404040;
 }

@@ -40,6 +40,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.inmemory.MemTable;
+import com.servoy.eclipse.model.inmemory.MenuTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
@@ -129,6 +130,19 @@ public abstract class AbstractServoyModel implements IServoyModel
 					try
 					{
 						return findViewITable(DataSourceUtils.getViewDataSourceName(dataSource));
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("couldn't find view table for datasource: " + dataSource, e);
+					}
+				}
+				else if (dataSource != null && dataSource.startsWith(DataSourceUtils.MENU_DATASOURCE_SCHEME_COLON))
+				{
+					try
+					{
+						// should we cache this?
+						String menuName = DataSourceUtils.getMenuDataSourceName(dataSource);
+						return new MenuTable(menuName);
 					}
 					catch (Exception e)
 					{

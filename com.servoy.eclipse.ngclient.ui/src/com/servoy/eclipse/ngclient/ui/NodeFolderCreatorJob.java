@@ -43,7 +43,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Bundle;
 
-import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -74,6 +75,8 @@ public class NodeFolderCreatorJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
+		IStatus jobStatus = Status.OK_STATUS;
+
 		boolean executeNpmInstall = false;
 		File fullyGenerated = new File(nodeFolder.getParent(), ".fullygenerated");
 		ConsoleFactory consoleTiNG = new ConsoleFactory();
@@ -89,7 +92,7 @@ public class NodeFolderCreatorJob extends Job
 				}
 				catch (IOException e)
 				{
-					Debug.error(e);
+					writeErrorToConsoleAndLog(console, e, "Exception while deleting node folder for replacement: ");
 				}
 			}
 			long startTime = System.currentTimeMillis();
@@ -122,7 +125,7 @@ public class NodeFolderCreatorJob extends Job
 					}
 					catch (IOException e)
 					{
-						e.printStackTrace();
+						Activator.getInstance().getLog().error("Error reading " + packageCopyJsonFile, e);
 					}
 				}
 			}
@@ -166,7 +169,8 @@ public class NodeFolderCreatorJob extends Job
 					}
 					catch (IOException e)
 					{
-						Debug.error(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while deleting full node parent targe dir: " + nodeFolder.getParentFile().toPath() +
+							" due to main packageJson change: ");
 					}
 					writeConsole(console, "- deleted main target folder, because the root package.json is changed (" +
 						Math.round((System.currentTimeMillis() - time) / 1000) + " s)\r\n- copying the new sources...");
@@ -180,7 +184,7 @@ public class NodeFolderCreatorJob extends Job
 					}
 					catch (IOException e)
 					{
-						Debug.error(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while deleting src dir " + srcFolder + " due to changes: ");
 					}
 					try
 					{
@@ -188,7 +192,7 @@ public class NodeFolderCreatorJob extends Job
 					}
 					catch (IOException e)
 					{
-						Debug.error(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while deleting projects dir " + srcFolder + " due to changes: ");
 					}
 					writeConsole(console, "- the solution's sources were changed\r\n- deleted old sources (" +
 						Math.round((System.currentTimeMillis() - time) / 1000) + " s)\r\n- copying the new sources...");
@@ -207,12 +211,18 @@ public class NodeFolderCreatorJob extends Job
 					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageCopyJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
 
+
+					File favicon = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "server/webapps/ROOT/favicon.ico");
+					if (favicon.exists())
+					{
+						FileUtils.copyFile(favicon, new File(nodeFolder, "src/favicon.ico"));
+					}
+
 					executeNpmInstall = true;
 				}
 				catch (IOException e)
 				{
-					writeConsole(console, "\r\n" + "Exception when creating node/ng folder and moving the package json files: " + e.getMessage() + "\r\n");
-					e.printStackTrace();
+					writeErrorToConsoleAndLog(console, e, "Exception when creating node/ng folder and moving the package json files: ");
 				}
 
 				writeConsole(console, "- the new sources were copied (" + Math.round((System.currentTimeMillis() - time) / 1000) + " s)");
@@ -222,22 +232,44 @@ public class NodeFolderCreatorJob extends Job
 		}
 		catch (RuntimeException e)
 		{
-			writeConsole(console, "\r\n" + "Exception when creating node/ng folder: " + e.getMessage() + "\r\n");
-			e.printStackTrace();
+			writeErrorToConsoleAndLog(console, e, "Exception when creating node/ng folder: ");
 		}
 		finally
 		{
 			if (executeNpmInstall) try
 			{
 				// now do an npm install on the main, parent folder
-				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("uninstall", "@servoy/public")).runCommand(monitor);
-				Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(), Arrays.asList("install", "--legacy-peer-deps")).runCommand(monitor);
-				fullyGenerated.createNewFile();
+				RunNPMCommand npmUninstallPublicRunner = Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(),
+					Arrays.asList("uninstall", "@servoy/public"));
+				npmUninstallPublicRunner.runCommand(monitor);
+
+				if (npmUninstallPublicRunner.getExitCode() == 0)
+				{
+					RunNPMCommand npmInstallRunner = Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(),
+						Arrays.asList("install", "--legacy-peer-deps"));
+					npmInstallRunner.runCommand(monitor);
+					if (npmInstallRunner.getExitCode() == 0) fullyGenerated.createNewFile();
+					else
+					{
+						writeConsole(console,
+							"\r\n" + "Unexpected EXIT_CODE calling install on the parent root folder: " + npmInstallRunner.getExitCode() + "\r\n");
+						jobStatus = new Status(IStatus.WARNING, getClass(),
+							"Unexpected EXIT_CODE calling install on the parent root folder: " + npmInstallRunner.getExitCode());
+					}
+				}
+				else
+				{
+					writeConsole(console,
+						"\r\n" + "Unexpected EXIT_CODE calling uninstall on @servoy/public: " + npmUninstallPublicRunner.getExitCode() + "\r\n");
+					jobStatus = new Status(IStatus.WARNING, getClass(),
+						"Unexpected EXIT_CODE calling uninstall on @servoy/public: " + npmUninstallPublicRunner.getExitCode());
+				}
 			}
 			catch (IOException | InterruptedException e1)
 			{
-				writeConsole(console, "\r\n" + "Exception when calling install on the parent root folder: " + e1.getMessage() + "\r\n");
-				e1.printStackTrace();
+				writeErrorToConsoleAndLog(console, e1, "Exception when calling install on the parent root folder: ");
+				jobStatus = new Status(IStatus.WARNING, getClass(),
+					"Exception when calling install on the parent root folder: " + e1.getMessage());
 			}
 
 			try
@@ -248,7 +280,13 @@ public class NodeFolderCreatorJob extends Job
 			{
 			}
 		}
-		return Status.OK_STATUS;
+		return jobStatus;
+	}
+
+	private void writeErrorToConsoleAndLog(StringOutputStream console, Exception e, String s)
+	{
+		Activator.getInstance().getLog().error(s, e);
+		writeConsole(console, "\r\n" + s + e.getMessage() + "\r\n");
 	}
 
 	private void writeConsole(StringOutputStream console, String message)
@@ -405,7 +443,7 @@ public class NodeFolderCreatorJob extends Job
 										}
 										catch (IOException e)
 										{
-											Debug.error(e);
+											Activator.getInstance().getLog().error("Error deleting dir " + target, e);
 										}
 									}
 									else if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY)

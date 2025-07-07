@@ -3,7 +3,8 @@ import { AbstractFormComponent } from '../../ngclient/form/form_component.compon
 
 @Component({
     selector: 'servoycore-formcomponent-responsive-container',
-    templateUrl: './formcomponent-responsive-container.html'
+    templateUrl: './formcomponent-responsive-container.html',
+    standalone: false
 })
 export class ServoyCoreFormcomponentResponsiveCotainer {
     @Input() items: any[];

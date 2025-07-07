@@ -52,6 +52,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.ViewFoundSet;
+import com.servoy.j2db.documentation.scripting.docs.Globals;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
@@ -63,6 +64,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.scripting.solutionmodel.IJSDeveloperSolutionModel;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
@@ -91,9 +93,12 @@ public class ElementResolver implements IElementResolver
 	public ElementResolver()
 	{
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_APPLICATION, new SimpleNameTypeNameCreator("JSApplication"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_EVENTS_MANAGER, new SimpleNameTypeNameCreator("JSEventsManager"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_SECURITY, new SimpleNameTypeNameCreator("JSSecurity"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_I18N, new SimpleNameTypeNameCreator("JSI18N"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_HISTORY, new SimpleNameTypeNameCreator("HistoryProvider"));
+		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_MENUS, new SimpleNameTypeNameCreator("MenuManager"));
+//		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_EVENTTYPES, new SimpleNameTypeNameCreator("EventType"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_UTILS, new SimpleNameTypeNameCreator("JSUtils"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_CLIENTUTILS, new SimpleNameTypeNameCreator("JSClientUtils"));
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_JSUNIT, new SimpleNameTypeNameCreator("JSUnit"));
@@ -131,6 +136,8 @@ public class ElementResolver implements IElementResolver
 
 		deprecated.add("alldataproviders");
 		deprecated.add("currentcontroller");
+
+		constantTypeNames.put("EventType", "EventType");
 	}
 
 
@@ -177,15 +184,15 @@ public class ElementResolver implements IElementResolver
 				Form form = getForm(context);
 				if (form != null)
 				{
-					if (!form.isResponsiveLayout())
+					Form formToUse = fs.getFlattenedForm(form);
+					if (!form.isResponsiveLayout() && !formToUse.containsResponsiveLayout())
 					{
 						typeNames.remove("containers");
 					}
 					typeNames.add(ScriptVariable.GLOBAL_SCOPE);
-					Form formToUse = form;
+
 					if (form.getExtendsID() > 0)
 					{
-						formToUse = fs.getFlattenedForm(form);
 						typeNames.add("_super");
 					}
 					try
@@ -369,6 +376,8 @@ public class ElementResolver implements IElementResolver
 			property.setReadOnly(true);
 			property.setAttribute(TypeCreator.IMAGE_DESCRIPTOR, TypeCreator.GLOBALS);
 			property.setType(context.getTypeRef("Scope<" + fs.getSolution().getName() + "/globals>"));
+			String desc = TypeCreator.getTopLevelDoc(Globals.class);
+			if (desc != null) property.setDescription(desc);
 			members.add(property);
 		}
 
@@ -507,7 +516,7 @@ public class ElementResolver implements IElementResolver
 		{
 			if (ServoyModelFinder.getServoyModel().getActiveProject() == null) return null; // in this case TypeCreator would not create the needed type; avoid generating a resolve stack overflow
 			typeName = name;
-			description = "ONLY AVAILABLE when running a client from Servoy Developer. Do not try to use this when running clients from a normal server/war deployment.<br/>It is meant to be used primarily from developer's 'Interactive Console' view (so you will not get it suggested in code completion of a scope/form script editor).<br/><br/>It provides utility methods for interacting with the developer's environment from a debug Servoy client.";
+			description = TypeCreator.getTopLevelDoc(IJSDeveloperSolutionModel.class);
 		}
 		else
 		{
@@ -682,10 +691,6 @@ public class ElementResolver implements IElementResolver
 		return members;
 	}
 
-	/**
-	 * @param context
-	 * @return
-	 */
 	private boolean isCalculationResource(ITypeInfoContext context)
 	{
 		return isTableNodeResource(context, SolutionSerializer.CALCULATIONS_POSTFIX);

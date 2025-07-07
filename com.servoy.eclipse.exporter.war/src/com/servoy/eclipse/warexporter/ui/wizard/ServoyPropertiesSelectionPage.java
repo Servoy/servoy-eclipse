@@ -264,69 +264,33 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 					Properties prop = new Properties();
 					prop.load(fis);
 
-					boolean propertiesFileFieldWasCleared = false;
-					// this is the same as in com.servoy.j2db.server.main.ApplicationServer.startRMIRegistry()
-					boolean startRMI = Utils.getAsBoolean(prop.getProperty("servoy.server.start.rmi", "false"));
 					// just make sure the model is now set to follow the given servoy properties file
-					exportModel.setStartRMI(startRMI);
-					String rmiServerFactory = prop.getProperty("SocketFactory.rmiServerFactory");
-					if (exportModel.getStartRMI() && !exportModel.allowOverwriteSocketFactoryProperties() &&
-						(rmiServerFactory == null || !rmiServerFactory.equals("com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory")))
-					{
-						final Shell shell = getShell();
-						final boolean[] ok = new boolean[1];
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
-							{
-								ok[0] = MessageDialog.open(MessageDialog.QUESTION, shell, "SocketFactory properties override needed",
-									"In the servoy.properties file this is currently configured for this export - " +
-										exportModel.getServoyPropertiesFileName() +
-										" - the property 'SocketFactory.rmiServerFactory' is not set to 'com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory'.\n\nPlease allow exporter to automatically change socket factory properties, or select another properties file.",
-									SWT.NONE, "Allow exporter to alter socket factory properties", "Do not use this properties file") == 0;
-							}
-						});
-						if (ok[0])
-						{
-							exportModel.setOverwriteSocketFactoryProperties(true);
-						}
-						else
-						{
-							exportModel.setServoyPropertiesFileName(null);
-							fileNameText.setText("");
-							propertiesFileFieldWasCleared = true;
-							// blank value is ok - it will prompt more wizard pages afterwards
-							// so continue validating the rest of the textfields on the page
-						}
-					}
+					exportModel.setStartRMI(false);
 
-					if (!propertiesFileFieldWasCleared)
+					String numberOfServers = prop.getProperty("ServerManager.numberOfServers");
+					if (numberOfServers != null)
 					{
-						String numberOfServers = prop.getProperty("ServerManager.numberOfServers");
-						if (numberOfServers != null)
+						int nrOfServers = Utils.getAsInteger(numberOfServers.trim(), false);
+						boolean repositoryExists = false;
+						for (int i = 0; i < nrOfServers && !repositoryExists; i++)
 						{
-							int nrOfServers = Utils.getAsInteger(numberOfServers.trim(), false);
-							boolean repositoryExists = false;
-							for (int i = 0; i < nrOfServers && !repositoryExists; i++)
-							{
-								String serverName = prop.getProperty("server." + i + ".serverName");
-								if (serverName.equals(IServer.REPOSITORY_SERVER)) repositoryExists = true;
-							}
-							if (!repositoryExists)
-							{
-								setMessage("Servoy properties file '" + exportModel.getServoyPropertiesFileName() +
-									"' is not valid because it doesn't contain 'repository_server' database (which is required).", IMessageProvider.ERROR);
-								messageSet = true;
-							}
-
+							String serverName = prop.getProperty("server." + i + ".serverName");
+							if (serverName.equals(IServer.REPOSITORY_SERVER)) repositoryExists = true;
 						}
-						else
+						if (!repositoryExists)
 						{
-							setMessage("File '" + exportModel.getServoyPropertiesFileName() +
-								"' doesn't look like a valid servoy properties file; no database servers are defined (ServerManager.numberOfServers is not defined).",
-								IMessageProvider.ERROR);
+							setMessage("Servoy properties file '" + exportModel.getServoyPropertiesFileName() +
+								"' is not valid because it doesn't contain 'repository_server' database (which is required).", IMessageProvider.ERROR);
 							messageSet = true;
 						}
+
+					}
+					else
+					{
+						setMessage("File '" + exportModel.getServoyPropertiesFileName() +
+							"' doesn't look like a valid servoy properties file; no database servers are defined (ServerManager.numberOfServers is not defined).",
+							IMessageProvider.ERROR);
+						messageSet = true;
 					}
 				}
 				catch (IOException e)

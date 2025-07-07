@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
-import { LoggerService, LoggerFactory, Deferred, RequestInfoPromise } from '@servoy/public';
+import { LoggerService, LogLevel, LoggerFactory, Deferred, RequestInfoPromise } from '@servoy/public';
 import { ConverterService, IChangeAwareValue, instanceOfChangeAwareValue, ChangeListenerFunction, isChanged, instanceOfUIDestroyAwareValue } from '../sablo/converter.service';
 import { ServoyService } from './servoy.service';
 import { get, set } from 'lodash-es';
 import { ComponentCache, FormCache, FormComponentCache, FormComponentProperties, IFormComponent, instanceOfFormComponent, PartCache, StructureCache } from './types';
-import { ClientFunctionService } from './services/clientfunction.service';
+import { ClientFunctionService } from '../sablo/clientfunction.service';
 import { PushToServerEnum, IType, IWebObjectSpecification, TypesRegistry, RootPropertyContextCreator, PushToServerUtils } from '../sablo/types_registry';
 import { FoundsetLinkedValue } from './converters/foundsetLinked_converter';
 import { DateType } from '../sablo/converters/date_converter';
@@ -17,7 +17,10 @@ import { SvyUtilsService } from './utils.service';
 })
 export class FormService {
 
-    private formsCache: Map<string, FormCache>;
+    private formsCache: Map<string, FormCache>; // keeps form state (not actual angular components that are forms)
+    private formsCachePendingRunnables: Map<string, ((FormCache) => void)[]>; // in case code wants to execute to update formCache content before form cache is sent from server;;
+                             // this should normally not happen (use of 'formCachePendingRunnables') since SVY-19635 and we do print a warning message when it does...
+    
     private log: LoggerService;
     private formComponentCache: Map<string, IFormComponent | Deferred<any>>; // this refers to forms (angular components), not to servoy form components
     private ngUtilsFormStyleclasses: { property: string };
@@ -29,6 +32,7 @@ export class FormService {
 
         this.log = logFactory.getLogger('FormService');
         this.formsCache = new Map();
+        this.formsCachePendingRunnables = new Map();
         this.formComponentCache = new Map();
         this.utils.setFormService(this);
         websocketService.getSession().then((session) => {
@@ -37,19 +41,22 @@ export class FormService {
                 if (msg.forms) {
                     for (const formname in msg.forms) {
                         // if form is loaded
-                        if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)) {
+                        if (this.formsCache.has(formname)) {
                             this.clientFunctionService.waitForLoading().finally(() => {
                                 this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService);
                             });
                         } else {
-                            if (!this.formComponentCache.has(formname)) {
-                                this.formComponentCache.set(formname, new Deferred<unknown>());
+                            this.log.warn('Updates to a form state/cache/model came before it was initialized; this is no longer expected; form: ' + formname);
+                            // do treat this situation anyway, even if it's no loner expected
+                            let pendingRunnablesForThisForm = this.formsCachePendingRunnables.get(formname);
+                            if (!pendingRunnablesForThisForm) {
+                                pendingRunnablesForThisForm = [];
+                                this.formsCachePendingRunnables.set(formname, pendingRunnablesForThisForm);
                             }
-                            const deferred = this.formComponentCache.get(formname) as Deferred<unknown>;
-                            deferred.promise.then(() =>
-                                this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService)
-                            ).catch(error => {
-                                console.log(error);
+                            
+                            pendingRunnablesForThisForm.push((formCache) => {
+                                // it is not needed here to do this.clientFunctionService.waitForLoading().finally, as pendingRunnables will always run inside that anyway
+                                this.formMessageHandler(formCache, formname, msg, servoyService);
                             });
                         }
                     }
@@ -58,38 +65,117 @@ export class FormService {
                     // this is a component API call; execute it
                     // {"call":{"form":"product","bean":"datatextfield1","api":"requestFocus","args":[arg1, arg2]}, // optionally "viewIndex":1 }
                     const componentCall = msg.call;
-                    
 
-                    this.log.spam(this.log.buildMessage(() => ('sbl * Received API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                    if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] Received API call from server: "' + componentCall.api + '" to form ' + componentCall.form
                         + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
 
-                    const callItNow = ((doReturnTheRetVal: boolean) => {
-                        const formComponent = this.formComponentCache.get(componentCall.form) as IFormComponent;
-                        const def = new Deferred();
-                        this.clientFunctionService.waitForLoading().finally(() => {
-                            const retValue = formComponent.callApi(componentCall.bean, componentCall.api, componentCall.args, componentCall.propertyPath);
-                            formComponent.detectChanges();
-                            def.resolve(retValue);
+                    const callItOnceClientFunctionsAreLoaded = ((doReturnTheRetVal: boolean) => {
+                        const def = new Deferred(); // because clientFunctionService.waitForLoading().finally does not return a Promise that we could use directly, we create an explicit defer here in order to have a promise to return
+
+                        if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "callItOnceClientFunctionsAreLoaded" 1 for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                            + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                        this.clientFunctionService.waitForLoading().finally(() => { // this can execute sync right away if there is no need to wait for client functions to load
+                            // as this could execute later, make sure the form is still there
+                            if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
+                                if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "callItOnceClientFunctionsAreLoaded" 2; really calling it now; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                                    + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                                const formComponent = this.formComponentCache.get(componentCall.form) as IFormComponent;
+                                const retValue = formComponent.callApi(componentCall.bean, componentCall.api, componentCall.args, componentCall.propertyPath);
+                                formComponent.detectChanges();
+                                def.resolve(retValue);
+                            } else {
+                                this.log.error(this.log.buildMessage(() => ('[compAPIcalled] calling api ' + componentCall.api + ' in form ' + componentCall.form + ' on component '
+                                    + componentCall.bean + '. Form was loaded but it got unloaded while waiting for clientFunctionServices to load; unexpected... Api call was skipped.')));
+                                def.resolve(undefined);
+                            }
                         });
                         if (doReturnTheRetVal) return def.promise;
                     });
 
                     // if form is loaded just call the api
                     if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
-                        return callItNow(true);
+                        return callItOnceClientFunctionsAreLoaded(true);
                     }
+
+                    // else
+
+                    const waitForFormToShowOnClientThenCallAPI = (doReturnTheRetVal: boolean, timeOutIfItDoesNotShowMS: number) => {
+                        if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "waitForFormToShowOnClientThenCallAPI" for API call from server; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                            + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                        // if form got loaded meanwhile call the API
+                        if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
+                            return callItOnceClientFunctionsAreLoaded(true);
+                        }
+
+                        if (!this.formComponentCache.has(componentCall.form)) {
+                            this.formComponentCache.set(componentCall.form, new Deferred<any>());
+                        }
+                        const deferredFCC = this.formComponentCache.get(componentCall.form) as Deferred<any>;
+
+                        if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "waitForFormToShowOnClientThenCallAPI" will wait for form ui to load; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                            + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                        const cancelled: [boolean] = [ false ];
+                        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                        const thenPromise = deferredFCC.promise.then(() => { if (!cancelled[0]) return callItOnceClientFunctionsAreLoaded(doReturnTheRetVal) });
+                        
+                        if (timeOutIfItDoesNotShowMS > 0) {
+                            // it's either a sync call or a simple async (without wait until form loads) call, and the form ui was not yet loaded; but server said that forms will be made visible soon
+                            
+                            // prepare a promise that resolves when the callItOnceClientFunctionsAreLoaded 'then' promise resolves
+                            // OR gives up and returns undefined if the timeout elapses and it was not called
+                            const deferred = new Deferred<any>();
+                            
+                            if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] api call will time-out if form does not load soon; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                                + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                            const timeout = setTimeout(() => {
+                                this.log.error(this.log.buildMessage(() => ('[compAPIcalled] Error; non-delayed api call timed out waiting for form UI to load; it will no longer be called; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                                    + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+
+                                cancelled[0] = true;
+                                deferred.resolve(undefined);
+                            }, timeOutIfItDoesNotShowMS);
+                            thenPromise.then((rv) => {
+                                if (!cancelled[0]) {
+                                    deferred.resolve(rv);
+                                    clearTimeout(timeout);
+                                }
+                            }, () => {
+                                if (!cancelled[0]) {
+                                    this.log.error(this.log.buildMessage(() => ('[compAPIcalled] Error; non-delayed api call cancelled waiting for form UI to load; but the form was destroyed; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
+                                        + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
+    
+                                    deferred.resolve(undefined);
+                                    clearTimeout(timeout);
+                                }
+                            });
+                            return deferred.promise;
+                        } else return thenPromise; // it a delayUntilFormLoads async call
+                    }
+                    
                     if (!componentCall.delayUntilFormLoads) {
-                        // form is not loaded yet, api cannot wait; i think this should be an error
-                        this.log.error(this.log.buildMessage(() => ('calling api ' + componentCall.api + ' in form ' + componentCall.form + ' on component '
-                            + componentCall.bean + '. Form not loaded and api cannot be delayed. Api call was skipped.')));
-                        return;
+                        if (this.sabloService.isExpectingAFormToShowSoon()) {
+                            // it could be that the needed form is already scheduled to show (on server-side) but it's not yet sent to client
+                            // (if this call to client-side API was initiated by solution onShow handler code)
+                            return this.sabloService.waitForPendingFormShowFromServer().finally(() => {
+                                return waitForFormToShowOnClientThenCallAPI(true, 3000);
+                            });
+                        } else {
+                            // form is not loaded yet, api cannot wait; the server did not notify that a form show
+                            // will happen soon (it's not scheduled on the event thread serverside); this should be an error
+                            // (calling api calls - sync or async - that do no have 'delayUntilFormLoads', the form is not loaded on client,
+                            // and no form is going to show in moments... probably solution code does this calls on non-visible forms... that is not supported)
+                            this.log.error(this.log.buildMessage(() => ('[compAPIcalled] Error calling api ' + componentCall.api + ' in form ' + componentCall.form + ' on component '
+                                + componentCall.bean + '. Form not loaded, no form show expected, and the api cannot be delayed. Api call was skipped.')));
+                            return;
+                        }
+                    } else {
+                        waitForFormToShowOnClientThenCallAPI(false, -1); // it's a an async call with wait until form loads; no need to return anything
                     }
-                    if (!this.formComponentCache.has(componentCall.form)) {
-                        this.formComponentCache.set(componentCall.form, new Deferred<any>());
-                    }
-                    const deferred = this.formComponentCache.get(componentCall.form) as Deferred<any>;
-                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                    deferred.promise.then(() => callItNow(false));
                 }
             });
         }).catch((error) => {
@@ -244,11 +330,19 @@ export class FormService {
     }
 
     public getFormCache(form: IFormComponent): FormCache {
-        if (this.formComponentCache.get(form.name) instanceof Deferred) {
+        return this.formsCache.get(form.name);
+    }
+        
+    public resolveComponentCache(form: IFormComponent): void {
+        const previousValue = this.formComponentCache.get(form.name);
+        if (!previousValue || previousValue instanceof Deferred) {
+            this.sabloService.callService('formService', 'formLoaded', { formname: form.name }, true);
+        }
+        
+        if (previousValue instanceof Deferred) {
             (this.formComponentCache.get(form.name) as Deferred<any>).resolve(null);
         }
         this.formComponentCache.set(form.name, form);
-        return this.formsCache.get(form.name);
     }
 
     public getFormStyleClasses(name: string) {
@@ -278,7 +372,12 @@ export class FormService {
     }
 
     public destroy(formName: string) {
+        const previousFormUI = this.formComponentCache.get(formName);
         this.formComponentCache.delete(formName);
+
+        if (previousFormUI && !(previousFormUI instanceof Deferred))
+            this.sabloService.callService('formService', 'formUnloaded', { formname: formName }, true);
+
         const form = this.formsCache.get(formName);
         if (form) {
             form.componentCache.forEach((comp) => {
@@ -310,13 +409,28 @@ export class FormService {
 
     public createFormCache(formName: string, jsonData: any, url: string) {
         const formCache = new FormCache(formName, jsonData.size, jsonData.responsive, url, this.typesRegistry);
+
         this.walkOverChildren(jsonData.children, formCache);
+
         this.clientFunctionService.waitForLoading().finally(() => {
             this.formsCache.set(formName, formCache);
+            
+            let pendingRunnablesForThisFormState = this.formsCachePendingRunnables.get(formName);
+            if (pendingRunnablesForThisFormState) {
+                // note that here we are already inside this.clientFunctionService.waitForLoading().finally, so the pending runnables do not need to do that themselves
+                pendingRunnablesForThisFormState.forEach(r => r(formCache));
+                this.formsCachePendingRunnables.delete(formName);
+            }
+            
             const formComponent = this.formComponentCache.get(formName);
             if (instanceOfFormComponent(formComponent)) {
+                // there is a form angular component that needs to update it's form state to the new one
                 formComponent.formCacheChanged(formCache);
             } else {
+                // if it is not a update on an existing form (solution model) but a new form,
+                // make sure to call detectChanges() on all existing forms, because 1 of
+                // those could show the new form in it (as tab for example), and that form should be marked as
+                // changed so that everything is change-detected correctly
                 this.formComponentCache.forEach((value) => {
                     if (instanceOfFormComponent(value)) {
                         value.detectChanges();
@@ -329,6 +443,10 @@ export class FormService {
 
     public destroyFormCache(formName: string) {
         this.formsCache.delete(formName);
+        
+        const previousValue = this.formComponentCache.get(formName);
+        if (previousValue instanceof Deferred) previousValue.reject("Form " + formName + " was destroyed on server. Rejecting and clearing client side form ui defer in order to avoid leaks.");
+
         this.formComponentCache.delete(formName);
     }
 
@@ -542,7 +660,10 @@ export class FormService {
     }
 
     private formMessageHandler(formCache: FormCache, formName: string, msg: {forms: {[property: string]: {[property: string]: {[property: string]: unknown}}}}, servoyService: ServoyService) {
-        const formComponent = this.formComponentCache.get(formName) as IFormComponent;
+        // if the form angular component is already created, update it's properties and use it as well; if not, just update models so form/component 'caches'
+        const fc = this.formComponentCache.get(formName);
+        let formComponent: IFormComponent;
+        if (fc && !(fc instanceof Deferred)) formComponent = fc as IFormComponent;
 
         const newFormData = msg.forms[formName];
         const newFormProperties = newFormData['']; // properties of the form itself
@@ -554,7 +675,7 @@ export class FormService {
             // currently what server side sends for the form itself doesn't need client side conversions
             for (const p of Object.keys(newFormProperties)) {
 				comp.model[p] = newFormProperties[p];
-                formComponent[p] = newFormProperties[p]; 
+                if (formComponent) formComponent[p] = newFormProperties[p]; 
             }
         }
 
@@ -580,9 +701,9 @@ export class FormService {
             FormService.updateComponentModelPropertiesFromServer(newComponentProperties, comp, componentSpec, this.converterService,
                 (propertyName: string, newPropertyValue: any) => this.createChangeListenerForSmartValue(formCache.formname, componentName, propertyName, newPropertyValue),
                 (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[]) =>
-                    formComponent.triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName, propertiesChangedButNotByRef));
+                    formComponent?.triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName, propertiesChangedButNotByRef));
         }
-        formComponent.detectChanges(); // this will also fire ngOnChanges which will fire svyOnChanges for all root props that changed by ref
+        formComponent?.detectChanges(); // this will also fire ngOnChanges which will fire svyOnChanges for all root props that changed by ref
     }
 
     private walkOverChildren(children: ServerElement[], formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
@@ -650,7 +771,7 @@ export class FormService {
                     }
 
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
-                    const fcc = new FormComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.responsive, elem.position, formComponentProperties,
+                    const fcc = new FormComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.responsive, elem.position?elem.position:elem.model.cssPosition, formComponentProperties,
                         !!elem.model.foundset, this.typesRegistry);
 
                     this.handleComponentModelConversionsAndChangeListeners(elem, fcc, componentSpec, formCache);
@@ -661,7 +782,7 @@ export class FormService {
                     formCache.add(fcc, parent);
                 } else {
                     // simple component
-                    const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position, this.typesRegistry);
+                    const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position?elem.position:elem.model.cssPosition, this.typesRegistry);
                     this.handleComponentModelConversionsAndChangeListeners(elem, comp, componentSpec, formCache);
 
                     formCache.add(comp, parent);
@@ -704,7 +825,7 @@ export interface ServerElement {
     part: boolean,
     layout: boolean| { [property: string]: string },
     position: { [property: string]: string },
-    model: { [property: string]: unknown, containedForm: {[property: string]: unknown }, styleClass: string, servoyAttributes: { [property: string]: string }},
+    model: { [property: string]: unknown, containedForm: {[property: string]: unknown }, styleClass: string, servoyAttributes: { [property: string]: string }, cssPosition: { [property: string]: string }},
     styleclass: Array<string>,
     classes: Array<string>
     formComponent: Array<string>,

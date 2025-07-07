@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Extension Compatibility
 Bundle-SymbolicName: com.servoy.eclipse.extension.compatibility;singleton:=true
-Bundle-Version: 2024.3.6.3949_LTS
+Bundle-Version: 2025.3.1.4043
 Bundle-Vendor: Servoy
 Require-Bundle: servoy_shared,
  servoy_smart_client,
@@ -13,10 +13,8 @@ Require-Bundle: servoy_shared,
  org.eclipse.dltk.javascript.rhino,
  org.apache.logging.log4j.api,
  org.apache.logging.log4j.core,
- org.apache.commons.logging,
  org.apache.commons.commons-pool2,
  j2db_server,
- org.apache.commons.codec,
  org.apache.commons.commons-collections4,
  sablo,
  javax.websocket,
@@ -28,10 +26,17 @@ Require-Bundle: servoy_shared,
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.14.2",
  com.fasterxml.jackson.core.jackson-databind;bundle-version="2.14.2",
  wrapped.com.auth0.java-jwt;bundle-version="4.2.2",
- wrapped.org.apache.httpcomponents.client5.httpclient5;bundle-version="5.2.1",
- wrapped.org.apache.httpcomponents.core5.httpcore5;bundle-version="5.2.3",
- wrapped.org.apache.httpcomponents.core5.httpcore5-h2;bundle-version="5.2.3",
- org.apache.commons.commons-compress;bundle-version="1.25.0"
+ wrapped.org.apache.httpcomponents.client5.httpclient5;bundle-version="5.3.1",
+ wrapped.org.apache.httpcomponents.core5.httpcore5;bundle-version="5.2.5",
+ wrapped.org.apache.httpcomponents.core5.httpcore5-h2;bundle-version="5.2.5",
+ org.apache.commons.commons-compress;bundle-version="1.25.0",
+ org.apache.commons.logging;bundle-version="1.2.0",
+ org.apache.commons.commons-codec;bundle-version="1.16.0",
+ com.github.scribejava.apis;bundle-version="8.3.3",
+ com.github.scribejava.core;bundle-version="8.3.3",
+ com.github.scribejava.java8;bundle-version="8.3.3",
+ wrapped.com.auth0.jwks-rsa;bundle-version="0.22.1",
+ org.apache.commons.text;bundle-version="1.12.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

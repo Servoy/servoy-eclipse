@@ -13,7 +13,8 @@ import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dom
 @Component({
     selector: 'servoydefault-calendar',
     templateUrl: './calendar.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement> {
 
@@ -31,6 +32,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         allowInputToggle: false,
         useCurrent: false,
         display: {
+            keyboardNavigation: true,
             components: {
 				calendar: true,
                 decades: true,
@@ -120,12 +122,12 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             if (changes.format.currentValue) {
                 if (changes.format.currentValue.type === 'DATETIME' && changes.format.currentValue.display) {
                     const format = changes.format.currentValue.display;
-                    const showYear = format.indexOf('y') >= 0 || format.indexOf('Y') >= 0;
-                    const showMonth = (format.indexOf('m') >= 0 || format.indexOf('M') >= 0) && (format.indexOf('-') >= 0 || format.indexOf('/') >= 0);
-                    const showDate = format.indexOf('d') >= 0 || format.indexOf('D') >= 0;
+                    const showYear = format.indexOf('y') >= 0;
+                    const showMonth = format.indexOf('M') >= 0;
+                    const showDate = format.indexOf('d') >= 0;
                     const showHour = format.indexOf('h') >= 0 || format.indexOf('H') >= 0;
-                    const showMinute = (format.indexOf('m') >= 0 || format.indexOf('M') >= 0) && format.indexOf(':') >= 0;
-                    const showSecond = format.indexOf('s') >= 0 || format.indexOf('S') >= 0;
+                    const showMinute = format.indexOf('m') >= 0;
+                    const showSecond = format.indexOf('s') >= 0;
                     this.config.display.components.calendar = showYear || showMonth || showDate;
                     this.config.display.components.decades = showYear;
                     this.config.display.components.year = showYear;

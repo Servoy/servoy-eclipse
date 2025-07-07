@@ -39,7 +39,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
@@ -66,8 +65,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -89,6 +86,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private ExpandableComposite excomposite;
 
 	private Boolean addDefaultTheme;
+	private Boolean addDefaultWAM;
 	private int[] solutionTypeComboValues;
 	private int solutionType;
 	private Label configLabel;
@@ -97,6 +95,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	protected static final String IS_ADVANCED_USER_SETTING = "is_advanced_user";
 	protected static final String SELECTED_SOLUTIONS_SETTING = "selected_solutions";
 	protected static final String SHOULD_ADD_DEFAULT_THEME_SETTING = "should_add_default_theme";
+	protected static final String SHOULD_ADD_DEFAULT_WAM_SETTING = "should_add_default_web_app_manifest";
 	protected static final String NO_RESOURCE_PROJECT_SETTING = "no_resource_project";
 	protected static final String RESOURCE_PROJECT_NAME_SETTING = "resource_project_name";
 	protected static final String SOLUTION_TYPE = "solution_type";
@@ -106,7 +105,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private static final String SEARCH = "search";
 	private static final String NAVIGATION = "navigation";
 
-	private static String[] toImport = new String[] { SECURITY, UTILS, SEARCH, NAVIGATION };
+	private static String[] toImport = new String[] { UTILS, SEARCH };
 	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	protected GenerateSolutionWizardPage(String pageName)
@@ -174,16 +173,6 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			ExpandableComposite.TWISTIE);
 		excomposite.setExpanded(getWizard().getDialogSettings().getBoolean(wizard.getSettingsPrefix() + IS_ADVANCED_USER_SETTING));
 		excomposite.setText(excomposite.isExpanded() ? "Hide advanced solution settings" : "Show advanced solution settings");
-		if (IconPreferences.getInstance().getUseDarkThemeIcons())
-		{
-			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
-				.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
-			if (darkFGColor != null)
-			{
-				excomposite.setTitleBarForeground(darkFGColor);
-				excomposite.setActiveToggleColor(darkFGColor);
-			}
-		}
 
 		expandComposite = new SolutionAdvancedSettingsComposite(excomposite, isModuleWizard);
 		expandComposite.setBackground(topLevel.getBackground());
@@ -462,6 +451,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private final class SolutionAdvancedSettingsComposite extends Composite implements IValidator
 	{
 		private final Button defaultThemeCheck;
+		private final Button defaultWAMCheck;
 		private final Combo solutionTypeCombo;
 		private final ProjectLocationComposite projectLocationComposite;
 		private final ResourcesProjectChooserComposite resourceProjectComposite;
@@ -469,10 +459,26 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		public SolutionAdvancedSettingsComposite(Composite parent, boolean isModule)
 		{
 			super(parent, SWT.NONE);
+			defaultWAMCheck = new Button(this, SWT.CHECK);
+			defaultWAMCheck.setVisible(!isModule);
+
 			defaultThemeCheck = new Button(this, SWT.CHECK);
 			defaultThemeCheck.setVisible(!isModule);
 			if (!isModule)
 			{
+				defaultWAMCheck.setText("Add default web application manifest (manifest.json in Media - used for installable web application)");
+				addDefaultWAM = (getDialogSettings().get(wizard.getSettingsPrefix() + SHOULD_ADD_DEFAULT_WAM_SETTING) != null)
+					? Boolean.valueOf(getDialogSettings().get(wizard.getSettingsPrefix() + SHOULD_ADD_DEFAULT_WAM_SETTING)) : Boolean.TRUE;//ng solution is selected by default
+				defaultWAMCheck.setSelection(addDefaultWAM.booleanValue());
+				defaultWAMCheck.addSelectionListener(new SelectionAdapter()
+				{
+					@Override
+					public void widgetSelected(SelectionEvent e)
+					{
+						addDefaultWAM = Boolean.valueOf(defaultWAMCheck.getSelection());
+					}
+				});
+
 				defaultThemeCheck.setText("Add default servoy .less theme (configurable by a less properties file)");
 				addDefaultTheme = (getDialogSettings().get(wizard.getSettingsPrefix() + SHOULD_ADD_DEFAULT_THEME_SETTING) != null)
 					? Boolean.valueOf(getDialogSettings().get(wizard.getSettingsPrefix() + SHOULD_ADD_DEFAULT_THEME_SETTING)) : Boolean.TRUE;//ng solution is selected by default
@@ -491,14 +497,11 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			Label solutionTypeLabel = new Label(this, SWT.NONE);
 			solutionTypeLabel.setText("Solution type");
 			solutionTypeCombo = new Combo(this, SWT.DROP_DOWN | SWT.READ_ONLY);
-			boolean showLegacyTypes = new DesignerPreferences().getShowLegacySolutionTypes();
-
-			String[] solutionTypeNames = new String[showLegacyTypes ? SolutionMetaData.solutionTypeNames.length - 1
-				: SolutionMetaData.currentSolutionTypeNames.length - 1];
-			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypeNames : SolutionMetaData.currentSolutionTypeNames, 1, solutionTypeNames, 0,
+			String[] solutionTypeNames = new String[SolutionMetaData.currentSolutionTypeNames.length - 1];
+			System.arraycopy(SolutionMetaData.currentSolutionTypeNames, 1, solutionTypeNames, 0,
 				solutionTypeNames.length);
-			solutionTypeComboValues = new int[showLegacyTypes ? SolutionMetaData.solutionTypes.length - 1 : SolutionMetaData.currentSolutionTypes.length - 1];
-			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypes : SolutionMetaData.currentSolutionTypes, 1, solutionTypeComboValues, 0,
+			solutionTypeComboValues = new int[SolutionMetaData.currentSolutionTypes.length - 1];
+			System.arraycopy(SolutionMetaData.currentSolutionTypes, 1, solutionTypeComboValues, 0,
 				solutionTypeComboValues.length);
 			solutionTypeCombo.setItems(solutionTypeNames);
 			int defaultSolutionType = getDialogSettings().get(wizard.getSettingsPrefix() + SOLUTION_TYPE) != null
@@ -550,8 +553,13 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
 			formData.top = new FormAttachment(resourceProjectComposite, 20);
-			formData.bottom = new FormAttachment(100, 0);
 			defaultThemeCheck.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.top = new FormAttachment(defaultThemeCheck, 20);
+			formData.bottom = new FormAttachment(100, 0);
+			defaultWAMCheck.setLayoutData(formData);
 
 			this.pack();
 
@@ -587,6 +595,8 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			solutionType = solutionTypeComboValues[solutionTypeCombo.getSelectionIndex()];
 			defaultThemeCheck.setEnabled(SolutionMetaData.isNGOnlySolution(solutionType));
 			defaultThemeCheck.setSelection(shouldAddDefaultTheme());
+			defaultWAMCheck.setEnabled(SolutionMetaData.isNGOnlySolution(solutionType));
+			defaultWAMCheck.setSelection(shouldAddDefaultWAM());
 			checkboxTableViewer.getTable().setEnabled(solutionType == SolutionMetaData.NG_CLIENT_ONLY);
 		}
 
@@ -643,6 +653,12 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	public boolean shouldAddDefaultTheme()
 	{
 		return addDefaultTheme != null ? (addDefaultTheme.booleanValue() && solutionType == SolutionMetaData.NG_CLIENT_ONLY)
+			: solutionType == SolutionMetaData.NG_CLIENT_ONLY;
+	}
+
+	public boolean shouldAddDefaultWAM()
+	{
+		return addDefaultWAM != null ? (addDefaultWAM.booleanValue() && solutionType == SolutionMetaData.NG_CLIENT_ONLY)
 			: solutionType == SolutionMetaData.NG_CLIENT_ONLY;
 	}
 

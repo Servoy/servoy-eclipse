@@ -47,9 +47,9 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBasicFormManager;
-import com.servoy.j2db.IBeanManager;
 import com.servoy.j2db.IDataRendererFactory;
-import com.servoy.j2db.ILAFManager;
+import com.servoy.j2db.IEventsManager;
+import com.servoy.j2db.IMenuManager;
 import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.IModeManager;
 import com.servoy.j2db.ISmartClientApplication;
@@ -114,7 +114,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	private final HashMap<Locale, Properties> messages = new HashMap<Locale, Properties>();
 	private PluginManager pluginManager;
 	private PageFormat pageFormat;
-	private IBeanManager beanManager;
 	private ClientPluginAccessProvider pluginAccess;
 
 	public DesignApplication()
@@ -198,16 +197,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public int getClientPlatform()
 	{
 		return Utils.getPlatform();
-	}
-
-	public IBeanManager getBeanManager()
-	{
-		if (beanManager == null)
-		{
-			// don't create bean manager again, this is needed for jfxpanel bean, its native libraries cannot be loaded twice
-			beanManager = ApplicationServerRegistry.get().getBeanManager();
-		}
-		return beanManager;
 	}
 
 	public String getClientID()
@@ -677,11 +666,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return itemFactory;
 	}
 
-	public ILAFManager getLAFManager()
-	{
-		return ApplicationServerRegistry.get().getLafManager();
-	}
-
 	public Locale getLocale()
 	{
 		String settingsLocale = getSettings().getProperty("locale.default");
@@ -701,6 +685,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public IModeManager getModeManager()
 	{
 		return getClient().getModeManager();
+	}
+
+	@Override
+	public IMenuManager getMenuManager()
+	{
+		return getClient().getMenuManager();
 	}
 
 	public PageFormat getPageFormat()
@@ -1221,5 +1211,11 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			return ((IFormUI)parent).getController().getName();
 		}
 		return "";
+	}
+
+	@Override
+	public IEventsManager getEventsManager()
+	{
+		return getClient().getEventsManager();
 	}
 }

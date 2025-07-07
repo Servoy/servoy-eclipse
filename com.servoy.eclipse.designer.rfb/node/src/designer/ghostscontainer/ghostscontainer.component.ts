@@ -7,7 +7,8 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
 @Component({
     selector: 'designer-ghostscontainer',
     templateUrl: './ghostscontainer.component.html',
-    styleUrls: ['./ghostscontainer.component.css']
+    styleUrls: ['./ghostscontainer.component.css'],
+    standalone: false
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {
 
@@ -25,6 +26,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     draggingGhost: Ghost;
     draggingInGhostContainer: GhostContainer;
     draggingClone: Element;
+    draggingGhostComponents: Array<DraggingGhostInfo>;
 
     draggingGhostComponent: HTMLElement;
     formWidth: number;
@@ -39,6 +41,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     private glasspane: HTMLElement;
     private ghostsBottom = 0;
     private lastMouseY = 0;
+    private frameRect: DOMRect;
 
     constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, private editorContentService: EditorContentService) {
@@ -159,10 +162,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 if (this.editorContentService.getContentElement(ghostContainer.uuid)?.parentElement?.parentElement?.classList.contains('maxLevelDesign')) {
                     ghostContainer.style.display = 'none';
                 }
-                
+
                 const filterGhostParts = ghostContainer.ghosts.filter(ghost => ghost.type == GHOST_TYPES.GHOST_TYPE_PART);
-				const onlyBodyPart =  filterGhostParts.length === 1 && filterGhostParts[0].text.toLowerCase() === "body";
-				
+                const onlyBodyPart = filterGhostParts.length === 1 && filterGhostParts[0].text.toLowerCase() === "body";
+
                 for (const ghost of ghostContainer.ghosts) {
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_GROUP) {
                         ghostContainer.style.display = 'none';
@@ -181,8 +184,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                             overflow: 'visible'
                         };
                         if (onlyBodyPart) {
-							style['visibility'] = 'hidden';
-						}
+                            style['visibility'] = 'hidden';
+                        }
                         ghost.hrstyle = {
                             marginTop: '-1px',
                             borderTop: '1px dashed #000',
@@ -225,7 +228,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                         else if (ghost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
                             style['background'] = '#ffbb37';
                         }
-                        else if (ghost.type != GHOST_TYPES.GHOST_TYPE_GROUP) {
+                        else {
                             style['background'] = '#e4844a';
                         }
                         this.ghostsBottom = Math.max(this.ghostsBottom, ghost.location.y + yOffset + ghost.size.height);
@@ -248,7 +251,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     onMouseDown(event: MouseEvent, ghost: Ghost, ghostContainer: GhostContainer) {
-        const selection = this.editorSession.getSelection();
+        let selection = this.editorSession.getSelection();
         if (event.ctrlKey || event.metaKey) {
             const index = selection.indexOf(ghost.uuid);
             if (index >= 0) {
@@ -263,13 +266,12 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             if (event.button == 2 && selection.indexOf(ghost.uuid) >= 0) {
                 //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
                 this.editorSession.getState().ghosthandle = true;
-                return;    
+                return;
             }
-            else
-            {
-                this.editorSession.setSelection([ghost.uuid]); 
+            else if (this.editorSession.getSelection().indexOf(ghost.uuid) == -1 || ghost.type != GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                this.editorSession.setSelection([ghost.uuid]);
             }
-           
+
         }
         if (event.button == 0) {
             this.editorSession.getState().dragging = true;
@@ -288,7 +290,23 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 this.draggingClone = (event.currentTarget as Element).cloneNode(true) as Element;
                 this.renderer.setStyle(this.draggingClone, 'background', '#ffbb37');
             }
-
+            if (this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                this.frameRect = this.editorContentService.getContent().getBoundingClientRect();
+                selection = this.editorSession.getSelection();
+                this.draggingGhostComponents = new Array<DraggingGhostInfo>();
+                if (selection && selection.length > 1) {
+                    for (let i = 0; i < selection.length; i++) {
+                        const node = this.editorContentService.querySelector('[svy-id="' + selection[i] + '"]');
+                        if (node) {
+                            for (const ghost of ghostContainer.ghosts) {
+                                if (this.draggingGhost != ghost && ghost.uuid == selection[i] && ghost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
+                                    this.draggingGhostComponents.push(new DraggingGhostInfo(ghost, node));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
                 this.draggingGhostComponent = this.editorContentService.querySelector('[svy-id="' + this.draggingGhost.uuid + '"]');
                 const containerHeight = parseInt(ghostContainer.style.height.replace('px', ''));
@@ -320,12 +338,6 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
                     this.renderGhostsInternal(this.ghostContainers);
-                }
-                if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_COMPONENT) {
-                    const obj = {};
-                    obj[this.draggingGhost.uuid] = { 'x': event.pageX - this.editorContentService.getLeftPositionIframe() - this.leftOffsetRelativeToSelectedGhost, 'y': event.pageY - this.editorContentService.getTopPositionIframe() - this.topOffsetRelativeToSelectedGhost };
-                    this.editorSession.sendChanges(obj);
-                    this.renderGhosts();
                 }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
                     const changes = {};
@@ -359,6 +371,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         this.draggingGhost = null;
         this.draggingInGhostContainer = null;
         this.draggingGhostComponent = null;
+        this.draggingGhostComponents = null;
         this.renderGhosts();
     }
 
@@ -417,6 +430,24 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
                 this.renderer.setStyle(this.draggingGhostComponent, 'left', (event.pageX - this.containerLeftOffset - this.leftOffsetRelativeToSelectedGhost) + 'px');
                 this.renderer.setStyle(this.draggingGhostComponent, 'top', (event.pageY - this.containerTopOffset - this.topOffsetRelativeToSelectedGhost) + 'px');
+                if (this.draggingGhostComponents) {
+                    for (const draggingInfo of this.draggingGhostComponents) {
+                        this.renderer.setStyle(draggingInfo.ghostComponent, 'left', (event.pageX - this.mousedownpoint.x + draggingInfo.originalLeft - this.containerLeftOffset) + 'px');
+                        this.renderer.setStyle(draggingInfo.ghostComponent, 'top', (event.pageY - this.mousedownpoint.y + draggingInfo.originalTop - this.containerTopOffset) + 'px');
+                    }
+                }
+                if (this.frameRect) {
+                    let visibilityStyle = 'visible';
+                    if (this.frameRect.left <= event.pageX && this.frameRect.right >= event.pageX && this.frameRect.top <= event.pageY && this.frameRect.bottom >= event.pageY) {
+                        visibilityStyle = 'hidden';
+                    }
+                    this.draggingGhostComponent.style.visibility = visibilityStyle;
+                    if (this.draggingGhostComponents) {
+                        for (const draggingInfo of this.draggingGhostComponents) {
+                            draggingInfo.ghostComponent.style.visibility = visibilityStyle;
+                        }
+                    }
+                }
             }
             if (this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_PART) {
                 let step = event.pageY - this.lastMouseY;
@@ -496,7 +527,7 @@ class GhostContainer {
 class Ghost {
     uuid: string;
     text: string;
-    type: string;
+    type: GHOST_TYPES;
     class: string;
     propertyType: string;
     style: { left?: string, top?: string; right?: string; width?: string; height?: string };
@@ -512,4 +543,20 @@ export enum GHOST_TYPES {
     GHOST_TYPE_FORM = 'form',
     GHOST_TYPE_INVISIBLE = 'invisible',
     GHOST_TYPE_GROUP = 'group'
+}
+
+class DraggingGhostInfo {
+
+    ghost: Ghost;
+    ghostComponent: HTMLElement;
+    originalLeft: number;
+    originalTop: number;
+
+    constructor(ghost: Ghost, ghostComponent: HTMLElement) {
+        this.ghost = ghost;
+        this.ghostComponent = ghostComponent;
+        const parentRect = ghostComponent.getBoundingClientRect();
+        this.originalLeft = parentRect.left;
+        this.originalTop = parentRect.top;
+    }
 }

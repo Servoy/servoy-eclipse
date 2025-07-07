@@ -19,18 +19,20 @@ package com.servoy.eclipse.jsunit.scriptunit;
 
 import java.util.List;
 
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.dltk.testing.ITestingClient;
+import org.eclipse.dltk.testing.model.ITestRunSession;
+
+import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
+import com.servoy.eclipse.jsunit.runner.ServoyAssertionFailedError;
+import com.servoy.eclipse.model.test.TestTarget;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestListener;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-
-import org.eclipse.dltk.testing.ITestingClient;
-import org.eclipse.dltk.testing.model.ITestRunSession;
-
-import com.servoy.eclipse.jsunit.runner.JSUnitTestListenerHandler;
-import com.servoy.eclipse.jsunit.runner.ServoyAssertionFailedError;
 
 /**
  * Notifies the current running dltk TestRunSession about the test states .
@@ -47,11 +49,11 @@ public class ScriptUnitTestRunNotifier implements TestListener
 	private int currentTestCounter = 0;
 	long startTime = 0;
 
-	public ScriptUnitTestRunNotifier(List<Test> testList, TestResult testResult)
+	public ScriptUnitTestRunNotifier(List<Test> testList, TestResult testResult, TestTarget target)
 	{
 		this.testList = testList;
 		this.nrOfTests = testList.get(0).countTestCases();
-		this.testingClient = getScriptTestRunnerClient();
+		this.testingClient = getScriptTestRunnerClient(target);
 		this.testResult = testResult;
 	}
 
@@ -100,16 +102,15 @@ public class ScriptUnitTestRunNotifier implements TestListener
 	}
 
 	/**
-	 * Used both to send failure and send error depending on argument type Error or  AssertionFailedError 
+	 * Used both to send failure and send error depending on argument type Error or  AssertionFailedError
 	 * @param test
 	 * @param t
 	 */
 	private void sendTestFailure(Test test, Throwable t)
 	{
 		isStopRequested();
-		if (t instanceof AssertionFailedError)
+		if (t instanceof AssertionFailedError fail)
 		{
-			AssertionFailedError fail = (AssertionFailedError)t;
 			testingClient.testFailed(ITestingClient.FAILED, testList.indexOf(test), ((TestCase)test).getName());
 			if (t instanceof ServoyAssertionFailedError)
 			{
@@ -166,18 +167,14 @@ public class ScriptUnitTestRunNotifier implements TestListener
 	}
 
 
-	private ITestingClient getScriptTestRunnerClient()
+	private ITestingClient getScriptTestRunnerClient(TestTarget target)
 	{
-		ITestRunSession testRunSession = org.eclipse.dltk.testing.DLTKTestingPlugin.getModel().getTestRunSession(
-			com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate.getCurrentLaunch());
+		ITestRunSession testRunSession = org.eclipse.dltk.testing.DLTKTestingPlugin.getModel().getTestRunSession((ILaunch)target.launch);
 		if (testRunSession != null)
 		{
 			return testRunSession.getTestRunnerClient();
 		}
-		else
-		{
-			return null;
-		}
+		return null;
 	}
 
 	@Override

@@ -28,6 +28,7 @@ import javax.swing.border.Border;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
@@ -42,9 +43,8 @@ import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
  */
 public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IAdaptable
 {
-
 	private Object[] editValues;
-	private boolean hasDefaultVaue;
+	private boolean hasDefaultValue;
 
 	public ModifiedPropertySheetEntry()
 	{
@@ -246,7 +246,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 		// See if the value changed and if so update
 		Object newValue = editor.getValue();
-		if (hasDefaultVaue || stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
+		if (hasDefaultValue || stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
 		{
 			// Set the editor value
 			setValue(newValue);
@@ -254,13 +254,13 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 	}
 
 	@Override
-	public void setValuesInternal(Object[] objects, boolean hasDefaultVaue)
+	public void setValuesInternal(Object[] objects, boolean hasDefaultValue)
 	{
-		super.setValuesInternal(objects, hasDefaultVaue);
+		super.setValuesInternal(objects, hasDefaultValue);
 		if (objects.length == 0)
 		{
 			editValues = null;
-			this.hasDefaultVaue = false;
+			this.hasDefaultValue = false;
 		}
 		else
 		{
@@ -276,7 +276,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 				}
 				editValues[i] = newValue;
 			}
-			this.hasDefaultVaue = hasDefaultVaue;
+			this.hasDefaultValue = hasDefaultValue;
 		}
 	}
 
@@ -323,5 +323,20 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 	protected IPropertyDescriptor getDescriptor()
 	{
 		return super.getDescriptor();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.views.properties.PropertySheetEntry#getEditor(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	public CellEditor getEditor(Composite parent)
+	{
+		if (parent == null)
+		{
+			return this.editor;
+		}
+		return super.getEditor(parent);
 	}
 }

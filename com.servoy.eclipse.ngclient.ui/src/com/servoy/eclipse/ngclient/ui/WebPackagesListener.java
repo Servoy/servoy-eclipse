@@ -52,8 +52,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -81,11 +84,11 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.SerialRule;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.war.exporter.IWarExportModel;
+import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
-import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
@@ -112,17 +115,40 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 */
 	private static final class PackageCheckerJob extends Job
 	{
-		private final IWarExportModel warExportModel;
+		private final ITiNGExportModel warExportModel;
 		private final File projectFolder;
+		private final String whatToRun;
 
 		/**
 		 * @param name
 		 */
-		private PackageCheckerJob(String name, File projectFolder, IWarExportModel warExportModel)
+		private PackageCheckerJob(String name, File projectFolder, ITiNGExportModel warExportModel)
 		{
 			super(name);
 			this.warExportModel = warExportModel;
 			this.projectFolder = projectFolder;
+			String toRun = "build_debug_nowatch";
+			if (warExportModel != null)
+			{
+				// skip the null values and the true value then it should just be "build"
+				if (!Arrays.asList(null, "", "true").contains(warExportModel.exportNG2Mode()))
+				{
+					toRun = "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : warExportModel.exportNG2Mode();
+				}
+				else
+				{
+					toRun = "build";
+				}
+			}
+			else
+			{
+				if (Boolean.valueOf(Settings.getInstance().getProperty("servoy.ngclient.testingMode", "false")).booleanValue())
+				{
+					toRun = "build_sourcemap";
+				}
+			}
+			whatToRun = toRun;
+
 		}
 
 		@Override
@@ -293,10 +319,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						ServoyLog.logError(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while checking what packages should be installed: ");
+						// TODO should we return a WARNING status here as we do for other failures?
 					}
 				}
-
 
 				// adjust the allservices.sevice.ts
 				try
@@ -364,7 +390,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e)
 				{
-					ServoyLog.logError(e);
+					writeErrorToConsoleAndLog(console, e, "Exception while generating allservices.service.ts: ");
+					// TODO should we return a WARNING status here as we do for other failures?
 				}
 
 				for (WebObjectSpecification spec : WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications())
@@ -447,7 +474,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e1)
 				{
-					ServoyLog.logError(e1);
+					writeErrorToConsoleAndLog(console, e1, "Exception while adjusting component templates: ");
+					// TODO should we return a WARNING status here as we do for other failures?
 				}
 
 				try
@@ -489,7 +517,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e1)
 				{
-					ServoyLog.logError(e1);
+					writeErrorToConsoleAndLog(console, e1, "Exception while generating allcomponents.module.ts: ");
+					// TODO should we return a WARNING status here as we do for other failures?
 				}
 
 				try
@@ -547,7 +576,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e)
 				{
-					ServoyLog.logError(e);
+					writeErrorToConsoleAndLog(console, e, "Exception while adjusting angular.json styles: ");
+					// TODO should we return a WARNING status here as we do for other failures?
 				}
 				try
 				{
@@ -579,7 +609,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 									catch (JSONException ex)
 									{
-										ServoyLog.logError("Can't add asset object to angular.json: " + asset, ex);
+										writeErrorToConsoleAndLog(console, ex, "Can't add asset object to angular.json: " + asset + ": ");
+										// TODO should we return a WARNING status here as we do for other failures?
 									}
 								}
 								else
@@ -598,7 +629,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				}
 				catch (IOException e)
 				{
-					ServoyLog.logError(e);
+					writeErrorToConsoleAndLog(console, e, "Exception while checking assets: ");
+					// TODO should we return a WARNING status here as we do for other failures?
 				}
 				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get())
 				{
@@ -623,17 +655,24 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// fist create the servoy/public dist if needed
 					String location = Activator.getInstance().getBundle().getLocation();
 					int fromSourceIndex = location.indexOf("file:/");
-					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists())
+					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists() || sourceChanged)
 					{
 						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
 							Arrays.asList("run", "build_lib_debug_nowatch"));
 						try
 						{
 							npmCommand.runCommand(monitor);
+							if (npmCommand.getExitCode() != 0)
+							{
+								writeConsole(console,
+									"\r\n" + "Unexpected EXIT_CODE calling build_lib_debug_nowatch: " + npmCommand.getExitCode() + "\r\n");
+								return new Status(IStatus.WARNING, getClass(), "npm run build_lib_debug_nowatch EXIT_CODE was: " + npmCommand.getExitCode());
+							}
 						}
 						catch (Exception e)
 						{
-							ServoyLog.logError(e);
+							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm run build_lib_debug_nowatch': ");
+							return new Status(IStatus.WARNING, getClass(), "npm run build_lib_debug_nowatch failed: " + e.getMessage());
 						}
 					}
 
@@ -649,10 +688,18 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					try
 					{
 						npmCommand.runCommand(monitor);
+						if (npmCommand.getExitCode() != 0)
+						{
+							writeConsole(console,
+								"\r\n" + "Unexpected EXIT_CODE calling npm install many, packages, that, are, needed: " + npmCommand.getExitCode() + "\r\n");
+							return new Status(IStatus.WARNING, getClass(),
+								"npm install many, packages, that, are, needed EXIT_CODE was: " + npmCommand.getExitCode());
+						}
 					}
 					catch (Exception e)
 					{
-						ServoyLog.logError(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while running 'npm install many, packages, that, we, need': ");
+						return new Status(IStatus.WARNING, getClass(), "npm install many, packages, that, we, need failed: " + e.getMessage());
 					}
 					if (cleanInstall.get())
 					{
@@ -661,10 +708,17 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						try
 						{
 							npmCommand.runCommand(monitor);
+							if (npmCommand.getExitCode() != 0)
+							{
+								writeConsole(console,
+									"\r\n" + "Unexpected EXIT_CODE calling npm ci: " + npmCommand.getExitCode() + "\r\n");
+								return new Status(IStatus.WARNING, getClass(), "npm ci EXIT_CODE was: " + npmCommand.getExitCode());
+							}
 						}
 						catch (Exception e)
 						{
-							ServoyLog.logError(e);
+							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm ci': ");
+							return new Status(IStatus.WARNING, getClass(), "npm ci failed: " + e.getMessage());
 						}
 					}
 					else
@@ -673,20 +727,34 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						try
 						{
 							npmCommand.runCommand(monitor);
+							if (npmCommand.getExitCode() != 0)
+							{
+								writeConsole(console,
+									"\r\n" + "Unexpected EXIT_CODE calling npm update: " + npmCommand.getExitCode() + "\r\n");
+								return new Status(IStatus.WARNING, getClass(), "npm update EXIT_CODE was: " + npmCommand.getExitCode());
+							}
 						}
 						catch (Exception e)
 						{
-							ServoyLog.logError(e);
+							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm update': ");
+							return new Status(IStatus.WARNING, getClass(), "npm update failed: " + e.getMessage());
 						}
 					}
 					npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("dedup"));
 					try
 					{
 						npmCommand.runCommand(monitor);
+						if (npmCommand.getExitCode() != 0)
+						{
+							writeConsole(console,
+								"\r\n" + "Unexpected EXIT_CODE calling npm dedup: " + npmCommand.getExitCode() + "\r\n");
+							return new Status(IStatus.WARNING, getClass(), "npm dedup EXIT_CODE was: " + npmCommand.getExitCode());
+						}
 					}
 					catch (Exception e)
 					{
-						ServoyLog.logError(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while running 'npm dedup': ");
+						return new Status(IStatus.WARNING, getClass(), "npm dedup failed: " + e.getMessage());
 					}
 					long dedupTime = System.currentTimeMillis();
 					// after dedup we have to run our own dedup, but then compared to the root node_modules
@@ -719,7 +787,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 									catch (IOException e)
 									{
-										Debug.error(e);
+										writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
 									}
 								}
 								else
@@ -736,9 +804,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 											}
 											catch (IOException e)
 											{
-												Debug.error(e);
+												writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
 											}
-
 										}
 									});
 								}
@@ -758,16 +825,21 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					else
 					{
-						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("run",
-							warExportModel != null ? "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : "build"
-								: "build_debug_nowatch"));
+						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("run", whatToRun));
 						try
 						{
 							npmCommand.runCommand(monitor);
+							if (npmCommand.getExitCode() != 0)
+							{
+								writeConsole(console,
+									"\r\n" + "Unexpected EXIT_CODE calling npm " + whatToRun + ": " + npmCommand.getExitCode() + "\r\n");
+								return new Status(IStatus.WARNING, getClass(), "npm run " + whatToRun + " EXIT_CODE was: " + npmCommand.getExitCode());
+							}
 						}
 						catch (Exception e)
 						{
-							ServoyLog.logError(e);
+							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm run " + whatToRun + "': ");
+							return new Status(IStatus.WARNING, getClass(), "npm run " + whatToRun + " failed: " + e.getMessage());
 						}
 					}
 				}
@@ -880,6 +952,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 		}
 
+		private void writeErrorToConsoleAndLog(StringOutputStream console, Exception e, String s)
+		{
+			Activator.getInstance().getLog().error(s, e);
+			writeConsole(console, "\r\n" + s + e.getMessage() + "\r\n");
+		}
+
 		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, StringOutputStream console)
 		{
 			String packageVersion = packageReader.getVersion();
@@ -913,7 +991,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						}
 						catch (Exception e)
 						{
-							ServoyLog.logError(e);
+							writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
+							// TODO should we return a WARNING status here for the whole job as we do for other failures?
 						}
 					}
 					else return null;
@@ -1012,7 +1091,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 											}
 											catch (IOException e)
 											{
-												Debug.error(e);
+												writeErrorToConsoleAndLog(console, e,
+													"Exception while deleting package folder " + packageFolder + " for replacement: ");
 											}
 										}
 
@@ -1068,13 +1148,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 							catch (IOException e)
 							{
-								ServoyLog.logError(e);
+								writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
+								// TODO should we return a WARNING status here for the whole job as we do for other failures?
 							}
 						}
 					}
 					catch (URISyntaxException e)
 					{
-						ServoyLog.logError(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
+						// TODO should we return a WARNING status here for the whole job as we do for other failures?
 					}
 				}
 				else if (packageReader instanceof ZipPackageReader)
@@ -1099,7 +1181,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								}
 								catch (IOException e)
 								{
-									Debug.error(e);
+									writeErrorToConsoleAndLog(console, e,
+										"Exception while deleting package folder (of zip) " + packageFolder + " for replacement: ");
 								}
 							}
 
@@ -1118,7 +1201,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						ServoyLog.logError(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
+						// TODO should we return a WARNING status here for the whole job as we do for other failures?
 					}
 
 					boolean exists = packageFolder.exists();
@@ -1135,7 +1219,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								}
 								catch (IOException e)
 								{
-									Debug.error(e);
+									writeErrorToConsoleAndLog(console, e,
+										"Exception while deleting package folder (zip - timestamp): " + packageFolder + " for replacement: ");
 								}
 
 								exists = false;
@@ -1150,7 +1235,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							}
 							catch (IOException io)
 							{
-								Debug.error(io);
+								writeErrorToConsoleAndLog(console, io,
+									"Exception while deleting package folder (zip - timestamp - attempt2): " + packageFolder +
+										" for replacement: ");
 							}
 							exists = false;
 						}
@@ -1178,7 +1265,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					catch (IOException e)
 					{
-						ServoyLog.logError(e);
+						writeErrorToConsoleAndLog(console, e, "Exception while checking package '" + packageName + "': ");
+						// TODO should we return a WARNING status here for the whole job as we do for other failures?
 					}
 				}
 
@@ -1235,9 +1323,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		else checkPackages(false);
 	}
 
-	/**
-	 *
-	 */
 	protected void createNodeFolderAndCheckPackages()
 	{
 		Activator.getInstance().setActiveSolution(ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName());
@@ -1247,10 +1332,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			@Override
 			public void done(IJobChangeEvent event)
 			{
-				checkPackages(false);
+				if (event.getResult().getSeverity() == IStatus.OK) checkPackages(false);
+				else
+				{
+					// else npm install gave an error...
+					handleTitaniumNGClientBuildFailure();
+				}
 			}
 		});
 		job.setRule(serialRule);
+		job.setUser(false);
 		job.schedule();
 	}
 
@@ -1309,13 +1400,42 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		{
 			Job job = new PackageCheckerJob("Checking/Installing Titanium NG Components and Services", Activator.getInstance().getSolutionProjectFolder(),
 				null);
+			job.setUser(false);
 			job.schedule(5000);
+			job.addJobChangeListener(IJobChangeListener.onDone(event -> {
+				if (event.getResult().getSeverity() != IStatus.OK) handleTitaniumNGClientBuildFailure();
+			}));
 		}
 		else if (scheduled.get() == 2)
 		{
 			// there is only 1 job and that one is running (not scheduled) then increase by one to make it run again
 			scheduled.incrementAndGet();
 		}
+	}
+
+	private static void handleTitaniumNGClientBuildFailure()
+	{
+		Display display = Display.getDefault();
+
+		// a timer just in case another titanium build is quickly triggered by another change;
+		// give the new build a chance to start then; in that case we will want to ignore this failure
+		display.asyncExec(() -> display.timerExec(2000, () -> {
+			if (!CopySourceFolderAction.isTitaniumNGBuildRunning())
+			{
+				int usersChoice = MessageDialog.open(MessageDialog.WARNING, display.getActiveShell(),
+					"Titanium NG Client build failed",
+					"Details are available in the 'Titanium NG Build Console'.\nIt could be due an incorrect version or error in some service/component package that the solution uses, but there are multiple other possible causes.\n\nYou can either check what went wrong in the 'Titanium NG Build Console' or start a full/clean client build.",
+					SWT.NONE, "Show 'Titanium NG Build Console'", "Retry; start a full/clean build");
+				if (usersChoice <= 0)
+				{
+					ConsoleFactory.openTiNGBuildConsole();
+				}
+				else
+				{
+					CopySourceFolderAction.startTitaniumNGBuild(CopySourceFolderAction.CLEAN_BUILD);
+				}
+			} // else a new build is running; allow it to finish and see if it fails again
+		}));
 	}
 
 	/**
@@ -1338,7 +1458,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			File distFolder = new File(distributionSource, "dist/app/browser");
 			if (distFolder.exists())
 			{
-				FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));
+				FileUtils.copyDirectory(distFolder, model.getExportLocation(),
+					(path) -> !(path.getName().equals("index.html") || path.getName().equals("favicon.ico")));
 
 				FileUtils.copyFile(new File(distFolder, "index.html"), new File(model.getExportLocation(), "WEB-INF/angular-index.html"));
 			}

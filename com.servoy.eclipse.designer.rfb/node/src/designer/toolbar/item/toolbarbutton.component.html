@@ -1,19 +1,20 @@
 <div *ngIf="!item.list" class="btn-group">
 	<button type="button" class="btn btn-xs" [ngClass]="item.state !== undefined && item.state ? 'toggle-on' : ''" (click)="item.onclick()" [disabled]="isDisabled()" [style]="item.style">
-		<img [src]="'designer/assets/' +  (isDisabled() && item.disabledIcon ?  item.disabledIcon : item.icon)" alt="{{item.text}}" title="{{item.text}}"/>
+		<img [src]="'designer/assets/' +  (isDisabled() && item.disabledIcon ?  item.disabledIcon : item.icon)" alt="{{item.text}}" title="{{item.tooltip ? item.tooltip : item.text}}"/>
 	</button>
 </div>
 <div *ngIf="item.list" class="btn-group">
 
-	<button type="button" *ngIf="!item.getIconStyle" title="{{item.tooltip}}" class="btn btn-xs" (click)="item.onclick(item.text)" [disabled]="!item.enabled">{{item.getIconStyle ? "" : item.text}}</button>
+	<button type="button" *ngIf="!item.getIconStyle" title="{{item.tooltip}}" class="btn btn-xs" (click)="item.onclick(item.text)" [disabled]="!item.enabled">{{item.getIconStyle || item.icon ? "" : item.text}}</button>
 	<div ngbDropdown>
 		<button id="{{item.text}}" ngbDropdownToggle type="button" class="btn" [ngClass]="item.getIconStyle ? '' : 'btn-xs dropdown-toggle'" [disabled]="!item.enabled" 
 		style="background-repeat:no-repeat;background-position:left center;min-width:26px;height:24px;padding-left:0px"
 		[ngStyle]="item.getIconStyle ? item.getIconStyle(item.text) : {}" (click)="item.onclick(item.text)" title="{{item.tooltip}}">
+		    <img *ngIf="item.icon" [src]="'designer/assets/' +  item.icon" alt="{{item.text}}"/>
 			<span [ngClass]="item.getIconStyle ? '' : 'caret'"></span>
 		</button>
 		<ul ngbDropdownMenu [attr.aria-labelledby]="item.text" class="dropdown-menu dropdown-menu-right" style="min-width:inherit;">
-			<li *ngFor="let listItem of item.list" ngbDropdownItem><a href="#" style="height:24px;background-repeat:no-repeat;background-position:left center;" [ngStyle]="listItem.iconStyle" (click)="onselection(listItem.text)">{{listItem.text ? listItem.text : listItem}}</a></li> 
+			<li *ngFor="let listItem of item.list" ngbDropdownItem><a href="#" style="height:24px;background-repeat:no-repeat;background-position:left center;" [ngStyle]="listItem.iconStyle" (click)="onselection(listItem.text)" title="{{listItem.tooltip}}">{{listItem.text ? listItem.text : listItem}}</a></li> 
 		</ul>
 	</div>
 	<i *ngIf="item.faIcon" [ngClass]="item.faIcon" style="color: gray;vertical-align: middel;margin: auto;" aria-hidden="true"></i>

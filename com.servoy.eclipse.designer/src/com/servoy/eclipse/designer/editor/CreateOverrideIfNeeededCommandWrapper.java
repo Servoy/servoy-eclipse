@@ -68,7 +68,7 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command
 					.map(IPersist::getID)
 					.flatMap(propertySource.getPersistContext().getPersist()::searchForExtendsId)
 					.map(IPersist::getUUID)
-					// fall back to the original uuid if we can't find it (should not happen)
+					// fall back to the original uuid if we can't find it
 					.orElse(null);
 			}
 
@@ -105,5 +105,4 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command
 		}
 		command = null;
 	}
-
 }

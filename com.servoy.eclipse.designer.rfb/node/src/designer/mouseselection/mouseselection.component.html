@@ -9,11 +9,11 @@
     <div class="knob l decorator {{node.isResizable.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'l',direction:'e',top:0,left:1,width:-1,height:0}"></div>
     
     <div class="menubar" *ngIf="nodes.length == 1 && node.isContainer && !node.maxLevelDesign && checkIfNodeIsVisible(node)">
-        <span class="containerAction" (mousedown)="insertACopyAction($event, node, true)" style="background-image: url('designer/assets/images/insert_before.png')" title="Insert a {{node.containerName}} before"></span>
-        <span class="containerAction" (mousedown)="insertACopyAction($event, node, false)" style="background-image: url('designer/assets/images/insert_after.png')" title="Insert a {{node.containerName}} after"></span>
+        <span class="containerAction" *ngIf="notInsideFormComponent(node)" (mousedown)="insertACopyAction($event, node, true)" style="background-image: url('designer/assets/images/insert_before.png')" title="Insert a {{node.containerName}} before"></span>
+        <span class="containerAction" *ngIf="notInsideFormComponent(node)" (mousedown)="insertACopyAction($event, node, false)" style="background-image: url('designer/assets/images/insert_after.png')" title="Insert a {{node.containerName}} after"></span>
         <span class="containerAction" (mousedown)="copyAction($event)" style="background-image: url('designer/assets/images/copy_edit.png')" title="Copy"></span>
         <span class="containerAction" (mousedown)="zoomInAction($event)" style="background-image: url('designer/assets/images/zoom_in_menu.png')" title="Zoom in"></span>
-        <span class="containerAction" (mousedown)="deleteAction($event)" style="margin-left:3px; margin-right: 10px;background-color: #A80000;background-image: url('designer/assets/images/delete_in_menu.png')" title="Delete"></span>
+        <span class="containerAction" *ngIf="notInsideFormComponent(node)" (mousedown)="deleteAction($event)" style="margin-left:3px; margin-right: 10px;background-color: #A80000;background-image: url('designer/assets/images/delete_in_menu.png')" title="Delete"></span>
     </div>
     <div class="menubar" style="margin-top: -13px;" *ngIf="node.maxLevelDesign" [positionMenu]="node">
         <i #menuOpen class="fas fa-caret-down fa-xs" style="color:black;" (mouseenter)="onEnter($event)"></i>

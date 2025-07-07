@@ -5,7 +5,8 @@ import { URLParserService } from "../services/urlparser.service";
 import { ElementInfo } from "./resizeknob.directive";
 
 @Directive({
-    selector: '[keyboardlayout]'
+    selector: '[keyboardlayout]',
+    standalone: false
 })
 export class KeyboardLayoutDirective {
 
@@ -91,25 +92,38 @@ export class KeyboardLayoutDirective {
 							element.style.width = elementInfo.width + 'px';
 							element.style.height = elementInfo.height + 'px';
 						} else {
+							const computedStyle = window.getComputedStyle(elementInfo.element)
 							if (elementInfo.y + changeY > -1) elementInfo.y = elementInfo.y + changeY;
 							if (elementInfo.x + changeX > -1) elementInfo.x = elementInfo.x + changeX;
 							if (elementInfo.element.style.left.length) {
-								element.style.left = elementInfo.x + 'px';
+								element.style.left = (parseFloat(computedStyle.left.replace('px', '')) || 0)  + changeX + 'px';
+								if (parseFloat(elementInfo.element.style.left.replace('px', '')) < 0) {
+									elementInfo.element.style.left = '0px';
+								}
 							}
 							if (elementInfo.element.style.top.length) {
-								element.style.top = elementInfo.y + 'px';
+								element.style.top = (parseFloat(computedStyle.top.replace('px', '')) || 0)  + changeY + 'px';
+								if (parseFloat(elementInfo.element.style.top.replace('px', '')) < 0) {
+									elementInfo.element.style.top = '0px';
+								}
 							}
-							if (elementInfo.element.style.right.length) {
-								elementInfo.element.style.right = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.right, 'x').replace('px', ''))|| 0)  - changeX + 'px';
+							if (elementInfo.element.style.right.length && elementInfo.x > 0) {
+								elementInfo.element.style.right = (parseFloat(computedStyle.right.replace('px', '')) || 0)  - changeX + 'px';
 							}
-							if (elementInfo.element.style.bottom.length) {
-								elementInfo.element.style.bottom = (parseInt(this.editorContentService.getValueInPixel(elementInfo.element.style.bottom, 'y').replace('px', ''))|| 0)  - changeY + 'px';
+							if (elementInfo.element.style.bottom.length && elementInfo.y > 0) {
+								elementInfo.element.style.bottom = (parseFloat(computedStyle.bottom.replace('px', '')) || 0)  - changeY + 'px';
 							}
 							if (!elementInfo.element.style.left.length && !elementInfo.element.style.right.length) {
-								element.style.left = elementInfo.x + 'px';
+								element.style.left = (parseFloat(computedStyle.left.replace('px', '')) || 0)  + changeX + 'px';
+								if (parseFloat(elementInfo.element.style.left.replace('px', '')) < 0) {
+									elementInfo.element.style.left = '0px';
+								}
 							}
 							if (!elementInfo.element.style.top.length && !elementInfo.element.style.bottom.length) {
-								element.style.top = elementInfo.y + 'px';
+								element.style.top = (parseFloat(computedStyle.top.replace('px', '')) || 0)  + changeY + 'px';
+								if (parseFloat(elementInfo.element.style.top.replace('px', '')) < 0) {
+									elementInfo.element.style.top = '0px';
+								}
 							}
 						}
                     }

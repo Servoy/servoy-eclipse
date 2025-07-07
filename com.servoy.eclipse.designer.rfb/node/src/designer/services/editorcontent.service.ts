@@ -165,20 +165,6 @@ export class EditorContentService {
         return this.leftAdjust;
     }
     
-    getValueInPixel(value: string, axis: string) {
-		if (value.includes('%')) {
-			const percentage = parseInt(value.replace('%',''));
-			if (axis === 'x') {
-				const width = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().width; 
-				return `${Math.round(percentage / 100 * width)}`;
-			} else {
-				const height = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().height; 
-				return `${Math.round(percentage / 100 * height)}`;
-			}
-		}
-		return value;
-	}
-    
    private initIFrame(variants?: boolean) {
         if (variants) {
             if (!this.frameElement || this.frameElement.id != 'VariantsForm') {

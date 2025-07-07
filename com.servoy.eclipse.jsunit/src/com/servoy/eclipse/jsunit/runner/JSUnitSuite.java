@@ -26,6 +26,8 @@ import java.util.List;
 
 import org.mozilla.javascript.Scriptable;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+
 import de.berlios.jsunit.JsUnitException;
 import junit.framework.Test;
 import junit.framework.TestResult;
@@ -154,13 +156,9 @@ public class JSUnitSuite extends TestSuite
 			testList.add(this);
 			treeHandler.fillTestListSequencialOrder(testList);
 		}
-		catch (JsUnitException e)
+		catch (JsUnitException | IOException e)
 		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 	}
 
@@ -217,13 +215,9 @@ public class JSUnitSuite extends TestSuite
 		{
 			runner.evaluateReader(jsTestCode, testFileName);
 		}
-		catch (JsUnitException e)
+		catch (JsUnitException | IOException e)
 		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 	}
 
@@ -250,7 +244,7 @@ public class JSUnitSuite extends TestSuite
 			{
 				Test runningTest = testListener.popLastStartedTest();
 				result.addError(runningTest != null ? runningTest : this, e);
-				e.printStackTrace();
+				ServoyLog.logError(e);
 			}
 			else
 			{

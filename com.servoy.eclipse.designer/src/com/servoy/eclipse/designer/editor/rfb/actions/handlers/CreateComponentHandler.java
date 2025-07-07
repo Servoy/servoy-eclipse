@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,10 @@ import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
@@ -40,6 +44,7 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.CustomJSONObjectType;
@@ -56,6 +61,9 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
+import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
+import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
+import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
@@ -66,10 +74,13 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author user
@@ -96,6 +107,50 @@ public class CreateComponentHandler implements IServerService
 		{
 			// if we drop directly on form while zoomed in , do nothing
 			return null;
+		}
+		final String[] menuName = new String[] { null };
+		final String[] menuPropertyName = new String[] { null };
+		if (options.getName() != null && options.getName().startsWith("servoymenu-"))
+		{
+			List<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
+			WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
+			for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
+			{
+				if (webComponentSpec.isDeprecated()) continue;
+				if (webComponentSpec.getProperties(MenuPropertyType.INSTANCE).size() > 0)
+				{
+					specs.add(webComponentSpec);
+				}
+			}
+			TreeSelectDialog dialog = new TreeSelectDialog(editorPart.getEditorSite().getShell(), true, true, TreePatternFilter.FILTER_LEAFS,
+				FlatTreeContentProvider.INSTANCE, new LabelProvider()
+				{
+					@Override
+					public String getText(Object element)
+					{
+						String displayName = ((WebObjectSpecification)element).getDisplayName();
+						if (Utils.stringIsEmpty(displayName))
+						{
+							displayName = ((WebObjectSpecification)element).getName();
+							int index = displayName.indexOf("-");
+							if (index != -1)
+							{
+								displayName = displayName.substring(index + 1);
+							}
+						}
+						return displayName + " [" + ((WebObjectSpecification)element).getPackageName() + "]";
+					}
+				}, null, null, SWT.NONE, "Select JSMenu compatible component", specs.toArray(new WebObjectSpecification[0]),
+				null, false, "SpecDialog", null, false);
+			if (dialog.open() == Window.CANCEL)
+			{
+				return null;
+			}
+			WebObjectSpecification spec = (WebObjectSpecification)((StructuredSelection)dialog.getSelection()).getFirstElement();
+			menuName[0] = options.getName().split("servoymenu-")[1];
+			options.setName(spec.getName());
+			options.setPackageName(spec.getPackageName());
+			menuPropertyName[0] = spec.getProperties(MenuPropertyType.INSTANCE).iterator().next().getName();
 		}
 		if (options.getName() != null && ("component".equals(options.getName()) || "template".equals(options.getName()) || "*".equals(options.getName())))
 		{
@@ -131,8 +186,17 @@ public class CreateComponentHandler implements IServerService
 			public void run()
 			{
 				final IStructuredSelection[] newSelection = new IStructuredSelection[1];
-				editorPart.getCommandStack().execute(new CreateComponentCommand(editorPart, options, newSelection));
-
+				editorPart.getCommandStack().execute(new CreateComponentCommand(editorPart.getForm(), options, newSelection));
+				if (menuName[0] != null)
+				{
+					WebComponent webComponent = (WebComponent)((PersistContext)newSelection[0].getFirstElement()).getPersist();
+					FlattenedSolution flattenedSolution = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+					Menu menu = flattenedSolution.getMenu(menuName[0]);
+					if (menu != null)
+					{
+						webComponent.setProperty(menuPropertyName[0], menu.getUUID());
+					}
+				}
 				if (newSelection[0] != null) selectionProvider.setSelection(newSelection[0]);
 			}
 		});
@@ -161,7 +225,7 @@ public class CreateComponentHandler implements IServerService
 	}
 
 	public static void autoshowWizard(ISupportFormElements parentSupportingElements, WebObjectSpecification spec,
-		WebComponent webComponent, PropertyDescription property, BaseVisualFormEditor editorPart, AtomicInteger id)
+		WebComponent webComponent, PropertyDescription property, Form form, AtomicInteger id)
 	{
 		// prop type should be an array of a custom type..
 		IPropertyType< ? > propType = property.getType();
@@ -177,7 +241,7 @@ public class CreateComponentHandler implements IServerService
 				PersistContext context = PersistContext.create(webComponent, parentSupportingElements);
 				FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
 				ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager()
-					.getDataSource(flattenedSolution.getFlattenedForm(editorPart.getForm()).getDataSource());
+					.getDataSource(flattenedSolution.getFlattenedForm(form).getDataSource());
 
 				PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(UIUtils.getActiveShell(),
 					context,
@@ -190,7 +254,7 @@ public class CreateComponentHandler implements IServerService
 					{
 						Map<String, Object> row = result.get(i);
 						String customTypeName = typeName + "_" + id.incrementAndGet();
-						while (!PersistFinder.INSTANCE.checkName(editorPart, customTypeName))
+						while (!PersistFinder.INSTANCE.checkName(form, customTypeName))
 						{
 							customTypeName = typeName + "_" + id.incrementAndGet();
 						}

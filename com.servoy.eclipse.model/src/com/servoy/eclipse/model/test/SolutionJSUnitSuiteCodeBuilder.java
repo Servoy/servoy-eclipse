@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.model.test;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -177,10 +176,6 @@ public class SolutionJSUnitSuiteCodeBuilder
 				}
 			}
 			catch (RepositoryException e)
-			{
-				Debug.log(e);
-			}
-			catch (RemoteException e)
 			{
 				Debug.log(e);
 			}
@@ -478,7 +473,17 @@ public class SolutionJSUnitSuiteCodeBuilder
 		error.append(INVALID_APP_SUITE);
 		error.append("_testSystemInitFailed() { this.fail(");
 
-		error.append(NativeJSON.stringify(Context.getCurrentContext(), new NativeObject(), msg, null, 0));
+		Context context = Context.getCurrentContext();
+		if (context == null)
+		{
+			Debug.warn("Error initializing jsunit with error: " + msg);
+			// cannot format the message in a safe way without a context, just return a fixed js string
+			error.append("\"Error initializing jsunit (no solution?)\"");
+		}
+		else
+		{
+			error.append(NativeJSON.stringify(context, new NativeObject(), msg, null, 0));
+		}
 
 		error.append("); }\n");
 		error.append(INVALID_APP_SUITE);

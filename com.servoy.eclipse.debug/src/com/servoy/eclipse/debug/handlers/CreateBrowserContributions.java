@@ -2,7 +2,6 @@ package com.servoy.eclipse.debug.handlers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jface.action.IContributionItem;
@@ -81,11 +80,10 @@ public class CreateBrowserContributions extends CompoundContributionItem impleme
 		java.util.List<IContributionItem> contributions = new ArrayList<IContributionItem>();
 		try
 		{
-			Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
-			while (iterator.hasNext())
+			for (IBrowserDescriptor ewb : BrowserManager.getInstance().getWebBrowsers())
 			{
 
-				final IBrowserDescriptor ewb = (IBrowserDescriptor)iterator.next();
+				if (ewb.getName() != null && (ewb.getName().contains("Internet Explorer") || ewb.getName().contains("InternetExplorer"))) continue;
 				final CommandContributionItemParameter contributionParameter = new CommandContributionItemParameter(mServiceLocator, null, getId(),
 					CommandContributionItem.STYLE_PUSH);
 				contributionParameter.label = ewb.getName();

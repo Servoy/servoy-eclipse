@@ -32,6 +32,7 @@ import org.eclipse.dltk.ui.text.completion.ScriptCompletionProposalCollector;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 
@@ -53,6 +54,8 @@ public class ElementLabelProvider implements IElementLabelProviderExtension
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_APPLICATION);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_I18N);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_HISTORY);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_MENUS);
+		propertyNames.add(IExecutingEnviroment.TOPLEVEL_EVENTTYPES);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_UTILS);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_CLIENTUTILS);
 		propertyNames.add(IExecutingEnviroment.TOPLEVEL_JSUNIT);
@@ -157,7 +160,7 @@ public class ElementLabelProvider implements IElementLabelProviderExtension
 		else if (element instanceof Type)
 		{
 			// for custom types that can be packagename.typename it should not change the name based on .
-			if (element.getName().startsWith(TypeCreator.CUSTOM_TYPE)) return null;
+			if (element.getName().startsWith(ElementUtil.CUSTOM_TYPE)) return null;
 			int lastDotIndex = element.getName().lastIndexOf('.');
 			if (lastDotIndex != -1)
 			{

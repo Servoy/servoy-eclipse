@@ -72,7 +72,7 @@ public abstract class AbstractNewDbAction extends Action
 	@Override
 	public void run()
 	{
-		HashMap<String, ServerConfig> serverMap = getServerMap();
+		Map<String, ServerConfig> serverMap = getServerMap();
 
 		if (serverMap.isEmpty())
 		{
@@ -161,10 +161,10 @@ public abstract class AbstractNewDbAction extends Action
 		return state;
 	}
 
-	protected HashMap<String, ServerConfig> getServerMap()
+	protected Map<String, ServerConfig> getServerMap()
 	{
 		ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
-		HashMap<String, ServerConfig> serverMap = new HashMap<String, ServerConfig>();
+		Map<String, ServerConfig> serverMap = new HashMap<>();
 		for (ServerConfig sc : serverConfigs)
 		{
 			String serverURL = getServerUrl(sc);
@@ -250,14 +250,20 @@ public abstract class AbstractNewDbAction extends Action
 	 * @param serverManager
 	 * @param configName
 	 */
-	protected void saveAndOpenDefaultConfig(ServerConfig origConfig, ServerSettings serverSettings, String serverUrl, IServerManagerInternal serverManager,
-		String configName)
+	protected void saveAndOpenDefaultConfig(ServerConfig origConfig, ServerSettings serverSettings, String serverUrl,
+		IServerManagerInternal serverManager, String configName)
 	{
-		ServerConfig serverConfig = new ServerConfig(configName, origConfig.getUserName(), origConfig.getPassword(), serverUrl,
-			origConfig.getConnectionProperties(), origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
-			origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
-			origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
-			origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
+		ServerConfig serverConfig = origConfig.newBuilder()
+			.setServerName(configName)
+			.setServerUrl(serverUrl)
+			.setSchema(null)
+			.setDataModelCloneFrom(null)
+			.setEnabled(true)
+			.setSkipSysTables(false)
+			.setIdleTimeout(-1)
+			.build();
+
+
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()

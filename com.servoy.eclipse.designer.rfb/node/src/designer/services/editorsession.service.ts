@@ -216,6 +216,10 @@ export class EditorSessionService implements ServiceProvider {
     createComponents(components) {
         void this.wsSession.callService('formeditor', 'createComponents', components, true)
     }
+    
+    updateFavoritesComponents(component) {
+        void this.wsSession.callService('formeditor', 'updateFavoritesComponents', component, true)
+    }
 
     openElementWizard(elementType: string) {
         void this.wsSession.callService('formeditor', 'openElementWizard', {
@@ -569,6 +573,7 @@ export class PaletteComp {
     rightSibling?: string;
     variant?: string;
     cssPos?: { property: string };
+    isFav?: boolean;
 }
 
 export class Package {

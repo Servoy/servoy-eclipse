@@ -20,7 +20,6 @@ package com.servoy.eclipse.designer.editor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.draw2d.ColorConstants;
@@ -230,7 +229,7 @@ public class FormPartGraphicalEditPart extends BaseGraphicalEditPart implements 
 			}
 
 			@Override
-			protected List<Object> createOperationSet()
+			protected List< ? extends EditPart> createOperationSet()
 			{
 				return filterMovableEditParts(super.createOperationSet());
 			}
@@ -268,10 +267,9 @@ public class FormPartGraphicalEditPart extends BaseGraphicalEditPart implements 
 
 					request.setType(REQ_CLONE);
 
-					Iterator<EditPart> iter = getOperationSet().iterator();
-					while (iter.hasNext())
+					for (EditPart element : getOperationSet())
 					{
-						command.add(iter.next().getCommand(request));
+						command.add(element.getCommand(request));
 					}
 					if (command.canExecute())
 					{
@@ -284,10 +282,10 @@ public class FormPartGraphicalEditPart extends BaseGraphicalEditPart implements 
 		};
 	}
 
-	public static List<Object> filterMovableEditParts(List<Object> editParts)
+	public static List< ? extends EditPart> filterMovableEditParts(List< ? extends EditPart> editParts)
 	{
-		List<Object> newEditParts = new ArrayList<Object>(editParts.size());
-		for (Object editPart : editParts)
+		List<EditPart> newEditParts = new ArrayList<>(editParts.size());
+		for (EditPart editPart : editParts)
 		{
 			boolean foundParent = false;
 			if (editPart instanceof FormPartGraphicalEditPart)

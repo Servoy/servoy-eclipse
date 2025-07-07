@@ -158,6 +158,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private final HashMap<String, Integer> existingSolutionAction = new HashMap<String, Integer>();
 	private boolean allowDataModelChanges = false;
 	private boolean importSampleData = false;
+	private Boolean importDatasources;
 	private boolean allowSQLKeywords;
 	private boolean createMissingServer = false;
 	private String isMissingServer;
@@ -279,6 +280,19 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					}
 
 					@Override
+					public int askImportDatasources()
+					{
+						Boolean value = ImportSolutionWizard.this.shouldImportDatasources();
+						if (value != null)
+						{
+							return value.booleanValue() ? OK_ACTION : CANCEL_ACTION;
+						}
+						int retValue = super.askImportDatasources();
+						ImportSolutionWizard.this.setImportDatasources(retValue == OK_ACTION ? Boolean.TRUE : Boolean.FALSE);
+						return retValue;
+					}
+
+					@Override
 					public int getAllowDataModelChange(String serverName)
 					{
 						if (ImportSolutionWizard.this.shouldAllowDataModelChanges())
@@ -387,12 +401,15 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 					protected ServerConfig createServer(String name, ServerConfig sc)
 					{
-						ServerConfig serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(),
-							EclipseDatabaseUtils.getPostgresServerUrl(sc, name),
-							sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
-							sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
-							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
-							sc.getQuoteList(), sc.isClientOnlyConnections());
+						ServerConfig serverConfig = sc.newBuilder()
+							.setServerName(name)
+							.setServerUrl(EclipseDatabaseUtils.getPostgresServerUrl(sc, name))
+							.setDataModelCloneFrom(null)
+							.setEnabled(true)
+							.setSkipSysTables(false)
+							.setIdleTimeout(-1)
+							.build();
+
 						if (ApplicationServerRegistry.get().getServerManager().validateServerConfig(null, serverConfig) != null)
 						{
 							// something is wrong
@@ -566,6 +583,16 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	protected boolean shouldImportSampleData()
 	{
 		return importSampleData;
+	}
+
+	public void setImportDatasources(Boolean importDatasources)
+	{
+		this.importDatasources = importDatasources;
+	}
+
+	public Boolean shouldImportDatasources()
+	{
+		return importDatasources;
 	}
 
 	public class ImportSolutionWizardPage extends WizardPage implements IValidator

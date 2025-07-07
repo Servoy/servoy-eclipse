@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.AbstractMemServerWrapper;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
+import com.servoy.eclipse.model.util.MenuFoundsetServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
@@ -92,6 +93,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			{
 				lst.add(new InMemServerWrapper());
 				if (options.includeViewFS) lst.add(new ViewFoundsetServerWrapper());
+				lst.add(new MenuFoundsetServerWrapper());
 			}
 			else if (options.serverName.equals(DataSourceUtils.INMEM_DATASOURCE))
 			{
@@ -100,6 +102,10 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			else if (options.serverName.equals(DataSourceUtils.VIEW_DATASOURCE))
 			{
 				lst.addAll(Arrays.asList(getChildren(new ViewFoundsetServerWrapper())));
+			}
+			else if (options.serverName.equals(DataSourceUtils.MENU_DATASOURCE))
+			{
+				lst.addAll(Arrays.asList(getChildren(new MenuFoundsetServerWrapper())));
 			}
 			return lst.toArray();
 		}
@@ -125,6 +131,10 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 		{
 			return new ViewFoundsetServerWrapper();
 		}
+		else if (element instanceof MenuFoundsetServerWrapper && ((MenuFoundsetServerWrapper)element).getTableName() != null)
+		{
+			return new MenuFoundsetServerWrapper();
+		}
 		return null;
 	}
 
@@ -145,7 +155,9 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			int i = 0;
 			for (String tableName : tableNames)
 			{
-				wrappers[i++] = parentElement instanceof InMemServerWrapper ? new InMemServerWrapper(tableName) : new ViewFoundsetServerWrapper(tableName);
+				wrappers[i++] = parentElement instanceof InMemServerWrapper ? new InMemServerWrapper(tableName)
+					: (parentElement instanceof ViewFoundsetServerWrapper ? new ViewFoundsetServerWrapper(tableName)
+						: new MenuFoundsetServerWrapper(tableName));
 			}
 			return wrappers;
 		}

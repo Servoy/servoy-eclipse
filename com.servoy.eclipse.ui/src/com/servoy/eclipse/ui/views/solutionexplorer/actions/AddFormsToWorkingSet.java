@@ -93,8 +93,10 @@ public class AddFormsToWorkingSet extends Action implements ISelectionChangedLis
 						Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
 						IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
 						formsFile.add(file);
-						String oldWorkingSetName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject()
-							.getContainingWorkingSet(form.getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
+						String oldWorkingSetName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null
+							? ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject()
+								.getContainingWorkingSet(form.getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames())
+							: null;
 						if (oldWorkingSetName != null)
 						{
 							IWorkingSet oldWorkingSet = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(oldWorkingSetName);

@@ -43,4 +43,19 @@
 	${line_selection}${cursor}
 }</template>
 
+<template 
+    context="javascriptUniversalTemplateContextType" 
+    description="%foroffoundset.description" 
+    id="com.servoy.eclipse.template.foroffoundset" 
+    name="forof">for (var record of ${foundset}) {
+    ${line_selection}${cursor}
+}</template>
+
+<template 
+    context="javascriptUniversalTemplateContextType" 
+    description="%forofdataset.description" 
+    id="com.servoy.eclipse.template.forofdataset" 
+    name="forof">for (var rowData of ${dataset}) {
+    ${line_selection}${cursor}
+}</template>
 </templates>

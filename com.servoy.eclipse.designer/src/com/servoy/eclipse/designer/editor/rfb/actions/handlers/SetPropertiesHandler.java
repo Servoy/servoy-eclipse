@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.util.SnapToComponentUtil;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -75,7 +76,7 @@ public class SetPropertiesHandler implements IServerService
 				while (keys.hasNext())
 				{
 					String uuid = (String)keys.next();
-					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
+					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
 					if (persist != null)
 					{
 						PersistContext context = PersistContext.create(persist, editorPart.getForm());
@@ -93,6 +94,10 @@ public class SetPropertiesHandler implements IServerService
 										propertyName, properties.opt(propertyName)));
 								}
 							}
+							if (persist instanceof WebFormComponentChildType)
+							{
+								persist = ((WebFormComponentChildType)persist).getElement();
+							}
 							if (persist instanceof ISupportCSSPosition && CSSPositionUtils.useCSSPosition(persist) &&
 								(properties.has("x") || properties.has("y") ||
 									properties.has("width") || properties.has("height")))
@@ -101,18 +106,17 @@ public class SetPropertiesHandler implements IServerService
 								Dimension oldSize = CSSPositionUtils.getSize((ISupportCSSPosition)persist);
 								// we need to calculate the new cssposition
 								CSSPosition newPosition = null;
-//								if (properties.has("cssPos"))
-//								{
-//									newPosition = DesignerUtil.cssPositionFromJSON(editorPart, persist, properties,
-//										properties.has("width") && properties.has("height"));
-//								}
-//								else
-//								{
-								newPosition = CSSPositionUtils.adjustCSSPosition((ISupportCSSPosition)persist,
-									properties.optInt("x", oldLocation.x), properties.optInt("y", oldLocation.y),
-									properties.optInt("width", oldSize.width),
-									properties.optInt("height", oldSize.height), properties.optBoolean("move", false));
-//								}
+								if (properties.has("cssPos"))
+								{
+									newPosition = SnapToComponentUtil.cssPositionFromJSON(editorPart.getForm(), persist, properties);
+								}
+								else
+								{
+									newPosition = CSSPositionUtils.adjustCSSPosition((ISupportCSSPosition)persist,
+										properties.optInt("x", oldLocation.x), properties.optInt("y", oldLocation.y),
+										properties.optInt("width", oldSize.width),
+										properties.optInt("height", oldSize.height), properties.optBoolean("move", false));
+								}
 								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
 									StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName(),
 									newPosition));

@@ -17,7 +17,6 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -216,10 +215,6 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 				}
 				return allServers;
 			}
-			catch (RemoteException e)
-			{
-				ServoyLog.logError(e);
-			}
 			catch (RepositoryException e)
 			{
 				ServoyLog.logError(e);
@@ -274,10 +269,6 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 					}
 				}
 
-			}
-			catch (RemoteException e)
-			{
-				ServoyLog.logError(e);
 			}
 			catch (RepositoryException e)
 			{

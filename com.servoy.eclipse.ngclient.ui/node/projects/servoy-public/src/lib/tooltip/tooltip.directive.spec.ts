@@ -9,7 +9,8 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 const mouseEnter: Event = new Event('pointerenter');
 
 @Component({
-  template: '<input  type="text" [svyTooltip]="textTooltip">',
+    template: '<input  type="text" [svyTooltip]="textTooltip">',
+    standalone: false
 })
 class TestTooltipWrapperComponent {
   textTooltip = 'Hi';

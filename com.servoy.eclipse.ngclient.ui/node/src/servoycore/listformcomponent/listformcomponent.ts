@@ -15,13 +15,13 @@ import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEv
 import { isEmpty } from 'lodash-es';
 import { DOCUMENT } from '@angular/common';
 import { ServoyApi } from '../../ngclient/servoy_api';
-import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from '@ag-grid-community/core';
+import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { RowRenderer } from './row-renderer.component';
-import { AgGridAngular } from '@ag-grid-community/angular';
+import { AgGridAngular } from 'ag-grid-angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
 
-const AGGRID_CACHE_BLOCK_SIZE = 10;
+const AGGRID_CACHE_BLOCK_SIZE = 50;
 const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
 
 @Component({
@@ -40,7 +40,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
     <ng-container *ngIf="!useScrolling">
         <div *ngIf="containedForm&&containedForm.absoluteLayout">
             <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
-                <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item['layout']" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+                <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                     <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
                 </div>
             </div>
@@ -55,7 +55,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
 </div>
 
 <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
-    <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+    <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
         <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
     </div>
 </ng-template>
@@ -67,12 +67,15 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
           </div>
 </ng-template>
 <ng-template  #formComponentResponsiveDiv  let-state="state" let-row="row" let-i="i">
+    <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" class="svy-formcomponent">
         <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
+    </div>
 </ng-template>
 <!-- structure template generate start -->
 <!-- structure template generate end -->
 
-`
+`,
+    standalone: false
 })
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 
@@ -90,6 +93,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() readOnly: boolean;
     @Input() editable: boolean;
     @Input() onSelectionChanged: (event: any) => void;
+    @Input() onListItemClick: (record: any, event: any) => void;
 
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
@@ -199,6 +203,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         this.onSelectionChanged(event);
                     }
                 }
+                if(this.onListItemClick) {
+                    this.onListItemClick(this.foundset.getRecordRefByRowID(row['_svyRowId']), event);
+                }
                 break;
             }
         }
@@ -254,7 +261,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
                 infiniteInitialRowCount: AGGRID_CACHE_BLOCK_SIZE,
                 //maxBlocksInCache: AGGRID_MAX_BLOCKS_IN_CACHE,
-                getRowHeight: (params) => this.getRowHeight(),
+                rowHeight: this.getRowHeight(),
                 navigateToNextCell: (params: any) => {
                     const previousCell = params.previousCellPosition;
                     const suggestedNextCell = params.nextCellPosition;
@@ -278,7 +285,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         default:
                             return previousCell;
                     }
-                }
+                },
+                onFirstDataRendered: (params: any) => {
+                    this.scrollToSelection();
+                },
+                domLayout: this.responsiveHeight < 0 ? 'autoHeight' : 'normal'
             };
         }
 
@@ -298,6 +309,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         return;
                     } else if (event.fullValueChanged) {
                         this.foundset = event.fullValueChanged.newValue;
+                        if (this.foundset.serverSize > 0 && this.numberOfCells > 0 && this.page * this.numberOfCells >= this.foundset.serverSize)
+                        {
+                            this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells);
+                        }
                         this.calculateCells();
                         return;
                     }
@@ -380,6 +395,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 if (event.requestInfos && event.requestInfos.includes('AGGridDatasourceGetRows')) {
                     return;
                 }
+                if (event.serverFoundsetSizeChanged ) {
+                    this.agGrid.api.setRowCount(Math.ceil(event.serverFoundsetSizeChanged.newValue / this.getNumberOfColumns()));
+                }
                 if (event.viewportRowsUpdated) {
                     // copy the viewport data over to the cell
                     // TODO this only is working for "updates", what happens with deletes or inserts?
@@ -388,13 +406,32 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     changes.forEach(change => {
                         insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
                     });
-                    if (insertOrDeletes) this.agGrid.api.refreshServerSide({ purge: true });
+                    if (insertOrDeletes) {
+                        this.agGrid.api.refreshServerSide({ purge: true });
+                        this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
+                    }
                     else this.agGrid.api.refreshCells();
-                } else if (event.viewportRowsUpdated || event.viewportRowsCompletelyChanged || event.fullValueChanged) {
+                } else if (event.viewportRowsCompletelyChanged || event.fullValueChanged) {
                     this.agGrid.api.refreshServerSide({ purge: true });
+                }
+                if(event.selectedRowIndexesChanged) {
+                    this.scrollToSelection();
                 }
             });
         }
+    }
+
+    private scrollToSelection() {
+        if(this.foundset.selectedRowIndexes.length) {
+            const rowCount = this.agGrid.api.getDisplayedRowCount();
+            if(rowCount > 1) {
+                const selectedIdx = Math.ceil(this.foundset.selectedRowIndexes[0] / this.getNumberOfColumns());
+                if(selectedIdx > rowCount - AGGRID_CACHE_BLOCK_SIZE) {
+                    this.agGrid.api.setRowCount(Math.min(selectedIdx + AGGRID_CACHE_BLOCK_SIZE, Math.ceil(this.foundset.serverSize / this.getNumberOfColumns())));
+                }
+                this.agGrid.api.ensureIndexVisible(selectedIdx < rowCount ? selectedIdx : rowCount - 1);
+            }
+        }        
     }
 
     ngAfterViewInit() {
@@ -507,7 +544,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
         if (row._cache) {
             const cache = row._cache.get(cm.name);
-            if (cache) return cache;
+            if (cache && cache.rowIndex === rowIndex) return cache;
         }
 
         if (item?.model?.servoyAttributes) {
@@ -548,7 +585,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             });
         }
 
-        const thisLFC = this;;
+        const thisLFC = this;
         const idx = rowIndex;
         Object.defineProperty(rowItem.model, 'readOnly', {
             configurable: true,
@@ -604,7 +641,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
             } else {
                 FormComponent.doCallApiOnComponent(uiComp, this.typesRegistry.getComponentSpecification(compModel.type),
-                    apiName, args, this.converterService, this.log);
+                    apiName, args, this.converterService, this.log, componentName);
             }
         } else {
             this.log.error('got api call for ' + componentName + ' api ' + apiName + ' on LFC but path is wrong ' + path);
@@ -622,6 +659,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return cell.api;
     }
 
+    getDesignNGClass(item: StructureCache): { [klass: string]: any } {
+       if (this.parent instanceof DesignFormComponent){
+          return this.parent.getNGClass(item);
+       }
+       return null;
+    }
+        
     datachange(component: Cell, property: string, value: any, dataprovider: boolean) {
         const model = component.model;
         const oldValue = model[property];
@@ -741,11 +785,17 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getAGGridStyle(): any {
+        const aggridStyle = {
+            '--ag-row-height': 42,
+            '--ag-header-height': 48,
+            '--ag-list-item-height': 24
+        };
         if (this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight < 1) {
-            return { height: '100%' };
+            aggridStyle['height'] = '100%';
         } else {
-            return { 'height.px': this.responsiveHeight };
+            aggridStyle['height.px'] = this.responsiveHeight;
         }
+        return aggridStyle;
     }
 }
 

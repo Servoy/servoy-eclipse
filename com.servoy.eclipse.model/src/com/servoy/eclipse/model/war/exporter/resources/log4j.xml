@@ -23,32 +23,22 @@
 	</Appenders>
 	<Loggers>
         <Logger name="com.servoy.j2db.util.Debug" level="WARN" />
-        <Logger name="com.servoy.j2db.dataprocessing.editedRecords"
-            level="WARN" />
-        <Logger name="persistence.Server"
-            level="WARN" />
-        <Logger
-            name="com.servoy.j2db.persistence.XMLInMemoryImportHandlerVersions11AndHigher"
-            level="WARN" />
+        <Logger name="stateless.login" level="WARN" />
+        <Logger name="com.servoy.j2db.dataprocessing.editedRecords" level="WARN" />
+        <Logger name="persistence.Server" level="WARN" />
+        <Logger name="com.servoy.j2db.persistence.XMLInMemoryImportHandlerVersions11AndHigher" level="WARN" />
         <Logger name="WarSolutionImportLogger" level="WARN" />
-        <Logger name="com.servoy.j2db.persistence.XMLExporter"
-            level="WARN" />
+        <Logger name="com.servoy.j2db.persistence.XMLExporter" level="WARN" />
         <Logger name="com.servoy.j2db.server" level="WARN" />
-        <Logger name="WebServer"
-            level="WARN" />
+        <Logger name="WebServer" level="WARN" />
         <Logger name="com.servoy.j2db.datasource" level="WARN" />
-        <Logger name="ClientManager"
-            level="WARN" />
+        <Logger name="ClientManager" level="WARN" />
         <Logger name="org.sablo" level="WARN" />
         <Logger name="org.sablo.specification.property" level="WARN" />
         <Logger name="org.sablo.websocket" level="WARN" />
 		<Logger name="org.sablo.IndexPageEnhancer" level="ERROR" />
-        <Logger name="com.servoy.j2db.server.ngclient.property.types"
-            level="WARN" />
-        <Logger name="org.apache.wicket" level="WARN" />
-        <Logger
-            name="org.apache.wicket.request.target.component.listener.BehaviorRequestTarget"
-            level="ERROR" />
+        <Logger name="com.servoy.j2db.server.ngclient.property.types" level="WARN" />
+		
 		<Root level="WARN">
 			<AppenderRef ref="asyncfile" />
 			<AppenderRef ref="configservlet" />

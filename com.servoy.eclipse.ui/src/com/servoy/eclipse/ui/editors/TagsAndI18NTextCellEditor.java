@@ -184,7 +184,7 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 		return contents;
 	}
 
-	private void setNewValue(String newValue)
+	private void setNewValue(Object newValue)
 	{
 		markDirty();
 		doSetValue(newValue);
@@ -197,7 +197,8 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 	{
 		if (shell != null)
 		{
-			setNewValue(tableKyes.getSelectedKey());
+			String selectedKey = tableKyes.getSelectedKey();
+			setNewValue(selectedKey != null ? selectedKey : super.doGetValue());
 		}
 		super.handleDefaultSelection(event);
 	}

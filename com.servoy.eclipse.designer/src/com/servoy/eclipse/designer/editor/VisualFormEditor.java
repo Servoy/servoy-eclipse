@@ -33,7 +33,6 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
-import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.ChromiumVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
@@ -44,13 +43,11 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.IContextProvider;
 import com.servoy.j2db.util.Utils;
@@ -64,6 +61,12 @@ import com.servoy.j2db.util.Utils;
  */
 public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEditor, IEditorRefresh
 {
+	/**
+	 * A viewer property indicating whether inherited elements are hidden. The value must  be a Boolean.
+	 */
+	public static final String PROPERTY_HIDE_INHERITED = "Hide.inherited";
+
+
 	public static final RequestType REQ_PLACE_TAB = new RequestType(RequestType.TYPE_TAB);
 	public static final RequestType REQ_PLACE_PORTAL = new RequestType(RequestType.TYPE_PORTAL);
 	public static final RequestType REQ_PLACE_MEDIA = new RequestType(RequestType.TYPE_MEDIA);
@@ -180,15 +183,11 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 		switch (editorType)
 		{
-			case MobileClassic :
-				return new MobileVisualFormEditorDesignPage(this);
 			case Mobile :
 				return new MobileVisualFormEditorHtmlDesignPage(this);
 			case Rfb :
 				if (new DesignerPreferences().useChromiumBrowser()) return new ChromiumVisualFormEditorDesignPage(this);
 				return new SystemVisualFormEditorDesignPage(this);
-			case Classic :
-				return new VisualFormEditorDesignPage(this);
 		}
 
 		throw new IllegalStateException("No design page for " + editorType);
@@ -196,35 +195,12 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 	private static DesignPagetype determineEditorType(FlattenedSolution fs, Form form)
 	{
-		FormEditorDesignerPreference formEditorDesignerPreference = new DesignerPreferences().getFormEditorDesignerPreference();
 		if (isMobile(form))
 		{
-			if (formEditorDesignerPreference == FormEditorDesignerPreference.Classic
-			// TODO for now we also map automatic to classic, because mobile doesn't really work correctly currently
-				|| formEditorDesignerPreference == FormEditorDesignerPreference.Automatic)
-			{
-				return DesignPagetype.MobileClassic;
-			}
 			return DesignPagetype.Mobile;
 		}
 
-		if (formEditorDesignerPreference == FormEditorDesignerPreference.New)
-		{
-			return DesignPagetype.Rfb;
-		}
-
-		if (formEditorDesignerPreference == FormEditorDesignerPreference.Automatic && fs != null && fs.getSolution() != null &&
-			SolutionMetaData.isNGOnlySolution(fs.getSolution().getSolutionType()))
-		{
-			return DesignPagetype.Rfb;
-		}
-
-		if (form != null && (form.getUseCssPosition() || form.isResponsiveLayout() || (fs != null && hasWebComponents(fs.getFlattenedForm(form)))))
-		{
-			return DesignPagetype.Rfb;
-		}
-
-		return DesignPagetype.Classic;
+		return DesignPagetype.Rfb;
 	}
 
 	private static boolean hasWebComponents(Form flattenedForm)
@@ -264,10 +240,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	}
 
 	@Override
-	public void revert(boolean force)
+	public void revert(boolean force, boolean refresh)
 	{
 		boolean revert = force || isDirty();
-		super.revert(force);
+		super.revert(force, refresh);
 		if (revert)
 		{
 			if (graphicaleditor instanceof RfbVisualFormEditorDesignPage)
@@ -346,6 +322,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		{
 			return dummyCommandStack;
 		}
+		if (adapter.equals(CommandStack.class))
+		{
+			return getCommandStack();
+		}
 		if (adapter.equals(IContextProvider.class))
 		{
 			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_editor");
@@ -373,9 +353,12 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 	}
 
+	private Boolean isMobile = null;
+
 	private boolean isMobile()
 	{
-		return isMobile(getForm());
+		if (isMobile == null) isMobile = Boolean.valueOf(isMobile(getForm()));
+		return isMobile.booleanValue();
 	}
 
 	private static boolean isMobile(Form form)

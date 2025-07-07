@@ -18,7 +18,6 @@ package com.servoy.eclipse.designer.property;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EventObject;
 
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
@@ -48,15 +47,15 @@ import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
  * <b>NOTE:</b> If you intend to use an IPropertySourceProvider for a PropertySheetPage whose root entry is an instance of of UndoablePropertySheetEntry, you
  * should set the IPropertySourceProvider on that root entry, rather than the PropertySheetPage.
  */
-public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
+public class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 {
 	private CommandStackListener commandStackListener;
 
-	private CommandStack stack;
+	protected CommandStack stack;
 
 	private String prevErrorMessage; // keep track of previous message to prevent same message to pop up twice
 
-	private UndoablePropertySheetEntry()
+	protected UndoablePropertySheetEntry()
 	{
 	}
 
@@ -90,7 +89,7 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 		super.dispose();
 	}
 
-	CommandStack getCommandStack()
+	protected CommandStack getCommandStack()
 	{
 		//only the root has, and is listening too, the command stack
 		if (getParent() != null) return ((UndoablePropertySheetEntry)getParent()).getCommandStack();
@@ -128,22 +127,19 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 		}
 		if (cc.getCommands().size() > 0)
 		{
-			getCommandStack().execute(cc);
+			executeCommand(cc);
 			refreshFromRoot();
 		}
 	}
 
-	void setCommandStack(CommandStack stack)
+	public void setCommandStack(CommandStack stack)
 	{
 		this.stack = stack;
-		commandStackListener = new CommandStackListener()
+		if (stack != null)
 		{
-			public void commandStackChanged(EventObject e)
-			{
-				refreshFromRoot();
-			}
-		};
-		stack.addCommandStackListener(commandStackListener);
+			commandStackListener = (e) -> refreshFromRoot();
+			stack.addCommandStackListener(commandStackListener);
+		}
 	}
 
 	@Override
@@ -264,9 +260,25 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 		if (getParent() != null) ((UndoablePropertySheetEntry)getParent()).valueChanged(this, command);
 		else
 		{
-			//I am the root entry
-			stack.execute(command);
+			// I am the root entry
+			executeCommand(command);
 		}
 	}
 
+	/**
+	 * Execute the command, on the command stack if it can be found, otherwise directly
+	 */
+	protected void executeCommand(Command command)
+	{
+		CommandStack commandStack = getCommandStack();
+		if (commandStack != null)
+		{
+			commandStack.execute(command);
+		}
+		else if (command.canExecute())
+		{
+			// else the value does not have an editor (for example, a Solution), in that case the command must be called directly.
+			command.execute();
+		}
+	}
 }

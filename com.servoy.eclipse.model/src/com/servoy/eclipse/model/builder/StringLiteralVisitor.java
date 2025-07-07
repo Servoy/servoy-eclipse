@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.builder;
 
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.javascript.ast.CallExpression;
+import org.eclipse.dltk.javascript.ast.Identifier;
 import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 
@@ -78,7 +79,8 @@ public abstract class StringLiteralVisitor extends org.eclipse.dltk.ast.ASTVisit
 		else if (node instanceof CallExpression)
 		{
 			CallExpression mc = (CallExpression)node;
-			if ((mc.getExpression() instanceof PropertyExpression) && I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
+			if ((mc.getExpression() instanceof PropertyExpression) && ((PropertyExpression)mc.getExpression()).getObject() instanceof Identifier &&
+				I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
 			{
 				isEvaluatingI18N = true;
 			}
@@ -105,7 +107,8 @@ public abstract class StringLiteralVisitor extends org.eclipse.dltk.ast.ASTVisit
 			else if (node instanceof CallExpression)
 			{
 				CallExpression mc = (CallExpression)node;
-				if ((mc.getExpression() instanceof PropertyExpression) && I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
+				if ((mc.getExpression() instanceof PropertyExpression) && ((PropertyExpression)mc.getExpression()).getObject() instanceof Identifier &&
+					I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
 				{
 					isEvaluatingI18N = false;
 				}

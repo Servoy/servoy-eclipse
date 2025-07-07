@@ -1,3 +1,8 @@
+* {
+  transition: none !important;
+  animation: none !important;
+}
+
 .user-selection-off {
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -86,4 +91,8 @@
 
 .variants_container > .variant_item > * {
     display: flex;
-} 
+}
+
+.svy-form.svy-respform > .highlight_element:last-child {
+    margin-bottom: 1px;
+}

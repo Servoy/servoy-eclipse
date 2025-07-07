@@ -26,6 +26,7 @@ import java.util.TreeSet;
 
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.Node;
 
 import com.servoy.base.util.ITagResolver;
 import com.servoy.j2db.documentation.ClientSupport;
@@ -70,6 +71,7 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 	private final String publicName;
 	private String scriptingName;
 	private String extendsComponent;
+	private String description;
 	private boolean deprecated;
 	private final String[] parentClasses;
 	private final SortedSet<IFunctionDocumentation> functions;
@@ -154,6 +156,18 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 	public void setScriptingName(String scriptingName)
 	{
 		this.scriptingName = scriptingName;
+	}
+
+	public String getDescription(ClientSupport csp)
+	{
+		ClientSupport searchCSp = csp;
+		if (searchCSp == null) searchCSp = ClientSupport.Default;
+
+		ClientSupport thisObjectsSupport = getClientSupport();
+		if (thisObjectsSupport == null) thisObjectsSupport = ClientSupport.Default;
+
+		if (thisObjectsSupport.hasSupport(csp)) return description;
+		else return null;
 	}
 
 	@Override
@@ -433,6 +447,7 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 		String qualifiedName = objectElement.attributeValue(ATTR_QUALIFIEDNAME);
 		String extendsFrom = objectElement.attributeValue(ATTR_EXTENDS_COMPONENT);
 		String deprecated = objectElement.attributeValue(ATTR_DEPRECATED);
+
 		ClientSupport clientSupport = ClientSupport.fromString(objectElement.attributeValue(ATTR_CLIENT_SUPPORT));
 		if (clientSupport == null && Boolean.TRUE.toString().equals(objectElement.attributeValue(ATTR_SERVOY_MOBILE)))
 		{
@@ -441,6 +456,13 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 		}
 
 		ObjectDocumentation objDoc = new ObjectDocumentation(category, qualifiedName, publicName, scriptingName, extendsFrom, null);
+
+		Node descriptionNode = objectElement.element("description");
+		if (descriptionNode != null)
+		{
+			objDoc.setDescription(descriptionNode.getText());
+		}
+
 		if (deprecated != null && deprecated.equals(Boolean.TRUE.toString())) objDoc.setDeprecated(true);
 		objDoc.setClientSupport(clientSupport);
 
@@ -482,6 +504,11 @@ public class ObjectDocumentation implements Comparable<ObjectDocumentation>, IOb
 		}
 
 		return objDoc;
+	}
+
+	private void setDescription(String description)
+	{
+		this.description = description;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -30,18 +30,18 @@ import { TypesRegistry} from '../sablo/types_registry';
           <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
           </div>
-          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
                    <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
           </div>
       </div>
       <div *ngIf="!formCache.absolute && name!=='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
-            <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+            <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
                    <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
             </div>
             <ng-template *ngFor="let item of formCache.mainStructure?.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
       </div>
-      <div *ngIf="!formCache.absolute && name==='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
-            <div (mousedown)="onVariantsMouseDown($event)" *ngFor="let item of formCache.mainStructure?.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" style="position:absolute">
+      <div *ngIf="!formCache.absolute && name==='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses" (keyup)="onVariantKeyup($event)"> <!-- main container div -->
+            <div (mousedown)="onVariantsMouseDown($event)" (keyup)="onVariantKeyup($event)" *ngFor="let item of formCache.mainStructure?.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" style="position:absolute">
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>
             </div>
       </div>
@@ -68,7 +68,7 @@ import { TypesRegistry} from '../sablo/types_registry';
           </div>
       </ng-template>
       <ng-template  #formComponentResponsiveDiv  let-state="state" >
-          <servoycore-formcomponent-responsive-container [ngClass]="{'invisible_element' : state.model.svyVisible === false}" [items]="state.items" [class]="state.model.styleClass" [formComponent]="this"></servoycore-formcomponent-responsive-container>
+          <servoycore-formcomponent-responsive-container [svyContainerStyle]="state.formComponentProperties" [svyContainerAttributes]="state.formComponentProperties.attributes" [ngClass]="{'invisible_element' : state.model.svyVisible === false}" [items]="state.items" [class]="state.model.styleClass" [formComponent]="this"></servoycore-formcomponent-responsive-container>
           <div *ngIf="!state.items || !state.items.length">FormComponentContainer, select a form.</div>
       </ng-template>
       <!-- component template generate start -->
@@ -82,6 +82,8 @@ import { TypesRegistry} from '../sablo/types_registry';
      <!-- component template generate end -->
    `
     /* eslint-enable max-len */
+    ,
+    standalone: false
 })
 
 export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, IFormComponent {
@@ -226,6 +228,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.insertedVariants = null;
                 this.variantsLoaded = false;
                 this.showWireframe = this.designMode;
+                this.windowRefService.nativeWindow.parent.postMessage({ id: 'onDestroyVariants'}, '*');
 
             }
             if (event.data.id === 'createDraggedComponent') {
@@ -277,7 +280,20 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         this.insertedCloneParent = this.formCache.mainStructure;
                     }
                 }
-                if (this.insertedCloneParent) this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+                if (this.insertedCloneParent) {
+                    this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+                    if (event.data.uuids) {
+                        event.data.uuids.forEach(uuid => {
+                            let insertedClone: ComponentCache | StructureCache = this.formCache.getLayoutContainer(uuid); 
+                            if (!insertedClone) {
+                                insertedClone = this.formCache.getComponent(uuid);
+                            }
+                            const insertedCloneParent = insertedClone.parent;
+                            insertedCloneParent.removeChild(insertedClone);
+                            this.insertedCloneParent.addChild(insertedClone, beforeChild);
+                        });
+                    }
+                }
             }
             if (event.data.id === 'removeDragCopy') {
                 if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
@@ -300,6 +316,14 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 const changed = this.showWireframe !== event.data.value;
                 this.showWireframe = event.data.value;
                 this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts', formname : this.name }, '*');
+                if (changed){
+                    Array.from( this.formCache.formComponents.values()).forEach(formComponent => {
+                       if (formComponent.hasFoundset && formComponent.model.containedForm && !formComponent.model.containedForm.absoluteLayout){
+                           // just trigger the change detection
+                          formComponent.model.editable = ! formComponent.model.editable;
+                       }
+                    });
+                }
             }
             if (event.data.id === 'maxLevel') {
                 this.maxLevel = parseInt(event.data.value, 10);
@@ -314,8 +338,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             this.detectChanges();
         });
     }
-    
-    
+
     sendVariantSizes() {
         const variants = this.document.getElementsByClassName('variant_item');
         if (!this.variantsLoaded || variants.length === 0) {
@@ -332,6 +355,12 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover',
             formWidth,
             formHeight}, '*');
+    }
+
+    public onVariantKeyup(event: KeyboardEvent) {
+        if (event.keyCode === 27) {
+            this.windowRefService.nativeWindow.parent.postMessage({ id: 'variantsEscapePressed'}, '*');
+        }
     }
 
     public onVariantsMouseDown(event: MouseEvent) {
@@ -413,6 +442,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
+            if (item.type === 'menu') return;
             if (this[item.type] === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }
@@ -530,6 +560,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         // really make sure all form state is reverted to default
         // Form Instances are reused for tabpanels that have a template reference to this.
         this.formCache = this.formservice.getFormCache(this);
+        this.formservice.resolveComponentCache(this);
         const styleClasses: string = this.formCache.getComponent('').model.styleClass;
         if (styleClasses)
             this.formClasses = styleClasses.split(' ');

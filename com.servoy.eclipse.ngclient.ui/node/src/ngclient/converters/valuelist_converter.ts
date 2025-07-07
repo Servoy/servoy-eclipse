@@ -45,13 +45,13 @@ export class ValuelistType implements IType<Valuelist> {
                         currentClientValue.getInternalState().realToDisplayCache : internalState.realToDisplayCache;
                     internalState.valuelistid = serverJSONValue.valuelistid;
                     internalState.hasRealValues = serverJSONValue.hasRealValues;
-                    if (serverJSONValue.realValueAreDates || serverJSONValue.displayValueAreDates) {
+                    if (serverJSONValue.realValueType === 'Date' || serverJSONValue.displayValueType === 'Date') {
                         serverJSONValue.values.forEach(element => {
-                            if (serverJSONValue.realValueAreDates && element.realValue) element.realValue = new Date(element.realValue);
-                            if (serverJSONValue.displayValueAreDates && element.displayValue) element.displayValue = new Date(element.displayValue);
+                            if (serverJSONValue.realValueType === 'Date' && element.realValue) element.realValue = new Date(element.realValue);
+                            if (serverJSONValue.displayValueType === 'Date' && element.displayValue) element.displayValue = new Date(element.displayValue);
                         });
                     }
-                    newValue = new Valuelist(this.sabloDeferHelper, serverJSONValue.realValueAreDates, internalState, serverJSONValue.values);
+                    newValue = new Valuelist(this.sabloDeferHelper, serverJSONValue.realValueType, internalState, serverJSONValue.values);
                     serverJSONValue.vl = newValue;
                     deferredValue = newValue;
                 }
@@ -123,7 +123,7 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
 
 export class Valuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist, IChangeAwareValue, IUIDestroyAwareValue {
 
-    constructor(private sabloDeferHelper: SabloDeferHelper, private realValueIsDate: boolean,
+    constructor(private sabloDeferHelper: SabloDeferHelper, private realValueType: string,
         private internalState: ValuelistState, values?: Array<{ displayValue: string; realValue: any }>) {
         super();
         if (values) this.push(...values);
@@ -133,9 +133,13 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
     }
 
     isRealValueDate(): boolean {
-        return this.realValueIsDate;
+        return this.realValueType === 'Date';
     }
 
+    isRealValueUUID(): boolean {
+        return this.realValueType === 'UUID';
+    }
+    
     /**
      * This is meant for internal use only; do not call this in component code.
      */
@@ -204,8 +208,8 @@ export interface IValuelistTValueFromServer {
     vl?: Valuelist;
     valuelistid?: number;
     hasRealValues?: boolean;
-    realValueAreDates?: boolean;
-    displayValueAreDates?: boolean;
+    realValueType?: string;
+    displayValueType?: string;
     getDisplayValue?: any;
     id?: number;
     handledID?: { id: number; value: any };

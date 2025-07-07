@@ -70,7 +70,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.WebComponentSpecProvider;
 
-import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
@@ -409,12 +408,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 				servoyProject.getEditingSolution().setFirstFormID(0);
 			}
 
-			if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE)
-			{
-				// mobile solution, make the form mobile
-				form.putCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName, Boolean.TRUE);
-				form.setStyleName("_servoy_mobile"); // set internal style name
-			}
+//			if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE)
+//			{
+//				// mobile solution, make the form mobile
+//				form.putCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName, Boolean.TRUE);
+//				form.setStyleName("_servoy_mobile"); // set internal style name
+//			}
 
 			if (superForm != null && template == null)
 			{
@@ -450,7 +449,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 			String parentWorkingSet = newFormWizardPage.getWorkingSet();
 			if (superForm != null || parentWorkingSet != null)
 			{
-				if (parentWorkingSet == null && superForm != null)
+				if (parentWorkingSet == null && superForm != null &&
+					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 				{
 					parentWorkingSet = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getContainingWorkingSet(
 						superForm.getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
@@ -935,7 +935,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			};
 
-			if (isNgClient)
+			if (isNgClient || activeSolutionMobile)
 			{
 				Group grpType = new Group(topLevel, SWT.SHADOW_IN);
 				grpType.setLayout(new RowLayout(SWT.VERTICAL));
@@ -954,7 +954,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				bTypeAnchored.addSelectionListener(typeSelectionListener);
 				bTypeAnchored.setSelection(true);
 				typeFormControl = grpType;
-				if (getActiveSolution() != null && SolutionMetaData.isNGOnlySolution(getActiveSolution().getSolutionType()))
+				if (getActiveSolution() != null && (SolutionMetaData.isNGOnlySolution(getActiveSolution().getSolutionType()) || activeSolutionMobile))
 				{
 					bTypeAnchored.setVisible(false);
 					bTypeCSSPosition.setSelection(true);

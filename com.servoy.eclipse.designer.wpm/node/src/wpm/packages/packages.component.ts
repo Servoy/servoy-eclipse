@@ -6,7 +6,8 @@ import { WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.s
 @Component({
     selector: 'app-packages',
     templateUrl: './packages.component.html',
-    styleUrls: ['./packages.component.css']
+    styleUrls: ['./packages.component.css'],
+    standalone: false
 })
 export class PackagesComponent implements OnChanges {
 

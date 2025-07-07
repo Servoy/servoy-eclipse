@@ -1,9 +1,10 @@
 import { Component, Input, ViewChild, ElementRef, HostListener} from '@angular/core';
 
 @Component({
-  selector: 'servoycore-message-dialog-window',
-  templateUrl: './message-dialog-window.component.html',
-  styleUrls: ['./message-dialog-window.component.css']
+    selector: 'servoycore-message-dialog-window',
+    templateUrl: './message-dialog-window.component.html',
+    styleUrls: ['./message-dialog-window.component.css'],
+    standalone: false
 })
 export class MessageDialogWindowComponent {
 
@@ -11,9 +12,11 @@ export class MessageDialogWindowComponent {
   @Input() styleClass: string;
   @Input() values: string[];
   @Input() buttonsText: string[]
+  @Input() inputType: string;
 
   @ViewChild("inputfield") inputfield: ElementRef;
   @ViewChild("buttons") buttons: ElementRef;
+  @ViewChild("svyMessageDialog") svyMessageDialog: ElementRef;
 
   retValue: string;
   onCloseCallback: (r: string) => void;
@@ -43,6 +46,11 @@ export class MessageDialogWindowComponent {
     } else {
       this.buttons.nativeElement.children[0].focus();
     }
+    const headerHeight = this.svyMessageDialog.nativeElement.querySelector('.window-header').offsetHeight;
+    const footerHeight = this.buttons.nativeElement.offsetHeight;
+    document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+    document.documentElement.style.setProperty('--footer-height', `${footerHeight}px`);
+    this.svyMessageDialog.nativeElement.scrollTop = 0;
   }
 
   getButtonClass(btnIndex: number): string {
@@ -67,5 +75,9 @@ export class MessageDialogWindowComponent {
       this.retValue = value;
     }    
     this.onCloseCallback(this.retValue);
+  }
+
+  getType(): string {
+    return this.inputType ? this.inputType : 'text';
   }
 }

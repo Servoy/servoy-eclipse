@@ -23,7 +23,7 @@ export class PropertyUtils {
         }
     }
 
-    public static setRotation(element: HTMLElement, renderer: Renderer2, rotation: number, size: {width: number; height: number}) {
+    public static setRotation(element: HTMLElement, renderer: Renderer2, rotation: number, size?: {width: number; height: number}) {
         const r = 'rotate(' + rotation + 'deg)';
         renderer.setStyle( element, '-moz-transform',  r );
         renderer.setStyle( element, '-webkit-transform', r );
@@ -31,7 +31,7 @@ export class PropertyUtils {
         renderer.setStyle( element, '-ms-transform', r );
         renderer.setStyle( element, 'transform', r );
         renderer.setStyle( element, 'position', 'absolute' );
-        if (rotation === 90 || rotation === 270) {
+        if ((rotation === 90 || rotation === 270) && size) {
             renderer.setStyle( element, 'width', size.height + 'px' );
             renderer.setStyle( element, 'height', size.width + 'px' );
             renderer.setStyle( element, 'left', (size.width - size.height) / 2 + 'px' );

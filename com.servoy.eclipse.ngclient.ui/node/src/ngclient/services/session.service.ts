@@ -11,7 +11,7 @@ export class SessionService {
     public expireSession(sessionExpired: SessionProblem){
         const exp = {
                 viewUrl: 'templates/sessionExpiredView.html',
-                redirectUrl : window.location.href
+                redirectUrl : window.location.href.split('#')[0]
         };
         if(sessionExpired.viewUrl)  exp.viewUrl= sessionExpired.viewUrl;
         if(sessionExpired.redirectUrl)  exp.redirectUrl= sessionExpired.redirectUrl;

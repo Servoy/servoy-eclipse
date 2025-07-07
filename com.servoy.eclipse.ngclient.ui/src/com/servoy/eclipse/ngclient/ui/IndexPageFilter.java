@@ -41,6 +41,8 @@ import org.sablo.security.ContentSecurityPolicyConfig;
 import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
 import com.servoy.j2db.server.ngclient.NGLocalesFilter;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
+import com.servoy.j2db.server.ngclient.auth.CloudStatelessAccessManager;
+import com.servoy.j2db.server.ngclient.auth.OAuthHandler;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -57,7 +59,7 @@ public class IndexPageFilter implements Filter
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException
 	{
-		StatelessLoginHandler.init();
+		StatelessLoginHandler.init(filterConfig.getServletContext());
 	}
 
 	@Override
@@ -86,17 +88,28 @@ public class IndexPageFilter implements Filter
 			distFolder = new File(projectFolder, "dist/app/browser");
 			indexFile = new File(distFolder, "index.html");
 		}
-		String solutionName = getSolutionNameFromURI(Paths.get(requestURI).normalize());
+		String solutionName = getSolutionNameFromURI(Paths.get(requestURI.replace(':', '_')).normalize());
 		if (indexFile != null && indexFile.exists())
 		{
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
-					requestURI.toLowerCase().endsWith("/index.html")))
+					requestURI.toLowerCase().endsWith("/index.html")) ||
+				requestURI.contains("/svy_oauth/"))
 			{
-				Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
+				Pair<Boolean, String> showLogin = null;
+				if (requestURI.contains("/svy_oauth/"))
+				{
+					showLogin = OAuthHandler.handleOauth(request, response);
+					if (Boolean.FALSE.equals(showLogin.getLeft()) && showLogin.getRight() == null) return;
+				}
+				else
+				{
+					showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
+				}
+
 				if (showLogin.getLeft().booleanValue())
 				{
-					StatelessLoginHandler.writeLoginPage(request, response, solutionName);
+					StatelessLoginHandler.writeLoginPage(request, response, solutionName, showLogin.getRight());
 					return;
 				}
 				if (showLogin.getRight() != null)
@@ -111,22 +124,22 @@ public class IndexPageFilter implements Filter
 					contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
 				return;
 			}
-			else if (solutionName != null && StatelessLoginHandler.handlePossibleCloudRequest(request, response, solutionName))
+			else if (solutionName != null && CloudStatelessAccessManager.handlePossibleCloudRequest(request, response, solutionName, indexFile))
 			{
 				return;
 			}
-			else if (solutionName != null && requestURI.toLowerCase().endsWith("/startup.js"))
-			{
-				AngularIndexPageWriter.writeStartupJs(request, (HttpServletResponse)servletResponse, solutionName);
-				return;
-			}
+//			else if (solutionName != null && requestURI.toLowerCase().endsWith("/startup.js"))
+//			{
+//				AngularIndexPageWriter.writeStartupJs(request, (HttpServletResponse)servletResponse, solutionName);
+//				return;
+//			}
 			else if (AngularIndexPageWriter.handleDeeplink(request, (HttpServletResponse)servletResponse))
 			{
 				return;
 			}
 			else
 			{
-				String normalize = Paths.get(requestURI).normalize().toString();
+				String normalize = Paths.get(requestURI.replace(':', '_')).normalize().toString();
 				File file = new File(distFolder, normalize);
 				String localeId = request.getParameter("localeid");
 				if (requestURI.startsWith("/locales/") && localeId != null && !file.exists())

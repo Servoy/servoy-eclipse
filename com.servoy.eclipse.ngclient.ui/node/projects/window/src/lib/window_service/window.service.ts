@@ -29,6 +29,11 @@ export class WindowPluginService {
     cancelFormPopupInternal(disableClearPopupFormCallToServer: boolean): void {
         this.servoyService.cancelFormPopup(disableClearPopupFormCallToServer);
     }
+	
+	cancelForm(form: string) {
+		this.servoyService.cancelFormPopup(form);
+	}
+	
     get shortcuts(): Shortcut[] {
         return this._shortcuts;
     }
@@ -71,7 +76,10 @@ export class WindowPluginService {
                                         argsWithEvent.push(args);
                                     }
                                 }
-                                targetEl.dispatchEvent(new CustomEvent('change'));
+                                // should trigger a change only if the shorcut is a combination of 'CTRL' or 'ALT' or 'META' + any key
+                                if (this.checkModifierKey(translatedShortcut)) {
+                                    targetEl.dispatchEvent(new CustomEvent('change'));
+                                }
                                 //$sabloTestability.block(true);
                                 setTimeout((clb: { script: string; formname?: string }, clbArgs: Array<any>) => {
                                     let formName = clbArgs[0].formName;
@@ -107,6 +115,10 @@ export class WindowPluginService {
     set popupMenus(popupmenus: Popup[]) {
         this._popupmenus = popupmenus;
         this.showPopupMenu();
+    }
+    
+    private checkModifierKey(str: string) {
+        return ['ctrl', 'alt', 'meta'].some(item => str.toLowerCase().startsWith(item));
     }
 
     private showPopupMenu() {

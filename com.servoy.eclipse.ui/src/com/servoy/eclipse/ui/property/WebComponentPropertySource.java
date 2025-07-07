@@ -36,6 +36,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -178,7 +179,8 @@ public class WebComponentPropertySource extends PDPropertySource
 	{
 		if (BEAN_PROPERTIES.containsKey(propertyDescriptor.propertyDescriptor.getName())) return super.createPropertyCategory(propertyDescriptor);
 		if (getPropertyDescription().getHandlers().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Events;
-		if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
+		if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName()) &&
+			!IContentSpecConstants.PROPERTY_ATTRIBUTES.equals(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
 		return super.createPropertyCategory(propertyDescriptor);
 	}
 

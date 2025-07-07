@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import static com.servoy.eclipse.core.ServoyModelManager.getServoyModelManager;
+
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,7 +31,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -96,7 +97,7 @@ public class CalculationNameEditingSupport extends EditingSupport
 		columns = new String[table.getColumnCount() + 1];
 		columns[0] = "type_here";
 		int i = 1;
-		Iterator<Column> it = EditorUtil.getTableColumns(table);
+		Iterator<Column> it = EditorUtil.getTableColumns(table, true);
 		while (it.hasNext())
 		{
 			columns[i++] = it.next().getName();
@@ -131,7 +132,7 @@ public class CalculationNameEditingSupport extends EditingSupport
 	{
 		if (element instanceof ScriptCalculation)
 		{
-			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+			IValidateName nameValidator = getServoyModelManager().getServoyModel().getNameValidator();
 			CCombo combo = (CCombo)editor.getControl();
 			ScriptCalculation calculation = (ScriptCalculation)element;
 			try

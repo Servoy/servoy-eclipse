@@ -8,11 +8,11 @@ export class DesignerUtilsService {
     constructor(protected readonly editorSession: EditorSessionService, protected readonly editorContentService: EditorContentService) {
     }
 
-    public adjustElementRect(node: Element, position: DOMRect) {
+    public adjustElementRect(node: Element, position: DOMRect): DOMRect {
         if (position.width == 0 || position.height == 0) {
             if (node.parentElement.classList.contains('svy-layoutcontainer')) {
                 // if the parent element is a responsive container then height or width can be nust null
-                return;
+                return position;
             }
             let correctWidth = position.width;
             let correctHeight = position.height;
@@ -27,7 +27,7 @@ export class DesignerUtilsService {
             if (position.height == 0) position.height = correctHeight;
         } else if (node.getAttribute('svy-id') != null) {
             if (node.parentElement.classList.contains('svy-layoutcontainer')) {
-                return;
+                return position;
             }
             let currentNode: Element = null;
             if (node.parentElement.classList.contains('svy-wrapper')) {
@@ -37,18 +37,17 @@ export class DesignerUtilsService {
                 currentNode = node.parentElement.parentElement;
             }
             if (!currentNode && node.parentElement.parentElement.classList.contains('svy-layoutcontainer')) {
-                return;
+                return position;
             }
             if (!currentNode && node.parentElement.parentElement.parentElement.classList.contains('svy-wrapper')) {
                 currentNode = node.parentElement.parentElement.parentElement;
             }
             if (currentNode) {
                 // take position from wrapper div if available, is more accurate
-                const parentPosition = currentNode.getBoundingClientRect();
-                position.width = parentPosition.width;
-                position.height = parentPosition.height;
+                return DOMRect.fromRect(currentNode.getBoundingClientRect());
             }
         }
+        return position;
     }
 
     convertToContentPoint(glasspane: HTMLElement, point: { x?: number; y?: number; top?: number; left?: number }): { x?: number; y?: number; top?: number; left?: number } {
@@ -65,7 +64,7 @@ export class DesignerUtilsService {
 
     getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget: Element = null;
-        if (type == 'layout' || (type == 'component' && !absoluteLayout)) {
+        if (type == 'layout' || ((type == 'component' || type === 'jsmenu') && !absoluteLayout)) {
             const realName = layoutName ? layoutName : 'component';
 
             dropTarget = this.getNode(event, true, skipNodeId);
@@ -179,7 +178,7 @@ export class DesignerUtilsService {
                     };
                 }
             }
-        } else if (type != 'component' && type != 'template') {
+        } else if (type != 'jsmenu' && type != 'component' && type != 'template') {
             dropTarget = this.getNode(event);
             if (dropTarget && dropTarget.getAttribute('svy-types')) {
                 if (dropTarget.getAttribute('svy-types').indexOf(type) <= 0)
@@ -246,8 +245,8 @@ export class DesignerUtilsService {
             elements = elements.filter(item => !(item.parentNode as Element).closest('[svy-id="' + skipNodeId + '"]'));
         }
         const found = elements.reverse().find((node) => {
-            const position = node.getBoundingClientRect();
-            this.adjustElementRect(node, position);
+            const position = this.adjustElementRect(node, node.getBoundingClientRect());
+            
             if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                 return node;
             }
@@ -259,8 +258,8 @@ export class DesignerUtilsService {
                     const nodeComputedStyle = window.getComputedStyle(node);
                     const top = position.top + parseInt(nodeComputedStyle.paddingTop) + parseInt(computedStyle.marginTop);
                     const left = position.left + parseInt(nodeComputedStyle.paddingLeft) + parseInt(computedStyle.marginLeft);
-                    const height = parseInt(computedStyle.height);
-                    const width = parseInt(computedStyle.width);
+                    const height = parseInt(nodeComputedStyle.height);
+                    const width = parseInt(nodeComputedStyle.width);
                     if (point.y >= top && point.x >= left && point.y <= top + height && point.x <= left + width) {
                         return node;
                     }

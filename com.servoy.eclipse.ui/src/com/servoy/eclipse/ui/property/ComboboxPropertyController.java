@@ -345,4 +345,10 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 			return getConverter().convertProperty(getId(), convertedValue);
 		}
 	}
+
+	@Override
+	public String toString()
+	{
+		return "ComboboxPropertyController [" + getDisplayName() + "]";
+	}
 }

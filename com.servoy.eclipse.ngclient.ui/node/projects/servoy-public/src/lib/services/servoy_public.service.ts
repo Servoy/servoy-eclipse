@@ -20,7 +20,7 @@ export abstract class ServoyPublicService {
      */
     public abstract showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void;
 
-    public abstract showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<string>;
+    public abstract showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string): Promise<string>;
     /**
      * This created the correct {@link JSEvent} object that is used for handler calls to the server, tries to fill in as much as it can.
      */
@@ -100,7 +100,7 @@ export abstract class ServoyPublicService {
     /**
      * cancel/hide the form popup that is currently showing.
      */
-    public abstract cancelFormPopup(disableClearPopupFormCallToServer: boolean): void;
+    public abstract cancelFormPopup(disableClearPopupFormCallToServer_or_name: boolean|string): void;
     /**
      * Internal api, used by ngutils services to set the styleclass of forms, the argument is a map of formname->styleclases
      *

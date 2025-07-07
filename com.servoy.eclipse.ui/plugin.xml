@@ -31,6 +31,14 @@
             id="com.servoy.eclipse.ui.views.FavoritesView"
             name="Favorites">
       </view>
+      <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.DocumentationView"
+            icon="icons/solution.png"
+            id="com.servoy.eclipse.ui.views.DocumentationView"
+            name="Documentation"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -67,6 +75,13 @@
                relationship="stack"
                relative="org.eclipse.help.ui.HelpView"
                visible="false">
+         </view>
+         <view
+               id="com.servoy.eclipse.ui.views.DocumentationView"
+               minimized="false"
+               relationship="stack"
+               relative="org.eclipse.ui.console.ConsoleView"
+               visible="true">
          </view>
       </perspectiveExtension>
       <perspectiveExtension
@@ -295,6 +310,18 @@
                contentTypeId="com.servoy.eclipse.core.resource.relation">
          </contentTypeBinding>
       </editor>
+       <editor
+            class="com.servoy.eclipse.ui.editors.MenuEditor"
+            default="true"
+            extensions="mnu"
+            icon="icons/column.png"
+            id="com.servoy.eclipse.ui.editors.MenuEditor"
+            matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
+            name="Menu Editor">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.menu">
+         </contentTypeBinding>
+      </editor>
       <editor
             class="com.servoy.eclipse.ui.editors.ValueListEditor"
             default="true"
@@ -399,12 +426,6 @@
             class="com.servoy.eclipse.ui.preferences.StartupPreferences"
             id="com.servoy.eclipse.ui.startup"
             name="Startup">
-      </page>
-      <page
-            category="com.servoy.eclipse.ui.preference"
-            class="com.servoy.eclipse.ui.preferences.TeamPreferences"
-            id="com.servoy.eclipse.ui.team"
-            name="Team Development">
       </page>
       <page
             category="com.servoy.eclipse.ui.preference"
@@ -573,7 +594,7 @@
                style="push"
                tooltip="Open Servoy Forum">
          </action> 
-          <action
+<!--          <action
             class="com.servoy.eclipse.ui.PostOnTheForumAction"
             icon="icons/forum.png"
             id="com.servoy.eclipse.ui.NewForumPost"
@@ -583,6 +604,7 @@
             style="push"
             tooltip="Post in the forum directly from the developer.">
       </action>        
+-->
       </actionSet>
       <actionSet
             id="com.servoy.eclipse.ui.choosers"

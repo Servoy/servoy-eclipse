@@ -17,10 +17,17 @@
 
 package com.servoy.eclipse.debug.script;
 
+import java.util.HashSet;
+import java.util.Map;
+
+import org.eclipse.dltk.javascript.typeinfo.IJavaScriptLikeObject;
 import org.eclipse.dltk.javascript.typeinfo.IRArrayType;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
+import org.eclipse.dltk.javascript.typeinfo.ImmutableType;
+import org.eclipse.dltk.javascript.typeinfo.RSimpleType;
+import org.eclipse.dltk.javascript.typeinfo.TypeCompatibility;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 
 /**
@@ -28,7 +35,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
  * @since 2024.06
  *
  */
-public class ServoyDynamicArrayRuntimeType extends ServoyDynamicRuntimeType implements IRArrayType
+public class ServoyDynamicArrayRuntimeType extends RSimpleType implements IJavaScriptLikeObject, IRArrayType
 {
 	private final IRType itemType;
 
@@ -51,6 +58,38 @@ public class ServoyDynamicArrayRuntimeType extends ServoyDynamicRuntimeType impl
 	public IRType getItemType()
 	{
 		return itemType;
+	}
+
+	@Override
+	public TypeCompatibility isAssignableFrom(IRType type)
+	{
+		TypeCompatibility compatible = super.isAssignableFrom(type);
+		if (!compatible.ok() && type instanceof ServoyDynamicArrayRuntimeType)
+		{
+			IRTypeDeclaration other = ((RSimpleType)type).getDeclaration();
+			return ServoyDynamicRuntimeType.isAssignableFrom(getDeclaration(), other, new HashSet<IRTypeDeclaration>());
+		}
+		return compatible;
+	}
+
+	@Override
+	public IRArrayType makeImmutable(Map<Object, Object> visited)
+	{
+		IRTypeDeclaration declaration = getDeclaration();
+		if (declaration instanceof ImmutableType< ? > || itemType instanceof ImmutableType< ? >)
+		{
+			IRType type = itemType;
+			if (type instanceof ImmutableType< ? > t)
+			{
+				type = (IRType)t.makeImmutable(visited);
+			}
+			if (declaration instanceof ImmutableType< ? > t)
+			{
+				declaration = (IRTypeDeclaration)t.makeImmutable(visited);
+			}
+			return new ServoyDynamicArrayRuntimeType(declaration, type);
+		}
+		return this;
 	}
 
 }

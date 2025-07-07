@@ -25,6 +25,7 @@ import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
+import org.eclipse.dltk.javascript.ast.BigIntLiteral;
 import org.eclipse.dltk.javascript.ast.DecimalLiteral;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
@@ -158,6 +159,17 @@ public class ScriptingUtils
 				 */
 				@Override
 				public Object visitDecimalLiteral(DecimalLiteral node)
+				{
+					return Integer.valueOf(IColumnTypes.NUMBER);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 *
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitBigIntLiteral(org.eclipse.dltk.javascript.ast.BigIntLiteral)
+				 */
+				@Override
+				public Object visitBigIntLiteral(BigIntLiteral node)
 				{
 					return Integer.valueOf(IColumnTypes.NUMBER);
 				}

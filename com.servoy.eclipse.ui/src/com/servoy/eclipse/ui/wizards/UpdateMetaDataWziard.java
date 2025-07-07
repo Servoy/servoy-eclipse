@@ -73,7 +73,6 @@ import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard.SplitInThreeWiza
 import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard.SplitInThreeWizardPage.PairTreeContentProvider;
 import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard.SplitInThreeWizardPage.RadioEditingSupport;
 import com.servoy.j2db.IDebugJ2DBClient;
-import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
@@ -271,11 +270,6 @@ public class UpdateMetaDataWziard extends Wizard
 							if (debugJ2DBClient != null)
 							{
 								((FoundSetManager)debugJ2DBClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
-							}
-							IDebugWebClient debugWebClient = com.servoy.eclipse.core.Activator.getDefault().getDebugWebClient();
-							if (debugWebClient != null)
-							{
-								((FoundSetManager)debugWebClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
 							}
 							sb.append("Successfully saved " + ninserted + " records from workspace in table " + table.getName() + " in server " +
 								table.getServerName());

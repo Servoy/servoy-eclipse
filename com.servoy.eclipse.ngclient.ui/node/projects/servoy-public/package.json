@@ -1,17 +1,18 @@
 {
   "name": "@servoy/public",
-  "version": "2024.3.0",
+  "version": "2025.3.0",
   "peerDependencies": {
-    "@angular/common": "^17",
-    "@angular/core": "^17"
+    "@angular/common": "^19",
+    "@angular/core": "^19"
   },
   "dependencies": {
     "luxon": "^3",
+    "numbro": "^2.5",
     "tslib": "*"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Servoy/servoy-eclipse/tree/master/com.servoy.eclipse.ngclient.ui/node/projects/servoy-public"
+    "url": "git+https://github.com/Servoy/servoy-eclipse.git#master"
   }
 }

@@ -27,6 +27,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.ServoySearchDialog;
+import com.servoy.eclipse.ui.dialogs.ServoySearchDialog.Column;
 import com.servoy.eclipse.ui.dialogs.ServoySearchDialog.Scope;
 import com.servoy.eclipse.ui.dialogs.ServoySearchDialog.Table;
 import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
@@ -80,6 +81,10 @@ public class SearchServoyAction implements IWorkbenchWindowActionDelegate
 			{
 				Table table = (Table)result;
 				EditorUtil.openTableEditor(table.getDataSource());
+			}
+			else if (result instanceof Column)
+			{
+				EditorUtil.openTableEditor(((Column)result).getDataSource());
 			}
 			else if (result instanceof Scope)
 			{

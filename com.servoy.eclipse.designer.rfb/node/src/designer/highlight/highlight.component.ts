@@ -6,7 +6,8 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
 @Component({
     selector: 'designer-highlight',
     templateUrl: './highlight.component.html',
-    styleUrls: ['./highlight.component.css']
+    styleUrls: ['./highlight.component.css'],
+    standalone: false
 })
 export class HighlightComponent implements IShowHighlightChangedListener, OnInit, IContentMessageListener, OnDestroy {
     highlightedComponent: Node;
@@ -87,7 +88,7 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
         this.showPermanentHighlight = showHighlight;
         this.editorContentService.executeOnlyAfterInit(() => {
             const elements = this.editorContentService.getAllContentElements();
-            Array.from(elements).forEach((node, i) => {
+            Array.from(elements).forEach((node) => {
                 if (node.parentElement.classList.contains('svy-wrapper')) {
                     node = node.parentElement;
                 } else if (node.parentElement.parentElement.classList.contains('svy-wrapper')) {
@@ -100,10 +101,6 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
                 }
                 else {
                     this.renderer.removeClass(node, 'highlight_element');
-                }
-                if (i === Array.from(elements).length - 1) {
-                    const lastElement = Array.from(node.closest('.svy-form').childNodes).filter(item => item.toString() != '[object Comment]').slice(-1)[0] as HTMLElement;
-                    lastElement.style.marginBottom = '1px';
                 }
             });
         });

@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.model.repository;
 
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,8 +35,8 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnInfoSequence;
 import com.servoy.j2db.persistence.IColumn;
-import com.servoy.j2db.persistence.IServerInfoManager;
 import com.servoy.j2db.persistence.ISequenceProvider;
+import com.servoy.j2db.persistence.IServerInfoManager;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.QuerySet;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -190,11 +189,6 @@ public class EclipseSequenceProvider implements ISequenceProvider
 			}
 		}
 		catch (ServoyException e)
-		{
-			ServoyLog.logError(e);
-			throw new RepositoryException("error getting next sequence for " + column, e);
-		}
-		catch (RemoteException e)
 		{
 			ServoyLog.logError(e);
 			throw new RepositoryException("error getting next sequence for " + column, e);

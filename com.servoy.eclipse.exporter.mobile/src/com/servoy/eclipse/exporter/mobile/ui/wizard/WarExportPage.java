@@ -194,37 +194,57 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(typeLabel)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(exportAsWar, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(18).add(outputLabel).addPreferredGap(LayoutStyle.RELATED).add(outputText, GroupLayout.DEFAULT_SIZE,
-						130, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(outputBrowseButton, GroupLayout.PREFERRED_SIZE, 80,
-						GroupLayout.PREFERRED_SIZE)).add(
-					groupLayout.createSequentialGroup().add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE, 15, GroupLayout.PREFERRED_SIZE).add(phoneGapLink,
-						GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)).add(
-					groupLayout.createSequentialGroup().add(20).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblPhoneGapUsername).add(lblPhoneGapPassword)).addPreferredGap(
-						LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(phoneGapUsername, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE).add(
-							phoneGapPassword, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))).add(
-					groupLayout.createSequentialGroup().add(20).add(savePasswordCheck).addPreferredGap(LayoutStyle.RELATED))).addContainerGap()));
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(typeLabel))
+				.addPreferredGap(
+					LayoutStyle.RELATED)
+				.add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(exportAsWar, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
+						groupLayout.createSequentialGroup().add(18).add(outputLabel).addPreferredGap(LayoutStyle.RELATED)
+							.add(outputText, GroupLayout.DEFAULT_SIZE,
+								130, Short.MAX_VALUE)
+							.addPreferredGap(LayoutStyle.RELATED).add(outputBrowseButton, GroupLayout.PREFERRED_SIZE, 80,
+								GroupLayout.PREFERRED_SIZE))
+						.add(
+							groupLayout.createSequentialGroup().add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE, 15, GroupLayout.PREFERRED_SIZE).add(
+								phoneGapLink,
+								GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE))
+						.add(
+							groupLayout.createSequentialGroup().add(20).add(
+								groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(lblPhoneGapUsername).add(lblPhoneGapPassword)).addPreferredGap(
+									LayoutStyle.RELATED)
+								.add(
+									groupLayout.createParallelGroup(GroupLayout.LEADING).add(phoneGapUsername, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+										.add(
+											phoneGapPassword, GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)))
+						.add(
+							groupLayout.createSequentialGroup().add(20).add(savePasswordCheck).addPreferredGap(LayoutStyle.RELATED)))
+				.addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
 					groupLayout.createSequentialGroup().add(exportAsWar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 						10).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(outputBrowseButton).add(outputText, GroupLayout.PREFERRED_SIZE,
-							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(outputLabel)).add(10).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapLink).add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE,
-							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10).add(
-						groupLayout.createSequentialGroup().add(10).add(
-							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapUsername, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE).add(lblPhoneGapUsername)).add(7).add(
-							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapPassword, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE).add(lblPhoneGapPassword))).add(7).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(savePasswordCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-							GroupLayout.PREFERRED_SIZE))).add(typeLabel))));
+							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(outputBrowseButton).add(outputText, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(outputLabel))
+						.add(10).add(
+							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(phoneGapLink).add(exportUsingPhoneGap, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.add(10).add(
+							groupLayout.createSequentialGroup().add(10).add(
+								groupLayout.createParallelGroup(GroupLayout.BASELINE)
+									.add(phoneGapUsername, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE)
+									.add(lblPhoneGapUsername))
+								.add(7).add(
+									groupLayout.createParallelGroup(GroupLayout.BASELINE)
+										.add(phoneGapPassword, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+											GroupLayout.PREFERRED_SIZE)
+										.add(lblPhoneGapPassword)))
+						.add(7).add(
+							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(savePasswordCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)))
+					.add(typeLabel))));
 
 		container.setLayout(groupLayout);
 
@@ -240,7 +260,7 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 		}
 
 		savePasswordCheck.setSelection(getDialogSettings().getBoolean(IN_SECURE_STORE));
-		//load existing PhoneGap accounts 
+		//load existing PhoneGap accounts
 		loadPhoneGapAccounts();
 
 		ModifyListener errorMessageDetecter = new ModifyListener()
@@ -297,12 +317,12 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 				{
 					if (getDialogSettings().get(PHONEGAP_EMAIL) != null)
 					{
-						// fill in the last used email address 
+						// fill in the last used email address
 						phoneGapUsername.setText(getDialogSettings().get(PHONEGAP_EMAIL));
 					}
 					else
 					{
-						// select the first element in accounts list 
+						// select the first element in accounts list
 						phoneGapUsername.select(0);
 						if (phoneGapUsername.getText() != null) phoneGapPassword.setText(node.get(phoneGapUsername.getText(), null));
 					}
@@ -459,7 +479,7 @@ public class WarExportPage extends WizardPage implements IMobileExportProperties
 			{
 				try
 				{
-					mobileExporter.doExport(false);
+					mobileExporter.doExport(false, monitor);
 				}
 				catch (Exception ex)
 				{

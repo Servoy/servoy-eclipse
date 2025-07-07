@@ -4,7 +4,8 @@ import { IViewStateListener } from '../basecomponent';
 import { WindowRefService } from '../services/windowref.service';
 
 @Directive({
-    selector: '[svyImageMediaId]'
+    selector: '[svyImageMediaId]',
+    standalone: false
 })
 export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnDestroy {
 

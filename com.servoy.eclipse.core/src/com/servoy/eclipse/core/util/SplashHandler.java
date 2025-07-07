@@ -29,6 +29,8 @@ import com.servoy.j2db.util.Utils;
 
 public class SplashHandler extends BasicSplashHandler
 {
+	private Font font;
+
 	@Override
 	public void init(final Shell splash)
 	{
@@ -59,9 +61,11 @@ public class SplashHandler extends BasicSplashHandler
 			GC gc = new GC(background);
 			// size is very different on the three os
 			String osName = System.getProperty("os.name").toLowerCase();
-			if (osName.contains("windows")) gc.setFont(new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
-			else if (osName.contains("mac")) gc.setFont(new Font(splash.getDisplay(), "SansSerif", 9, SWT.NORMAL));
-			else if (osName.contains("linux")) gc.setFont(new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
+
+			if (font != null) gc.setFont(font);
+			else if (osName.contains("windows")) gc.setFont(font = new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
+			else if (osName.contains("mac")) gc.setFont(font = new Font(splash.getDisplay(), "SansSerif", 9, SWT.NORMAL));
+			else if (osName.contains("linux")) gc.setFont(font = new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
 
 			StringBuffer text = getSplashText();
 			gc.drawText(text.toString(), 10, 540, true);
@@ -84,4 +88,12 @@ public class SplashHandler extends BasicSplashHandler
 		text.append("\nCopyright \u00A9 Servoy BV 1997 - " + Utils.formatTime(System.currentTimeMillis(), "yyyy"));
 		return text;
 	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		if (font != null) font.dispose();
+	}
+
 }

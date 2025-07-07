@@ -534,8 +534,50 @@ describe('FormattingService', () => {
         expect(service.format('aa11BB22', myformat,false)).toEqual('AA11BB22');
 
         myformat.display = '#HHHUU##';
-        expect(()=>{
-service.format('aa11BB22', myformat,false);
-}).toThrow('input string not corresponding to format : aa11BB22 , #HHHUU##');
+        expect(()=>{service.format('aa11BB22', myformat,false);
+        }).toThrow('input string not corresponding to format : aa11BB22 , #HHHUU##');
     });
+
+    it("should preserve content within single quotes while applying format conversions outside", () => {
+
+        const myFormat: Format = new Format();
+        myFormat.type = 'DATETIME';
+
+        myFormat.display = "'This is' HH:mm:ss";
+        expect(service.format(new Date(2014, 10, 3, 15, 23, 14), myFormat, false)).toEqual("This is 15:23:14");
+
+        myFormat.display = "'Tuesday, March 21, 2024 at' dd-MM-yyyy HH:mma s G S";
+        expect(service.format(new Date(2024, 2, 21, 8, 30, 0), myFormat, false)).toEqual("Tuesday, March 21, 2024 at 21-03-2024 08:30AM 0 AD 0");
+
+        myFormat.display = "'Today is' dd-MM-yyyy HH:mm:ss";
+        expect(service.format(new Date(2014, 10, 3, 15, 23, 14), myFormat, false)).toEqual("Today is 03-11-2014 15:23:14");
+
+        myFormat.display = "'The date is' dd/MM/yyyy HH:mm:ss";
+        expect(service.format(new Date(2014, 10, 4, 15, 23, 14), myFormat, false)).toEqual("The date is 04/11/2014 15:23:14");
+
+        myFormat.display = "'It is now' dd MM yyyy KK:mm a";
+        expect(service.format(new Date(2014, 10, 5, 12, 23, 14), myFormat, false)).toEqual("It is now 05 11 2014 12:23 PM");
+
+        myFormat.display = "'At the stroke of' dd MM yyyy kk:mm";
+        expect(service.format(new Date(2014, 10, 5, 24, 23, 14), myFormat, false)).toEqual("At the stroke of 06 11 2014 00:23");
+
+        myFormat.display = "'On the day of' dd 'in the month of' MM', year' yyyy', the time was' HH:mm";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("On the day of 03 in the month of 11, year 2014, the time was 15:23");
+
+
+        myFormat.display = "dd 'day of' MM', year' yyyy 'witnessed the hour of' HH:mm 'sharp'";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("03 day of 11, year 2014 witnessed the hour of 15:23 sharp");
+
+        myFormat.display = "dd 'under the moon of' MM 'in' yy', precisely at' HH:mm";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("03 under the moon of 11 in 14, precisely at 15:23");
+
+        myFormat.display = "dd 'as the leaves fall in' MM 'of' yyyy', the clock strikes' HH:mm 'in the heart of night'";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("03 as the leaves fall in 11 of 2014, the clock strikes 15:23 in the heart of night");
+
+        myFormat.display = "'Today is' dd 'of' MM 'in the year' yyyy 'at' HH:mm";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("Today is 03 of 11 in the year 2014 at 15:23");
+
+
+    });
+
 });

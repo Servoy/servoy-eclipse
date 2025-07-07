@@ -101,6 +101,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 {
 	public static final String ID = "com.servoy.eclipse.ui.editors.TableEditor";
 
+	public static final String PREFERENCE_KEY_EXTENDED_VIEW = "com.servoy.eclipse.ui.editors.TableEditor.extended_view";
+
 	private boolean isModified;
 
 	private IServerInternal server;
@@ -289,7 +291,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			try
 			{
-				if (server != null)
+				if (server != null && getTable().getExistInDB())
 				{
 					for (Column element : getTable().getColumns())
 					{
@@ -1047,17 +1049,20 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					}
 
 					disposeDynamicPages();
-					createDynamicPages();
-
-					if (activeOrder != null)
+					if (!getContainer().isDisposed())
 					{
-						int pages = getPageCount();
-						for (int i = 0; i < pages; i++)
+						createDynamicPages();
+
+						if (activeOrder != null)
 						{
-							if (activeOrder.equals(getControl(i).getData("order")))
+							int pages = getPageCount();
+							for (int i = 0; i < pages; i++)
 							{
-								setActivePage(i);
-								break;
+								if (activeOrder.equals(getControl(i).getData("order")))
+								{
+									setActivePage(i);
+									break;
+								}
 							}
 						}
 					}

@@ -1,13 +1,20 @@
 import { IType, ITypesRegistryForSabloConverters, IPropertyContext } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
 import { DateType } from './date_converter';
+import { LoggerService, LoggerFactory } from '@servoy/public';
 
 // object type / default conversions
 export class ObjectType implements IType<any> {
 
     public static readonly TYPE_NAME = 'object';
 
-	constructor(private readonly typesRegistry: ITypesRegistryForSabloConverters, private readonly converterService: ConverterService<unknown>) {}
+    private log: LoggerService;
+
+	constructor(private readonly typesRegistry: ITypesRegistryForSabloConverters,
+                private readonly converterService: ConverterService<unknown>,
+                logFactory: LoggerFactory) {
+        this.log = logFactory.getLogger('ObjectType');
+    }
 
 	fromServerToClient(serverJSONValue: any, currentClientValue: any, propertyContext: IPropertyContext): any {
 		// this means that it's either a property with defined 'object' type (with any value) or the result of a server-side
@@ -29,9 +36,16 @@ export class ObjectType implements IType<any> {
 		return serverJSONValue;
 	}
 
-	fromClientToServer(newClientData: any, oldClientData: any, propertyContext: IPropertyContext): [any, any] {
-		let retVal = newClientData;
+    fromClientToServer(newClientData: any, oldClientData: any, propertyContext: IPropertyContext): [any, any] {
+        let [valueToSend, newValueRef, cyclicDepError] =  this.fromClientToServerInternal(newClientData, oldClientData, propertyContext, new Set(), false);
+        if (cyclicDepError) this.log.error("Value that will be sent to server (with nested cyclic refs set to null): " + JSON.stringify(valueToSend));
 
+        return [valueToSend, newValueRef];
+    }
+
+    private fromClientToServerInternal(newClientData: any, oldClientData: any, propertyContext: IPropertyContext, alreadyProcessedNestingValues: Set<unknown>, cyclicDepError: boolean): [any, any, boolean] {
+		let retVal = newClientData;
+        
 		// default conversion to server (for date values)
 		if (newClientData instanceof Date) {
 			const dateType = this.typesRegistry.getAlreadyRegisteredType(DateType.TYPE_NAME_SABLO);
@@ -44,21 +58,32 @@ export class ObjectType implements IType<any> {
 				retVal[ConverterService.VALUE_KEY] = this.converterService.convertFromClientToServer(newClientData,
 				        		 dateType , oldClientData, propertyContext)[0];
 			}
+		} else if (typeof newClientData === 'object' && newClientData != null && !(newClientData instanceof Event) && !(newClientData instanceof Element)) {
+            if (alreadyProcessedNestingValues.has(newClientData)) {
+                if (!cyclicDepError) this.log.error(new Error("fromClientToServer: plain 'object' typed data cannot be sent to server (recursive same references will be changed to null) when it contains circular references. One of the circular refs is: " + newClientData));
+                retVal = null;
+                cyclicDepError = true;
+            } else {
+                alreadyProcessedNestingValues.add(newClientData);
+                
+    			let isChanged = false;
+    			let newRetVal = {};
+    			for (const i in newClientData) { // works for both arrays (indexes) and objects (keys) in JS
+    				const oldEl = newClientData[i];
+    				const newEl = this.fromClientToServerInternal(oldEl, oldClientData ? oldClientData[i] : undefined, propertyContext, alreadyProcessedNestingValues, cyclicDepError);
+                    cyclicDepError ||= newEl[2];
+    				if (oldEl !== newEl[0]) {
+    					isChanged = true;
+    					newRetVal[i] = newEl[0];
+    				} else {
+    					newRetVal[i] = oldEl;
+    				}
+    			}
+    			if(isChanged) retVal = newRetVal;
+            }
 		}
 
-		/* TODO if needed (like if we want dates in nested objects/arrays of prop. type 'object' to also be sent properly to server): the code
-		     below is not supported by server-side code currently (JSONObject / JSONArray that it will become on server are not currently converted to java maps/lists in 'object' type)
-		    else if (newClientData instanceof Object) {
-			for (const i in newClientData) { // works for both arrays (indexes) and objects (keys) in JS
-				const oldEl = newClientData[i];
-				const newEl = this.fromClientToServer(oldEl, oldClientData ? oldClientData[i] : undefined, scope, propertyContext);
-				if (oldEl !== newEl) try { newClientData[i] = newEl; } catch (e) {} // just to not re-assign it if not needed as the
-				       // very broad "Object" detection above can be anything (even with restricted access to js members) not just simple
-				       // objects or arrays; in which case child els/props won't change most likely
-			}
-		}*/
-
-		return [retVal, newClientData];
+		return [retVal, newClientData, cyclicDepError];
 	}
 
 }

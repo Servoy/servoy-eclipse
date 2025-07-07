@@ -97,10 +97,12 @@ public class ColumnComposite extends Composite
 	private ColumnValidationComposite columnValidationComposite;
 	private ColumnConversionComposite columnConversionComposite;
 	private final Composite tableContainer;
-	private final Button displayDataProviderID;
+	private final Button extendedViewBtn;
 
 	private CopyColumnNameAction copyColumnNameAction;
 	private SearchForDataProvidersReferencesAction searchForReferences;
+
+	private boolean firstClick = true;
 
 	/**
 	 * Create the composite
@@ -179,7 +181,11 @@ public class ColumnComposite extends Composite
 					tabFolder.setVisible(b);
 					if (b) propagateSelection(c);
 					tableViewer.getTable().setToolTipText(c.getNote());
-					ColumnComposite.this.layout(true, true);
+					if (firstClick)
+					{
+						ColumnComposite.this.layout(true, true);
+						firstClick = false;
+					}
 
 					Display.getDefault().asyncExec(new Runnable()
 					{
@@ -206,27 +212,47 @@ public class ColumnComposite extends Composite
 			{
 				Point pt = new Point(event.x, event.y);
 				TableItem item = tableViewer.getTable().getItem(pt);
-				if (item != null && (event.stateMask & SWT.MOD1) > 0 && tableViewer.getTable().getSelection() != null)
+				if (item != null)
 				{
-					tableViewer.getTable().deselectAll();
-				}
-				else if (item != null && item.getBounds(displayDataProviderID.getSelection() ? CI_DELETE + 1 : CI_DELETE).contains(pt))
-				{
-					if (t.getTableType() != ITable.TABLE)
+					if ((event.stateMask & SWT.MOD1) > 0 && tableViewer.getTable().getSelection() != null)
 					{
-						MessageDialog.openInformation(getShell(), "Cannot delete column", "Cannot delete column from a view.");
-						return;
+						tableViewer.getTable().deselectAll();
 					}
-					Object column = item.getData();
-					if (column instanceof Column &&
-						MessageDialog.openConfirm(getShell(), "Delete column", "Are you sure you want to delete column '" + ((Column)column).getName() + "'?"))
+					else if (item.getBounds(isDataProviderIdDisplayed() ? CI_DELETE + 5 : CI_DELETE).contains(pt))
 					{
-						ArrayList<Column> columns = new ArrayList<Column>(t.getColumns());
-						int index = columns.indexOf(column);
-						t.removeColumn((Column)column);
-						WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
-						if (columnsList.size() > 0)
-							tableViewer.setSelection(new StructuredSelection(columnsList.get(index >= columnsList.size() ? index - 1 : index)), true);
+						if (t.getTableType() != ITable.TABLE)
+						{
+							MessageDialog.openInformation(getShell(), "Cannot delete column", "Cannot delete column from a view.");
+							return;
+						}
+						Object column = item.getData();
+						if (column instanceof Column &&
+							MessageDialog.openConfirm(getShell(), "Delete column",
+								"Are you sure you want to delete column '" + ((Column)column).getName() + "'?"))
+						{
+							ArrayList<Column> columns = new ArrayList<Column>(t.getColumns());
+							int index = columns.indexOf(column);
+							t.removeColumn((Column)column);
+							WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
+							if (columnsList.size() > 0)
+								tableViewer.setSelection(new StructuredSelection(columnsList.get(index >= columnsList.size() ? index - 1 : index)), true);
+						}
+					}
+					else if (item.getBounds(CI_EX_FORMAT).contains(pt))
+					{
+						tabFolder.setSelection(0);
+					}
+					else if (item.getBounds(CI_EX_AUTOENTER).contains(pt))
+					{
+						tabFolder.setSelection(1);
+					}
+					else if (item.getBounds(CI_EX_VALIDATION).contains(pt))
+					{
+						tabFolder.setSelection(2);
+					}
+					else if (item.getBounds(CI_EX_CONVERSION).contains(pt))
+					{
+						tabFolder.setSelection(3);
 					}
 				}
 			}
@@ -310,6 +336,7 @@ public class ColumnComposite extends Composite
 						tableViewer.setSelection(new StructuredSelection(c), true);
 					}
 					tableViewer.editElement(c, 0);
+					ColumnComposite.this.layout(true, true);
 				}
 				catch (RepositoryException e1)
 				{
@@ -319,15 +346,16 @@ public class ColumnComposite extends Composite
 			}
 		});
 
-		displayDataProviderID = new Button(container, SWT.CHECK);
-		displayDataProviderID.setText("Display DataProviderID");
-		displayDataProviderID.setVisible(!isViewFoundsetTable);
-		displayDataProviderID.addSelectionListener(new SelectionAdapter()
+		extendedViewBtn = new Button(container, SWT.CHECK);
+		extendedViewBtn.setText("Extended view");
+		extendedViewBtn.setVisible(!isViewFoundsetTable);
+		extendedViewBtn.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				showDataProviderColumn();
+				showExdendedView();
+				PlatformUI.getPreferenceStore().setValue(TableEditor.PREFERENCE_KEY_EXTENDED_VIEW, extendedViewBtn.getSelection());
 			}
 		});
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().addContainerGap().add(
@@ -336,11 +364,11 @@ public class ColumnComposite extends Composite
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
 						Short.MAX_VALUE).add(addButton).add(
 							groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
-								Short.MAX_VALUE).add(displayDataProviderID))))));
+								Short.MAX_VALUE).add(extendedViewBtn))))));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID)).addPreferredGap(
+				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(extendedViewBtn)).addPreferredGap(
 					LayoutStyle.RELATED)
 				.add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
 
@@ -348,13 +376,13 @@ public class ColumnComposite extends Composite
 			tableLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
 				addButton).add(
 					tableLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
-						Short.MAX_VALUE).add(displayDataProviderID)))
+						Short.MAX_VALUE).add(extendedViewBtn)))
 			.addContainerGap()));
 		tableLayout.setVerticalGroup(
 			tableLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 				tableLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
 					LayoutStyle.RELATED).add(
-						tableLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID))
+						tableLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(extendedViewBtn))
 					.addContainerGap()));
 		container.setLayout(tableLayout);
 		//
@@ -368,10 +396,10 @@ public class ColumnComposite extends Composite
 
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
-		if (hasDataProviderSet(t))
+		if (hasDataProviderSet(t) || PlatformUI.getPreferenceStore().getBoolean(TableEditor.PREFERENCE_KEY_EXTENDED_VIEW))
 		{
-			displayDataProviderID.setSelection(true);
-			showDataProviderColumn();
+			extendedViewBtn.setSelection(true);
+			showExdendedView();
 		}
 	}
 
@@ -406,10 +434,10 @@ public class ColumnComposite extends Composite
 		return false;
 	}
 
-	private void showDataProviderColumn()
+	private void showExdendedView()
 	{
 		TableColumnLayout layout = getTableLayout();
-		if (displayDataProviderID.getSelection())
+		if (isDataProviderIdDisplayed())
 		{
 			final TableColumn dataProviderIDColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_DATAPROVIDER_ID);
 			dataProviderIDColumn.setText("DataProviderID");
@@ -417,14 +445,35 @@ public class ColumnComposite extends Composite
 			dataProviderIDViewerColumn.setEditingSupport(new ColumnNameEditingSupport(tableViewer, false));
 			layout.setColumnData(dataProviderIDColumn, new ColumnWeightData(20, 50, true));
 			tableViewer.getTable().getColumn(CI_NAME).setText("SQL Name");
+
+			final TableColumn exFormatColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_EX_FORMAT);
+			exFormatColumn.setText("Format");
+			layout.setColumnData(exFormatColumn, new ColumnWeightData(20, 40, true));
+
+			final TableColumn exAutoenterColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_EX_AUTOENTER);
+			exAutoenterColumn.setText("Autoenter");
+			layout.setColumnData(exAutoenterColumn, new ColumnWeightData(20, 40, true));
+
+			final TableColumn exValidationColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_EX_VALIDATION);
+			exValidationColumn.setText("Validation");
+			layout.setColumnData(exValidationColumn, new ColumnWeightData(20, 40, true));
+
+			final TableColumn exConversionColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_EX_CONVERSION);
+			exConversionColumn.setText("Conversion");
+			layout.setColumnData(exConversionColumn, new ColumnWeightData(20, 40, true));
 		}
 		else
 		{
+			tableViewer.getTable().getColumn(CI_EX_CONVERSION).dispose();
+			tableViewer.getTable().getColumn(CI_EX_VALIDATION).dispose();
+			tableViewer.getTable().getColumn(CI_EX_AUTOENTER).dispose();
+			tableViewer.getTable().getColumn(CI_EX_FORMAT).dispose();
 			tableViewer.getTable().getColumn(CI_DATAPROVIDER_ID).dispose();
 			tableViewer.getTable().getColumn(CI_NAME).setText("Name");
 		}
 		tableContainer.setLayout(layout);
 		tableViewer.setLabelProvider(tableViewer.getLabelProvider());
+		tableViewer.getTable().clearAll();
 		tableViewer.refresh();
 		tableContainer.layout(true);
 	}
@@ -467,6 +516,11 @@ public class ColumnComposite extends Composite
 	static final int CI_SEQUENCE_TYPE = 5;
 	static final int CI_DELETE = 6;
 	static final int CI_DATAPROVIDER_ID = 1;
+
+	static final int CI_EX_FORMAT = 7;
+	static final int CI_EX_AUTOENTER = 8;
+	static final int CI_EX_VALIDATION = 9;
+	static final int CI_EX_CONVERSION = 10;
 
 	private ColumnNameEditingSupport nameEditor = null;
 	private TableColumn nameColumn;
@@ -743,7 +797,7 @@ public class ColumnComposite extends Composite
 
 	public boolean isDataProviderIdDisplayed()
 	{
-		return displayDataProviderID.getSelection();
+		return extendedViewBtn.getSelection();
 	}
 
 	public static String[] getSeqDisplayTypeStrings(ITable table)

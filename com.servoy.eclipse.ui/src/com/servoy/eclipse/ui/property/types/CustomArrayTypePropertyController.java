@@ -88,16 +88,17 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	{
 		callHandler(handler -> {
 			Object id = getId();
-			String parentKey;
 			if (id instanceof ArrayPropertyChildId)
 			{
-				parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+				String parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), null, false);
 			}
 			else
 			{
-				parentKey = String.valueOf(id);
+				String parentKey = String.valueOf(id);
+				handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), null, false);
+				cellEditor.applyValue(persistPropertySource.getPropertyValue(parentKey));
 			}
-			handler.createComponent(persistPropertySource, persistContext.getPersist().getUUID(), parentKey, getTypeName(), true, false);
 		});
 	}
 
@@ -186,7 +187,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					{
 						if (oldValue instanceof IPersist)
 						{
-							callHandler(handler -> handler.deleteComponent((IPersist)oldValue));
+							callHandler(handler -> handler.deleteComponent(persistPropertySource, ((IPersist)oldValue).getUUID()));
 						}
 					}
 
@@ -203,20 +204,22 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					@Override
 					protected void buttonClicked()
 					{
-						if (oldValue instanceof IPersist)
+						if (oldValue instanceof IPersist persist)
 						{
 							callHandler(handler -> {
 								Object id = getId();
 								String parentKey;
-								if (id instanceof ArrayPropertyChildId)
+								Integer idx = null;
+								if (id instanceof ArrayPropertyChildId arrayPropertyChildId)
 								{
-									parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+									idx = Integer.valueOf(arrayPropertyChildId.idx + 1);
+									parentKey = String.valueOf(arrayPropertyChildId.arrayPropId);
 								}
 								else
 								{
 									parentKey = String.valueOf(id);
 								}
-								handler.createComponent(persistPropertySource, ((IPersist)oldValue).getUUID(), parentKey, getTypeName(), false, true);
+								handler.createComponent(persistPropertySource, persist.getParent().getUUID(), parentKey, getTypeName(), idx, true);
 							});
 						}
 					}

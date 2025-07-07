@@ -154,7 +154,7 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 			}
 			catch (CoreException e)
 			{
-				e.printStackTrace();
+				ServoyLog.logError(e);
 			}
 		}
 		eclipseFile = componentsFolder.getFile(javaFile.getName());
@@ -210,9 +210,9 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 		{
 			project.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 		}
-		catch (CoreException e1)
+		catch (CoreException e)
 		{
-			e1.printStackTrace();
+			ServoyLog.logError(e);
 		}
 		IFolder folder = project.getFolder(this.folderName);
 		if (!folder.exists())

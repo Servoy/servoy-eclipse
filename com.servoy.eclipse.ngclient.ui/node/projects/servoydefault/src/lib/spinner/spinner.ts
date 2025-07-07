@@ -7,7 +7,8 @@ import { DOCUMENT } from '@angular/common';
     selector: 'servoydefault-spinner',
     templateUrl: './spinner.html',
     styleUrls: ['./spinner.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement> {
 

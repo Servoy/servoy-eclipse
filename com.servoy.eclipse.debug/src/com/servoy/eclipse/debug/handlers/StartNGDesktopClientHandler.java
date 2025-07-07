@@ -41,6 +41,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -64,7 +66,6 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.NGDesktopConfiguration;
 import com.servoy.eclipse.ui.preferences.NgDesktopPreferences;
@@ -84,10 +85,13 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	public static final String NGDESKTOP_APP_NAME = "servoyngdesktop";
 	public static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "https://download.servoy.com/ngdesktop/");
 	protected static String PLATFORM = Utils.isAppleMacOS() ? "-mac" : (Utils.isWindowsOS()) ? "-win" : "-linux";
+	protected static String ARCHITECTURE = Utils.isArmArchitecture() ? "-arm64" : "";
 	protected static String LOCAL_PATH = Activator.getDefault().getStateLocation().toOSString() + File.separator;
 	protected static String NGDESKTOP_PREFIX = NGDESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
 
 	protected static final int BUFFER_SIZE = 16 * 1024;
+
+	private final AtomicReference<Process> ngdesktopProcess = new AtomicReference<>(null);
 
 	static
 	{
@@ -194,8 +198,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			{
 				if (archiveUpdateNeeded())
 				{
-					URL archiveUrl = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + NGDESKTOP_PREFIX + PLATFORM + ".tar.gz");
-					String savePath = Utils.isAppleMacOS() ? LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM : LOCAL_PATH;
+					URL archiveUrl = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + ".tar.gz");
+					String savePath = Utils.isAppleMacOS() ? LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE : LOCAL_PATH;
 					deleteVersionFile();
 					downloadCancelled = downloadArchive(archiveUrl, savePath);
 				}
@@ -330,13 +334,12 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	private void updateJsonFile(Solution solution)
 	{
-		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() +
-			((new Ng2DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/") + solution.getName() + "/index.html";
+		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solution/" + solution.getName() + "/index.html";
 		String resourceStr = Utils.isAppleMacOS() ? "/" + NGDESKTOP_APP_NAME + ".app/Contents/Resources" : File.separator + "resources";
 		String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
 			File.separator + "servoy.json";
 
-		File configFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + configLocation).normalize().toFile();// + fileUrl);
+		File configFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + configLocation).normalize().toFile();// + fileUrl);
 		JSONObject configObject = getJsonObj(configFile, solutionUrl);
 
 		try (FileWriter file = new FileWriter(configFile);
@@ -352,20 +355,56 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	private void runNgDesktop(IProgressMonitor monitor)
 	{
-		//Now try opening servoyNGDesktop app.
+		// Now try opening servoyNGDesktop app.
 		try
 		{
+			Process existingProcess = ngdesktopProcess.get();
+			if (existingProcess != null)
+			{
+				try
+				{
+					existingProcess.destroy();
+					ngdesktopProcess.set(null); // Process ended, reset it
+				}
+				catch (IllegalThreadStateException ex)
+				{
+					// Process is still running
+					ServoyLog.logInfo("NGDesktop is already running.");
+					return;
+				}
+			}
+
+
 			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
-			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + File.separator + NGDESKTOP_APP_NAME + extension;
+			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + File.separator + NGDESKTOP_APP_NAME + extension;
 			monitor.beginTask("Open NGDesktop", 3);
-			String[] cmdArgs = Utils.isAppleMacOS() ? new String[] { "/usr/bin/open", command } : new String[] { command };
-			Runtime.getRuntime().exec(cmdArgs);
+
+			ProcessBuilder builder = new ProcessBuilder();
+			if (Utils.isAppleMacOS())
+			{
+				builder.command("/usr/bin/open", command);
+			}
+			else
+			{
+				builder.command(command);
+			}
+
+			builder.directory(new File(System.getProperty("user.dir")));
+			builder.redirectErrorStream(true); // redirect error stream to the output stream
+			Process process = builder.start();
+			ngdesktopProcess.set(process);
+			if (!process.waitFor(50, TimeUnit.MINUTES))
+			{
+				runNgDesktop(monitor);
+			}
+
 		}
-		catch (IOException e)
+		catch (IOException | InterruptedException e)
 		{
 			ServoyLog.logError("Cannot find servoy NGDesktop executable", e);
 		}
 	}
+
 
 	public String getStartTitle()
 	{
@@ -468,7 +507,8 @@ class DownloadNgDesktop implements IRunnableWithProgress
 		String fString = Activator.getDefault().getStateLocation().toOSString();
 		if (Utils.isAppleMacOS())
 		{
-			fString += File.separator + "servoyngdesktop" + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-mac";
+			fString += File.separator + "servoyngdesktop" + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-mac" +
+				StartNGDesktopClientHandler.ARCHITECTURE;
 		}
 		File f = new File(fString);
 		f.mkdirs();

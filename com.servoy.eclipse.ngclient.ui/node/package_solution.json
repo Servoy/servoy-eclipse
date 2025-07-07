@@ -1,7 +1,7 @@
 {
-  "name": "ngclient2",
-  "version": "2024.3.1",
-  "description": "Servoy NGClient2 2024.3.6.3949_LTS",
+  "name": "TiNG",
+  "version": "2025.3.0",
+  "description": "Servoy TiNG 2025.3.1.4043",
   "license": "GNU Affero General Public License",
   "scripts": {
     "ng": "ng",
@@ -13,6 +13,8 @@
     "build_debug": "ng build ngclient2 --watch",
     "build_debug_nowatch": "ng build ngclient2 --watch=false",
     "build_lib_debug": "ng build @servoy/public --watch",
+    "build_mobile": "ng build --configuration mobile --subresource-integrity=true ngclient2",
+    "build_mobile_debug": "ng build --configuration development_mobile ngclient2",
     "test": "ng test --watch --browsers Chrome",
     "test_public": "ng test @servoy/public --watch --browsers Chrome",
     "test_default": "ng test @servoy/servoydefault --watch --browsers Chrome",

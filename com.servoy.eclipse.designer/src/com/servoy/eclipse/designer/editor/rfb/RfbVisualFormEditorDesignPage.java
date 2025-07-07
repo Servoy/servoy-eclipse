@@ -71,7 +71,6 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -89,6 +88,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -128,7 +128,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				return point;
 			}
 			return location;
-		};
+		}
 	};
 
 	// for updating selection in editor when selection changes in IDE
@@ -268,7 +268,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			boolean marqueeSelectOuter = designerPreferences.getMarqueeSelectOuter();
 			Dimension formSize = flattenedForm.getSize();
 			if (isCSSPositionContainer) formSize = showedContainer.getSize();
-			final String path = (new Ng2DesignerPreferences()).showNG2Designer() ? "angular2" : "angular";
+			final String path = "angular2";
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/" + path + "/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() + "&hd=" + hideDefault + "&mso=" + marqueeSelectOuter +
@@ -525,6 +525,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			public void run()
 			{
 				designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh", new Object[] { });
+				designerWebsocketSession.valueChanged();
 			}
 		});
 	}
@@ -685,9 +686,9 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 		public void persistChanges(Collection<IPersist> changes)
 		{
-			Object media = changes.iterator().next();
+			Object persist = changes.iterator().next();
 
-			if (media instanceof Media mediaFile)
+			if (persist instanceof Media mediaFile)
 			{
 
 				if (mediaFile.getName().equals("variants.json") || mediaFile.getName().endsWith(".less") || mediaFile.getName().endsWith(".css"))
@@ -696,6 +697,11 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				}
 
 			}
+			else if (persist instanceof Menu)
+			{
+				refresh(false);
+			}
+
 		}
 
 

@@ -61,11 +61,6 @@ public class DebugMethod implements IViewActionDelegate
 		IDebugClientHandler debugClientHandler = Activator.getDefault().getDebugClientHandler();
 		if (sm != null && debugClientHandler.getDebugReadyClient() != null)
 		{
-			if (debugClientHandler.getDebugWebClient() != null)
-			{
-				//make sure the web client gets the latest changes
-				debugClientHandler.getDebugWebClient().checkForChanges();
-			}
 			IPath path = sm.getPath();
 			String[] segments = path.segments();
 			String solutionName = segments[0];

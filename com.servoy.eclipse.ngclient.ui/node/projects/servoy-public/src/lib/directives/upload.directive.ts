@@ -2,7 +2,8 @@ import { Directive , Input, OnInit, HostListener} from '@angular/core';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Directive({
-  selector: '[svyUpload]'
+    selector: '[svyUpload]',
+    standalone: false
 })
 export class UploadDirective implements OnInit {
     @Input() formname: string;

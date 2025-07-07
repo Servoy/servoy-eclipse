@@ -124,7 +124,7 @@ public class ZOrderCommand extends AbstractEditorAndOutlineActionDelegateHandler
 			CompoundCommand cc = new CompoundCommand();
 			for (OrderableElement element : elements)
 			{
-				cc.add(new SetPropertyCommand("zindex", PersistPropertySource.createPersistPropertySource(element.getFormElement(), false),
+				cc.add(new SetPropertyCommand("zindex", PersistPropertySource.createPersistPropertySource(element.getFormElement(), form, false),
 					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), element.zIndex));
 			}
 			return cc;

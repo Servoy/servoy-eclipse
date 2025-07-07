@@ -57,6 +57,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
@@ -119,12 +120,21 @@ public class LinkWithEditorAction extends Action
 		else selection = selectionP;
 
 		List<IPersist> persists = new ArrayList<IPersist>();
+		IPersist context = null;
 		if (selection instanceof IStructuredSelection)
 		{
 			Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
 			while (iterator.hasNext())
 			{
 				Object obj = iterator.next();
+				if (obj instanceof PersistContext && (context == null || ((PersistContext)obj).getContext() == context))
+				{
+					context = ((PersistContext)obj).getContext();
+				}
+				else
+				{
+					context = null;
+				}
 				IPersist persist = Platform.getAdapterManager().getAdapter(obj, IPersist.class);
 				if (persist instanceof BaseComponent && ((BaseComponent)persist).getName() != null)
 				{
@@ -207,7 +217,28 @@ public class LinkWithEditorAction extends Action
 			List<TreePath> paths = new ArrayList<TreePath>();
 			for (Map.Entry<UUID, IFile> entry : files.entrySet())
 			{
-				TreePath path = ((SolutionExplorerTreeContentProvider)treeContentProvider).getTreePath(entry.getKey());
+				TreePath path = null;
+				if (context == null)
+				{
+					path = ((SolutionExplorerTreeContentProvider)treeContentProvider).getTreePath(entry.getKey());
+				}
+				else
+				{
+					path = ((SolutionExplorerTreeContentProvider)treeContentProvider).getTreePath(context.getUUID());
+					if (path != null)
+					{
+						TreePath innerPath = ((SolutionExplorerTreeContentProvider)treeContentProvider).getTreePath(entry.getKey(),
+							(PlatformSimpleUserNode)path.getLastSegment());
+						if (innerPath != null)
+						{
+							for (int i = 1; i < innerPath.getSegmentCount(); i++)
+							{
+								path = path.createChildPath(innerPath.getSegment(i));
+							}
+						}
+					}
+				}
+
 				if (path != null)
 				{
 					tree.expandToLevel(path, 1);
@@ -549,6 +580,10 @@ public class LinkWithEditorAction extends Action
 		if (solution != null)
 		{
 			PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)contentProvider).getSolutionNode(solution.getName());
+			if (solutionNode != null && solutionNode.children == null)
+			{
+				((SolutionExplorerTreeContentProvider)contentProvider).getChildren(solutionNode);
+			}
 			if (solutionNode != null && solutionNode.children != null)
 			{
 				for (SimpleUserNode child : solutionNode.children)

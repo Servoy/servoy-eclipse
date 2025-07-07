@@ -19,12 +19,9 @@ package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.ui.property.PersistPropertySource.NullDefaultLabelProvider;
 import com.servoy.j2db.persistence.IPersist;
@@ -56,57 +53,12 @@ public class VersionPropertyController extends PropertySetterController<String, 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		return new CellEditor(parent, SWT.NONE)
+		return new TextCellEditor(parent, SWT.NONE)
 		{
-			private String value;
-			private boolean setValue = true;
-
-			@Override
-			protected Control createControl(Composite parentComposite)
-			{
-				Text text = new Text(parentComposite, SWT.NONE);
-				text.addModifyListener(event -> {
-					if (!setValue) return;
-					doSetValue(text.getText());
-				});
-				text.addKeyListener(new KeyListener()
-				{
-					@Override
-					public void keyReleased(KeyEvent e)
-					{
-					}
-
-					@Override
-					public void keyPressed(KeyEvent e)
-					{
-						if (e.keyCode == SWT.CR)
-						{
-							doSetValue(text.getText());
-						}
-					}
-				});
-				return text;
-			}
-
-			@Override
-			protected Object doGetValue()
-			{
-				return value;
-			}
-
-			@Override
-			protected void doSetFocus()
-			{
-				setValue = false;
-				((Text)getControl()).setText("-none-".equals(value) ? "" : value);
-				((Text)getControl()).setSelection(((Text)getControl()).getText().length());
-				setValue = true;
-			}
-
 			@Override
 			protected void doSetValue(Object newValue)
 			{
-				this.value = "-none-".equals(((String)newValue).trim()) ? "" : ((String)newValue).trim();
+				super.doSetValue("-none-".equals(((String)newValue).trim()) ? "" : ((String)newValue).trim());
 			}
 		};
 	}

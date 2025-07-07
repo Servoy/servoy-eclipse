@@ -6,7 +6,7 @@ export class FormSettings {
     public size: { width: number; height: number };
 }
 
-/** Cache for a Servoy form. Also keeps the component caches, Servoy form component caches etc. */
+/** Cache for a Servoy form (data/model instances, no UI). Also keeps the component caches, Servoy form component caches etc. */
 export class FormCache implements IFormCache {
     public navigatorForm: FormSettings;
     public size: Dimension;
@@ -163,12 +163,14 @@ export class FormCache implements IFormCache {
  */
 export interface IFormComponent extends IApiExecutor {
     name: string;
-    // called when there are changed pushed to this form, so this form can trigger a detection change
+
+    /** called when there are changes pushed into this form's existing cache/state, so that this form can trigger a detection change */
     detectChanges(): void;
-    // called when there are changed pushed to this form, so this form can trigger a detection change
+    
+    /** called when there are changed pushed to this form (and a new form cache/state), so that this form can store the new cache and trigger a detection change on it's new cache/state */
     formCacheChanged(cache: FormCache): void;
 
-    // called when a model property is updated for the given compponent, but the value itself didn't change (only nested)
+    /** called when a model property is updated for the given compponent, but the value itself didn't change (only nested) */
     triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: unknown}[]): void;
 
     updateFormStyleClasses(ngutilsstyleclasses: string): void;
@@ -216,7 +218,7 @@ export class ComponentCache implements IComponentCache {
         public layout: { [property: string]: string },
         public readonly typesRegistry: TypesRegistry) {
             this.type = ComponentCache.convertToJSName(elType ? elType : specName);
-            this.model = {};
+            this.model = {visible:true};
     }
 
     private static convertToJSName(webObjectSpecName: string) {

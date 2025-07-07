@@ -24,8 +24,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -93,11 +95,26 @@ public class FixedSelectAllAction extends SelectAllAction
 //			}
 		}
 
-		// select them all.
-		selectionProvider.setSelection(new StructuredSelection(
-			Utils.asList(ModelUtils.getEditingFlattenedSolution(part.getForm()).getFlattenedForm(part.getForm()).getFormElementsSortedByFormIndex()).stream()
-				.map(persist -> PersistContext.create(persist, part.getForm())).collect(Collectors.toList())));
-
+		if (part.getForm().isResponsiveLayout())
+		{
+			// Get the last zoomed container and select all its children if it is a CSSPositionContainer
+			LayoutContainer lc = (LayoutContainer)((RfbVisualFormEditorDesignPage)part.getGraphicaleditor()).getShowedContainer();
+			if (lc != null && "csspositioncontainer".equals(lc.getSpecName()))
+			{
+				selectionProvider.setSelection(new StructuredSelection(
+					lc.getAllObjectsAsList()
+						.stream()
+						.map(persist -> PersistContext.create(persist, part.getForm())).collect(Collectors.toList())));
+			}
+		}
+		else
+		{
+			// select them all.
+			selectionProvider.setSelection(new StructuredSelection(
+				Utils.asList(ModelUtils.getEditingFlattenedSolution(part.getForm()).getFlattenedForm(part.getForm()).getFormElementsSortedByFormIndex())
+					.stream()
+					.map(persist -> PersistContext.create(persist, part.getForm())).collect(Collectors.toList())));
+		}
 	}
 
 	@Override

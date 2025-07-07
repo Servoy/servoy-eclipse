@@ -59,11 +59,6 @@ public class SetSelectionHandler implements IServerService
 		this.selectionProvider = selectionProvider;
 	}
 
-	/**
-	 * @param methodName
-	 * @param args
-	 * @throws JSONException
-	 */
 	public Object executeMethod(String methodName, final JSONObject args) throws JSONException
 	{
 		JSONArray json = args.getJSONArray("selection");
@@ -72,7 +67,7 @@ public class SetSelectionHandler implements IServerService
 		{
 			String uuid = json.getString(i);
 
-			IPersist searchPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
+			IPersist searchPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
 			if (searchPersist != null)
 			{
 				selection.add(PersistContext.create(searchPersist, editorPart.getForm()));

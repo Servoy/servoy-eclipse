@@ -44,7 +44,7 @@ describe('FoundsetConverter', () => {
         typesRegistry = TestBed.inject(TypesRegistry);
         typesRegistry.registerGlobalType(FoundsetType.TYPE_NAME, new FoundsetType(sabloService, sabloDeferHelper, viewportService, loggerFactory));
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, new DateType());
-        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService), true);
+        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService, loggerFactory), true);
 
         changeNotified = false;
         someDate = new Date();

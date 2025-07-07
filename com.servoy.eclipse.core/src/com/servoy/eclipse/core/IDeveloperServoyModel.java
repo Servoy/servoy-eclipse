@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -45,8 +44,6 @@ public interface IDeveloperServoyModel extends IServoyModel
 	public IValidateName getNameValidator();
 
 	public void dispose();
-
-	public AbstractServoyModel refreshServoyProjects();
 
 	public void buildActiveProjectsInJob();
 

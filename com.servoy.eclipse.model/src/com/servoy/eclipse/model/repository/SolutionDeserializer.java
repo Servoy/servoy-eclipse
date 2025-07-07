@@ -17,7 +17,6 @@
 package com.servoy.eclipse.model.repository;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -655,7 +654,8 @@ public class SolutionDeserializer
 			{
 				// main solution directory
 				return SolutionSerializer.FORMS_DIR.equals(subdir.getName()) || SolutionSerializer.RELATIONS_DIR.equals(subdir.getName()) ||
-					SolutionSerializer.VALUELISTS_DIR.equals(subdir.getName()) || SolutionSerializer.DATASOURCES_DIR_NAME.equals(subdir.getName());
+					SolutionSerializer.VALUELISTS_DIR.equals(subdir.getName()) || SolutionSerializer.DATASOURCES_DIR_NAME.equals(subdir.getName()) ||
+					SolutionSerializer.MENUS_DIR.equals(subdir.getName());
 			}
 			if (parentDir.getParentFile().equals(solutionDir) && SolutionSerializer.DATASOURCES_DIR_NAME.equals(parentDir.getName()))
 			{
@@ -1558,6 +1558,17 @@ public class SolutionDeserializer
 					object.put("start", comment.sourceStart());
 					object.put("end", comment.sourceEnd());
 					object.put("text", comment.getText());
+					int linenr = 1;
+					int commentLineIndex = comment.sourceStart();
+					for (Line line : lines)
+					{
+						if (line.start > commentLineIndex)
+						{
+							linenr = line.line;
+							break;
+						}
+					}
+					object.put("linenr", linenr);
 					array.put(object);
 				}
 				jsonObjects.get(0).put(EXTRA_DOC_COMMENTS, array.toString());
@@ -1937,10 +1948,6 @@ public class SolutionDeserializer
 				{
 					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, null);
 				}
-				if (obj.has(DECL_KEYWORD))
-				{
-					((ScriptVariable)retval).setKeyword(obj.getString(DECL_KEYWORD));
-				}
 
 			}
 			else if (retval instanceof AbstractScriptProvider)
@@ -2054,6 +2061,10 @@ public class SolutionDeserializer
 			if (obj.has(EXTRA_DOC_COMMENTS))
 			{
 				((AbstractBase)retval).putCustomProperty(new String[] { EXTRA_DOC_COMMENTS }, obj.get(EXTRA_DOC_COMMENTS));
+			}
+			if (retval instanceof ScriptVariable && obj.has(DECL_KEYWORD))
+			{
+				((ScriptVariable)retval).setKeyword(obj.getString(DECL_KEYWORD));
 			}
 			if (useFilesForDirtyMark) handleChanged(obj, retval);
 		}
@@ -2287,14 +2298,14 @@ public class SolutionDeserializer
 							}
 							catch (Exception e)
 							{
-								ServoyLog.logError(e);
+								ServoyLog.logError("Error while reading working sets file: " + path, e);
 							}
 						}
 					}
 				}
-				catch (IOException ex)
+				catch (Exception ex)
 				{
-					ServoyLog.logError(ex);
+					ServoyLog.logError("Error while reading working sets file: " + path, ex);
 				}
 			}
 		}

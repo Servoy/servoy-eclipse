@@ -13,6 +13,7 @@ import { ApplicationService } from './application.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { FormSettings } from '../types';
+import { environment as env} from '../../environments/environment';
 
 @Injectable()
 export class WindowService {
@@ -50,6 +51,15 @@ export class WindowService {
 
         this.windowCounter = 0;
         this.renderer2 = rendererFactory.createRenderer(null, null);
+        
+        if (env.mobile && (this.windowRefService.nativeWindow as any)._formdata_) {
+			const formsData: Array<{[key: string]: any}> = (this.windowRefService.nativeWindow as any)._formdata_;
+			formsData.forEach(formData => {
+				for (const formName in formData) {
+					this.formService.createFormCache(formName, formData[formName], formName);
+				}
+			})   
+        }
     }
 
     public updateController(formName: string, formStructure: string, url: string) {
@@ -92,7 +102,7 @@ export class WindowService {
                 return;
             }
 
-            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-dialog').length < 1) {
                 const customEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
                 });
@@ -241,7 +251,7 @@ export class WindowService {
                 }
             }
             instance.hide();
-            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-dialog').length < 1) {
                 const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                 });
@@ -300,6 +310,12 @@ export class WindowService {
             this.instances[name].setSize( size );
         }
     }
+	
+	public requestFullscreen(name: string ){
+		if ( this.instances[name] ) {
+			this.instances[name].requestFullscreen();
+		}
+	}
 
     public getSize(name: string ) {
         if ( this.instances[name] && this.instances[name].bsWindowInstance ) {
@@ -465,6 +481,7 @@ export class WindowService {
                         this.setInitialBounds(window.name, window.initialBounds);
                         this.setStoreBounds(window.name, window.storeBounds);
                         this.setSize(window.name, window.size);
+						this.requestFullscreen(window.name);
                         this.setLocation(window.name, window.location);
                         this.setOpacity(window.name, window.opacity);
                         this.setTransparent(window.name, window.transparent);
@@ -542,6 +559,17 @@ export class SvyWindow {
         if (this.storeBounds) this.windowService.localStorageService.set(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.size', this.size);
     }
+	
+	requestFullscreen() {
+		const doc = document.documentElement as IHTMLElement;
+		if (doc.requestFullscreen) {
+			doc.requestFullscreen().catch(err => console.log(err));
+		} else if (doc.webkitRequestFullscreen) { /* Safari */
+			doc.webkitRequestFullscreen().catch(err => console.log(err));
+		} else if (doc.msRequestFullscreen) { /* IE11 */
+			doc.msRequestFullscreen().catch(err => console.log(err));
+		}
+	}
 
     getSize() {
         return this.size;
@@ -572,4 +600,9 @@ export class SvyWindow {
         this.title = title;
         if(this.bsWindowInstance) this.bsWindowInstance.setTitle(title);
     }
+}
+
+interface IHTMLElement extends HTMLElement {
+	webkitRequestFullscreen?: () => Promise<void>;
+	msRequestFullscreen?: () => Promise<void>;
 }

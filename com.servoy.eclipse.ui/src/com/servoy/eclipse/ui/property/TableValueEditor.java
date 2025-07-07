@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.property;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.inmemory.MenuTable;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -38,7 +39,7 @@ public class TableValueEditor implements IValueEditor<Object>
 			IDataSourceWrapper tw = (IDataSourceWrapper)value;
 
 			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(tw.getDataSource());
-			if (table != null)
+			if (table != null && !(table instanceof MenuTable))
 			{
 				return true;
 			}

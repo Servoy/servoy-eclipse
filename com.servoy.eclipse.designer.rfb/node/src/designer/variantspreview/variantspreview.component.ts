@@ -11,7 +11,8 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
     selector: 'designer-variantspreview',
     templateUrl: './variantspreview.component.html',
     styleUrls: ['./variantspreview.component.css'],
-	encapsulation: ViewEncapsulation.Emulated
+    encapsulation: ViewEncapsulation.Emulated,
+    standalone: false
 })
 export class VariantsPreviewComponent implements AfterViewInit {
 
@@ -23,6 +24,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
     clientURL: SafeResourceUrl;
     margin = 16; //ng-popover margin
 	variantItemBeingDragged: Node;
+	variantItemBeingDisplayed: Node;
 	variantsIFrame: HTMLIFrameElement;
 	top = -1000;
 	left = -1000;
@@ -35,17 +37,19 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	maxPopupHeight = 300;
     popupParkingPosition = '-10000px';
     scrollbarwidth = 32;
+	showVariantPopup = false;
 	
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
         private windowRef: WindowRefService, private popoverCfgRef: NgbPopoverConfig, private editorSession: EditorSessionService,
 		private editorContentService: EditorContentService) {
 	
 		this.editorSession.variantsTrigger.subscribe((value) => {
-			if (value.show) {
+			if (value.show == true) {
 				this.top = value.top;
 				this.left = value.left;
-			} else {
-				this.hidePopover('block');
+				this.showPopover();
+			} else if (value.show == false) {
+				this.hidePopover();
 			}
 		});
 
@@ -80,6 +84,8 @@ export class VariantsPreviewComponent implements AfterViewInit {
 				this.variantsIFrame = this.document.getElementById('VariantsForm') as HTMLIFrameElement;
 				this.variantsIFrame.contentWindow.document.body.addEventListener('mouseup', this.onMouseUp);
                 this.variantsIFrame.contentWindow.document.body.addEventListener('mousemove', this.onMouseMove);
+			} else if (event.data.id === 'variantsEscapePressed') {
+				this.editorSession.variantsTrigger.emit({ show: false });
 			}
         });
         if (!this.isPopoverInitialized) {
@@ -94,22 +100,21 @@ export class VariantsPreviewComponent implements AfterViewInit {
         this.left = -1000;
         //need to create the form prior to correctly rendering variants in designer
         this.setPopoverSizeAndPosition(100, 100);
-		this.hidePopover('block');
+		this.hidePopover();
 
     }
 
-	hidePopover(iframeDisplay: string) {
+	hidePopover() {
 		this.editorSession.variantsPopup.emit({status: 'hidden'});
-        if (this.variantsIFrame) {
-            this.variantsIFrame.style.display = iframeDisplay;
-            const popoverCtrl = this.document.getElementById('VariantsCtrl');
-            popoverCtrl.style.top = this.popupParkingPosition;
-            popoverCtrl.style.left = this.popupParkingPosition;	
-        }
+        this.variantsIFrame && (this.variantsIFrame.style.display = 'none');
+        const popoverCtrl = this.document.getElementById('VariantsCtrl');
+        popoverCtrl.style.top = this.popupParkingPosition;
+        popoverCtrl.style.left = this.popupParkingPosition;	
 	}
 
 	showPopover() {
 		this.editorSession.variantsPopup.emit({status: 'visible'});
+		this.variantsIFrame.style.display = 'block';
 	}
 
 	setPopoverSizeAndPosition(formWidth: number, formHeight: number) {
@@ -150,32 +155,41 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	}
 
 	onVariantsClick = () => {
-		this.hidePopover('block');
+		this.showPopover();
 	}
 
 	onVariantMouseDown = (pageX: number, pageY: number) => {
-		this.variantItemBeingDragged = this.variantsIFrame.contentWindow.document.elementFromPoint(pageX, pageY).cloneNode(true) as Element;
-		this.renderer.setStyle(this.variantItemBeingDragged, 'left',pageX + 'px');
-        this.renderer.setStyle(this.variantItemBeingDragged, 'top', pageY + 'px');
-        this.renderer.setStyle(this.variantItemBeingDragged, 'position', 'absolute');
+		this.variantItemBeingDragged = this.variantsIFrame.contentWindow.document.elementFromPoint(pageX, pageY)?.cloneNode(true) as Element;
+		this.variantItemBeingDisplayed = this.variantsIFrame.contentWindow.document.elementFromPoint(pageX, pageY)?.parentNode.cloneNode(true) as Element;
 		this.renderer.setAttribute(this.variantItemBeingDragged, 'id', 'svy_variantelement');
-        this.variantsIFrame.contentWindow.document.body.appendChild(this.variantItemBeingDragged);
+
+		const applyStyles = (element: Element) => {
+			this.renderer.setStyle(element, 'left', `${pageX}px`);
+			this.renderer.setStyle(element, 'top', `${pageY}px`);
+			this.renderer.setStyle(element, 'position', 'absolute');
+		};
+		
+        applyStyles(this.variantItemBeingDragged as Element);
+		applyStyles(this.variantItemBeingDisplayed as Element);
+		this.variantsIFrame.contentWindow.document.body.appendChild(this.variantItemBeingDisplayed);
 	}
 
 	onMouseUp = (event: MouseEvent) => {
 		event.stopPropagation();
-		if (this.variantItemBeingDragged) {
-			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDragged);
-			this.variantItemBeingDragged = null;
+		if (this.variantItemBeingDisplayed) {
+			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDisplayed);
 			this.windowRef.nativeWindow.postMessage({ id: 'onVariantMouseUp'});
 		}
+		this.variantItemBeingDragged = null;
+		this.variantItemBeingDisplayed = null;
 	}
 
 	onMouseMove = () => {
-		if (this.variantItemBeingDragged) {
-			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDragged);
+		if (this.variantItemBeingDisplayed) {
+			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDisplayed);
 			this.variantItemBeingDragged = null;
-			this.hidePopover('none');
+			this.variantItemBeingDisplayed = null;
+			this.hidePopover();
 		}
 	}
 

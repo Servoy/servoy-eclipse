@@ -22,6 +22,10 @@ import java.util.Map;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -29,6 +33,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -42,6 +47,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -58,13 +65,18 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetSorter;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.actions.CopyPropertyValueAction;
+import com.servoy.eclipse.ui.actions.PastePropertyValueAction;
+import com.servoy.eclipse.ui.actions.ToggleNoDefaultPropertiesViewAction;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.property.IProvidesTooltip;
+import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.eclipse.ui.views.solutionexplorer.HTMLToolTipSupport;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Settings;
@@ -78,11 +90,53 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 	private Composite composite;
 	private Label propertiesLabel;
 	private final Map<String, IAction> actions;
+	private Clipboard clipboard2;
+	private CopyPropertyValueAction copyValueAction;
+	private PastePropertyValueAction pasteValueAction;
+
+	private IPersist selectedPersist = null;
+
+	private ToggleNoDefaultPropertiesViewAction toggleNoDefaultPropertiesViewAction;
 
 	public ModifiedPropertySheetPage(Map<String, IAction> actions)
 	{
 		super();
 		this.actions = actions;
+	}
+
+	@Override
+	public void makeContributions(IMenuManager menuManager,
+		IToolBarManager toolBarManager, IStatusLineManager statusLineManager)
+	{
+		super.makeContributions(menuManager, toolBarManager, statusLineManager);
+		toggleNoDefaultPropertiesViewAction = new ToggleNoDefaultPropertiesViewAction();
+		toolBarManager.add(toggleNoDefaultPropertiesViewAction);
+	}
+
+	@Override
+	public void selectionChanged(IWorkbenchPart part, ISelection selection)
+	{
+		if (selection instanceof IStructuredSelection sel && !sel.isEmpty())
+		{
+			Object firstElement = sel.getFirstElement();
+			if (firstElement instanceof IAdaptable adaptable)
+			{
+				firstElement = adaptable.getAdapter(IPersist.class);
+			}
+			if (firstElement instanceof IPersist persist)
+			{
+				selectedPersist = persist;
+			}
+			else
+			{
+				selectedPersist = null;
+			}
+		}
+		else
+		{
+			selectedPersist = null;
+		}
+		super.selectionChanged(part, selection);
 	}
 
 	@Override
@@ -112,6 +166,23 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					}
 				}
 				return super.compare(entryA, entryB);
+			}
+
+			@Override
+			public int compareCategories(String categoryA, String categoryB)
+			{
+				if (selectedPersist instanceof MenuItem)
+				{
+					if (PropertyCategory.Properties.name().equals(categoryA))
+					{
+						return -1;
+					}
+					if (PropertyCategory.Properties.name().equals(categoryB))
+					{
+						return 1;
+					}
+				}
+				return super.compareCategories(categoryA, categoryB);
 			}
 		});
 
@@ -144,7 +215,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 							// the contains(">") and "<" below are an attempt to detect if the tooltip text is html based or just a simple String (in which case we need to change \n to <br/>)
 							return HTMLToolTipSupport.createBrowserTooltipContentArea(this,
 								lastTooltipText.contains("<") && lastTooltipText.contains(">") ? lastTooltipText : lastTooltipText.replaceAll("\\n", "<br/>"),
-								parent, false, 600, 450, 150, 50);
+								parent, false, 600, 450, 250, 150);
 						} // else should never happen because of shouldCreateToolTip() below that should have returned false
 					}
 					return new Composite(parent, SWT.NONE); // no tooltip
@@ -207,9 +278,13 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					{
 						hardcodedText = "Warning: Do not use dialogs, as a dialog will interfere with focus";
 					}
+					else if ("authenticator".equals(item.getText(0)))
+					{
+						hardcodedText = "This can set various options for the stateless login page, see <a href='https://docs.servoy.com/guides/develop/security/authentication'>authenciation</a> for more information";
+					}
 					else if (StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName().equals(item.getText(0)))
 					{
-						hardcodedText = "Set value <empty> for no title text";
+						hardcodedText = "Set value &lt;empty> for no title text";
 					}
 					else if (StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(item.getText(0)))
 					{
@@ -349,6 +424,21 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				selectionChanged(activeEditor, selectionProvider.getSelection());
 			}
 		}
+
+		Shell shell = control.getShell();
+		clipboard2 = new Clipboard(shell.getDisplay());
+
+		MenuManager menuManager = (MenuManager)control.getMenu().getData(MenuManager.MANAGER_KEY);
+		menuManager.add(copyValueAction = new CopyPropertyValueAction("Copy Value", clipboard2));
+		menuManager.add(pasteValueAction = new PastePropertyValueAction("Paste Value", clipboard2, this));
+
+		Menu menu = menuManager.getMenu();
+		if (menu != null)
+		{
+			menu.dispose();
+		}
+		menu = menuManager.createContextMenu(control);
+		control.setMenu(menu);
 	}
 
 	private TreeItem getNextSibling(Tree tree, TreeItem currentItem, boolean forward)
@@ -479,5 +569,35 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			}
 			propertiesLabel.setText(text);
 		}
+	}
+
+	@Override
+	public void handleEntrySelection(ISelection selection)
+	{
+		super.handleEntrySelection(selection);
+		if (copyValueAction != null)
+		{
+			copyValueAction.selectionChanged((IStructuredSelection)selection);
+		}
+		if (pasteValueAction != null)
+		{
+			pasteValueAction.selectionChanged((IStructuredSelection)selection);
+		}
+	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		if (clipboard2 != null)
+		{
+			clipboard2.dispose();
+			clipboard2 = null;
+		}
+		copyValueAction = null;
+		pasteValueAction = null;
+
+		toggleNoDefaultPropertiesViewAction = null;
+
 	}
 }

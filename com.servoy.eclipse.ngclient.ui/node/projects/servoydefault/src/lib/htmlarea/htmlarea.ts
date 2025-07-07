@@ -7,7 +7,8 @@ import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 @Component({
     selector: 'servoydefault-htmlarea',
     templateUrl: './htmlarea.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 
@@ -47,6 +48,13 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
 
     click({ event }: { event: MouseEvent }) {
         if (this.onActionMethodID) this.onActionMethodID(new MouseEvent(event.type, event));
+    }
+
+    contextMenu(event) {
+        if (this.onRightClickMethodID) {
+            this.onRightClickMethodID(new CustomEvent('contextmenu'));
+            event.event.preventDefault();
+        }
     }
 
     ngOnInit() {

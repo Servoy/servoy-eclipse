@@ -19,6 +19,9 @@ export class TooltipService {
     }
 
 
+    /**
+     * Showsthe tooltip on the screen on the position of the mouse event, showing the message with a initial delay and dismissing it after dismissDelay.
+     */
     public showTooltip(event: MouseEvent, message: string, initialDelay: number, dismissDelay: number) {
         let e = event;
         if (!e) e = this.windowRefService.nativeWindow.event as MouseEvent;
@@ -47,6 +50,9 @@ export class TooltipService {
         this.tipInitialTimeout = setTimeout(() => this.adjustAndShowTooltip(dismissDelay), initialDelay);
     }
 
+    /**
+     *  hides the tooltip directly that is currently showing.
+     */
     public hideTooltip() {
         this.internalHideTooltip();
     }
@@ -133,9 +139,10 @@ export class TooltipService {
         clearTimeout(this.tipInitialTimeout);
         clearTimeout(this.tipTimeout);
 
-        const tDiv = this.getTooltipDiv();
-        tDiv.style.display = 'none';
-        this.isTooltipActive.next(false);
+        if (this.tooltipDiv){
+            this.tooltipDiv.style.display = 'none';
+            this.isTooltipActive.next(false);
+        }
     }
 }
 

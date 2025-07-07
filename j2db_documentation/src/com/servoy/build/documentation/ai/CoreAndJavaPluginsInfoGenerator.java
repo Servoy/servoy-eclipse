@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.servoy.build.documentation.apigen.ConfluenceGenerator;
 import com.servoy.build.documentation.apigen.FunctionTemplateModel;
 import com.servoy.build.documentation.apigen.MarkdownGenerator;
 import com.servoy.j2db.documentation.ClientSupport;
@@ -97,11 +96,16 @@ public class CoreAndJavaPluginsInfoGenerator
 		if (functions != null && functions.size() > 0)
 		{
 			List<FunctionTemplateModel> models = new ArrayList<>();
+			ClientSupport fdCs;
 			for (IFunctionDocumentation fd : functions)
 			{
 				if (fd.isDeprecated()) continue;
-				if (ngOnly && !fd.getClientSupport().hasSupport(ClientSupport.ng)) continue;
-				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly);
+
+				fdCs = fd.getClientSupport();
+				if (fdCs == null) fdCs = ClientSupport.Default;
+
+				if (ngOnly && !fdCs.hasSupport(ClientSupport.ng)) continue;
+				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, MarkdownGenerator::getPublicName, cls, ngOnly, null);
 				models.add(ftm);
 //			if ("void".equals(ftm.getReturnType()) || ftm.getReturnType() == null)
 //			{
@@ -123,7 +127,7 @@ public class CoreAndJavaPluginsInfoGenerator
 	private void generateClientSupport(IObjectDocumentation value)
 	{
 		ClientSupport clientSupport = value.getClientSupport();
-		List<String> support = ConfluenceGenerator.getSupportedClientsList(clientSupport);
+		List<String> support = MarkdownGenerator.getSupportedClientsList(clientSupport);
 		root.put("supportedClients", support);
 	}
 

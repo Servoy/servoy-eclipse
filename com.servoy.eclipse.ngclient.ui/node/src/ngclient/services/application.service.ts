@@ -340,7 +340,7 @@ export class ApplicationService {
         bsWindowInstance.setActive(true);
     }
 
-    public showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<string> {
+    public showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const messageDialogWindowComponent = this.mainViewRefService.mainContainer.createComponent(MessageDialogWindowComponent);
 
@@ -348,6 +348,7 @@ export class ApplicationService {
             messageDialogWindowComponent.instance.styleClass = styleClass;
             messageDialogWindowComponent.instance.values = values;
             messageDialogWindowComponent.instance.buttonsText = buttonsText;
+            messageDialogWindowComponent.instance.inputType = inputType;
 
             const dialogWindowComponentEl = messageDialogWindowComponent.location.nativeElement.childNodes[0];
             const windowWidth = this.doc.documentElement.clientWidth;
@@ -421,9 +422,12 @@ export class ApplicationService {
         return this.windowRefService.nativeWindow.navigator.clipboard.readText();
     }
 
-    public replaceUrlState() {
-        history.replaceState({}, '', this.windowRefService.nativeWindow.location.href.split('?')[0]);
-    }
+	public replaceUrlState(): void {
+		const currentUrl = this.windowRefService.nativeWindow.location.href;
+		const baseUrl = currentUrl.split('?')[0];
+		const cleanedUrl = baseUrl.replace('/svylogin', '').replace('/svy_oauth', '');
+		history.replaceState({}, '', cleanedUrl);
+	}
 
     private showDefaultLoginWindow() {
         const defaultLoginWindowComponent = this.mainViewRefService.mainContainer.createComponent(DefaultLoginWindowComponent);

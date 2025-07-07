@@ -21,7 +21,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
  * Holder for property value with sub-properties (like Dimension, Point, ..)..
- * 
+ *
  * @author rgansevles
  */
 
@@ -61,9 +61,9 @@ public class ComplexProperty<T> implements IAdaptable
 
 	/**
 	 * Convert from base object to ComplexProperty wrapper.
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 * @param <T>
 	 */
 	public static abstract class ComplexPropertyConverter<T> implements IPropertyConverter<T, Object>
@@ -80,5 +80,11 @@ public class ComplexProperty<T> implements IAdaptable
 			// this happens when complex value is edited directly in the cell-editor, an not via one of the child-nodes.
 			return (T)value;
 		}
+	}
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [" + value + "]";
 	}
 }

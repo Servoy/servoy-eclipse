@@ -71,7 +71,8 @@ public class CreateComponentsHandler extends CreateComponentHandler
 								newPersists = new ArrayList<IPersist>();
 								for (int i = 0; i < components.length(); i++)
 								{
-									IPersist[] persist = CreateComponentCommand.createComponent(editorPart, CreateComponentOptions.fromJson(components.getJSONObject(i)),
+									IPersist[] persist = CreateComponentCommand.createComponent(editorPart.getForm(),
+										CreateComponentOptions.fromJson(components.getJSONObject(i)),
 										changedPersists);
 									for (IPersist iPersist : persist)
 									{

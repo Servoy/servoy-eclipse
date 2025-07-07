@@ -19,9 +19,28 @@ package com.servoy.eclipse.debug.handlers;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.ui.internal.browser.BrowserManager;
+import org.eclipse.ui.internal.browser.IBrowserDescriptor;
+import org.eclipse.ui.internal.browser.Messages;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
@@ -29,7 +48,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.NGClientStarter;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.IDebugClient;
@@ -41,14 +59,52 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * @author jcompagner
  *
  */
-public class StartNGClientHandler extends StartWebClientHandler implements NGClientStarter
+public class StartNGClientHandler extends StartDebugHandler implements NGClientStarter, IRunnableWithProgress, IHandler
 {
+	private IWebBrowser webBrowser;
+	private IEclipsePreferences eclipsePreferences;
+
+	protected static final String COMMAND_PARAMETER = "com.servoy.eclipse.debug.browser";
+	protected static final String LAST_USED_BROWSER = "com.servoy.eclipse.debug.browser.last";
+
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException
+	{
+		//make sure the plugins are loaded
+		DLTKDebugUIPlugin.getDefault();
+		DebugPlugin.getDefault();
+
+		initBrowser(event.getParameter(COMMAND_PARAMETER));
+
+		Job job = new Job(getStartTitle())
+		{
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				try
+				{
+					StartNGClientHandler.this.run(monitor);
+				}
+				catch (InvocationTargetException itex)
+				{
+					ServoyLog.logError(itex);
+				}
+				catch (InterruptedException intex)
+				{
+					ServoyLog.logError(intex);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see com.servoy.eclipse.debug.actions.StartWebClientActionDelegate#getStartTitle()
 	 */
-	@Override
 	public String getStartTitle()
 	{
 		return "NGClient launch";
@@ -97,7 +153,7 @@ public class StartNGClientHandler extends StartWebClientHandler implements NGCli
 				if (testAndStartDebugger())
 				{
 					monitor.worked(3);
-					final String solution_path = (new Ng2DesignerPreferences()).launchNG2() ? "/solution/" : "/solutions/";
+					final String solution_path = "/solution/";
 					final IDebugClient debugNGClient = Activator.getDefault().getDebugNGClient();
 					if (debugNGClient != null && debugNGClient.getSolution() != null)
 					{
@@ -127,6 +183,83 @@ public class StartNGClientHandler extends StartWebClientHandler implements NGCli
 		finally
 		{
 			monitor.done();
+		}
+	}
+
+	protected IWebBrowser getWebBrowser() throws PartInitException
+	{
+		return webBrowser == null ? PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser() : webBrowser;
+	}
+
+	public void initBrowser(String name)
+	{
+		String lastUsedBrowser = getLastUsedBrowserName();
+		String ewbName = name == null ? lastUsedBrowser : name;
+		try
+		{
+			for (IBrowserDescriptor ewb : BrowserManager.getInstance().getWebBrowsers())
+			{
+				if (ewb.getName().equals(ewbName))
+				{
+					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
+					org.eclipse.ui.internal.browser.IBrowserExt ext = null;
+					if (ewb != null && !ewb.getName().equals(Messages.prefSystemBrowser))
+					{
+						//ext := "org.eclipse.ui.browser." + specifiId
+
+						if (ewb.getLocation() != null)
+							webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." + ewb.getName().toLowerCase().replace(" ", "_"), ewb);
+						else
+						{
+							ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
+
+							if (ext != null)
+							{
+								webBrowser = ext.createBrowser(ext.getId(), ewb.getLocation(), ewb.getParameters());
+								if (webBrowser == null) webBrowser = new ExternalBrowserInstance(ext.getId(), ewb);
+							}
+						}
+					}
+
+					if (webBrowser == null || ((ewb != null && ewb.getName().equals(Messages.prefSystemBrowser)) &&
+						(webBrowser != null && !webBrowser.equals(support.getExternalBrowser()))))
+					{
+
+						webBrowser = support.getExternalBrowser();
+					}
+				}
+			}
+			if (name != null && !name.equals(lastUsedBrowser)) setLastUsedBrowserName(name);
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+	}
+
+	private String getLastUsedBrowserName()
+	{
+		if (eclipsePreferences == null)
+		{
+			eclipsePreferences = InstanceScope.INSTANCE.getNode(Activator.PLUGIN_ID);
+		}
+		return eclipsePreferences.get(LAST_USED_BROWSER, Messages.prefSystemBrowser);
+	}
+
+	private void setLastUsedBrowserName(String browserName)
+	{
+		if (eclipsePreferences == null)
+		{
+			eclipsePreferences = InstanceScope.INSTANCE.getNode(Activator.PLUGIN_ID);
+		}
+		eclipsePreferences.put(LAST_USED_BROWSER, browserName);
+		try
+		{
+			eclipsePreferences.flush();
+		}
+		catch (BackingStoreException e)
+		{
+			Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
 		}
 	}
 }

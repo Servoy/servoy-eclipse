@@ -17,24 +17,15 @@
 package com.servoy.eclipse.core;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IDocumentationManager;
 import com.servoy.j2db.documentation.IObjectDocumentation;
@@ -43,9 +34,7 @@ import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
-import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.Extension;
-import com.servoy.j2db.util.JarManager.ExtensionResource;
 
 public class XMLScriptObjectAdapterLoader
 {
@@ -78,9 +67,9 @@ public class XMLScriptObjectAdapterLoader
 				ServoyLog.logError("Error reading documentation from " + url, t);
 			}
 
-			// the following - commented out code is only to be used when for adjusting native-references.xml of org.eclipse.dltk.javascript.core/resources
+			// the following - commented out code is only to be used for adjusting native-references.xml of org.eclipse.dltk.javascript.core/resources
 			// when one of the classes in com.servoy.j2db.documentation.scripting.docs changed
-			// see NGClientStarter commented code that prints those out to console and those can be used as descriptinos in native-references.xml (used in code completion for native javascript types)
+			// see NGClientStarter commented code that prints those out to console and those can be used as descriptions in native-references.xml (used in code completion for native javascript types)
 //			url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc_jslib.xml");
 //			try
 //			{
@@ -112,20 +101,7 @@ public class XMLScriptObjectAdapterLoader
 			{
 				try
 				{
-					Class< ? > clazz = DocumentationUtil.loadClass(loader, objDoc.getQualifiedName());
-					// see if there are already return types that the class itself specifies (to be exactly the same as a real client)
-					IScriptObject scriptObjectForClass = ScriptObjectRegistry.getScriptObjectForClass(clazz);
-					XMLScriptObjectAdapter adapter = new XMLScriptObjectAdapter(objDoc, scriptObjectForClass);
-					if (scriptObjectForClass != null)
-					{
-						Class< ? >[] allReturnedTypes = scriptObjectForClass.getAllReturnedTypes();
-						if (allReturnedTypes != null && allReturnedTypes.length > 0)
-						{
-							// if there are return types already set those.
-							adapter.setReturnTypes(allReturnedTypes);
-						}
-					}
-					ScriptObjectRegistry.registerScriptObjectForClass(clazz, adapter);
+					registerReturnTypesFromDoc(loader, objDoc);
 					succeeded++;
 				}
 				catch (Throwable e)
@@ -141,6 +117,24 @@ public class XMLScriptObjectAdapterLoader
 
 		Date stop = new Date();
 		ServoyLog.logInfo("Documentation loaded and registered in " + (stop.getTime() - start.getTime()) + " ms.");
+	}
+
+	public static void registerReturnTypesFromDoc(ClassLoader loader, IObjectDocumentation objDoc) throws ClassNotFoundException
+	{
+		Class< ? > clazz = DocumentationUtil.loadClass(loader, objDoc.getQualifiedName());
+		// see if there are already return types that the class itself specifies (to be exactly the same as a real client)
+		IScriptObject scriptObjectForClass = ScriptObjectRegistry.getScriptObjectForClass(clazz);
+		XMLScriptObjectAdapter adapter = new XMLScriptObjectAdapter(objDoc, scriptObjectForClass);
+		if (scriptObjectForClass != null)
+		{
+			Class< ? >[] allReturnedTypes = scriptObjectForClass.getAllReturnedTypes();
+			if (allReturnedTypes != null && allReturnedTypes.length > 0)
+			{
+				// if there are return types already set those.
+				adapter.setReturnTypes(allReturnedTypes);
+			}
+		}
+		ScriptObjectRegistry.registerScriptObjectForClass(clazz, adapter);
 	}
 
 	public static IObjectDocumentation getObjectDocumentation(Class< ? > clz)
@@ -191,51 +185,4 @@ public class XMLScriptObjectAdapterLoader
 		}
 	}
 
-	/**
-	 * Tries to load documentation XMLs for available beans.
-	 */
-	public static void loadDocumentationForBeans(IBeanManagerInternal beanManager, IDocumentationManagerProvider documentationManagerProvider)
-	{
-		File beanDir = beanManager.getBeansDir();
-		Map<String, List<ExtensionResource>> beans = beanManager.getLoadedBeanDefs();
-		List<File> allJars = new ArrayList<File>();
-		for (List<ExtensionResource> exts : beans.values())
-		{
-			for (ExtensionResource ext : exts)
-			{
-				allJars.add(new File(beanDir, ext.jarFileName));
-			}
-		}
-		for (File jarPath : allJars)
-		{
-			try
-			{
-				JarFile file = new JarFile(jarPath);
-				Manifest mf = file.getManifest();
-				if (mf != null)
-				{
-					List<String> beanClasses = JarManager.getClassNamesForKey(mf, JarManager.JAVA_BEAN_ATTRIBUTE);
-					Set<String> docXMLs = new TreeSet<String>();
-					for (String clz : beanClasses)
-					{
-						docXMLs.add(XMLScriptObjectAdapterLoader.getPluginDocXMLForClass(clz));
-					}
-					for (String docXMLPath : docXMLs)
-					{
-						ZipEntry docEntry = file.getEntry(docXMLPath);
-						if (docEntry != null)
-						{
-							InputStream is = file.getInputStream(docEntry);
-							IDocumentationManager mgr = documentationManagerProvider.fromXML(is, beanManager.getClassLoader());
-							XMLScriptObjectAdapterLoader.loadDocumentationFromXML(beanManager.getClassLoader(), mgr);
-						}
-					}
-				}
-			}
-			catch (IOException e)
-			{
-				ServoyLog.logError("Exception while loading extension XML files from JAR file '" + jarPath + "'.", e);
-			}
-		}
-	}
 }

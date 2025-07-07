@@ -69,10 +69,13 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 		{
 			return new ComplexProperty<Object>(value)
 			{
+				ObjectPropertySource propertySource = null;
+
 				@Override
 				public IPropertySource getPropertySource()
 				{
-					return getObjectChildPropertySource(this);
+					if (propertySource == null) propertySource = getObjectChildPropertySource(this);
+					return propertySource;
 				}
 			};
 		}
