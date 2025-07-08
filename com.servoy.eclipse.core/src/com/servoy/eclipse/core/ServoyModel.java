@@ -3881,11 +3881,19 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						while (it.hasNext())
 						{
 							String path = it.next();
-							IResource resource = getWorkspace().getRoot().getFile(new Path(path));
-							resources.add(resource);
-							if (!resource.exists())
+							try
 							{
-								it.remove();
+								IResource resource = getWorkspace().getRoot().getFile(new Path(path));
+								resources.add(resource);
+								if (!resource.exists())
+								{
+									it.remove();
+								}
+							}
+							catch (Exception e)
+							{
+								ServoyLog.logError("The path " + path + " from the working set file " + workingSetName + " is illegal, please adjust that file",
+									e);
 							}
 						}
 					}
