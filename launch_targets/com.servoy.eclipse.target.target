@@ -284,30 +284,6 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
-                    <groupId>org.apache.httpcomponents.client5</groupId>
-                    <artifactId>httpclient5-win</artifactId>
-                    <version>5.2.3</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents.client5</groupId>
-                    <artifactId>httpclient5</artifactId>
-                    <version>5.4.4</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents.core5</groupId>
-                    <artifactId>httpcore5-h2</artifactId>
-                    <version>5.3.4</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents.core5</groupId>
-                    <artifactId>httpcore5</artifactId>
-                    <version>5.3.4</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
                     <groupId>org.apache.james</groupId>
                     <artifactId>apache-mime4j</artifactId>
                     <version>0.6</version>

@@ -11,7 +11,6 @@
     <version>2025.6.0.4082</version>
   </parent>
   <artifactId>com.servoy.eclipse.core</artifactId>
-  <version>2025.6.0.4082</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 		<plugins>
