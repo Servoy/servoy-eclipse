@@ -814,6 +814,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				setInput(getEditorInput());
 				removePage(0);
 				createPages();
+				setActivePage(0);
 				if (getEditorSite() != null && getEditorSite().getPage().getActivePart() == this)
 				{
 					//if an editor was previously open, then after restart we have to make sure that our modified properties sheet page is used
@@ -834,7 +835,6 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					// set up the editor actions, this is normally done in part activation listener
 					getEditorSite().getActionBarContributor().setActiveEditor(this);
 				}
-				setActivePage(0);
 			});
 		}
 		else
