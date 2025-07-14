@@ -475,7 +475,11 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             const value = { width: formSize.width, height: formSize.height }
             const oldValue = this.formCache.getComponent('').model['size'];
             if (oldValue.width != value.width || oldValue.height != value.height) {
-                this.formservice.sendChanges(this.name, '', 'size', value, oldValue, false);
+				if (this.formservice.getFormCache(this)){
+					this.formservice.sendChanges(this.name, '', 'size', value, oldValue, false);
+				}else{
+					this.log.warn("onResize called on form visible in browser but missing from cache: " + this.name);
+				}
             }
         }
     }
