@@ -349,7 +349,7 @@ public class TextFilter extends ViewerFilter
 	    if (text == null) {
 			throw new IllegalArgumentException();
 		}
-	
+
 	    int tlen = text.length();
 	    if (start < 0) {
 			start = 0;
@@ -370,12 +370,12 @@ public class TextFilter extends ViewerFilter
 			}
 	        return new Position(x, x + fLength);
 	    }
-	
+
 	    int segCount = fSegments.length;
 	    if (segCount == 0) {
 			return new Position(start, end);
 		}
-	
+
 	    int curPos = start;
 	    int matchStart = -1;
 	    int i;
@@ -463,6 +463,11 @@ public class TextFilter extends ViewerFilter
 		}
 		int i = 0;
 		String current = fSegments[i];
+
+		if (current == null)
+		{
+			return false;
+		}
 		int segLength = current.length();
 
 		/* process first segment */
