@@ -27,6 +27,4 @@ public interface IDeveloperFeedback
 	String getCode();
 
 	String getToolTipText();
-
-	void setToolTipText(String toolTipText);
 }

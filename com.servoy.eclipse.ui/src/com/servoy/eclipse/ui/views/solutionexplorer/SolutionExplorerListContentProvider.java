@@ -2832,12 +2832,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								return "/** @type {" + ElementUtil.getDecoratedCustomTypeName(entry.getValue()) + "} */";
 							}
 
-							@Override
-							public void setToolTipText(String toolTipText)
-							{
-								// TODO Auto-generated method stub
-							}
-
 						});
 						return node;
 					}).sorted((node1, node2) -> node1.getName().compareTo(node2.getName())).collect(Collectors.toList());
@@ -3052,18 +3046,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return "<pre>" + (isMetadata ? "Metadata table " : "Table") + " with datasource: '<b>" + getCode() + "\'</b><pre";
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#setToolTipText(java.lang.String)
-		 */
-		@Override
-		public void setToolTipText(String toolTipText)
-		{
-			// TODO Auto-generated method stub
-
-		}
-
 	}
 	private static class ProcedureFeedback implements IDeveloperFeedback
 	{
@@ -3106,18 +3088,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		public String getToolTipText()
 		{
 			return "<pre>Procedure with signature: '<b>" + getCode() + "\'</b><pre";
-		}
-
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#setToolTipText(java.lang.String)
-		 */
-		@Override
-		public void setToolTipText(String toolTipText)
-		{
-			// TODO Auto-generated method stub
-
 		}
 	}
 
@@ -3338,18 +3308,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 			}
 			return paramTypes.substring(0, paramTypes.length() - 2);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#setToolTipText(java.lang.String)
-		 */
-		@Override
-		public void setToolTipText(String toolTipText)
-		{
-			// TODO Auto-generated method stub
-
 		}
 	}
 
@@ -3594,18 +3552,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return toolTip;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#setToolTipText(java.lang.String)
-		 */
-		@Override
-		public void setToolTipText(String toolTipText)
-		{
-			// TODO Auto-generated method stub
-
-		}
-
 	}
 
 	/**
@@ -3639,18 +3585,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		public String getToolTipText()
 		{
 			return getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic), elementName, false);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#setToolTipText(java.lang.String)
-		 */
-		@Override
-		public void setToolTipText(String toolTipText)
-		{
-			// TODO Auto-generated method stub
-
 		}
 	}
 
@@ -3688,18 +3622,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		public String getToolTipText()
 		{
 			return "<pre><b>" + c.getTypeAsString() + " " + c.getDataProviderID() + "</b></pre>";
-		}
-
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#setToolTipText(java.lang.String)
-		 */
-		@Override
-		public void setToolTipText(String toolTipText)
-		{
-			// TODO Auto-generated method stub
-
 		}
 
 	}

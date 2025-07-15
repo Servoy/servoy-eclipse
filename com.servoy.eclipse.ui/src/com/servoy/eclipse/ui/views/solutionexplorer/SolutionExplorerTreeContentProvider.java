@@ -4225,17 +4225,6 @@ public class SolutionExplorerTreeContentProvider
 			return scriptObject instanceof XMLScriptObjectAdapter soo ? soo.getObjectDocumentation() : null;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#setToolTipText(java.lang.String)
-		 */
-		@Override
-		public void setToolTipText(String toolTipText)
-		{
-			this.tooltip = toolTipText;
-		}
-
 	}
 
 	public PlatformSimpleUserNode getAllWebPackagesNode()
