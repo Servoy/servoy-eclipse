@@ -3883,11 +3883,17 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							String path = it.next();
 							try
 							{
-								IResource resource = getWorkspace().getRoot().getFile(new Path(path));
-								resources.add(resource);
-								if (!resource.exists())
+								IResource resource = getWorkspace().getRoot().findMember(new Path(path));
+								if (resource == null || !resource.exists())
 								{
 									it.remove();
+									ServoyLog.logWarning("The path " + path + " from the working set file " + workingSetName +
+										" is illegal, will remove it from the working set",
+										new RuntimeException("Illegal path in working set file " + workingSetName));
+								}
+								else
+								{
+									resources.add(resource);
 								}
 							}
 							catch (Exception e)
@@ -3927,7 +3933,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			(event.getNewValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId())))
 		{
 
-			Job job = new Job("Seriale working set")
+			Job job = new Job("Serialize working set")
 			{
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
