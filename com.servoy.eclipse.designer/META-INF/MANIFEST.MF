@@ -33,7 +33,8 @@ Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.ui.browser,
  org.eclipse.dltk.javascript.rhino,
  com.servoy.eclipse.notification,
- com.equo.chromium;resolution:=optional
+ com.equo.chromium;resolution:=optional,
+ net.bytebuddy.byte-buddy
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.resource,org.eclipse.ui.plugin,org.osgi.framework"
 Bundle-RequiredExecutionEnvironment: JavaSE-21

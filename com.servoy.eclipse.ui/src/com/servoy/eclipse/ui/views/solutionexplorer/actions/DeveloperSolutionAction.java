@@ -18,17 +18,16 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.mozilla.javascript.Function;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.developersolution.DeveloperNGClient;
-import com.servoy.eclipse.ui.editors.IFlagChangeEditor;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.editors.ISupportDeveloperMenu;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.scripting.SolutionScope;
-import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 
 /**
@@ -41,16 +40,20 @@ public class DeveloperSolutionAction extends Action
 {
 
 	private final Function function;
-	private final Object[] args;
+	private final String solutionName;
+	private final Form[] forms;
+	private final BaseComponent[] components;
 
 	/**
 	 * @param key
 	 * @param value
 	 */
-	public DeveloperSolutionAction(JSDeveloperMenu key, Function function, Object[] args)
+	public DeveloperSolutionAction(JSDeveloperMenu key, Function function, String solutionName, Form[] forms, BaseComponent[] components)
 	{
 		this.function = function;
-		this.args = args;
+		this.solutionName = solutionName;
+		this.forms = forms;
+		this.components = components;
 		setText(key.getText());
 	}
 
@@ -58,28 +61,33 @@ public class DeveloperSolutionAction extends Action
 	@Override
 	public void run()
 	{
-		SolutionScope solutionScope = DeveloperNGClient.INSTANCE.getScriptEngine().getSolutionScope();
-		DeveloperNGClient.INSTANCE.getWebsocketSession().getEventDispatcher().addEvent(() -> {
-			try
+		if (forms != null && forms.length > 0)
+		{
+			IEditorPart editorPart = EditorUtil.openFormDesignEditor(this.forms[0]);
+			if (editorPart instanceof ISupportDeveloperMenu formEditor)
 			{
-				Object retValue = DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, args, false, false);
-				if (retValue instanceof Boolean b && b.booleanValue() && args[0] instanceof JSForm jsform)
+				formEditor.executeDeveloperMenuCommand(function, forms, components);
+			}
+			else
+			{
+				ServoyLog.logInfo("DeveloperSolutionAction form editor does not implement ISupportDeveloperMenu - skipping execution");
+			}
+		}
+		else if (solutionName != null)
+		{
+			SolutionScope solutionScope = DeveloperNGClient.INSTANCE.getScriptEngine().getSolutionScope();
+			DeveloperNGClient.INSTANCE.getWebsocketSession().getEventDispatcher().addEvent(() -> {
+				try
 				{
-					Display.getDefault().asyncExec(() -> {
-						ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, jsform.getContainer(), true);
-						IEditorPart editorPart = EditorUtil.openFormDesignEditor((Form)jsform.getContainer());
-						if (editorPart instanceof IFlagChangeEditor formEditor)
-						{
-							formEditor.flagModified();
-						}
-					});
+					DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, new Object[] { solutionName }, false,
+						false);
 				}
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		});
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			});
+		}
 	}
 
 }
