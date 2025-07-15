@@ -134,8 +134,8 @@ public class ServoyResourcesProject implements IProjectNature
 			{
 				for (String path : pathsList)
 				{
-					IFile file = getProject().getWorkspace().getRoot().getFile(new Path(path));
-					if (file.exists() && file.getProject().getName().equals(solutionName))
+					IResource resource = getProject().getWorkspace().getRoot().findMember(new Path(path));
+					if (resource != null && resource.exists() && resource.getProject().getName().equals(solutionName))
 					{
 						return true;
 					}
@@ -236,14 +236,14 @@ public class ServoyResourcesProject implements IProjectNature
 			List<String> formNames = new ArrayList<String>();
 			for (String path : pathsList)
 			{
-				IFile file = getProject().getWorkspace().getRoot().getFile(new Path(path));
-				if (solutionNames != null)
+				IResource resource = getProject().getWorkspace().getRoot().findMember(new Path(path));
+				if (resource != null && resource.exists() && solutionNames != null)
 				{
 					for (String solutionName : solutionNames)
 					{
-						if (file.exists() && file.getProject().getName().equals(solutionName))
+						if (resource.getProject().getName().equals(solutionName))
 						{
-							String formName = SolutionSerializer.getFormNameFromFile(file);
+							String formName = SolutionSerializer.getFormNameFromFile(resource);
 							if (formName != null && !formNames.contains(formName))
 							{
 								formNames.add(formName);
@@ -335,10 +335,10 @@ public class ServoyResourcesProject implements IProjectNature
 			List<String> affectedSolutions = new ArrayList<String>();
 			for (String path : pathsList)
 			{
-				IFile file = getProject().getWorkspace().getRoot().getFile(new Path(path));
-				if (file.exists() && !affectedSolutions.contains(file.getProject().getName()))
+				IResource resource = getProject().getWorkspace().getRoot().findMember(new Path(path));
+				if (resource != null && resource.exists() && !affectedSolutions.contains(resource.getProject().getName()))
 				{
-					affectedSolutions.add(file.getProject().getName());
+					affectedSolutions.add(resource.getProject().getName());
 				}
 			}
 			for (IWorkingSetChangedListener listener : listeners)
