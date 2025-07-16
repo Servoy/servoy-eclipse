@@ -404,7 +404,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
                 if (event.viewportRowsUpdated) {
                     // copy the viewport data over to the cell
-                    // TODO this only is working for "updates", what happens with deletes or inserts?
                     const changes = event.viewportRowsUpdated;
                     let insertOrDeletes = false;
                     changes.forEach(change => {
@@ -414,7 +413,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         this.agGrid.api.refreshServerSide({ purge: true });
                         this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
                     }
-                    else this.agGrid.api.refreshCells();
+                    else if (changes.length == 1 && changes[0].startIndex === changes[0].endIndex){
+						this.agGrid.api.refreshCells();	
+					}
+					else {
+						this.agGrid.api.refreshServerSide({ purge: true });	
+					}
                 } else if (event.viewportRowsCompletelyChanged || event.fullValueChanged) {
                     this.agGrid.api.refreshServerSide({ purge: true });
                 }
