@@ -109,6 +109,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
+import com.servoy.eclipse.ui.node.FormTooltipFeedback;
 import com.servoy.eclipse.ui.node.IDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -2796,8 +2797,11 @@ public class SolutionExplorerTreeContentProvider
 
 	private void addFormNode(Form f, List<PlatformSimpleUserNode> nodes, PlatformSimpleUserNode parentNode)
 	{
-		PlatformSimpleUserNode node = new PlatformSimpleUserNode(f.getName(), UserNodeType.FORM, f.getName(),
-			f.getDataSource() == null ? "No table" : ("Server: " + f.getServerName() + ", Table: " + f.getTableName()), f,
+		PlatformSimpleUserNode node = new PlatformSimpleUserNode(
+			f.getName(),
+			UserNodeType.FORM,
+			(IDeveloperFeedback)new FormTooltipFeedback(f.getName(), null, f),
+			(Object)f,
 			ElementUtil.getImageForFormEncapsulation(f));
 		nodes.add(node);
 		node.parent = parentNode;
@@ -2820,7 +2824,7 @@ public class SolutionExplorerTreeContentProvider
 							ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().hasPersistsInServoyWorkingSets(workingSet,
 								new String[] { solution.getName() }, true))))
 					{
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, null, solution,
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, (String)null, solution,
 							uiActivator.loadImageFromBundle("servoy_workingset.png"));
 						nodes.add(node);
 						node.parent = formsNode;
@@ -2950,7 +2954,7 @@ public class SolutionExplorerTreeContentProvider
 		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
 		for (String name : allLayoutNames)
 		{
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(name, UserNodeType.FORM_CONTAINERS_ITEM, null, null,
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(name, UserNodeType.FORM_CONTAINERS_ITEM, (String)null, null,
 				uiActivator.loadImageFromBundle("layoutcontainer.png"));
 			node.setDeveloperFeedback(new SimpleDeveloperFeedback(name + ".", null, null));
 			elements.add(node);
