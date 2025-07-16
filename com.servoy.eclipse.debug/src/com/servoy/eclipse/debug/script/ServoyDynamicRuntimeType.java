@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.debug.script;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -75,9 +76,65 @@ public class ServoyDynamicRuntimeType extends RSimpleType implements IJavaScript
 	{
 		if (visited.add(current))
 		{
-			if (self.getName().equals(current.getName()))
+			String selfName = self.getName();
+			String currentName = current.getName();
+			if (selfName.equals(currentName))
 			{
 				return TypeCompatibility.TRUE;
+			}
+			String selfConfig = null;
+			String currentConfig = null;
+			if (selfName.contains("<") && selfName.endsWith(">"))
+			{
+				selfConfig = selfName.substring(selfName.indexOf('<') + 1, selfName.length() - 1);
+				selfName = selfName.substring(0, selfName.indexOf('<'));
+			}
+			if (currentName.contains("<") && currentName.endsWith(">"))
+			{
+				currentConfig = currentName.substring(currentName.indexOf('<') + 1, currentName.length() - 1);
+				currentName = currentName.substring(0, currentName.indexOf('<'));
+			}
+			if (selfName.equals(currentName))
+			{
+				if (selfConfig == null)
+				{
+					return TypeCompatibility.TRUE;
+				}
+				if (selfConfig.startsWith("{") && selfConfig.endsWith("}"))
+				{
+					selfConfig = selfConfig.substring(1, selfConfig.length() - 1).trim();
+				}
+				if (currentConfig != null && currentConfig.startsWith("{") && currentConfig.endsWith("}"))
+				{
+					currentConfig = currentConfig.substring(1, currentConfig.length() - 1).trim();
+				}
+				if (selfConfig.equals(currentConfig))
+				{
+					return TypeCompatibility.TRUE;
+				}
+				if (currentConfig != null)
+				{
+					Map<String, String> currentConfigProperties = new HashMap<String, String>();
+					String[] props = currentConfig.split(",");
+					for (String prop : props)
+					{
+						String[] propAndValue = prop.split(":");
+						currentConfigProperties.put(propAndValue[0].trim(), propAndValue.length > 1 ? propAndValue[1].trim() : "");
+					}
+					props = selfConfig.split(",");
+					for (String prop : props)
+					{
+						// must be present in the current config, and must have the same value
+						String[] propAndValue = prop.split(":");
+						if (!currentConfigProperties.containsKey(propAndValue[0].trim()) ||
+							!currentConfigProperties.get(propAndValue[0].trim()).equals(propAndValue.length > 1 ? propAndValue[1].trim() : ""))
+						{
+							return TypeCompatibility.FALSE;
+						}
+					}
+					return TypeCompatibility.TRUE;
+				}
+				return TypeCompatibility.FALSE;
 			}
 			final IRTypeDeclaration superType = current.getSuperType();
 			if (superType != null)
