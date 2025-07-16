@@ -209,6 +209,10 @@ export class FormService {
                 comp.layout = newPropertyValue;
             }
             
+            if (comp instanceof FormComponentCache && propertyName === 'styleClass') {
+                (comp as FormComponentCache).formComponentProperties.classes = newPropertyValue.split(' ');
+            }
+            
             comp.model[propertyName] = newPropertyValue;
 
             if (instanceOfChangeAwareValue(newPropertyValue)) {
