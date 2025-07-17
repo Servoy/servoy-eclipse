@@ -21,6 +21,8 @@ export class MainComponent implements OnInit, OnDestroy {
   i18n_reconnecting_feedback: string;
   formStyle = { position: 'absolute', top: '0px', bottom: '0px' };
   navigatorStyle = { position: 'absolute', top: '0px', bottom: '0px' };
+  
+  incudeAutoFillHack = !this.isSafariBrowser();
 
   private  listener: I18NListener = null;
 
@@ -95,5 +97,22 @@ export class MainComponent implements OnInit, OnDestroy {
     this.formStyle[orientationVar1] = '0px';
     this.formStyle[orientationVar2] = this.servoyService.getSolutionSettings().navigatorForm.size.width + 'px';
     return this.formStyle;
+  }
+  
+  private isSafariBrowser(): boolean {
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    // Check for "Safari" in the user agent
+    const isSafari = userAgent.includes('safari');
+
+    // Check for the absence of "Chrome", "Chromium", or "CriOS" (Chrome on iOS)
+    // This is crucial because Chrome's user agent often contains "Safari"
+    const isChrome = userAgent.includes('chrome') || userAgent.includes('crios');
+    const isChromium = userAgent.includes('chromium');
+    const isFirefox = userAgent.includes('firefox');
+    const isEdge = userAgent.includes('edge'); // Edge also includes Safari/Chrome parts
+
+    // If it's Safari and NOT Chrome/Chromium/Firefox/Edge, it's likely Safari
+    return isSafari && !isChrome && !isChromium && !isFirefox && !isEdge;
   }
 }
