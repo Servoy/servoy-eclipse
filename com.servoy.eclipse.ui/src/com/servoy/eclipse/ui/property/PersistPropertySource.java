@@ -3805,7 +3805,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 									@Override
 									protected IPersist createPersist(Solution editingSolution)
 									{
-										OpenNewFormWizardAction newFormWizardAction = new OpenNewFormWizardAction(false);
+										OpenNewFormWizardAction newFormWizardAction = new OpenNewFormWizardAction(false, false);
 										newFormWizardAction.run();
 										return newFormWizardAction.getNewForm();
 									}
