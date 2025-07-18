@@ -54,6 +54,7 @@ public class OpenWizardAction extends Action
 {
 
 	private final Class< ? extends IWorkbenchWizard> wizardClass;
+	private boolean saveDirtyEditors = true;
 
 	/**
 	 * Creates a new "open wizard" action.
@@ -64,6 +65,11 @@ public class OpenWizardAction extends Action
 	 */
 	public OpenWizardAction(Class< ? extends IWorkbenchWizard> wizardClass, ImageDescriptor image, String text)
 	{
+		this(wizardClass, image, text, true);
+	}
+
+	public OpenWizardAction(Class< ? extends IWorkbenchWizard> wizardClass, ImageDescriptor image, String text, boolean saveDirtyEditors)
+	{
 		this.wizardClass = wizardClass;
 
 		setImageDescriptor(image);
@@ -72,6 +78,7 @@ public class OpenWizardAction extends Action
 			setText(text);
 			setToolTipText(text);
 		}
+		this.saveDirtyEditors = saveDirtyEditors;
 	}
 
 	@Override
@@ -79,7 +86,7 @@ public class OpenWizardAction extends Action
 	{
 		try
 		{
-			if (SaveDirtyEditorsOutputEnum.CANCELED == EditorUtil.saveDirtyEditors(UIUtils.getActiveShell(), true)) return;
+			if (saveDirtyEditors && SaveDirtyEditorsOutputEnum.CANCELED == EditorUtil.saveDirtyEditors(UIUtils.getActiveShell(), true)) return;
 			final IWorkbenchWizard wizard = wizardClass.newInstance();
 
 			IStructuredSelection selection = StructuredSelection.EMPTY;
