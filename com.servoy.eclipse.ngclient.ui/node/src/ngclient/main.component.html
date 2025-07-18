@@ -1,4 +1,4 @@
- <div style="overflow: hidden; height:0px;width:0px;background: transparent;" data-description="dummyPanel for Chrome auto-fill issue">
+ <div *ngIf="incudeAutoFillHack" style="overflow: hidden; height:0px;width:0px;background: transparent;" data-description="dummyPanel for Chrome auto-fill issue">
         username<input type="text" style="height:0px;width:0px;background: transparent; color: transparent;border: none;" data-description="dummyUsername" tabindex="-1" autocomplete="username">
         password<input type="password" style="height:0px;width:0px;background: transparent; color: transparent;border: none;" data-description="dummyPassword" tabindex="-1" autocomplete="current-password">
 </div>
