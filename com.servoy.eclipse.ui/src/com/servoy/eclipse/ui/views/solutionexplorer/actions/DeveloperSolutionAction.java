@@ -23,6 +23,7 @@ import org.mozilla.javascript.Function;
 
 import com.servoy.eclipse.developersolution.DeveloperNGClient;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.ISupportDeveloperMenu;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -55,6 +56,7 @@ public class DeveloperSolutionAction extends Action
 		this.forms = forms;
 		this.components = components;
 		setText(key.getText());
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("developer_bridge.png"));
 	}
 
 

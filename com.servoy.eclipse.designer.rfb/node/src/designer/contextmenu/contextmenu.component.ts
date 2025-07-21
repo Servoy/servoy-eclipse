@@ -186,12 +186,16 @@ export class ContextMenuComponent implements OnInit {
 					const developerMenus = this.editorSession.getDeveloperMenus(isFormNode, node.getAttribute('svy-formelement-type'));
 					if (developerMenus) {
 						const insertIndex = this.menuItems.findIndex(item => item.text.startsWith("Delete"));//insert above delete
-						const devMenus = developerMenus.map(value =>
-							new ContextmenuItem(value, () => {
+						const devMenus = developerMenus.map(value => {
+							const devMenu = new ContextmenuItem(value, () => {
 								this.hide()
 								this.editorSession.executeDeveloperMenu(isFormNode, value);
-							}, true)
-						);
+							}, true);
+							devMenu.getIconStyle = () => {
+								return { 'background-image': 'url(designer/assets/images/developer_bridge.png)' };
+							};
+							return devMenu;
+						});
 						this.menuItems.splice(insertIndex, 0, ...devMenus);
 					}
 				}
