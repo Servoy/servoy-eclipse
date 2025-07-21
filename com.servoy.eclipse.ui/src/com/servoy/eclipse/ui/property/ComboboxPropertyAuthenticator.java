@@ -178,36 +178,36 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 					private void redirectToTheCloud()
 					{
 						String solutionUUID = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getUUID().toString();
-						String loginToken = ServoyLoginDialog.getLoginToken();
-						if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-						if (loginToken == null)
-						{
-							Display.getDefault().asyncExec(new Runnable()
+						ServoyLoginDialog.getLoginToken(token -> {
+							if (token == null)
 							{
-								public void run()
+								Display.getDefault().asyncExec(new Runnable()
 								{
-									MessageDialog.openInformation(
-										Display.getDefault().getActiveShell(),
-										"Login Required",
-										"You need to log in if you want to be redirected to Servoy Cloud.");
-								}
-							});
-						}
+									public void run()
+									{
+										MessageDialog.openInformation(
+											Display.getDefault().getActiveShell(),
+											"Login Required",
+											"You need to log in if you want to be redirected to Servoy Cloud.");
+									}
+								});
+							}
 
-						if (loginToken != null && solutionUUID != null)
-						{
-							String url = CLOUD_BASE_URL + "/solution/svyCloud/index.html?loginToken=" + loginToken +
-								"&applicationUUID=" + solutionUUID +
-								"&navigateTo=setupCloudSecurity";
-							try
+							if (token != null && solutionUUID != null)
 							{
-								PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
+								String url = CLOUD_BASE_URL + "/solution/svyCloud/index.html?loginToken=" + token +
+									"&applicationUUID=" + solutionUUID +
+									"&navigateTo=setupCloudSecurity";
+								try
+								{
+									PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
+								}
+								catch (PartInitException | MalformedURLException e1)
+								{
+									ServoyLog.logError(e1);
+								}
 							}
-							catch (PartInitException | MalformedURLException e1)
-							{
-								ServoyLog.logError(e1);
-							}
-						}
+						});
 					}
 				});
 

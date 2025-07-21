@@ -31,9 +31,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -108,51 +109,66 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
 			return false;
 		}
-		final String loginToken = logIn();
-		if (Utils.stringIsEmpty(loginToken))
-			return false; //no login
+		final boolean result[] = { false, false };
+		ServoyLoginDialog.getLoginToken(loginToken -> {
 
-		exportSettings.put("login_token", loginToken);
-
-		final boolean result[] = { false };
-
-		errorMsg.delete(0, errorMsg.length());
-
-		exportPage.getSelectedPlatforms().forEach((platform) -> {
-			exportSettings.put("platform", platform);
-
-			try (final CloseableHttpResponse httpResponse = sendRequest(exportSettings))
+			if (Utils.stringIsEmpty(loginToken))
 			{
-				final int httpStatusCode = httpResponse.getCode();
+				result[1] = true;
+				return; //no login
+			}
 
-				switch (httpStatusCode)
+			exportSettings.put("login_token", loginToken);
+
+
+			errorMsg.delete(0, errorMsg.length());
+
+			exportPage.getSelectedPlatforms().forEach((platform) -> {
+				exportSettings.put("platform", platform);
+
+				try (final CloseableHttpResponse httpResponse = sendRequest(exportSettings))
 				{
-					case HttpStatus.SC_OK :
-						result[0] = true; //at least one platform has been delivered succesfully
-						break;
-					default :
-						String reasonPhrase = httpResponse.getReasonPhrase();
-						if (Utils.stringIsEmpty(reasonPhrase)) reasonPhrase = getReasonPhrase(httpResponse);
-						errorMsg
-							.append(String.format("Platform: %s\nError code: %d\n%s", platform, httpStatusCode, reasonPhrase));
-						break;
+					final int httpStatusCode = httpResponse.getCode();
+
+					switch (httpStatusCode)
+					{
+						case HttpStatus.SC_OK :
+							result[0] = true; //at least one platform has been delivered succesfully
+							break;
+						default :
+							String reasonPhrase = httpResponse.getReasonPhrase();
+							if (Utils.stringIsEmpty(reasonPhrase)) reasonPhrase = getReasonPhrase(httpResponse);
+							errorMsg
+								.append(String.format("Platform: %s\nError code: %d\n%s", platform, httpStatusCode, reasonPhrase));
+							break;
+					}
 				}
-			}
-			catch (final HttpHostConnectException | UnknownHostException e)
-			{
-				errorMsg.append("Can't connect to the remote service.\nTry again later ...");
-			}
-			catch (final IOException e)
-			{
-				ServoyLog.logError(e);
-			}
+				catch (final HttpHostConnectException | UnknownHostException e)
+				{
+					errorMsg.append("Can't connect to the remote service.\nTry again later ...");
+				}
+				catch (final IOException e)
+				{
+					ServoyLog.logError(e);
+				}
+			});
+
+			final Runnable run = () -> {
+				if (errorMsg.length() > 0) MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
+				else
+				{
+					final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be sent to the provided address ...";
+					MessageDialog.open(MessageDialog.INFORMATION, UIUtils.getActiveShell(), "NG Desktop Export", message, SWT.None, "OK");
+				}
+			};
+			if (Display.getCurrent() != null) run.run();
+			else Display.getDefault().syncExec(run);
+			result[1] = true;
 		});
-		if (errorMsg.length() > 0) MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
-		else
-		{
-			final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be sent to the provided address ...";
-			MessageDialog.open(MessageDialog.INFORMATION, UIUtils.getActiveShell(), "NG Desktop Export", message, SWT.None, "OK");
-		}
+		final Shell shell = getShell();
+		final Display display = Display.getCurrent();
+		while (!shell.isDisposed() && !result[1])
+			if (!display.readAndDispatch()) display.sleep();
 		return result[0];
 	}
 
@@ -240,14 +256,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		return StartNGDesktopClientHandler.getNgDesktopVersion(selectedVersion);
 	}
 
-	private String logIn()
-	{
-
-		String loginToken = ServoyLoginDialog.getLoginToken();
-		if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-
-		return loginToken;
-	}
 
 	@Override
 	public void addPages()

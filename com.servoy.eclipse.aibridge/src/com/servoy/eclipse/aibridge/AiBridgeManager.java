@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.javascript.parser.JavascriptParserPreferences;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,92 +78,89 @@ public class AiBridgeManager
 		String cmdName, String inputData,
 		String source, int offset, int length, String context)
 	{
-		final String loginToken = logIn();
-		if (!Utils.stringIsEmpty(loginToken))
-		{
-			CompletableFuture.runAsync(() -> {
-				UUID uuid = UUID.randomUUID();
-				Completion completion = new Completion(uuid, cmdName, inputData, context, source, offset, length);
-				try
-				{
-					requestMap.put(uuid, completion);
-					AiBridgeView.setSelectionId(uuid);
-					AiBridgeView.refresh();
-					completion = sendHttpRequest(loginToken, completion);
+		ServoyLoginDialog.getLoginToken(loginToken -> {
+			if (!Utils.stringIsEmpty(loginToken))
+			{
+				CompletableFuture.runAsync(() -> {
+					UUID uuid = UUID.randomUUID();
+					Completion completion = new Completion(uuid, cmdName, inputData, context, source, offset, length);
+					try
+					{
+						requestMap.put(uuid, completion);
+						AiBridgeView.setSelectionId(uuid);
+						AiBridgeView.refresh();
+						completion = sendHttpRequest(loginToken, completion);
 
-				}
-				catch (Exception e)
-				{
-					completion.setMessage(e.getMessage());
-					completion.setStatus(AiBridgeStatus.ERROR);
-					ServoyLog.logError(e);
-				}
-				finally
-				{
-					saveCompletion(AiBridgeView.getSolutionName(), uuid, completion);
-					AiBridgeView.setSelectionId(uuid);
-					AiBridgeView.refresh();
-				}
-			}, executorService);
-		}
+					}
+					catch (Exception e)
+					{
+						completion.setMessage(e.getMessage());
+						completion.setStatus(AiBridgeStatus.ERROR);
+						ServoyLog.logError(e);
+					}
+					finally
+					{
+						saveCompletion(AiBridgeView.getSolutionName(), uuid, completion);
+						AiBridgeView.setSelectionId(uuid);
+						AiBridgeView.refresh();
+					}
+				}, executorService);
+			}
+			else showConnectMessage();
+		});
 	}
 
 	public void sendCompletion(Completion completion)
 	{
-		final String loginToken = logIn();
+		ServoyLoginDialog.getLoginToken(loginToken -> {
+			if (!Utils.stringIsEmpty(loginToken))
+			{
+				CompletableFuture.runAsync(() -> {
+					//load full context and selection
+					Completion myCompletion = completion.getFullCompletion();
+					try
+					{
+						deleteFile(AiBridgeView.getSolutionName(), myCompletion.getId());
+						requestMap.put(myCompletion.getId(), myCompletion.fullReset());
+						myCompletion.setStatus(AiBridgeStatus.SUBMITTED);
+						myCompletion.setResponse(new Response());
+						myCompletion.setMessage("Processing...");
+						AiBridgeView.setSelectionId(myCompletion.getId());
+						AiBridgeView.refresh();
+						myCompletion = sendHttpRequest(loginToken, myCompletion);
+					}
+					catch (Exception e)
+					{
+						myCompletion.setMessage(e.getMessage());
+						myCompletion.setStatus(AiBridgeStatus.ERROR);
+						ServoyLog.logError(e);
+					}
+					finally
+					{
+						saveCompletion(AiBridgeView.getSolutionName(), myCompletion.getId(), myCompletion);
+						AiBridgeView.setSelectionId(myCompletion.getId());
+						AiBridgeView.refresh();
 
-		if (!Utils.stringIsEmpty(loginToken))
-		{
-			CompletableFuture.runAsync(() -> {
-				//load full context and selection
-				Completion myCompletion = completion.getFullCompletion();
-				try
-				{
-					deleteFile(AiBridgeView.getSolutionName(), myCompletion.getId());
-					requestMap.put(myCompletion.getId(), myCompletion.fullReset());
-					myCompletion.setStatus(AiBridgeStatus.SUBMITTED);
-					myCompletion.setResponse(new Response());
-					myCompletion.setMessage("Processing...");
-					AiBridgeView.setSelectionId(myCompletion.getId());
-					AiBridgeView.refresh();
-					myCompletion = sendHttpRequest(loginToken, myCompletion);
-				}
-				catch (Exception e)
-				{
-					myCompletion.setMessage(e.getMessage());
-					myCompletion.setStatus(AiBridgeStatus.ERROR);
-					ServoyLog.logError(e);
-				}
-				finally
-				{
-					saveCompletion(AiBridgeView.getSolutionName(), myCompletion.getId(), myCompletion);
-					AiBridgeView.setSelectionId(myCompletion.getId());
-					AiBridgeView.refresh();
-
-				}
-			}, executorService);
-		}
+					}
+				}, executorService);
+			}
+			else showConnectMessage();
+		});
 	}
 
-	private String logIn()
+	private void showConnectMessage()
 	{
 
-		String loginToken = ServoyLoginDialog.getLoginToken();
-		if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-		if (Utils.stringIsEmpty(loginToken))
+		Display.getDefault().asyncExec(new Runnable()
 		{
-			Display.getDefault().asyncExec(new Runnable()
+			public void run()
 			{
-				public void run()
-				{
-					MessageDialog.openInformation(
-						Display.getDefault().getActiveShell(),
-						"Login Required",
-						"You need to log in to Servoy Cloud if you want to use Servoy AI.");
-				}
-			});
-		}
-		return loginToken;
+				MessageDialog.openInformation(
+					Display.getDefault().getActiveShell(),
+					"Login Required",
+					"You need to log in to Servoy Cloud if you want to use Servoy AI.");
+			}
+		});
 	}
 
 	private StringEntity createEntity(Completion request)
@@ -217,8 +213,7 @@ public class AiBridgeManager
 
 					String errorMessage = switch (httpResponse.getCode())
 					{
-						case 200 ->
-						{
+						case 200 -> {
 							request.setStatus(AiBridgeStatus.COMPLETE);
 							yield null; // No error message for success
 						}

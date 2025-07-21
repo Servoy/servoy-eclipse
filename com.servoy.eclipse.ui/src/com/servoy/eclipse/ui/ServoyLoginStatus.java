@@ -17,7 +17,7 @@
 
 package com.servoy.eclipse.ui;
 
-import java.net.URL;
+import java.net.URI;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -65,9 +65,9 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 			{
 				try
 				{
-					if (ServoyLoginDialog.getLoginToken() == null)
+					if (ServoyLoginDialog.getLoginToken(null) == null)
 					{
-						new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+						new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin(null);
 					}
 					else
 					{
@@ -107,9 +107,10 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 					PlatformUI.getWorkbench()
 						.getBrowserSupport()
 						.getExternalBrowser()
-						.openURL(new URL(
-							"https://admin.servoy-cloud.eu/solutions/svyCloud/index.html?loginToken=" + ServoyLoginDialog.getLoginToken() +
-								"#svyCloudLogin"));
+						.openURL(URI.create(
+							"https://admin.servoy-cloud.eu/solutions/svyCloud/index.html?loginToken=" + ServoyLoginDialog.getLoginToken(null) +
+								"#svyCloudLogin")
+							.toURL());
 				}
 				catch (Exception ex)
 				{
@@ -126,7 +127,7 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 			public void widgetSelected(SelectionEvent e)
 			{
 				ServoyLoginDialog.clearSavedInfo();
-				new ServoyLoginDialog(getWorkbenchWindow().getShell()).doLogin();
+				new ServoyLoginDialog(getWorkbenchWindow().getShell()).doLogin(null);
 			}
 		});
 
@@ -140,7 +141,7 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 	 * @see com.servoy.eclipse.ui.IServoyLoginListener#onLogin(java.lang.String)
 	 */
 	@Override
-	public void onLogin(String username, String loginToken)
+	public void onLogin(String username)
 	{
 		if (username != null)
 		{

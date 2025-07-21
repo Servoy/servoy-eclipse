@@ -312,13 +312,16 @@ public class TutorialView extends ViewPart
 
 								if (event.getSource() instanceof StyledText)
 								{
-									String loginToken = getLoginToken();
-									if (loginToken != null)
-									{
-										BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-											Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + tutorialID, true, false);
-										tutorialDialog.open();
-									}
+									ServoyLoginDialog.getLoginToken(loginToken -> {
+										if (loginToken != null)
+										{
+											Display.getDefault().asyncExec(() -> {
+												BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+													Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + tutorialID, true, false);
+												tutorialDialog.open();
+											});
+										}
+									});
 								}
 							}
 						});
@@ -388,14 +391,15 @@ public class TutorialView extends ViewPart
 				@Override
 				public void handleEvent(Event event)
 				{
-					String loginToken = getLoginToken();
-					if (loginToken != null)
-					{
-						final String currentTutorialID = dataModel.optString("tutorialID");
-						BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-							Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + currentTutorialID, true, false);
-						tutorialDialog.open();
-					}
+					ServoyLoginDialog.getLoginToken(loginToken -> {
+						if (loginToken != null)
+						{
+							final String currentTutorialID = dataModel.optString("tutorialID");
+							BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+								Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + currentTutorialID, true, false);
+							tutorialDialog.open();
+						}
+					});
 				}
 			});
 
@@ -865,16 +869,6 @@ public class TutorialView extends ViewPart
 		return copyText;//.trim().replaceAll(" +", " ");
 	}
 
-	private String getLoginToken()
-	{
-		String loginToken = ServoyLoginDialog.getLoginToken();
-		if (loginToken == null)
-		{
-			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-		}
-
-		return loginToken;
-	}
 
 	private Image getImageFromEncodedString(String imgBase64)
 	{

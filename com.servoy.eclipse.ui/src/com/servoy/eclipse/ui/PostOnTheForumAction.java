@@ -267,14 +267,13 @@ public class PostOnTheForumAction implements IWorkbenchWindowActionDelegate
 	@Override
 	public void run(IAction action)
 	{
-		String loginToken = ServoyLoginDialog.getLoginToken();
-		if (loginToken == null)
-		{
-			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-		}
-		if (loginToken == null) return;
-		ForumPostDialog dialog = new ForumPostDialog(window.getShell());
-		dialog.open();
+		ServoyLoginDialog.getLoginToken(token -> {
+			if (token == null) return;
+			Display.getDefault().asyncExec(() -> {
+				ForumPostDialog dialog = new ForumPostDialog(window.getShell());
+				dialog.open();
+			});
+		});
 	}
 
 	@Override
