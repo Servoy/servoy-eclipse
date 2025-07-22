@@ -23,6 +23,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 
@@ -44,8 +45,10 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 	{
 		if (isDirty())
 		{
-			if (getActivePage() == 0)
+			if (getActivePage() == 0 && propertiesComposite != null)
 			{
+				// if we are on the properties page or there is no properties page, update the text editor from the properties
+				// otherwise update the properties from the text editor
 				updateTextEditorFromProperties();
 			}
 			else
@@ -108,7 +111,11 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 	@Override
 	public void setFocus()
 	{
-		switch (getActivePage())
+		if (propertiesComposite == null)
+		{
+			textEditor.setFocus();
+		}
+		else switch (getActivePage())
 		{
 			case 0 :
 				propertiesComposite.setFocus();
@@ -133,14 +140,18 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 	@Override
 	protected void createPages()
 	{
-		propertiesComposite = new LessPropertiesComposite(getContainer(), SWT.NONE, this);
-		int index = addPage(propertiesComposite.getControl());
-		setPageText(index, "Properties");
-		propertiesComposite.getControl().getDisplay().asyncExec(() -> updatePropertiesFromTextEditor());
+		int index = 0;
+		if (editorInput.hasProperties())
+		{
+			propertiesComposite = new LessPropertiesComposite(getContainer(), SWT.NONE, this);
+			index = addPage(propertiesComposite.getControl());
+			setPageText(index, "Properties");
+			propertiesComposite.getControl().getDisplay().asyncExec(() -> updatePropertiesFromTextEditor());
+		}
 
 		try
 		{
-			textEditor = new TextEditor();
+			textEditor = new ExtensionBasedTextEditor();
 			index = addPage(textEditor, getEditorInput());
 			setPageText(index, "Source");
 		}

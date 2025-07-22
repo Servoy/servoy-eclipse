@@ -401,7 +401,7 @@
        <editor
              class="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              default="true"
-             filenames="custom_servoy_theme_properties.less"
+             filenames="custom_servoy_theme_properties.less,solution_properties.less"
              icon="icons/theme_properties.png"
              id="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              matchingStrategy="com.servoy.eclipse.ui.editors.less.PropertiesLessMatchingStrategy"
