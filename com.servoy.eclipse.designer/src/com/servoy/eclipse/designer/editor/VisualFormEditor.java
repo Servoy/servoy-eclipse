@@ -17,9 +17,11 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -48,6 +50,7 @@ import com.servoy.eclipse.designer.editor.rfb.ChromiumVisualFormEditorDesignPage
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.SystemVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -206,7 +209,17 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 					try
 					{
 						removePage(page);
-						file.create(new byte[0], true, false, null);
+
+						byte[] bytes = new byte[0];
+						try
+						{
+							bytes = IOUtils.toByteArray(VisualFormEditor.class.getResourceAsStream("less_form_template.less"));
+						}
+						catch (IOException e)
+						{
+							ServoyLog.logError(e);
+						}
+						file.create(bytes, true, false, null);
 						int page2 = addPage(cssEditor, FileEditorInputFactory.createFileEditorInput(file));
 						setPageText(page2, "Less");
 						setActivePage(page2);
@@ -343,7 +356,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 			IDocument document = cssEditor.getDocumentProvider().getDocument(cssEditor.getEditorInput());
 			try
 			{
-				AngularFormGenerator.parseLess(document.get(), getForm().getName());
+				AngularFormGenerator.parseLess(document.get(), getForm().getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution());
 			}
 			catch (Exception e)
 			{
