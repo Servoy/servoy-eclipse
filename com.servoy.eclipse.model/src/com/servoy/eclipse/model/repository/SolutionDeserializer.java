@@ -1232,6 +1232,8 @@ public class SolutionDeserializer
 						{
 							// this is a destructuring variable, which we skip when initializing vars in scope
 							obj.put(IS_DESTRUCTURING, Boolean.TRUE);
+							// remove the uuid from the json for this one else we generate duplicates
+							obj.remove(SolutionSerializer.PROP_UUID);
 						}
 					}
 					jsonObjects.add(obj);
