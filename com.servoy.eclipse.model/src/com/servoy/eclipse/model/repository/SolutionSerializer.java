@@ -820,6 +820,7 @@ public class SolutionSerializer
 	 */
 	private static void generateJSDocScriptVariableType(ScriptVariable variable, StringBuilder sb)
 	{
+		if (variable.getSerializableRuntimeProperty(IScriptProvider.DESTRUCTURING) != null) return;
 		int type = Column.mapToDefaultType(variable.getVariableType());
 		// Add the "@type" tag.
 		String jsType = variable.getSerializableRuntimeProperty(IScriptProvider.TYPE);

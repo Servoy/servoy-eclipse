@@ -146,7 +146,7 @@ public class SolutionDeserializer
 	private static final String DESTRUCTURING_VAlUE_KEY = "destructuringValue";
 	private static final String IS_DESTRUCTURING = "is_destructuring";
 
-	
+
 	public static final RuntimeProperty<Boolean> POSSIBLE_DUPLICATE_UUID = new RuntimeProperty<Boolean>()
 	{
 
@@ -1438,198 +1438,206 @@ public class SolutionDeserializer
 
 		}
 
-		if (code != null)
+		if (field instanceof DestructuringVariableDeclaration)
 		{
-			String value_part = fileContent.substring(code.sourceStart(), code.sourceEnd());
-			if (value_part.endsWith(";")) value_part = value_part.substring(0, value_part.length() - 1);
-			if (code instanceof UnaryOperation)
-			{
-				code = ((UnaryOperation)code).getExpression();
-			}
-			if (code instanceof DecimalLiteral)
-			{
-				int variableType = Column.mapToDefaultType(json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT));
-				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, variableType);
-				try
-				{
-					Integer.parseInt(value_part);
-					if (variableType != IColumnTypes.NUMBER) json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.INTEGER);
-				}
-				catch (NumberFormatException e)
-				{
-					try
-					{
-						Double.parseDouble(value_part);
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
-					}
-					catch (NumberFormatException e2)
-					{
-						// ignore shouldnt happen
-						if (json.has(VARIABLE_TYPE_JSON_ATTRIBUTE))
-						{
-							if (variableType == IColumnTypes.INTEGER || variableType == IColumnTypes.NUMBER)
-							{
-								json.remove(VARIABLE_TYPE_JSON_ATTRIBUTE);
-							}
-						}
-					}
-				}
-			}
-			else if (code instanceof StringLiteral)
-			{
-				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
-			}
-			else if (code instanceof NullExpression)
-			{
-				if (newField)
-				{
-					String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-					if (typeName != null)
-					{
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
-					}
-					else
-					{
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-					}
-				}
-			}
-			else if (code instanceof CallExpression || code instanceof NewExpression || code instanceof FunctionStatement)
-			{
-				ASTNode callExpression = code;
-				if (callExpression instanceof CallExpression)
-				{
-					callExpression = ((CallExpression)callExpression).getExpression();
-				}
-				String objectclass = null;
-				if (callExpression instanceof NewExpression)
-				{
-					Expression objectClassExpression = ((NewExpression)callExpression).getObjectClass();
-					if (objectClassExpression instanceof Identifier)
-					{
-						objectclass = ((Identifier)objectClassExpression).getName();
-					}
-					else if (objectClassExpression instanceof CallExpression &&
-						((CallExpression)objectClassExpression).getExpression() instanceof Identifier)
-					{
-						objectclass = ((Identifier)((CallExpression)objectClassExpression).getExpression()).getName();
-					}
-				}
-				if ("String".equals(objectclass))
-				{
-					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
-				}
-				else if ("Date".equals(objectclass))
-				{
-					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.DATETIME);
-				}
-				else if ("Array".equals(objectclass))
-				{
-					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-					String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-					if (doCleanup && (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))))
-						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
-				}
-				else
-				{
-					String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-					if (typeName != null)
-					{
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
-					}
-					else
-					{
-						if (objectclass != null)
-						{
-							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, objectclass);
-						}
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-					}
-				}
-			}
-			else if (code instanceof ObjectInitializer)
-			{
-				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-			}
-			else if (code instanceof ArrayInitializer)
-			{
-				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-				String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-				if (doCleanup && (current == null || (!current.startsWith("{Array") && !current.startsWith("Array")) && !current.endsWith("[]")))
-				{
-					List<Expression> items = ((ArrayInitializer)code).getItems();
-					if (items != null && items.size() > 0)
-					{
-						boolean isString = true;
-						boolean isNumber = true;
-						for (Expression item : items)
-						{
-							if (!(item instanceof StringLiteral))
-							{
-								isString = false;
-							}
-							if (!(item instanceof DecimalLiteral))
-							{
-								isNumber = false;
-							}
-						}
-						if (isString)
-						{
-							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<String>");
-						}
-						else if (isNumber)
-						{
-							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<Number>");
-						}
-					}
-
-				}
-			}
-			else if (code instanceof BooleanLiteral)
-			{
-				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-				if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Boolean");
-			}
-			else if (code instanceof BinaryOperation && json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
-			{
-				Expression le = ((BinaryOperation)code).getLeftExpression();
-				Expression re = ((BinaryOperation)code).getRightExpression();
-				if (le instanceof StringLiteral || re instanceof StringLiteral)
-				{
-					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
-					if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "String");
-				}
-				else if (le instanceof DecimalLiteral || re instanceof DecimalLiteral)
-				{
-					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
-					if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Number");
-				}
-			}
-			else
-			{
-				// only fall back to media if the jstype is not set, else keep the jstype that is specified in the doc
-				if (json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
-				{
-					Debug.log("Unknow expression falling back to media: " + code.getClass());
-					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-				}
-				else
-				{
-					int current = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, -1);
-					int servoyType = getServoyType(json.optString(JS_TYPE_JSON_ATTRIBUTE));
-					if (current == -1 || !((servoyType == IColumnTypes.NUMBER || servoyType == IColumnTypes.INTEGER) &&
-						(current == IColumnTypes.NUMBER || current == IColumnTypes.INTEGER)))
-					{
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
-					}
-				}
-			}
-			json.put("defaultValue", value_part);
+			json.remove(VARIABLE_TYPE_JSON_ATTRIBUTE);
 		}
 		else
 		{
-			json.put("defaultValue", "");
+			if (code != null)
+			{
+				String value_part = fileContent.substring(code.sourceStart(), code.sourceEnd());
+				if (value_part.endsWith(";")) value_part = value_part.substring(0, value_part.length() - 1);
+				if (code instanceof UnaryOperation)
+				{
+					code = ((UnaryOperation)code).getExpression();
+				}
+				if (code instanceof DecimalLiteral)
+				{
+					int variableType = Column.mapToDefaultType(json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT));
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, variableType);
+					try
+					{
+						Integer.parseInt(value_part);
+						if (variableType != IColumnTypes.NUMBER) json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.INTEGER);
+					}
+					catch (NumberFormatException e)
+					{
+						try
+						{
+							Double.parseDouble(value_part);
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
+						}
+						catch (NumberFormatException e2)
+						{
+							// ignore shouldnt happen
+							if (json.has(VARIABLE_TYPE_JSON_ATTRIBUTE))
+							{
+								if (variableType == IColumnTypes.INTEGER || variableType == IColumnTypes.NUMBER)
+								{
+									json.remove(VARIABLE_TYPE_JSON_ATTRIBUTE);
+								}
+							}
+						}
+					}
+				}
+				else if (code instanceof StringLiteral)
+				{
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
+				}
+				else if (code instanceof NullExpression)
+				{
+					if (newField)
+					{
+						String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
+						if (typeName != null)
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
+						}
+						else
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+						}
+					}
+				}
+				else if (code instanceof CallExpression || code instanceof NewExpression || code instanceof FunctionStatement)
+				{
+					ASTNode callExpression = code;
+					if (callExpression instanceof CallExpression)
+					{
+						callExpression = ((CallExpression)callExpression).getExpression();
+					}
+					String objectclass = null;
+					if (callExpression instanceof NewExpression)
+					{
+						Expression objectClassExpression = ((NewExpression)callExpression).getObjectClass();
+						if (objectClassExpression instanceof Identifier)
+						{
+							objectclass = ((Identifier)objectClassExpression).getName();
+						}
+						else if (objectClassExpression instanceof CallExpression &&
+							((CallExpression)objectClassExpression).getExpression() instanceof Identifier)
+						{
+							objectclass = ((Identifier)((CallExpression)objectClassExpression).getExpression()).getName();
+						}
+					}
+					if ("String".equals(objectclass))
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
+					}
+					else if ("Date".equals(objectclass))
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.DATETIME);
+					}
+					else if ("Array".equals(objectclass))
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+						String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
+						if (doCleanup && (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))))
+							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
+					}
+					else
+					{
+						String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
+						if (typeName != null)
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
+						}
+						else
+						{
+							if (objectclass != null)
+							{
+								json.putOpt(JS_TYPE_JSON_ATTRIBUTE, objectclass);
+							}
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+						}
+					}
+				}
+				else if (code instanceof ObjectInitializer)
+				{
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+				}
+				else if (code instanceof ArrayInitializer)
+				{
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+					String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
+					if (doCleanup && (current == null || (!current.startsWith("{Array") && !current.startsWith("Array")) && !current.endsWith("[]")))
+					{
+						List<Expression> items = ((ArrayInitializer)code).getItems();
+						if (items != null && items.size() > 0)
+						{
+							boolean isString = true;
+							boolean isNumber = true;
+							for (Expression item : items)
+							{
+								if (!(item instanceof StringLiteral))
+								{
+									isString = false;
+								}
+								if (!(item instanceof DecimalLiteral))
+								{
+									isNumber = false;
+								}
+							}
+							if (isString)
+							{
+								json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<String>");
+							}
+							else if (isNumber)
+							{
+								json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<Number>");
+							}
+						}
+
+					}
+				}
+				else if (code instanceof BooleanLiteral)
+				{
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+					if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Boolean");
+				}
+				else if (code instanceof BinaryOperation && json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
+				{
+					Expression le = ((BinaryOperation)code).getLeftExpression();
+					Expression re = ((BinaryOperation)code).getRightExpression();
+					if (le instanceof StringLiteral || re instanceof StringLiteral)
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
+						if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "String");
+					}
+					else if (le instanceof DecimalLiteral || re instanceof DecimalLiteral)
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
+						if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Number");
+					}
+				}
+				else
+				{
+					// only fall back to media if the jstype is not set, else keep the jstype that is specified in the doc
+					if (json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
+					{
+						Debug.log("Unknow expression falling back to media: " + code.getClass());
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+					}
+					else
+					{
+						int current = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, -1);
+						int servoyType = getServoyType(json.optString(JS_TYPE_JSON_ATTRIBUTE));
+						if (current == -1 || !((servoyType == IColumnTypes.NUMBER || servoyType == IColumnTypes.INTEGER) &&
+							(current == IColumnTypes.NUMBER || current == IColumnTypes.INTEGER)))
+						{
+							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
+						}
+					}
+				}
+				json.put("defaultValue", value_part);
+			}
+			else
+			{
+				json.put("defaultValue", "");
+			}
 		}
+
 
 		int linenr = 1;
 		int fieldLineIndex = field.sourceStart();
