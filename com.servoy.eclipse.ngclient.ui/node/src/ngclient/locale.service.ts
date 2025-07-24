@@ -195,7 +195,7 @@ export class LocaleService {
         
         return new Promise<string>((resolve, reject) => {
             return import(
-                `${context}locales/angular/${localeId}.mjs?localeid=${localeId}`).then(
+                `${context}locales/angular/${localeId}.js?localeid=${localeId}`).then(
                 module => {
                     registerLocaleData(module.default, localeId);
                     resolve(localeId);

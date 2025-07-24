@@ -35,7 +35,7 @@
               "src/assets",
               "src/favicon.ico",
               {
-                    "glob": "*.mjs",
+                    "glob": "*.js",
                     "input": "../node_modules/@angular/common/locales",
                     "output": "/locales/angular"
               }
