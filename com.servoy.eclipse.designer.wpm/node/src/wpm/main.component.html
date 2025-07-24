@@ -1,3 +1,5 @@
 <app-header class="wpm-header"></app-header>
-<app-content *ngIf="isContentAvailable()" class="wpm-content"></app-content>
+@if (isContentAvailable()) {
+  <app-content class="wpm-content"></app-content>
+}
 

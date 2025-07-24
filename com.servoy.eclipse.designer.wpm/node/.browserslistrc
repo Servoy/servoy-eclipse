@@ -1,16 +1,18 @@
-# This file is currently used by autoprefixer to adjust CSS to support the below specified browsers
+# This file is used by the build system to adjust CSS and JS output to support the specified browsers below.
 # For additional information regarding the format and rule options, please see:
 # https://github.com/browserslist/browserslist#queries
-#
-# For IE 9-11 support, please remove 'not' from the last line of the file and adjust as needed
 
-> 0.5%
-last 2 versions
-Firefox ESR
-not dead
-not IE 11
-not op_mini all
-not op_mob <63
-not baidu 7.12
-not kaios 2.5
-not and_uc 12.12
+# For Angular's browser support policy, please see:
+# https://angular.dev/reference/versions#browser-support
+
+# You can see what browsers were selected by your queries by running:
+#   npx browserslist
+
+Chrome >= 107
+ChromeAndroid >= 107
+Edge >= 107
+Firefox >= 104
+FirefoxAndroid >= 104
+Safari >= 16
+iOS >= 16
+

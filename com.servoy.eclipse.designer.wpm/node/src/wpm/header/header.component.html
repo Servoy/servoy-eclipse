@@ -1,18 +1,26 @@
 <div class="header-content">
-    <div style="float:right; display: flex;">
-      <mat-select [(value)]="activeRepository" class="repository" matTooltip="Select to change the repository" (selectionChange)="onActiveRepositoryChange()">
-        <mat-option *ngFor="let repository of repositories" [value]="repository">{{ repository }}</mat-option>
-      </mat-select>
-      <button mat-icon-button *ngIf="showRemoveRepository()" matTooltip="Remove the repository url" (click)="removeRepository()"><mat-icon>delete_outline</mat-icon></button>
-    </div>
-    <span> <h1 class="wpm-title">Servoy Package Manager</h1> <button [ngStyle]="isUpdateAllButtonDisabled && {'background-color': 'gray'}" [disabled]="isUpdateAllButtonDisabled" class="updateButton" (click)="openDialog()" tooltip="Update packages">Update ALL</button></span>
-    <p *ngIf="isNeedRefresh()" class="warning">There are new packages available! Reopen the Web Package Manager to load them.</p>
-    <p class="wpm-subtitle">Manage Web Packages of the active solution {{ !!getActiveSolution() ? "'" + getActiveSolution() + "'" : ""}} and it's modules...</p>
+  <div style="float:right; display: flex;">
+    <mat-select [(value)]="activeRepository" class="repository" matTooltip="Select to change the repository" (selectionChange)="onActiveRepositoryChange()">
+      @for (repository of repositories; track repository) {
+        <mat-option [value]="repository">{{ repository }}</mat-option>
+      }
+    </mat-select>
+    @if (showRemoveRepository()) {
+      <button mat-icon-button matTooltip="Remove the repository url" (click)="removeRepository()"><mat-icon>delete_outline</mat-icon></button>
+    }
+  </div>
+  <span> <h1 class="wpm-title">Servoy Package Manager</h1> <button [ngStyle]="isUpdateAllButtonDisabled && {'background-color': 'gray'}" [disabled]="isUpdateAllButtonDisabled" class="updateButton" (click)="openDialog()" tooltip="Update packages">Update ALL</button></span>
+  @if (isNeedRefresh()) {
+    <p class="warning">There are new packages available! Reopen the Web Package Manager to load them.</p>
+  }
+  <p class="wpm-subtitle">Manage Web Packages of the active solution {{ !!getActiveSolution() ? "'" + getActiveSolution() + "'" : ""}} and it's modules...</p>
 </div>
-<div *ngIf="!isContentAvailable()" class="offline-message">
+@if (!isContentAvailable()) {
+  <div class="offline-message">
     <span><mat-icon class="offline-icon">cloud_off</mat-icon></span>
     <span>Cannot load remote web packages, either you're not connected to the internet or the remote repository is not accesible.</span>
     <span>Please check the Servoy log file for more details. Click refresh to try again.</span>
     <br>
-    <span><button mat-raised-button (click)="refresh()">Refresh</button></span>
-</div>
+      <span><button mat-raised-button (click)="refresh()">Refresh</button></span>
+    </div>
+  }

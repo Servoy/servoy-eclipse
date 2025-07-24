@@ -1,80 +1,102 @@
 <table style="width:100%" class="table-package">
-    <tr>
-      <th><div>Package</div></th>
-      <th colspan="2"><div class="subheader">Released version</div></th>  
-      <th><div>Added</div></th>
-      <th><div>In solution/module</div></th>  
-      <th><div>References</div></th>
-    </tr>
-    <ng-template ngFor let-package [ngForOf]="packages">
-      <tr [ngClass]="isPackageSelected(package) ? 'wpm-package-selected' : ''">
-        <td>
-          <div class="wpm-clickable" matTooltip="{{ getDescriptionTooltip(package) }}" matTooltipDisabled="{{ !package.description }}" (click)="togglePackageSelection($event, package)">
-            <img  [src]="package.icon" [ngStyle]="{'filter': invertIcon(package) ? 'invert(1)' : 'invert(0)' }" class="md-avatar" />
-            <span>{{ package.displayName }}</span>
-            <mat-icon *ngIf="package.description">{{ isSelectedAndWithDescriptionExpanded(package) ? "arrow_drop_up" : "arrow_drop_down" }}</mat-icon>
+  <tr>
+    <th><div>Package</div></th>
+    <th colspan="2"><div class="subheader">Released version</div></th>
+    <th><div>Added</div></th>
+    <th><div>In solution/module</div></th>
+    <th><div>References</div></th>
+  </tr>
+  @for (package of packages; track package) {
+    <tr [ngClass]="isPackageSelected(package) ? 'wpm-package-selected' : ''">
+      <td>
+        <div class="wpm-clickable" matTooltip="{{ getDescriptionTooltip(package) }}" matTooltipDisabled="{{ !package.description }}" (click)="togglePackageSelection($event, package)">
+          <img  [src]="package.icon" [ngStyle]="{'filter': invertIcon(package) ? 'invert(1)' : 'invert(0)' }" class="md-avatar" />
+          <span>{{ package.displayName }}</span>
+          @if (package.description) {
+            <mat-icon>{{ isSelectedAndWithDescriptionExpanded(package) ? "arrow_drop_up" : "arrow_drop_down" }}</mat-icon>
+          }
+        </div>
+      </td>
+      <td class="column-fitwidth">
+        <!-- Release Version-->
+        <div class="align-center">
+          <div class= "select">
+            <mat-form-field>
+              <mat-label>{{getSelectedRelease(package)}}</mat-label>
+              <mat-select [(value)]="package.selected" matTooltip="{{ getReleaseTooltip(package) }}">
+                @for ( release of package.releases; track  release) {
+                  <mat-option [value]="release.version">{{ release.version }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
           </div>
-        </td>
-        <td class="column-fitwidth">
-          <!-- Release Version-->
-          <div class="align-center">
-            <div class= "select"> 
-              <mat-form-field>
-                  <mat-label>{{getSelectedRelease(package)}}</mat-label>
-                <mat-select [(value)]="package.selected" matTooltip="{{ getReleaseTooltip(package) }}">
-                  <mat-option *ngFor=" let release of package.releases" [value]="release.version">{{ release.version }}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div>
-        </td>
-        <td class="column-fitwidth">
-          <!-- Add/Upgrade button -->
-          <div class="align-center btn-group">
-            <button mat-icon-button *ngIf="installAvailable(package)" [disabled]="isInstallingOrRemoving(package)" (click)="install(package)">
+        </div>
+      </td>
+      <td class="column-fitwidth">
+        <!-- Add/Upgrade button -->
+        <div class="align-center btn-group">
+          @if (installAvailable(package)) {
+            <button mat-icon-button [disabled]="isInstallingOrRemoving(package)" (click)="install(package)">
               <mat-icon matTooltip="{{ getInstallTooltip(package) }}">
                 {{ package.installed ? ( wpmService.versionCompare(package.selected, package.installed) > 0 ? "update" : "settings_backup_restore") : "add_circle_outline" }}
               </mat-icon>
             </button>
-          </div>
-        </td>
-        <td class="column-fitwidth">
-          <!-- Added -->
-          <div class="align-center"> 
-            <p matTooltip="{{ getNotWPAAddedTooltip() }}" matTooltipDisabled="{{ !package.installed || package.installedIsWPA }}">{{ package.installed == 'unknown' ? 'installed' : package.installed }}</p>
-            <button mat-icon-button *ngIf="canBeRemoved(package)" [disabled]="isInstallingOrRemoving(package)" (click)="uninstall(package)">
+          }
+        </div>
+      </td>
+      <td class="column-fitwidth">
+        <!-- Added -->
+        <div class="align-center">
+          <p matTooltip="{{ getNotWPAAddedTooltip() }}" matTooltipDisabled="{{ !package.installed || package.installedIsWPA }}">{{ package.installed == 'unknown' ? 'installed' : package.installed }}</p>
+          @if (canBeRemoved(package)) {
+            <button mat-icon-button [disabled]="isInstallingOrRemoving(package)" (click)="uninstall(package)">
               <mat-icon matTooltip="{{ getRemoveTooltip(package) }}">delete_outline</mat-icon>
             </button>
-          </div>
-        </td>
-        <td class="column-fitwidth">
-          <!-- Active Solution -->
-          <div class="align-center" *ngIf="needsActiveSolution(package)">
+          }
+        </div>
+      </td>
+      <td class="column-fitwidth">
+        <!-- Active Solution -->
+        @if (needsActiveSolution(package)) {
+          <div class="align-center">
             <mat-select [(value)]="package.activeSolution" [disabled]="!installEnabled(package)" matTooltip="{{ getSolutionTooltip(package) }}">
-              <mat-option *ngFor="let solution of getSolutions()" [value]="solution">{{ solution }}</mat-option>
+              @for (solution of getSolutions(); track solution) {
+                <mat-option [value]="solution">{{ solution }}</mat-option>
+              }
             </mat-select>
           </div>
+        }
+      </td>
+      <td class="column-fitwidth">
+        <!-- References -->
+        <div class="align-right">
+          @if (package.sampleUrl) {
+            <button mat-raised-button matTooltip="View demo" (click)="showUrl(package.sampleUrl)">Demo</button>
+          }
+          @if (package.wikiUrl) {
+            <button mat-icon-button matTooltip="Documentation" (click)="showUrl(package.wikiUrl)"><mat-icon>library_books</mat-icon></button>
+          }
+          @if (package.sourceUrl) {
+            <button mat-icon-button matTooltip="Source code" (click)="showUrl(package.sourceUrl)"><mat-icon>code</mat-icon></button>
+          }
+        </div>
+      </td>
+    </tr>
+    @if (isInstallingOrRemoving(package)) {
+      <tr>
+        <!-- Loading indicator -->
+        <td colspan="6">
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </td>
-        <td class="column-fitwidth">
-          <!-- References -->
-          <div class="align-right">  
-            <button mat-raised-button *ngIf="package.sampleUrl" matTooltip="View demo" (click)="showUrl(package.sampleUrl)">Demo</button>
-            <button mat-icon-button *ngIf="package.wikiUrl" matTooltip="Documentation" (click)="showUrl(package.wikiUrl)"><mat-icon>library_books</mat-icon></button>
-            <button mat-icon-button *ngIf="package.sourceUrl" matTooltip="Source code" (click)="showUrl(package.sourceUrl)"><mat-icon>code</mat-icon></button>
-          </div>
-        </td> 
       </tr>
-      <tr *ngIf="isInstallingOrRemoving(package)"> 
-          <!-- Loading indicator -->
-          <td colspan="6">
-            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-          </td>
-      </tr>
-      <tr [hidden]="!isSelectedAndWithDescriptionExpanded(package)" class="wpm-package-description">
-            <!-- Description panel --> 
-            <td colspan="6">
-              <mat-card-content *ngIf="isSelectedAndWithDescriptionExpanded(package)" [innerHTML]="getPackageDescription(package)"></mat-card-content>
-            </td>
-      </tr>
-    </ng-template>
-  </table>
+    }
+    <tr [hidden]="!isSelectedAndWithDescriptionExpanded(package)" class="wpm-package-description">
+      <!-- Description panel -->
+      <td colspan="6">
+        @if (isSelectedAndWithDescriptionExpanded(package)) {
+          <mat-card-content [innerHTML]="getPackageDescription(package)"></mat-card-content>
+        }
+      </td>
+    </tr>
+  }
+</table>

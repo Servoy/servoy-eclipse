@@ -1,5 +1,5 @@
 :root {
-  --mdc-tab-indicator-active-indicator-color: #e4844a;
+  --mat-tab-active-indicator-color: #e4844a;
 }
 
 body {
@@ -87,7 +87,7 @@ mat-select.repository .mat-mdc-select-arrow {
 }
 
 .mdc-tab:hover .mdc-tab__text-label{
-    color: var(--mdc-tab-indicator-active-indicator-color) !important;
+    color: var(--mat-tab-active-indicator-color) !important;
 }
 
 
@@ -166,14 +166,14 @@ html, body {
 }
 
 .dark .mdc-text-field--filled:not(.mdc-text-field--disabled):hover .mdc-line-ripple:before {
-    border-bottom-color: var(--mdc-tab-indicator-active-indicator-color) !important;
+    border-bottom-color: var(--mat-tab-active-indicator-color) !important;
 }
 
 .dark .mdc-icon-button:hover {
-    background-color: var(--mdc-tab-indicator-active-indicator-color);
+    background-color: var(--mat-tab-active-indicator-color);
 }
 
 .dark .mdc-text-field--filled:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-floating-label, 
 .dark .mdc-text-field--filled:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-floating-label--float-above {
-	color: var(--mdc-tab-indicator-active-indicator-color);
+	color: var(--mat-tab-active-indicator-color);
 }
