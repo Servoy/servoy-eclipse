@@ -1,4 +1,5 @@
- <div #selected class="decorationOverlay" *ngFor="let node of nodes" [ngStyle]="node.style" [style.visibility]="checkIfNodeIsVisible(node) ? 'unset' : 'hidden'" [id]="node.svyid" [hidden]="editorSession.getState().dragging">
+@for (node of nodes; track node) {
+  <div #selected class="decorationOverlay" [ngStyle]="node.style" [style.visibility]="checkIfNodeIsVisible(node) ? 'unset' : 'hidden'" [id]="node.svyid" [hidden]="editorSession.getState().dragging">
     <div class="knob t l decorator {{node.isResizable.t && node.isResizable.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'tl',direction:'se',top:1,left:1,width:-1,height:-1}"></div>
     <div class="knob t decorator {{node.isResizable.t ? '': 'hidden'}}" [resizeKnob]="{node, position:'t',direction:'s',top:1,left:0,width:0,height:-1}"></div>
     <div class="knob t r decorator {{node.isResizable.t && node.isResizable.r ? '': 'hidden'}}" [resizeKnob]="{node, position:'tr',direction:'ne',top:1,left:0,width:1,height:-1}"></div>
@@ -7,57 +8,75 @@
     <div class="knob b decorator {{node.isResizable.b ? '': 'hidden'}}" [resizeKnob]="{node, position:'b',direction:'s',top:0,left:0,width:0,height:1}"></div>
     <div class="knob b l decorator {{node.isResizable.b && node.isResizable.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'bl',direction:'ne',top:0,left:1,width:-1,height:1}"></div>
     <div class="knob l decorator {{node.isResizable.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'l',direction:'e',top:0,left:1,width:-1,height:0}"></div>
-    
-    <div class="menubar" *ngIf="nodes.length == 1 && node.isContainer && !node.maxLevelDesign && checkIfNodeIsVisible(node)">
-        <span class="containerAction" *ngIf="notInsideFormComponent(node)" (mousedown)="insertACopyAction($event, node, true)" style="background-image: url('designer/assets/images/insert_before.png')" title="Insert a {{node.containerName}} before"></span>
-        <span class="containerAction" *ngIf="notInsideFormComponent(node)" (mousedown)="insertACopyAction($event, node, false)" style="background-image: url('designer/assets/images/insert_after.png')" title="Insert a {{node.containerName}} after"></span>
+    @if (nodes.length == 1 && node.isContainer && !node.maxLevelDesign && checkIfNodeIsVisible(node)) {
+      <div class="menubar">
+        @if (notInsideFormComponent(node)) {
+          <span class="containerAction" (mousedown)="insertACopyAction($event, node, true)" style="background-image: url('designer/assets/images/insert_before.png')" title="Insert a {{node.containerName}} before"></span>
+        }
+        @if (notInsideFormComponent(node)) {
+          <span class="containerAction" (mousedown)="insertACopyAction($event, node, false)" style="background-image: url('designer/assets/images/insert_after.png')" title="Insert a {{node.containerName}} after"></span>
+        }
         <span class="containerAction" (mousedown)="copyAction($event)" style="background-image: url('designer/assets/images/copy_edit.png')" title="Copy"></span>
         <span class="containerAction" (mousedown)="zoomInAction($event)" style="background-image: url('designer/assets/images/zoom_in_menu.png')" title="Zoom in"></span>
-        <span class="containerAction" *ngIf="notInsideFormComponent(node)" (mousedown)="deleteAction($event)" style="margin-left:3px; margin-right: 10px;background-color: #A80000;background-image: url('designer/assets/images/delete_in_menu.png')" title="Delete"></span>
-    </div>
-    <div class="menubar" style="margin-top: -13px;" *ngIf="node.maxLevelDesign" [positionMenu]="node">
+        @if (notInsideFormComponent(node)) {
+          <span class="containerAction" (mousedown)="deleteAction($event)" style="margin-left:3px; margin-right: 10px;background-color: #A80000;background-image: url('designer/assets/images/delete_in_menu.png')" title="Delete"></span>
+        }
+      </div>
+    }
+    @if (node.maxLevelDesign) {
+      <div class="menubar" style="margin-top: -13px;" [positionMenu]="node">
         <i #menuOpen class="fas fa-caret-down fa-xs" style="color:black;" (mouseenter)="onEnter($event)"></i>
         <ul id="dropdownMenu" class="dropdown-menu" style="display:none;" (mouseleave)="onLeave($event)">
-            <li> <a tabindex="-1" href="#" (mousedown)="insertACopyAction($event, node, true)" style="background-image: url('designer/assets/images/insert_before_dropdown.png')" class="dropdown-item containerActionWithText">
-                    <span style="text-decoration: none;">Insert a {{node.containerName}} before</span>    
-                </a>
-            </li>
-            <li> <a tabindex="-1" href="#" (mousedown)="insertACopyAction($event, node, false)" style="background-image: url('designer/assets/images/insert_after_dropdown.png')" class="dropdown-item containerActionWithText">
-                    <span style="text-decoration: none;">Insert a {{node.containerName}} after</span>    
-                </a>
-            </li>
-            <li> <a tabindex="-1" href="#" (mousedown)="copyAction($event)" style="background-image: url('designer/assets/images/copy_in_dropdown.png')" class="dropdown-item containerActionWithText">
-                    <span style="text-decoration: none;">Copy</span>    
-                </a>
-            </li>
-            <li> <a tabindex="-1" href="#" (mousedown)="zoomInAction($event)" style="background-image: url('designer/assets/images/zoom_in_dropdown.png')" class="dropdown-item containerActionWithText">
-                    <span style="text-decoration: none;">Zoom in</span>    
-                </a>
-            </li>
-            <li> <a tabindex="-1" href="#" (mousedown)="deleteAction($event)" style="color: #A80000;background-image: url('designer/assets/images/delete_in_dropdown.png')"  class="dropdown-item containerActionWithText">
-                    <span style="text-decoration: none;">Delete</span>    
-                </a>
-            </li>
-            </ul>
-     </div>
-     <div class="menubar" *ngIf="nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length == 1">
-     	<span class="containerAction" (mousedown)="openWizardAction($event, node.autowizardProperties[0])" style="margin-left:3px; margin-right: 10px;background-color: #E9720B;background-image: url('designer/assets/images/configure_in_menu.png')" title="Configure {{node.autowizardProperties[0]}}"></span>
-     </div>  
-     <div class="menubar" style="top: -19px; float: left;" *ngIf="nodes.length == 1 && node.isFCorLFC">
-     	<span class="containerAction" (mousedown)="updateMoveFCorLFC()" style="margin-left: 3px; margin-right: 10px; background-color: #0099FF; background-image: url('designer/assets/images/move_component.png')" title="Move component"></span>
-     </div> 
-     <div class="menubar" style="margin-top: -13px;" *ngIf="nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length > 1" [positionMenu]="node">
-        <span #menuOpen (mouseenter)="onEnter($event)">
-        	<i class="fas fa-gear fa-sm" style="color: #E9720B;"></i>
-        	<i class="fas fa-caret-down fa-xs" style="color:black;"></i>
-        </span>
-        <ul id="dropdownMenu" class="dropdown-menu" style="display:none;" (mouseleave)="onLeave($event)">
-        	<li *ngFor="let wizardProperty of node.autowizardProperties">
-        		<a tabindex="-1" href="#" (mousedown)="openWizardAction($event, wizardProperty)" class="dropdown-item containerActionWithText">
-                    <span style="text-decoration: none;">Configure {{wizardProperty}}</span>    
-                </a>
-        	</li>
-      	</ul>
-     </div>  
- </div>
+          <li> <a tabindex="-1" href="#" (mousedown)="insertACopyAction($event, node, true)" style="background-image: url('designer/assets/images/insert_before_dropdown.png')" class="dropdown-item containerActionWithText">
+            <span style="text-decoration: none;">Insert a {{node.containerName}} before</span>
+          </a>
+        </li>
+        <li> <a tabindex="-1" href="#" (mousedown)="insertACopyAction($event, node, false)" style="background-image: url('designer/assets/images/insert_after_dropdown.png')" class="dropdown-item containerActionWithText">
+          <span style="text-decoration: none;">Insert a {{node.containerName}} after</span>
+        </a>
+      </li>
+      <li> <a tabindex="-1" href="#" (mousedown)="copyAction($event)" style="background-image: url('designer/assets/images/copy_in_dropdown.png')" class="dropdown-item containerActionWithText">
+        <span style="text-decoration: none;">Copy</span>
+      </a>
+    </li>
+    <li> <a tabindex="-1" href="#" (mousedown)="zoomInAction($event)" style="background-image: url('designer/assets/images/zoom_in_dropdown.png')" class="dropdown-item containerActionWithText">
+      <span style="text-decoration: none;">Zoom in</span>
+    </a>
+  </li>
+  <li> <a tabindex="-1" href="#" (mousedown)="deleteAction($event)" style="color: #A80000;background-image: url('designer/assets/images/delete_in_dropdown.png')"  class="dropdown-item containerActionWithText">
+    <span style="text-decoration: none;">Delete</span>
+  </a>
+</li>
+</ul>
+</div>
+}
+@if (nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length == 1) {
+  <div class="menubar">
+    <span class="containerAction" (mousedown)="openWizardAction($event, node.autowizardProperties[0])" style="margin-left:3px; margin-right: 10px;background-color: #E9720B;background-image: url('designer/assets/images/configure_in_menu.png')" title="Configure {{node.autowizardProperties[0]}}"></span>
+  </div>
+}
+@if (nodes.length == 1 && node.isFCorLFC) {
+  <div class="menubar" style="top: -19px; float: left;">
+    <span class="containerAction" (mousedown)="updateMoveFCorLFC()" style="margin-left: 3px; margin-right: 10px; background-color: #0099FF; background-image: url('designer/assets/images/move_component.png')" title="Move component"></span>
+  </div>
+}
+@if (nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length > 1) {
+  <div class="menubar" style="margin-top: -13px;" [positionMenu]="node">
+    <span #menuOpen (mouseenter)="onEnter($event)">
+      <i class="fas fa-gear fa-sm" style="color: #E9720B;"></i>
+      <i class="fas fa-caret-down fa-xs" style="color:black;"></i>
+    </span>
+    <ul id="dropdownMenu" class="dropdown-menu" style="display:none;" (mouseleave)="onLeave($event)">
+      @for (wizardProperty of node.autowizardProperties; track wizardProperty) {
+        <li>
+          <a tabindex="-1" href="#" (mousedown)="openWizardAction($event, wizardProperty)" class="dropdown-item containerActionWithText">
+            <span style="text-decoration: none;">Configure {{wizardProperty}}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+}
+</div>
+}
 <div class="lasso" #lasso></div>
