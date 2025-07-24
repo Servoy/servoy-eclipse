@@ -1,17 +1,26 @@
 <div
-    class='svy-container'
-    [id]="servoyApi.getMarkupId()"
-    [svyTooltip]="toolTipText"
-    [sabloTabseq]="tabSeq"
-    [sabloTabseqConfig]="{container: true, reservedGap: 50}"
-    #element>
-    <div class='svy-tabcontainer' [@slideAnimation]="form1_state"  (@slideAnimation.done)="animationDone($event, 'form1')" *ngIf="form1_visible" [ngStyle]="getContainerStyle(getForm1())">
-    <ng-template [ngIf]="!servoyApi.isInDesigner()" [ngIfElse]="desingform" [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm1()}"></ng-template>
+  class='svy-container'
+  [id]="servoyApi.getMarkupId()"
+  [svyTooltip]="toolTipText"
+  [sabloTabseq]="tabSeq"
+  [sabloTabseqConfig]="{container: true, reservedGap: 50}"
+  #element>
+  @if (form1_visible) {
+    <div class='svy-tabcontainer' [@slideAnimation]="form1_state"  (@slideAnimation.done)="animationDone($event, 'form1')" [ngStyle]="getContainerStyle(getForm1())">
+      @if (!servoyApi.isInDesigner()) {
+        <ng-template  [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm1()}"></ng-template>
+      } @else {
+        <div style="height: 100%; background-color:#e6e6e6;">{{ containedForm }}</div>
+      }
     </div>
-    <div class='svy-tabcontainer' [@slideAnimation]="form2_state" (@slideAnimation.done)="animationDone($event, 'form2')" *ngIf="form2_visible"  [ngStyle]="getContainerStyle(getForm2())">
-    <ng-template [ngIf]="!servoyApi.isInDesigner()" [ngIfElse]="desingform" [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm2()}" ></ng-template>
+  }
+  @if (form2_visible) {
+    <div class='svy-tabcontainer' [@slideAnimation]="form2_state" (@slideAnimation.done)="animationDone($event, 'form2')"  [ngStyle]="getContainerStyle(getForm2())">
+      @if (!servoyApi.isInDesigner()) {
+        <ng-template  [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm2()}" ></ng-template>
+      } @else {
+        <div style="height: 100%; background-color:#e6e6e6;">{{ containedForm }}</div>
+      }
     </div>
+  }
 </div>
-<ng-template #desingform>
-    <div style="height: 100%; background-color:#e6e6e6;">{{ containedForm }}</div>
-</ng-template>

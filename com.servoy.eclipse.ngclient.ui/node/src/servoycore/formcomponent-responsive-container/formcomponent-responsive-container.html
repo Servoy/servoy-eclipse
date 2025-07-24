@@ -1,1 +1,1 @@
-<ng-template *ngFor="let item of items" [ngTemplateOutlet]="formComponent.getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:formComponent }"></ng-template>  <!-- component  -->
+@for (item of items; track item) {<ng-template [ngTemplateOutlet]="formComponent.getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:formComponent }"></ng-template>}  <!-- component  -->

@@ -1,5 +1,5 @@
-import { Injectable, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Injectable, Inject, DOCUMENT } from '@angular/core';
+
 
 import { ShortcutService, Shortcut as Shortcut2 } from './shortcut.service';
 import { PopupMenuService, Popup } from './popupmenu.service';

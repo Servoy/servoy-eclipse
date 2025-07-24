@@ -1,6 +1,6 @@
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, DOCUMENT } from '@angular/core';
 import { environment } from '../environments/environment';
-import { DOCUMENT } from '@angular/common';
+
 import { SabloService } from '../sablo/sablo.service';
 import { SvyUtilsService } from './utils.service';
 

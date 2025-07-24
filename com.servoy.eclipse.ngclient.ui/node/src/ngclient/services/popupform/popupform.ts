@@ -1,5 +1,5 @@
-import { Component, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, Inject, DOCUMENT } from '@angular/core';
+
 import { ServoyPublicService, PopupForm } from '@servoy/public';
 import { PopupFormService } from '../popupform.service';
 

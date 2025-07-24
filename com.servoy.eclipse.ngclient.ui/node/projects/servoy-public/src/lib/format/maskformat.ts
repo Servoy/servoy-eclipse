@@ -1,5 +1,5 @@
-import { DOCUMENT } from '@angular/common';
-import { Inject, Renderer2 } from '@angular/core';
+
+import { Inject, Renderer2, DOCUMENT } from '@angular/core';
 import { Format, FormattingService } from './formatting.service';
 
 const MASK_CONST = {

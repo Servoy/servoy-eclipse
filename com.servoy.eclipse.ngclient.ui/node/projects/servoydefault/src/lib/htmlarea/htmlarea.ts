@@ -1,7 +1,7 @@
-import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
-import { DOCUMENT } from '@angular/common';
+
 import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 
 @Component({

@@ -1,7 +1,7 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, DOCUMENT } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { SvyUtilsService } from '../utils.service';
-import { DOCUMENT } from '@angular/common';
+
 
 @Injectable()
 export class ClientDesignService {

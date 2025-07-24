@@ -38,22 +38,20 @@ import { By } from '@angular/platform-browser';
     template: `
     <svy-form [name]="'aForm'" [injectedComponentRefs]="getCustomTestComponentTemplates()"></svy-form>
     <ng-template #customTestComponent let-callback="callback" let-state="state">
+      @if (state.model.visible) {
         <testcomponents-custom-component
-            *ngIf="state.model.visible"
-
-            [divLocation]="state.model.divLocation"
-            (divLocationChange)="callback.datachange(state,'divLocation',$event)"
-            [dataprovider]="state.model.dataprovider"
-            (dataprovider)="callback.datachange(state,'dataprovider',$event,true)"
-            [arrayOfCustomObjects]="state.model.arrayOfCustomObjects" (arrayOfCustomObjectsChange)="callback.datachange(state,'arrayOfCustomObjects',$event)"
-
-            [myActionHandler]="callback.getHandler(state,'myActionHandler')"
-            [servoyApi]="callback.getServoyApi(state)"
-
-            [servoyAttributes]="state.model.servoyAttributes"
-            [cssPosition]="state.model.cssPosition"
-            [name]="state.name" #cmp>
+          [divLocation]="state.model.divLocation"
+          (divLocationChange)="callback.datachange(state,'divLocation',$event)"
+          [dataprovider]="state.model.dataprovider"
+          (dataprovider)="callback.datachange(state,'dataprovider',$event,true)"
+          [arrayOfCustomObjects]="state.model.arrayOfCustomObjects" (arrayOfCustomObjectsChange)="callback.datachange(state,'arrayOfCustomObjects',$event)"
+          [myActionHandler]="callback.getHandler(state,'myActionHandler')"
+          [servoyApi]="callback.getServoyApi(state)"
+          [servoyAttributes]="state.model.servoyAttributes"
+          [cssPosition]="state.model.cssPosition"
+          [name]="state.name" #cmp>
         </testcomponents-custom-component>
+      }
     </ng-template>`,
     standalone: false
 })

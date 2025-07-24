@@ -1,5 +1,5 @@
-import { Injectable, Inject, ComponentRef } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Injectable, Inject, ComponentRef, DOCUMENT } from '@angular/core';
+
 import { ServoyFormPopupComponent } from './popupform/popupform';
 import { FormService } from '../form.service';
 import { ServicesService } from '../../sablo/services.service';

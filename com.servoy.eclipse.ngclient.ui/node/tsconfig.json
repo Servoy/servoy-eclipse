@@ -5,7 +5,7 @@
     "module": "es2020",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": false,
     "experimentalDecorators": true,
     "esModuleInterop": true,
@@ -21,8 +21,7 @@
       "dom",
       "dom.Iterable"
     ],
-    "paths": {
-    },
+    "paths": {},
     "outDir": "./out-tsc/app",
     "useDefineForClassFields": false
   },

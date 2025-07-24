@@ -1,7 +1,7 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, DOCUMENT } from '@angular/core';
 import { SabloService } from '../../../sablo/sablo.service';
 import { SvyWindow } from '../window.service';
-import { DOCUMENT } from '@angular/common';
+
 import { FormService } from '../../form.service';
 
 @Component({

@@ -1,4 +1,4 @@
-import { Injectable, Inject, Renderer2, RendererFactory2, ComponentRef } from '@angular/core';
+import { Injectable, Inject, Renderer2, RendererFactory2, ComponentRef, DOCUMENT } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
@@ -8,7 +8,7 @@ import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
 import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow';
 import { WindowRefService, LocalStorageService, SessionStorageService, MainViewRefService, PopupStateService } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
-import { DOCUMENT, PlatformLocation } from '@angular/common';
+import { PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';

@@ -1,5 +1,5 @@
-import { DOCUMENT } from '@angular/common';
-import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, ChangeDetectorRef, Input, OnInit, Inject } from '@angular/core';
+
+import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, ChangeDetectorRef, Input, OnInit, Inject, DOCUMENT } from '@angular/core';
 import { FormattingService } from '@servoy/public';
 import { ServoyDefaultBaseField } from './basefield';
 
