@@ -416,6 +416,8 @@ public class SolutionExplorerView extends ViewPart
 	private ChangeResourcesProjectAction changeResourcesProjectAction;
 	private RemoveSolutionProtectionAction removeSolutionProtectionAction;
 
+	private ConvertToNewFormatAction convertToNewFormatAction;
+
 	private PublishToCloudAction publishToCloudAction;
 
 	private DuplicatePersistAction duplicateFormAction;
@@ -2741,6 +2743,7 @@ public class SolutionExplorerView extends ViewPart
 		if (changeResourcesProjectAction.isEnabled()) manager.add(changeResourcesProjectAction);
 		if (replaceServerAction.isEnabled()) manager.add(replaceServerAction);
 		if (replaceActionInTree.isEnabled()) manager.add(replaceActionInTree);
+		if (convertToNewFormatAction.isEnabled()) manager.add(convertToNewFormatAction);
 		if (convertFormsToCSSPosition.isEnabled()) manager.add(convertFormsToCSSPosition);
 		if (removeSolutionProtectionAction.isEnabled()) manager.add(removeSolutionProtectionAction);
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
@@ -3229,6 +3232,7 @@ public class SolutionExplorerView extends ViewPart
 		duplicateFormAction = new DuplicatePersistAction(shell);
 		newBackwardsRelationAction = new NewBackwardsRelationAction();
 		changeResourcesProjectAction = new ChangeResourcesProjectAction(shell);
+		convertToNewFormatAction = new ConvertToNewFormatAction();
 		removeSolutionProtectionAction = new RemoveSolutionProtectionAction(shell);
 		reloadTablesOfServerAction = new ReloadTablesAction();
 		updateServoySequencesAction = new UpdateServoySequencesAction();
@@ -3676,6 +3680,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(upgradeComponentPackageAction);
 		addTreeSelectionChangedListener(moveFormAction);
 		addTreeSelectionChangedListener(changeResourcesProjectAction);
+		addTreeSelectionChangedListener(convertToNewFormatAction);
 		addTreeSelectionChangedListener(removeSolutionProtectionAction);
 		addTreeSelectionChangedListener(reloadTablesOfServerAction);
 		addTreeSelectionChangedListener(updateServoySequencesAction);

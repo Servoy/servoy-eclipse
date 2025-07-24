@@ -34,6 +34,7 @@ public class Messages extends NLS
 	public static String ReloadTablesAction_reloadTablesDescription;
 	public static String DuplicateFormAction_duplicateForm;
 	public static String ChangeResourcesProjectAction_chooseResourcesProject;
+	public static String ConvertSolutionToNewFormatAction_convertToNewFormat;
 	public static String EditVariableAction_editVariable;
 	public static String HideUnhideTablesAction_toggle;
 	public static String HideUnhideTablesAction_hide;
