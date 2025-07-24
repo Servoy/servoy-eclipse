@@ -16,6 +16,7 @@ import { FormattingService } from './format/formatting.service';
 import { ComponentContributor } from './basecomponent';
 import { SabloTabseq } from './directives/sablotabseq.directive';
 import { WindowRefService } from './services/windowref.service';
+import { PopupStateService } from './services/popup-state.service';
 
 @NgModule({
     declarations: [ TabFixDirective,
