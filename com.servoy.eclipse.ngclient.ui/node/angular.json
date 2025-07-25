@@ -180,22 +180,6 @@
         }
       }
     },
-    "ngclient2-e2e": {
-      "root": "",
-      "sourceRoot": "",
-      "projectType": "application",
-      "architect": {
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "lintFilePatterns": [
-              "e2e/**/*.ts",
-              "e2e/**/*.html"
-            ]
-          }
-        }
-      }
-    },
     "@servoy/public": {
       "projectType": "library",
       "root": "projects/servoy-public",
@@ -217,8 +201,11 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],            
             "preserveSymlinks": true,
-            "main": "projects/servoy-public/src/test.ts",
             "tsConfig": "projects/servoy-public/tsconfig.spec.json",
             "karmaConfig": "projects/servoy-public/karma.conf.js",
             "codeCoverage": false,
@@ -248,8 +235,11 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "preserveSymlinks": true,
-            "main": "projects/ngclientutils/src/test.ts",
             "tsConfig": "projects/ngclientutils/tsconfig.spec.json",
             "karmaConfig": "projects/ngclientutils/karma.conf.js",
             "codeCoverage": false,
@@ -279,8 +269,11 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "preserveSymlinks": true,
-            "main": "projects/dialogs/src/test.ts",
             "tsConfig": "projects/dialogs/tsconfig.spec.json",
             "karmaConfig": "projects/dialogs/karma.conf.js",
             "codeCoverage": false,
@@ -310,8 +303,11 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "preserveSymlinks": true,
-            "main": "projects/window/src/test.ts",
             "tsConfig": "projects/window/tsconfig.spec.json",
             "karmaConfig": "projects/window/karma.conf.js",
             "codeCoverage": false,
@@ -341,8 +337,11 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "preserveSymlinks": true,
-            "main": "projects/servoydefault/src/test.ts",
             "tsConfig": "projects/servoydefault/tsconfig.spec.json",
             "karmaConfig": "projects/servoydefault/karma.conf.js",
             "codeCoverage": false,

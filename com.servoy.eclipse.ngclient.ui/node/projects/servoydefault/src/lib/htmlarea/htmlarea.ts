@@ -64,7 +64,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
             this.tinyConfig['language'] = this.servoyService.getLocaleObject().language;
         }
 
-        this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0].href + 'tinymce';
+        this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0]?.href + 'tinymce';
 
         // app level configuration
         let defaultConfiguration = this.servoyService.getUIProperty('config');
