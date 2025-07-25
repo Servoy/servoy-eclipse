@@ -3232,7 +3232,7 @@ public class SolutionExplorerView extends ViewPart
 		duplicateFormAction = new DuplicatePersistAction(shell);
 		newBackwardsRelationAction = new NewBackwardsRelationAction();
 		changeResourcesProjectAction = new ChangeResourcesProjectAction(shell);
-		convertToNewFormatAction = new ConvertToNewFormatAction();
+		convertToNewFormatAction = new ConvertToNewFormatAction(shell);
 		removeSolutionProtectionAction = new RemoveSolutionProtectionAction(shell);
 		reloadTablesOfServerAction = new ReloadTablesAction();
 		updateServoySequencesAction = new UpdateServoySequencesAction();

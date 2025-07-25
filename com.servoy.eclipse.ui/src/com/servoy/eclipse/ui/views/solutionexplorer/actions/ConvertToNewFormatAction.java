@@ -22,10 +22,12 @@ import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -54,11 +56,13 @@ import com.servoy.j2db.util.Utils;
  */
 public class ConvertToNewFormatAction extends Action implements ISelectionChangedListener
 {
+	private final Shell shell;
 	private ServoyProject selectedSolutionProject;
 
 
-	public ConvertToNewFormatAction()
+	public ConvertToNewFormatAction(Shell shell)
 	{
+		this.shell = shell;
 		setText(Messages.ConvertSolutionToNewFormatAction_convertToNewFormat);
 		setToolTipText(Messages.ConvertSolutionToNewFormatAction_convertToNewFormat);
 	}
@@ -114,10 +118,27 @@ public class ConvertToNewFormatAction extends Action implements ISelectionChange
 	public void run()
 	{
 		if (selectedSolutionProject == null) return;
-		Solution[] modules = selectedSolutionProject.getModules();
-		for (Solution solution : modules)
+		// Create a modal progress dialog
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
+
+		try
 		{
-			convertSolutionToNewFormat(solution);
+			dialog.run(true, false, monitor -> {
+				Solution[] modules = selectedSolutionProject.getModules();
+				monitor.beginTask("Converting " + selectedSolutionProject.getSolution().getName() + " and its modules...", modules.length);
+				for (Solution solution : modules)
+				{
+					monitor.subTask("Converting " + solution.getName());
+					convertSolutionToNewFormat(solution);
+					monitor.worked(1);
+					if (monitor.isCanceled()) break;
+				}
+				monitor.done();
+			});
+		}
+		catch (Exception e)
+		{
+			Debug.error(e);
 		}
 	}
 
