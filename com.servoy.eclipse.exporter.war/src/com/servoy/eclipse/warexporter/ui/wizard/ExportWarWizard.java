@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -351,7 +352,32 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 						if (!cancel[0]) missingJarName = exporter.searchExportedPlugins();
 						else missingJarName = null;
 					}
-					if (!cancel[0]) exporter.doExport(monitor);
+					if (!cancel[0])
+					{
+						exporter.doActiveSolutionExports(monitor);
+						if (!monitor.isCanceled())
+						{
+							Job.create("Exporting resources to war file", (innerMonitor) -> {
+								try
+								{
+									exporter.doExport(innerMonitor);
+								}
+								catch (ExportException e)
+								{
+									Debug.error(e);
+									Display.getDefault().asyncExec(new Runnable()
+									{
+										public void run()
+										{
+											MessageDialog.openError(getShell(), "Error creating the WAR file", e.getMessage());
+										}
+									});
+								}
+								monitor.done();
+
+							}).schedule();
+						}
+					}
 				}
 				catch (final ExportException e)
 				{
