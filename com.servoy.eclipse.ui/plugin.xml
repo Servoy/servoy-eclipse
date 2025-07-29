@@ -594,17 +594,6 @@
                style="push"
                tooltip="Open Servoy Forum">
          </action> 
-<!--          <action
-            class="com.servoy.eclipse.ui.PostOnTheForumAction"
-            icon="icons/forum.png"
-            id="com.servoy.eclipse.ui.NewForumPost"
-            name="Forum Post"
-            label="Ask on the Forum"
-            menubarPath="help/intro"
-            style="push"
-            tooltip="Post in the forum directly from the developer.">
-      </action>        
--->
       </actionSet>
       <actionSet
             id="com.servoy.eclipse.ui.choosers"
