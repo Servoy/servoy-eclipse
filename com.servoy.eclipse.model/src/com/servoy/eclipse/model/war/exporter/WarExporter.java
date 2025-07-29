@@ -183,13 +183,8 @@ public class WarExporter
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
 		"wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
-		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar", //
-		"org.apache.httpcomponents.core5.httpcore5_*.jar", "org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
-		"org.apache.httpcomponents.client5.httpclient5_*.jar" };
+		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar" };
 
-	private static final Set<String> HTTP_PLUGIN_FILES = Set.of("httpclient5.jar", "httpcore5-h2.jar", "httpcore5.jar");
-
-	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
 
 	static
@@ -412,7 +407,7 @@ public class WarExporter
 	protected boolean filterPluginFile(File file)
 	{
 		String name = file.getName().toLowerCase();
-		return file.isFile() && !name.endsWith(".jnlp") && !name.equals("plugins.properties") && !HTTP_PLUGIN_FILES.contains(name);
+		return file.isFile() && !name.endsWith(".jnlp") && !name.equals("plugins.properties");
 	}
 
 	private void checkDuplicateJars() throws ExportException
@@ -1628,8 +1623,6 @@ public class WarExporter
 		int read = 0;
 		for (File file : files)
 		{
-			// skip the WRO4J_RUNNNER if somehow it couldn't be deleted.
-			if (file.getName().equals(WRO4J_RUNNER) || file.getName().equals("wro.xml")) continue;
 			if (file.isDirectory())
 			{
 				zip(file, base, zos);
