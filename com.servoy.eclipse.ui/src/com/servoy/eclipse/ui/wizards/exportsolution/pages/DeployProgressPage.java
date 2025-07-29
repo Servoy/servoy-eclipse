@@ -18,24 +18,13 @@
 package com.servoy.eclipse.ui.wizards.exportsolution.pages;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.ResponseInfo;
 import java.nio.charset.Charset;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.hc.client5.http.ClientProtocolException;
-import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.mime.FileBody;
-import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
-import org.apache.hc.client5.http.entity.mime.StringBody;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.HttpResponse;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -53,6 +42,8 @@ import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
+import com.servoy.j2db.util.http.MultipartFormDataBodyPublisher;
+import com.servoy.j2db.util.http.StringBodyHandler;
 
 /**
  * @author gboros
@@ -123,61 +114,52 @@ public class DeployProgressPage extends WizardPage implements IJobChangeListener
 				final StringBuilder responseMessage = new StringBuilder();
 				// the file we want to upload
 				File inFile = new File(exportFile);
-				try
+				try (HttpClient httpclient = HttpClient.newHttpClient())
 				{
 					responseMessage.append("Deploy started ...").append('\n');
 					updateDeployOutput(responseMessage.toString());
 
-					HttpClient httpclient = HttpClients.createDefault();
-					HttpPost httppost = new HttpPost(url);
-
 					String auth = username + ":" + password;
 					byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("ISO-8859-1")));
 					String authHeader = "Basic " + new String(encodedAuth);
-					httppost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
 
-
-					MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
-					multipartEntityBuilder.addPart("if", new FileBody(inFile));
+					MultipartFormDataBodyPublisher multipart = new MultipartFormDataBodyPublisher();
+					multipart.addFile("if", inFile.toPath());
 					if (exportSolutionWizard.getModel().isProtectWithPassword())
 					{
-						multipartEntityBuilder.addPart("solution_password",
-							new StringBody(exportSolutionWizard.getModel().getPassword(), ContentType.MULTIPART_FORM_DATA));
+						multipart.add("solution_password", exportSolutionWizard.getModel().getPassword());
 					}
-					httppost.setEntity(multipartEntityBuilder.build());
+
+					HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+						.setHeader("Authorization", authHeader).POST(multipart).build();
 
 					// execute the request
-					HttpResponse response = httpclient.execute(httppost);
-
-					HttpEntity responseEntity = ((ClassicHttpResponse)response).getEntity();
-					String responseString = EntityUtils.toString(responseEntity);
-
-					if (response.getCode() == 200)
+					httpclient.send(request, new StringBodyHandler<Void>()
 					{
-						String[] responses = responseString.split("\n");
-
-						for (String s : responses)
+						@Override
+						public Void handleResponse(ResponseInfo responseInfo, String responseString)
 						{
-							responseMessage.append(s.trim()).append('\n');
+							if (responseInfo.statusCode() == 200)
+							{
+								String[] responses = responseString.split("\n");
+
+								for (String s : responses)
+								{
+									responseMessage.append(s.trim()).append('\n');
+								}
+								responseMessage.append("Done!");
+							}
+							else
+							{
+								responseMessage.append("HTTP ERROR : ").append(responseInfo.statusCode()).append(' ').append(responseString);
+							}
+							return null;
 						}
-						responseMessage.append("Done!");
-					}
-					else
-					{
-						responseMessage.append("HTTP ERROR : ").append(response.getCode()).append(' ').append(responseString);
-					}
+					});
+
+
 				}
-				catch (ClientProtocolException e)
-				{
-					responseMessage.append("Unable to make connection").append('\n').append(e.getMessage());
-					ServoyLog.logError(e);
-				}
-				catch (ParseException e)
-				{
-					responseMessage.append("Unable to parse response").append('\n').append(e.getMessage());
-					ServoyLog.logError(e);
-				}
-				catch (IOException e)
+				catch (Exception e)
 				{
 					responseMessage.append("Unable to read file").append('\n').append(e.getMessage());
 					ServoyLog.logError(e);

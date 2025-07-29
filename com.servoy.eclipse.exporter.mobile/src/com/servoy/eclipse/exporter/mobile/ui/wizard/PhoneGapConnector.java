@@ -18,35 +18,21 @@
 package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.classic.methods.HttpPut;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
-import org.apache.hc.client5.http.entity.mime.FileBody;
-import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
-import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
-import org.apache.hc.client5.http.entity.mime.StringBody;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpException;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,6 +42,7 @@ import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.http.MultipartFormDataBodyPublisher;
 
 /**
  * @author lvostinar
@@ -69,8 +56,15 @@ public class PhoneGapConnector
 	private static final String URL_PHONEGAP_CLOUD = "https://build.phonegap.com/api/v1/apps";
 
 	private ServoyJSONObject jsonContent;
-	private final CloseableHttpClient client = HttpClientBuilder.create().build();
-	private HttpClientContext context;
+	private final HttpClient client = HttpClient.newBuilder().authenticator(new Authenticator()
+	{
+		@Override
+		protected PasswordAuthentication getPasswordAuthentication()
+		{
+			return passwordAuthentication;
+		}
+	}).build(); // Use HttpClientBuilder for HttpClient 11+
+	private PasswordAuthentication passwordAuthentication;
 	private JSONArray iosCertificates;
 	private JSONArray androidCertificates;
 	private JSONArray blackberryCertificates;
@@ -82,9 +76,9 @@ public class PhoneGapConnector
 		return loadPhoneGapAccount();
 	}
 
-	protected String getURL(String url)
+	protected URI getURL(String url)
 	{
-		return authToken != null ? url + AUTH_TOKEN_PARAM + authToken : url;
+		return authToken != null ? URI.create(url + AUTH_TOKEN_PARAM + authToken) : URI.create(url);
 	}
 
 	public String loadPhoneGapAcount(String username, String password)
@@ -97,72 +91,60 @@ public class PhoneGapConnector
 		{
 			return "Please provide your PhoneGap account password";
 		}
-		try
-		{
-			URL _url = new URL(URL_PHONEGAP_CLOUD);
+		passwordAuthentication = new PasswordAuthentication(username, password.toCharArray());
 
-			BasicCredentialsProvider bcp = new BasicCredentialsProvider();
-			bcp.setCredentials(new AuthScope(_url.getHost(), _url.getPort()), new UsernamePasswordCredentials(username, password.toCharArray()));
-			context = HttpClientContext.create();
-			context.setCredentialsProvider(bcp);
-
-			return loadPhoneGapAccount();
-		}
-		catch (MalformedURLException e)
-		{
-			return e.getMessage();
-		}
+		return loadPhoneGapAccount();
 	}
 
-	private ServoyJSONObject getJSONResponse(HttpUriRequest method) throws Exception
+	private ServoyJSONObject getJSONResponse(HttpRequest method) throws Exception
 	{
-		CloseableHttpResponse response = client.execute(method, context);
-		int status = response.getCode();
-		String content = EntityUtils.toString(response.getEntity());
+		return client.send(method, responseInfo -> BodySubscribers.mapping(
+			BodySubscribers.ofString(StandardCharsets.UTF_8), // Upstream subscriber gives us a String
+			(String content) -> { // This function converts the String to JSONObject
+				int status = responseInfo.statusCode();
 
-		if (status != HttpStatus.SC_OK)
-		{
-			String errorMsg = null;
-			String contentType = response.getEntity().getContentType();
-			if (contentType != null && contentType.contains("json"))
-			{
-				try
+				if (status != HttpURLConnection.HTTP_OK)
 				{
-					ServoyJSONObject json = new ServoyJSONObject(content, false);
-					if (json.has("error") && json.get("error") instanceof String)
+					String errorMsg = null;
+					String contentType = responseInfo.headers().firstValue("Content-Type").orElse(null);
+					if (contentType != null && contentType.contains("json"))
 					{
-						errorMsg = json.getString("error");
+						try
+						{
+							ServoyJSONObject json = new ServoyJSONObject(content, false);
+							if (json.has("error") && json.get("error") instanceof String)
+							{
+								errorMsg = json.getString("error");
+							}
+						}
+						catch (JSONException ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+
+					if (errorMsg == null && status >= 400)//error with no json error message (e.g. 504 Gateway Timeout)
+					{
+						errorMsg = "Cannot connect to Phonegap. Please try again later";
+					}
+					if (errorMsg != null)
+					{
+						String reason = "Status code " + status;
+						throw new RuntimeException(errorMsg + " " + reason);
 					}
 				}
-				catch (JSONException ex)
-				{
-					ServoyLog.logError(ex);
-				}
-			}
 
-			if (errorMsg == null && status >= 400)//error with no json error message (e.g. 504 Gateway Timeout)
-			{
-				errorMsg = "Cannot connect to Phonegap. Please try again later";
-			}
-			if (errorMsg != null)
-			{
-				String reason = "Status code " + status +
-					(response.getReasonPhrase() != null ? " " + response.getReasonPhrase() : "");
-				EntityUtils.consumeQuietly(response.getEntity());
-				throw new HttpException(errorMsg + " " + reason);
-			}
-		}
+				return new ServoyJSONObject(content, false);
+			})).body();
 
-		EntityUtils.consumeQuietly(response.getEntity());
-		return new ServoyJSONObject(content, false);
 	}
 
 	protected String loadPhoneGapAccount()
 	{
 		try
 		{
-			jsonContent = getJSONResponse(new HttpGet(getURL(URL_PHONEGAP_CLOUD)));
-			JSONObject keys = getJSONResponse(new HttpGet(getURL(URL_PHONEGAP_KEYS)));
+			jsonContent = getJSONResponse(HttpRequest.newBuilder(getURL(URL_PHONEGAP_CLOUD)).build());
+			JSONObject keys = getJSONResponse(HttpRequest.newBuilder(getURL(URL_PHONEGAP_KEYS)).build());
 			if (keys.has("keys"))
 			{
 				keys = keys.getJSONObject("keys");
@@ -196,7 +178,7 @@ public class PhoneGapConnector
 						{
 							int appID = apps.getJSONObject(i).getInt("id");
 							String url = URL_PHONEGAP_CLOUD + "/" + appID;
-							JSONObject jsonApp = getJSONResponse(new HttpGet(getURL(url)));
+							JSONObject jsonApp = getJSONResponse(HttpRequest.newBuilder(getURL(url)).build());
 							if (jsonApp.has("keys"))
 							{
 								apps.getJSONObject(i).put("keys", jsonApp.getJSONObject("keys"));
@@ -210,14 +192,10 @@ public class PhoneGapConnector
 				}
 			}
 		}
-		catch (HttpException ex)
-		{
-			return ex.getMessage();
-		}
 		catch (Exception ex)
 		{
 			ServoyLog.logError(ex);
-			return "Cannot load Phonegap account. Please try again later.";
+			return "Cannot load Phonegap account. Please try again later, message: " + ex.getMessage();
 		}
 		return null;
 	}
@@ -314,19 +292,9 @@ public class PhoneGapConnector
 
 			PhoneGapApplication existingApplication = getApplication(application.getTitle());
 			int appId = -1;
-			HttpUriRequestBase request;
 			if (existingApplication != null)
 			{
 				appId = existingApplication.getId();
-			}
-			if (appId >= 0)
-			{
-				url += "/" + appId;
-				request = new HttpPut(getURL(url));
-			}
-			else
-			{
-				request = new HttpPost(getURL(url));
 			}
 			if (application.getCertificates() != null && application.getCertificates().length > 0)
 			{
@@ -340,8 +308,8 @@ public class PhoneGapConnector
 				JSONObject json = new JSONObject(selectedCertificates);
 				application.setSelectedCertificates(json);
 			}
-			MultipartEntityBuilder entity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.LEGACY);
-			entity.addPart("data", new StringBody(application.getJSON(), ContentType.TEXT_PLAIN));
+			MultipartFormDataBodyPublisher entity = new MultipartFormDataBodyPublisher();
+			entity.add("data", application.getJSON());
 
 			mobileExporter.setOutputFolder(new File(System.getProperty("java.io.tmpdir")));
 			if (!configFile.exists())
@@ -357,9 +325,18 @@ public class PhoneGapConnector
 			}
 			mobileExporter.setConfigFile(configFile);
 			exportedFile = mobileExporter.doExport(true, new NullProgressMonitor());
-			entity.addPart("file", new FileBody(exportedFile));
+			entity.addFile("file", exportedFile.toPath());
 
-			request.setEntity(entity.build());
+			HttpRequest request;
+			if (appId >= 0)
+			{
+				url += "/" + appId;
+				request = HttpRequest.newBuilder(getURL(url)).PUT(entity).build();
+			}
+			else
+			{
+				request = HttpRequest.newBuilder(getURL(url)).POST(entity).build();
+			}
 
 			ServoyJSONObject jsonResponse = getJSONResponse(request);
 			appId = jsonResponse.getInt("id");
@@ -370,22 +347,17 @@ public class PhoneGapConnector
 				if (file.exists() && file.isFile())
 				{
 					url = URL_PHONEGAP_CLOUD + "/" + appId + "/icon";
-					request = new HttpPost(getURL(url));
-					entity = MultipartEntityBuilder.create().setMode(HttpMultipartMode.LEGACY);
-					entity.addPart("icon", new FileBody(file));
-					request.setEntity(entity.build());
+					entity = new MultipartFormDataBodyPublisher();
+					entity.addFile("icon", file.toPath());
+					request = HttpRequest.newBuilder(getURL(url)).POST(entity).build();
 					jsonResponse = getJSONResponse(request);
 				}
 			}
 		}
-		catch (HttpException ex)
-		{
-			return ex.getMessage();
-		}
 		catch (Exception ex)
 		{
 			ServoyLog.logError(ex);
-			return "Cannot connect to Phonegap. Please try again later";
+			return "Cannot connect to Phonegap. Please try again later, message: " + ex.getMessage();
 		}
 		finally
 		{

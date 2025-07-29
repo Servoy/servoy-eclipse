@@ -1,29 +1,22 @@
 package com.servoy.eclipse.exporter.ngdesktop.ui.wizard;
 
 import java.awt.Dimension;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.UnknownHostException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.ResponseInfo;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.hc.client5.http.ClientProtocolException;
-import org.apache.hc.client5.http.HttpHostConnectException;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -48,6 +41,7 @@ import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.http.StringBodyHandler;
 
 /**
  * @author gboros
@@ -61,7 +55,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	public final static int APP_NAME_LENGTH = 20; // chars
 	protected static final int STORE_TIMEOUT = 7; //days
 	private String service_url = "https://ngdesktop-builder.servoy.com";
-	private CloseableHttpClient httpClient = null;
 
 	public ExportNGDesktopWizard()
 	{
@@ -123,35 +116,59 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 			errorMsg.delete(0, errorMsg.length());
 
-			exportPage.getSelectedPlatforms().forEach((platform) -> {
-				exportSettings.put("platform", platform);
+			try (HttpClient httpClient = HttpClient.newHttpClient())
+			{
+				exportPage.getSelectedPlatforms().forEach((platform) -> {
+					exportSettings.put("platform", platform);
 
-				try (final CloseableHttpResponse httpResponse = sendRequest(exportSettings))
-				{
-					final int httpStatusCode = httpResponse.getCode();
+					final String srvAddress = System.getProperty("ngdesktop.service.address");
+					if (srvAddress != null && isValidUrl(srvAddress))
+						service_url = srvAddress;
 
-					switch (httpStatusCode)
+					final String input = formatRequest(exportSettings);
+
+					final HttpRequest postRequest = HttpRequest.newBuilder(URI.create(service_url + "/build/start"))
+						.POST(HttpRequest.BodyPublishers.ofString(input))
+						.build();
+
+					ServoyLog.logInfo("Send request to " + service_url + "/build/start");
+
+					try
 					{
-						case HttpStatus.SC_OK :
-							result[0] = true; //at least one platform has been delivered succesfully
-							break;
-						default :
-							String reasonPhrase = httpResponse.getReasonPhrase();
-							if (Utils.stringIsEmpty(reasonPhrase)) reasonPhrase = getReasonPhrase(httpResponse);
-							errorMsg
-								.append(String.format("Platform: %s\nError code: %d\n%s", platform, httpStatusCode, reasonPhrase));
-							break;
+						httpClient.send(postRequest, new StringBodyHandler<Void>()
+						{
+							@Override
+							public Void handleResponse(ResponseInfo responseInfo, String content)
+							{
+								final int httpStatusCode = responseInfo.statusCode();
+
+								switch (httpStatusCode)
+								{
+									case HttpURLConnection.HTTP_OK :
+										result[0] = true; //at least one platform has been delivered succesfully
+										break;
+									default :
+										final String reasonPhrase = getReasonPhrase(content);
+										errorMsg
+											.append(String.format("Platform: %s\nError code: %d\n%s", platform, httpStatusCode, reasonPhrase));
+										break;
+								}
+								return null;
+							}
+						});
 					}
-				}
-				catch (final HttpHostConnectException | UnknownHostException e)
-				{
-					errorMsg.append("Can't connect to the remote service.\nTry again later ...");
-				}
-				catch (final IOException e)
-				{
-					ServoyLog.logError(e);
-				}
-			});
+					catch (IOException | InterruptedException e)
+					{
+						errorMsg.append("Can't connect to the remote service.\nTry again later ...");
+						ServoyLog.logError(e);
+					}
+				});
+			}
+			catch (final Exception e)
+			{
+				errorMsg.append("Can't connect to the remote service.\nTry again later ...");
+				ServoyLog.logError(e);
+			}
 
 			final Runnable run = () -> {
 				if (errorMsg.length() > 0) MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
@@ -173,46 +190,22 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	}
 
 	//fail to customize reason phrase into Spring - so extract from the
-	private String getReasonPhrase(CloseableHttpResponse response) throws IOException
+	private String getReasonPhrase(String content)
 	{
-		if (response != null) try (BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent())))
+		try
 		{
-			String output;
-			final StringBuffer sb = new StringBuffer();
-			while ((output = br.readLine()) != null)
-				sb.append(output);
-			try
-			{
-				final JSONObject jsonObj = new JSONObject(sb.toString());
-				return jsonObj.optString("statusMessage", "Unexpected error");
-			}
-			catch (final JSONException e)
-			{
-				//Unexpected http response?
-				return "Internal server error: " + response.getReasonPhrase();
-
-			}
+			final JSONObject jsonObj = new JSONObject(content);
+			return jsonObj.optString("statusMessage", "Unexpected error");
 		}
-		return "Internal server error";//not sure what happen ...
+		catch (final JSONException e)
+		{
+			//Unexpected http response?
+			return "Internal server error: " + e.getMessage();
+
+		}
 	}
 
-	private CloseableHttpResponse sendRequest(IDialogSettings settings) throws ClientProtocolException, IOException, HttpHostConnectException
-	{
-		final String srvAddress = System.getProperty("ngdesktop.service.address");
-		if (srvAddress != null && isValidUrl(srvAddress))
-			service_url = srvAddress;
-
-		final HttpClientBuilder httpBuilder = HttpClientBuilder.create();
-		httpClient = httpBuilder.build();
-
-		final StringEntity input = formatRequest(settings);
-		final HttpPost postRequest = new HttpPost(service_url + "/build/start");
-		postRequest.setEntity(input);
-		ServoyLog.logInfo("Send request to " + service_url + "/build/start");
-		return httpClient.execute(postRequest);
-	}
-
-	private StringEntity formatRequest(IDialogSettings settings)
+	private String formatRequest(IDialogSettings settings)
 	{
 		try
 		{
@@ -241,8 +234,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			jsonObj.put("emailAddress", settings.get("email_address"));
 			jsonObj.put("storageTimeout", settings.getBoolean("store_data") ? STORE_TIMEOUT * 24 : 0); //convert to hours
 
-			final StringEntity input = new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
-			return input;
+			return jsonObj.toString();
 		}
 		catch (final IOException e)
 		{
