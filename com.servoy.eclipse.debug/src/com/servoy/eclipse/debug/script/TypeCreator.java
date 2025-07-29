@@ -283,12 +283,12 @@ import com.servoy.j2db.scripting.info.JSPermission;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
-import com.servoy.j2db.scripting.solutionmodel.developer.Location;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FoundsetReferencePropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ModifiablePropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RecordPropertyType;
@@ -1610,6 +1610,10 @@ public class TypeCreator extends TypeCache
 		if (RecordPropertyType.TYPE_NAME.equals(type.getName()))
 		{
 			return getTypeRef(context, Record.JS_RECORD);
+		}
+		if (FoundsetReferencePropertyType.TYPE_NAME.equals(type.getName()))
+		{
+			return getTypeRef(context, FoundSet.JS_FOUNDSET);
 		}
 		return null;
 	}
