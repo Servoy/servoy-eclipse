@@ -131,7 +131,7 @@ public class DeployProgressPage extends WizardPage implements IJobChangeListener
 					}
 
 					HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-						.setHeader("Authorization", authHeader).POST(multipart).build();
+						.setHeader("Authorization", authHeader).setHeader("Content-Type", multipart.contentType()).POST(multipart).build();
 
 					// execute the request
 					httpclient.send(request, new StringBodyHandler<Void>()

@@ -331,11 +331,11 @@ public class PhoneGapConnector
 			if (appId >= 0)
 			{
 				url += "/" + appId;
-				request = HttpRequest.newBuilder(getURL(url)).PUT(entity).build();
+				request = HttpRequest.newBuilder(getURL(url)).setHeader("Content-Type", entity.contentType()).PUT(entity).build();
 			}
 			else
 			{
-				request = HttpRequest.newBuilder(getURL(url)).POST(entity).build();
+				request = HttpRequest.newBuilder(getURL(url)).setHeader("Content-Type", entity.contentType()).POST(entity).build();
 			}
 
 			ServoyJSONObject jsonResponse = getJSONResponse(request);
