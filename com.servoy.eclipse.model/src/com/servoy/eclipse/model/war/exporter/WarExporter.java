@@ -271,7 +271,7 @@ public class WarExporter
 	 * @param monitor
 	 * @throws ExportException if export fails
 	 */
-	public void doExport(IProgressMonitor m) throws ExportException
+	public File doExport(IProgressMonitor m) throws ExportException
 	{
 		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 42);
 		File warFile = createNewWarFile();
@@ -313,7 +313,7 @@ public class WarExporter
 		monitor.setWorkRemaining(11);
 		monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
 		copyComponentsAndServicesPlusLibs(monitor.newChild(2));
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 
 		monitor.setWorkRemaining(5);
 		monitor.subTask("Copy exported components");
@@ -328,7 +328,7 @@ public class WarExporter
 			}
 			catch (RuntimeException e)
 			{
-				if (monitor.isCanceled()) return;
+				if (monitor.isCanceled()) return null;
 				throw new ExportException("could not create/copy Titanium NGClient resources", e);
 			}
 		}
@@ -348,7 +348,7 @@ public class WarExporter
 		createDeployPropertiesFile();
 		monitor.worked(1);
 		monitor.subTask("Checking war for duplicate jars (" + SDF.format(new Date()) + ")");
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 		// first check,remove duplicate jars from the plugins dir.
 		checkDuplicateJars();
 		monitor.worked(1);
@@ -391,7 +391,7 @@ public class WarExporter
 		}
 
 		monitor.worked(1);
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 		monitor.subTask("Creating/zipping the WAR file (" + SDF.format(new Date()) + ")");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
@@ -399,6 +399,7 @@ public class WarExporter
 		monitor.worked(1);
 		monitor.subTask("Done (" + SDF.format(new Date()) + ")");
 		monitor.done();
+		return warFile;
 	}
 
 	/**
