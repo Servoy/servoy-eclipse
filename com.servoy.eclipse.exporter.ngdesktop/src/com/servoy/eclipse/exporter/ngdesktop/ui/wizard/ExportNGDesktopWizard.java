@@ -127,7 +127,9 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 					final String input = formatRequest(exportSettings);
 
-					final HttpRequest postRequest = HttpRequest.newBuilder(URI.create(service_url + "/build/start"))
+					final HttpRequest postRequest = HttpRequest.newBuilder()
+						.uri(URI.create(service_url + "/build/start"))
+						.header("Content-Type", "application/json")
 						.POST(HttpRequest.BodyPublishers.ofString(input))
 						.build();
 
