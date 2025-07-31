@@ -430,7 +430,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			{
 				try
 				{
-					IProjectDescription pd = workspace.loadProjectDescription(IPath.fromFile(f));
+					IProjectDescription pd = workspace.loadProjectDescription(IPath.fromFile(new File(f, ".project")));
 					IProject p = workspaceRoot.getProject(pd.getName());
 					if (!p.exists() || !p.isOpen())
 					{
