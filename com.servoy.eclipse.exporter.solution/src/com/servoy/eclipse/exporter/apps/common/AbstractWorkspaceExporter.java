@@ -427,6 +427,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			{
 				if (!p.exists() || !p.isOpen())
 				{
+					outputExtra("Trying to import project '" + f.getName() + "' from location '" + f.getAbsolutePath() + "' into workspace.");
 					try
 					{
 						boolean existed = p.exists();
