@@ -1,10 +1,10 @@
-import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, HostListener, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, HostListener, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { Observable, merge, Subject, of } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService, ServoyPublicService } from '@servoy/public';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
-import { DOCUMENT } from '@angular/common';
+
 
 @Component({
 	selector: 'servoydefault-typeahead',

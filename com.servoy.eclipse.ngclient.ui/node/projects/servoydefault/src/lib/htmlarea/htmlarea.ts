@@ -1,7 +1,7 @@
-import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
-import { DOCUMENT } from '@angular/common';
+
 import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 
 @Component({
@@ -64,7 +64,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
             this.tinyConfig['language'] = this.servoyService.getLocaleObject().language;
         }
 
-        this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0].href + 'tinymce';
+        this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0]?.href + 'tinymce';
 
         // app level configuration
         let defaultConfiguration = this.servoyService.getUIProperty('config');

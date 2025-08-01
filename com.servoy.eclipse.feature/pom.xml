@@ -10,9 +10,7 @@
 		<version>2025.9.0.4100_rc</version>
 	</parent>
 
-	<groupId>com.servoy</groupId>
 	<artifactId>com.servoy.eclipse.feature</artifactId>
-	<version>2025.9.0.4100_rc</version>
 	<packaging>eclipse-feature</packaging>
 
 </project>

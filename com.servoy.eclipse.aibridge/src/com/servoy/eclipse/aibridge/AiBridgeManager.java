@@ -1,9 +1,13 @@
 package com.servoy.eclipse.aibridge;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse.BodySubscribers;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,19 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpException;
-import org.apache.hc.core5.http.io.HttpClientResponseHandler;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.javascript.parser.JavascriptParserPreferences;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,8 +38,8 @@ import com.servoy.j2db.util.Utils;
 public class AiBridgeManager
 {
 
-	private static final String ENDPOINT = System.getProperty("servoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
-		"/servoy-service/rest_ws/api/llm/AIBridge";
+	private static final URI ENDPOINT = URI.create(System.getProperty("servoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
+		"/servoy-service/rest_ws/api/llm/AIBridge");
 	private static final int MAX_SIM_REQUESTS = 10;
 
 	private final static ExecutorService executorService = Executors.newFixedThreadPool(MAX_SIM_REQUESTS);
@@ -79,95 +74,92 @@ public class AiBridgeManager
 		String cmdName, String inputData,
 		String source, int offset, int length, String context)
 	{
-		final String loginToken = logIn();
-		if (!Utils.stringIsEmpty(loginToken))
-		{
-			CompletableFuture.runAsync(() -> {
-				UUID uuid = UUID.randomUUID();
-				Completion completion = new Completion(uuid, cmdName, inputData, context, source, offset, length);
-				try
-				{
-					requestMap.put(uuid, completion);
-					AiBridgeView.setSelectionId(uuid);
-					AiBridgeView.refresh();
-					completion = sendHttpRequest(loginToken, completion);
+		ServoyLoginDialog.getLoginToken(loginToken -> {
+			if (!Utils.stringIsEmpty(loginToken))
+			{
+				CompletableFuture.runAsync(() -> {
+					UUID uuid = UUID.randomUUID();
+					Completion completion = new Completion(uuid, cmdName, inputData, context, source, offset, length);
+					try
+					{
+						requestMap.put(uuid, completion);
+						AiBridgeView.setSelectionId(uuid);
+						AiBridgeView.refresh();
+						completion = sendHttpRequest(loginToken, completion);
 
-				}
-				catch (Exception e)
-				{
-					completion.setMessage(e.getMessage());
-					completion.setStatus(AiBridgeStatus.ERROR);
-					ServoyLog.logError(e);
-				}
-				finally
-				{
-					saveCompletion(AiBridgeView.getSolutionName(), uuid, completion);
-					AiBridgeView.setSelectionId(uuid);
-					AiBridgeView.refresh();
-				}
-			}, executorService);
-		}
+					}
+					catch (Exception e)
+					{
+						completion.setMessage(e.getMessage());
+						completion.setStatus(AiBridgeStatus.ERROR);
+						ServoyLog.logError(e);
+					}
+					finally
+					{
+						saveCompletion(AiBridgeView.getSolutionName(), uuid, completion);
+						AiBridgeView.setSelectionId(uuid);
+						AiBridgeView.refresh();
+					}
+				}, executorService);
+			}
+			else showConnectMessage();
+		});
 	}
 
 	public void sendCompletion(Completion completion)
 	{
-		final String loginToken = logIn();
+		ServoyLoginDialog.getLoginToken(loginToken -> {
+			if (!Utils.stringIsEmpty(loginToken))
+			{
+				CompletableFuture.runAsync(() -> {
+					//load full context and selection
+					Completion myCompletion = completion.getFullCompletion();
+					try
+					{
+						deleteFile(AiBridgeView.getSolutionName(), myCompletion.getId());
+						requestMap.put(myCompletion.getId(), myCompletion.fullReset());
+						myCompletion.setStatus(AiBridgeStatus.SUBMITTED);
+						myCompletion.setResponse(new Response());
+						myCompletion.setMessage("Processing...");
+						AiBridgeView.setSelectionId(myCompletion.getId());
+						AiBridgeView.refresh();
+						myCompletion = sendHttpRequest(loginToken, myCompletion);
+					}
+					catch (Exception e)
+					{
+						myCompletion.setMessage(e.getMessage());
+						myCompletion.setStatus(AiBridgeStatus.ERROR);
+						ServoyLog.logError(e);
+					}
+					finally
+					{
+						saveCompletion(AiBridgeView.getSolutionName(), myCompletion.getId(), myCompletion);
+						AiBridgeView.setSelectionId(myCompletion.getId());
+						AiBridgeView.refresh();
 
-		if (!Utils.stringIsEmpty(loginToken))
-		{
-			CompletableFuture.runAsync(() -> {
-				//load full context and selection
-				Completion myCompletion = completion.getFullCompletion();
-				try
-				{
-					deleteFile(AiBridgeView.getSolutionName(), myCompletion.getId());
-					requestMap.put(myCompletion.getId(), myCompletion.fullReset());
-					myCompletion.setStatus(AiBridgeStatus.SUBMITTED);
-					myCompletion.setResponse(new Response());
-					myCompletion.setMessage("Processing...");
-					AiBridgeView.setSelectionId(myCompletion.getId());
-					AiBridgeView.refresh();
-					myCompletion = sendHttpRequest(loginToken, myCompletion);
-				}
-				catch (Exception e)
-				{
-					myCompletion.setMessage(e.getMessage());
-					myCompletion.setStatus(AiBridgeStatus.ERROR);
-					ServoyLog.logError(e);
-				}
-				finally
-				{
-					saveCompletion(AiBridgeView.getSolutionName(), myCompletion.getId(), myCompletion);
-					AiBridgeView.setSelectionId(myCompletion.getId());
-					AiBridgeView.refresh();
-
-				}
-			}, executorService);
-		}
+					}
+				}, executorService);
+			}
+			else showConnectMessage();
+		});
 	}
 
-	private String logIn()
+	private void showConnectMessage()
 	{
 
-		String loginToken = ServoyLoginDialog.getLoginToken();
-		if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-		if (Utils.stringIsEmpty(loginToken))
+		Display.getDefault().asyncExec(new Runnable()
 		{
-			Display.getDefault().asyncExec(new Runnable()
+			public void run()
 			{
-				public void run()
-				{
-					MessageDialog.openInformation(
-						Display.getDefault().getActiveShell(),
-						"Login Required",
-						"You need to log in to Servoy Cloud if you want to use Servoy AI.");
-				}
-			});
-		}
-		return loginToken;
+				MessageDialog.openInformation(
+					Display.getDefault().getActiveShell(),
+					"Login Required",
+					"You need to log in to Servoy Cloud if you want to use Servoy AI.");
+			}
+		});
 	}
 
-	private StringEntity createEntity(Completion request)
+	private String createEntity(Completion request)
 	{
 		//this method need to be in sync with the json object expected by the endpoint
 		JSONObject jsonObj = new JSONObject();
@@ -181,7 +173,7 @@ public class AiBridgeManager
 		jsonObj.put("useEcmaScriptParser", new JavascriptParserPreferences().useES6Parser());
 
 
-		return new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
+		return jsonObj.toString();
 	}
 
 	private String getRequestType(String cmdName)
@@ -200,32 +192,29 @@ public class AiBridgeManager
 
 	private Completion sendHttpRequest(String loginToken, final Completion request)
 	{
-		HttpClientBuilder httpBuilder = HttpClientBuilder.create();
-		try (CloseableHttpClient httpClient = httpBuilder.build())
+		try (HttpClient httpClient = HttpClient.newHttpClient())
 		{
-			HttpPost postRequest = new HttpPost(ENDPOINT);
-			StringEntity entity = createEntity(request);
-			postRequest.setEntity(entity);
-			postRequest.setHeader("token", loginToken);
+			HttpRequest post = HttpRequest.newBuilder(ENDPOINT)
+				.setHeader("token", loginToken)
+				.setHeader("Content-Type", "application/json")
+				.POST(BodyPublishers.ofString(createEntity(request)))
+				.build();
 
-			return httpClient.execute(postRequest, new HttpClientResponseHandler<Completion>()
-			{
-				@Override
-				public Completion handleResponse(ClassicHttpResponse httpResponse) throws HttpException, IOException
-				{
-					request.setHttpCode(httpResponse.getCode());
+			return httpClient.send(post, responseInfo -> BodySubscribers.mapping(
+				BodySubscribers.ofString(StandardCharsets.UTF_8), // Upstream subscriber gives us a String
+				(String jsonString) -> { // This function converts the String to JSONObject
+					request.setHttpCode(responseInfo.statusCode());
 
-					String errorMessage = switch (httpResponse.getCode())
+					String errorMessage = switch (responseInfo.statusCode())
 					{
-						case 200 ->
-						{
+						case 200 -> {
 							request.setStatus(AiBridgeStatus.COMPLETE);
 							yield null; // No error message for success
 						}
 						case 500 -> "Service is temporary down ...!";
 						case 403 -> "Unrecognized sender ...!";
 						case 401 -> "Invalid credentials ...!";
-						default -> "Unexpected error: " + httpResponse.getCode();
+						default -> "Unexpected error: " + responseInfo.statusCode();
 					};
 					if (errorMessage != null)
 					{
@@ -234,26 +223,14 @@ public class AiBridgeManager
 						return request;
 					}
 
-
-					BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
-					StringBuilder sbResult = new StringBuilder();
-					String output;
-					while ((output = br.readLine()) != null)
-					{
-						sbResult.append(output);
-					}
-
-					String jsonString = sbResult.toString();
 					JSONObject jsonObj = new JSONObject(jsonString);
 					Response response = new Response(jsonObj);
 					request.setResponse(response);
 					request.setEndTime(Calendar.getInstance().getTime());
 					return request;
-				}
-			});
-
+				})).body();
 		}
-		catch (RuntimeException | IOException e)
+		catch (RuntimeException | IOException | InterruptedException e)
 		{
 			e.printStackTrace();
 			request.setStatus(AiBridgeStatus.ERROR);

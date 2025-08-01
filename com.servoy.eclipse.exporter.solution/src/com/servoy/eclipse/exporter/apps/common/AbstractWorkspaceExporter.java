@@ -29,6 +29,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -36,6 +37,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -258,9 +261,9 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		{
 			outputExtra("Importing existing projects into workspace and opening closed ones if needed. " +
 				(configuration.shouldAggregateWorkspace() ? "(checking child folders for projects as well)" : ""));
-			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-			File wr = workspaceRoot.getLocation().toFile();
-			importExistingAndOpenClosedProjects(wr, workspaceRoot, importedProjects, existingClosedProjects);
+			IWorkspace workspace = ResourcesPlugin.getWorkspace();
+			File wr = workspace.getRoot().getLocation().toFile();
+			importExistingAndOpenClosedProjects(wr, workspace, importedProjects, existingClosedProjects);
 
 			if (configuration.shouldAggregateWorkspace())
 			{
@@ -268,12 +271,12 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				for (File f : FileUtils.listFilesAndDirs(wr, FalseFileFilter.INSTANCE, DirectoryFileFilter.DIRECTORY))
 				{
 					if (f.getAbsolutePath().contains(".metadata")) continue;
-					importExistingAndOpenClosedProjects(f, workspaceRoot, importedProjects, existingClosedProjects);
+					importExistingAndOpenClosedProjects(f, workspace, importedProjects, existingClosedProjects);
 				}
 			}
 
 			outputExtra("Refreshing projects.");
-			IProject[] prjs = workspaceRoot.getProjects();
+			IProject[] prjs = workspace.getRoot().getProjects();
 			try
 			{
 				for (IProject p : prjs)
@@ -412,9 +415,10 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	}
 
 
-	protected void importExistingAndOpenClosedProjects(File sourceFolder, IWorkspaceRoot workspaceRoot, List<IProject> importedProjects,
+	protected void importExistingAndOpenClosedProjects(File sourceFolder, IWorkspace workspace, List<IProject> importedProjects,
 		List<IProject> existingClosedProjects)
 	{
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
 		boolean useLinks = !workspaceRoot.getLocation().toFile().equals(sourceFolder);
 		File[] files = sourceFolder.listFiles();
 		if (files == null) return;
@@ -422,13 +426,15 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		{
 			// this assumes that the name defined in ".project" matches the name of the parent folder;
 			// if needed in the future, Workspace.loadProjectDescription(<.project>) can be used before we create the Project instance
-			IProject p = workspaceRoot.getProject(f.getName());
 			if (f.isDirectory() && new File(f, ".project").exists())
 			{
-				if (!p.exists() || !p.isOpen())
+				try
 				{
-					try
+					IProjectDescription pd = workspace.loadProjectDescription(IPath.fromFile(new File(f, ".project")));
+					IProject p = workspaceRoot.getProject(pd.getName());
+					if (!p.exists() || !p.isOpen())
 					{
+						outputExtra("Trying to import project '" + p.getName() + "' from location '" + f.getAbsolutePath() + "' into workspace.");
 						boolean existed = p.exists();
 						if (!existed)
 						{
@@ -438,11 +444,14 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								IProjectDescription projectDescription = workspaceRoot.getWorkspace().newProjectDescription(p.getName());
 								projectDescription.setLocationURI(f.toURI());
 								p.create(projectDescription, null);
+								outputExtra("Project '" + p + "' created/imported as a link into workspace");
+
 							}
 							else
 							{
 								// real project location is default - directly inside workspace folder
-								p.create(null);
+								p.create(pd, new NullProgressMonitor());
+								outputExtra("Project '" + p + "' created/imported into workspace");
 							}
 							importedProjects.add(p);
 						}
@@ -466,17 +475,17 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 						}
 					}
-					catch (CoreException e)
+					else if (useLinks && !p.getLocation().toFile().equals(f))
 					{
-						ServoyLog.logError(e);
-						outputError("Cannot import and open project '" + f.getName() + "' into workspace. Check workspace log.");
+						outputError("Cannot use project in alternate location '" + f.getAbsolutePath() +
+							"'. Another project with that name is already present in workspace from location '" + p.getLocation().toFile().getAbsolutePath() +
+							"'.");
 					}
 				}
-				else if (useLinks && !p.getLocation().toFile().equals(f))
+				catch (CoreException e)
 				{
-					outputError("Cannot use project in alternate location '" + f.getAbsolutePath() +
-						"'. Another project with that name is already present in workspace from location '" + p.getLocation().toFile().getAbsolutePath() +
-						"'.");
+					ServoyLog.logError(e);
+					outputError("Cannot import and open project '" + f.getName() + "' into workspace. Check workspace log.");
 				}
 			}
 		}

@@ -1,7 +1,9 @@
 <div class="content">
   <mat-tab-group>
-        <mat-tab *ngFor="let packageList of packageLists" label="{{getPackageTabLabel(packageList)}}">
-          <app-packages [packages]="packageList.packages"></app-packages>
-        </mat-tab>
+    @for (packageList of packageLists; track packageList) {
+      <mat-tab label="{{getPackageTabLabel(packageList)}}">
+        <app-packages [packages]="packageList.packages"></app-packages>
+      </mat-tab>
+    }
   </mat-tab-group>
 </div>

@@ -12,7 +12,6 @@
 		<version>2025.9.0.4100_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.designer.wpm</artifactId>
-	<version>2025.9.0.4100_rc</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
@@ -34,7 +33,7 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
-							<nodeVersion>v22.11.0</nodeVersion>
+							<nodeVersion>v22.17.1</nodeVersion>
 						</configuration>
 					</execution>
 

@@ -1,7 +1,7 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ElementRef, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ElementRef, ViewChild, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService } from '@servoy/public';
-import { DOCUMENT } from '@angular/common';
+
 
 @Component({
     selector: 'servoydefault-spinner',

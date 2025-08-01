@@ -27,15 +27,13 @@ import org.json.JSONObject;
 import org.mozilla.javascript.Function;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.developersolution.DeveloperBridge;
-import com.servoy.eclipse.developersolution.DeveloperNGClient;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeveloperSolutionAction;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.scripting.solutionmodel.JSForm;
-import com.servoy.j2db.scripting.solutionmodel.JSWebComponent;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.util.UUID;
 
@@ -46,11 +44,13 @@ import com.servoy.j2db.util.UUID;
 public class ExecuteDeveloperMenu implements IServerService
 {
 
+	private final BaseVisualFormEditor editorPart;
 	private final UUID formUUID;
 	private final ISelectionProvider selectionProvider;
 
-	public ExecuteDeveloperMenu(UUID formUUID, ISelectionProvider selectionProvider)
+	public ExecuteDeveloperMenu(BaseVisualFormEditor editorPart, UUID formUUID, ISelectionProvider selectionProvider)
 	{
+		this.editorPart = editorPart;
 		this.formUUID = formUUID;
 		this.selectionProvider = selectionProvider;
 	}
@@ -65,27 +65,27 @@ public class ExecuteDeveloperMenu implements IServerService
 	{
 		if (args.has("isForm") && args.has("name"))
 		{
-			JSForm form = null;
-			ArrayList<JSWebComponent> wc = new ArrayList<>();
+			Form form = null;
+			ArrayList<BaseComponent> wc = new ArrayList<>();
+			boolean allSelectedComponentsAreWebComponents = true;
 
 			if (args.getBoolean("isForm"))
 			{
-				form = new JSForm(DeveloperNGClient.INSTANCE, (Form)ServoyModelFinder.getServoyModel().getActiveProject().getEditingPersist(formUUID), true);
+				form = (Form)ServoyModelFinder.getServoyModel().getActiveProject().getEditingPersist(formUUID);
 			}
 			else if (selectionProvider != null)
 			{
 				PersistContext[] selection = null;
 				selection = (PersistContext[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new PersistContext[0]);
-				if (selection.length > 0 && selection[0].getContext() instanceof Form && selection[0].getPersist() instanceof WebComponent)
+				if (selection.length > 0 && selection[0].getContext() instanceof Form && selection[0].getPersist() instanceof BaseComponent)
 				{
-					form = new JSForm(DeveloperNGClient.INSTANCE, (Form)selection[0].getContext(), true);
-					wc.add(new JSWebComponent(form, (WebComponent)selection[0].getPersist(), DeveloperNGClient.INSTANCE, true));
-
-					for (int i = 1; i < selection.length; i++)
+					form = (Form)selection[0].getContext();
+					for (PersistContext element : selection)
 					{
-						if (selection[i].getPersist() instanceof WebComponent)
+						if (element.getPersist() instanceof BaseComponent)
 						{
-							wc.add(new JSWebComponent(form, (WebComponent)selection[i].getPersist(), DeveloperNGClient.INSTANCE, true));
+							wc.add((BaseComponent)element.getPersist());
+							if (allSelectedComponentsAreWebComponents) allSelectedComponentsAreWebComponents = element.getPersist() instanceof WebComponent;
 						}
 					}
 				}
@@ -98,12 +98,10 @@ public class ExecuteDeveloperMenu implements IServerService
 				{
 					String[] componentNames = entry.getKey().getComponentNames();
 
-					if (args.getBoolean("isForm") || componentNames == null || componentNames.length == 0 ||
-						(wc.size() > 0 && Arrays.asList(componentNames).contains(wc.get(0).getTypeName())))
+					if (args.getBoolean("isForm") || componentNames == null || componentNames.length == 0 || !allSelectedComponentsAreWebComponents ||
+						(wc.size() > 0 && Arrays.asList(componentNames).contains(((WebComponent)wc.get(0)).getTypeName())))
 					{
-						DeveloperSolutionAction devSolAction = new DeveloperSolutionAction(entry.getKey(), entry.getValue(),
-							new Object[] { form, wc.toArray(new JSWebComponent[wc.size()]) });
-						devSolAction.run();
+						editorPart.executeDeveloperMenuCommand(entry.getValue(), new Form[] { form }, wc.toArray(new BaseComponent[wc.size()]));
 						break;
 					}
 				}
@@ -111,5 +109,4 @@ public class ExecuteDeveloperMenu implements IServerService
 		}
 		return null;
 	}
-
 }

@@ -146,7 +146,7 @@ public class SolutionDeserializer
 	private static final String DESTRUCTURING_VAlUE_KEY = "destructuringValue";
 	private static final String IS_DESTRUCTURING = "is_destructuring";
 
-	
+
 	public static final RuntimeProperty<Boolean> POSSIBLE_DUPLICATE_UUID = new RuntimeProperty<Boolean>()
 	{
 
@@ -1232,6 +1232,8 @@ public class SolutionDeserializer
 						{
 							// this is a destructuring variable, which we skip when initializing vars in scope
 							obj.put(IS_DESTRUCTURING, Boolean.TRUE);
+							// remove the uuid from the json for this one else we generate duplicates
+							obj.remove(SolutionSerializer.PROP_UUID);
 						}
 					}
 					jsonObjects.add(obj);
@@ -1398,18 +1400,28 @@ public class SolutionDeserializer
 		boolean newField,
 		JSONObject json, String commentString, Identifier ident)
 	{
+		String comment = commentString;
 		json.put(SolutionSerializer.PROP_NAME, ident.getName());
 		Expression code = field.getInitializer(ident.getName());
-		if (code == null) code = field.getInitializer();
-		if (commentString != null && commentString.length() > 0)
+		if (code == null)
 		{
-			int typeIndex = commentString.indexOf(SolutionSerializer.TYPEKEY);
+			if (field instanceof DestructuringVariableDeclaration)
+			{
+				// for a destruction if it doesn't have a assigned or default value check the comment for that identifier
+				comment = ident.getDocumentation().getText();
+			}
+			else code = field.getInitializer();
+		}
+		if (comment != null && comment.length() > 0)
+		{
+			int typeIndex = comment.indexOf(SolutionSerializer.TYPEKEY);
 			if (typeIndex != -1)
 			{
-				int newLine = commentString.indexOf('\n', typeIndex);
+				int newLine = comment.indexOf('\n', typeIndex);
+				if (newLine == -1) newLine = comment.indexOf("*/", typeIndex);
 				if (newLine > 0)
 				{
-					String typeName = commentString.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).trim();
+					String typeName = comment.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).trim();
 					// don't touch the special object types that start with {{
 					if (!typeName.startsWith("{{"))
 					{
@@ -1631,6 +1643,7 @@ public class SolutionDeserializer
 			json.put("defaultValue", "");
 		}
 
+
 		int linenr = 1;
 		int fieldLineIndex = field.sourceStart();
 		for (Line line : lines)
@@ -1643,7 +1656,7 @@ public class SolutionDeserializer
 		}
 
 		json.put(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE, linenr);
-		json.put(COMMENT_JSON_ATTRIBUTE, commentString);
+		json.put(COMMENT_JSON_ATTRIBUTE, comment);
 		json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
 		return json;
 	}

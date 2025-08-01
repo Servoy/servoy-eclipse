@@ -35,6 +35,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.IPropertyType;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -53,6 +54,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
+import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.documentation.persistence.docs.DocsButton;
 import com.servoy.j2db.documentation.persistence.docs.DocsCalendar;
@@ -105,6 +107,7 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.server.ngclient.property.types.FoundsetReferencePropertyType;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
 import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
@@ -149,15 +152,24 @@ public class ElementUtil
 	public static String getDecoratedCustomTypeName(IPropertyType< ? > type)
 	{
 		if (type == null) return "void";
+		String typeName = type.getName();
+		if (FoundsetReferencePropertyType.TYPE_NAME.equals(type.getName()))
+		{
+			typeName = FoundSet.JS_FOUNDSET;
+		}
 		if (type instanceof CustomJSONObjectType || (type instanceof CustomJSONArrayType &&
 			((CustomJSONArrayType< ? , ? >)type).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
 		{
 
-			return ElementUtil.CUSTOM_TYPE + '<' + type.getName() + '>';
+			return ElementUtil.CUSTOM_TYPE + '<' + typeName + '>';
+		}
+		else if (PropertyUtils.isCustomJSONArrayPropertyType(type))
+		{
+			return "Array<" + typeName + '>';
 		}
 		else
 		{
-			return type.getName();
+			return typeName;
 		}
 	}
 

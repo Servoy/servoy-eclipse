@@ -164,12 +164,6 @@ public class SimpleUserNode implements IAdaptable
 				{
 					return feedback.getCode();
 				}
-
-				@Override
-				public void setToolTipText(String toolTipText)
-				{
-					// TODO Auto-generated method stub
-				}
 			});
 		}
 		else
@@ -311,11 +305,6 @@ public class SimpleUserNode implements IAdaptable
 	public String getToolTipText()
 	{
 		if (developerFeedback == null) return null;
-		if (this._realObject instanceof Form form)
-		{
-			developerFeedback
-				.setToolTipText(form.getDataSource() == null ? "No table" : ("Server: " + form.getServerName() + ", Table: " + form.getTableName()));
-		}
 		String toolTip = developerFeedback.getToolTipText();
 		if (_realObject instanceof IServerInternal && !((IServerInternal)_realObject).getName().equals(getName()) && toolTip != null)
 		{

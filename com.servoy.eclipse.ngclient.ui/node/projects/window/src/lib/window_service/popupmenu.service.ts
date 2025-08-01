@@ -1,5 +1,5 @@
-import { Inject, Injectable, SecurityContext } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, SecurityContext, DOCUMENT } from '@angular/core';
+
 import { ServoyPublicService, Callback, BaseCustomObject, TooltipService } from '@servoy/public';
 import { createPopper, VirtualElement } from '@popperjs/core';
 import { DomSanitizer } from '@angular/platform-browser';

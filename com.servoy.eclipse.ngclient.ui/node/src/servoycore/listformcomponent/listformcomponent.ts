@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
 import {
-    Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
-    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector
+  Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
+  HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector,
+  DOCUMENT
 } from '@angular/core';
 import { AbstractFormComponent, FormComponent } from '../../ngclient/form/form_component.component';
 import { DesignFormComponent } from '../../designer/designform_component.component';
@@ -13,7 +14,7 @@ import { ServoyService } from '../../ngclient/servoy.service';
 import { ComponentCache, FormComponentCache, IApiExecutor, instanceOfApiExecutor, StructureCache } from '../../ngclient/types';
 import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEvent, IFoundset, IChildComponentPropertyValue } from '@servoy/public';
 import { isEmpty } from 'lodash-es';
-import { DOCUMENT } from '@angular/common';
+
 import { ServoyApi } from '../../ngclient/servoy_api';
 import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { RowRenderer } from './row-renderer.component';
@@ -30,51 +31,69 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
     <div class="svy-listformcomponent" [ngClass]='styleClass' #element>
-    <ng-container *ngIf="useScrolling">
+      @if (useScrolling) {
         <ag-grid-angular #aggrid
-            [gridOptions]="agGridOptions"
-            [ngStyle]="getAGGridStyle()">
+          [gridOptions]="agGridOptions"
+          [ngStyle]="getAGGridStyle()">
         </ag-grid-angular>
-    </ng-container>
-
-    <ng-container *ngIf="!useScrolling">
-        <div *ngIf="containedForm&&containedForm.absoluteLayout">
-            <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
-                <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+      }
+    
+      @if (!useScrolling) {
+        @if (containedForm&&containedForm.absoluteLayout) {
+          <div>
+            @for (row of getViewportRows(); track row; let i = $index) {
+              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
+                @for (item of cache.items; track item) {
+                  <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                     <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
-                </div>
-            </div>
-        </div>
-        <div *ngIf="containedForm&&!containedForm.absoluteLayout">
-            <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index; trackBy: trackByFn" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
-                <ng-template *ngFor="let item of cache.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component or responsive div  -->
-            </div>
-        </div>
-        <div class='svyPagination'><div #firstelement style='text-align:center;cursor:pointer;display:inline;visibility:hidden;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='firstPage()' ><i class='fa fa-backward' aria-hidden="true"></i></div><div  #leftelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveLeft()' ><i class='fa fa-chevron-left' aria-hidden="true"></i></div><div #rightelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveRight()'><i class='fa fa-chevron-right' aria-hidden="true"></i></div></div>
-    </ng-container>
-</div>
-
-<ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
-    <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
-        <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
-    </div>
-</ng-template>
-<ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
-          <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
-               </div>
+                  </div>
+                }
+              </div>
+            }
           </div>
-</ng-template>
-<ng-template  #formComponentResponsiveDiv  let-state="state" let-row="row" let-i="i">
-    <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" class="svy-formcomponent">
-        <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
-    </div>
-</ng-template>
-<!-- structure template generate start -->
-<!-- structure template generate end -->
-
-`,
+        }
+        @if (containedForm&&!containedForm.absoluteLayout) {
+          <div>
+            @for (row of getViewportRows(); track trackByFn(i, row); let i = $index) {
+              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
+                @for (item of cache.items; track item) {
+                  <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
+                  }  <!-- component or responsive div  -->
+                </div>
+              }
+            </div>
+          }
+          <div class='svyPagination'><div #firstelement style='text-align:center;cursor:pointer;display:inline;visibility:hidden;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='firstPage()' ><i class='fa fa-backward' aria-hidden="true"></i></div><div  #leftelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveLeft()' ><i class='fa fa-chevron-left' aria-hidden="true"></i></div><div #rightelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveRight()'><i class='fa fa-chevron-right' aria-hidden="true"></i></div></div>
+        }
+      </div>
+    
+      <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
+        <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+          @for (item of state.items; track item) {
+            <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
+          }
+        </div>
+      </ng-template>
+      <ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
+        <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
+          @for (item of state.items; track item) {
+            <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+              <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
+            </div>
+          }
+        </div>
+      </ng-template>
+      <ng-template  #formComponentResponsiveDiv  let-state="state" let-row="row" let-i="i">
+        <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" class="svy-formcomponent">
+          @for (item of state.items; track item) {
+            <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
+            }  <!-- component  -->
+          </div>
+        </ng-template>
+        <!-- structure template generate start -->
+        <!-- structure template generate end -->
+    
+    `,
     standalone: false
 })
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
@@ -404,7 +423,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
                 if (event.viewportRowsUpdated) {
                     // copy the viewport data over to the cell
-                    // TODO this only is working for "updates", what happens with deletes or inserts?
                     const changes = event.viewportRowsUpdated;
                     let insertOrDeletes = false;
                     changes.forEach(change => {
@@ -414,7 +432,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         this.agGrid.api.refreshServerSide({ purge: true });
                         this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
                     }
-                    else this.agGrid.api.refreshCells();
+                    else if (changes.length == 1 && changes[0].startIndex === changes[0].endIndex){
+						this.agGrid.api.refreshCells();	
+					}
+					else {
+						this.agGrid.api.refreshServerSide({ purge: true });	
+					}
                 } else if (event.viewportRowsCompletelyChanged || event.fullValueChanged) {
                     this.agGrid.api.refreshServerSide({ purge: true });
                 }

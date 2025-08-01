@@ -1,10 +1,10 @@
-import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef, Inject } from '@angular/core';
+import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef, Inject, DOCUMENT } from '@angular/core';
 
 import { PropertyUtils, FormattingService, IValuelist } from '@servoy/public';
 
 import { ServoyDefaultBaseComponent } from './basecomponent';
 
-import { DOCUMENT } from '@angular/common';
+
 
 @Directive()
 // eslint-disable-next-line

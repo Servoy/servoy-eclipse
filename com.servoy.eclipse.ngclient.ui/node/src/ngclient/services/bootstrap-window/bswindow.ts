@@ -1,6 +1,6 @@
 import { WindowRefService } from '@servoy/public';
-import { Renderer2, RendererFactory2, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Renderer2, RendererFactory2, Inject, DOCUMENT } from '@angular/core';
+
 import { BSWindowManager } from './bswindow_manager.service';
 import { SvyUtilsService } from '../../utils.service';
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2, DOCUMENT } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
 import { FormService } from '../ngclient/form.service';
@@ -8,7 +8,7 @@ import { TypesRegistry } from '../sablo/types_registry';
 import { DesignFormComponent } from './designform_component.component';
 
 import { Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+
 
 @Component({
     selector: 'servoy-designer',

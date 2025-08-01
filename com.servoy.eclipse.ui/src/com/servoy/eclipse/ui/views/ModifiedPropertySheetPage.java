@@ -555,7 +555,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					break;
 
 				case 1 :
-					text = propertySources[0] == null ? "" : propertySources[0].toString();
+					text = propertySources[0] == null ? "" : getPropertyViewTitle(propertySources);
 					break;
 
 				default :
@@ -564,6 +564,17 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			}
 			propertiesLabel.setText(text);
 		}
+	}
+
+	private String getPropertyViewTitle(IPropertySource[] propertySources)
+	{
+		if (propertySources[0] instanceof org.eclipse.ui.views.properties.FilePropertySource file)
+		{
+			String propertyName = org.eclipse.jface.viewers.IBasicPropertyConstants.P_TEXT;
+			String[] fileNameAndExtension = file.getPropertyValue(propertyName).toString().split("\\.");
+			return "Form - " + fileNameAndExtension[0] + " - " + fileNameAndExtension[1] + " file";
+		}
+		return propertySources[0].toString();
 	}
 
 	@Override

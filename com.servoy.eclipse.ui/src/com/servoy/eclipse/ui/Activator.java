@@ -460,34 +460,32 @@ public class Activator extends AbstractUIPlugin
 			@Override
 			public void run()
 			{
-				Shell activeShell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-				if (activeShell == null)
+				Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+				if (shell == null)
 				{
 					Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
 					for (int i = shells.length; --i >= 0;)
 					{
 						if (shells[i].getParent() == null && shells[i].isVisible())
 						{
-							activeShell = shells[i];
+							shell = shells[i];
 							break;
 						}
 					}
-					if (activeShell == null)
+					if (shell == null)
 					{
 						Display.getDefault().asyncExec(this);
 						return;
 					}
 				}
-				while (activeShell.getParent() instanceof Shell && activeShell.getParent().isVisible())
+				while (shell.getParent() instanceof Shell && shell.getParent().isVisible())
 				{
-					activeShell = (Shell)activeShell.getParent();
+					shell = (Shell)shell.getParent();
 				}
-				boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
-				//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
-				String username = null;
+				String uname = null;
 				try
 				{
-					username = SecurePreferencesFactory.getDefault()
+					uname = SecurePreferencesFactory.getDefault()
 						.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY)
 						.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
 				}
@@ -495,28 +493,35 @@ public class Activator extends AbstractUIPlugin
 				{
 					ServoyLog.logError(e);
 				}
-				String loginToken = new ServoyLoginDialog(activeShell).doLogin();
-				if (loginToken != null)
-				{
-					ISecurePreferences node = SecurePreferencesFactory.getDefault().node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
-					try
+				Shell activeShell = shell;
+				String username = uname;
+				new ServoyLoginDialog(shell).doLogin(loginToken -> {
+					if (loginToken != null)
 					{
-						com.servoy.eclipse.cloud.Activator.getDefault().checkoutFromCloud(loginToken, node.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null),
-							node.get(ServoyLoginDialog.SERVOY_LOGIN_PASSWORD, null));
+						ISecurePreferences node = SecurePreferencesFactory.getDefault().node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
+						try
+						{
+							com.servoy.eclipse.cloud.Activator.getDefault().checkoutFromCloud(loginToken,
+								node.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null),
+								node.get(ServoyLoginDialog.SERVOY_LOGIN_PASSWORD, null));
+						}
+						catch (StorageException e)
+						{
+							ServoyLog.logError(e);
+						}
 					}
-					catch (StorageException e)
+					// only show if first login or is not disabled from preferences
+					if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
 					{
-						ServoyLog.logError(e);
+						boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
+						Display.getDefault().asyncExec(() -> {
+							BrowserDialog dialog = new BrowserDialog(activeShell,
+								TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, true);
+							dialog.open();
+						});
 					}
-				}
-				// only show if first login or is not disabled from preferences
-				if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
-				{
-					BrowserDialog dialog = new BrowserDialog(activeShell,
-						TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, true);
-					dialog.open();
-				}
 
+				});
 			}
 		};
 		Display.getDefault().asyncExec(runnable);

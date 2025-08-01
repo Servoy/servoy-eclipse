@@ -1,6 +1,6 @@
-import { Injectable, Renderer2, Inject, RendererFactory2 } from '@angular/core';
+import { Injectable, Renderer2, Inject, RendererFactory2, DOCUMENT } from '@angular/core';
 
-import { DOCUMENT, PlatformLocation } from '@angular/common';
+import { PlatformLocation } from '@angular/common';
 import { WindowRefService, ServoyPublicService } from '@servoy/public';
 
 @Injectable()

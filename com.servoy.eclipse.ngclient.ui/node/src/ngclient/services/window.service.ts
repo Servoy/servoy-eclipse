@@ -1,4 +1,4 @@
-import { Injectable, Inject, Renderer2, RendererFactory2, ComponentRef } from '@angular/core';
+import { Injectable, Inject, Renderer2, RendererFactory2, ComponentRef, DOCUMENT } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
@@ -6,9 +6,9 @@ import { ServoyService } from '../servoy.service';
 import { DialogWindowComponent } from './dialog-window/dialog-window.component';
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
 import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow';
-import { WindowRefService, LocalStorageService, SessionStorageService, MainViewRefService } from '@servoy/public';
+import { WindowRefService, LocalStorageService, SessionStorageService, MainViewRefService, PopupStateService } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
-import { DOCUMENT, PlatformLocation } from '@angular/common';
+import { PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
@@ -42,6 +42,7 @@ export class WindowService {
         private webSocketService: WebsocketService,
         private sabloLoadingIndicatorService: LoadingIndicatorService,
         rendererFactory: RendererFactory2,
+        private popupStateService: PopupStateService,
         @Inject(DOCUMENT) private doc: Document) {
 
         this.platformLocation.onPopState(() => {
@@ -95,7 +96,7 @@ export class WindowService {
             this.windowCounter++;
         }
         const instance = this.instances[name];
-        if (this.instances[name]) {
+        if (instance) {
             instance.title = title;
             if (instance.bsWindowInstance) {
                 // already showing
@@ -210,6 +211,12 @@ export class WindowService {
                 });
                 event.target.dispatchEvent(customEvent);
             };
+
+            if (instance.closeOnEscape) {
+                instance.keyUpListener = (event) => this.handleEscapeKey(event, instance);
+                window.addEventListener('keyup', instance.keyUpListener, true);
+            }
+            
             instance.bsWindowInstance.element.addEventListener('bswin.resize', resizeListener);
             instance.bsWindowInstance.element.addEventListener('bswin.move', moveListener);
             instance.bsWindowInstance.element.addEventListener('bswin.active', activeListener);
@@ -230,6 +237,12 @@ export class WindowService {
             }
         }
     }
+    
+    handleEscapeKey(event: KeyboardEvent, instance: SvyWindow) {
+        if (event.key === 'Escape' && instance.bsWindowInstance && !this.popupStateService.isAnyPopupActive()) {
+            instance.componentRef.instance.cancel();
+        }
+    }
 
     public hide(name: string) {
         let winCounter = 0;
@@ -243,6 +256,11 @@ export class WindowService {
         }
         const instance = this.instances[name];
         if (instance) {
+            if (instance.closeOnEscape) {
+                window.removeEventListener('keyup', instance.keyUpListener, true);
+                instance.keyUpListener = null;
+            }
+            
             if (instance['loadingIndicatorIsHidden']) {
                 let counter = instance['loadingIndicatorIsHidden'];
                 delete instance['loadingIndicatorIsHidden'];
@@ -329,6 +347,13 @@ export class WindowService {
         this.saveInSessionStorage(undecorated, 'undecorated');
         if ( this.instances[name] ) {
             this.instances[name].undecorated = undecorated;
+        }
+    }
+    
+    public setCloseOnEscape(name: string, closeOnEscape: boolean) {
+        this.saveInSessionStorage(closeOnEscape, 'closeOnEscape');
+        if (this.instances[name]) {
+            this.instances[name].closeOnEscape = closeOnEscape;
         }
     }
 
@@ -477,6 +502,7 @@ export class WindowService {
                         this.switchForm(window.name, window.switchForm, window.navigatorForm);
                         this.setTitle(window.name, window.title);
                         this.setUndecorated(window.name, window.undecorated);
+                        this.setCloseOnEscape(window.name, window.closeOnEscape);
                         this.setCSSClassName(window.name, window.cssClassName);
                         this.setInitialBounds(window.name, window.initialBounds);
                         this.setStoreBounds(window.name, window.storeBounds);
@@ -510,6 +536,7 @@ export class SvyWindow {
     opacity = 1;
     undecorated = false;
     cssClassName: string = null;
+    closeOnEscape = false;
     size: { width: number; height: number } = null;
     location: {x: number; y: number} = null;
     navigatorForm: any = null;
@@ -519,6 +546,8 @@ export class SvyWindow {
     transparent = false;
     storeBounds = false;
     renderer2: Renderer2;
+    
+    keyUpListener: (event: KeyboardEvent) => void;
 
     bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
     windowService: WindowService;

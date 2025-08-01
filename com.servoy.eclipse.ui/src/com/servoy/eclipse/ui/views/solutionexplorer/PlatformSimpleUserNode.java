@@ -62,6 +62,11 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon);
 	}
 
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Image icon)
+	{
+		super(displayName, type, developerFeedback, realObject, icon);
+	}
+
 	/**
 	 * @see com.servoy.j2db.develop.node.SimpleUserNode#getIcon()
 	 */

@@ -56,6 +56,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
+import org.mozilla.javascript.Function;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -68,6 +69,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.DeveloperMenuCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -76,9 +78,11 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.editors.IFlagChangeEditor;
+import com.servoy.eclipse.ui.editors.ISupportDeveloperMenu;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.FlattenedPortal;
@@ -116,7 +120,7 @@ import com.servoy.j2db.util.Utils;
  */
 
 public abstract class BaseVisualFormEditor extends MultiPageEditorPart
-	implements IActiveProjectListener, IPersistChangeListener, IShowEditorInput, ISupportCheatSheetActions, IFlagChangeEditor
+	implements IActiveProjectListener, IPersistChangeListener, IShowEditorInput, ISupportCheatSheetActions, IFlagChangeEditor, ISupportDeveloperMenu
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
 	private static final String COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.rfb.context";
@@ -338,7 +342,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			return (T)new UndoablePersistPropertySourceProvider(this);
 		}
 		Object result = super.getAdapter(adapter);
-		if (result == null && graphicaleditor != null && graphicaleditor == getActiveEditor())
+		if (result == null && graphicaleditor != null && (graphicaleditor == getActiveEditor() || getActiveEditor() == null))
 		{
 			result = graphicaleditor.getAdapter(adapter);
 		}
@@ -814,6 +818,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				setInput(getEditorInput());
 				removePage(0);
 				createPages();
+				setActivePage(0);
 				if (getEditorSite() != null && getEditorSite().getPage().getActivePart() == this)
 				{
 					//if an editor was previously open, then after restart we have to make sure that our modified properties sheet page is used
@@ -834,7 +839,6 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					// set up the editor actions, this is normally done in part activation listener
 					getEditorSite().getActionBarContributor().setActiveEditor(this);
 				}
-				setActivePage(0);
 			});
 		}
 		else
@@ -1151,5 +1155,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	public void setContentDescription(String description)
 	{
 		super.setContentDescription(description);
+	}
+
+	public void executeDeveloperMenuCommand(Function callback, Form[] forms, BaseComponent[] components)
+	{
+		getCommandStack().execute(new DeveloperMenuCommand(callback, forms, components));
 	}
 }

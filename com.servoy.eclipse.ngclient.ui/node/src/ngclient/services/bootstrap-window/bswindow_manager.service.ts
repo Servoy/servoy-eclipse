@@ -1,6 +1,6 @@
 import { BSWindow, BSWindowOptions } from './bswindow';
-import { Injectable, Inject, RendererFactory2, Renderer2 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Injectable, Inject, RendererFactory2, Renderer2, DOCUMENT } from '@angular/core';
+
 import { WindowRefService } from '@servoy/public';
 import { SvyUtilsService } from '../../utils.service';
 

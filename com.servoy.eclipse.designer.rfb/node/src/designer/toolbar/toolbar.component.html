@@ -1,78 +1,126 @@
 <div class="toolbar-area">
 
-    <div class="toolbar element" *ngIf="elements && elements.length > 0">
-		<ng-container *ngFor="let item of elements">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item"  class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
+  @if (elements && elements.length > 0) {
+    <div class="toolbar element">
+      @for (item of elements; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button [item]="item"  class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
 
-	<div class="toolbar ordering" *ngIf="ordering && ordering.length > 0">
-		<ng-container *ngFor="let item of ordering">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
+  @if (ordering && ordering.length > 0) {
+    <div class="toolbar ordering">
+      @for (item of ordering; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button [item]="item" class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
 
-	<div class="toolbar alignment" *ngIf="alignment && alignment.length > 0">
-		<ng-container *ngFor="let item of alignment">
-			<designer-toolbar-button  *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
-	
-	<div class="toolbar distribution" *ngIf="distribution && distribution.length > 0">
-		<ng-container *ngFor="let item of distribution">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
+  @if (alignment && alignment.length > 0) {
+    <div class="toolbar alignment">
+      @for (item of alignment; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button  [item]="item" class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
 
-	<div class="toolbar zoom" *ngIf="zoom && zoom.length > 0">
-		<ng-container *ngFor="let item of zoom">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
+  @if (distribution && distribution.length > 0) {
+    <div class="toolbar distribution">
+      @for (item of distribution; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button [item]="item" class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
 
-	<div class="toolbar zoom_level" *ngIf="zoom_level && zoom_level.length > 0" style="border-left-width: 0px;">
-		<ng-container *ngFor="let item of zoom_level">
-			<designer-toolbar-spinner *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-spinner>
-		</ng-container>
-	</div>
+  @if (zoom && zoom.length > 0) {
+    <div class="toolbar zoom">
+      @for (item of zoom; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button [item]="item" class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
 
-	<div class="toolbar form" *ngIf="form && form.length > 0">
-		<ng-container *ngFor="let item of form">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
+  @if (zoom_level && zoom_level.length > 0) {
+    <div class="toolbar zoom_level" style="border-left-width: 0px;">
+      @for (item of zoom_level; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-spinner [item]="item" class="toolbar-action"></designer-toolbar-spinner>
+        }
+      }
+    </div>
+  }
 
-	<div class="toolbar display" *ngIf="display && display.length > 0">
-		<ng-container *ngFor="let item of display">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
-	
-	<!-- This right aligned toolbar will expand its left margin so that it will be moved as far right as possible, 
-		 divs after this one will also be on the right side of the toolbar -->
+  @if (form && form.length > 0) {
+    <div class="toolbar form">
+      @for (item of form; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button [item]="item" class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
 
-	<div class="toolbar show_data right-aligned" *ngIf="show_data && show_data.length > 0">
-		<ng-container *ngFor="let item of show_data">
-			<designer-toolbar-switch *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-switch>
-		</ng-container>
-	</div>
+  @if (display && display.length > 0) {
+    <div class="toolbar display">
+      @for (item of display; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button [item]="item" class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
 
-	<div class="toolbar design_mode" *ngIf="design_mode && design_mode.length > 0">
-		<ng-container *ngFor="let item of design_mode">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
+  <!-- This right aligned toolbar will expand its left margin so that it will be moved as far right as possible,
+  divs after this one will also be on the right side of the toolbar -->
 
-	<div class="toolbar sticky" *ngIf="sticky && sticky.length > 0">
-		<ng-container *ngFor="let item of sticky">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>
+  @if (show_data && show_data.length > 0) {
+    <div class="toolbar show_data right-aligned">
+      @for (item of show_data; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-switch [item]="item" class="toolbar-action"></designer-toolbar-switch>
+        }
+      }
+    </div>
+  }
 
-	<div class="toolbar standard_actions" *ngIf="standard_actions && standard_actions.length > 0">
-		<ng-container *ngFor="let item of standard_actions">
-			<designer-toolbar-button *ngIf="!item.hide" [item]="item" class="toolbar-action"></designer-toolbar-button>
-		</ng-container>
-	</div>	
+  @if (design_mode && design_mode.length > 0) {
+    <div class="toolbar design_mode">
+      @for (item of design_mode; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button [item]="item" class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
+
+  @if (sticky && sticky.length > 0) {
+    <div class="toolbar sticky">
+      @for (item of sticky; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button [item]="item" class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
+
+  @if (standard_actions && standard_actions.length > 0) {
+    <div class="toolbar standard_actions">
+      @for (item of standard_actions; track item) {
+        @if (!item.hide) {
+          <designer-toolbar-button [item]="item" class="toolbar-action"></designer-toolbar-button>
+        }
+      }
+    </div>
+  }
 
 </div>

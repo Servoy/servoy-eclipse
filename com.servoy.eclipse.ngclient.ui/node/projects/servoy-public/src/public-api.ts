@@ -31,4 +31,4 @@ export * from './lib/testing/publictesting.module';
 export * from './lib/testing/servoyapi_testing';
 export * from './lib/testing/utils';
 export * from './lib/directives/tabfix.directive';
-
+export * from './lib/services/popup-state.service';

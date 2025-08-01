@@ -1,55 +1,95 @@
-<div id="palette" class="palette" (scroll)="onPaletteScroll()">	
-    <input type="text" class="form-control input-xs" placeholder="Search"  [(ngModel)]="searchText"/>
-    <button type="button" class="btn btn-default btn-link" (click)="openPackageManager()"><img draggable="false" src='/rfb/angular/templates/images/add_components.png'/>Get more components</button>
-    <div ngbAccordion>
-        <div ngbAccordionItem *ngFor="let package of getPackages()| searchTextFilterDeep : searchText;let i = index" [id]="package.id" [collapsed]="activeIds.indexOf(package.id) == -1">
-            <h2 ngbAccordionHeader>
-                <button ngbAccordionButton>{{package.packageDisplayname}}</button>
-            </h2>
-            <div ngbAccordionCollapse>
-                <div ngbAccordionBody>
-                     <ng-template>         
-                        <ul>
-                            <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of package.components | searchTextFilter : searchText" (click)="onClick(component)">
-                                <span>
-                                <img id="chevron" draggable="false" *ngIf="component.properties" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
-                                <img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{component.displayName}}
-                                </span>
-                                <designer-variantscontent [component]="component" (click)="onVariantClick($event, component, component.packageName ? component.packageName : package.packageName)" *ngIf="component.styleVariantCategory"></designer-variantscontent>
-                                <span name="favIcon" *ngIf="component.isFav === undefined ? false : true" class="favIcon" (click)="onFavoriteCLick($event, component)">
-                                    <i name="favIcon" *ngIf="!component.isFav" class="fa-regular fa-star"></i>
-                                    <i name="favIcon" *ngIf="component.isFav" class="fa-solid fa-star"></i>
-                                </span>
-                                <ul>
-                                	<li *ngFor="let ghost of component.types" (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)">
-                                	   <span>
-                                	       <img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}
-                                	   </span>
-                                	</li>
-                                </ul>
-                                <ul *ngFor="let propertyName of component.properties" [ngbCollapse]="!component.isOpen">
-                                    <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, propertyName, comp.propertyValue, component.componentType)" *ngFor="let comp of component.components"><span><img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/> {{propertyName + ': ' + comp.displayName}}</span></li>
-                                </ul>
+<div id="palette" class="palette" (scroll)="onPaletteScroll()">
+  <input type="text" class="form-control input-xs" placeholder="Search"  [(ngModel)]="searchText"/>
+  <button type="button" class="btn btn-default btn-link" (click)="openPackageManager()"><img draggable="false" src='/rfb/angular/templates/images/add_components.png'/>Get more components</button>
+  <div ngbAccordion>
+    @for (package of getPackages()| searchTextFilterDeep : searchText; track package; let i = $index) {
+      <div ngbAccordionItem [id]="package.id" [collapsed]="activeIds.indexOf(package.id) == -1">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton>{{package.packageDisplayname}}</button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              <ul>
+                @for (component of package.components | searchTextFilter : searchText; track component) {
+                  <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" (click)="onClick(component)">
+                    <span>
+                      @if (component.properties) {
+                        <img id="chevron" draggable="false" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
+                      }
+                      @if (component.icon) {
+                        <img draggable="false" [src]="'/'+component.icon" alt=""/>
+                        }{{component.displayName}}
+                      </span>
+                      @if (component.styleVariantCategory) {
+                        <designer-variantscontent [component]="component" (click)="onVariantClick($event, component, component.packageName ? component.packageName : package.packageName)"></designer-variantscontent>
+                      }
+                      @if (component.isFav === undefined ? false : true) {
+                        <span name="favIcon" class="favIcon" (click)="onFavoriteCLick($event, component)">
+                          @if (!component.isFav) {
+                            <i name="favIcon" class="fa-regular fa-star"></i>
+                          }
+                          @if (component.isFav) {
+                            <i name="favIcon" class="fa-solid fa-star"></i>
+                          }
+                        </span>
+                      }
+                      <ul>
+                        @for (ghost of component.types; track ghost) {
+                          <li (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)">
+                            <span>
+                              @if (component.icon) {
+                                <img draggable="false" [src]="'/'+component.icon" alt=""/>
+                                }{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}
+                              </span>
                             </li>
+                          }
                         </ul>
-                         <ul *ngIf="package.categories">
-                            <li *ngFor="let categoryObject of package.categories | keyvalue" >
-                                <div>{{categoryObject.key}}</div>
-                                <ul>
-                                     <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" *ngFor="let component of categoryObject.value | searchTextFilter : searchText" (click)="onClick(component)">
-                                         <span><img draggable="false" *ngIf="component.icon" [src]="'/'+component.icon" alt=""/>{{component.displayName}}</span>
-                                         <span name="favIcon" *ngIf="component.isFav === undefined ? false : true" class="favIcon" (click)="onFavoriteCLick($event, component)">
-                                            <i name="favIcon" *ngIf="!component.isFav" class="fa-regular fa-star"></i>
-                                            <i name="favIcon" *ngIf="component.isFav" class="fa-solid fa-star"></i>
-                                         </span>
-                                     </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </ng-template>
-                </div>
+                        @for (propertyName of component.properties; track propertyName) {
+                          <ul [ngbCollapse]="!component.isOpen">
+                            @for (comp of component.components; track comp) {
+                              <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, propertyName, comp.propertyValue, component.componentType)"><span>@if (component.icon) {
+                                <img draggable="false" [src]="'/'+component.icon" alt=""/>
+                              } {{propertyName + ': ' + comp.displayName}}</span></li>
+                            }
+                          </ul>
+                        }
+                      </li>
+                    }
+                  </ul>
+                  @if (package.categories) {
+                    <ul>
+                      @for (categoryObject of package.categories | keyvalue; track categoryObject) {
+                        <li >
+                          <div>{{categoryObject.key}}</div>
+                          <ul>
+                            @for (component of categoryObject.value | searchTextFilter : searchText; track component) {
+                              <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" (click)="onClick(component)">
+                                <span>@if (component.icon) {
+                                  <img draggable="false" [src]="'/'+component.icon" alt=""/>
+                                }{{component.displayName}}</span>
+                                @if (component.isFav === undefined ? false : true) {
+                                  <span name="favIcon" class="favIcon" (click)="onFavoriteCLick($event, component)">
+                                    @if (!component.isFav) {
+                                      <i name="favIcon" class="fa-regular fa-star"></i>
+                                    }
+                                    @if (component.isFav) {
+                                      <i name="favIcon" class="fa-solid fa-star"></i>
+                                    }
+                                  </span>
+                                }
+                              </li>
+                            }
+                          </ul>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </ng-template>
+              </div>
             </div>
-        </div>
+          </div>
+        }
+      </div>
+
     </div>
-    
-</div>

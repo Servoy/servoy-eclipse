@@ -1,8 +1,8 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, DOCUMENT } from '@angular/core';
 import { SabloService } from '../sablo/sablo.service';
 import { Deferred, SessionStorageService, LoggerFactory, LoggerService, Locale } from '@servoy/public';
 import { registerLocaleData } from '@angular/common';
-import { DOCUMENT } from '@angular/common';
+
 import { environment as env} from '../environments/environment';
 
 import numbro from 'numbro';
@@ -195,7 +195,7 @@ export class LocaleService {
         
         return new Promise<string>((resolve, reject) => {
             return import(
-                `${context}locales/angular/${localeId}.mjs?localeid=${localeId}`).then(
+                `${context}locales/angular/${localeId}.js?localeid=${localeId}`).then(
                 module => {
                     registerLocaleData(module.default, localeId);
                     resolve(localeId);

@@ -116,9 +116,9 @@ public class SimpleDeveloperFeedback implements IDeveloperFeedback
 		return prettyPrintToolTipText(tooltip);
 	}
 
-	@Override
 	public void setToolTipText(String toolTip)
 	{
 		this.tooltip = toolTip;
 	}
+
 }

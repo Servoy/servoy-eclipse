@@ -1,9 +1,9 @@
 
-import { Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, Inject } from '@angular/core';
+import { Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, Inject, DOCUMENT } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
-import { DOCUMENT } from '@angular/common';
+
 import { LoggerFactory, LoggerService } from '../logger.service';
 import { DateTime } from 'luxon';
 

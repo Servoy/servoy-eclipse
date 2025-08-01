@@ -26,11 +26,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -44,6 +46,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -59,6 +62,8 @@ import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.eclipse.notification.INotification;
+import com.servoy.eclipse.notification.NotificationPopUpUI;
 import com.servoy.eclipse.ui.wizards.DirtySaveExportWizard;
 import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
@@ -351,7 +356,69 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 						if (!cancel[0]) missingJarName = exporter.searchExportedPlugins();
 						else missingJarName = null;
 					}
-					if (!cancel[0]) exporter.doExport(monitor);
+					if (!cancel[0])
+					{
+						exporter.doActiveSolutionExports(monitor);
+						if (!monitor.isCanceled())
+						{
+							Job.create("Exporting resources to war file", (innerMonitor) -> {
+								try
+								{
+									File warFile = exporter.doExport(innerMonitor);
+									if (warFile != null)
+									{
+										final ArrayList<INotification> notifications = new ArrayList<INotification>();
+										notifications.add(new INotification()
+										{
+											public String getTitle()
+											{
+												return "War Export Completed";
+											}
+
+											public String getDescription()
+											{
+												return "The following war file has been created:\n" + warFile.getAbsolutePath();
+											}
+
+											public String getLink()
+											{
+												return null;
+											}
+
+											public Date getDate()
+											{
+												return null;
+											}
+
+											public boolean isCommand()
+											{
+												return false;
+											}
+										});
+										PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+											NotificationPopUpUI notificationPopUpUI = new NotificationPopUpUI(Display.getCurrent(),
+												notifications, null);
+											notificationPopUpUI.setDelayClose(0);
+											notificationPopUpUI.open();
+										});
+									}
+								}
+								catch (ExportException e)
+								{
+									Debug.error(e);
+									Display.getDefault().asyncExec(new Runnable()
+									{
+										public void run()
+										{
+											MessageDialog.openError(getShell(), "Error creating the WAR file", e.getMessage());
+										}
+									});
+								}
+								monitor.done();
+
+							}).schedule();
+						}
+					}
 				}
 				catch (final ExportException e)
 				{

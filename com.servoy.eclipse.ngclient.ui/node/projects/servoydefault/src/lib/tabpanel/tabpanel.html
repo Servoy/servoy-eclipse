@@ -1,21 +1,25 @@
 <div class="svy-tabpanel" #element style='height:100%;width:100%;position:absolute;' [sabloTabseq]="tabSeq"
-    [sabloTabseqConfig]="{container: true, reservedGap: 50}">
-<ul ngbNav #nav="ngbNav" class="nav-tabs text-nowrap flex-nowrap" [(activeId)]="selectedTabID" style="overflow-x: auto; overflow-y: hidden;" (navChange)="onTabChange($event)"
-	[class]='styleClass' [id]="servoyApi.getMarkupId()">
-	<li *ngFor="let tab of tabs;let i = index" [ngbNavItem]="tab._id" [disabled]="tab.disabled || !enabled || !tab.containsFormId" (click)="tabClicked(tab, i)"
-		[id]="tab._id"  [svyTooltip]="tab.toolTipText">
-		<a ngbNavLink svy-mnemonic='tab.mnemonic'>
-			<img *ngIf="tab.imageMediaID" ng-src='tab.imageMediaID' />
-			<span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
-				[innerHTML]='tab?.text| htmlFilter| trustAsHtml:servoyApi.trustAsHtml()'></span>
-		</a>
-		<ng-template ngbNavContent>
-            <default-tabpanel-active-tab-visibility-listener [tab]="tab" (visibleTab)="onVisibleTab(tab)"></default-tabpanel-active-tab-visibility-listener>
-			<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}">
-			</ng-template>
-		</ng-template>
-	</li>
-</ul>
-<div [ngbNavOutlet]="nav" [ngStyle]="getContainerStyle(element)"></div>
+  [sabloTabseqConfig]="{container: true, reservedGap: 50}">
+  <ul ngbNav #nav="ngbNav" class="nav-tabs text-nowrap flex-nowrap" [(activeId)]="selectedTabID" style="overflow-x: auto; overflow-y: hidden;" (navChange)="onTabChange($event)"
+    [class]='styleClass' [id]="servoyApi.getMarkupId()">
+    @for (tab of tabs; track tab; let i = $index) {
+      <li [ngbNavItem]="tab._id" [disabled]="tab.disabled || !enabled || !tab.containsFormId" (click)="tabClicked(tab, i)"
+        [id]="tab._id"  [svyTooltip]="tab.toolTipText">
+        <a ngbNavLink svy-mnemonic='tab.mnemonic'>
+          @if (tab.imageMediaID) {
+            <img ng-src='tab.imageMediaID' />
+          }
+          <span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
+          [innerHTML]='tab?.text| htmlFilter| trustAsHtml:servoyApi.trustAsHtml()'></span>
+        </a>
+        <ng-template ngbNavContent>
+          <default-tabpanel-active-tab-visibility-listener [tab]="tab" (visibleTab)="onVisibleTab(tab)"></default-tabpanel-active-tab-visibility-listener>
+          <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}">
+          </ng-template>
+        </ng-template>
+      </li>
+    }
+  </ul>
+  <div [ngbNavOutlet]="nav" [ngStyle]="getContainerStyle(element)"></div>
 </div>
 

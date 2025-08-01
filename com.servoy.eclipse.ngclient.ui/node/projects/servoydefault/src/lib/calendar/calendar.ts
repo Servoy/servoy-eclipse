@@ -1,4 +1,4 @@
-import { Component, SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 
 import { FormattingService, ServoyPublicService, getFirstDayOfWeek } from '@servoy/public';
 
@@ -6,7 +6,7 @@ import { ServoyDefaultBaseField } from '../basefield';
 
 import { DateTime as LuxonDateTime } from 'luxon';
 
-import { DOCUMENT } from '@angular/common';
+
 import { FormatDirective, LoggerFactory, LoggerService } from '@servoy/public';
 import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dominus';
 

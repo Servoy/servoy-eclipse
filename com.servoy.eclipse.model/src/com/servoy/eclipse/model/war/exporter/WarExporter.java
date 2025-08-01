@@ -183,13 +183,8 @@ public class WarExporter
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
 		"wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
-		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar", //
-		"org.apache.httpcomponents.core5.httpcore5_*.jar", "org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
-		"org.apache.httpcomponents.client5.httpclient5_*.jar" };
+		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar" };
 
-	private static final Set<String> HTTP_PLUGIN_FILES = Set.of("httpclient5.jar", "httpcore5-h2.jar", "httpcore5.jar");
-
-	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
 
 	static
@@ -227,6 +222,8 @@ public class WarExporter
 	private final SpecProviderState componentsSpecProviderState;
 	private final SpecProviderState servicesSpecProviderState;
 	private Set<File> pluginFiles = new HashSet<>();
+	private File tmpWarDir = null;
+	private String activeSolutionName = null;
 
 	public WarExporter(IWarExportModel exportModel, IXMLExportUserChannel userChannel)
 	{
@@ -237,77 +234,101 @@ public class WarExporter
 		this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 	}
 
-	/**
-	 * Export the solution as war.
-	 * @param monitor
-	 * @throws ExportException if export fails
-	 */
-	public void doExport(IProgressMonitor m) throws ExportException
+	public void doActiveSolutionExports(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 42);
-		File warFile = createNewWarFile();
-		monitor.worked(2);
-		File tmpWarDir = createTempDir();
-		monitor.worked(2);
-		String appServerDir = exportModel.getServoyApplicationServerDir();
-		monitor.subTask("Copy root webapp files (" + SDF.format(new Date()) + ")");
-		copyRootWebappFiles(tmpWarDir, appServerDir);
-		monitor.worked(2);
-		monitor.subTask("Copy plugins");
-		copyPlugins(tmpWarDir, appServerDir);
-		monitor.worked(2);
-		monitor.subTask("Copy all standard libraries (" + SDF.format(new Date()) + ")");
-		final File targetLibDir = copyStandardLibs(tmpWarDir, appServerDir);
-		monitor.worked(2);
-		monitor.subTask("Copy Drivers");
-		copyDrivers(appServerDir, targetLibDir);
-		monitor.worked(2);
-		moveSlf4j(tmpWarDir, targetLibDir);
-		monitor.worked(2);
-		monitor.subTask("Creating web.xml");
-		copyWebXml(tmpWarDir);
-		monitor.worked(2);
-		monitor.subTask("Creating log4j configuration file");
-		copyLog4jConfigurationFile(tmpWarDir);
-		monitor.worked(2);
-		monitor.subTask("Creating context.xml");
-		createTomcatContextXML(tmpWarDir);
-		monitor.worked(2);
-		addServoyProperties(tmpWarDir);
-		monitor.worked(2);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 8);
+
+		if (tmpWarDir != null)
+		{
+			try
+			{
+				FileUtils.deleteDirectory(tmpWarDir);
+			}
+			catch (IOException e)
+			{
+				throw new ExportException("Could not delete the temporary war directory " + tmpWarDir, e);
+			}
+		}
+		activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+
+		tmpWarDir = createTempDir();
+		monitor.worked(1);
 		copySecAndDBIFiles(tmpWarDir);
 		monitor.worked(4);
 		if (exportModel.isExportActiveSolution())
 		{
 			monitor.subTask("Copy the active solution (" + SDF.format(new Date()) + ")");
-			copyActiveSolution(monitor.newChild(2), tmpWarDir);
+			copyActiveSolution(monitor.newChild(2));
 			// TODO this only compiles the less resources of the active project (and its modules) not for the none active solutions that could also be exported
 			monitor.subTask("Compile less resources (" + SDF.format(new Date()) + ")");
 			compileLessResources(tmpWarDir);
 			monitor.worked(1);
 		}
+	}
 
-		exportAdminUser(tmpWarDir);
+	/**
+	 * Export the solution as war.
+	 * @param monitor
+	 * @throws ExportException if export fails
+	 */
+	public File doExport(IProgressMonitor m) throws ExportException
+	{
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 42);
+		File warFile = createNewWarFile();
+		monitor.worked(2);
+		if (tmpWarDir == null)
+		{
+			doActiveSolutionExports(m);
+		}
+		monitor.worked(2);
+		String appServerDir = exportModel.getServoyApplicationServerDir();
+		monitor.subTask("Copy root webapp files (" + SDF.format(new Date()) + ")");
+		copyRootWebappFiles(appServerDir);
+		monitor.worked(2);
+		monitor.subTask("Copy plugins");
+		copyPlugins(appServerDir);
+		monitor.worked(2);
+		monitor.subTask("Copy all standard libraries (" + SDF.format(new Date()) + ")");
+		final File targetLibDir = copyStandardLibs(appServerDir);
+		monitor.worked(2);
+		monitor.subTask("Copy Drivers");
+		copyDrivers(appServerDir, targetLibDir);
+		monitor.worked(2);
+		moveSlf4j(targetLibDir);
+		monitor.worked(2);
+		monitor.subTask("Creating web.xml");
+		copyWebXml();
+		monitor.worked(2);
+		monitor.subTask("Creating log4j configuration file");
+		copyLog4jConfigurationFile();
+		monitor.worked(2);
+		monitor.subTask("Creating context.xml");
+		createTomcatContextXML();
+		monitor.worked(2);
+		addServoyProperties();
+		monitor.worked(2);
+
+		exportAdminUser();
 
 		monitor.setWorkRemaining(11);
 		monitor.subTask("Copying NGClient components/services... (" + SDF.format(new Date()) + ")");
-		copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir);
-		if (monitor.isCanceled()) return;
+		copyComponentsAndServicesPlusLibs(monitor.newChild(2));
+		if (monitor.isCanceled()) return null;
 
 		monitor.setWorkRemaining(5);
 		monitor.subTask("Copy exported components");
-		copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
+		copyExportedComponentsAndServicesPropertyFile(m);
 		monitor.worked(2);
 		if (exportModel.exportNG2Mode() == null || !exportModel.exportNG2Mode().equals("false"))
 		{
 			monitor.subTask("Copy Titanium NGClient resources (" + SDF.format(new Date()) + ")");
 			try
 			{
-				copyNGClient2(tmpWarDir, monitor);
+				copyNGClient2(monitor);
 			}
 			catch (RuntimeException e)
 			{
-				if (monitor.isCanceled()) return;
+				if (monitor.isCanceled()) return null;
 				throw new ExportException("could not create/copy Titanium NGClient resources", e);
 			}
 		}
@@ -324,12 +345,12 @@ public class WarExporter
 		}
 		monitor.worked(1);
 		monitor.subTask("Creating deploy properties (" + SDF.format(new Date()) + ")");
-		createDeployPropertiesFile(tmpWarDir);
+		createDeployPropertiesFile();
 		monitor.worked(1);
 		monitor.subTask("Checking war for duplicate jars (" + SDF.format(new Date()) + ")");
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 		// first check,remove duplicate jars from the plugins dir.
-		checkDuplicateJars(tmpWarDir);
+		checkDuplicateJars();
 		monitor.worked(1);
 		// after that copy or move everything to the WEB-INF/lib dir to have 1 big classpath but only if this is not for a smartclient
 		if (!exportModel.getStartRMI())
@@ -370,7 +391,7 @@ public class WarExporter
 		}
 
 		monitor.worked(1);
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 		monitor.subTask("Creating/zipping the WAR file (" + SDF.format(new Date()) + ")");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
@@ -378,6 +399,7 @@ public class WarExporter
 		monitor.worked(1);
 		monitor.subTask("Done (" + SDF.format(new Date()) + ")");
 		monitor.done();
+		return warFile;
 	}
 
 	/**
@@ -386,10 +408,10 @@ public class WarExporter
 	protected boolean filterPluginFile(File file)
 	{
 		String name = file.getName().toLowerCase();
-		return file.isFile() && !name.endsWith(".jnlp") && !name.equals("plugins.properties") && !HTTP_PLUGIN_FILES.contains(name);
+		return file.isFile() && !name.endsWith(".jnlp") && !name.equals("plugins.properties");
 	}
 
-	private void checkDuplicateJars(File tmpWarDir) throws ExportException
+	private void checkDuplicateJars() throws ExportException
 	{
 		Map<String, TreeMap<String, List<File>>> dependenciesVersions = new HashMap<>();
 		TreeMap<String, List<File>> possibleDuplicates = new TreeMap<>();
@@ -530,7 +552,7 @@ public class WarExporter
 		return latestJar.getPath().replace(tmpWarDir.getPath(), "").replace(File.separator + "WEB-INF", "");
 	}
 
-	private void copyNGClient2(File tmpWarDir, IProgressMonitor monitor)
+	private void copyNGClient2(IProgressMonitor monitor)
 	{
 		Activator.getDefault().exportNG2ToWar(new ING2WarExportModel()
 		{
@@ -555,9 +577,11 @@ public class WarExporter
 
 			public String getSolutionName()
 			{
-				IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
-				FlattenedSolution solution = servoyModel.getFlattenedSolution();
-				return solution.getName();
+				if (activeSolutionName == null)
+				{
+					return ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+				}
+				return activeSolutionName;
 			}
 		});
 	}
@@ -614,7 +638,7 @@ public class WarExporter
 	 * This is needed to optimize the references included in the index.html file.
 	 * If no components and services are selected, then all references would be included in the index.
 	 */
-	private void copyExportedComponentsAndServicesPropertyFile(File tmpWarDir, IProgressMonitor m) throws ExportException
+	private void copyExportedComponentsAndServicesPropertyFile(IProgressMonitor m) throws ExportException
 	{
 		Set<String> exportedComponents = exportModel.getAllExportedComponents();
 		Set<String> exportedServicesWithoutSabloServices = exportModel.getAllExportedServicesWithoutSabloServices();
@@ -673,7 +697,7 @@ public class WarExporter
 	/**
 	 * Copy to the war all NG components and services (default and user-defined), as well as the jars required by the NGClient.
 	 */
-	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor, File tmpWarDir) throws ExportException
+	private void copyComponentsAndServicesPlusLibs(IProgressMonitor monitor) throws ExportException
 	{
 		try
 		{
@@ -747,7 +771,7 @@ public class WarExporter
 								excludes = new HashSet<String>(EXCLUDED_RESOURCES_BY_NAME);
 								excludes.add(entryDir + '/'); // extractaJar is startsWith because of the jar entries.
 							}
-							extractJar(name, resource, tmpWarDir, allTemplates, excludes);
+							extractJar(name, resource, allTemplates, excludes);
 						}
 					}
 				}
@@ -804,7 +828,7 @@ public class WarExporter
 		}
 	}
 
-	private void extractJar(String dirName, File file, File tmpWarDir, Map<String, File> allTemplates, Set<String> excludedResourcesByName)
+	private void extractJar(String dirName, File file, Map<String, File> allTemplates, Set<String> excludedResourcesByName)
 	{
 		try (JarFile jarfile = new JarFile(file))
 		{
@@ -915,7 +939,7 @@ public class WarExporter
 		return tmpWarDir;
 	}
 
-	protected void copyActiveSolution(IProgressMonitor monitor, File tmpWarDir) throws ExportException
+	protected void copyActiveSolution(IProgressMonitor monitor) throws ExportException
 	{
 		try
 		{
@@ -1021,7 +1045,7 @@ public class WarExporter
 	/**
 	 * @param tmpWarDir
 	 */
-	private void exportAdminUser(File tmpWarDir)
+	private void exportAdminUser()
 	{
 		if (exportModel.getDefaultAdminUser() != null && exportModel.getDefaultAdminPassword() != null)
 		{
@@ -1137,7 +1161,7 @@ public class WarExporter
 		}
 	}
 
-	protected void createTomcatContextXML(File tmpWarDir) throws ExportException
+	protected void createTomcatContextXML() throws ExportException
 	{
 		String fileName = exportModel.getTomcatContextXMLFileName();
 		if (fileName != null && !"".equals(fileName.trim()))
@@ -1222,7 +1246,7 @@ public class WarExporter
 	 * @param tmpWarDir
 	 * @throws ExportException
 	 */
-	private void addServoyProperties(File tmpWarDir) throws ExportException
+	private void addServoyProperties() throws ExportException
 	{
 		if (exportModel.getServoyPropertiesFileName() == null)
 		{
@@ -1246,7 +1270,7 @@ public class WarExporter
 		}
 	}
 
-	private void copyWebXml(File tmpWarDir) throws ExportException
+	private void copyWebXml() throws ExportException
 	{
 		// copy war web.xml
 		File webXMLFile = new File(tmpWarDir, "WEB-INF/web.xml");
@@ -1280,7 +1304,7 @@ public class WarExporter
 	}
 
 
-	private void copyLog4jConfigurationFile(File tmpWarDir) throws ExportException
+	private void copyLog4jConfigurationFile() throws ExportException
 	{
 		// copy war log4j configuration file
 		String name = exportModel.getLog4jConfigurationFile();
@@ -1327,7 +1351,7 @@ public class WarExporter
 		}
 	}
 
-	private void moveSlf4j(File tmpWarDir, final File targetLibDir) throws ExportException
+	private void moveSlf4j(final File targetLibDir) throws ExportException
 	{
 		// move the slf4j outside of the WEB-INF/lib to /lib/, its only used in the client
 		File slf4j = new File(targetLibDir, "slf4j-jdk14.jar");
@@ -1351,7 +1375,7 @@ public class WarExporter
 		}
 	}
 
-	private File copyStandardLibs(File tmpWarDir, String appServerDir) throws ExportException
+	private File copyStandardLibs(String appServerDir) throws ExportException
 	{
 		// copy lib dir (excluding images)
 		final File libDir = new File(appServerDir, "lib");
@@ -1371,7 +1395,7 @@ public class WarExporter
 		return targetLibDir;
 	}
 
-	private void copyPlugins(File tmpWarDir, String appServerDir) throws ExportException
+	private void copyPlugins(String appServerDir) throws ExportException
 	{
 		// copy the plugins
 		File pluginsDir = new File(tmpWarDir, "plugins");
@@ -1442,7 +1466,7 @@ public class WarExporter
 		}
 	}
 
-	private void copyRootWebappFiles(File tmpWarDir, String appServerDir) throws ExportException
+	private void copyRootWebappFiles(String appServerDir) throws ExportException
 	{
 		File webAppDir = new File(appServerDir, "server/webapps/ROOT");
 		// copy first the standard webapp dir of the app server
@@ -1600,8 +1624,6 @@ public class WarExporter
 		int read = 0;
 		for (File file : files)
 		{
-			// skip the WRO4J_RUNNNER if somehow it couldn't be deleted.
-			if (file.getName().equals(WRO4J_RUNNER) || file.getName().equals("wro.xml")) continue;
 			if (file.isDirectory())
 			{
 				zip(file, base, zos);
@@ -2059,7 +2081,7 @@ public class WarExporter
 		return null;
 	}
 
-	private void createDeployPropertiesFile(File tmpWarDir) throws ExportException
+	private void createDeployPropertiesFile() throws ExportException
 	{
 		File deployPropertiesFile = new File(tmpWarDir, "WEB-INF/deploy.properties");
 		Properties properties = new Properties();

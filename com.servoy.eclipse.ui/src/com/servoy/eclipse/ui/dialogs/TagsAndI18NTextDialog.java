@@ -68,6 +68,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Utils;
@@ -97,6 +98,9 @@ public class TagsAndI18NTextDialog extends Dialog
 		Utils.arrayJoin(STANDARD_TAGS_COMMON, new String[] { "serverURL", "pageNumber", "totalNumberOfPages" }), I18N_TAG, true);
 	private static final String[] STANDARD_TAGS_ON_RELATION_MOBILE = new String[] { "maxRecordIndex", "lazyMaxRecordIndex" };
 	private static final String[] STANDARD_TAGS_ON_RELATION_REGULAR = STANDARD_TAGS_ON_RELATION_MOBILE;
+
+	private static final String[] STANDARD_TAGS_REGULAR_FOR_SOLUTION_PROPERTIES = Utils
+		.arrayAdd((new String[] { "serverURL", "pageNumber", "totalNumberOfPages" }), I18N_TAG, true);
 
 	private final FlattenedSolution flattenedSolution;
 	private final PersistContext persistContext;
@@ -172,7 +176,7 @@ public class TagsAndI18NTextDialog extends Dialog
 				new CombinedTreeLabelProvider(1, new ILabelProvider[] { StandardTagsLabelProvider.INSTANCE_HIDEPREFIX, solutionContextLabelProvider }),
 				new CombinedTreeContentProvider(1,
 					new ITreeContentProvider[] { new DataProviderContentProvider(persistContext, flattenedSolution,
-						table), StandardTagsContentProvider.getInstance(mobile) }),
+						table), new StandardTagsContentProvider(mobile, persistContext) }),
 				mainInputOptions, true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 			addButton = new Button(composite_1, SWT.NONE);
@@ -394,19 +398,13 @@ public class TagsAndI18NTextDialog extends Dialog
 
 	public static class StandardTagsContentProvider extends ArrayContentProvider implements ITreeContentProvider, com.servoy.eclipse.ui.util.IKeywordChecker
 	{
-		private static final StandardTagsContentProvider INSTANCE_REGULAR = new StandardTagsContentProvider(false);
-		private static final StandardTagsContentProvider INSTANCE_MOBILE = new StandardTagsContentProvider(true);
-
-		public static final StandardTagsContentProvider getInstance(boolean mobile)
-		{
-			return mobile ? INSTANCE_MOBILE : INSTANCE_REGULAR;
-		}
-
 		private final boolean mobile;
+		private final PersistContext persistContext;
 
-		private StandardTagsContentProvider(boolean mobile)
+		public StandardTagsContentProvider(boolean mobile, PersistContext persistContext)
 		{
 			this.mobile = mobile;
+			this.persistContext = persistContext;
 		}
 
 		public Object[] getChildren(Object parentElement)
@@ -414,8 +412,11 @@ public class TagsAndI18NTextDialog extends Dialog
 			if (parentElement instanceof StandardTagsRelationNode)
 			{
 				Relation relation = ((StandardTagsRelationNode)parentElement).relation;
-				String[] standardTags = relation != null ? (mobile ? STANDARD_TAGS_ON_RELATION_MOBILE : STANDARD_TAGS_ON_RELATION_REGULAR)
-					: (mobile ? STANDARD_TAGS_MOBILE : STANDARD_TAGS_REGULAR);
+				final boolean isContextSolution = persistContext != null && persistContext.getContext() != null && persistContext.getPersist() != null &&
+					persistContext.getPersist() instanceof Solution && persistContext.getContext().equals(persistContext.getPersist());
+				String[] standardTags = isContextSolution ? STANDARD_TAGS_REGULAR_FOR_SOLUTION_PROPERTIES
+					: (relation != null ? (mobile ? STANDARD_TAGS_ON_RELATION_MOBILE : STANDARD_TAGS_ON_RELATION_REGULAR)
+						: (mobile ? STANDARD_TAGS_MOBILE : STANDARD_TAGS_REGULAR));
 				Object[] tags = new Object[standardTags.length];
 				for (int i = 0; i < standardTags.length; i++)
 				{

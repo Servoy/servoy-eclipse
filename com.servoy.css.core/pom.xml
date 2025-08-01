@@ -6,7 +6,6 @@
 		<version>2025.9.0.4100_rc</version>
 	</parent>
 	<artifactId>com.servoy.css.core</artifactId>
-	<version>2025.9.0.4100_rc</version>
 	<packaging>eclipse-feature</packaging>
 
 </project>
