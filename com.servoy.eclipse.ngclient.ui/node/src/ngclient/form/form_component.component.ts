@@ -133,9 +133,9 @@ export abstract class AbstractFormComponent {
     template: `
       @if (formCache.absolute) {
         <div [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
-          @for (part of formCache.parts; track part) {
+          @for (part of formCache.parts; track part.name) {
             <div [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
-              @for (item of part.items; track item) {
+              @for (item of part.items; track item.name) {
                 <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
                 </div>

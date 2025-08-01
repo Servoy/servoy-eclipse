@@ -313,6 +313,10 @@ export class StructureCache {
         return level;
     }
 
+	public get name() {
+	   return this.id ? this.id : this.tagname;
+	}
+	 
     toString() {
         return 'StructureCache(' + this.id + ')';
     }
