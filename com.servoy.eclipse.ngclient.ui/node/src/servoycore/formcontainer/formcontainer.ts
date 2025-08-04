@@ -114,9 +114,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 								this.form1_state = this.animation;
 								this.form2_state = this.animation;
 							}
-							if (change.currentValue) {
-								this.switchForm(change.currentValue);
-							}
+							this.switchForm(change.currentValue);
 						}
 						break;
 					}
