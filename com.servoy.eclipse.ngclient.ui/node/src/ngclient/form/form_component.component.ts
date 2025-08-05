@@ -133,9 +133,9 @@ export abstract class AbstractFormComponent {
     template: `
       @if (formCache.absolute) {
         <div [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
-          @for (part of formCache.parts; track part.name) {
+          @for (part of formCache.parts; track part.rId) {
             <div [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
-              @for (item of part.items; track item.name) {
+              @for (item of part.items; track item.rId) {
                 <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
                 </div>
@@ -146,7 +146,7 @@ export abstract class AbstractFormComponent {
       }
       @if (!formCache.absolute&&formCache.mainStructure) {
         <div class="svy-form svy-respform" [ngClass]="formClasses"> <!-- main container div -->
-          @for (item of formCache.mainStructure.items; track item) {
+          @for (item of formCache.mainStructure.items; track item.rId) {
             <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
             }  <!-- component or responsive div  -->
           </div>
@@ -154,7 +154,7 @@ export abstract class AbstractFormComponent {
       
         <ng-template  #svyResponsiveDiv  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
-            @for (item of state.items; track item) {
+            @for (item of state.items; track item.rId) {
               <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
             }
           </div>
@@ -162,7 +162,7 @@ export abstract class AbstractFormComponent {
       
         <ng-template  #cssPositionContainer  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
-            @for (item of state.items; track item) {
+            @for (item of state.items; track item.rId) {
               <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
               </div>
@@ -175,7 +175,7 @@ export abstract class AbstractFormComponent {
         <ng-template  #formComponentAbsoluteDiv  let-state="state" >
           @if (state.model.visible) {
             <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
-              @for (item of state.items; track item) {
+              @for (item of state.items; track item.rId) {
                 <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
                 </div>
