@@ -34,7 +34,7 @@ export class FormService {
 		websocketService.getSession().then((session) => {
 			session.onMessageObject((msg: {
 				forms: { [property: string]: { [property: string]: { [property: string]: unknown } } },
-				call: { form: string, bean: string, api: string, args: Array<unknown>, propertyPath: Array<string>, delayUntilFormLoads: boolean }
+				call: { form: string, bean: string, api: string, args: Array<unknown>, propertyPath: Array<string>, delayUntilFormLoads: boolean, async: boolean, asyncNow: boolean }
 			}) => {
 				if (msg.forms) {
 					for (const formname in msg.forms) {
@@ -64,8 +64,9 @@ export class FormService {
 
 					this.log.spam(this.log.buildMessage(() => ('sbl * Received API call from server: "' + componentCall.api + '" to form ' + componentCall.form
 						+ ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
-
-					const callItNow = ((doReturnTheRetVal: boolean) => {
+					
+					const doReturnTheRetVal = !componentCall.delayUntilFormLoads && !componentCall.async && !componentCall.asyncNow;
+					const callItNow = (() => {
 						const formComponent = this.formComponentCache.get(componentCall.form) as IFormComponent;
 						const def = new Deferred();
 						this.clientFunctionService.waitForLoading().finally(() => {
@@ -78,7 +79,7 @@ export class FormService {
 
 					// if form is loaded just call the api
 					if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
-						return callItNow(true);
+						return callItNow();
 					}
 					if (!componentCall.delayUntilFormLoads) {
 						// form is not loaded yet, api cannot wait; i think this should be an error
@@ -91,7 +92,7 @@ export class FormService {
 					}
 					const deferred = this.formComponentCache.get(componentCall.form) as Deferred<any>;
 					// eslint-disable-next-line @typescript-eslint/no-floating-promises
-					deferred.promise.then(() => callItNow(false));
+					deferred.promise.then(() => callItNow());
 				}
 			});
 		}).catch((error) => {
