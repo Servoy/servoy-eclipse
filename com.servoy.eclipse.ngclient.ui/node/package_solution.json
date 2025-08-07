@@ -1,7 +1,7 @@
 {
   "name": "TiNG",
   "version": "2025.6.0",
-  "description": "Servoy TiNG 2025.6.1.4083",
+  "description": "Servoy TiNG 2025.6.2.4084",
   "license": "GNU Affero General Public License",
   "scripts": {
     "ng": "ng",

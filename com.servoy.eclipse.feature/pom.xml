@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.6.1.4083</version>
+		<version>2025.6.2.4084</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.feature</artifactId>
