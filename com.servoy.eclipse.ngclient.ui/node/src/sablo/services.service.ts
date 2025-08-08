@@ -31,7 +31,7 @@ export class ServicesService {
                 for (const serviceCall of serviceApisJSON as Array<ApiCallFromServer>) {
                     if (serviceCall['pre_data_service_call']) {
                         // responseValue keeps last services call return value
-                        responseValue = this.callServiceApi(serviceCall); // this handles arg type conversions and return value type conversion as well
+                        responseValue = this.callServiceApi(serviceCall, previousResponseValue); // this handles arg type conversions and return value type conversion as well
                     }
                 }
                 return responseValue;
@@ -51,7 +51,7 @@ export class ServicesService {
                     for (const serviceCall of serviceApisJSON as Array<ApiCallFromServer>) {
                         if (!serviceCall['pre_data_service_call']) {
                             // responseValue keeps last services call return value
-                            responseValue = this.callServiceApi(serviceCall); // this handles arg type conversions and return value type conversion as well
+                            responseValue = this.callServiceApi(serviceCall, previousResponseValue); // this handles arg type conversions and return value type conversion as well
                         }
                     }
                     def.resolve(responseValue);
@@ -70,7 +70,7 @@ export class ServicesService {
         return this.serviceProvider;
     }
 
-    public callServiceApi(serviceCall: ApiCallFromServer): any {
+    public callServiceApi(serviceCall: ApiCallFromServer, previousResponseValue: any): any {
 
         const serviceInstance = this.getServiceProvider().getService(serviceCall.name);
 
@@ -83,16 +83,20 @@ export class ServicesService {
                 serviceCall.args[argNo] = this.converterService.convertFromServerToClient(serviceCall.args[argNo], serviceCallSpec?.getArgumentType(argNo),
                     undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
             }
-
-            // wrap return value in a Promise.resolve to make sure we convert-to-server the return value as well when the api returns a promise
-            return Promise.resolve(serviceInstance[serviceCall.call].apply(serviceInstance, serviceCall.args)).then(
-                (ret) => this.converterService.convertFromClientToServer(ret, serviceCallSpec?.returnType,
-                    undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0],
-                (reason) => {
-                    // error
-                    this.log.error('sbl * Error (follows below) in in executing service Api call "' + serviceCall.call + '" to service ' + serviceCall.name);
-                    this.log.error(reason);
-                });
+            
+            if (serviceCallSpec?.shouldReturnValue) {
+                // wrap return value in a Promise.resolve to make sure we convert-to-server the return value as well when the api returns a promise
+                return Promise.resolve(serviceInstance[serviceCall.call].apply(serviceInstance, serviceCall.args)).then(
+                    (ret) => this.converterService.convertFromClientToServer(ret, serviceCallSpec?.returnType,
+                        undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0],
+                    (reason) => {
+                        // error
+                        this.log.error('sbl * Error (follows below) in in executing service Api call "' + serviceCall.call + '" to service ' + serviceCall.name);
+                        this.log.error(reason);
+                    });
+            } else {
+                serviceInstance[serviceCall.call].apply(serviceInstance, serviceCall.args);
+            }
         } else {
             if (serviceInstance) {
                 this.log.error('trying to call a service api ' + serviceCall.call + ' for service ' + serviceCall.name + ' but the api function was not found!');

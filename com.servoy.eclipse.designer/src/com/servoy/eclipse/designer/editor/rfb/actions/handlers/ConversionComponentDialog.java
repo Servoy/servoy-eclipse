@@ -180,7 +180,8 @@ public class ConversionComponentDialog extends Dialog
 					int index = getPropertiesForSpec(newSpecName).indexOf(propertyName);
 					if (index >= 0)
 					{
-						return Integer.valueOf(index);
+						// +1 because the first entry in the list is "-none-"
+						return Integer.valueOf(index + 1);
 					}
 				}
 				return Integer.valueOf(0);

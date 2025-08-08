@@ -186,8 +186,12 @@ export const instanceOfApiExecutor = (obj: unknown): obj is IApiExecutor =>
 export const instanceOfFormComponent = (obj: unknown): obj is IFormComponent =>
     obj != null && (obj as IFormComponent).detectChanges instanceof Function;
 
+let repeaterIdCounter = 1;
+export interface IRepeaterIDProvider {
+    rId: number;
+}
 /** More (but internal not servoy public) impl. for IComponentCache implementors. */
-export class ComponentCache implements IComponentCache {
+export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
 
     /**
      * The dynamic client side types of a component's properties (never null, can be an empty obj). These are client side types sent from server that are
@@ -208,6 +212,8 @@ export class ComponentCache implements IComponentCache {
 
     /** this is used as #ref inside form_component.component.ts and it has camel-case instead of dashes */
     public readonly type: string;
+
+    public readonly rId = repeaterIdCounter++;
 
     public parent: StructureCache;
 
@@ -266,9 +272,10 @@ export class ComponentCache implements IComponentCache {
 
 }
 
-export class StructureCache {
+export class StructureCache implements IRepeaterIDProvider{
     public parent: StructureCache;
     public model:  { [property: string]: unknown } = {};
+    public readonly rId = repeaterIdCounter++;
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
         public readonly id?: string, public readonly cssPositionContainer?: boolean, public layout?: { [property: string]: string }) {
@@ -313,13 +320,20 @@ export class StructureCache {
         return level;
     }
 
+	public get name() {
+	   return this.id ? this.id : this.tagname;
+	}
+	 
     toString() {
         return 'StructureCache(' + this.id + ')';
     }
 }
 
 /** This is a cache that represents a form part (body/header/etc.). */
-export class PartCache {
+export class PartCache implements IRepeaterIDProvider {
+    
+    public readonly rId = repeaterIdCounter++;
+
     constructor(public readonly name: string,
         public readonly classes: Array<string>,
         public layout: { [property: string]: string },

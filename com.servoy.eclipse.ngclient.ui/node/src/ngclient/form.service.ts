@@ -37,8 +37,10 @@ export class FormService {
         this.formComponentCache = new Map();
         this.utils.setFormService(this);
         websocketService.getSession().then((session) => {
-            session.onMessageObject((msg: {forms: {[property: string]: {[property: string]: {[property: string]: unknown}}},
-                                call: {form:string,bean:string, api: string, args: Array<unknown>, propertyPath: Array<string>,delayUntilFormLoads: boolean}}) => {
+            session.onMessageObject((msg: {
+                forms: { [property: string]: { [property: string]: { [property: string]: unknown } } },
+                call: { form: string, bean: string, api: string, args: Array<unknown>, propertyPath: Array<string>, delayUntilFormLoads: boolean, async: boolean, asyncNow: boolean }
+            }) => {
                 if (msg.forms) {
                     for (const formname in msg.forms) {
                         // if form is loaded
@@ -70,7 +72,8 @@ export class FormService {
                     if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] Received API call from server: "' + componentCall.api + '" to form ' + componentCall.form
                         + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
 
-                    const callItOnceClientFunctionsAreLoaded = ((doReturnTheRetVal: boolean) => {
+                    const doReturnTheRetVal = !componentCall.delayUntilFormLoads && !componentCall.async && !componentCall.asyncNow;
+                    const callItOnceClientFunctionsAreLoaded = (() => {
                         const def = new Deferred(); // because clientFunctionService.waitForLoading().finally does not return a Promise that we could use directly, we create an explicit defer here in order to have a promise to return
 
                         if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "callItOnceClientFunctionsAreLoaded" 1 for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
@@ -97,18 +100,17 @@ export class FormService {
 
                     // if form is loaded just call the api
                     if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
-                        return callItOnceClientFunctionsAreLoaded(true);
+                        return callItOnceClientFunctionsAreLoaded();
                     }
-
+                    
                     // else
-
-                    const waitForFormToShowOnClientThenCallAPI = (doReturnTheRetVal: boolean, timeOutIfItDoesNotShowMS: number) => {
+                    const waitForFormToShowOnClientThenCallAPI = (timeOutIfItDoesNotShowMS: number) => {
                         if (this.log.logLevel >= LogLevel.SPAM) this.log.spam(this.log.buildMessage(() => ('[compAPIcalled] in "waitForFormToShowOnClientThenCallAPI" for API call from server; for API call from server: "' + componentCall.api + '" to form ' + componentCall.form
                             + ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
 
                         // if form got loaded meanwhile call the API
                         if (this.formComponentCache.has(componentCall.form) && !(this.formComponentCache.get(componentCall.form) instanceof Deferred)) {
-                            return callItOnceClientFunctionsAreLoaded(true);
+                            return callItOnceClientFunctionsAreLoaded();
                         }
 
                         if (!this.formComponentCache.has(componentCall.form)) {
@@ -121,7 +123,7 @@ export class FormService {
 
                         const cancelled: [boolean] = [ false ];
                         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                        const thenPromise = deferredFCC.promise.then(() => { if (!cancelled[0]) return callItOnceClientFunctionsAreLoaded(doReturnTheRetVal) });
+                        const thenPromise = deferredFCC.promise.then(() => { if (!cancelled[0]) return callItOnceClientFunctionsAreLoaded() });
                         
                         if (timeOutIfItDoesNotShowMS > 0) {
                             // it's either a sync call or a simple async (without wait until form loads) call, and the form ui was not yet loaded; but server said that forms will be made visible soon
@@ -162,9 +164,10 @@ export class FormService {
                         if (this.sabloService.isExpectingAFormToShowSoon()) {
                             // it could be that the needed form is already scheduled to show (on server-side) but it's not yet sent to client
                             // (if this call to client-side API was initiated by solution onShow handler code)
-                            return this.sabloService.waitForPendingFormShowFromServer().finally(() => {
-                                return waitForFormToShowOnClientThenCallAPI(true, 3000);
+                            const callPromise = this.sabloService.waitForPendingFormShowFromServer().finally(() => {
+                                return waitForFormToShowOnClientThenCallAPI(3000);
                             });
+                            return doReturnTheRetVal ? callPromise : undefined;
                         } else {
                             // form is not loaded yet, api cannot wait; the server did not notify that a form show
                             // will happen soon (it's not scheduled on the event thread serverside); this should be an error
@@ -175,7 +178,7 @@ export class FormService {
                             return;
                         }
                     } else {
-                        waitForFormToShowOnClientThenCallAPI(false, -1); // it's a an async call with wait until form loads; no need to return anything
+                        waitForFormToShowOnClientThenCallAPI(-1); // it's a an async call with wait until form loads; no need to return anything
                     }
                 }
             });

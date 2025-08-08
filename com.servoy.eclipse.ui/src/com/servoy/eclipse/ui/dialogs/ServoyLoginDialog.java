@@ -136,6 +136,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 					{
 						ServoyLog.logError(ex);
 					}
+					if (onLogin != null) onLogin.accept(loginToken);
 				}
 				else if (finalFirstLogin || loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
 				{
@@ -145,9 +146,13 @@ public class ServoyLoginDialog extends TitleAreaDialog
 
 					Display.getDefault().asyncExec(() -> doLogin(onLogin));
 				}
+				else
+				{
+					if (onLogin != null) onLogin.accept(loginToken);
+				}
 				notifyLoginListener(finalUsername);
 
-				if (onLogin != null) onLogin.accept(loginToken);
+
 			});
 		}
 		else

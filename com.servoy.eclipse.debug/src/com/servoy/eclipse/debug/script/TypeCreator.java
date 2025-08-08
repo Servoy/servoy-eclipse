@@ -1372,6 +1372,9 @@ public class TypeCreator extends TypeCache
 					"Check if a style class is present on styleclass named property</br></br>elements.myelem.hasStyleClass('mycssclass');" +
 						"</br></br>@param {String} style class to search"),
 					createParam("String", "styleclass")));
+				members.add(fillParameter(createMethod("getStyleClasses",
+					"Returns the style classes of the styleclass named property</br></br>elements.myelem.getStyleClasses();" +
+						"</br></br>@return {String[]} array of style classes")));
 			}
 
 			if (fullTypeName.endsWith(_ABS_POSTFIX))

@@ -9,3 +9,4 @@ servoydoc_jslib.warnings.txt
 servoydoc.html
 servoydoc.warnings.txt
 /target/
+/local_launch_files/
