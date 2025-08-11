@@ -14,6 +14,7 @@ Import-Package: org.eclipse.core.runtime,
  org.eclipse.emf.common.util,
  org.eclipse.jface.resource,
  org.osgi.framework,
- org.osgi.service.prefs
+ org.osgi.service.prefs,
+ org.slf4j;version="[2.0.0,3.0.0)"
 Automatic-Module-Name: com.servoy.eclipse.ui.tweaks
 Require-Bundle: org.eclipse.ui.workbench

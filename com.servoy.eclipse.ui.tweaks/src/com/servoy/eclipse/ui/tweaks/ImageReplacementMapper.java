@@ -30,6 +30,8 @@ import java.util.Set;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains the mappings between old images locations and new image locations that are used to replace icons in non Servoy plug-ins.
@@ -39,6 +41,8 @@ import org.eclipse.ui.PlatformUI;
  */
 public class ImageReplacementMapper
 {
+	public static final Logger LOG = LoggerFactory.getLogger("ImageReplacementMapper");
+
 	public static final String DEFAULT_ICONS_PATH = "icons";
 	public static final String DARK_ICONS_PATH = "darkicons";
 
@@ -800,11 +804,20 @@ public class ImageReplacementMapper
 			}
 			URL replacement = classAndFileNameReplacements.get(new Pair<>(location.getName(), filename));
 
+			if (replacement == null && filename.contains(".svg"))
+			{
+				replacement = classAndFileNameReplacements.get(new Pair<>(location.getName(), filename.replace(".svg", ".png")));
+				if (replacement != null)
+				{
+					LOG.warn("SVG_WITH_PNG: " + filename);
+				}
+			}
+
 			if (list_mappings)
 			{
 				if (interceptableFiles.add(new Pair<Class< ? >, String>(location, filename)))
 				{
-					System.out.println((replacement == null ? "(ORIGINAL)" : "(REPLACED)") + " FileBasedImageReplacer: (" + location + ", " + filename + ")");
+					LOG.warn((replacement == null ? "(ORIGINAL)" : "(REPLACED)") + " FileBasedImageReplacer: (" + location + ", " + filename + ")");
 				}
 			}
 
@@ -812,7 +825,7 @@ public class ImageReplacementMapper
 		}
 		else if (list_mappings)
 		{
-			System.out.println("skipped the url " + filename + " because workbench is not running yet");
+			LOG.warn("skipped the url " + filename + " because workbench is not running yet");
 		}
 		return null;
 	}
@@ -858,18 +871,39 @@ public class ImageReplacementMapper
 				}
 				catch (MalformedURLException e)
 				{
-					System.err.print("couldn't create url from bundle entry " + url);
+					LOG.warn("couldn't create url from bundle entry " + url);
 					return null;
 				}
 			}
 
 			URL replacement = urlReplacements.get(stableUrl);
 
+			if (replacement == null && stableUrl.toExternalForm().contains(".svg"))
+			{
+				String svgForm = stableUrl.toExternalForm();
+				String pngForm = svgForm.replace(".svg", ".png");
+				if (svgForm != pngForm)
+				{
+					try
+					{
+						replacement = urlReplacements.get(java.net.URI.create(pngForm).toURL());
+						if (replacement != null)
+						{
+							LOG.warn("SVG_WITH_PNG: " + stableUrl);
+						}
+					}
+					catch (MalformedURLException e)
+					{
+						// ignore
+					}
+				}
+			}
+
 			if (list_mappings)
 			{
 				if (interceptableUrls.add(String.valueOf(stableUrl)))
 				{
-					System.out.println((replacement == null ? "(ORIGINAL)" : "(REPLACED)") + " URLBasedImageReplacer: (" + stableUrl + ")");
+					LOG.warn((replacement == null ? "(ORIGINAL)" : "(REPLACED)") + " URLBasedImageReplacer: (" + stableUrl + ")");
 				}
 			}
 
@@ -877,7 +911,7 @@ public class ImageReplacementMapper
 		}
 		else if (list_mappings)
 		{
-			System.out.println("skipped the url " + url + " because workbench is not running yet");
+			LOG.warn("skipped the url " + url + " because workbench is not running yet");
 		}
 		return null;
 	}
