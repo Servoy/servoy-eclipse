@@ -183,7 +183,7 @@
                 </dependency>
                 <dependency>
                     <groupId>de.inetsoftware</groupId>
-                    <artifactId>de.inetsoftware.jlessc</artifactId>
+                    <artifactId>jlessc</artifactId>
                     <version>1.14.0.s2</version>
                     <type>jar</type>
                 </dependency>
