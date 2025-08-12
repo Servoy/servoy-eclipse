@@ -30,7 +30,7 @@
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.09/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202507231516"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202507231519"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202508121425"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/eclipse/updates/4.36/"/>
@@ -70,7 +70,7 @@
                 <dependency>
                     <groupId>com.auth0</groupId>
                     <artifactId>jwks-rsa</artifactId>
-                    <version>0.22.2</version>
+                    <version>0.23.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
