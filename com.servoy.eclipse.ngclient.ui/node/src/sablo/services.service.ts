@@ -84,7 +84,7 @@ export class ServicesService {
                     undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
             }
             
-            if (serviceCallSpec?.shouldReturnValue) {
+            if (serviceCallSpec?.shouldReturnValue || serviceCallSpec === undefined) {
                 // wrap return value in a Promise.resolve to make sure we convert-to-server the return value as well when the api returns a promise
                 return Promise.resolve(serviceInstance[serviceCall.call].apply(serviceInstance, serviceCall.args)).then(
                     (ret) => this.converterService.convertFromClientToServer(ret, serviceCallSpec?.returnType,

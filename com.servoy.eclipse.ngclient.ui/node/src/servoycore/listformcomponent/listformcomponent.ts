@@ -675,14 +675,38 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 				elementReadOnly = value;
 			}
         });
-        if (this.rowEnableDataprovider && this.rowEnableDataprovider.length > idx) {
-            Object.defineProperty(rowItem.model, 'enabled', {
-                configurable: true,
-                get() {
-                    return thisLFC.rowEnableDataprovider[idx];
-                },
-            });
-        }
+        // TODO: 'enabledDataProvider' and 'visibleDataProvider' should not be in the model - on the server side
+        // they should be evaluated for each row and added to the model as regular 'enabled' and 'visible' properties
+        let elementEnabled = rowItem.model.enabled;
+        Object.defineProperty(rowItem.model, 'enabled', {
+            configurable: true,
+            get() {
+                if (thisLFC.rowEnableDataprovider && thisLFC.rowEnableDataprovider.length > idx) {
+                    return thisLFC.rowEditableDataprovider[idx]
+                }
+                if(this.enabledDataProvider !== undefined) {
+                    return this.enabledDataProvider;
+                }
+                return elementEnabled;
+            },
+            set(value: boolean) {
+				elementEnabled = value;
+			}
+        });
+        let elementVisible = rowItem.model.visible;
+        Object.defineProperty(rowItem.model, 'visible', {
+            configurable: true,
+            get() {
+                if(this.visibleDataProvider !== undefined) {
+                    return this.visibleDataProvider;
+                }
+                return elementVisible;
+            },
+            set(value: boolean) {
+				elementVisible = value;
+			}
+        });
+
         if (!row._cache) row._cache = new Map();
         row._cache.set(cm.name, rowItem);
         return rowItem;

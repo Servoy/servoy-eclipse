@@ -33,8 +33,7 @@ Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.ui.browser,
  org.eclipse.dltk.javascript.rhino,
  com.servoy.eclipse.notification,
- com.equo.chromium;resolution:=optional,
- net.bytebuddy.byte-buddy
+ com.equo.chromium;resolution:=optional
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.resource,org.eclipse.ui.plugin,org.osgi.framework"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
@@ -43,6 +42,12 @@ Import-Package: com.servoy.eclipse.ngclient.ui,
  jakarta.servlet.http;version="[6.1.0,8.0.0)",
  jakarta.websocket;version="[2.2.0,4.0.0)",
  jakarta.websocket.server;version="[2.2.0,4.0.0)",
+ net.bytebuddy;version="[1.17.0,2.0.0)",
+ net.bytebuddy.dynamic;version="[1.17.0,2.0.0)",
+ net.bytebuddy.dynamic.loading;version="[1.17.0,2.0.0)",
+ net.bytebuddy.implementation;version="[1.17.0,2.0.0)",
+ net.bytebuddy.implementation.bind.annotation;version="[1.17.0,2.0.0)",
+ net.bytebuddy.matcher;version="[1.17.0,2.0.0)",
  org.apache.commons.io;version="[2.19.0,3.0.0)",
  org.apache.commons.text;version="1.11.0",
  org.eclipse.jface.text,

@@ -1787,7 +1787,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	{
 		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUUID == null || (!isOperational()))
 		{
-			ServoyLog.logError("Invalid parameters received, or manager is not operational - setFormSecurityAccess(...)", null);
+			ServoyLog.logError("Invalid parameters: permision: " + groupName + ", accessMask: " + accessMask + ", element: " + elementUUID +
+				" received, or manager is not operational: " + isOperational() + " - setFormSecurityAccess(...)", null);
 			return;
 		}
 
@@ -1844,7 +1845,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUUID == null || (!isOperational()))
 		{
-			ServoyLog.logError("Invalid parameters received, or manager is not operational - setFormSecurityAccess(...)", null);
+			ServoyLog.logError("Invalid parameters: permision: " + groupName + ", accessMask: " + accessMask + ", element: " + elementUUID +
+				" received, or manager is not operational: " + isOperational() + " - setFormSecurityAccess(...)", null);
 			return;
 		}
 

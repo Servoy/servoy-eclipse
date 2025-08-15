@@ -51,6 +51,7 @@ import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.implementation.bind.annotation.SuperCall;
 import net.bytebuddy.implementation.bind.annotation.This;
+import net.bytebuddy.matcher.ElementMatchers;
 
 /**
  * @author gabi
@@ -60,10 +61,10 @@ public class JSMethodCallInterceptor
 {
 	private static final JSMethodCallInterceptor instance = new JSMethodCallInterceptor();
 
-	private static final Map<Class< ? >, Class< ? >> CLASS_MAP;
+	private static final Map<Class< ? extends BaseComponent>, Class< ? extends JSComponent< ? extends BaseComponent>>> CLASS_MAP;
 	static
 	{
-		Map<Class< ? >, Class< ? >> map = new HashMap<>();
+		Map<Class< ? extends BaseComponent>, Class< ? extends JSComponent< ? extends BaseComponent>>> map = new HashMap<>();
 		map.put(WebComponent.class, JSWebComponent.class);
 		map.put(GraphicalComponent.class, JSGraphicalComponent.class);
 		map.put(Bean.class, JSBean.class);
@@ -73,7 +74,7 @@ public class JSMethodCallInterceptor
 		CLASS_MAP = Collections.unmodifiableMap(map);
 	}
 
-	private final Map<Class< ? >, Class< ? >> proxyClassComponent = new HashMap<>();
+	private final Map<Class< ? extends BaseComponent>, Class< ? extends JSComponent< ? extends BaseComponent>>> proxyClassComponent = new HashMap<>();
 	private JSComponentMethodCallListener jsComponentMethodCallListener;
 
 	private Class< ? extends JSForm> proxyClassForm;
@@ -85,19 +86,20 @@ public class JSMethodCallInterceptor
 	}
 
 
-	public JSComponent createComponent(JSForm jsForm, BaseComponent component) throws Exception
+	public JSComponent< ? extends BaseComponent> createComponent(JSForm jsForm, BaseComponent component) throws Exception
 	{
-		JSComponent jsComponent = null;
-		Class baseClass = component.getClass(), jsClass = CLASS_MAP.get(baseClass);
+		JSComponent< ? extends BaseComponent> jsComponent = null;
+		Class< ? extends BaseComponent> baseClass = component.getClass();
+		Class< ? extends JSComponent< ? extends BaseComponent>> jsClass = CLASS_MAP.get(baseClass);
 
 		if (jsClass != null)
 		{
-			Class proxyClass = proxyClassComponent.get(baseClass);
+			Class< ? extends JSComponent< ? extends BaseComponent>> proxyClass = proxyClassComponent.get(baseClass);
 			if (proxyClass == null)
 			{
 				proxyClass = new ByteBuddy()
 					.subclass(jsClass)
-					.method(net.bytebuddy.matcher.ElementMatchers.any())
+					.method(ElementMatchers.any())
 					.intercept(MethodDelegation.to(this))
 					.make()
 					.load(JSMethodCallInterceptor.class.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
@@ -106,18 +108,18 @@ public class JSMethodCallInterceptor
 			}
 
 
-			Constructor ctor;
+			Constructor< ? extends JSComponent< ? extends BaseComponent>> ctor;
 			if (baseClass == Bean.class)
 			{
 				ctor = proxyClass.getDeclaredConstructor(
 					IJSParent.class, baseClass, boolean.class);
-				jsComponent = (JSComponent)ctor.newInstance(jsForm, component, true);
+				jsComponent = ctor.newInstance(jsForm, component, Boolean.TRUE);
 			}
 			else
 			{
 				ctor = proxyClass.getDeclaredConstructor(
 					IJSParent.class, baseClass, IApplication.class, boolean.class);
-				jsComponent = (JSComponent)ctor.newInstance(jsForm, component, DeveloperNGClient.INSTANCE, true);
+				jsComponent = ctor.newInstance(jsForm, component, DeveloperNGClient.INSTANCE, Boolean.TRUE);
 			}
 
 
@@ -146,7 +148,7 @@ public class JSMethodCallInterceptor
 		}
 		Constructor< ? extends JSForm> ctor = proxyClassForm.getDeclaredConstructor(
 			IApplication.class, Form.class, boolean.class);
-		JSForm jsForm = ctor.newInstance(DeveloperNGClient.INSTANCE, form, true);
+		JSForm jsForm = ctor.newInstance(DeveloperNGClient.INSTANCE, form, Boolean.TRUE);
 		return jsForm;
 	}
 
@@ -166,13 +168,13 @@ public class JSMethodCallInterceptor
 			methodName.startsWith("new") ||
 			methodName.startsWith("remove"))
 		{
-			if (targetInstance instanceof JSComponent)
+			if (targetInstance instanceof JSComponent comp)
 			{
-				if (jsComponentMethodCallListener != null) jsComponentMethodCallListener.onJSComponentMethodCall((JSComponent)targetInstance);
+				if (jsComponentMethodCallListener != null) jsComponentMethodCallListener.onJSComponentMethodCall(comp);
 			}
-			else if (targetInstance instanceof JSForm)
+			else if (targetInstance instanceof JSForm form)
 			{
-				if (jsFormMethodCallListener != null) jsFormMethodCallListener.onJSFormMethodCall((JSForm)targetInstance);
+				if (jsFormMethodCallListener != null) jsFormMethodCallListener.onJSFormMethodCall(form);
 			}
 		}
 		return superMethod.call(); // Call the original method on the target instance
