@@ -219,7 +219,16 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
             const formCache = this.formService.getFormCacheByName(name);
             if (formCache && formCache.absolute) {
                 minHeight = formCache.size.height;
-            }
+			}
+			if (formCache) {
+				const layout = formCache.parts[0]?.layout;
+				if (layout?.["overflow-x"]) {
+					styl["overflowX"] = layout["overflow-x"];
+				}
+				if (layout?.["overflow-y"]) {
+					styl["overflowY"] = layout["overflow-y"];
+				}
+			}
         }
         if (this.height && this.height.indexOf('%') >= 0){
             styl['height'] = this.height;
