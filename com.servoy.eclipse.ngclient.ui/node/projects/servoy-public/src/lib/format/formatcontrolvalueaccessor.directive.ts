@@ -49,7 +49,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private static DATETIMEFORMAT: Format = { display: 'yyyy-MM-dd\'T\'HH:mm:ss', type: 'DATETIME' } as Format;
     private static DATEFORMAT: Format = { display: 'yyyy-MM-dd', type: 'DATETIME' } as Format;
     private static MONTHFORMAT: Format = { display: 'yyyy-MM', type: 'DATETIME' } as Format;
-    private static WEEKFORMAT: Format = { display: 'YYYY-[W]WW', type: 'DATETIME' } as Format;
+    private static WEEKFORMAT: Format = { display: 'YYYY-\'W\'WW', type: 'DATETIME' } as Format;
     private static TIMEFORMAT: Format = { display: 'HH:mm', type: 'DATETIME' } as Format;
     private static BROWSERNUMBERFORMAT = new NumberParser();
 
