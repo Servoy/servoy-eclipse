@@ -69,6 +69,14 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         super.svyOnChanges(changes);
     }
 
+	get borderStyle(): string {
+		if (this.borderType?.borderStyle) {
+			const bs = this.borderType.borderStyle;
+			return `${bs.borderWidth} ${bs.borderStyle} ${bs.borderColor}`;
+		}
+		return '';
+	}
+	
     getForm(tab?: Tab) {
         if (!this.selectedTab) {
             const tabIndex = this.getRealTabIndex();
