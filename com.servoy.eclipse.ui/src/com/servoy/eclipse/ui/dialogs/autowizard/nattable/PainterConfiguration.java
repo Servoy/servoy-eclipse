@@ -367,16 +367,16 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 					IPersist persist = flattenedSolution.searchPersist((String)canonicalValue);
 					if (persist instanceof AbstractBase)
 					{
-						return Integer.valueOf(persist.getID());
+						return persist.getUUID().toString();
 					}
 				}
-				return Integer.valueOf(-1);
+				return null;
 			}
 
 			@Override
 			public Object displayToCanonicalValue(Object displayValue)
 			{
-				Form frm = flattenedSolution.getForm(((Integer)displayValue).intValue());
+				Form frm = flattenedSolution.getForm(displayValue != null ? displayValue.toString() : null);
 				return (frm == null) ? "" : frm.getName();
 			}
 		}, DisplayMode.EDIT, dp.getName());

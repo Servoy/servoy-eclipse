@@ -105,7 +105,7 @@ public class CreateMethodReferenceQuickFix implements IMarkerResolution
 				else
 				{
 					PropertyDescriptor descriptor = new PropertyDescriptor(eventName, persist.getClass());
-					descriptor.getWriteMethod().invoke(persist, new Integer(method.getID()));
+					descriptor.getWriteMethod().invoke(persist, method.getUUID().toString());
 				}
 				servoyProject.saveEditingSolutionNodes(new IPersist[] { parent }, true);
 			}

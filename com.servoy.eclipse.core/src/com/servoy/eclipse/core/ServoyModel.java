@@ -987,19 +987,19 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	 * @param rootObjectId the rootObjectId of the style.
 	 * @return the style with the given name.
 	 */
-	public IRootObject getActiveRootObject(int rootObjectId)
+	public IRootObject getActiveRootObject(UUID rootObjectUUID)
 	{
 		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
 			{
-				return repository.getActiveRootObject(rootObjectId);
+				return repository.getActiveRootObject(rootObjectUUID);
 				// TODO Problem markers for deserialize exception (in servoy builder)
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logWarning("Cannot get style object with id " + rootObjectId + " from " + activeResourcesProject, e);
+				ServoyLog.logWarning("Cannot get style object with uuid " + rootObjectUUID + " from " + activeResourcesProject, e);
 			}
 		}
 		else
@@ -1938,13 +1938,13 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	public void firePersistChanged(boolean realSolution, Object obj, boolean recursive)
 	{
 		flushFlattenedFormCache(realSolution); // looking up elements in firePersistChangedInternal may use out-of-date flattened forms
-		firePersistChangedInternal(realSolution, obj, recursive, new HashSet<Integer>());
+		firePersistChangedInternal(realSolution, obj, recursive, new HashSet<String>());
 	}
 
-	private void firePersistChangedInternal(boolean realSolution, Object obj, boolean recursive, Set<Integer> visited)
+	private void firePersistChangedInternal(boolean realSolution, Object obj, boolean recursive, Set<String> visited)
 	{
 		// Protect against cycle in form extends relation.
-		if (obj instanceof IPersist && !visited.add(new Integer(((IPersist)obj).getID())))
+		if (obj instanceof IPersist && !visited.add(((IPersist)obj).getUUID().toString()))
 		{
 			return;
 		}
@@ -2374,7 +2374,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						if (isLoaded)
 						{
 							eclipseRepository.removeRootObject(
-								eclipseRepository.getRootObjectMetaData(resource.getName(), IRepository.SOLUTIONS).getRootObjectId());
+								eclipseRepository.getRootObjectMetaData(resource.getName(), IRepository.SOLUTIONS).getRootObjectUuid());
 							// it is unloaded; avoid loading it afterwards when checking for active solutions
 							if (activeProject != null && activeProject.getProject().getName().equals(resource.getName()))
 							{
@@ -2928,16 +2928,16 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				{
 					// if there is a media in the modules with the same name, but no file on in the ws, then ignore it, because
 					// it is deleting
-					int skip_media_id = 0;
+					UUID skip_media_uuid = null;
 					Media moduleMedia = getFlattenedSolution().getMedia(name);
 					if (moduleMedia != null)
 					{
 						Pair<String, String> filePath = SolutionSerializer.getFilePath(moduleMedia, false);
 						if (!servoyProject.getProject().getWorkspace().getRoot().getFile(new Path(filePath.getLeft() + filePath.getRight())).exists())
-							skip_media_id = moduleMedia.getID();
+							skip_media_uuid = moduleMedia.getUUID();
 					}
 
-					media = editingSolution.createNewMedia(getNameValidator(), name, skip_media_id);
+					media = editingSolution.createNewMedia(getNameValidator(), name, skip_media_uuid);
 					media.setMimeType(eclipseRepository.getContentType(name));
 				}
 				if (media != null) eclipseRepository.updateNodesInWorkspace(new IPersist[] { media }, false, false);
@@ -3353,7 +3353,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						{
 							// the style is there, only needs to be loaded into the repository
 							repository.addRootObjectMetaData(md);
-							modifiedResourcesList.add(repository.getActiveRootObject(md.getRootObjectId()));
+							modifiedResourcesList.add(repository.getActiveRootObject(md.getRootObjectUuid()));
 						}
 					}
 					catch (RepositoryException e)
@@ -3371,7 +3371,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					try
 					{
 						modifiedResourcesList.add(resource);
-						repository.removeRootObject(resource.getID());
+						repository.removeRootObject(resource.getUUID());
 					}
 					catch (RepositoryException e)
 					{

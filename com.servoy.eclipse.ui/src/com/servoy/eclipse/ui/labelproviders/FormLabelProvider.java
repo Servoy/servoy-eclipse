@@ -24,6 +24,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDeprecated;
+import com.servoy.j2db.util.Utils;
 
 /**
  * LabelProvider for forms.
@@ -56,30 +57,24 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 		{
 			return Messages.LabelNone;
 		}
-		if (value instanceof String)
+		if (value == Form.NAVIGATOR_DEFAULT)
+		{
+			return defaultIsNone ? Messages.LabelNone : defaultAsText ? Messages.LabelDefaultAsText : Messages.LabelDefault;
+		}
+		if (Form.NAVIGATOR_IGNORE.equals(value))
+		{
+			return Messages.LabelIgnore;
+		}
+		if (Form.NAVIGATOR_NONE.equals(value))
+		{
+			return Messages.LabelNone;
+		}
+		if (value instanceof String && Utils.getAsUUID(value, false) == null)
 		{
 			// working set
 			return value.toString();
 		}
 
-		if (!(value instanceof Integer))
-		{
-			return Messages.LabelUnresolved;
-		}
-
-		int formId = ((Integer)value).intValue();
-		if (formId == Form.NAVIGATOR_DEFAULT)
-		{
-			return defaultIsNone ? Messages.LabelNone : defaultAsText ? Messages.LabelDefaultAsText : Messages.LabelDefault;
-		}
-		if (formId == Form.NAVIGATOR_IGNORE)
-		{
-			return Messages.LabelIgnore;
-		}
-		if (formId == Form.NAVIGATOR_NONE)
-		{
-			return Messages.LabelNone;
-		}
 		IPersist persist = getPersist(value);
 		if (!(persist instanceof Form))
 		{
@@ -95,11 +90,7 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 		{
 			return null;
 		}
-		if (value instanceof String)
-		{
-			return null;
-		}
-		return flattenedSolution.getForm(((Integer)value).intValue());
+		return flattenedSolution.getForm(value.toString());
 	}
 
 	/*

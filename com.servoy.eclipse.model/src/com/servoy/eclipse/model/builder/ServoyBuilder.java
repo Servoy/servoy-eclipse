@@ -1501,7 +1501,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				addDeprecatedElementWarningIfNeeded(persist, fallbackValuelist, markerResource,
 					"Valuelist \"" + elementName + "\" has a deprecated fallback valuelist \"" + fallbackValuelist.getName() + "\".");
-				if (fallbackValuelist.getFallbackValueListID() > 0)
+				if (fallbackValuelist.getFallbackValueListID() != null)
 				{
 					ServoyMarker mk = MarkerMessages.ValuelistFallbackOfFallbackFound.fill(((ValueList)persist).getName(), fallbackValuelist.getName());
 					addMarker(markerResource, mk.getType(), mk.getText(), -1, VALUELIST_WITH_FALLBACK_OF_FALLBACK, IMarker.PRIORITY_HIGH, null, persist);
@@ -1997,12 +1997,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								{
 									final Method method = methods.get(element.getName());
 									Object property_value = method.invoke(o, new Object[] { });
-									final int element_id = Utils.getAsInteger(property_value);
-									if (element_id > 0)
+									final UUID element_uuid = Utils.getAsUUID(property_value, false);
+									if (element_uuid != null)
 									{
 										final IPersist foundPersist = flattenedSolution
-											.searchPersist(((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository())
-												.getUUIDForElementId(element_id, element_id, -1, -1, null));
+											.searchPersist(element_uuid);
 										ServoyBuilderUtils.addNullReferenceMarker(project, o, foundPersist, context, element);
 										ServoyBuilderUtils.addNotAccessibleMethodMarkers(project, o, foundPersist, context, element, flattenedSolution);
 										ServoyBuilderUtils.addMethodParseErrorMarkers(project, o, foundPersist, context, element, methodsParsed,

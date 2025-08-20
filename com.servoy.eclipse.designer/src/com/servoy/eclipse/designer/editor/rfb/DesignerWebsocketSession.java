@@ -259,14 +259,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 				boolean componentFound = false;
 				boolean responsive = form.isResponsiveLayout();
-				int mainContainerID = -1;
+				String mainContainerID = null;
 				if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
 				{
 					AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
 					if (container instanceof LayoutContainer)
 					{
 						responsive = !CSSPositionUtils.isCSSPositionContainer((LayoutContainer)container);
-						mainContainerID = container.getID();
+						mainContainerID = container.getUUID().toString();
 					}
 				}
 				if (name != null)

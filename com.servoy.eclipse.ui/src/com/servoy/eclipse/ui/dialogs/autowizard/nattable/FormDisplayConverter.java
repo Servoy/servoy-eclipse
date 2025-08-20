@@ -38,7 +38,7 @@ public class FormDisplayConverter extends DisplayConverter
 	public Object displayToCanonicalValue(Object displayValue)
 	{
 		Form frm = ModelUtils.getEditingFlattenedSolution(context.getPersist(), context.getContext())
-			.getForm(((Integer)displayValue).intValue());
+			.getForm(displayValue != null ? displayValue.toString() : null);
 		return (frm == null) ? null : frm.getUUID().toString();
 	}
 

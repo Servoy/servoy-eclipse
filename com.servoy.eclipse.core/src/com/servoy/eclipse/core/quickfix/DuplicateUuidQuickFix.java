@@ -60,7 +60,7 @@ public class DuplicateUuidQuickFix implements IMarkerResolution
 		{
 			return "Generate new uuid for '" + SolutionSerializer.getRelativePath(persist, false) + fileName + "' (" + persist + ").";
 		}
-		return "Generate new uuid for persist with id '" + persist.getID() + "' (" + persist + ").";
+		return "Generate new uuid for persist with uuid '" + persist.getUUID() + "' (" + persist + ").";
 	}
 
 	public void run(IMarker marker)

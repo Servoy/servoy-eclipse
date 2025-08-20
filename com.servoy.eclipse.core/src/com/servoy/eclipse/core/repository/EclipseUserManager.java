@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -301,7 +300,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				{
 					if (persist instanceof Form)
 					{
-						if (((Solution)persist.getRootObject()).getForm(persist.getID()) == null)
+						if (((Solution)persist.getRootObject()).getForm(persist.getUUID().toString()) == null)
 						{
 							// this means the form was deleted; delete security file as well
 							IPath path = new Path(SolutionSerializer.getRelativePath(persist, false) + IPath.SEPARATOR +
@@ -334,13 +333,9 @@ public class EclipseUserManager extends WorkspaceUserManager
 						{
 							synchronized (EclipseUserManager.this)
 							{
-								// the form has changed but has not been deleted - maybe it was added (no way to know currently with this listener);
-								// in case it was just added we must load the sec. info for it
-								Iterator<GroupSecurityInfo> it = groupInfos.iterator();
 								boolean alreadyLoaded = false;
-								while (it.hasNext())
+								for (GroupSecurityInfo gsi : groupInfos)
 								{
-									GroupSecurityInfo gsi = it.next();
 									List<SecurityInfo> tmp = gsi.formSecurity.get(persist.getUUID());
 									if (tmp != null && tmp.size() > 0)
 									{

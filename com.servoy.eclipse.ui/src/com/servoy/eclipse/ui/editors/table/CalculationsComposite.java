@@ -279,11 +279,13 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING,
 				treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED).add(removeButton).addPreferredGap(
-						LayoutStyle.RELATED).add(openCalculationButton))).addContainerGap()));
+						LayoutStyle.RELATED).add(openCalculationButton)))
+				.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(treeContainer, GroupLayout.PREFERRED_SIZE, 323, Short.MAX_VALUE).addPreferredGap(
 				LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(openCalculationButton).add(removeButton).add(addButton)).addContainerGap()));
+					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(openCalculationButton).add(removeButton).add(addButton))
+				.addContainerGap()));
 		container.setLayout(groupLayout);
 		//
 		createTableColumns(t, te);
@@ -355,7 +357,7 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 					{
 						try
 						{
-							nameValidator.checkName(calcName, 0, searchContext, false);
+							nameValidator.checkName(calcName, null, searchContext, false);
 							isValidName = true;
 						}
 						catch (RepositoryException e)

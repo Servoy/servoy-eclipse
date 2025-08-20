@@ -56,7 +56,7 @@ public class MoveElementOverride implements IMarkerResolution
 	{
 		try
 		{
-			if (!(persist.getParent() instanceof Form) && ((IFormElement)persist).getExtendsID() > 0)
+			if (!(persist.getParent() instanceof Form) && ((IFormElement)persist).getExtendsID() != null)
 			{
 				persist.getParent().removeChild(persist);
 				form.addChild(persist);

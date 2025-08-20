@@ -306,7 +306,7 @@ public class PersistEditPolicy extends ComponentEditPolicy
 				return SetValueCommand.createSetvalueCommand(
 					"Drag-n-drop value list", PersistPropertySource.createPersistPropertySource((IPersist)child,
 						(IPersist)(formEditPart == null ? null : formEditPart.getModel()), false),
-					StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), new Integer(persist.getID()));
+					StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), persist.getUUID().toString());
 			}
 			if (persist instanceof Form && child instanceof IPersist && ((IPersist)child).getAncestor(IRepository.TABPANELS) != null)
 			{

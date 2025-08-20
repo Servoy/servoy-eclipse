@@ -101,7 +101,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			{
 				valueCollection = getValueCollection(file);
 			}
-			if (valueCollection == null && form.getExtendsID() > 0)
+			if (valueCollection == null && form.getExtendsID() != null)
 			{
 				valueCollection = ValueCollectionFactory.createValueCollection();
 			}
@@ -246,7 +246,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	@SuppressWarnings("restriction")
 	private IValueCollection getSuperFormContext(ITypeInfoContext context, Form form, IValueCollection formCollection)
 	{
-		if (form.getExtendsID() > 0)
+		if (form.getExtendsID() != null)
 		{
 			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fs != null)

@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.Media;
  * Property controller for media id based properties.
  * @author acostescu
  */
-public class MediaIDPropertyController extends MediaPropertyController<Integer>
+public class MediaIDPropertyController extends MediaPropertyController<String>
 {
 
 	protected final FlattenedSolution editingFlattenedSolution;
@@ -39,17 +39,16 @@ public class MediaIDPropertyController extends MediaPropertyController<Integer>
 	}
 
 	@Override
-	protected IPropertyConverter<Integer, MediaNode> createConverter()
+	protected IPropertyConverter<String, MediaNode> createConverter()
 	{
 		// convert between media node and image name
-		return new IPropertyConverter<Integer, MediaNode>()
+		return new IPropertyConverter<String, MediaNode>()
 		{
-			public MediaNode convertProperty(@SuppressWarnings("hiding")
-			Object id, Integer value)
+			public MediaNode convertProperty(@SuppressWarnings("hiding") Object id, String value)
 			{
-				if (value != null && value.intValue() > 0)
+				if (value != null)
 				{
-					Media media = editingFlattenedSolution.getMedia(value.intValue());
+					Media media = editingFlattenedSolution.getMedia(value);
 					if (media != null)
 					{
 						String mediaFullPath = media.getName();//this may include the path
@@ -62,10 +61,9 @@ public class MediaIDPropertyController extends MediaPropertyController<Integer>
 				return MediaLabelProvider.MEDIA_NODE_NONE;
 			}
 
-			public Integer convertValue(@SuppressWarnings("hiding")
-			Object id, MediaNode value)
+			public String convertValue(@SuppressWarnings("hiding") Object id, MediaNode value)
 			{
-				return value == null || value == MediaLabelProvider.MEDIA_NODE_NONE ? Integer.valueOf(0) : Integer.valueOf(value.getMedia().getID());
+				return value == null || value == MediaLabelProvider.MEDIA_NODE_NONE ? null : value.getMedia().getUUID().toString();
 			}
 		};
 	}

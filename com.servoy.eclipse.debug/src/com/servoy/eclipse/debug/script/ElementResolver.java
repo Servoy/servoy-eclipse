@@ -202,7 +202,7 @@ public class ElementResolver implements IElementResolver
 					}
 					typeNames.add(ScriptVariable.GLOBAL_SCOPE);
 
-					if (form.getExtendsID() > 0)
+					if (form.getExtendsID() != null)
 					{
 						typeNames.add("_super");
 					}
@@ -394,7 +394,7 @@ public class ElementResolver implements IElementResolver
 		if ("_super".equals(name))
 		{
 			Form form = getForm(context);
-			if (form != null && form.getExtendsID() > 0 && fs != null)
+			if (form != null && form.getExtendsID() != null && fs != null)
 			{
 				Form superForm = fs.getForm(form.getExtendsID());
 				if (superForm != null)

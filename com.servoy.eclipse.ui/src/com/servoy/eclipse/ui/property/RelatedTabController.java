@@ -59,7 +59,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 			Object oldValue = getProperty(propertySource);
 
 			RelatedForm relatedForm = (RelatedForm)value;
-			propertySource.setPropertyValue("containsFormID", relatedForm.form.getID());
+			propertySource.setPropertyValue("containsFormID", relatedForm.form.getUUID().toString());
 			propertySource.setPropertyValue("relationName", EclipseDatabaseUtils.getRelationsString(relatedForm.relations));
 			// update text as well if it has not been changed yet
 			if (oldValue instanceof RelatedForm && ((RelatedForm)oldValue).form.getName().equals(propertySource.getPropertyValue("text")))
@@ -71,16 +71,16 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 
 	public Object getProperty(ISetterAwarePropertySource propertySource)
 	{
-		Integer containsFormID = (Integer)(propertySource.getPropertyValue("containsFormID"));
+		String containsFormUUID = (String)(propertySource.getPropertyValue("containsFormID"));
 		Object relation = propertySource.getPropertyValue("relationName"); // RelationContentProvider.NONE when no relation is set
 
 		Form containsForm = null;
-		if (containsFormID == null || containsFormID.intValue() == 0)
+		if (containsFormUUID == null)
 		{
 			return RelationContentProvider.NONE;
 		}
 
-		containsForm = flattenedEditingSolution.getForm(containsFormID.intValue());
+		containsForm = flattenedEditingSolution.getForm(containsFormUUID);
 		if (containsForm == null)
 		{
 			return UnresolvedValue.NO_STRING_VALUE;
@@ -92,7 +92,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
 		// allow reset only for inherited forms
-		if (form.getExtendsID() > 0)
+		if (form.getExtendsID() != null)
 		{
 			Object oldValue = getProperty(propertySource);
 			propertySource.resetPropertyValue("containsFormID");
@@ -107,7 +107,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 
 	public boolean isPropertySet(ISetterAwarePropertySource propertySource)
 	{
-		return form.getExtendsID() > 0 ? propertySource.isPropertySet("containsFormID") : false;
+		return form.getExtendsID() != null ? propertySource.isPropertySet("containsFormID") : false;
 	}
 
 	@Override

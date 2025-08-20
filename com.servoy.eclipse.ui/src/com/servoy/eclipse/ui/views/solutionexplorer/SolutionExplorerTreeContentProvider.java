@@ -2975,7 +2975,7 @@ public class SolutionExplorerTreeContentProvider
 
 		// see if this form extends another form and if so add the parent's elements
 		PlatformSimpleUserNode parentElementsNode = null;
-		if (ancestorForm.getExtendsID() > 0)
+		if (ancestorForm.getExtendsID() != null)
 		{
 			Form parentForm = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForm(ancestorForm.getExtendsID());
 			if (parentForm != null)
@@ -3064,7 +3064,7 @@ public class SolutionExplorerTreeContentProvider
 					else
 					{
 						// If the element was extended on the original form, use that one as model
-						model = originalForm.searchForExtendsId(element.getID()).orElse(element);
+						model = originalForm.searchForExtendsId(element.getUUID()).orElse(element);
 					}
 
 					String displayName = element.getName();

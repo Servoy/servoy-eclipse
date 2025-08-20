@@ -1374,31 +1374,32 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		return false;
 	}
 
-	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, int[] solution_ids, int[] releaseNumbers, String[] groups)
+	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, UUID[] solution_uuids, int[] releaseNumbers, String[] groups)
 	{
 		Map<Object, Integer> retval = new HashMap<Object, Integer>();
 		Set<Object> implicitRights = new HashSet<>();
 		Map<Object, Integer> groupsWithNonDefaultAccess = new HashMap<>();
-		for (int i = 0; i < solution_ids.length; i++)
+		for (int i = 0; i < solution_uuids.length; i++)
 		{
-			int solution_id = solution_ids[i];
+			UUID solution_uuid = solution_uuids[i];
 			int releaseNumber = releaseNumbers[i];
 
 			IRootObject solution = null;
-			if (solution_id >= 0)
+			if (solution_uuid != null)
 			{
 				try
 				{
-					solution = ApplicationServerRegistry.get().getDeveloperRepository().getRootObject(solution_id, releaseNumber);
+					solution = ApplicationServerRegistry.get().getDeveloperRepository().getRootObject(solution_uuid, releaseNumber);
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logError("Cannot get security access for solution with id, release = " + solution_id + ", " + releaseNumber, e);
+					ServoyLog.logError("Cannot get security access for solution with id, release = " + solution_uuid + ", " + releaseNumber, e);
 					return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
 				}
 				if (solution == null)
 				{
-					ServoyLog.logError("Cannot get security access because of missing solution with id, release = " + solution_id + ", " + releaseNumber, null);
+					ServoyLog.logError("Cannot get security access because of missing solution with id, release = " + solution_uuid + ", " + releaseNumber,
+						null);
 					return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
 				}
 			}

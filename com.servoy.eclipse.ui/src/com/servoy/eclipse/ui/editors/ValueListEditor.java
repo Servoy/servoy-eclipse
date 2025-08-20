@@ -1000,7 +1000,7 @@ public class ValueListEditor extends PersistEditor
 					if (fromObject instanceof MethodWithArguments)
 					{
 						FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
-						ScriptMethod scriptMethod = fs.getScriptMethod(((MethodWithArguments)fromObject).methodId);
+						ScriptMethod scriptMethod = fs.getScriptMethod(((MethodWithArguments)fromObject).methodUUID);
 						if (scriptMethod != null)
 						{
 							return scriptMethod.getPrefixedName();
@@ -1130,7 +1130,7 @@ public class ValueListEditor extends PersistEditor
 		{
 			handleGlobalMethodButtonSelected();
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
-			ScriptMethod scriptMethod = fs.getScriptMethod(methodWithArguments.methodId);
+			ScriptMethod scriptMethod = fs.getScriptMethod(methodWithArguments.methodUUID);
 			if (scriptMethod != null)
 			{
 				getValueList().setCustomValues(scriptMethod.getUUID().toString());
@@ -1416,8 +1416,8 @@ public class ValueListEditor extends PersistEditor
 		@Override
 		public Object[] getElements(Object inputElement)
 		{
-			List<Integer> vlIds = new ArrayList<Integer>();
-			vlIds.add(Integer.valueOf(ValuelistLabelProvider.VALUELIST_NONE));
+			List<String> vlIds = new ArrayList<String>();
+			vlIds.add(ValuelistLabelProvider.VALUELIST_NONE_STRING);
 
 			Iterator<ValueList> it = flattenedSolution.getValueLists(true);
 			while (it.hasNext())
@@ -1426,7 +1426,7 @@ public class ValueListEditor extends PersistEditor
 				ValueList obj = it.next();
 				if (isValid(obj, processed))
 				{
-					vlIds.add(Integer.valueOf(obj.getID()));
+					vlIds.add(obj.getUUID().toString());
 				}
 			}
 
@@ -1444,7 +1444,7 @@ public class ValueListEditor extends PersistEditor
 				String vlTable = getDataSource(vl);
 				if (!listTable.equals(vlTable)) return false;
 			}
-			if (list.getFallbackValueListID() != 0)
+			if (list.getFallbackValueListID() != null)
 			{
 				ValueList valueList = flattenedSolution.getValueList(list.getFallbackValueListID());
 				if (valueList != null)

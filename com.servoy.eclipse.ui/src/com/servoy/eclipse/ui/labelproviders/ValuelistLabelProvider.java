@@ -44,8 +44,7 @@ import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 
 public class ValuelistLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider, IDeprecationProvider
 {
-	public static final int VALUELIST_NONE = 0;
-	public static final int VALUELIST_SPECIAL = Integer.MAX_VALUE;
+	public static final String VALUELIST_NONE_STRING = "-none-";
 	private final FlattenedSolution flattenedSolution;
 	private final IPersist persist;
 
@@ -60,9 +59,9 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 	{
 		if (value == null) return Messages.LabelNone;
 
-		int vlmId = ((Integer)value).intValue();
+		String vlUUID = value.toString();
 
-		if (vlmId == VALUELIST_NONE || vlmId == VALUELIST_SPECIAL)
+		if (VALUELIST_NONE_STRING.equals(vlUUID))
 		{
 			PropertyDescription specPD = null;
 			if (persist instanceof IChildWebObject) specPD = ((IChildWebObject)persist).getPropertyDescription();
@@ -102,9 +101,9 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 	{
 		if (value == null) return FontResource.getDefaultFont(SWT.ITALIC, 0);
 
-		int vlmId = ((Integer)value).intValue();
+		String vlUUID = value.toString();
 
-		if (vlmId == VALUELIST_NONE)
+		if (VALUELIST_NONE_STRING.equals(vlUUID))
 		{
 			return FontResource.getDefaultFont(SWT.ITALIC, 0);
 		}
@@ -113,9 +112,9 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 
 	public IPersist getPersist(Object value)
 	{
-		if (value instanceof Integer)
+		if (value instanceof String && !VALUELIST_NONE_STRING.equals(value))
 		{
-			return flattenedSolution.getValueList(((Integer)value).intValue());
+			return flattenedSolution.getValueList(value.toString());
 		}
 		return null;
 	}

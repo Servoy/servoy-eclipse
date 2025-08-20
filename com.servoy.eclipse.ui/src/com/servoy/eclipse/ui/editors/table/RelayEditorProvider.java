@@ -61,7 +61,7 @@ public class RelayEditorProvider implements IRelayEditorProvider
 					{
 						Solution solution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution();
 						PersistContext persistContext = PersistContext.create(solution);
-						// The global method plugins are not tied to a solution, so we cannot filter for private methods here 
+						// The global method plugins are not tied to a solution, so we cannot filter for private methods here
 						MethodLabelProvider methodLabelProvider = new MethodLabelProvider(persistContext, false, false);
 						methodCellEditor = new MethodCellEditor(parent.getTable(), methodLabelProvider, new MethodValueEditor(persistContext), persistContext,
 							key, false, new MethodListOptions(true, false, false, true, false, null));
@@ -161,7 +161,7 @@ public class RelayEditorProvider implements IRelayEditorProvider
 					if (value instanceof MethodWithArguments)
 					{
 						ScriptMethod scriptMethod = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScriptMethod(
-							((MethodWithArguments)value).methodId);
+							((MethodWithArguments)value).methodUUID);
 						if (scriptMethod != null)
 						{
 							realValue = ScopesUtils.getScopeString(scriptMethod);

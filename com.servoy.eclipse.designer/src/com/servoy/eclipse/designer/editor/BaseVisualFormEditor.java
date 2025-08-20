@@ -524,7 +524,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					while (formFieldsIte.hasNext())
 					{
 						formField = formFieldsIte.next();
-						if (formField.getValuelistID() == valueList.getID())
+						if (valueList.getUUID().toString().equals(formField.getValuelistID()))
 						{
 							replaceValuelistWithFields.add(formField);
 						}
@@ -624,9 +624,9 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						{
 							public Object visit(IPersist o)
 							{
-								if (o instanceof ISupportExtendsID && (changed.getID() == ((ISupportExtendsID)o).getExtendsID() ||
-									(((ISupportExtendsID)changed).getExtendsID() > 0 &&
-										((ISupportExtendsID)changed).getExtendsID() == ((ISupportExtendsID)o).getExtendsID())))
+								if (o instanceof ISupportExtendsID && (changed.getUUID().toString().equals(((ISupportExtendsID)o).getExtendsID()) ||
+									(((ISupportExtendsID)changed).getExtendsID() != null &&
+										Utils.equalObjects(((ISupportExtendsID)changed).getExtendsID(), ((ISupportExtendsID)o).getExtendsID()))))
 								{
 									return o;
 								}

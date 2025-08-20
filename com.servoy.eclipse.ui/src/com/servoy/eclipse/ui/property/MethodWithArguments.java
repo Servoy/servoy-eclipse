@@ -21,6 +21,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.SafeArrayList;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Holder for method id and actual arguments
@@ -30,25 +31,25 @@ import com.servoy.j2db.util.SafeArrayList;
  */
 public class MethodWithArguments
 {
-	public static final MethodWithArguments METHOD_NONE = new MethodWithArguments(-1, null);
-	public static final MethodWithArguments METHOD_DEFAULT = new MethodWithArguments(0, null);
+	public static final MethodWithArguments METHOD_NONE = new MethodWithArguments("-1", null);
+	public static final MethodWithArguments METHOD_DEFAULT = new MethodWithArguments("0", null);
 
-	public final int methodId;
+	public final String methodUUID;
 	public final SafeArrayList<Object> arguments;
 	public final SafeArrayList<String> paramNames;
 	public final ITable table;
 
-	public MethodWithArguments(int methodId, ITable table)
+	public MethodWithArguments(String methodUUID, ITable table)
 	{
-		this(methodId, null, null, table);
+		this(methodUUID, null, null, table);
 	}
 
-	public MethodWithArguments(int methodId, SafeArrayList<String> paramNames, SafeArrayList<Object> arguments, ITable table)
+	public MethodWithArguments(String methodUUID, SafeArrayList<String> paramNames, SafeArrayList<Object> arguments, ITable table)
 	{
-		this.methodId = methodId;
+		this.methodUUID = methodUUID;
 		this.arguments = arguments;
 		this.paramNames = paramNames;
-		this.table = methodId > 0 ? table : null;
+		this.table = methodUUID != null ? table : null;
 	}
 
 	public static MethodWithArguments create(IPersist script, SafeArrayList<Object> arguments)
@@ -67,14 +68,14 @@ public class MethodWithArguments
 		{
 			table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((TableNode)script.getParent()).getDataSource());
 		}
-		return new MethodWithArguments(script.getID(), paramNames, arguments, table);
+		return new MethodWithArguments(script.getUUID().toString(), paramNames, arguments, table);
 	}
 
 	@Override
 	public int hashCode()
 	{
 		// arguments and/or table doesn't matter for equal/hashcode
-		return methodId;
+		return methodUUID != null ? methodUUID.hashCode() : 0;
 	}
 
 	@Override
@@ -84,7 +85,7 @@ public class MethodWithArguments
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		return methodId == ((MethodWithArguments)obj).methodId;
+		return Utils.equalObjects(methodUUID, ((MethodWithArguments)obj).methodUUID);
 	}
 
 	public static class UnresolvedMethodWithArguments extends MethodWithArguments
@@ -93,7 +94,7 @@ public class MethodWithArguments
 
 		public UnresolvedMethodWithArguments(String unresolvedValue)
 		{
-			super(-1, null);
+			super("-1", null);
 			this.unresolvedValue = unresolvedValue;
 		}
 

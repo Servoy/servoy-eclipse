@@ -36,7 +36,6 @@ import org.sablo.util.HTTPUtils;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -156,32 +155,29 @@ public class EditorContentFilter implements Filter
 			if (flattenedForm == null) return; //form renamed
 			HTTPUtils.setNoCacheHeaders((HttpServletResponse)response);
 
-			String containerID = httpServletRequest.getParameter("cont");
+			String containerUUID = httpServletRequest.getParameter("cont");
 			PrintWriter w = response.getWriter();
 			response.setContentType("text/html");
-			if (containerID != null)
+			if (containerUUID != null)
 			{
-				int id = Utils.getAsInteger(containerID);
-				if (id > 0)
+				try
 				{
-					try
+					IPersist container = flattenedForm.findChild(
+						Utils.getAsUUID(containerUUID, false));
+					if (container instanceof LayoutContainer)
 					{
-						IPersist container = flattenedForm.findChild(
-							((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getUUIDForElementId(id, id, -1, -1, null));
-						if (container instanceof LayoutContainer)
-						{
-							FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true);
-							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)container, flattenedForm, fs, w, new DesignProperties(id),
-								FormElementHelper.INSTANCE);
-							FormLayoutGenerator.generateFormEndTag(w, true);
-						}
+						FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true);
+						FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)container, flattenedForm, fs, w,
+							new DesignProperties(containerUUID),
+							FormElementHelper.INSTANCE);
+						FormLayoutGenerator.generateFormEndTag(w, true);
 					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-
 				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+
 			}
 			else if (flattenedForm.isResponsiveLayout())
 			{

@@ -107,7 +107,7 @@ public abstract class AbstractMovePersistAction extends AbstractPersistSelection
 		{
 			try
 			{
-				nameValidator.checkName(getName(persist), persist.getID(), new ValidatorSearchContext(getPersistType()), false);
+				nameValidator.checkName(getName(persist), persist.getUUID(), new ValidatorSearchContext(getPersistType()), false);
 			}
 			catch (RepositoryException ex)
 			{

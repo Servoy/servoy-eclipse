@@ -111,11 +111,6 @@ public class ColumnInfoBean
 		return columnInfo.getForeignType();
 	}
 
-	public int getID()
-	{
-		return columnInfo.getID();
-	}
-
 	private String oldLookupValue = null;
 
 	public String getLookupValue()

@@ -30,7 +30,6 @@ import com.servoy.eclipse.ui.labelproviders.MenuLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.Menu;
 
 /**
  * Property controller for selecting value list in Properties view.
@@ -39,7 +38,7 @@ import com.servoy.j2db.persistence.Menu;
  *
  * @param <P> property type
  */
-public class JSMenuPropertyController extends PropertyController<Object, Integer>
+public class JSMenuPropertyController extends PropertyController<Object, String>
 {
 	private final PersistContext persistContext;
 
@@ -57,50 +56,15 @@ public class JSMenuPropertyController extends PropertyController<Object, Integer
 	public CellEditor createPropertyEditor(Composite parent)
 	{
 		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-		List<Integer> actualList = new ArrayList<Integer>();
-		actualList.add(Integer.valueOf(MenuLabelProvider.MENU_NONE));
-		flattenedEditingSolution.getMenus(true).forEachRemaining(menu -> actualList.add(Integer.valueOf(menu.getID())));
+		List<String> actualList = new ArrayList<String>();
+		actualList.add(MenuLabelProvider.MENU_NONE_STRING);
+		flattenedEditingSolution.getMenus(true).forEachRemaining(menu -> actualList.add(menu.getUUID().toString()));
 		return new ListSelectCellEditor(parent, "Select Servoy Menu", getLabelProvider(), new JSMenuValueEditor(flattenedEditingSolution), isReadOnly(),
 			actualList.toArray(),
 			SWT.NONE, null, "menuDialog");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.PropertyController#createConverter()
-	 */
-	@Override
-	protected IPropertyConverter<Object, Integer> createConverter()
-	{
-		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-		return new IPropertyConverter<Object, Integer>()
-		{
-			public Integer convertProperty(Object id, Object value)
-			{
-				if (value == null)
-				{
-					return Integer.valueOf(MenuLabelProvider.MENU_NONE);
-				}
-				Menu menu = flattenedEditingSolution.getMenu(value.toString());
-				if (menu != null)
-				{
-					return Integer.valueOf(menu.getID());
-				}
-				return Integer.valueOf(MenuLabelProvider.MENU_UNRESOLVED);
-			}
-
-			public Object convertValue(Object id, Integer value)
-			{
-				int menuId = value.intValue();
-				if (menuId == MenuLabelProvider.MENU_NONE) return null;
-				Menu menu = flattenedEditingSolution.getMenu(menuId);
-				return menu == null ? null : menu.getUUID();
-			}
-		};
-	}
-
-	public static class JSMenuValueEditor implements IValueEditor<Integer>
+	public static class JSMenuValueEditor implements IValueEditor<String>
 	{
 		private final FlattenedSolution flattenedEditingSolution;
 
@@ -109,15 +73,15 @@ public class JSMenuPropertyController extends PropertyController<Object, Integer
 			this.flattenedEditingSolution = flattenedEditingSolution;
 		}
 
-		public void openEditor(Integer value)
+		public void openEditor(String value)
 		{
-			EditorUtil.openMenuEditor(flattenedEditingSolution.getMenu(value.intValue()), true);
+			EditorUtil.openMenuEditor(flattenedEditingSolution.getMenu(value), true);
 		}
 
-		public boolean canEdit(Integer value)
+		public boolean canEdit(String value)
 		{
-			return value != null && value.intValue() != MenuLabelProvider.MENU_NONE &&
-				flattenedEditingSolution.getMenu(value.intValue()) != null;
+			return value != null && !MenuLabelProvider.MENU_NONE_STRING.equals(value) &&
+				flattenedEditingSolution.getMenu(value) != null;
 		}
 	}
 }

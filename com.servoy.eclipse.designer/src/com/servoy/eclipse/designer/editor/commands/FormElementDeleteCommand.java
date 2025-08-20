@@ -233,7 +233,7 @@ public class FormElementDeleteCommand extends Command
 			if (child instanceof WebCustomType custom)
 			{
 				IBasicWebComponent component = custom.getParentComponent();
-				if (component.getExtendsID() > 0 && isInherited(custom, component))
+				if (component.getExtendsID() != null && isInherited(custom, component))
 				{
 					return;
 				}
@@ -284,7 +284,7 @@ public class FormElementDeleteCommand extends Command
 
 	private boolean isInherited(WebCustomType custom, IBasicWebComponent component)
 	{
-		if (custom.getExtendsID() > 0) return true;
+		if (custom.getExtendsID() != null) return true;
 		IPersist parentComponent = PersistHelper.getSuperPersist(component);
 		if (parentComponent instanceof IBasicWebObject indexed)
 		{
@@ -389,7 +389,7 @@ public class FormElementDeleteCommand extends Command
 
 	private static void addOverriding(List<IPersist> overriding, IPersist superPersist, IPersist p)
 	{
-		if (p instanceof ISupportExtendsID && (((ISupportExtendsID)p).getExtendsID() == superPersist.getID()))
+		if (p instanceof ISupportExtendsID && superPersist.getUUID().toString().equals((((ISupportExtendsID)p).getExtendsID())))
 		{
 			if (!overriding.contains(p)) overriding.add(p);
 			if (p instanceof ISupportChilds)

@@ -38,7 +38,7 @@ class VisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMen
 {
 	/**
 	 * Instantiate a new menu context provider for the specified EditPartViewer and ActionRegistry.
-	 * 
+	 *
 	 * @param viewer the editor's graphical viewer
 	 * @param registry the editor's action registry
 	 * @throws IllegalArgumentException if registry is <tt>null</tt>.
@@ -62,7 +62,7 @@ class VisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMen
 
 		//we need to set the action definition id for "Open super in script editor" because it doesn't work setting it in plugin.xml
 		Form form = DesignerUtil.getActiveEditor().getForm();
-		if (form != null && form.getExtendsID() > 0)
+		if (form != null && form.getExtendsID() != null)
 		{
 			MenuManager openSubmenu = new MenuManager(OpenSuperformsInScriptEditor.OPEN_SUPER_SCRIPT_MENU_LABEL,
 				OpenSuperformsInScriptEditor.OPEN_SUPER_SCRIPT_MENU_ID);

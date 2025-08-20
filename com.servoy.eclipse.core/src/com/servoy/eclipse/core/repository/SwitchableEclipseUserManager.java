@@ -97,11 +97,11 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 		return switchedTo == null ? eclipseUserManger.getUserGroups(clientId, userUID) : switchedTo.getUserGroups(clientId, userUID);
 	}
 
-	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, int[] solution_id, int[] releaseNumber, String[] groups)
+	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, UUID[] solution_uuids, int[] releaseNumber, String[] groups)
 		throws RemoteException, ServoyException
 	{
-		return switchedTo == null ? eclipseUserManger.getSecurityAccess(clientId, solution_id, releaseNumber, groups)
-			: switchedTo.getSecurityAccess(clientId, solution_id, releaseNumber, groups);
+		return switchedTo == null ? eclipseUserManger.getSecurityAccess(clientId, solution_uuids, releaseNumber, groups)
+			: switchedTo.getSecurityAccess(clientId, solution_uuids, releaseNumber, groups);
 	}
 
 	public String getUserUID(String clientId, String username) throws ServoyException, RemoteException

@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -111,9 +110,9 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 	 * @see com.servoy.j2db.persistence.AbstractRepository#getActiveSolutionModuleMetaDatas(int)
 	 */
 	@Override
-	public List<RootObjectReference> getActiveSolutionModuleMetaDatas(int solutionId) throws RepositoryException
+	public List<RootObjectReference> getActiveSolutionModuleMetaDatas(UUID solutionUUID) throws RepositoryException
 	{
-		Solution sol = (Solution)getActiveRootObject(solutionId);
+		Solution sol = (Solution)getActiveRootObject(solutionUUID);
 		if (sol != null && !Utils.getTokenElementsAsList(sol.getModulesNames(), ",", true).stream().allMatch(this::isSolutionLoaded))
 		{
 			ForkJoinPool pool = new ForkJoinPool();
@@ -123,7 +122,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 			pool.awaitQuiescence(15, TimeUnit.MINUTES);
 			pool.shutdown();
 		}
-		return super.getActiveSolutionModuleMetaDatas(solutionId);
+		return super.getActiveSolutionModuleMetaDatas(solutionUUID);
 	}
 
 	/**
@@ -206,18 +205,6 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		return false;
 	}
 
-	private int last_element_id = Integer.MAX_VALUE / 2;
-
-	public int getNewElementID(UUID new_uuid)
-	{
-		synchronized (uuid_element_id_map)
-		{
-			int element_id = last_element_id++;
-			if (new_uuid != null) uuid_element_id_map.put(new_uuid, new Integer(element_id));
-			return element_id;
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -291,33 +278,33 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		return null;//should never be called
 	}
 
-	public void setRootObjectActiveRelease(int rootObjectId, int releaseNumber) throws RepositoryException
+	public void setRootObjectActiveRelease(UUID rootObjectUUID, int releaseNumber) throws RepositoryException
 	{
 		//should never be called
 	}
 
-	public long[] getActiveRootObjectsLastModified(int[] rootObjectIds) throws RepositoryException
+	public long[] getActiveRootObjectsLastModified(UUID[] rootObjectUUIDs) throws RepositoryException
 	{
-		long[] retval = new long[rootObjectIds.length];
-		for (int i = 0; i < rootObjectIds.length; i++)
+		long[] retval = new long[rootObjectUUIDs.length];
+		for (int i = 0; i < rootObjectUUIDs.length; i++)
 		{
-			retval[i] = getActiveRootObject(rootObjectIds[i]).getLastModifiedTime();
+			retval[i] = getActiveRootObject(rootObjectUUIDs[i]).getLastModifiedTime();
 		}
 		return retval;
 	}
 
 	@Override
-	public void removeRootObject(int rootObjectId) throws RepositoryException
+	public void removeRootObject(UUID rootObjectUUID) throws RepositoryException
 	{
-		super.removeRootObject(rootObjectId);
+		super.removeRootObject(rootObjectUUID);
 		//nop, remove project manually in eclipse
 	}
 
 
 	@Override
-	public IRootObject createNewRootObject(String name, int objectTypeId, int newElementID, UUID uuid) throws RepositoryException
+	public IRootObject createNewRootObject(String name, int objectTypeId, UUID uuid) throws RepositoryException
 	{
-		return createRootObject(createNewRootObjectMetaData(newElementID, uuid, name, objectTypeId, 1, 1));
+		return createRootObject(createNewRootObjectMetaData(uuid, name, objectTypeId, 1, 1));
 	}
 
 	@Override
@@ -336,7 +323,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 			{
 				if (meta.getObjectTypeId() == objectTypeId)
 				{
-					removeRootObject(meta.getRootObjectId());
+					removeRootObject(meta.getRootObjectUuid());
 				}
 			}
 		}
@@ -394,66 +381,6 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		return smd;
 	}
 
-	@Override
-	public UUID resolveUUIDForElementId(int id) throws RepositoryException
-	{
-		Integer oID = new Integer(id);
-		if (foreignElementUUIDs.containsValue(oID))
-		{
-			Set<UUID> keys = foreignElementUUIDs.keySet();
-			for (UUID key : keys)
-			{
-				if (foreignElementUUIDs.get(key).equals(oID)) return key;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public int resolveIdForElementUuid(UUID id) throws RepositoryException
-	{
-		return getNewElementID(id);
-	}
-
-	@Override
-	public int getElementIdForUUID(UUID id) throws RepositoryException
-	{
-		if (foreignElementUUIDs.containsKey(id)) return foreignElementUUIDs.get(id).intValue();
-
-		return super.getElementIdForUUID(id);
-	}
-
-	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
-
-	public void loadForeignElementsIDs(Map<UUID, Integer> foreignUUIDs)
-	{
-		foreignElementUUIDs.putAll(foreignUUIDs);
-	}
-
-	public void loadForeignElementsIDs(final IPersist rootObject)
-	{
-		rootObject.acceptVisitor(new IPersistVisitor()
-		{
-			public Object visit(IPersist o)
-			{
-				EclipseRepository.this.foreignElementUUIDs.put(o.getUUID(), new Integer(o.getID()));
-				Map<UUID, Integer> map = ((AbstractBase)o).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
-				if (map != null)
-				{
-					for (Entry<UUID, Integer> entry : map.entrySet())
-					{
-						foreignElementUUIDs.put(entry.getKey(), entry.getValue());
-					}
-				}
-				return IPersistVisitor.CONTINUE_TRAVERSAL;
-			}
-		});
-	}
-
-	public void clearForeignElementsIds()
-	{
-		foreignElementUUIDs.clear();
-	}
 
 	@Override
 	public void updateRootObject(IRootObject rootObject) throws RepositoryException

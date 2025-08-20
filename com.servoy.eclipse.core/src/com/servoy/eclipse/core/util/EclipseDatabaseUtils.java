@@ -45,8 +45,8 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DatabaseUtils;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
@@ -112,12 +112,12 @@ public final class EclipseDatabaseUtils
 			{
 				private final IValidateName normalValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 
-				public void checkName(String nameToCheck, int skip_element_id, ValidatorSearchContext searchContext, boolean sqlRelated)
+				public void checkName(String nameToCheck, UUID skip_element_uuid, ValidatorSearchContext searchContext, boolean sqlRelated)
 					throws RepositoryException
 				{
 					try
 					{
-						normalValidator.checkName(nameToCheck, skip_element_id, searchContext, sqlRelated);
+						normalValidator.checkName(nameToCheck, skip_element_uuid, searchContext, sqlRelated);
 					}
 					catch (RepositoryException e)
 					{
@@ -235,8 +235,7 @@ public final class EclipseDatabaseUtils
 				boolean newColumnInfoObj = false;
 				if (columnInfo == null)
 				{
-					int element_id = ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null);
-					columnInfo = new ColumnInfo(element_id, true);
+					columnInfo = new ColumnInfo(true);
 					newColumnInfoObj = true;
 				}
 

@@ -63,7 +63,7 @@ public class ValuelistCellEditor<P> extends ListSelectCellEditor
 	{
 		Object value = super.doGetValue();
 		// if this value is the none value return the defaultValue that this property should have.
-		if (value instanceof Integer i && i.intValue() == ValuelistLabelProvider.VALUELIST_NONE)
+		if (ValuelistLabelProvider.VALUELIST_NONE_STRING.equals(value))
 		{
 			return defaultValue;
 		}

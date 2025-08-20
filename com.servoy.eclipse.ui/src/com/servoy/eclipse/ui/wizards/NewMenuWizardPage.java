@@ -274,7 +274,7 @@ public class NewMenuWizardPage extends WizardPage implements Listener
 		}
 		try
 		{
-			validator.checkName(name, 0, searchContext, false);
+			validator.checkName(name, null, searchContext, false);
 		}
 		catch (RepositoryException e)
 		{
@@ -295,7 +295,7 @@ public class NewMenuWizardPage extends WizardPage implements Listener
 		{
 			error = "Invalid menu name";
 		}
-		else if (((IStructuredSelection)tableViewer.getSelection()).isEmpty())
+		else if (tableViewer.getSelection().isEmpty())
 		{
 			error = "Select a solution";
 		}

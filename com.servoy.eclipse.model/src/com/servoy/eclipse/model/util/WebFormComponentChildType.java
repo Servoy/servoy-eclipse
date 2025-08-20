@@ -51,7 +51,6 @@ import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
@@ -71,7 +70,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 
 	public WebFormComponentChildType(IBasicWebObject parentWebObject, String key, FlattenedSolution fs)
 	{
-		super(IRepository.WEBCUSTOMTYPES, parentWebObject, parentWebObject.getID(), UUID.randomUUID());
+		super(IRepository.WEBCUSTOMTYPES, parentWebObject, UUID.randomUUID());
 		this.key = key;
 		this.fs = fs;
 		int index = key.indexOf('.');
@@ -203,9 +202,8 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 
 	private WebCustomType createWebCustomType(Object propertyDescriptionArg, final String jsonKey, final int index, UUID uuidArg)
 	{
-		Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(this);
-		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index, idAndUUID.getLeft().intValue(),
-			uuidArg != null ? uuidArg : idAndUUID.getRight());
+		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index,
+			uuidArg != null ? uuidArg : UUID.randomUUID());
 	}
 
 	@Override
@@ -544,9 +542,9 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		String jsonKey;
 		int index;
 
-		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, int id, UUID uuid)
+		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, UUID uuid)
 		{
-			super(parentWebObject, propertyDescription, jsonKey, index, false, id, uuid);
+			super(parentWebObject, propertyDescription, jsonKey, index, false, uuid);
 			this.jsonKey = jsonKey;
 			this.index = index;
 		}

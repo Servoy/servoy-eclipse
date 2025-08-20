@@ -173,7 +173,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 						{
 							try
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value, -1,
+								ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value, null,
 									new ValidatorSearchContext(group.getParent(), IRepository.ELEMENTS), false);
 							}
 							catch (RepositoryException e)
@@ -402,7 +402,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		{
 			if (!name.equals(group.getName()))
 			{
-				validator.checkName(name, -1, new ValidatorSearchContext(context, IRepository.ELEMENTS), false);
+				validator.checkName(name, null, new ValidatorSearchContext(context, IRepository.ELEMENTS), false);
 			}
 			newGroupId = name;
 		}

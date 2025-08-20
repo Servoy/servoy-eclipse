@@ -40,16 +40,17 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Edit part for tabs in a tabpanel in form designer.
- * 
+ *
  * @author rgansevles
  */
 
 public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 {
-	protected int prevImageId = -1;
+	protected String prevImageId = null;
 
 	public TabFormGraphicalEditPart(IApplication application, Tab tab, boolean inherited)
 	{
@@ -88,7 +89,7 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 	{
 		label.setText(tab.getText());
 
-		if (prevImageId != tab.getImageMediaID())
+		if (!Utils.equalObjects(prevImageId, tab.getImageMediaID()))
 		{
 			prevImageId = tab.getImageMediaID();
 			Image image = label.getIcon();
@@ -97,7 +98,7 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 				image.dispose();
 				image = null;
 			}
-			if (tab.getImageMediaID() > 0)
+			if (tab.getImageMediaID() != null)
 			{
 				Media media = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(getPersist()).getMedia(
 					tab.getImageMediaID());
@@ -143,7 +144,7 @@ public class TabFormGraphicalEditPart extends BasePersistGraphicalEditPart
 			image.dispose();
 			label.setIcon(null);
 		}
-		prevImageId = -1;
+		prevImageId = null;
 
 		super.deactivate();
 	}

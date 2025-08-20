@@ -259,7 +259,7 @@ public class NewRelationWizardPage extends WizardPage implements Listener
 		IValidateName validator = servoyModel.getNameValidator();
 		try
 		{
-			validator.checkName(relName, 0, validatorSearchContext, false);
+			validator.checkName(relName, null, validatorSearchContext, false);
 		}
 		catch (RepositoryException e)
 		{

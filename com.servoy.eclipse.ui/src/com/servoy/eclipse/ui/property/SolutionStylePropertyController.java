@@ -325,7 +325,7 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 
 			int index = 0;
 			Media currentStyleSheet = null;
-			if (editingFlattenedSolution.getSolution().getStyleSheetID() > 0 &&
+			if (editingFlattenedSolution.getSolution().getStyleSheetID() != null &&
 				(currentStyleSheet = editingFlattenedSolution.getMedia(editingFlattenedSolution.getSolution().getStyleSheetID())) != null)
 			{
 				index = Arrays.asList(items).indexOf(
@@ -459,7 +459,7 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 		{
 			try
 			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(path + newName, -1,
+				ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(path + newName, null,
 					new ValidatorSearchContext(IRepository.MEDIA), false);
 			}
 			catch (RepositoryException e)

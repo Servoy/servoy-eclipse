@@ -293,7 +293,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									try
 									{
 										if (!p.getParent().equals(targetLayoutContainer) && p instanceof ISupportExtendsID &&
-											((((ISupportExtendsID)p).getExtendsID() > 0 ||
+											((((ISupportExtendsID)p).getExtendsID() != null ||
 												!p.equals(ElementUtil.getOverridePersist(PersistContext.create(p, form))))))
 										{
 											//do not allow changing the parent for inherited elements
@@ -313,7 +313,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 											doAllow = false;
 											break;
 										}
-										if (parentContainer instanceof ISupportExtendsID && ((ISupportExtendsID)parentContainer).getExtendsID() > 0 &&
+										if (parentContainer instanceof ISupportExtendsID && ((ISupportExtendsID)parentContainer).getExtendsID() != null &&
 											parentContainer.getParent() instanceof Form)
 										{
 											IPersist superParent = PersistHelper.getSuperPersist((ISupportExtendsID)parentContainer);

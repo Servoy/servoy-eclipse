@@ -274,7 +274,7 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		}
 		try
 		{
-			validator.checkName(valueListName, 0, searchContext, false);
+			validator.checkName(valueListName, null, searchContext, false);
 		}
 		catch (RepositoryException e)
 		{
@@ -295,7 +295,7 @@ public class NewValuelistWizardPage extends WizardPage implements Listener
 		{
 			error = "Invalid valuelist name";
 		}
-		else if (((IStructuredSelection)tableViewer.getSelection()).isEmpty())
+		else if (tableViewer.getSelection().isEmpty())
 		{
 			error = "Select a solution";
 		}

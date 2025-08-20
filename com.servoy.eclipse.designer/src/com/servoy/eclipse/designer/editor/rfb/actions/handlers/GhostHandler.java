@@ -310,7 +310,7 @@ public class GhostHandler implements IServerService
 											String ghostID = parentID != null ? parentID + "#" + ghostWebObject.getUUID() : ghostWebObject.getUUID().toString();
 											writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID, ghostWebObject.getIndex(),
 												ghostWebObject.getTypeName(),
-												inherited || ghostWebObject instanceof WebCustomType custom && custom.getExtendsID() > 0);
+												inherited || ghostWebObject instanceof WebCustomType custom && custom.getExtendsID() != null);
 										}
 										catch (JSONException e1)
 										{

@@ -117,7 +117,7 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 
 					try
 					{
-						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(selectedMediaPath + newText, -1,
+						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(selectedMediaPath + newText, null,
 							new ValidatorSearchContext(IRepository.MEDIA), false);
 					}
 					catch (RepositoryException e)

@@ -990,9 +990,9 @@ public class MenuEditor extends PersistEditor
 						{
 							IStructuredSelection selection = (IStructuredSelection)valuelistComponent.getSelection();
 							ValueList valuelist = null;
-							if (!selection.isEmpty())
+							if (!selection.isEmpty() && selection.getFirstElement() != null)
 							{
-								valuelist = editingFlattenedSolution.getValueList(Utils.getAsInteger(selection.getFirstElement()));
+								valuelist = editingFlattenedSolution.getValueList(selection.getFirstElement().toString());
 							}
 							if (isExtraProperties)
 							{
@@ -1023,7 +1023,7 @@ public class MenuEditor extends PersistEditor
 					}
 					else
 					{
-						valuelistComponent.setSelection(new StructuredSelection(valuelist.getID()));
+						valuelistComponent.setSelection(new StructuredSelection(valuelist.getUUID().toString()));
 					}
 				});
 			}
@@ -1099,9 +1099,9 @@ public class MenuEditor extends PersistEditor
 						{
 							IStructuredSelection selection = (IStructuredSelection)formViewer.getSelection();
 							Form form = null;
-							if (!selection.isEmpty())
+							if (!selection.isEmpty() && selection.getFirstElement() != null)
 							{
-								form = editingFlattenedSolution.getForm(Utils.getAsInteger(selection.getFirstElement()));
+								form = editingFlattenedSolution.getForm(selection.getFirstElement().toString());
 							}
 							if (isExtraProperties)
 							{
@@ -1129,7 +1129,7 @@ public class MenuEditor extends PersistEditor
 					}
 					else
 					{
-						formViewer.setSelection(new StructuredSelection(form.getID()));
+						formViewer.setSelection(new StructuredSelection(form.getUUID().toString()));
 					}
 				});
 			}
