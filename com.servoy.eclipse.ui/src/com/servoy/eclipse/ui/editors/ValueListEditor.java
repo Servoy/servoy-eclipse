@@ -906,7 +906,7 @@ public class ValueListEditor extends PersistEditor
 
 		IObservableValue customValuesTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(customValues);
 		IObservableValue globalMethodtObserveWidget = new TreeSelectObservableValue(globalMethodSelect, MethodWithArguments.class);
-		IObservableValue fallbackValueListObserveWidget = new TreeSelectObservableValue(fallbackValuelist, int.class);
+		IObservableValue fallbackValueListObserveWidget = new TreeSelectObservableValue(fallbackValuelist, String.class);
 
 		IObservableValue getValueListSortOpotionsObserveValue = PojoProperties.value("sortOptions").observe(getValueList());
 		IObservableValue sortingDefinitionSelectObserveWidget = new TreeSelectObservableValue(sortingDefinitionSelect, String.class);
@@ -957,13 +957,7 @@ public class ValueListEditor extends PersistEditor
 		m_bindingContext = new DataBindingContext();
 		//
 		m_bindingContext.bindValue(fallbackValueListObserveWidget, fallbackValueListObserveValue,
-			new UpdateValueStrategy().setConverter(new Converter(Integer.class, Integer.class)
-			{
-				public Object convert(Object fromObject)
-				{
-					return fromObject == null ? Integer.valueOf(0) : fromObject;
-				}
-			}), new UpdateValueStrategy());
+			null, null);
 
 		m_bindingContext.bindValue(nameFieldTextObserveWidget, getValueListNameObserveValue, null, null);
 		m_bindingContext.bindValue(lazyLoadingTextObserveWidget, getValueListLazyLoadingObserveValue, null, null);
