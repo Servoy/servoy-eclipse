@@ -3020,7 +3020,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			}
 		}
 
-		// TODO maybe here update used DB severs/tables here instead of sooner? or maybe both now and before... (there is another todo added in the same commit in SolutionDeserializer where it currently does that)
+		// Update solution server proxies after all persists are fully processed including deletions.
+		// This ensures the data source collection reflects the current state of the solution.
+		ModelUtils.updateSolutionServerProxies(solution, ApplicationServerRegistry.get().getDeveloperRepository());
 
 		// update the last modified time for the web client.
 		solution.updateLastModifiedTime();

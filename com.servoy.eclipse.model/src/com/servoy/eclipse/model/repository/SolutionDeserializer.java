@@ -328,9 +328,9 @@ public class SolutionDeserializer
 
 			});
 
-			// TODO isn't this done too soon? I mean a deleted form from disk for example would not yet be removed from the solution at this point right? (see the other TODO that was added in ServoyModel in the same commit)
-			ModelUtils.updateSolutionServerProxies(solution, repository);
-
+			// ModelUtils.updateSolutionServerProxies() moved to ServoyModel.handleChangedFiles() 
+			// for better timing - after all persists are fully processed including deletions
+			
 			return changedFilesCopy; // what remains of the day
 		}
 		catch (Exception e)
