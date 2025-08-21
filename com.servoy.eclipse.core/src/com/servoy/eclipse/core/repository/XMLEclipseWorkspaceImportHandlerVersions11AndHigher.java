@@ -1205,11 +1205,6 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		x11handler.importRevisionInfo(importInfo);
 	}
 
-	public String getPropertyValue(String oldValue)
-	{
-		return x11handler.getPropertyValue(oldValue);
-	}
-
 	public IPersist loadDeletedObjectByElementId(IRootObject rootObject, UUID elementUUID, ISupportChilds parent)
 		throws RepositoryException, IllegalAccessException, IntrospectionException, InvocationTargetException
 	{
