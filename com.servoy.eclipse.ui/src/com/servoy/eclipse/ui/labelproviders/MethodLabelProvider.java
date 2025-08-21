@@ -74,7 +74,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 	@Override
 	public String getText(Object value)
 	{
-		if (value == null) return "";
+		if (value == null) return Messages.LabelNone;
 		Object val = value;
 		if (val instanceof ComplexProperty)
 		{
