@@ -206,7 +206,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				if (value instanceof MethodWithArguments)
 				{
 					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(),
-						((MethodWithArguments)value).table, ((MethodWithArguments)value).methodId);
+						((MethodWithArguments)value).table, ((MethodWithArguments)value).methodUUID);
 					if (scriptProvider instanceof ScriptCalculation)
 					{
 						return ScriptDialog.CALCULATIONS;
@@ -242,13 +242,13 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			public boolean canEdit(Object value)
 			{
 				return value instanceof MethodWithArguments &&
-					ModelUtils.getScriptMethod(persist, null, ((MethodWithArguments)value).table, ((MethodWithArguments)value).methodId) != null;
+					ModelUtils.getScriptMethod(persist, null, ((MethodWithArguments)value).table, ((MethodWithArguments)value).methodUUID) != null;
 			}
 
 			public void openEditor(Object value)
 			{
 				IScriptProvider scriptprovider = ModelUtils.getScriptMethod(persist, null, ((MethodWithArguments)value).table,
-					((MethodWithArguments)value).methodId);
+					((MethodWithArguments)value).methodUUID);
 				if (scriptprovider instanceof IDataProvider) // it is a calculation
 				{
 					EditorUtil.openDataProviderEditor((IDataProvider)scriptprovider);
@@ -338,7 +338,7 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 				if (value instanceof MethodWithArguments)
 				{
 					return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), ((MethodWithArguments)value).table,
-						((MethodWithArguments)value).methodId);
+						((MethodWithArguments)value).methodUUID);
 				}
 				return null;
 			}

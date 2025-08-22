@@ -43,6 +43,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameSolutionAction;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -143,7 +144,7 @@ public class AISolutionGenerator
 			null);
 		ScriptMethod onSolutionOpen = solution.getScriptMethod("mainSol", "onSolutionOpen");
 		onSolutionOpen.setDeclaration("function onSolutionOpen() { scopes.core.onSolutionOpen(); }");
-		solution.setOnOpenMethodID(onSolutionOpen.getID());
+		solution.setOnOpenMethodID(onSolutionOpen.getUUID().toString());
 
 		// add css/less from templates into solution level css/less
 		addSolutionCSSorLessContributionsFromTemplates(solution, templateForAIReader);
@@ -188,7 +189,7 @@ public class AISolutionGenerator
 					BaseFormTemplateDefinition formTemplateDef = templateForAIReader.getBaseFormTemplateDefinition(extendedFormTemplateRef);
 					Form extendedForm = flattenedSolution.getForm(formTemplateDef.getRealFormName());
 					form.setExtendsForm(extendedForm);
-					form.setExtendsID(extendedForm.getID());
+					form.setExtendsID(extendedForm.getUUID().toString());
 
 					// see if AI wants to insert some new components in available slots
 					JSONObject slots = formJSON.optJSONObject("slots");
@@ -295,8 +296,7 @@ public class AISolutionGenerator
 
 	private static void addSolutionCSSorLessContributionsFromTemplates(Solution solution, TemplateForAIReader templateForAIReader)
 	{
-		int solutionCSSOrLessMediaID = solution.getStyleSheetID();
-		Media solutionCSSOrLessMedia = solution.getMedia(solutionCSSOrLessMediaID);
+		Media solutionCSSOrLessMedia = AbstractBase.selectByUUID(solution.getMedias(false), solution.getStyleSheetID());
 		String oldCssOrLessContent;
 		if (solutionCSSOrLessMedia == null)
 		{
@@ -310,7 +310,7 @@ public class AISolutionGenerator
 			}
 			solutionCSSOrLessMedia.setMimeType("text/css");
 			oldCssOrLessContent = "";
-			solution.setStyleSheetID(solutionCSSOrLessMedia.getID());
+			solution.setStyleSheetID(solutionCSSOrLessMedia.getUUID().toString());
 		}
 		else
 		{

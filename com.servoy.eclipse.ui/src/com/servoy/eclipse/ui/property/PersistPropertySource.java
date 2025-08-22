@@ -134,7 +134,6 @@ import com.servoy.eclipse.ui.labelproviders.PersistInheritenceDelegateLabelProvi
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.ValidvalueDelegatelabelProvider;
-import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.MediaPropertyController.MediaPropertyControllerConfig;
 import com.servoy.eclipse.ui.property.MethodWithArguments.UnresolvedMethodWithArguments;
@@ -214,7 +213,6 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
@@ -527,29 +525,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								if (propertyDescription.getType() instanceof ValueListPropertyType)
 								{
 									pd = new ValuelistPropertyController<Object>(uniqueName, propertyName, persistContext,
-										true)
-									{
-										@Override
-										protected IPropertyConverter<Object, Integer> createConverter()
-										{
-											return new IPropertyConverter<Object, Integer>()
-											{
-												public Integer convertProperty(Object id, Object value)
-												{
-													ValueList vl = flattenedEditingSolution.getValueList(value != null ? value.toString() : null);
-													return Integer.valueOf(vl == null ? ValuelistLabelProvider.VALUELIST_NONE : vl.getID());
-												}
-
-												public Object convertValue(Object id, Integer value)
-												{
-													int vlId = value.intValue();
-													if (vlId == ValuelistLabelProvider.VALUELIST_NONE) return null;
-													ValueList vl = flattenedEditingSolution.getValueList(vlId);
-													return vl == null ? null : vl.getUUID();
-												}
-											};
-										}
-									};
+										true);
 								}
 								else
 								{
@@ -583,30 +559,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							if (propertyDescription.getType() instanceof ValueListPropertyType)
 							{
 								pd = new ValuelistPropertyController<Object>(propertyName, propertyName, persistContext,
-									true)
-								{
-
-									@Override
-									protected IPropertyConverter<Object, Integer> createConverter()
-									{
-										return new IPropertyConverter<Object, Integer>()
-										{
-											public Integer convertProperty(Object id, Object value)
-											{
-												ValueList vl = flattenedEditingSolution.getValueList(value != null ? value.toString() : null);
-												return Integer.valueOf(vl == null ? ValuelistLabelProvider.VALUELIST_NONE : vl.getID());
-											}
-
-											public Object convertValue(Object id, Integer value)
-											{
-												int vlId = value.intValue();
-												if (vlId == ValuelistLabelProvider.VALUELIST_NONE) return null;
-												ValueList vl = flattenedEditingSolution.getValueList(vlId);
-												return vl == null ? null : vl.getUUID();
-											}
-										};
-									}
-								};
+									true);
 							}
 							else
 							{
@@ -1032,7 +985,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		/*
 		 * Category based property controllers.
 		 */
-		MethodPropertyController<Integer> functionPropertyDescriptor = createFunctionPropertyDescriptorIfAppropriate(id, displayName, propertyDescription, form,
+		MethodPropertyController<String> functionPropertyDescriptor = createFunctionPropertyDescriptorIfAppropriate(id, displayName, propertyDescription, form,
 			persistContext);
 		if (functionPropertyDescriptor != null) return functionPropertyDescriptor;
 
@@ -1193,7 +1146,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						public FunctionDefinition convertValue(Object id, MethodWithArguments value)
 						{
 							IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), value.table,
-								value.methodId);
+								value.methodUUID);
 							if (scriptMethod != null)
 							{
 								String formName = (scriptMethod.getParent() instanceof Form) ? ((Form)scriptMethod.getParent()).getName() : null;
@@ -1203,7 +1156,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						}
 					};
 
-					if (persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getExtendsID() > 0)
+					if (persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getExtendsID() != null)
 					{
 						// convert to the actual method called according to form inheritance
 						methodsWithArgumentConverter = new ChainedPropertyConverter<FunctionDefinition, MethodWithArguments, MethodWithArguments>(
@@ -1364,28 +1317,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 									Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false, false, false, null),
 								SWT.NONE, null, "Select form dialog");
 						}
-
-						@Override
-						protected IPropertyConverter<String, Integer> createConverter()
-						{
-							// convert between form ids and form name
-							return new IPropertyConverter<String, Integer>()
-							{
-								public Integer convertProperty(Object id, String value)
-								{
-									Form f = flattenedEditingSolution.getForm(value);
-									return Integer.valueOf(f == null ? Form.NAVIGATOR_NONE : f.getID());
-								}
-
-								public String convertValue(Object id, Integer value)
-								{
-									int formId = value.intValue();
-									if (formId == Form.NAVIGATOR_NONE) return null;
-									Form f = flattenedEditingSolution.getForm(formId);
-									return f == null ? null : f.getName();
-								}
-							};
-						}
 					};
 					pd.setLabelProvider(formLabelProvider);
 					return pd;
@@ -1395,31 +1326,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					// String property, select a value list
 					return new ValuelistPropertyController<String>(id, displayName, persistContext,
-						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)))
-					{
-
-						@Override
-						protected IPropertyConverter<String, Integer> createConverter()
-						{
-							// convert between value list ids and value list name
-							return new IPropertyConverter<String, Integer>()
-							{
-								public Integer convertProperty(Object id, String value)
-								{
-									ValueList vl = flattenedEditingSolution.getValueList(value);
-									return Integer.valueOf(vl == null ? ValuelistLabelProvider.VALUELIST_NONE : vl.getID());
-								}
-
-								public String convertValue(Object id, Integer value)
-								{
-									int vlId = value.intValue();
-									if (vlId == ValuelistLabelProvider.VALUELIST_NONE) return null;
-									ValueList vl = flattenedEditingSolution.getValueList(vlId);
-									return vl == null ? null : vl.getName();
-								}
-							};
-						}
-					};
+						Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)));
 				}
 
 				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.media && beanHandler.getPropertyType() == String.class)
@@ -1882,24 +1789,24 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return resultingPropertyDescriptor;
 	}
 
-	private static MethodPropertyController<Integer> createFunctionPropertyDescriptorIfAppropriate(Object id, String displayName,
+	private static MethodPropertyController<String> createFunctionPropertyDescriptorIfAppropriate(Object id, String displayName,
 		PropertyDescription propertyDescription, Form form, final PersistContext persistContext) throws RepositoryException
 	{
-		MethodPropertyController<Integer> methodPropertyController = null;
+		MethodPropertyController<String> methodPropertyController = null;
 		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
 		if (propertyType != null && FunctionPropertyType.INSTANCE.getClass().isAssignableFrom(propertyType.getClass()))
 		{
 			final ITable table = form == null ? null : ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(form.getDataSource());
-			methodPropertyController = new MethodPropertyController<Integer>(id, displayName, persistContext,
+			methodPropertyController = new MethodPropertyController<String>(id, displayName, persistContext,
 				new MethodListOptions(true, Boolean.TRUE.equals(propertyDescription.getConfig()), form != null && !form.isFormComponent(), true,
 					allowFoundsetMethods(persistContext, id) && table != null, table))
 			{
 				@Override
-				protected IPropertyConverter<Integer, Object> createConverter()
+				protected IPropertyConverter<String, Object> createConverter()
 				{
-					IPropertyConverter<Integer, MethodWithArguments> id2MethodsWithArgumentConverter = new IPropertyConverter<Integer, MethodWithArguments>()
+					IPropertyConverter<String, MethodWithArguments> id2MethodsWithArgumentConverter = new IPropertyConverter<String, MethodWithArguments>()
 					{
-						public MethodWithArguments convertProperty(Object id, Integer value)
+						public MethodWithArguments convertProperty(Object id, String value)
 						{
 							if (value == null) return null;
 
@@ -1941,20 +1848,20 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 										instanceParamsArgs.getRight() == null ? new SafeArrayList<Object>() : instanceParamsArgs.getRight());
 								}
 							}
-							return new MethodWithArguments(value.intValue(), params, args, table);
+							return new MethodWithArguments(value, params, args, table);
 						}
 
-						public Integer convertValue(Object id, MethodWithArguments value)
+						public String convertValue(Object id, MethodWithArguments value)
 						{
 							if (persistContext != null) setMethodArguments(persistContext.getPersist(), id, value.paramNames, value.arguments);
-							return Integer.valueOf(value.methodId);
+							return value.methodUUID;
 						}
 					};
 
-					if (persistContext != null && persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getExtendsID() > 0)
+					if (persistContext != null && persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getExtendsID() != null)
 					{
 						// convert to the actual method called according to form inheritance
-						id2MethodsWithArgumentConverter = new ChainedPropertyConverter<Integer, MethodWithArguments, MethodWithArguments>(
+						id2MethodsWithArgumentConverter = new ChainedPropertyConverter<String, MethodWithArguments, MethodWithArguments>(
 							id2MethodsWithArgumentConverter, new FormInheritenceMethodConverter(persistContext));
 					}
 
@@ -1984,7 +1891,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						}
 					};
 
-					return new ChainedPropertyConverter<Integer, MethodWithArguments, Object>(id2MethodsWithArgumentConverter, mwa2complexConverter);
+					return new ChainedPropertyConverter<String, MethodWithArguments, Object>(id2MethodsWithArgumentConverter, mwa2complexConverter);
 				}
 			};
 			String tooltipText = null;
@@ -2351,7 +2258,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							.searchPersist((String)value);
 						if (persist instanceof AbstractBase)
 						{
-							value = Integer.valueOf(persist.getID());
+							value = persist.getUUID().toString();
 						}
 					}
 				}
@@ -2370,10 +2277,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						.searchPersist((String)value);
 					if (persist != null)
 					{
-						return Integer.valueOf(persist.getID());
+						return persist.getUUID().toString();
 					}
 				}
-				return Integer.valueOf(0);
+				return null;
 			}
 		}
 		return null;
@@ -2926,39 +2833,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			if (propertyDescriptor != null)
 			{
 				boolean isCustomProperty = Menu.CUSTOM_PROPERTIES_CATEGORY.equals(propertyDescriptor.getCategory());
-				if (value instanceof Integer)
-				{
-					IPropertyType< ? > propertyType = null;
-					if (isCustomProperty)
-					{
-						Menu menu = persistContext.getPersist().getAncestor(Menu.class);
-						if (menu != null)
-						{
-							Object typeName = menu.getCustomPropertiesDefinition().get(id);
-							if (typeName != null)
-							{
-								propertyType = TypesRegistry.getType(typeName.toString(), false);
-							}
-						}
-					}
-					else
-					{
-						propertyType = MenuPropertyType.INSTANCE.getExtraProperties().get(propertyDescriptor.getCategory())
-							.get(propertyDescriptor.getDisplayName()).getType();
-					}
-					if (propertyType instanceof ValueListPropertyType)
-					{
-						ValueList val = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
-							.getValueList(((Integer)value).intValue());
-						value = (val == null) ? null : val.getUUID().toString();
-					}
-					else if (propertyType instanceof FormPropertyType)
-					{
-						Form frm = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
-							.getForm(((Integer)value).intValue());
-						value = (frm == null) ? null : frm.getUUID().toString();
-					}
-				}
 				if (isCustomProperty)
 				{
 					((MenuItem)persistContext.getPersist()).putCustomPropertyValue(id.toString(), value);
@@ -2974,15 +2848,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPropertyDescriptor propertyDescriptor = propertyDescriptors.get(id);
 			if (propertyDescriptor != null && CUSTOM_EVENTS_CATEGORY.equals(propertyDescriptor.getCategory()))
 			{
-				if (value instanceof Integer)
-				{
-					ScriptMethod scriptMethod = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())
-						.getScriptMethod(((Integer)value).intValue());
-					value = (scriptMethod == null) ? null : scriptMethod.getUUID().toString();
-				}
 				((AbstractBase)persistContext.getPersist()).putCustomEventValue(id.toString(), value);
 			}
-
 		}
 	}
 
@@ -3483,7 +3350,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			// cannot change table when we have a super-form that already has a data source
 			boolean propertyReadOnly = false;
-			if (!readOnly && persistContext != null && persistContext.getPersist() instanceof Form && ((Form)persistContext.getPersist()).getExtendsID() > 0)
+			if (!readOnly && persistContext != null && persistContext.getPersist() instanceof Form &&
+				((Form)persistContext.getPersist()).getExtendsID() != null)
 			{
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
@@ -3919,7 +3787,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 										if (persistContext.getPersist() instanceof IFormElement)
 										{
 											ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
-												persistContext.getPersist().getID(), new ValidatorSearchContext(
+												persistContext.getPersist().getUUID(), new ValidatorSearchContext(
 													flattenedEditingSolution.getFlattenedForm(persistContext.getPersist()), IRepository.ELEMENTS),
 												false);
 
@@ -3927,7 +3795,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 										else if (persistContext.getPersist() instanceof AbstractContainer)
 									{
 										ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
-											persistContext.getPersist().getID(),
+											persistContext.getPersist().getUUID(),
 											new ValidatorSearchContext(persistContext.getPersist(), persistContext.getPersist().getTypeID()), false);
 									}
 									}

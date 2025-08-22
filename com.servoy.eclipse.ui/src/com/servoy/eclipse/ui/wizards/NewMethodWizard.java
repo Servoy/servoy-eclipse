@@ -412,7 +412,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 				IValidateName validator = servoyModel.getNameValidator();
 				try
 				{
-					validator.checkName(methodName, 0, validatorSearchContext, false);
+					validator.checkName(methodName, null, validatorSearchContext, false);
 				}
 				catch (RepositoryException e)
 				{
@@ -426,7 +426,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 				IValidateName validator = servoyModel.getNameValidator();
 				try
 				{
-					validator.checkName(methodName, 0, validatorSearchContext, false);
+					validator.checkName(methodName, null, validatorSearchContext, false);
 				}
 				catch (RepositoryException e)
 				{

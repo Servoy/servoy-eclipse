@@ -129,8 +129,7 @@ public class StringResourceDeserializer
 					UUID rootObjectUuid = UUID.fromString(obj.getString(SolutionSerializer.PROP_UUID));
 					if (objectTypeId == obj.getInt(SolutionSerializer.PROP_TYPEID))
 					{
-						int id = eclipseRepository.getElementIdForUUID(rootObjectUuid);
-						RootObjectMetaData metadata = eclipseRepository.createRootObjectMetaData(id, rootObjectUuid, name, objectTypeId, 1, 1);
+						RootObjectMetaData metadata = eclipseRepository.createRootObjectMetaData(rootObjectUuid, name, objectTypeId, 1, 1);
 						return metadata;
 					}
 				}

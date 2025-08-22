@@ -117,12 +117,12 @@ public class MovePersistAction extends AbstractMovePersistAction
 						{
 							// reset all uuids
 							IPersist duplicate = null;
-							final Map< ? extends Object, ? extends Object> idMap;
+							final Map< ? extends Object, ? extends Object> uuidMap;
 							if (editingNode instanceof Media)
 							{
 								duplicate = PersistCloner.duplicatePersist(editingNode, ((Media)editingNode).getName(), destination.getServoyProject(),
 									DummyValidator.INSTANCE);
-								idMap = Collections.singletonMap(new Integer(editingNode.getID()), new Integer(duplicate.getID()));
+								uuidMap = Collections.singletonMap(editingNode.getUUID().toString(), duplicate.getUUID().toString());
 								oldToNewID.put(editingNode.getUUID(), editingNode.getUUID());
 								duplicates.put(editingNode.getUUID(), duplicate);
 								servoyProject.saveEditingSolutionNodes(new IPersist[] { duplicate }, true, false);
@@ -130,10 +130,10 @@ public class MovePersistAction extends AbstractMovePersistAction
 							else
 							{
 								UUID oldID = editingNode.getUUID();
-								idMap = AbstractPersistFactory.resetUUIDSRecursively(editingNode, (EclipseRepository)rootObject.getRepository(), true);
+								uuidMap = AbstractPersistFactory.resetUUIDSRecursively(editingNode, (EclipseRepository)rootObject.getRepository(), true);
 								oldToNewID.put(oldID, editingNode.getUUID());
 							}
-							updateReferences(editingNode, idMap);
+							updateReferences(editingNode, uuidMap);
 						}
 						catch (final RepositoryException e)
 						{
@@ -237,7 +237,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 		}
 	}
 
-	private void updateReferences(IPersist editingNode, final Map< ? extends Object, ? extends Object> idMap) throws RepositoryException
+	private void updateReferences(IPersist editingNode, final Map< ? extends Object, ? extends Object> uuidMap) throws RepositoryException
 	{
 		boolean saveEditingNode = true;
 		ServoyProject editingProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(editingNode.getRootObject().getName());
@@ -259,7 +259,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 								UUID uuid = Utils.getAsUUID(wc.getProperty(handler), false);
 								if (uuid != null)
 								{
-									Object newUUID = idMap.get(uuid.toString());
+									Object newUUID = uuidMap.get(uuid.toString());
 									if (newUUID != null)
 									{
 										wc.setProperty(handler, newUUID);
@@ -283,13 +283,12 @@ public class MovePersistAction extends AbstractMovePersistAction
 								if (element.getTypeID() == IRepository.ELEMENTS)
 								{
 									Object property_value = ((AbstractBase)o).getProperty(element.getName());
-									int id = Utils.getAsInteger(property_value);
-									if (id > 0)
+									if (property_value != null)
 									{
-										Object newId = idMap.get(new Integer(id));
-										if (newId != null)
+										Object newUUID = uuidMap.get(property_value);
+										if (newUUID != null)
 										{
-											((AbstractBase)o).setProperty(element.getName(), newId);
+											((AbstractBase)o).setProperty(element.getName(), newUUID);
 											changed[0] = true;
 										}
 									}

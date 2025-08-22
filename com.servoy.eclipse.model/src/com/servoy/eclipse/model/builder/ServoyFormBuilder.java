@@ -252,11 +252,10 @@ public class ServoyFormBuilder
 						{
 							final Method method = methods.get(element.getName());
 							Object property_value = method.invoke(o, new Object[] { });
-							final int element_id = Utils.getAsInteger(property_value);
-							if (element_id > 0)
+							final UUID element_uuid = Utils.getAsUUID(property_value, false);
+							if (element_uuid != null)
 							{
-								IPersist foundPersist = fs.searchPersist(((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository())
-									.getUUIDForElementId(element_id, element_id, -1, -1, null));
+								IPersist foundPersist = fs.searchPersist(element_uuid);
 
 								if (foundPersist instanceof Form)
 								{
@@ -449,7 +448,7 @@ public class ServoyFormBuilder
 							while (parts.hasNext())
 							{
 								com.servoy.j2db.persistence.Part part = parts.next();
-								int startPos = flattenedForm.getPartStartYPos(part.getID());
+								int startPos = flattenedForm.getPartStartYPos(part.getUUID().toString());
 								int endPos = part.getHeight();
 								if (startPos <= location.y && endPos > location.y)
 								{
@@ -645,7 +644,7 @@ public class ServoyFormBuilder
 
 					addFormVariablesHideTableColumn(markerResource, form, table);
 
-					if (form.getExtendsID() > 0 && formFlattenedSolution != null)
+					if (form.getExtendsID() != null && formFlattenedSolution != null && Utils.getAsUUID(form.getExtendsID(), false) != null)
 					{
 						Form superForm = formFlattenedSolution.getForm(form.getExtendsID());
 						if (superForm != null)
@@ -659,17 +658,17 @@ public class ServoyFormBuilder
 									form);
 							}
 
-							List<Integer> forms = new ArrayList<Integer>();
-							forms.add(Integer.valueOf(form.getID()));
-							forms.add(Integer.valueOf(superForm.getID()));
+							List<String> forms = new ArrayList<String>();
+							forms.add(form.getUUID().toString());
+							forms.add(superForm.getUUID().toString());
 							while (superForm != null)
 							{
-								if (superForm.getExtendsID() > 0)
+								if (superForm.getExtendsID() != null)
 								{
 									superForm = formFlattenedSolution.getForm(superForm.getExtendsID());
 									if (superForm != null)
 									{
-										if (forms.contains(Integer.valueOf(superForm.getID())))
+										if (forms.contains(superForm.getUUID().toString()))
 										{
 											// a cycle detected
 											ServoyMarker mk = MarkerMessages.FormExtendsCycle.fill(form.getName());
@@ -680,7 +679,7 @@ public class ServoyFormBuilder
 										}
 										else
 										{
-											forms.add(Integer.valueOf(superForm.getID()));
+											forms.add(superForm.getUUID().toString());
 										}
 									}
 								}
@@ -852,11 +851,12 @@ public class ServoyFormBuilder
 						for (IPersist duplicatePersist : duplicates)
 						{
 							UUID wrongOverrideUUID = null;
-							if (duplicatePersist instanceof IFormElement && ((IFormElement)duplicatePersist).getExtendsID() == o.getID())
+							if (duplicatePersist instanceof IFormElement &&
+								Utils.equalObjects(((IFormElement)duplicatePersist).getExtendsID(), o.getUUID().toString()))
 							{
 								wrongOverrideUUID = duplicatePersist.getUUID();
 							}
-							else if (o instanceof IFormElement && ((IFormElement)o).getExtendsID() == duplicatePersist.getID())
+							else if (o instanceof IFormElement && Utils.equalObjects(((IFormElement)o).getExtendsID(), duplicatePersist.getUUID().toString()))
 							{
 								wrongOverrideUUID = o.getUUID();
 							}
@@ -1024,12 +1024,12 @@ public class ServoyFormBuilder
 							}
 						}
 					}
-					if (tab.getImageMediaID() > 0)
+					if (tab.getImageMediaID() != null)
 					{
 						Media media = tabFlattenedSolution.getMedia(tab.getImageMediaID());
 						if (media != null)
 						{
-							BuilderDependencies.getInstance().addDependency(form, fs.getMedia(media.getID()));
+							BuilderDependencies.getInstance().addDependency(form, fs.getMedia(media.getUUID().toString()));
 							ImageIcon mediaImageIcon = new ImageIcon(media.getMediaData());
 							if (mediaImageIcon.getIconWidth() > 20 || mediaImageIcon.getIconHeight() > 20)
 							{
@@ -1066,7 +1066,7 @@ public class ServoyFormBuilder
 					{
 						fieldName = field.getUUID().toString();
 					}
-					if (field.getValuelistID() > 0)
+					if (field.getValuelistID() != null)
 					{
 						ValueList vl = fieldFlattenedSolution.getValueList(field.getValuelistID());
 						if (vl != null)
@@ -1125,7 +1125,7 @@ public class ServoyFormBuilder
 										isUnstoredCalc(vl.getDataProviderID2(), table, fieldFlattenedSolution) || //
 										isUnstoredCalc(vl.getDataProviderID3(), table, fieldFlattenedSolution);
 								}
-								if (!vlWithUnstoredCalcError && vl.getFallbackValueListID() > 0)
+								if (!vlWithUnstoredCalcError && vl.getFallbackValueListID() != null)
 								{
 									ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
 									if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES)
@@ -1215,7 +1215,7 @@ public class ServoyFormBuilder
 										}
 									}
 								}
-								if (vl.getFallbackValueListID() > 0)
+								if (vl.getFallbackValueListID() != null)
 								{
 									ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
 									if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES &&
@@ -1390,8 +1390,8 @@ public class ServoyFormBuilder
 						}
 					}
 				}
-				if (o instanceof GraphicalComponent && ((GraphicalComponent)o).getRolloverImageMediaID() > 0 &&
-					((GraphicalComponent)o).getImageMediaID() <= 0)
+				if (o instanceof GraphicalComponent && ((GraphicalComponent)o).getRolloverImageMediaID() != null &&
+					((GraphicalComponent)o).getImageMediaID() == null)
 				{
 					ServoyMarker mk = MarkerMessages.ImageMediaNotSet.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
 					ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.IMAGE_MEDIA_NOT_SET, IMarker.PRIORITY_NORMAL, null,
@@ -1399,7 +1399,7 @@ public class ServoyFormBuilder
 				}
 				if (o instanceof GraphicalComponent)
 				{
-					if (((GraphicalComponent)o).getImageMediaID() > 0)
+					if (((GraphicalComponent)o).getImageMediaID() != null)
 					{
 						Media media = fs.getMedia(((GraphicalComponent)o).getImageMediaID());
 						if (media != null)
@@ -1407,7 +1407,7 @@ public class ServoyFormBuilder
 							BuilderDependencies.getInstance().addDependency(form, media);
 						}
 					}
-					if (((GraphicalComponent)o).getRolloverImageMediaID() > 0)
+					if (((GraphicalComponent)o).getRolloverImageMediaID() != null)
 					{
 						Media media = fs.getMedia(((GraphicalComponent)o).getRolloverImageMediaID());
 						if (media != null)
@@ -1693,12 +1693,7 @@ public class ServoyFormBuilder
 						else if (pd.getType() instanceof FunctionPropertyType)
 						{
 							ScriptMethod scriptMethod = null;
-							int methodId = Utils.getAsInteger(value);
-							if (methodId > 0)
-							{
-								scriptMethod = flattenedSolution.getScriptMethod(methodId);
-							}
-							else if (value instanceof String)
+							if (value instanceof String)
 							{
 								scriptMethod = flattenedSolution.getScriptMethod((String)value);
 							}
@@ -2125,8 +2120,8 @@ public class ServoyFormBuilder
 					if ((o instanceof Field || o instanceof GraphicalComponent) && dataProvider != null)
 					{
 						// check for valuelist type matching dataprovider type
-						int valuelistID = o instanceof Field ? ((Field)o).getValuelistID() : ((GraphicalComponent)o).getValuelistID();
-						ValueList valuelist = persistFlattenedSolution.getValueList(valuelistID);
+						String valuelistUUID = o instanceof Field ? ((Field)o).getValuelistID() : ((GraphicalComponent)o).getValuelistID();
+						ValueList valuelist = persistFlattenedSolution.getValueList(valuelistUUID);
 						if (valuelist != null)
 						{
 							BuilderDependencies.getInstance().addDependency(parentForm, valuelist);
@@ -2185,7 +2180,7 @@ public class ServoyFormBuilder
 					}
 					if (o instanceof Field &&
 						(((Field)o).getDisplayType() == Field.TYPE_AHEAD || ((Field)o).getDisplayType() == Field.TEXT_FIELD) &&
-						((Field)o).getValuelistID() > 0 && ((Field)o).getFormat() != null)
+						((Field)o).getValuelistID() != null && ((Field)o).getFormat() != null)
 					{
 						boolean showWarning = false;
 						ValueList vl = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getValueList(

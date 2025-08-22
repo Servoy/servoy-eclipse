@@ -166,7 +166,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						}
 					}
 				}
-				if (form.getExtendsID() > 0 && changedPersists.size() >= 2)
+				if (form.getExtendsID() != null && changedPersists.size() >= 2)
 				{
 					Display.getDefault().asyncExec(new Runnable()
 					{
@@ -302,7 +302,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				{
 					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(args.getLocation());
 					gc.setText("button");
-					gc.setOnActionMethodID(-1);
+					gc.setOnActionMethodID(null);
 					gc.setRolloverCursor(Cursor.HAND_CURSOR);
 					if (args.getStyleClass() != null)
 					{
@@ -916,11 +916,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 
 				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, asList(newPersist));
 
-				if (form.getExtendsID() > 0 && newPersist.length > 1)
+				if (form.getExtendsID() != null && newPersist.length > 1)
 				{
 					for (IPersist persist : newPersist)
 					{
-						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() > 0)
+						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() != null)
 						{
 							// very likely a complex inheritance situation that won't refresh correctly, just reinitialize form designer
 							doFullFormRefresh(null);

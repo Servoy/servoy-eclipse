@@ -360,7 +360,7 @@ public class ElementUtil
 		persist = PersistHelper.getBasePersist((ISupportExtendsID)persist);
 		IPersist parentPersist = persist;
 		IPersist newPersist = (IPersist)context.acceptVisitor(o -> {
-			if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getID())
+			if (o instanceof ISupportExtendsID && Utils.equalObjects(((ISupportExtendsID)o).getExtendsID(), parentPersist.getUUID().toString()))
 			{
 				return o;
 			}
@@ -376,7 +376,8 @@ public class ElementUtil
 			{
 				parent = null;
 				parent = (ISupportChilds)context.acceptVisitor(o -> {
-					if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getParent().getID())
+					if (o instanceof ISupportExtendsID &&
+						Utils.equalObjects(((ISupportExtendsID)o).getExtendsID(), parentPersist.getParent().getUUID().toString()))
 					{
 						return o;
 					}
@@ -387,13 +388,13 @@ public class ElementUtil
 				{
 					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false, false);
 					((AbstractBase)parent).copyPropertiesMap(null, true);
-					((ISupportExtendsID)parent).setExtendsID(parentPersist.getParent().getID());
+					((ISupportExtendsID)parent).setExtendsID(parentPersist.getParent().getUUID().toString());
 				}
 			}
 
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
-			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());
+			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getUUID().toString());
 			if (persist instanceof WebComponent webComponent && newPersist instanceof WebComponent newWebComponent)
 			{
 				List<WebCustomType> customTypes = new ArrayList<>();
@@ -409,7 +410,7 @@ public class ElementUtil
 				{
 					if (child instanceof WebCustomType custom && customTypeIterator.hasNext())
 					{
-						custom.setExtendsID(customTypeIterator.next().getID());
+						custom.setExtendsID(customTypeIterator.next().getUUID().toString());
 					}
 				}
 			}
@@ -638,7 +639,7 @@ public class ElementUtil
 	 */
 	private static boolean isSingle(IApplication application, Field field)
 	{
-		if (field.getValuelistID() > 0)
+		if (field.getValuelistID() != null)
 		{
 			FlattenedSolution flattenedSolution = application.getFlattenedSolution();
 			ValueList valuelist = flattenedSolution != null ? flattenedSolution.getValueList(field.getValuelistID()) : null;

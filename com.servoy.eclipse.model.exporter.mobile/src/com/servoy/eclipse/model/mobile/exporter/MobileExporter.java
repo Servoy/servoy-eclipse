@@ -71,7 +71,6 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.test.SolutionJSUnitSuiteCodeBuilder;
 import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.IValueFilter;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
@@ -320,9 +319,9 @@ public class MobileExporter
 									{
 										Object methodID = ApplicationServerRegistry.get().getDeveloperRepository().convertArgumentStringToObject(
 											contentSpec.getTypeID(), value);
-										if (methodID instanceof Integer i)
+										if (methodID instanceof String methodUUIDString)
 										{
-											return generateMethodCall(form, persist, key, i.intValue());
+											return generateMethodCall(form, persist, key, methodUUIDString);
 										}
 									}
 									catch (Exception e)
@@ -387,7 +386,7 @@ public class MobileExporter
 								return value;
 							}
 						});
-					if (flattenedSolution.getSolution().getFirstFormID() == form.getID())
+					if (form.getUUID().toString().equals(flattenedSolution.getSolution().getFirstFormID()))
 					{
 						formJSons.add(0, formJSon);
 					}
@@ -484,14 +483,14 @@ public class MobileExporter
 				solutionModel.put("styleSheet", MediaResourcesServlet.SERVOY_SOLUTION_CSS + media.getName().replace(".less", ".css"));
 			}
 
-			int onOpenMethodID = solution.getOnOpenMethodID();
-			if (onOpenMethodID > 0)
+			String onOpenMethodUUID = solution.getOnOpenMethodID();
+			if (onOpenMethodUUID != null)
 			{
 				solutionModel.put("onSolutionOpen",
-					generateMethodCall(solution, solution, StaticContentSpecLoader.PROPERTY_ONOPENMETHODID.getPropertyName(), onOpenMethodID));
+					generateMethodCall(solution, solution, StaticContentSpecLoader.PROPERTY_ONOPENMETHODID.getPropertyName(), onOpenMethodUUID));
 			}
 
-			if (solution.getLoginFormID() > 0)
+			if (solution.getLoginFormID() != null)
 			{
 				solutionModel.put("loginForm", flattenedSolution.getForm(solution.getLoginFormID()).getName());
 			}
@@ -1294,18 +1293,6 @@ public class MobileExporter
 		this.skipConnect = connect;
 	}
 
-	/**
-	 * @param form
-	 * @param persist
-	 * @param key
-	 * @param methodID
-	 * @return
-	 */
-	private String generateMethodCall(final IPersist parent, IPersist persist, String key, int methodID)
-	{
-		IScriptProvider sm = ModelUtils.getScriptMethod(parent, parent, null, methodID);
-		return generateMethodCall(persist, key, sm);
-	}
 
 	/**
 	 * @param form

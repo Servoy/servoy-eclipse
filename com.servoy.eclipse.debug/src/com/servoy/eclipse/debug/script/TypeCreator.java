@@ -3564,7 +3564,7 @@ public class TypeCreator extends TypeCache
 			Type baseType = findType(context, "RuntimeForm");
 			Type superForm = baseType;
 			Form extendsForm = null;
-			if (form.getExtendsID() > 0)
+			if (form.getExtendsID() != null)
 			{
 				extendsForm = fs.getForm(form.getExtendsID());
 				if (extendsForm != null) superForm = getType(context, "RuntimeForm<" + extendsForm.getName() + '>');
@@ -4904,7 +4904,7 @@ public class TypeCreator extends TypeCache
 					{
 						EList<Member> members = type.getMembers();
 						Form formToUse = form;
-						if (form.getExtendsID() > 0)
+						if (form.getExtendsID() != null)
 						{
 							formToUse = fs.getFlattenedForm(form);
 						}
@@ -4929,7 +4929,7 @@ public class TypeCreator extends TypeCache
 											if (p.getPartType() == Part.BODY)
 											{
 												bodyPart = p;
-												startY = formToUse.getPartStartYPos(bodyPart.getID());
+												startY = formToUse.getPartStartYPos(bodyPart.getUUID().toString());
 												break;
 											}
 										}

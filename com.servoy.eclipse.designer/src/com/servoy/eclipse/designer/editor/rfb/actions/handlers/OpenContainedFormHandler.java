@@ -39,7 +39,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -147,12 +146,8 @@ public class OpenContainedFormHandler implements IServerService
 				{
 					Form toOpen = null;
 
-					if (value instanceof Integer) toOpen = s.getForm(((Integer)value).intValue());
-					else if (value instanceof String)
-					{
-						IPersist persistByUUID = AbstractRepository.searchPersist(s, UUID.fromString((String)value));
-						if (persistByUUID instanceof Form) toOpen = (Form)persistByUUID;
-					}
+					IPersist persistByUUID = AbstractRepository.searchPersist(s, Utils.getAsUUID(value, false));
+					if (persistByUUID instanceof Form) toOpen = (Form)persistByUUID;
 					if (toOpen != null)
 					{
 						return EditorUtil.openFormDesignEditor(toOpen) != null;

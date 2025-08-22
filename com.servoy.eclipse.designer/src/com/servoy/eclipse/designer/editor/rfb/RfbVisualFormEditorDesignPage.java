@@ -143,7 +143,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 	private String layout = null;
 	private String formName = null;
-	private int extendsId = -1;
+	private String extendsId = null;
 	protected WebsocketSessionKey editorKey = null;
 	protected WebsocketSessionKey clientKey = null;
 	private AbstractContainer showedContainer;
@@ -258,7 +258,8 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		}
 
 		String newLayout = computeLayout(flattenedForm, isCSSPositionContainer);
-		if (!Utils.equalObjects(layout, newLayout) || !Utils.equalObjects(formName, flattenedForm.getName()) || extendsId != flattenedForm.getExtendsID() ||
+		if (!Utils.equalObjects(layout, newLayout) || !Utils.equalObjects(formName, flattenedForm.getName()) ||
+			!Utils.equalObjects(extendsId, flattenedForm.getExtendsID()) ||
 			force)
 		{
 			layout = newLayout;
@@ -272,7 +273,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/" + path + "/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() + "&hd=" + hideDefault + "&mso=" + marqueeSelectOuter +
-				(showedContainer != null ? ("&cont=" + showedContainer.getID()) : "") + (form.isFormComponent().booleanValue() ? "&fc=true" : "");
+				(showedContainer != null ? ("&cont=" + showedContainer.getUUID().toString()) : "") + (form.isFormComponent().booleanValue() ? "&fc=true" : "");
 			final Runnable runnable = new Runnable()
 			{
 				public void run()
@@ -449,7 +450,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 										while (superPersist instanceof ISupportExtendsID)
 										{
 											// if there is already one
-											if (superPersist.getID() == persist.getID())
+											if (superPersist.getUUID().equals(persist.getUUID()))
 											{
 												continue outer;
 											}

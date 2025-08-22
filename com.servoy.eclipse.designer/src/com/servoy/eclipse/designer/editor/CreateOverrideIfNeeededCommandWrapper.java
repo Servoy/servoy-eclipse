@@ -65,7 +65,7 @@ public class CreateOverrideIfNeeededCommandWrapper extends Command
 
 				// find the uuid of the element that is being extended the original element
 				newUUID = persistContextBefore.getPersist().searchChild(origUUID)
-					.map(IPersist::getID)
+					.map(IPersist::getUUID)
 					.flatMap(propertySource.getPersistContext().getPersist()::searchForExtendsId)
 					.map(IPersist::getUUID)
 					// fall back to the original uuid if we can't find it

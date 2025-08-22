@@ -123,7 +123,7 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 			}, "valuelistDialog", defaultValue);
 	}
 
-	public static class ValueListValueEditor implements IValueEditor<Integer>
+	public static class ValueListValueEditor implements IValueEditor<String>
 	{
 		private final FlattenedSolution flattenedEditingSolution;
 
@@ -132,15 +132,15 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 			this.flattenedEditingSolution = flattenedEditingSolution;
 		}
 
-		public void openEditor(Integer value)
+		public void openEditor(String value)
 		{
-			EditorUtil.openValueListEditor(flattenedEditingSolution.getValueList(value.intValue()));
+			EditorUtil.openValueListEditor(flattenedEditingSolution.getValueList(value));
 		}
 
-		public boolean canEdit(Integer value)
+		public boolean canEdit(String value)
 		{
-			return value != null && value.intValue() != ValuelistLabelProvider.VALUELIST_NONE &&
-				flattenedEditingSolution.getValueList(value.intValue()) != null;
+			return value != null && !ValuelistLabelProvider.VALUELIST_NONE_STRING.equals(value) &&
+				flattenedEditingSolution.getValueList(value) != null;
 		}
 	}
 }

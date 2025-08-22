@@ -115,7 +115,7 @@ public class HierarchyDecorator implements ILightweightLabelDecorator
 		}
 
 		if (element instanceof Form) return;
-		if (element instanceof ISupportExtendsID && ((ISupportExtendsID)element).getExtendsID() > 0)
+		if (element instanceof ISupportExtendsID && ((ISupportExtendsID)element).getExtendsID() != null)
 		{
 			decoration.addOverlay(DLTKPluginImages.DESC_OVR_OVERRIDES, IDecoration.BOTTOM_RIGHT);
 		}

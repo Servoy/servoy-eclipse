@@ -91,7 +91,7 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 		}
 		else
 		{
-			if (openForm.getExtendsID() > 0)
+			if (openForm.getExtendsID() != null)
 			{
 				TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS, FlatTreeContentProvider.INSTANCE,
 					new LabelProvider()

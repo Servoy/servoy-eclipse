@@ -47,7 +47,7 @@ public abstract class AddPersistButtonComposite extends Composite
 				if (newPersist != null)
 				{
 					dialog.refreshTree();
-					dialog.setSelection(new Integer(newPersist.getID()));
+					dialog.setSelection(newPersist.getUUID().toString());
 				}
 			}
 		});

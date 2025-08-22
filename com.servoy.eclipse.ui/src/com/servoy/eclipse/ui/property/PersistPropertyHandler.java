@@ -586,7 +586,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 							if (returnValue != null)
 							{
 								Form f = (Form)persistContext.getPersist();
-								if (!Utils.equalObjects(Integer.valueOf(f.getExtendsID()), returnValue))
+								if (!Utils.equalObjects(f.getExtendsID(), returnValue))
 								{
 									List<IPersist> overridePersists = new ArrayList<IPersist>();
 									for (IPersist child : f.getAllObjectsAsList())
@@ -617,10 +617,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 										// has those parts, mark them as overriden; if we wouldn't do this you could end up with 2 body parts in the same form: one overriden and one not�
 										// an alternative would be to simply delete these parts
 										ArrayList<Part> inheritedParts = new ArrayList<Part>();
-										int newExtendsId = ((Integer)returnValue).intValue();
-										if (newExtendsId != Form.NAVIGATOR_NONE && newExtendsId != Form.NAVIGATOR_DEFAULT) // NAVIGATOR_NONE (0 default value as in contentspec) should be used but in the past either one or the other was used
+										String newExtendsUUID = returnValue.toString();
+										if (!Form.NAVIGATOR_NONE.equals(newExtendsUUID) && newExtendsUUID != Form.NAVIGATOR_DEFAULT) // NAVIGATOR_NONE (0 default value as in contentspec) should be used but in the past either one or the other was used
 										{
-											Form newSuperForm = flattenedEditingSolution.getForm(((Integer)returnValue).intValue());
+											Form newSuperForm = flattenedEditingSolution.getForm(newExtendsUUID);
 											if (newSuperForm != null)
 											{
 												Iterator<Part> it = newSuperForm.getParts();
@@ -657,7 +657,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 												pMap.remove(StaticContentSpecLoader.PROPERTY_PARTTYPE.getPropertyName());
 												p.copyPropertiesMap(pMap, true);
 
-												p.setExtendsID(ancestorP.getID());
+												p.setExtendsID(ancestorP.getUUID().toString());
 											}
 										}
 									}

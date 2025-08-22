@@ -161,7 +161,7 @@ public class RfbSelectionListener implements ISelectionListener
 				{
 					IPersist ancestor = persist.getAncestor(IRepository.FORMS);
 					if (ancestor == null) continue;
-					if (form.getID() == ancestor.getID())
+					if (form.getUUID().equals(ancestor.getUUID()))
 					{
 						/*
 						 * if (persist instanceof WebCustomType) { WebCustomType ghostBean = (WebCustomType)persist; uuids.add(ghostBean.getUUIDString()); }
@@ -186,7 +186,7 @@ public class RfbSelectionListener implements ISelectionListener
 				FormElementGroup formElementGroup = Platform.getAdapterManager().getAdapter(sel, FormElementGroup.class);
 				if (formElementGroup != null)
 				{
-					if (form.getID() == formElementGroup.getParent().getID())
+					if (form.getUUID().equals(formElementGroup.getParent().getUUID()))
 					{
 						uuids.add(formElementGroup.getGroupID());
 						forCurrentForm = true;

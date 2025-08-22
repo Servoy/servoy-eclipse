@@ -757,7 +757,7 @@ public class DataModelManager implements IServerInfoManager
 				if (c != null)
 				{
 					existingColumnInfo++;
-					DatabaseUtils.updateColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), c, cid);
+					DatabaseUtils.updateColumnInfo(c, cid);
 					changedColumns.add(c);
 				}
 				addDifferenceMarkersIfNecessary(c, cid, t, cname);
@@ -1917,7 +1917,7 @@ public class DataModelManager implements IServerInfoManager
 	@Override
 	public void createNewColumnInfo(Column c, boolean createMissingServoySequence) throws RepositoryException
 	{
-		DatabaseUtils.createNewColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), c, createMissingServoySequence);
+		DatabaseUtils.createNewColumnInfo(c, createMissingServoySequence);
 	}
 
 	@Override

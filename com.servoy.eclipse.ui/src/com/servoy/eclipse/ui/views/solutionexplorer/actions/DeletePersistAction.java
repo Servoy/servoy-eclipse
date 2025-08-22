@@ -269,15 +269,15 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	 * @param formsToDelete
 	 * @return
 	 */
-	private Map<Integer, List<String>> retrieveDeleteFormRelations(List<IPersist> formsToDelete)
+	private Map<String, List<String>> retrieveDeleteFormRelations(List<IPersist> formsToDelete)
 	{
-		Map<Integer, List<String>> map = new HashMap<Integer, List<String>>();
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
 
 		//build a list of the selected form ids;
-		List<Integer> formsIds = new ArrayList<Integer>();
+		List<String> formsUUIDs = new ArrayList<String>();
 		for (IPersist form : formsToDelete)
 		{
-			formsIds.add(new Integer(form.getID()));
+			formsUUIDs.add(form.getUUID().toString());
 		}
 
 		//retrieve the servoy model
@@ -291,24 +291,22 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			Form itForm = it.next();
 
-			int extendedFormId = itForm.getExtendsID();
-			if (extendedFormId > 0)
+			String extendedFormUUID = itForm.getExtendsID();
+			if (extendedFormUUID != null)
 			{
-				Integer itExtendsFormID = new Integer(extendedFormId);
-
 				//if we found a form that has an extended class in the list of the ones that we wish to delete then...
-				if (formsIds.contains(itExtendsFormID))
+				if (formsUUIDs.contains(extendedFormUUID))
 				{
-					if (map.containsKey(itExtendsFormID))
+					if (map.containsKey(extendedFormUUID))
 					{
-						List<String> list = map.get(itExtendsFormID);
+						List<String> list = map.get(extendedFormUUID);
 						list.add(itForm.getName());
 					}
 					else
 					{
 						List<String> list = new ArrayList<String>();
 						list.add(itForm.getName());
-						map.put(itExtendsFormID, list);
+						map.put(extendedFormUUID, list);
 					}
 				}
 			}
@@ -323,17 +321,17 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	 * @param map
 	 * @return
 	 */
-	private String buildMessageFromRelationsTable(Map<Integer, List<String>> map)
+	private String buildMessageFromRelationsTable(Map<String, List<String>> map)
 	{
 		String message = "";
 		//retrieve the servoy model
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
-		for (Integer currentKey : map.keySet())
+		for (String currentKey : map.keySet())
 		{
 			List<String> childFormNames = map.get(currentKey);
 
-			String baseFormName = servoyModel.getFlattenedSolution().getForm(currentKey.intValue()).getName();
+			String baseFormName = servoyModel.getFlattenedSolution().getForm(currentKey).getName();
 
 			message += "Form: [" + baseFormName + "] has the following children: ";
 			for (Object object : childFormNames)
@@ -362,11 +360,11 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	 * @param formsToDelete
 	 * @return true/false whether is found or not;
 	 */
-	private boolean idInFormsToDelete(int id, List<IPersist> formsToDelete)
+	private boolean idInFormsToDelete(String uuid, List<IPersist> formsToDelete)
 	{
 		for (IPersist persist : formsToDelete)
 		{
-			if (persist.getID() == id) return true;
+			if (persist.getUUID().toString().equals(uuid)) return true;
 		}
 		return false;
 	}
@@ -388,12 +386,9 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			Form form = it.next();
 
-			if (form.getExtendsID() > 0)
+			if (form.getExtendsID() != null)
 			{
-				int id = form.getID();
-				int extendedFormId = form.getExtendsID();
-
-				if (!idInFormsToDelete(id, formsToDelete) && idInFormsToDelete(extendedFormId, formsToDelete)) return false;
+				if (!idInFormsToDelete(form.getUUID().toString(), formsToDelete) && idInFormsToDelete(form.getExtendsID(), formsToDelete)) return false;
 			}
 		}
 
@@ -407,7 +402,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		if (selectedPersists == null) return;
 		List<IPersist> deleteItems = selectedPersists;
 
-		Map<Integer, List<String>> map = new HashMap<Integer, List<String>>();
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
 		String message = "";
 
 		if (deleteItems.size() > 0 && (deleteItems.get(0).getRootObject() instanceof Solution))

@@ -1167,16 +1167,6 @@ public class SolutionSerializer
 			{
 				property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, false, true)); // always store as pure json
 			}
-			if (persist instanceof AbstractBase && element.getTypeID() == IRepository.ELEMENTS &&
-				((Integer)propertyObjectValue).intValue() == IRepository.UNRESOLVED_ELEMENT)
-			{
-				HashMap<String, String> unresolvedMap = ((AbstractBase)persist).getSerializableRuntimeProperty(
-					AbstractBase.UnresolvedPropertyToValueMapProperty);
-				if (unresolvedMap != null && unresolvedMap.containsKey(propertyName))
-				{
-					propertyValue = unresolvedMap.get(propertyName);
-				}
-			}
 
 			if (valueFilter != null)
 			{
@@ -1224,7 +1214,7 @@ public class SolutionSerializer
 				if (!(child instanceof IScriptElement))
 				{
 					IPersist superPersist = null;
-					if (child instanceof ISupportChilds && child instanceof ISupportExtendsID && ((ISupportExtendsID)child).getExtendsID() > 0 &&
+					if (child instanceof ISupportChilds && child instanceof ISupportExtendsID && ((ISupportExtendsID)child).getExtendsID() != null &&
 						!((ISupportChilds)child).getAllObjects().hasNext() && (superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)child)) != null)
 					{
 						Map<String, Object> parentProperties = getPersistAsValueMap(superPersist, repository, true);

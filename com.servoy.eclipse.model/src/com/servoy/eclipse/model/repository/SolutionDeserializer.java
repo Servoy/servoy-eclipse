@@ -1981,8 +1981,7 @@ public class SolutionDeserializer
 		}
 		else
 		{
-			int element_id = repository.getElementIdForUUID(uuid);
-			retval = repository.createObject(parent, objectTypeId, element_id, uuid);
+			retval = repository.createObject(parent, objectTypeId, uuid);
 			parent.addChild(retval);
 		}
 		return retval;
@@ -2218,36 +2217,7 @@ public class SolutionDeserializer
 					propertyObjectValue = propertyObjectValue.toString();
 				}
 
-				if (element.getTypeID() == IRepository.ELEMENTS)
-				{
-					String id = propertyObjectValue.toString();
-					UUID uuid = null;
-					if (id.indexOf('-') > 0)
-					{
-						uuid = UUID.fromString(id);
-						propertyObjectValue = new Integer(repository.getElementIdForUUID(uuid));
-					}
-					else
-					{
-						propertyObjectValue = new Integer(Utils.getAsInteger(id));
-					}
-
-					//filling this in case the obj is sent to team repository (with other ids)
-					HashMap<UUID, Integer> map = ((AbstractBase)persist).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
-					if (map == null)
-					{
-						map = new HashMap<UUID, Integer>();
-						((AbstractBase)persist).setSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty, map);
-					}
-					if (uuid != null)
-					{
-						map.put(uuid, (Integer)propertyObjectValue);
-					}
-				}
-				else
-				{
-					propertyObjectValue = repository.convertArgumentStringToObject(element.getTypeID(), (String)propertyObjectValue);
-				}
+				propertyObjectValue = repository.convertArgumentStringToObject(element.getTypeID(), (String)propertyObjectValue);
 				propertyValues.put(propertyName, propertyObjectValue);
 				obj.remove(propertyName);
 			}
@@ -2450,8 +2420,7 @@ public class SolutionDeserializer
 			int solutionType = obj.getInt("solutionType");
 			boolean mustAuthenticate = obj.getBoolean("mustAuthenticate");
 			//int id = repository.getNewElementID(rootObjectUuid);
-			int id = repository.getElementIdForUUID(rootObjectUuid);
-			SolutionMetaData metadata = (SolutionMetaData)repository.createRootObjectMetaData(id, rootObjectUuid, name, objectTypeId, 1, 1);
+			SolutionMetaData metadata = (SolutionMetaData)repository.createRootObjectMetaData(rootObjectUuid, name, objectTypeId, 1, 1);
 			metadata.setMustAuthenticate(mustAuthenticate);
 			metadata.setSolutionType(solutionType);
 			metadata.setFileVersion(fileVersion);

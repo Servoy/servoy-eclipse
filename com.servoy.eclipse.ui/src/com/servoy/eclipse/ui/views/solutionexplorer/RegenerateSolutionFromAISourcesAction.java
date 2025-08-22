@@ -61,7 +61,7 @@ public class RegenerateSolutionFromAISourcesAction extends Action
 			// delete old unneeded content
 			Solution solution = activeProject.getEditingSolution();
 			List<IPersist> allPersistsToDelete = new ArrayList<>();
-			solution.setFirstFormID(-1);
+			solution.setFirstFormID(null);
 			solution.getAllObjects().forEachRemaining((p) -> {
 				if (!(p instanceof Media))
 				{
@@ -87,8 +87,8 @@ public class RegenerateSolutionFromAISourcesAction extends Action
 			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
 
 			Solution aps = ServoyModelFinder.getServoyModel().getActiveProject().getSolution();
-			int ffid = aps.getFirstFormID();
-			if (ffid > 0) EditorUtil.openFormDesignEditor(aps.getForm(ffid));
+			String ffuuid = aps.getFirstFormID();
+			if (ffuuid != null) EditorUtil.openFormDesignEditor(aps.getForm(ffuuid));
 			else EditorUtil.openFormDesignEditor(aps.getAllNormalForms(true).next());
 		}
 	}

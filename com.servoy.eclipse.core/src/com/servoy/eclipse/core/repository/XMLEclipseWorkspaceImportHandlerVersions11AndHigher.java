@@ -531,11 +531,6 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		importTransactable.processPostRollBack();
 	}
 
-	public int getObjectId(boolean cleanImport, String uuid) throws RepositoryException
-	{
-		return repository.getElementIdForUUIDString(uuid);
-	}
-
 	public void getRootObjectNameForImport(ImportInfo importInfo, RootObjectImportInfo rootObjectImportInfo) throws RepositoryException
 	{
 		// duplicate uuid fails, duplicate name requires user decision
@@ -596,7 +591,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			switch (result)
 			{
 				case IXMLImportUserChannel.OVERWRITE_ACTION :
-					repository.removeRootObject(rootObjectMetaData.getRootObjectId());
+					repository.removeRootObject(rootObjectMetaData.getRootObjectUuid());
 					name = rootObjectMetaData.getName();
 					break;
 				case IXMLImportUserChannel.SKIP_ACTION :
@@ -1210,15 +1205,10 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		x11handler.importRevisionInfo(importInfo);
 	}
 
-	public String getPropertyValue(String oldValue)
-	{
-		return x11handler.getPropertyValue(oldValue);
-	}
-
-	public IPersist loadDeletedObjectByElementId(IRootObject rootObject, int elementId, ISupportChilds parent)
+	public IPersist loadDeletedObjectByElementId(IRootObject rootObject, UUID elementUUID, ISupportChilds parent)
 		throws RepositoryException, IllegalAccessException, IntrospectionException, InvocationTargetException
 	{
-		return x11handler.loadDeletedObjectByElementId(rootObject, elementId, parent);
+		return x11handler.loadDeletedObjectByElementId(rootObject, elementUUID, parent);
 	}
 
 	public void setStyleActiveRelease(IRootObject[] rootObjects) throws RepositoryException

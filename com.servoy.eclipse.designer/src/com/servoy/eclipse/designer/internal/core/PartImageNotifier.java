@@ -36,7 +36,7 @@ import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Handles painting of part backgrounds using awt printing.
- * 
+ *
  * @author rgansevles
  */
 
@@ -58,7 +58,7 @@ public class PartImageNotifier extends AbstractImageNotifier
 		Form form = application.getFlattenedSolution().getFlattenedForm(context);
 
 		StyledEnablePanel comp = new StyledEnablePanel(application);
-		comp.setSize(form.getWidth(), part.getHeight() - form.getPartStartYPos(part.getID()));
+		comp.setSize(form.getWidth(), part.getHeight() - form.getPartStartYPos(part.getUUID().toString()));
 
 		Pair<IStyleSheet, IStyleRule> pair = ComponentFactory.getStyleForBasicComponent(application, part, form);
 		SolutionMetaData solution = null;

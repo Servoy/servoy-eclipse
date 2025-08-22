@@ -107,7 +107,7 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 								try
 								{
 									if (!persist.getParent().equals(parent) &&
-										(persist instanceof ISupportExtendsID supportExtendsID && supportExtendsID.getExtendsID() > 0) ||
+										(persist instanceof ISupportExtendsID supportExtendsID && supportExtendsID.getExtendsID() != null) ||
 										!persist.equals(getOverridePersist(PersistContext.create(persist, editorPart.getForm()))))
 									{
 										// do not allow changing the parent for inherited elements

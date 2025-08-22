@@ -169,7 +169,7 @@ public class NewMenuItemAction extends Action implements ISelectionChangedListen
 		IValidateName validator = servoyModel.getNameValidator();
 		try
 		{
-			validator.checkName(newText, 0, validatorSearchContext, false);
+			validator.checkName(newText, null, validatorSearchContext, false);
 		}
 		catch (Exception e)
 		{

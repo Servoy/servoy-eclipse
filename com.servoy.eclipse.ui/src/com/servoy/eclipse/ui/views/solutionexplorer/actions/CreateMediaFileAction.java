@@ -124,7 +124,7 @@ public class CreateMediaFileAction extends Action implements ISelectionChangedLi
 				IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 				try
 				{
-					nameValidator.checkName(fileName, 0, new ValidatorSearchContext(IRepository.MEDIA), false);
+					nameValidator.checkName(fileName, null, new ValidatorSearchContext(IRepository.MEDIA), false);
 					WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 					try
 					{

@@ -156,9 +156,9 @@ public class ElementFactory
 	{
 		GraphicalComponent button = parent.createNewGraphicalComponent(
 			new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
-		button.setOnActionMethodID(method == null ? -1 : method.getID());
-		button.setOnDoubleClickMethodID(-1);
-		button.setOnRightClickMethodID(-1);
+		button.setOnActionMethodID(method == null ? null : method.getUUID().toString());
+		button.setOnDoubleClickMethodID(null);
+		button.setOnRightClickMethodID(null);
 		button.setText(text);
 		button.setRolloverCursor(Cursor.HAND_CURSOR);
 		placeElementOnTop(button);
@@ -255,7 +255,7 @@ public class ElementFactory
 				try
 				{
 					Form form = (Form)(parent).getAncestor(IRepository.FORMS);
-					validator.checkName(newName, 0, new ValidatorSearchContext(form, type), false);
+					validator.checkName(newName, null, new ValidatorSearchContext(form, type), false);
 					break;
 				}
 				catch (RepositoryException e)
@@ -373,12 +373,12 @@ public class ElementFactory
 	public static IPersist createImage(ISupportFormElements parent, Media media, Point location) throws RepositoryException
 	{
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(parent);
-		ImageIcon ii = ImageLoader.getIcon(ComponentFactory.loadIcon(flattenedSolution, new Integer(media.getID())), -1, -1, true);
+		ImageIcon ii = ImageLoader.getIcon(ComponentFactory.loadIcon(flattenedSolution, media.getUUID().toString()), -1, -1, true);
 		if (ii == null) return null;
 
 		GraphicalComponent label = parent.createNewGraphicalComponent(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 		label.setText("");
-		label.setImageMediaID(media.getID());
+		label.setImageMediaID(media.getUUID().toString());
 		label.setTransparent(ImageLoader.imageHasAlpha(ii.getImage(), 0));
 		Dimension labeldim = new Dimension(ii.getIconWidth(), ii.getIconHeight());
 		if (labeldim.width < 10 || labeldim.height < 10)
@@ -862,7 +862,7 @@ public class ElementFactory
 		{
 			GraphicalComponent gc = parent.createNewGraphicalComponent(location);
 			gc.setText("button");
-			gc.setOnActionMethodID(-1);
+			gc.setOnActionMethodID(null);
 			gc.setDataProviderID(dp.getDataProviderID());
 			gc.setRolloverCursor(Cursor.HAND_CURSOR);
 			return gc;
@@ -1185,15 +1185,15 @@ public class ElementFactory
 
 		// include navigator size
 		Dimension navigatorSize = null;
-		int navigatorID = form.getNavigatorID();
-		if (navigatorID == Form.NAVIGATOR_DEFAULT && form.getView() != FormController.TABLE_VIEW && form.getView() != FormController.LOCKED_TABLE_VIEW)
+		String navigatorUUID = form.getNavigatorID();
+		if (navigatorUUID == Form.NAVIGATOR_DEFAULT && form.getView() != FormController.TABLE_VIEW && form.getView() != FormController.LOCKED_TABLE_VIEW)
 		{
 			navigatorSize = new Dimension(ISupportNavigator.DEFAULT_NAVIGATOR_WIDTH, 160);
 		}
-		else if (navigatorID != Form.NAVIGATOR_NONE)
+		else if (!Form.NAVIGATOR_NONE.equals(navigatorUUID))
 		{
 			navigatorSize = calculateFormSize(application,
-				ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getForm(navigatorID), processed);
+				ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getForm(navigatorUUID), processed);
 		}
 
 		if (navigatorSize != null)
@@ -1428,10 +1428,9 @@ public class ElementFactory
 					continue;
 				}
 
-				int methodId = repository.getElementIdForUUID(uuid);
-				if (methodId > 0)
+				if (uuid != null)
 				{
-					IScriptProvider scriptMethod = ModelUtils.getScriptMethod(form, null, flattenedSolution.getTable(form.getDataSource()), methodId);
+					IScriptProvider scriptMethod = ModelUtils.getScriptMethod(form, null, flattenedSolution.getTable(form.getDataSource()), uuid.toString());
 					if (scriptMethod != null)
 					{
 						object.put(key,
@@ -1540,7 +1539,7 @@ public class ElementFactory
 					{
 						try
 						{
-							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(n == 0 ? name : (name + n), -1,
+							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(n == 0 ? name : (name + n), null,
 								new ValidatorSearchContext(parentForm, IRepository.ELEMENTS), false);
 						}
 						catch (RepositoryException e)
@@ -1618,7 +1617,7 @@ public class ElementFactory
 										compName = baseName + i;
 										try
 										{
-											nameValidator.checkName(compName, -1, nameSearchContext, false);
+											nameValidator.checkName(compName, null, nameSearchContext, false);
 											supportsName.updateName(nameValidator, compName);
 											break;
 										}
@@ -1674,7 +1673,7 @@ public class ElementFactory
 					{
 						try
 						{
-							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(groupName, -1,
+							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(groupName, null,
 								new ValidatorSearchContext(parent, IRepository.ELEMENTS), false);
 							// groupName is ok
 							break;

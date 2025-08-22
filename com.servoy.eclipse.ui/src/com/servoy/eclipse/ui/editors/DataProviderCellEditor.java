@@ -73,7 +73,7 @@ public class DataProviderCellEditor extends DialogCellEditor
 		FlattenedSolution flattenedSolution, boolean readOnly, DataProviderOptions input, DataProviderConverter converter, ITable table, String... title)
 	{
 		super(parent, labelProvider, valueEditor, readOnly, SWT.NONE);
-		this.form = form instanceof FlattenedForm ? flattenedSolution.getForm(form.getID()) : form;
+		this.form = form instanceof FlattenedForm ? flattenedSolution.getForm(form.getUUID().toString()) : form;
 		this.flattenedSolution = flattenedSolution;
 		this.input = input;
 		this.converter = converter;

@@ -413,16 +413,16 @@ public class ModelUtils
 	 * @param methodId
 	 * @return
 	 */
-	public static IScriptProvider getScriptMethod(IPersist persist, IPersist context, ITable table, int methodId)
+	public static IScriptProvider getScriptMethod(IPersist persist, IPersist context, ITable table, String methodUUID)
 	{
-		if (methodId <= 0)
+		if (methodUUID == null)
 		{
 			return null;
 		}
 
 		// This will normally now return any method now..
 		FlattenedSolution editingFlattenedSolution = getEditingFlattenedSolution(persist, context);
-		ScriptMethod sm = editingFlattenedSolution.getScriptMethod(methodId);
+		ScriptMethod sm = editingFlattenedSolution.getScriptMethod(methodUUID);
 		if (sm == null)
 		{
 			// this code shouldn't be hit anymore
@@ -432,7 +432,7 @@ public class ModelUtils
 				while (tableNodes.hasNext())
 				{
 					TableNode tableNode = tableNodes.next();
-					IPersist method = AbstractBase.selectById(tableNode.getAllObjects(), methodId);
+					IPersist method = AbstractBase.selectByUUID(tableNode.getAllObjects(), methodUUID);
 					if (method instanceof IScriptProvider)
 					{
 						return (IScriptProvider)method;

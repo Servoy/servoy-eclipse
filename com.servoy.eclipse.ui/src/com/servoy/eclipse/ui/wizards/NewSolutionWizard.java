@@ -280,7 +280,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					addMediaFile(solution, ThemeResourceLoader.getCustomProperties(), ThemeResourceLoader.SOLUTION_PROPERTIES_LESS);
 					addMediaFile(solution, ThemeResourceLoader.getVariantsFile(), ThemeResourceLoader.VARIANTS_JSON);
 
-					solution.setStyleSheetID(defaultTheme.getID());
+					solution.setStyleSheetID(defaultTheme.getUUID().toString());
 					repository.updateRootObject(solution);
 				}
 			}

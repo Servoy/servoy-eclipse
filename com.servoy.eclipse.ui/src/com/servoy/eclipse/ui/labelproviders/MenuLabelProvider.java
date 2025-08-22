@@ -37,8 +37,7 @@ import com.servoy.j2db.persistence.Menu;
 
 public class MenuLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider, IDeprecationProvider
 {
-	public static final int MENU_NONE = 0;
-	public static final int MENU_UNRESOLVED = -1;
+	public static final String MENU_NONE_STRING = "-none-"; //$NON-NLS-1$";
 
 	private final FlattenedSolution flattenedSolution;
 
@@ -52,9 +51,7 @@ public class MenuLabelProvider extends LabelProvider implements IFontProvider, I
 	{
 		if (value == null) return Messages.LabelNone;
 
-		int vlmId = ((Integer)value).intValue();
-
-		if (vlmId == MENU_NONE)
+		if (MENU_NONE_STRING.equals(value))
 		{
 			return Messages.LabelNone;
 		}
@@ -72,9 +69,7 @@ public class MenuLabelProvider extends LabelProvider implements IFontProvider, I
 	{
 		if (value == null) return FontResource.getDefaultFont(SWT.ITALIC, 0);
 
-		int vlmId = ((Integer)value).intValue();
-
-		if (vlmId == MENU_NONE)
+		if (MENU_NONE_STRING.equals(value))
 		{
 			return FontResource.getDefaultFont(SWT.ITALIC, 0);
 		}
@@ -83,9 +78,9 @@ public class MenuLabelProvider extends LabelProvider implements IFontProvider, I
 
 	public IPersist getPersist(Object value)
 	{
-		if (value instanceof Integer)
+		if (value instanceof String)
 		{
-			return flattenedSolution.getMenu(((Integer)value).intValue());
+			return flattenedSolution.getMenu((String)value);
 		}
 		return null;
 	}

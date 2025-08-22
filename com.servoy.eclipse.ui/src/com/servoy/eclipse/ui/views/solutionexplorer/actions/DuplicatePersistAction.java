@@ -153,7 +153,7 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 					{
 						try
 						{
-							nameValidator.checkName(newText, -1, new ValidatorSearchContext(getPersistType()), false);
+							nameValidator.checkName(newText, null, new ValidatorSearchContext(getPersistType()), false);
 						}
 						catch (RepositoryException e)
 						{

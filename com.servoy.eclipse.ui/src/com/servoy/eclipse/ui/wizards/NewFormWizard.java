@@ -403,9 +403,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
 			}
 
-			if (form.isFormComponent().booleanValue() && servoyProject.getEditingSolution().getFirstFormID() == form.getID())
+			if (form.isFormComponent().booleanValue() && Utils.equalObjects(servoyProject.getEditingSolution().getFirstFormID(), form.getUUID().toString()))
 			{
-				servoyProject.getEditingSolution().setFirstFormID(0);
+				servoyProject.getEditingSolution().setFirstFormID(null);
 			}
 
 //			if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE)
@@ -420,7 +420,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				form.clearProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 				form.clearProperty(StaticContentSpecLoader.PROPERTY_SHOWINMENU.getPropertyName());
 			}
-			if (superForm != null) form.setExtendsID(superForm.getID());
+			if (superForm != null) form.setExtendsID(superForm.getUUID().toString());
 			// add selected data providers
 			DesignerPreferences designerPreferences = new DesignerPreferences();
 			if (dataProviderWizardPage != null && !form.isResponsiveLayout())
@@ -793,11 +793,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 				@Override
 				protected Object determineValue(String contents)
 				{
-					if ("-none-".equals(contents)) return Integer.valueOf(Form.NAVIGATOR_NONE);
+					if ("-none-".equals(contents)) return Form.NAVIGATOR_NONE;
 					Form frm = contents != null ? servoyProject.getEditingFlattenedSolution().getForm(contents.split(" ")[0]) : null;
 					if (frm != null)
 					{
-						return new Integer(frm.getID());
+						return frm.getUUID().toString();
 					}
 					return null;
 				}
@@ -812,11 +812,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			if (superForm != null)
 			{
-				extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(superForm.getID())));
+				extendsFormViewer.setSelection(new StructuredSelection(superForm.getUUID().toString()));
 			}
 			else
 			{
-				extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(Form.NAVIGATOR_NONE)));
+				extendsFormViewer.setSelection(new StructuredSelection(Form.NAVIGATOR_NONE));
 			}
 			extendsFormViewer.addStatusChangedListener(new IStatusChangedListener()
 			{
@@ -1270,10 +1270,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 			superForm = null;
 			if (!selection.isEmpty())
 			{
-				Object formId = selection.getFirstElement();
-				if (formId instanceof Integer)
+				Object formUUID = selection.getFirstElement();
+				if (formUUID instanceof String formUUIDString)
 				{
-					superForm = flattenedSolution.getForm(((Integer)formId).intValue());
+					superForm = flattenedSolution.getForm(formUUIDString);
 				}
 			}
 
@@ -1367,7 +1367,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					}
 
 					// extendsFormID
-					int extendsFormID = Form.NAVIGATOR_NONE;
+					String extendsFormUUID = Form.NAVIGATOR_NONE;
 					String formExtendsName = null;
 					if (formObject.has(StaticContentSpecLoader.PROPERTY_EXTENDSFORMID.getPropertyName()))
 					{
@@ -1382,10 +1382,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 						Form form = flattenedSolution.getForm(formExtendsName);
 						if (form != null)
 						{
-							extendsFormID = form.getID();
+							extendsFormUUID = form.getUUID().toString();
 						}
 					}
-					extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(extendsFormID)));
+					extendsFormViewer.setSelection(new StructuredSelection(extendsFormUUID));
 
 					// styleName
 					Style templateStyle = null;
@@ -1544,7 +1544,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				try
 				{
-					ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(formName, -1,
+					ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(formName, null,
 						new ValidatorSearchContext(null, IRepository.FORMS), false);
 				}
 				catch (RepositoryException e)

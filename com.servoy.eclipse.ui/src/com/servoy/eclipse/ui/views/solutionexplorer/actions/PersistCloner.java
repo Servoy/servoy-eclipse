@@ -141,21 +141,21 @@ public class PersistCloner
 							if (typeId == IRepository.ELEMENTS)
 							{
 								Object property_value = ((AbstractBase)o).getProperty(element.getName());
-								final int element_id = Utils.getAsInteger(property_value);
-								if (element_id > 0)
+								final UUID element_uuid = Utils.getAsUUID(property_value, false);
+								if (element_uuid != null)
 								{
 									boolean idFound = false;
 									Iterator<ScriptMethod> originalScriptMethods = original.getScriptMethods(false);
 									while (originalScriptMethods.hasNext())
 									{
 										ScriptMethod originalMethod = originalScriptMethods.next();
-										if (originalMethod.getID() == element_id)
+										if (originalMethod.getUUID().equals(element_uuid))
 										{
 											// reference to a method in the original form - change this to the duplicated form method
 											ScriptMethod duplicateMethod = duplicate.getScriptMethod(originalMethod.getName());
 											if (duplicateMethod != null)
 											{
-												((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateMethod.getID()));
+												((AbstractBase)o).setProperty(element.getName(), duplicateMethod.getUUID().toString());
 											}
 											idFound = true;
 										}
@@ -167,13 +167,13 @@ public class PersistCloner
 										while (originalScriptVariables.hasNext())
 										{
 											ScriptVariable originalVariable = originalScriptVariables.next();
-											if (originalVariable.getID() == element_id)
+											if (originalVariable.getUUID().equals(element_uuid))
 											{
 												// reference to a variable in the original form - change this to the duplicated form variable
 												ScriptVariable duplicateVariable = duplicate.getScriptVariable(originalVariable.getName());
 												if (duplicateVariable != null)
 												{
-													((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateVariable.getID()));
+													((AbstractBase)o).setProperty(element.getName(), duplicateVariable.getUUID().toString());
 												}
 											}
 										}
@@ -275,7 +275,7 @@ public class PersistCloner
 					for (Solution mod : fs.getModules())
 					{
 						FlattenedSolution editingFlattenedSolution = servoyModel.getServoyProject(mod.getName()).getEditingFlattenedSolution();
-						if (editingFlattenedSolution.getForm(clone.getID()) != null)
+						if (editingFlattenedSolution.getForm(clone.getUUID().toString()) != null)
 						{
 							editingFlattenedSolution.flushAllCachedData();
 						}

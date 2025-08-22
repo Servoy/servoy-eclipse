@@ -62,6 +62,7 @@ import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
 import com.servoy.eclipse.ui.wizards.NewAuthenticatorWizard;
 import com.servoy.eclipse.ui.wizards.NewOAuthConfigWizard;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -296,14 +297,14 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 				UUID uuid = Utils.getAsUUID(property, false);
 				ScriptMethod sm = (ScriptMethod)authenticatorModule.getAllObjectsAsList().stream().filter(persist -> persist.getUUID().equals(uuid))
 					.findFirst().orElse(null);
-				m = new MethodWithArguments(sm != null ? sm.getID() : -1, null);
+				m = new MethodWithArguments(sm != null ? sm.getUUID().toString() : "-1", null);
 			}
 
 			MethodDialog dialog = new MethodDialog(Display.getDefault().getActiveShell(),
 				new MethodLabelProvider(persistContext, false, true, true),
 				new MethodDialog.MethodTreeContentProvider(
 					persistContext),
-				new StructuredSelection(new Object[] { m.methodId == -1 ? MethodWithArguments.METHOD_NONE : m }),
+				new StructuredSelection(new Object[] { "-1".equals(m.methodUUID) ? MethodWithArguments.METHOD_NONE : m }),
 				new MethodListOptions(false, false, false, true, false, null), SWT.NONE, "Select Method", null);
 			dialog.setOptionsAreaFactory(new IControlFactory()
 			{
@@ -332,7 +333,7 @@ public class ComboboxPropertyAuthenticator<T> extends ComboboxPropertyController
 			}
 
 			MethodWithArguments selected = (MethodWithArguments)((StructuredSelection)dialog.getSelection()).getFirstElement();
-			ScriptMethod scriptMethod = authenticatorModule.getScriptMethod(selected.methodId);
+			ScriptMethod scriptMethod = AbstractBase.selectByUUID(authenticatorModule.getScriptMethods(null, false), selected.methodUUID);
 			if (scriptMethod == null)
 			{
 				editingSolution.clearCustomProperty(new String[] { OAUTH_CONFIG_METHOD_PROPERTY });

@@ -33,7 +33,6 @@ import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -78,11 +77,11 @@ public class ChangeSuperFormQuickFix implements IMarkerResolution
 		{
 			if (!dlg.getSelection().isEmpty())
 			{
-				Object formId = ((StructuredSelection)dlg.getSelection()).getFirstElement();
-				if (formId instanceof Integer)
+				Object formUUID = ((StructuredSelection)dlg.getSelection()).getFirstElement();
+				if (formUUID instanceof String)
 				{
-					Form superForm = project.getEditingSolution().getForm(((Integer)formId).intValue());
-					form.setExtendsID(superForm != null ? superForm.getID() : AbstractBase.DEFAULT_INT);
+					Form superForm = project.getEditingSolution().getForm(formUUID.toString());
+					form.setExtendsID(superForm != null ? superForm.getUUID().toString() : null);
 					try
 					{
 						project.saveEditingSolutionNodes(new IPersist[] { form }, false);

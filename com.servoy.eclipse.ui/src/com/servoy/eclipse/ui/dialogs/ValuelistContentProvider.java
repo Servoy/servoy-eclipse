@@ -29,9 +29,9 @@ import com.servoy.j2db.persistence.ValueList;
 
 /**
  * Content provider class for value lists.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 
 public class ValuelistContentProvider extends FlatTreeContentProvider
@@ -53,8 +53,8 @@ public class ValuelistContentProvider extends FlatTreeContentProvider
 		{
 			ValuelistListOptions options = (ValuelistListOptions)inputElement;
 
-			List<Integer> vlIds = new ArrayList<Integer>();
-			if (options.includeNone) vlIds.add(new Integer(ValuelistLabelProvider.VALUELIST_NONE));
+			List<String> vlUUIDS = new ArrayList<String>();
+			if (options.includeNone) vlUUIDS.add(ValuelistLabelProvider.VALUELIST_NONE_STRING);
 
 			Iterator<ValueList> it = flattenedSolution.getValueLists(true);
 			while (it.hasNext())
@@ -64,10 +64,10 @@ public class ValuelistContentProvider extends FlatTreeContentProvider
 				{
 					continue;
 				}
-				vlIds.add(new Integer(obj.getID()));
+				vlUUIDS.add(obj.getUUID().toString());
 			}
 
-			return vlIds.toArray();
+			return vlUUIDS.toArray();
 		}
 
 		return super.getElements(inputElement);
