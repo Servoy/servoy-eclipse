@@ -350,6 +350,10 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="3.2.0"/>
 
    <plugin
+         id="jakarta.transaction-api"
+         version="2.0.1"/>
+
+   <plugin
          id="com.servoy.eclipse.jre.macosx.aarch64"
          os="macosx"
          arch="aarch64"
