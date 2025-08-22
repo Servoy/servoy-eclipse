@@ -434,8 +434,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         this.agGrid.api.refreshServerSide({ purge: true });
                         this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
                     }
+                    else if (changes.length == 1 && changes[0].startIndex === changes[0].endIndex){
+						this.agGrid.api.refreshCells();	
+					}
 					else {
-                        this.agGrid.api.refreshCells();	
+						this.agGrid.api.refreshServerSide({ purge: true });	
 					}
                 }
                 if(event.selectedRowIndexesChanged) {
