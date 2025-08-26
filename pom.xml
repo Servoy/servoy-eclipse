@@ -11,7 +11,7 @@
 	<version>2025.9.0.4100_rc</version>
 	<properties>
 		<tycho.version>4.0.12</tycho.version>
-		<rhino.version>1.8.0.s6</rhino.version>
+		<rhino.version>1.8.0.s7</rhino.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
