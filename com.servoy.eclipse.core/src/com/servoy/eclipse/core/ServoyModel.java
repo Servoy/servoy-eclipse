@@ -1598,7 +1598,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						}
 						else
 						{
-							dataModelManager = null;
+							dataModelManager = new DataModelManager(null, serverManager);
 							sequenceProvider = null;
 						}
 						if (old != null)
@@ -1670,6 +1670,10 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						// so we must reload the form security access info
 						getUserManager().reloadAllFormInfo();
 						monitor.worked(4);
+					}
+					if (activeResourcesProject == null && dataModelManager == null)
+					{
+						dataModelManager = new DataModelManager(null, ApplicationServerRegistry.get().getServerManager());
 					}
 				}
 				finally

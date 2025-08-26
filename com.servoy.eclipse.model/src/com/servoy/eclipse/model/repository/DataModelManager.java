@@ -307,7 +307,7 @@ public class DataModelManager implements IServerInfoManager
 	{
 		if (server == null || tableName == null || !server.getConfig().isEnabled() || !server.isValid()) return TableMetaInfo.DEFAULT; // this should never happen
 		IFile file = getDBIFile(server.getConfig().getDataModelCloneFrom() != null ? server.getConfig().getDataModelCloneFrom() : server.getName(), tableName);
-		if (file.exists())
+		if (file != null && file.exists())
 		{
 			InputStream is = null;
 			String errMsg = null;
