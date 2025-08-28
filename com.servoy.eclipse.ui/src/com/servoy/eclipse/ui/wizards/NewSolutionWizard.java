@@ -81,7 +81,6 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaWebAppManifest;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
@@ -144,15 +143,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
-		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
-		{
-			solutions.add(NewSolutionWizardDefaultPackages.SVYGEN_TEMPLATES);
-			solutionName = AISolutionGenerator.getAIGeneratedJSON(configPage.getSvyGenPath()).optString("projectName", "new_ai_gen_solution");
-		}
-		else
-		{
-			solutionName = configPage.getNewSolutionName();
-		}
+//		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+//		{
+//			solutions.add(NewSolutionWizardDefaultPackages.SVYGEN_TEMPLATES);
+//			solutionName = AISolutionGenerator.getAIGeneratedJSON(configPage.getSvyGenPath()).optString("projectName", "new_ai_gen_solution");
+//		}
+//		else
+//		{
+		solutionName = configPage.getNewSolutionName();
+//		}
 
 		final boolean mustAuthenticate = configPage.mustAuthenticate();
 		IRunnableWithProgress newSolutionRunnable = new IRunnableWithProgress()
@@ -165,14 +164,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				try
 				{
 					Solution solution = null;
-					if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
-					{
-						solution = AISolutionGenerator.createSolutionFromAIContent(configPage.getSvyGenPath());
-					}
-					else
-					{
-						solution = (Solution)repository.createNewRootObject(solutionName, IRepository.SOLUTIONS);
-					}
+//					if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+//					{
+//						solution = AISolutionGenerator.createSolutionFromAIContent(configPage.getSvyGenPath());
+//					}
+//					else
+//					{
+					solution = (Solution)repository.createNewRootObject(solutionName, IRepository.SOLUTIONS);
+//					}
 
 					String modulesTokenized = ModelUtils.getTokenValue(solutions.toArray(new String[] { }), ",");
 					solution.setModulesNames(modulesTokenized);
@@ -232,7 +231,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						int solutionType = configPage.getSolutionType();
 						solution.setSolutionType(solutionType);
 
-						solution.putCustomProperty(new String[] { "svygen_path" }, configPage.getSvyGenPath());
+//						solution.putCustomProperty(new String[] { "svygen_path" }, configPage.getSvyGenPath());
 
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
@@ -367,7 +366,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					else
 					{
 						servoyModel.setActiveProject(newProject, true);
-						genAISol(newProject);
+//						genAISol(newProject);
 					}
 				}
 				else
@@ -476,17 +475,17 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return true;
 	}
 
-	private void genAISol(ServoyProject activeProject)
-	{
-		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
-		{
-			if (activeProject == null)
-			{
-				throw new RuntimeException("No active project found to generate solution from AI content.");
-			}
-			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
-		}
-	}
+//	private void genAISol(ServoyProject activeProject)
+//	{
+//		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+//		{
+//			if (activeProject == null)
+//			{
+//				throw new RuntimeException("No active project found to generate solution from AI content.");
+//			}
+//			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
+//		}
+//	}
 
 	public static IRunnableWithProgress importSolutions(final Map<String, SolutionPackageInstallInfo> solutions, final String jobName, String newSolutionName,
 		boolean activateSolution, boolean overwriteModules)
@@ -855,8 +854,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	@Override
 	public boolean canFinish()
 	{
-		return super.canFinish() && ((searchMissingServers(configPage.getSolutionsToImport()).isEmpty() || canCreateMissingServers()) ||
-			configPage.getSvyGenPath().isEmpty());
+		return super.canFinish() && ((searchMissingServers(configPage.getSolutionsToImport()).isEmpty() || canCreateMissingServers())
+		/* || configPage.getSvyGenPath().isEmpty() */);
 	}
 
 

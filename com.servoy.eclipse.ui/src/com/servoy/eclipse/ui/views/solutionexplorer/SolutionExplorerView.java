@@ -353,7 +353,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private ContextAction newActionInTreeTertiary;
 
-	private RegenerateSolutionFromAISourcesAction regenerateSolutionFromAIAction;
+//	private RegenerateSolutionFromAISourcesAction regenerateSolutionFromAIAction;
 
 	private ReplaceTableAction replaceActionInTree;
 	private ReplaceServerAction replaceServerAction;
@@ -2022,16 +2022,16 @@ public class SolutionExplorerView extends ViewPart
 
 	private void handleActiveProjectChanged(final ServoyProject activeProject)
 	{
-		newActionInTreeTertiary.unregisterAction(regenerateSolutionFromAIAction);
-		if (activeProject != null)
-		{
-			Solution editingSolution = activeProject.getSolution();
-			Object property = editingSolution.getCustomProperty(new String[] { "svygen_path" });
-			if (property != null)
-			{
-				newActionInTreeTertiary.registerAction(UserNodeType.SOLUTION, regenerateSolutionFromAIAction);
-			}
-		}
+//		newActionInTreeTertiary.unregisterAction(regenerateSolutionFromAIAction);
+//		if (activeProject != null)
+//		{
+//			Solution editingSolution = activeProject.getSolution();
+//			Object property = editingSolution.getCustomProperty(new String[] { "svygen_path" });
+//			if (property != null)
+//			{
+//				newActionInTreeTertiary.registerAction(UserNodeType.SOLUTION, regenerateSolutionFromAIAction);
+//			}
+//		}
 
 		boolean showFirstForm = this.loadFirstForm;
 		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(activeProject));
@@ -3533,7 +3533,7 @@ public class SolutionExplorerView extends ViewPart
 
 		debugMethodAction = new DebugMethodAction(this);
 
-		regenerateSolutionFromAIAction = new RegenerateSolutionFromAISourcesAction();
+//		regenerateSolutionFromAIAction = new RegenerateSolutionFromAISourcesAction();
 
 		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		IAction openRelation = new OpenRelationAction(); // must be another instance

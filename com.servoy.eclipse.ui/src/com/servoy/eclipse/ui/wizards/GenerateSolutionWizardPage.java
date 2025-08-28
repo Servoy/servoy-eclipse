@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.ui.wizards;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,10 +25,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -53,7 +50,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -70,7 +66,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IRepository;
@@ -98,8 +93,9 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private int solutionType;
 	private Label configLabel;
 	private NewSolutionWizard wizard;
-	private Text svyGenLocationText;
-	private Button svyGenBrowseButton;
+//	private Text svyGenLocationText;
+//	private Button svyGenBrowseButton;
+//	private String svyGenLocation;
 
 	protected static final String IS_ADVANCED_USER_SETTING = "is_advanced_user";
 	protected static final String SELECTED_SOLUTIONS_SETTING = "selected_solutions";
@@ -118,7 +114,6 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	private final IEclipsePreferences preferences = Activator.getDefault().getEclipsePreferences();
-	private String svyGenLocation;
 
 	protected GenerateSolutionWizardPage(String pageName)
 	{
@@ -155,48 +150,49 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		});
 
 		// svy gen location
-		svyGenLocation = preferences.get(wizard.getSettingsPrefix() + ".svygenlocation", "");
-		Label locationLabel = new Label(topLevel, SWT.NONE);
-		locationLabel.setText("Generate project using SvyGen: ");
-		svyGenLocationText = new Text(topLevel, SWT.BORDER);
-		svyGenLocationText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		svyGenLocationText.addListener(SWT.FocusOut, new Listener()
-		{
-
-			@Override
-			public void handleEvent(Event event)
-			{
-				File f = new File(svyGenLocationText.getText());
-				if (f.exists())
-				{
-					handleSvyGenLocationChanged(svyGenLocationText.getText());
-				}
-				else
-				{
-					svyGenLocationText.setText("");
-					MessageDialog.openError(getShell(), "SVYGen Spec Location Error", "Please select an existing location.");
-				}
-
-			}
-		});
-
-		svyGenBrowseButton = new Button(topLevel, SWT.PUSH);
-		svyGenBrowseButton.setText("Browse...");
-		svyGenBrowseButton.addListener(SWT.Selection, new Listener()
-		{
-
-			@Override
-			public void handleEvent(Event event)
-			{
-				DirectoryDialog dlg = new DirectoryDialog(UIUtils.getActiveShell(), SWT.SAVE);
-				dlg.setFilterPath("".equals(svyGenLocation) ? ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() : svyGenLocation);
-				String chosenFileName = dlg.open();
-				if (chosenFileName != null)
-				{
-					handleSvyGenLocationChanged(chosenFileName);
-				}
-			}
-		});
+//		svyGenLocation = preferences.get(wizard.getSettingsPrefix() + ".svygenlocation", "");
+//		Label locationLabel = new Label(topLevel, SWT.NONE);
+//		locationLabel.setText("Generate project using SvyGen: ");
+//		locationLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+//		svyGenLocationText = new Text(topLevel, SWT.BORDER);
+//		svyGenLocationText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//		svyGenLocationText.addListener(SWT.FocusOut, new Listener()
+//		{
+//
+//			@Override
+//			public void handleEvent(Event event)
+//			{
+//				File f = new File(svyGenLocationText.getText());
+//				if (f.exists())
+//				{
+//					handleSvyGenLocationChanged(svyGenLocationText.getText());
+//				}
+//				else
+//				{
+//					svyGenLocationText.setText("");
+//					MessageDialog.openError(getShell(), "SVYGen Spec Location Error", "Please select an existing location.");
+//				}
+//
+//			}
+//		});
+//
+//		svyGenBrowseButton = new Button(topLevel, SWT.PUSH);
+//		svyGenBrowseButton.setText("Browse...");
+//		svyGenBrowseButton.addListener(SWT.Selection, new Listener()
+//		{
+//
+//			@Override
+//			public void handleEvent(Event event)
+//			{
+//				DirectoryDialog dlg = new DirectoryDialog(UIUtils.getActiveShell(), SWT.SAVE);
+//				dlg.setFilterPath("".equals(svyGenLocation) ? ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() : svyGenLocation);
+//				String chosenFileName = dlg.open();
+//				if (chosenFileName != null)
+//				{
+//					handleSvyGenLocationChanged(chosenFileName);
+//				}
+//			}
+//		});
 
 		Composite tableContainer = addConfigureModules(isModuleWizard);
 		addAdvancedSettings(isModuleWizard);
@@ -219,12 +215,11 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 6));
 		}
 
-		locationLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 
-		GridData svyTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		svyTextGridData.minimumWidth = 300;
-		svyGenLocationText.setLayoutData(svyTextGridData);
-		svyGenBrowseButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+//		GridData svyTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//		svyTextGridData.minimumWidth = 300;
+//		svyGenLocationText.setLayoutData(svyTextGridData);
+//		svyGenBrowseButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1);
 		gridData.minimumWidth = 650;
@@ -366,11 +361,11 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		}
 
 		String error = null;
-		if (solutionNameField.getText().trim().length() == 0 && svyGenLocationText.getText().length() == 0)
+		if (solutionNameField.getText().trim().length() == 0 /* && svyGenLocationText.getText().length() == 0 */)
 		{
 			error = "Please give a name for the new solution";
 		}
-		if (error == null && svyGenLocationText.getText().length() == 0)
+		if (error == null /* && svyGenLocationText.getText().length() == 0 */)
 		{
 			// see if solution name is OK
 			if (!IdentDocumentValidator.isJavaIdentifier(solutionName))
@@ -766,22 +761,22 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		}
 	}
 
-	private void handleSvyGenLocationChanged(String chosenFileName)
-	{
-		svyGenLocationText.setText(chosenFileName);
-		svyGenLocation = chosenFileName;
-		preferences.put(wizard.getSettingsPrefix() + ".svygenlocation", svyGenLocation);
-
-		solutionNameField.setEnabled(chosenFileName.length() == 0);
-		if (chosenFileName.length() > 0)
-		{
-			solutionNameField.setText("");
-			solutionName = null;
-		}
-	}
-
-	public String getSvyGenPath()
-	{
-		return svyGenLocation;
-	}
+//	private void handleSvyGenLocationChanged(String chosenFileName)
+//	{
+//		svyGenLocationText.setText(chosenFileName);
+//		svyGenLocation = chosenFileName;
+//		preferences.put(wizard.getSettingsPrefix() + ".svygenlocation", svyGenLocation);
+//
+//		solutionNameField.setEnabled(chosenFileName.length() == 0);
+//		if (chosenFileName.length() > 0)
+//		{
+//			solutionNameField.setText("");
+//			solutionName = null;
+//		}
+//	}
+//
+//	public String getSvyGenPath()
+//	{
+//		return svyGenLocation;
+//	}
 }
