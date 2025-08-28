@@ -27,6 +27,8 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 
 /**
  * @author emera
@@ -51,6 +53,15 @@ public class ConfigureLessThemeAction extends Action implements ISelectionChange
 		{
 			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
 			state = (node.getType() == UserNodeType.SOLUTION && node.getRealObject() != null);
+			if (state && node.getRealObject() instanceof ServoyProject sp)
+			{
+				Media media = sp.getSolution().getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
+				if (media == null)
+				{
+					media = sp.getSolution().getMedia(ThemeResourceLoader.SOLUTION_PROPERTIES_LESS);
+				}
+				state = media != null;
+			}
 		}
 		setEnabled(state);
 	}
@@ -59,10 +70,9 @@ public class ConfigureLessThemeAction extends Action implements ISelectionChange
 	public void run()
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
-		if (node.getRealObject() instanceof ServoyProject)
+		if (node.getRealObject() instanceof ServoyProject sp)
 		{
-			final ServoyProject project = (ServoyProject)node.getRealObject();
-			EditorUtil.openThemeEditor(project.getSolution());
+			EditorUtil.openThemeEditor(sp.getSolution());
 		}
 	}
 }

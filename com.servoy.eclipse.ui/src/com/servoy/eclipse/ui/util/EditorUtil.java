@@ -727,22 +727,29 @@ public class EditorUtil
 	public static void openThemeEditor(final IMediaProvider project)
 	{
 		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
-		Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
-		Path path = new Path(pathPair.getLeft() + pathPair.getRight());
-		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-		try
+		if (media == null)
 		{
-			IWorkbenchPage activePage = getActivePage();
-			if (activePage != null)
-			{
-				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
-				activePage.openEditor(PropertiesLessEditorInput.createFromFileEditorInput(new FileEditorInput(file)), desc.getId(),
-					true);
-			}
+			media = project.getMedia(ThemeResourceLoader.SOLUTION_PROPERTIES_LESS);
 		}
-		catch (PartInitException ex)
+		if (media != null)
 		{
-			ServoyLog.logError(ex);
+			Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
+			Path path = new Path(pathPair.getLeft() + pathPair.getRight());
+			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+			try
+			{
+				IWorkbenchPage activePage = getActivePage();
+				if (activePage != null)
+				{
+					IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
+					activePage.openEditor(PropertiesLessEditorInput.createFromFileEditorInput(new FileEditorInput(file)), desc.getId(),
+						true);
+				}
+			}
+			catch (PartInitException ex)
+			{
+				ServoyLog.logError(ex);
+			}
 		}
 	}
 
