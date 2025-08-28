@@ -20,6 +20,7 @@
 --add-modules=ALL-SYSTEM
 --add-exports java.desktop/sun.java2d=ALL-UNNAMED
 -Dp2.trustedAuthorities=https://download.servoy.com,https://developer.servoy.com,https://download.eclipse.org
+-Dchromium.integration.eclipse.disable=true
       </vmArgs>
       <vmArgsLin>-Dchromium.suspend_threads=false
       </vmArgsLin>
