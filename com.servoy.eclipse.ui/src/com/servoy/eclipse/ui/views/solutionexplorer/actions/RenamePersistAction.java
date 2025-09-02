@@ -30,6 +30,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Form;
@@ -44,7 +45,7 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 
 	public RenamePersistAction()
 	{
-
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("rename_form.png"));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
