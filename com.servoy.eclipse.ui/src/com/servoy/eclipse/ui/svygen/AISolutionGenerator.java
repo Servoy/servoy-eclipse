@@ -31,7 +31,6 @@ import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -167,7 +166,7 @@ public class AISolutionGenerator
 				if (inlineStyleToBeAddedToFormCssOrLess != null)
 				{
 					form.setFormCss(inlineStyleToBeAddedToFormCssOrLess);
-					ResourcesUtils.createFileAndParentContainers(getFormCSSFile(form),
+					ResourcesUtils.createFileAndParentContainers(SolutionSerializer.getFormLESSFile(form),
 						new ByteArrayInputStream(inlineStyleToBeAddedToFormCssOrLess.getBytes("UTF8")),
 						true);
 				}
@@ -343,19 +342,11 @@ public class AISolutionGenerator
 		}
 	}
 
-	public static IFile getFormCSSFile(Form form)
-	{
-		Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
-		IFile file = ServoyModel.getWorkspace().getRoot()
-			.getFile(new Path(formFilePath.getLeft() + form.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
-		return file;
-	}
-
 	public static void createFormCSS(Form frm, String css)
 	{
 		try
 		{
-			ResourcesUtils.createFileAndParentContainers(getFormCSSFile(frm), new ByteArrayInputStream(css.getBytes("UTF8")),
+			ResourcesUtils.createFileAndParentContainers(SolutionSerializer.getFormLESSFile(frm), new ByteArrayInputStream(css.getBytes("UTF8")),
 				true);
 		}
 		catch (UnsupportedEncodingException | CoreException e)

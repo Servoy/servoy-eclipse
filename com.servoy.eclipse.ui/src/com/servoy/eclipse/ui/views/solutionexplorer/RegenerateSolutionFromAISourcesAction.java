@@ -26,6 +26,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
@@ -70,7 +71,7 @@ public class RegenerateSolutionFromAISourcesAction extends Action
 					{
 						try
 						{
-							AISolutionGenerator.getFormCSSFile(frm).delete(true, null);
+							SolutionSerializer.getFormLESSFile(frm).delete(true, null);
 						}
 						catch (CoreException e)
 						{

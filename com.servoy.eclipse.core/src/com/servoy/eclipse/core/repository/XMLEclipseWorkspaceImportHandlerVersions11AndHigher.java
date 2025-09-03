@@ -400,8 +400,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 							{
 								if (newResourcesProjectName != null)
 								{
-									// create the resources project
-									// create a new resource project
+									// create a new resources project
 									rProject[0] = ServoyModel.getWorkspace().getRoot().getProject(newResourcesProjectName);
 									rProject[0].create(null);
 									rProject[0].open(null);

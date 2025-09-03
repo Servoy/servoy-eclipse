@@ -351,7 +351,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private ContextAction newActionInTreeSecondary;
 
-	private ContextAction newActionInTreeTertiary;
+//	private ContextAction newActionInTreeTertiary;
 
 //	private RegenerateSolutionFromAISourcesAction regenerateSolutionFromAIAction;
 
@@ -2720,7 +2720,7 @@ public class SolutionExplorerView extends ViewPart
 		{
 			if (newActionInTreePrimary.isEnabled()) manager.add(newActionInTreePrimary);
 			if (newActionInTreeSecondary.isEnabled()) manager.add(newActionInTreeSecondary);
-			if (newActionInTreeTertiary.isEnabled()) manager.add(newActionInTreeTertiary);
+//			if (newActionInTreeTertiary.isEnabled()) manager.add(newActionInTreeTertiary);
 
 			if (createActionInTree.isEnabled()) manager.add(createActionInTree);
 		}
@@ -3248,8 +3248,8 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.setId("com.servoy.action.new");
 		newActionInTreeSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");
-		newActionInTreeTertiary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
-			"New");
+//		newActionInTreeTertiary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
+//			"New");
 		createActionInTree = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"Create");
 		newActionInListSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
@@ -3650,7 +3650,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(loadRelationsAction);
 		addTreeSelectionChangedListener(newActionInTreePrimary);
 		addTreeSelectionChangedListener(newActionInTreeSecondary);
-		addTreeSelectionChangedListener(newActionInTreeTertiary);
+//		addTreeSelectionChangedListener(newActionInTreeTertiary);
 		addTreeSelectionChangedListener(createActionInTree);
 		addTreeSelectionChangedListener(newComponentsPackageProjectAction);
 		addTreeSelectionChangedListener(newServicesPackageProjectAction);

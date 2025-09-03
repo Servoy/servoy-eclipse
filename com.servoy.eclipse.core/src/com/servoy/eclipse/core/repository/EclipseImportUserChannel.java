@@ -830,18 +830,4 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		});
 	}
 
-	@Override
-	public void addFormCss(String uuid, String css)
-	{
-		if (css != null && css.length() > 0)
-		{
-			formCss.put(uuid, css);
-		}
-	}
-
-	@Override
-	public Map<String, String> getFormCss()
-	{
-		return formCss;
-	}
 }

@@ -714,28 +714,35 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.showFinishDialog(false);
 
 		String newResourceProjectName = null;
-		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
-		if (project == null && packageInfo.forceActivateResourcesProject)
+		ServoyResourcesProject resourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+		if (resourcesProject == null && packageInfo.forceActivateResourcesProject)
 		{
 			ServoyProject sol = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
-			final String selectedResourceProjectName = sol != null && sol.getResourcesProject() != null ? sol.getResourcesProject().getProject().getName()
-				: "resources";
-			newResourceProjectName = selectedResourceProjectName;
-			if (project == null && ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+			final ServoyResourcesProject selectedResourcesProject = (sol != null ? sol.getResourcesProject() : null);
+			if (selectedResourcesProject != null)
 			{
-				project = Arrays.stream(ServoyModelManager.getServoyModelManager().getServoyModel().getResourceProjects())
-					.filter(p -> p.getProject().getName().equals(selectedResourceProjectName)).findFirst().orElse(null);
+				resourcesProject = selectedResourcesProject;
 			}
 			else
 			{
-				int counter = 1;
-				while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+				// try to find default resources project with name "resources" // TODO why do we do this? shouldn't we just create
+				// a new one? if not, why not use any other available resources project in the workspace if "resources" is not found?
+				resourcesProject = Arrays.stream(ServoyModelManager.getServoyModelManager().getServoyModel().getResourceProjects())
+					.filter(p -> p.getProject().getName().equals("resources")).findFirst().orElse(null);
+
+				if (resourcesProject == null)
 				{
-					newResourceProjectName = "resources" + counter++;
+					newResourceProjectName = "resources";
+					// didn't find an existing one or default one, give a name that can be used as a new resources project
+					int counter = 1;
+					while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+					{
+						newResourceProjectName = "resources" + counter++;
+					}
 				}
 			}
 		}
-		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, project, false, false, false, null, null,
+		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, resourcesProject, false, false, false, null, null,
 			monitor, packageInfo.forceActivateResourcesProject, packageInfo.keepResourcesProjectOpen, projectsToDeleteAfterImport);
 		importDatasources[0] = importSolutionWizard.shouldImportDatasources();
 		// write the wpm version into the new solution project
