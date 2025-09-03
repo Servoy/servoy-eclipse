@@ -86,24 +86,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.gef"
          version="0.0.0"/>
 
-   <includes
-         id="com.equo.chromium.cef.feature"
-         version="0.0.0"
-         arch="x86_64"/>
-
-   <includes
-         id="com.equo.chromium.feature"
-         version="0.0.0"
-         arch="x86_64"/>
-
-   <includes
-         id="com.equo.chromium.cef.arm.feature"
-         version="0.0.0"/>
-
-   <includes
-         id="com.equo.chromium.eclipse.feature"
-         version="0.0.0"/>
-
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
@@ -402,5 +384,53 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    <plugin
          id="org.apache.logging.log4j.jakarta.web"
          version="2.25.1"/>
+
+   <plugin
+         id="com.equo.chromium"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.cocoa.macosx.aarch64"
+         os="macosx"
+         arch="aarch64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.cocoa.macosx.x86_64"
+         os="macosx"
+         arch="x86_64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.gtk.linux.aarch64"
+         os="linux"
+         arch="aarch64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.gtk.linux.x86_64"
+         os="linux"
+         arch="x86_64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.win32.win32.aarch64"
+         os="win32"
+         arch="aarch64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.win32.win32.x86_64"
+         os="win32"
+         arch="x86_64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.eclipse"
+         version="1.0.11"/>
+
+   <plugin
+         id="com.equo.chromium.eclipse.hook"
+         version="1.0.11"/>
 
 </feature>

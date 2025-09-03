@@ -26,7 +26,6 @@ import java.util.stream.IntStream;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -66,7 +65,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
-import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -113,7 +111,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private static String[] toImport = new String[] { UTILS, SEARCH };
 	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
-	private final IEclipsePreferences preferences = Activator.getDefault().getEclipsePreferences();
+//	private final IEclipsePreferences preferences = Activator.getDefault().getEclipsePreferences();
 
 	protected GenerateSolutionWizardPage(String pageName)
 	{
@@ -149,7 +147,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			}
 		});
 
-		// svy gen location
+//		// svy gen location
 //		svyGenLocation = preferences.get(wizard.getSettingsPrefix() + ".svygenlocation", "");
 //		Label locationLabel = new Label(topLevel, SWT.NONE);
 //		locationLabel.setText("Generate project using SvyGen: ");
@@ -194,35 +192,57 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 //			}
 //		});
 
-		Composite tableContainer = addConfigureModules(isModuleWizard);
-		addAdvancedSettings(isModuleWizard);
-
-		// layout of the page
-		GridLayout gridLayout = new GridLayout(3, false);
-		gridLayout.marginWidth = 20;
-		gridLayout.marginHeight = 20;
-		gridLayout.verticalSpacing = 10;
-		topLevel.setLayout(gridLayout);
-		topLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		solutionLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		GridData solutionFieldData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-		solutionNameField.setLayoutData(solutionFieldData);
-
-		if (!isModuleWizard)
-		{
-			configLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
-			tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 6));
-		}
-
-
+//		Composite tableContainer = addConfigureModules(isModuleWizard);
+//		addAdvancedSettings(isModuleWizard);
+//
+//		// layout of the page
+//		GridLayout gridLayout = new GridLayout(3, false);
+//		gridLayout.marginWidth = 20;
+//		gridLayout.marginHeight = 20;
+//		gridLayout.verticalSpacing = 10;
+//		topLevel.setLayout(gridLayout);
+//		topLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//
+//		solutionLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+//		GridData solutionFieldData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+//		solutionNameField.setLayoutData(solutionFieldData);
+//
+//		if (!isModuleWizard)
+//		{
+//			configLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+//			tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 6));
+//		}
+//
 //		GridData svyTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 //		svyTextGridData.minimumWidth = 300;
 //		svyGenLocationText.setLayoutData(svyTextGridData);
 //		svyGenBrowseButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+//
+//		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1);
+//		gridData.minimumWidth = 650;
+//		excomposite.setLayoutData(gridData);
 
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1);
-		gridData.minimumWidth = 650;
+		Composite tableContainer = addConfigureModules(isModuleWizard);
+		addAdvancedSettings(isModuleWizard);
+
+		// layout of the page
+		GridLayout gridLayout = new GridLayout(2, false);
+		gridLayout.marginWidth = gridLayout.marginHeight = 0;
+		gridLayout.marginTop = gridLayout.marginBottom = gridLayout.marginLeft = gridLayout.marginRight = 20;
+		gridLayout.verticalSpacing = 10;
+		topLevel.setLayout(gridLayout);
+		topLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		solutionLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
+		solutionNameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+
+		if (!isModuleWizard)
+		{
+			configLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 6));
+		}
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
+		gridData.minimumWidth = 650; // otherwise the resources project text is not visible
 		excomposite.setLayoutData(gridData);
 	}
 

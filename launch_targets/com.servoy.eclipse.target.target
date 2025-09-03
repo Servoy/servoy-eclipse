@@ -2,11 +2,11 @@
 <?pde version="3.8"?>
 <target includeMode="feature" name="eclipse_sources" sequenceNumber="60">
     <locations>    
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+        <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+        <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="http://download.eclipse.org/nattable/releases/2.5.0/repository/"/>
             <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.5.0.202411280718"/>
             <unit id="org.eclipse.nebula.widgets.nattable.core.feature.source.feature.group" version="2.5.0.202411280718"/>
@@ -15,18 +15,18 @@
             <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.feature.group" version="2.5.0.202411280718"/>
             <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.source.feature.group" version="2.5.0.202411280718"/>
         </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+        <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.09/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202507231516"/>
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202508121425"/>
         </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+        <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/eclipse/updates/4.36/"/>
             <unit id="org.eclipse.emf.ecore.feature.group" version="2.40.0.v20250414-1351"/>
             <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.2900.v20250519-0528"/>
             <unit id="org.eclipse.sdk.ide" version="4.36.0.I20250528-1830"/>
         </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+        <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/releases/2025-06"/>
             <unit id="org.eclipse.egit.feature.group" version="7.3.0.202506031305-r"/>
             <unit id="org.eclipse.epp.mpc.feature.group" version="1.12.1.v20250508-2126"/>
@@ -35,24 +35,17 @@
             <unit id="org.eclipse.jgit.lfs.feature.group" version="7.3.0.202506031305-r"/>
             <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.37.0.v202502280419"/>
         </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+        <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/tm4e/releases/0.15.0/"/>
             <unit id="org.eclipse.tm4e.feature.feature.group" version="0.15.0.202506111431"/>
             <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.15.0.202506111431"/>
         </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+        <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/tools/gef/classic/release/3.24.0"/>
             <unit id="org.eclipse.draw2d.feature.group" version="3.24.0.202505280821"/>
             <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.24.0.202505280821"/>
             <unit id="org.eclipse.gef.feature.group" version="3.24.0.202505280821"/>
             <unit id="org.eclipse.gef.sdk.feature.group" version="3.24.0.202505280821"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://dl.equo.dev/chromium-swt-ee/servoy/p2/128"/>
-            <unit id="com.equo.chromium.cef.arm.feature.feature.group" version="128.0.16"/>
-            <unit id="com.equo.chromium.cef.feature.feature.group" version="128.0.16"/>
-            <unit id="com.equo.chromium.eclipse.feature.feature.group" version="1.0.11"/>
-            <unit id="com.equo.chromium.feature.feature.group" version="128.0.16"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
@@ -410,8 +403,57 @@
                     <version>2.4</version>
                     <type>jar</type>
                 </dependency>
+                <dependency>
+                    <groupId>com.equo</groupId>
+                    <artifactId>com.equo.chromium</artifactId>
+                    <version>128.0.18</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.equo</groupId>
+                    <artifactId>com.equo.chromium.eclipse.hook</artifactId>
+                    <version>1.0.11</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.equo</groupId>
+                    <artifactId>com.equo.chromium.cef.cocoa.macosx.aarch64</artifactId>
+                    <version>128.0.18</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.equo</groupId>
+                    <artifactId>com.equo.chromium.cef.cocoa.macosx.x86_64</artifactId>
+                    <version>128.0.18</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.equo</groupId>
+                    <artifactId>com.equo.chromium.cef.gtk.linux.aarch64</artifactId>
+                    <version>128.0.18</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.equo</groupId>
+                    <artifactId>com.equo.chromium.cef.gtk.linux.x86_64</artifactId>
+                    <version>128.0.18</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.equo</groupId>
+                    <artifactId>com.equo.chromium.cef.win32.win32.aarch64</artifactId>
+                    <version>128.0.18</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.equo</groupId>
+                    <artifactId>com.equo.chromium.cef.win32.win32.x86_64</artifactId>
+                    <version>128.0.18</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.equo</groupId>
+                    <artifactId>com.equo.chromium.eclipse</artifactId>
+                    <version>1.0.11</version>
+                </dependency>                
             </dependencies>
             <repositories>
+                <repository>
+                    <id>chromium</id>
+                    <url>https://dl.equo.dev/chromium-swt-ee/servoy/mvn</url>
+                </repository>
                 <repository>
                     <id>servoy2</id>
                     <url>https://developer.servoy.com/mvn_repository/</url>
