@@ -158,7 +158,12 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 				createCSSPage();
 				if (DesignerUtil.getContentOutline() != null)
 				{
-					Display.getDefault().asyncExec(() -> getSite().getPage().activate(this));
+					Display.getDefault().asyncExec(() -> {
+						if (getSite() != null && getSite().getPage() != null)
+						{
+							getSite().getPage().activate(this);
+						}
+					});
 				}
 			}
 		}
