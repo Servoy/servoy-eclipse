@@ -1853,6 +1853,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 						public String convertValue(Object id, MethodWithArguments value)
 						{
+							if (value == null) return null;
 							if (persistContext != null) setMethodArguments(persistContext.getPersist(), id, value.paramNames, value.arguments);
 							return value.methodUUID;
 						}
