@@ -30,9 +30,12 @@ export class ClientFunctionService {
 		this.script.src = context + 'clientfunctions.js?clientnr=' + this.sabloService.getClientnr() + '&stamp=' + new Date().getTime();
 		// only create a defered when there is not one yet. if there was already one just reuse that one (could be waited already)
 		// because we removed the script above, that one should not really resolve it now anymore.
+		// seems is possible to have multiple onload called, just have a null check
 		if (!this.deferred) this.deferred = new Deferred();
 		this.script.onload = () => {
-			this.deferred.resolve();
+			if (this.deferred) {
+				this.deferred.resolve();
+			}
 			this.deferred = null;
 		};
 		this.renderer.appendChild(this.doc.body, this.script);
