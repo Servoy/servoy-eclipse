@@ -433,4 +433,12 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.equo.chromium.eclipse.hook"
          version="1.0.11"/>
 
+   <plugin
+         id="angus-activation"
+         version="2.0.2"/>
+
+   <plugin
+         id="org.eclipse.angus.mail"
+         version="2.0.4"/>
+
 </feature>
