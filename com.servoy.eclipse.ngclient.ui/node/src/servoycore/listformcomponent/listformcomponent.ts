@@ -21,6 +21,7 @@ import { RowRenderer } from './row-renderer.component';
 import { AgGridAngular } from 'ag-grid-angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
+import { animate } from '@angular/animations';
 
 const AGGRID_CACHE_BLOCK_SIZE = 50;
 const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
@@ -266,6 +267,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         if (this.useScrolling) {
             this.agGridOptions = {
+                animateRows: false,
                 suppressContextMenu: true,
                 context: {
                     componentParent: this
