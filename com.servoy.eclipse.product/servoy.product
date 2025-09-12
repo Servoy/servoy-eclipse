@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2025.9.0.4100_rc" type="features" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2025.12.0.4120_rc" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
@@ -20,6 +20,7 @@
 --add-modules=ALL-SYSTEM
 --add-exports java.desktop/sun.java2d=ALL-UNNAMED
 -Dp2.trustedAuthorities=https://download.servoy.com,https://developer.servoy.com,https://download.eclipse.org
+-Dchromium.integration.eclipse.disable=true
       </vmArgs>
       <vmArgsLin>-Dchromium.suspend_threads=false
       </vmArgsLin>
@@ -94,7 +95,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="2025.9.0.4100_rc"/>
+      <feature id="com.servoy.eclipse.feature" version="2025.12.0.4120_rc"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -111,6 +112,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </features>
 
    <configurations>
+      <plugin id="angus-activation" autoStart="true" startLevel="0" />
       <plugin id="com.servoy.eclipse.ui.tweaks" autoStart="true" startLevel="3" />
       <plugin id="j2db_log4j" autoStart="true" startLevel="0" />
       <plugin id="org.apache.aries.spifly.dynamic.bundle" autoStart="true" startLevel="3" />
@@ -119,6 +121,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.apache.logging.log4j.api" autoStart="true" startLevel="3" />
       <plugin id="org.apache.logging.log4j.core" autoStart="true" startLevel="3" />
       <plugin id="org.apache.logging.log4j.slf4j2-impl" autoStart="true" startLevel="3" />
+      <plugin id="org.eclipse.angus.mail" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />

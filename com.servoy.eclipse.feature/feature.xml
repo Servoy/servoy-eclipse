@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="2025.9.0.4100_rc"
+      version="2025.12.0.4120_rc"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -68,7 +68,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="com.servoy.css.core"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <includes
          id="org.eclipse.dltk.core.servoy"
@@ -84,20 +84,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="org.eclipse.gef"
-         version="0.0.0"/>
-
-   <includes
-         id="com.equo.chromium.cef.feature"
-         version="0.0.0"
-         arch="x86_64"/>
-
-   <includes
-         id="com.equo.chromium.feature"
-         version="0.0.0"
-         arch="x86_64"/>
-
-   <includes
-         id="com.equo.chromium.cef.arm.feature"
          version="0.0.0"/>
 
    <requires>
@@ -124,95 +110,95 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.core"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.debug"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.designer"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.ui"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.jsunit"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.profiler"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
-         version="1.8.0.s6"/>
+         version="1.8.0.s7"/>
 
    <plugin
          id="j2db_documentation"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="j2db_log4j"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="j2db_server"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="servoy_debug"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="servoy_headless_client"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="servoy_shared"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="servoy_smart_client"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.model"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="servoy_base"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="org.apache.tomcat"
@@ -220,11 +206,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="sablo"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="servoy_ngclient"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="org.maven.ide.eclipse.grouplayout"
@@ -248,15 +234,15 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.designer.wpm"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.notification"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="org.apache.logging.log4j.api"
@@ -296,7 +282,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.ngclient.ui"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
@@ -321,11 +307,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.ngclient"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="com.servoy.eclipse.jre.linux.x86_64"
@@ -372,7 +358,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.cloud"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="org.hibernate.common.hibernate-commons-annotations"
@@ -380,7 +366,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.aibridge"
-         version="2025.9.0.4100_rc"/>
+         version="2025.12.0.4120_rc"/>
 
    <plugin
          id="org.apache.commons.commons-codec"
@@ -402,5 +388,61 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    <plugin
          id="org.apache.logging.log4j.jakarta.web"
          version="2.25.1"/>
+
+   <plugin
+         id="com.equo.chromium"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.cocoa.macosx.aarch64"
+         os="macosx"
+         arch="aarch64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.cocoa.macosx.x86_64"
+         os="macosx"
+         arch="x86_64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.gtk.linux.aarch64"
+         os="linux"
+         arch="aarch64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.gtk.linux.x86_64"
+         os="linux"
+         arch="x86_64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.win32.win32.aarch64"
+         os="win32"
+         arch="aarch64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.cef.win32.win32.x86_64"
+         os="win32"
+         arch="x86_64"
+         version="128.0.18"/>
+
+   <plugin
+         id="com.equo.chromium.eclipse"
+         version="1.0.11"/>
+
+   <plugin
+         id="com.equo.chromium.eclipse.hook"
+         version="1.0.11"/>
+
+   <plugin
+         id="angus-activation"
+         version="2.0.2"/>
+
+   <plugin
+         id="org.eclipse.angus.mail"
+         version="2.0.4"/>
 
 </feature>

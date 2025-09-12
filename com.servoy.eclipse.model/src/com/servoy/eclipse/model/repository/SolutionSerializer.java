@@ -375,6 +375,19 @@ public class SolutionSerializer
 					if (SolutionSerializer.isCompositeItem(p)) return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 
 					Pair<String, String> filepathname = getFilePath(p, false);
+					if (p instanceof Form frm && !writeChangedPersistOnly && frm.getFormCss() != null) // TODO we should have a generic way of writing such persist properties to their own files...
+					{
+						// in case we are here due to a .servoy file import - then when the forms are written, their less files should be written as well as needed
+						Pair<String, String> lessFilePath = new Pair<>(filepathname.getLeft(), frm.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION);
+						Map<IPersist, Object> fileContents = projectContents.get(lessFilePath);
+						if (fileContents == null)
+						{
+							fileContents = new HashMap<IPersist, Object>();
+							projectContents.put(lessFilePath, fileContents);
+						}
+						fileContents.put(frm, frm.getFormCss());
+					}
+
 					if (!writeChangedPersistOnly || changedFiles.contains(filepathname))
 					{
 						Map<IPersist, Object> fileContents = projectContents.get(filepathname);
@@ -1826,6 +1839,14 @@ public class SolutionSerializer
 			}
 		}
 		return changedMedias;
+	}
+
+	public static IFile getFormLESSFile(Form form)
+	{
+		Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
+		IFile file = ResourcesPlugin.getWorkspace().getRoot()
+			.getFile(new Path(formFilePath.getLeft() + form.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
+		return file;
 	}
 
 }

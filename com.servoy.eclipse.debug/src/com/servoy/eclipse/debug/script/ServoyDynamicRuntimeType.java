@@ -82,6 +82,23 @@ public class ServoyDynamicRuntimeType extends RSimpleType implements IJavaScript
 			{
 				return TypeCompatibility.TRUE;
 			}
+			final IRTypeDeclaration superType = current.getSuperType();
+			if (superType != null)
+			{
+				final TypeCompatibility result = isAssignableFrom(self, superType, visited);
+				if (result != null && result.ok())
+				{
+					return result;
+				}
+			}
+			for (IRTypeDeclaration trait : current.getTraits())
+			{
+				final TypeCompatibility result = isAssignableFrom(self, trait, visited);
+				if (result != null && result.ok())
+				{
+					return result;
+				}
+			}
 			String selfConfig = null;
 			String currentConfig = null;
 			if (selfName.contains("<") && selfName.endsWith(">"))
@@ -135,23 +152,6 @@ public class ServoyDynamicRuntimeType extends RSimpleType implements IJavaScript
 					return TypeCompatibility.TRUE;
 				}
 				return TypeCompatibility.FALSE;
-			}
-			final IRTypeDeclaration superType = current.getSuperType();
-			if (superType != null)
-			{
-				final TypeCompatibility result = isAssignableFrom(self, superType, visited);
-				if (result != null)
-				{
-					return result;
-				}
-			}
-			for (IRTypeDeclaration trait : current.getTraits())
-			{
-				final TypeCompatibility result = isAssignableFrom(self, trait, visited);
-				if (result != null)
-				{
-					return result;
-				}
 			}
 		}
 		return TypeCompatibility.FALSE;

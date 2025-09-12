@@ -123,6 +123,11 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 				{
 					isOverridden = true;
 				}
+				else if (StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName().equals(propertyId) &&
+					((AbstractBase)persist).hasProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName()))
+				{
+					isOverridden = true;
+				}
 			}
 
 		}

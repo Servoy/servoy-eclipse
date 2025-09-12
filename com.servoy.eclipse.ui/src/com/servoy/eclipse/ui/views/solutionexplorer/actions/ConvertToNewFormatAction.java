@@ -86,7 +86,7 @@ public class ConvertToNewFormatAction extends Action implements ISelectionChange
 
 					// check if it is already converted
 					final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-					File frmd = new File(wfa.getProjectFile(selectedSolutionProject.getProject().getName()), SolutionSerializer.ROOT_METADATA);
+					File frmd = new File(wfa.getProjectFile(selectedSolutionProject.getProject().getName()), SolutionSerializer.SOLUTION_SETTINGS);
 					String solutionmetadata = Utils.getTXTFileContent(frmd);
 					ServoyJSONObject solutionMetaDataJSONObject = new ServoyJSONObject(solutionmetadata, false);
 					String solutionmetadataConverter = solutionMetaDataJSONObject.toString();

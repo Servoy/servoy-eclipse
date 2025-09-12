@@ -452,7 +452,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					met.setDeclaration(declaration);
 
 					String code = SolutionSerializer.serializePersist(met, true, ApplicationServerRegistry.get().getDeveloperRepository(), null).toString();
-					final IEditorPart openEditor = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getActivePage().findEditor(
+					final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(
 						FileEditorInputFactory.createFileEditorInput(file));
 					if (openEditor instanceof ScriptEditor)
 					{

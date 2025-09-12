@@ -351,9 +351,9 @@ public class SolutionExplorerView extends ViewPart
 
 	private ContextAction newActionInTreeSecondary;
 
-	private ContextAction newActionInTreeTertiary;
+//	private ContextAction newActionInTreeTertiary;
 
-	private RegenerateSolutionFromAISourcesAction regenerateSolutionFromAIAction;
+//	private RegenerateSolutionFromAISourcesAction regenerateSolutionFromAIAction;
 
 	private ReplaceTableAction replaceActionInTree;
 	private ReplaceServerAction replaceServerAction;
@@ -2022,16 +2022,16 @@ public class SolutionExplorerView extends ViewPart
 
 	private void handleActiveProjectChanged(final ServoyProject activeProject)
 	{
-		newActionInTreeTertiary.unregisterAction(regenerateSolutionFromAIAction);
-		if (activeProject != null)
-		{
-			Solution editingSolution = activeProject.getSolution();
-			Object property = editingSolution.getCustomProperty(new String[] { "svygen_path" });
-			if (property != null)
-			{
-				newActionInTreeTertiary.registerAction(UserNodeType.SOLUTION, regenerateSolutionFromAIAction);
-			}
-		}
+//		newActionInTreeTertiary.unregisterAction(regenerateSolutionFromAIAction);
+//		if (activeProject != null)
+//		{
+//			Solution editingSolution = activeProject.getSolution();
+//			Object property = editingSolution.getCustomProperty(new String[] { "svygen_path" });
+//			if (property != null)
+//			{
+//				newActionInTreeTertiary.registerAction(UserNodeType.SOLUTION, regenerateSolutionFromAIAction);
+//			}
+//		}
 
 		boolean showFirstForm = this.loadFirstForm;
 		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(activeProject));
@@ -2720,7 +2720,7 @@ public class SolutionExplorerView extends ViewPart
 		{
 			if (newActionInTreePrimary.isEnabled()) manager.add(newActionInTreePrimary);
 			if (newActionInTreeSecondary.isEnabled()) manager.add(newActionInTreeSecondary);
-			if (newActionInTreeTertiary.isEnabled()) manager.add(newActionInTreeTertiary);
+//			if (newActionInTreeTertiary.isEnabled()) manager.add(newActionInTreeTertiary);
 
 			if (createActionInTree.isEnabled()) manager.add(createActionInTree);
 		}
@@ -3248,8 +3248,8 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.setId("com.servoy.action.new");
 		newActionInTreeSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");
-		newActionInTreeTertiary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
-			"New");
+//		newActionInTreeTertiary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
+//			"New");
 		createActionInTree = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"Create");
 		newActionInListSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
@@ -3533,7 +3533,7 @@ public class SolutionExplorerView extends ViewPart
 
 		debugMethodAction = new DebugMethodAction(this);
 
-		regenerateSolutionFromAIAction = new RegenerateSolutionFromAISourcesAction();
+//		regenerateSolutionFromAIAction = new RegenerateSolutionFromAISourcesAction();
 
 		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		IAction openRelation = new OpenRelationAction(); // must be another instance
@@ -3650,7 +3650,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(loadRelationsAction);
 		addTreeSelectionChangedListener(newActionInTreePrimary);
 		addTreeSelectionChangedListener(newActionInTreeSecondary);
-		addTreeSelectionChangedListener(newActionInTreeTertiary);
+//		addTreeSelectionChangedListener(newActionInTreeTertiary);
 		addTreeSelectionChangedListener(createActionInTree);
 		addTreeSelectionChangedListener(newComponentsPackageProjectAction);
 		addTreeSelectionChangedListener(newServicesPackageProjectAction);

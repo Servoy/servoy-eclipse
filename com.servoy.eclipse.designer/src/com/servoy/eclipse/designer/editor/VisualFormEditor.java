@@ -52,13 +52,13 @@ import com.servoy.eclipse.designer.editor.rfb.SystemVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
-import com.servoy.eclipse.ui.svygen.AISolutionGenerator;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -158,7 +158,12 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 				createCSSPage();
 				if (DesignerUtil.getContentOutline() != null)
 				{
-					Display.getDefault().asyncExec(() -> getSite().getPage().activate(this));
+					Display.getDefault().asyncExec(() -> {
+						if (getSite() != null && getSite().getPage() != null)
+						{
+							getSite().getPage().activate(this);
+						}
+					});
 				}
 			}
 		}
@@ -192,7 +197,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		cssEditor = new ExtensionBasedTextEditor();
 		try
 		{
-			IFile file = AISolutionGenerator.getFormCSSFile(getForm());
+			IFile file = SolutionSerializer.getFormLESSFile(getForm());
 			if (file.exists())
 			{
 				setPageText(addPage(cssEditor, FileEditorInputFactory.createFileEditorInput(file)), "Less");

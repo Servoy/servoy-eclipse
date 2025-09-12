@@ -6,9 +6,10 @@
     "declarationMap": true,
     "inlineSources": true,
     "types": [],
-    "lib": [
+   "lib": [
       "dom",
-      "es2018"
+      "dom.iterable",
+      "es2020"
     ]
   },
   "angularCompilerOptions": {

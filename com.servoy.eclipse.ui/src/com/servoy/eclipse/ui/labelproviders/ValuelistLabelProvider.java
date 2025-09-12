@@ -87,7 +87,10 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 			}
 			return Messages.LabelNone;
 		}
-
+		if ("autoVL".equals(vlUUID))
+		{
+			return "autoVL";
+		}
 		ValueList vl = (ValueList)getPersist(value);
 		if (vl != null)
 		{
