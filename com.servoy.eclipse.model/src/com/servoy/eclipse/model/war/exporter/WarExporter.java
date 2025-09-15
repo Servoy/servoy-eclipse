@@ -170,8 +170,6 @@ public class WarExporter
 		"javax.transaction_*.jar", //
 		"javax.persistence-api_*.jar", //
 		"jakarta.mail-api_*.jar", //
-		"angus-activation_*.jar", //
-		"org.eclipse.angus.mail_*.jar", //
 		"jakarta.activation-api_*.jar", //
 		"org.apache.james.apache-mime4j_*.jar", //
 		"xstream_*.jar", //

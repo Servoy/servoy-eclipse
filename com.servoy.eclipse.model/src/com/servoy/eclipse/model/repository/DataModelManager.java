@@ -564,7 +564,7 @@ public class DataModelManager implements IServerInfoManager
 	public ServerSettings loadServerSettings(String serverName) throws RepositoryException
 	{
 		IFile dbiFile = getServerDBIFile(serverName);
-		if (dbiFile.exists())
+		if (dbiFile != null && dbiFile.exists())
 		{
 			try (InputStream is = dbiFile.getContents(true))
 			{
