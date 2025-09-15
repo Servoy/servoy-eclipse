@@ -27,6 +27,7 @@ import java.util.List;
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.WebCustomType;
@@ -70,11 +71,11 @@ public class ReorderCustomTypesCommand extends Command
 				@Override
 				public int compare(IChildWebObject o1, IChildWebObject o2)
 				{
-					String o1key = o1.getUUID().toString();
 					String parentKey = o1.getParent().getUUID() + o1.getJsonKey();
-					String o2key = o2.getUUID().toString();
-					Point o1Location = LocationCache.getINSTANCE().getLocation(parentKey, o1key);
-					Point o2Location = LocationCache.getINSTANCE().getLocation(parentKey, o2key);
+					Point o1Location = LocationCache.getINSTANCE().getLocation(parentKey,
+						GhostHandler.getGhostPersistIdentifier((AbstractBase)o1.getParent(), o1).toJSONString());
+					Point o2Location = LocationCache.getINSTANCE().getLocation(parentKey,
+						GhostHandler.getGhostPersistIdentifier((AbstractBase)o2.getParent(), o2).toJSONString());
 					if (o1Location != null && o2Location != null) return PositionComparator.comparePoint(true, o1Location, o2Location);
 					return 0;
 				}

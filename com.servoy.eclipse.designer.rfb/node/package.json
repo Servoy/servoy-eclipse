@@ -8,6 +8,7 @@
     "start": "ng serve",
     "build": "ng build --configuration production",
     "build_debug": "ng build --watch",
+    "build_debug_nowatch": "ng build --watch=false",
     "test": "ng test",
     "e2e": "ng e2e",
     "lint": "ng lint"

@@ -119,7 +119,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 			}
 			if (((PersistContext)element).getPersist() instanceof WebFormComponentChildType)
 			{
-				return ((WebFormComponentChildType)((PersistContext)element).getPersist()).getKey();
+				return ((WebFormComponentChildType)((PersistContext)element).getPersist()).getFcPropAndCompPathAsString();
 			}
 
 			return SupportNameLabelProvider.INSTANCE_DEFAULT_ANONYMOUS.getText(((PersistContext)element).getPersist());

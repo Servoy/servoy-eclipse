@@ -38,6 +38,7 @@ import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 
@@ -68,14 +69,15 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 				Iterator keys = args.keys();
 				while (keys.hasNext())
 				{
-					String uuid = (String)keys.next();
-					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
+					String persistIdentifierString = (String)keys.next();
+					PersistIdentifier persistIdentifier = PersistIdentifier.fromJSONString(persistIdentifierString);
+					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), persistIdentifier);
 					if (persist instanceof AbstractBase)
 					{
-						JSONObject properties = args.optJSONObject(uuid);
+						JSONObject properties = args.optJSONObject(persistIdentifierString);
 
-						String dropTarget = properties.optString("dropTargetUUID", null);
-						String rightSibling = properties.optString("rightSibling", null);
+						PersistIdentifier dropTarget = PersistIdentifier.fromJSONString(properties.optString("dropTargetUUID", null));
+						PersistIdentifier rightSibling = PersistIdentifier.fromJSONString(properties.optString("rightSibling", null));
 
 						ISupportFormElements parent = editorPart.getForm();
 						IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), dropTarget);

@@ -37,6 +37,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 
 /**
  * @author emera
@@ -87,7 +88,7 @@ public class SetCssAnchoringHandler implements IServerService
 		CompoundCommand cc = new CompoundCommand();
 		List<IPersist> changedPersists = new ArrayList<IPersist>();
 		selection.forEach(uuid -> {
-			IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), (String)uuid);
+			IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), PersistIdentifier.fromJSONString((String)uuid));
 			if (persist != null)
 			{
 				cc.add(new SetCssAnchoringCommand(top, right, bottom, left, persist));
@@ -106,7 +107,7 @@ public class SetCssAnchoringHandler implements IServerService
 	{
 		boolean[] selectedAnchors = new boolean[] { true, true, true, true };
 		selection.forEach(uuid -> {
-			IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), (String)uuid);
+			IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), PersistIdentifier.fromJSONString((String)uuid));
 			if (persist instanceof BaseComponent)
 			{
 				CSSPosition position = ((BaseComponent)persist).getCssPosition();

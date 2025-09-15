@@ -68,7 +68,6 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
-import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
@@ -106,10 +105,10 @@ import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONObject;
-import com.servoy.j2db.util.UUID;
 
 /**
  * Command to create a component.
@@ -179,7 +178,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		if (args.getType() != null)
 		{
 			// a ghost dragged from the palette. it is defined in the "types" section of the .spec file
-			IPersist webObject = PersistFinder.INSTANCE.searchForPersist(form, args.getDropTargetUUID());
+			IPersist webObject = PersistFinder.INSTANCE.searchForPersist(form, args.getDropTarget());
 
 			int arrayIndex = -1;
 			if (webObject instanceof IChildWebObject && args.isDropTargetIsSibling())
@@ -232,9 +231,9 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			ISupportFormElements parentSupportingElements = form;
 			IPersist dropTarget = null;
 			IPersist initialDropTarget = null;
-			if (args.getDropTargetUUID() != null)
+			if (args.getDropTarget() != null)
 			{
-				dropTarget = PersistFinder.INSTANCE.searchForPersist(form, args.getDropTargetUUID());
+				dropTarget = PersistFinder.INSTANCE.searchForPersist(form, args.getDropTarget());
 				if (dropTarget != null)
 				{
 					initialDropTarget = dropTarget;
@@ -860,12 +859,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(form, args.getRightSibling());
 					if (rightSibling == null && form.getExtendsForm() != null)
 					{
-
 						Form f = form;
 						do
 						{
 							f = f.getExtendsForm();
-							rightSibling = AbstractRepository.searchPersist(f, UUID.fromString(args.getRightSibling()));
+							rightSibling = PersistFinder.INSTANCE.searchForPersist(f, args.getRightSibling());
 						}
 						while (f.getExtendsForm() != null);
 						if (rightSibling != null)
@@ -937,15 +935,15 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		private final JSONObject allProperties;
 		private Point location;
 		private Dimension size;
-		private String rightSibling;
 		private String text;
 		private String styleClass;
 		private String packageName;
-		private String uuid;
+		private PersistIdentifier uuid;
 		private String name;
 		private Object type;
 		private String ghostPropertyName;
-		private String dropTargetUUID;
+		private PersistIdentifier rightSibling;
+		private PersistIdentifier dropTarget;
 		private boolean keepOldSelection;
 		private boolean dropTargetIsSibling;
 		private boolean prepend;
@@ -973,113 +971,71 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			return allProperties == null ? null : allProperties.opt(propertyName);
 		}
 
-		/**
-		 * @param location the location to set
-		 */
 		public void setLocation(Point location)
 		{
 			this.location = location;
 		}
 
-		/**
-		 * @param rightSibling the rightSibling to set
-		 */
-		public void setRightSibling(String rightSibling)
+		public void setRightSibling(PersistIdentifier rightSibling)
 		{
 			this.rightSibling = rightSibling;
 		}
 
-		/**
-		 * @param text the text to set
-		 */
 		public void setText(String text)
 		{
 			this.text = text;
 		}
 
-		/**
-		 * @param styleClass the styleClass to set
-		 */
 		public void setStyleClass(String styleClass)
 		{
 			this.styleClass = styleClass;
 		}
 
-		/**
-		 * @param packageName the packageName to set
-		 */
 		public void setPackageName(String packageName)
 		{
 			this.packageName = packageName;
 		}
 
-		/**
-		 * @param uuid the uuid to set
-		 */
-		public void setUuid(String uuid)
+		public void setUuid(PersistIdentifier uuid)
 		{
 			this.uuid = uuid;
 		}
 
-		/**
-		 * @param name the name to set
-		 */
 		public void setName(String name)
 		{
 			this.name = name;
 		}
 
-		/**
-		 * @param type the type to set
-		 */
 		public void setType(Object type)
 		{
 			this.type = type;
 		}
 
-		/**
-		 * @param ghostPropertyName the ghostPropertyName to set
-		 */
 		public void setGhostPropertyName(String ghostPropertyName)
 		{
 			this.ghostPropertyName = ghostPropertyName;
 		}
 
-		/**
-		 * @param size the size to set
-		 */
 		public void setSize(Dimension size)
 		{
 			this.size = size;
 		}
 
-		/**
-		 * @param dropTargetUUID the dropTargetUUID to set
-		 */
-		public void setDropTargetUUID(String dropTargetUUID)
+		public void setDropTarget(PersistIdentifier dropTarget)
 		{
-			this.dropTargetUUID = dropTargetUUID;
+			this.dropTarget = dropTarget;
 		}
 
-		/**
-		 * @param dropTargetIsSibling the dropTargetIsSibling to set
-		 */
 		public void setDropTargetIsSibling(boolean dropTargetIsSibling)
 		{
 			this.dropTargetIsSibling = dropTargetIsSibling;
 		}
 
-		/**
-		 * @param prepend the prepend to set
-		 */
 		public void setPrepend(boolean prepend)
 		{
 			this.prepend = prepend;
 		}
 
-		/**
-		 * @param keepOldSelection the keepOldSelection to set
-		 */
 		public void setKeepOldSelection(boolean keepOldSelection)
 		{
 			this.keepOldSelection = keepOldSelection;
@@ -1095,7 +1051,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			return size;
 		}
 
-		public String getRightSibling()
+		public PersistIdentifier getRightSibling()
 		{
 			return rightSibling;
 		}
@@ -1115,7 +1071,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			return packageName;
 		}
 
-		public String getUuid()
+		public PersistIdentifier getUuid()
 		{
 			return uuid;
 		}
@@ -1135,14 +1091,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			return ghostPropertyName;
 		}
 
-		public String getDropTargetUUID()
+		public PersistIdentifier getDropTarget()
 		{
-			return dropTargetUUID;
+			return dropTarget;
 		}
 
-		/**
-		 * @return the dropTargetIsSibling
-		 */
 		public boolean isDropTargetIsSibling()
 		{
 			return dropTargetIsSibling;
@@ -1158,23 +1111,19 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			return keepOldSelection;
 		}
 
-		/**
-		 * @param args
-		 * @return
-		 */
 		public static CreateComponentOptions fromJson(JSONObject args)
 		{
 			CreateComponentOptions options = new CreateComponentOptions(args);
 
-			options.rightSibling = args.optString("rightSibling", null);
+			options.rightSibling = PersistIdentifier.fromJSONString(args.optString("rightSibling", null));
 			options.text = args.optString("text", null);
 			options.styleClass = args.optString("styleClass", null);
 			options.packageName = args.optString("packageName", null);
-			options.uuid = args.optString("uuid", null);
+			options.uuid = PersistIdentifier.fromJSONString(args.optString("uuid", null));
 			options.name = args.optString("name", null);
 			options.type = args.optString("type", null);
 			options.ghostPropertyName = args.optString("ghostPropertyName", null);
-			options.dropTargetUUID = args.optString("dropTargetUUID", null);
+			options.dropTarget = PersistIdentifier.fromJSONString(args.optString("dropTargetUUID", null));
 			options.dropTargetIsSibling = args.optBoolean("dropTargetIsSibling", false);
 			options.prepend = args.optBoolean("prepend", false);
 			options.keepOldSelection = args.optBoolean("keepOldSelection", false);
@@ -1183,5 +1132,8 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			options.size = new Dimension(args.optInt("w"), args.optInt("h"));
 			return options;
 		}
+
 	}
+
 }
+

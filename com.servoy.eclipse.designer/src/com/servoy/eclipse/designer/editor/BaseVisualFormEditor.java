@@ -70,6 +70,7 @@ import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -98,6 +99,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
@@ -284,37 +286,34 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			{
 				public void gotoMarker(IMarker marker)
 				{
-					String elementUuid = null;
+					String[] fcComponentAndPropertyNamePath = null;
 					try
 					{
-						elementUuid = (String)marker.getAttribute("elementUuid");
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
-					}
-					if (marker.getAttribute(IMarker.CHAR_START, -1) != -1)
-					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
-							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
-					}
-					try
-					{
-						String name = (String)marker.getAttribute("Name");
-						if (name != null && name.indexOf('$') >= 0)
+						fcComponentAndPropertyNamePath = (String[])marker.getAttribute(ServoyBuilder.ATTR_FC_FULL_UUID_PROP_AND_COMPONENT_PATH);
+						if (fcComponentAndPropertyNamePath == null)
 						{
-							elementUuid = name;
+							String elementUuid = null;
+
+							if (elementUuid == null && marker.getAttribute(IMarker.CHAR_START, -1) != -1)
+							{
+								elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
+									Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
+							}
+							if (elementUuid == null) elementUuid = (String)marker.getAttribute("elementUuid");
+
+							if (elementUuid != null) fcComponentAndPropertyNamePath = new String[] { elementUuid };
 						}
 					}
 					catch (CoreException e)
 					{
 						ServoyLog.logError(e);
 					}
-					if (elementUuid != null)
+					if (fcComponentAndPropertyNamePath != null)
 					{
 						try
 						{
-							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this.getForm(), elementUuid));
+							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this.getForm(),
+								new PersistIdentifier(fcComponentAndPropertyNamePath, null)));
 						}
 						catch (IllegalArgumentException e)
 						{

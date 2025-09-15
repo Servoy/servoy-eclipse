@@ -42,6 +42,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 
 /**
  * @author user
@@ -75,15 +76,16 @@ public class SetPropertiesHandler implements IServerService
 				Iterator keys = args.keys();
 				while (keys.hasNext())
 				{
-					String uuid = (String)keys.next();
-					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
+					String persistIdentifierAsString = (String)keys.next();
+					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(),
+						PersistIdentifier.fromJSONString(persistIdentifierAsString));
 					if (persist != null)
 					{
 						PersistContext context = PersistContext.create(persist, editorPart.getForm());
 						if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType ||
 							persist instanceof WebFormComponentChildType || persist instanceof ISupportCSSPosition)
 						{
-							JSONObject properties = args.optJSONObject(uuid);
+							JSONObject properties = args.optJSONObject(persistIdentifierAsString);
 							Iterator it = properties.keys();
 							while (it.hasNext())
 							{
@@ -146,7 +148,7 @@ public class SetPropertiesHandler implements IServerService
 						}
 						else if (persist instanceof Part)
 						{
-							JSONObject properties = args.optJSONObject(uuid);
+							JSONObject properties = args.optJSONObject(persistIdentifierAsString);
 							if (properties.has("y"))
 							{
 								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
@@ -160,7 +162,7 @@ public class SetPropertiesHandler implements IServerService
 						}
 						else if (persist instanceof Form)
 						{
-							JSONObject properties = args.optJSONObject(uuid);
+							JSONObject properties = args.optJSONObject(persistIdentifierAsString);
 							if (properties.has("width"))
 							{
 								cc.add(new SetPropertyCommand("formwidth", PersistPropertySource.createPersistPropertySource(context, false),

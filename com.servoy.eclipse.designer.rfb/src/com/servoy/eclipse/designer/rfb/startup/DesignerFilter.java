@@ -116,7 +116,7 @@ public class DesignerFilter implements Filter
 			{
 				SpecProviderState specProvider = WebComponentSpecProvider.getSpecProviderState();
 
-				((HttpServletResponse)servletResponse).setContentType("application/json");
+				servletResponse.setContentType("application/json");
 
 				if (servletResponse instanceof HttpServletResponse) HTTPUtils.setNoCacheHeaders((HttpServletResponse)servletResponse);
 
@@ -414,7 +414,7 @@ public class DesignerFilter implements Filter
 										FormLayoutGenerator.generateFormElement(printWriter, formElement, form);
 										componentJson.put("tagName", stringWriter.toString());
 										componentJson.put("componentTagName", FormTemplateGenerator.getTagName(spec.getName()));
-										model.put("componentName", formElement.getDesignId());
+										model.put("componentName", formElement.getDesignId().toJSONString());
 									}
 									else componentJson.put("tagName", FormTemplateGenerator.getTagName(spec.getName()));
 
@@ -506,7 +506,7 @@ public class DesignerFilter implements Filter
 				if (servletResponse instanceof HttpServletResponse)
 				{
 					HTTPUtils.setNoCacheHeaders((HttpServletResponse)servletResponse);
-					((HttpServletResponse)servletResponse).setContentType("text/html");
+					servletResponse.setContentType("text/html");
 				}
 				String width = "350px";
 				String height = "200px";

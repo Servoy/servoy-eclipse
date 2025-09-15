@@ -78,6 +78,7 @@ import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
@@ -705,8 +706,8 @@ public class DesignerUtil
 		if (obj.has("left"))
 		{
 			JSONObject jsonObject = obj.getJSONObject("left");
-			ISupportCSSPosition left = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
+			ISupportCSSPosition left = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form, PersistIdentifier.fromJSONString(
+				jsonObject.optString("uuid"))));
 			if (left != null)
 			{
 				String value = getCssValue(left.getCssPosition(), jsonObject.optString("prop", "left"));
@@ -743,7 +744,7 @@ public class DesignerUtil
 		{
 			JSONObject jsonObject = obj.getJSONObject("right");
 			ISupportCSSPosition right = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
+				PersistIdentifier.fromJSONString(jsonObject.optString("uuid"))));
 			if (right != null)
 			{
 				String value = getCssValue(right.getCssPosition(), jsonObject.optString("prop", "right"));
@@ -789,7 +790,7 @@ public class DesignerUtil
 		{
 			JSONObject jsonObject = obj.getJSONObject("middleH");
 			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
+				PersistIdentifier.fromJSONString(jsonObject.optString("uuid"))));
 			if (middle != null)
 			{
 				CSSPosition midCssPosition = middle.getCssPosition();
@@ -830,7 +831,7 @@ public class DesignerUtil
 		{
 			JSONObject jsonObject = obj.getJSONObject("top");
 			ISupportCSSPosition top = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
+				PersistIdentifier.fromJSONString(jsonObject.optString("uuid"))));
 			if (top != null)
 			{
 				String value = getCssValue(top.getCssPosition(), jsonObject.optString("prop", "top"));
@@ -867,7 +868,7 @@ public class DesignerUtil
 		{
 			JSONObject jsonObject = obj.getJSONObject("bottom");
 			ISupportCSSPosition bottom = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
+				PersistIdentifier.fromJSONString(jsonObject.optString("uuid"))));
 			if (bottom != null)
 			{
 				String value = getCssValue(bottom.getCssPosition(), jsonObject.optString("prop", "bottom"));
@@ -913,7 +914,7 @@ public class DesignerUtil
 		{
 			JSONObject jsonObject = obj.getJSONObject("middleV");
 			ISupportCSSPosition middle = ((ISupportCSSPosition)PersistFinder.INSTANCE.searchForPersist(form,
-				jsonObject.optString("uuid")));
+				PersistIdentifier.fromJSONString(jsonObject.optString("uuid"))));
 			if (middle != null)
 			{
 				CSSPosition midCssPosition = middle.getCssPosition();

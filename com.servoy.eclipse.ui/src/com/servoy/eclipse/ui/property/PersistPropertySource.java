@@ -1871,7 +1871,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
 			{
-				boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
+				boolean add = object.getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
 					!((WebComponent)object).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
 				if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
 				{
@@ -2508,6 +2508,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				if (beanPropertyPersist instanceof IChildWebObject) specPD = ((IChildWebObject)beanPropertyPersist).getPropertyDescription();
 				if (beanPropertyPersist instanceof WebComponent && ((WebComponent)beanPropertyPersist).getImplementation() instanceof WebObjectImpl)
 					specPD = ((WebObjectImpl)(((WebComponent)beanPropertyPersist).getImplementation())).getPropertyDescription();
+				if (beanPropertyPersist instanceof WebFormComponentChildType wfcct) specPD = wfcct.getPropertyDescription();
+
 				if (specPD != null)
 				{
 					// find out if this property has a default value
@@ -3690,7 +3692,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		if (persistContext.getPersist() instanceof WebFormComponentChildType)
 		{
-			WebComponent parentComponent = (WebComponent)persistContext.getPersist().getAncestor(IRepository.WEBCOMPONENTS);
+			WebComponent parentComponent = (WebComponent)persistContext.getPersist().getParent().getAncestor(IRepository.WEBCOMPONENTS);
 			if (parentComponent != null)
 			{
 				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentComponent.getTypeName());

@@ -437,14 +437,13 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				WebFormComponentChildType webFormComponentChildType = persist instanceof WebFormComponentChildType ? (WebFormComponentChildType)persist : null;
 				if (webFormComponentChildType != null)
 				{
-					String wfcName = webFormComponentChildType.getElement().getName();
-					int first$ = wfcName.indexOf("$");
-					if (first$ > 0)
+					String[] fcPropAndCompPath = webFormComponentChildType.getFcPropAndCompPath();
+					if (fcPropAndCompPath != null && fcPropAndCompPath.length > 0) // should always be true because it is a WebFormComponentChildType
 					{
-						String uuid = wfcName.substring(0, first$);
-						if (uuid.startsWith("_")) uuid = uuid.substring(1);
-						uuid = uuid.replace('_', '-');
-						persist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(uuid);
+						String rootFormComponentContainerUuid = fcPropAndCompPath[0];
+						if (rootFormComponentContainerUuid.startsWith("_")) rootFormComponentContainerUuid = rootFormComponentContainerUuid.substring(1);
+						rootFormComponentContainerUuid = rootFormComponentContainerUuid.replace('_', '-');
+						persist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(rootFormComponentContainerUuid);
 					}
 				}
 				if (persist != null)

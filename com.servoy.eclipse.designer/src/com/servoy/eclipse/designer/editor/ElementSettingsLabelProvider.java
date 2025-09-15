@@ -85,7 +85,7 @@ public class ElementSettingsLabelProvider extends LabelProvider implements ITabl
 			String name = ((ISupportName)element).getName();
 			if (element instanceof AbstractBase)
 			{
-				String formName = ((AbstractBase)element).getRuntimeProperty(FormElementHelper.FORM_COMPONENT_FORM_NAME);
+				String formName = ((AbstractBase)element).getRuntimeProperty(FormElementHelper.FC_NAME_OF_ROOT_ACTUAL_FORM_EVEN_IN_CASE_OF_NESTED_FORM_COMPONENTS);
 				if (formName != null)
 				{
 					// todo

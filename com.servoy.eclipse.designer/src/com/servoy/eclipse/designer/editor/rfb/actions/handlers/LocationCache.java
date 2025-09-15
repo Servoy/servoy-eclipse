@@ -60,12 +60,9 @@ public class LocationCache
 		this.locations.get(parent).put(id, location);
 	}
 
-	/**
-	 * @param string
-	 */
-	public void clearParent(String string)
+	public void clearParent(String parent)
 	{
-		locations.remove(string);
+		locations.remove(parent);
 	}
 
 

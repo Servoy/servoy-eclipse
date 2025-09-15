@@ -356,7 +356,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 							public String toString()
 							{
 								final WebFormComponentChildType child = (WebFormComponentChildType)getPersist();
-								return child.getParentComponent().getName() + '.' + child.getKey() + " (" + getPropertyDescription().getName() + ')';
+								return child.getParentComponent().getName() + '.' + child.getFcPropAndCompPathAsString() + " (" +
+									getPropertyDescription().getName() + ')';
 							}
 						};
 					}

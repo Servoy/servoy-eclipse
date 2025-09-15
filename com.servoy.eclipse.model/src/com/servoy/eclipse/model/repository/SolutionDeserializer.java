@@ -2140,10 +2140,14 @@ public class SolutionDeserializer
 		{
 			return null;
 		}
+		String txtFileContent = Utils.getTXTFileContent(file);
+
+		if (txtFileContent.trim().startsWith("[")) return null; // it's a JSON file but not one with one UUID; for example medias.obj
+
 		UUID uuid = null;
 		try
 		{
-			JSONObject obj = new ServoyJSONObject(Utils.getTXTFileContent(file), true);
+			JSONObject obj = new ServoyJSONObject(txtFileContent, true);
 			if (obj.has(SolutionSerializer.PROP_UUID))
 			{
 				uuid = UUID.fromString(obj.getString(SolutionSerializer.PROP_UUID));

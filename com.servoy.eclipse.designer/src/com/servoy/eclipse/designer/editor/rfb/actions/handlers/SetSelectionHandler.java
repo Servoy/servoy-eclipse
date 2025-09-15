@@ -35,22 +35,14 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 
-/**
- * @author user
- *
- */
 public class SetSelectionHandler implements IServerService
 {
 	private final BaseVisualFormEditor editorPart;
 	private final RfbSelectionListener selectionListener;
 	private final ISelectionProvider selectionProvider;
 
-	/**
-	 * @param editorPart
-	 * @param selectionListener
-	 * @param selectionProvider
-	 */
 	public SetSelectionHandler(BaseVisualFormEditor editorPart, RfbSelectionListener selectionListener, ISelectionProvider selectionProvider)
 	{
 		this.editorPart = editorPart;
@@ -58,20 +50,16 @@ public class SetSelectionHandler implements IServerService
 		this.selectionProvider = selectionProvider;
 	}
 
-	/**
-	 * @param methodName
-	 * @param args
-	 * @throws JSONException
-	 */
 	public Object executeMethod(String methodName, final JSONObject args) throws JSONException
 	{
 		JSONArray json = args.getJSONArray("selection");
 		final List<Object> selection = new ArrayList<Object>();
 		for (int i = 0; i < json.length(); i++)
 		{
-			String uuid = json.getString(i);
+			String persistIdentifierAsStringOrGroupID = json.getString(i);
 
-			IPersist searchPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
+			IPersist searchPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(),
+				PersistIdentifier.fromJSONString(persistIdentifierAsStringOrGroupID));
 			if (searchPersist != null)
 			{
 				selection.add(PersistContext.create(searchPersist, editorPart.getForm()));
@@ -79,7 +67,8 @@ public class SetSelectionHandler implements IServerService
 			else
 			{
 				//check if group
-				FormElementGroup group = new FormElementGroup(uuid, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm());
+				FormElementGroup group = new FormElementGroup(persistIdentifierAsStringOrGroupID, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()),
+					editorPart.getForm());
 				if (group.getElements().hasNext()) selection.add(group);
 			}
 		}
@@ -94,4 +83,5 @@ public class SetSelectionHandler implements IServerService
 		});
 		return null;
 	}
+
 }

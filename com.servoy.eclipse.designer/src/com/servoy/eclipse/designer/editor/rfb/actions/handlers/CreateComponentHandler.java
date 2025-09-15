@@ -92,7 +92,7 @@ public class CreateComponentHandler implements IServerService
 
 		if (editorPart.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage &&
 			((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getShowedContainer() != null && options.getName() != null &&
-			options.getDropTargetUUID() == null)
+			options.getDropTarget() == null)
 		{
 			// if we drop directly on form while zoomed in , do nothing
 			return null;

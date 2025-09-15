@@ -24,17 +24,16 @@ import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebObjectImpl;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
-/**
- * @author user
- *
- */
 public class PersistFinder
 {
 
@@ -49,42 +48,49 @@ public class PersistFinder
 	{
 	}
 
-	public IPersist searchForPersist(Form form, String fullUUIDA)
+	/**
+	 * @param persistIdentifier .persistUUIDAndFCPropAndComponentPath something like ["D9884DBA_C5E7_4395_A934_52030EB8F1F0", "containedForm", "button_1"]; it could also be an array with just one item if we do a simple search for a persist; .customTypeOrComponentTypePropertyUUIDInsidePersist can be null or an UUID
+	 */
+	public IPersist searchForPersist(Form form, PersistIdentifier persistIdentifier)
 	{
-		if (fullUUIDA == null) return null;
-		String fullUUID = fullUUIDA;
-		String uuid = fullUUID, childUUID = null;
-		int index = uuid.indexOf('$');
-		if (index > 1)
-		{
-			// this is a form component selection
-			String[] uuidParts = fullUUID.split("#");
-			uuid = fullUUID = uuidParts[0];
-			if (uuidParts.length > 1)
-			{
-				childUUID = uuidParts[1];
-			}
+		if (persistIdentifier == null) return null;
+		String uuidAsString = persistIdentifier.persistUUIDAndFCPropAndComponentPath()[0];
 
-			int start = 0;
-			if (uuid.startsWith("_")) start = 1;
-			uuid = uuid.substring(start, index).replace('_', '-');
-		}
-		IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(uuid);
-		if (index > 1)
+		if (persistIdentifier.persistUUIDAndFCPropAndComponentPath().length > 1)
 		{
-			searchPersist = new WebFormComponentChildType((WebComponent)searchPersist, fullUUID.substring(index + 1).replace('$', '.'),
+			// this is a selection of a component (or a custom type prop or component prop inside a component) that is inside a form component container
+			int start = 0;
+
+			// there is similar code in FormElement.getName(rawName); but this code should now no longer use a "name", but a PersistIdentifier that is not (directly) based on names...
+			if (uuidAsString.startsWith("_")) start = 1; // TODO why is this needed with _ prefix and _ to - ? explain here
+			uuidAsString = uuidAsString.substring(start).replace('_', '-');
+		}
+
+		IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(uuidAsString);
+		if (persistIdentifier.persistUUIDAndFCPropAndComponentPath().length > 1)
+		{
+			searchPersist = new WebFormComponentChildType((WebComponent)searchPersist, persistIdentifier.persistUUIDAndFCPropAndComponentPath(),
 				ModelUtils.getEditingFlattenedSolution(form));
-			if (childUUID != null)
+		}
+
+		if (persistIdentifier.customTypeOrComponentTypePropertyUUIDInsidePersist() != null)
+		{
+			UUID childPropUUID = UUID.fromString(persistIdentifier.customTypeOrComponentTypePropertyUUIDInsidePersist()); // this is I think meant for custom types (maybe component child types) inside components that are inside form component containers
+			PropertyDescription pd = null;
+
+			if (searchPersist instanceof WebFormComponentChildType fcChild) pd = fcChild.getPropertyDescription();
+			if (searchPersist instanceof WebComponent wc)
+				pd = (wc.getImplementation() instanceof WebObjectImpl wcImpl ? wcImpl.getPropertyDescription() : null);
+
+			if (pd != null)
 			{
-				UUID childId = UUID.fromString(childUUID);
-				PropertyDescription pd = ((WebFormComponentChildType)searchPersist).getPropertyDescription();
 				Map<String, PropertyDescription> customMap = pd.getCustomJSONProperties();
 				for (PropertyDescription customProperty : customMap.values())
 				{
-					Object customValue = ((WebFormComponentChildType)searchPersist).getProperty(customProperty.getName());
+					Object customValue = ((AbstractBase)searchPersist).getProperty(customProperty.getName());
 					if (customValue instanceof IPersist)
 					{
-						if (((IPersist)customValue).getUUID().equals(childUUID))
+						if (((IPersist)customValue).getUUID().equals(childPropUUID))
 						{
 							return (IPersist)customValue;
 						}
@@ -93,18 +99,17 @@ public class PersistFinder
 					{
 						for (IPersist child : (IPersist[])customValue)
 						{
-							if (child.getUUID().equals(childId))
+							if (child.getUUID().equals(childPropUUID))
 							{
 								return child;
 							}
 						}
 					}
 				}
-			}
+			} // else should never happen
 		}
 
 		return searchPersist;
-
 	}
 
 

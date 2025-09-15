@@ -334,7 +334,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		boolean isDifferent = false;
 		if (persist != existingPersist)
 		{
-			// if this is a WebCustomType this can be created multiply times for the same thing
+			// if this is a WebCustomType this can be created multiple times for the same thing
 			// we should check if it is the same parent and the same index then assume this is the same thing
 			isDifferent = !((persist instanceof WebCustomType && existingPersist instanceof WebCustomType) &&
 				(existingPersist.getAncestor(IRepository.WEBCOMPONENTS).getUUID().equals(persist.getAncestor(IRepository.WEBCOMPONENTS).getUUID())) &&
@@ -344,13 +344,13 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 				ISupportChilds parent = persist.getParent();
 				while (isDifferent && parent instanceof WebComponent)
 				{
-					isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FORM_COMPONENT_UUID) == null;
+					isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FC_DIRECT_PARENT_FORM_COMPONENT_CONTAINER) == null;
 					parent = parent.getParent();
 				}
 				parent = existingPersist.getParent();
 				while (isDifferent && parent instanceof WebComponent)
 				{
-					isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FORM_COMPONENT_UUID) == null;
+					isDifferent = ((WebComponent)parent).getRuntimeProperty(FormElementHelper.FC_DIRECT_PARENT_FORM_COMPONENT_CONTAINER) == null;
 					parent = parent.getParent();
 				}
 			}

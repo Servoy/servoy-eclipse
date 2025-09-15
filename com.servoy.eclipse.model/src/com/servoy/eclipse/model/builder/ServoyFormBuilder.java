@@ -342,12 +342,12 @@ public class ServoyFormBuilder
 										Object foundsetJson = ((WebComponent)o).getProperty(forFoundsetName);
 										if (foundsetJson instanceof JSONObject)
 										{
-											foundsetValue = (String)((JSONObject)foundsetJson).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
+											foundsetValue = ((JSONObject)foundsetJson).optString(FoundsetPropertyType.FOUNDSET_SELECTOR, null);
 										}
 									}
 									else
 									{
-										//default is form foundset
+										// default is form foundset
 										foundsetValue = "";
 									}
 									if (foundsetValue != null)
@@ -1937,7 +1937,7 @@ public class ServoyFormBuilder
 
 								//first check if the foundset is valid
 								boolean invalid = false;
-								String fs = val.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+								String fs = val.optString(FoundsetPropertyType.FOUNDSET_SELECTOR, null);
 								if (!"".equals(fs)) //Form foundset, no need to check
 								{
 									if (DataSourceUtils.isDatasourceUri(fs))
@@ -2442,7 +2442,7 @@ public class ServoyFormBuilder
 			Object forFoundsetValue = parent.getProperty(forFoundset);
 			if (forFoundsetValue instanceof JSONObject)
 			{
-				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR, null);
 			}
 		}
 		else if (pd.getType() instanceof FoundsetPropertyType)
@@ -2450,7 +2450,7 @@ public class ServoyFormBuilder
 			Object forFoundsetValue = webObject.getProperty(pd.getName());
 			if (forFoundsetValue instanceof JSONObject)
 			{
-				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR, null);
 			}
 		}
 		return "";
@@ -2469,7 +2469,7 @@ public class ServoyFormBuilder
 				Object relatedFS = component.getProperty(pd.getName());
 				if (relatedFS instanceof JSONObject)
 				{
-					String fs = ((JSONObject)relatedFS).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+					String fs = ((JSONObject)relatedFS).optString(FoundsetPropertyType.FOUNDSET_SELECTOR, null);
 					if ("".equals(fs)) //Form foundset
 					{
 						Form f = (Form)component.getAncestor(IRepository.FORMS);

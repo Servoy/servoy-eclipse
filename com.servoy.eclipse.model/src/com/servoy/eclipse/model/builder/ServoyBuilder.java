@@ -145,6 +145,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -168,6 +169,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	public static final int LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM = 3;
 	public static final int LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM = 20;
+
+	public static final String ATTR_FC_FULL_UUID_PROP_AND_COMPONENT_PATH = "fcFUPACP";
 
 	class ServoyDeltaVisitor implements IResourceDeltaVisitor
 	{
@@ -3293,6 +3296,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		try
 		{
 			IMarker marker = null;
+			String[] fcComponentAndPropertyNamePath = null;
 			String elementName = null;
 			if (persist != null)
 			{
@@ -3302,23 +3306,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (persist instanceof IFormElement)
 				{
 					Form parent = persist.getAncestor(Form.class);
-					if (parent != null && parent.isFormComponent())
+					if (parent != null && parent.isFormComponent().booleanValue())
 					{
-						String name = ((IFormElement)persist).getName();
-						if (name != null)
+						fcComponentAndPropertyNamePath = ((AbstractBase)persist).getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
+						if (fcComponentAndPropertyNamePath != null)
 						{
-							String[] nameParts = name.split("\\$");
-							if (nameParts.length == 3)
+							// look for real form to add marker on it; as this is a component from a form component - so its inside one or more form component containers
+							IPersist formComponentContainer = ServoyModelFinder.getServoyModel().getFlattenedSolution()
+								.searchPersist(fcComponentAndPropertyNamePath[0]);
+							if (formComponentContainer != null)
 							{
-								// look for real form to add marker on it
-								IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(nameParts[0]);
-								if (form != null)
-								{
-									elementName = name;
-									pathPair = SolutionSerializer.getFilePath(form, true);
-									path = new Path(pathPair.getLeft() + pathPair.getRight());
-									file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-								}
+								elementName = ((IFormElement)persist).getName();
+								pathPair = SolutionSerializer.getFilePath(formComponentContainer, true);
+								path = new Path(pathPair.getLeft() + pathPair.getRight());
+								file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 							}
 						}
 					}
@@ -3378,6 +3379,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("Name", type.equals(ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE) ? "element" : ((ISupportName)persist).getName());
+				if (fcComponentAndPropertyNamePath != null) marker.setAttribute(ATTR_FC_FULL_UUID_PROP_AND_COMPONENT_PATH, fcComponentAndPropertyNamePath);
 				marker.setAttribute("SolutionName", resource.getProject().getName());
 			}
 			else if (type.equals(DUPLICATE_UUID) || type.equals(DUPLICATE_SIBLING_UUID) || type.equals(BAD_STRUCTURE_MARKER_TYPE) ||
@@ -3389,6 +3391,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("SolutionName", resource.getProject().getName());
 				if (elementName != null) marker.setAttribute("Name", elementName);
+				if (fcComponentAndPropertyNamePath != null) marker.setAttribute(ATTR_FC_FULL_UUID_PROP_AND_COMPONENT_PATH, fcComponentAndPropertyNamePath);
 				if (type.equals(INVALID_DATAPROVIDERID) && persist instanceof ISupportDataProviderID)
 				{
 					marker.setAttribute("DataProviderID", ((ISupportDataProviderID)persist).getDataProviderID());

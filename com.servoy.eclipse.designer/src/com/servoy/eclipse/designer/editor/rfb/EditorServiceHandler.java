@@ -79,6 +79,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
@@ -416,7 +417,7 @@ public class EditorServiceHandler implements IServerService
 			@Override
 			public Object executeMethod(String methodName, JSONObject args) throws Exception
 			{
-				IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), args.optString("svyId"));
+				IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), PersistIdentifier.fromJSONString(args.optString("svyId")));
 				if (persist instanceof AbstractBase)
 				{
 					return ((AbstractBase)persist).getProperty(args.optString("propertyName"));

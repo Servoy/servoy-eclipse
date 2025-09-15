@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.notification.rss;
 
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -160,6 +161,11 @@ public class RSSNotificationJob extends Job
 		}
 		catch (UnknownHostException e)
 		{
+			ServoyLog.logInfo("Cannot get RSS notifications for '" + this.title + "'. It's likely that either the developer or the remote site is offline: " + e.getLocalizedMessage());
+		}
+		catch (FileNotFoundException e)
+		{
+			// TODO DELETE THIS CATCH; IT WAS ONLY ADDED TO AVOID EXCEPTIONS IN THE LOG WHEN DEBUGGING OLD CODE THAT WAS LOOKING FOR OBSOLETE FORMUL CONTENT
 			ServoyLog.logInfo("Cannot get RSS notifications for '" + this.title + "'. It's likely that either the developer or the remote site is offline: " + e.getLocalizedMessage());
 		}
 		catch (Exception ex)
