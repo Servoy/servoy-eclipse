@@ -18,6 +18,8 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
         this.editorSession.addHighlightChangedListener(this);
         this.editorContentService.addContentMessageListener(this);
     }
+    
+    private shouldRepeatHighlight = false;
 
     ngOnInit(): void {
         this.editorContentService.getContentArea().addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
@@ -29,6 +31,7 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
 
     contentMessageReceived(id: string, data: { property: string }) {
         if (id === 'redrawDecorators') {
+            this.shouldRepeatHighlight = true;
             this.highlightChanged(this.showPermanentHighlight);
         }
     }
@@ -104,10 +107,11 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
                 }
             });
 
-            if (showHighlight) {
+            if (showHighlight && this.shouldRepeatHighlight) {
                 setTimeout(() => {
+                    this.shouldRepeatHighlight = false;
                     this.highlightChanged(showHighlight);
-                }, 0);
+                }, 50);
             }
         });
     }
