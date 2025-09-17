@@ -246,7 +246,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 		// See if the value changed and if so update
 		Object newValue = editor.getValue();
-		if (hasDefaultValue || stream(editValues).noneMatch(el -> valueEquals(newValue, el)))
+		if (hasDefaultValue || stream(editValues).anyMatch(el -> !valueEquals(newValue, el)))
 		{
 			// Set the editor value
 			setValue(newValue);
