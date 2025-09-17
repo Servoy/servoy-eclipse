@@ -9,7 +9,7 @@
           @if (tab.imageMediaID) {
             <img ng-src='tab.imageMediaID' />
           }
-          <span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
+          <span [style.backgroundColor]='background' [style.color]='tab.foreground == null ? foreground : tab.foreground'
           [innerHTML]='tab?.text| htmlFilter| trustAsHtml:servoyApi.trustAsHtml()'></span>
         </a>
         <ng-template ngbNavContent>
