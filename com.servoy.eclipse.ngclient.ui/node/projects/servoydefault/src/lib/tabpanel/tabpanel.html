@@ -6,7 +6,7 @@
 		[id]="tab._id"  [svyTooltip]="tab.toolTipText">
 		<a ngbNavLink svy-mnemonic='tab.mnemonic'>
 			<img *ngIf="tab.imageMediaID" ng-src='tab.imageMediaID' />
-			<span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
+			<span [style.backgroundColor]='background' [style.color]='tab.foreground == null ? foreground : tab.foreground'
 				[innerHTML]='tab?.text| htmlFilter| trustAsHtml:servoyApi.trustAsHtml()'></span>
 		</a>
 		<ng-template ngbNavContent>
