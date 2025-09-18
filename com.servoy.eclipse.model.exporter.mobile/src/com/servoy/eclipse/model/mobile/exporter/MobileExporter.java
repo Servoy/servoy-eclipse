@@ -964,6 +964,7 @@ public class MobileExporter
 			{
 				String name = file.getAbsolutePath();
 				name = name.substring(tmpWarDir.getAbsolutePath().length()).replace('\\', '/');
+				if (name.startsWith("/")) name = name.substring(1);
 				addZipEntry(name, warStream, is);
 			}
 			catch (IOException e)
