@@ -84,7 +84,7 @@
             },
             "mobile": {
               "outputPath": {
-                "base": "dist/app_mobile"
+                "base": "dist/app"
               },
               "budgets": [
                 {

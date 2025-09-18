@@ -49,9 +49,9 @@ import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.wizards.DirtySaveExportWizard;
 import com.servoy.eclipse.ui.wizards.FinishPage;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
-import com.servoy.eclipse.ui.wizards.DirtySaveExportWizard;
 
 public class ExportMobileWizard extends DirtySaveExportWizard implements IExportWizard
 {
@@ -79,7 +79,14 @@ public class ExportMobileWizard extends DirtySaveExportWizard implements IExport
 	public ExportMobileWizard()
 	{
 		finishPage = new CustomizedFinishPage("lastPage");
-		mobileExporter = new MobileExporter(new ExportWarModel(ExportWarModel.getDialogSettings()));
+		mobileExporter = new MobileExporter(new ExportWarModel(ExportWarModel.getDialogSettings())
+		{
+			@Override
+			public String exportNG2Mode()
+			{
+				return "build_mobile";
+			}
+		});
 		pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", mobileExporter);
 		warExportPage = new WarExportPage("outputPage", "Choose output", null, finishPage, pgAppPage, mobileExporter);
 		pgAppPage.setWarExportPage(warExportPage);
@@ -372,7 +379,7 @@ public class ExportMobileWizard extends DirtySaveExportWizard implements IExport
 	}
 
 	/**
-	 * Interface for wizard pages to save last used settings. 
+	 * Interface for wizard pages to save last used settings.
 	 * @author emera
 	 */
 	interface IMobileExportPropertiesPage
