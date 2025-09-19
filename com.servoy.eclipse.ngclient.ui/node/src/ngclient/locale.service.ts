@@ -201,7 +201,7 @@ export class LocaleService {
                     resolve(localeId);
                 },
                 () => {
-                    import(`${context}locales/angular/${language.toLowerCase()}.mjs?localeid=${language.toLowerCase()}`).then(module => {
+                    import(`${context}locales/angular/${language.toLowerCase()}.js?localeid=${language.toLowerCase()}`).then(module => {
                         registerLocaleData(module.default, localeId.split('-')[0]);
                         resolve(language.toLowerCase());
                     }, reject);
