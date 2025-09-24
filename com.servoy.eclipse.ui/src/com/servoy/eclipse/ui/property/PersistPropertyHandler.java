@@ -993,7 +993,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		String toolTip = null;
 		if ((persist instanceof IFormElement || persist instanceof AbstractContainer) && propertyOrHandlerName != null)
 		{
-			if (isHandler)
+			if (isHandler && persist instanceof IFormElement)
 			{
 				// first see if this maps on the javadoc on one of the legacy element interfaces
 				MethodTemplate legacyMethodTemplate = MethodTemplate.getTemplate(persist.getClass(), propertyOrHandlerName);
