@@ -177,6 +177,13 @@
 								<version>${project.parent.version}</version>
 							</restrictTo>
 						</filter>
+                        <filter>
+                            <type>eclipse-plugin</type>
+                            <id>com.servoy.eclipse.ngclient.ui</id>
+                            <restrictTo>
+                                <version>${project.parent.version}</version>
+                            </restrictTo>
+                        </filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>com.servoy.css.core</id>
