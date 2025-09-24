@@ -22,7 +22,7 @@
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.37.0.v20250522-1428</version>
+  <version>3.38.0.v20250807-1828</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
