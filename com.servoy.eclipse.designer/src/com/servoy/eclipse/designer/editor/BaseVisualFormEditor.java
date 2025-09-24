@@ -291,7 +291,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	@Override
 	public <T> T getAdapter(Class<T> adapter)
 	{
-		IEditorPart activeEditor = getActiveEditor();
+		IEditorPart activeEditor = Display.getCurrent() != null ? getActiveEditor() : null;
 		if (activeEditor != null)
 		{
 			// If the active inner part can provide the adapter, return it
@@ -342,7 +342,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			return (T)new UndoablePersistPropertySourceProvider(this);
 		}
 		Object result = super.getAdapter(adapter);
-		if (result == null && graphicaleditor != null && (graphicaleditor == getActiveEditor() || getActiveEditor() == null))
+		if (result == null && Display.getCurrent() != null && graphicaleditor != null && (graphicaleditor == getActiveEditor() || getActiveEditor() == null))
 		{
 			result = graphicaleditor.getAdapter(adapter);
 		}
