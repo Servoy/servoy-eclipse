@@ -36,10 +36,18 @@ public class Activator extends AbstractUIPlugin
 		JSONObject json = null;
 		if (!addServoyServer)
 		{
-			json = new JSONObject(mcpServers);
-			if (json.has("servers") && json.getJSONObject("servers").has("servoy"))
+			try
 			{
-				addServoyServer = false;
+				json = new JSONObject(mcpServers);
+				if (json.has("servers") && json.getJSONObject("servers").has("servoy"))
+				{
+					addServoyServer = false;
+				}
+			}
+			catch (Exception ex)
+			{
+				// ignore and add servoy server
+				addServoyServer = true;
 			}
 		}
 		if (addServoyServer)
