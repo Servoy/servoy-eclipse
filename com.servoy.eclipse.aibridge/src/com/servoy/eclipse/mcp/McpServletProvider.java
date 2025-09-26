@@ -38,10 +38,25 @@ public class McpServletProvider implements IServicesProvider
 				.build())
 			.build();
 
-		Tool tool = McpSchema.Tool.builder().inputSchema(new JsonSchema("object", null, null, null, null, null)).name("getForms")
+//		Map<String, Object> outputSchema = Map.of(
+//			"type", "object",
+//			"properties", Map.of(
+//				"data", Map.of(
+//					"type", "array",
+//					"items", Map.of(
+//						"type", "object",
+//						"properties", Map.of(
+//							"name", Map.of("type", "string"),
+//							"datasource", Map.of("type", "string"))))));
+
+
+		Tool tool = McpSchema.Tool.builder().inputSchema(new JsonSchema("object", null, null, null, null, null)).name("getForms") //.outputSchema(outputSchema)
 			.description("Getting all the forms in the current solution").build();
 
 		SyncToolSpecification syncToolSpecification = SyncToolSpecification.builder().tool(tool).callHandler((exchange, request) -> {
+//			List<Map<String, String>> lst = List.of(Map.of("name", "forma", "datasource", "db:/servera/tablea"),
+//				Map.of("name", "formb", "datasource", "db:/servera/tableb"));
+//			return McpSchema.CallToolResult.builder().structuredContent(lst).build();
 			return McpSchema.CallToolResult.builder().content(List.of(new TextContent("FormA"))).build();
 		}).build();
 		server.addTool(syncToolSpecification);
