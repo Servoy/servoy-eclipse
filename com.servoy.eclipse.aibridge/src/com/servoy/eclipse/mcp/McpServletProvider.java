@@ -1,6 +1,7 @@
 package com.servoy.eclipse.mcp;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.tomcat.starter.IServicesProvider;
@@ -60,8 +61,52 @@ public class McpServletProvider implements IServicesProvider
 			return McpSchema.CallToolResult.builder().content(List.of(new TextContent("FormA"))).build();
 		}).build();
 		server.addTool(syncToolSpecification);
+
+		// createValueList tool
+		Tool createValueListTool = McpSchema.Tool.builder()
+			.inputSchema(new JsonSchema("object", null, null, null, null, null))
+			.name("createValueList")
+			.description("Creates a new value list with the specified name")
+			.build();
+
+		SyncToolSpecification createValueListSpec = SyncToolSpecification.builder()
+			.tool(createValueListTool)
+			.callHandler(this::handleCreateValueList)
+			.build();
+		server.addTool(createValueListSpec);
+
 		return Set.of(new ServletInstance(transportProvider, "/mcp"));
 	}
 
+	/**
+	 * Handler for the createValueList tool
+	 */
+	private McpSchema.CallToolResult handleCreateValueList(Object exchange, McpSchema.CallToolRequest request)
+	{
+		// Extract the name parameter from the request
+		String name = "DefaultValueList";
+		try
+		{
+			Map<String, Object> args = request.arguments();
+			if (args != null && args.containsKey("name"))
+			{
+				Object nameObj = args.get("name");
+				if (nameObj != null)
+				{
+					name = nameObj.toString();
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			// Handle parsing errors
+		}
+
+		// TODO: Implement actual value list creation logic here
+		String resultMessage = "Value list '" + name + "' created successfully";
+		return McpSchema.CallToolResult.builder()
+			.content(List.of(new TextContent(resultMessage)))
+			.build();
+	}
 
 }
