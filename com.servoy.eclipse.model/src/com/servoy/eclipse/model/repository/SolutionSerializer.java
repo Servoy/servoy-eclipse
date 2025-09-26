@@ -906,7 +906,11 @@ public class SolutionSerializer
 			ServoyJSONObject obj;
 			try
 			{
-				obj = generateJSONObject(persist, forceRecursive, false, repository, true, null);
+				if (persist instanceof ScriptMethod)
+				{
+					obj = generateJSONObject(persist, forceRecursive, false, repository, false, null);
+				}
+				else obj = generateJSONObject(persist, forceRecursive, false, repository, true, null);
 			}
 			catch (RepositoryException e)
 			{
@@ -1178,7 +1182,11 @@ public class SolutionSerializer
 
 			if (isJSON)
 			{
-				property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, false, true)); // always store as pure json
+				if (persist instanceof ScriptMethod)
+				{
+					property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, true, true)); // always store as pure json
+				}
+				else property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, false, true)); // always store as pure json
 			}
 
 			if (valueFilter != null)
