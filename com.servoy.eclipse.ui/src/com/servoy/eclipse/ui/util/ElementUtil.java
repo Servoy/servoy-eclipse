@@ -60,6 +60,7 @@ import com.servoy.j2db.documentation.persistence.docs.DocsButton;
 import com.servoy.j2db.documentation.persistence.docs.DocsCalendar;
 import com.servoy.j2db.documentation.persistence.docs.DocsCheckBoxes;
 import com.servoy.j2db.documentation.persistence.docs.DocsComboBox;
+import com.servoy.j2db.documentation.persistence.docs.DocsForm;
 import com.servoy.j2db.documentation.persistence.docs.DocsImage;
 import com.servoy.j2db.documentation.persistence.docs.DocsLabel;
 import com.servoy.j2db.documentation.persistence.docs.DocsListForm;
@@ -531,6 +532,11 @@ public class ElementUtil
 				default :
 					return forScripting ? IRuntimeTextField.class : DocsTextField.class;
 			}
+		}
+
+		if (model instanceof Form)
+		{
+			return DocsForm.class;
 		}
 
 		if (model instanceof Bean)

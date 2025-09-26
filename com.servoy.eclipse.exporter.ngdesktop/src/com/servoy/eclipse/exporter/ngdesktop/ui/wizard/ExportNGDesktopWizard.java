@@ -344,8 +344,16 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 		}
 
+		final boolean includeUpdate = settings.getBoolean("include_update");
 		strValue = settings.get("update_url");
-		if (strValue != null && strValue.trim().length() > 0 && !isValidUrl(strValue))
+
+		if (includeUpdate && (strValue == null || strValue.trim().isEmpty()))
+		{
+			errorMsg.append("Please provide server address for the update packages\n");
+			return errorMsg;
+		}
+
+		if (strValue != null && !strValue.trim().isEmpty() && !isValidUrl(strValue))
 		{
 			final boolean result = MessageDialog.open(MessageDialog.QUESTION, UIUtils.getActiveShell(), "NG Desktop Export",
 				"URL can't be validated. Use it anyway? \n" + strValue, SWT.YES);

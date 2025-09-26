@@ -17,9 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
-import static com.servoy.eclipse.ui.util.ElementUtil.getOverridePersist;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.eclipse.gef.commands.CompoundCommand;
@@ -28,14 +27,15 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
@@ -107,10 +107,10 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 								try
 								{
 									if (!persist.getParent().equals(parent) &&
-										(persist instanceof ISupportExtendsID supportExtendsID && supportExtendsID.getExtendsID() != null) ||
-										!persist.equals(getOverridePersist(PersistContext.create(persist, editorPart.getForm()))))
+										(PersistHelper.isOverrideElement(persist) || persist.getAncestor(IRepository.FORMS) != editorPart.getForm()))
 									{
-										// do not allow changing the parent for inherited elements
+										// do not allow changing the parent for inherited elements, fire it as changed so that it gets refreshed in form designer
+										ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(persist));
 										continue;
 									}
 								}

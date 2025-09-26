@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -36,6 +37,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.OptionDialog;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -134,18 +136,26 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 					return "Invalid scope name";
 				}
 				Collection<String> scopeNames = null;
-				if (project.getSolution().getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK ||
-					project.getSolution().getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK)
+				try
 				{
-					scopeNames = project.getSolution().getScopeNames();
+					if (project.getSolution().getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK ||
+						project.getSolution().getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK ||
+						project.getProject().hasNature(ServoyDeveloperProject.NATURE_ID))
+					{
+						scopeNames = project.getSolution().getScopeNames();
+					}
+					else if (ScriptVariable.GLOBAL_SCOPE.equals(newText))
+					{
+						scopeNames = project.getGlobalScopenames();
+					}
+					else
+					{
+						scopeNames = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScopeNames();
+					}
 				}
-				else if (ScriptVariable.GLOBAL_SCOPE.equals(newText))
+				catch (CoreException e)
 				{
-					scopeNames = project.getGlobalScopenames();
-				}
-				else
-				{
-					scopeNames = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getScopeNames();
+					ServoyLog.logError(e);
 				}
 				for (String scopeName : scopeNames)
 				{

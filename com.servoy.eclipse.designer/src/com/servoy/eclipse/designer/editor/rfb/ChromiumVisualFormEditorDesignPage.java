@@ -70,6 +70,7 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 				{
 				}
 			};
+			this.browser.setData("AUTOSCALE_DISABLED", Boolean.TRUE); // HACK because chromium does not handle DPI zoom well
 			browser.addFocusListener(new FocusListener()
 			{
 

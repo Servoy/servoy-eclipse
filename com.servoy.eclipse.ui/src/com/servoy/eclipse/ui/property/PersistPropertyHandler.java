@@ -78,6 +78,7 @@ import com.servoy.j2db.FormController;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.documentation.IFunctionDocumentation;
 import com.servoy.j2db.documentation.IObjectDocumentation;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -990,9 +991,9 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip)
 	{
 		String toolTip = null;
-		if (persist instanceof IFormElement && propertyOrHandlerName != null)
+		if ((persist instanceof IFormElement || persist instanceof AbstractContainer) && propertyOrHandlerName != null)
 		{
-			if (isHandler)
+			if (isHandler && persist instanceof IFormElement)
 			{
 				// first see if this maps on the javadoc on one of the legacy element interfaces
 				MethodTemplate legacyMethodTemplate = MethodTemplate.getTemplate(persist.getClass(), propertyOrHandlerName);
@@ -1027,7 +1028,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 					}
 				}
 
-				if (toolTip == null || "".equals(toolTip))
+				if (persist instanceof IFormElement && (toolTip == null || "".equals(toolTip)))
 				{
 					// try to find the spec even for legacy components - to get the property/handler docs from the .spec file
 					// normally you don't get here - as a legacy java interface with javadoc should already be found above
@@ -1041,7 +1042,6 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			}
 
 		}
-
 		if ("".equals(toolTip)) toolTip = null;
 		return toolTip;
 	}

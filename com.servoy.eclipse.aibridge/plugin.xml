@@ -84,4 +84,12 @@
           class="com.servoy.eclipse.aibridge.AiBridgeStartup">
     </startup>
  </extension>
+ <extension
+       point="org.apache.tomcat.serviceprovider">
+    <serviceprovider
+          class="com.servoy.eclipse.mcp.McpServletProvider"
+          id="com.servoy.eclipse.mcp.serviceprovider"
+          name="MCP ServiceProvider">
+    </serviceprovider>
+ </extension>
 </plugin>

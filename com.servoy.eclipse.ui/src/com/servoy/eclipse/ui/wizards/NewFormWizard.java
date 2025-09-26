@@ -23,6 +23,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
@@ -77,6 +78,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
@@ -115,8 +117,10 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -356,8 +360,20 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			// create empty form
 			String dataSource = newFormWizardPage.getDataSource();
-			form = servoyProject.getEditingSolution().createNewForm(servoyModel.getNameValidator(), style, newFormWizardPage.getFormName(), dataSource,
-				true, null);
+			IValidateName validator;
+			try
+			{
+				validator = servoyProject.getProject().hasNature(ServoyDeveloperProject.NATURE_ID)
+					? new ScriptNameValidator(servoyProject.getEditingFlattenedSolution())
+					: servoyModel.getNameValidator();
+				form = servoyProject.getEditingSolution().createNewForm(validator, style, newFormWizardPage.getFormName(), dataSource,
+					true, null);
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+
 			// use superform selected by user
 			Form superForm = newFormWizardPage.getSuperForm();
 
@@ -1542,15 +1558,43 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 			else
 			{
+				IStructuredSelection selection = (IStructuredSelection)projectCombo.getSelection();
+				if (selection.size() == 1)
+				{
+					servoyProject = ((ServoyProject)selection.getFirstElement());
+				}
 				try
 				{
-					ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(formName, null,
-						new ValidatorSearchContext(null, IRepository.FORMS), false);
+					if (servoyProject != null && servoyProject.getProject().hasNature(ServoyDeveloperProject.NATURE_ID))
+					{
+						try
+						{
+							new ScriptNameValidator(servoyProject.getEditingFlattenedSolution()).checkName(formName, null,
+								new ValidatorSearchContext(null, IRepository.FORMS), false);
+						}
+						catch (RepositoryException e)
+						{
+							error = e.getMessage();
+						}
+					}
+					else
+					{
+						try
+						{
+							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(formName, null,
+								new ValidatorSearchContext(null, IRepository.FORMS), false);
+						}
+						catch (RepositoryException e)
+						{
+							error = e.getMessage();
+						}
+					}
 				}
-				catch (RepositoryException e)
+				catch (CoreException e)
 				{
-					error = e.getMessage();
+					ServoyLog.logError(e);
 				}
+
 			}
 			setErrorMessage(error);
 			return error == null;
