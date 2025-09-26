@@ -40,9 +40,9 @@ import com.servoy.j2db.scripting.solutionmodel.JSComponent;
 import com.servoy.j2db.scripting.solutionmodel.JSField;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.scripting.solutionmodel.JSGraphicalComponent;
+import com.servoy.j2db.scripting.solutionmodel.JSNGWebComponent;
 import com.servoy.j2db.scripting.solutionmodel.JSPortal;
 import com.servoy.j2db.scripting.solutionmodel.JSTabPanel;
-import com.servoy.j2db.scripting.solutionmodel.JSWebComponent;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
@@ -65,7 +65,7 @@ public class JSMethodCallInterceptor
 	static
 	{
 		Map<Class< ? extends BaseComponent>, Class< ? extends JSComponent< ? extends BaseComponent>>> map = new HashMap<>();
-		map.put(WebComponent.class, JSWebComponent.class);
+		map.put(WebComponent.class, JSNGWebComponent.class);
 		map.put(GraphicalComponent.class, JSGraphicalComponent.class);
 		map.put(Bean.class, JSBean.class);
 		map.put(Field.class, JSField.class);

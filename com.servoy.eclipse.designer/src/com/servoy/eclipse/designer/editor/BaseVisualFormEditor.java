@@ -56,7 +56,6 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
-import org.mozilla.javascript.Function;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -103,6 +102,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
@@ -1157,7 +1157,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		super.setContentDescription(description);
 	}
 
-	public void executeDeveloperMenuCommand(Function callback, Form[] forms, BaseComponent[] components)
+	public void executeDeveloperMenuCommand(FunctionDefinition callback, Form[] forms, BaseComponent[] components)
 	{
 		getCommandStack().execute(new DeveloperMenuCommand(callback, forms, components));
 	}

@@ -94,6 +94,7 @@ public abstract class BaseRestorableCommand extends Command
 
 	protected void save(Object object, Object state)
 	{
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, object, true);
 		if (states != null && states.containsKey(object))
 		{
 			// already saved

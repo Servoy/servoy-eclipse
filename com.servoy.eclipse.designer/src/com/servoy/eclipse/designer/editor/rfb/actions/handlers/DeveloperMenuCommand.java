@@ -17,8 +17,6 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
-import org.mozilla.javascript.Function;
-
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.util.JSMethodCallInterceptor;
 import com.servoy.eclipse.designer.util.JSMethodCallInterceptor.JSComponentMethodCallListener;
@@ -27,7 +25,8 @@ import com.servoy.eclipse.developersolution.DeveloperNGClient;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.scripting.SolutionScope;
+import com.servoy.j2db.plugins.IClientPluginAccess;
+import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.scripting.solutionmodel.JSComponent;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
 
@@ -37,11 +36,11 @@ import com.servoy.j2db.scripting.solutionmodel.JSForm;
  */
 public class DeveloperMenuCommand extends BaseRestorableCommand implements JSComponentMethodCallListener, JSFormMethodCallListener
 {
-	private final Function callback;
+	private final FunctionDefinition callback;
 	private final Form[] forms;
 	private final BaseComponent[] components;
 
-	public DeveloperMenuCommand(Function callback, Form forms[], BaseComponent[] components)
+	public DeveloperMenuCommand(FunctionDefinition callback, Form forms[], BaseComponent[] components)
 	{
 		super("developerMenu");
 		this.callback = callback;
@@ -79,13 +78,12 @@ public class DeveloperMenuCommand extends BaseRestorableCommand implements JSCom
 			}
 			else args = null;
 
-			SolutionScope solutionScope = DeveloperNGClient.INSTANCE.getScriptEngine().getSolutionScope();
 			DeveloperNGClient.INSTANCE.getWebsocketSession().getEventDispatcher().addEvent(() -> {
 				try
 				{
 					JSMethodCallInterceptor.getInstance().setJSFormMethodCallListener(DeveloperMenuCommand.this);
 					JSMethodCallInterceptor.getInstance().setJSComponentMethodCallListener(DeveloperMenuCommand.this);
-					DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(callback, solutionScope, solutionScope, args, false, false);
+					callback.executeSync((IClientPluginAccess)DeveloperNGClient.INSTANCE.getPluginAccess(), args);
 				}
 				catch (Exception e)
 				{
