@@ -1,5 +1,6 @@
 package com.servoy.eclipse.mcp;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -162,7 +163,15 @@ public class McpServletProvider implements IServicesProvider
 		{
 			System.out.println("DEBUG: Creating ValueList with name: '" + name + "'");
 			ValueList myVL = servoyModel.getActiveProject().getSolution().createNewValueList(servoyModel.getNameValidator(), name);
+
 			System.out.println("DEBUG: ValueList created: " + (myVL != null ? "SUCCESS" : "NULL"));
+
+			Iterator<ValueList> it = servoyModel.getActiveProject().getSolution().getValueLists(false);
+			while (it.hasNext())
+			{
+				ValueList vl = it.next();
+				System.out.println("DEBUG: Existing ValueList: '" + vl.getName() + "'");
+			}
 
 			// If values were provided, add them to the value list
 			if (valuesList != null && !valuesList.isEmpty())
@@ -193,15 +202,15 @@ public class McpServletProvider implements IServicesProvider
 				System.out.println("DEBUG: About to set custom values on ValueList...");
 				myVL.setCustomValues(customValues.toString());
 				System.out.println("DEBUG: Custom values set on value list");
-				
+
 				// Verify the values were actually set
 				String retrievedValues = myVL.getCustomValues();
 				System.out.println("DEBUG: Retrieved custom values from ValueList: '" + retrievedValues + "'");
-				
+
 				// Check if they match what we set
 				boolean valuesMatch = customValues.toString().equals(retrievedValues);
 				System.out.println("DEBUG: Values match check: " + valuesMatch);
-				
+
 				if (!valuesMatch)
 				{
 					System.out.println("DEBUG: WARNING - Set values don't match retrieved values!");
