@@ -49,6 +49,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -974,7 +975,8 @@ public class DataModelManager implements IServerInfoManager
 			obj.putOpt(ColumnInfoDef.DESCRIPTION, cid.description);
 			obj.putOpt(ColumnInfoDef.FOREIGN_TYPE, cid.foreignType);
 			obj.putOpt(ColumnInfoDef.CONVERTER_NAME, cid.converterName);
-			obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES, cid.converterProperties != null ? new ServoyJSONObject(cid.converterProperties, false) : null);
+			obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES,
+				cid.converterProperties != null ? new ServoyJSONObject(propertiesToJsonString(cid.converterProperties), false) : null);
 			obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES, cid.validatorProperties != null ? new ServoyJSONObject(cid.validatorProperties, false) : null);
 			obj.putOpt(ColumnInfoDef.VALIDATOR_NAME, cid.validatorName);
 			obj.putOpt(ColumnInfoDef.DEFAULT_FORMAT, cid.defaultFormat);
@@ -1954,4 +1956,45 @@ public class DataModelManager implements IServerInfoManager
 		}
 	}
 
+	/**
+	 * Converts Java properties file data to a JSON string suitable for JSONObject constructor.
+	 * Ignores lines that are comments or blank. Handles key=value and key:value pairs.
+	 *
+	 * @param propertiesData the string data from a properties file
+	 * @return a JSON string representation of the properties
+	 */
+	private static String propertiesToJsonString(String propertiesData)
+	{
+		String propertiesToJsonString = propertiesData;
+		if (propertiesData != null)
+		{
+			String[] lines = propertiesData.split("\r?\n");
+			if (lines.length > 0 && lines[0].trim().startsWith("#"))
+			{
+				StringBuilder json = new StringBuilder();
+				json.append("{");
+				boolean first = true;
+				for (String line : lines)
+				{
+					String trimmed = line.trim();
+					if (trimmed.isEmpty() || trimmed.startsWith("#") || trimmed.startsWith("!")) continue;
+					int sepIdx = trimmed.indexOf('=');
+					if (sepIdx < 0) sepIdx = trimmed.indexOf(':');
+					if (sepIdx < 0) continue;
+					String key = trimmed.substring(0, sepIdx).trim();
+					String value = trimmed.substring(sepIdx + 1).trim();
+					// Unescape Java properties escapes (basic)
+					key = key.replace("\\:", ":").replace("\\=", "=").replace("\\ ", " ");
+					value = value.replace("\\:", ":").replace("\\=", "=").replace("\\ ", " ");
+					if (!first) json.append(", ");
+					json.append(JSONObject.quote(key)).append(":").append(JSONObject.quote(value));
+					first = false;
+				}
+				json.append("}");
+				propertiesToJsonString = json.toString();
+			}
+		}
+
+		return propertiesToJsonString;
+	}
 }
