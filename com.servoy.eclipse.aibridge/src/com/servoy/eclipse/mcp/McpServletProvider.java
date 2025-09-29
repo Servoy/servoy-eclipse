@@ -87,7 +87,7 @@ public class McpServletProvider implements IServicesProvider
 	 */
 	private McpSchema.CallToolResult handleCreateValueList(Object exchange, McpSchema.CallToolRequest request)
 	{
-		String name = "DefaultValueList";
+		String name = null;
 		List<String> valuesList = null;
 		String errorMessage = null;
 
@@ -114,6 +114,10 @@ public class McpServletProvider implements IServicesProvider
 							.collect(java.util.stream.Collectors.toList());
 					}
 				}
+			}
+			if (name == null || name.trim().isEmpty())
+			{
+				throw new IllegalArgumentException("The 'name' argument is required.");
 			}
 			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ValueList myVL = servoyModel.getActiveProject().getEditingSolution().createNewValueList(servoyModel.getNameValidator(), name);
