@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.repository;
 import static com.servoy.j2db.util.DatabaseUtils.deserializeServerInfo;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -49,7 +50,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -63,6 +63,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.UpdateMarkersJob;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
@@ -975,8 +976,16 @@ public class DataModelManager implements IServerInfoManager
 			obj.putOpt(ColumnInfoDef.DESCRIPTION, cid.description);
 			obj.putOpt(ColumnInfoDef.FOREIGN_TYPE, cid.foreignType);
 			obj.putOpt(ColumnInfoDef.CONVERTER_NAME, cid.converterName);
-			obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES,
-				cid.converterProperties != null ? new ServoyJSONObject(propertiesToJsonString(cid.converterProperties), false) : null);
+			try
+			{
+				obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES,
+					cid.converterProperties != null ? new ServoyJSONObject(ComponentFactory.parseJSonProperties(cid.converterProperties), false, true) : null);
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+				throw new JSONException("Error calling ComponentFactory.parseJSonProperties with " + cid.converterProperties);
+			}
 			obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES, cid.validatorProperties != null ? new ServoyJSONObject(cid.validatorProperties, false) : null);
 			obj.putOpt(ColumnInfoDef.VALIDATOR_NAME, cid.validatorName);
 			obj.putOpt(ColumnInfoDef.DEFAULT_FORMAT, cid.defaultFormat);
@@ -1954,47 +1963,5 @@ public class DataModelManager implements IServerInfoManager
 				addTableDeserializeErrorMarker(difference.getServerName(), difference.getTableName(), difference.getCustomMessage(), true);
 			else addDifferenceMarker(difference, true);
 		}
-	}
-
-	/**
-	 * Converts Java properties file data to a JSON string suitable for JSONObject constructor.
-	 * Ignores lines that are comments or blank. Handles key=value and key:value pairs.
-	 *
-	 * @param propertiesData the string data from a properties file
-	 * @return a JSON string representation of the properties
-	 */
-	private static String propertiesToJsonString(String propertiesData)
-	{
-		String propertiesToJsonString = propertiesData;
-		if (propertiesData != null)
-		{
-			String[] lines = propertiesData.split("\r?\n");
-			if (lines.length > 0 && lines[0].trim().startsWith("#"))
-			{
-				StringBuilder json = new StringBuilder();
-				json.append("{");
-				boolean first = true;
-				for (String line : lines)
-				{
-					String trimmed = line.trim();
-					if (trimmed.isEmpty() || trimmed.startsWith("#") || trimmed.startsWith("!")) continue;
-					int sepIdx = trimmed.indexOf('=');
-					if (sepIdx < 0) sepIdx = trimmed.indexOf(':');
-					if (sepIdx < 0) continue;
-					String key = trimmed.substring(0, sepIdx).trim();
-					String value = trimmed.substring(sepIdx + 1).trim();
-					// Unescape Java properties escapes (basic)
-					key = key.replace("\\:", ":").replace("\\=", "=").replace("\\ ", " ");
-					value = value.replace("\\:", ":").replace("\\=", "=").replace("\\ ", " ");
-					if (!first) json.append(", ");
-					json.append(JSONObject.quote(key)).append(":").append(JSONObject.quote(value));
-					first = false;
-				}
-				json.append("}");
-				propertiesToJsonString = json.toString();
-			}
-		}
-
-		return propertiesToJsonString;
 	}
 }
