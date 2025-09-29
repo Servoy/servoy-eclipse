@@ -377,6 +377,8 @@ public class Activator extends AbstractUIPlugin
 											};
 											// start the DeveloperNGClient
 											DeveloperNGClient developerNGClient = new DeveloperNGClient(session, null);
+											com.servoy.eclipse.core.Activator.getDefault().getDebugClientHandler()
+												.registerDebugDeveloperNGClient(developerNGClient);
 											session.setClient(developerNGClient);
 											DeveloperWindow window = new DeveloperWindow(session, 1, "1");
 											CurrentWindow.set(window);

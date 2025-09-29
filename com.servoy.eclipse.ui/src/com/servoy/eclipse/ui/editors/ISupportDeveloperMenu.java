@@ -17,10 +17,9 @@
 
 package com.servoy.eclipse.ui.editors;
 
-import org.mozilla.javascript.Function;
-
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.scripting.FunctionDefinition;
 
 /**
  * @author gabi
@@ -28,5 +27,5 @@ import com.servoy.j2db.persistence.Form;
  */
 public interface ISupportDeveloperMenu
 {
-	public void executeDeveloperMenuCommand(Function callback, Form[] forms, BaseComponent[] components);
+	public void executeDeveloperMenuCommand(FunctionDefinition callback, Form[] forms, BaseComponent[] components);
 }
