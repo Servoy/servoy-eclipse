@@ -7,10 +7,12 @@ import java.util.Set;
 
 import org.apache.tomcat.starter.IServicesProvider;
 import org.apache.tomcat.starter.ServletInstance;
+import org.eclipse.swt.widgets.Display;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.ValueList;
 
 import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
@@ -138,7 +140,17 @@ public class McpServletProvider implements IServicesProvider
 				}
 				myVL.setCustomValues(customValues.toString());
 			}
-			servoyModel.getActiveProject().saveEditingSolutionNodes(new com.servoy.j2db.persistence.IPersist[] { myVL }, true);
+
+			final ValueList valueListToOpen = myVL;
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					EditorUtil.openValueListEditor(valueListToOpen, true);
+				}
+			});
+
 		}
 		catch (Exception e)
 		{
