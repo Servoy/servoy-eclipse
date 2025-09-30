@@ -986,8 +986,17 @@ public class DataModelManager implements IServerInfoManager
 				ServoyLog.logError(e);
 				throw new JSONException("Error calling ComponentFactory.parseJSonProperties with " + cid.converterProperties);
 			}
-			obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES, cid.validatorProperties != null ? new ServoyJSONObject(cid.validatorProperties, false) : null);
 			obj.putOpt(ColumnInfoDef.VALIDATOR_NAME, cid.validatorName);
+			try
+			{
+				obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES,
+					cid.validatorProperties != null ? new ServoyJSONObject(ComponentFactory.parseJSonProperties(cid.validatorProperties), false, true) : null);
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+				throw new JSONException("Error calling ComponentFactory.parseJSonProperties with " + cid.validatorProperties);
+			}
 			obj.putOpt(ColumnInfoDef.DEFAULT_FORMAT, cid.defaultFormat);
 			obj.putOpt(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES, cid.elementTemplateProperties);
 			obj.putOpt(ColumnInfoDef.DATA_PROVIDER_ID, cid.dataProviderID);
