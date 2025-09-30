@@ -949,14 +949,12 @@ public class SolutionExplorerTreeContentProvider
 							if (un.isEnabled()) addSolutionNodeChildren(un);
 							if (un.children != null)
 							{
-								PlatformSimpleUserNode activeSolutionChildren[] = new PlatformSimpleUserNode[un.children.length + 2];
-								for (int i = un.children.length - 1; i >= 0; i--)
-								{
-									activeSolutionChildren[i] = (PlatformSimpleUserNode)un.children[i];
-								}
-								activeSolutionChildren[activeSolutionChildren.length - 2] = modulesOfActiveSolution;
-								activeSolutionChildren[activeSolutionChildren.length - 1] = devSolutionOfActiveSolution;
-								un.children = activeSolutionChildren;
+								List<SimpleUserNode> activeSolutionChildren = new ArrayList<>(Arrays.asList(un.children));
+								activeSolutionChildren.add(modulesOfActiveSolution);
+								if (uiActivator.getDialogSettings().getBoolean(SolutionExplorerView.INCLUDE_DEVELOPER_SOLUTION))
+									activeSolutionChildren.add(devSolutionOfActiveSolution);
+
+								un.children = activeSolutionChildren.toArray(new PlatformSimpleUserNode[activeSolutionChildren.size()]);
 							}
 							else
 							{
