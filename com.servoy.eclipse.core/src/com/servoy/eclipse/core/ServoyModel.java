@@ -2787,8 +2787,11 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	{
 		// TODO refresh modules when solution type was changed
 		List<IPersist> strayCats = new ArrayList<IPersist>();
+		//List to store UUIDs of the methods with same name but different uuid
+		List<UUID> scriptMethodSameName = new ArrayList<UUID>();
 		String oldModules = solution.getModulesNames();
-		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false, true, true, doCleanup);
+		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false, true, true, doCleanup,
+			scriptMethodSameName);
 
 		// see if modules were changed
 		String newModules = solution.getModulesNames();
@@ -3021,6 +3024,16 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			if (editingPersist != null)
 			{
 				changedEditing.put(child.getUUID(), editingPersist);
+			}
+		}
+
+		// now handle the case where there are methods with the same name but different uuid (happens when a method with comment is copied from one scope to another)
+		for (UUID child : scriptMethodSameName)
+		{
+			IPersist editingPersist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), child);
+			if (editingPersist != null)
+			{
+				servoyProject.getEditingSolution().removeChild(editingPersist);
 			}
 		}
 

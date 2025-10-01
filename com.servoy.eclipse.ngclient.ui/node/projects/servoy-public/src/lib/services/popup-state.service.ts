@@ -17,6 +17,6 @@ export class PopupStateService {
     deactivatePopup(id: string) {
         setTimeout(() => {
             this.activePopups.delete(id);
-        }, 100); // a delay is required to allow the window.service.ts keyListener to complete execution
+        }, 200); // a delay is required to allow the window.service.ts keyListener to complete execution
     }
 }

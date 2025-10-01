@@ -56,7 +56,6 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
-import org.mozilla.javascript.Function;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -103,6 +102,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
@@ -292,7 +292,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	@Override
 	public <T> T getAdapter(Class<T> adapter)
 	{
-		IEditorPart activeEditor = getActiveEditor();
+		IEditorPart activeEditor = Display.getCurrent() != null ? getActiveEditor() : null;
 		if (activeEditor != null)
 		{
 			// If the active inner part can provide the adapter, return it
@@ -343,7 +343,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			return (T)new UndoablePersistPropertySourceProvider(this);
 		}
 		Object result = super.getAdapter(adapter);
-		if (result == null && graphicaleditor != null && (graphicaleditor == getActiveEditor() || getActiveEditor() == null))
+		if (result == null && Display.getCurrent() != null && graphicaleditor != null && (graphicaleditor == getActiveEditor() || getActiveEditor() == null))
 		{
 			result = graphicaleditor.getAdapter(adapter);
 		}
@@ -1158,7 +1158,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		super.setContentDescription(description);
 	}
 
-	public void executeDeveloperMenuCommand(Function callback, Form[] forms, BaseComponent[] components)
+	public void executeDeveloperMenuCommand(FunctionDefinition callback, Form[] forms, BaseComponent[] components)
 	{
 		getCommandStack().execute(new DeveloperMenuCommand(callback, forms, components));
 	}

@@ -49,7 +49,11 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONArrayType;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 
@@ -260,6 +264,18 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				array[i] = setValueInternal(bean, array[i], persistContext, caType.getCustomJSONTypeDefinition());
 			}
 			return array;
+		}
+		else if (type instanceof FormPropertyType || type instanceof ValueListPropertyType || type instanceof MediaPropertyType ||
+			type instanceof MenuPropertyType)
+		{
+			if (convertedValue != null)
+			{
+				IPersist p = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).searchPersist(convertedValue.toString());
+				if (p == null)
+				{
+					convertedValue = null;
+				}
+			}
 		}
 		return convertedValue;
 	}

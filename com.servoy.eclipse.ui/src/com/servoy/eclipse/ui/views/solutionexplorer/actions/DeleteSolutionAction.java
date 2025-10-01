@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -32,6 +33,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.DeleteResourceAction;
+import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -105,38 +107,43 @@ public class DeleteSolutionAction extends Action implements ISelectionChangedLis
 			EditorUtil.getActivePage().closeAllEditors(false);
 		}
 		deleteAction.run();
-		ServoyProject[] activeProjects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-		if (activeProjects != null)
+		// hack for checking if delete is really happening (it runs in a job)
+		if (Job.getJobManager().find(IDEWorkbenchMessages.DeleteResourceAction_jobName).length > 0 ||
+			(selectedProjects.length > 0 && !selectedProjects[0].exists()))
 		{
-			outer : for (ServoyProject sp : activeProjects)
+			ServoyProject[] activeProjects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+			if (activeProjects != null)
 			{
-				boolean modified = false;
-				String[] modules = Utils.getTokenElements(sp.getEditingSolution().getModulesNames(), ",", true);
-				if (modules != null)
+				outer : for (ServoyProject sp : activeProjects)
 				{
-					List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
-					for (IProject project : selectedProjects)
+					boolean modified = false;
+					String[] modules = Utils.getTokenElements(sp.getEditingSolution().getModulesNames(), ",", true);
+					if (modules != null)
 					{
-						if (Utils.equalObjects(sp.getProject().getName(), project.getName()))
+						List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
+						for (IProject project : selectedProjects)
 						{
-							continue outer;
+							if (Utils.equalObjects(sp.getProject().getName(), project.getName()))
+							{
+								continue outer;
+							}
+							if (modulesList.remove(project.getName()))
+							{
+								modified = true;
+							}
 						}
-						if (modulesList.remove(project.getName()))
+						if (modified)
 						{
-							modified = true;
-						}
-					}
-					if (modified)
-					{
-						String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
-						sp.getEditingSolution().setModulesNames(modulesTokenized);
-						try
-						{
-							sp.saveEditingSolutionNodes(new IPersist[] { sp.getEditingSolution() }, false);
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError("Cannot save new module list for solution " + sp.getProject().getName(), e);
+							String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+							sp.getEditingSolution().setModulesNames(modulesTokenized);
+							try
+							{
+								sp.saveEditingSolutionNodes(new IPersist[] { sp.getEditingSolution() }, false);
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError("Cannot save new module list for solution " + sp.getProject().getName(), e);
+							}
 						}
 					}
 				}

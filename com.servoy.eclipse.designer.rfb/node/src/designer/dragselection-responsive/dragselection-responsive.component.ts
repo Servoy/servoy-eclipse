@@ -201,7 +201,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                 components.push(obj);
             });
             
-            if (event.ctrlKey || event.metaKey) {
+            if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
                 this.editorSession.createComponents({ 'components': components });
             } else {
                 this.editorSession.getSession().callService('formeditor', 'moveComponent', { 'components': components }, true);

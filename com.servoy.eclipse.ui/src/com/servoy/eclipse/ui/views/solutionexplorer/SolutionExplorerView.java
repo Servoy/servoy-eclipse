@@ -170,7 +170,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
-import org.mozilla.javascript.Function;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 
@@ -261,6 +260,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -2933,7 +2933,7 @@ public class SolutionExplorerView extends ViewPart
 				if (selectedType > 0)
 				{
 					boolean seperatedAdded = false;
-					for (Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+					for (Entry<JSDeveloperMenu, FunctionDefinition> entry : DeveloperBridge.menus.entrySet())
 					{
 						int location = entry.getKey().getLocation();
 						if ((location & selectedType) > 0)

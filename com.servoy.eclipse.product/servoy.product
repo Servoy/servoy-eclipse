@@ -106,9 +106,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <feature id="org.eclipse.jdt"/>
       <feature id="org.eclipse.help"/>
       <feature id="org.eclipse.rcp"/>
-      <feature id="org.eclipse.ecf.core.feature"/>
-      <feature id="org.eclipse.ecf.filetransfer.feature"/>
-      <feature id="org.eclipse.ecf.filetransfer.httpclient5.feature" installMode="root"/>
    </features>
 
    <configurations>

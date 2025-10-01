@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.IEditorPart;
-import org.mozilla.javascript.Function;
 
 import com.servoy.eclipse.developersolution.DeveloperNGClient;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -28,7 +27,8 @@ import com.servoy.eclipse.ui.editors.ISupportDeveloperMenu;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.scripting.SolutionScope;
+import com.servoy.j2db.plugins.IClientPluginAccess;
+import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 
 /**
@@ -40,7 +40,7 @@ import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 public class DeveloperSolutionAction extends Action
 {
 
-	private final Function function;
+	private final FunctionDefinition function;
 	private final String solutionName;
 	private final Form[] forms;
 	private final BaseComponent[] components;
@@ -49,7 +49,7 @@ public class DeveloperSolutionAction extends Action
 	 * @param key
 	 * @param value
 	 */
-	public DeveloperSolutionAction(JSDeveloperMenu key, Function function, String solutionName, Form[] forms, BaseComponent[] components)
+	public DeveloperSolutionAction(JSDeveloperMenu key, FunctionDefinition function, String solutionName, Form[] forms, BaseComponent[] components)
 	{
 		this.function = function;
 		this.solutionName = solutionName;
@@ -77,12 +77,10 @@ public class DeveloperSolutionAction extends Action
 		}
 		else if (solutionName != null)
 		{
-			SolutionScope solutionScope = DeveloperNGClient.INSTANCE.getScriptEngine().getSolutionScope();
 			DeveloperNGClient.INSTANCE.getWebsocketSession().getEventDispatcher().addEvent(() -> {
 				try
 				{
-					DeveloperNGClient.INSTANCE.getScriptEngine().executeFunction(function, solutionScope, solutionScope, new Object[] { solutionName }, false,
-						false);
+					function.executeSync((IClientPluginAccess)DeveloperNGClient.INSTANCE.getPluginAccess(), new Object[] { solutionName });
 				}
 				catch (Exception e)
 				{
