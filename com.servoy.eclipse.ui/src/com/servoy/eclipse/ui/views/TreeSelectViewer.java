@@ -112,6 +112,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	private IValueEditor valueEditor;
 	private ModifyListener textModifyListener;
 	private Color textForeground;
+	private int minTextWidth = 200;
 
 	private boolean skipNextFocusGained = false;
 
@@ -136,6 +137,12 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	public TreeSelectViewer(Composite parent, int style, IValueEditor valueEditor)
 	{
 		init(parent, style, valueEditor);
+	}
+
+	public TreeSelectViewer(Composite parent, int style, int minTextWidth)
+	{
+		this.minTextWidth = minTextWidth;
+		init(parent, style, null);
 	}
 
 	protected void init(Composite parent, int style, IValueEditor valueEditor)
@@ -230,7 +237,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 			GroupLayout groupLayout = new GroupLayout(composite);
 			SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
-			sequentialGroup.add(text, GroupLayout.PREFERRED_SIZE, 200, Integer.MAX_VALUE);
+			sequentialGroup.add(text, GroupLayout.PREFERRED_SIZE, minTextWidth, Integer.MAX_VALUE);
 			sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(button);
 			if (openButton != null)
 			{
@@ -330,7 +337,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 			selection = newSelection;
 			internalRefresh(null);
 			fireSelectionChanged(new SelectionChangedEvent(TreeSelectViewer.this, getSelection()));
-			setValid(getValue() != null && getSelectionFilter().select(getValue()));
+			setValid(getValue() == null || getSelectionFilter().select(getValue()));
 		}
 	}
 

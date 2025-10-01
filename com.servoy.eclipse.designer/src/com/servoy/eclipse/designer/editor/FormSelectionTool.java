@@ -83,9 +83,9 @@ public class FormSelectionTool extends PanningSelectionTool
 			Tab tab = (Tab)((TabFormGraphicalEditPart)editpart).getModel();
 			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(tab);
 			FormValueEditor formValueEditor = new FormValueEditor(flattenedSolution);
-			if (formValueEditor.canEdit(new Integer(tab.getContainsFormID())))
+			if (formValueEditor.canEdit(tab.getContainsFormID()))
 			{
-				formValueEditor.openEditor(new Integer(tab.getContainsFormID()));
+				formValueEditor.openEditor(tab.getContainsFormID());
 			}
 			return true;
 		}

@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.TrayDialog;
@@ -201,8 +200,7 @@ public abstract class Wizard implements IWizard, IShellProvider {
 			try {
 				page.dispose();
 			} catch (Exception e) {
-				Status status = new Status(IStatus.ERROR, Policy.JFACE, IStatus.ERROR, e.getMessage(), e);
-				Policy.getLog().log(status);
+				Policy.getLog().log(Status.error(e.getMessage(), e));
 			}
 		}
 		// dispose of image
@@ -386,7 +384,6 @@ public abstract class Wizard implements IWizard, IShellProvider {
 	 * @param settings
 	 *            the dialog settings, or <code>null</code> if none
 	 * @see #getDialogSettings
-	 *
 	 */
 	public void setDialogSettings(IDialogSettings settings) {
 		dialogSettings = settings;

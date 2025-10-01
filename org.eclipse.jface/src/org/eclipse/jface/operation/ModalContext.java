@@ -18,11 +18,12 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.util.Policy;
+import org.eclipse.pde.api.tools.annotations.NoExtend;
+import org.eclipse.pde.api.tools.annotations.NoInstantiate;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -35,9 +36,9 @@ import org.eclipse.swt.widgets.Display;
  * <p>
  * This class is not intended to be subclassed.
  * </p>
- * @noinstantiate This class is not intended to be instantiated by clients.
- * @noextend This class is not intended to be subclassed by clients.
  */
+@NoInstantiate
+@NoExtend
 public class ModalContext {
 	/**
 	 * Indicates whether ModalContext is in debug mode; <code>false</code> by
@@ -192,8 +193,8 @@ public class ModalContext {
 								throw new RuntimeException(t);
 							}
 						}
-						Policy.getLog().log(new Status(IStatus.ERROR, Policy.JFACE,
-								"Unhandled event loop exception during blocked modal context.", t)); //$NON-NLS-1$
+						Policy.getLog()
+								.log(Status.error("Unhandled event loop exception during blocked modal context.", t)); //$NON-NLS-1$
 					}
 				}
 			} else {
@@ -387,9 +388,6 @@ public class ModalContext {
 						} else if (throwable instanceof InterruptedException e) {
 							throw e;
 						} else if (throwable instanceof OperationCanceledException) {
-							// See 1GAN3L5: ITPUI:WIN2000 - ModalContext
-							// converts OperationCancelException into
-							// InvocationTargetException
 							InterruptedException interruptedException = new InterruptedException(throwable.getMessage());
 							interruptedException.initCause(throwable);
 							throw interruptedException;
@@ -408,7 +406,6 @@ public class ModalContext {
 	 * Invoke the ThreadListener if there are any errors or RuntimeExceptions
 	 * return them.
 	 *
-	 * @param listener
 	 * @param switchingThread
 	 *            the {@link Thread} being switched to
 	 */
@@ -436,7 +433,9 @@ public class ModalContext {
 				runnable.run(progressMonitor);
 			}
 		} catch (OperationCanceledException e) {
-			throw new InterruptedException();
+			InterruptedException interruptedException = new InterruptedException(e.getLocalizedMessage());
+			interruptedException.initCause(e);
+			throw interruptedException;
 		} catch (InvocationTargetException | InterruptedException | ThreadDeath e) {
 			// Make sure to propagate ThreadDeath, or threads will never fully
 			// terminate.

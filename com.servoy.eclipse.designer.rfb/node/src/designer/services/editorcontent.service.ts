@@ -1,5 +1,5 @@
-import { Injectable, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Injectable, Inject, DOCUMENT } from '@angular/core';
+
 import { WindowRefService } from '@servoy/public';
 import { URLParserService } from '../services/urlparser.service';
 
@@ -164,20 +164,6 @@ export class EditorContentService {
         this.initAdjustments();
         return this.leftAdjust;
     }
-    
-    getValueInPixel(value: string, axis: string) {
-		if (value.includes('%')) {
-			const percentage = parseInt(value.replace('%',''));
-			if (axis === 'x') {
-				const width = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().width; 
-				return `${Math.round(percentage / 100 * width)}`;
-			} else {
-				const height = this.getGlassPane().querySelector('.ghostcontainer').getBoundingClientRect().height; 
-				return `${Math.round(percentage / 100 * height)}`;
-			}
-		}
-		return value;
-	}
     
    private initIFrame(variants?: boolean) {
         if (variants) {

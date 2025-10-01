@@ -21,12 +21,10 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.server.ngclient.FormElementHelper;
 
 /**
  * Label provider for setting security checkboxes in form editor security page.
@@ -83,14 +81,6 @@ public class ElementSettingsLabelProvider extends LabelProvider implements ITabl
 		if (columnIndex == VisualFormEditorSecurityPage.CI_NAME)
 		{
 			String name = ((ISupportName)element).getName();
-			if (element instanceof AbstractBase)
-			{
-				String formName = ((AbstractBase)element).getRuntimeProperty(FormElementHelper.FC_NAME_OF_ROOT_ACTUAL_FORM_EVEN_IN_CASE_OF_NESTED_FORM_COMPONENTS);
-				if (formName != null)
-				{
-					// todo
-				}
-			}
 			if (((IPersist)element).getAncestor(IRepository.FORMS) != model.getForm())
 			{
 				name += " [" + ((Form)((IPersist)element).getAncestor(IRepository.FORMS)).getName() + "]";

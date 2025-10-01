@@ -28,6 +28,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -40,7 +41,6 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -139,12 +139,8 @@ public class OpenContainedFormHandler implements IServerService
 				{
 					Form toOpen = null;
 
-					if (value instanceof Integer) toOpen = s.getForm(((Integer)value).intValue());
-					else if (value instanceof String)
-					{
-						IPersist persistByUUID = AbstractRepository.searchPersist(s, UUID.fromString((String)value));
-						if (persistByUUID instanceof Form) toOpen = (Form)persistByUUID;
-					}
+					IPersist persistByUUID = AbstractRepository.searchPersist(s, Utils.getAsUUID(value, false));
+					if (persistByUUID instanceof Form) toOpen = (Form)persistByUUID;
 					if (toOpen != null)
 					{
 						return EditorUtil.openFormDesignEditor(toOpen) != null;

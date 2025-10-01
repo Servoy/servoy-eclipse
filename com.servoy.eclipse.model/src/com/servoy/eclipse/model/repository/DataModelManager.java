@@ -19,10 +19,10 @@ package com.servoy.eclipse.model.repository;
 import static com.servoy.j2db.util.DatabaseUtils.deserializeServerInfo;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,7 +58,6 @@ import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.preferences.DbiPreferences;
-import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -82,7 +81,6 @@ import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.DatabaseUtils;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -235,7 +233,17 @@ public class DataModelManager implements IServerInfoManager
 		{
 			element.removeColumnInfo();
 		}
-		IFile file = getDBIFile(t.getServerName(), t.getName());
+		IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
+		String serverName = t.getServerName();
+		if (s != null)
+		{
+			String parentServerName = s.getConfig().getDataModelCloneFrom();
+			if (parentServerName != null)
+			{
+				serverName = parentServerName;
+			}
+		}
+		IFile file = getDBIFile(serverName, t.getName());
 		if (file.exists())
 		{
 			InputStream is = null;
@@ -243,7 +251,6 @@ public class DataModelManager implements IServerInfoManager
 			{
 				is = file.getContents(true);
 				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
 				{
 					deserializeTable(s, t, json_table);
@@ -281,7 +288,6 @@ public class DataModelManager implements IServerInfoManager
 			boolean clonedServerWithoutTableDbiInDeveloper = false;
 			if (ApplicationServerRegistry.get().isDeveloperStartup())
 			{
-				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				// checking if the server is a clone
 				if (s != null && s.getConfig() != null && s.getConfig().getDataModelCloneFrom() != null && s.getConfig().getDataModelCloneFrom().length() != 0)
 					clonedServerWithoutTableDbiInDeveloper = true;
@@ -300,8 +306,8 @@ public class DataModelManager implements IServerInfoManager
 	public TableMetaInfo getTableMetainfo(IServerInternal server, String tableName)
 	{
 		if (server == null || tableName == null || !server.getConfig().isEnabled() || !server.isValid()) return TableMetaInfo.DEFAULT; // this should never happen
-		IFile file = getDBIFile(server.getName(), tableName);
-		if (file.exists())
+		IFile file = getDBIFile(server.getConfig().getDataModelCloneFrom() != null ? server.getConfig().getDataModelCloneFrom() : server.getName(), tableName);
+		if (file != null && file.exists())
 		{
 			InputStream is = null;
 			String errMsg = null;
@@ -399,25 +405,6 @@ public class DataModelManager implements IServerInfoManager
 		//updateAllColumnInfo(t);
 	}
 
-	public void serializeAllColumnInfo(Table t, IFileAccess fileAccess, String projectName) throws RepositoryException
-	{
-		if (t == null) return;
-
-		try
-		{
-			String out = serializeTable(t);
-			fileAccess.setUTF8Contents(projectName + '/' + getRelativeServerPath(t.getServerName()) + IPath.SEPARATOR + getDBIFileName(t.getName()), out);
-		}
-		catch (JSONException e)
-		{
-			throw new RepositoryException(e);
-		}
-		catch (IOException e)
-		{
-			throw new RepositoryException(e);
-		}
-	}
-
 	public static void reloadAllColumnInfo(IServerInternal server)
 	{
 		server.reloadServerInfo();
@@ -445,6 +432,10 @@ public class DataModelManager implements IServerInfoManager
 	private void updateAllColumnInfoImpl(final ITable t, boolean checkForMarkers) throws RepositoryException
 	{
 		if (t == null || !writeDBIFiles) return;
+
+		// do not write dbi files of clones, just load content from parent server
+		IServerInternal server = (IServerInternal)sm.getServer(t.getServerName());
+		if (server != null && server.getConfig().getDataModelCloneFrom() != null) return;
 
 		// this optimize would normally be OK - but would block writes when startAsTeamProvider is true... so leave it out for now (until we stop using 2 column info providers)
 		// if there are no changes in column info, no use saving them... just to produce (time stamp) outgoing changes in team providers
@@ -551,7 +542,7 @@ public class DataModelManager implements IServerInfoManager
 				}
 				catch (CoreException e)
 				{
-					Debug.error(e);
+					ServoyLog.logError(e);
 				}
 			}
 		}
@@ -564,7 +555,7 @@ public class DataModelManager implements IServerInfoManager
 			}
 			catch (CoreException e)
 			{
-				Debug.error(e);
+				ServoyLog.logError(e);
 			}
 		}
 	}
@@ -573,7 +564,7 @@ public class DataModelManager implements IServerInfoManager
 	public ServerSettings loadServerSettings(String serverName) throws RepositoryException
 	{
 		IFile dbiFile = getServerDBIFile(serverName);
-		if (dbiFile.exists())
+		if (dbiFile != null && dbiFile.exists())
 		{
 			try (InputStream is = dbiFile.getContents(true))
 			{
@@ -766,7 +757,7 @@ public class DataModelManager implements IServerInfoManager
 				if (c != null)
 				{
 					existingColumnInfo++;
-					DatabaseUtils.updateColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), c, cid);
+					DatabaseUtils.updateColumnInfo(c, cid);
 					changedColumns.add(c);
 				}
 				addDifferenceMarkersIfNecessary(c, cid, t, cname);
@@ -957,6 +948,7 @@ public class DataModelManager implements IServerInfoManager
 			obj.put(ColumnInfoDef.DATA_TYPE, cid.columnType.getSqlType());
 			if (cid.columnType.getLength() != 0) obj.put(ColumnInfoDef.LENGTH, cid.columnType.getLength());
 			if (cid.columnType.getScale() != 0) obj.put(ColumnInfoDef.SCALE, cid.columnType.getScale());
+			if (cid.columnType.getSubType() != 0) obj.put(ColumnInfoDef.SUB_TYPE, cid.columnType.getSubType());
 			String compatibleColumnTypesStr = XMLUtils.serializeColumnTypeArray(cid.compatibleColumnTypes);
 			if (compatibleColumnTypesStr != null)
 			{
@@ -982,8 +974,8 @@ public class DataModelManager implements IServerInfoManager
 			obj.putOpt(ColumnInfoDef.DESCRIPTION, cid.description);
 			obj.putOpt(ColumnInfoDef.FOREIGN_TYPE, cid.foreignType);
 			obj.putOpt(ColumnInfoDef.CONVERTER_NAME, cid.converterName);
-			obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES, cid.converterProperties);
-			obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES, cid.validatorProperties);
+			obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES, cid.converterProperties != null ? new ServoyJSONObject(cid.converterProperties, false) : null);
+			obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES, cid.validatorProperties != null ? new ServoyJSONObject(cid.validatorProperties, false) : null);
 			obj.putOpt(ColumnInfoDef.VALIDATOR_NAME, cid.validatorName);
 			obj.putOpt(ColumnInfoDef.DEFAULT_FORMAT, cid.defaultFormat);
 			obj.putOpt(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES, cid.elementTemplateProperties);
@@ -1000,7 +992,7 @@ public class DataModelManager implements IServerInfoManager
 			carray.put(obj);
 		}
 		tobj.put(TableDef.PROP_COLUMNS, carray);
-		return tobj.toString(true);
+		return tobj.toString(false);
 	}
 
 	public static String getDBIFileName(String tableName)
@@ -1031,30 +1023,50 @@ public class DataModelManager implements IServerInfoManager
 
 	public IFile getDBIFile(String serverName, String tableName)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getDBIFileName(tableName));
 		return resourceProject.getFile(path);
 	}
 
 	public IFile getSecurityFile(String serverName, String tableName)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(getRelativeServerPath(serverName) + IPath.SEPARATOR + getSecurityFileName(tableName));
 		return resourceProject.getFile(path);
 	}
 
 	public IFile getServerDBIFile(String serverName)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(getRelativeServerPath(serverName) + COLUMN_INFO_FILE_EXTENSION_WITH_DOT);
 		return resourceProject.getFile(path);
 	}
 
 	public IFile getSecurityFile()
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(SECURITY_DIRECTORY + IPath.SEPARATOR + SECURITY_FILENAME);
 		return resourceProject.getFile(path);
 	}
 
 	public IFile getMetaDataFile(String dataSource)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		String[] stn = DataSourceUtilsBase.getDBServernameTablename(dataSource);
 		if (stn == null)
 		{
@@ -1066,6 +1078,10 @@ public class DataModelManager implements IServerInfoManager
 
 	public IFolder getServerInformationFolder(String serverName)
 	{
+		if (resourceProject == null)
+		{
+			return null;
+		}
 		IPath path = new Path(getRelativeServerPath(serverName));
 		return resourceProject.getFolder(path);
 	}
@@ -1148,7 +1164,7 @@ public class DataModelManager implements IServerInfoManager
 		{
 			public void run()
 			{
-				if (resource.exists())
+				if (resource != null && resource.exists())
 				{
 					// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
 					// the project might have disappeared before this job was started... (delete)
@@ -1346,7 +1362,7 @@ public class DataModelManager implements IServerInfoManager
 		for (String key : keys)
 		{
 			Long id = missingDbiFileMarkerIds.remove(key);
-			if (id != null)
+			if (resourceProject != null && id != null)
 			{
 				IMarker marker = resourceProject.findMarker(id.longValue());
 				if (marker != null)
@@ -1365,24 +1381,22 @@ public class DataModelManager implements IServerInfoManager
 	{
 		differences.removeDifferences(serverName);
 		final IFolder folder = getServerInformationFolder(serverName);
-		updateProblemMarkers(new Runnable()
-		{
-			public void run()
+
+		updateProblemMarkers(() -> {
+			try
 			{
-				try
+				if (folder != null && folder.exists() &&
+					folder.findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, false, IResource.DEPTH_INFINITE).length > 0)
 				{
-					if (folder.exists() && folder.findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, false, IResource.DEPTH_INFINITE).length > 0)
-					{
-						// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
-						// the project might have disappeared before this job was started... (delete)
-						ServoyBuilder.deleteMarkers(folder, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
-					}
-					deleteMissingDBIFileMarkerIfNeeded(serverName, null);
+					// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
+					// the project might have disappeared before this job was started... (delete)
+					ServoyBuilder.deleteMarkers(folder, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError(e);
-				}
+				deleteMissingDBIFileMarkerIfNeeded(serverName, null);
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
 			}
 		});
 	}
@@ -1391,18 +1405,14 @@ public class DataModelManager implements IServerInfoManager
 	private void clearProblemMarkers(boolean clearAlsoDifferences)
 	{
 		if (clearAlsoDifferences) differences.removeAllDifferences();
-		updateProblemMarkers(new Runnable()
-		{
-			public void run()
+		updateProblemMarkers(() -> {
+			if (resourceProject != null && resourceProject.exists())
 			{
-				if (resourceProject.exists())
-				{
-					// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
-					// the project might have disappeared before this job was started... (delete)
-					ServoyBuilder.deleteMarkers(resourceProject, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
-				}
-				missingDbiFileMarkerIds.clear();
+				// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
+				// the project might have disappeared before this job was started... (delete)
+				ServoyBuilder.deleteMarkers(resourceProject, ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 			}
+			missingDbiFileMarkerIds.clear();
 		});
 	}
 
@@ -1657,7 +1667,7 @@ public class DataModelManager implements IServerInfoManager
 					{
 						severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);
 					}
-					else
+					else if (t1 != Types.ARRAY || t2 != Types.ARRAY) // ignore difference of array length, db reports as MAXINT
 					{
 						boolean compatibleLengths = (t1 == t2) && (t1 == IColumnTypes.MEDIA || t1 == IColumnTypes.TEXT) &&
 							(Math.abs(colColumnType.getLength() - (float)dbiColumnType.getLength()) > (Integer.MAX_VALUE / 2));
@@ -1907,7 +1917,7 @@ public class DataModelManager implements IServerInfoManager
 	@Override
 	public void createNewColumnInfo(Column c, boolean createMissingServoySequence) throws RepositoryException
 	{
-		DatabaseUtils.createNewColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null), c, createMissingServoySequence);
+		DatabaseUtils.createNewColumnInfo(c, createMissingServoySequence);
 	}
 
 	@Override

@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.actions;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
@@ -39,18 +40,17 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 
 	public void run(IAction action)
 	{
-		String loginToken = ServoyLoginDialog.getLoginToken();
-		if (loginToken == null)
-		{
-			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-		}
-		if (loginToken != null)
-		{
-			boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
-			BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-				Activator.TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, false);
-			dialog.open(true);
-		}
+		ServoyLoginDialog.getLoginToken(token -> {
+			if (token != null)
+			{
+				Display.getDefault().asyncExec(() -> {
+					boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
+					BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+						Activator.TUTORIALS_URL + token + "&emptyWorkspace=" + emptyWorkspace, true, false);
+					dialog.open();
+				});
+			}
+		});
 	}
 
 	public void selectionChanged(IAction action, ISelection selection)

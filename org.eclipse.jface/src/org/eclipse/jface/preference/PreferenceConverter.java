@@ -18,6 +18,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.StringConverter;
+import org.eclipse.pde.api.tools.annotations.NoInstantiate;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
@@ -46,9 +47,8 @@ import org.eclipse.swt.widgets.Display;
  * </p>
  * Note: touching this class has the side effect of creating a display (static
  * initializer).
- *
- * @noinstantiate This class is not intended to be instantiated by clients.
  */
+@NoInstantiate
 public class PreferenceConverter {
 
 	/**
@@ -73,39 +73,26 @@ public class PreferenceConverter {
 	private static final String ENTRY_SEPARATOR = ";"; //$NON-NLS-1$
 
 	/**
-	 * The default-default value for <code>FontData[]</code> preferences.
-	 * Read-only.
+	 * The default-default value for <code>FontData</code> preferences. Read-only.
+	 * The value is hard coded to the object created via
+	 * {@link FontData#FontData()}.
 	 *
-	 * @deprecated this is not thread-safe and may contain invalid data at
-	 *             startup. Call {@link #getFontDataArrayDefaultDefault()} from
-	 *             the UI thread instead.
+	 * @deprecated Call {@link #getFontDataArrayDefaultDefault()}} from the UI
+	 *             thread instead.
 	 */
-	@Deprecated
-	public static FontData[] FONTDATA_ARRAY_DEFAULT_DEFAULT;
+	@Deprecated(forRemoval = true, since = "2025-06")
+	public static FontData FONTDATA_DEFAULT_DEFAULT = new FontData();
 
 	/**
-	 * The default-default value for <code>FontData</code> preferences.
-	 * Read-only.
+	 * Contains single {@link #FONTDATA_DEFAULT_DEFAULT} element.
 	 *
-	 * @deprecated this is not thread-safe and may contain invalid data at
-	 *             startup. Call {@link #getFontDataArrayDefaultDefault()}} from
-	 *             the UI thread instead.
+	 * @deprecated Call {@link #getFontDataArrayDefaultDefault()} from the UI thread
+	 *             instead.
 	 */
-	@Deprecated
-	public static FontData FONTDATA_DEFAULT_DEFAULT;
+	@Deprecated(forRemoval = true, since = "2025-06")
+	public static FontData[] FONTDATA_ARRAY_DEFAULT_DEFAULT = new FontData[] { FONTDATA_DEFAULT_DEFAULT };
 
 	private static FontData[] fontDataArrayDefaultDefault;
-
-	static {
-		Display display = Display.getDefault();
-		display.asyncExec(() -> {
-			// Ensure that the deprecated FONTDATA_DEFAULT_DEFAULT and
-			// FONTDATA_ARRAY_DEFAULT values
-			// are initialized as soon as possible
-			FONTDATA_ARRAY_DEFAULT_DEFAULT = getFontDataArrayDefaultDefault();
-			FONTDATA_DEFAULT_DEFAULT = getFontDataArrayDefaultDefault()[0];
-		});
-	}
 
 	/**
 	 * private constructor to prevent instantiation.
@@ -177,7 +164,6 @@ public class PreferenceConverter {
 
 	/**
 	 * Helper method to construct a point from the given string.
-	 * @param value
 	 * @return Point
 	 */
 	private static Point basicGetPoint(String value) {
@@ -190,7 +176,6 @@ public class PreferenceConverter {
 
 	/**
 	 *  Helper method to construct a rectangle from the given string.
-	 * @param value
 	 * @return Rectangle
 	 */
 	private static Rectangle basicGetRectangle(String value) {

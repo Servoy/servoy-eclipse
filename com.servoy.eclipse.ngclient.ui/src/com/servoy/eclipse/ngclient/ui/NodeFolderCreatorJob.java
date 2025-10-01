@@ -43,6 +43,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Bundle;
 
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -101,23 +103,30 @@ public class NodeFolderCreatorJob extends Job
 				createFolder(nodeFolder);
 			}
 			boolean codeChanged = true;
-			boolean mainPackageJsonChanged = false;
 			File packageJsonFile = new File(nodeFolder.getParent(), "package.json");
 			File packageCopyJsonFile = new File(nodeFolder.getParent(), "package_copy.json");
 			Bundle bundle = Activator.getInstance().getBundle();
 			URL packageJsonUrl = bundle.getEntry("/node/package.json");
 			String bundleContent = Utils.getURLContent(packageJsonUrl);
-			if (packageCopyJsonFile.exists() && !force && fullyGenerated.exists())
+			boolean mainPackageJsonChanged = false;
+			if (!force)
 			{
-				try
+				// if not already in force mode (then a clean is already done)
+				// then if the package_copy is not there or the last time (fullgenerated) is not there, then also force a rebuild.
+				mainPackageJsonChanged = !packageCopyJsonFile.exists() || !fullyGenerated.exists();
+				if (!mainPackageJsonChanged && packageCopyJsonFile.exists())
 				{
-					String fileContent = FileUtils.readFileToString(packageCopyJsonFile, "UTF-8");
-					codeChanged = !fileContent.equals(bundleContent);
-					mainPackageJsonChanged = codeChanged;
-				}
-				catch (IOException e)
-				{
-					Activator.getInstance().getLog().error("Error reading " + packageCopyJsonFile, e);
+					// if it is not a forced rebuild, then check if the package_copy is still the same as the bundle content, if not then rebuild
+					try
+					{
+						String fileContent = FileUtils.readFileToString(packageCopyJsonFile, "UTF-8");
+						codeChanged = !fileContent.equals(bundleContent);
+						mainPackageJsonChanged = codeChanged;
+					}
+					catch (IOException e)
+					{
+						Activator.getInstance().getLog().error("Error reading " + packageCopyJsonFile, e);
+					}
 				}
 			}
 			File projectsFolder = new File(nodeFolder, "projects");
@@ -150,10 +159,10 @@ public class NodeFolderCreatorJob extends Job
 			}
 			if (codeChanged)
 			{
-				// delete the full parent dir because the main package json is changed
 				fullyGenerated.delete();
 				if (mainPackageJsonChanged)
 				{
+					// delete the full parent dir because the main package json is changed
 					try
 					{
 						Files.walkFileTree(nodeFolder.getParentFile().toPath(), DeletePathVisitor.INSTANCE);
@@ -201,6 +210,13 @@ public class NodeFolderCreatorJob extends Job
 					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageCopyJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
+
+
+					File favicon = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "server/webapps/ROOT/favicon.ico");
+					if (favicon.exists())
+					{
+						FileUtils.copyFile(favicon, new File(nodeFolder, "src/favicon.ico"));
+					}
 
 					executeNpmInstall = true;
 				}
@@ -362,7 +378,7 @@ public class NodeFolderCreatorJob extends Job
 	private static boolean ignoredResource(String filename)
 	{
 		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/e2e/") || filename.indexOf("/node_modules/") != -1 ||
-			filename.startsWith("/node/") || filename.startsWith("/dist/") || filename.endsWith(".spec.ts") ||
+			filename.startsWith("/node/") || filename.startsWith("/dist/") || filename.startsWith("/dist-public/") || filename.endsWith(".spec.ts") ||
 			filename.startsWith("/.gitignore") || filename.startsWith("/.angular/");
 	}
 

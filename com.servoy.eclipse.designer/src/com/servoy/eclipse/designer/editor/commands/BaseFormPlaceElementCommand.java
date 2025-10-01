@@ -73,6 +73,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
@@ -290,7 +291,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 		// drag-n-drop or paste
 		List<Object> res = new ArrayList<Object>(((Object[])object).length);
 
-		Map<ISupportBounds, java.awt.Point> origLocations = new HashMap<ISupportBounds, java.awt.Point>();
+		Map<ISupportBounds, Map<ISupportChilds, java.awt.Point>> origLocations = new HashMap<ISupportBounds, Map<ISupportChilds, java.awt.Point>>();
 		Point loc = location;
 		Map<String, String> groupMap = new HashMap<String, String>(); // holds mapping between old and new group ids for copied elements
 		for (int i = 0; i < ((Object[])object).length; i++)
@@ -329,29 +330,48 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 		if (location != null && origLocations.size() > 1)
 		{
 			// update the locations of the pasted persists to place them relative to each other same as in original position
-			Set<Entry<ISupportBounds, java.awt.Point>> entrySet = origLocations.entrySet();
+			Set<Entry<ISupportBounds, Map<ISupportChilds, java.awt.Point>>> entrySet = origLocations.entrySet();
 
 			// find the minimum x and y (upper-left corner of the original selection)
 			int minx = Integer.MAX_VALUE;
 			int miny = Integer.MAX_VALUE;
-			for (Entry<ISupportBounds, java.awt.Point> entry : entrySet)
+			for (Entry<ISupportBounds, Map<ISupportChilds, java.awt.Point>> entry : entrySet)
 			{
-				minx = minx < entry.getValue().x ? minx : entry.getValue().x;
-				miny = miny < entry.getValue().y ? miny : entry.getValue().y;
+				for (Entry<ISupportChilds, java.awt.Point> value : entry.getValue().entrySet())
+				{
+					minx = minx < value.getValue().x ? minx : value.getValue().x;
+					miny = miny < value.getValue().y ? miny : value.getValue().y;
+				}
 			}
 			// relocate relative to the upper-left corner of the original selection
-			for (Entry<ISupportBounds, java.awt.Point> entry : entrySet)
+			for (Entry<ISupportBounds, Map<ISupportChilds, java.awt.Point>> entry : entrySet)
 			{
 				ISupportBounds element = entry.getKey();
-				if (element instanceof BaseComponent && parent instanceof Form && ((Form)parent).getUseCssPosition())
+				for (Entry<ISupportChilds, java.awt.Point> value : entry.getValue().entrySet())
 				{
-					CSSPosition cssPosition = ((BaseComponent)element).getCssPosition();
+					if (element instanceof BaseComponent && parent instanceof Form && ((Form)parent).getUseCssPosition())
+					{
+						CSSPosition cssPosition = ((BaseComponent)element).getCssPosition();
 
-					((BaseComponent)element).setCssPosition(cssPosition);
-				}
-				else
-				{
-					CSSPositionUtils.setLocation(entry.getKey(), location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny);
+						if (((BaseComponent)element).getParent().equals(value.getKey()))
+						{
+							int left = CSSPositionUtils.getPixelsValue(cssPosition.left);
+							if (left >= 0)
+							{
+								cssPosition.left = String.valueOf(location.x + value.getValue().x - minx);
+							}
+							int top = CSSPositionUtils.getPixelsValue(cssPosition.top);
+							if (top >= 0)
+							{
+								cssPosition.top = String.valueOf(location.y + value.getValue().y - miny);
+							}
+						}
+						((BaseComponent)element).setCssPosition(cssPosition);
+					}
+					else
+					{
+						CSSPositionUtils.setLocation(entry.getKey(), location.x + value.getValue().x - minx, location.y + value.getValue().y - miny);
+					}
 				}
 			}
 		}
@@ -368,7 +388,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 		return new IPersist[] { persist };
 	}
 
-	protected Object[] pastePersist(PersistDragData dragData, Point location, Map<ISupportBounds, java.awt.Point> origLocations, Map<String, String> groupMap)
+	protected Object[] pastePersist(PersistDragData dragData, Point location, Map<ISupportBounds, Map<ISupportChilds, java.awt.Point>> origLocations,
+		Map<String, String> groupMap)
 		throws RepositoryException
 	{
 		if (dragData.type == IRepository.TEMPLATES)
@@ -522,7 +543,9 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			{
 				((ISupportTabSeq)persist).setTabSeq(ISupportTabSeq.DEFAULT);
 			}
-			origLocations.put((ISupportBounds)persist, CSSPositionUtils.getLocation(supportBounds));
+			Map<ISupportChilds, java.awt.Point> map = new HashMap<ISupportChilds, java.awt.Point>();
+			map.put(draggedPersist.getParent(), CSSPositionUtils.getLocation(supportBounds));
+			origLocations.put((ISupportBounds)persist, map);
 			return toArrAy(persist);
 		}
 		else if (draggedPersist instanceof WebCustomType && parent instanceof IBasicWebComponent)
@@ -726,7 +749,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 			else if (model instanceof FormElementGroup)
 			{
-				Iterator<IFormElement> elements = ((FormElementGroup)model).getElements();
+				Iterator<ISupportFormElement> elements = ((FormElementGroup)model).getElements();
 				while (elements.hasNext())
 				{
 					toDelete.add(elements.next());

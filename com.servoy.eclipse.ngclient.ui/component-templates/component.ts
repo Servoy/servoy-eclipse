@@ -4,7 +4,8 @@ import { ServoyBaseComponent } from '@servoy/public';
 @Component({
     selector: '##packagename##-##componentdashname##',
     templateUrl: './##componentname##.html',
-     changeDetection: ChangeDetectionStrategy.OnPush
+     changeDetection: ChangeDetectionStrategy.OnPush,
+     standalone: false
 })
 export class ##componentclassname## extends ServoyBaseComponent<HTMLDivElement>{
 

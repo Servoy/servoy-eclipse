@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.editors;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -28,6 +29,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -46,10 +49,12 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.editors.FormatDialog.IFormatTextContainer;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -111,6 +116,21 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 			{
 				displayCaret = displayFormat.getSelection();
 				editCaret = null;
+			}
+		});
+		displayFormat.addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusLost(FocusEvent e)
+			{
+				DecimalFormat format = new DecimalFormat(displayFormat.getText(), RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
+				double precision = -Math.log10(Utils.DEFAULT_EQUALS_PRECISION);
+				if (precision < format.getMaximumFractionDigits())
+				{
+					MessageDialog.openWarning(UIUtils.getActiveShell(), "Wrong format precision",
+						"The precision of the format is higher than the default precision used for equals checks. This can lead to unexpected results when comparing numbers. Please adjust the format to have a maximum of " +
+							(int)precision + " decimal. Precision can be set using setting: servoy.client.equals.decimal.precision (default value is 7)");
+				}
 			}
 		});
 		Label lblEditFormat = new Label(this, SWT.NONE);

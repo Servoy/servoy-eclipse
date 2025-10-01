@@ -24,6 +24,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.Handle;
 import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 
@@ -31,7 +32,7 @@ import com.servoy.eclipse.designer.editor.mobile.editparts.MobileSnapData.Mobile
 
 /**
  * SelectionEditPolicy for use in mobile form editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -43,10 +44,10 @@ public class MobileSelectionEditPolicy extends NonResizableEditPolicy
 	}
 
 	@Override
-	protected List<IFigure> createSelectionHandles()
+	protected List< ? extends Handle> createSelectionHandles()
 	{
 		// just 1 line (the move handles), no drag handles
-		List<IFigure> list = new ArrayList<IFigure>();
+		List<Handle> list = new ArrayList<>();
 		createMoveHandle(list);
 		return list;
 	}

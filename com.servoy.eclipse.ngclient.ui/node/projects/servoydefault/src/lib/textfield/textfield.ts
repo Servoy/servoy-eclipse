@@ -1,5 +1,5 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject} from '@angular/core';
+
+import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 
 import {FormattingService} from '@servoy/public';
 
@@ -8,26 +8,13 @@ import {ServoyDefaultBaseField} from '../basefield';
 @Component( {
     selector: 'servoydefault-textfield',
     templateUrl: './textfield.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 } )
 export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElement> {
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef , formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
         super(renderer, cdRef, formattingService, doc);
-    }
-
-    attachFocusListeners(nativeElement: any) {
-        if (this.onFocusGainedMethodID)
-            this.renderer.listen( nativeElement, 'focus', ( e ) => {
-                if ( this.mustExecuteOnFocus !== false ) {
-                    this.onFocusGainedMethodID( e );
-                }
-                this.mustExecuteOnFocus = true;
-            } );
-        if (this.onFocusLostMethodID)
-            this.renderer.listen( nativeElement, 'blur', ( e ) => {
-                this.onFocusLostMethodID(e);
-            } );
     }
 
     onModelChange(newValue) {
@@ -40,6 +27,12 @@ export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElem
         }
         else {
             this.dataProviderID = newValue;
+        }
+    }
+    
+    onClick(event){
+        if (this.editable == false && this.onActionMethodID) {
+            this.onActionMethodID(event)
         }
     }
 }

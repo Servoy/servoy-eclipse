@@ -430,7 +430,7 @@ public class ExportPage extends WizardPage
 		if (applicationUrl == null)
 		{
 			final String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
-			applicationUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solutionName + "/index.html";
+			applicationUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solution/" + solutionName + "/index.html";
 		}
 		return applicationUrl;
 	}

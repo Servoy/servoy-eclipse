@@ -19,9 +19,9 @@ package com.servoy.eclipse.ui.editors.table;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.databinding.observable.ChangeEvent;
@@ -164,10 +164,8 @@ public class ColumnValidationComposite extends Composite
 		Map<String, IColumnValidator> validators = ApplicationServerRegistry.get().getPluginManager().getColumnValidatorManager().getValidators();
 		List<String> options = new ArrayList<String>();
 		options.add("none");
-		Iterator<IColumnValidator> it = validators.values().iterator();
-		while (it.hasNext())
+		for (IColumnValidator conv : validators.values())
 		{
-			IColumnValidator conv = it.next();
 			String name = conv.getName();
 			int[] conv_types = conv.getSupportedColumnTypes();
 			if (conv_types != null)
@@ -203,11 +201,9 @@ public class ColumnValidationComposite extends Composite
 	private IColumnValidator getSelectedValidator()
 	{
 		Map<String, IColumnValidator> Validators = ApplicationServerRegistry.get().getPluginManager().getColumnValidatorManager().getValidators();
-		Iterator<IColumnValidator> it = Validators.values().iterator();
 		String selectedConvertor = combo.getText();
-		while (it.hasNext())
+		for (IColumnValidator conv : Validators.values())
 		{
-			IColumnValidator conv = it.next();
 			String name = conv.getName();
 			if (name.equals(selectedConvertor))
 			{
@@ -277,11 +273,8 @@ public class ColumnValidationComposite extends Composite
 					ServoyJSONObject json = new ServoyJSONObject();
 					Map<String, String> defaults = conv.getDefaultProperties();
 
-					//subtract defaults, makes save smaller
-					Iterator<Map.Entry<String, String>> it = data.iterator();
-					while (it.hasNext())
+					for (Entry<String, String> pair : data)
 					{
-						Map.Entry<String, String> pair = it.next();
 						if (defaults == null || (defaults != null && !Utils.equalObjects(defaults.get(pair.getKey()), pair.getValue())))
 						{
 							try

@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.property;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.beans.PropertyDescriptor;
+import java.util.Iterator;
 
 import javax.swing.border.Border;
 
@@ -44,6 +45,7 @@ import org.sablo.specification.property.types.TypesRegistry;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -58,6 +60,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
@@ -284,6 +287,26 @@ public class BasePropertyHandler implements IPropertyHandler
 			}
 			else
 			{
+				if (StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName().equals(getName()) && obj instanceof Form form && form.getExtendsForm() != null &&
+					!form.getParts().hasNext())
+				{
+					// we must override the part first
+					Form parentForm = form.getExtendsForm();
+					outer : while (parentForm != null)
+					{
+						Iterator<Part> it = parentForm.getParts();
+						while (it.hasNext())
+						{
+							Part parentPart = it.next();
+							if (parentPart.getPartType() == Part.BODY)
+							{
+								ElementUtil.getOverridePersist(PersistContext.create(parentPart, form));
+								break outer;
+							}
+						}
+						parentForm = parentForm.getExtendsForm();
+					}
+				}
 				propertyDescriptor.getWriteMethod().invoke(obj, new Object[] { value });
 			}
 		}
@@ -329,7 +352,7 @@ public class BasePropertyHandler implements IPropertyHandler
 			if (IContentSpecConstants.PROPERTY_ATTRIBUTES.equals(name))
 			{
 				if (!(persist instanceof IFormElement)) return false;
-				Form form = (Form)((IFormElement)persist).getAncestor(IRepository.FORMS);
+				Form form = (Form)persist.getAncestor(IRepository.FORMS);
 				int type = form.getSolution().getSolutionType();
 				return (persist instanceof WebComponent || SolutionMetaData.isNGOnlySolution(type));
 			}
@@ -337,7 +360,7 @@ public class BasePropertyHandler implements IPropertyHandler
 			{
 				return false;
 			}
-			if (persist instanceof Form frm && frm.isResponsiveLayout() && name.equals("height"))
+			if (persist instanceof Form frm && frm.isResponsiveLayout() && (name.equals("height") || name.equals("useMinHeight") || name.equals("useMinWidth")))
 			{
 				return false;
 			}

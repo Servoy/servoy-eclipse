@@ -106,16 +106,18 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -356,6 +358,38 @@ public class EditorUtil
 	 * @param resource
 	 * @return
 	 */
+	public static IEditorPart openMenuEditor(IPersist menu, boolean activate)
+	{
+		if (menu instanceof MenuItem)
+		{
+			menu = menu.getAncestor(IRepository.MENUS);
+		}
+		if (menu instanceof Menu mnu)
+		{
+			try
+			{
+				IWorkbenchPage activePage = getActivePage();
+				if (activePage != null)
+				{
+					return activePage.openEditor(new PersistEditorInput(mnu.getName(), menu.getRootObject().getName(), menu.getUUID()),
+						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+							Platform.getContentTypeManager().getContentType(PersistEditorInput.MENU_RESOURCE_ID)).getId(),
+						activate);
+				}
+			}
+			catch (PartInitException ex)
+			{
+				ServoyLog.logError(ex);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Open file.
+	 * @param resource
+	 * @return
+	 */
 	public static IEditorPart openFileEditor(IFile resource)
 	{
 		if (resource == null) return null;
@@ -438,6 +472,10 @@ public class EditorUtil
 		if (persist instanceof Media)
 		{
 			return openMediaViewer((Media)persist, activate);
+		}
+		if (persist instanceof Menu || persist instanceof MenuItem)
+		{
+			return openMenuEditor(persist, activate);
 		}
 		if (persist instanceof IScriptProvider)
 		{
@@ -686,40 +724,32 @@ public class EditorUtil
 		}
 	}
 
-	public static void openComponentVariantsEditor(String deepLinkArgs)
-	{
-		try
-		{
-			IFile variants = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject()
-				.getFile(new Path("medias/variants.less"));
-			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("variants.less");
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(variants), desc.getId(), true);
-		}
-		catch (PartInitException e)
-		{
-			Debug.log(e);
-		}
-	}
-
 	public static void openThemeEditor(final IMediaProvider project)
 	{
 		Media media = project.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
-		Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
-		Path path = new Path(pathPair.getLeft() + pathPair.getRight());
-		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-		try
+		if (media == null)
 		{
-			IWorkbenchPage activePage = getActivePage();
-			if (activePage != null)
-			{
-				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
-				activePage.openEditor(PropertiesLessEditorInput.createFromFileEditorInput(new FileEditorInput(file)), desc.getId(),
-					true);
-			}
+			media = project.getMedia(ThemeResourceLoader.SOLUTION_PROPERTIES_LESS);
 		}
-		catch (PartInitException ex)
+		if (media != null)
 		{
-			ServoyLog.logError(ex);
+			Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, false);
+			Path path = new Path(pathPair.getLeft() + pathPair.getRight());
+			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+			try
+			{
+				IWorkbenchPage activePage = getActivePage();
+				if (activePage != null)
+				{
+					IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
+					activePage.openEditor(PropertiesLessEditorInput.createFromFileEditorInput(new FileEditorInput(file)), desc.getId(),
+						true);
+				}
+			}
+			catch (PartInitException ex)
+			{
+				ServoyLog.logError(ex);
+			}
 		}
 	}
 
@@ -1158,7 +1188,7 @@ public class EditorUtil
 		boolean hideDefault = !PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.show.default.package");
 		if (form != null && !form.isResponsiveLayout() && hideDefault)
 		{
-			Iterator<IFormElement> elements = form.getFormElementsSortedByFormIndex();
+			Iterator<ISupportFormElement> elements = form.getFormElementsSortedByFormIndex();
 			while (elements.hasNext() && hideDefault)
 			{
 				hideDefault = hideDefault && (elements.next() instanceof WebComponent);

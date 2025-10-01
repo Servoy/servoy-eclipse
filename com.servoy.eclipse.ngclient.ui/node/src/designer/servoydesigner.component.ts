@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2, DOCUMENT } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
 import { FormService } from '../ngclient/form.service';
@@ -8,11 +8,12 @@ import { TypesRegistry } from '../sablo/types_registry';
 import { DesignFormComponent } from './designform_component.component';
 
 import { Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+
 
 @Component({
     selector: 'servoy-designer',
-    templateUrl: './servoydesigner.component.html'
+    templateUrl: './servoydesigner.component.html',
+    standalone: false
 })
 export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy, IDesignFormComponent {
 
@@ -120,6 +121,11 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         // not sure how to fix that sometimes wrong calls come from server; for example when deleting a component from css position container
         if (width != 0 && height != 0) {
             this.windowRef.nativeWindow.parent.postMessage({ id: 'updateFormSize', width: width, height: height }, '*');
+			this.contentRefresh();
+			setTimeout(()=>{
+				this.renderGhosts();
+				this.redrawDecorators();
+			}, 200);
         }
     }
 

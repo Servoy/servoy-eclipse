@@ -195,6 +195,7 @@
 
 .toolbar-action .btn:disabled {
 	border-style: none;
+	pointer-events: auto;
 }
 
 .toolbar .dropdown-toggle::after {

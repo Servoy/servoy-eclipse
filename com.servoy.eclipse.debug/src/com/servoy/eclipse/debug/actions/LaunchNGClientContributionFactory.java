@@ -2,7 +2,7 @@ package com.servoy.eclipse.debug.actions;
 
 
 /**
- *  The webclient toolbar menu item.
+ *  The ngclient toolbar menu item.
  *
  * @author jcompagner
  * @since 8.2

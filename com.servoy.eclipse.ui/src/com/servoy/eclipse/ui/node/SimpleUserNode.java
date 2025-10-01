@@ -77,13 +77,14 @@ public class SimpleUserNode implements IAdaptable
 		this.icon = icon;
 	}
 
-	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Image icon, Class< ? > realType)
+	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, Image icon, Class< ? > realType, IDeveloperFeedback feedback)
 	{
 		this(displayName, type);
 		this._realObject = realObject;
 		storeContainingPersistIfNeeded(_realObject);
 		this.icon = icon;
 		this.clientSupport = AnnotationManagerReflection.getInstance().getClientSupport(realType, ClientSupport.Default);
+		this.developerFeedback = feedback;
 	}
 
 	public SimpleUserNode(String displayName, UserNodeType type, Object realObject, IPersist containingPersist, Image icon)
@@ -98,6 +99,7 @@ public class SimpleUserNode implements IAdaptable
 	{
 		this(displayName, type);
 		this._realObject = realObject;
+		storeContainingPersistIfNeeded(_realObject);
 		this.icon = icon;
 		this.developerFeedback = developerFeedback;
 	}
@@ -315,8 +317,10 @@ public class SimpleUserNode implements IAdaptable
 		}
 		if (toolTip != null)
 		{
-			if (toolTip.startsWith("<")) return toolTip;
-			return "<pre>" + toolTip + "</pre>";
+			if (toolTip.contains("<") &&
+				(toolTip.contains("/>") || toolTip.contains("</") || /* wrong tag, but it is present in a few places */toolTip.contains("<br>")))
+				return toolTip;
+			return "<p>" + toolTip.replace("\n\n", "\n<p>\n") + "</p>";
 		}
 		return developerFeedback.getCode();
 	}

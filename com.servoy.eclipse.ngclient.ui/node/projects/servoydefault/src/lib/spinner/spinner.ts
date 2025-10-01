@@ -1,13 +1,14 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ElementRef, ViewChild, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ElementRef, ViewChild, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService } from '@servoy/public';
-import { DOCUMENT } from '@angular/common';
+
 
 @Component({
     selector: 'servoydefault-spinner',
     templateUrl: './spinner.html',
     styleUrls: ['./spinner.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement> {
 

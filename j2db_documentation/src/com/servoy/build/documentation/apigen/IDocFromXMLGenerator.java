@@ -18,7 +18,6 @@
 package com.servoy.build.documentation.apigen;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import com.servoy.build.documentation.DocumentationManager;
 
@@ -27,8 +26,15 @@ import com.servoy.build.documentation.DocumentationManager;
  */
 public interface IDocFromXMLGenerator
 {
+	/**
+	 * @param pluginProviderPublicName null if it's not for a plugin
+	 */
+	void processDocObjectToPathAndOtherMaps(DocumentationManager manager, String path, String pluginProviderPublicName)
+		throws ClassNotFoundException, InstantiationException, IllegalAccessException;
 
 	void generateDocsFromXML(DocumentationManager manager, String path, boolean ngOnly)
-		throws MalformedURLException, ClassNotFoundException, IOException;
+		throws ClassNotFoundException, IOException;
+
+	void writeAggregatedOutput(boolean ngOnly) throws IOException;
 
 }

@@ -402,6 +402,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 									}
 								case SWT.ESC :
 									text.dispose();
+									usersTree.setFocus();
 									break;
 							}
 						}

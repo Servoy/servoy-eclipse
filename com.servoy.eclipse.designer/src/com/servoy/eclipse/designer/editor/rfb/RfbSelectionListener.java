@@ -31,6 +31,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
@@ -94,6 +95,18 @@ public class RfbSelectionListener implements ISelectionListener
 						}
 					});
 				}
+				else if (uuids == null)
+				{ //the components were deleted so the current selection is null; we also need to update the selection to empty
+					editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
+								new Object[] { new String[0] });
+						}
+					});
+				}
 			}
 		});
 	}
@@ -106,7 +119,20 @@ public class RfbSelectionListener implements ISelectionListener
 		final List<String> uuids = new ArrayList<String>();
 		for (Object sel : Utils.iterate(selection.iterator()))
 		{
-			IPersist persist = Platform.getAdapterManager().getAdapter(sel, IPersist.class);
+			IPersist persist = null;
+			PersistContext pc = Platform.getAdapterManager().getAdapter(sel, PersistContext.class);
+			if (pc != null)
+			{
+				// if this is a selection that is not form the current form (of this listener)
+				// then ignore it , Sub forms component should be only selected in that subform.
+				// not in the base or other subforms that show that same uuid/persist.
+				if (pc.getContext() instanceof Form && pc.getContext() != form) continue;
+				persist = pc.getPersist();
+			}
+			else
+			{
+				persist = Platform.getAdapterManager().getAdapter(sel, IPersist.class);
+			}
 			if (persist != null)
 			{
 				if (persist instanceof WebFormComponentChildType)
@@ -126,7 +152,7 @@ public class RfbSelectionListener implements ISelectionListener
 				{
 					IPersist ancestor = persist.getAncestor(IRepository.FORMS);
 					if (ancestor == null) continue;
-					if (form.getID() == ancestor.getID())
+					if (form.getUUID().equals(ancestor.getUUID()))
 					{
 						/*
 						 * if (persist instanceof WebCustomType) { WebCustomType ghostBean = (WebCustomType)persist; uuids.add(ghostBean.getUUIDString()); }
@@ -151,7 +177,7 @@ public class RfbSelectionListener implements ISelectionListener
 				FormElementGroup formElementGroup = Platform.getAdapterManager().getAdapter(sel, FormElementGroup.class);
 				if (formElementGroup != null)
 				{
-					if (form.getID() == formElementGroup.getParent().getID())
+					if (form.getUUID().equals(formElementGroup.getParent().getUUID()))
 					{
 						uuids.add(formElementGroup.getGroupID());
 						forCurrentForm = true;

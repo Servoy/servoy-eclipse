@@ -86,7 +86,7 @@ public class LayoutContainerPropertyHandler implements IPropertyHandler
 			if (value == null && !layoutContainer.hasProperty(getName()) && propertyDescription.hasDefault()) // default values for persist mapped properties are already handled by LayoutContainer, so value will not be null here for those
 			{
 				// if null is coming from parent, return it
-				if (layoutContainer.getExtendsID() > 0) return value;
+				if (layoutContainer.getExtendsID() != null) return value;
 				Object defaultValue = propertyDescription.getDefaultValue();
 				if (propertyDescription.getType() instanceof IDesignValueConverter)
 				{

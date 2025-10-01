@@ -32,12 +32,14 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -57,7 +59,6 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	// stored in ui plugin prefs
 	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS = "debugger.showConfirmationDialogWhenErrors";
 	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS = "debugger.showConfirmationDialogWhenWarnings";
-	public static final String STARTUP_EXTENSION_UPDATE_CHECK = "startup.checkForExtensionUpdates";
 	public static final String STARTUP_SHOW_START_PAGE = "servoy.developer.showStartPage";
 	public static boolean DEFAULT_ERROR_CONFIRMATION = true;
 	public static boolean DEFAULT_WARNING_CONFIRMATION = false;
@@ -72,7 +73,6 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	private Text settingsFileText;
 	private Button showErrorsConfirmation;
 	private Button showWarningsConfirmation;
-	private Button startupExtensionUpdateCheck;
 	private Button showStartPageCheck;
 
 	public void init(IWorkbench workbench)
@@ -119,8 +119,6 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		retriesSpinner = new Spinner(settings, SWT.BORDER);
 		retriesSpinner.setValues(0, 1, 100, 0, 1, 5);
 
-		startupExtensionUpdateCheck = new Button(others, SWT.CHECK);
-		startupExtensionUpdateCheck.setText("Check for Servoy Extension updates at startup");
 		showErrorsConfirmation = new Button(others, SWT.CHECK);
 		showErrorsConfirmation.setText("Check for error markers when launching (debug) client");
 		showWarningsConfirmation = new Button(others, SWT.CHECK);
@@ -159,13 +157,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
 		showErrorsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, DEFAULT_ERROR_CONFIRMATION));
 		showWarningsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, DEFAULT_WARNING_CONFIRMATION));
-		startupExtensionUpdateCheck.setSelection(eclipsePreferences.getBoolean(STARTUP_EXTENSION_UPDATE_CHECK, DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK));
 		showStartPageCheck.setSelection(Utils.getAsBoolean(Settings.getInstance().getProperty(STARTUP_SHOW_START_PAGE, "true")));
-		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
-		{
-			showStartPageCheck.setEnabled(false);
-			showStartPageCheck.setSelection(true);
-		}
 	}
 
 	@Override
@@ -177,26 +169,35 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		settings.setProperty(SHUTDOWN_LAUNCHER_SETTING, shutdownLauncherText.getText());
 		settings.setProperty(RETRIES_SETTING, String.valueOf(retriesSpinner.getSelection()));
 
-		InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).put(com.servoy.eclipse.core.Activator.PROPERTIES_FILE_PATH_SETTING,
-			settingsFileText.getText());
-		try
-		{
-			InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).flush();
-		}
-		catch (BackingStoreException e)
-		{
-			ServoyLog.logError(e);
-		}
 
 		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, showErrorsConfirmation.getSelection());
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, showWarningsConfirmation.getSelection());
-		eclipsePreferences.putBoolean(STARTUP_EXTENSION_UPDATE_CHECK, startupExtensionUpdateCheck.getSelection());
-		Settings.getInstance().setProperty(STARTUP_SHOW_START_PAGE, new Boolean(showStartPageCheck.getSelection()).toString());
-		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
+		Settings.getInstance().setProperty(STARTUP_SHOW_START_PAGE, Boolean.valueOf(showStartPageCheck.getSelection()).toString());
+
+		String currentServoyProperties = InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).get(
+			com.servoy.eclipse.core.Activator.PROPERTIES_FILE_PATH_SETTING, "servoy.properties");
+		String newServoyProperties = settingsFileText.getText();
+		if (!Utils.equalObjects(currentServoyProperties, newServoyProperties))
 		{
-			Settings.getInstance().setProperty(STARTUP_SHOW_START_PAGE, "true");
+			InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).put(com.servoy.eclipse.core.Activator.PROPERTIES_FILE_PATH_SETTING,
+				newServoyProperties);
+			try
+			{
+				InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).flush();
+			}
+			catch (BackingStoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+
+			if (ServoyMessageDialog.openQuestion(UIUtils.getActiveShell(), "servoy.properties preference changed",
+				"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
+			{
+				PlatformUI.getWorkbench().restart();
+			}
 		}
+
 		return true;
 	}
 
@@ -210,7 +211,6 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		settingsFileText.setText("servoy.properties");
 		retriesSpinner.setSelection(RETRIES_DEFAULT);
 
-		startupExtensionUpdateCheck.setSelection(DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK);
 		showErrorsConfirmation.setSelection(DEFAULT_ERROR_CONFIRMATION);
 		showWarningsConfirmation.setSelection(DEFAULT_WARNING_CONFIRMATION);
 		showStartPageCheck.setSelection(DEFAULT_STARTUP_SHOW_START_PAGE);

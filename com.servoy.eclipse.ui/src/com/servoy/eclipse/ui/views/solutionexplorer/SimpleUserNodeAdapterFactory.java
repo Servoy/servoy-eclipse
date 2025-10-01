@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.internal.core.SourceMethod;
-import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
@@ -52,7 +51,6 @@ import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.actions.Openable;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.preferences.TeamPreferences;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -81,44 +79,6 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				if (projectNature != null)
 				{
 					mappings.add(new SimpleResourceMapping(projectNature.getProject()));
-
-					// add resource / modules project(s) if set in preferences
-					if (nodeType == UserNodeType.SOLUTION)
-					{
-						RepositoryProvider solutionRP = RepositoryProvider.getProvider(projectNature.getProject());
-
-						if (solutionRP != null)
-						{
-							if (TeamPreferences.isAutomaticResourceSynch())
-							{
-								ServoyResourcesProject servoyResourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel()
-									.getActiveResourcesProject();
-
-								if (servoyResourcesProject != null)
-								{
-									IProject resourceProject = servoyResourcesProject.getProject();
-									RepositoryProvider rp = RepositoryProvider.getProvider(resourceProject);
-									if (rp != null && rp.getID().equals(solutionRP.getID())) mappings.add(new SimpleResourceMapping(resourceProject));
-								}
-							}
-
-							if (TeamPreferences.isAutomaticModulesSynch())
-							{
-								ServoyProject[] servoyModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
-
-								for (ServoyProject moduleProject : servoyModules)
-								{
-									// ignore main project that is part of the modules
-									if (moduleProject.equals(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject())) continue;
-
-									IProject moduleIProject = moduleProject.getProject();
-									RepositoryProvider rp = RepositoryProvider.getProvider(moduleIProject);
-									if (rp != null && rp.getID().equals(solutionRP.getID()))
-										mappings.add(new SimpleResourceMapping(moduleProject.getProject()));
-								}
-							}
-						}
-					}
 				}
 			}
 			else if (nodeType == UserNodeType.RESOURCES)

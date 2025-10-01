@@ -111,11 +111,6 @@ public class ColumnInfoBean
 		return columnInfo.getForeignType();
 	}
 
-	public int getID()
-	{
-		return columnInfo.getID();
-	}
-
 	private String oldLookupValue = null;
 
 	public String getLookupValue()
@@ -314,6 +309,17 @@ public class ColumnInfoBean
 	public void setExcludedFlag(boolean excluded)
 	{
 		columnInfo.setFlag(IBaseColumn.EXCLUDED_COLUMN, excluded);
+		columnInfo.flagChanged();
+	}
+
+	public boolean getNoDataLogFlag()
+	{
+		return (columnInfo.getFlags() & IBaseColumn.NO_DATA_LOG_COLUMN) == IBaseColumn.NO_DATA_LOG_COLUMN;
+	}
+
+	public void setNoDataLogFlag(boolean noDataLog)
+	{
+		columnInfo.setFlag(IBaseColumn.NO_DATA_LOG_COLUMN, noDataLog);
 		columnInfo.flagChanged();
 	}
 

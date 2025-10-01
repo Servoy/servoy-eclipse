@@ -295,7 +295,7 @@ public class PasteAction extends Action implements ISelectionChangedListener
 		{
 			try
 			{
-				nameValidator.checkName(newName, -1, new ValidatorSearchContext(IRepository.FORMS), false);
+				nameValidator.checkName(newName, null, new ValidatorSearchContext(IRepository.FORMS), false);
 				ok = true;
 			}
 			catch (RepositoryException e)

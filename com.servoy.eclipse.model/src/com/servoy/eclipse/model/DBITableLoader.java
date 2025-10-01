@@ -72,8 +72,7 @@ public class DBITableLoader implements ITableLoader
 							table.setMarkedAsMetaData(TRUE.equals(tableDef.isMetaData));
 							for (ColumnInfoDef colInfo : tableDef.columnInfoDefSet)
 							{
-								Column c = new Column(table, colInfo.name, colInfo.columnType.getSqlType(), colInfo.columnType.getLength(),
-									colInfo.columnType.getScale(), true);
+								Column c = new Column(table, colInfo.name, colInfo.columnType, true);
 								if (colInfo.dataProviderID != null) c.setDataProviderID(colInfo.dataProviderID);
 								c.setAllowNull(colInfo.allowNull);
 								if ((IBaseColumn.PK_COLUMN & colInfo.flags) > 0) c.setDatabasePK(true);

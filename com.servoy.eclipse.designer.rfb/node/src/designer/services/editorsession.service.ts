@@ -24,6 +24,7 @@ export class EditorSessionService implements ServiceProvider {
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
     private allowedChildren: { [key: string]: string[] }  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
     private wizardProperties: { [key: string]: string[] } = {};
+    private developerMenus: { [key: string]: string[] } = {};
 
     private bIsDirty = false;
     private lockAutoscrollId = '';
@@ -65,6 +66,9 @@ export class EditorSessionService implements ServiceProvider {
         this.wsSession.callService('formeditor', 'getWizardProperties').then((result: { [key: string]: string[] }) => {
             this.wizardProperties = result;
         }).catch(e => console.log(e));
+        this.wsSession.callService('formeditor', 'getDeveloperMenus').then((result: { [key: string]: string[] }) => {
+            this.developerMenus = result;
+        }).catch(e => console.log(e));        
     }
 
     activated() {
@@ -127,6 +131,10 @@ export class EditorSessionService implements ServiceProvider {
 
     openConfigurator(property: string) {
         return this.wsSession.callService('formeditor', 'openConfigurator', { name: property }, false);
+    }
+
+    executeDeveloperMenu(isForm: boolean, property: string) {
+        return this.wsSession.callService('formeditor', 'executeDeveloperMenu', { isForm, name: property }, false);
     }
 
     setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
@@ -215,6 +223,10 @@ export class EditorSessionService implements ServiceProvider {
 
     createComponents(components) {
         void this.wsSession.callService('formeditor', 'createComponents', components, true)
+    }
+    
+    updateFavoritesComponents(component) {
+        void this.wsSession.callService('formeditor', 'updateFavoritesComponents', component, true)
     }
 
     openElementWizard(elementType: string) {
@@ -359,6 +371,24 @@ export class EditorSessionService implements ServiceProvider {
             return this.wizardProperties[spec];
         }
         return null;
+    }
+    
+    getDeveloperMenus(isForm: boolean, formElementType: string): string[] {
+        let devMenus = null;
+        if (this.developerMenus) {
+            if(isForm)
+                devMenus = this.developerMenus["FORM"];
+            else {
+                const compMenus = this.developerMenus["COMPONENT"];
+                if(compMenus)
+                {
+                    const allCompMenus = compMenus[""];
+                    const specMenus = compMenus[formElementType];
+                    devMenus = [...(allCompMenus ?? []), ...(specMenus ?? [])];
+                }
+            }
+        }
+        return devMenus && devMenus.length > 0 ? devMenus : null;
     }
 
     getSuperForms() {
@@ -569,6 +599,7 @@ export class PaletteComp {
     rightSibling?: string;
     variant?: string;
     cssPos?: { property: string };
+    isFav?: boolean;
 }
 
 export class Package {

@@ -79,6 +79,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	private final StringBuffer allImportantMSGes;
 	private final Shell shell;
 	private final HashMap<String, Integer> rootObjectsMap = new HashMap();
+	private final Map<String, String> formCss = new HashMap<String, String>();
 
 	public EclipseImportUserChannel(boolean displayDataModelChanges, Shell shell)
 	{
@@ -432,11 +433,14 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 							serverPrototype = (IServerInternal)serverManager.getServer(sc.getServerName());
 							if (serverPrototype != null && serverPrototype.isValid())
 							{
-								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), EclipseDatabaseUtils.getPostgresServerUrl(sc, name),
-									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
-									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
-									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass(),
-									sc.getQuoteList(), sc.isClientOnlyConnections());
+								serverConfig = sc.newBuilder()
+									.setServerName(name)
+									.setServerUrl(EclipseDatabaseUtils.getPostgresServerUrl(sc, name))
+									.setDataModelCloneFrom(null)
+									.setEnabled(true)
+									.setSkipSysTables(false)
+									.setIdleTimeout(-1)
+									.build();
 								if (serverManager.validateServerConfig(null, serverConfig) != null)
 								{
 									// something is wrong
@@ -825,4 +829,5 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			}
 		});
 	}
+
 }

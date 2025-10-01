@@ -1,5 +1,5 @@
-import { DOCUMENT } from '@angular/common';
-import { Renderer2, Component, ViewChild, ElementRef, ChangeDetectorRef, SimpleChanges, Input, ChangeDetectionStrategy, Inject } from '@angular/core';
+
+import { Renderer2, Component, ViewChild, ElementRef, ChangeDetectorRef, SimpleChanges, Input, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { FormattingService } from '@servoy/public';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
@@ -8,7 +8,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     selector: 'servoydefault-radio',
     templateUrl: './radio.html',
     styleUrls: ['./radio.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 } )
 export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement> {
     @Input() horizontalAlignment: any;

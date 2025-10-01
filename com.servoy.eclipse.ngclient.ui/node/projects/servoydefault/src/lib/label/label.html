@@ -1,17 +1,21 @@
-<div *ngIf="!labelFor" style='width:100%;height:100%;overflow:hidden;position:absolute' class='svy-label'  [id]="servoyApi.getMarkupId()" [svyTooltip]="toolTipText" [sabloTabseq]="tabSeq"
-	#element [ngStyle]="{pointerEvents: enabled ? 'unset': 'none'}">  	 
-<ng-container [ngTemplateOutlet]="template"></ng-container>
-</div>
-<label *ngIf="labelFor"  for='{{labelFor}}' style='width:100%;height:100%;overflow:hidden;position:absolute' [id]="servoyApi.getMarkupId()" class='svy-label' 
-	[svyTooltip]="toolTipText" #element [ngStyle]="{pointerEvents: enabled ? 'unset': 'none'}">
-<ng-container [ngTemplateOutlet]="template"></ng-container>	
-</label>
+@if (!labelFor) {
+  <div style='width:100%;height:100%;overflow:hidden;position:absolute' class='svy-label'  [id]="servoyApi.getMarkupId()" [svyTooltip]="toolTipText" [sabloTabseq]="tabSeq"
+    #element [ngStyle]="{pointerEvents: enabled ? 'unset': 'none', opacity: enabled ? '': '0.5'}">
+    <ng-container [ngTemplateOutlet]="template"></ng-container>
+  </div>
+}
+@if (labelFor) {
+  <label  for='{{labelFor}}' style='width:100%;height:100%;overflow:hidden;position:absolute' [id]="servoyApi.getMarkupId()" class='svy-label'
+    [svyTooltip]="toolTipText" #element [ngStyle]="{pointerEvents: enabled ? 'unset': 'none', opacity: enabled ? '': '0.5'}">
+    <ng-container [ngTemplateOutlet]="template"></ng-container>
+  </label>
+}
 
 <ng-template #template>
-	<div style="width:100%;overflow:hidden;position:relative;" class='svy-nowrap' #child>
-	   		<span [svyImageMediaId]='{img: dataProviderID?.url ? dataProviderID.url : imageMediaID, rollOverImg:rolloverImageMediaID, mediaOptions: mediaOptions}' [hostComponent]="this"></span>
- 	   		<span [innerHTML]='(((dataProviderID == null && !hideText) || dataProviderID?.url) ? text : dataProviderID) | formatFilter:format | mnemonicletterFilter:mnemonic | trustAsHtml:servoyApi.trustAsHtml()'></span>
-	</div>
+  <div style="width:100%;overflow:hidden;position:relative;" class='svy-nowrap' #child>
+    <span [svyImageMediaId]='{img: dataProviderID?.url ? dataProviderID.url : imageMediaID, rollOverImg:rolloverImageMediaID, mediaOptions: mediaOptions}' [hostComponent]="this"></span>
+    <span [innerHTML]='(((dataProviderID == null && !hideText) || dataProviderID?.url) ? text : dataProviderID) | formatFilter:format | mnemonicletterFilter:mnemonic | trustAsHtml:servoyApi.trustAsHtml()'></span>
+  </div>
 </ng-template>
 
 

@@ -54,7 +54,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -74,6 +73,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.forms.HyperlinkSettings;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -91,7 +92,6 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
-import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -369,16 +369,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		excomposite.setExpanded(false);
 		excomposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		excomposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
-		if (IconPreferences.getInstance().getUseDarkThemeIcons())
+		excomposite.addExpansionListener(new ExpansionAdapter()
 		{
-			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
-				.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
-			if (darkFGColor != null)
+			@Override
+			public void expansionStateChanged(ExpansionEvent e)
 			{
-				excomposite.setTitleBarForeground(darkFGColor);
-				excomposite.setActiveToggleColor(darkFGColor);
+				relayout();
 			}
-		}
+		});
 
 		advancedSettingsComposite = new Composite(excomposite, SWT.NONE);
 		advancedSettingsComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
@@ -970,13 +968,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			String.class, String.class, String.class, int.class, int.class, //
 			int.class, int.class, String.class, String.class, boolean.class, //
 			boolean.class, boolean.class, boolean.class, int.class, Integer.class, //
-			String.class, List.class, boolean.class //
+			String.class, List.class, boolean.class, String.class //
 		}, new String[] { //
 			"serverName", "userName", "password", "serverUrl", "connectionProperties", //
 			"driver", "catalog", "schema", "maxActive", "maxIdle", //
 			"maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", //
 			"skipSysTables", "prefixTables", "queryProceduresNOTUSED", "idleTimeout", "selectINValueCountLimit", //
-			"dialectClass", "quoteList", "clientOnlyConnectionsNOTUSED" }, new String[] { "queryProceduresNOTUSED", "clientOnlyConnectionsNOTUSED" });
+			"dialectClass", "quoteList", "clientOnlyConnectionsNOTUSED", "initializationString" },
+			new String[] { "queryProceduresNOTUSED", "clientOnlyConnectionsNOTUSED" });
 
 		serverSettingsObservable = new ImmutableObjectObservable<ServerSettings>(serverSettings,
 			new Class[] { boolean.class, SortingNullprecedence.class, Boolean.class, Boolean.class

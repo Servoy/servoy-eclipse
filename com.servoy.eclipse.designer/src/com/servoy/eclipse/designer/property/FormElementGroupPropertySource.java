@@ -53,9 +53,9 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -95,9 +95,9 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 	/**
 	 * get elements, order by y-position
 	 */
-	public IFormElement[] getSortedElements()
+	public ISupportFormElement[] getSortedElements()
 	{
-		IFormElement[] asArray = Utils.asArray(group.getElements(), IFormElement.class);
+		ISupportFormElement[] asArray = Utils.asArray(group.getElements(), ISupportFormElement.class);
 		Arrays.sort(asArray, PositionComparator.XY_PERSIST_COMPARATOR);
 		return asArray;
 	}
@@ -105,11 +105,11 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 	public IPropertyDescriptor[] getPropertyDescriptors()
 	{
 		// get elements, order by y-position
-		IFormElement[] sortedElements = getSortedElements();
+		ISupportFormElement[] sortedElements = getSortedElements();
 		List<PropertyDescriptor> lst = new ArrayList<PropertyDescriptor>(sortedElements.length + 10);
 		for (int i = 0; i < sortedElements.length; i++)
 		{
-			IFormElement element = sortedElements[i];
+			ISupportFormElement element = sortedElements[i];
 			Object name = element.getName();
 			if (name == null)
 			{
@@ -173,7 +173,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 						{
 							try
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value, -1,
+								ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value, null,
 									new ValidatorSearchContext(group.getParent(), IRepository.ELEMENTS), false);
 							}
 							catch (RepositoryException e)
@@ -239,7 +239,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 			group.getName());
 		if (id instanceof Integer && ((Integer)id).intValue() >= 0)
 		{
-			IFormElement[] sortedElements = getSortedElements();
+			ISupportFormElement[] sortedElements = getSortedElements();
 			if (((Integer)id).intValue() < sortedElements.length)
 			{
 				return PersistContext.create(sortedElements[((Integer)id).intValue()]);
@@ -309,10 +309,10 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		int dy = p.y - oldLocation.y;
 		if (dx == 0 && dy == 0) return;
 
-		Iterator<IFormElement> elements = group.getElements();
+		Iterator<ISupportFormElement> elements = group.getElements();
 		while (elements.hasNext())
 		{
-			IFormElement element = elements.next();
+			ISupportFormElement element = elements.next();
 			Point oldElementLocation = CSSPositionUtils.getLocation(element);
 			Point location = new Point(oldElementLocation.x + dx, oldElementLocation.y + dy);
 			setElementProperty(element, StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), location);
@@ -330,10 +330,10 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		float factorW = d.width / (float)oldBounds.width;
 		float factorH = d.height / (float)oldBounds.height;
 
-		Iterator<IFormElement> elements = group.getElements();
+		Iterator<ISupportFormElement> elements = group.getElements();
 		while (elements.hasNext())
 		{
-			IFormElement element = elements.next();
+			ISupportFormElement element = elements.next();
 			Dimension oldElementSize = CSSPositionUtils.getSize(element);
 			Point oldElementLocation = CSSPositionUtils.getLocation(element);
 
@@ -370,10 +370,10 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 
 	protected <T> void setPropertyToElements(TypedProperty<T> property, T arg)
 	{
-		Iterator<IFormElement> elements = group.getElements();
+		Iterator<ISupportFormElement> elements = group.getElements();
 		while (elements.hasNext())
 		{
-			IFormElement element = elements.next();
+			ISupportFormElement element = elements.next();
 			setElementProperty(element, property.getPropertyName(), arg);
 		}
 	}
@@ -402,7 +402,7 @@ public class FormElementGroupPropertySource implements IPropertySource, IModelSa
 		{
 			if (!name.equals(group.getName()))
 			{
-				validator.checkName(name, -1, new ValidatorSearchContext(context, IRepository.ELEMENTS), false);
+				validator.checkName(name, null, new ValidatorSearchContext(context, IRepository.ELEMENTS), false);
 			}
 			newGroupId = name;
 		}

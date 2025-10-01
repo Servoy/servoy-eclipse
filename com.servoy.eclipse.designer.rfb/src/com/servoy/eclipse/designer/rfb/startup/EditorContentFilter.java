@@ -26,16 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
@@ -46,7 +36,6 @@ import org.sablo.util.HTTPUtils;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -62,6 +51,16 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator.Des
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @author jcompagner
@@ -98,8 +97,8 @@ public class EditorContentFilter implements Filter
 
 			if (solution != null && form != null)
 			{
-				((HttpServletResponse)response).setContentType("text/html");
-				((HttpServletResponse)response).setCharacterEncoding("UTF-8");
+				response.setContentType("text/html");
+				response.setCharacterEncoding("UTF-8");
 				PrintWriter w = response.getWriter();
 				Set<String> formScripts = new HashSet<String>();
 				formScripts.add("js/servoy-components.js?x=" + System.currentTimeMillis());
@@ -156,32 +155,29 @@ public class EditorContentFilter implements Filter
 			if (flattenedForm == null) return; //form renamed
 			HTTPUtils.setNoCacheHeaders((HttpServletResponse)response);
 
-			String containerID = httpServletRequest.getParameter("cont");
+			String containerUUID = httpServletRequest.getParameter("cont");
 			PrintWriter w = response.getWriter();
-			((HttpServletResponse)response).setContentType("text/html");
-			if (containerID != null)
+			response.setContentType("text/html");
+			if (containerUUID != null)
 			{
-				int id = Utils.getAsInteger(containerID);
-				if (id > 0)
+				try
 				{
-					try
+					IPersist container = flattenedForm.findChild(
+						Utils.getAsUUID(containerUUID, false));
+					if (container instanceof LayoutContainer)
 					{
-						IPersist container = flattenedForm.findChild(
-							((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getUUIDForElementId(id, id, -1, -1, null));
-						if (container instanceof LayoutContainer)
-						{
-							FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true);
-							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)container, flattenedForm, fs, w, new DesignProperties(id),
-								FormElementHelper.INSTANCE);
-							FormLayoutGenerator.generateFormEndTag(w, true);
-						}
+						FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true);
+						FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)container, flattenedForm, fs, w,
+							new DesignProperties(containerUUID),
+							FormElementHelper.INSTANCE);
+						FormLayoutGenerator.generateFormEndTag(w, true);
 					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-
 				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+
 			}
 			else if (flattenedForm.isResponsiveLayout())
 			{

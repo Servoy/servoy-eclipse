@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackEvent;
@@ -57,7 +56,9 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
+import org.mozilla.javascript.Function;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
@@ -67,18 +68,21 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.DeveloperMenuCommand;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
-import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
+import com.servoy.eclipse.ui.editors.IFlagChangeEditor;
+import com.servoy.eclipse.ui.editors.ISupportDeveloperMenu;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.FlattenedPortal;
@@ -92,13 +96,17 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
@@ -113,7 +121,7 @@ import com.servoy.j2db.util.Utils;
  */
 
 public abstract class BaseVisualFormEditor extends MultiPageEditorPart
-	implements IActiveProjectListener, IPersistChangeListener, IShowEditorInput, ISupportCheatSheetActions
+	implements IActiveProjectListener, IPersistChangeListener, IShowEditorInput, ISupportCheatSheetActions, IFlagChangeEditor, ISupportDeveloperMenu
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
 	private static final String COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.rfb.context";
@@ -223,7 +231,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removeActiveProjectListener(this);
 		servoyModel.removePersistChangeListener(false, this);
-		revert(false);
+		revert(false, false);
 
 		if (dummyActionRegistry != null)
 		{
@@ -237,7 +245,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	 *
 	 * @param force
 	 */
-	public void revert(boolean force)
+	public void revert(boolean force, boolean refresh)
 	{
 		if (force || isDirty())
 		{
@@ -245,6 +253,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel().revertEditingPersist(servoyProject, form);
 				getCommandStack().flush();
+				if (refresh)
+				{
+					this.refresh(new ArrayList<IPersist>(), true);
+				}
 			}
 			catch (RepositoryException e)
 			{
@@ -271,49 +283,51 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	{
 		super.pageChange(newPageIndex);
 		if (graphicaleditor != null) graphicaleditor.commandStackChanged(new EventObject(this));
+
+		activateEditorContext();
 	}
 
+
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter)
+	public <T> T getAdapter(Class<T> adapter)
 	{
+		IEditorPart activeEditor = getActiveEditor();
+		if (activeEditor != null)
+		{
+			// If the active inner part can provide the adapter, return it
+			T returnValue = activeEditor.getAdapter(adapter);
+			if (returnValue != null)
+			{
+				return returnValue;
+			}
+		}
 		if (adapter.equals(IPersist.class))
 		{
-			return form;
+			return (T)form;
 		}
 		if (adapter.equals(IGotoMarker.class))
 		{
-			return new IGotoMarker()
+			return (T)new IGotoMarker()
 			{
 				public void gotoMarker(IMarker marker)
 				{
-					String[] fcComponentAndPropertyNamePath = null;
-					try
-					{
-						fcComponentAndPropertyNamePath = (String[])marker.getAttribute(ServoyBuilder.ATTR_FC_FULL_UUID_PROP_AND_COMPONENT_PATH);
-						if (fcComponentAndPropertyNamePath == null)
-						{
-							String elementUuid = null;
+					PersistIdentifier persistIdentifier = null;
+					int start = marker.getAttribute(IMarker.CHAR_START, -1);
 
-							if (elementUuid == null && marker.getAttribute(IMarker.CHAR_START, -1) != -1)
-							{
-								elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
-									Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
-							}
-							if (elementUuid == null) elementUuid = (String)marker.getAttribute("elementUuid");
-
-							if (elementUuid != null) fcComponentAndPropertyNamePath = new String[] { elementUuid };
-						}
-					}
-					catch (CoreException e)
+					if (start != -1)
 					{
-						ServoyLog.logError(e);
+						String uuidAtStart = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), start);
+						if (uuidAtStart != null) persistIdentifier = PersistIdentifier.fromSimpleUUID(UUID.fromString(uuidAtStart));
 					}
-					if (fcComponentAndPropertyNamePath != null)
+					if (persistIdentifier == null) persistIdentifier = PersistIdentifier.fromJSONString(marker.getAttribute("persistIdentifier", null));
+
+					if (persistIdentifier != null)
 					{
 						try
 						{
 							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this.getForm(),
-								new PersistIdentifier(fcComponentAndPropertyNamePath, null)));
+								persistIdentifier));
 						}
 						catch (IllegalArgumentException e)
 						{
@@ -326,19 +340,19 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		}
 		if (adapter == IPropertySourceProvider.class)
 		{
-			return new UndoablePersistPropertySourceProvider(this);
+			return (T)new UndoablePersistPropertySourceProvider(this);
 		}
 		Object result = super.getAdapter(adapter);
-		if (result == null && graphicaleditor != null)
+		if (result == null && graphicaleditor != null && (graphicaleditor == getActiveEditor() || getActiveEditor() == null))
 		{
 			result = graphicaleditor.getAdapter(adapter);
 		}
 		if (result == null && adapter.equals(ActionRegistry.class))
 		{
 			// dummy return, this prevents a NPE when form editor is opened for form that is not part of the active solution
-			return getDummyActionRegistry();
+			return (T)getDummyActionRegistry();
 		}
-		return result;
+		return (T)result;
 	}
 
 	private ActionRegistry dummyActionRegistry;
@@ -511,7 +525,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					while (formFieldsIte.hasNext())
 					{
 						formField = formFieldsIte.next();
-						if (formField.getValuelistID() == valueList.getID())
+						if (valueList.getUUID().toString().equals(formField.getValuelistID()))
 						{
 							replaceValuelistWithFields.add(formField);
 						}
@@ -611,9 +625,9 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						{
 							public Object visit(IPersist o)
 							{
-								if (o instanceof ISupportExtendsID && (changed.getID() == ((ISupportExtendsID)o).getExtendsID() ||
-									(((ISupportExtendsID)changed).getExtendsID() > 0 &&
-										((ISupportExtendsID)changed).getExtendsID() == ((ISupportExtendsID)o).getExtendsID())))
+								if (o instanceof ISupportExtendsID && (changed.getUUID().toString().equals(((ISupportExtendsID)o).getExtendsID()) ||
+									(((ISupportExtendsID)changed).getExtendsID() != null &&
+										Utils.equalObjects(((ISupportExtendsID)changed).getExtendsID(), ((ISupportExtendsID)o).getExtendsID()))))
 								{
 									return o;
 								}
@@ -686,6 +700,38 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				if (hasFormReference(flattenedSolution, getForm(), formParent, new HashSet<String>()))
 				{
 					full_refresh = true;
+				}
+			}
+			else if (changed instanceof MenuItem menuItem)
+			{
+				Menu menu = (Menu)menuItem.getAncestor(IRepository.MENUS);
+				if (menu != null)
+				{
+					form.acceptVisitor(new IPersistVisitor()
+					{
+						@Override
+						public Object visit(IPersist o)
+						{
+							if (o instanceof WebComponent webComponent)
+							{
+								WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+									.getWebObjectSpecification(((WebComponent)o).getTypeName());
+								if (spec != null)
+								{
+
+									for (PropertyDescription pd : spec.getProperties(MenuPropertyType.INSTANCE))
+									{
+										if (Utils.equalObjects(webComponent.getFlattenedJson().opt(pd.getName()), menu.getUUID()))
+										{
+											changedChildren.add(o);
+											break;
+										}
+									}
+								}
+							}
+							return IPersistVisitor.CONTINUE_TRAVERSAL;
+						}
+					});
 				}
 			}
 
@@ -773,6 +819,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				setInput(getEditorInput());
 				removePage(0);
 				createPages();
+				setActivePage(0);
 				if (getEditorSite() != null && getEditorSite().getPage().getActivePart() == this)
 				{
 					//if an editor was previously open, then after restart we have to make sure that our modified properties sheet page is used
@@ -793,7 +840,6 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					// set up the editor actions, this is normally done in part activation listener
 					getEditorSite().getActionBarContributor().setActiveEditor(this);
 				}
-				setActivePage(0);
 			});
 		}
 		else
@@ -959,13 +1005,16 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				activateContext = null;
 			}
 
-			if (getGraphicaleditor().getDesignPagetype() == DesignPagetype.Rfb)
+			if (getActiveEditor() == graphicaleditor && graphicaleditor != null)
 			{
-				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT);
-			}
-			else
-			{
-				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+				if (getGraphicaleditor().getDesignPagetype() == DesignPagetype.Rfb)
+				{
+					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT);
+				}
+				else
+				{
+					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+				}
 			}
 		}
 	}
@@ -1107,5 +1156,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	public void setContentDescription(String description)
 	{
 		super.setContentDescription(description);
+	}
+
+	public void executeDeveloperMenuCommand(Function callback, Form[] forms, BaseComponent[] components)
+	{
+		getCommandStack().execute(new DeveloperMenuCommand(callback, forms, components));
 	}
 }

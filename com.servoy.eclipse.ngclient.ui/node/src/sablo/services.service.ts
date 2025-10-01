@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 
 import { ConverterService, instanceOfChangeAwareValue, ChangeListenerFunction } from './converter.service';
-import { LoggerService, LoggerFactory, RequestInfoPromise } from '@servoy/public';
+import { LoggerService, LoggerFactory, RequestInfoPromise, Deferred } from '@servoy/public';
 import { TypesRegistry, IType, IWebObjectSpecification, IPropertyContextCreator, PushToServerUtils, PushToServerEnum } from '../sablo/types_registry';
-import { WebsocketService,wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
+import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
+import { ClientFunctionService } from './clientfunction.service';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class ServicesService {
 
@@ -15,11 +16,12 @@ export class ServicesService {
     private log: LoggerService;
     private serviceDynamicClientSideTypes = {}; // it stores property types that are dynamic (can change at runtime)
 
-    constructor( private converterService: ConverterService<unknown>,
-                    private readonly typesRegistry: TypesRegistry,
-                    websocketService: WebsocketService,
-                    private sabloService: SabloService,
-                    logFactory: LoggerFactory ) {
+    constructor(private converterService: ConverterService<unknown>,
+        private readonly typesRegistry: TypesRegistry,
+        websocketService: WebsocketService,
+        private sabloService: SabloService,
+        logFactory: LoggerFactory,
+        private clientFunctionService: ClientFunctionService) {
         this.log = logFactory.getLogger('ServicesService');
 
         websocketService.getSession().then((session) => session.setServicesHandler({
@@ -29,32 +31,38 @@ export class ServicesService {
                 for (const serviceCall of serviceApisJSON as Array<ApiCallFromServer>) {
                     if (serviceCall['pre_data_service_call']) {
                         // responseValue keeps last services call return value
-                        responseValue = this.callServiceApi(serviceCall); // this handles arg type conversions and return value type conversion as well
+                        responseValue = this.callServiceApi(serviceCall, previousResponseValue); // this handles arg type conversions and return value type conversion as well
                     }
                 }
                 return responseValue;
             },
 
             handlerServiceUpdatesFromServer: (servicesUpdatesFromServerJSON: any): void => {
-                this.updateServiceScopes(servicesUpdatesFromServerJSON);
+                this.clientFunctionService.waitForLoading().finally(() => {
+                    this.updateServiceScopes(servicesUpdatesFromServerJSON);
+                });
             },
 
             handleNormalServiceApis: (serviceApisJSON: any, previousResponseValue: any): any => {
                 // normal api calls
-                let responseValue: any = previousResponseValue;
-                for (const serviceCall of serviceApisJSON as Array<ApiCallFromServer>) {
-                    if (!serviceCall['pre_data_service_call']) {
-                        // responseValue keeps last services call return value
-                        responseValue = this.callServiceApi(serviceCall); // this handles arg type conversions and return value type conversion as well
+                const def = new Deferred();
+                this.clientFunctionService.waitForLoading().finally(() => {
+                    let responseValue: any = previousResponseValue;
+                    for (const serviceCall of serviceApisJSON as Array<ApiCallFromServer>) {
+                        if (!serviceCall['pre_data_service_call']) {
+                            // responseValue keeps last services call return value
+                            responseValue = this.callServiceApi(serviceCall, previousResponseValue); // this handles arg type conversions and return value type conversion as well
+                        }
                     }
-                }
-                return responseValue;
+                    def.resolve(responseValue);
+                });
+                return def.promise;
             }
         }));
     }
 
-    public setServiceProvider( serviceProvider: ServiceProvider ) {
-        if ( serviceProvider == null ) this.serviceProvider = new VoidServiceProvider();
+    public setServiceProvider(serviceProvider: ServiceProvider) {
+        if (serviceProvider == null) this.serviceProvider = new VoidServiceProvider();
         else this.serviceProvider = serviceProvider;
     }
 
@@ -62,7 +70,7 @@ export class ServicesService {
         return this.serviceProvider;
     }
 
-    public callServiceApi(serviceCall: ApiCallFromServer): any {
+    public callServiceApi(serviceCall: ApiCallFromServer, previousResponseValue: any): any {
 
         const serviceInstance = this.getServiceProvider().getService(serviceCall.name);
 
@@ -75,44 +83,53 @@ export class ServicesService {
                 serviceCall.args[argNo] = this.converterService.convertFromServerToClient(serviceCall.args[argNo], serviceCallSpec?.getArgumentType(argNo),
                     undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
             }
-
-            // wrap return value in a Promise.resolve to make sure we convert-to-server the return value as well when the api returns a promise
-            return Promise.resolve(serviceInstance[serviceCall.call].apply(serviceInstance, serviceCall.args)).then(
-                (ret) => this.converterService.convertFromClientToServer(ret, serviceCallSpec?.returnType,
-                            undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0],
-                (reason) => {
-                    // error
-                    this.log.error('sbl * Error (follows below) in in executing service Api call "' + serviceCall.call + '" to service ' + serviceCall.name);
-                    this.log.error(reason);
-                });
+            
+            if (serviceCallSpec?.shouldReturnValue || serviceCallSpec === undefined) {
+                // wrap return value in a Promise.resolve to make sure we convert-to-server the return value as well when the api returns a promise
+                return Promise.resolve(serviceInstance[serviceCall.call].apply(serviceInstance, serviceCall.args)).then(
+                    (ret) => this.converterService.convertFromClientToServer(ret, serviceCallSpec?.returnType,
+                        undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0],
+                    (reason) => {
+                        // error
+                        this.log.error('sbl * Error (follows below) in in executing service Api call "' + serviceCall.call + '" to service ' + serviceCall.name);
+                        this.log.error(reason);
+                    });
+            } else {
+                serviceInstance[serviceCall.call].apply(serviceInstance, serviceCall.args);
+            }
         } else {
-            this.log.error('trying to call a service api ' + serviceCall.call + ' for service ' + serviceCall.name + ' but the sevice (' + serviceInstance + ') or the call was not found!');
+            if (serviceInstance) {
+                this.log.error('trying to call a service api ' + serviceCall.call + ' for service ' + serviceCall.name + ' but the api function was not found!');
+            }
+            else {
+                this.log.error('trying to call a service api ' + serviceCall.call + ' for service ' + serviceCall.name + ' but the service (' + serviceInstance + ') was not found!');
+            }
         }
     }
 
-    public updateServiceScopes( services: any ) {
-        for ( const servicename of Object.keys(services) ) {
+    public updateServiceScopes(services: any) {
+        for (const servicename of Object.keys(services)) {
             // current model
             const service = this.serviceProvider.getService(servicename);
-            if ( service ) {
+            if (service) {
                 const serviceData = services[servicename];
 
                 const serviceSpec: IWebObjectSpecification = this.typesRegistry.getServiceSpecification(servicename); // get static client side types for this service - if it has any
                 const propertyContextCreator: IPropertyContextCreator = PushToServerUtils.newRootPropertyContextCreator(
-                        (propertyName: string) => service[propertyName],
-                        serviceSpec
+                    (propertyName: string) => service[propertyName],
+                    serviceSpec
                 );
                 try {
                     // convert all properties, remember any dynamic type(s) for when a client-server conversion will be needed
                     const dynamicPropertyTypesForThisService = this.getServiceDynamicClientSideTypes(servicename);
-                    for ( const propertyName of Object.keys(serviceData) ) {
+                    for (const propertyName of Object.keys(serviceData)) {
                         const oldValue = service[propertyName];
                         const staticPropertyType = serviceSpec?.getPropertyType(propertyName); // get static client side type if any
                         const oldPropertyType = staticPropertyType ? staticPropertyType : dynamicPropertyTypesForThisService[propertyName];
 
                         service[propertyName] = this.converterService.convertFromServerToClient(serviceData[propertyName],
-                                staticPropertyType /*update from server; old dynamic type does not matter*/, service[propertyName],
-                                dynamicPropertyTypesForThisService, propertyName, propertyContextCreator.withPushToServerFor(propertyName));
+                            staticPropertyType /*update from server; old dynamic type does not matter*/, service[propertyName],
+                            dynamicPropertyTypesForThisService, propertyName, propertyContextCreator.withPushToServerFor(propertyName));
 
                         const newPropertyType = staticPropertyType ? staticPropertyType : dynamicPropertyTypesForThisService[propertyName];
 
@@ -123,7 +140,7 @@ export class ServicesService {
                         // currently, the services do not need to manually trigger that if old property value and new property value are the same by ref (which detectChanges() would not see);
                         // so currently services that need to detect incomming changes from server for a property define that property as getter+setter in their class
                     }
-                } catch ( ex ) {
+                } catch (ex) {
                     this.log.error(ex);
                 }
             }
@@ -157,10 +174,10 @@ export class ServicesService {
         }
 
         const converted = this.converterService.convertFromClientToServer(propertyValue, propertyType, oldPropertValue, {
-                    getProperty: (propertyN: string) => service[propertyN],
-                    getPushToServerCalculatedValue: () => serviceSpec ? serviceSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT,
-                    isInsideModel: true
-                });
+            getProperty: (propertyN: string) => service[propertyN],
+            getPushToServerCalculatedValue: () => serviceSpec ? serviceSpec.getPropertyPushToServer(propertyName) : PushToServerEnum.REJECT,
+            isInsideModel: true
+        });
         changes[propertyName] = converted[0];
         service[propertyName] = converted[1];
 
@@ -184,10 +201,10 @@ export class ServicesService {
 
         // convert return value as needed
         const promise = this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: serviceName, methodName, args });
-        
+
         return wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
-                                undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
-                    // in case of a reject/errorCallback we just let it propagate to caller;
+            undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
+        // in case of a reject/errorCallback we just let it propagate to caller;
     }
 
     private setChangeListenerIfSmartProperty(propertyValue: any, serviceName: string, propertyName: string): void {
@@ -204,7 +221,7 @@ export class ServicesService {
             if (!doNotPushNow) {
                 this.sendServiceChanges(serviceName, propertyName);
             }  // else this was triggered by an custom array or object change with push to server ALLOW - which should not send it automatically but just mark changes in the
-               // nested values towards this root prop; so nothing to do here then
+            // nested values towards this root prop; so nothing to do here then
         };
     }
 
@@ -221,11 +238,11 @@ export class ServicesService {
 interface ApiCallFromServer { name: string; call: string; args: any[] }
 
 export interface ServiceProvider {
-    getService( name: string ): any;
+    getService(name: string): any;
 }
 
 class VoidServiceProvider implements ServiceProvider {
-    getService( _name: string ) {
+    getService(_name: string) {
         return null;
     }
 }

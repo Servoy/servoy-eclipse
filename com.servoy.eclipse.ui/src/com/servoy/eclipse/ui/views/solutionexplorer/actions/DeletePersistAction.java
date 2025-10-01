@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
+import static java.util.Arrays.asList;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,6 +59,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StringResource;
@@ -76,7 +79,6 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 	/**
 	 * Creates a new "delete persist" action for the given solution view.
-	 *
 	 */
 	public DeletePersistAction(UserNodeType type, String text)
 	{
@@ -106,7 +108,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 					IPersist persist = (IPersist)node.getRealObject();
 					selected.add(persist);
 					// do not allow delete if object is not shown under its own parent (for instance module object)
-					if (persist.getParent() != null)
+					if (!(persist instanceof MenuItem) && persist.getParent() != null)
 					{
 						SimpleUserNode parentNode = node.getAncestorOfType(persist.getParent().getClass());
 						if (parentNode != null && parentNode.getRealObject() != null && !parentNode.getRealObject().equals(persist.getParent()))
@@ -137,11 +139,12 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		setEnabled(state);
 	}
 
-	/**
-	 *
-	 * @param selectedPersistItems
-	 */
 	protected void performDeletion(List<IPersist> selectedPersistItems)
+	{
+		performDeletionStatic(selectedPersistItems, RefactoringUIMessages.DeleteResourcesHandler_title);
+	}
+
+	public static void performDeletionStatic(List<IPersist> selectedPersistItems, String formDeleteDialogTitle)
 	{
 		List<IPersist> toDelete = selectedPersistItems;
 		List<IPersist> refItems = selectedPersistItems;
@@ -150,7 +153,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			if (toDelete.size() > 0)
 			{
-				List<IPersist> formsToDelete = new ArrayList<IPersist>();
+				List<Form> formsToDelete = new ArrayList<>();
 				boolean isTemplateChange = false;
 				for (IPersist persist : refItems)
 				{
@@ -159,10 +162,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 					if (rootObject instanceof Solution)
 					{
-						if (persist instanceof Form)
+						if (persist instanceof Form frm)
 						{
 							//make a list of forms to delete them all at once using Delete Resources Wizard
-							formsToDelete.add(persist);
+							formsToDelete.add(frm);
 							closeEditor = false;
 						}
 						else
@@ -173,8 +176,13 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 							IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
 
 							repository.deleteObject(editingNode);
-
+							if (editingNode instanceof MenuItem)
+							{
+								editingNode = editingNode.getAncestor(IRepository.MENUS);
+							}
 							servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+							ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(true,
+								asList(new IPersist[] { editingNode }));
 						}
 					}
 					else if (rootObject instanceof StringResource)
@@ -221,10 +229,10 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 				if (!formsToDelete.isEmpty())
 				{
 					EclipseRepository rep = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
-					HashMap<IPersist, List<String>> persists = rep.getAllFilesForPersists(formsToDelete);
+					HashMap<Form, List<String>> persists = rep.getAllFilesForPersists(formsToDelete);
 
-					Set<IPersist> keys = persists.keySet();
-					Iterator it = keys.iterator();
+					Set<Form> keys = persists.keySet();
+					Iterator<Form> it = keys.iterator();
 					ArrayList<IFile> resources = new ArrayList<IFile>();
 					while (it.hasNext())
 					{
@@ -240,7 +248,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 					RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(wizard);
 					try
 					{
-						op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), RefactoringUIMessages.DeleteResourcesHandler_title);
+						op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), formDeleteDialogTitle);
 					}
 					catch (InterruptedException e)
 					{
@@ -261,15 +269,15 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	 * @param formsToDelete
 	 * @return
 	 */
-	private Map<Integer, List<String>> retrieveDeleteFormRelations(List<IPersist> formsToDelete)
+	private Map<String, List<String>> retrieveDeleteFormRelations(List<IPersist> formsToDelete)
 	{
-		Map<Integer, List<String>> map = new HashMap<Integer, List<String>>();
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
 
 		//build a list of the selected form ids;
-		List<Integer> formsIds = new ArrayList<Integer>();
+		List<String> formsUUIDs = new ArrayList<String>();
 		for (IPersist form : formsToDelete)
 		{
-			formsIds.add(new Integer(form.getID()));
+			formsUUIDs.add(form.getUUID().toString());
 		}
 
 		//retrieve the servoy model
@@ -283,24 +291,22 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			Form itForm = it.next();
 
-			int extendedFormId = itForm.getExtendsID();
-			if (extendedFormId > 0)
+			String extendedFormUUID = itForm.getExtendsID();
+			if (extendedFormUUID != null)
 			{
-				Integer itExtendsFormID = new Integer(extendedFormId);
-
 				//if we found a form that has an extended class in the list of the ones that we wish to delete then...
-				if (formsIds.contains(itExtendsFormID))
+				if (formsUUIDs.contains(extendedFormUUID))
 				{
-					if (map.containsKey(itExtendsFormID))
+					if (map.containsKey(extendedFormUUID))
 					{
-						List<String> list = map.get(itExtendsFormID);
+						List<String> list = map.get(extendedFormUUID);
 						list.add(itForm.getName());
 					}
 					else
 					{
 						List<String> list = new ArrayList<String>();
 						list.add(itForm.getName());
-						map.put(itExtendsFormID, list);
+						map.put(extendedFormUUID, list);
 					}
 				}
 			}
@@ -315,20 +321,17 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	 * @param map
 	 * @return
 	 */
-	private String buildMessageFromRelationsTable(Map<Integer, List<String>> map)
+	private String buildMessageFromRelationsTable(Map<String, List<String>> map)
 	{
 		String message = "";
-		Iterator<Integer> keyEnumeration = map.keySet().iterator();
-
 		//retrieve the servoy model
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
-		while (keyEnumeration.hasNext())
+		for (String currentKey : map.keySet())
 		{
-			Integer currentKey = keyEnumeration.next();
 			List<String> childFormNames = map.get(currentKey);
 
-			String baseFormName = servoyModel.getFlattenedSolution().getForm(currentKey.intValue()).getName();
+			String baseFormName = servoyModel.getFlattenedSolution().getForm(currentKey).getName();
 
 			message += "Form: [" + baseFormName + "] has the following children: ";
 			for (Object object : childFormNames)
@@ -357,11 +360,11 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	 * @param formsToDelete
 	 * @return true/false whether is found or not;
 	 */
-	private boolean idInFormsToDelete(int id, List<IPersist> formsToDelete)
+	private boolean idInFormsToDelete(String uuid, List<IPersist> formsToDelete)
 	{
 		for (IPersist persist : formsToDelete)
 		{
-			if (persist.getID() == id) return true;
+			if (persist.getUUID().toString().equals(uuid)) return true;
 		}
 		return false;
 	}
@@ -383,12 +386,9 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		{
 			Form form = it.next();
 
-			if (form.getExtendsID() > 0)
+			if (form.getExtendsID() != null)
 			{
-				int id = form.getID();
-				int extendedFormId = form.getExtendsID();
-
-				if (!idInFormsToDelete(id, formsToDelete) && idInFormsToDelete(extendedFormId, formsToDelete)) return false;
+				if (!idInFormsToDelete(form.getUUID().toString(), formsToDelete) && idInFormsToDelete(form.getExtendsID(), formsToDelete)) return false;
 			}
 		}
 
@@ -402,7 +402,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		if (selectedPersists == null) return;
 		List<IPersist> deleteItems = selectedPersists;
 
-		Map<Integer, List<String>> map = new HashMap<Integer, List<String>>();
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
 		String message = "";
 
 		if (deleteItems.size() > 0 && (deleteItems.get(0).getRootObject() instanceof Solution))

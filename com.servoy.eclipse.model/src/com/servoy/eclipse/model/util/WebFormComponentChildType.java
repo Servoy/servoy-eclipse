@@ -52,7 +52,6 @@ import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
@@ -84,7 +83,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 
 	public WebFormComponentChildType(IBasicWebObject parentWebObject, String[] fcPropAndCompPath, FlattenedSolution fs)
 	{
-		super(IRepository.WEBCUSTOMTYPES, parentWebObject, parentWebObject.getID(), UUID.randomUUID());
+		super(IRepository.WEBCUSTOMTYPES, parentWebObject, UUID.randomUUID());
 
 		this.fcCompAndPropPath = fcPropAndCompPath; // something like [7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8, containedForm, formComponent2, containedForm, n1]; can be nested, more or less
 		fcPropAndCompPathAsString = String.join(".", Arrays.copyOfRange(fcPropAndCompPath, 1, fcPropAndCompPath.length)); // would be containedForm.formComponent2.containedForm.n1
@@ -165,7 +164,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	private Object convertToJavaType(String propertyName, Object val)
 	{
 		Object value = val;
-		PropertyDescription pd = propertyDescription.getProperty(propertyName);
+		PropertyDescription pd = (propertyDescription != null ? propertyDescription.getProperty(propertyName) : null);
 
 		if (pd != null)
 		{
@@ -206,7 +205,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 
 	private Object convertFromJavaType(String propertyName, Object value)
 	{
-		PropertyDescription pd = propertyDescription.getProperty(propertyName);
+		PropertyDescription pd = (propertyDescription != null ? propertyDescription.getProperty(propertyName) : null);
 		if (value instanceof IChildWebObject)
 		{
 			return ((IChildWebObject)value).getFullJsonInFrmFile();
@@ -234,9 +233,8 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 
 	private WebCustomType createWebCustomType(Object propertyDescriptionArg, final String jsonKey, final int index, UUID uuidArg)
 	{
-		Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(this);
-		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index, idAndUUID.getLeft().intValue(),
-			uuidArg != null ? uuidArg : idAndUUID.getRight());
+		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index,
+			uuidArg != null ? uuidArg : UUID.randomUUID());
 	}
 
 	@Override
@@ -276,7 +274,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	public Object getPropertyDefaultValueClone(String propertyName)
 	{
 		PropertyDescription pd = getPropertyDescription();
-		PropertyDescription propPD = pd != null ? pd.getProperty(propertyName) : null;
+		PropertyDescription propPD = (pd != null ? pd.getProperty(propertyName) : null);
 		return propPD != null && propPD.hasDefault() ? ServoyJSONObject.deepCloneJSONArrayOrObj(propPD.getDefaultValue()) : null;
 	}
 
@@ -438,7 +436,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	@Override
 	public String getTypeName()
 	{
-		return propertyDescription.getName();
+		return propertyDescription != null ? propertyDescription.getName() : null;
 	}
 
 	@Override
@@ -568,17 +566,20 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	{
 		ArrayList<IPersist> allObjectsAsList = new ArrayList<IPersist>();
 		PropertyDescription pd = getPropertyDescription();
-		Map<String, PropertyDescription> customMap = pd.getCustomJSONProperties();
-		for (PropertyDescription customProperty : customMap.values())
+		if (pd != null)
 		{
-			Object customValue = getProperty(customProperty.getName());
-			if (customValue instanceof IPersist)
+			Map<String, PropertyDescription> customMap = pd.getCustomJSONProperties();
+			for (PropertyDescription customProperty : customMap.values())
 			{
-				allObjectsAsList.add((IPersist)customValue);
-			}
-			else if (customValue instanceof IPersist[])
-			{
-				allObjectsAsList.addAll(Arrays.asList((IPersist[])customValue));
+				Object customValue = getProperty(customProperty.getName());
+				if (customValue instanceof IPersist)
+				{
+					allObjectsAsList.add((IPersist)customValue);
+				}
+				else if (customValue instanceof IPersist[])
+				{
+					allObjectsAsList.addAll(Arrays.asList((IPersist[])customValue));
+				}
 			}
 		}
 		return allObjectsAsList;
@@ -619,9 +620,9 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 		String jsonKey;
 		int index;
 
-		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, int id, UUID uuid)
+		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, UUID uuid)
 		{
-			super(parentWebObject, propertyDescription, jsonKey, index, false, id, uuid);
+			super(parentWebObject, propertyDescription, jsonKey, index, false, uuid);
 			this.jsonKey = jsonKey;
 			this.index = index;
 		}

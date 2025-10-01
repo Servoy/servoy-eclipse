@@ -9,7 +9,8 @@ import { LoggerFactory } from '@servoy/public';
 @Component( {
     selector: 'servoydefault-tablesspanel',
     templateUrl: './tablesspanel.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 } )
 export class ServoyDefaultTablesspanel extends BaseTabpanel {
     constructor(windowRefService: WindowRefService, cdRef: ChangeDetectorRef, logFactory: LoggerFactory, renderer: Renderer2) {

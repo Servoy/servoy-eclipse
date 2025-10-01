@@ -282,6 +282,8 @@ public abstract class PersistEditor extends EditorPart implements IPersistChange
 
 			private final ListenerList postListeners = new ListenerList();
 
+			private ISelection selection;
+
 			public void addSelectionChangedListener(ISelectionChangedListener listener)
 			{
 				listeners.add(listener);
@@ -321,6 +323,10 @@ public abstract class PersistEditor extends EditorPart implements IPersistChange
 
 			public ISelection getSelection()
 			{
+				if (this.selection != null)
+				{
+					return this.selection;
+				}
 				IPersist p = getPersist();
 				return p != null ? new StructuredSelection(p) : StructuredSelection.EMPTY;
 			}
@@ -337,6 +343,14 @@ public abstract class PersistEditor extends EditorPart implements IPersistChange
 
 			public void setSelection(ISelection selection)
 			{
+				ISelection oldSelection = getSelection();
+				this.selection = selection;
+				ISelection newSelection = getSelection();
+				if (!oldSelection.equals(newSelection))
+				{
+					fireSelectionChanged(new SelectionChangedEvent(this, newSelection));
+					firePostSelectionChanged(new SelectionChangedEvent(this, newSelection));
+				}
 			}
 		});
 	}

@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -84,6 +85,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.specification.property.ICustomType;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
@@ -94,6 +96,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.inmemory.AbstractMemServer;
 import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -106,8 +109,11 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
+import com.servoy.eclipse.ui.node.FormTooltipFeedback;
+import com.servoy.eclipse.ui.node.IDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.TreeBuilder;
 import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -123,8 +129,11 @@ import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
+import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.documentation.ServoyDocumented;
+import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -137,6 +146,8 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -145,6 +156,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.scripting.IConstantsObject;
@@ -154,12 +166,15 @@ import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSClientUtils;
+import com.servoy.j2db.scripting.JSEventsManager;
 import com.servoy.j2db.scripting.JSI18N;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
@@ -167,6 +182,7 @@ import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
@@ -210,6 +226,8 @@ public class SolutionExplorerTreeContentProvider
 
 	private final PlatformSimpleUserNode databaseManager;
 
+	private final PlatformSimpleUserNode eventsManager;
+
 	private final PlatformSimpleUserNode solutionModel;
 
 	private final PlatformSimpleUserNode history;
@@ -252,6 +270,8 @@ public class SolutionExplorerTreeContentProvider
 
 	private final PlatformSimpleUserNode modulesOfActiveSolution;
 
+	private final PlatformSimpleUserNode devSolutionOfActiveSolution;
+
 	private final Object servicesSpecProviderLock = new Object();
 	private final Object pluginsLoadLock = new Object();
 	private ArrayList<PlatformSimpleUserNode> loadedJavaPluginNodes;
@@ -268,9 +288,12 @@ public class SolutionExplorerTreeContentProvider
 
 	private final ISpecReloadListener specReloadListener = new SpecReloadListener();
 
-	private static PlatformSimpleUserNode createTypeNode(String displayName, UserNodeType type, Class< ? > realType, PlatformSimpleUserNode parent)
+
+	private static PlatformSimpleUserNode createTypeNode(String displayName, UserNodeType type, Class< ? > realType, PlatformSimpleUserNode parent,
+		boolean isJSLibNode)
 	{
-		PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, type, null, IconProvider.instance().image(realType), realType);
+		PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, type, null, IconProvider.instance().image(realType), realType,
+			isJSLibNode ? new JSLibScriptObjectFeedback(null, realType) : new ScriptObjectFeedback(null, realType));
 		node.parent = parent;
 		return node;
 	}
@@ -284,30 +307,34 @@ public class SolutionExplorerTreeContentProvider
 			uiActivator.loadImageFromBundle("api_explorer.png"));
 		apiexplorer.parent = invisibleRootNode;
 
-		PlatformSimpleUserNode jslib = createTypeNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, JSLib.class, apiexplorer);
+		PlatformSimpleUserNode jslib = createTypeNode(Messages.TreeStrings_JSLib, UserNodeType.JSLIB, JSLib.class, apiexplorer, true);
 
 		jslib.children = new PlatformSimpleUserNode[] { //
-			createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Date, UserNodeType.DATE, com.servoy.j2db.documentation.scripting.docs.Date.class, jslib), //
-			createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Object, UserNodeType.OBJECT, com.servoy.j2db.documentation.scripting.docs.Object.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Map, UserNodeType.MAP, com.servoy.j2db.documentation.scripting.docs.Map.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Set, UserNodeType.SET, com.servoy.j2db.documentation.scripting.docs.Set.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Iterator, UserNodeType.ITERATOR, com.servoy.j2db.documentation.scripting.docs.Iterator.class, jslib), //
+			createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_BigInt, UserNodeType.BIGINT, com.servoy.j2db.documentation.scripting.docs.BigInt.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Date, UserNodeType.DATE, com.servoy.j2db.documentation.scripting.docs.Date.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Iterator, UserNodeType.ITERATOR, com.servoy.j2db.documentation.scripting.docs.Iterator.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_Iterablevalue, UserNodeType.ITERABELVALUE, com.servoy.j2db.documentation.scripting.docs.IterableValue.class,
-				jslib), //
-			createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib), //
-			createTypeNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, com.servoy.j2db.documentation.scripting.docs.RegExp.class, jslib), //
-			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
+				jslib, true), //
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Map, UserNodeType.MAP, com.servoy.j2db.documentation.scripting.docs.Map.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Object, UserNodeType.OBJECT, com.servoy.j2db.documentation.scripting.docs.Object.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Promise, UserNodeType.PROMISE, com.servoy.j2db.documentation.scripting.docs.Promise.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, com.servoy.j2db.documentation.scripting.docs.RegExp.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Set, UserNodeType.SET, com.servoy.j2db.documentation.scripting.docs.Set.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
-				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib,
+				true), //
+			createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib, true), //
+			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib, true), //
 			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-				jslib) };
+				jslib, true) };
 
-		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, apiexplorer);
+		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, apiexplorer,
+			false);
 
 		Class< ? >[] allJSApplicationTypes = ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes();
 		List<Class< ? >> list = new ArrayList<Class< ? >>();
@@ -359,6 +386,10 @@ public class SolutionExplorerTreeContentProvider
 			uiActivator.loadImageFromBundle("modules.png"));
 		modulesOfActiveSolution.parent = activeSolutionNode;
 
+		devSolutionOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_DeveloperSolutions, UserNodeType.DEVELOPER_SOLUTIONS, null,
+			uiActivator.loadImageFromBundle("modules.png"));
+		devSolutionOfActiveSolution.parent = activeSolutionNode;
+
 		allSolutionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllSolutions, UserNodeType.ALL_SOLUTIONS, null,
 			uiActivator.loadImageFromBundle("solutions.png"));
 		allSolutionsNode.parent = invisibleRootNode;
@@ -367,23 +398,32 @@ public class SolutionExplorerTreeContentProvider
 			uiActivator.loadImageFromBundle("all_packages.png"));
 		allWebPackagesNode.parent = invisibleRootNode;
 
-		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, apiexplorer);
+		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, apiexplorer, false);
 		addReturnTypeNodesPlaceHolder(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 
-		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, apiexplorer);
 
-		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, apiexplorer);
+		eventsManager = createTypeNode(Messages.TreeStrings_EventsManager, UserNodeType.EVENTS_MANAGER, JSEventsManager.class, apiexplorer, false);
+		addReturnTypeNodesPlaceHolder(eventsManager, ScriptObjectRegistry.getScriptObjectForClass(JSEventsManager.class).getAllReturnedTypes());
 
-		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, apiexplorer);
+
+		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, apiexplorer, false);
+
+		PlatformSimpleUserNode clientutils = createTypeNode(Messages.TreeStrings_ClientUtils, UserNodeType.CLIENT_UTILS, JSClientUtils.class, apiexplorer,
+			false);
+		addReturnTypeNodesPlaceHolder(clientutils, ScriptObjectRegistry.getScriptObjectForClass(JSClientUtils.class).getAllReturnedTypes());
+
+		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, apiexplorer, false);
+
+		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, apiexplorer, false);
 
 		addReturnTypeNodesPlaceHolder(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
-		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, apiexplorer);
+		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, apiexplorer, false);
 
-		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, apiexplorer);
+		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, apiexplorer, false);
 		addReturnTypeNodesPlaceHolder(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
 
-		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, apiexplorer);
+		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, apiexplorer, false);
 		addReturnTypeNodesPlaceHolder(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.png"));
@@ -399,7 +439,10 @@ public class SolutionExplorerTreeContentProvider
 		resourcesChildren.add(stylesNode);
 		resourcesChildren.add(userGroupSecurityNode);
 		resourcesChildren.add(i18nFilesNode);
-		resourcesChildren.add(templatesNode);
+		if (templatesNode.children != null && templatesNode.children.length > 0)
+		{
+			resourcesChildren.add(templatesNode);
+		}
 		if (hasChildren(componentsFromResourcesNode))
 		{
 			resourcesChildren.add(componentsFromResourcesNode);
@@ -429,6 +472,8 @@ public class SolutionExplorerTreeContentProvider
 		apiexplorerChildren.add(application);
 		apiexplorerChildren.add(solutionModel);
 		apiexplorerChildren.add(databaseManager);
+		apiexplorerChildren.add(eventsManager);
+		apiexplorerChildren.add(clientutils);
 		apiexplorerChildren.add(utils);
 		apiexplorerChildren.add(history);
 		apiexplorerChildren.add(security);
@@ -444,9 +489,10 @@ public class SolutionExplorerTreeContentProvider
 
 		apiexplorerNodes = new PlatformSimpleUserNode[] { apiexplorer };
 
-		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /*
-																																			 * exceptions ,
-																																			 */jsunit, plugins };
+		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, eventsManager, clientutils, utils, history, security, i18n, /*
+																																										 * exceptions
+																																										 * ,
+																																										 */jsunit, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
 
 		Job job = Job.create("Background loading of database connections", (ICoreRunnable)monitor -> {
@@ -711,6 +757,7 @@ public class SolutionExplorerTreeContentProvider
 
 		List<PlatformSimpleUserNode> modulesNodeChildren = new ArrayList<PlatformSimpleUserNode>();
 		List<PlatformSimpleUserNode> allSolutionChildren = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> developerSolutionNodeChildren = new ArrayList<PlatformSimpleUserNode>();
 
 		activeSolutionNode.children = null;
 		activeSolutionNode.setEnabled(false); // this node will be accessible even if it is not enabled;
@@ -813,6 +860,17 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 
+		if (servoyModel.getActiveProject() != null)
+		{
+			servoyModel.getActiveProject().getDeveloperProjects().forEach((project) -> {
+				String displayValue = project.getProject().getName();
+				PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.DEVELOPER_SOLUTION, project,
+					uiActivator.loadImageFromBundle(IMG_SOLUTION_MODULE, false));
+				node.setEnabled(true);
+				developerSolutionNodeChildren.add(node);
+				node.parent = devSolutionOfActiveSolution;
+			});
+		}
 		// set active solution node to usable/unusable
 		activeSolutionNode.setRealObject(servoyModel.getActiveProject());
 		if (activeSolutionNode.getRealObject() != null && ((ServoyProject)activeSolutionNode.getRealObject()).getSolution() != null)
@@ -846,6 +904,7 @@ public class SolutionExplorerTreeContentProvider
 
 		// add children to nodes...
 		modulesOfActiveSolution.children = modulesNodeChildren.toArray(new PlatformSimpleUserNode[modulesNodeChildren.size()]);
+		devSolutionOfActiveSolution.children = developerSolutionNodeChildren.toArray(new PlatformSimpleUserNode[developerSolutionNodeChildren.size()]);
 		allSolutionsNode.children = allSolutionChildren.toArray(new PlatformSimpleUserNode[allSolutionChildren.size()]);
 		Arrays.sort(modulesOfActiveSolution.children, StringComparator.INSTANCE);
 		Arrays.sort(allSolutionsNode.children, StringComparator.INSTANCE);
@@ -890,12 +949,13 @@ public class SolutionExplorerTreeContentProvider
 							if (un.isEnabled()) addSolutionNodeChildren(un);
 							if (un.children != null)
 							{
-								PlatformSimpleUserNode activeSolutionChildren[] = new PlatformSimpleUserNode[un.children.length + 1];
+								PlatformSimpleUserNode activeSolutionChildren[] = new PlatformSimpleUserNode[un.children.length + 2];
 								for (int i = un.children.length - 1; i >= 0; i--)
 								{
 									activeSolutionChildren[i] = (PlatformSimpleUserNode)un.children[i];
 								}
-								activeSolutionChildren[activeSolutionChildren.length - 1] = modulesOfActiveSolution;
+								activeSolutionChildren[activeSolutionChildren.length - 2] = modulesOfActiveSolution;
+								activeSolutionChildren[activeSolutionChildren.length - 1] = devSolutionOfActiveSolution;
 								un.children = activeSolutionChildren;
 							}
 							else
@@ -904,7 +964,7 @@ public class SolutionExplorerTreeContentProvider
 							}
 						}
 					}
-					else if (type == UserNodeType.SOLUTION_ITEM)
+					else if (type == UserNodeType.SOLUTION_ITEM || type == UserNodeType.DEVELOPER_SOLUTION)
 					{
 						if (un.isEnabled())
 						{
@@ -926,6 +986,14 @@ public class SolutionExplorerTreeContentProvider
 					else if (type == UserNodeType.FORM || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORM))
 					{
 						addFormNodeChildren(un);
+					}
+					else if (type == UserNodeType.MENUS)
+					{
+						addMenusNodeChildren(un, UserNodeType.MENU, true);
+					}
+					else if (type == UserNodeType.MENU_FOUNDSETS)
+					{
+						addMenusNodeChildren(un, UserNodeType.MENU_FOUNDSET, false);
 					}
 					else if (type == UserNodeType.SERVERS)
 					{
@@ -1516,7 +1584,7 @@ public class SolutionExplorerTreeContentProvider
 			}
 			catch (CoreException e)
 			{
-				Debug.log(e);
+				ServoyLog.logError(e);
 			}
 		}
 		return children;
@@ -1616,8 +1684,7 @@ public class SolutionExplorerTreeContentProvider
 				Display display = Display.getDefault();
 				try
 				{
-					int px = Math.round(16 * display.getDPI().y / 96f);
-					Image image = new Image(display, new ImageData(is).scaledTo(px, px));
+					Image image = new Image(display, new ImageData(is).scaledTo(16, 16));
 					if (image != null) imageCache.put(path, image);
 				}
 				catch (SWTException e)
@@ -1655,7 +1722,7 @@ public class SolutionExplorerTreeContentProvider
 				{
 					return un.getRealObject() != null;
 				}
-				else if (un.getType() == UserNodeType.SOLUTION_ITEM)
+				else if (un.getType() == UserNodeType.SOLUTION_ITEM || un.getType() == UserNodeType.DEVELOPER_SOLUTION)
 				{
 					return un.isEnabled();
 				}
@@ -1766,7 +1833,7 @@ public class SolutionExplorerTreeContentProvider
 							}
 							catch (CoreException e)
 							{
-								Debug.log(e);
+								ServoyLog.logError(e);
 							}
 						}
 					}
@@ -1793,7 +1860,7 @@ public class SolutionExplorerTreeContentProvider
 							}
 							catch (CoreException e)
 							{
-								Debug.log(e);
+								ServoyLog.logError(e);
 							}
 						}
 					}
@@ -1812,7 +1879,7 @@ public class SolutionExplorerTreeContentProvider
 						}
 						catch (CoreException e)
 						{
-							Debug.log(e);
+							ServoyLog.logError(e);
 						}
 					}
 					return false;
@@ -1859,6 +1926,10 @@ public class SolutionExplorerTreeContentProvider
 				else if (un.getType() == UserNodeType.WEB_OBJECT_FOLDER)
 				{
 					return hasChildren((IFolder)un.getRealObject());
+				}
+				else if (un.getType() == UserNodeType.MENUS || un.getType() == UserNodeType.MENU_FOUNDSETS)
+				{
+					return (((Solution)un.getRealObject()).getMenus(false).hasNext()) ? true : false;
 				}
 			}
 			else if (un.children.length > 0)
@@ -1923,7 +1994,7 @@ public class SolutionExplorerTreeContentProvider
 					}
 					catch (CoreException e)
 					{
-						Debug.log(e);
+						ServoyLog.logError(e);
 						allReferencedProjects = new ArrayList<IProject>(1);
 						allReferencedProjects.add(eclipseProject);
 					}
@@ -1996,11 +2067,55 @@ public class SolutionExplorerTreeContentProvider
 				}
 				catch (CoreException e)
 				{
-					Debug.log(e);
+					ServoyLog.logError(e);
 				}
 			}
 		}
 		return false;
+	}
+
+	private void addMenusNodeChildren(PlatformSimpleUserNode menusNode, UserNodeType childType, boolean addChildren)
+	{
+		Solution solution = (Solution)menusNode.getRealObject();
+		List<PlatformSimpleUserNode> menuNodes = new ArrayList<PlatformSimpleUserNode>();
+		Iterator<Menu> it = solution.getMenus(true);
+		while (it.hasNext())
+		{
+			Menu menu = it.next();
+			String tooltip = "Menu node " + menu.getName() + " for creating a menu";
+			if (childType == UserNodeType.MENU_FOUNDSET)
+			{
+				tooltip = "Menu based datasource: <b>'menu:" + menu.getName() + "'</b>";
+			}
+
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(menu.getName(), childType, "", tooltip, menu,
+				uiActivator.loadImageFromBundle("column.png"));
+			menuNodes.add(node);
+			node.parent = menusNode;
+			if (addChildren)
+			{
+				addMenuItemsChildren(node, menu);
+			}
+		}
+		menusNode.children = menuNodes.toArray(new PlatformSimpleUserNode[menuNodes.size()]);
+	}
+
+	private void addMenuItemsChildren(PlatformSimpleUserNode parentNode, AbstractBase parentPersist)
+	{
+		List<PlatformSimpleUserNode> menuNodes = new ArrayList<PlatformSimpleUserNode>();
+		for (IPersist persist : parentPersist.getAllObjectsAsList())
+		{
+			if (persist instanceof MenuItem menuItem)
+			{
+				PlatformSimpleUserNode node = new PlatformSimpleUserNode(menuItem.getName(), UserNodeType.MENU_ITEM, "", "Menu item", menuItem,
+					uiActivator.loadImageFromBundle("class.png"));
+				menuNodes.add(node);
+				node.parent = parentNode;
+				addMenuItemsChildren(node, menuItem);
+			}
+
+		}
+		parentNode.children = menuNodes.toArray(new PlatformSimpleUserNode[menuNodes.size()]);
 	}
 
 	private void addServersNodeChildren(PlatformSimpleUserNode serversNode)
@@ -2168,9 +2283,12 @@ public class SolutionExplorerTreeContentProvider
 				Image icon = getIconFromSpec(spec, true);
 				if (icon == null) icon = uiActivator.loadImageFromBundle("plugin.png");
 				PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
-					icon, WebServiceScriptable.class);
+					icon, WebServiceScriptable.class, new SimpleDeveloperFeedback(
+						SolutionExplorerListContentProvider.PLUGIN_PREFIX + "." + spec.getScriptingName(), null,
+						spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic)));
 				allPluginNodes.add(node);
 				node.parent = pluginNode;
+				this.addCustomTypesNodes(node, spec, null);
 			}
 		}
 		pluginNode.children = allPluginNodes.toArray(new PlatformSimpleUserNode[allPluginNodes.size()]);
@@ -2202,24 +2320,24 @@ public class SolutionExplorerTreeContentProvider
 						}
 						if (scriptObject != null)
 						{
-
-
 							PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, null,
-								scriptObject.getClass())
+								scriptObject.getClass(),
+								new ScriptObjectFeedback(SolutionExplorerListContentProvider.PLUGIN_PREFIX + "." + plugin.getName(), scriptObject.getClass()))
 							{
 								@Override
 								public Image getIcon()
 								{
-									boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 									Image image = super.getIcon();
 									if (image == null)
 									{
 										if (plugin instanceof IIconProvider && ((IIconProvider)plugin).getIconUrl() != null)
 										{
 											URL urlLightTheme = ((IIconProvider)plugin).getIconUrl();
-											URL urlDarkTheme = null;
+
+											boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 											if (darkTheme)
 											{
+												URL urlDarkTheme = null;
 												String urlString = urlLightTheme.toString();
 												urlString = UIUtils.replaceLast(urlString, ".", "_dark.");
 												try
@@ -2229,16 +2347,16 @@ public class SolutionExplorerTreeContentProvider
 												catch (MalformedURLException e)
 												{
 												}
+												if (urlDarkTheme != null && ImageDescriptor.createFromURL(urlDarkTheme).getImageData(100) != null)
+												{
+													image = ImageDescriptor.createFromURL(urlDarkTheme).createImage();
+												} // else use light theme/single plugin icon here as well
 											}
-											if (urlDarkTheme != null)
-											{
-												image = ImageDescriptor.createFromURL(urlDarkTheme).createImage();
-											}
-											if (urlDarkTheme == null || ImageDescriptor.createFromURL(urlDarkTheme).getImageData() == null)
+
+											if (image == null)
 											{
 												image = ImageDescriptor.createFromURL(urlLightTheme).createImage();
 											}
-
 										}
 										else
 										{
@@ -2300,11 +2418,11 @@ public class SolutionExplorerTreeContentProvider
 	private Image getIconFromSpec(WebObjectSpecification spec, boolean isService)
 	{
 		Image icon = null;
-		boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 		if (spec.getIcon() != null)
 		{
 			try
 			{
+				boolean darkTheme = UIUtils.isDarkThemeSelected(false);
 				if (!"file".equals(spec.getSpecURL().getProtocol()))
 				{
 					SpecProviderState specProvider = isService ? getServicesSpecProviderState() : getComponentsSpecProviderState();
@@ -2318,10 +2436,10 @@ public class SolutionExplorerTreeContentProvider
 
 					if (darkTheme)
 					{
-						iconPath = UIUtils.replaceLast(iconPath, ".", "-dark.");
-						if (reader.getUrlForPath(iconPath) == null)
+						String darkIconPath = UIUtils.replaceLast(iconPath, ".", "-dark.");
+						if (reader.getUrlForPath(darkIconPath) != null)
 						{
-							iconPath = spec.getIcon().replaceFirst(spec.getPackageName() + "/", "");
+							iconPath = darkIconPath;
 						}
 					}
 					IPath path = new Path(reader.getUrlForPath(iconPath).toURI().toString());
@@ -2385,6 +2503,29 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
+	private void addCustomTypesNodes(PlatformSimpleUserNode node, WebObjectSpecification spec, Form originalForm)
+	{
+		if (node != null && spec != null)
+		{
+			Map<String, ICustomType< ? >> customTypes = new HashMap<String, ICustomType< ? >>(spec.getDeclaredCustomObjectTypes());
+			customTypes.values().removeIf(type -> WebFormComponent.isPrivateProperty(type.getCustomJSONTypeDefinition()));
+			if (customTypes.size() > 0)
+			{
+				PlatformSimpleUserNode customTypesNode = new PlatformSimpleUserNode("CustomTypes", UserNodeType.CUSTOM_TYPE, spec, originalForm,
+					uiActivator.loadImageFromBundle("components_package.png"));
+				node.children = new SimpleUserNode[] { customTypesNode };
+
+				List<SimpleUserNode> nodes = customTypes.entrySet().stream()
+					.map(entry -> new PlatformSimpleUserNode(entry.getKey(), UserNodeType.CUSTOM_TYPE, entry.getValue(), originalForm,
+						uiActivator.loadImageFromBundle("js.png")))
+					.sorted((node1, node2) -> node1.getName().compareTo(node2.getName()))
+					.collect(Collectors.toList());
+
+				customTypesNode.children = nodes.toArray(new SimpleUserNode[0]);
+			}
+		}
+	}
+
 	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class< ? >[] clss)
 	{
 		if (clss != null)
@@ -2413,7 +2554,7 @@ public class SolutionExplorerTreeContentProvider
 						nodeName = cls.getName().substring(index + 1);
 					}
 					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, uiActivator.loadImageFromBundle("class.png"),
-						cls);
+						cls, new ScriptObjectFeedback(null, cls));
 					JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
 					if (IConstantsObject.class.isAssignableFrom(cls) &&
 						!(javaMembers instanceof InstanceJavaMembers && javaMembers.getMethodIds(false).size() > 0))
@@ -2432,17 +2573,29 @@ public class SolutionExplorerTreeContentProvider
 					n.parent = node;
 				}
 			}
-
-			PlatformSimpleUserNode constants = null;
-			if (constantsChildren.size() > 0)
+			// first sort the normal stuff
+			if (children.size() > 0)
 			{
-				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT, null,
-					uiActivator.loadImageFromBundle("constant.png")));
-				constants.parent = node;
+				Collections.sort(children, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 			}
 
-			if (constants != null)
+			// then insert execptions to the top
+			if (exceptionsChildren.size() > 0)
 			{
+				PlatformSimpleUserNode exceptions = null;
+				children.add(0, exceptions = new PlatformSimpleUserNode(Messages.TreeStrings_ServoyException, UserNodeType.EXCEPTIONS, null, null));
+				Collections.sort(exceptionsChildren, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
+				exceptions.children = exceptionsChildren.toArray(new PlatformSimpleUserNode[exceptionsChildren.size()]);
+			}
+
+			// and then insert constants before that again so that constant are always the first.
+			if (constantsChildren.size() > 0)
+			{
+				PlatformSimpleUserNode constants = null;
+				children.add(0, constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT, null,
+					uiActivator.loadImageFromBundle("constant.png")));
+				constants.parent = node;
+				Collections.sort(constantsChildren, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 				constants.children = constantsChildren.toArray(new PlatformSimpleUserNode[constantsChildren.size()]);
 				for (SimpleUserNode c : constants.children)
 				{
@@ -2451,26 +2604,7 @@ public class SolutionExplorerTreeContentProvider
 				constants.checkClientSupportInChildren();
 			}
 
-			PlatformSimpleUserNode exceptions = null;
-			if (exceptionsChildren.size() > 0)
-			{
-				children.add(exceptions = new PlatformSimpleUserNode(Messages.TreeStrings_ServoyException, UserNodeType.EXCEPTIONS, null, null));
-			}
 
-			if (exceptions != null)
-			{
-				exceptions.children = exceptionsChildren.toArray(new PlatformSimpleUserNode[exceptionsChildren.size()]);
-			}
-			if (children.size() > 0)
-			{
-				Collections.sort(children, new Comparator<PlatformSimpleUserNode>()
-				{
-					public int compare(PlatformSimpleUserNode o1, PlatformSimpleUserNode o2)
-					{
-						return o1.getName().compareTo(o2.getName());
-					}
-				});
-			}
 			node.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 		}
 	}
@@ -2491,69 +2625,86 @@ public class SolutionExplorerTreeContentProvider
 				uiActivator.loadImageFromBundle("forms.png"));
 			forms.parent = projectNode;
 
-			PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_FormComponents, UserNodeType.COMPONENT_FORMS, solution,
-				uiActivator.loadImageFromBundle("form_component.png"));
-			formReferences.parent = projectNode;
-			PlatformSimpleUserNode allRelations = null;
-			if (solutionOfCalculation == null)
+			if (!(servoyProject instanceof ServoyDeveloperProject))
 			{
-				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
-					uiActivator.loadImageFromBundle("relations.png"));
-				allRelations.parent = projectNode;
-			}
-			PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
-				uiActivator.loadImageFromBundle("valuelists.png"));
-			valuelists.parent = projectNode;
-			PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
-				uiActivator.loadImageFromBundle("media.png"));
-			media.parent = projectNode;
-			addMediaFolderChildrenNodes(media, solution);
+				PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_FormComponents, UserNodeType.COMPONENT_FORMS, solution,
+					uiActivator.loadImageFromBundle("form_component.png"));
+				formReferences.parent = projectNode;
+				PlatformSimpleUserNode allRelations = null;
+				if (solutionOfCalculation == null)
+				{
+					allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
+						uiActivator.loadImageFromBundle("relations.png"));
+					allRelations.parent = projectNode;
+				}
+				PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
+					uiActivator.loadImageFromBundle("valuelists.png"));
+				valuelists.parent = projectNode;
 
-			PlatformSimpleUserNode solutionDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionDataSources, UserNodeType.SOLUTION_DATASOURCES,
-				solution, IconProvider.instance().image(JSDataSources.class));
-			solutionDataSources.parent = projectNode;
+				PlatformSimpleUserNode menus = new PlatformSimpleUserNode(Messages.TreeStrings_Menus, UserNodeType.MENUS, solution,
+					uiActivator.loadImageFromBundle("column.png"));
+				menus.parent = projectNode;
+
+				PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
+					uiActivator.loadImageFromBundle("media.png"));
+				media.parent = projectNode;
+				addMediaFolderChildrenNodes(media, solution);
+
+				PlatformSimpleUserNode solutionDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionDataSources,
+					UserNodeType.SOLUTION_DATASOURCES,
+					solution, IconProvider.instance().image(JSDataSources.class));
+				solutionDataSources.parent = projectNode;
 
 
-			PlatformSimpleUserNode solutionMemoryDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_InMemory, UserNodeType.INMEMORY_DATASOURCES,
-				servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));
-			solutionMemoryDataSources.parent = solutionDataSources;
+				PlatformSimpleUserNode solutionMemoryDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_InMemory, UserNodeType.INMEMORY_DATASOURCES,
+					servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));
+				solutionMemoryDataSources.parent = solutionDataSources;
 
-			PlatformSimpleUserNode viewFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_ViewFoundsets, UserNodeType.VIEW_FOUNDSETS,
-				servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSViewDataSource.class));
-			viewFoundsets.parent = solutionDataSources;
+				PlatformSimpleUserNode viewFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_ViewFoundsets, UserNodeType.VIEW_FOUNDSETS,
+					servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSViewDataSource.class));
+				viewFoundsets.parent = solutionDataSources;
 
-			solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets };
+				PlatformSimpleUserNode menuFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_MenuFoundsets, UserNodeType.MENU_FOUNDSETS,
+					solution, IconProvider.instance().image(JSDataSources.class));
+				menuFoundsets.parent = solutionDataSources;
+
+				solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets, menuFoundsets };
 
 
-			PlatformSimpleUserNode solutionWebPackages = new PlatformSimpleUserNode(Messages.TreeStrings_Web_Packages,
-				UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, solution, uiActivator.loadImageFromBundle("all_packages.png"));
-			solutionWebPackages.parent = projectNode;
+				PlatformSimpleUserNode solutionWebPackages = new PlatformSimpleUserNode(Messages.TreeStrings_Web_Packages,
+					UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, solution, uiActivator.loadImageFromBundle("all_packages.png"));
+				solutionWebPackages.parent = projectNode;
 
-			if (solutionOfCalculation != null)
-			{
-				// in case of calculation editor
-				PlatformSimpleUserNode dataProvidersNode = new PlatformSimpleUserNode(Messages.TreeStrings_DataProviders, UserNodeType.TABLE_COLUMNS,
-					tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.png"));
-				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS, tableOfCalculation,
-					uiActivator.loadImageFromBundle("relations.png"));
-				addRelationsNodeChildren(allRelations, solution, tableOfCalculation, UserNodeType.CALC_RELATION);
+				if (solutionOfCalculation != null)
+				{
+					// in case of calculation editor
+					PlatformSimpleUserNode dataProvidersNode = new PlatformSimpleUserNode(Messages.TreeStrings_DataProviders, UserNodeType.TABLE_COLUMNS,
+						tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.png"));
+					allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS, tableOfCalculation,
+						uiActivator.loadImageFromBundle("relations.png"));
+					addRelationsNodeChildren(allRelations, solution, tableOfCalculation, UserNodeType.CALC_RELATION);
 
-				dataProvidersNode.parent = projectNode;
-				allRelations.parent = projectNode;
-				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, dataProvidersNode, forms, formReferences, allRelations, valuelists, media, solutionDataSources, solutionWebPackages };
-				forms.hide();
-				formReferences.hide();
+					dataProvidersNode.parent = projectNode;
+					allRelations.parent = projectNode;
+					projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, dataProvidersNode, forms, formReferences, allRelations, valuelists, menus, media, solutionDataSources, solutionWebPackages };
+					forms.hide();
+					formReferences.hide();
+				}
+				else
+				{
+					projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms, formReferences, allRelations, valuelists, menus, media, solutionDataSources, solutionWebPackages };
+					// solution's allRelations not allowed in login solutions
+					if (activeSolutionNode != null &&
+						((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+						allRelations != null)
+					{
+						allRelations.hide();
+					}
+				}
 			}
 			else
 			{
-				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms, formReferences, allRelations, valuelists, media, solutionDataSources, solutionWebPackages };
-				// solution's allRelations not allowed in login solutions
-				if (activeSolutionNode != null &&
-					((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
-					allRelations != null)
-				{
-					allRelations.hide();
-				}
+				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms };
 			}
 		}
 	}
@@ -2646,8 +2797,11 @@ public class SolutionExplorerTreeContentProvider
 
 	private void addFormNode(Form f, List<PlatformSimpleUserNode> nodes, PlatformSimpleUserNode parentNode)
 	{
-		PlatformSimpleUserNode node = new PlatformSimpleUserNode(f.getName(), UserNodeType.FORM, f.getName(),
-			f.getDataSource() == null ? "No table" : ("Server: " + f.getServerName() + ", Table: " + f.getTableName()), f,
+		PlatformSimpleUserNode node = new PlatformSimpleUserNode(
+			f.getName(),
+			UserNodeType.FORM,
+			(IDeveloperFeedback)new FormTooltipFeedback(f.getName(), null, f),
+			(Object)f,
 			ElementUtil.getImageForFormEncapsulation(f));
 		nodes.add(node);
 		node.parent = parentNode;
@@ -2670,7 +2824,7 @@ public class SolutionExplorerTreeContentProvider
 							ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().hasPersistsInServoyWorkingSets(workingSet,
 								new String[] { solution.getName() }, true))))
 					{
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, null, solution,
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, (String)null, solution,
 							uiActivator.loadImageFromBundle("servoy_workingset.png"));
 						nodes.add(node);
 						node.parent = formsNode;
@@ -2800,7 +2954,7 @@ public class SolutionExplorerTreeContentProvider
 		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
 		for (String name : allLayoutNames)
 		{
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(name, UserNodeType.FORM_CONTAINERS_ITEM, null, null,
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(name, UserNodeType.FORM_CONTAINERS_ITEM, (String)null, null,
 				uiActivator.loadImageFromBundle("layoutcontainer.png"));
 			node.setDeveloperFeedback(new SimpleDeveloperFeedback(name + ".", null, null));
 			elements.add(node);
@@ -2821,7 +2975,7 @@ public class SolutionExplorerTreeContentProvider
 
 		// see if this form extends another form and if so add the parent's elements
 		PlatformSimpleUserNode parentElementsNode = null;
-		if (ancestorForm.getExtendsID() > 0)
+		if (ancestorForm.getExtendsID() != null)
 		{
 			Form parentForm = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForm(ancestorForm.getExtendsID());
 			if (parentForm != null)
@@ -2910,7 +3064,7 @@ public class SolutionExplorerTreeContentProvider
 					else
 					{
 						// If the element was extended on the original form, use that one as model
-						model = originalForm.searchForExtendsId(element.getID()).orElse(element);
+						model = originalForm.searchForExtendsId(element.getUUID()).orElse(element);
 					}
 
 					String displayName = element.getName();
@@ -2931,10 +3085,14 @@ public class SolutionExplorerTreeContentProvider
 						{
 							SolutionExplorerListContentProvider.extractApiDocs(spec); // so that we have the main description of the component available in spec
 						}
+						if (model instanceof WebComponent)
+						{
+							this.addCustomTypesNodes(node, spec, originalForm);
+						}
 					}
 					node.setDeveloperFeedback(
 						new SimpleDeveloperFeedback("elements." + element.getName() + ".", null,
-							spec != null ? "<p>" + spec.getDocumentation() + "</p>" : null));
+							spec != null ? spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic) : null));
 				}
 				elements.add(node);
 				node.parent = parentNode;
@@ -2983,7 +3141,7 @@ public class SolutionExplorerTreeContentProvider
 			if (elementRealObject instanceof Object[] && ((Object[])elementRealObject).length > 0 && ((Object[])elementRealObject)[0] instanceof Bean) continue; // children already added
 			List<SimpleUserNode> nodeChildren = children.get(element);
 			int i;
-			if (element == elementsNode && parentElementsNode != null && parentElementsNode.children.length > 0)
+			if (element == elementsNode && parentElementsNode != null && parentElementsNode.children != null && parentElementsNode.children.length > 0)
 			{
 				element.children = new PlatformSimpleUserNode[nodeChildren == null ? 1 : (nodeChildren.size() + 1)];
 				element.children[0] = parentElementsNode;
@@ -2992,7 +3150,10 @@ public class SolutionExplorerTreeContentProvider
 			}
 			else
 			{
-				element.children = new PlatformSimpleUserNode[nodeChildren == null ? 0 : nodeChildren.size()];
+				if (nodeChildren != null)
+				{
+					element.children = new PlatformSimpleUserNode[nodeChildren.size()];
+				}
 				i = 0;
 			}
 			if (nodeChildren != null)
@@ -3366,6 +3527,23 @@ public class SolutionExplorerTreeContentProvider
 								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
 						}
+						else if (persist instanceof Menu)
+						{
+							PlatformSimpleUserNode menusNode = findChildNode(node, Messages.TreeStrings_Menus);
+							addMenusNodeChildren(menusNode, UserNodeType.MENU, true);
+							view.refreshTreeNodeFromModel(menusNode);
+
+							PlatformSimpleUserNode menuFoundsetsNode = findChildNode(node, Messages.TreeStrings_Datasources);
+							if (menuFoundsetsNode != null)
+							{
+								menuFoundsetsNode = findChildNode(menuFoundsetsNode, Messages.TreeStrings_MenuFoundsets);
+								if (menuFoundsetsNode != null)
+								{
+									addMenusNodeChildren(menuFoundsetsNode, UserNodeType.MENU_FOUNDSET, false);
+									view.refreshTreeNodeFromModel(menuFoundsetsNode);
+								}
+							}
+						}
 					}
 				}
 			}
@@ -3411,6 +3589,7 @@ public class SolutionExplorerTreeContentProvider
 							PlatformSimpleUserNode elements = findChildNode(node, Messages.TreeStrings_elements);
 							if (elements != null)
 							{
+								elements.setChildren(null);
 								addFormElementsChildren(elements);
 								view.refreshTreeNodeFromModel(elements);
 							}
@@ -3716,10 +3895,15 @@ public class SolutionExplorerTreeContentProvider
 
 	public TreePath getTreePath(UUID uuid)
 	{
-		if (activeSolutionNode.getRealObject() != null)
+		return getTreePath(uuid, activeSolutionNode);
+	}
+
+	public TreePath getTreePath(UUID uuid, PlatformSimpleUserNode startNode)
+	{
+		if (startNode != null && startNode.getRealObject() != null)
 		{
 			List<PlatformSimpleUserNode> al = new ArrayList<PlatformSimpleUserNode>();
-			if (findNode(activeSolutionNode, uuid, al))
+			if (findNode(startNode, uuid, al))
 			{
 				Collections.reverse(al);
 				return new TreePath(al.toArray());
@@ -3978,6 +4162,74 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
+	/**
+	 * Used to get tooltip text for script objects documented in JSLib.
+	 */
+	private static class JSLibScriptObjectFeedback extends ScriptObjectFeedback
+	{
+
+		JSLibScriptObjectFeedback(String codeSample, Class< ? > scriptObjectClass)
+		{
+			super(codeSample, scriptObjectClass);
+		}
+
+		@Override
+		protected IObjectDocumentation getDocObjForClass()
+		{
+			return TreeBuilder.getDocObjectForJSLibClass(cls);
+		}
+
+	}
+
+	/**
+	 * Used to get tooltip text for script objects documented in core or plugins.
+	 */
+	private static class ScriptObjectFeedback implements IDeveloperFeedback
+	{
+		private final String codeSample;
+		protected Class< ? > cls;
+		private String tooltip;
+
+		ScriptObjectFeedback(String codeSample, Class< ? > scriptObjectClass)
+		{
+			this.codeSample = codeSample;
+			this.cls = scriptObjectClass;
+		}
+
+		public String getSample()
+		{
+			return null;
+		}
+
+		public String getCode()
+		{
+			return codeSample;
+		}
+
+		public String getToolTipText()
+		{
+			if (tooltip == null && cls != null)
+			{
+				IObjectDocumentation docObj = getDocObjForClass();
+				cls = null; // just to not search again...
+				String desc = (docObj != null ? docObj.getDescription(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType())
+					: null);
+				if (desc != null)
+				{
+					tooltip = HtmlUtils.applyDescriptionMagic(desc);
+				}
+			}
+
+			return tooltip;
+		}
+
+		protected IObjectDocumentation getDocObjForClass()
+		{
+			IScriptObject scriptObject = ScriptObjectRegistry.getScriptObjectForClass(cls);
+			return scriptObject instanceof XMLScriptObjectAdapter soo ? soo.getObjectDocumentation() : null;
+		}
+
+	}
 
 	public PlatformSimpleUserNode getAllWebPackagesNode()
 	{

@@ -34,8 +34,8 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.UUID;
 
@@ -151,7 +151,7 @@ public abstract class AbstractGroupCommand extends AbstractEditorAndOutlineActio
 		{
 			for (FormElementGroup group : selectedGroups)
 			{
-				Iterator<IFormElement> elementsIt = group.getElements();
+				Iterator<ISupportFormElement> elementsIt = group.getElements();
 				while (elementsIt.hasNext())
 				{
 					selection.add(elementsIt.next());

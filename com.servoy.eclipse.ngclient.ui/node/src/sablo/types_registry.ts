@@ -166,8 +166,8 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
         return new WebObjectEventHandler(...this.processFunction(functionFromServer, webObjectSpecName), functionFromServer.iBDE);
     }
 
-    private processApiFunction(functionFromServer: IWebObjectFunctionFromServer, webObjectSpecName: string): IWebObjectFunction {
-        return new WebObjectFunction(...this.processFunction(functionFromServer, webObjectSpecName));
+    private processApiFunction(functionFromServer: IApiFunctionFromServer, webObjectSpecName: string): IWebObjectFunction {
+        return new WebObjectApiFunction(...this.processFunction(functionFromServer, webObjectSpecName), functionFromServer.srv);
     }
 
     private processFunction(functionFromServer: IWebObjectFunctionFromServer, webObjectSpecName: string): [IType<any>, ObjectOfITypeWithNumberKeys] {
@@ -176,7 +176,7 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
 
         if (functionFromServer.r) returnType = this.processTypeFromServer(functionFromServer.r, webObjectSpecName);
         for (const argIdx in functionFromServer) {
-            if (argIdx !== 'r' && argIdx !== 'iBDE') {
+            if (argIdx !== 'r' && argIdx !== 'iBDE' && argIdx !== 'srv') {
                 if (!argumentTypes) argumentTypes = {};
                 argumentTypes[argIdx] = this.processTypeFromServer(functionFromServer[argIdx], webObjectSpecName);
             }
@@ -420,6 +420,18 @@ class WebObjectEventHandler extends WebObjectFunction implements IEventHandler {
 
 }
 
+class WebObjectApiFunction extends WebObjectFunction implements IApiFunction {
+
+    constructor(
+            returnType?: IType<any>,
+            argumentTypes?: ObjectOfITypeWithNumberKeys,
+            readonly shouldReturnValue?: boolean
+    ) {
+        super(returnType, argumentTypes);
+    }
+
+}
+
 export interface IWebObjectTypesFromServer {
     [specName: string]: IWebObjectSpecificationFromServer;
 }
@@ -467,6 +479,11 @@ export interface IWebObjectFunctionsFromServer {
 interface IEventHandlerFromServer extends IWebObjectFunctionFromServer {
     /** "ignoreNGBlockDuplicateEvents" flag from spec. - if the handler is supposed to ignore the blocking of duplicates - when that is enabled via client or ui properties of component */
     iBDE?: boolean;
+}
+
+interface IApiFunctionFromServer extends IWebObjectFunctionFromServer {
+   /** this is a boolean that indicates if the server expects a return value from this function call (true) or not (false) */
+    srv?: boolean;
 }
 
 export interface IWebObjectFunctionFromServer {
@@ -623,7 +640,7 @@ export interface IWebObjectSpecification {
     /** this can return null if no property descriptions needed to be sent to client (no special client side type nor pushToServer) */
     getPropertyDescriptions(): { [propertyName: string]: IPropertyDescription };
     getHandler(handlerName: string): IEventHandler;
-    getApiFunction(apiFunctionName: string): IWebObjectFunction;
+    getApiFunction(apiFunctionName: string): IApiFunction;
 
 }
 
@@ -642,6 +659,12 @@ export interface IPropertyDescription {
      */
     getPropertyPushToServer(): PushToServerEnum;
 
+}
+
+/** The type definition with client side conversion types for an api function.  */
+interface IApiFunction extends IWebObjectFunction {
+    /** if it is a sync function should return a value */
+    shouldReturnValue?: boolean;
 }
 
 /** The type definition with client side conversion types for a handler.  */

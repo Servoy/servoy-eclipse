@@ -1,17 +1,33 @@
- <div style="overflow: hidden; height:0px;width:0px;background: transparent;" data-description="dummyPanel for Chrome auto-fill issue">
-        username<input type="text" style="height:0px;width:0px;background: transparent; color: transparent;border: none;" data-description="dummyUsername" autocomplete="username">
-        password<input type="password" style="height:0px;width:0px;background: transparent; color: transparent;border: none;" data-description="dummyPassword" autocomplete="current-password">
-</div>
+@if (incudeAutoFillHack) {
+  <div style="overflow: hidden; height:0px;width:0px;background: transparent;" data-description="dummyPanel for Chrome auto-fill issue">
+    username<input type="text" style="height:0px;width:0px;background: transparent; color: transparent;border: none;" data-description="dummyUsername" tabindex="-1" autocomplete="username">
+    password<input type="password" style="height:0px;width:0px;background: transparent; color: transparent;border: none;" data-description="dummyPassword" tabindex="-1" autocomplete="current-password">
+  </div>
+}
 <div id="mainBody" [sabloTabseq]="1" [sabloTabseqConfig]="{root: true}">
-<!--The content below is only a placeholder and can be replaced.-->
-<div *ngIf="(this.websocketService.reconnectingEmitter | async)" class="svy-reconnecting" >{{i18n_reconnecting_feedback}}</div>
-<div class="svy-main-window-navigator-container"  *ngIf="hasDefaultNavigator() || navigatorForm != null" [ngStyle]="getNavigatorStyle()">
-<svy-default-navigator [name]="mainForm" *ngIf="hasDefaultNavigator()"></svy-default-navigator>
-<svy-form [name]="navigatorForm" *ngIf="navigatorForm != null"></svy-form>
+  <!--The content below is only a placeholder and can be replaced.-->
+  @if ((this.websocketService.reconnectingEmitter | async)) {
+    <div class="svy-reconnecting" >{{i18n_reconnecting_feedback}}</div>
+  }
+  @if (hasDefaultNavigator() || navigatorForm != null) {
+    <div class="svy-main-window-navigator-container"  [ngStyle]="getNavigatorStyle()">
+      @if (hasDefaultNavigator()) {
+        <svy-default-navigator [name]="mainForm"></svy-default-navigator>
+      }
+      @if (navigatorForm != null) {
+        <svy-form [name]="navigatorForm"></svy-form>
+      }
+    </div>
+  }
+  @if (mainForm != null) {
+    <div id="mainForm" class="svy-main-window-container" autoscroll="true" [ngStyle]="getFormStyle()"  [sabloTabseq]="1" [sabloTabseqConfig]="{container: true, reservedGap: 5000}">
+      <svy-form [name]="mainForm"></svy-form>
+    </div>
+  }
+  @if (sessionProblem != null) {
+    <session-view></session-view>
+  }
+  @if ((this.loadingIndicatorService.showLoadingIndicator | async)) {
+    <loading-indicator></loading-indicator>
+  }
 </div>
-<div id="mainForm" class="svy-main-window-container" autoscroll="true" [ngStyle]="getFormStyle()"  *ngIf="mainForm != null" [sabloTabseq]="1" [sabloTabseqConfig]="{container: true, reservedGap: 5000}">
-<svy-form [name]="mainForm"></svy-form>
-</div> 
-<session-view *ngIf="sessionProblem != null"></session-view>
-<loading-indicator *ngIf="(this.loadingIndicatorService.showLoadingIndicator | async)"></loading-indicator>
-</div> 

@@ -1,16 +1,16 @@
 {
   "name": "@servoy/dialogs",
-  "version": "2024.3.0",
+  "version": "2025.9.0",
   "peerDependencies": {
-    "@angular/animations": "^17",
-    "@angular/common": "^17",
-    "@angular/core": "^17",
-    "@angular/forms": "^17",
+    "@angular/animations": "^20",
+    "@angular/common": "^20",
+    "@angular/core": "^20",
+    "@angular/forms": "^20",
     "@servoy/public": "*",
     "rxjs": "^7"
   },
   "dependencies": {
-    "@angular/cdk": "^17",
+    "@angular/cdk": "^20",
     "tslib": "*"
   },
   "license": "MIT",

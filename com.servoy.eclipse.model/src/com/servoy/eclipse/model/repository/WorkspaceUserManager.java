@@ -136,7 +136,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		public ServoyJSONObject toJSON() throws JSONException
 		{
-			ServoyJSONObject obj = new ServoyJSONObject(true, false);
+			ServoyJSONObject obj = new ServoyJSONObject(false, true);
 			obj.put(NAME, name);
 			obj.put(PASSWORD_HASH, passwordHash);
 			obj.put(USER_UID, userUid);
@@ -596,7 +596,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			}
 		}
 		obj.put(JSON_USERGROUPS, jsonUsersForGroups);
-		return obj.toString(true);
+		return obj.toString(false);
 	}
 
 	/**
@@ -814,7 +814,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				obj.put(groupName, jinfos);
 			}
 		}
-		return obj.toString(true);
+		return obj.toString(false);
 	}
 
 	protected String serializeSecurityInfo(Form f) throws JSONException
@@ -892,7 +892,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		throws JSONException
 	{
 		// read JSON contents into the objects above (that can be easily altered)
-		ServoyJSONObject oldContent = new ServoyJSONObject(jsonContent, true);
+		ServoyJSONObject oldContent = new ServoyJSONObject(jsonContent, false);
 		if (oldContent.length() == 0) return; // allow empty content
 
 		JSONArray oldGroups = oldContent.getJSONArray(WorkspaceUserManager.JSON_GROUPS);
@@ -1180,7 +1180,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	public static Map<String, List<SecurityInfo>> deserializeSecurityPermissionInfo(String jsonContent) throws JSONException
 	{
 		Map<String, List<SecurityInfo>> access = new HashMap<String, List<SecurityInfo>>();
-		ServoyJSONObject obj = new ServoyJSONObject(jsonContent, true);
+		ServoyJSONObject obj = new ServoyJSONObject(jsonContent, false);
 
 		Iterator<String> keys = obj.keys();
 		while (keys.hasNext())
@@ -1323,13 +1323,16 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	protected GroupSecurityInfo getGroupSecurityInfo(String group)
 	{
-		GroupSecurityInfo groupSecurityInfo = null;
+		if (group == null) return null;
 		for (GroupSecurityInfo element : groupInfos)
 		{
-			groupSecurityInfo = element;
-			if (groupSecurityInfo.getName().equals(group)) break;
+			if (group.equals(element.getName()))
+			{
+				return element;
+			}
 		}
-		return groupSecurityInfo;
+		ServoyLog.logError(new Exception("Gsi not found for group " + group));
+		return null;
 	}
 
 	public String checkPasswordForUserName(String clientId, String userName, String password)
@@ -1371,31 +1374,32 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		return false;
 	}
 
-	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, int[] solution_ids, int[] releaseNumbers, String[] groups)
+	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, UUID[] solution_uuids, int[] releaseNumbers, String[] groups)
 	{
 		Map<Object, Integer> retval = new HashMap<Object, Integer>();
 		Set<Object> implicitRights = new HashSet<>();
 		Map<Object, Integer> groupsWithNonDefaultAccess = new HashMap<>();
-		for (int i = 0; i < solution_ids.length; i++)
+		for (int i = 0; i < solution_uuids.length; i++)
 		{
-			int solution_id = solution_ids[i];
+			UUID solution_uuid = solution_uuids[i];
 			int releaseNumber = releaseNumbers[i];
 
 			IRootObject solution = null;
-			if (solution_id >= 0)
+			if (solution_uuid != null)
 			{
 				try
 				{
-					solution = ApplicationServerRegistry.get().getDeveloperRepository().getRootObject(solution_id, releaseNumber);
+					solution = ApplicationServerRegistry.get().getDeveloperRepository().getRootObject(solution_uuid, releaseNumber);
 				}
 				catch (RepositoryException e)
 				{
-					ServoyLog.logError("Cannot get security access for solution with id, release = " + solution_id + ", " + releaseNumber, e);
+					ServoyLog.logError("Cannot get security access for solution with id, release = " + solution_uuid + ", " + releaseNumber, e);
 					return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
 				}
 				if (solution == null)
 				{
-					ServoyLog.logError("Cannot get security access because of missing solution with id, release = " + solution_id + ", " + releaseNumber, null);
+					ServoyLog.logError("Cannot get security access because of missing solution with id, release = " + solution_uuid + ", " + releaseNumber,
+						null);
 					return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
 				}
 			}
@@ -1405,7 +1409,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				for (String group : groups)
 				{
 					GroupSecurityInfo gsi = getGroupSecurityInfo(group);
-					if (solution != null)
+					if (solution != null && gsi != null)
 					{
 						for (Entry<UUID, List<SecurityInfo>> formSecurityEntry : gsi.formSecurity.entrySet())
 						{
@@ -1445,32 +1449,35 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		for (String group : groups)
 		{
 			GroupSecurityInfo gsi = getGroupSecurityInfo(group);
-			for (Entry<String, List<SecurityInfo>> entry : gsi.tableSecurity.entrySet())
+			if (gsi != null)
 			{
-				String s_t = entry.getKey();
-				List<SecurityInfo> lsi = entry.getValue();
-				for (SecurityInfo si : lsi)
+				for (Entry<String, List<SecurityInfo>> entry : gsi.tableSecurity.entrySet())
 				{
-					String cid = Utils.getDotQualitfied(s_t, si.element_uid);
-					Object value = retval.get(cid);
-					if (value instanceof Integer)
+					String s_t = entry.getKey();
+					List<SecurityInfo> lsi = entry.getValue();
+					for (SecurityInfo si : lsi)
 					{
-						value = new Integer(((Integer)value).intValue() | si.access);
+						String cid = Utils.getDotQualitfied(s_t, si.element_uid);
+						Object value = retval.get(cid);
+						if (value instanceof Integer)
+						{
+							value = new Integer(((Integer)value).intValue() | si.access);
+						}
+						else
+						{
+							value = new Integer(si.access);
+						}
+						Integer old = groupsWithNonDefaultAccess.get(cid);
+						if (old == null)
+						{
+							groupsWithNonDefaultAccess.put(cid, Integer.valueOf(1));
+						}
+						else
+						{
+							groupsWithNonDefaultAccess.put(cid, Integer.valueOf(old.intValue() + 1));
+						}
+						retval.put(cid, (Integer)value); //server.table.column -> int
 					}
-					else
-					{
-						value = new Integer(si.access);
-					}
-					Integer old = groupsWithNonDefaultAccess.get(cid);
-					if (old == null)
-					{
-						groupsWithNonDefaultAccess.put(cid, Integer.valueOf(1));
-					}
-					else
-					{
-						groupsWithNonDefaultAccess.put(cid, Integer.valueOf(old.intValue() + 1));
-					}
-					retval.put(cid, (Integer)value); //server.table.column -> int
 				}
 			}
 		}
@@ -1781,7 +1788,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	{
 		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUUID == null || (!isOperational()))
 		{
-			ServoyLog.logError("Invalid parameters received, or manager is not operational - setFormSecurityAccess(...)", null);
+			ServoyLog.logError("Invalid parameters: permision: " + groupName + ", accessMask: " + accessMask + ", element: " + elementUUID +
+				" received, or manager is not operational: " + isOperational() + " - setFormSecurityAccess(...)", null);
 			return;
 		}
 
@@ -1811,6 +1819,46 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 					}
 				}
 			}
+
+			if (form != null)
+			{
+				addFormSecurityAccess(groupName, accessMask, elementUUID, form.getUUID());
+				if (writeMode == WRITE_MODE_AUTOMATIC)
+				{
+					writeSecurityInfo(form, false);
+				}
+			}
+			else
+			{
+				ServoyLog.logWarning("setFormSecurityAccess(...) cannot find element with given UUID or not form element!", null);
+			}
+		}
+		else
+		{
+			ServoyLog.logWarning("setFormSecurityAccess(...) cannot find the group with the given name!", null);
+		}
+	}
+
+	@Override
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID formUUID, UUID elementUUID, String solutionName)
+		throws ServoyException, RemoteException
+	{
+
+		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUUID == null || (!isOperational()))
+		{
+			ServoyLog.logError("Invalid parameters: permision: " + groupName + ", accessMask: " + accessMask + ", element: " + elementUUID +
+				" received, or manager is not operational: " + isOperational() + " - setFormSecurityAccess(...)", null);
+			return;
+		}
+
+		checkForAdminUser(clientId, null);
+
+		GroupSecurityInfo gsi = getGroupSecurityInfo(groupName);
+
+		if (gsi != null)
+		{
+			// now we must find the form from the UUID
+			Form form = getForm(formUUID);
 
 			if (form != null)
 			{
@@ -2221,7 +2269,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 								if (file.exists())
 								{
 									String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
-									ServoyJSONObject obj = new ServoyJSONObject(fileContent, true);
+									ServoyJSONObject obj = new ServoyJSONObject(fileContent, false);
 									boolean changed = false;
 									for (String groupName : groupNames)
 									{
@@ -2486,12 +2534,20 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 */
 	public void setResourcesProject(IProject project)
 	{
+		setResourcesProject(project, true);
+	}
+
+	public void setResourcesProject(IProject project, boolean reloadAllSecurityInformation)
+	{
 		if (project != resourcesProject)
 		{
 			resourcesProject = project;
 			dataModelManager = new DataModelManager(resourcesProject, ApplicationServerRegistry.get().getServerManager());
 
-			reloadAllSecurityInformation();
+			if (reloadAllSecurityInformation)
+			{
+				reloadAllSecurityInformation();
+			}
 		}
 	}
 

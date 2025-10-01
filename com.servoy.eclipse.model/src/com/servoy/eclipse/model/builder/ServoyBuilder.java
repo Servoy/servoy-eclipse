@@ -50,6 +50,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -122,6 +123,7 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportMedia;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
@@ -169,8 +171,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	public static final int LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM = 3;
 	public static final int LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM = 20;
-
-	public static final String ATTR_FC_FULL_UUID_PROP_AND_COMPONENT_PATH = "fcFUPACP";
 
 	class ServoyDeltaVisitor implements IResourceDeltaVisitor
 	{
@@ -1043,6 +1043,25 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					ServoyProject module = getServoyModel().getServoyProject(name);
 					if (module == null)
 					{
+						// test if the project is not really there (but closed)
+						IProject prj = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+						if (prj != null && prj.exists() && !prj.isOpen())
+						{
+							try
+							{
+								// if it is closed then just open it and try to get the servoy project again.
+								prj.open(new NullProgressMonitor());
+								getServoyModel().refreshServoyProjects();
+								module = getServoyModel().getServoyProject(name);
+							}
+							catch (CoreException e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+					}
+					if (module == null)
+					{
 						ServoyMarker mk = MarkerMessages.ModuleNotFound.fill(name, servoyProject.getSolution().getName());
 						IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MODULE_NOT_FOUND, IMarker.PRIORITY_HIGH, null, null);
 						if (marker != null)
@@ -1093,13 +1112,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ServoyLog.logError(e);
 						}
 					}
-				}
-
-				// import hook modules should not contain other modules
-				if (SolutionMetaData.isPreImportHook(servoyProject.getSolution()) && modulesNames.length > 0)
-				{
-					String message = "Module " + servoyProject.getSolution().getName() + " is a solution import hook, so it should not contain any modules.";
-					addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
 				}
 			}
 		}
@@ -1396,7 +1408,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				if ((form.isResponsiveLayout() != extendsForm.isResponsiveLayout()) || (form.getUseCssPosition() != extendsForm.getUseCssPosition()))
 				{
-					Iterator<IFormElement> uiElements = extendsForm.getFormElementsSortedByFormIndex();
+					Iterator<ISupportFormElement> uiElements = extendsForm.getFormElementsSortedByFormIndex();
 					// do now show if no ui is present
 					if (uiElements.hasNext())
 					{
@@ -1430,7 +1442,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						catch (CoreException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 				}
@@ -1491,7 +1503,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				addDeprecatedElementWarningIfNeeded(persist, fallbackValuelist, markerResource,
 					"Valuelist \"" + elementName + "\" has a deprecated fallback valuelist \"" + fallbackValuelist.getName() + "\".");
-				if (fallbackValuelist.getFallbackValueListID() > 0)
+				if (fallbackValuelist.getFallbackValueListID() != null)
 				{
 					ServoyMarker mk = MarkerMessages.ValuelistFallbackOfFallbackFound.fill(((ValueList)persist).getName(), fallbackValuelist.getName());
 					addMarker(markerResource, mk.getType(), mk.getText(), -1, VALUELIST_WITH_FALLBACK_OF_FALLBACK, IMarker.PRIORITY_HIGH, null, persist);
@@ -1987,12 +1999,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								{
 									final Method method = methods.get(element.getName());
 									Object property_value = method.invoke(o, new Object[] { });
-									final int element_id = Utils.getAsInteger(property_value);
-									if (element_id > 0)
+									final UUID element_uuid = Utils.getAsUUID(property_value, false);
+									if (element_uuid != null)
 									{
 										final IPersist foundPersist = flattenedSolution
-											.searchPersist(((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository())
-												.getUUIDForElementId(element_id, element_id, -1, -1, null));
+											.searchPersist(element_uuid);
 										ServoyBuilderUtils.addNullReferenceMarker(project, o, foundPersist, context, element);
 										ServoyBuilderUtils.addNotAccessibleMethodMarkers(project, o, foundPersist, context, element, flattenedSolution);
 										ServoyBuilderUtils.addMethodParseErrorMarkers(project, o, foundPersist, context, element, methodsParsed,
@@ -2162,6 +2173,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								case IRepository.VALUELISTS :
 								case IRepository.SCRIPTVARIABLES :
 								case IRepository.METHODS :
+								case IRepository.MENUS :
 									break;
 								default :
 									addBadStructureMarker(o, servoyProject, project);
@@ -2431,8 +2443,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							String datasource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
 							if (!dataSourceCollectorVisitor.getDataSources().contains(datasource))
 							{
-								Object markerSeverity = marker.getAttribute(IMarker.SEVERITY);
-								if (markerSeverity == null || (markerSeverity != null && ((Integer)markerSeverity).intValue() > IMarker.SEVERITY_WARNING))
+								int markerSeverity = marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+								if (markerSeverity > IMarker.SEVERITY_WARNING)
 								{
 									marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
 								}
@@ -2638,7 +2650,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
-							final ITable table = server.getTable(tableName);
+							ITable table = server.getTable(tableName);
 							IResource res = project;
 							if (getServoyModel().getDataModelManager() != null &&
 								getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
@@ -2648,8 +2660,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							if (table.isTableInvalidInDeveloperBecauseNoPk())
 							{
 
-								final ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
-								final IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
+								ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
+								IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
 									IMarker.PRIORITY_HIGH, null, null);
 								try
 								{
@@ -2658,7 +2670,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								catch (CoreException e)
 								{
-									Debug.error(e);
+									ServoyLog.logError(e);
 								}
 							}
 							Map<String, Column> columnsByName = new HashMap<String, Column>();
@@ -3133,7 +3145,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						catch (CoreException e)
 						{
-							Debug.error(e);
+							ServoyLog.logError(e);
 						}
 					}
 				}
@@ -3187,7 +3199,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								catch (CoreException e)
 								{
-									Debug.error(e);
+									ServoyLog.logError(e);
 								}
 							}
 						}
@@ -3214,7 +3226,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										catch (CoreException e)
 										{
-											Debug.error(e);
+											ServoyLog.logError(e);
 										}
 										return CONTINUE_TRAVERSAL;
 									}
@@ -3303,7 +3315,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
 				Path path = new Path(pathPair.getLeft() + pathPair.getRight());
 				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-				if (persist instanceof IFormElement)
+				if (persist instanceof ISupportFormElement)
 				{
 					Form parent = persist.getAncestor(Form.class);
 					if (parent != null && parent.isFormComponent().booleanValue())
@@ -3379,7 +3391,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("Name", type.equals(ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE) ? "element" : ((ISupportName)persist).getName());
-				if (fcComponentAndPropertyNamePath != null) marker.setAttribute(ATTR_FC_FULL_UUID_PROP_AND_COMPONENT_PATH, fcComponentAndPropertyNamePath);
 				marker.setAttribute("SolutionName", resource.getProject().getName());
 			}
 			else if (type.equals(DUPLICATE_UUID) || type.equals(DUPLICATE_SIBLING_UUID) || type.equals(BAD_STRUCTURE_MARKER_TYPE) ||
@@ -3391,7 +3402,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("SolutionName", resource.getProject().getName());
 				if (elementName != null) marker.setAttribute("Name", elementName);
-				if (fcComponentAndPropertyNamePath != null) marker.setAttribute(ATTR_FC_FULL_UUID_PROP_AND_COMPONENT_PATH, fcComponentAndPropertyNamePath);
 				if (type.equals(INVALID_DATAPROVIDERID) && persist instanceof ISupportDataProviderID)
 				{
 					marker.setAttribute("DataProviderID", ((ISupportDataProviderID)persist).getDataProviderID());

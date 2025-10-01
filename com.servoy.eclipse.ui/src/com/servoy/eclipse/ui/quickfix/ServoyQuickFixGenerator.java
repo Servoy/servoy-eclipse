@@ -66,9 +66,12 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 
 			if (type.equals(ServoyBuilder.INVALID_SORT_OPTION))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				return new IMarkerResolution[] { new RemoveInvalidSortColumnsQuickFix(uuid, solName) };
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (solName != null && uuid != null)
+				{
+					return new IMarkerResolution[] { new RemoveInvalidSortColumnsQuickFix(uuid, solName) };
+				}
 			}
 
 			if (type.equals(ServoyBuilder.DUPLICATE_SCOPE_NAME_MARKER_TYPE))
@@ -77,13 +80,15 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			if (type.equals(ServoyBuilder.UNRESOLVED_RELATION_UUID))
 			{
-				String propertyName = (String)marker.getAttribute("PropertyName");
-				String displayName = (String)marker.getAttribute("DisplayName");
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-
-				return new IMarkerResolution[] { new ResolveUuidRelationNameQuickFix(solName, uuid, propertyName,
-					displayName), new ClearPropertyQuickFix(solName, uuid, propertyName, displayName) };
+				String propertyName = marker.getAttribute("PropertyName", null);
+				String displayName = marker.getAttribute("DisplayName", null);
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (propertyName != null && displayName != null && solName != null && uuid != null)
+				{
+					return new IMarkerResolution[] { new ResolveUuidRelationNameQuickFix(solName, uuid, propertyName,
+						displayName), new ClearPropertyQuickFix(solName, uuid, propertyName, displayName) };
+				}
 			}
 			if (type.equals(ServoyBuilder.MISSING_PROPERTY_FROM_SPEC))
 			{
@@ -91,50 +96,53 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			if (type.equals(ServoyBuilder.MISSING_SPEC))
 			{
-				final String packageName = (String)marker.getAttribute("packageName");
-				return new IMarkerResolution[] { new IMarkerResolution()
+				String packageName = marker.getAttribute("packageName", null);
+				if (packageName != null)
 				{
-
-					@Override
-					public void run(IMarker marker)
+					return new IMarkerResolution[] { new IMarkerResolution()
 					{
-						List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(IAutomaticImportWPMPackages.EXTENSION_ID);
-						if (defaultImports != null && defaultImports.size() > 0)
+
+						@Override
+						public void run(IMarker marker)
 						{
-							defaultImports.get(0).importPackage(packageName);
+							List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(IAutomaticImportWPMPackages.EXTENSION_ID);
+							if (defaultImports != null && defaultImports.size() > 0)
+							{
+								defaultImports.get(0).importPackage(packageName);
+							}
 						}
-					}
 
-					@Override
-					public String getLabel()
+						@Override
+						public String getLabel()
+						{
+							return "Automatic import of '" + packageName + "' from Servoy Package Manager";
+						}
+					}, new IMarkerResolution()
 					{
-						return "Automatic import of '" + packageName + "' from Servoy Package Manager";
-					}
-				}, new IMarkerResolution()
-				{
 
-					@Override
-					public void run(IMarker marker)
-					{
-						EditorUtil.openWebPackageManager();
-					}
+						@Override
+						public void run(IMarker marker)
+						{
+							EditorUtil.openWebPackageManager();
+						}
 
-					@Override
-					public String getLabel()
-					{
-						return "Open Servoy Package Manager";
-					}
-				} };
+						@Override
+						public String getLabel()
+						{
+							return "Open Servoy Package Manager";
+						}
+					} };
+				}
 			}
 
 			if (type.equals(ServoyBuilder.DEPRECATED_SPEC))
 			{
-				final String replacement = (String)marker.getAttribute("replacement");
+				String replacement = marker.getAttribute("replacement", null);
 				if (replacement != null)
 				{
-					String solName = (String)marker.getAttribute("solutionName");
+					String solName = marker.getAttribute("solutionName", null);
 					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-					if (servoyProject.isSolutionLoaded())
+					if (servoyProject != null && servoyProject.isSolutionLoaded())
 					{
 						return new IMarkerResolution[] { new DeprecatedSpecQuickFix(marker) };
 					}
@@ -145,124 +153,140 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 
 			if (type.equals(ServoyBuilder.DEPRECATED_PROPERTY_USAGE) || type.equals(ServoyBuilder.FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION))
 			{
-				String propertyName = (String)marker.getAttribute("PropertyName");
-				String displayName = (String)marker.getAttribute("DisplayName");
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-
-				resolutions.add(new ClearPropertyQuickFix(solName, uuid, propertyName, displayName));
-
-				if (StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName().equals(propertyName))
+				String propertyName = marker.getAttribute("PropertyName", null);
+				String displayName = marker.getAttribute("DisplayName", null);
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (propertyName != null && displayName != null && solName != null && uuid != null)
 				{
-					resolutions.add(0, new CreateLoginSolutionQuickFix(solName));
-					resolutions.add(new MarkSolutionAsWebclientOnlyQuickFix(solName));
+
+					resolutions.add(new ClearPropertyQuickFix(solName, uuid, propertyName, displayName));
+
+					if (StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName().equals(propertyName))
+					{
+						resolutions.add(0, new CreateLoginSolutionQuickFix(solName));
+					}
 				}
 			}
 
 			else if (type.equals(ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE))
 			{
-				String propertyName = (String)marker.getAttribute("PropertyName");
-				String displayName = (String)marker.getAttribute("DisplayName");
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-
-				if (StaticContentSpecLoader.PROPERTY_FIRSTFORMID.getPropertyName().equals(propertyName))
+				String propertyName = marker.getAttribute("PropertyName", null);
+				String displayName = marker.getAttribute("DisplayName", null);
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (propertyName != null && displayName != null && solName != null && uuid != null)
 				{
-					resolutions.add(new ClearPropertyQuickFix(solName, uuid, propertyName, displayName));
+					if (StaticContentSpecLoader.PROPERTY_FIRSTFORMID.getPropertyName().equals(propertyName))
+					{
+						resolutions.add(new ClearPropertyQuickFix(solName, uuid, propertyName, displayName));
+					}
 				}
 			}
 
 			else if (type.equals(ServoyBuilder.INVALID_EVENT_METHOD) || type.equals(ServoyBuilder.INVALID_COMMAND_METHOD))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String eventName = (String)marker.getAttribute("EventName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				String dataSource = (String)marker.getAttribute("DataSource");
-				int contextTypeId = marker.getAttribute("ContextTypeId", -1);
+				String solName = marker.getAttribute("SolutionName", null);
+				String eventName = marker.getAttribute("EventName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				String dataSource = marker.getAttribute("DataSource", null);
+				if (solName != null && eventName != null && dataSource != null && uuid != null)
+				{
+					int contextTypeId = marker.getAttribute("ContextTypeId", -1);
 
-				BaseSetPropertyQuickFix quickfix = new ClearPropertyQuickFix(solName, uuid, eventName, eventName);
-				quickfix.setLabel("Clear property " + quickfix.getDisplayName());
-				resolutions.add(quickfix);
-				if (contextTypeId == IRepository.FORMS)
-					resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.FORMS, "form"));
-				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.SOLUTIONS, "global"));
-				if (dataSource != null)
-					resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.TABLENODES, "entity"));
+					BaseSetPropertyQuickFix quickfix = new ClearPropertyQuickFix(solName, uuid, eventName, eventName);
+					quickfix.setLabel("Clear property " + quickfix.getDisplayName());
+					resolutions.add(quickfix);
+					if (contextTypeId == IRepository.FORMS)
+						resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.FORMS, "form"));
+					resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.SOLUTIONS, "global"));
+					if (dataSource != null)
+						resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.TABLENODES, "entity"));
+				}
 			}
 
 			else if (type.equals(ServoyBuilder.INVALID_DATAPROVIDERID))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				String dataProviderID = (String)marker.getAttribute("DataProviderID");
-
-				resolutions.add(new ClearPropertyQuickFix(solName, uuid, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-					StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName()));
-
-				UUID id = UUID.fromString(uuid);
-				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-				ServoyProject servoyProject = servoyModel.getServoyProject(solName);
-				try
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (solName != null && uuid != null)
 				{
-					IPersist persist = servoyProject.getEditingPersist(id);
-					if (persist instanceof ISupportDataProviderID)
+
+					resolutions.add(new ClearPropertyQuickFix(solName, uuid, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+						StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName()));
+
+					UUID id = UUID.fromString(uuid);
+					IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+					ServoyProject servoyProject = servoyModel.getServoyProject(solName);
+					try
 					{
-						IPersist parent = persist.getAncestor(IRepository.FORMS);
-						if (parent != null)
+						IPersist persist = servoyProject.getEditingPersist(id);
+						if (persist instanceof ISupportDataProviderID)
 						{
-							ITable table = servoyModel.getDataSourceManager().getDataSource(((Form)parent).getDataSource());
-							if (table != null)
+							IPersist parent = persist.getAncestor(IRepository.FORMS);
+							if (parent != null)
 							{
-								String columnName = ((ISupportDataProviderID)persist).getDataProviderID();
-								if (table.getColumn(Ident.RESERVED_NAME_PREFIX + columnName) != null)
+								ITable table = servoyModel.getDataSourceManager().getDataSource(((Form)parent).getDataSource());
+								if (table != null)
 								{
-									//resolutions.add(new RenameDataProviderIDQuickFix((ISupportDataProviderID)persist, columnName));
-									resolutions.add(new RenamePropertyQuickFix(solName, uuid, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
-										StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), Ident.RESERVED_NAME_PREFIX + columnName));
-								}
-								else
-								{
-									// don't create column name when dpid is a global
-									if (!ScopesUtils.isVariableScope(columnName)) resolutions.add(new CreateColumnReferenceQuickFix(uuid, solName));
-									resolutions.add(new CreateVariableReferenceQuickFix(uuid, solName));
+									String columnName = ((ISupportDataProviderID)persist).getDataProviderID();
+									if (table.getColumn(Ident.RESERVED_NAME_PREFIX + columnName) != null)
+									{
+										//resolutions.add(new RenameDataProviderIDQuickFix((ISupportDataProviderID)persist, columnName));
+										resolutions
+											.add(new RenamePropertyQuickFix(solName, uuid, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+												StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), Ident.RESERVED_NAME_PREFIX + columnName));
+									}
+									else
+									{
+										// don't create column name when dpid is a global
+										if (!ScopesUtils.isVariableScope(columnName)) resolutions.add(new CreateColumnReferenceQuickFix(uuid, solName));
+										resolutions.add(new CreateVariableReferenceQuickFix(uuid, solName));
+									}
 								}
 							}
 						}
 					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 			}
 			else if (type.equals(ServoyBuilder.DUPLICATE_MEM_TABLE_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				final UUID id = UUID.fromString(uuid);
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
-				resolutions.add(new RenameMemTableQuickFix(persist, servoyProject));
-				resolutions.add(new DeleteMemTableQuickFix(persist, servoyProject));
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (solName != null && uuid != null)
+				{
+					UUID id = UUID.fromString(uuid);
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
+					resolutions.add(new RenameMemTableQuickFix(persist, servoyProject));
+					resolutions.add(new DeleteMemTableQuickFix(persist, servoyProject));
+				}
 			}
 			else if (type.equals(ServoyBuilder.SUPERFORM_PROBLEM_TYPE))
 			{
-				String solName = (String)marker.getAttribute("SolutionName");
-				String uuid = (String)marker.getAttribute("Uuid");
-				final UUID id = UUID.fromString(uuid);
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-				Form form = (Form)servoyProject.getEditingPersist(id);
-				Form extendsForm = form.getExtendsForm();
-				resolutions.add(new ChangeSuperFormQuickFix(form, servoyProject));
-				if (form != null && extendsForm != null)
+				String solName = marker.getAttribute("SolutionName", null);
+				String uuid = marker.getAttribute("Uuid", null);
+				if (solName != null && uuid != null)
 				{
-					if (form.getUseCssPosition() && !extendsForm.getUseCssPosition() && !extendsForm.isResponsiveLayout())
+					UUID id = UUID.fromString(uuid);
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+					Form form = (Form)servoyProject.getEditingPersist(id);
+					Form extendsForm = form.getExtendsForm();
+					resolutions.add(new ChangeSuperFormQuickFix(form, servoyProject));
+					if (form != null && extendsForm != null)
 					{
-						resolutions.add(new ConvertToCSSPositionLayout(extendsForm, servoyProject));
-					}
-					else if (extendsForm.getUseCssPosition() && !form.getUseCssPosition() && !form.isResponsiveLayout())
-					{
-						resolutions.add(new ConvertToCSSPositionLayout(form, servoyProject));
+						if (form.getUseCssPosition() && !extendsForm.getUseCssPosition() && !extendsForm.isResponsiveLayout())
+						{
+							resolutions.add(new ConvertToCSSPositionLayout(extendsForm, servoyProject));
+						}
+						else if (extendsForm.getUseCssPosition() && !form.getUseCssPosition() && !form.isResponsiveLayout())
+						{
+							resolutions.add(new ConvertToCSSPositionLayout(form, servoyProject));
+						}
 					}
 				}
 			}

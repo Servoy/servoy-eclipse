@@ -30,10 +30,11 @@ import com.servoy.eclipse.designer.editor.PersistGraphicalEditPart;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Select-all action with logic for selecting elements based on type of the already selected elements.
- * 
+ *
  * @author lvostinar
  */
 
@@ -50,7 +51,7 @@ public class FixedSelectAllAction extends SelectAllAction
 	@Override
 	public void run()
 	{
-		GraphicalViewer viewer = (GraphicalViewer)part.getAdapter(GraphicalViewer.class);
+		GraphicalViewer viewer = part.getAdapter(GraphicalViewer.class);
 		if (viewer != null)
 		{
 			List elements = viewer.getContents().getChildren();
@@ -58,11 +59,11 @@ public class FixedSelectAllAction extends SelectAllAction
 			if (selectedElements != null && selectedElements.size() > 0 && selectedElements.get(0) instanceof PersistGraphicalEditPart)
 			{
 				IPersist persist = (IPersist)((PersistGraphicalEditPart)selectedElements.get(0)).getModel();
-				for (int i = 0; i < selectedElements.size(); i++)
+				for (Object selectedElement : selectedElements)
 				{
-					if (selectedElements.get(i) instanceof PersistGraphicalEditPart && persist != null)
+					if (selectedElement instanceof PersistGraphicalEditPart && persist != null)
 					{
-						if (persist.getTypeID() != ((IPersist)((PersistGraphicalEditPart)selectedElements.get(i)).getModel()).getTypeID())
+						if (persist.getTypeID() != ((IPersist)((PersistGraphicalEditPart)selectedElement).getModel()).getTypeID())
 						{
 							persist = null;
 						}
@@ -79,9 +80,11 @@ public class FixedSelectAllAction extends SelectAllAction
 							if (persist.getTypeID() == IRepository.GRAPHICALCOMPONENTS)
 							{
 								IPersist currentPersist = (IPersist)((PersistGraphicalEditPart)elements.get(i)).getModel();
-								int id1 = ((GraphicalComponent)persist).getOnActionMethodID();
-								int id2 = ((GraphicalComponent)currentPersist).getOnActionMethodID();
-								if (!((id1 == 0 && id2 == 0) || ((id1 > 0 || id1 == -1) && (id2 > 0 || id2 == -1))))
+								String uuid1 = ((GraphicalComponent)persist).getOnActionMethodID();
+								String uuid2 = ((GraphicalComponent)currentPersist).getOnActionMethodID();
+								if (!((uuid1 == null && uuid2 == null) ||
+									((Utils.getAsUUID(uuid1, false) != null || "-1".equals(uuid1)) &&
+										(Utils.getAsUUID(uuid2, false) != null || "-1".equals(uuid2)))))
 								{
 									continue;
 								}

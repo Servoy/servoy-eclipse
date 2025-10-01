@@ -42,17 +42,6 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.osgi.framework.Bundle;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
@@ -73,6 +62,17 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HTTPUtils;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Utils;
+
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Filter that should only be there in a developer environment.
@@ -289,7 +289,7 @@ public class ResourceProvider implements Filter
 		if (pathInfo != null && !pathInfo.equals("/"))
 		{
 			URL url = null;
-			Path normalizedPath = Paths.get(pathInfo).normalize();
+			Path normalizedPath = Paths.get(pathInfo.replace(':', '_')).normalize();
 			if (normalizedPath.startsWith("/templates/"))
 			{
 				File templateFile = new File(templatesDir, pathInfo.substring("/templates/".length()));

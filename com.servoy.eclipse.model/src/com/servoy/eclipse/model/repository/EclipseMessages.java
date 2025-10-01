@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -105,11 +104,9 @@ public class EclipseMessages implements ICustomMessageLoader
 		TreeMap<String, I18NUtil.MessageEntry> messages = getDatasourceMessages(i18nDatasource);
 		if (messages != null)
 		{
-			Iterator<Map.Entry<String, I18NUtil.MessageEntry>> messagesIte = messages.entrySet().iterator();
 			ArrayList<String> langKeyToRemove = new ArrayList<String>();
-			while (messagesIte.hasNext())
+			for (Entry<String, MessageEntry> entry : messages.entrySet())
 			{
-				Map.Entry<String, I18NUtil.MessageEntry> entry = messagesIte.next();
 				String msgKey = entry.getValue().getKey();
 				if (msgKey.equals(messageKey)) langKeyToRemove.add(entry.getKey());
 			}
@@ -162,11 +159,10 @@ public class EclipseMessages implements ICustomMessageLoader
 	public void removeCachedMessages()
 	{
 		ArrayList<String> i18nDatasourceToRemove = new ArrayList<String>();
-		Iterator<String> i18nDatasourceMessagesIte = i18nDatasourceMessages.keySet().iterator();
 		String i18nDatasourceKey;
-		while (i18nDatasourceMessagesIte.hasNext())
+		for (String element : i18nDatasourceMessages.keySet())
 		{
-			i18nDatasourceKey = i18nDatasourceMessagesIte.next();
+			i18nDatasourceKey = element;
 			if (!hasUnsavedMessages(i18nDatasourceKey)) i18nDatasourceToRemove.add(i18nDatasourceKey);
 		}
 
@@ -214,10 +210,8 @@ public class EclipseMessages implements ICustomMessageLoader
 			TreeMap<String, String> allDefaults = new TreeMap<String, String>();
 			TreeMap<String, String> allLocales = new TreeMap<String, String>();
 
-			Iterator<Map.Entry<String, I18NUtil.MessageEntry>> messagesIte = messages.entrySet().iterator();
-			while (messagesIte.hasNext())
+			for (Entry<String, MessageEntry> entry : messages.entrySet())
 			{
-				Map.Entry<String, I18NUtil.MessageEntry> entry = messagesIte.next();
 				String lang = entry.getValue().getLanguage();
 				String messageKey = entry.getValue().getKey();
 				String value = entry.getValue().getValue();
@@ -281,10 +275,8 @@ public class EclipseMessages implements ICustomMessageLoader
 
 				if (messages != null)
 				{
-					Iterator<Map.Entry<String, I18NUtil.MessageEntry>> messagesIte = messages.entrySet().iterator();
-					while (messagesIte.hasNext())
+					for (Entry<String, MessageEntry> entry : messages.entrySet())
 					{
-						Map.Entry<String, I18NUtil.MessageEntry> entry = messagesIte.next();
 						String lang = entry.getValue().getLanguage();
 						String messageKey = entry.getValue().getKey();
 
@@ -402,12 +394,11 @@ public class EclipseMessages implements ICustomMessageLoader
 	{
 		final HashMap<String, Properties> languagesOutput = new HashMap<String, Properties>();
 
-		Iterator<Map.Entry<String, I18NUtil.MessageEntry>> messagesIte = messages.entrySet().iterator();
 		Map.Entry<String, I18NUtil.MessageEntry> entry;
 		String lang, key;
-		while (messagesIte.hasNext())
+		for (Entry<String, MessageEntry> element : messages.entrySet())
 		{
-			entry = messagesIte.next();
+			entry = element;
 			lang = entry.getValue().getLanguage();
 			key = entry.getValue().getKey();
 			Properties output = languagesOutput.get(lang);
@@ -424,11 +415,10 @@ public class EclipseMessages implements ICustomMessageLoader
 		{
 			IPath messageFilePath;
 			String langExt;
-			Iterator<Map.Entry<String, Properties>> languagesOutputIte = languagesOutput.entrySet().iterator();
 			Map.Entry<String, Properties> languageOutputEntry;
-			while (languagesOutputIte.hasNext())
+			for (Entry<String, Properties> element : languagesOutput.entrySet())
 			{
-				languageOutputEntry = languagesOutputIte.next();
+				languageOutputEntry = element;
 				langExt = languageOutputEntry.getKey();
 				if (!langExt.equals("")) langExt = "." + langExt;
 				messageFilePath = resourceProject.getFullPath().append(MESSAGES_DIR).append(i18nServer + "." + i18nTable + langExt + MESSAGES_EXTENSION);
@@ -562,11 +552,10 @@ public class EclipseMessages implements ICustomMessageLoader
 									Properties messagesProp = new Properties();
 									messagesProp.load(new ByteArrayInputStream(messages));
 
-									Iterator<Map.Entry<Object, Object>> messagesPropIte = messagesProp.entrySet().iterator();
 									Map.Entry<Object, Object> messagesPropEntry;
-									while (messagesPropIte.hasNext())
+									for (Entry<Object, Object> element : messagesProp.entrySet())
 									{
-										messagesPropEntry = messagesPropIte.next();
+										messagesPropEntry = element;
 										I18NUtil.MessageEntry messageEntry = new I18NUtil.MessageEntry(language, messagesPropEntry.getKey().toString(),
 											messagesPropEntry.getValue().toString());
 										messagesMap.put(messageEntry.getLanguageKey(), messageEntry);
@@ -744,7 +733,8 @@ public class EclipseMessages implements ICustomMessageLoader
 		String activeSolutionI18NServerName = activeProject.getSolution().getI18nServerName();
 		String activeSolutionI18NTableName = activeProject.getSolution().getI18nTableName();
 
-		if (activeSolutionI18NServerName != null && activeSolutionI18NTableName != null)
+		if (activeSolutionI18NServerName != null && activeSolutionI18NTableName != null &&
+			ServoyModelFinder.getServoyModel().getActiveResourcesProject() != null)
 		{
 			final ArrayList<Pair<String, String>> i18nKeysToSave = new ArrayList<Pair<String, String>>();
 			form.acceptVisitor(new IPersistVisitor()

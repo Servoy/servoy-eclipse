@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import static com.servoy.eclipse.core.ServoyModelManager.getServoyModelManager;
+import static com.servoy.eclipse.core.util.UIUtils.runInUI;
+
 import java.util.Comparator;
 
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -29,7 +32,6 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionEvent;
@@ -42,9 +44,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.j2db.dataprocessing.IDataSet;
@@ -188,17 +188,6 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 		});
 		tableViewer.setContentProvider(new IStructuredContentProvider()
 		{
-
-			public void dispose()
-			{
-
-			}
-
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
-			{
-
-			}
-
 			public Object[] getElements(Object inputElement)
 			{
 				IDataSet localGroups = (IDataSet)inputElement;
@@ -211,7 +200,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 				return groupNames;
 			}
 		});
-		EclipseUserManager eum = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager();
+		EclipseUserManager eum = getServoyModelManager().getServoyModel().getUserManager();
 		IDataSet groups = eum.getGroups(ApplicationServerRegistry.get().getClientId());
 		tableViewer.setInput(groups);
 		tableViewer.setSorter(new ColumnsSorter(tableViewer, new TableColumn[] { nameColumn }, new Comparator[] { NameComparator.INSTANCE }));
@@ -232,12 +221,11 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 
 	public void userGroupChanged()
 	{
-		UIUtils.runInUI(new Runnable()
-		{
-			public void run()
+		runInUI(() -> {
+			if (!tableViewer.getControl().isDisposed())
 			{
 				tableViewer.setInput(
-					ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerRegistry.get().getClientId()));
+					getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerRegistry.get().getClientId()));
 
 			}
 		}, true);
@@ -246,7 +234,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 	@Override
 	public void dispose()
 	{
-		EclipseUserManager eum = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager();
+		EclipseUserManager eum = getServoyModelManager().getServoyModel().getUserManager();
 		eum.removeUserGroupChangeListener(this);
 		super.dispose();
 	}

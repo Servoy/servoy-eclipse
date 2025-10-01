@@ -19,7 +19,6 @@ package com.servoy.eclipse.model.repository;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,6 +56,7 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractRootObject;
 import com.servoy.j2db.persistence.ChangeHandler;
 import com.servoy.j2db.persistence.ContentSpec;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -110,9 +110,9 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 	 * @see com.servoy.j2db.persistence.AbstractRepository#getActiveSolutionModuleMetaDatas(int)
 	 */
 	@Override
-	public List<RootObjectReference> getActiveSolutionModuleMetaDatas(int solutionId) throws RepositoryException
+	public List<RootObjectReference> getActiveSolutionModuleMetaDatas(UUID solutionUUID) throws RepositoryException
 	{
-		Solution sol = (Solution)getActiveRootObject(solutionId);
+		Solution sol = (Solution)getActiveRootObject(solutionUUID);
 		if (sol != null && !Utils.getTokenElementsAsList(sol.getModulesNames(), ",", true).stream().allMatch(this::isSolutionLoaded))
 		{
 			ForkJoinPool pool = new ForkJoinPool();
@@ -122,7 +122,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 			pool.awaitQuiescence(15, TimeUnit.MINUTES);
 			pool.shutdown();
 		}
-		return super.getActiveSolutionModuleMetaDatas(solutionId);
+		return super.getActiveSolutionModuleMetaDatas(solutionUUID);
 	}
 
 	/**
@@ -205,18 +205,6 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		return false;
 	}
 
-	private int last_element_id = Integer.MAX_VALUE / 2;
-
-	public int getNewElementID(UUID new_uuid)
-	{
-		synchronized (uuid_element_id_map)
-		{
-			int element_id = last_element_id++;
-			if (new_uuid != null) uuid_element_id_map.put(new_uuid, new Integer(element_id));
-			return element_id;
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -285,38 +273,38 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		return rootObject;
 	}
 
-	public byte[] getMediaBlob(int blob_id) throws RemoteException, RepositoryException
+	public byte[] getMediaBlob(int blob_id) throws RepositoryException
 	{
 		return null;//should never be called
 	}
 
-	public void setRootObjectActiveRelease(int rootObjectId, int releaseNumber) throws RepositoryException
+	public void setRootObjectActiveRelease(UUID rootObjectUUID, int releaseNumber) throws RepositoryException
 	{
 		//should never be called
 	}
 
-	public long[] getActiveRootObjectsLastModified(int[] rootObjectIds) throws RemoteException, RepositoryException
+	public long[] getActiveRootObjectsLastModified(UUID[] rootObjectUUIDs) throws RepositoryException
 	{
-		long[] retval = new long[rootObjectIds.length];
-		for (int i = 0; i < rootObjectIds.length; i++)
+		long[] retval = new long[rootObjectUUIDs.length];
+		for (int i = 0; i < rootObjectUUIDs.length; i++)
 		{
-			retval[i] = getActiveRootObject(rootObjectIds[i]).getLastModifiedTime();
+			retval[i] = getActiveRootObject(rootObjectUUIDs[i]).getLastModifiedTime();
 		}
 		return retval;
 	}
 
 	@Override
-	public void removeRootObject(int rootObjectId) throws RepositoryException
+	public void removeRootObject(UUID rootObjectUUID) throws RepositoryException
 	{
-		super.removeRootObject(rootObjectId);
+		super.removeRootObject(rootObjectUUID);
 		//nop, remove project manually in eclipse
 	}
 
 
 	@Override
-	public IRootObject createNewRootObject(String name, int objectTypeId, int newElementID, UUID uuid) throws RepositoryException
+	public IRootObject createNewRootObject(String name, int objectTypeId, UUID uuid) throws RepositoryException
 	{
-		return createRootObject(createNewRootObjectMetaData(newElementID, uuid, name, objectTypeId, 1, 1));
+		return createRootObject(createNewRootObjectMetaData(uuid, name, objectTypeId, 1, 1));
 	}
 
 	@Override
@@ -335,7 +323,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 			{
 				if (meta.getObjectTypeId() == objectTypeId)
 				{
-					removeRootObject(meta.getRootObjectId());
+					removeRootObject(meta.getRootObjectUuid());
 				}
 			}
 		}
@@ -393,68 +381,6 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		return smd;
 	}
 
-	@Override
-	public UUID resolveUUIDForElementId(int id) throws RepositoryException
-	{
-		Integer oID = new Integer(id);
-		if (foreignElementUUIDs.containsValue(oID))
-		{
-			Set<UUID> keys = foreignElementUUIDs.keySet();
-			for (UUID key : keys)
-			{
-				if (foreignElementUUIDs.get(key).equals(oID)) return key;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public int resolveIdForElementUuid(UUID id) throws RepositoryException
-	{
-		return getNewElementID(id);
-	}
-
-	@Override
-	public int getElementIdForUUID(UUID id) throws RepositoryException
-	{
-		if (foreignElementUUIDs.containsKey(id)) return foreignElementUUIDs.get(id).intValue();
-
-		return super.getElementIdForUUID(id);
-	}
-
-	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
-
-	public void loadForeignElementsIDs(Map<UUID, Integer> foreignUUIDs)
-	{
-		foreignElementUUIDs.putAll(foreignUUIDs);
-	}
-
-	public void loadForeignElementsIDs(final IPersist rootObject)
-	{
-		rootObject.acceptVisitor(new IPersistVisitor()
-		{
-			public Object visit(IPersist o)
-			{
-				EclipseRepository.this.foreignElementUUIDs.put(o.getUUID(), new Integer(o.getID()));
-				Map<UUID, Integer> map = ((AbstractBase)o).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
-				if (map != null)
-				{
-					Iterator<Map.Entry<UUID, Integer>> it = map.entrySet().iterator();
-					while (it.hasNext())
-					{
-						Map.Entry<UUID, Integer> entry = it.next();
-						foreignElementUUIDs.put(entry.getKey(), entry.getValue());
-					}
-				}
-				return IPersistVisitor.CONTINUE_TRAVERSAL;
-			}
-		});
-	}
-
-	public void clearForeignElementsIds()
-	{
-		foreignElementUUIDs.clear();
-	}
 
 	@Override
 	public void updateRootObject(IRootObject rootObject) throws RepositoryException
@@ -749,8 +675,9 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 								}
 							}
 
-							if (o.getTypeID() == IRepository.FORMS) // move form security file
+							if (o.getTypeID() == IRepository.FORMS)
 							{
+								// move form security file
 								String oldSecFileRelativePath = fileRelativePath.substring(0,
 									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT;
 								if (wsa.exists(oldSecFileRelativePath))
@@ -758,6 +685,15 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 									wsa.move(oldSecFileRelativePath,
 										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
 											DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT);
+								}
+								// move form less file
+								String oldLessFileRelativePath = fileRelativePath.substring(0,
+									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + SolutionSerializer.FORM_LESS_FILE_EXTENSION;
+								if (wsa.exists(oldLessFileRelativePath))
+								{
+									wsa.move(oldLessFileRelativePath,
+										fileFromPath.getLeft() + fileToName.substring(0, fileToName.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
+											SolutionSerializer.FORM_LESS_FILE_EXTENSION);
 								}
 							}
 						}
@@ -837,10 +773,10 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		}
 	}
 
-	public HashMap<IPersist, List<String>> getAllFilesForPersists(List<IPersist> persists)
+	public <T extends IPersist> HashMap<T, List<String>> getAllFilesForPersists(List<T> persists)
 	{
-		HashMap<IPersist, List<String>> allFiles = new HashMap<IPersist, List<String>>();
-		for (IPersist persist : persists)
+		HashMap<T, List<String>> allFiles = new HashMap<>();
+		for (T persist : persists)
 		{
 			ArrayList<String> files = new ArrayList<String>();
 			Pair<String, String> filePath = SolutionSerializer.getFilePath(persist, true);
@@ -861,6 +797,13 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 								if (wsa.exists(scriptPath)) files.add(scriptPath);
 							}
 						}
+
+						if (persist instanceof Form frm)
+						{
+							String lessPath = filePath.getLeft() + frm.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION;
+							if (wsa.exists(lessPath)) files.add(lessPath);
+						}
+
 					}
 				}
 			}

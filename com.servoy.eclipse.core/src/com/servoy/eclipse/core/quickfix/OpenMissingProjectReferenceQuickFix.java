@@ -58,7 +58,7 @@ public class OpenMissingProjectReferenceQuickFix implements IMarkerResolution
 			final IProject[] referencedProjects = servoyProject.getDescription().getReferencedProjects();
 			for (IProject p : referencedProjects)
 			{
-				if (p.getName().equalsIgnoreCase((String)marker.getAttribute(ServoyBuilder.PROJECT_REFERENCE_NAME)))
+				if (p.getName().equalsIgnoreCase(marker.getAttribute(ServoyBuilder.PROJECT_REFERENCE_NAME, null)))
 				{
 					if (p.exists() && !p.isOpen())
 					{

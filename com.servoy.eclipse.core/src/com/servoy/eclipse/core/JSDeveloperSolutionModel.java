@@ -23,11 +23,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -35,13 +32,8 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.inmemory.MemServer;
@@ -54,7 +46,6 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.IDebugClient;
-import com.servoy.j2db.IForm;
 import com.servoy.j2db.dataprocessing.BufferedDataSetInternal;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
@@ -62,7 +53,6 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.DummyValidator;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportName;
@@ -75,15 +65,14 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.query.ColumnType;
-import com.servoy.j2db.scripting.solutionmodel.IJSDeveloperSolutionModel;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.scripting.solutionmodel.JSMedia;
 import com.servoy.j2db.scripting.solutionmodel.JSRelation;
 import com.servoy.j2db.scripting.solutionmodel.JSValueList;
+import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperSolutionModel;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -96,7 +85,6 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 {
 
 	private final IDebugClient state;
-	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
 
 	public JSDeveloperSolutionModel(IDebugClient state)
 	{
@@ -109,9 +97,9 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save()
 	 */
 	@Override
-	public void js_save()
+	public void save()
 	{
-		js_save(false);
+		save(false);
 	}
 
 	/*
@@ -120,7 +108,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(boolean)
 	 */
 	@Override
-	public void js_save(final boolean override)
+	public void save(final boolean override)
 	{
 		IWorkspaceRunnable saveJob = new IWorkspaceRunnable()
 		{
@@ -187,7 +175,6 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 						}
 					}
 					eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
-					eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(solutionCopy));
 					List<String> scriptPaths = new ArrayList<String>();
 					for (IPersist persist : objectsToSave)
 					{
@@ -238,10 +225,6 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 				{
 					Debug.error(e);
 				}
-				finally
-				{
-					if (eclipseRepository != null) eclipseRepository.clearForeignElementsIds();
-				}
 			}
 		};
 		RunInWorkspaceJob job = new RunInWorkspaceJob("Save solution data", saveJob);
@@ -256,9 +239,9 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(java.lang.Object)
 	 */
 	@Override
-	public void js_save(Object obj)
+	public void save(Object obj)
 	{
-		js_save(obj, false);
+		save(obj, false);
 	}
 
 	/*
@@ -267,7 +250,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(java.lang.Object, boolean)
 	 */
 	@Override
-	public void js_save(Object obj, final boolean override)
+	public void save(Object obj, final boolean override)
 	{
 		save(obj, null, override, null, null);
 	}
@@ -278,7 +261,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(java.lang.Object, java.lang.String)
 	 */
 	@Override
-	public void js_save(Object obj, String solutionName)
+	public void save(Object obj, String solutionName)
 	{
 		save(obj, solutionName, false, null, null);
 	}
@@ -290,7 +273,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	 * java.lang.Object)
 	 */
 	@Override
-	public void js_updateInMemDataSource(Object dataSource, JSDataSet dataSet, Object types)
+	public void updateInMemDataSource(Object dataSource, JSDataSet dataSet, Object types)
 	{
 		save(dataSource, null, true, dataSet, types);
 	}
@@ -400,8 +383,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 												String columnName = updateColumnNames.get(i);
 												if (tableColumnNames.indexOf(columnName) == -1)
 												{
-													memTable.createNewColumn(DummyValidator.INSTANCE, columnName, columnTypes[i].getSqlType(),
-														columnTypes[i].getLength());
+													memTable.createNewColumn(DummyValidator.INSTANCE, columnName, columnTypes[i]);
 												}
 												else if (memTable.getColumn(columnName).getColumnType().getSqlType() != columnTypes[i].getSqlType())
 												{
@@ -466,24 +448,33 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 									throw new IllegalArgumentException("Solution name should not be specified for existing persists. The object '" + objName +
 										"' already exists in solution '" + solution.getName() + "'");
 								}
+								Iterator<Media> medias = solutionCopy.getMedias(false);
 								solutionCopy = eclipseRepository.createSolutionCopy(solution);
+								if (obj instanceof JSMedia)
+								{
+									Iterator<Media> oldMedias = solution.getMedias(false);
+									while (oldMedias.hasNext())
+									{
+										eclipseRepository.copyPersistIntoSolution(oldMedias.next(), solutionCopy, false);
+									}
+									while (medias.hasNext())
+									{
+										eclipseRepository.copyPersistIntoSolution(medias.next(), solutionCopy, false);
+									}
+
+								}
 							}
 						}
 
 						saveObj.setParent(solutionCopy);
 						checkParent(saveObj);
 
-						eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(saveObj));
-						SolutionSerializer.writePersist(saveObj, wfa, ApplicationServerRegistry.get().getDeveloperRepository(), !(saveObj instanceof Media),
+						SolutionSerializer.writePersist(saveObj, wfa, ApplicationServerRegistry.get().getDeveloperRepository(), true,
 							false, true);
 					}
 					catch (RepositoryException | SQLException e)
 					{
 						Debug.error(e);
-					}
-					finally
-					{
-						if (eclipseRepository != null) eclipseRepository.clearForeignElementsIds();
 					}
 					return Status.OK_STATUS;
 				}
@@ -496,7 +487,8 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 						Solution solution = servoyProject.getSolution();
 						if (saveObj instanceof Form && solution.getForm(saveObj.getName()) != null ||
 							saveObj instanceof ValueList && solution.getValueList(saveObj.getName()) != null ||
-							saveObj instanceof Relation && solution.getRelation(saveObj.getName()) != null)
+							saveObj instanceof Relation && solution.getRelation(saveObj.getName()) != null ||
+							saveObj instanceof Media && solution.getMedia(saveObj.getName()) != null)
 						{
 							return solution;
 						}
@@ -544,77 +536,5 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 				}
 			}
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_openForm(java.lang.Object)
-	 */
-	@Override
-	public void js_openForm(Object form)
-	{
-		String name = null;
-		if (form instanceof String)
-		{
-			name = (String)form;
-		}
-		else if (form instanceof JSForm)
-		{
-			name = ((JSForm)form).getName();
-		}
-		else if (form instanceof IForm)
-		{
-			name = ((IForm)form).getName();
-		}
-		if (name != null)
-		{
-			final Form frm = ServoyModelFinder.getServoyModel().getFlattenedSolution().getForm(name);
-			if (frm != null)
-			{
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						try
-						{
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-								PersistEditorInput.createFormEditorInput(frm).setNew(false),
-								PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-									Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
-						}
-						catch (PartInitException ex)
-						{
-							ServoyLog.logError(ex);
-						}
-					}
-				});
-			}
-			else
-			{
-				throw new IllegalArgumentException("form " + name + " is not a workspace stored (blueprint) form");
-			}
-		}
-	}
-
-	private Map<UUID, Integer> loadForeignElementsIDs(final IPersist rootObject)
-	{
-		rootObject.acceptVisitor(new IPersistVisitor()
-		{
-			public Object visit(IPersist o)
-			{
-				foreignElementUUIDs.put(o.getUUID(), new Integer(o.getID()));
-				Map<UUID, Integer> map = ((AbstractBase)o).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
-				if (map != null)
-				{
-					for (Entry<UUID, Integer> entry : map.entrySet())
-					{
-						foreignElementUUIDs.put(entry.getKey(), entry.getValue());
-					}
-				}
-				return IPersistVisitor.CONTINUE_TRAVERSAL;
-			}
-		});
-		return foreignElementUUIDs;
 	}
 }

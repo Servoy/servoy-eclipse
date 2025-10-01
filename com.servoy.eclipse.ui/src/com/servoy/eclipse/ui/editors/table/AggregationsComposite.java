@@ -221,7 +221,8 @@ public class AggregationsComposite extends AbstractTableEditorComposite
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING,
 				treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED).add(removeButton))).addContainerGap()));
+					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED).add(removeButton)))
+				.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(treeContainer, GroupLayout.PREFERRED_SIZE, 323, Short.MAX_VALUE).addPreferredGap(
 				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeButton).add(addButton)).addContainerGap()));
@@ -268,7 +269,7 @@ public class AggregationsComposite extends AbstractTableEditorComposite
 							{
 								try
 								{
-									nameValidator.checkName(newName, 0, searchContext, true);
+									nameValidator.checkName(newName, null, searchContext, true);
 									isValidName = true;
 								}
 								catch (RepositoryException e)

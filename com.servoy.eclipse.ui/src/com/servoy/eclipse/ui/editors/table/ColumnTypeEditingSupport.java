@@ -137,8 +137,9 @@ public class ColumnTypeEditingSupport extends EditingSupport
 					column.setFlag(IBaseColumn.UUID_COLUMN, false);
 				}
 			}
-			pi.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(type, length, 0));
-			if (!pi.getExistInDB()) pi.updateColumnType(type, length, 0);
+			ColumnType newColumnType = ColumnType.getInstance(type, length, 0);
+			pi.getColumnInfo().setConfiguredColumnType(newColumnType);
+			if (!pi.getExistInDB()) pi.updateColumnType(newColumnType);
 
 			getViewer().update(element, null);
 			getViewer().refresh();

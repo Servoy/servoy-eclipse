@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.jface.util.Policy;
 import org.eclipse.jface.viewers.internal.ExpandableNode;
+import org.eclipse.pde.api.tools.annotations.NoExtend;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.events.TreeListener;
@@ -65,8 +66,8 @@ import org.eclipse.swt.widgets.Widget;
  * Users setting up an editable tree with more than 1 column <b>have</b> to pass the
  * SWT.FULL_SELECTION style bit
  * </p>
- * @noextend This class is not intended to be subclassed by clients.
  */
+@NoExtend
 public class TreeViewer extends AbstractTreeViewer {
 
 	private static final String VIRTUAL_DISPOSE_KEY = Policy.JFACE
@@ -439,7 +440,7 @@ public class TreeViewer extends AbstractTreeViewer {
 			if (index < tree.getItemCount()) {
 				TreeItem item = tree.getItem(index);
 				if (!insidePreservingSelection) {
-					selection = adjustSelectionForReplace(selectedItems, selection, item, element, getRoot());
+					selection = adjustSelectionForReplace(selectedItems, selection, item, element);
 				}
 				// disassociate any different item that represents the
 				// same element under the same parent (the tree)
@@ -468,8 +469,7 @@ public class TreeViewer extends AbstractTreeViewer {
 				if (index < parentItem.getItemCount()) {
 					TreeItem item = parentItem.getItem(index);
 					if (!insidePreservingSelection) {
-						selection = adjustSelectionForReplace(selectedItems, selection, item, element,
-								parentItem.getData());
+						selection = adjustSelectionForReplace(selectedItems, selection, item, element);
 					}
 					// disassociate any different item that represents the
 					// same element under the same parent (the tree)
@@ -509,14 +509,10 @@ public class TreeViewer extends AbstractTreeViewer {
 	 * to the selection that is being restored. Only do this if its getData() is
 	 * currently null
 	 *
-	 * @param selectedItems
-	 * @param selection
-	 * @param item
-	 * @param element
 	 * @return the adjusted selection
 	 */
 	private TreeSelection adjustSelectionForReplace(Item[] selectedItems,
-			TreeSelection selection, TreeItem item, Object element, Object parentElement) {
+			TreeSelection selection, TreeItem item, Object element) {
 		if (item.getData() != null) {
 			// Don't do anything - we are not seeing an instance of bug 185673
 			return selection;
@@ -693,8 +689,6 @@ public class TreeViewer extends AbstractTreeViewer {
 	 * counts.
 	 *
 	 * @param parent the parent of the widget, or <code>null</code> if the widget is the tree
-	 * @param widget
-	 * @param element
 	 * @param index the index of the widget in the children array of its parent, or 0 if the widget is the tree
 	 */
 	private void virtualRefreshExpandedItems(Widget parent, Widget widget, Object element, int index) {
@@ -758,9 +752,6 @@ public class TreeViewer extends AbstractTreeViewer {
 	/**
 	 * Create a new ViewerRow at rowIndex
 	 *
-	 * @param parent
-	 * @param style
-	 * @param rowIndex
 	 * @return ViewerRow
 	 */
 	private ViewerRow createNewRowPart(ViewerRow parent, int style, int rowIndex) {
@@ -985,8 +976,6 @@ public class TreeViewer extends AbstractTreeViewer {
 
 	/**
 	 * Update the widget at index.
-	 * @param widget
-	 * @param index
 	 */
 	private void virtualLazyUpdateWidget(Widget widget, int index) {
 		boolean oldBusy = isBusy();
@@ -1021,8 +1010,6 @@ public class TreeViewer extends AbstractTreeViewer {
 
 	/**
 	 * Update the child count
-	 * @param widget
-	 * @param currentChildCount
 	 */
 	private void virtualLazyUpdateChildCount(Widget widget, int currentChildCount) {
 		boolean oldBusy = isBusy();
@@ -1047,8 +1034,6 @@ public class TreeViewer extends AbstractTreeViewer {
 
 	/**
 	 * Update the item with the current child count.
-	 * @param item
-	 * @param currentChildCount
 	 */
 	private void virtualLazyUpdateHasChildren(Item item, int currentChildCount) {
 		boolean oldBusy = isBusy();
@@ -1169,19 +1154,18 @@ public class TreeViewer extends AbstractTreeViewer {
 				createTreeItem(parent, element, -1);
 			}
 
-			// If we've expanded but still have not reached the limit
-			// select new expandable node, so user can click through
-			// to the end
+			// reset the selection. client's selection listener should not be triggered.
+			// there was only one selection on Expandable Node.
+			Item[] curSel = tree.getSelection();
+			if (curSel.length == 1) {
+				tree.deselect((TreeItem) curSel[0]);
+			}
+
+			// Scroll to the last element, so user can see what's expanded
+			// end continue expanding if needed
 			Object lastElement = getLastElement(parent);
-			if (lastElement instanceof ExpandableNode node) {
-				setSelection(new StructuredSelection(node), true);
-			} else {
-				// reset the selection. client's selection listener should not be triggered.
-				// there was only one selection on Expandable Node.
-				Item[] curSel = tree.getSelection();
-				if (curSel.length == 1) {
-					tree.deselect((TreeItem) curSel[0]);
-				}
+			if (lastElement instanceof ExpandableNode) {
+				reveal(lastElement);
 			}
 		} finally {
 			tree.setRedraw(true);

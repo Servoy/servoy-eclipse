@@ -24,26 +24,29 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.FileUtils;
 import org.sablo.security.ContentSecurityPolicyConfig;
 
 import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
 import com.servoy.j2db.server.ngclient.NGLocalesFilter;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
+import com.servoy.j2db.server.ngclient.auth.CloudStatelessAccessManager;
+import com.servoy.j2db.server.ngclient.auth.OAuthHandler;
+import com.servoy.j2db.server.ngclient.auth.StatelessLoginUtils;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
+
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @author jcomp
@@ -57,7 +60,7 @@ public class IndexPageFilter implements Filter
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException
 	{
-		StatelessLoginHandler.init();
+		StatelessLoginHandler.init(filterConfig.getServletContext());
 	}
 
 	@Override
@@ -86,47 +89,63 @@ public class IndexPageFilter implements Filter
 			distFolder = new File(projectFolder, "dist/app/browser");
 			indexFile = new File(distFolder, "index.html");
 		}
-		String solutionName = getSolutionNameFromURI(Paths.get(requestURI).normalize());
-		if (indexFile != null && indexFile.exists())
+		String solutionName = getSolutionNameFromURI(Paths.get(requestURI.replace(':', '_')).normalize());
+		if (indexFile != null && indexFile.exists() && !requestURI.toLowerCase().contains("rfb/angular2"))
 		{
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) ||
-					requestURI.toLowerCase().endsWith("/index.html")))
+					requestURI.toLowerCase().endsWith("/index.html")) ||
+				requestURI.contains("/svy_oauth/"))
 			{
-				Pair<Boolean, String> showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
+				Pair<Boolean, String> showLogin = null;
+				if (requestURI.contains("/svy_oauth/"))
+				{
+					showLogin = OAuthHandler.handleOauth(request, response);
+					if (Boolean.FALSE.equals(showLogin.getLeft()) && showLogin.getRight() == null) return;
+				}
+				else
+				{
+					showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
+				}
+
 				if (showLogin.getLeft().booleanValue())
 				{
-					StatelessLoginHandler.writeLoginPage(request, response, solutionName);
+					StatelessLoginHandler.writeLoginPage(request, response, solutionName, showLogin.getRight());
 					return;
 				}
+
+				HttpServletRequest req = request;
 				if (showLogin.getRight() != null)
 				{
 					((HttpServletRequest)servletRequest).getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
+
+					//could be oauth + deeplink (need to wrap the request to add the parameters)
+					req = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
 				}
 
 				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
 
-				ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(request, response, false); // for NG2 remove the unsafe-eval
-				AngularIndexPageWriter.writeIndexPage(indexHtml, request, response, solutionName,
+				ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(req, response, false); // for NG2 remove the unsafe-eval
+				AngularIndexPageWriter.writeIndexPage(indexHtml, req, response, solutionName,
 					contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
 				return;
 			}
-			else if (solutionName != null && StatelessLoginHandler.handlePossibleCloudRequest(request, response, solutionName))
+			else if (solutionName != null && CloudStatelessAccessManager.handlePossibleCloudRequest(request, response, solutionName, indexFile))
 			{
 				return;
 			}
-			else if (solutionName != null && requestURI.toLowerCase().endsWith("/startup.js"))
-			{
-				AngularIndexPageWriter.writeStartupJs(request, (HttpServletResponse)servletResponse, solutionName);
-				return;
-			}
+//			else if (solutionName != null && requestURI.toLowerCase().endsWith("/startup.js"))
+//			{
+//				AngularIndexPageWriter.writeStartupJs(request, (HttpServletResponse)servletResponse, solutionName);
+//				return;
+//			}
 			else if (AngularIndexPageWriter.handleDeeplink(request, (HttpServletResponse)servletResponse))
 			{
 				return;
 			}
 			else
 			{
-				String normalize = Paths.get(requestURI).normalize().toString();
+				String normalize = Paths.get(requestURI.replace(':', '_')).normalize().toString();
 				File file = new File(distFolder, normalize);
 				String localeId = request.getParameter("localeid");
 				if (requestURI.startsWith("/locales/") && localeId != null && !file.exists())

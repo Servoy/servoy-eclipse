@@ -54,7 +54,6 @@ import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -93,20 +92,15 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 	protected void openMediaViewer(MediaNode value)
 	{
 		Media media = value.getMedia();
-		boolean ng2Mode = new Ng2DesignerPreferences().showNG2Designer();
-
-		if (ng2Mode)
+		String styleSheet = media.getName();
+		int index = styleSheet.indexOf(".less");
+		if (index > 0)
 		{
-			String styleSheet = media.getName();
-			int index = styleSheet.indexOf(".less");
-			if (index > 0)
+			String ng2Filename = styleSheet.substring(0, index) + "_ng2.less";
+			Media media2 = ModelUtils.getEditingFlattenedSolution(media.getParent()).getMedia(ng2Filename);
+			if (media2 != null)
 			{
-				String ng2Filename = styleSheet.substring(0, index) + "_ng2.less";
-				Media media2 = ModelUtils.getEditingFlattenedSolution(media.getParent()).getMedia(ng2Filename);
-				if (media2 != null)
-				{
-					media = media2;
-				}
+				media = media2;
 			}
 		}
 		EditorUtil.openMediaViewer(media);
@@ -331,7 +325,7 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 
 			int index = 0;
 			Media currentStyleSheet = null;
-			if (editingFlattenedSolution.getSolution().getStyleSheetID() > 0 &&
+			if (editingFlattenedSolution.getSolution().getStyleSheetID() != null &&
 				(currentStyleSheet = editingFlattenedSolution.getMedia(editingFlattenedSolution.getSolution().getStyleSheetID())) != null)
 			{
 				index = Arrays.asList(items).indexOf(
@@ -465,7 +459,7 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 		{
 			try
 			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(path + newName, -1,
+				ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(path + newName, null,
 					new ValidatorSearchContext(IRepository.MEDIA), false);
 			}
 			catch (RepositoryException e)

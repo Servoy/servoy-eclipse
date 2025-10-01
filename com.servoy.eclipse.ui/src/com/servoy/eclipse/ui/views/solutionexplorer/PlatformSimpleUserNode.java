@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IActionFilter;
 
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.node.IDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -36,9 +37,9 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 		super(displayName, type);
 	}
 
-	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, Image icon, Class< ? > realType)
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, Image icon, Class< ? > realType, IDeveloperFeedback feedback)
 	{
-		super(displayName, type, realObject, icon, realType);
+		super(displayName, type, realObject, icon, realType, feedback);
 	}
 
 	public PlatformSimpleUserNode(String displayName, UserNodeType type, Object realObject, Image icon)
@@ -59,6 +60,11 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 	public PlatformSimpleUserNode(String displayName, UserNodeType type, String codeFragment, String sampleCode, String toolTip, Object realObject, Image icon)
 	{
 		super(displayName, type, new SimpleDeveloperFeedback(codeFragment, sampleCode, toolTip), realObject, icon);
+	}
+
+	public PlatformSimpleUserNode(String displayName, UserNodeType type, IDeveloperFeedback developerFeedback, Object realObject, Image icon)
+	{
+		super(displayName, type, developerFeedback, realObject, icon);
 	}
 
 	/**

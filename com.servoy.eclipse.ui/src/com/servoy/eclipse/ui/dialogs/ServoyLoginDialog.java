@@ -17,21 +17,18 @@
 
 package com.servoy.eclipse.ui.dialogs;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.Charset;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpException;
-import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.io.HttpClientResponseHandler;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -88,11 +85,10 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		super(parentShell);
 	}
 
-	public String doLogin()
+	public void doLogin(Consumer<String> onLogin)
 	{
 		String username = null;
 		String password = null;
-		String loginToken = null;
 
 		ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
 
@@ -120,88 +116,106 @@ public class ServoyLoginDialog extends TitleAreaDialog
 
 		if (username != null && password != null)
 		{
-			LoginTokenResponse loginTokenResponse = getLoginToken(username, password);
-			if (loginTokenResponse.status == LoginTokenResponse.Status.OK)
-			{
-				loginToken = loginTokenResponse.response;
-				try
+			String finalUsername = username;
+			String finalPassword = password;
+			boolean finalFirstLogin = firstLogin;
+
+			CompletableFuture<LoginTokenResponse> future = getLoginToken(username, password);
+			future.thenAccept(loginTokenResponse -> {
+				String loginToken = null;
+				if (loginTokenResponse.status == LoginTokenResponse.Status.OK)
 				{
-					node.put(SERVOY_LOGIN_USERNAME, username, true);
-					node.put(SERVOY_LOGIN_PASSWORD, password, true);
-					node.put(SERVOY_LOGIN_TOKEN, loginToken, true);
+					loginToken = loginTokenResponse.response;
+					try
+					{
+						node.put(SERVOY_LOGIN_USERNAME, finalUsername, true);
+						node.put(SERVOY_LOGIN_PASSWORD, finalPassword, true);
+						node.put(SERVOY_LOGIN_TOKEN, loginToken, true);
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
+					if (onLogin != null) onLogin.accept(loginToken);
 				}
-				catch (Exception ex)
+				else if (finalFirstLogin || loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
 				{
-					ServoyLog.logError(ex);
+					clearSavedInfo();
+					this.errorMessage = loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR ? "Login failed, invalid credentials"
+						: "Login failed";
+
+					Display.getDefault().asyncExec(() -> doLogin(onLogin));
 				}
-			}
-			else if (firstLogin || loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
-			{
-				clearSavedInfo();
-				this.errorMessage = loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR ? "Login failed, invalid credentials" : "Login failed";
-				doLogin();
-			}
+				else
+				{
+					if (onLogin != null) onLogin.accept(loginToken);
+				}
+				notifyLoginListener(finalUsername);
+
+
+			});
 		}
+		else
+		{
+			notifyLoginListener(null);
+			if (onLogin != null) onLogin.accept(null);
+		}
+	}
+
+	/**
+	 * @param finalUsername
+	 */
+	public void notifyLoginListener(String finalUsername)
+	{
 		if (ServoyLoginDialog.servoyLoginListener != null)
 		{
 			try
 			{
-				ServoyLoginDialog.servoyLoginListener.onLogin(username, loginToken);
+				Display.getDefault().asyncExec(() -> ServoyLoginDialog.servoyLoginListener.onLogin(finalUsername));
 			}
 			catch (Exception ex)
 			{
 				ServoyLog.logError(ex);
 			}
 		}
-
-		return loginToken;
 	}
 
-	private LoginTokenResponse getLoginToken(String username, String password)
+	private CompletableFuture<LoginTokenResponse> getLoginToken(String username, String password)
 	{
-		CloseableHttpClient httpclient = HttpClients.createDefault();
-		HttpGet httpget = new HttpGet(CROWD_URL);
-
 		String auth = username + ":" + password;
 		byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("ISO-8859-1")));
 		String authHeader = "Basic " + new String(encodedAuth);
-		httpget.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-		httpget.addHeader(HttpHeaders.ACCEPT, "application/json");
-		httpget.addHeader("servoyVersion", ClientVersion.getBundleVersion());
-		httpget.addHeader("os", Utils.getPlatformAsString());
 
-		// execute the request
-		try
-		{
-			return httpclient.execute(httpget, new HttpClientResponseHandler<LoginTokenResponse>()
+
+		HttpClient httpClient = HttpClient.newHttpClient();
+
+		HttpRequest httpRequest = HttpRequest.newBuilder(URI.create(CROWD_URL))
+			.header("Authorization", authHeader)
+			.header("Accept", "application/json")
+			.header("servoyVersion", ClientVersion.getBundleVersion())
+			.header("os", Utils.getPlatformAsString()).build();
+
+		CompletableFuture<HttpResponse<String>> stringResponse = httpClient.sendAsync(httpRequest, BodyHandlers.ofString());
+		return stringResponse.handleAsync((response, error) -> {
+
+			if (error != null)
 			{
-
-				@Override
-				public LoginTokenResponse handleResponse(ClassicHttpResponse response) throws HttpException, IOException
-				{
-					HttpEntity responseEntity = response.getEntity();
-					String responseString = EntityUtils.toString(responseEntity);
-					if (response.getCode() == 200)
-					{
-
-						JSONObject loginTokenJSON = new JSONObject(responseString);
-						String loginToken = loginTokenJSON.getString("token");
-						return new LoginTokenResponse(LoginTokenResponse.Status.OK, loginToken);
-					}
-					else
-					{
-						StringBuilder sb = new StringBuilder();
-						sb.append("HTTP ERROR : ").append(response.getCode()).append(' ').append(responseString);
-						return new LoginTokenResponse(LoginTokenResponse.Status.LOGIN_ERROR, sb.toString());
-					}
-				}
-			});
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError(ex);
-			return new LoginTokenResponse(LoginTokenResponse.Status.ERROR, ex.toString());
-		}
+				return new LoginTokenResponse(LoginTokenResponse.Status.ERROR, error.toString());
+			}
+			String responseString = response.body();
+			if (response.statusCode() == 200)
+			{
+				JSONObject loginTokenJSON = new JSONObject(responseString);
+				String loginToken = loginTokenJSON.getString("token");
+				return new LoginTokenResponse(LoginTokenResponse.Status.OK, loginToken);
+			}
+			else
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.append("HTTP ERROR : ").append(response.statusCode()).append(' ').append(responseString);
+				return new LoginTokenResponse(LoginTokenResponse.Status.LOGIN_ERROR, sb.toString());
+			}
+		});
 	}
 
 	@Override
@@ -367,7 +381,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		ServoyLoginDialog.servoyLoginListener = loginListener;
 	}
 
-	public static String getLoginToken()
+	public static String getLoginToken(Consumer<String> onLogin)
 	{
 		String loginToken = null;
 
@@ -381,6 +395,11 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		catch (StorageException ex)
 		{
 			ServoyLog.logError(ex);
+		}
+		if (onLogin != null)
+		{
+			if (loginToken == null) new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin(onLogin);
+			else onLogin.accept(loginToken);
 		}
 		return loginToken;
 	}

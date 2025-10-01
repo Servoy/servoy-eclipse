@@ -52,35 +52,20 @@ public class RemoveJSONPropertyQuickFix extends WorkbenchMarkerResolution
 
 	public String getLabel()
 	{
-		String propertyName;
-		try
+		String propertyName = marker.getAttribute("PropertyName", null);
+		if (propertyName != null)
 		{
-			propertyName = (String)marker.getAttribute("PropertyName");
 			String[] parts = propertyName.split("\\.");
 			return "Clear property " + parts[parts.length - 1];
-		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError(e);
 		}
 		return "Clear property";
 	}
 
 	public void run(IMarker marker)
 	{
-		String propertyName = null;
-		String solutionName = null;
-		String uuid = null;
-		try
-		{
-			propertyName = (String)marker.getAttribute("PropertyName");
-			solutionName = (String)marker.getAttribute("SolutionName");
-			uuid = (String)marker.getAttribute("Uuid");
-		}
-		catch (CoreException e1)
-		{
-			ServoyLog.logError(e1);
-		}
+		String propertyName = marker.getAttribute("PropertyName", null);
+		String solutionName = marker.getAttribute("SolutionName", null);
+		String uuid = marker.getAttribute("Uuid", null);
 		if (solutionName != null && uuid != null && propertyName != null)
 		{
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
@@ -105,12 +90,17 @@ public class RemoveJSONPropertyQuickFix extends WorkbenchMarkerResolution
 
 	private void removeProperty(IWebComponent webComponent, String propertyName)
 	{
-		JSONObject json = (JSONObject)webComponent.getProperty(
-			StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
-		if (json != null && propertyName != null)
+		if (propertyName == null) return;
+
+		String[] parts = propertyName.split("\\."); //$NON-NLS-1$
+		if (parts.length == 1)
 		{
+			webComponent.clearProperty(propertyName);
+		}
+		else
+		{
+			JSONObject json = (JSONObject)webComponent.getOwnProperty(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
 			JSONObject currentJSON = json;
-			String[] parts = propertyName.split("\\."); //$NON-NLS-1$
 			for (int i = 0; i < parts.length; i++)
 			{
 				if (currentJSON == null)

@@ -8,13 +8,13 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2024.6.0.3980_rc</version>
+	<version>2025.12.0.4120_rc</version>
 	<properties>
-		<tycho.version>4.0.5</tycho.version>
-		<rhino.version>1.7.14.s6</rhino.version>
+		<tycho.version>4.0.12</tycho.version>
+		<rhino.version>1.8.0.s7</rhino.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 <!--        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.15/repository/</chromium>
         <chromium.cef>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/cef/80.0.11/repository/</chromium.cef>
 -->
@@ -64,6 +64,7 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho.version}</version>
 				<configuration>
+				    <executionEnvironment>JavaSE-21</executionEnvironment>
 					<target>
 						<artifact>
 							<groupId>com.servoy</groupId>
@@ -78,6 +79,11 @@
 							<ws>win32</ws>
 							<arch>x86_64</arch>
 						</environment>
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>aarch64</arch>
+                        </environment>
 						<environment>
 							<os>macosx</os>
 							<ws>cocoa</ws>
@@ -342,10 +348,12 @@
 				<module>com.servoy.eclipse.jre.macosx.x86_64</module>
 				<module>com.servoy.eclipse.jre.macosx.aarch64</module>
 				<module>com.servoy.eclipse.jre.win32.x86_64</module>
+				<module>com.servoy.eclipse.jre.win32.aarch64</module>
 				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>
 				<module>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</module>
 				<module>com.servoy.eclipse.nodejs.macosx.cocoa.aarch64</module>
 				<module>com.servoy.eclipse.nodejs.win32.win32.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.win32.win32.aarch64</module>
 				<module>com.servoy.eclipse.feature</module>
 				<module>com.servoy.eclipse.product</module>
 			</modules>
@@ -354,7 +362,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
-						<version>1.8</version>
+						<version>3.1.0</version>
 						<inherited>false</inherited>
 						<executions>
 							<execution>

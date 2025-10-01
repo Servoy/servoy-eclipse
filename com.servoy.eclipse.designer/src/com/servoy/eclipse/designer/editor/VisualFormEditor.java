@@ -17,41 +17,55 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.gef.commands.CommandStack;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextEditor;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
-import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.ChromiumVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.SystemVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
+import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.IContextProvider;
 import com.servoy.j2db.util.Utils;
 
@@ -64,6 +78,12 @@ import com.servoy.j2db.util.Utils;
  */
 public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEditor, IEditorRefresh
 {
+	/**
+	 * A viewer property indicating whether inherited elements are hidden. The value must  be a Boolean.
+	 */
+	public static final String PROPERTY_HIDE_INHERITED = "Hide.inherited";
+
+
 	public static final RequestType REQ_PLACE_TAB = new RequestType(RequestType.TYPE_TAB);
 	public static final RequestType REQ_PLACE_PORTAL = new RequestType(RequestType.TYPE_PORTAL);
 	public static final RequestType REQ_PLACE_MEDIA = new RequestType(RequestType.TYPE_MEDIA);
@@ -89,6 +109,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	private VisualFormEditorPartsPage partseditor = null;
 	private VisualFormEditorTabSequencePage tabseditor = null;
 	private VisualFormEditorSecurityPage seceditor = null;
+	private TextEditor cssEditor;
 
 	private final CommandStack dummyCommandStack = new CommandStack()
 	{
@@ -134,6 +155,16 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 					createTabsPage();
 				}
 				createSecPage(); // MultiPageEditorPart wants at least 1 page
+				createCSSPage();
+				if (DesignerUtil.getContentOutline() != null)
+				{
+					Display.getDefault().asyncExec(() -> {
+						if (getSite() != null && getSite().getPage() != null)
+						{
+							getSite().getPage().activate(this);
+						}
+					});
+				}
 			}
 		}
 		else
@@ -161,6 +192,57 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		setPageText(addPage(seceditor), "Security");
 	}
 
+	private void createCSSPage()
+	{
+		cssEditor = new ExtensionBasedTextEditor();
+		try
+		{
+			IFile file = SolutionSerializer.getFormLESSFile(getForm());
+			if (file.exists())
+			{
+				setPageText(addPage(cssEditor, FileEditorInputFactory.createFileEditorInput(file)), "Less");
+			}
+			else
+			{
+				Composite control = new Composite(getContainer(), SWT.NONE);
+				control.setLayout(new RowLayout());
+				Button button = new Button(control, SWT.PUSH);
+				button.setText("Create Form Less file");
+				final int page = addPage(control);
+				setPageText(page, "Less");
+				button.addListener(SWT.Selection, selection -> {
+					try
+					{
+						removePage(page);
+
+						byte[] bytes = new byte[0];
+						try
+						{
+							bytes = IOUtils.toByteArray(VisualFormEditor.class.getResourceAsStream("less_form_template.less"));
+						}
+						catch (IOException e)
+						{
+							ServoyLog.logError(e);
+						}
+						file.create(bytes, true, false, null);
+						int page2 = addPage(cssEditor, FileEditorInputFactory.createFileEditorInput(file));
+						setPageText(page2, "Less");
+						setActivePage(page2);
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+
+				});
+			}
+		}
+		catch (PartInitException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
 	@Override
 	protected BaseVisualFormEditorDesignPage createGraphicaleditor(DesignPagetype designPagetype)
 	{
@@ -180,15 +262,11 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 		switch (editorType)
 		{
-			case MobileClassic :
-				return new MobileVisualFormEditorDesignPage(this);
 			case Mobile :
 				return new MobileVisualFormEditorHtmlDesignPage(this);
 			case Rfb :
 				if (new DesignerPreferences().useChromiumBrowser()) return new ChromiumVisualFormEditorDesignPage(this);
 				return new SystemVisualFormEditorDesignPage(this);
-			case Classic :
-				return new VisualFormEditorDesignPage(this);
 		}
 
 		throw new IllegalStateException("No design page for " + editorType);
@@ -196,35 +274,12 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 	private static DesignPagetype determineEditorType(FlattenedSolution fs, Form form)
 	{
-		FormEditorDesignerPreference formEditorDesignerPreference = new DesignerPreferences().getFormEditorDesignerPreference();
 		if (isMobile(form))
 		{
-			if (formEditorDesignerPreference == FormEditorDesignerPreference.Classic
-			// TODO for now we also map automatic to classic, because mobile doesn't really work correctly currently
-				|| formEditorDesignerPreference == FormEditorDesignerPreference.Automatic)
-			{
-				return DesignPagetype.MobileClassic;
-			}
 			return DesignPagetype.Mobile;
 		}
 
-		if (formEditorDesignerPreference == FormEditorDesignerPreference.New)
-		{
-			return DesignPagetype.Rfb;
-		}
-
-		if (formEditorDesignerPreference == FormEditorDesignerPreference.Automatic && fs != null && fs.getSolution() != null &&
-			SolutionMetaData.isNGOnlySolution(fs.getSolution().getSolutionType()))
-		{
-			return DesignPagetype.Rfb;
-		}
-
-		if (form != null && (form.getUseCssPosition() || form.isResponsiveLayout() || (fs != null && hasWebComponents(fs.getFlattenedForm(form)))))
-		{
-			return DesignPagetype.Rfb;
-		}
-
-		return DesignPagetype.Classic;
+		return DesignPagetype.Rfb;
 	}
 
 	private static boolean hasWebComponents(Form flattenedForm)
@@ -264,10 +319,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	}
 
 	@Override
-	public void revert(boolean force)
+	public void revert(boolean force, boolean refresh)
 	{
 		boolean revert = force || isDirty();
-		super.revert(force);
+		super.revert(force, refresh);
 		if (revert)
 		{
 			if (graphicaleditor instanceof RfbVisualFormEditorDesignPage)
@@ -301,8 +356,22 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	@Override
 	public void doSave(IProgressMonitor monitor)
 	{
+		if (cssEditor != null && cssEditor.isDirty())
+		{
+			IDocument document = cssEditor.getDocumentProvider().getDocument(cssEditor.getEditorInput());
+			try
+			{
+				AngularFormGenerator.parseLess(document.get(), getForm().getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution());
+			}
+			catch (Exception e)
+			{
+				MessageDialog.openError(getSite().getShell(), "Error saving Less", "There is an error saving the less content:" + e.getMessage());
+			}
+			cssEditor.doSave(monitor);
+		}
 		if (!isMobile() && seceditor != null) seceditor.saveSecurityElements();
 		super.doSave(monitor);
+
 
 		try
 		{
@@ -339,16 +408,19 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter)
+	public <T> T getAdapter(Class<T> adapter)
 	{
-		if (!isMobile() && adapter.equals(CommandStack.class) && getActivePage() >= 0 && getControl(getActivePage()).equals(seceditor))
+		if (adapter.equals(CommandStack.class))
 		{
-			return dummyCommandStack;
+			if (getActiveEditor() == graphicaleditor)
+				return (T)getCommandStack();
+			else return (T)dummyCommandStack;
 		}
 		if (adapter.equals(IContextProvider.class))
 		{
-			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_editor");
+			return (T)new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_editor");
 		}
 		return super.getAdapter(adapter);
 	}
@@ -373,9 +445,12 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 	}
 
+	private Boolean isMobile = null;
+
 	private boolean isMobile()
 	{
-		return isMobile(getForm());
+		if (isMobile == null) isMobile = Boolean.valueOf(isMobile(getForm()));
+		return isMobile.booleanValue();
 	}
 
 	private static boolean isMobile(Form form)

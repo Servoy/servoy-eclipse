@@ -1,5 +1,5 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener, QueryList, ElementRef, ViewChildren, ChangeDetectionStrategy, Inject } from '@angular/core';
+
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, HostListener, QueryList, ElementRef, ViewChildren, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { NgbDropdownItem, NgbTooltip, NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService, ServoyPublicService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
@@ -7,7 +7,8 @@ import { ServoyDefaultBaseField } from '../basefield';
 @Component({
     selector: 'servoydefault-combobox',
     templateUrl: './combobox.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputElement> {
 
@@ -92,7 +93,8 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             'Alt', 'AltGraph', 'CapsLock', 'Fn', 'Meta', 'NumLock', 'ScrollLock', 'Command', 'Shift',
             'Enter', 'Tab', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home',
             'PageUp', 'PageDown', 'Delete', 'Control', 'Insert', 'Del', 'Escape',
-            'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'
+            'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'Dead',
+            'AudioVolumeMute', 'AudioVolumeDown', 'AudioVolumeUp', 'LaunchApplication2', 'Unidentified', 'ContextMenu'
         ];
         if (nonPrintableValue.includes(key)) {
             const keysThatCloseTooltip = [
@@ -148,7 +150,12 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             });
         } else {
             this.closeTooltip();
-            super.requestFocus(this.mustExecuteOnFocus);
+            const nativeElementBtn = this.elementRef.nativeElement.firstElementChild;
+            if (this.doc.activeElement !== nativeElementBtn) {
+                const event = new Event('blur');
+                nativeElementBtn.dispatchEvent(event);
+            }
+            this.skipFocus = false;
         }
     }
 
@@ -156,7 +163,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         this.valueComparator = this.valuelistID && this.valuelistID.isRealValueDate() ? this.dateValueCompare : this.valueCompare;
         if (changes['dataProviderID'] && this.findmode) {
             this.formattedValue = this.dataProviderID;
-        } else if (changes['dataProviderID'] && this.valuelistID) {
+        } else if ( (changes['dataProviderID'] || changes['valuelistID']) && this.valuelistID) {
             // eslint-disable-next-line eqeqeq
             const valueListElem = this.valuelistID.find(this.valueComparator);
             if (valueListElem) this.formattedValue = this.formatService.format(valueListElem.displayValue, this.format, false);
@@ -184,23 +191,37 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         super.svyOnChanges(changes);
     }
 
-    updateValue(realValue: any) {
+    updateValue(realValue: any, event: Event) {
         this.dataProviderID = realValue;
         this.dataProviderIDChange.emit(this.dataProviderID);
+        if (this.onActionMethodID) {
+            this.onActionMethodID(event);
+        }
     }
-
-    getStrongValue(value: any): any {
+    
+    getRemainingValueBefore(value: any): any {
         let retValue = '';
-        if (this.openState && this.lastSelectValue && value && value.startsWith(this.lastSelectValue)) {
-            retValue = this.lastSelectValue;
+        const valIndex = this.lastSelectValue ? value.toLowerCase().indexOf(this.lastSelectValue.toLowerCase()) : -1;
+        if (this.openState && value && valIndex >= 0) {
+            retValue = value.substring(0, valIndex);
         }
         return retValue;
     }
-
-    getRemainingValue(value: any): any {
+    
+    getStrongValue(value: any): any {
+        let retValue = '';
+        const valIndex = this.lastSelectValue ? value.toLowerCase().indexOf(this.lastSelectValue.toLowerCase()) : -1;
+        if (this.openState && value && valIndex >= 0) {
+            retValue = value.substring(valIndex, (valIndex + this.lastSelectValue.length));
+        }
+        return retValue;
+    }
+    
+    getRemainingValueAfter(value: any): any {
         let retValue = value;
-        if (this.openState && this.lastSelectValue && value && value.startsWith(this.lastSelectValue)) {
-            retValue = value.substring(this.lastSelectValue.length);
+        const valIndex = this.lastSelectValue ? value.toLowerCase().indexOf(this.lastSelectValue.toLowerCase()) : -1;
+        if (this.openState && value && valIndex >= 0) {
+            retValue = value.substring(valIndex + this.lastSelectValue.length);
         }
         return retValue;
     }
@@ -208,7 +229,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     scrollToFirstMatchingItem() {
         if (this.openState && this.lastSelectValue) {
             for (const item of this.menuItems) {
-                if (item.nativeElement.innerText.startsWith(this.lastSelectValue) && !this.firstItemFound) {
+                if (item.nativeElement.innerText.toLowerCase().indexOf(this.lastSelectValue.toLowerCase()) >= 0 && !this.firstItemFound) {
                     this.firstItemFound = true;
                     item.nativeElement.focus();
                 }

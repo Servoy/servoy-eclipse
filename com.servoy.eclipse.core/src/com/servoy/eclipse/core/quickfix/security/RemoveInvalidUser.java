@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.core.quickfix.security;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Quick fix for removing an invalid user.
- * 
+ *
  * @author acostescu
  */
 public class RemoveInvalidUser extends AlterUserGroupSecFileQuickFix
@@ -64,14 +63,12 @@ public class RemoveInvalidUser extends AlterUserGroupSecFileQuickFix
 		boolean removed = false;
 		try
 		{
-			invalidUser = WorkspaceUserManager.User.fromJSON(new ServoyJSONObject((String)wrongValue, true));
+			invalidUser = WorkspaceUserManager.User.fromJSON(new ServoyJSONObject((String)wrongValue, false));
 			removed = users.remove(invalidUser);
 			if (removed)
 			{
-				Iterator<List<String>> it = usersForGroups.values().iterator();
-				while (it.hasNext())
+				for (List<String> uidList : usersForGroups.values())
 				{
-					List<String> uidList = it.next();
 					uidList.remove(invalidUser.userUid);
 				}
 			}

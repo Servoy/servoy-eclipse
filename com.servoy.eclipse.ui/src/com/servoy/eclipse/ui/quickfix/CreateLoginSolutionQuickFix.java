@@ -34,7 +34,6 @@ import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.Location;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
-import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -107,9 +106,7 @@ public class CreateLoginSolutionQuickFix implements IMarkerResolution
 
 									// update the affected properties in the current solution
 									solution.setLoginSolutionName(loginSolutionName);
-									Element loginFormEl = repository.getContentSpec().getPropertyForObjectTypeByName(solution.getTypeID(), "loginFormID");
-									Object loginFormElDefValue = loginFormEl.getDefaultClassValue();
-									solution.setLoginFormID(loginFormElDefValue instanceof Integer ? ((Integer)loginFormElDefValue).intValue() : 0);
+									solution.setLoginFormID(null);
 									servoyProject.saveEditingSolutionNodes(new IPersist[] { solution }, false);
 
 									// move the login form to the login solution

@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.internal.InternalPolicy;
@@ -281,7 +280,6 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 	/**
 	 * The ColorAndFontCollector collects fonts and colors without a
 	 * a color or font provider.
-	 *
 	 */
 	protected class ColorAndFontCollector {
 
@@ -424,7 +422,9 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 
 		@Override
 		public void run() {
-			doUpdateItem(widget, element, fullMap);
+			if (!widget.isDisposed()) {
+				doUpdateItem(widget, element, fullMap);
+			}
 		}
 	}
 
@@ -547,9 +547,7 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 				if (old != null) {
 					String message = "Sibling elements in viewer must not be equal:\n  " //$NON-NLS-1$
 							+ old + ",\n  " + element; //$NON-NLS-1$
-					Policy.getLog().log(
-							new Status(IStatus.WARNING, Policy.JFACE, message,
-									new RuntimeException()));
+					Policy.getLog().log(Status.warning(message));
 					return;
 				}
 			}
@@ -865,9 +863,6 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 
 	/**
 	 * Notifies an AssociateListener of the elements that have been filtered out.
-	 *
-	 * @param rawResult
-	 * @param filteredResult
 	 */
 	private void notifyFilteredOut(Object[] rawResult, Object[] filteredResult) {
 		int rawIndex = 0;
@@ -919,7 +914,6 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 	 * @deprecated This method is deprecated in 3.3 in favor of {@link ColumnViewer#getItemAt(org.eclipse.swt.graphics.Point)}.
 	 * Viewers who are not subclasses of {@link ColumnViewer} should consider using a
 	 * widget relative implementation like {@link ColumnViewer#getItemAt(org.eclipse.swt.graphics.Point)}.
-	 *
 	 */
 	@Deprecated
 	protected Item getItem(int x, int y) {

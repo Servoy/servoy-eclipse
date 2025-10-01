@@ -6,7 +6,8 @@ import { EditorContentService } from '../services/editorcontent.service';
 @Component({
     selector: 'designer-autoscroll',
     templateUrl: './autoscroll.component.html',
-    styleUrls: ['./autoscroll.component.css']
+    styleUrls: ['./autoscroll.component.css'],
+    standalone: false
 })
 
 export class AutoscrollComponent implements OnInit, AfterViewInit {

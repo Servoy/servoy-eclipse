@@ -8,7 +8,8 @@ import { URLParserService } from '../services/urlparser.service';
 @Component({
     selector: 'designer-anchoring-indicator',
     templateUrl: './anchoringindicator.component.html',
-    styleUrls: ['./anchoringindicator.component.css']
+    styleUrls: ['./anchoringindicator.component.css'],
+    standalone: false
 })
 export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener {
     TOP_LEFT_IMAGE = 'designer/assets/images/anchoringtopleft.png';
@@ -64,7 +65,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
             this.editorContentService.executeOnlyAfterInit(() => {
                 const element = this.editorContentService.getContentElement(selection[0])
                 if (element) {
-                    if (element.parentElement.closest('.svy-responsivecontainer')) return;
+                    if (element.parentElement.closest('.svy-responsivecontainer') || element.closest('.svy-csspositioncontainer')) return;
                     const elementRect = element.getBoundingClientRect();
                     let wrapperRect: DOMRect = null;
                     let image: string;

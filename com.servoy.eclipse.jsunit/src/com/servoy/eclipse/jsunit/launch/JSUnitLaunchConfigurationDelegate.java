@@ -57,18 +57,9 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	public static final int MAX_CONFIG_INSTANCES = 10;
 	private static ILaunch currentLaunch = null;
 
-	private static int counter = 1;
-
-	public static ILaunch getCurrentLaunch()
-	{
-		return currentLaunch;
-	}
-
 	// mostly preparations needed for DLTK testing view to work as expected
 	public static TestTarget prepareForLaunch(ILaunchConfiguration configuration, ILaunch launch) throws CoreException
 	{
-		currentLaunch = launch;
-
 		DLTKTestingPlugin.getModel().start();
 		final ITestingEngine engine = getTestingEngine(configuration);
 		//we don't run servoy js as an interpreter in eclipse context so first parameter  == null
@@ -99,7 +90,7 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 			}, false);
 			target = TestTarget.activeProjectTarget();
 		}
-
+		target.launch = launch;
 		return target;
 	}
 

@@ -6,10 +6,9 @@ export class FormSettings {
     public size: { width: number; height: number };
 }
 
-/** Cache for a Servoy form. Also keeps the component caches, Servoy form component caches etc. */
+/** Cache for a Servoy form (data/model instances, no UI). Also keeps the component caches, Servoy form component caches etc. */
 export class FormCache implements IFormCache {
     public navigatorForm: FormSettings;
-    public size: Dimension;
     public partComponentsCache: Array<ComponentCache | StructureCache | FormComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
     public formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
@@ -17,11 +16,12 @@ export class FormCache implements IFormCache {
 
     private _mainStructure: StructureCache;
     private _parts: Array<PartCache>;
-    private responsive: boolean;
 
-    constructor(readonly formname: string, size: Dimension, responsive: boolean, public readonly url: string, private readonly typesRegistry: TypesRegistry) {
-        this.size = size;
-        this.responsive = responsive;
+    constructor(readonly formname: string, 
+                public size: Dimension, 
+                readonly responsive: boolean, 
+                readonly url: string, 
+                private readonly typesRegistry: TypesRegistry) {
         this.componentCache = new Map();
         this.partComponentsCache = [];
         this._parts = [];
@@ -130,7 +130,7 @@ export class FormCache implements IFormCache {
     public getClientSideType(componentName: string, propertyName: string) {
         const componentSpec = this.getComponentSpecification(componentName);
 
-        let type = componentSpec.getPropertyType(propertyName);
+        let type = componentSpec?.getPropertyType(propertyName);
         if (!type) type = this.componentCache.get(componentName)?.dynamicClientSideTypes[propertyName];
         if (!type) type = this.getFormComponent(componentName)?.dynamicClientSideTypes[propertyName];
 
@@ -163,12 +163,14 @@ export class FormCache implements IFormCache {
  */
 export interface IFormComponent extends IApiExecutor {
     name: string;
-    // called when there are changed pushed to this form, so this form can trigger a detection change
+
+    /** called when there are changes pushed into this form's existing cache/state, so that this form can trigger a detection change */
     detectChanges(): void;
-    // called when there are changed pushed to this form, so this form can trigger a detection change
+    
+    /** called when there are changed pushed to this form (and a new form cache/state), so that this form can store the new cache and trigger a detection change on it's new cache/state */
     formCacheChanged(cache: FormCache): void;
 
-    // called when a model property is updated for the given compponent, but the value itself didn't change (only nested)
+    /** called when a model property is updated for the given compponent, but the value itself didn't change (only nested) */
     triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: unknown}[]): void;
 
     updateFormStyleClasses(ngutilsstyleclasses: string): void;
@@ -184,8 +186,12 @@ export const instanceOfApiExecutor = (obj: unknown): obj is IApiExecutor =>
 export const instanceOfFormComponent = (obj: unknown): obj is IFormComponent =>
     obj != null && (obj as IFormComponent).detectChanges instanceof Function;
 
+let repeaterIdCounter = 1;
+export interface IRepeaterIDProvider {
+    rId: number;
+}
 /** More (but internal not servoy public) impl. for IComponentCache implementors. */
-export class ComponentCache implements IComponentCache {
+export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
 
     /**
      * The dynamic client side types of a component's properties (never null, can be an empty obj). These are client side types sent from server that are
@@ -207,6 +213,8 @@ export class ComponentCache implements IComponentCache {
     /** this is used as #ref inside form_component.component.ts and it has camel-case instead of dashes */
     public readonly type: string;
 
+    public readonly rId = repeaterIdCounter++;
+
     public parent: StructureCache;
 
     constructor(public readonly name: string,
@@ -216,7 +224,7 @@ export class ComponentCache implements IComponentCache {
         public layout: { [property: string]: string },
         public readonly typesRegistry: TypesRegistry) {
             this.type = ComponentCache.convertToJSName(elType ? elType : specName);
-            this.model = {};
+            this.model = {visible:true};
     }
 
     private static convertToJSName(webObjectSpecName: string) {
@@ -244,6 +252,14 @@ export class ComponentCache implements IComponentCache {
         }
         return this;
     }
+	
+	initForDesignerIsVariant(initialModelProperties: { [property: string]: unknown }, isComponentVariant: boolean ): ComponentCache {
+	      // set initial model contents
+	      for (const key of Object.keys(initialModelProperties)) {
+			if(isComponentVariant && key!='styleClass') this.model[key] = initialModelProperties[key];
+	      }
+	      return this;
+	  }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sendChanges(_propertyName: string, _newValue: unknown, _oldValue: unknown, _rowId?: string, _isDataprovider?: boolean) {
@@ -256,9 +272,10 @@ export class ComponentCache implements IComponentCache {
 
 }
 
-export class StructureCache {
+export class StructureCache implements IRepeaterIDProvider{
     public parent: StructureCache;
     public model:  { [property: string]: unknown } = {};
+    public readonly rId = repeaterIdCounter++;
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
         public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
         public readonly id?: string, public readonly cssPositionContainer?: boolean, public layout?: { [property: string]: string }) {
@@ -303,13 +320,20 @@ export class StructureCache {
         return level;
     }
 
+	public get name() {
+	   return this.id ? this.id : this.tagname;
+	}
+	 
     toString() {
         return 'StructureCache(' + this.id + ')';
     }
 }
 
 /** This is a cache that represents a form part (body/header/etc.). */
-export class PartCache {
+export class PartCache implements IRepeaterIDProvider {
+    
+    public readonly rId = repeaterIdCounter++;
+
     constructor(public readonly name: string,
         public readonly classes: Array<string>,
         public layout: { [property: string]: string },

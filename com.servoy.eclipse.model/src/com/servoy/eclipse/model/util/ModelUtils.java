@@ -18,6 +18,7 @@ package com.servoy.eclipse.model.util;
 
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,6 +44,8 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.extensions.IUnexpectedSituationHandler;
@@ -84,7 +87,8 @@ import com.servoy.j2db.util.Utils;
 
 public class ModelUtils
 {
-	private static final ConcurrentMap<String, Pair<Long, List<String>>> cachedStyleNames = new ConcurrentHashMap<>();
+	private static final Cache<List<String>, Pair<Long, String[]>> cachedCssClasses = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofMinutes(20))
+		.build();
 
 	public static final String ONLY_WHEN_UI_DISABLED_ATTRIBUTE_NAME = "whenUIDisabledStateIs";
 
@@ -139,7 +143,7 @@ public class ModelUtils
 	 * @param lookupName
 	 */
 	public static Pair<String[], String> getStyleClasses(FlattenedSolution flattenedSolution, Form form, IPersist persist, String styleClassProperty,
-		String lookupName, boolean ng2Mode)
+		String lookupName)
 	{
 		if (flattenedSolution == null || form == null)
 		{
@@ -159,7 +163,6 @@ public class ModelUtils
 		}
 
 		// if we have solution level css, return spec file and classes from css, ignore form style
-		Set<String> cssClasses = new TreeSet<>(StringComparator.INSTANCE);
 		String defaultValue = null;
 
 		WebObjectSpecification spec = null;
@@ -177,34 +180,27 @@ public class ModelUtils
 				spec = pkg.getSpecification(((LayoutContainer)persist).getSpecName());
 			}
 		}
-		if (spec != null)
-		{
-			PropertyDescription pd = spec.getProperty(styleClassProperty);
-			if (pd != null)
-			{
-				List<Object> values = pd.getValues();
-				for (Object val : Utils.iterate(values))
-				{
-					cssClasses.add(val.toString());
-				}
-				if (pd.hasDefault() && pd.getDefaultValue() != null)
-				{
-					defaultValue = NGStyleClassPropertyType.NG_INSTANCE.fromDesignValue(pd.getDefaultValue().toString(), pd, persist);
-				}
-			}
-		}
+
+		String[] css = new String[0];
 
 		if (mediaStyleSheets != null)
 		{
-			for (String styleSheet : mediaStyleSheets)
+			long lastModifiedTime = mediaStyleSheets.stream().map(name -> flattenedSolution.getMedia(name)).mapToLong(Media::getLastModifiedTime).max()
+				.orElse(0);
+			Pair<Long, String[]> pair = cachedCssClasses.getIfPresent(mediaStyleSheets);
+			if (pair != null && pair.getLeft().longValue() == lastModifiedTime)
 			{
-				Media media = flattenedSolution.getMedia(styleSheet);
-				if (media != null)
+				css = pair.getRight();
+			}
+			else
+			{
+				Set<String> cssClasses = new TreeSet<>(StringComparator.INSTANCE);
+				for (String styleSheet : mediaStyleSheets)
 				{
-					String lessStyleSheet = media.getName();
-					if (ng2Mode)
+					Media media = flattenedSolution.getMedia(styleSheet);
+					if (media != null)
 					{
-
+						String lessStyleSheet = media.getName();
 						int index = lessStyleSheet.indexOf(".less");
 						if (index > 0)
 						{
@@ -215,58 +211,71 @@ public class ModelUtils
 								media = media2;
 							}
 						}
-					}
 
-					List<String> styleNames = null;
-					Pair<Long, List<String>> pair = cachedStyleNames.get(media.getName());
-					if (pair != null)
-					{
-						if (pair.getLeft().longValue() == media.getLastModifiedTime())
+						try
 						{
-							styleNames = pair.getRight();
-						}
-					}
-					try
-					{
-						if (styleNames == null)
-						{
-							String cssContent = media.getName().endsWith(".less") ? LessCompiler.compileSolutionLessFile(media, flattenedSolution)
-								: new String(media.getMediaData(), "UTF-8");
-							// we only use the css3 styling (getStyleNames() so that we can give a boolean to ignore/don't create the rest
-							IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName(), true);
-							styleNames = ss.getStyleNames();
-							cachedStyleNames.put(media.getName(), new Pair<Long, List<String>>(Long.valueOf(media.getLastModifiedTime()), styleNames));
-						}
-						for (String cssSelector : styleNames)
-						{
-							if (cssSelector.contains("."))
+							List<String> styleNames = null;
+							if (styleNames == null)
 							{
-								String[] selectors = cssSelector.split("\\.");
-								for (int i = 0; i < selectors.length; i++)
+								String cssContent = media.getName().endsWith(".less") ? LessCompiler.compileSolutionLessFile(media, flattenedSolution)
+									: new String(media.getMediaData(), "UTF-8");
+								// we only use the css3 styling (getStyleNames() so that we can give a boolean to ignore/don't create the rest
+								IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName(), true);
+								styleNames = ss.getStyleNames();
+							}
+							for (String cssSelector : styleNames)
+							{
+								if (cssSelector.contains("."))
 								{
-									if (i == 0 && selectors.length > 1) continue;
-									String selector = selectors[i];
-									int cutIndex = selector.indexOf(" ");
-									int pseudoClassIndex = selector.indexOf(":");
-									cutIndex = Math.min(Math.max(cutIndex, 0), Math.max(pseudoClassIndex, 0));
-									if (cutIndex > 0)
+									String[] selectors = cssSelector.split("\\.");
+									for (int i = 0; i < selectors.length; i++)
 									{
-										selector = selector.substring(0, cutIndex);
+										if (i == 0 && selectors.length > 1) continue;
+										String selector = selectors[i];
+										int cutIndex = selector.indexOf(" ");
+										int pseudoClassIndex = selector.indexOf(":");
+										cutIndex = Math.min(Math.max(cutIndex, 0), Math.max(pseudoClassIndex, 0));
+										if (cutIndex > 0)
+										{
+											selector = selector.substring(0, cutIndex);
+										}
+										cssClasses.add(selector);
 									}
-									cssClasses.add(selector);
 								}
 							}
 						}
+						catch (UnsupportedEncodingException ex)
+						{
+							ServoyLog.logError(ex);
+						}
 					}
-					catch (UnsupportedEncodingException ex)
+				}
+				css = cssClasses.toArray(css);
+				cachedCssClasses.put(mediaStyleSheets, new Pair<Long, String[]>(Long.valueOf(lastModifiedTime), css));
+			}
+		}
+		else
+		{
+			Set<String> cssClasses = new TreeSet<>(StringComparator.INSTANCE);
+			if (spec != null)
+			{
+				PropertyDescription pd = spec.getProperty(styleClassProperty);
+				if (pd != null)
+				{
+					List<Object> values = pd.getValues();
+					for (Object val : Utils.iterate(values))
 					{
-						ServoyLog.logError(ex);
+						cssClasses.add(val.toString());
+					}
+					if (pd.hasDefault() && pd.getDefaultValue() != null)
+					{
+						defaultValue = NGStyleClassPropertyType.NG_INSTANCE.fromDesignValue(pd.getDefaultValue().toString(), pd, persist);
 					}
 				}
 			}
+			css = cssClasses.toArray(css);
 		}
-
-		return new Pair<>(cssClasses.toArray(new String[0]), defaultValue);
+		return new Pair<>(css, defaultValue);
 	}
 
 	public static String[] getStyleClasses(Style style, String lookupName, String formStyleClass)
@@ -404,16 +413,16 @@ public class ModelUtils
 	 * @param methodId
 	 * @return
 	 */
-	public static IScriptProvider getScriptMethod(IPersist persist, IPersist context, ITable table, int methodId)
+	public static IScriptProvider getScriptMethod(IPersist persist, IPersist context, ITable table, String methodUUID)
 	{
-		if (methodId <= 0)
+		if (methodUUID == null)
 		{
 			return null;
 		}
 
 		// This will normally now return any method now..
 		FlattenedSolution editingFlattenedSolution = getEditingFlattenedSolution(persist, context);
-		ScriptMethod sm = editingFlattenedSolution.getScriptMethod(methodId);
+		ScriptMethod sm = editingFlattenedSolution.getScriptMethod(methodUUID);
 		if (sm == null)
 		{
 			// this code shouldn't be hit anymore
@@ -423,7 +432,7 @@ public class ModelUtils
 				while (tableNodes.hasNext())
 				{
 					TableNode tableNode = tableNodes.next();
-					IPersist method = AbstractBase.selectById(tableNode.getAllObjects(), methodId);
+					IPersist method = AbstractBase.selectByUUID(tableNode.getAllObjects(), methodUUID);
 					if (method instanceof IScriptProvider)
 					{
 						return (IScriptProvider)method;

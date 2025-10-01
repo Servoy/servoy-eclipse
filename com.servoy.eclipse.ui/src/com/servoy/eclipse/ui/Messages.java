@@ -34,6 +34,7 @@ public class Messages extends NLS
 	public static String ReloadTablesAction_reloadTablesDescription;
 	public static String DuplicateFormAction_duplicateForm;
 	public static String ChangeResourcesProjectAction_chooseResourcesProject;
+	public static String ConvertSolutionToNewFormatAction_convertToNewFormat;
 	public static String EditVariableAction_editVariable;
 	public static String HideUnhideTablesAction_toggle;
 	public static String HideUnhideTablesAction_hide;
@@ -121,6 +122,7 @@ public class Messages extends NLS
 	public static String TreeStrings_Application;
 	public static String TreeStrings_Array;
 	public static String TreeStrings_Object;
+	public static String TreeStrings_Promise;
 	public static String TreeStrings_Map;
 	public static String TreeStrings_Set;
 	public static String TreeStrings_Iterator;
@@ -128,11 +130,12 @@ public class Messages extends NLS
 	public static String TreeStrings_controller;
 	public static String TreeStrings_currentcontroller;
 	public static String TreeStrings_DatabaseManager;
+	public static String TreeStrings_EventsManager;
 	public static String TreeStrings_Datasources;
 	public static String TreeStrings_Date;
 	public static String TreeStrings_DBServers;
 	public static String TreeStrings_InMemory;
-	public static String TreeStrings_procedures;;
+	public static String TreeStrings_procedures;
 	public static String TreeStrings_elements;
 	public static String TreeStrings_containers;
 	public static String TreeStrings_Statements;
@@ -162,6 +165,7 @@ public class Messages extends NLS
 	public static String TreeStrings_ServoyException;
 	public static String TreeStrings_NoActiveSolution;
 	public static String TreeStrings_Modules;
+	public static String TreeStrings_DeveloperSolutions;
 	public static String TreeStrings_String;
 	public static String TreeStrings_Styles;
 	public static String TreeStrings_Components;
@@ -172,13 +176,17 @@ public class Messages extends NLS
 	public static String TreeStrings_ImportHookTooltip;
 	public static String TreeStrings_Templates;
 	public static String TreeStrings_Utils;
+	public static String TreeStrings_ClientUtils;
 	public static String TreeStrings_JSUnit;
 	public static String TreeStrings_ValueLists;
+	public static String TreeStrings_Menus;
 	public static String TreeStrings_variables;
 	public static String TreeStrings_XMLMethods;
 	public static String TreeStrings_XMLListMethods;
 	public static String TreeStrings_RegExp;
 	public static String TreeStrings_ViewFoundsets;
+	public static String TreeStrings_MenuFoundsets;
+	public static String TreeStrings_BigInt;
 
 	public static String LabelTemplatesPalette;
 	public static String LabelElementsPalette;

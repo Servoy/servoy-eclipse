@@ -3,7 +3,10 @@ import { DesignFormComponent } from '../designer/designform_component.component'
 import { AbstractFormComponent, FormComponent } from '../ngclient/form/form_component.component';
 import { StructureCache } from '../ngclient/types';
 
-@Directive({ selector: '[svyContainerStyle]' })
+@Directive({
+    selector: '[svyContainerStyle]',
+    standalone: false
+})
 export class AddAttributeDirective implements OnChanges {
     @Input() svyContainerStyle: any;
     @Input() svyContainerLayout;

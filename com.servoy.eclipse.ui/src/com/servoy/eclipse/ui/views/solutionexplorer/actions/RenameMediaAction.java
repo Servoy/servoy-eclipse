@@ -109,14 +109,15 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 					{
 						return "";
 					}
-					if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
+					if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0 || newText.endsWith(".") ||
+						newText.startsWith("."))
 					{
 						return "Invalid new media name";
 					}
 
 					try
 					{
-						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(selectedMediaPath + newText, -1,
+						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(selectedMediaPath + newText, null,
 							new ValidatorSearchContext(IRepository.MEDIA), false);
 					}
 					catch (RepositoryException e)

@@ -9,17 +9,16 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.6.0.3980_rc</version>
+		<version>2025.12.0.4120_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.designer.rfb</artifactId>
-	<version>2024.6.0.3980_rc</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.15.0</version>
+				<version>1.15.1</version>
 				<configuration>
 				  <workingDirectory>node</workingDirectory>
 				</configuration>
@@ -34,7 +33,7 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
-							<nodeVersion>v20.11.1</nodeVersion>
+							<nodeVersion>v22.17.1</nodeVersion>
 						</configuration>
 					</execution>
 

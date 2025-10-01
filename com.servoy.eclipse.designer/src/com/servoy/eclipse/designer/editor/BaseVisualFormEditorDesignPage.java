@@ -360,8 +360,9 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 
 	protected abstract DeleteAction createDeleteAction();
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class type)
+	public <T> T getAdapter(final Class<T> type)
 	{
 		if (type == IPropertySheetPage.class)
 		{
@@ -370,11 +371,11 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 			actions.put(ActionFactory.REDO.getId(), getActionRegistry().getAction(ActionFactory.REDO.getId()));
 			PropertySheetPage page = new ModifiedPropertySheetPage(actions);
 			page.setRootEntry(new UndoablePropertySheetEntry(getCommandStack()));
-			return page;
+			return (T)page;
 		}
 		if (type.equals(IContentOutlinePage.class))
 		{
-			return new FormOutlinePage(editorPart.getForm(), getGraphicalViewer(), getActionRegistry());
+			return (T)new FormOutlinePage(editorPart.getForm(), getGraphicalViewer(), getActionRegistry());
 		}
 		return super.getAdapter(type);
 	}

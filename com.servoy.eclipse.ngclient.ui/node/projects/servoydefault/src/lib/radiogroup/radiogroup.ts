@@ -1,13 +1,14 @@
-import { Component, OnInit, SimpleChanges, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, OnInit, SimpleChanges, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { ServoyDefaultBaseChoice } from '../basechoice';
 import { FormattingService, PropertyUtils } from '@servoy/public';
-import { DOCUMENT } from '@angular/common';
+
 
 @Component({
     selector: 'servoydefault-radiogroup',
     templateUrl: './radiogroup.html',
     styleUrls: ['./radiogroup.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
 

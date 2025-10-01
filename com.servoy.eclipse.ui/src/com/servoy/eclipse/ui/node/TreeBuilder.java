@@ -56,6 +56,16 @@ public class TreeBuilder
 		return docManager;
 	}
 
+	public static IObjectDocumentation getDocObjectForJSLibClass(Class< ? > cls)
+	{
+		IDocumentationManager dm = getDocManager();
+		if (dm != null)
+		{
+			return dm.getObjectByQualifiedName(cls.getCanonicalName());
+		}
+		return null;
+	}
+
 	public static UserNode[] createLengthAndArray(IImageLookup imageLookup, String prefix)
 	{
 		Image propertiesIcon = imageLookup.loadImage("properties.png");
@@ -70,6 +80,16 @@ public class TreeBuilder
 	public static UserNode[] createJSArray(IImageLookup imageLookup)
 	{
 		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Array.class, UserNodeType.ARRAY, null);
+	}
+
+	public static UserNode[] createJSPromise(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Promise.class, UserNodeType.PROMISE, null);
+	}
+
+	public static UserNode[] createJSBigInt(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.BigInt.class, UserNodeType.BIGINT, null);
 	}
 
 	public static UserNode[] createJSObject(IImageLookup imageLookup)

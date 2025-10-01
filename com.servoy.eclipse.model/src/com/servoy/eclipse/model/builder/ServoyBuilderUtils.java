@@ -61,7 +61,6 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.keyword.Ident;
@@ -402,7 +401,7 @@ public class ServoyBuilderUtils
 					}
 					catch (CoreException e)
 					{
-						Debug.error(e);
+						ServoyLog.logError(e);
 					}
 					addMarker = false;
 				}
@@ -436,7 +435,7 @@ public class ServoyBuilderUtils
 					}
 					catch (CoreException e)
 					{
-						Debug.error(e);
+						ServoyLog.logError(e);
 					}
 				}
 			}
@@ -693,7 +692,7 @@ public class ServoyBuilderUtils
 			}
 			catch (CoreException e)
 			{
-				Debug.error(e);
+				ServoyLog.logError(e);
 			}
 		}
 	}

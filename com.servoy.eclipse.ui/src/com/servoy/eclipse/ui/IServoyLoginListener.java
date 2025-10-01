@@ -23,5 +23,5 @@ package com.servoy.eclipse.ui;
  */
 public interface IServoyLoginListener
 {
-	void onLogin(String username, String loginToken);
+	void onLogin(String username);
 }

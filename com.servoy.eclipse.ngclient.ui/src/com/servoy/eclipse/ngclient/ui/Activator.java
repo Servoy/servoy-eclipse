@@ -25,6 +25,7 @@ import org.eclipse.ui.console.IOConsole;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
 public class Activator extends Plugin
@@ -105,7 +106,14 @@ public class Activator extends Plugin
 
 	public void setActiveSolution(String solutionName)
 	{
-		this.solutionProjectFolder = new File(mainTargetFolder, solutionName);
+		if (solutionName == null)
+		{
+			solutionProjectFolder = null;
+		}
+		else
+		{
+			this.solutionProjectFolder = new File(mainTargetFolder, solutionName);
+		}
 	}
 
 	private String getSystemOrEvironmentProperty(String propertyName)
@@ -179,14 +187,19 @@ public class Activator extends Plugin
 		IPath stateLocation = plugin.getStateLocation();
 		File baseDir = stateLocation.toFile();
 		File file = new File(baseDir, path);
-		if (!file.exists())
+		File fullyGenerated = new File(baseDir, ".fullygenerated");
+		if (!file.exists() || !fullyGenerated.exists())
 		{
 			String archive = element.getAttribute("archive");
 			URL archiveUrl = Platform.getBundle(pluginId).getResource(archive);
 			if (archiveUrl != null)
 			{
-				if (deletePreviousPaths)
+				if (deletePreviousPaths || !fullyGenerated.exists())
 				{
+					if (fullyGenerated.exists())
+					{
+						fullyGenerated.delete();
+					}
 					File[] dirs = baseDir.listFiles(oldFile -> oldFile.isDirectory() && !oldFile.getName().equals(NG2_FOLDER));
 					if (dirs != null)
 					{
@@ -216,6 +229,10 @@ public class Activator extends Plugin
 					else if (ZipUtils.isTarXZFile(archiveUrl))
 					{
 						ZipUtils.extractTarXZ(archiveUrl, baseDir);
+					}
+					if (!fullyGenerated.exists())
+					{
+						fullyGenerated.createNewFile();
 					}
 				}
 				catch (IOException e)
@@ -259,7 +276,7 @@ public class Activator extends Plugin
 		}
 		catch (InterruptedException e)
 		{
-			e.printStackTrace();
+			ServoyLog.logError(e);
 		}
 	}
 

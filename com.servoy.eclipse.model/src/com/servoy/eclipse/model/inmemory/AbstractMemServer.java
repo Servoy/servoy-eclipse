@@ -108,7 +108,14 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		this.servoyProject = servoyProject;
 		this.datasource = datasource;
 		this.scheme = scheme;
-		this.serverConfig = new ServerConfig(datasource, "", "", "", null, "", "", null, true, true, null, "");
+		this.serverConfig = new ServerConfig.Builder()
+			.setServerName("")
+			.setUserName("")
+			.setPassword("")
+			.setServerUrl("")
+			.setSkipSysTables(true)
+			.setDriver("")
+			.build();
 		init();
 	}
 
@@ -428,10 +435,10 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 					is.close();
 					if (tn.getColumns() != null && file.getName().equals(t.getName() + ".tbl"))
 					{
-						ServoyJSONObject json = new ServoyJSONObject(content, true);
+						ServoyJSONObject json = new ServoyJSONObject(content, false);
 						json.getJSONObject("columns").put("name", newName);
 						json.put("dataSource", newTable.getDataSource());
-						content = json.toString(true);
+						content = json.toString(false);
 					}
 
 					IFile newFile = folder.getFile(file.getName().replace(t.getName(), newName));
@@ -794,6 +801,12 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		return Collections.emptySet();
 	}
 
+	@Override
+	public Procedure getProcedure(String name, Object[] args) throws RepositoryException, RemoteException
+	{
+		return null;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -842,7 +855,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		for (Column c : selectedTable.getColumns())
 		{
 			ColumnInfo columnInfo = c.getColumnInfo();
-			Column newColumn = table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
+			Column newColumn = table.createNewColumn(validator, c.getSQLName(), c.getColumnType(), c.getAllowNull(),
 				(c.getFlags() & IBaseColumn.PK_COLUMN) != 0);
 			if (columnInfo != null)
 			{
@@ -1264,7 +1277,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 			JSONObject driveColumns = (JSONObject)next.getPropertiesMap().get(IContentSpecConstants.PROPERTY_COLUMNS);
 			DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
 			String mem = dmm.serializeTable(abstractMemTable, false);
-			ServoyJSONObject memoryVersion = new ServoyJSONObject(mem, true);
+			ServoyJSONObject memoryVersion = new ServoyJSONObject(mem, false, false, true);
 			return !memoryVersion.equals(driveColumns);
 		}
 		else return true;

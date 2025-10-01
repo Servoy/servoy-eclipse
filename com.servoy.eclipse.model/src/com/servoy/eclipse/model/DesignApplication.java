@@ -48,8 +48,11 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.IDataRendererFactory;
+import com.servoy.j2db.IEventsManager;
+import com.servoy.j2db.IMenuManager;
 import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.IModeManager;
+import com.servoy.j2db.IPermissionManager;
 import com.servoy.j2db.ISmartClientApplication;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.RuntimeWindowManager;
@@ -81,6 +84,7 @@ import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.querybuilder.IQueryBuilder;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.scripting.JSBlobLoaderBuilder;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.server.shared.IApplicationServerAccess;
@@ -167,6 +171,13 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public Object generateBrowserFunction(String functionString)
 	{
 		return functionString;
+	}
+
+	@Override
+	public JSBlobLoaderBuilder createUrlBlobloaderBuilder(String dataprovider)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public String getClientOSName()
@@ -675,6 +686,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public IModeManager getModeManager()
 	{
 		return getClient().getModeManager();
+	}
+
+	@Override
+	public IMenuManager getMenuManager()
+	{
+		return getClient().getMenuManager();
 	}
 
 	public PageFormat getPageFormat()
@@ -1195,5 +1212,16 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			return ((IFormUI)parent).getController().getName();
 		}
 		return "";
+	}
+
+	@Override
+	public IEventsManager getEventsManager()
+	{
+		return getClient().getEventsManager();
+	}
+
+	public IPermissionManager getPermissionManager()
+	{
+		return getClient().getPermissionManager();
 	}
 }

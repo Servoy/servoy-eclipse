@@ -1,89 +1,96 @@
 <#-- This is a GENERATED file. DO NOT modify/push it manually as all changes will be lost the next time this documentation is generated. MODIFY the component_template.md file from j2db_documentation instead -->
-# ${componentname}<#if service> (ref)</#if><#-- Get rid of this if once ref and guides of services get separate places in menu -->
-(part of package '[${package_display_name}](${instance.getPackagePath(package_display_name)})')  
+# ${MD(componentname)}<#if service> (ref)</#if><#-- Get rid of this if once ref and guides of services get separate places in menu -->
+
+(part of package '[${MD(package_display_name)}](${instance.getPackagePath(package_display_name)})')  
 <#if designtimeExtends??>
-Extends designtime/SolutionModel: [${designtimeExtends.name()}](${instance.getReturnTypePath(designtimeExtends)})  
+Extends designtime/SolutionModel: [${MD(designtimeExtends.name())}](${instance.getReturnTypePath(designtimeExtends)})  
 </#if>
 <#if runtimeExtends??>
-Extends runtime: [${runtimeExtends.name()}](${instance.getReturnTypePath(runtimeExtends)})  
+Extends runtime: [${MD(runtimeExtends.name())}](${instance.getReturnTypePath(runtimeExtends)})  
 </#if>
 <#if service_scripting_name??>
 
-You can access it in code via: **plugins.${service_scripting_name}**  
+You can access it in code via: **plugins\.${MD(service_scripting_name)}**  
 </#if>
 <#if overview??>
 
 ${overview}
 </#if>
-
 <#if service>
 <#-- This is a reference page; many services have detailed usage guides [here](CURRENTLY SERVICE GUIDES ARE IN THE SAME DIR, INSIDE "REFERENCE", JUST LIKE THIS REFERENCE PAGE, BUT THIS IS PROBABLY TEMPORARY). -->
 <#else>
-This is a reference page; many components have detailed usage guides [here](https://docs.servoy.com/guides/develop/application-design/ui-components).
+
+This is a reference page; many components have detailed usage guides [here](https://docs.servoy.com/guides/develop/application-design/ui-components)\.
 </#if>
 <#if properties??>
 
 ## Properties
 
 <#list properties as propName, propValue>
-### ${propName}
+### ${MD(propName)}
 <#if propValue.doc()??>
-${propValue.doc()}
-
+${propValue.doc()?trim}
 </#if>
-Type: [${propValue.type()?replace("[", "\\[")?replace("]", "\\]")}](${instance.getReturnTypePath(propValue)})  
-<#if propValue.defaultValue()??>
-Default Value: ${propValue.defaultValue()}  
+Type: [${MD(instance.getDocType(propValue, types, componentinternalname))}](${instance.getReturnTypePath(propValue)})
+<#if propValue.defaultValue()??> 
+Default Value: ${MD(propValue.defaultValue())}
 </#if>
 ***
+
 </#list>
 </#if>
 <#if events??>
-
 ## Events
 
 <#list events as propName, propValue>
-### ${propName}
+### ${MD(propName)}
+
 <#if propValue.doc()??>
-
 ${propValue.doc()?trim}
-
 </#if>
 <#if propValue.parameters()?has_content>
-Parameters:  
+
+**Parameters:**
+
 <#list propValue.parameters() as param> 
-> ${param.name()} [${param.type()?replace("[", "\\[")?replace("]", "\\]")}](${instance.getReturnTypePath(param)})  
+> - {[${MD(instance.getDocType(param, types, componentinternalname))}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if><#if param.doc()??> ${param.doc()}</#if>
 </#list>
 </#if>
 <#if propValue.returnValue()??>
 
-Returns: [${propValue.returnValue()?replace("[", "\\[")?replace("]", "\\]")}](${instance.getReturnTypePath(propValue)})  
+**Returns:** {[${MD(instance.getDocType(propValue.returnValue(), types, componentinternalname))}](${instance.getReturnTypePath(propValue)})}
+<#if (propValue.returnValue()?keys)?seq_contains("description") && propValue.returnValue()["description"]?has_content>
+${propValue.returnValue()["description"]}
+</#if>
 </#if>
 ***
+
 </#list>
 </#if>
 <#if api??>
-
 ## API
 
 <#list api as propName, propValue>
-### ${propName}
+### ${MD(propName)}
 <#if propValue.doc()??>
 
 ${propValue.doc()?trim}
 
 </#if>
 <#if propValue.parameters()?has_content>
-Parameters:  
+**Parameters:**
+
 <#list propValue.parameters() as param> 
-> ${param.name()} [${param.type()?replace("[", "\\[")?replace("]", "\\]")}](${instance.getReturnTypePath(param)})<#if param.optional()> (optional)</#if>  
+> - {[${MD(instance.getDocType(param, types, componentinternalname))}](${instance.getReturnTypePath(param)})} <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if> <#if param.doc()??>${param.doc()}
+</#if>
 </#list>
+
 </#if>
 <#if propValue.returnValue()??>
-
-Returns: [${propValue.returnValue()?replace("[", "\\[")?replace("]", "\\]")}](${instance.getReturnTypePath(propValue)})  
+**Returns:** [${MD(instance.getDocType(propValue.returnValue(), types, componentinternalname))}](${instance.getReturnTypePath(propValue)}) ${propValue.returnValue().description} 
 </#if>
 ***
+
  </#list>
 </#if>
 <#if types??>
@@ -91,16 +98,45 @@ Returns: [${propValue.returnValue()?replace("[", "\\[")?replace("]", "\\]")}](${
 ## Types<#-- Due to markdown limitations that do not allow both anchors and lists/tables, so ### inside indentation workarounds (tables / lists), we could either use non-breaking spaces (&#160;) but when line wraps, it would still wrap from the beginning; so we drop anchor usage so subProperties of types are no longer #### , but lists - that can be used as a better indentation workaround... -->
 
 <#list types as typeName, typeValue>
-### ${typeName}
-<#list typeValue as propName, propValue>
- - ${propName}
+## ${MD(typeName)} 
+  <#if typeValue._doc?? && typeValue._doc?trim?length gt 0>
+  ${typeValue._doc}
+  </#if>
+  scripting type: CustomType<${componentinternalname}.${typeName}>
+
+<#if typeValue.extends?has_content>
+  extends: ${typeValue.extends} 
+</#if>
+<#list typeValue.model as propName, propValue>
+ - ${MD(propName)}
 <#if propValue.doc()??>
      - ${propValue.doc()}  
 </#if>
-     - **Type**: [${propValue.type()?replace("[", "\\[")?replace("]", "\\]")}](${instance.getReturnTypePath(propValue)})
+     - **Type**: [${MD(propValue.type())}](${instance.getReturnTypePath(propValue)})
 <#if propValue.defaultValue()??>
-     - **Default Value**: ${propValue.defaultValue()}
+     - **Default Value**: ${MD(propValue.defaultValue())}
 </#if>
 </#list>
+<#if typeValue.serversideapi??>
+<#list typeValue.serversideapi as propName, propValue>
+### ${MD(propName)}
+<#if propValue.doc()??>
+
+${propValue.doc()?trim}
+</#if>
+<#if propValue.parameters()?has_content>
+**Parameters:**  
+<#list propValue.parameters() as param> 
+> - [${MD(param.type())}](${instance.getReturnTypePath(param)}) <#if param.optional()>[</#if>${MD(param.name())}<#if param.optional()>]</#if>  ${param.doc()}  
 </#list>
 </#if>
+<#if propValue.returnValue()??>
+**Returns:** [${MD(propValue.returnValue().type)}](${instance.getReturnTypePath(propValue)}) ${propValue.returnValue().description} 
+</#if>
+***
+ </#list>
+ </#if>
+</#list>
+</#if>
+
+---

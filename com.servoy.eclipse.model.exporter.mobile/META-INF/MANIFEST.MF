@@ -2,13 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Mobile Exporter
 Bundle-SymbolicName: com.servoy.eclipse.model.exporter.mobile;singleton:=true
-Bundle-Version: 2024.6.0.3980_rc
+Bundle-Version: 2025.12.0.4120_rc
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.runtime,
  servoy_base,
  servoy_shared,
- com.servoy.eclipse.model
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+ com.servoy.eclipse.model,
+ servoy_ngclient,
+ sablo
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/js.jar,
  lib/jshybugger.jar,
@@ -21,3 +23,4 @@ Export-Package: com.servoy.eclipse.model.mobile.exporter,
  org.jshybugger.proxy,
  org.webbitserver
 Automatic-Module-Name: com.servoy.eclipse.model.exporter.mobile
+Import-Package: org.apache.commons.io;version="[2.16.0,3.0.0)"

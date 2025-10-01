@@ -84,10 +84,13 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		{
 			return new ComplexProperty<Object>(value)
 			{
+				private ArrayPropertySource sourceInstance;
+
 				@Override
 				public IPropertySource getPropertySource()
 				{
-					return getArrayElementPropertySource(this);
+					if (sourceInstance == null) sourceInstance = getArrayElementPropertySource(this);
+					return sourceInstance;
 				}
 			};
 		}
@@ -512,6 +515,12 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				return Integer.valueOf(index);
 			}
 			return null;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + "basePD=" + basePD + ", index=" + index + ", source=" + arrayPropertySource;
 		}
 
 	}

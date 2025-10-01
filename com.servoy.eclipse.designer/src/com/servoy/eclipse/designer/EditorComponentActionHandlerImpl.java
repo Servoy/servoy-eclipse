@@ -55,12 +55,12 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 	}
 
 	@Override
-	public void createComponent(IPropertySource propertySource, UUID uuid, String propertyName, String type, boolean prepend,
+	public void createComponent(IPropertySource propertySource, UUID uuid, String propertyName, String type, Integer index,
 		boolean dropTargetIsSibling)
 	{
 		if (propertySource instanceof PersistPropertySource persistPropertySource && persistPropertySource.getContext() instanceof Form form)
 		{
-			var commandCreater = createCommandCreater(form, propertyName, type, prepend, dropTargetIsSibling);
+			var commandCreater = createCommandCreater(form, propertyName, type, index, dropTargetIsSibling);
 			executeCommandOnForm(propertySource, new CreateOverrideIfNeeededCommandWrapper(persistPropertySource, uuid, commandCreater), "createComponent");
 		}
 	}
@@ -69,14 +69,14 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 	 * Create a command to create the component, the uuid may be different from the one supplied above
 	 */
 	private static Function<UUID, Command> createCommandCreater(Form form, String propertyName, String type,
-		boolean prepend, boolean dropTargetIsSibling)
+		Integer index, boolean dropTargetIsSibling)
 	{
 		return (uuid) -> {
 			CreateComponentOptions args = new CreateComponentOptions();
 			args.setDropTarget(PersistIdentifier.fromSimpleUUID(uuid));
 			args.setGhostPropertyName(propertyName);
 			args.setDropTargetIsSibling(dropTargetIsSibling);
-			args.setPrepend(prepend);
+			args.setIndex(index);
 			args.setType(type);
 			return new CreateComponentCommand(form, args, null);
 		};

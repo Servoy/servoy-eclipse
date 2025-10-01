@@ -35,9 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,6 +50,7 @@ import org.sablo.websocket.utils.PropertyUtils;
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -60,6 +59,7 @@ import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.designer.util.SnapToComponentUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.autowizard.FormComponentTreeSelectDialog;
@@ -87,6 +87,8 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.IWebComponent;
@@ -164,6 +166,19 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						}
 					}
 				}
+				if (form.getExtendsID() != null && changedPersists.size() >= 2)
+				{
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						LayoutContainer container = (LayoutContainer)newPersist[newPersist.length - 1].getAncestor(IRepository.LAYOUTCONTAINERS);
+
+						@Override
+						public void run()
+						{
+							doFullFormRefresh(container);
+						}
+					});
+				}
 			}
 		}
 		catch (JSONException | RepositoryException ex)
@@ -184,11 +199,10 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			if (webObject instanceof IChildWebObject && args.isDropTargetIsSibling())
 			{
 				arrayIndex = ((IChildWebObject)webObject).getIndex() + 1; // add after sibling
-				webObject = webObject.getParent();
 			}
-			else if (args.isPrepend())
+			else if (args.getIndex() != null)
 			{
-				arrayIndex = 0;
+				arrayIndex = args.getIndex().intValue();
 			}
 
 			if (webObject instanceof IBasicWebObject)
@@ -199,11 +213,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					WebObjectSpecification componentSpec = WebComponentSpecProvider.getSpecProviderState()
 						.getWebObjectSpecification(webComponent.getTypeName());
 					String propertyName = args.getGhostPropertyName();
-					String compName = "component_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(form, compName))
-					{
-						compName = "component_" + id.incrementAndGet();
-					}
+					String compName = uniqueName(form, args.getType());
 					webObject = ElementUtil.getOverridePersist(PersistContext.create(webObject, form));
 					WebCustomType bean = AddContainerCommand.addCustomType(componentSpec, (IBasicWebObject)webObject, propertyName, compName, arrayIndex, null);
 					AddContainerCommand.showDataproviderDialog(bean.getPropertyDescription().getProperties(), bean, form);
@@ -212,15 +222,9 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			}
 			else if (webObject instanceof ISupportChilds && args.getType().equals("tab"))
 			{
-				ISupportChilds iSupportChilds = (ISupportChilds)webObject;
-				iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(iSupportChilds, form));
+				ISupportChilds iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(webObject, form));
 				Tab newTab = (Tab)form.getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
-				String tabName = "tab_" + id.incrementAndGet();
-				while (!PersistFinder.INSTANCE.checkName(form, tabName))
-				{
-					tabName = "tab_" + id.incrementAndGet();
-				}
-				newTab.setText(tabName);
+				newTab.setText(uniqueName(form, "tab"));
 				newTab.setLocation(args.getLocation());
 				iSupportChilds.addChild(newTab);
 				return new IPersist[] { newTab };
@@ -298,7 +302,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				{
 					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(args.getLocation());
 					gc.setText("button");
-					gc.setOnActionMethodID(-1);
+					gc.setOnActionMethodID(null);
 					gc.setRolloverCursor(Cursor.HAND_CURSOR);
 					if (args.getStyleClass() != null)
 					{
@@ -373,15 +377,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				}
 				else if ("servoydefault-tabpanel".equals(name))
 				{
-					String compName = "tabpanel_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(form, compName))
+					String compName = uniqueName(form, "tabpanel");
+					TabPanel tabPanel;
+					if (parentSupportingElements instanceof AbstractContainer container)
 					{
-						compName = "tabpanel_" + id.incrementAndGet();
-					}
-					TabPanel tabPanel = null;
-					if (parentSupportingElements instanceof AbstractContainer)
-					{
-						tabPanel = ((AbstractContainer)parentSupportingElements).createNewTabPanel(compName);
+						tabPanel = container.createNewTabPanel(compName);
 					}
 					else
 					{
@@ -391,15 +391,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				}
 				else if ("servoydefault-splitpane".equals(name))
 				{
-					String compName = "tabpanel_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(form, compName))
+					String compName = uniqueName(form, "tabpanel");
+					TabPanel tabPanel;
+					if (parentSupportingElements instanceof AbstractContainer container)
 					{
-						compName = "tabpanel_" + id.incrementAndGet();
-					}
-					TabPanel tabPanel = null;
-					if (parentSupportingElements instanceof AbstractContainer)
-					{
-						tabPanel = ((AbstractContainer)parentSupportingElements).createNewTabPanel(compName);
+						tabPanel = container.createNewTabPanel(compName);
 					}
 					else
 					{
@@ -410,15 +406,11 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				}
 				else if ("servoycore-portal".equals(name))
 				{
-					String compName = "portal_" + id.incrementAndGet();
-					while (!PersistFinder.INSTANCE.checkName(form, compName))
+					String compName = uniqueName(form, "portal");
+					Portal portal;
+					if (parentSupportingElements instanceof AbstractContainer container)
 					{
-						compName = "portal_" + id.incrementAndGet();
-					}
-					Portal portal = null;
-					if (parentSupportingElements instanceof AbstractContainer)
-					{
-						portal = ((AbstractContainer)parentSupportingElements).createNewPortal(compName, args.getLocation());
+						portal = container.createNewPortal(compName, args.getLocation());
 					}
 					else
 					{
@@ -437,14 +429,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(name);
 					if (spec != null)
 					{
-						String compName = null;
-						String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
-						componentName = componentName.replaceAll("-", "_");
-						compName = componentName + "_" + id.incrementAndGet();
-						while (!PersistFinder.INSTANCE.checkName(form, compName))
-						{
-							compName = componentName + "_" + id.incrementAndGet();
-						}
+						String compName = uniqueName(form, spec.getDisplayName());
 
 						WebComponent webComponent = null;
 						if (parentSupportingElements instanceof Portal)
@@ -468,10 +453,8 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						}
 						if (args.allProperties.has("cssPos"))
 						{
-							CSSPosition cssPositionFromJSON = DesignerUtil.cssPositionFromJSON(form, webComponent, args.allProperties);
+							CSSPosition cssPositionFromJSON = SnapToComponentUtil.cssPositionFromJSON(form, webComponent, args.allProperties);
 							webComponent.setCssPosition(cssPositionFromJSON);
-							CSSPositionUtils.setLocation(webComponent, args.getLocation());
-							CSSPositionUtils.setSize(webComponent, args.getSize());
 						}
 						else
 						{
@@ -523,7 +506,8 @@ public class CreateComponentCommand extends BaseRestorableCommand
 										((ComponentTypeConfig)property.getConfig()).forFoundset != null)
 									{
 										// list form component
-										FormComponentTreeSelectDialog.selectFormComponent(webComponent, form);
+										FormComponentTreeSelectDialog.setFormComponentProperty(webComponent, form,
+											FormComponentTreeSelectDialog.selectFormComponent(webComponent, form));
 									}
 									else
 									{
@@ -590,8 +574,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									}
 								}
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
-									initialDropTarget.getParent() instanceof Form;
 								// this is a fix for dropping the responsive container on csspos
 								List<IPersist> res = createLayoutContainer(form, parentSupportingElements, layoutSpec, sameTypeChildContainer, config,
 									args.getRightSibling() != null
@@ -600,6 +582,24 @@ public class CreateComponentCommand extends BaseRestorableCommand
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
 									res.add(dropTarget);
+									if (initialDropTarget != null &&
+										!initialDropTarget.getUUID().equals(parentSupportingElements.getUUID()))
+									{
+										FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(parentSupportingElements);
+										ISupportChilds parent = PersistHelper.getFlattenedPersist(flattenedSolution, form, parentSupportingElements);
+										Iterator<IPersist> it = parent.getAllObjects();
+										while (it.hasNext())
+										{
+											IPersist child = it.next();
+											IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, form));
+											// parent is overridden, make sure all children are sent to designer
+											if (!extraChangedPersists.contains(overridePersist))
+											{
+												extraChangedPersists.add(overridePersist);
+											}
+										}
+
+									}
 								}
 //								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
 //								{
@@ -610,21 +610,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 //									fullRefreshNeeded = !layoutContainer.getUUID().equals(children.get(children.size() - 1).getUUID());
 //								}
 								IPersist[] result = res.toArray(new IPersist[0]);
-								if (fullRefreshNeeded)
-								{
-									IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-									for (IEditorReference editorRef : editorRefs)
-									{
-										IEditorPart editor = editorRef.getEditor(false);
-										if (editor instanceof BaseVisualFormEditor)
-										{
-											BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
-											if (activePage instanceof RfbVisualFormEditorDesignPage)
-												((RfbVisualFormEditorDesignPage)activePage).refreshContent();
-											break;
-										}
-									}
-								}
 								return result;
 							}
 						}
@@ -641,12 +626,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									{
 										if (applyTemplate[0] instanceof FormElementGroup)
 										{
-											Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
+											Iterator<ISupportFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
 											//convert iterator to []
-											ArrayList<IFormElement> list = new ArrayList<>();
+											ArrayList<ISupportFormElement> list = new ArrayList<>();
 											while (elements.hasNext())
 											{
-												IFormElement next = elements.next();
+												ISupportFormElement next = elements.next();
 												list.add(next);
 											}
 											return list.toArray(new IPersist[list.size()]);
@@ -696,6 +681,22 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		return null;
 	}
 
+	private static String uniqueName(Form form, Object type)
+	{
+		String prefix = "component";
+		if (type instanceof String str)
+		{
+
+			prefix = str.replaceAll("\\s", "").toLowerCase().replaceAll("-", "_");
+		}
+		String compName = null;
+		while (compName == null || !PersistFinder.INSTANCE.checkName(form, compName))
+		{
+			compName = prefix + "_" + id.incrementAndGet();
+		}
+		return compName;
+	}
+
 	private static IPersist[] createField(ISupportFormElements parentSupportingElements, int displayType, CreateComponentOptions args)
 		throws RepositoryException
 	{
@@ -731,7 +732,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		}
 		else
 		{
-			container.setLocation(new Point(location.x, location.x));
+			container.setLocation(new Point(location.x, location.y));
 			if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
 		}
 		newPersists.add(container);
@@ -762,7 +763,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						}
 						else if (jsonObject.has("componentName"))
 						{
-							String compName = "component_" + id.incrementAndGet();
+							String compName = uniqueName(form, "component");
 							WebComponent component = container.createNewWebComponent(compName, jsonObject.getString("componentName"));
 							newPersists.add(component);
 							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
@@ -799,15 +800,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentSpecName);
 		if (spec != null)
 		{
-			String compName = null;
-			String componentName = spec.getDisplayName().replaceAll("\\s", "").toLowerCase();
-			componentName = componentName.replaceAll("-", "_");
-			compName = componentName + "_" + id.incrementAndGet();
-			while (!PersistFinder.INSTANCE.checkName(form, compName))
-			{
-				compName = componentName + "_" + id.incrementAndGet();
-			}
-
 			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWebComponent, pd, propertyName, indexIfInArray);
 			webComponent.setTypeName(componentSpecName);
 
@@ -922,11 +914,42 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				}
 
 				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, asList(newPersist));
+
+				if (form.getExtendsID() != null && newPersist.length > 1)
+				{
+					for (IPersist persist : newPersist)
+					{
+						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() != null)
+						{
+							// very likely a complex inheritance situation that won't refresh correctly, just reinitialize form designer
+							doFullFormRefresh(null);
+							break;
+						}
+					}
+				}
 			}
 		}
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError("Could not undo create elements", e);
+		}
+	}
+
+	public static void doFullFormRefresh(LayoutContainer container)
+	{
+		BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
+		if (editor != null)
+		{
+			BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
+			if (activePage instanceof RfbVisualFormEditorDesignPage)
+			{
+				if (container != null && ((RfbVisualFormEditorDesignPage)activePage).getShowedContainer() != null)
+				{
+					((RfbVisualFormEditorDesignPage)activePage).zoomOut();
+					((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
+				}
+				((RfbVisualFormEditorDesignPage)activePage).refreshContent();
+			}
 		}
 	}
 
@@ -946,7 +969,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		private PersistIdentifier dropTarget;
 		private boolean keepOldSelection;
 		private boolean dropTargetIsSibling;
-		private boolean prepend;
+		private Integer index;
 
 		public CreateComponentOptions()
 		{
@@ -1031,9 +1054,9 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			this.dropTargetIsSibling = dropTargetIsSibling;
 		}
 
-		public void setPrepend(boolean prepend)
+		public void setIndex(Integer index)
 		{
-			this.prepend = prepend;
+			this.index = index;
 		}
 
 		public void setKeepOldSelection(boolean keepOldSelection)
@@ -1101,9 +1124,9 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			return dropTargetIsSibling;
 		}
 
-		public boolean isPrepend()
+		public Integer getIndex()
 		{
-			return prepend;
+			return index;
 		}
 
 		public boolean isKeepOldSelection()
@@ -1125,7 +1148,12 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			options.ghostPropertyName = args.optString("ghostPropertyName", null);
 			options.dropTarget = PersistIdentifier.fromJSONString(args.optString("dropTargetUUID", null));
 			options.dropTargetIsSibling = args.optBoolean("dropTargetIsSibling", false);
-			options.prepend = args.optBoolean("prepend", false);
+			Object index = args.opt("index");
+			if (index != null)
+			{
+				options.index = Integer.valueOf(index.toString());
+			}
+
 			options.keepOldSelection = args.optBoolean("keepOldSelection", false);
 
 			options.location = new Point(args.optInt("x"), args.optInt("y"));

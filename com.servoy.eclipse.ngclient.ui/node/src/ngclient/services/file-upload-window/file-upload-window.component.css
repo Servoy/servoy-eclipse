@@ -79,6 +79,15 @@
          -o-transition: width .6s ease;
             transition: width .6s ease;
   }
+  
+  .oversized-file {
+    color: #999;
+    background-color: #f9f9f9;
+  }
+    
+  .oversized-file td {
+    font-style: italic;
+  }
 
   #svy-upload-id {
       display: none;

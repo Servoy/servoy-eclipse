@@ -49,7 +49,7 @@ describe('ComponentConverter', () => {
         typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, loggerFactory, viewportService, sabloService, uiBlockerService));
         
         typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, new DateType());
-        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService), true);
+        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, converterService, loggerFactory), true);
 
         // here we feed in the client side equivalent some (imaginary test) servoy .spec file
         // so we can play a bit with push to server settings in tests

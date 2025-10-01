@@ -27,8 +27,9 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.designer.util.SnapToComponentUtil;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -96,6 +97,10 @@ public class SetPropertiesHandler implements IServerService
 										propertyName, properties.opt(propertyName)));
 								}
 							}
+							if (persist instanceof WebFormComponentChildType)
+							{
+								persist = ((WebFormComponentChildType)persist).getElement();
+							}
 							if (persist instanceof ISupportCSSPosition && CSSPositionUtils.useCSSPosition(persist) &&
 								(properties.has("x") || properties.has("y") ||
 									properties.has("width") || properties.has("height")))
@@ -106,8 +111,7 @@ public class SetPropertiesHandler implements IServerService
 								CSSPosition newPosition = null;
 								if (properties.has("cssPos"))
 								{
-									newPosition = DesignerUtil.cssPositionFromJSON(editorPart.getForm(), persist, properties,
-										properties.has("width") && properties.has("height"));
+									newPosition = SnapToComponentUtil.cssPositionFromJSON(editorPart.getForm(), persist, properties);
 								}
 								else
 								{

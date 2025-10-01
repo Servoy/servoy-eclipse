@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.function.Supplier;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.util.Policy;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
@@ -81,6 +83,9 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor<Image> {
 	ImageDescriptor(boolean shouldBeCached) {
 		super(shouldBeCached);
 	}
+
+	private static final ImageDescriptor NULL_IMAGE = createFromImageDataProvider(z -> null);
+
 	/**
 	 * Creates and returns a new image descriptor from a file.
 	 *
@@ -94,7 +99,22 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor<Image> {
 			if (url != null)
 				return new URLImageDescriptor(url);
 		}
-		return new FileImageDescriptor(location, filename);
+		URL url;
+		if (location == null) {
+			try {
+				// Use IPath, which can handle illegal path's on Windows like: /C:/data/other
+				url = IPath.fromOSString(filename).toPath().toUri().toURL();
+			} catch (MalformedURLException e) {
+				Policy.logException(e);
+				url = null;
+			}
+		} else {
+			url = location.getResource(filename);
+		}
+		if (url == null) {
+			return NULL_IMAGE; // Defer failure to the time when the image is created
+		}
+		return new URLImageDescriptor(url);
 	}
 
 	/**
@@ -154,7 +174,6 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor<Image> {
 	 *
 	 * @see Image#Image(Device, Image, int)
 	 * @since 3.1
-	 *
 	 */
 	public static ImageDescriptor createWithFlags(ImageDescriptor originalImage, int swtFlags) {
 		return new DerivedImageDescriptor(originalImage, swtFlags);
@@ -221,6 +240,32 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor<Image> {
 	}
 
 	/**
+	 * Convenient method to create an ImageDescriptor from an URI.
+	 *
+	 * Delegates to {@link ImageDescriptor#createFromURL(URL)}. <em>Important</em>
+	 * This method should only be used when it's guaranteed that the given
+	 * {@link URI} is also a valid {@link URL}, in order to avoid the
+	 * {@link MalformedURLException} thrown by {@link URI#toURL()}.
+	 *
+	 * If the URI is {@code null} or not a valid {@link URL}, then an image from
+	 * {@link #getMissingImageDescriptor()} will be returned.
+	 *
+	 * @param uriIconPath The URI of the image file.
+	 * @return a new image descriptor
+	 *
+	 * @since 3.36
+	 */
+	public static ImageDescriptor createFromURI(URI uriIconPath) {
+		try {
+			return ImageDescriptor.createFromURL(uriIconPath != null ? uriIconPath.toURL() : null);
+		} catch (MalformedURLException e) {
+			// return the missing image placeholder to indicate
+			// the incorrect call without interfering with the user flow
+			return getMissingImageDescriptor();
+		}
+	}
+
+	/**
 	 * Convenient method to create an ImageDescriptor from an URI
 	 *
 	 * Delegates to ImageDescriptor createFromURL
@@ -229,15 +274,11 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor<Image> {
 	 * @return a new image descriptor
 	 *
 	 * @since 3.19
+	 * @deprecated Use {@link #createFromURI(URI)} instead.
 	 */
+	@Deprecated(since = "3.36", forRemoval = true)
 	public ImageDescriptor imageDescriptorFromURI(URI uriIconPath) {
-		try {
-			return ImageDescriptor.createFromURL(new URL(uriIconPath.toString()));
-		} catch (MalformedURLException | NullPointerException e) {
-			// return the missing image placeholder to indicate
-			// the incorrect call without interfering with the user flow
-			return getMissingImageDescriptor();
-		}
+		return createFromURI(uriIconPath);
 	}
 
 	@Override
@@ -428,12 +469,15 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor<Image> {
 		return getImageData(100);
 	}
 
+	private static final ImageDescriptor MISSING_IMAGE = createFromImageDataProvider(
+			z -> z == 100 ? DEFAULT_IMAGE_DATA : null);
+
 	/**
 	 * Returns the shared image descriptor for a missing image.
 	 *
 	 * @return the missing image descriptor
 	 */
 	public static ImageDescriptor getMissingImageDescriptor() {
-		return MissingImageDescriptor.getInstance();
+		return MISSING_IMAGE;
 	}
 }

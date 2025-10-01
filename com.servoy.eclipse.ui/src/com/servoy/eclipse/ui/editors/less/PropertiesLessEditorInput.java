@@ -61,7 +61,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		if (input != null)
 		{
 			String fileName = input.getName();
-			if (fileName.startsWith(CUSTOM_PROPERTIES_LESS) && fileName.endsWith(".less"))
+			if ((fileName.startsWith("solution_properties") || fileName.startsWith(CUSTOM_PROPERTIES_LESS)) && fileName.endsWith(".less"))
 			{
 				content = getFileContent(input);
 				if (content != null)
@@ -96,21 +96,37 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		this.properties = loadProperties(content, null);
 	}
 
+	public boolean hasProperties()
+	{
+		return this.properties != null && !this.properties.isEmpty();
+	}
+
 	private LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> loadProperties(String text,
 		LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> previousValues)
 	{
 		// First read in the default properties file for the given version (that is in the text)
 		String defaultThemeProperties;
 		int versionIndex = text.indexOf(ThemeResourceLoader.THEME_LESS + "?version=");
+		int length = (ThemeResourceLoader.THEME_LESS + "?version=").length();
 		if (versionIndex == -1)
 		{
-			defaultThemeProperties = ThemeResourceLoader.getLatestThemeProperties();
-			version = "latest";
+			versionIndex = text.indexOf(ThemeResourceLoader.PROPERTIES_LESS + "?version=");
+			length = (ThemeResourceLoader.PROPERTIES_LESS + "?version=").length();
+		}
+		if (versionIndex == -1)
+		{
+			if (text.indexOf(ThemeResourceLoader.THEME_LESS) > 0 ||
+				text.indexOf(ThemeResourceLoader.PROPERTIES_LESS) > 0)
+			{
+				defaultThemeProperties = ThemeResourceLoader.getLatestThemeProperties();
+				version = "latest";
+			}
+			else return null;
 		}
 		else
 		{
 			int endIndex = text.indexOf(';', versionIndex);
-			version = text.substring(versionIndex + (ThemeResourceLoader.THEME_LESS + "?version=").length(), endIndex - 1);
+			version = text.substring(versionIndex + length, endIndex - 1);
 			defaultThemeProperties = ThemeResourceLoader.getThemeProperties(version);
 		}
 
@@ -351,26 +367,42 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	public String getText()
 	{
 		StringBuilder content = new StringBuilder(getFileContent(this));
-		int lastImport = content.lastIndexOf("@import");
-		if (lastImport > 0)
+		int custom = content.indexOf("// END own custom properties");
+		if (custom > 0)
 		{
-			lastImport = content.indexOf("\n", lastImport) + 1;
-			if (lastImport > 0)
+			custom = content.indexOf("\n", custom) + 1;
+			if (custom > 0)
 			{
-				content.setLength(lastImport);
+				content.setLength(custom);
 			}
 		}
+		else
+		{
+			int lastImport = content.lastIndexOf("@import");
+			if (lastImport > 0)
+			{
+				lastImport = content.indexOf("\n", lastImport) + 1;
+				if (lastImport > 0)
+				{
+					content.setLength(lastImport);
+				}
+			}
+		}
+
 
 		for (String category : properties.keySet())
 		{
 			LinkedHashMap<String, LessPropertyEntry> props = properties.get(category);
-			content.append("\n/* START ");
-			content.append(category);
-			content.append(" */");
+			boolean outputCategory = false;
 			for (LessPropertyEntry prop : props.values())
 			{
 				if (prop.getDefaultValue() != null && !prop.getDefaultValue().equals(prop.getValue()))
 				{
+					if (!outputCategory)
+					{
+						content.append("\n\n/* START ").append(category).append(" */");
+						outputCategory = true;
+					}
 					content.append("\n\n");
 					content.append(prop.toString());
 					content.append("; // default:");

@@ -31,6 +31,14 @@
             id="com.servoy.eclipse.ui.views.FavoritesView"
             name="Favorites">
       </view>
+      <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.DocumentationView"
+            icon="icons/solution.png"
+            id="com.servoy.eclipse.ui.views.DocumentationView"
+            name="Documentation"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -67,6 +75,13 @@
                relationship="stack"
                relative="org.eclipse.help.ui.HelpView"
                visible="false">
+         </view>
+         <view
+               id="com.servoy.eclipse.ui.views.DocumentationView"
+               minimized="false"
+               relationship="stack"
+               relative="org.eclipse.ui.console.ConsoleView"
+               visible="true">
          </view>
       </perspectiveExtension>
       <perspectiveExtension
@@ -295,6 +310,18 @@
                contentTypeId="com.servoy.eclipse.core.resource.relation">
          </contentTypeBinding>
       </editor>
+       <editor
+            class="com.servoy.eclipse.ui.editors.MenuEditor"
+            default="true"
+            extensions="mnu"
+            icon="icons/column.png"
+            id="com.servoy.eclipse.ui.editors.MenuEditor"
+            matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
+            name="Menu Editor">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.menu">
+         </contentTypeBinding>
+      </editor>
       <editor
             class="com.servoy.eclipse.ui.editors.ValueListEditor"
             default="true"
@@ -374,7 +401,7 @@
        <editor
              class="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              default="true"
-             filenames="custom_servoy_theme_properties.less"
+             filenames="custom_servoy_theme_properties.less,solution_properties.less"
              icon="icons/theme_properties.png"
              id="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              matchingStrategy="com.servoy.eclipse.ui.editors.less.PropertiesLessMatchingStrategy"
@@ -399,12 +426,6 @@
             class="com.servoy.eclipse.ui.preferences.StartupPreferences"
             id="com.servoy.eclipse.ui.startup"
             name="Startup">
-      </page>
-      <page
-            category="com.servoy.eclipse.ui.preference"
-            class="com.servoy.eclipse.ui.preferences.TeamPreferences"
-            id="com.servoy.eclipse.ui.team"
-            name="Team Development">
       </page>
       <page
             category="com.servoy.eclipse.ui.preference"
@@ -573,16 +594,6 @@
                style="push"
                tooltip="Open Servoy Forum">
          </action> 
-          <action
-            class="com.servoy.eclipse.ui.PostOnTheForumAction"
-            icon="icons/forum.png"
-            id="com.servoy.eclipse.ui.NewForumPost"
-            name="Forum Post"
-            label="Ask on the Forum"
-            menubarPath="help/intro"
-            style="push"
-            tooltip="Post in the forum directly from the developer.">
-      </action>        
       </actionSet>
       <actionSet
             id="com.servoy.eclipse.ui.choosers"
@@ -639,7 +650,7 @@
                menubarPath="help/updates"
                style="push"
                tooltip="Servoy Step By Step Tutorial">
-         </action>          
+         </action>
       </actionSet>
         <!-- main concepts page, disabled for now
       <actionSet
@@ -784,7 +795,12 @@
 			find="M1+M2+Z"
 			replace="M4+M2+Z"
 			platforms="cocoa,carbon">
-		</sequenceModifier>	
+		</sequenceModifier>
+		<sequenceModifier
+            find="M2+M3+K"
+            replace="M2+M4+K"
+            platforms="cocoa,carbon">
+        </sequenceModifier> 
         <key
               commandId="com.servoy.eclipse.ui.search"
               schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
@@ -1330,4 +1346,11 @@
           id="com.servoy.eclipse.ui.views.TutorialView">
     </excludeSources>
  </extension>
+    <extension
+         point="org.apache.tomcat.serviceprovider">
+      <serviceprovider
+            class="com.servoy.eclipse.developersolution.ServicesProvider"
+            id="servoy_ngclient.servicesprovider">
+      </serviceprovider>
+   </extension>
 </plugin>

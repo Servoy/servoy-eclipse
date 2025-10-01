@@ -33,13 +33,13 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.debug.layout.MobileFormLayout;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.ISupportFormElement;
 
 /**
  * Graphical edit part for element groups in mobile editor.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class MobileGroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 {
@@ -49,7 +49,7 @@ public class MobileGroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 	}
 
 	@Override
-	protected List<IFormElement> getModelChildren()
+	protected List<ISupportFormElement> getModelChildren()
 	{
 		return MobileFormLayout.getGroupElements(getGroup());
 	}

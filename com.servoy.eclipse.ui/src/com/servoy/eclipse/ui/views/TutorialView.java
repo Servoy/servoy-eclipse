@@ -68,6 +68,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
@@ -311,13 +312,16 @@ public class TutorialView extends ViewPart
 
 								if (event.getSource() instanceof StyledText)
 								{
-									String loginToken = getLoginToken();
-									if (loginToken != null)
-									{
-										BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-											Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + tutorialID, true, false);
-										tutorialDialog.open(true);
-									}
+									ServoyLoginDialog.getLoginToken(loginToken -> {
+										if (loginToken != null)
+										{
+											Display.getDefault().asyncExec(() -> {
+												BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+													Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + tutorialID, true, false);
+												tutorialDialog.open();
+											});
+										}
+									});
 								}
 							}
 						});
@@ -387,14 +391,15 @@ public class TutorialView extends ViewPart
 				@Override
 				public void handleEvent(Event event)
 				{
-					String loginToken = getLoginToken();
-					if (loginToken != null)
-					{
-						final String currentTutorialID = dataModel.optString("tutorialID");
-						BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-							Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + currentTutorialID, true, false);
-						tutorialDialog.open(true);
-					}
+					ServoyLoginDialog.getLoginToken(loginToken -> {
+						if (loginToken != null)
+						{
+							final String currentTutorialID = dataModel.optString("tutorialID");
+							BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+								Activator.TUTORIALS_URL + loginToken + "&viewTutorial=" + currentTutorialID, true, false);
+							tutorialDialog.open();
+						}
+					});
 				}
 			});
 
@@ -527,10 +532,9 @@ public class TutorialView extends ViewPart
 							}
 						}
 					}
-					catch (MalformedURLException e1)
+					catch (MalformedURLException ex)
 					{
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						ServoyLog.logError(ex);
 					}
 					if (size == null)
 					{
@@ -549,7 +553,7 @@ public class TutorialView extends ViewPart
 					{
 						dialog = new BrowserDialog(parent.getShell(),
 							rowData.optString("gifURL"), false, false);
-						dialog.open(location, size, false);
+						dialog.open(location, size);
 					}
 					else
 					{
@@ -708,7 +712,7 @@ public class TutorialView extends ViewPart
 						}
 						catch (IllegalArgumentException e)
 						{
-							e.printStackTrace();
+							ServoyLog.logError(e);
 						}
 						if (range != null && range.underline && range.underlineStyle == SWT.UNDERLINE_LINK)
 						{
@@ -718,7 +722,7 @@ public class TutorialView extends ViewPart
 							}
 							catch (PartInitException | MalformedURLException e)
 							{
-								e.printStackTrace();
+								ServoyLog.logError(e);
 							}
 						}
 					}
@@ -865,16 +869,6 @@ public class TutorialView extends ViewPart
 		return copyText;//.trim().replaceAll(" +", " ");
 	}
 
-	private String getLoginToken()
-	{
-		String loginToken = ServoyLoginDialog.getLoginToken();
-		if (loginToken == null)
-		{
-			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-		}
-
-		return loginToken;
-	}
 
 	private Image getImageFromEncodedString(String imgBase64)
 	{

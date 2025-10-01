@@ -59,7 +59,7 @@ public class DiscardExistingSecurityInfo extends SecurityQuickFix
 		IProject project = marker.getResource().getProject();
 		ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 		ServoyResourcesProject activeResourceProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
-		boolean ok = (activeResourceProject.getProject() == project);
+		boolean ok = (activeResourceProject != null && activeResourceProject.getProject() == project);
 		if (!ok) for (ServoyProject p : activeModules)
 		{
 			if (p.getProject() == project)

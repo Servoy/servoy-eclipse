@@ -23,11 +23,11 @@ import com.servoy.j2db.persistence.Form;
 
 /**
  * IValueEditor for forms, opens form designer.
- * 
+ *
  * @author rgansevles
  */
 
-public class FormValueEditor implements IValueEditor<Integer>
+public class FormValueEditor implements IValueEditor<String>
 {
 	protected final FlattenedSolution flattenedSolution;
 
@@ -36,15 +36,14 @@ public class FormValueEditor implements IValueEditor<Integer>
 		this.flattenedSolution = flattenedSolution;
 	}
 
-	public void openEditor(Integer value)
+	public void openEditor(String value)
 	{
-		EditorUtil.openFormDesignEditor(flattenedSolution.getForm(value.intValue()));
+		EditorUtil.openFormDesignEditor(flattenedSolution.getForm(value));
 	}
 
-	public boolean canEdit(Integer value)
+	public boolean canEdit(String value)
 	{
 		if (value == null) return false;
-		int val = value.intValue();
-		return val != Form.NAVIGATOR_NONE && val != Form.NAVIGATOR_DEFAULT && val != Form.NAVIGATOR_IGNORE && flattenedSolution.getForm(val) != null;
+		return !Form.NAVIGATOR_NONE.equals(value) && !Form.NAVIGATOR_IGNORE.equals(value) && flattenedSolution.getForm(value) != null;
 	}
 }

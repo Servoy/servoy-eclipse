@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Servoy Cloud
+Bundle-Name: Servoy AI Bridge
 Bundle-SymbolicName: com.servoy.eclipse.aibridge;singleton:=true
-Bundle-Version: 2023.9.0.3900_rc
+Bundle-Version: 2025.12.0.4120_rc
 Export-Package: com.servoy.eclipse.aibridge
 Import-Package: com.fasterxml.jackson.annotation;version="2.15.3",
  com.fasterxml.jackson.core.type;version="2.15.3",
@@ -16,12 +16,6 @@ Import-Package: com.fasterxml.jackson.annotation;version="2.15.3",
  org.apache.commons.io;version="2.13.0",
  org.apache.commons.io.file;version="2.8.0",
  org.apache.commons.lang3;version="3.12.0",
- org.apache.hc.client5.http.classic.methods;version="5.2.1",
- org.apache.hc.client5.http.impl.classic;version="5.2.1",
- org.apache.hc.core5.http;version="5.2.3",
- org.apache.hc.core5.http.io;version="5.2.3",
- org.apache.hc.core5.http.io.entity;version="5.2.3",
- org.apache.hc.core5.http.message;version="5.2.3",
  org.eclipse.dltk.ast,
  org.eclipse.dltk.core,
  org.eclipse.dltk.internal.javascript.ti,
@@ -60,6 +54,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide;bundle-version="3.21.0",
  org.eclipse.ui.editors;bundle-version="3.16.0",
  com.servoy.eclipse.ui.tweaks;bundle-version="2023.12.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.aibridge
 Bundle-ActivationPolicy: lazy

@@ -68,7 +68,7 @@ public class FormComponentTreeSelectDialog extends TreeSelectDialog
 			selection != null ? new StructuredSelection(selection) : null, true, "FormComponentDialog", null, false);
 	}
 
-	public static void selectFormComponent(WebComponent component, Form context)
+	public static RelatedForm selectFormComponent(WebComponent component, Form context)
 	{
 		RelatedForm initialSelection = null;
 		Object containedForm = component.getProperty("containedForm");
@@ -97,17 +97,25 @@ public class FormComponentTreeSelectDialog extends TreeSelectDialog
 			ISelection selection = dialog.getSelection();
 			if (selection instanceof IStructuredSelection && ((IStructuredSelection)selection).getFirstElement() instanceof RelatedForm)
 			{
-				RelatedForm relatedForm = (RelatedForm)((IStructuredSelection)selection).getFirstElement();
-				JSONObject json = new JSONObject();
-				json.put(FormComponentPropertyType.SVY_FORM, relatedForm.form.getUUID().toString());
-				component.setProperty("containedForm", json);
-				json = new JSONObject();
-				json.put(FoundsetPropertyType.FOUNDSET_SELECTOR,
-					relatedForm.relations != null ? EclipseDatabaseUtils.getRelationsString(relatedForm.relations)
-						: (Utils.equalObjects(relatedForm.form.getDataSource(), context.getDataSource()) ? "" : relatedForm.form.getDataSource()));
-				component.setProperty("foundset", json);
-				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, component, true);
+				return (RelatedForm)((IStructuredSelection)selection).getFirstElement();
 			}
+		}
+		return null;
+	}
+
+	public static void setFormComponentProperty(WebComponent component, Form context, RelatedForm relatedForm)
+	{
+		if (relatedForm != null)
+		{
+			JSONObject json = new JSONObject();
+			json.put(FormComponentPropertyType.SVY_FORM, relatedForm.form.getUUID().toString());
+			component.setProperty("containedForm", json);
+			json = new JSONObject();
+			json.put(FoundsetPropertyType.FOUNDSET_SELECTOR,
+				relatedForm.relations != null ? EclipseDatabaseUtils.getRelationsString(relatedForm.relations)
+					: (Utils.equalObjects(relatedForm.form.getDataSource(), context.getDataSource()) ? "" : relatedForm.form.getDataSource()));
+			component.setProperty("foundset", json);
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, component, true);
 		}
 	}
 }

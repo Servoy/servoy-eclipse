@@ -30,6 +30,8 @@ import org.eclipse.jface.dialogs.PopupDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.pde.api.tools.annotations.NoExtend;
+import org.eclipse.pde.api.tools.annotations.NoInstantiate;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
@@ -52,10 +54,9 @@ import org.osgi.framework.FrameworkUtil;
  * <li>an image registry</li>
  * <li>a resource bundle</li>
  * </ul>
- *
- * @noinstantiate This class is not intended to be instantiated by clients.
- * @noextend This class is not intended to be subclassed by clients.
  */
+@NoInstantiate
+@NoExtend
 public class JFaceResources {
 
 	/**
@@ -418,7 +419,6 @@ public class JFaceResources {
 
 	/**
 	 * Initialize default images in JFace's image registry.
-	 *
 	 */
 	private static void initializeDefaultImages() {
 
@@ -428,33 +428,33 @@ public class JFaceResources {
 		} catch (Throwable exception) {
 			// Test to see if OSGI is present
 		}
-		declareImage(bundle, Wizard.DEFAULT_IMAGE, ICONS_PATH + "page.png", //$NON-NLS-1$
-				Wizard.class, "images/page.png"); //$NON-NLS-1$
+		declareImage(bundle, Wizard.DEFAULT_IMAGE, ICONS_PATH + "page.svg", //$NON-NLS-1$
+				Wizard.class, "images/page.svg"); //$NON-NLS-1$
 
 		// register default images for dialogs
 		declareImage(bundle, Dialog.DLG_IMG_MESSAGE_INFO, ICONS_PATH
-				+ "message_info.png", Dialog.class, "images/message_info.png"); //$NON-NLS-1$ //$NON-NLS-2$
+				+ "message_info.svg", Dialog.class, "images/message_info.svg"); //$NON-NLS-1$ //$NON-NLS-2$
 		declareImage(bundle, Dialog.DLG_IMG_MESSAGE_WARNING, ICONS_PATH
-				+ "message_warning.png", Dialog.class, //$NON-NLS-1$
-				"images/message_warning.png"); //$NON-NLS-1$
+				+ "message_warning.svg", Dialog.class, //$NON-NLS-1$
+				"images/message_warning.svg"); //$NON-NLS-1$
 		declareImage(bundle, Dialog.DLG_IMG_MESSAGE_ERROR, ICONS_PATH
-				+ "message_error.png", Dialog.class, "images/message_error.png");//$NON-NLS-1$ //$NON-NLS-2$
+				+ "message_error.svg", Dialog.class, "images/message_error.svg");//$NON-NLS-1$ //$NON-NLS-2$
 		declareImage(bundle, Dialog.DLG_IMG_HELP,
-				ICONS_PATH + "help.png", Dialog.class, "images/help.png");//$NON-NLS-1$ //$NON-NLS-2$
+				ICONS_PATH + "help.svg", Dialog.class, "images/help.svg");//$NON-NLS-1$ //$NON-NLS-2$
 		declareImage(
 				bundle,
 				TitleAreaDialog.DLG_IMG_TITLE_BANNER,
-				ICONS_PATH + "title_banner.png", TitleAreaDialog.class, "images/title_banner.png");//$NON-NLS-1$ //$NON-NLS-2$
+				ICONS_PATH + "title_banner.svg", TitleAreaDialog.class, "images/title_banner.svg");//$NON-NLS-1$ //$NON-NLS-2$
 		declareImage(
 				bundle,
 				PreferenceDialog.PREF_DLG_TITLE_IMG,
-				ICONS_PATH + "pref_dialog_title.png", PreferenceDialog.class, "images/pref_dialog_title.png");//$NON-NLS-1$ //$NON-NLS-2$
+				ICONS_PATH + "pref_dialog_title.svg", PreferenceDialog.class, "images/pref_dialog_title.svg");//$NON-NLS-1$ //$NON-NLS-2$
 		declareImage(bundle, PopupDialog.POPUP_IMG_MENU, ICONS_PATH
-				+ "popup_menu.png", PopupDialog.class, "images/popup_menu.png");//$NON-NLS-1$ //$NON-NLS-2$
+				+ "popup_menu.svg", PopupDialog.class, "images/popup_menu.svg");//$NON-NLS-1$ //$NON-NLS-2$
 		declareImage(
 				bundle,
 				PopupDialog.POPUP_IMG_MENU_DISABLED,
-				ICONS_PATH + "popup_menu_disabled.png", PopupDialog.class, "images/popup_menu_disabled.png");//$NON-NLS-1$ //$NON-NLS-2$
+				ICONS_PATH + "popup_menu_disabled.svg", PopupDialog.class, "images/popup_menu_disabled.svg");//$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -475,7 +475,6 @@ public class JFaceResources {
 	 *            image is relative to
 	 * @param fallbackPath
 	 *            the path relative to the fallback {@link Class}
-	 *
 	 */
 	private static final void declareImage(Object bundle, String key, String path, Class<?> fallback,
 			String fallbackPath) {

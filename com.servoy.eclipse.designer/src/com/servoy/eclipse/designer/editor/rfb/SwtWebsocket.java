@@ -30,19 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.EncodeException;
-import javax.websocket.Extension;
-import javax.websocket.MessageHandler;
-import javax.websocket.MessageHandler.Partial;
-import javax.websocket.MessageHandler.Whole;
-import javax.websocket.RemoteEndpoint.Async;
-import javax.websocket.RemoteEndpoint.Basic;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
-import javax.websocket.server.ServerEndpoint;
-
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
@@ -55,6 +42,19 @@ import com.servoy.eclipse.designer.rfb.endpoint.EditorContentEndpoint;
 import com.servoy.eclipse.designer.rfb.endpoint.EditorEndpoint;
 import com.servoy.j2db.server.ngclient.NGRuntimeWindowManager;
 import com.servoy.j2db.util.Debug;
+
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.EncodeException;
+import jakarta.websocket.Extension;
+import jakarta.websocket.MessageHandler;
+import jakarta.websocket.MessageHandler.Partial;
+import jakarta.websocket.MessageHandler.Whole;
+import jakarta.websocket.RemoteEndpoint.Async;
+import jakarta.websocket.RemoteEndpoint.Basic;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
+import jakarta.websocket.server.ServerEndpoint;
 
 /**
  * Fake WebSocket implementation that mimics WebSocket via SWT Browser functions.
@@ -104,7 +104,7 @@ public class SwtWebsocket
 		}
 
 		websocketEndpoint = new EditorContentEndpoint();
-		((EditorContentEndpoint)websocketEndpoint).start(newSession, String.valueOf(contentClientnr), args[1], args[2].split("\\?")[0]);
+		websocketEndpoint.start(newSession, String.valueOf(contentClientnr), args[1], args[2].split("\\?")[0]);
 		websocketEndpoint.getWindow().getSession().registerServerService(NGRuntimeWindowManager.WINDOW_SERVICE, new IServerService()
 		{
 			@Override

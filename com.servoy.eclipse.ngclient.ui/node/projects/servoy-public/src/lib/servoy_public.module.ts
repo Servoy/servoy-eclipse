@@ -15,7 +15,6 @@ import { FormatDirective } from './format/formatcontrolvalueaccessor.directive';
 import { FormattingService } from './format/formatting.service';
 import { ComponentContributor } from './basecomponent';
 import { SabloTabseq } from './directives/sablotabseq.directive';
-import { WindowRefService } from './services/windowref.service';
 
 @NgModule({
     declarations: [ TabFixDirective,

@@ -144,7 +144,7 @@ public class ElementSettingsModel
 						if (formElements.stream().anyMatch(formElement -> formElement.getUUID().equals(uuid)))
 						{
 							ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().setFormSecurityAccess(
-								ApplicationServerRegistry.get().getClientId(), group, currentGroupSecurityInfo.get(uuid), uuid, solutionName);
+								ApplicationServerRegistry.get().getClientId(), group, currentGroupSecurityInfo.get(uuid), form.getUUID(), uuid, solutionName);
 						}
 
 					}

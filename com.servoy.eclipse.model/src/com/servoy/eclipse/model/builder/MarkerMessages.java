@@ -244,7 +244,8 @@ public class MarkerMessages
 		"Style class \"{0}\" from element \"{1}\" in form \"{2}\" is set but no style is assigned to form.", ServoyBuilder.MISSING_STYLE);
 
 	public static ServoyMarker MediaTIFF = new ServoyMarker(
-		"Media {0} will not display correctly in Webclient since many browsers do not support TIFF image format.", ServoyBuilder.MEDIA_MARKER_TYPE);
+		"Media {0} will not display correctly in NGClient/Titanium Client since many browsers do not support TIFF image format.",
+		ServoyBuilder.MEDIA_MARKER_TYPE);
 
 
 	public static ServoyMarker VariantIdUnresolved = new ServoyMarker(
@@ -528,12 +529,6 @@ public class MarkerMessages
 		"Element in form \"{0}\" has a 'rolloverImageMedia' property while no 'imageMedia' property is set.", ServoyBuilder.MEDIA_MARKER_TYPE);
 
 	/**
-	 * The roll over imageand cursor is not working in Smart Client tableview/listview form.
-	 */
-	public static ServoyMarker RolloverImageAndCursorNotWorking = new ServoyMarker(
-		"Roll over image and cursor are not supported in Smart client tableview/listview forms.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
-
-	/**
 	 * The mobile form navigator overlaps the left header button
 	 */
 	public static ServoyMarker MobileFormNavigatorOverlapsHeaderButton = new ServoyMarker(
@@ -694,9 +689,6 @@ public class MarkerMessages
 	public static ServoyMarker ElementExtendsDeletedElement = new ServoyMarker("Element in form \"{0}\" extends a deleted element from the parent form.", //$NON-NLS-1$
 		ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE);
 
-	/**
-	 * The roll over imageand cursor is not working in Smart Client tableview/listview form.
-	 */
 	public static ServoyMarker MissingSpecification = new ServoyMarker("{0} specification \"{1}\" from package \"{2}\" is missing.",
 		ServoyBuilder.MISSING_SPEC);
 

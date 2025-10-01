@@ -1,4 +1,4 @@
-import { Injectable, Inject, Renderer2, RendererFactory2, ComponentRef } from '@angular/core';
+import { Injectable, Inject, Renderer2, RendererFactory2, ComponentRef, DOCUMENT } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
@@ -6,13 +6,14 @@ import { ServoyService } from '../servoy.service';
 import { DialogWindowComponent } from './dialog-window/dialog-window.component';
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
 import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow';
-import { WindowRefService, LocalStorageService, SessionStorageService, MainViewRefService } from '@servoy/public';
+import { WindowRefService, LocalStorageService, SessionStorageService, MainViewRefService, PopupStateService } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
-import { DOCUMENT, PlatformLocation } from '@angular/common';
+import { PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { FormSettings } from '../types';
+import { environment as env} from '../../environments/environment';
 
 @Injectable()
 export class WindowService {
@@ -41,6 +42,7 @@ export class WindowService {
         private webSocketService: WebsocketService,
         private sabloLoadingIndicatorService: LoadingIndicatorService,
         rendererFactory: RendererFactory2,
+        private popupStateService: PopupStateService,
         @Inject(DOCUMENT) private doc: Document) {
 
         this.platformLocation.onPopState(() => {
@@ -50,6 +52,15 @@ export class WindowService {
 
         this.windowCounter = 0;
         this.renderer2 = rendererFactory.createRenderer(null, null);
+        
+        if (env.mobile && (this.windowRefService.nativeWindow as any)._formdata_) {
+			const formsData: Array<{[key: string]: any}> = (this.windowRefService.nativeWindow as any)._formdata_;
+			formsData.forEach(formData => {
+				for (const formName in formData) {
+					this.formService.createFormCache(formName, formData[formName], formName);
+				}
+			})   
+        }
     }
 
     public updateController(formName: string, formStructure: string, url: string) {
@@ -85,14 +96,14 @@ export class WindowService {
             this.windowCounter++;
         }
         const instance = this.instances[name];
-        if (this.instances[name]) {
+        if (instance) {
             instance.title = title;
             if (instance.bsWindowInstance) {
                 // already showing
                 return;
             }
 
-            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-dialog').length < 1) {
                 const customEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
                 });
@@ -186,18 +197,35 @@ export class WindowService {
 
             instance.bsWindowInstance = this.bsWindowManager.createWindow(opt);
 
-            instance.bsWindowInstance.element.addEventListener('bswin.resize', (event: CustomEvent< { width: number; height: number }>) => {
+            const resizeListener = (event: CustomEvent< { width: number; height: number }>) => {
                 instance.onResize(event.detail);
-            });
-            instance.bsWindowInstance.element.addEventListener('bswin.move', (event: CustomEvent<{x: number; y: number}>) => {
+            };
+            
+            const moveListener = (event: CustomEvent<{x: number; y: number}>) => {
                 instance.onMove(event.detail);
-            });
-            instance.bsWindowInstance.element.addEventListener('bswin.active', (event: CustomEvent<boolean>) => {
+            };
+            
+            const activeListener = (event: CustomEvent<boolean>) => {
                 const customEvent = new CustomEvent(event.detail ? 'enableTabseq' : 'disableTabseq', {
                     bubbles: true
                 });
                 event.target.dispatchEvent(customEvent);
-            });
+            };
+
+            if (instance.closeOnEscape) {
+                instance.keyUpListener = (event) => this.handleEscapeKey(event, instance);
+                window.addEventListener('keyup', instance.keyUpListener, true);
+            }
+            
+            instance.bsWindowInstance.element.addEventListener('bswin.resize', resizeListener);
+            instance.bsWindowInstance.element.addEventListener('bswin.move', moveListener);
+            instance.bsWindowInstance.element.addEventListener('bswin.active', activeListener);
+            
+            instance.bsWindowInstance.onClose = () => {
+               instance.bsWindowInstance.element.removeEventListener('bswin.resize', resizeListener);
+               instance.bsWindowInstance.element.removeEventListener('bswin.move', moveListener);
+               instance.bsWindowInstance.element.removeEventListener('bswin.active', activeListener);
+            };
             (this.doc.getElementsByClassName('window-header').item(0) as HTMLElement).focus();
             instance.bsWindowInstance.setActive(true);
             // init the size of the dialog
@@ -207,6 +235,12 @@ export class WindowService {
                 const dialogSize = { width, height };
                 this.sabloService.callService('$windowService', 'resize', { name: instance.name, size: dialogSize }, true);
             }
+        }
+    }
+    
+    handleEscapeKey(event: KeyboardEvent, instance: SvyWindow) {
+        if (event.key === 'Escape' && instance.bsWindowInstance && !this.popupStateService.isAnyPopupActive()) {
+            instance.componentRef.instance.cancel();
         }
     }
 
@@ -222,6 +256,11 @@ export class WindowService {
         }
         const instance = this.instances[name];
         if (instance) {
+            if (instance.closeOnEscape) {
+                window.removeEventListener('keyup', instance.keyUpListener, true);
+                instance.keyUpListener = null;
+            }
+            
             if (instance['loadingIndicatorIsHidden']) {
                 let counter = instance['loadingIndicatorIsHidden'];
                 delete instance['loadingIndicatorIsHidden'];
@@ -230,7 +269,7 @@ export class WindowService {
                 }
             }
             instance.hide();
-            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-window').length < 1) {
+            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-dialog').length < 1) {
                 const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                 });
@@ -249,7 +288,7 @@ export class WindowService {
     public setTitle(name: string, title: string ) {
         this.saveInSessionStorage(title, 'title');
         if ( this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW ) {
-            this.instances[name].title = title;
+            this.instances[name].setTitle(title);
         } else {
             this.titleService.setTitle(title);
         }
@@ -289,6 +328,12 @@ export class WindowService {
             this.instances[name].setSize( size );
         }
     }
+	
+	public requestFullscreen(name: string ){
+		if ( this.instances[name] ) {
+			this.instances[name].requestFullscreen();
+		}
+	}
 
     public getSize(name: string ) {
         if ( this.instances[name] && this.instances[name].bsWindowInstance ) {
@@ -302,6 +347,13 @@ export class WindowService {
         this.saveInSessionStorage(undecorated, 'undecorated');
         if ( this.instances[name] ) {
             this.instances[name].undecorated = undecorated;
+        }
+    }
+    
+    public setCloseOnEscape(name: string, closeOnEscape: boolean) {
+        this.saveInSessionStorage(closeOnEscape, 'closeOnEscape');
+        if (this.instances[name]) {
+            this.instances[name].closeOnEscape = closeOnEscape;
         }
     }
 
@@ -450,10 +502,12 @@ export class WindowService {
                         this.switchForm(window.name, window.switchForm, window.navigatorForm);
                         this.setTitle(window.name, window.title);
                         this.setUndecorated(window.name, window.undecorated);
+                        this.setCloseOnEscape(window.name, window.closeOnEscape);
                         this.setCSSClassName(window.name, window.cssClassName);
                         this.setInitialBounds(window.name, window.initialBounds);
                         this.setStoreBounds(window.name, window.storeBounds);
                         this.setSize(window.name, window.size);
+						this.requestFullscreen(window.name);
                         this.setLocation(window.name, window.location);
                         this.setOpacity(window.name, window.opacity);
                         this.setTransparent(window.name, window.transparent);
@@ -482,6 +536,7 @@ export class SvyWindow {
     opacity = 1;
     undecorated = false;
     cssClassName: string = null;
+    closeOnEscape = false;
     size: { width: number; height: number } = null;
     location: {x: number; y: number} = null;
     navigatorForm: any = null;
@@ -491,6 +546,8 @@ export class SvyWindow {
     transparent = false;
     storeBounds = false;
     renderer2: Renderer2;
+    
+    keyUpListener: (event: KeyboardEvent) => void;
 
     bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
     windowService: WindowService;
@@ -531,6 +588,17 @@ export class SvyWindow {
         if (this.storeBounds) this.windowService.localStorageService.set(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.size', this.size);
     }
+	
+	requestFullscreen() {
+		const doc = document.documentElement as IHTMLElement;
+		if (doc.requestFullscreen) {
+			doc.requestFullscreen().catch(err => console.log(err));
+		} else if (doc.webkitRequestFullscreen) { /* Safari */
+			doc.webkitRequestFullscreen().catch(err => console.log(err));
+		} else if (doc.msRequestFullscreen) { /* IE11 */
+			doc.msRequestFullscreen().catch(err => console.log(err));
+		}
+	}
 
     getSize() {
         return this.size;
@@ -556,4 +624,14 @@ export class SvyWindow {
         this.windowService.localStorageService.remove(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.size');
     }
+
+    setTitle(title: string) {
+        this.title = title;
+        if(this.bsWindowInstance) this.bsWindowInstance.setTitle(title);
+    }
+}
+
+interface IHTMLElement extends HTMLElement {
+	webkitRequestFullscreen?: () => Promise<void>;
+	msRequestFullscreen?: () => Promise<void>;
 }

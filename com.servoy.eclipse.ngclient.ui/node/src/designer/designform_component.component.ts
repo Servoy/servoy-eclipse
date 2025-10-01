@@ -1,7 +1,8 @@
 import {
-    Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-    TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, Inject, ViewEncapsulation,
-    HostListener
+  Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+  TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, Inject, ViewEncapsulation,
+  HostListener,
+  DOCUMENT
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, IFormComponent } from '../ngclient/types';
@@ -12,7 +13,7 @@ import { LoggerService, LoggerFactory, ServoyBaseComponent, WindowRefService } f
 
 import { ServoyApi } from '../ngclient/servoy_api';
 import { FormService } from '../ngclient/form.service';
-import { DOCUMENT } from '@angular/common';
+
 import { AbstractFormComponent } from '../ngclient/form/form_component.component';
 import { TypesRegistry} from '../sablo/types_registry';
 
@@ -24,64 +25,96 @@ import { TypesRegistry} from '../sablo/types_registry';
     encapsulation: ViewEncapsulation.None,
     /* eslint-disable max-len */
     template: `
-      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses"> <!-- main div -->
-          <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
-          </div>
-          <div *ngFor="let item of formCache.partComponentsCache" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
-          </div>
-          <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
-                   <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
-          </div>
-      </div>
-      <div *ngIf="!formCache.absolute && name!=='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
-            <div *ngIf="draggedElementItem" [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem['layout']" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
-                   <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
+      @if (formCache.absolute) {
+        <div [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses"> <!-- main div -->
+          @for (part of formCache.parts; track part) {
+            <div [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
             </div>
-            <ng-template *ngFor="let item of formCache.mainStructure?.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
-      </div>
-      <div *ngIf="!formCache.absolute && name==='VariantsForm'" class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
-            <div (mousedown)="onVariantsMouseDown($event)" *ngFor="let item of formCache.mainStructure?.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" style="position:absolute">
+          }
+          @for (item of formCache.partComponentsCache; track item) {
+            <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false, 'inherited_element' : item.model.svyInheritedElement}" style="position:absolute"> <!-- wrapper div -->
+              <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
+            </div>
+          }
+          @if (draggedElementItem) {
+            <div [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+              <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
+            </div>
+          }
+        </div>
+      }
+      @if (!formCache.absolute && name!=='VariantsForm') {
+        <div class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses"> <!-- main container div -->
+          @if (draggedElementItem) {
+            <div [svyContainerStyle]="draggedElementItem" [svyContainerLayout]="draggedElementItem.layout" class="svy-wrapper" style="position:absolute" id="svy_draggedelement">
+              <ng-template [ngTemplateOutlet]="getTemplate(draggedElementItem)" [ngTemplateOutletContext]="{ state:draggedElementItem, callback:this }"></ng-template>
+            </div>
+          }
+          @for (item of formCache.mainStructure?.items; track item) {
+            <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+            }  <!-- component or responsive div  -->
+          </div>
+        }
+        @if (!formCache.absolute && name==='VariantsForm') {
+          <div class="svy-form svy-respform svy-overflow-auto" [ngClass]="formClasses" (keyup)="onVariantKeyup($event)"> <!-- main container div -->
+            @for (item of formCache.mainStructure?.items; track item) {
+              <div (mousedown)="onVariantsMouseDown($event)" (keyup)="onVariantKeyup($event)" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" style="position:absolute">
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>
-            </div>
-      </div>
-      <ng-template  #svyResponsiveDiv  let-state="state" >
+              </div>
+            }
+          </div>
+        }
+        <ng-template  #svyResponsiveDiv  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" [ngClass]="getNGClass(state)" class="svy-layoutcontainer">
-               <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+            @for (item of state.items; track item) {
+              <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+            }
           </div>
-      </ng-template>
-      <ng-template  #cssPositionContainer  let-state="state" >
+        </ng-template>
+        <ng-template  #cssPositionContainer  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
-            <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+            @for (item of state.items; track item) {
+              <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
-            </div>
+              </div>
+            }
           </div>
-      </ng-template>
-      <!-- structure template generate start -->
-      <!-- structure template generate end -->
-      <ng-template  #formComponentAbsoluteDiv  let-state="state" >
+        </ng-template>
+        <!-- structure template generate start -->
+        <!-- structure template generate end -->
+        <ng-template  #formComponentAbsoluteDiv  let-state="state" >
           <div [ngClass]="{'invisible_element' : state.model.svyVisible === false}" [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
-               </div>
-               <div *ngIf="!state.items || !state.items.length">FormComponentContainer, select a form.</div>
+            @for (item of state.items; track item) {
+              <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngClass]="{'invisible_element' : item.model.svyVisible === false}" style="position:absolute"> <!-- wrapper div -->
+                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
+              </div>
+            }
+            @if (!state.items || !state.items.length) {
+              <div>FormComponentContainer, select a form.</div>
+            }
           </div>
-      </ng-template>
-      <ng-template  #formComponentResponsiveDiv  let-state="state" >
+        </ng-template>
+        <ng-template  #formComponentResponsiveDiv  let-state="state" >
           <servoycore-formcomponent-responsive-container [svyContainerStyle]="state.formComponentProperties" [svyContainerAttributes]="state.formComponentProperties.attributes" [ngClass]="{'invisible_element' : state.model.svyVisible === false}" [items]="state.items" [class]="state.model.styleClass" [formComponent]="this"></servoycore-formcomponent-responsive-container>
-          <div *ngIf="!state.items || !state.items.length">FormComponentContainer, select a form.</div>
-      </ng-template>
-      <!-- component template generate start -->
-<ng-template #servoycoreDefaultLoadingIndicator let-callback="callback" let-state="state"><servoycore-defaultLoadingIndicator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [size]="state.model.size" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-defaultLoadingIndicator></ng-template>
-<ng-template #servoycoreErrorbean let-callback="callback" let-state="state"><servoycore-errorbean  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [error]="state.model.error" [location]="state.model.location" [size]="state.model.size" [toolTipText]="state.model.toolTipText" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-errorbean></ng-template>
-<ng-template #servoycoreFormcomponent let-callback="callback" let-state="state"><servoycore-formcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [size]="state.model.size" [styleClass]="state.model.styleClass" [width]="state.model.width" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-formcomponent></ng-template>
-<ng-template #servoycoreFormcontainer let-callback="callback" let-state="state"><servoycore-formcontainer  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [relationName]="state.model.relationName" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [waitForData]="state.model.waitForData" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'><svy-form *ngIf="isFormAvailable(name)" [name]="name"></svy-form></ng-template></servoycore-formcontainer></ng-template>
-<ng-template #servoycoreListformcomponent let-callback="callback" let-state="state"><servoycore-listformcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [foundset]="state.model.foundset" [location]="state.model.location" [pageLayout]="state.model.pageLayout" [paginationStyleClass]="state.model.paginationStyleClass" [readOnly]="state.model.readOnly" [responsivePageSize]="state.model.responsivePageSize" [rowStyleClass]="state.model.rowStyleClass" [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider" [selectionClass]="state.model.selectionClass" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [onSelectionChanged]="callback.getHandler(state,'onSelectionChanged')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-listformcomponent></ng-template>
-<ng-template #servoycoreNavigator let-callback="callback" let-state="state"><servoycore-navigator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [currentIndex]="state.model.currentIndex" [hasMore]="state.model.hasMore" [location]="state.model.location" [maxIndex]="state.model.maxIndex" [minIndex]="state.model.minIndex" [size]="state.model.size" [setSelectedIndex]="callback.getHandler(state,'setSelectedIndex')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-navigator></ng-template>
-<ng-template #servoycoreSlider let-callback="callback" let-state="state"><servoycore-slider  [animate]="state.model.animate" [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="callback.datachange(state,'dataProviderID',$event, true)" [enabled]="state.model.enabled" [location]="state.model.location" [max]="state.model.max" [min]="state.model.min" [orientation]="state.model.orientation" [range]="state.model.range" [size]="state.model.size" [step]="state.model.step" [onChangeMethodID]="callback.getHandler(state,'onChangeMethodID')" [onCreateMethodID]="callback.getHandler(state,'onCreateMethodID')" [onSlideMethodID]="callback.getHandler(state,'onSlideMethodID')" [onStartMethodID]="callback.getHandler(state,'onStartMethodID')" [onStopMethodID]="callback.getHandler(state,'onStopMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-slider></ng-template>
-     <!-- component template generate end -->
-   `
+          @if (!state.items || !state.items.length) {
+            <div>FormComponentContainer, select a form.</div>
+          }
+        </ng-template>
+        <!-- component template generate start -->
+        <ng-template #servoycoreDefaultLoadingIndicator let-callback="callback" let-state="state"><servoycore-defaultLoadingIndicator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [size]="state.model.size" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-defaultLoadingIndicator></ng-template>
+        <ng-template #servoycoreErrorbean let-callback="callback" let-state="state"><servoycore-errorbean  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [error]="state.model.error" [location]="state.model.location" [size]="state.model.size" [toolTipText]="state.model.toolTipText" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-errorbean></ng-template>
+        <ng-template #servoycoreFormcomponent let-callback="callback" let-state="state"><servoycore-formcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [size]="state.model.size" [styleClass]="state.model.styleClass" [width]="state.model.width" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-formcomponent></ng-template>
+        <ng-template #servoycoreFormcontainer let-callback="callback" let-state="state"><servoycore-formcontainer  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [relationName]="state.model.relationName" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [waitForData]="state.model.waitForData" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'>@if (isFormAvailable(name)) {
+          <svy-form [name]="name"></svy-form>
+        }</ng-template></servoycore-formcontainer></ng-template>
+        <ng-template #servoycoreListformcomponent let-callback="callback" let-state="state"><servoycore-listformcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [foundset]="state.model.foundset" [location]="state.model.location" [pageLayout]="state.model.pageLayout" [paginationStyleClass]="state.model.paginationStyleClass" [readOnly]="state.model.readOnly" [responsivePageSize]="state.model.responsivePageSize" [rowStyleClass]="state.model.rowStyleClass" [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider" [selectionClass]="state.model.selectionClass" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [onSelectionChanged]="callback.getHandler(state,'onSelectionChanged')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-listformcomponent></ng-template>
+        <ng-template #servoycoreNavigator let-callback="callback" let-state="state"><servoycore-navigator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [currentIndex]="state.model.currentIndex" [hasMore]="state.model.hasMore" [location]="state.model.location" [maxIndex]="state.model.maxIndex" [minIndex]="state.model.minIndex" [size]="state.model.size" [setSelectedIndex]="callback.getHandler(state,'setSelectedIndex')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-navigator></ng-template>
+        <ng-template #servoycoreSlider let-callback="callback" let-state="state"><servoycore-slider  [animate]="state.model.animate" [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="callback.datachange(state,'dataProviderID',$event, true)" [enabled]="state.model.enabled" [location]="state.model.location" [max]="state.model.max" [min]="state.model.min" [orientation]="state.model.orientation" [range]="state.model.range" [size]="state.model.size" [step]="state.model.step" [onChangeMethodID]="callback.getHandler(state,'onChangeMethodID')" [onCreateMethodID]="callback.getHandler(state,'onCreateMethodID')" [onSlideMethodID]="callback.getHandler(state,'onSlideMethodID')" [onStartMethodID]="callback.getHandler(state,'onStartMethodID')" [onStopMethodID]="callback.getHandler(state,'onStopMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-slider></ng-template>
+        <!-- component template generate end -->
+      `
     /* eslint-enable max-len */
+    ,
+    standalone: false
 })
 
 export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, IFormComponent {
@@ -190,7 +223,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     const layout = { width: variant.width + 'px', height: variant.height + 'px' };
 
                     const variantElement = new ComponentCache(null, event.data.name, undefined, [], layout, typesRegistry);
-                    variantElement.initForDesigner(JSON.parse(JSON.stringify(event.data.model).slice()));
+                    variantElement.initForDesignerIsVariant(JSON.parse(JSON.stringify(event.data.model).slice()), true);
 
                     const componentModel = variantElement.model;
                     componentModel.variant = variant.classes; // this is hardcoded property name "variant" should be changed to really get the variant property
@@ -226,6 +259,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.insertedVariants = null;
                 this.variantsLoaded = false;
                 this.showWireframe = this.designMode;
+                this.windowRefService.nativeWindow.parent.postMessage({ id: 'onDestroyVariants'}, '*');
 
             }
             if (event.data.id === 'createDraggedComponent') {
@@ -277,7 +311,20 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                         this.insertedCloneParent = this.formCache.mainStructure;
                     }
                 }
-                if (this.insertedCloneParent) this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+                if (this.insertedCloneParent) {
+                    this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+                    if (event.data.uuids) {
+                        event.data.uuids.forEach(uuid => {
+                            let insertedClone: ComponentCache | StructureCache = this.formCache.getLayoutContainer(uuid); 
+                            if (!insertedClone) {
+                                insertedClone = this.formCache.getComponent(uuid);
+                            }
+                            const insertedCloneParent = insertedClone.parent;
+                            insertedCloneParent.removeChild(insertedClone);
+                            this.insertedCloneParent.addChild(insertedClone, beforeChild);
+                        });
+                    }
+                }
             }
             if (event.data.id === 'removeDragCopy') {
                 if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
@@ -322,8 +369,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             this.detectChanges();
         });
     }
-    
-    
+
     sendVariantSizes() {
         const variants = this.document.getElementsByClassName('variant_item');
         if (!this.variantsLoaded || variants.length === 0) {
@@ -340,6 +386,12 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.windowRefService.nativeWindow.parent.parent.parent.postMessage({ id: 'resizePopover',
             formWidth,
             formHeight}, '*');
+    }
+
+    public onVariantKeyup(event: KeyboardEvent) {
+        if (event.keyCode === 27) {
+            this.windowRefService.nativeWindow.parent.postMessage({ id: 'variantsEscapePressed'}, '*');
+        }
     }
 
     public onVariantsMouseDown(event: MouseEvent) {
@@ -421,6 +473,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
+            if (item.type === 'menu') return;
             if (this[item.type] === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }
@@ -538,6 +591,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         // really make sure all form state is reverted to default
         // Form Instances are reused for tabpanels that have a template reference to this.
         this.formCache = this.formservice.getFormCache(this);
+        this.formservice.resolveComponentCache(this);
         const styleClasses: string = this.formCache.getComponent('').model.styleClass;
         if (styleClasses)
             this.formClasses = styleClasses.split(' ');

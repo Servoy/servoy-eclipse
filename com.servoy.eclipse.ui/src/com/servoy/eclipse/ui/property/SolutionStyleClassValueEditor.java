@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -60,19 +59,14 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 			Media media = ModelUtils.getEditingFlattenedSolution(solution).getMedia(styleSheet);
 			if (media != null)
 			{
-				boolean ng2Mode = new Ng2DesignerPreferences().showNG2Designer();
-
-				if (ng2Mode)
+				int index = styleSheet.indexOf(".less");
+				if (index > 0)
 				{
-					int index = styleSheet.indexOf(".less");
-					if (index > 0)
+					String ng2Filename = styleSheet.substring(0, index) + "_ng2.less";
+					Media media2 = ModelUtils.getEditingFlattenedSolution(solution).getMedia(ng2Filename);
+					if (media2 != null)
 					{
-						String ng2Filename = styleSheet.substring(0, index) + "_ng2.less";
-						Media media2 = ModelUtils.getEditingFlattenedSolution(solution).getMedia(ng2Filename);
-						if (media2 != null)
-						{
-							media = media2;
-						}
+						media = media2;
 					}
 				}
 

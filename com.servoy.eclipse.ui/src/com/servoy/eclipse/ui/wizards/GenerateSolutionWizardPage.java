@@ -39,7 +39,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
@@ -66,8 +65,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -89,14 +86,19 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private ExpandableComposite excomposite;
 
 	private Boolean addDefaultTheme;
+	private Boolean addDefaultWAM;
 	private int[] solutionTypeComboValues;
 	private int solutionType;
 	private Label configLabel;
 	private NewSolutionWizard wizard;
+//	private Text svyGenLocationText;
+//	private Button svyGenBrowseButton;
+//	private String svyGenLocation;
 
 	protected static final String IS_ADVANCED_USER_SETTING = "is_advanced_user";
 	protected static final String SELECTED_SOLUTIONS_SETTING = "selected_solutions";
 	protected static final String SHOULD_ADD_DEFAULT_THEME_SETTING = "should_add_default_theme";
+	protected static final String SHOULD_ADD_DEFAULT_WAM_SETTING = "should_add_default_web_app_manifest";
 	protected static final String NO_RESOURCE_PROJECT_SETTING = "no_resource_project";
 	protected static final String RESOURCE_PROJECT_NAME_SETTING = "resource_project_name";
 	protected static final String SOLUTION_TYPE = "solution_type";
@@ -106,8 +108,10 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private static final String SEARCH = "search";
 	private static final String NAVIGATION = "navigation";
 
-	private static String[] toImport = new String[] { SECURITY, UTILS, SEARCH, NAVIGATION };
+	private static String[] toImport = new String[] { UTILS, SEARCH };
 	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
+
+//	private final IEclipsePreferences preferences = Activator.getDefault().getEclipsePreferences();
 
 	protected GenerateSolutionWizardPage(String pageName)
 	{
@@ -143,6 +147,81 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			}
 		});
 
+//		// svy gen location
+//		svyGenLocation = preferences.get(wizard.getSettingsPrefix() + ".svygenlocation", "");
+//		Label locationLabel = new Label(topLevel, SWT.NONE);
+//		locationLabel.setText("Generate project using SvyGen: ");
+//		locationLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+//		svyGenLocationText = new Text(topLevel, SWT.BORDER);
+//		svyGenLocationText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//		svyGenLocationText.addListener(SWT.FocusOut, new Listener()
+//		{
+//
+//			@Override
+//			public void handleEvent(Event event)
+//			{
+//				File f = new File(svyGenLocationText.getText());
+//				if (f.exists())
+//				{
+//					handleSvyGenLocationChanged(svyGenLocationText.getText());
+//				}
+//				else
+//				{
+//					svyGenLocationText.setText("");
+//					MessageDialog.openError(getShell(), "SVYGen Spec Location Error", "Please select an existing location.");
+//				}
+//
+//			}
+//		});
+//
+//		svyGenBrowseButton = new Button(topLevel, SWT.PUSH);
+//		svyGenBrowseButton.setText("Browse...");
+//		svyGenBrowseButton.addListener(SWT.Selection, new Listener()
+//		{
+//
+//			@Override
+//			public void handleEvent(Event event)
+//			{
+//				DirectoryDialog dlg = new DirectoryDialog(UIUtils.getActiveShell(), SWT.SAVE);
+//				dlg.setFilterPath("".equals(svyGenLocation) ? ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() : svyGenLocation);
+//				String chosenFileName = dlg.open();
+//				if (chosenFileName != null)
+//				{
+//					handleSvyGenLocationChanged(chosenFileName);
+//				}
+//			}
+//		});
+
+//		Composite tableContainer = addConfigureModules(isModuleWizard);
+//		addAdvancedSettings(isModuleWizard);
+//
+//		// layout of the page
+//		GridLayout gridLayout = new GridLayout(3, false);
+//		gridLayout.marginWidth = 20;
+//		gridLayout.marginHeight = 20;
+//		gridLayout.verticalSpacing = 10;
+//		topLevel.setLayout(gridLayout);
+//		topLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//
+//		solutionLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+//		GridData solutionFieldData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+//		solutionNameField.setLayoutData(solutionFieldData);
+//
+//		if (!isModuleWizard)
+//		{
+//			configLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+//			tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 6));
+//		}
+//
+//		GridData svyTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//		svyTextGridData.minimumWidth = 300;
+//		svyGenLocationText.setLayoutData(svyTextGridData);
+//		svyGenBrowseButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+//
+//		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1);
+//		gridData.minimumWidth = 650;
+//		excomposite.setLayoutData(gridData);
+
 		Composite tableContainer = addConfigureModules(isModuleWizard);
 		addAdvancedSettings(isModuleWizard);
 
@@ -163,7 +242,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 6));
 		}
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
-		gridData.minimumWidth = 650;//otherwise the resources project text is not visible
+		gridData.minimumWidth = 650; // otherwise the resources project text is not visible
 		excomposite.setLayoutData(gridData);
 	}
 
@@ -174,16 +253,6 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			ExpandableComposite.TWISTIE);
 		excomposite.setExpanded(getWizard().getDialogSettings().getBoolean(wizard.getSettingsPrefix() + IS_ADVANCED_USER_SETTING));
 		excomposite.setText(excomposite.isExpanded() ? "Hide advanced solution settings" : "Show advanced solution settings");
-		if (IconPreferences.getInstance().getUseDarkThemeIcons())
-		{
-			Color darkFGColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
-				.get("com.servoy.themes.darktheme.FOREGROUND_COLOR");
-			if (darkFGColor != null)
-			{
-				excomposite.setTitleBarForeground(darkFGColor);
-				excomposite.setActiveToggleColor(darkFGColor);
-			}
-		}
 
 		expandComposite = new SolutionAdvancedSettingsComposite(excomposite, isModuleWizard);
 		expandComposite.setBackground(topLevel.getBackground());
@@ -312,11 +381,11 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		}
 
 		String error = null;
-		if (solutionNameField.getText().trim().length() == 0)
+		if (solutionNameField.getText().trim().length() == 0 /* && svyGenLocationText.getText().length() == 0 */)
 		{
 			error = "Please give a name for the new solution";
 		}
-		if (error == null)
+		if (error == null /* && svyGenLocationText.getText().length() == 0 */)
 		{
 			// see if solution name is OK
 			if (!IdentDocumentValidator.isJavaIdentifier(solutionName))
@@ -462,6 +531,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private final class SolutionAdvancedSettingsComposite extends Composite implements IValidator
 	{
 		private final Button defaultThemeCheck;
+		private final Button defaultWAMCheck;
 		private final Combo solutionTypeCombo;
 		private final ProjectLocationComposite projectLocationComposite;
 		private final ResourcesProjectChooserComposite resourceProjectComposite;
@@ -469,10 +539,26 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		public SolutionAdvancedSettingsComposite(Composite parent, boolean isModule)
 		{
 			super(parent, SWT.NONE);
+			defaultWAMCheck = new Button(this, SWT.CHECK);
+			defaultWAMCheck.setVisible(!isModule);
+
 			defaultThemeCheck = new Button(this, SWT.CHECK);
 			defaultThemeCheck.setVisible(!isModule);
 			if (!isModule)
 			{
+				defaultWAMCheck.setText("Add default web application manifest (manifest.json in Media - used for installable web application)");
+				addDefaultWAM = (getDialogSettings().get(wizard.getSettingsPrefix() + SHOULD_ADD_DEFAULT_WAM_SETTING) != null)
+					? Boolean.valueOf(getDialogSettings().get(wizard.getSettingsPrefix() + SHOULD_ADD_DEFAULT_WAM_SETTING)) : Boolean.TRUE;//ng solution is selected by default
+				defaultWAMCheck.setSelection(addDefaultWAM.booleanValue());
+				defaultWAMCheck.addSelectionListener(new SelectionAdapter()
+				{
+					@Override
+					public void widgetSelected(SelectionEvent e)
+					{
+						addDefaultWAM = Boolean.valueOf(defaultWAMCheck.getSelection());
+					}
+				});
+
 				defaultThemeCheck.setText("Add default servoy .less theme (configurable by a less properties file)");
 				addDefaultTheme = (getDialogSettings().get(wizard.getSettingsPrefix() + SHOULD_ADD_DEFAULT_THEME_SETTING) != null)
 					? Boolean.valueOf(getDialogSettings().get(wizard.getSettingsPrefix() + SHOULD_ADD_DEFAULT_THEME_SETTING)) : Boolean.TRUE;//ng solution is selected by default
@@ -491,14 +577,11 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			Label solutionTypeLabel = new Label(this, SWT.NONE);
 			solutionTypeLabel.setText("Solution type");
 			solutionTypeCombo = new Combo(this, SWT.DROP_DOWN | SWT.READ_ONLY);
-			boolean showLegacyTypes = new DesignerPreferences().getShowLegacySolutionTypes();
-
-			String[] solutionTypeNames = new String[showLegacyTypes ? SolutionMetaData.solutionTypeNames.length - 1
-				: SolutionMetaData.currentSolutionTypeNames.length - 1];
-			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypeNames : SolutionMetaData.currentSolutionTypeNames, 1, solutionTypeNames, 0,
+			String[] solutionTypeNames = new String[SolutionMetaData.currentSolutionTypeNames.length - 1];
+			System.arraycopy(SolutionMetaData.currentSolutionTypeNames, 1, solutionTypeNames, 0,
 				solutionTypeNames.length);
-			solutionTypeComboValues = new int[showLegacyTypes ? SolutionMetaData.solutionTypes.length - 1 : SolutionMetaData.currentSolutionTypes.length - 1];
-			System.arraycopy(showLegacyTypes ? SolutionMetaData.solutionTypes : SolutionMetaData.currentSolutionTypes, 1, solutionTypeComboValues, 0,
+			solutionTypeComboValues = new int[SolutionMetaData.currentSolutionTypes.length - 1];
+			System.arraycopy(SolutionMetaData.currentSolutionTypes, 1, solutionTypeComboValues, 0,
 				solutionTypeComboValues.length);
 			solutionTypeCombo.setItems(solutionTypeNames);
 			int defaultSolutionType = getDialogSettings().get(wizard.getSettingsPrefix() + SOLUTION_TYPE) != null
@@ -550,8 +633,13 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
 			formData.top = new FormAttachment(resourceProjectComposite, 20);
-			formData.bottom = new FormAttachment(100, 0);
 			defaultThemeCheck.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.top = new FormAttachment(defaultThemeCheck, 20);
+			formData.bottom = new FormAttachment(100, 0);
+			defaultWAMCheck.setLayoutData(formData);
 
 			this.pack();
 
@@ -587,6 +675,8 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			solutionType = solutionTypeComboValues[solutionTypeCombo.getSelectionIndex()];
 			defaultThemeCheck.setEnabled(SolutionMetaData.isNGOnlySolution(solutionType));
 			defaultThemeCheck.setSelection(shouldAddDefaultTheme());
+			defaultWAMCheck.setEnabled(SolutionMetaData.isNGOnlySolution(solutionType));
+			defaultWAMCheck.setSelection(shouldAddDefaultWAM());
 			checkboxTableViewer.getTable().setEnabled(solutionType == SolutionMetaData.NG_CLIENT_ONLY);
 		}
 
@@ -646,6 +736,12 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			: solutionType == SolutionMetaData.NG_CLIENT_ONLY;
 	}
 
+	public boolean shouldAddDefaultWAM()
+	{
+		return addDefaultWAM != null ? (addDefaultWAM.booleanValue() && solutionType == SolutionMetaData.NG_CLIENT_ONLY)
+			: solutionType == SolutionMetaData.NG_CLIENT_ONLY;
+	}
+
 	public void handleEvent(Event event)
 	{
 		setPageComplete(validatePage());
@@ -684,4 +780,23 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			solutionNameField.setFocus();
 		}
 	}
+
+//	private void handleSvyGenLocationChanged(String chosenFileName)
+//	{
+//		svyGenLocationText.setText(chosenFileName);
+//		svyGenLocation = chosenFileName;
+//		preferences.put(wizard.getSettingsPrefix() + ".svygenlocation", svyGenLocation);
+//
+//		solutionNameField.setEnabled(chosenFileName.length() == 0);
+//		if (chosenFileName.length() > 0)
+//		{
+//			solutionNameField.setText("");
+//			solutionName = null;
+//		}
+//	}
+//
+//	public String getSvyGenPath()
+//	{
+//		return svyGenLocation;
+//	}
 }

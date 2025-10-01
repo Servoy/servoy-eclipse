@@ -21,12 +21,13 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 
 /**
  * @author acostache
@@ -35,27 +36,26 @@ import com.servoy.j2db.util.UUID;
 public class ClearLabelForElementProperty implements IMarkerResolution
 {
 
-	private final String uuid;
+	private final PersistIdentifier persistIdentifier;
 	private final String solutionName;
 
-	public ClearLabelForElementProperty(String uuid, String solutionName)
+	public ClearLabelForElementProperty(PersistIdentifier persistIdentifier, String solutionName)
 	{
-		this.uuid = uuid;
+		this.persistIdentifier = persistIdentifier;
 		this.solutionName = solutionName;
 	}
 
 	private IPersist getElementAsPersist()
 	{
 		IPersist element = null;
-		if (uuid != null)
+		if (persistIdentifier != null)
 		{
-			UUID id = UUID.fromString(uuid);
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
 			if (servoyProject != null)
 			{
 				try
 				{
-					element = servoyProject.getEditingPersist(id);
+					element = PersistFinder.INSTANCE.searchForPersist(servoyProject.getEditingFlattenedSolution(), persistIdentifier);
 				}
 				catch (Exception e)
 				{

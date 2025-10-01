@@ -7,7 +7,8 @@ import { Tab } from '../tabpanel/basetabpanel';
 @Component( {
     selector: 'servoydefault-splitpane',
     templateUrl: './splitpane.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 } )
 export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> {
 

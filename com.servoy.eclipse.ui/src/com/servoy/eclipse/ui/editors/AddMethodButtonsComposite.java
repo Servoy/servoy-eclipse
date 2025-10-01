@@ -185,7 +185,7 @@ public class AddMethodButtonsComposite extends Composite
 		}
 		//check if we want to override form method
 		if (initialContext.getContext() instanceof Form && !initialContext.getContext().equals(persistContext.getContext()) &&
-			((Form)initialContext.getContext()).getExtendsID() > 0 &&
+			((Form)initialContext.getContext()).getExtendsID() != null &&
 			PersistHelper.getOverrideHierarchy((ISupportExtendsID)initialContext.getContext()).contains(persistContext.getContext()) &&
 			((Form)persistContext.getContext()).getScriptMethod(methodKey) != null)
 		{

@@ -106,7 +106,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 					{
 						return "Name cannot be empty";
 					}
-					else if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
+					else if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0 || newText.endsWith(".") || newText.startsWith("."))
 					{
 						return "Invalid new media name";
 					}
@@ -161,7 +161,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 					StringBuilder sb = new StringBuilder();
 					for (IPersist conflictedMedia : conflictingMedias)
 					{
-						sb.append(((Media)conflictedMedia).getAncestor(IRepository.SOLUTIONS)).append("  ->  ").append(
+						sb.append(conflictedMedia.getAncestor(IRepository.SOLUTIONS)).append("  ->  ").append(
 							((Media)conflictedMedia).getName()).append("\n");
 					}
 					UIUtils.showScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",

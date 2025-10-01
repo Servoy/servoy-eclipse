@@ -8,7 +8,7 @@ import {WindowRefService} from '@servoy/public';
 
 import { FormService } from './form.service';
 import {ServoyService} from './servoy.service';
-import { ClientFunctionService } from './services/clientfunction.service';
+import { ClientFunctionService } from '../sablo/clientfunction.service';
 
 describe('FormService', () => {
   let websocketService;

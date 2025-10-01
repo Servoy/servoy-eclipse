@@ -14,13 +14,13 @@
 
 package org.eclipse.jface.util;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.IStructuredTextExpert;
 import org.eclipse.equinox.bidi.advanced.StructuredTextEnvironment;
 import org.eclipse.equinox.bidi.advanced.StructuredTextExpertFactory;
 import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
+import org.eclipse.pde.api.tools.annotations.NoExtend;
 import org.eclipse.swt.events.SegmentEvent;
 import org.eclipse.swt.events.SegmentListener;
 
@@ -34,8 +34,8 @@ import org.eclipse.swt.events.SegmentListener;
  * </p>
  *
  * @since 3.9
- * @noextend This class is not intended to be subclassed by clients.
  */
+@NoExtend
 public class StructuredTextSegmentListener implements SegmentListener {
 
 	private final IStructuredTextExpert expert;
@@ -83,8 +83,8 @@ public class StructuredTextSegmentListener implements SegmentListener {
 			} catch (RuntimeException ex) {
 				// Only log the first exception. Logging every exception would make the system unusable.
 				if (logExceptions) {
-					Policy.getLog().log(new Status(IStatus.ERROR, Policy.JFACE,
-							"An error occurred while processing \"" + event.lineText + "\" with " + expert, ex)); //$NON-NLS-1$//$NON-NLS-2$
+					Policy.getLog().log(Status
+							.error("An error occurred while processing \"" + event.lineText + "\" with " + expert, ex)); //$NON-NLS-1$//$NON-NLS-2$
 					logExceptions = false;
 				}
 			}

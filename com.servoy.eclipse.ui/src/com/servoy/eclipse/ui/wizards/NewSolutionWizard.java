@@ -82,6 +82,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaWebAppManifest;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -109,6 +110,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 {
 	public static final String ID = "com.servoy.eclipse.ui.NewSolutionWizard";
 	protected GenerateSolutionWizardPage configPage;
+	private String solutionName;
 
 	/**
 	 * Creates a new wizard.
@@ -141,10 +143,19 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
+//		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+//		{
+//			solutions.add(NewSolutionWizardDefaultPackages.SVYGEN_TEMPLATES);
+//			solutionName = AISolutionGenerator.getAIGeneratedJSON(configPage.getSvyGenPath()).optString("projectName", "new_ai_gen_solution");
+//		}
+//		else
+//		{
+		solutionName = configPage.getNewSolutionName();
+//		}
+
 		final boolean mustAuthenticate = configPage.mustAuthenticate();
 		IRunnableWithProgress newSolutionRunnable = new IRunnableWithProgress()
 		{
-
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
 				monitor.beginTask("Creating solution and writing files to disk", 4);
@@ -152,7 +163,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 				try
 				{
-					Solution solution = (Solution)repository.createNewRootObject(configPage.getNewSolutionName(), IRepository.SOLUTIONS);
+					Solution solution = null;
+//					if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+//					{
+//						solution = AISolutionGenerator.createSolutionFromAIContent(configPage.getSvyGenPath());
+//					}
+//					else
+//					{
+					solution = (Solution)repository.createNewRootObject(solutionName, IRepository.SOLUTIONS);
+//					}
 
 					String modulesTokenized = ModelUtils.getTokenValue(solutions.toArray(new String[] { }), ",");
 					solution.setModulesNames(modulesTokenized);
@@ -194,13 +213,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					monitor.setTaskName("Creating and opening project");
 					// as the serialization is done using java.io, we must make sure the Eclipse resource structure
 					// stays up to date; we create a project, then we must open it and add servoy solution nature
-					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(configPage.getNewSolutionName());
+					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(solutionName);
 					String location = configPage.getProjectLocation();
-					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(configPage.getNewSolutionName());
+					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(solutionName);
 					if (location != null)
 					{
 						IPath path = new Path(location);
-						path = path.append(configPage.getNewSolutionName());
+						path = path.append(solution.getName());
 						description.setLocation(path);
 					}
 					newProject.create(description, null);
@@ -212,12 +231,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						int solutionType = configPage.getSolutionType();
 						solution.setSolutionType(solutionType);
 
+//						solution.putCustomProperty(new String[] { "svygen_path" }, configPage.getSvyGenPath());
+
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
 
 						//disable must authenticate for now, until we include login form generation, users creation
 						//solution.setMustAuthenticate(mustAuthenticate);
 						addDefaultThemeIfNeeded(repository, solution);
+						addDefaultWAMIfNeeded(repository, solution);
 					}
 					monitor.worked(1);
 
@@ -254,10 +276,20 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				if (configPage.shouldAddDefaultTheme())
 				{
 					Media defaultTheme = addMediaFile(solution, ThemeResourceLoader.getDefaultSolutionLess(), solution.getName() + ".less");
-					addMediaFile(solution, ThemeResourceLoader.getCustomProperties(), ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
+					addMediaFile(solution, ThemeResourceLoader.getCustomProperties(), ThemeResourceLoader.SOLUTION_PROPERTIES_LESS);
 					addMediaFile(solution, ThemeResourceLoader.getVariantsFile(), ThemeResourceLoader.VARIANTS_JSON);
 
-					solution.setStyleSheetID(defaultTheme.getID());
+					solution.setStyleSheetID(defaultTheme.getUUID().toString());
+					repository.updateRootObject(solution);
+				}
+			}
+
+			private void addDefaultWAMIfNeeded(EclipseRepository repository, Solution solution) throws RepositoryException, IOException
+			{
+				if (configPage.shouldAddDefaultWAM())
+				{
+					addMediaFile(solution, CreateMediaWebAppManifest.createManifest(solutionName), CreateMediaWebAppManifest.FILE_NAME);
+					addMediaFile(solution, CreateMediaWebAppManifest.getIcon(), CreateMediaWebAppManifest.ICON_NAME);
 					repository.updateRootObject(solution);
 				}
 			}
@@ -292,11 +324,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				monitor.beginTask(jobName, 1);
 				servoyModel.refreshServoyProjects();
 				// set this solution as the new active solution or add it as a module
-				ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+				ServoyProject newProject = servoyModel.getServoyProject(solutionName);
 				if (newProject == null)
 				{
 					servoyModel.refreshServoyProjects();
-					newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+					newProject = servoyModel.getServoyProject(solutionName);
 				}
 				if (newProject != null)
 				{
@@ -334,6 +366,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					else
 					{
 						servoyModel.setActiveProject(newProject, true);
+//						genAISol(newProject);
 					}
 				}
 				else
@@ -351,7 +384,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			Pair<String, File> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
 			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
 		}
-		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false, false);
+		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, solutionName, false, false);
 
 		IRunnableWithProgress importPackagesRunnable = null;
 		final List<String> packs = configPage.getWebPackagesToImport();
@@ -361,11 +394,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 				{
-					ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+					ServoyProject newProject = servoyModel.getServoyProject(solutionName);
 					if (newProject == null)
 					{
 						servoyModel.refreshServoyProjects();
-						newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+						newProject = servoyModel.getServoyProject(solutionName);
 					}
 					if (newProject != null)
 					{
@@ -407,13 +440,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			};
 		}
 
+
 		try
 		{
 			IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 			progressService.run(true, false, newSolutionRunnable);
 			if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
-			progressService.run(true, false, solutionActivationRunnable);
 			progressService.run(true, false, importSolutionsRunnable);
+			progressService.run(true, false, solutionActivationRunnable);
 		}
 		catch (Exception e)
 		{
@@ -441,6 +475,18 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return true;
 	}
 
+//	private void genAISol(ServoyProject activeProject)
+//	{
+//		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+//		{
+//			if (activeProject == null)
+//			{
+//				throw new RuntimeException("No active project found to generate solution from AI content.");
+//			}
+//			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
+//		}
+//	}
+
 	public static IRunnableWithProgress importSolutions(final Map<String, SolutionPackageInstallInfo> solutions, final String jobName, String newSolutionName,
 		boolean activateSolution, boolean overwriteModules)
 	{
@@ -456,13 +502,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 					HashSet<IProject> projectsToDeleteAfterImport = new HashSet<IProject>();
 					IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+					Boolean[] importDatasources = new Boolean[] { null };
 					for (String name : solutions.keySet())
 					{
 						boolean shouldAskOverwrite = (sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name));
 						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
 						{
 							importSolution(solutions.get(name), name, newSolutionName, monitor, true,
-								shouldAskOverwrite, activateSolution, overwriteModules, projectsToDeleteAfterImport);
+								shouldAskOverwrite, activateSolution, overwriteModules, importDatasources, projectsToDeleteAfterImport);
 							monitor.worked(1);
 						}
 					}
@@ -589,12 +636,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		for (String server_name : missingServerNames)
 		{
 			action.createDatabase(server, server_name, monitor);
-			final ServerConfig serverConfig = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
-				EclipseDatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
-				origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
-				origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getPrefixTables(),
-				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass(),
-				origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
+			final ServerConfig serverConfig = origConfig.newBuilder()
+				.setServerName(server_name)
+				.setServerUrl(EclipseDatabaseUtils.getPostgresServerUrl(origConfig, server_name))
+				.setSchema(null)
+				.setDataModelCloneFrom(null)
+				.setEnabled(true).setSkipSysTables(false)
+				.setIdleTimeout(-1)
+				.build();
 			try
 			{
 				serverManager.testServerConfigConnection(serverConfig, 0);
@@ -629,10 +678,12 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 
 		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, configPage.shouldAddDefaultTheme());
+		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_WAM_SETTING, configPage.shouldAddDefaultWAM());
 	}
 
 	public static void importSolution(SolutionPackageInstallInfo packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
-		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules, Set<IProject> projectsToDeleteAfterImport)
+		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules, Boolean[] importDatasources,
+		Set<IProject> projectsToDeleteAfterImport)
 		throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
@@ -658,22 +709,42 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setSkipModulesImport(!shouldAskOverwrite);
 		importSolutionWizard.setAllowDataModelChanges(true);
 		importSolutionWizard.setImportSampleData(true);
+		importSolutionWizard.setImportDatasources(importDatasources[0]);
 		importSolutionWizard.shouldAllowSQLKeywords(true);
 		importSolutionWizard.showFinishDialog(false);
 
 		String newResourceProjectName = null;
-		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
-		if (project == null && packageInfo.forceActivateResourcesProject)
+		ServoyResourcesProject resourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+		if (resourcesProject == null && packageInfo.forceActivateResourcesProject)
 		{
-			newResourceProjectName = "resources";
-			int counter = 1;
-			while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+			ServoyProject sol = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
+			final ServoyResourcesProject selectedResourcesProject = (sol != null ? sol.getResourcesProject() : null);
+			if (selectedResourcesProject != null)
 			{
-				newResourceProjectName = "resources" + counter++;
+				resourcesProject = selectedResourcesProject;
+			}
+			else
+			{
+				// try to find default resources project with name "resources" // TODO why do we do this? shouldn't we just create
+				// a new one? if not, why not use any other available resources project in the workspace if "resources" is not found?
+				resourcesProject = Arrays.stream(ServoyModelManager.getServoyModelManager().getServoyModel().getResourceProjects())
+					.filter(p -> p.getProject().getName().equals("resources")).findFirst().orElse(null);
+
+				if (resourcesProject == null)
+				{
+					newResourceProjectName = "resources";
+					// didn't find an existing one or default one, give a name that can be used as a new resources project
+					int counter = 1;
+					while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+					{
+						newResourceProjectName = "resources" + counter++;
+					}
+				}
 			}
 		}
-		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, project, false, false, false, null, null,
+		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, resourcesProject, false, false, false, null, null,
 			monitor, packageInfo.forceActivateResourcesProject, packageInfo.keepResourcesProjectOpen, projectsToDeleteAfterImport);
+		importDatasources[0] = importSolutionWizard.shouldImportDatasources();
 		// write the wpm version into the new solution project
 		String solutionVersion = packageInfo.version;
 		if (solutionVersion.length() > 0)
@@ -790,7 +861,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	@Override
 	public boolean canFinish()
 	{
-		return super.canFinish() && (searchMissingServers(configPage.getSolutionsToImport()).isEmpty() || canCreateMissingServers());
+		return super.canFinish() && ((searchMissingServers(configPage.getSolutionsToImport()).isEmpty() || canCreateMissingServers())
+		/* || configPage.getSvyGenPath().isEmpty() */);
 	}
 
 
@@ -806,12 +878,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				ServerConfig origConfig = getValidServerConfig();
 				for (String server_name : searchMissingServers)
 				{
-					ServerConfig config = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
-						origConfig.getServerUrl().replace(origConfig.getServerName(), server_name), origConfig.getConnectionProperties(),
-						origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
-						origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
-						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
-						origConfig.getDialectClass(), origConfig.getQuoteList(), origConfig.isClientOnlyConnections());
+					final ServerConfig config = origConfig.newBuilder()
+						.setServerName(server_name)
+						.setSchema(null)
+						.setDataModelCloneFrom(null)
+						.setEnabled(true).setSkipSysTables(false)
+						.setIdleTimeout(-1)
+						.build();
 
 					EditorUtil.openServerEditor(config, ServerSettings.DEFAULT, true);
 				}

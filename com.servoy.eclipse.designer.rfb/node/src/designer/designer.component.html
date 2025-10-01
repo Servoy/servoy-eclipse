@@ -1,27 +1,31 @@
 <div class="editor">
-<designer-toolbar></designer-toolbar>
-<div class="fill-area">
+  <designer-toolbar></designer-toolbar>
+  <div class="fill-area">
     <designer-variantspreview></designer-variantspreview>
     <designer-palette></designer-palette>
-    <designer-resizer></designer-resizer> 
+    <designer-resizer></designer-resizer>
     <div #contentArea class="content-area" tabindex="0">
-        <div #glasspane class="contentframe-overlay">
-            <selection-decorators></selection-decorators>
-            <designer-highlight></designer-highlight>
-            <designer-ghostscontainer #ghostContainer></designer-ghostscontainer>
-            <dragselection *ngIf="urlParser.isAbsoluteFormLayout()"></dragselection>
-            <dragselection-responsive></dragselection-responsive>
-            <designer-samesize-indicator></designer-samesize-indicator>
-            <designer-anchoring-indicator></designer-anchoring-indicator>
-            <dynamic-guides *ngIf="urlParser.isAbsoluteFormLayout()"></dynamic-guides>
-        </div>
-        <designer-editorcontent></designer-editorcontent> 
+      <div #glasspane class="contentframe-overlay">
+        <selection-decorators></selection-decorators>
+        <designer-highlight></designer-highlight>
+        <designer-ghostscontainer #ghostContainer></designer-ghostscontainer>
+        @if (urlParser.isAbsoluteFormLayout()) {
+          <dragselection></dragselection>
+        }
+        <dragselection-responsive></dragselection-responsive>
+        <designer-samesize-indicator></designer-samesize-indicator>
+        <designer-anchoring-indicator></designer-anchoring-indicator>
+        @if (urlParser.isAbsoluteFormLayout()) {
+          <dynamic-guides></dynamic-guides>
+        }
+      </div>
+      <designer-editorcontent></designer-editorcontent>
     </div>
     <designer-autoscroll [placement]="'top'"></designer-autoscroll>
     <designer-autoscroll [placement]="'bottom'"></designer-autoscroll>
     <designer-autoscroll [placement]="'left'"></designer-autoscroll>
     <designer-autoscroll [placement]="'right'"></designer-autoscroll>
-</div> 
-<designer-status-bar *ngIf="!urlParser.isAbsoluteFormLayout()"></designer-status-bar> </div>
-<designer-contextmenu></designer-contextmenu>
-<designer-inline-edit></designer-inline-edit>
+  </div>
+  <designer-status-bar></designer-status-bar> </div>
+  <designer-contextmenu></designer-contextmenu>
+  <designer-inline-edit></designer-inline-edit>

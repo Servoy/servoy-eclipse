@@ -1,19 +1,25 @@
- <div class="svy-dialog" [class.window]="!isUndecorated()" [ngClass]="getCSSClassName()" [style.background-color]="getBackgroundColor()" [sabloTabseq]="1" [sabloTabseqConfig]="{container: true}">
-    <div [style.opacity]="getOpacity()">
-        <div  class='window-header' tabindex="-1"  style="outline:0;" [style.display]="isUndecorated() ? 'none' : 'block'">
-            <button type="button" class="svy-dialog-close"
-                aria-hidden="true" tabindex="-1" (click)="cancel()">x</button>
-            <h4 class="window-title"></h4>
-        </div>	
-        <div class="window-body">
-            <svy-default-navigator [name]="getFormName()" *ngIf="hasDefaultNavigator()"></svy-default-navigator>
-            <svy-form [name]="getNavigatorFormName()" *ngIf="getNavigatorFormName() != null"></svy-form>
-            <div id="tabStart" [sabloTabseq]="1" (focus)="firstElementFocused($event)"></div>
-            <div [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}" style="height: 100%;">
-                <svy-form [name]="getFormName()" *ngIf="getFormName() != null"></svy-form>
-            </div>
-            <div id="tabStop" [sabloTabseq]="3" (focus)="lastElementFocused($event)"></div>
-        </div>    
-        <div class="window-footer" [style.display]="isUndecorated() ? 'none' : 'block'"></div>
+<div class="svy-dialog" [class.window]="!isUndecorated()" [ngClass]="getCSSClassName()" [style.background-color]="getBackgroundColor()" [sabloTabseq]="1" [sabloTabseqConfig]="{container: true}">
+  <div [style.opacity]="getOpacity()">
+    <div  class='window-header' tabindex="-1"  style="outline:0;" [style.display]="isUndecorated() ? 'none' : 'block'">
+      <button type="button" class="svy-dialog-close"
+      aria-hidden="true" tabindex="-1" (click)="cancel()">x</button>
+      <h4 class="window-title"></h4>
     </div>
+    <div class="window-body">
+      @if (hasDefaultNavigator()) {
+        <svy-default-navigator [name]="getFormName()"></svy-default-navigator>
+      }
+      @if (getNavigatorFormName() != null) {
+        <svy-form [name]="getNavigatorFormName()"></svy-form>
+      }
+      <div id="tabStart" [sabloTabseq]="1" (focus)="firstElementFocused($event)"></div>
+      <div [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}" [ngStyle]="{'height': '100%', 'position': 'absolute', 'top': '0px', 'right': '0px', 'bottom': '0px', 'left': this.window.navigatorForm.size.width + 'px'}">
+        @if (getFormName() != null) {
+          <svy-form [name]="getFormName()"></svy-form>
+        }
+      </div>
+      <div id="tabStop" [sabloTabseq]="3" (focus)="lastElementFocused($event)"></div>
+    </div>
+    <div class="window-footer" [style.display]="isUndecorated() ? 'none' : 'block'"></div>
+  </div>
 </div>

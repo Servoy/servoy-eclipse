@@ -1,3 +1,5 @@
-<div #element id="mainForm" class="svy-main-window-container user-selection-off"  *ngIf="mainForm != null">
+@if (mainForm != null) {
+  <div #element id="mainForm" class="svy-main-window-container user-selection-off" >
     <svy-designform [name]="mainForm" #DesignFormComponent></svy-designform>
-</div> 
+  </div>
+}

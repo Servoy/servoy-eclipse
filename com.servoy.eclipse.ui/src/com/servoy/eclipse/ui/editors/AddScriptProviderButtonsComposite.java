@@ -170,7 +170,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 	{
 		try
 		{
-			ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(name, 0,
+			ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(name, null,
 				new ValidatorSearchContext(table, IRepository.SCRIPTCALCULATIONS), false);
 		}
 		catch (RepositoryException e)

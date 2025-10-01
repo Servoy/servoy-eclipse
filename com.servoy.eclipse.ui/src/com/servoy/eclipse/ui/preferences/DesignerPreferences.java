@@ -52,27 +52,6 @@ public class DesignerPreferences
 	public static final int CM = 1;
 	public static final int IN = 2;
 
-	public static enum FormEditorDesignerPreference
-	{
-		Classic, New, Automatic;
-
-		public static FormEditorDesignerPreference safeValueOf(String value, FormEditorDesignerPreference def)
-		{
-			if (value != null)
-			{
-				try
-				{
-					return valueOf(value);
-				}
-				catch (IllegalArgumentException e)
-				{
-					// ignore
-				}
-			}
-			return def;
-		}
-	}
-
 	public static final String DESIGNER_SETTINGS_PREFIX = "designer.";
 
 	public static final String METRICS_SETTING = "preferdMetrics";
@@ -95,7 +74,6 @@ public class DesignerPreferences
 	public static final String CLOSE_EDITORS_ON_EXIT_SETTING = "saveEditorState";
 	public static final String OPEN_FIRST_FORM_DESIGNER_SETTING = "openFirstFormDesigner";
 	public static final String SHOW_COLUMNS_IN_DB_ORDER_SETTING = "showColumnsInDbOrder";
-	public static final String SHOW_LEGACY_SOLUTION_TYPES_SETTING = "showLegacySolutionTypes";
 	public static final String FORM_TOOLS_ON_MAIN_TOOLBAR_SETTING = "formToolsOnMainToolbar";
 	public static final String FORM_COOLBAR_LAYOUT_SETTING = "formCoolBarLayout";
 	public static final String SHOW_SAME_SIZE_SETTING = "showSameSizeFeedback";
@@ -151,7 +129,6 @@ public class DesignerPreferences
 	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
 	public static final boolean SHOW_RULERS_DEFAULT = true;
 	public static final boolean MARQUEE_SELECT_OUTER_DEFAULT = true;
-	public static final FormEditorDesignerPreference FORM_EDITOR_DESIGNER_DEFAULT = FormEditorDesignerPreference.Automatic;
 
 	public static final int FORM_EVENT_HANDLER_NAMING_DEFAULT = 0;
 	public static final int FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_NAME = 1;
@@ -276,11 +253,6 @@ public class DesignerPreferences
 		return getProperty(METRICS_SETTING, METRICS_DEFAULT);
 	}
 
-	public void setMetrics(int metrics)
-	{
-		setProperty(METRICS_SETTING, metrics);
-	}
-
 	public int getStepSize()
 	{
 		return PersistHelper.createDimension(getProperty(STEP_SIZE_SETTING, STEP_SIZE_DEFAULT + ",0")).width;
@@ -321,19 +293,9 @@ public class DesignerPreferences
 		return getProperty(ALIGNMENT_THRESHOLD_SETTING, ALIGNMENT_THRESHOLD_DEFAULT);
 	}
 
-	public void setAlignmentThreshold(int alignmentThreshold)
-	{
-		setProperty(ALIGNMENT_THRESHOLD_SETTING, alignmentThreshold);
-	}
-
 	public int getAlignmentIndent()
 	{
 		return getProperty(ALIGNMENT_INDENT_SETTING, ALIGNMENT_INDENT_DEFAULT);
-	}
-
-	public void setAlignmentIndent(int indent)
-	{
-		setProperty(ALIGNMENT_INDENT_SETTING, indent);
 	}
 
 	public int[] getAlignmentDistances()
@@ -356,19 +318,9 @@ public class DesignerPreferences
 		return distances;
 	}
 
-	public void setAlignmentDistances(int smallDistance, int mediumDistance, int largeDistance)
-	{
-		setProperty(ALIGNMENT_DISTANCES_SETTING, String.valueOf(smallDistance) + ':' + String.valueOf(mediumDistance) + ':' + String.valueOf(largeDistance));
-	}
-
 	public boolean getAnchor()
 	{
 		return getProperty(ANCHOR_SETTING, ANCHOR_DEFAULT);
-	}
-
-	public void setAnchor(boolean anchor)
-	{
-		setProperty(ANCHOR_SETTING, anchor);
 	}
 
 	public boolean getPaintPageBreaks()
@@ -376,19 +328,9 @@ public class DesignerPreferences
 		return getProperty(PAINT_PAGEBREAKS_SETTING, PAINT_PAGEBREAKS_DEFAULT);
 	}
 
-	public void setPaintPageBreaks(boolean paintPageBreaks)
-	{
-		setProperty(PAINT_PAGEBREAKS_SETTING, paintPageBreaks);
-	}
-
 	public boolean getShowRulers()
 	{
 		return getProperty(SHOW_RULERS_SETTING, SHOW_RULERS_DEFAULT);
-	}
-
-	public void setShowRulers(boolean showRulers)
-	{
-		setProperty(SHOW_RULERS_SETTING, showRulers);
 	}
 
 	public boolean getMarqueeSelectOuter()
@@ -401,16 +343,6 @@ public class DesignerPreferences
 		setProperty(MARQUEE_SELECT_OUTER_SETTING, outer);
 	}
 
-	public FormEditorDesignerPreference getFormEditorDesignerPreference()
-	{
-		return FormEditorDesignerPreference.safeValueOf(getProperty(FORM_EDITOR_DESIGNER_SETTING, null), FORM_EDITOR_DESIGNER_DEFAULT);
-	}
-
-	public void setFormEditorDesignerPreference(FormEditorDesignerPreference pref)
-	{
-		setProperty(FORM_EDITOR_DESIGNER_SETTING, pref == null ? null : pref.name());
-	}
-
 	public static boolean isGuideSetting(String key)
 	{
 		return GUIDE_SIZE_SETTING.equals(getKeyPostfix(key));
@@ -419,11 +351,6 @@ public class DesignerPreferences
 	public int getGuideSize()
 	{
 		return getProperty(GUIDE_SIZE_SETTING, GUIDE_SIZE_DEFAULT);
-	}
-
-	public void setGuideSize(int guideSize)
-	{
-		setProperty(GUIDE_SIZE_SETTING, guideSize);
 	}
 
 	public RGB getGridColor()
@@ -437,24 +364,10 @@ public class DesignerPreferences
 			PersistHelper.createColor(getProperty(SAME_HEIGHT_WIDTH_INDICATOR_COLOR_SETTING, SAME_HEIGHT_WIDTH_INDICATOR_COLOR_DEFAULT)));
 	}
 
-	public void setGridColor(RGB rgb)
-	{
-		setProperty(GRID_COLOR_SETTING, PersistHelper.createColorString(ColorResource.ColoRgb2Awt(rgb)));
-	}
-
-	public void setSameHeightWidthIndicatorColor(RGB rgb)
-	{
-		setProperty(SAME_HEIGHT_WIDTH_INDICATOR_COLOR_SETTING, PersistHelper.createColorString(ColorResource.ColoRgb2Awt(rgb)));
-	}
 
 	public RGB getAlignmentGuideColor()
 	{
 		return ColorResource.ColorAwt2Rgb(PersistHelper.createColor(getProperty(ALIGNMENT_GUIDE_COLOR_SETTING, ALIGNMENT_GUIDE_COLOR_DEFAULT)));
-	}
-
-	public void setAlignmentGuideColor(RGB rgb)
-	{
-		setProperty(ALIGNMENT_GUIDE_COLOR_SETTING, PersistHelper.createColorString(ColorResource.ColoRgb2Awt(rgb)));
 	}
 
 	public int getGridSize()
@@ -462,19 +375,9 @@ public class DesignerPreferences
 		return getProperty(GRID_SIZE_SETTING, GRID_SIZE_DEFAULT);
 	}
 
-	public void setGridSize(int gridSize)
-	{
-		setProperty(GRID_SIZE_SETTING, gridSize);
-	}
-
 	public int getGridPointSize()
 	{
 		return getProperty(GRID_POINTSIZE_SETTING, GRID_POINTSIZE_DEFAULT);
-	}
-
-	public void setGridPointSize(int gridPointSize)
-	{
-		setProperty(GRID_POINTSIZE_SETTING, gridPointSize);
 	}
 
 	public boolean getNoneSnapTo()
@@ -492,19 +395,9 @@ public class DesignerPreferences
 		return SNAP_TO_ALIGMNENT.equals(getProperty(SNAPTO_SETTING, SNAPTO_DEFAULT));
 	}
 
-	public void setSnapTo(boolean grid, boolean alignment)
-	{
-		setProperty(SNAPTO_SETTING, grid ? SNAP_TO_GRID : alignment ? SNAP_TO_ALIGMNENT : SNAP_TO_NONE);
-	}
-
 	public boolean getFeedbackGrid()
 	{
 		return getProperty(FEEDBACK_GRID_SETTING, FEEDBACK_GRID_DEFAULT);
-	}
-
-	public void setFeedbackGrid(boolean feedbackGrid)
-	{
-		setProperty(FEEDBACK_GRID_SETTING, feedbackGrid);
 	}
 
 	public boolean getFeedbackAlignment()
@@ -545,16 +438,6 @@ public class DesignerPreferences
 	public void setShowColumnsInDbOrder(boolean showColumnsInDbOrder)
 	{
 		setProperty(SHOW_COLUMNS_IN_DB_ORDER_SETTING, showColumnsInDbOrder);
-	}
-
-	public boolean getShowLegacySolutionTypes()
-	{
-		return getProperty(SHOW_LEGACY_SOLUTION_TYPES_SETTING, SHOW_LEGACY_SOLUTION_TYPES_DEFAULT);
-	}
-
-	public void setShowLegacySolutionTypes(boolean showLegacySolutionTypes)
-	{
-		setProperty(SHOW_LEGACY_SOLUTION_TYPES_SETTING, showLegacySolutionTypes);
 	}
 
 	public boolean getShowSameSizeFeedback()

@@ -11,8 +11,11 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE" value="true"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/OpenJDK 21.0.2 [21.0.2]/"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.servoy.build.documentation.apigen.SpecMarkdownGenerator"/>
+    <listAttribute key="org.eclipse.jdt.launching.MODULEPATH"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="j2db_documentation"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="E:/GitHome/git/gitbook&#13;&#10;./launchers/ng_package_git_repos_for_docs.txt&#13;&#10;true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="gitRepoPath=/Users/marianvid/Servoy/git/master/gitbook&#13;&#10;scanPackagesPath=./launchers/ng_package_git_repos_for_docs.txt&#13;&#10;generateExtent=true&#10;clearDirs=false&#10;mergeSpecAndDoc=true"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="j2db_documentation"/>
 </launchConfiguration>

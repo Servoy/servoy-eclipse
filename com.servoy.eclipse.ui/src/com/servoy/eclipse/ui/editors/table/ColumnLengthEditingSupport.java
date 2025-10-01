@@ -41,7 +41,7 @@ public class ColumnLengthEditingSupport extends EditingSupport
 	@Override
 	protected void setValue(Object element, Object value)
 	{
-		if (element instanceof Column)
+		if (element instanceof Column column)
 		{
 			int length = 0;
 			try
@@ -56,10 +56,11 @@ public class ColumnLengthEditingSupport extends EditingSupport
 				ServoyLog.logError(e);
 			}
 
-			ColumnType columnType = ((Column)element).getConfiguredColumnType();
-			((Column)element).getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(columnType.getSqlType(), length, columnType.getScale()));
-			if (!((Column)element).getExistInDB()) ((Column)element).updateColumnType(columnType.getSqlType(), length, columnType.getScale());
-			getViewer().update(element, null);
+			ColumnType columnType = column.getConfiguredColumnType();
+			ColumnType newColumnType = ColumnType.getInstance(columnType.getSqlType(), length, columnType.getScale(), columnType.getSubType());
+			column.getColumnInfo().setConfiguredColumnType(newColumnType);
+			if (!column.getExistInDB()) column.updateColumnType(newColumnType);
+			getViewer().update(column, null);
 		}
 	}
 

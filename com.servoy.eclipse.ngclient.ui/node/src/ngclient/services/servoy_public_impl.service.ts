@@ -54,6 +54,10 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         return this.localeService.getLocale();
     }
 
+    getAGGridLocale(): { [key: string]: string; } {
+        return this.localeService.getAgGridLocale();
+    }
+
     getLocaleObject(): Locale {
         return this.sabloService.getLocale();
     }
@@ -66,8 +70,8 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         this.applicationService.showFileOpenDialog(title, multiselect, acceptFilter, url);
     }
 
-    showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<string> {
-        return this.applicationService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, buttonsText);
+    showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string): Promise<string> {
+        return this.applicationService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, buttonsText, inputType);
     }
 
     generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
@@ -105,8 +109,8 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         this.popupFormService.showForm(popup);
     }
 
-    cancelFormPopup(disableClearPopupFormCallToServer: boolean): void {
-        this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer);
+    cancelFormPopup(disableClearPopupFormCallToServer_or_name: boolean|string): void {
+        this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer_or_name);
     }
 
     setFormStyleClasses(styleclasses: { property: string }): void {

@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.inmemory.MenuTable;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
@@ -81,6 +82,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
@@ -888,6 +890,14 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		public String getText(Object value)
 		{
 			String append = "";
+			if (value instanceof Column && ((Column)value).getTable() instanceof MenuTable)
+			{
+				String category = MenuPropertyType.INSTANCE.getExtraPropertyCategory(((Column)value).getSQLName());
+				if (category != null)
+				{
+					append += "[" + category + "]";
+				}
+			}
 			if (selectedElements != null && selectedElements.contains(value))
 			{
 				append += getDataProviderTypeByValue(value);

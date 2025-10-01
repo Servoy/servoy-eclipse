@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -349,11 +350,10 @@ public class I18NExternalizeDialog extends HelpDialog
 			defaultMessages = new HashMap<String, String>();
 			Collection<I18NMessagesModelEntry> messages = i18nMessagesModel.getMessages(null, null, null, null,
 				ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile(), null);
-			Iterator<I18NMessagesModelEntry> messagesIte = messages.iterator();
 			I18NMessagesModelEntry message;
-			while (messagesIte.hasNext())
+			for (I18NMessagesModelEntry message2 : messages)
 			{
-				message = messagesIte.next();
+				message = message2;
 				defaultMessages.put(message.key, message.defaultvalue);
 			}
 		}
@@ -901,34 +901,52 @@ public class I18NExternalizeDialog extends HelpDialog
 		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(i18NLayout.createSequentialGroup().addContainerGap().add(
 			i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, treeViewerComposite, GroupLayout.PREFERRED_SIZE, 0,
 				Short.MAX_VALUE).add(GroupLayout.LEADING, showDatabaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-							GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE,
-								GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showOnlyEditedMessagesButton,
-									GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(
-										i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-											GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0,
-												Short.MAX_VALUE)).add(
-													i18NLayout.createSequentialGroup().add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE,
-														GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-															commonPrefix, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).addPreferredGap(
-																LayoutStyle.RELATED).add(commonPrefixApplyButton, GroupLayout.PREFERRED_SIZE,
-																	GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
+					GroupLayout.PREFERRED_SIZE)
+				.add(GroupLayout.LEADING, showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE)
+				.add(GroupLayout.LEADING, showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE)
+				.add(GroupLayout.LEADING, showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+				.add(GroupLayout.LEADING, showOnlyEditedMessagesButton,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+				.add(
+					i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0,
+							Short.MAX_VALUE))
+				.add(
+					i18NLayout.createSequentialGroup().add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+							commonPrefix, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+						.addPreferredGap(
+							LayoutStyle.RELATED)
+						.add(commonPrefixApplyButton, GroupLayout.PREFERRED_SIZE,
+							GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)))
+			.addContainerGap()));
 		i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(i18NLayout.createSequentialGroup().addContainerGap().add(
 			i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-				GroupLayout.PREFERRED_SIZE).add(filterTextField, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-					treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(showDatabaseMessagesButton,
-						GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-							showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-								LayoutStyle.RELATED).add(showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-									GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE,
-										GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-											showOnlyEditedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-											GroupLayout.PREFERRED_SIZE).addContainerGap().add(
-												i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE,
-													GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(commonPrefix, 0, GroupLayout.PREFERRED_SIZE,
-														Short.MAX_VALUE).add(commonPrefixApplyButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-															GroupLayout.PREFERRED_SIZE))));
+				GroupLayout.PREFERRED_SIZE).add(filterTextField, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+			.addPreferredGap(LayoutStyle.RELATED).add(
+				treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE)
+			.addPreferredGap(LayoutStyle.RELATED).add(showDatabaseMessagesButton,
+				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+			.addPreferredGap(LayoutStyle.RELATED).add(
+				showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+			.addPreferredGap(
+				LayoutStyle.RELATED)
+			.add(showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+				GroupLayout.PREFERRED_SIZE)
+			.addPreferredGap(LayoutStyle.RELATED).add(showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE,
+				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+			.addPreferredGap(LayoutStyle.RELATED).add(
+				showOnlyEditedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+				GroupLayout.PREFERRED_SIZE)
+			.addContainerGap().add(
+				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(commonPrefix, 0, GroupLayout.PREFERRED_SIZE,
+						Short.MAX_VALUE)
+					.add(commonPrefixApplyButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.PREFERRED_SIZE))));
 
 		composite.setLayout(i18NLayout);
 
@@ -1109,14 +1127,13 @@ public class I18NExternalizeDialog extends HelpDialog
 
 					Map<Integer, ArrayList<Pair<ASTNode, STATE>>> lineNumberForASTNodes = getLineNumbersForASTNodes(jsContent, startIdxNodeMap);
 					persistToLineNumberForASTNodes.put(persist, lineNumberForASTNodes);
-					Iterator<ArrayList<Pair<ASTNode, STATE>>> astNodesIte = lineNumberForASTNodes.values().iterator();
 					ArrayList<Pair<ASTNode, STATE>> astNodes;
 					ASTNode i18nNode;
 					ArrayList<SingleLineComment> lineComments;
 					int keyIdx = 0;
-					while (astNodesIte.hasNext())
+					for (ArrayList<Pair<ASTNode, STATE>> element : lineNumberForASTNodes.values())
 					{
-						astNodes = astNodesIte.next();
+						astNodes = element;
 						lineComments = new ArrayList<SingleLineComment>();
 						if (astNodes.get(0).getLeft() instanceof SingleLineComment)
 						{
@@ -1182,7 +1199,7 @@ public class I18NExternalizeDialog extends HelpDialog
 			{
 				if (comment instanceof SingleLineComment)
 				{
-					commentTxt = ((SingleLineComment)comment).getText();
+					commentTxt = comment.getText();
 					if (commentTxt.startsWith("//$NON-NLS-"))
 					{
 						commentsToRemove.add(comment);
@@ -1273,11 +1290,10 @@ public class I18NExternalizeDialog extends HelpDialog
 			String defaultText = getProperty(persist, element);
 			if (defaultMessages.containsValue(defaultText))
 			{
-				Iterator<Map.Entry<String, String>> defMsgIte = defaultMessages.entrySet().iterator();
 				Map.Entry<String, String> msgEntry;
-				while (defMsgIte.hasNext())
+				for (Entry<String, String> element2 : defaultMessages.entrySet())
 				{
-					msgEntry = defMsgIte.next();
+					msgEntry = element2;
 					if (msgEntry.getValue().equals(defaultText)) return msgEntry.getKey();
 				}
 			}
@@ -1566,7 +1582,7 @@ public class I18NExternalizeDialog extends HelpDialog
 						solutionChangedPersistsMapEntry = changedSolutions.next();
 						for (ServoyProject sp : I18NExternalizeDialog.this.getI18NProjects())
 						{
-							if (sp.getSolution().getID() == solutionChangedPersistsMapEntry.getKey().getID())
+							if (sp.getSolution().getUUID().equals(solutionChangedPersistsMapEntry.getKey().getUUID()))
 							{
 								ArrayList<IPersist> changedPersists = solutionChangedPersistsMapEntry.getValue();
 								sp.saveEditingSolutionNodes(changedPersists.toArray(new IPersist[changedPersists.size()]), false);

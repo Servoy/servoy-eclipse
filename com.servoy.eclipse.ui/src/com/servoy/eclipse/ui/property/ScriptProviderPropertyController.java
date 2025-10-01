@@ -130,7 +130,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 				{
 					MethodPropertyController.setMethodArguments(persistContext.getPersist(), id, mwa.paramNames, mwa.arguments);
 					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), mwa.table,
-						mwa.methodId);
+						mwa.methodUUID);
 					if (scriptProvider != null)
 					{
 						return scriptProvider.getParent() instanceof IRootObject ? ScopesUtils.getScopeString(scriptProvider) : scriptProvider.getDisplayName();

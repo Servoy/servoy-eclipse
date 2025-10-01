@@ -99,6 +99,7 @@ public class AddWorkingSetAction extends Action implements ISelectionChangedList
 				}
 				else if (ServoyModel.SERVOY_WORKING_SET_ID.equals(ws.getId()))
 				{
+					boolean changed = false;
 					for (IFile file : projectFiles)
 					{
 						List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
@@ -106,9 +107,15 @@ public class AddWorkingSetAction extends Action implements ISelectionChangedList
 						{
 							if (!files.contains(file))
 							{
+								changed = true;
 								PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(file, new IWorkingSet[] { ws });
 							}
 						}
+					}
+					if (!changed)
+					{
+						UIUtils.reportWarning("Existing working set",
+							"Working set '" + ws.getName() + "' already exists and solution was already added to it.");
 					}
 				}
 				else

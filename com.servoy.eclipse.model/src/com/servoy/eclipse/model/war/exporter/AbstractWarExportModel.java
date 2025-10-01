@@ -94,14 +94,13 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	protected SpecProviderState componentsSpecProviderState;
 	protected SpecProviderState servicesSpecProviderState;
-	private final boolean isNgExport;
 	private String userHome;
 	private boolean isOverwriteDeployedDBServerProperties = true;
 	private boolean isOverwriteDeployedServoyProperties;
 	private Map<String, String> upgradedLicenses;
 	private boolean skipDatabaseViewsUpdate;
 
-	public AbstractWarExportModel(boolean isNGExport)
+	public AbstractWarExportModel()
 	{
 		componentsUsedExplicitlyBySolution = new TreeSet<String>();
 		servicesUsedExplicitlyBySolution = new TreeSet<String>();
@@ -111,13 +110,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		exportedLayoutPackages = new HashSet<String>();
 		licenses = new HashMap<String, License>();
 
-		this.isNgExport = isNGExport;
-
-		if (isNGExport)
-		{
-			this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-			this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
-		}
+		this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+		this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 	}
 
 	public static class License
@@ -290,11 +284,11 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			}
 			catch (CoreException e)
 			{
-				Debug.error(e);
+				ServoyLog.logError(e);
 			}
 			catch (IOException e)
 			{
-				Debug.error(e);
+				ServoyLog.logError(e);
 			}
 			catch (StackOverflowError e)
 			{
@@ -382,7 +376,6 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	protected void searchForComponentsAndServicesBothDefaultAndInSolution()
 	{
-		if (!isNGExport()) return;
 		FlattenedSolution solution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 		Iterator<Form> forms = solution.getForms(false);
 		while (forms.hasNext())
@@ -455,11 +448,6 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			result = new String(Utils.decodeBASE64(password));
 		}
 		return result;
-	}
-
-	public boolean isNGExport()
-	{
-		return isNgExport;
 	}
 
 	@Override

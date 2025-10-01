@@ -74,7 +74,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 	@Override
 	public String getText(Object value)
 	{
-		if (value == null) return "";
+		if (value == null) return Messages.LabelNone;
 		Object val = value;
 		if (val instanceof ComplexProperty)
 		{
@@ -161,7 +161,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(form.getDataSource());
 			}
 		}
-		return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, mwa.methodId);
+		return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, mwa.methodUUID);
 	}
 
 	/*
@@ -209,7 +209,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		if (val instanceof MethodWithArguments)
 		{
 			return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), ((MethodWithArguments)val).table,
-				((MethodWithArguments)val).methodId);
+				((MethodWithArguments)val).methodUUID);
 		}
 		return null;
 	}

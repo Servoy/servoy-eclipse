@@ -4,7 +4,8 @@ import { Format } from '../format/formatting.service';
 import { NumberSymbol } from '@angular/common';
 
 @Directive({
-  selector: '[svyDecimalKeyConverter]'
+    selector: '[svyDecimalKeyConverter]',
+    standalone: false
 })
 export class DecimalkeyconverterDirective {
 

@@ -47,7 +47,7 @@ public class TestTarget
 	private final static String DELIM = "|";
 
 
-	private Pair<Solution, String> globalScopeToTest; // if a global scope should be tested 
+	private Pair<Solution, String> globalScopeToTest; // if a global scope should be tested
 	private Solution moduleToTest; // if a module is to be tested
 	private Form formToTest; // if a form scope should be tested
 	private ScriptMethod testMethodToTest; // if only one test method should be tested
@@ -56,6 +56,8 @@ public class TestTarget
 	private Form testMethodsForm;
 	private String testMethodsScope;
 	private int type; //value of SOLUTION ,FORM, GLOBAL_SCOPE...
+
+	public Object launch;
 
 	private TestTarget()
 	{
@@ -166,7 +168,7 @@ public class TestTarget
 			}
 			case FORM_METHOD :
 			{
-				return type + DELIM + activeSolution.getName() + DELIM + testMethodsForm.getName() + DELIM + testMethodToTest.getID();
+				return type + DELIM + activeSolution.getName() + DELIM + testMethodsForm.getName() + DELIM + testMethodToTest.getUUID();
 			}
 			case GLOBAL_METHOD :
 			{
@@ -212,9 +214,9 @@ public class TestTarget
 			case FORM_METHOD :
 			{
 				String formName = st.nextToken();
-				Integer methodId = Integer.valueOf(st.nextToken());
+				String methodUUID = st.nextToken();
 				Form form = fl.getForm(formName); //Assert not null
-				ScriptMethod method = form.getScriptMethod(methodId); //Assert not null
+				ScriptMethod method = form.getScriptMethod(methodUUID); //Assert not null
 				target.testMethodToTest = method;
 				break;
 			}

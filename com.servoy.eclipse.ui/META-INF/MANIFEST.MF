@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 2024.6.0.3980_rc
+Bundle-Version: 2025.12.0.4120_rc
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -10,6 +10,7 @@ Require-Bundle: org.eclipse.ui,
  com.servoy.eclipse.core,
  servoy_shared,
  servoy_smart_client,
+ org.eclipse.gef,
  org.eclipse.core.resources,
  org.eclipse.jface.text,
  org.eclipse.ui.workbench.texteditor,
@@ -73,7 +74,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface,
  sj.jsonschemavalidation,
  com.servoy.eclipse.ui.tweaks,
- org.apache.commons.codec,
  org.eclipse.help,
  com.servoy.eclipse.ngclient,
  org.eclipse.equinox.security,
@@ -88,10 +88,13 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tm4e.ui;bundle-version="0.6.1",
  org.eclipse.tm4e.core;bundle-version="0.5.1",
  org.eclipse.tm4e.languageconfiguration;bundle-version="0.5.2",
- org.eclipse.ui.genericeditor;bundle-version="1.2.300"
+ org.eclipse.ui.genericeditor;bundle-version="1.2.300",
+ servoy_headless_client,
+ org.apache.tomcat;bundle-version="11.0.8"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,
+ com.servoy.eclipse.developersolution,
  com.servoy.eclipse.ui,
  com.servoy.eclipse.ui.actions,
  com.servoy.eclipse.ui.browser,
@@ -108,6 +111,7 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.resource,
  com.servoy.eclipse.ui.scripting,
  com.servoy.eclipse.ui.search,
+ com.servoy.eclipse.ui.svygen,
  com.servoy.eclipse.ui.util,
  com.servoy.eclipse.ui.views,
  com.servoy.eclipse.ui.views.properties,
@@ -115,18 +119,14 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
  com.servoy.eclipse.ui.wizards,
  com.servoy.eclipse.ui.wizards.exportsolution.pages
-Import-Package: org.apache.commons.io;version="2.8.0",
- org.apache.hc.client5.http;version="5.2.1",
- org.apache.hc.client5.http.classic;version="5.2.1",
- org.apache.hc.client5.http.classic.methods;version="5.2.1",
- org.apache.hc.client5.http.entity;version="5.2.1",
- org.apache.hc.client5.http.entity.mime;version="5.2.1",
- org.apache.hc.client5.http.impl.classic;version="5.2.1",
- org.apache.hc.client5.http.protocol;version="5.2.1",
- org.apache.hc.core5.http;version="5.2.3",
- org.apache.hc.core5.http.io;version="5.2.3",
- org.apache.hc.core5.http.io.entity;version="5.2.3",
- org.apache.hc.core5.http.message;version="5.2.3"
+Import-Package: com.fasterxml.jackson.annotation;version="2.18.0",
+ com.fasterxml.jackson.core;version="2.18.0",
+ com.fasterxml.jackson.core.exc;version="2.18.0",
+ com.fasterxml.jackson.databind;version="2.18.0",
+ com.github.scribejava.core.oauth,
+ jakarta.websocket.server;version="[2.2.0,4.0.0)",
+ org.apache.commons.codec.binary;version="[1.16.0,2.0.0)",
+ org.apache.commons.io;version="2.8.0"
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.ui

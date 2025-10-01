@@ -203,7 +203,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 				{
 					try
 					{
-						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, -1,
+						ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(newText, null,
 							new ValidatorSearchContext(context, IRepository.SCRIPTVARIABLES), false);
 					}
 					catch (RepositoryException e)

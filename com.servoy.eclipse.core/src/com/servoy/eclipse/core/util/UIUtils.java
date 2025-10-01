@@ -787,7 +787,13 @@ public class UIUtils
 
 	public static String showTextFieldDialog(Shell shell, String title, String message, String initialValue)
 	{
-		TextFieldDialog dialog = new TextFieldDialog(shell, title, null, message, MessageDialog.NONE, new String[] { "OK", "Cancel" }, initialValue);
+		return showTextFieldDialog(shell, title, message, initialValue, false);
+	}
+
+	public static String showTextFieldDialog(Shell shell, String title, String message, String initialValue, boolean isTextArea)
+	{
+		TextFieldDialog dialog = new TextFieldDialog(shell, title, null, message, MessageDialog.NONE, new String[] { "OK", "Cancel" }, initialValue,
+			isTextArea);
 		dialog.setBlockOnOpen(true);
 		if (dialog.open() != Window.OK)
 		{
@@ -1153,22 +1159,26 @@ public class UIUtils
 			if (manager != null)
 			{
 				Display d = Display.getDefault();
-				IThemeEngine engine = manager.getEngineForDisplay(d);
-				if (engine != null)
-				{
-					ITheme it = engine.getActiveTheme();
-					if (it != null)
+				IS_DARK_THEME = d.syncCall(() -> {
+					Boolean retValue = Boolean.FALSE;
+					IThemeEngine engine = manager.getEngineForDisplay(d);
+					if (engine != null)
 					{
-						if (eclipseDarkTheme && ECLIPSE_DARK_THEME_ID.equals(it.getId()))
+						ITheme it = engine.getActiveTheme();
+						if (it != null)
 						{
-							IS_DARK_THEME = true;
-						}
-						if (!eclipseDarkTheme && isDarkTheme(it.getId()))
-						{
-							IS_DARK_THEME = true;
+							if (eclipseDarkTheme && ECLIPSE_DARK_THEME_ID.equals(it.getId()))
+							{
+								retValue = Boolean.TRUE;
+							}
+							if (!eclipseDarkTheme && isDarkTheme(it.getId()))
+							{
+								retValue = Boolean.TRUE;
+							}
 						}
 					}
-				}
+					return retValue;
+				}).booleanValue();
 			}
 		}
 		return IS_DARK_THEME;

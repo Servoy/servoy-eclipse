@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Responsive Form Builder Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.designer.rfb;singleton:=true
-Bundle-Version: 2024.6.0.3980_rc
+Bundle-Version: 2025.12.0.4120_rc
 Bundle-Vendor: Servoy
-Require-Bundle: org.apache.tomcat,
+Require-Bundle: org.apache.tomcat;bundle-version="11.0.8",
  servoy_shared,
  sablo,
  servoy_ngclient,
@@ -18,12 +18,12 @@ Require-Bundle: org.apache.tomcat,
  com.servoy.eclipse.ngclient,
  com.servoy.eclipse.ui
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-17
-Import-Package: javax.servlet;version="[4.0.0,5.0.0)",
- javax.servlet.annotation;version="[4.0.0,5.0.0)",
- javax.servlet.http;version="[4.0.0,5.0.0)",
- javax.websocket;version="[1.1.0,2.0.0)",
- javax.websocket.server;version="[1.1.0,2.0.0)",
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Import-Package: jakarta.servlet;version="[6.1.0,8.0.0)",
+ jakarta.servlet.annotation;version="[6.1.0,8.0.0)",
+ jakarta.servlet.http;version="[6.1.0,8.0.0)",
+ jakarta.websocket;version="[2.2.0,4.0.0)",
+ jakarta.websocket.server;version="[2.2.0,4.0.0)",
  org.apache.commons.text;version="1.11.0",
  org.eclipse.core.resources,
  org.osgi.framework,

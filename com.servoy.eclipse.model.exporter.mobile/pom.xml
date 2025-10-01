@@ -8,21 +8,20 @@
   <parent>
     <groupId>com.servoy</groupId>
     <artifactId>servoy-eclipse</artifactId>
-    <version>2024.6.0.3980_rc</version>
+    <version>2025.12.0.4120_rc</version>
   </parent>
   <artifactId>com.servoy.eclipse.model.exporter.mobile</artifactId>
-  <version>2024.6.0.3980_rc</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 		<plugins>
 			<plugin>
 	         <groupId>org.apache.maven.plugins</groupId>
 	         <artifactId>maven-dependency-plugin</artifactId>
-	         <version>3.6.1</version>
+	         <version>3.8.0</version>
 	         <executions>
 	           <execution>
 	             <id>copy</id>
-	             <phase>prepare-package</phase>
+	             <phase>process-resources</phase>
 	             <goals>
 	               <goal>copy</goal>
 	             </goals>
@@ -34,7 +33,7 @@
 	                   <version>${project.version}</version>
 	                   <type>war</type>
 	                   <overWrite>true</overWrite>
-	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
+	                   <outputDirectory>${project.basedir}/src/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
 	                 </artifactItem>
 					  <artifactItem>
 	                   <groupId>com.servoy</groupId>
@@ -42,7 +41,7 @@
 	                   <version>${project.version}</version>
 	                   <type>war</type>
 	                   <overWrite>true</overWrite>
-	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
+	                   <outputDirectory>${project.basedir}/src/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
 	                 </artifactItem>
 	               </artifactItems>
 	               <stripVersion>true</stripVersion>

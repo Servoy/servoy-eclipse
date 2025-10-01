@@ -1,5 +1,5 @@
-import { DOCUMENT } from '@angular/common';
-import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, Input, ViewChild, ElementRef, ChangeDetectionStrategy, Inject } from '@angular/core';
+
+import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, Input, ViewChild, ElementRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { FormattingService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
 
@@ -7,7 +7,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     selector: 'servoydefault-check',
     templateUrl: './check.html',
     styleUrls: ['./check.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement> {
     @Input() horizontalAlignment: number;

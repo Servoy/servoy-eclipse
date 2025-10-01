@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.internal.provisional.action.IToolBarContributionItem;
 import org.eclipse.jface.util.Policy;
+import org.eclipse.pde.api.tools.annotations.NoExtend;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionEvent;
@@ -46,8 +47,8 @@ import org.eclipse.swt.widgets.ToolItem;
  * </p>
  *
  * @since 3.0
- * @noextend This class is not intended to be subclassed by clients.
  */
+@NoExtend
 public class ToolBarContributionItem extends ContributionItem implements IToolBarContributionItem {
 
 	/**
@@ -137,7 +138,6 @@ public class ToolBarContributionItem extends ContributionItem implements IToolBa
 	 *
 	 * @return <code>true</code> if the item is disposed; <code>false</code>
 	 *         otherwise.
-	 *
 	 */
 	private final boolean checkDisposed() {
 		if (disposed) {
@@ -331,7 +331,7 @@ public class ToolBarContributionItem extends ContributionItem implements IToolBa
 	private void handleChevron(SelectionEvent event) {
 		CoolItem item = (CoolItem) event.widget;
 		Control control = item.getControl();
-		if ((control instanceof ToolBar) == false) {
+		if (!(control instanceof ToolBar)) {
 			return;
 		}
 		CoolBar coolBar = item.getParent();

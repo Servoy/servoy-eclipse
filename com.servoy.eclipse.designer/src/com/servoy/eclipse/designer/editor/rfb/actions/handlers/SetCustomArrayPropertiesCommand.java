@@ -29,6 +29,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
@@ -66,13 +67,13 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 	@Override
 	public void execute()
 	{
-		WebComponent webComponent = (WebComponent)persistContext.getPersist();
-		saveState(webComponent);
+		WebComponent parentWebComponent = (WebComponent)persistContext.getPersist();
+		saveState(parentWebComponent);
 
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponent.getTypeName());
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentWebComponent.getTypeName());
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());
-
+		WebComponent webComponent = parentWebComponent;
 		try
 		{
 			webComponent = (WebComponent)ElementUtil.getOverridePersist(persistContext);
@@ -87,7 +88,7 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 		for (int i = 0; i < result.size(); i++)
 		{
 			Map<String, Object> row = result.get(i);
-			WebCustomType customType;
+			WebCustomType[] customType = new WebCustomType[1];
 			Object uuid = row.get("svyUUID");
 			if (uuid == null)
 			{
@@ -96,16 +97,36 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 				{
 					name = typeName + "_" + id.incrementAndGet();
 				}
-				customType = AddContainerCommand.addCustomType(webComponent, propertyName, name, i, null);
+				customType[0] = AddContainerCommand.addCustomType(webComponent, propertyName, name, i, null);
 			}
 			else
 			{
-				customType = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
+				customType[0] = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
+				if (customType[0] == null && webComponent != parentWebComponent)
+				{
+					customType[0] = (WebCustomType)parentWebComponent.getChild(Utils.getAsUUID(uuid, false));
+					if (customType[0] != null)
+					{
+						Object webComponents = webComponent.getProperty(customType[0].getJsonKey());
+						if (webComponents instanceof Object[])
+						{
+							// inheritance by index for custom types
+							customType[0] = (WebCustomType)((Object[])webComponents)[customType[0].getIndex()];
+						}
+					}
+				}
 				previousItemsUUIDSCopy.remove(uuid); //it was updated, remove it from the set
 			}
-			row.forEach((key, value) -> {
-				if (!"svyUUID".equals(key)) customType.setProperty(key, value);
-			});
+			if (customType[0] != null)
+			{
+				row.forEach((key, value) -> {
+					if (!"svyUUID".equals(key)) customType[0].setProperty(key, value);
+				});
+			}
+			else
+			{
+				ServoyLog.logWarning("Cannot find a custom type for uuid: " + uuid + ", in component:" + webComponent, new RuntimeException());
+			}
 		}
 
 		if (!previousItemsUUIDSCopy.isEmpty())

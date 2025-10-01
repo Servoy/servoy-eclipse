@@ -49,6 +49,7 @@ public class Activator implements BundleActivator
 	private static final Bundle ngclientBundle = Platform.getBundle("servoy_ngclient");
 	private static final Bundle saboBundle = Platform.getBundle("sablo");
 	static IDesignerCallback designerCallback;
+	static NGClient developerNGClient;
 
 	public static Bundle getNClientBundle()
 	{
@@ -64,6 +65,12 @@ public class Activator implements BundleActivator
 	{
 		Activator.designerCallback = designerCallback;
 	}
+
+	public static void setDeveloperNGClient(NGClient developerNGClient)
+	{
+		Activator.developerNGClient = developerNGClient;
+	}
+
 
 	@Override
 	public void start(BundleContext ctx) throws Exception
@@ -91,6 +98,10 @@ public class Activator implements BundleActivator
 								if (requestParams.containsKey("nodebug"))
 								{
 									setClient(new NGClient(this, designerCallback));
+								}
+								else if (requestParams.containsKey("svy_developer"))
+								{
+									setClient(developerNGClient);
 								}
 								else
 								{

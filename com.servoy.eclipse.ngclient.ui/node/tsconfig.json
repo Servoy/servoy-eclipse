@@ -1,11 +1,12 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "skipLibCheck": true,
     "importHelpers": true,
     "module": "es2020",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": false,
     "experimentalDecorators": true,
     "esModuleInterop": true,
@@ -15,14 +16,12 @@
       "typings"
     ],
     "lib": [
-      "es2020",
-      "es2021.Promise",
+      "es2021",
       "es2022.Error",
       "dom",
       "dom.Iterable"
     ],
-    "paths": {
-    },
+    "paths": {},
     "outDir": "./out-tsc/app",
     "useDefineForClassFields": false
   },

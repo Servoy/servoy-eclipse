@@ -1,10 +1,11 @@
 import { LoggerFactory, LoggerService, LogLevel } from '@servoy/public';
-import { CustomEventEmitter, CustomEvent } from '../util/eventemitter';
+import { CustomEventEmitter } from '../util/eventemitter';
+import { IWebSocket, WebsocketCustomEvent } from './iwebsocket';
 
 
-type UrlFunction = () => string;
+type UrlFunction = (reconnectAttempt?:boolean) => string;
 
-export class ReconnectingWebSocket {
+export class ReconnectingWebSocket implements IWebSocket {
     /** Whether or not the websocket should attempt to connect immediately upon instantiation. */
     private automaticOpen = true;
 
@@ -153,14 +154,14 @@ export class ReconnectingWebSocket {
         }
 
        if (this.log.logLevel === LogLevel.DEBUG) {
-            this.log.debug('ReconnectingWebSocket', 'attempt-connect', this.getUrl());
+            this.log.debug('ReconnectingWebSocket', 'attempt-connect', this.getUrl(reconnectAttempt));
         }
-        this.ws = new WebSocket(this.getUrl());
+        this.ws = new WebSocket(this.getUrl(reconnectAttempt));
         const self = this;
         const localWs = this.ws;
         const timeout = setTimeout(() => {
             if (this.log.logLevel === LogLevel.DEBUG) {
-                this.log.debug('ReconnectingWebSocket', 'connection-timeout', this.getUrl());
+                this.log.debug('ReconnectingWebSocket', 'connection-timeout', this.getUrl(reconnectAttempt));
             }
             this.timedOut = true;
             localWs.close();
@@ -170,7 +171,7 @@ export class ReconnectingWebSocket {
         this.ws.onopen = (event) => {
             clearTimeout(timeout);
             if (this.log.logLevel === LogLevel.DEBUG) {
-                this.log.debug('ReconnectingWebSocket', 'onopen', self.getUrl());
+                this.log.debug('ReconnectingWebSocket', 'onopen', self.getUrl(reconnectAttempt));
             }
             self.readyState = WebSocket.OPEN;
             self.reconnectAttempts = 0;
@@ -195,7 +196,7 @@ export class ReconnectingWebSocket {
                 self.eventTarget.dispatchEvent(e);
                 if (!reconnectAttempt && !self.timedOut) {
                     if (this.log.logLevel === LogLevel.DEBUG) {
-                        this.log.debug('ReconnectingWebSocket', 'onclose', self.getUrl());
+                        this.log.debug('ReconnectingWebSocket', 'onclose', self.getUrl(reconnectAttempt));
                     }
                     self.eventTarget.dispatchEvent(new WebsocketCustomEvent('close'));
                 }
@@ -219,7 +220,7 @@ export class ReconnectingWebSocket {
         };
         this.ws.onerror = (event) => {
            if (this.log.logLevel === LogLevel.DEBUG) {
-                this.log.debug('ReconnectingWebSocket', 'onerror', self.getUrl(), event);
+                this.log.debug('ReconnectingWebSocket', 'onerror', self.getUrl(reconnectAttempt), event);
             }
             self.eventTarget.dispatchEvent(new WebsocketCustomEvent('error'));
         };
@@ -241,16 +242,8 @@ export class ReconnectingWebSocket {
 
 
     /** The URL as resolved by the constructor, or a function to return the current url. This is always an absolute URL. Read only. */
-    private getUrl(): string {
-        return typeof (this.url) === 'function' ? this.url() : this.url;
+    private getUrl(reconnectAttempt?: boolean): string {
+        return typeof (this.url) === 'function' ? this.url(reconnectAttempt) : this.url;
     }
 
-}
-
-export class WebsocketCustomEvent extends CustomEvent {
-    public isReconnect: boolean;
-    public code: number;
-    public reason: string;
-    public wasClean: boolean;
-    public data: any;
 }

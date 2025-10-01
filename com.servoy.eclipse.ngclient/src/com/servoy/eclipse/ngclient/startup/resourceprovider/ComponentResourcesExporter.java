@@ -43,9 +43,9 @@ public class ComponentResourcesExporter
 	 * @throws Exception
 	 */
 	public static void copyDefaultComponentsAndServices(File tmpWarDir, Set<String> exportedPackages,
-		Map<String, File> allTemplates, boolean exportNG2Only) throws IOException
+		Map<String, File> allTemplates) throws IOException
 	{
-		copy(Activator.getNClientBundle().getEntryPaths("/war/"), tmpWarDir, exportedPackages, allTemplates, exportNG2Only);
+		copy(Activator.getNClientBundle().getEntryPaths("/war/"), tmpWarDir, exportedPackages, allTemplates);
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class ComponentResourcesExporter
 	 * @param tmpWarDir
 	 * @throws IOException
 	 */
-	private static void copy(Enumeration<String> paths, File destDir, Set<String> exportedPackages, Map<String, File> allTemplates, boolean exportNG2Only)
+	private static void copy(Enumeration<String> paths, File destDir, Set<String> exportedPackages, Map<String, File> allTemplates)
 		throws IOException
 	{
 		if (paths != null)
@@ -110,11 +110,11 @@ public class ComponentResourcesExporter
 				if (path.endsWith("/"))
 				{
 					String packageName = path.substring("war/".length(), path.length() - 1);
-					if ((!exportNG2Only && (packageName.startsWith("js") || packageName.startsWith("css"))) || packageName.startsWith("templates") ||
+					if (packageName.startsWith("templates") ||
 						exportedPackages.contains(packageName.split("/")[0]))
 					{
 						File targetDir = new File(destDir, FilenameUtils.getName(path.substring(0, path.lastIndexOf("/"))));
-						copy(Activator.getNClientBundle().getEntryPaths(path), targetDir, exportedPackages, allTemplates, exportNG2Only);
+						copy(Activator.getNClientBundle().getEntryPaths(path), targetDir, exportedPackages, allTemplates);
 					}
 				}
 				else

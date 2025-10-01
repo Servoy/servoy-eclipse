@@ -1,23 +1,35 @@
 <div class="svy-upload">
-	<h4 class="svy-upload-header-txt window-title window-header">{{ title }}</h4>
-	<div class="window-body svy-upload-body">
-	<table class="svy-upload-table" *ngIf="isFileSelected()">
-		<caption>{{ i18n_selectedFiles }}</caption>
-		<thead><tr><th>{{ i18n_name }}</th><th></th></tr></thead>
-		<tr *ngFor="let f of getUploadFiles()"><td>{{ f.name }}</td><td><button class="svy-btn svy-btn-danger svy-upload-btn-remove" (click)="doRemove(f)" [attr.disabled]="isUploading ? '' : null">{{ i18n_remove }}</button></td></tr>
-	</table>
-	<div *ngIf="!isFileSelected()"><span>{{ i18n_nothingSelected }}</span></div>
-  <br>
-  <input id="svy-upload-id" type="file" (change)="fileChange($event)" [attr.accept]="getAcceptFilter()" [attr.multiple]="isMultiselect() ? '' : null" [attr.disabled]="isUploading ? '' : null">
-  <label for="svy-upload-id" class="svy-btn svy-btn-primary svy-upload-btn-select">{{ i18n_chooseFiles }}</label>
-  <button *ngIf="isFileSelected()" class="svy-btn svy-btn-success svy-upload-btn-upload" (click)="doUpload()" [attr.disabled]="isUploading || getUploadFiles().length == 0 ? '' : null">{{ i18n_upload }}</button>
-  <button class="svy-btn svy-btn-info svy-upload-btn-cancel" (click)="dismiss()" [attr.disabled]="isUploading ? '' : null">{{ i18n_cancel }}</button>
-  <br><br>
-  <div class="svy-progress">
-  <div class="svy-progress-bar" role="progressbar" [attr.aria-valuenow]="getProgress('')" aria-valuemin="0" aria-valuemax="100" [style.width]="getProgress('%')">
-   {{ getProgress('%') }}
-  </div>
-  <div><strong>{{ errorText }}</strong></div>
-  </div>
-  <div class="window-footer" style="display: none"></div>
-</div>
+  <h4 class="svy-upload-header-txt window-title window-header">{{ title }}</h4>
+  <div class="window-body svy-upload-body">
+    @if (isFileSelected()) {
+      <table class="svy-upload-table">
+        <caption>{{ i18n_selectedFiles }}</caption>
+        @for (f of getUploadFiles(); track f) {
+          <tr [class.oversized-file]="!isFileValidForUpload(f)">
+            <td>{{ getDisplayName(f) }}</td>
+            <td><button class="svy-btn svy-btn-danger svy-upload-btn-remove" (click)="doRemove(f)" [attr.disabled]="isUploading ? '' : null">{{ i18n_remove }}</button></td>
+          </tr>
+        }
+      </table>
+    }
+    @if (!isFileSelected()) {
+      <div><span>{{ i18n_nothingSelected }}</span></div>
+    }
+    <br>
+      <input id="svy-upload-id" type="file" (change)="fileChange($event)" [attr.accept]="getAcceptFilter()" [attr.multiple]="isMultiselect() ? '' : null" [attr.disabled]="isUploading ? '' : null">
+      <label for="svy-upload-id" class="svy-btn svy-btn-primary svy-upload-btn-select">{{ i18n_chooseFiles }}</label>
+      @if (isFileSelected()) {
+        <button class="svy-btn svy-btn-success svy-upload-btn-upload" (click)="doUpload()" [attr.disabled]="isUploading || getUploadFiles().length == 0 ? '' : null">{{ i18n_upload }}</button>
+      }
+      <button class="svy-btn svy-btn-info svy-upload-btn-cancel" (click)="dismiss()" [attr.disabled]="isUploading ? '' : null">{{ i18n_cancel }}</button>
+      <br><br>
+      @if (isFileSelected()) {
+        <div class="svy-progress">
+          <div class="svy-progress-bar" role="progressbar" [attr.aria-valuenow]="getProgress('')" aria-valuemin="0" aria-valuemax="100" [style.width]="getProgress('%')">
+            {{ getProgress('%') }}
+          </div>
+          <div><strong>{{ errorText }}</strong></div>
+        </div>
+      }
+      <div class="window-footer" style="display: none"></div>
+    </div>

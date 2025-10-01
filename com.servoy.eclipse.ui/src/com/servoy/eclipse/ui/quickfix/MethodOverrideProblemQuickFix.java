@@ -49,34 +49,37 @@ class MethodOverrideProblemQuickFix implements IMarkerResolution
 	{
 		try
 		{
-			String solName = (String)mk.getAttribute("SolutionName");
-			String uuid = (String)mk.getAttribute("Uuid");
-			final UUID id = UUID.fromString(uuid);
+			String solName = mk.getAttribute("SolutionName", null);
+			String uuid = mk.getAttribute("Uuid", null);
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
-			IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
-
-			if (persist instanceof ScriptMethod)
+			if (uuid != null && servoyProject != null)
 			{
-				ScriptMethod method = (ScriptMethod)persist;
-				method.setDeclaration(method.getDeclaration().replace(" * " + SolutionSerializer.OVERRIDEKEY + "\n", ""));
-			}
+				UUID id = UUID.fromString(uuid);
+				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
 
-			IFileAccess fileAccess = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-			Pair<String, String> filepathname = SolutionSerializer.getFilePath(persist, false);
-			String fileRelativePath = filepathname.getLeft() + filepathname.getRight();
-			Object content = SolutionSerializer.generateScriptFile(persist.getParent(), SolutionSerializer.getScriptPath(persist, false),
-				ApplicationServerRegistry.get().getDeveloperRepository(), null);
+				if (persist instanceof ScriptMethod)
+				{
+					ScriptMethod method = (ScriptMethod)persist;
+					method.setDeclaration(method.getDeclaration().replace(" * " + SolutionSerializer.OVERRIDEKEY + "\n", ""));
+				}
 
-			OutputStream fos = fileAccess.getOutputStream(fileRelativePath);
-			if (content instanceof byte[])
-			{
-				fos.write((byte[])content);
+				IFileAccess fileAccess = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+				Pair<String, String> filepathname = SolutionSerializer.getFilePath(persist, false);
+				String fileRelativePath = filepathname.getLeft() + filepathname.getRight();
+				Object content = SolutionSerializer.generateScriptFile(persist.getParent(), SolutionSerializer.getScriptPath(persist, false),
+					ApplicationServerRegistry.get().getDeveloperRepository(), null);
+
+				OutputStream fos = fileAccess.getOutputStream(fileRelativePath);
+				if (content instanceof byte[])
+				{
+					fos.write((byte[])content);
+				}
+				else if (content instanceof CharSequence)
+				{
+					fos.write(content.toString().getBytes("UTF8"));
+				}
+				Utils.closeOutputStream(fos);
 			}
-			else if (content instanceof CharSequence)
-			{
-				fos.write(content.toString().getBytes("UTF8"));
-			}
-			Utils.closeOutputStream(fos);
 		}
 		catch (Exception e)
 		{

@@ -20,7 +20,6 @@ package com.servoy.eclipse.ui.property;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.print.PageFormat;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -91,6 +90,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
@@ -113,12 +113,14 @@ import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.JSONPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
@@ -314,6 +316,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(FunctionPropertyType.TYPE_NAME)).withConfig(
 				Boolean.valueOf(category == PropertyCategory.Commands)).build();
 		}
+
+		applyTooltipFromJavadocOrSpec(name, persistContext.getPersist(), false, null);
 
 		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip = null;
 		PropertyDescription builtSabloPD;
@@ -582,7 +586,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 							if (returnValue != null)
 							{
 								Form f = (Form)persistContext.getPersist();
-								if (!Utils.equalObjects(Integer.valueOf(f.getExtendsID()), returnValue))
+								if (!Utils.equalObjects(f.getExtendsID(), returnValue))
 								{
 									List<IPersist> overridePersists = new ArrayList<IPersist>();
 									for (IPersist child : f.getAllObjectsAsList())
@@ -613,10 +617,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 										// has those parts, mark them as overriden; if we wouldn't do this you could end up with 2 body parts in the same form: one overriden and one not�
 										// an alternative would be to simply delete these parts
 										ArrayList<Part> inheritedParts = new ArrayList<Part>();
-										int newExtendsId = ((Integer)returnValue).intValue();
-										if (newExtendsId != Form.NAVIGATOR_NONE && newExtendsId != Form.NAVIGATOR_DEFAULT) // NAVIGATOR_NONE (0 default value as in contentspec) should be used but in the past either one or the other was used
+										String newExtendsUUID = returnValue.toString();
+										if (!Form.NAVIGATOR_NONE.equals(newExtendsUUID) && newExtendsUUID != Form.NAVIGATOR_DEFAULT) // NAVIGATOR_NONE (0 default value as in contentspec) should be used but in the past either one or the other was used
 										{
-											Form newSuperForm = flattenedEditingSolution.getForm(((Integer)returnValue).intValue());
+											Form newSuperForm = flattenedEditingSolution.getForm(newExtendsUUID);
 											if (newSuperForm != null)
 											{
 												Iterator<Part> it = newSuperForm.getParts();
@@ -653,7 +657,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 												pMap.remove(StaticContentSpecLoader.PROPERTY_PARTTYPE.getPropertyName());
 												p.copyPropertiesMap(pMap, true);
 
-												p.setExtendsID(ancestorP.getID());
+												p.setExtendsID(ancestorP.getUUID().toString());
 											}
 										}
 									}
@@ -881,7 +885,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			{
 				if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
 				{
-					boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
+					boolean add = object.getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
 						!((WebComponent)object).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
 					if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
 					{
@@ -918,10 +922,6 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						}
 					}
 				}
-				catch (RemoteException e)
-				{
-					ServoyLog.logError(e);
-				}
 				catch (RepositoryException e)
 				{
 					ServoyLog.logError(e);
@@ -939,6 +939,14 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		{
 			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(BooleanPropertyType.INSTANCE).withHasDefault(true)
 				.withTags(setTooltipOnTagsJSONObjectHack).build();
+		}
+		else if (obj instanceof MenuItem && IContentSpecConstants.PROPERTY_PERMISSIONS.equals(name))
+		{
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(JSONPropertyType.INSTANCE).build();
+		}
+		else if (obj instanceof Solution && IContentSpecConstants.PROPERTY_EVENTTYPES.equals(name))
+		{
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(JSONPropertyType.INSTANCE).build();
 		}
 		else builtSabloPD = super.getPropertyDescription(obj, propertySource, persistContext);
 
@@ -1027,7 +1035,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 					if (sabloSpecEvenForLegacyComponents != null)
 					{
 						PropertyDescription propertyDescription = sabloSpecEvenForLegacyComponents.getProperty(propertyOrHandlerName);
-						toolTip = (propertyDescription != null ? propertyDescription.getDocumentation() : null);
+						toolTip = (propertyDescription != null ? propertyDescription.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic) : null);
 					}
 				}
 			}

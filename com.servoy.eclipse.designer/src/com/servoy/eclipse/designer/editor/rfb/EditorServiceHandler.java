@@ -34,18 +34,21 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
-import com.servoy.eclipse.core.resource.DesignPagetype;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.VisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.MoveDownCommand;
 import com.servoy.eclipse.designer.editor.commands.MoveUpCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
+import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.GroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.UngroupCommand;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ConvertComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentsHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ExecuteDeveloperMenu;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GetPartStylesHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.KeyPressedHandler;
@@ -55,17 +58,16 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizard
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenFormHierarchyHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenPropertiesWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.RevertFormCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetPropertiesHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetSelectionHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SpacingCentersPack;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.StyleVariantsHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositioner;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
+import com.servoy.eclipse.designer.rfb.palette.PaletteFavoritesHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -112,7 +114,7 @@ public class EditorServiceHandler implements IServerService
 	{
 		configuredHandlers.put("getGhostComponents", new GhostHandler(editorPart));
 		configuredHandlers.put("setSelection", new SetSelectionHandler(editorPart, selectionListener, selectionProvider));
-		configuredHandlers.put("revertForm", new RevertFormCommand(editorPart));
+		configuredHandlers.put("revertForm", new RevertFormCommand());
 
 		configuredHandlers.put("setTabSequence", new SetTabSequenceCommand(editorPart, selectionProvider));
 
@@ -120,10 +122,6 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("z_order_send_to_back_one_step", new ZOrderCommand(editorPart, selectionProvider, "z_order_send_to_back_one_step"));
 		configuredHandlers.put("z_order_bring_to_front", new ZOrderCommand(editorPart, selectionProvider, "z_order_bring_to_front"));
 		configuredHandlers.put("z_order_send_to_back", new ZOrderCommand(editorPart, selectionProvider, "z_order_send_to_back"));
-
-		configuredHandlers.put("addStyleVariantFor", new StyleVariantsHandler());
-		configuredHandlers.put("editStyleVariantsFor", new StyleVariantsHandler());
-		configuredHandlers.put("getStyleVariantsFor", new StyleVariantsHandler());
 
 		configuredHandlers.put("horizontal_spacing", new SpacingCentersPack(editorPart, selectionProvider));
 		configuredHandlers.put("vertical_spacing", new SpacingCentersPack(editorPart, selectionProvider));
@@ -134,6 +132,7 @@ public class EditorServiceHandler implements IServerService
 
 		configuredHandlers.put("keyPressed", new KeyPressedHandler(editorPart, selectionProvider));
 		configuredHandlers.put("setProperties", new SetPropertiesHandler(editorPart));
+		configuredHandlers.put("convertComponent", new ConvertComponentHandler(editorPart, selectionProvider));
 		configuredHandlers.put("moveComponent", new MoveInResponsiveLayoutHandler(editorPart));
 		configuredHandlers.put("createComponent", new CreateComponentHandler(editorPart, selectionProvider));
 		configuredHandlers.put("getPartsStyles", new GetPartStylesHandler(editorPart));
@@ -154,10 +153,20 @@ public class EditorServiceHandler implements IServerService
 		});
 		configuredHandlers.put("createComponents", new CreateComponentsHandler(editorPart, selectionProvider));
 		configuredHandlers.put("openElementWizard", new OpenElementWizardHandler(editorPart, fieldPositioner, selectionProvider));
-		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(fieldPositioner));
+		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(editorPart, fieldPositioner));
 		configuredHandlers.put("openScript", new OpenScriptHandler(editorPart));
 		configuredHandlers.put("openFormHierarchy", new OpenFormHierarchyHandler(selectionProvider));
 		configuredHandlers.put("updatePaletteOrder", new UpdatePaletteOrder());
+		configuredHandlers.put("updateFavoritesComponents", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				PaletteFavoritesHandler.getInstance().updateFavorite(args.getString("name"));
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshPalette();
+				return null;
+			}
+		});
 		configuredHandlers.put("openContainedForm", new OpenContainedFormHandler(editorPart));
 		configuredHandlers.put("buildTiNG", new IServerService()
 		{
@@ -205,14 +214,17 @@ public class EditorServiceHandler implements IServerService
 				{
 					selection = (PersistContext)((IStructuredSelection)selectionProvider.getSelection()).getFirstElement();
 				}
-				IPersist currentPersist = selection.getPersist();
-				while (currentPersist != null && !(currentPersist instanceof LayoutContainer))
+				if (selection != null)
 				{
-					currentPersist = currentPersist.getParent();
-				}
-				if (currentPersist instanceof LayoutContainer)
-				{
-					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomIn((LayoutContainer)currentPersist);
+					IPersist currentPersist = selection.getPersist();
+					while (currentPersist != null && !(currentPersist instanceof LayoutContainer))
+					{
+						currentPersist = currentPersist.getParent();
+					}
+					if (currentPersist instanceof LayoutContainer)
+					{
+						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomIn((LayoutContainer)currentPersist);
+					}
 				}
 				return null;
 			}
@@ -249,6 +261,19 @@ public class EditorServiceHandler implements IServerService
 				CopyAction cp = new CopyAction(editorPart);
 				cp.update();
 				cp.run();
+				return null;
+			}
+		});
+
+		configuredHandlers.put("paste", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				PasteAction pasteAction = new PasteAction(com.servoy.eclipse.core.Activator.getDefault().getDesignClient(), selectionProvider, editorPart,
+					fieldPositioner);
+				pasteAction.update();
+				pasteAction.run();
 				return null;
 			}
 		});
@@ -305,7 +330,7 @@ public class EditorServiceHandler implements IServerService
 			{
 				if (args != null)
 				{
-					if (args.has("isInheritedForm")) return Boolean.valueOf(editorPart.getForm().getExtendsID() > 0);
+					if (args.has("isInheritedForm")) return Boolean.valueOf(editorPart.getForm().getExtendsID() != null);
 					if (args.has("showData"))
 					{
 						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER)
@@ -353,7 +378,7 @@ public class EditorServiceHandler implements IServerService
 					{
 						RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
 						return Boolean.valueOf(rfbVisualFormEditorDesignPage != null
-							? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED) : null);
+							? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditor.PROPERTY_HIDE_INHERITED) : null);
 					}
 					if (args.has(Activator.SHOW_I18N_VALUES_IN_ANGULAR_DESIGNER))
 					{
@@ -402,15 +427,6 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 		});
-		configuredHandlers.put("switchEditorClassic", new IServerService()
-		{
-			@Override
-			public Object executeMethod(String methodName, JSONObject args) throws Exception
-			{
-				editorPart.setDesignPageType(DesignPagetype.Classic);
-				return null;
-			}
-		});
 
 		configuredHandlers.put("getComponentPropertyWithTags", new IServerService()
 		{
@@ -448,8 +464,8 @@ public class EditorServiceHandler implements IServerService
 			public Object executeMethod(String methodName, JSONObject args)
 			{
 				RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
-				Boolean hideInherited = Boolean.valueOf(rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED));
-				rfbVisualFormEditorDesignPage.setPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED,
+				Boolean hideInherited = Boolean.valueOf(rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditor.PROPERTY_HIDE_INHERITED));
+				rfbVisualFormEditorDesignPage.setPartProperty(VisualFormEditor.PROPERTY_HIDE_INHERITED,
 					Boolean.toString(!hideInherited.booleanValue()));
 				if (DesignerUtil.getContentOutline() != null)
 				{
@@ -561,6 +577,9 @@ public class EditorServiceHandler implements IServerService
 
 		configuredHandlers.put("openConfigurator", new OpenPropertiesWizardHandler(selectionProvider));
 		configuredHandlers.put("getWizardProperties", new GetWizardProperties());
+
+		configuredHandlers.put("getDeveloperMenus", new GetDeveloperMenus());
+		configuredHandlers.put("executeDeveloperMenu", new ExecuteDeveloperMenu(editorPart, editorPart.getForm().getUUID(), selectionProvider));
 
 		configuredHandlers.put("getVariantsForCategory", new IServerService()
 		{

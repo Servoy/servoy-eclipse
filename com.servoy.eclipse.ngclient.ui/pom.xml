@@ -10,10 +10,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.6.0.3980_rc</version>
+		<version>2025.12.0.4120_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
-	<version>2024.6.0.3980_rc</version>
+	<version>2025.12.0.4120_rc</version>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
 		<test.script>test_headless</test.script>
@@ -34,7 +34,7 @@
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.15.0</version>
+				<version>1.15.1</version>
 				<executions>
 
 					<!-- 1. Install node and npm locally -->
@@ -46,9 +46,21 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<nodeVersion>v20.11.1</nodeVersion>
+							<nodeVersion>v22.17.1</nodeVersion>
 						</configuration>
 					</execution>
+
+                    <execution>
+                        <id>npm install</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node</workingDirectory>
+                            <arguments>install --legacy-peer-deps</arguments>
+                        </configuration>
+                    </execution>
 
                     <execution>
                         <id>build servoy public</id>
@@ -71,7 +83,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/servoydefault</workingDirectory>
-                            <nodeVersion>v20.11.1</nodeVersion>
+                            <nodeVersion>v22.17.1</nodeVersion>
                         </configuration>
                     </execution>
 
@@ -83,7 +95,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/dialogs</workingDirectory>
-                            <nodeVersion>v20.11.1</nodeVersion>
+                            <nodeVersion>v22.17.1</nodeVersion>
                         </configuration>
                     </execution>
 
@@ -95,23 +107,11 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/window</workingDirectory>
-                            <nodeVersion>v20.11.1</nodeVersion>
+                            <nodeVersion>v22.17.1</nodeVersion>
                         </configuration>
                     </execution>
 
 					<!-- run npm install over the projects -->
-					<execution>
-						<id>npm install</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>npm</goal>
-						</goals>
-						<configuration>
-							<workingDirectory>node</workingDirectory>
-							<arguments>install --legacy-peer-deps</arguments>
-						</configuration>
-					</execution>
-
 					<execution>
 						<id>npm install servoydefault</id>
 						<phase>initialize</phase>

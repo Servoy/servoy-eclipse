@@ -22,8 +22,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
@@ -34,7 +36,7 @@ import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.impl.ClientService;
 
-import com.servoy.eclipse.model.war.exporter.IWarExportModel;
+import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
@@ -54,7 +56,7 @@ public class ComponentTemplateGenerator
 	 *  right is the viewchild reference value to those components
 	 * @return Pair<String,String>
 	 */
-	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(IWarExportModel model)
+	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(ITiNGExportModel model)
 	{
 		StringBuilder template = new StringBuilder();
 		StringBuilder viewChild = new StringBuilder();
@@ -70,10 +72,29 @@ public class ComponentTemplateGenerator
 				return o1.getName().compareToIgnoreCase(o2.getName());
 			}
 		});
+		Map<String, Boolean> ng2Compatible = new HashMap<String, Boolean>();
 		for (WebObjectSpecification spec : specs)
 		{
 			if (model == null || model.getAllExportedComponents().contains(spec.getName()))
 			{
+				String packageName = spec.getPackageName();
+				if (!ng2Compatible.containsKey(packageName))
+				{
+					PackageSpecification packageSpecification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications().get(packageName);
+					if (packageSpecification != null)
+					{
+						Boolean isNG2Compatible = Boolean.FALSE;
+						if ("servoycore".equals(packageName) || packageSpecification.getNpmPackageName() != null ||
+							packageSpecification.getNg2Module() != null ||
+							packageSpecification.getEntryPoint() != null)
+						{
+							isNG2Compatible = Boolean.TRUE;
+						}
+						ng2Compatible.put(packageName, isNG2Compatible);
+					}
+				}
+				if (ng2Compatible.containsKey(packageName) && !ng2Compatible.get(packageName))
+					continue;
 				genereateSpec(template, viewChild, spec, spec.getName());
 				if (spec.getName().equals("servoydefault-tabpanel"))
 				{
@@ -117,7 +138,7 @@ public class ComponentTemplateGenerator
 		for (PropertyDescription pd : specProperties)
 		{
 			String name = pd.getName();
-			if (name.equals("anchors") || name.equals("formIndex")) continue;
+			if (name.equals("anchors") || name.equals("formIndex") || name.equals("size") || name.equals("location")) continue;
 			if (name.equals(IContentSpecConstants.PROPERTY_ATTRIBUTES))
 			{
 				name = "servoyAttributes";
@@ -169,11 +190,14 @@ public class ComponentTemplateGenerator
 		});
 		for (WebObjectFunctionDefinition handler : handlers)
 		{
-			template.append(" [");
-			template.append(handler.getName());
-			template.append("]=\"callback.getHandler(state,'");
-			template.append(handler.getName());
-			template.append("')\"");
+			if (!handler.isPrivate())
+			{
+				template.append(" [");
+				template.append(handler.getName());
+				template.append("]=\"callback.getHandler(state,'");
+				template.append(handler.getName());
+				template.append("')\"");
+			}
 		}
 		template.append(" [servoyApi]=\"callback.getServoyApi(state)\"");
 		template.append(" [name]=\"state.name\" #cmp");

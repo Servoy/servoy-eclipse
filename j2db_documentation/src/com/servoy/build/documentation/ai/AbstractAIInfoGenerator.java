@@ -20,7 +20,6 @@ package com.servoy.build.documentation.ai;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -107,7 +106,7 @@ public abstract class AbstractAIInfoGenerator
 
 		// ng package dirs listed in text file ngPackagesFileLocationsURI -> info source text (to be embedded)
 		List<String> ngPackageDirsToScan = Files.readAllLines(Paths.get(ngPackagesFileLocationsURI).normalize());
-		SpecMarkdownGenerator.generateNGComponentOrServicePackageContentForDir(true, ngPackageDirsToScan,
+		SpecMarkdownGenerator.generateNGComponentOrServicePackageContentForDir(true, false, ngPackageDirsToScan,
 			infoFromNGPackagesGenerator,
 			Map.of("referenceDate", DATE_OF_REFERENCE_FORMATTED, "trainingFootprint", TRAINING_FOOTPRINT, "utils", utilityObjectForTemplates));
 	}
@@ -122,8 +121,14 @@ public abstract class AbstractAIInfoGenerator
 			this.registerNewInfo = registerNewInfo;
 		}
 
+		public void processDocObjectToPathAndOtherMaps(DocumentationManager manager, String path, String pluginProviderPublicName)
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException
+		{
+			// anything here?
+		}
+
 		public void generateDocsFromXML(DocumentationManager manager, String path, boolean ngOnly)
-			throws MalformedURLException, ClassNotFoundException, IOException
+			throws ClassNotFoundException, IOException
 		{
 			// FIXME implememnt
 //
@@ -196,7 +201,7 @@ public abstract class AbstractAIInfoGenerator
 //				cg.table("commands", commands, cls, ngOnly);
 //				cg.table("events", events, cls, ngOnly);
 //				cg.table("methods", methods, cls, ngOnly);
-////			if (events != null && events.size() > 0) System.err.println(events.size() + value.getPublicName());
+			////			if (events != null && events.size() > 0) System.err.println(events.size() + value.getPublicName());
 //
 //				String output = cg.generate();
 //				String parent = cg.getPath().toString();
@@ -207,7 +212,7 @@ public abstract class AbstractAIInfoGenerator
 //					writer.write(output);
 //				}
 //
-////			file = new File(userDir, "generated_old/" + value.getPublicName() + ".html");
+			////			file = new File(userDir, "generated_old/" + value.getPublicName() + ".html");
 ////			if (file.exists())
 ////			{
 ////				if (file.length() == output.length())
@@ -227,6 +232,12 @@ public abstract class AbstractAIInfoGenerator
 ////				}
 ////			}
 //			}
+		}
+
+		@Override
+		public void writeAggregatedOutput(boolean ngOnly) throws IOException
+		{
+			// TODO Auto-generated method stub
 		}
 
 	}

@@ -31,7 +31,7 @@ import com.servoy.j2db.util.IDelegate;
  * Property descriptor wrapper.
  * <p>
  * isCompatibleWith() returns false if read-only state is not the same for both property descriptors
- * 
+ *
  */
 public class DelegatePropertyController<P, E> extends PropertyController<P, E> implements IMergeablePropertyDescriptor, IDelegate<IPropertyDescriptor>
 {
@@ -204,6 +204,12 @@ public class DelegatePropertyController<P, E> extends PropertyController<P, E> i
 	public String getTooltipText()
 	{
 		return propertyDescriptor instanceof IProvidesTooltip ? ((IProvidesTooltip)propertyDescriptor).getTooltipText() : null;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "DelegatePD:" + propertyDescriptor.toString();
 	}
 
 }

@@ -29,9 +29,9 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.UIUtils.CheckGroupDialog;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetCssAnchoringCommand;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;

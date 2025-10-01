@@ -167,7 +167,7 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 				Label descriptionLabel = new Label(notificationComposite, SWT.NO_FOCUS);
 				if(this.escapeHtmlTags)
 				{
-					descriptionText = descriptionText.replaceAll("(?s)<[^>]*>(\\s*<[^>]*>)*", " ");
+					descriptionText = descriptionText.replaceAll("(?s)<[^>]*>(\\s*<[^>]*>)*", " ").trim();
 					if(descriptionText.length() > 50) descriptionText = descriptionText.substring(0, 47) + "...";					
 				}
 				descriptionLabel.setText(descriptionText);

@@ -1,13 +1,25 @@
-<div #element class="ghostcontainer {{container.class}}" *ngFor="let container of ghostContainers"
-     [ngStyle]="container.style">
-    <div class="ghostContainerPropName" *ngIf="container.propertyName">property '{{container.propertyName}}'</div>
-    <designer-resizeeditorwidth *ngIf="!container.propertyName"></designer-resizeeditorwidth>
-    <div class="ghost label {{ghost.class}}" *ngFor="let ghost of container.ghosts"
+@for (container of ghostContainers; track container) {
+  <div #element class="ghostcontainer {{container.class}}"
+    [ngStyle]="container.style">
+    @if (container.propertyName) {
+      <div class="ghostContainerPropName">property '{{container.propertyName}}'</div>
+    }
+    @if (!container.propertyName) {
+      <designer-resizeeditorwidth></designer-resizeeditorwidth>
+    }
+    @for (ghost of container.ghosts; track ghost) {
+      <div class="ghost label {{ghost.class}}"
         [ngStyle]="ghost.style" [attr.svy-id]="ghost.uuid" [attr.svy-types]="[ghost.propertyType]" [attr.svy-ghosttype]="[ghost.type]"
         (dblclick)="openContainedForm(ghost)" (mousedown)="onMouseDown($event, ghost, container)">
         <hr [ngStyle]="ghost.hrstyle">
-        <i *ngIf="draggingGhost == ghost" class="fas fa-anchor"></i>
+        @if (draggingGhost == ghost) {
+          <i class="fas fa-anchor"></i>
+        }
         {{ghost.text}}&nbsp;
-    </div>
-    <designer-resizeeditorheight *ngIf="!container.propertyName"></designer-resizeeditorheight>
-</div>
+      </div>
+    }
+    @if (!container.propertyName) {
+      <designer-resizeeditorheight></designer-resizeeditorheight>
+    }
+  </div>
+}

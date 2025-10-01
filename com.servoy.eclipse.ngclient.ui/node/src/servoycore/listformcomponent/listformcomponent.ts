@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
 import {
-    Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
-    HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector
+  Component, Input, TemplateRef, ViewChild, ElementRef, AfterViewInit, Renderer2,
+  HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector,
+  DOCUMENT
 } from '@angular/core';
 import { AbstractFormComponent, FormComponent } from '../../ngclient/form/form_component.component';
 import { DesignFormComponent } from '../../designer/designform_component.component';
@@ -13,15 +14,16 @@ import { ServoyService } from '../../ngclient/servoy.service';
 import { ComponentCache, FormComponentCache, IApiExecutor, instanceOfApiExecutor, StructureCache } from '../../ngclient/types';
 import { LoggerFactory, LoggerService, ChangeType, ViewPortRow, FoundsetChangeEvent, IFoundset, IChildComponentPropertyValue } from '@servoy/public';
 import { isEmpty } from 'lodash-es';
-import { DOCUMENT } from '@angular/common';
+
 import { ServoyApi } from '../../ngclient/servoy_api';
-import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from '@ag-grid-community/core';
+import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { RowRenderer } from './row-renderer.component';
-import { AgGridAngular } from '@ag-grid-community/angular';
+import { AgGridAngular } from 'ag-grid-angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
+import { animate } from '@angular/animations';
 
-const AGGRID_CACHE_BLOCK_SIZE = 10;
+const AGGRID_CACHE_BLOCK_SIZE = 50;
 const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
 
 @Component({
@@ -30,53 +32,76 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
     <div class="svy-listformcomponent" [ngClass]='styleClass' #element>
-    <ng-container *ngIf="useScrolling">
+      @if (useScrolling) {
         <ag-grid-angular #aggrid
-            [gridOptions]="agGridOptions"
-            [ngStyle]="getAGGridStyle()">
+          [gridOptions]="agGridOptions"
+          [ngStyle]="getAGGridStyle()"
+          [sabloTabseq]="tabSeq">
         </ag-grid-angular>
-    </ng-container>
-
-    <ng-container *ngIf="!useScrolling">
-        <div *ngIf="containedForm&&containedForm.absoluteLayout">
-            <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
-                <div *ngFor="let item of cache.items" [svyContainerStyle]="item" [svyContainerLayout]="item['layout']" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+      }
+    
+      @if (!useScrolling) {
+        @if (containedForm&&containedForm.absoluteLayout) {
+          <div>
+            @for (row of getViewportRows(); track row; let i = $index) {
+              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
+                @for (item of cache.items; track item) {
+                  <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                     <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
-                </div>
-            </div>
-        </div>
-        <div *ngIf="containedForm&&!containedForm.absoluteLayout">
-            <div tabindex="-1" (click)="onRowClick(row, $event)" *ngFor="let row of getViewportRows(); let i = index; trackBy: trackByFn" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
-                <ng-template *ngFor="let item of cache.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component or responsive div  -->
-            </div>
-        </div>
-        <div class='svyPagination'><div #firstelement style='text-align:center;cursor:pointer;display:inline;visibility:hidden;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='firstPage()' ><i class='fa fa-backward' aria-hidden="true"></i></div><div  #leftelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveLeft()' ><i class='fa fa-chevron-left' aria-hidden="true"></i></div><div #rightelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveRight()'><i class='fa fa-chevron-right' aria-hidden="true"></i></div></div>
-    </ng-container>
-</div>
-
-<ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
-    <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
-        <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
-    </div>
-</ng-template>
-<ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
-          <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
-               </div>
+                  </div>
+                }
+              </div>
+            }
           </div>
-</ng-template>
-<ng-template  #formComponentResponsiveDiv  let-state="state" let-row="row" let-i="i">
-        <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
-</ng-template>
-<!-- structure template generate start -->
-<!-- structure template generate end -->
-
-`
+        }
+        @if (containedForm&&!containedForm.absoluteLayout) {
+          <div>
+            @for (row of getViewportRows(); track trackByFn(i, row); let i = $index) {
+              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
+                @for (item of cache.items; track item) {
+                  <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
+                  }  <!-- component or responsive div  -->
+                </div>
+              }
+            </div>
+          }
+          <div class='svyPagination'><div #firstelement style='text-align:center;cursor:pointer;display:inline;visibility:hidden;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='firstPage()' ><i class='fa fa-backward' aria-hidden="true"></i></div><div  #leftelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveLeft()' ><i class='fa fa-chevron-left' aria-hidden="true"></i></div><div #rightelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveRight()'><i class='fa fa-chevron-right' aria-hidden="true"></i></div></div>
+        }
+      </div>
+    
+      <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
+        <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+          @for (item of state.items; track item) {
+            <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
+          }
+        </div>
+      </ng-template>
+      <ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
+        <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
+          @for (item of state.items; track item) {
+            <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+              <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
+            </div>
+          }
+        </div>
+      </ng-template>
+      <ng-template  #formComponentResponsiveDiv  let-state="state" let-row="row" let-i="i">
+        <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" class="svy-formcomponent">
+          @for (item of state.items; track item) {
+            <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
+            }  <!-- component  -->
+          </div>
+        </ng-template>
+        <!-- structure template generate start -->
+        <!-- structure template generate end -->
+    
+    `,
+    standalone: false
 })
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 
     @Input() containedForm: FormComponentValue;
+    @Input() containedFormMargin: any;
     @Input() foundset: IFoundset;
     @Input() selectionClass: string;
     @Input() styleClass: string;
@@ -89,7 +114,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() pageLayout: string;
     @Input() readOnly: boolean;
     @Input() editable: boolean;
+    @Input() tabSeq: number;
+
     @Input() onSelectionChanged: (event: any) => void;
+    @Input() onListItemClick: (record: any, event: any) => void;
 
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
@@ -113,6 +141,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     parent: AbstractFormComponent;
     agGridOptions: GridOptions;
     numberOfColumns = 1;
+    resizeObserver: ResizeObserver;
+    resizeTimeout: any;
+    previousWidth = 0;
 
     // used for paging
     page = 0;
@@ -199,6 +230,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         this.onSelectionChanged(event);
                     }
                 }
+                if(this.onListItemClick) {
+                    this.onListItemClick(this.foundset.getRecordRefByRowID(row['_svyRowId']), event);
+                }
                 break;
             }
         }
@@ -236,6 +270,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         if (this.useScrolling) {
             this.agGridOptions = {
+                animateRows: false,
                 suppressContextMenu: true,
                 context: {
                     componentParent: this
@@ -254,7 +289,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
                 infiniteInitialRowCount: AGGRID_CACHE_BLOCK_SIZE,
                 //maxBlocksInCache: AGGRID_MAX_BLOCKS_IN_CACHE,
-                getRowHeight: (params) => this.getRowHeight(),
+                rowHeight: this.getRowHeight(),
                 navigateToNextCell: (params: any) => {
                     const previousCell = params.previousCellPosition;
                     const suggestedNextCell = params.nextCellPosition;
@@ -278,7 +313,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         default:
                             return previousCell;
                     }
-                }
+                },
+                onFirstDataRendered: (params: any) => {
+                    this.scrollToSelection();
+                },
+                domLayout: this.responsiveHeight < 0 ? 'autoHeight' : 'normal'
             };
         }
 
@@ -298,6 +337,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         return;
                     } else if (event.fullValueChanged) {
                         this.foundset = event.fullValueChanged.newValue;
+                        if (this.foundset.serverSize > 0 && this.numberOfCells > 0 && this.page * this.numberOfCells >= this.foundset.serverSize)
+                        {
+                            this.page = Math.floor((this.foundset.serverSize - 1) / this.numberOfCells);
+                        }
                         this.calculateCells();
                         return;
                     }
@@ -377,34 +420,96 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             });
         } else {
             this.removeListenerFunction = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
-                if (event.requestInfos && event.requestInfos.includes('AGGridDatasourceGetRows')) {
+                if ((event.requestInfos && event.requestInfos.includes('AGGridDatasourceGetRows')) || this.agGrid.api.isDestroyed()) {
                     return;
                 }
-                if (event.viewportRowsUpdated) {
+                if (event.serverFoundsetSizeChanged ) {
+                    this.agGrid.api.setRowCount(Math.ceil(event.serverFoundsetSizeChanged.newValue / this.getNumberOfColumns()));
+                }
+                if (event.viewportRowsCompletelyChanged || event.fullValueChanged) {
+                    this.agGrid.api.refreshServerSide({ purge: true });
+                } else if (event.viewportRowsUpdated) {
                     // copy the viewport data over to the cell
-                    // TODO this only is working for "updates", what happens with deletes or inserts?
                     const changes = event.viewportRowsUpdated;
                     let insertOrDeletes = false;
                     changes.forEach(change => {
                         insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
                     });
-                    if (insertOrDeletes) this.agGrid.api.refreshServerSide({ purge: true });
-                    else this.agGrid.api.refreshCells();
-                } else if (event.viewportRowsUpdated || event.viewportRowsCompletelyChanged || event.fullValueChanged) {
-                    this.agGrid.api.refreshServerSide({ purge: true });
+                    if (insertOrDeletes) {
+                        this.agGrid.api.refreshServerSide({ purge: true });
+                        this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
+                    }
+                    else if (changes.length == 1 && changes[0].startIndex === changes[0].endIndex){
+						this.agGrid.api.refreshCells();	
+					}
+					else {
+						this.agGrid.api.refreshServerSide({ purge: true });	
+					}
+                }
+                if(event.selectedRowIndexesChanged) {
+                    this.scrollToSelection();
                 }
             });
         }
+    }
+
+    private scrollToSelection() {
+        if(this.foundset.selectedRowIndexes.length && !this.agGrid.api.isDestroyed()) {
+            const rowCount = this.agGrid.api.getDisplayedRowCount();
+            if(rowCount > 1) {
+                const selectedIdx = Math.ceil(this.foundset.selectedRowIndexes[0] / this.getNumberOfColumns());
+                if(selectedIdx > rowCount - AGGRID_CACHE_BLOCK_SIZE) {
+                    this.agGrid.api.setRowCount(Math.min(selectedIdx + AGGRID_CACHE_BLOCK_SIZE, Math.ceil(this.foundset.serverSize / this.getNumberOfColumns())));
+                }
+                this.agGrid.api.ensureIndexVisible(selectedIdx < rowCount ? selectedIdx : rowCount - 1);
+            }
+        }        
+    }
+
+    private calculateNumberOfColumns(): number
+    {
+        const parentWidth = this.elementRef.nativeElement.offsetWidth;
+        let width = this.containedForm.formWidth;
+        if(this.containedFormMargin) {
+            let left = parseInt(this.containedFormMargin.paddingLeft, 10);
+            let right = parseInt(this.containedFormMargin.paddingRight, 10);
+            width += (left + right);
+        }
+        return (this.pageLayout === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
     }
 
     ngAfterViewInit() {
         this.calculateCells();
         if (this.useScrolling) {
             this.agGrid.api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
+            if(!this.servoyApi.isInAbsoluteLayout()) {
+                this.resizeObserver = new ResizeObserver((entries) => {
+                    const newWidth = entries[0].contentRect.width;
+                    if(newWidth !== this.previousWidth) {
+                        if(this.resizeTimeout) {
+                            clearTimeout(this.resizeTimeout);
+                        }
+                        this.resizeTimeout = setTimeout(() => {
+                            if(!this.agGrid.api.isDestroyed()) {
+                                this.numberOfColumns = this.calculateNumberOfColumns();
+                                this.resizeTimeout = null;
+                                this.agGrid.api.refreshServerSide({ purge: true });
+                                this.agGrid.api.setRowCount(this.foundset.serverSize ? Math.ceil(this.foundset.serverSize / this.getNumberOfColumns()) : 0);
+                                setTimeout(() => {
+                                    this.scrollToSelection();
+                                }, 200);
+                            }
+                        }, 200);
+                        this.previousWidth = newWidth;
+                    }
+                });
+                this.resizeObserver.observe(this.elementRef.nativeElement);
+            }
         }
     }
 
     ngOnDestroy() {
+        if (this.resizeObserver) this.resizeObserver.unobserve(this.elementRef.nativeElement);
         if (this.removeListenerFunction != null) {
             this.removeListenerFunction();
             this.removeListenerFunction = null;
@@ -431,6 +536,20 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return classes;
     }
 
+    getRowStyle(includeHeight: boolean): any {
+        const rowStyle = {
+            'width': this.getRowWidth()
+        };
+        if(this.containedFormMargin) {
+            rowStyle['margin-left'] = this.containedFormMargin.paddingLeft;
+            rowStyle['margin-right'] = this.containedFormMargin.paddingRight;
+            rowStyle['margin-top'] = this.containedFormMargin.paddingTop;
+            rowStyle['margin-bottom'] = this.containedFormMargin.paddingBottom;
+        }
+        if(includeHeight) rowStyle['height.px'] = this.getRowHeight();
+        return rowStyle;
+    }
+
     getRowHeight(): number {
         return this.containedForm.formHeight ? this.containedForm.formHeight : null;
     }
@@ -438,9 +557,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     getRowWidth(): string {
         if (this.pageLayout === 'listview') {
             return '100%';
-        }
-        if (!this.containedForm.absoluteLayout) {
-            return null;
         }
         return this.containedForm.formWidth + 'px';
     }
@@ -507,7 +623,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
         if (row._cache) {
             const cache = row._cache.get(cm.name);
-            if (cache) return cache;
+            if (cache && cache.rowIndex === rowIndex) return cache;
         }
 
         if (item?.model?.servoyAttributes) {
@@ -550,6 +666,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         const thisLFC = this;
         const idx = rowIndex;
+		let elementReadOnly = rowItem.model.readOnly;
         Object.defineProperty(rowItem.model, 'readOnly', {
             configurable: true,
             get() {
@@ -557,17 +674,44 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 if (thisLFC.rowEditableDataprovider && thisLFC.rowEditableDataprovider.length > idx) {
                     rowReadOnly = !thisLFC.rowEditableDataprovider[idx];
                 }
-                return rowReadOnly || thisLFC.readOnly || !thisLFC.editable;
+                return elementReadOnly || rowReadOnly || thisLFC.readOnly || !thisLFC.editable;
             },
+			set(value: boolean) {
+				elementReadOnly = value;
+			}
         });
-        if (this.rowEnableDataprovider && this.rowEnableDataprovider.length > idx) {
-            Object.defineProperty(rowItem.model, 'enabled', {
-                configurable: true,
-                get() {
-                    return thisLFC.rowEnableDataprovider[idx];
-                },
-            });
-        }
+        // TODO: 'enabledDataProvider' and 'visibleDataProvider' should not be in the model - on the server side
+        // they should be evaluated for each row and added to the model as regular 'enabled' and 'visible' properties
+        let elementEnabled = rowItem.model.enabled;
+        Object.defineProperty(rowItem.model, 'enabled', {
+            configurable: true,
+            get() {
+                if (thisLFC.rowEnableDataprovider && thisLFC.rowEnableDataprovider.length > idx) {
+                    return thisLFC.rowEditableDataprovider[idx]
+                }
+                if(this.enabledDataProvider !== undefined) {
+                    return this.enabledDataProvider;
+                }
+                return elementEnabled;
+            },
+            set(value: boolean) {
+				elementEnabled = value;
+			}
+        });
+        let elementVisible = rowItem.model.visible;
+        Object.defineProperty(rowItem.model, 'visible', {
+            configurable: true,
+            get() {
+                if(this.visibleDataProvider !== undefined) {
+                    return this.visibleDataProvider;
+                }
+                return elementVisible;
+            },
+            set(value: boolean) {
+				elementVisible = value;
+			}
+        });
+
         if (!row._cache) row._cache = new Map();
         row._cache.set(cm.name, rowItem);
         return rowItem;
@@ -604,7 +748,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
             } else {
                 FormComponent.doCallApiOnComponent(uiComp, this.typesRegistry.getComponentSpecification(compModel.type),
-                    apiName, args, this.converterService, this.log);
+                    apiName, args, this.converterService, this.log, componentName);
             }
         } else {
             this.log.error('got api call for ' + componentName + ' api ' + apiName + ' on LFC but path is wrong ' + path);
@@ -643,31 +787,30 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             this.numberOfCells = 1;
             return;
         }
-        this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout ? 0 : this.responsivePageSize;
-        if (this.numberOfCells <= 0) {
-            if (this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout) {
-                const parentWidth = this.elementRef.nativeElement.offsetWidth;
-                const parentHeight = this.elementRef.nativeElement.offsetHeight;
-                const height = this.containedForm.formHeight;
-                const width = this.containedForm.formWidth;
-                this.numberOfColumns = (this.pageLayout === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
-                const numberOfRows = Math.floor(parentHeight / height);
-                this.numberOfCells = numberOfRows * this.numberOfColumns;
-                // always just render 1
-                if (this.numberOfCells < 1) this.numberOfCells = 1;
-            } else if (!this.useScrolling) {
-                if (!this.servoyApi.isInAbsoluteLayout()) {
-                    this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
-                } else if (this.containedForm && !this.containedForm.absoluteLayout) {
-                    this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because its containedForm is a responsive form');
-                }
-            }
-
-        } else {
-            this.numberOfColumns = this.pageLayout === 'listview' ? 1 : this.responsivePageSize;
-        }
 
         if (!this.useScrolling) {
+            this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout ? 0 : this.responsivePageSize;
+            if (this.numberOfCells <= 0) {
+                if (this.servoyApi.isInAbsoluteLayout() && this.containedForm && this.containedForm.absoluteLayout) {
+                    const parentWidth = this.elementRef.nativeElement.offsetWidth;
+                    const parentHeight = this.elementRef.nativeElement.offsetHeight;
+                    const height = this.containedForm.formHeight;
+                    const width = this.containedForm.formWidth;
+                    const nrColumns = (this.pageLayout === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
+                    const numberOfRows = Math.floor(parentHeight / height);
+                    this.numberOfCells = numberOfRows * nrColumns;
+                    // always just render 1
+                    if (this.numberOfCells < 1) this.numberOfCells = 1;
+                } else {
+                    if (!this.servoyApi.isInAbsoluteLayout()) {
+                        this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
+                    } else if (this.containedForm && !this.containedForm.absoluteLayout) {
+                        this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because its containedForm is a responsive form');
+                    }
+                }
+    
+            }
+
             const startIndex = this.page * this.numberOfCells;
             const foundset = this.foundset;
             if (foundset.viewPort.startIndex !== startIndex) {
@@ -687,6 +830,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             this.updatePagingControls();
             foundset.setPreferredViewportSize(this.numberOfCells);
             this.cdRef.detectChanges();
+        } else {
+            this.numberOfColumns = this.calculateNumberOfColumns();
         }
     }
 
@@ -748,11 +893,17 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getAGGridStyle(): any {
+        const aggridStyle = {
+            '--ag-row-height': 42,
+            '--ag-header-height': 48,
+            '--ag-list-item-height': 24
+        };
         if (this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight < 1) {
-            return { height: '100%' };
+            aggridStyle['height'] = '100%';
         } else {
-            return { 'height.px': this.responsiveHeight };
+            aggridStyle['height.px'] = this.responsiveHeight;
         }
+        return aggridStyle;
     }
 }
 

@@ -420,11 +420,7 @@ public abstract class Dialog extends Window {
 	protected Dialog(Shell parentShell) {
 		this(new SameShellProvider(parentShell));
 		if (parentShell == null && Policy.DEBUG_DIALOG_NO_PARENT) {
-			Policy.getLog().log(
-					new Status(IStatus.INFO, Policy.JFACE, IStatus.INFO, this
-							.getClass()
-							+ " created with no shell",//$NON-NLS-1$
-							new Exception()));
+			Policy.getLog().log(Status.info(this.getClass() + " created with no shell")); //$NON-NLS-1$
 		}
 	}
 
@@ -727,7 +723,6 @@ public abstract class Dialog extends Window {
 	 *
 	 * @param container
 	 *            the potential parent
-	 * @param control
 	 * @return boolean <code>true</code> if control is a child of container
 	 */
 	private boolean isContained(Control container, Control control) {
@@ -1058,7 +1053,6 @@ public abstract class Dialog extends Window {
 	/**
 	 * Get the default font for this type of control.
 	 *
-	 * @param control
 	 * @return the default font
 	 */
 	private static Font getDefaultFont(Control control) {

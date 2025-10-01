@@ -1,13 +1,14 @@
-import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
-import { DOCUMENT } from '@angular/common';
+
 import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 
 @Component({
     selector: 'servoydefault-htmlarea',
     templateUrl: './htmlarea.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 
@@ -45,16 +46,25 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         if (this.onFocusLostMethodID) this.onFocusLostMethodID(new CustomEvent('blur'));
     }
 
-    click() {
-        if (this.onActionMethodID) this.onActionMethodID(new CustomEvent('click'));
+    click({ event }: { event: MouseEvent }) {
+        if (this.onActionMethodID) this.onActionMethodID(new MouseEvent(event.type, event));
+    }
+
+    contextMenu(event) {
+        if (this.onRightClickMethodID) {
+            this.onRightClickMethodID(new CustomEvent('contextmenu'));
+            event.event.preventDefault();
+        }
     }
 
     ngOnInit() {
         super.ngOnInit();
 
-        this.tinyConfig['language'] = this.servoyService.getLocale();
+        if (this.servoyService.getLocaleObject()) {
+            this.tinyConfig['language'] = this.servoyService.getLocaleObject().language;
+        }
 
-        this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0].href + 'tinymce';
+        this.tinyConfig['base_url'] = this.doc.head.getElementsByTagName('base')[0]?.href + 'tinymce';
 
         // app level configuration
         let defaultConfiguration = this.servoyService.getUIProperty('config');
@@ -172,7 +182,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     public getAsPlainText() {
-        return this.getEditor().getContent().replace(/<[^>]*>/g, '');
+        return this.getEditor().getContent({ format: 'text' });
     }
 
     public getScrollX(): number {

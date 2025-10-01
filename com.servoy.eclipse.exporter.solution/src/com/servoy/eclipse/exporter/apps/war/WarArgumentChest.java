@@ -42,7 +42,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String drivers;
 	private boolean isExportActiveSolution;
 	private String exportNG2Mode;
-	private boolean exportNG1;
 	private String pluginLocations;
 	private String selectedComponents;
 	private String selectedServices;
@@ -209,7 +208,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + overwriteGroups + " ...  overwrites Groups\n"
 			+ "        -" + allowSQLKeywords + " ... allows SQLKeywords\n"
 			+ "        -" + stopOnDataModelChanges + " ... stops import if data model changes.\n"
-			+ "             This option is ignored if "+allowDataModelChanges+" is present.\n"
+			+ "             This option is ignored if " + allowDataModelChanges + " is present.\n"
 			+ "        -" + allowDataModelChanges +" ... (optionally) a space separated list of server names  that\n"
 			+ "             allow data model changes.  If the list is missing,  then data model changes are\n"
 			+ "             allowed on all servers.\n"
@@ -238,17 +237,18 @@ public class WarArgumentChest extends AbstractArgumentChest
 //			+ "        -" + clearReferencesStopTimerThreads + " ... add  clearReferencesStopTimerThreads=\"true\"  to\n"
 //			+ "             Context element; may only be used with createTomcatContextXML.\n"
 			+ "        -" + useAsRealAdminUser + " ... the  default admin user login  given via   -" + defaultAdminUser + "\n"
-			+ "             above will be available as a normal admin user in solutions as well.\n"
-			+ "        -" + license+license_name_suffix +" OR "+license+".<i>"+license_name_suffix+",\n"
+			+ "             above will  be available for  admin page login even  if there are  Servoy users\n"
+			+ "             with the Administrators permission set.\n"
+			+ "        -" + license + license_name_suffix + " OR " + license+".<i>" + license_name_suffix + ",\n"
 			+ "             The name of the company that has the license,  where <i> is used when there are\n"
 			+ "             multiple licenses:\n"
-			+ "             -"+license+".1"+license_name_suffix +" name1" + " -"+license+".2"+license_name_suffix +" name2\n"
-			+ "        -" + license+license_code_suffix +" OR "+license+".<i>"+license_code_suffix+",\n"
+			+ "             -" + license + ".1" + license_name_suffix + " name1" + " -" + license + ".2" + license_name_suffix + " name2\n"
+			+ "        -" + license + license_code_suffix +" OR " + license + ".<i>" + license_code_suffix + ",\n"
 			+ "             The license code, where <i> is used when there are multiple licenses:\n"
-			+ "             -"+license+".1"+license_code_suffix +" XXXX-XXXX-XXXX" + " -"+license+".2"+license_code_suffix +"  XXXX-XXXX-XXXX\n"
-			+ "        -" + license+license_nr_suffix +" OR "+license+".<i>"+license_nr_suffix+",\n"
+			+ "             -" + license + ".1" + license_code_suffix + " XXXX-XXXX-XXXX" + " -" + license + ".2" + license_code_suffix + "  XXXX-XXXX-XXXX\n"
+			+ "        -" + license+license_nr_suffix + " OR " + license + ".<i>" + license_nr_suffix + ",\n"
 			+ "             The number of licenses, where <i> is used when there are multiple licenses:\n"
-			+ "             -"+license+".1"+license_nr_suffix +" SERVER" + " -"+license+".2"+license_nr_suffix +" 1000\n"
+			+ "             -" + license + ".1" + license_nr_suffix +" SERVER" + " -" + license + ".2" + license_nr_suffix +" 1000\n"
 			+ "        -" + userHomeDirectory + " <user_home_directory> ... this must be a writable directory where\n"
 			+ "             Servoy application  related files  will be stored;  if not set, then the system\n"
 			+ "             user home directory will be used.\n"
@@ -268,7 +268,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -ng2 true / false / sourcemaps ... export Titanium NG2 binaries.  If 'sourcemaps' is\n"
 			+ "             given, sourcemaps will be generated for .ts files - useful for debugging.\n"
 			+ "             Default: true\n"
-			+ "        -ng1 ... export NG1 client resources; not exported by default.\n"
 			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}
@@ -286,8 +285,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolution = false;
 		exportNG2Mode = "true";
 		if (argsMap.containsKey("ng2")) exportNG2Mode = argsMap.get("ng2");
-		exportNG1 = false;
-		if (argsMap.containsKey("ng1")) exportNG1 = true;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
 		if (pluginLocations == null) pluginLocations = "../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
@@ -486,11 +483,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String exportNG2Mode()
 	{
 		return exportNG2Mode;
-	}
-
-	public boolean exportNG1()
-	{
-		return exportNG1;
 	}
 
 	public String getPluginLocations()

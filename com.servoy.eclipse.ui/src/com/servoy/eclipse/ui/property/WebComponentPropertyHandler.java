@@ -45,15 +45,11 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONArrayType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 
@@ -108,35 +104,31 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	{
 		IBasicWebObject webObject = (IBasicWebObject)obj;
 		Object value = webObject.getProperty(getName());
+		return getValueInternal(value, propertyDescription, webObject, persistContext.getContext());
+	}
+
+	public Object getValueInternal(Object value, PropertyDescription pd, IBasicWebObject webObject, IPersist context)
+	{
 		try
 		{
-			IPropertyType< ? > type = propertyDescription.getType();
+			IPropertyType< ? > type = pd.getType();
 			if (type instanceof IYieldingType) type = ((IYieldingType< ? , ? >)type).getPossibleYieldType();
-
-			if (type instanceof FunctionPropertyType || type instanceof ValueListPropertyType || type instanceof FormPropertyType ||
-				type instanceof MediaPropertyType || type instanceof FormComponentPropertyType)
+			if (type instanceof NGCustomJSONArrayType caType && value instanceof Object[] array)
 			{
-				if (type instanceof FormComponentPropertyType && value instanceof JSONObject)
+				for (int i = 0; i < array.length; i++)
 				{
-					value = ((JSONObject)value).optString(FormComponentPropertyType.SVY_FORM);
+					array[i] = getValueInternal(array[i], caType.getCustomJSONTypeDefinition(), webObject, context);
 				}
-				if (value == null) return Integer.valueOf(0);
-				if (value instanceof Integer) return value;
-
-
-				IPersist persist = ModelUtils.getEditingFlattenedSolution(webObject, persistContext.getContext()).searchPersist((String)value);
-				if (persist instanceof AbstractBase)
-				{
-					return new Integer(persist.getID());
-				}
-
-				return Integer.MAX_VALUE;
+			}
+			if (type instanceof FormComponentPropertyType && value instanceof JSONObject)
+			{
+				value = ((JSONObject)value).optString(FormComponentPropertyType.SVY_FORM);
 			}
 			else if (value == null && !webObject.hasProperty(getName()) &&
 				(propertyDescription.hasDefault() || propertyDescription.getType().defaultValue(propertyDescription) != null)) // default values for persist mapped properties are already handled by WebObjectImpl, so value will not be null here for those
 			{
 				// if null is coming from parent and is a value that is was set, it is not a default, return it
-				if (webObject.getParentComponent().getExtendsID() > 0)
+				if (webObject.getParentComponent().getExtendsID() != null)
 				{
 					List<AbstractBase> overrideHierarchy = PersistHelper.getOverrideHierarchy(webObject.getParentComponent());
 					if (overrideHierarchy != null && overrideHierarchy.size() > 1) // list should contain as first item the component itself, so start with the first parent
@@ -162,7 +154,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 								}
 							}
 						}
-						if (propertyIsSetInHierarchy) return value;
+						if (propertyIsSetInHierarchy) return value; // here it returns null
 					}
 				}
 				Object defaultValue = null;
@@ -218,7 +210,17 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 		IBasicWebObject bean = (IBasicWebObject)obj;
 		Object convertedValue = value;
-		IPropertyType< ? > type = propertyDescription.getType();
+
+		convertedValue = setValueInternal(bean, convertedValue, persistContext, propertyDescription);
+
+		bean.setProperty(getName(), convertedValue);
+	}
+
+	public Object setValueInternal(IBasicWebObject bean, Object value, PersistContext persistContext, PropertyDescription pd)
+	{
+
+		Object convertedValue = value;
+		IPropertyType< ? > type = pd.getType();
 		if (type instanceof IYieldingType) type = ((IYieldingType< ? , ? >)type).getPossibleYieldType();
 
 		if (type instanceof FunctionPropertyType)
@@ -230,40 +232,14 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext());
 				table = editingFlattenedSolution.getTable(((Form)persistContext.getContext()).getDataSource());
 			}
-			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(bean, persistContext.getContext(), table, ((Integer)value).intValue());
+			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(bean, persistContext.getContext(), table, value != null ? value.toString() : null);
 			convertedValue = scriptMethod == null ? null : scriptMethod.getUUID().toString();
-		}
-		else if (type instanceof ValueListPropertyType)
-		{
-			if (value != null)
-			{
-				if (value instanceof String)
-				{
-					convertedValue = value;
-				}
-				else
-				{
-					ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
-					convertedValue = (val == null) ? null : val.getUUID().toString();
-				}
-			}
-			else convertedValue = null;
-		}
-		else if (type instanceof FormPropertyType)
-		{
-			Form frm = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getForm(((Integer)value).intValue());
-			convertedValue = (frm == null) ? null : frm.getUUID().toString();
-		}
-		else if (type instanceof MediaPropertyType)
-		{
-			Media media = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getMedia(((Integer)value).intValue());
-			convertedValue = (media == null) ? null : media.getUUID().toString();
 		}
 		else if (type instanceof FormComponentPropertyType)
 		{
 			if (convertedValue != null)
 			{
-				Form frm = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getForm(((Integer)value).intValue());
+				Form frm = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getForm((value != null ? value.toString() : null));
 				if (frm != null)
 				{
 					JSONObject json = new JSONObject();
@@ -276,7 +252,16 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				}
 			}
 		}
-		bean.setProperty(getName(), convertedValue);
+		else if (type instanceof NGCustomJSONArrayType caType && convertedValue instanceof Object[] array)
+		{
+			array = array.clone();
+			for (int i = 0; i < array.length; i++)
+			{
+				array[i] = setValueInternal(bean, array[i], persistContext, caType.getCustomJSONTypeDefinition());
+			}
+			return array;
+		}
+		return convertedValue;
 	}
 
 	public boolean shouldShow(PersistContext persistContext)

@@ -54,7 +54,11 @@ public class DataSourceWrapperFactory
 		{
 			return new ViewFoundsetServerWrapper(viewFoundsetDatasourceName);
 		}
-
+		String menuFoundsetDatasourceName = DataSourceUtils.getMenuDataSourceName(dataSource);
+		if (menuFoundsetDatasourceName != null)
+		{
+			return new MenuFoundsetServerWrapper(menuFoundsetDatasourceName);
+		}
 		return null;
 	}
 

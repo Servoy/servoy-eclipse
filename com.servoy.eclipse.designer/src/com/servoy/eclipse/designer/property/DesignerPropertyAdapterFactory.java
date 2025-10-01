@@ -71,6 +71,8 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Menu;
+import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
@@ -168,7 +170,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					persist = (IPersist)realObject;
 					context = userNode.getForm();
 				}
-				if (persist instanceof IScriptElement || persist instanceof Media)
+				if (persist instanceof IScriptElement || persist instanceof Media || persist instanceof Menu || persist instanceof MenuItem)
 				{
 					autoSave = true;
 				}
@@ -237,7 +239,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		else if (obj instanceof IPersist)
 		{
 			persist = (IPersist)obj;
-			autoSave = persist instanceof Solution || persist instanceof IScriptElement;
+			autoSave = persist instanceof Solution || persist instanceof IScriptElement || persist instanceof Menu || persist instanceof MenuItem;
 			// retargetToEditor must be true so that persist saves from anywhere (like quickfix)
 			// retargetToEditor = false;
 		}

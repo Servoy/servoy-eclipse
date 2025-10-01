@@ -109,6 +109,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.scripting.info.EventType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -273,7 +274,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				else if (parent instanceof Form)
 				{
 					Form form = (Form)parent;
-					if (form.getExtendsID() > 0)
+					if (form.getExtendsID() != null)
 					{
 						List<Form> formHierarchy = sm.getActiveProject().getEditingFlattenedSolution().getFormHierarchy(form);
 						for (Form f : formHierarchy)
@@ -409,6 +410,15 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 										returnType, returnTypeDescription,
 										arguments.toArray(new MethodArgument[arguments.size()]), defaultMethodCode, true);
 								}
+							}
+						}
+						if (template == null)
+						{
+							EventType eventType = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent)
+								.getEventType(methodKey);
+							if (eventType != null)
+							{
+								template = eventType.getMethodTemplate();
 							}
 						}
 						if (template == null) template = MethodTemplate.getTemplate(met.getClass(), methodKey);
@@ -611,18 +621,18 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			if (parent instanceof Solution)
 			{
 				// global method
-				validator.checkName(newText, 0, new ValidatorSearchContext(scopeName, IRepository.METHODS), false);
+				validator.checkName(newText, null, new ValidatorSearchContext(scopeName, IRepository.METHODS), false);
 			}
 
 			if (parent instanceof Form)
 			{
 				// form method
-				validator.checkName(newText, 0, new ValidatorSearchContext(parent, IRepository.METHODS), false);
+				validator.checkName(newText, null, new ValidatorSearchContext(parent, IRepository.METHODS), false);
 			}
 			if (parent instanceof TableNode)
 			{
 				// foundset method
-				validator.checkName(newText, 0, new ValidatorSearchContext(parent, IRepository.METHODS), false);
+				validator.checkName(newText, null, new ValidatorSearchContext(parent, IRepository.METHODS), false);
 			}
 		}
 		catch (RepositoryException e)

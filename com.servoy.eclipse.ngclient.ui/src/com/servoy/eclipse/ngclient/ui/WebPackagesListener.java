@@ -84,9 +84,11 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.SerialRule;
-import com.servoy.eclipse.model.war.exporter.IWarExportModel;
+import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
+import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
@@ -113,17 +115,40 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 */
 	private static final class PackageCheckerJob extends Job
 	{
-		private final IWarExportModel warExportModel;
+		private final ITiNGExportModel warExportModel;
 		private final File projectFolder;
+		private final String whatToRun;
 
 		/**
 		 * @param name
 		 */
-		private PackageCheckerJob(String name, File projectFolder, IWarExportModel warExportModel)
+		private PackageCheckerJob(String name, File projectFolder, ITiNGExportModel warExportModel)
 		{
 			super(name);
 			this.warExportModel = warExportModel;
 			this.projectFolder = projectFolder;
+			String toRun = "build_debug_nowatch";
+			if (warExportModel != null)
+			{
+				// skip the null values and the true value then it should just be "build"
+				if (!Arrays.asList(null, "", "true").contains(warExportModel.exportNG2Mode()))
+				{
+					toRun = "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : warExportModel.exportNG2Mode();
+				}
+				else
+				{
+					toRun = "build";
+				}
+			}
+			else
+			{
+				if (Boolean.valueOf(Settings.getInstance().getProperty("servoy.ngclient.testingMode", "false")).booleanValue())
+				{
+					toRun = "build_sourcemap";
+				}
+			}
+			whatToRun = toRun;
+
 		}
 
 		@Override
@@ -630,7 +655,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					// fist create the servoy/public dist if needed
 					String location = Activator.getInstance().getBundle().getLocation();
 					int fromSourceIndex = location.indexOf("file:/");
-					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists())
+					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists() || sourceChanged)
 					{
 						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
 							Arrays.asList("run", "build_lib_debug_nowatch"));
@@ -800,8 +825,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					else
 					{
-						String whatToRun = warExportModel != null ? "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : "build"
-							: "build_debug_nowatch";
 						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("run", whatToRun));
 						try
 						{
@@ -1302,18 +1325,23 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 	protected void createNodeFolderAndCheckPackages()
 	{
-		Activator.getInstance().setActiveSolution(ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName());
-		NodeFolderCreatorJob job = new NodeFolderCreatorJob(Activator.getInstance().getSolutionProjectFolder(), true, false);
+		final String activeProjectName = ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName();
+		Activator.getInstance().setActiveSolution(null);
+		NodeFolderCreatorJob job = new NodeFolderCreatorJob(new File(Activator.getInstance().getMainTargetFolder(), activeProjectName), true, false);
 		job.addJobChangeListener(new JobChangeAdapter()
 		{
 			@Override
 			public void done(IJobChangeEvent event)
 			{
-				if (event.getResult().getSeverity() == IStatus.OK) checkPackages(false);
-				else
+				if (Utils.equalObjects(activeProjectName, ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName()))
 				{
-					// else npm install gave an error...
-					handleTitaniumNGClientBuildFailure();
+					Activator.getInstance().setActiveSolution(ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName());
+					if (event.getResult().getSeverity() == IStatus.OK) checkPackages(false);
+					else
+					{
+						// else npm install gave an error...
+						handleTitaniumNGClientBuildFailure();
+					}
 				}
 			}
 		});
@@ -1324,7 +1352,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 	public static boolean isBuildRunning()
 	{
-		return scheduled.get() > 1;
+		return scheduled.get() > 1 || Job.getJobManager().find(CopySourceFolderAction.JOB_FAMILY).length > 0;
 	}
 
 	/**
@@ -1403,7 +1431,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					"Titanium NG Client build failed",
 					"Details are available in the 'Titanium NG Build Console'.\nIt could be due an incorrect version or error in some service/component package that the solution uses, but there are multiple other possible causes.\n\nYou can either check what went wrong in the 'Titanium NG Build Console' or start a full/clean client build.",
 					SWT.NONE, "Show 'Titanium NG Build Console'", "Retry; start a full/clean build");
-				if (usersChoice == 0)
+				if (usersChoice <= 0)
 				{
 					ConsoleFactory.openTiNGBuildConsole();
 				}
@@ -1435,7 +1463,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			File distFolder = new File(distributionSource, "dist/app/browser");
 			if (distFolder.exists())
 			{
-				FileUtils.copyDirectory(distFolder, model.getExportLocation(), (path) -> !path.getName().equals("index.html"));
+				FileUtils.copyDirectory(distFolder, model.getExportLocation(),
+					(path) -> !(path.getName().equals("index.html") || path.getName().equals("favicon.ico")));
 
 				FileUtils.copyFile(new File(distFolder, "index.html"), new File(model.getExportLocation(), "WEB-INF/angular-index.html"));
 			}

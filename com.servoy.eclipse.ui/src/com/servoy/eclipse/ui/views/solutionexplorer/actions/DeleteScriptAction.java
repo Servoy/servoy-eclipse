@@ -37,6 +37,7 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.persistence.IPersist;
@@ -108,9 +109,6 @@ public class DeleteScriptAction extends DeletePersistAction
 		return edited;
 	}
 
-	/**
-	 * @see com.servoy.eclipse.ui.views.actions.DeletePersistAction#performDeletion(java.util.List)
-	 */
 	@Override
 	protected void performDeletion(List<IPersist> selectedPersists)
 	{
@@ -185,28 +183,21 @@ public class DeleteScriptAction extends DeletePersistAction
 				IMarker[] findMarkers = file.findMarkers(null, true, IResource.DEPTH_INFINITE);
 				for (IMarker marker : findMarkers)
 				{
-					Object attribute = marker.getAttribute(IMarker.LINE_NUMBER);
-					if (attribute instanceof Integer)
+					int lineNumber = marker.getAttribute(IMarker.LINE_NUMBER, -1);
+					if (lineNumber != -1 && startLine <= lineNumber && endLine >= lineNumber)
 					{
-						int lineNumber = ((Integer)attribute).intValue();
-						if (startLine <= lineNumber && endLine >= lineNumber)
-						{
-							marker.delete();
-						}
+						marker.delete();
 					}
 				}
 			}
 			catch (CoreException e)
 			{
+				ServoyLog.logError(e);
 			}
 		}
 		super.performDeletion(selectedPersists);
 	}
 
-	/**
-	 * @param substring
-	 * @return
-	 */
 	private int countLines(String txt)
 	{
 		int lines = 0;

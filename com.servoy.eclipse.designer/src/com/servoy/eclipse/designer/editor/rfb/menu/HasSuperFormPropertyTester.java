@@ -33,7 +33,7 @@ public class HasSuperFormPropertyTester extends PropertyTester
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue)
 	{
 		BaseVisualFormEditor activeEditor = DesignerUtil.getActiveEditor();
-		if (activeEditor != null) return activeEditor.getForm().getExtendsID() > 0;
+		if (activeEditor != null) return activeEditor.getForm().getExtendsID() != null;
 		return false;
 	}
 

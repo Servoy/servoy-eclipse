@@ -33,6 +33,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 
 /**
@@ -94,12 +95,12 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 					{
 						private final IValidateName normalValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 
-						public void checkName(String nameToCheck, int skip_element_id, ValidatorSearchContext searchContext, boolean sqlRelated)
+						public void checkName(String nameToCheck, UUID skip_element_uuid, ValidatorSearchContext searchContext, boolean sqlRelated)
 							throws RepositoryException
 						{
 							try
 							{
-								normalValidator.checkName(nameToCheck, skip_element_id, searchContext, sqlRelated);
+								normalValidator.checkName(nameToCheck, skip_element_uuid, searchContext, sqlRelated);
 							}
 							catch (RepositoryException e)
 							{
@@ -110,7 +111,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 					};
 
 					// create a new column with the same name, but using column information
-					Column c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
+					Column c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType);
 					c.setDatabasePK((dbiFileDefinition.flags & IBaseColumn.PK_COLUMN) != 0);
 					c.setFlags(dbiFileDefinition.flags);
 					c.setAllowNull(dbiFileDefinition.allowNull);

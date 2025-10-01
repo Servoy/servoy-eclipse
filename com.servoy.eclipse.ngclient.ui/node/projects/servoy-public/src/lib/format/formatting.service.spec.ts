@@ -561,6 +561,22 @@ describe('FormattingService', () => {
         myFormat.display = "'At the stroke of' dd MM yyyy kk:mm";
         expect(service.format(new Date(2014, 10, 5, 24, 23, 14), myFormat, false)).toEqual("At the stroke of 06 11 2014 00:23");
 
+        myFormat.display = "'On the day of' dd 'in the month of' MM', year' yyyy', the time was' HH:mm";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("On the day of 03 in the month of 11, year 2014, the time was 15:23");
+
+
+        myFormat.display = "dd 'day of' MM', year' yyyy 'witnessed the hour of' HH:mm 'sharp'";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("03 day of 11, year 2014 witnessed the hour of 15:23 sharp");
+
+        myFormat.display = "dd 'under the moon of' MM 'in' yy', precisely at' HH:mm";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("03 under the moon of 11 in 14, precisely at 15:23");
+
+        myFormat.display = "dd 'as the leaves fall in' MM 'of' yyyy', the clock strikes' HH:mm 'in the heart of night'";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("03 as the leaves fall in 11 of 2014, the clock strikes 15:23 in the heart of night");
+
+        myFormat.display = "'Today is' dd 'of' MM 'in the year' yyyy 'at' HH:mm";
+        expect(service.format(new Date(2014, 10, 3, 15, 23), myFormat, false)).toEqual("Today is 03 of 11 in the year 2014 at 15:23");
+
 
     });
 

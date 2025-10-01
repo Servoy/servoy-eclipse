@@ -25,6 +25,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.RunNPMCommand;
 import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 
@@ -114,9 +115,9 @@ public interface NGClientStarter
 						}
 					});
 				}
-				catch (Exception e)
+				catch (InvocationTargetException | InterruptedException e)
 				{
-					e.printStackTrace();
+					ServoyLog.logError(e);
 				}
 			});
 		}

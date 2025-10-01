@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,8 @@
 package org.eclipse.jface.action;
 
 import static org.eclipse.swt.events.SelectionListener.widgetSelectedAdapter;
+
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressIndicator;
@@ -80,6 +82,9 @@ import org.eclipse.swt.widgets.ToolItem;
 	/** name of the task */
 	protected volatile String fTaskName;
 
+	/** name of the task without sub-tasks */
+	protected volatile String fBaseTaskName;
+
 	/** is the task is cancled */
 	protected volatile boolean fIsCanceled;
 
@@ -115,7 +120,7 @@ import org.eclipse.swt.widgets.ToolItem;
 
 	/** stop image descriptor */
 	protected static ImageDescriptor fgStopImage = ImageDescriptor
-			.createFromFile(StatusLine.class, "images/stop.png");//$NON-NLS-1$
+			.createFromFile(StatusLine.class, "images/stop.svg");//$NON-NLS-1$
 
 	private MenuItem copyMenuItem;
 	static {
@@ -363,12 +368,7 @@ import org.eclipse.swt.widgets.ToolItem;
 			if (!animated) {
 				fProgressBar.beginTask(totalWork);
 			}
-			if (name == null) {
-				fTaskName = Util.ZERO_LENGTH_STRING;
-			} else {
-				fTaskName = name;
-			}
-			setMessage(fTaskName);
+			setTaskName(name == null ? Util.ZERO_LENGTH_STRING : name);
 		});
 	}
 
@@ -398,7 +398,7 @@ import org.eclipse.swt.widgets.ToolItem;
 				fProgressBar.sendRemainingWork();
 				fProgressBar.done();
 			}
-			setMessage(null);
+			setTaskName(null);
 			hideProgress();
 		});
 	}
@@ -424,7 +424,6 @@ import org.eclipse.swt.widgets.ToolItem;
 
 	/**
 	 * Hides the Cancel button and ProgressIndicator.
-	 *
 	 */
 	protected void hideProgress() {
 
@@ -580,15 +579,17 @@ import org.eclipse.swt.widgets.ToolItem;
 	 */
 	@Override
 	public void setTaskName(String name) {
-		if (name == null)
-			fTaskName = Util.ZERO_LENGTH_STRING;
-		else
-			fTaskName = name;
+		String s = (name == null) ? Util.ZERO_LENGTH_STRING : name;
+		boolean changed = !Objects.equals(fTaskName, s);
+		if (changed) {
+			fTaskName = s;
+			fBaseTaskName = s;
+			updateMessageLabel();
+		}
 	}
 
 	/**
 	 * Makes the Cancel button visible.
-	 *
 	 */
 	protected void showButton() {
 		if (fToolBar != null && !fToolBar.isDisposed()) {
@@ -601,7 +602,6 @@ import org.eclipse.swt.widgets.ToolItem;
 
 	/**
 	 * Shows the Cancel button and ProgressIndicator.
-	 *
 	 */
 	protected void showProgress() {
 		if (!fProgressIsVisible && !isDisposed()) {
@@ -654,9 +654,13 @@ import org.eclipse.swt.widgets.ToolItem;
 		if (fTaskName == null || fTaskName.isEmpty()) {
 			text = newName;
 		} else {
-			text = JFaceResources.format("Set_SubTask", fTaskName, newName);//$NON-NLS-1$
+			text = JFaceResources.format("Set_SubTask", fBaseTaskName, newName);//$NON-NLS-1$
 		}
-		setMessage(text);
+		boolean changed = !Objects.equals(fTaskName, text);
+		if (changed) {
+			fTaskName = text;
+			updateMessageLabel();
+		}
 	}
 
 	/**
@@ -690,11 +694,14 @@ import org.eclipse.swt.widgets.ToolItem;
 	protected void updateMessageLabel() {
 		if (fMessageLabel != null && !fMessageLabel.isDisposed()) {
 			Display display = fMessageLabel.getDisplay();
-			if ((fErrorText != null && fErrorText.length() > 0)
-					|| fErrorImage != null) {
+			if ((fErrorText != null && !fErrorText.isEmpty()) || fErrorImage != null) {
 				fMessageLabel.setForeground(JFaceColors.getErrorText(display));
 				fMessageLabel.setText(fErrorText);
 				fMessageLabel.setImage(fErrorImage);
+			} else if (fTaskName != null && !fTaskName.isEmpty()) {
+				fMessageLabel.setForeground(getForeground());
+				fMessageLabel.setText(fTaskName == null ? "" : fTaskName); //$NON-NLS-1$
+				fMessageLabel.setImage(null);
 			} else {
 				fMessageLabel.setForeground(getForeground());
 				fMessageLabel.setText(fMessageText == null ? "" : fMessageText); //$NON-NLS-1$

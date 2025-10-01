@@ -67,9 +67,9 @@ public class XMLScriptObjectAdapterLoader
 				ServoyLog.logError("Error reading documentation from " + url, t);
 			}
 
-			// the following - commented out code is only to be used when for adjusting native-references.xml of org.eclipse.dltk.javascript.core/resources
+			// the following - commented out code is only to be used for adjusting native-references.xml of org.eclipse.dltk.javascript.core/resources
 			// when one of the classes in com.servoy.j2db.documentation.scripting.docs changed
-			// see NGClientStarter commented code that prints those out to console and those can be used as descriptinos in native-references.xml (used in code completion for native javascript types)
+			// see NGClientStarter commented code that prints those out to console and those can be used as descriptions in native-references.xml (used in code completion for native javascript types)
 //			url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc_jslib.xml");
 //			try
 //			{
@@ -101,20 +101,7 @@ public class XMLScriptObjectAdapterLoader
 			{
 				try
 				{
-					Class< ? > clazz = DocumentationUtil.loadClass(loader, objDoc.getQualifiedName());
-					// see if there are already return types that the class itself specifies (to be exactly the same as a real client)
-					IScriptObject scriptObjectForClass = ScriptObjectRegistry.getScriptObjectForClass(clazz);
-					XMLScriptObjectAdapter adapter = new XMLScriptObjectAdapter(objDoc, scriptObjectForClass);
-					if (scriptObjectForClass != null)
-					{
-						Class< ? >[] allReturnedTypes = scriptObjectForClass.getAllReturnedTypes();
-						if (allReturnedTypes != null && allReturnedTypes.length > 0)
-						{
-							// if there are return types already set those.
-							adapter.setReturnTypes(allReturnedTypes);
-						}
-					}
-					ScriptObjectRegistry.registerScriptObjectForClass(clazz, adapter);
+					registerReturnTypesFromDoc(loader, objDoc);
 					succeeded++;
 				}
 				catch (Throwable e)
@@ -130,6 +117,24 @@ public class XMLScriptObjectAdapterLoader
 
 		Date stop = new Date();
 		ServoyLog.logInfo("Documentation loaded and registered in " + (stop.getTime() - start.getTime()) + " ms.");
+	}
+
+	public static void registerReturnTypesFromDoc(ClassLoader loader, IObjectDocumentation objDoc) throws ClassNotFoundException
+	{
+		Class< ? > clazz = DocumentationUtil.loadClass(loader, objDoc.getQualifiedName());
+		// see if there are already return types that the class itself specifies (to be exactly the same as a real client)
+		IScriptObject scriptObjectForClass = ScriptObjectRegistry.getScriptObjectForClass(clazz);
+		XMLScriptObjectAdapter adapter = new XMLScriptObjectAdapter(objDoc, scriptObjectForClass);
+		if (scriptObjectForClass != null)
+		{
+			Class< ? >[] allReturnedTypes = scriptObjectForClass.getAllReturnedTypes();
+			if (allReturnedTypes != null && allReturnedTypes.length > 0)
+			{
+				// if there are return types already set those.
+				adapter.setReturnTypes(allReturnedTypes);
+			}
+		}
+		ScriptObjectRegistry.registerScriptObjectForClass(clazz, adapter);
 	}
 
 	public static IObjectDocumentation getObjectDocumentation(Class< ? > clz)

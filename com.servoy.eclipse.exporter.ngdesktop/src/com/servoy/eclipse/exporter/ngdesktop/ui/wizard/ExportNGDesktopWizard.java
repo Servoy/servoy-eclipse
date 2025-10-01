@@ -1,29 +1,22 @@
 package com.servoy.eclipse.exporter.ngdesktop.ui.wizard;
 
 import java.awt.Dimension;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.UnknownHostException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.ResponseInfo;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.hc.client5.http.ClientProtocolException;
-import org.apache.hc.client5.http.HttpHostConnectException;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -31,9 +24,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +41,7 @@ import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.http.StringBodyHandler;
 
 /**
  * @author gboros
@@ -60,7 +55,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	public final static int APP_NAME_LENGTH = 20; // chars
 	protected static final int STORE_TIMEOUT = 7; //days
 	private String service_url = "https://ngdesktop-builder.servoy.com";
-	private CloseableHttpClient httpClient = null;
 
 	public ExportNGDesktopWizard()
 	{
@@ -108,95 +102,112 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
 			return false;
 		}
-		final String loginToken = logIn();
-		if (Utils.stringIsEmpty(loginToken))
-			return false; //no login
+		final boolean result[] = { false, false };
+		ServoyLoginDialog.getLoginToken(loginToken -> {
 
-		exportSettings.put("login_token", loginToken);
-
-		final boolean result[] = { false };
-
-		errorMsg.delete(0, errorMsg.length());
-
-		exportPage.getSelectedPlatforms().forEach((platform) -> {
-			exportSettings.put("platform", platform);
-
-			try (final CloseableHttpResponse httpResponse = sendRequest(exportSettings))
+			if (Utils.stringIsEmpty(loginToken))
 			{
-				final int httpStatusCode = httpResponse.getCode();
-
-				switch (httpStatusCode)
-				{
-					case HttpStatus.SC_OK :
-						result[0] = true; //at least one platform has been delivered succesfully
-						break;
-					default :
-						String reasonPhrase = httpResponse.getReasonPhrase();
-						if (Utils.stringIsEmpty(reasonPhrase)) reasonPhrase = getReasonPhrase(httpResponse);
-						errorMsg
-							.append(String.format("Platform: %s\nError code: %d\n%s", platform, httpStatusCode, reasonPhrase));
-						break;
-				}
+				result[1] = true;
+				return; //no login
 			}
-			catch (final HttpHostConnectException | UnknownHostException e)
+
+			exportSettings.put("login_token", loginToken);
+
+
+			errorMsg.delete(0, errorMsg.length());
+
+			try (HttpClient httpClient = HttpClient.newHttpClient())
+			{
+				exportPage.getSelectedPlatforms().forEach((platform) -> {
+					exportSettings.put("platform", platform);
+
+					final String srvAddress = System.getProperty("ngdesktop.service.address");
+					if (srvAddress != null && isValidUrl(srvAddress))
+						service_url = srvAddress;
+
+					final String input = formatRequest(exportSettings);
+
+					final HttpRequest postRequest = HttpRequest.newBuilder()
+						.uri(URI.create(service_url + "/build/start"))
+						.header("Content-Type", "application/json")
+						.POST(HttpRequest.BodyPublishers.ofString(input))
+						.build();
+
+					ServoyLog.logInfo("Send request to " + service_url + "/build/start");
+
+					try
+					{
+						httpClient.send(postRequest, new StringBodyHandler<Void>()
+						{
+							@Override
+							public Void handleResponse(ResponseInfo responseInfo, String content)
+							{
+								final int httpStatusCode = responseInfo.statusCode();
+
+								switch (httpStatusCode)
+								{
+									case HttpURLConnection.HTTP_OK :
+										result[0] = true; //at least one platform has been delivered succesfully
+										break;
+									default :
+										final String reasonPhrase = getReasonPhrase(content);
+										errorMsg
+											.append(String.format("Platform: %s\nError code: %d\n%s", platform, httpStatusCode, reasonPhrase));
+										break;
+								}
+								return null;
+							}
+						});
+					}
+					catch (IOException | InterruptedException e)
+					{
+						errorMsg.append("Can't connect to the remote service.\nTry again later ...");
+						ServoyLog.logError(e);
+					}
+				});
+			}
+			catch (final Exception e)
 			{
 				errorMsg.append("Can't connect to the remote service.\nTry again later ...");
-			}
-			catch (final IOException e)
-			{
 				ServoyLog.logError(e);
 			}
+
+			final Runnable run = () -> {
+				if (errorMsg.length() > 0) MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
+				else
+				{
+					final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be sent to the provided address ...";
+					MessageDialog.open(MessageDialog.INFORMATION, UIUtils.getActiveShell(), "NG Desktop Export", message, SWT.None, "OK");
+				}
+			};
+			if (Display.getCurrent() != null) run.run();
+			else Display.getDefault().syncExec(run);
+			result[1] = true;
 		});
-		if (errorMsg.length() > 0) MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
-		else
-		{
-			final String message = "Your request has been added to the service queue.\nAn email with the download link(s) will be sent to the provided address ...";
-			MessageDialog.open(MessageDialog.INFORMATION, UIUtils.getActiveShell(), "NG Desktop Export", message, SWT.None, "OK");
-		}
+		final Shell shell = getShell();
+		final Display display = Display.getCurrent();
+		while (!shell.isDisposed() && !result[1])
+			if (!display.readAndDispatch()) display.sleep();
 		return result[0];
 	}
 
 	//fail to customize reason phrase into Spring - so extract from the
-	private String getReasonPhrase(CloseableHttpResponse response) throws IOException
+	private String getReasonPhrase(String content)
 	{
-		if (response != null) try (BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent())))
+		try
 		{
-			String output;
-			final StringBuffer sb = new StringBuffer();
-			while ((output = br.readLine()) != null)
-				sb.append(output);
-			try
-			{
-				final JSONObject jsonObj = new JSONObject(sb.toString());
-				return jsonObj.optString("statusMessage", "Unexpected error");
-			}
-			catch (final JSONException e)
-			{
-				//Unexpected http response?
-				return "Internal server error: " + response.getReasonPhrase();
-
-			}
+			final JSONObject jsonObj = new JSONObject(content);
+			return jsonObj.optString("statusMessage", "Unexpected error");
 		}
-		return "Internal server error";//not sure what happen ...
+		catch (final JSONException e)
+		{
+			//Unexpected http response?
+			return "Internal server error: " + e.getMessage();
+
+		}
 	}
 
-	private CloseableHttpResponse sendRequest(IDialogSettings settings) throws ClientProtocolException, IOException, HttpHostConnectException
-	{
-		final String srvAddress = System.getProperty("ngclient.service.address");
-		if (srvAddress != null && isValidUrl(srvAddress))
-			service_url = srvAddress;
-
-		final HttpClientBuilder httpBuilder = HttpClientBuilder.create();
-		httpClient = httpBuilder.build();
-
-		final StringEntity input = formatRequest(settings);
-		final HttpPost postRequest = new HttpPost(service_url + "/build/start");
-		postRequest.setEntity(input);
-		ServoyLog.logInfo("Send request to " + service_url + "/build/start");
-		return httpClient.execute(postRequest);
-	}
-
-	private StringEntity formatRequest(IDialogSettings settings)
+	private String formatRequest(IDialogSettings settings)
 	{
 		try
 		{
@@ -225,8 +236,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			jsonObj.put("emailAddress", settings.get("email_address"));
 			jsonObj.put("storageTimeout", settings.getBoolean("store_data") ? STORE_TIMEOUT * 24 : 0); //convert to hours
 
-			final StringEntity input = new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
-			return input;
+			return jsonObj.toString();
 		}
 		catch (final IOException e)
 		{
@@ -240,14 +250,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		return StartNGDesktopClientHandler.getNgDesktopVersion(selectedVersion);
 	}
 
-	private String logIn()
-	{
-
-		String loginToken = ServoyLoginDialog.getLoginToken();
-		if (loginToken == null) loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-
-		return loginToken;
-	}
 
 	@Override
 	public void addPages()
@@ -342,8 +344,16 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 		}
 
+		final boolean includeUpdate = settings.getBoolean("include_update");
 		strValue = settings.get("update_url");
-		if (strValue != null && strValue.trim().length() > 0 && !isValidUrl(strValue))
+
+		if (includeUpdate && (strValue == null || strValue.trim().isEmpty()))
+		{
+			errorMsg.append("Please provide server address for the update packages\n");
+			return errorMsg;
+		}
+
+		if (strValue != null && !strValue.trim().isEmpty() && !isValidUrl(strValue))
 		{
 			final boolean result = MessageDialog.open(MessageDialog.QUESTION, UIUtils.getActiveShell(), "NG Desktop Export",
 				"URL can't be validated. Use it anyway? \n" + strValue, SWT.YES);

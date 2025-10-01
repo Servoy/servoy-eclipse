@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.css.core"
       label="Servoy CSS feature"
-      version="2024.6.0.3980_rc"
+      version="2025.12.0.4120_rc"
       provider-name="Servoy">
 
    <description>
@@ -33,7 +33,7 @@
 
    <plugin
          id="org.eclipse.wst.common.emf"
-         version="1.2.700.v202007161535"/>
+         version="1.2.800.v202503020719"/>
 
    <plugin
          id="org.eclipse.wst.common.emfworkbench.integration"
@@ -57,11 +57,11 @@
 
    <plugin
          id="org.eclipse.wst.common.project.facet.core"
-         version="1.5.0.v202308161955"/>
+         version="1.5.0.v202501090237"/>
 
    <plugin
          id="org.eclipse.wst.common.snippets"
-         version="1.3.0.v202308161955"/>
+         version="1.3.200.v202410202228"/>
 
    <plugin
          id="org.eclipse.wst.common.ui"
@@ -93,11 +93,11 @@
 
    <plugin
          id="org.eclipse.wst.sse.core"
-         version="1.2.1200.v202308180854"/>
+         version="1.2.1400.v202405130132"/>
 
    <plugin
          id="org.eclipse.wst.sse.ui"
-         version="1.7.800.v202308200343"/>
+         version="1.7.1000.v202409140021"/>
 
    <plugin
          id="org.eclipse.wst.standard.schemas"
@@ -105,11 +105,11 @@
 
    <plugin
          id="org.eclipse.wst.validation"
-         version="1.3.0.v202308161955"/>
+         version="1.3.100.v202407180051"/>
 
    <plugin
          id="org.eclipse.wst.xml.core"
-         version="1.2.800.v202308210520"/>
+         version="1.2.900.v202405130132"/>
 
    <plugin
          id="org.eclipse.wst.xml.ui"
@@ -121,11 +121,7 @@
 
    <plugin
          id="org.eclipse.jem.util"
-         version="2.2.0.v202308161955"/>
-
-   <plugin
-         id="javax.xml"
-         version="1.3.4.v201005080400"/>
+         version="2.2.100.v202405122323"/>
 
    <plugin
          id="org.apache.xml.resolver"
@@ -149,7 +145,7 @@
 
    <plugin
          id="org.eclipse.wst.validation.ui"
-         version="1.3.0.v202308161955"/>
+         version="1.3.100.v202405020134"/>
 
    <plugin
          id="org.eclipse.wst.xml.ui.infopop"

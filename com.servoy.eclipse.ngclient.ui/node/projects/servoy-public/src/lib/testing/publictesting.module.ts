@@ -84,6 +84,9 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     public getLocaleObject(): Locale {
         return this.locale? this.locale: {language:'en', country: 'US', full: 'en-US'};
     }
+    public getAGGridLocale(): { [key: string]: string; } {
+        return null;
+    }
     public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
         const ev = new JSEvent();
         ev.eventType = eventType;
@@ -97,7 +100,7 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         throw new Error('Method not implemented.');
     }
 
-    public showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<string> {
+    public showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string): Promise<string> {
         throw new Error('Method not implemented.');   
     }
 
@@ -118,7 +121,7 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
 
     public showForm(_popup: PopupForm): void {}
 
-    public cancelFormPopup(_disableClearPopupFormCallToServer: boolean): void {}
+    public cancelFormPopup(_disableClearPopupFormCallToServer_or_name: boolean|string): void {}
 
     public setFormStyleClasses(_styleclasses: {property: string}): void {}
 

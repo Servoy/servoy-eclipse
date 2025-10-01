@@ -2,24 +2,32 @@
 <h1 mat-dialog-title>Update packages</h1>
 <div mat-dialog-content>
   <table class="table-package">
-        <tr *ngFor="let item of extendedData;">
-            <td class="column-fitwidth">
-                <div class="align-left">
-                    <img [src]="item.package.icon" class="md-avatar" />
-                    <span> {{item.package.displayName}} </span>
-                </div>
-            </td>
-            <td>
-                <section style="margin-left: 30px;">
-                    <mat-checkbox ngDefaultControl [(ngModel)]="item.isSelected"></mat-checkbox>
-                </section>
-            </td>
-        </tr>
+    @for (item of extendedData; track item) {
+      <tr>
+        <td class="column-fitwidth">
+          <div class="align-left">
+            <img [src]="item.package.icon" class="md-avatar" />
+            <span> {{item.package.displayName}} </span>
+          </div>
+        </td>
+        <td>
+          <section style="margin-left: 30px;">
+            <mat-checkbox ngDefaultControl [(ngModel)]="item.isSelected"></mat-checkbox>
+          </section>
+        </td>
+      </tr>
+    }
   </table>
-  <h3 *ngIf="extendedData.length == 0" >There is no package available for update.</h3>  
+  @if (extendedData.length == 0) {
+    <h3 >There is no package available for update.</h3>
+  }
 </div>
 <div mat-dialog-actions>
-    <button mat-button mat-dialog-close (click)="closeDialog()">Close</button>
-    <button mat-button *ngIf="extendedData.length > 0" title="Update only the selected packages" [mat-dialog-close]="extendedData" (click)="updateSelected()" class="updateButton" >Update selected</button>
-    <button mat-button *ngIf="extendedData.length > 0" title="Update all packages regardless what is selected" [mat-dialog-close]="extendedData" style="margin-left: 30px" class="updateButton" (click)="updateAll()" >Update ALL</button>
+  <button mat-button mat-dialog-close (click)="closeDialog()">Close</button>
+  @if (extendedData.length > 0) {
+    <button mat-button title="Update only the selected packages" [mat-dialog-close]="extendedData" (click)="updateSelected()" class="updateButton" >Update selected</button>
+  }
+  @if (extendedData.length > 0) {
+    <button mat-button title="Update all packages regardless what is selected" [mat-dialog-close]="extendedData" style="margin-left: 30px" class="updateButton" (click)="updateAll()" >Update ALL</button>
+  }
 </div>

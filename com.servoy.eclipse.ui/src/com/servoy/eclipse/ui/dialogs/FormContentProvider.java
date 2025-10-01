@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,7 +41,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 
@@ -57,8 +55,8 @@ public class FormContentProvider implements ITreeContentProvider
 {
 	private final FlattenedSolution flattenedSolution;
 	private final Form childForm;
-	private final Map<String, List<Integer>> workingSetForms = new HashMap<String, List<Integer>>();
-	private Object[] formIdsAndWorkingSets = new Object[] { new Integer(-1) };
+	private final Map<String, List<String>> workingSetForms = new HashMap<String, List<String>>();
+	private Object[] formIdsAndWorkingSets = new Object[] { "-1" };
 	private FormListOptions options;
 
 	public FormContentProvider(FlattenedSolution flattenedSolution, Form form)
@@ -78,19 +76,19 @@ public class FormContentProvider implements ITreeContentProvider
 		String workingSetName = activeProject != null ? activeProject.getContainingWorkingSet(f.getName(), solutionNames) : null;
 		if (workingSetName == null)
 		{
-			list.add(new Integer(f.getID()));
+			list.add(f.getUUID().toString());
 		}
 		else
 		{
-			List<Integer> listForm = workingSetForms.get(workingSetName);
+			List<String> listForm = workingSetForms.get(workingSetName);
 			if (listForm == null)
 			{
-				listForm = new ArrayList<Integer>();
+				listForm = new ArrayList<String>();
 				workingSetForms.put(workingSetName, listForm);
 			}
-			if (!listForm.contains(Integer.valueOf(f.getID())))
+			if (!listForm.contains(f.getUUID().toString()))
 			{
-				listForm.add(Integer.valueOf(f.getID()));
+				listForm.add(f.getUUID().toString());
 			}
 		}
 	}
@@ -169,9 +167,9 @@ public class FormContentProvider implements ITreeContentProvider
 					options = (FormListOptions)inputElement;
 
 					ArrayList<Object> list = new ArrayList<Object>();
-					if (options.includeNone) list.add(new Integer(Form.NAVIGATOR_NONE));
-					if (options.includeDefault) list.add(new Integer(Form.NAVIGATOR_DEFAULT));
-					if (options.includeIgnore) list.add(new Integer(Form.NAVIGATOR_IGNORE));
+					if (options.includeNone) list.add(Form.NAVIGATOR_NONE);
+					if (options.includeDefault) list.add(Form.NAVIGATOR_DEFAULT);
+					if (options.includeIgnore) list.add(Form.NAVIGATOR_IGNORE);
 					if (workingSets != null)
 					{
 						list.addAll(workingSets);
@@ -210,7 +208,6 @@ public class FormContentProvider implements ITreeContentProvider
 
 						case HIERARCHY :
 							forms = flattenedSolution.getForms(childForm.getDataSource(), true);
-							Map<Form, Integer> possibleParentForms = new TreeMap<Form, Integer>(NameComparator.INSTANCE);
 							while (forms.hasNext())
 							{
 								Form possibleParentForm = forms.next();
@@ -226,8 +223,6 @@ public class FormContentProvider implements ITreeContentProvider
 									}
 								}
 							}
-
-							list.addAll(possibleParentForms.values());
 							break;
 					}
 					formIdsAndWorkingSets = list.toArray();
@@ -290,11 +285,11 @@ public class FormContentProvider implements ITreeContentProvider
 	@Override
 	public Object getParent(Object element)
 	{
-		if (element instanceof Integer)
+		if (element instanceof String elementUUID)
 		{
 			// a form
 			ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
-			Form form = flattenedSolution.getForm(((Integer)element).intValue());
+			Form form = flattenedSolution.getForm(elementUUID);
 			if (activeProject != null && form != null)
 			{
 				return activeProject.getContainingWorkingSet(form.getName(), flattenedSolution.getSolutionNames());
@@ -306,7 +301,7 @@ public class FormContentProvider implements ITreeContentProvider
 	@Override
 	public boolean hasChildren(Object element)
 	{
-		if (element instanceof String)
+		if (element instanceof String && workingSetForms.containsKey(element))
 		{
 			// a working set, just return true because of LeafnodesSelectionFilter, this can have children
 			return true;

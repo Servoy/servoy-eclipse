@@ -36,6 +36,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -82,7 +83,8 @@ public class WebComponentPropertySource extends PDPropertySource
 					BEAN_PROPERTIES.put(desc.getName(), desc);
 				}
 				if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(desc.getName()) ||
-					StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(desc.getName()))
+					StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(desc.getName()) ||
+					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(desc.getName()))
 				{
 					CONTAINER_PROPERTIES.put(desc.getName(), desc);
 				}
@@ -122,8 +124,13 @@ public class WebComponentPropertySource extends PDPropertySource
 		handlers.addAll(Arrays.asList(tmp2));
 		IPropertyHandler groupIDHandler = new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName()));
 		if (groupIDHandler != null) handlers.add(groupIDHandler);
-		IPropertyHandler zIndexHandler = new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName()));
-		if (zIndexHandler != null) handlers.add(zIndexHandler);
+
+		if (!handlers.stream().anyMatch(handler -> handler.getName().equals(StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName())))
+		{
+			IPropertyHandler zIndexHandler = new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName()));
+			if (zIndexHandler != null) handlers.add(zIndexHandler);
+		}
+
 		IPropertyHandler commentHandler = new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_COMMENT.getPropertyName()));
 		if (commentHandler != null) handlers.add(commentHandler);
 		return handlers.toArray(new IPropertyHandler[handlers.size()]);
@@ -178,7 +185,8 @@ public class WebComponentPropertySource extends PDPropertySource
 	{
 		if (BEAN_PROPERTIES.containsKey(propertyDescriptor.propertyDescriptor.getName())) return super.createPropertyCategory(propertyDescriptor);
 		if (getPropertyDescription().getHandlers().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Events;
-		if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
+		if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName()) &&
+			!IContentSpecConstants.PROPERTY_ATTRIBUTES.equals(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
 		return super.createPropertyCategory(propertyDescriptor);
 	}
 

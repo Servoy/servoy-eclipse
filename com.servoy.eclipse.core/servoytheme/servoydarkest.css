@@ -23,6 +23,10 @@ CTabItem{
   color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
 }
 
+Sash{
+    background-color: #252525;
+}
+
 .MPartStack {
     swt-tab-renderer: url('bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.CTabRendering');
 }
@@ -66,6 +70,12 @@ ExpandBar {
     color: #330099;
 }
 
+ExpandableComposite {
+    swt-titlebar-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
+    tb-toggle-hover-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
+    tb-toggle-color: '#com-servoy-themes-darktheme-FOREGROUND_COLOR';
+}
+
 #svyeditor * {
     background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
@@ -96,6 +106,10 @@ ExpandBar {
 
 #svydialog Table, #svydialog Tree {
     swt-header-background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
+}
+
+Shell > Composite > Table {
+  background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
 }
 
 .svyNatTable {
@@ -177,12 +191,20 @@ IEclipsePreferences#org-eclipse-ui-editors:com-servoy-eclipse-servoydarktheme{
 }
 
 IEclipsePreferences#org-eclipse-debug-ui:com-servoy-eclipse-servoydarktheme {
-  preferences: 'org.eclipse.debug.ui.outColor=255,255,255';
+  preferences: 'org.eclipse.debug.ui.outColor=255,255,255'
+  'org.eclipse.debug.ui.PREF_CHANGED_VALUE_BACKGROUND=150,80,115';
 }
 
 IEclipsePreferences#org-eclipse-ui-workbench:com-servoy-eclipse-servoydarktheme {
   preferences: 'org.eclipse.search.ui.match.highlight=206,92,0'
-  'org.eclipse.egit.ui.UncommittedChangeForegroundColor=114,157,186';
+  'org.eclipse.egit.ui.UncommittedChangeForegroundColor=114,157,186'
+  'ERROR_COLOR=247,68,117'
+  'CONFLICTING_COLOR=240,15,66'
+  'HYPERLINK_COLOR=111,197,238'
+  'INCOMING_COLOR=31,179,235'
+  'OUTGOING_COLOR=238,238,238'
+  'RESOLVED_COLOR=108,210,17'
+  'EDITION_COLOR=238,238,238';
 }
 
 ThemesExtension {
@@ -218,4 +240,13 @@ ColorDefinition#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR {
   category: '#com-servoy-themes-darktheme-themeCategory';
   label: 'Editor Background Color';
   description: 'The editing zones background color.';
+}
+
+Composite#org-eclipse-ui-main-toolbar, 
+Composite#org-eclipse-ui-main-toolbar ImageBasedFrame, 
+Composite#org-eclipse-ui-main-toolbar Composite, 
+Composite#org-eclipse-ui-main-toolbar ToolBar, 
+Composite#org-eclipse-ui-main-toolbar LayoutModifierToolControl-1#PerspectiveSpacer, 
+Composite#org-eclipse-ui-main-toolbar ToolItem{
+	background-color: #404040;
 }

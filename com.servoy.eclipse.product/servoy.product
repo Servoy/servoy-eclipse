@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2024.6.0.3980_rc" type="features" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2025.12.0.4120_rc" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
@@ -20,12 +20,13 @@
 --add-modules=ALL-SYSTEM
 --add-exports java.desktop/sun.java2d=ALL-UNNAMED
 -Dp2.trustedAuthorities=https://download.servoy.com,https://developer.servoy.com,https://download.eclipse.org
+-Dchromium.integration.eclipse.disable=true
       </vmArgs>
       <vmArgsLin>-Dchromium.suspend_threads=false
       </vmArgsLin>
-      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED -Dchromium.suspend_threads=false
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts --add-exports=java.desktop/com.apple.laf=ALL-UNNAMED -Dchromium.suspend_threads=false -Dsun.java2d.metal=false
       </vmArgsMac>
-      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED -Dchromium.args=--disable-gpu-compositing
+      <vmArgsWin>--add-exports=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED -Dchromium.args=--disable-gpu-compositing;--force-light-mode
       </vmArgsWin>
    </launcherArgs>
 
@@ -94,7 +95,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="2024.6.0.3980_rc"/>
+      <feature id="com.servoy.eclipse.feature" version="2025.12.0.4120_rc"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -106,9 +107,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <feature id="org.eclipse.help"/>
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.ecf.core.feature"/>
-      <feature id="org.eclipse.ecf.core.ssl.feature"/>
       <feature id="org.eclipse.ecf.filetransfer.feature"/>
-      <feature id="org.eclipse.ecf.filetransfer.ssl.feature"/>
       <feature id="org.eclipse.ecf.filetransfer.httpclient5.feature" installMode="root"/>
    </features>
 
@@ -120,7 +119,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.apache.felix.scr" autoStart="true" startLevel="2" />
       <plugin id="org.apache.logging.log4j.api" autoStart="true" startLevel="3" />
       <plugin id="org.apache.logging.log4j.core" autoStart="true" startLevel="3" />
-      <plugin id="org.apache.logging.log4j.jcl" autoStart="true" startLevel="3" />
       <plugin id="org.apache.logging.log4j.slf4j2-impl" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
@@ -132,7 +130,12 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </configurations>
 
    <repositories>
-      <repository location="http://download.servoy.com/developer/latest/" name="" enabled="true" />
+      <repository location="https://download.servoy.com/developer/latest/" name="Servoy Latest Releases" enabled="true" />
+      <repository location="https://download.servoy.com/developer/lts" name="Servoy LTS Releases" enabled="false" />
+      <repository location="https://download.servoy.com/developer/latest/releasecandidate" name="Servoy Latest Release Candidates" enabled="true" />
+      <repository location="https://developer.servoy.com/sqlexplorer/" name="SQLExplorer" enabled="true" />
+      <repository location="https://download.eclipse.org/eclipse/updates/4.36" name="Eclipse Release" enabled="true" />
+      <repository location="https://download.eclipse.org/releases/2025-06" name="Eclipse Updates" enabled="true" />
    </repositories>
 
    <preferencesInfo>

@@ -17,18 +17,21 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import static com.servoy.eclipse.ui.util.ElementUtil.getOverridePersist;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.swt.widgets.Display;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IChildWebObject;
@@ -66,81 +69,89 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 			public void run()
 			{
 				CompoundCommand cc = new CompoundCommand();
-				Iterator keys = args.keys();
-				while (keys.hasNext())
+				JSONArray components = (JSONArray)args.get("components");
+				for (Object obj : components)
 				{
-					String persistIdentifierString = (String)keys.next();
-					PersistIdentifier persistIdentifier = PersistIdentifier.fromJSONString(persistIdentifierString);
-					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), persistIdentifier);
-					if (persist instanceof AbstractBase)
+					if (obj instanceof JSONObject jsonObj)
 					{
-						JSONObject properties = args.optJSONObject(persistIdentifierString);
-
-						PersistIdentifier dropTarget = PersistIdentifier.fromJSONString(properties.optString("dropTargetUUID", null));
-						PersistIdentifier rightSibling = PersistIdentifier.fromJSONString(properties.optString("rightSibling", null));
-
-						ISupportFormElements parent = editorPart.getForm();
-						IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), dropTarget);
-
-						if (searchForPersist != null)
+						Iterator keys = jsonObj.keys();
+						while (keys.hasNext())
 						{
-							IPersist p = searchForPersist;
-							while (!(p instanceof ISupportFormElements) && p != null)
+							String persistIdentifierString = (String)keys.next();
+							PersistIdentifier persistIdentifier = PersistIdentifier.fromJSONString(persistIdentifierString);
+							final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), persistIdentifier);
+							if (persist instanceof AbstractBase)
 							{
-								p = p.getParent();
-							}
-							if (p instanceof ISupportFormElements)
-							{
-								parent = (ISupportFormElements)p;
-							}
-						}
-						else
-						{
-							Debug.error("drop target with uuid: " + dropTarget + " not found in form: " + parent);
-						}
-
-						try
-						{
-							if (!persist.getParent().equals(parent) && (((ISupportExtendsID)persist).getExtendsID() > 0 ||
-								!persist.equals(ElementUtil.getOverridePersist(PersistContext.create(persist, editorPart.getForm())))))
-							{
-								//do not allow changing the parent for inherited elements
-								continue;
-							}
-						}
-						catch (Exception e)
-						{
-							Debug.error(e);
-						}
-						IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), rightSibling);
-						ISupportChilds initialParent = persist instanceof ISupportExtendsID ? ((ISupportExtendsID)persist).getRealParent()
-							: persist.getParent();
-						if (initialParent == parent)
-						{
-							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(initialParent);
-							ISupportChilds flattenedParent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), initialParent);
-							Class< ? > childPositionClass = persist instanceof ISupportBounds ? ISupportBounds.class
-								: (persist instanceof IChildWebObject ? IChildWebObject.class : null);
-							if (childPositionClass != null)
-							{
-								ArrayList<IPersist> children = new ArrayList<IPersist>();
-								Iterator<IPersist> it = flattenedParent.getAllObjects();
-								while (it.hasNext())
+								JSONObject properties = jsonObj.optJSONObject(persistIdentifierString);
+		
+								PersistIdentifier dropTarget = PersistIdentifier.fromJSONString(properties.optString("dropTargetUUID", null));
+								PersistIdentifier rightSibling = PersistIdentifier.fromJSONString(properties.optString("rightSibling", null));
+		
+								ISupportFormElements parent = editorPart.getForm();
+								IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), dropTarget);
+		
+								if (searchForPersist != null)
 								{
-									IPersist child = it.next();
-									if (childPositionClass.isInstance(persist))
+									IPersist p = searchForPersist;
+									while (!(p instanceof ISupportFormElements) && p != null)
 									{
-										children.add(
-											child instanceof IFlattenedPersistWrapper ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child);
+										p = p.getParent();
+									}
+									if (p instanceof ISupportFormElements)
+									{
+										parent = (ISupportFormElements)p;
 									}
 								}
-								if (children.size() == 1)
+								else
 								{
-									continue;
+									Debug.error("drop target with uuid: " + dropTarget + " not found in form: " + parent);
 								}
+		
+								try
+								{
+									if (!persist.getParent().equals(parent) &&
+											((persist instanceof ISupportExtendsID supportExtendsID && supportExtendsID.getExtendsID() != null) ||
+												!persist.equals(getOverridePersist(PersistContext.create(persist, editorPart.getForm())))))
+									{
+										//do not allow changing the parent for inherited elements
+										continue;
+									}
+								}
+								catch (Exception e)
+								{
+									Debug.error(e);
+								}
+								IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), rightSibling);
+								ISupportChilds initialParent = persist instanceof ISupportExtendsID ? ((ISupportExtendsID)persist).getRealParent()
+									: persist.getParent();
+								if (initialParent == parent)
+								{
+									FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(initialParent);
+									ISupportChilds flattenedParent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), initialParent);
+									Class< ? > childPositionClass = persist instanceof ISupportBounds ? ISupportBounds.class
+										: (persist instanceof IChildWebObject ? IChildWebObject.class : null);
+									if (childPositionClass != null)
+									{
+										ArrayList<IPersist> children = new ArrayList<IPersist>();
+										Iterator<IPersist> it = flattenedParent.getAllObjects();
+										while (it.hasNext())
+										{
+											IPersist child = it.next();
+											if (childPositionClass.isInstance(persist))
+											{
+												children.add(
+													child instanceof IFlattenedPersistWrapper ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child);
+											}
+										}
+										if (children.size() == 1)
+										{
+											continue;
+										}
+									}
+								}
+								cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist, editorPart.getForm(), false));
 							}
 						}
-						cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist, editorPart.getForm(), false));
 					}
 				}
 				if (!cc.isEmpty()) editorPart.getCommandStack().execute(cc);

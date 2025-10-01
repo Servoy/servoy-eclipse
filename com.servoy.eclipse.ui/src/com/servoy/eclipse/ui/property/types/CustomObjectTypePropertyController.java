@@ -191,27 +191,36 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	{
 		WebCustomType newPropertyValue;
 		String typeName = null;
-		if (oldPropertyValue != null)
+		Object id = getId();
+		if (oldPropertyValue != null && !(id instanceof ArrayPropertyChildId))
 		{
 			newPropertyValue = null;
 		}
 		else
 		{
-			Object id = getId();
 			String parentKey;
 			int indexInArray;
-			if (id instanceof ArrayPropertyChildId)
+			if (id instanceof ArrayPropertyChildId arrayPropertyChildId)
 			{
-				parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
-				indexInArray = ((ArrayPropertyChildId)id).idx;
+				parentKey = String.valueOf(arrayPropertyChildId.arrayPropId);
+				indexInArray = arrayPropertyChildId.idx;
 			}
 			else
 			{
 				parentKey = String.valueOf(id);
 				indexInArray = -1;
 			}
-
-			ISupportsIndexedChildren parent = (ISupportsIndexedChildren)persistContext.getPersist();
+			ISupportsIndexedChildren parent;
+			if (oldPropertyValue != null)
+			{
+				// in this scenario the old value is not null (for example when clearing a column)
+				// so the persist context is the array item itself, and we require the parent persist of the array
+				parent = (ISupportsIndexedChildren)persistContext.getPersist().getParent();
+			}
+			else
+			{
+				parent = (ISupportsIndexedChildren)persistContext.getPersist();
+			}
 			newPropertyValue = WebCustomType.createNewInstance((IBasicWebObject)parent, propertyDescription, parentKey, indexInArray, true);
 			typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType());
 			newPropertyValue.setTypeName(typeName);

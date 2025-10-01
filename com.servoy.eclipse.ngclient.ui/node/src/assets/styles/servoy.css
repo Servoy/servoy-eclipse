@@ -125,6 +125,10 @@ body {
   position:absolute;
 }
 
+.svy-typeahead-zindex {
+	z-index: 10000 !important;
+}
+
 #mktipmsg {
   display: none;
   position: absolute;
@@ -442,7 +446,7 @@ fieldset[disabled] .btn-default.focus {
 }
 
 /* Default form's height to 100% if responsive form is contained within an anchored form */
-.svy-wrapper > * > .svy-container > .tabcontainer > svy-form >.svy-respform {
+.svy-wrapper > * > .svy-container > .svy-tabcontainer > svy-form >.svy-respform {
     height: 100%;
 }
 

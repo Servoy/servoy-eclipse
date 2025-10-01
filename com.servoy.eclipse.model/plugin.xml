@@ -43,6 +43,22 @@
             id="org.eclipse.dltk.javascript.core.nature">
       </requires-nature>
    </extension>
+    <extension
+         id="com.servoy.eclipse.core.ServoyDeveloper"
+         name="Servoy Developer Project Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="com.servoy.eclipse.model.nature.ServoyDeveloperProject">
+         </run>
+      </runtime>
+      <builder
+            id="com.servoy.eclipse.core.servoyBuilder">
+      </builder>
+      <requires-nature
+            id="org.eclipse.dltk.javascript.core.nature">
+      </requires-nature>
+   </extension>
    <extension
          id="com.servoy.eclipse.core.xmlProblem"
          name="XML Problem"

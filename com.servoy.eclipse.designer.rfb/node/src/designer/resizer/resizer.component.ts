@@ -1,11 +1,12 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, ViewChild, ElementRef, OnInit, Renderer2, Inject, DOCUMENT } from '@angular/core';
+
 import { EditorSessionService } from '../services/editorsession.service';
 
 @Component({
     selector: 'designer-resizer',
     templateUrl: './resizer.component.html',
-    styleUrls: ['./resizer.component.css']
+    styleUrls: ['./resizer.component.css'],
+    standalone: false
 })
 export class ResizerComponent implements OnInit {
     @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;

@@ -37,7 +37,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -72,11 +71,15 @@ import com.servoy.j2db.util.Utils;
 public class MapEntriesPropertyController extends PropertyController<Map<String, Object>, Object>
 {
 	private final Map<String, PropertyDescription> attributesMap;
-	public static LabelProvider CLICK_TO_ADD = new LabelProvider()
+	public static LabelProvider MAP_LABEL_PROVIDER = new LabelProvider()
 	{
 		@Override
 		public String getText(Object element)
 		{
+			if (element instanceof Map map)
+			{
+				return map.keySet().toString();
+			}
 			return "click to add";
 		}
 	};
@@ -92,7 +95,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		JSONObject valueTypes)
 	{
 		super(id, displayName);
-		setLabelProvider(CLICK_TO_ADD);
+		setLabelProvider(MAP_LABEL_PROVIDER);
 		this.attributesMap = map;
 		this.addDialogCellEditor = addDialogCellEditor;
 		this.valueTypes = valueTypes;
@@ -529,11 +532,11 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 			// layout
 			GroupLayout groupLayout = new GroupLayout(composite);
 			SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
-			sequentialGroup.add(getInput(), GroupLayout.PREFERRED_SIZE, 135, Integer.MAX_VALUE);
-			sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(button);
+			sequentialGroup.add(getInput(), GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Integer.MAX_VALUE);
+			sequentialGroup.add(button);
 			if (openDialogButton != null)
 			{
-				sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(openDialogButton);
+				sequentialGroup.add(openDialogButton);
 			}
 			groupLayout.setHorizontalGroup(sequentialGroup);
 

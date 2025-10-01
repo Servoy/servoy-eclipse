@@ -61,6 +61,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
+import com.servoy.j2db.ISupportNavigator;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.debug.DebugUtils;
@@ -91,6 +92,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportSize;
@@ -112,7 +114,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.server.headlessclient.dataui.WebDefaultRecordNavigator;
+import com.servoy.j2db.server.ngclient.DefaultComponentPropertiesProvider;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -154,9 +156,9 @@ public class ElementFactory
 	{
 		GraphicalComponent button = parent.createNewGraphicalComponent(
 			new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
-		button.setOnActionMethodID(method == null ? -1 : method.getID());
-		button.setOnDoubleClickMethodID(-1);
-		button.setOnRightClickMethodID(-1);
+		button.setOnActionMethodID(method == null ? null : method.getUUID().toString());
+		button.setOnDoubleClickMethodID(null);
+		button.setOnRightClickMethodID(null);
 		button.setText(text);
 		button.setRolloverCursor(Cursor.HAND_CURSOR);
 		placeElementOnTop(button);
@@ -217,7 +219,7 @@ public class ElementFactory
 	public static void placeElementOnTop(IFormElement element)
 	{
 		int maxFormIndex = 0;
-		Iterator<IPersist> bros = ((IPersist)element).getParent().getAllObjects();
+		Iterator<IPersist> bros = element.getParent().getAllObjects();
 		while (bros.hasNext())
 		{
 			IPersist bro = bros.next();
@@ -253,7 +255,7 @@ public class ElementFactory
 				try
 				{
 					Form form = (Form)(parent).getAncestor(IRepository.FORMS);
-					validator.checkName(newName, 0, new ValidatorSearchContext(form, type), false);
+					validator.checkName(newName, null, new ValidatorSearchContext(form, type), false);
 					break;
 				}
 				catch (RepositoryException e)
@@ -305,6 +307,19 @@ public class ElementFactory
 		{
 			CSSPosition cssPosition = ((BaseComponent)copy).getCssPosition();
 
+			if (component.getParent().equals(copy.getParent()))
+			{
+				int left = CSSPositionUtils.getPixelsValue(cssPosition.left);
+				if (left >= 0)
+				{
+					cssPosition.left = String.valueOf(x);
+				}
+				int top = CSSPositionUtils.getPixelsValue(cssPosition.top);
+				if (top >= 0)
+				{
+					cssPosition.top = String.valueOf(y);
+				}
+			}
 			((BaseComponent)copy).setCssPosition(cssPosition);
 		}
 		else if (copy instanceof ISupportBounds)
@@ -347,10 +362,10 @@ public class ElementFactory
 
 	private static void updateName(ISupportChilds parent, WebComponent oWC, WebComponent cWC, IValidateName validator) throws RepositoryException
 	{
-		String name = createUniqueName(parent, IRepository.ELEMENTS, ((ISupportUpdateableName)oWC).getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR);
+		String name = createUniqueName(parent, IRepository.ELEMENTS, oWC.getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR);
 		if (name != null)
 		{
-			((ISupportUpdateableName)cWC).updateName(validator, name);
+			cWC.updateName(validator, name);
 			cWC.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
 		}
 	}
@@ -358,12 +373,12 @@ public class ElementFactory
 	public static IPersist createImage(ISupportFormElements parent, Media media, Point location) throws RepositoryException
 	{
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(parent);
-		ImageIcon ii = ImageLoader.getIcon(ComponentFactory.loadIcon(flattenedSolution, new Integer(media.getID())), -1, -1, true);
+		ImageIcon ii = ImageLoader.getIcon(ComponentFactory.loadIcon(flattenedSolution, media.getUUID().toString()), -1, -1, true);
 		if (ii == null) return null;
 
 		GraphicalComponent label = parent.createNewGraphicalComponent(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 		label.setText("");
-		label.setImageMediaID(media.getID());
+		label.setImageMediaID(media.getUUID().toString());
 		label.setTransparent(ImageLoader.imageHasAlpha(ii.getImage(), 0));
 		Dimension labeldim = new Dimension(ii.getIconWidth(), ii.getIconHeight());
 		if (labeldim.width < 10 || labeldim.height < 10)
@@ -572,10 +587,8 @@ public class ElementFactory
 		{
 			IDataProvider dp = pair.getLeft();
 			Object o = dp;
-			if (o instanceof IDataProvider)
+			if (o instanceof IDataProvider dataProvider)
 			{
-				IDataProvider dataProvider = (IDataProvider)o;
-
 				int fieldSpacing = configuration.getFieldSpacing() >= 0 ? configuration.getFieldSpacing() : 10;
 				if (loc == null)
 				{
@@ -849,7 +862,7 @@ public class ElementFactory
 		{
 			GraphicalComponent gc = parent.createNewGraphicalComponent(location);
 			gc.setText("button");
-			gc.setOnActionMethodID(-1);
+			gc.setOnActionMethodID(null);
 			gc.setDataProviderID(dp.getDataProviderID());
 			gc.setRolloverCursor(Cursor.HAND_CURSOR);
 			return gc;
@@ -958,6 +971,11 @@ public class ElementFactory
 			Collection<PropertyDescription> properties = wos.getProperties(DataproviderPropertyType.INSTANCE);
 			for (PropertyDescription pd : properties)
 			{
+				// skip the enabled and visible data providers when creating the component from newForm wizard
+				if (pd.getName().equals(DefaultComponentPropertiesProvider.ENABLED_DATAPROVIDER_NAME) ||
+					pd.getName().equals(DefaultComponentPropertiesProvider.VISIBLE_DATAPROVIDER_NAME))
+					continue;
+				// set the data provider id for the component
 				webComp.setProperty(pd.getName(), dp.getDataProviderID());
 			}
 			return webComp;
@@ -1001,8 +1019,9 @@ public class ElementFactory
 			String tabpanelName = null;
 			while (true)
 			{
-				Iterator<IFormElement> it = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent).getFlattenedForm(
-					parent).getFormElementsSortedByFormIndex();
+				Iterator<ISupportFormElement> it = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent)
+					.getFlattenedForm(parent)
+					.getFormElementsSortedByFormIndex();
 				tabpanelName = tabpanelNameHint + (counter == 0 ? "" : ("_" + counter));
 				boolean duplicate = false;
 				while (it.hasNext() && !duplicate)
@@ -1166,15 +1185,15 @@ public class ElementFactory
 
 		// include navigator size
 		Dimension navigatorSize = null;
-		int navigatorID = form.getNavigatorID();
-		if (navigatorID == Form.NAVIGATOR_DEFAULT && form.getView() != FormController.TABLE_VIEW && form.getView() != FormController.LOCKED_TABLE_VIEW)
+		String navigatorUUID = form.getNavigatorID();
+		if (navigatorUUID == Form.NAVIGATOR_DEFAULT && form.getView() != FormController.TABLE_VIEW && form.getView() != FormController.LOCKED_TABLE_VIEW)
 		{
-			navigatorSize = new Dimension(WebDefaultRecordNavigator.DEFAULT_WIDTH, WebDefaultRecordNavigator.DEFAULT_HEIGHT_WEB);
+			navigatorSize = new Dimension(ISupportNavigator.DEFAULT_NAVIGATOR_WIDTH, 160);
 		}
-		else if (navigatorID != Form.NAVIGATOR_NONE)
+		else if (!Form.NAVIGATOR_NONE.equals(navigatorUUID))
 		{
 			navigatorSize = calculateFormSize(application,
-				ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getForm(navigatorID), processed);
+				ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(form).getForm(navigatorUUID), processed);
 		}
 
 		if (navigatorSize != null)
@@ -1409,10 +1428,9 @@ public class ElementFactory
 					continue;
 				}
 
-				int methodId = repository.getElementIdForUUID(uuid);
-				if (methodId > 0)
+				if (uuid != null)
 				{
-					IScriptProvider scriptMethod = ModelUtils.getScriptMethod(form, null, flattenedSolution.getTable(form.getDataSource()), methodId);
+					IScriptProvider scriptMethod = ModelUtils.getScriptMethod(form, null, flattenedSolution.getTable(form.getDataSource()), uuid.toString());
 					if (scriptMethod != null)
 					{
 						object.put(key,
@@ -1521,7 +1539,7 @@ public class ElementFactory
 					{
 						try
 						{
-							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(n == 0 ? name : (name + n), -1,
+							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(n == 0 ? name : (name + n), null,
 								new ValidatorSearchContext(parentForm, IRepository.ELEMENTS), false);
 						}
 						catch (RepositoryException e)
@@ -1599,7 +1617,7 @@ public class ElementFactory
 										compName = baseName + i;
 										try
 										{
-											nameValidator.checkName(compName, -1, nameSearchContext, false);
+											nameValidator.checkName(compName, null, nameSearchContext, false);
 											supportsName.updateName(nameValidator, compName);
 											break;
 										}
@@ -1655,7 +1673,7 @@ public class ElementFactory
 					{
 						try
 						{
-							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(groupName, -1,
+							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(groupName, null,
 								new ValidatorSearchContext(parent, IRepository.ELEMENTS), false);
 							// groupName is ok
 							break;

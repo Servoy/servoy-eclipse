@@ -10,6 +10,8 @@ export class PopupForm extends BaseCustomObject {
     public showBackdrop: boolean;
     public doNotCloseOnClickOutside: boolean;
     public onClose: Callback;
+	public parent: PopupForm;
+	public parentInstance: object;
 }
 
 export class Callback {

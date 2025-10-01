@@ -18,7 +18,6 @@
 package com.servoy.eclipse.designer.editor.rfb.actions;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.gef.commands.Command;
@@ -34,8 +33,6 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.util.Utils;
 
 /** Command to copy selected editor models.
@@ -88,15 +85,6 @@ public class CopyAction extends SelectionAction
 			{
 				IPersist persist = modelObject instanceof PersistContext ? ((PersistContext)modelObject).getPersist() : (IPersist)modelObject;
 				toCopy.add(persist);
-				if (persist instanceof ISupportChilds && !(persist instanceof LayoutContainer))
-				{
-					// also copy children
-					Iterator<IPersist> it = ((ISupportChilds)persist).getAllObjects();
-					while (it.hasNext())
-					{
-						toCopy.add(it.next());
-					}
-				}
 			}
 		}
 

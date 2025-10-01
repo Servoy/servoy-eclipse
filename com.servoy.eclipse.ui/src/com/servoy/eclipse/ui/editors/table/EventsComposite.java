@@ -283,7 +283,8 @@ public class EventsComposite extends Composite
 			{
 				for (EventNode methodNode : node.getChildren())
 				{
-					if (methodNode.getMethodWithArguments() != null && methodNode.getMethodWithArguments().methodId > 0)
+					if (methodNode.getMethodWithArguments() != null && methodNode.getMethodWithArguments().methodUUID != null &&
+						Utils.getAsUUID(methodNode.getMethodWithArguments().methodUUID, false) != null)
 					{
 						expandedRows.add(node);
 						break;
@@ -360,6 +361,7 @@ public class EventsComposite extends Composite
 			onFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONCREATEMETHODID, true, true, false),
 			onFoundSetFind(StaticContentSpecLoader.PROPERTY_ONFINDMETHODID, true, true, false),
 			onFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID, true, true, false),
+			onFoundSetBeforeSelectionChange(StaticContentSpecLoader.PROPERTY_ONFOUNDSETBEFORESELECTIONCHANGEMETHODID, true, true, false),
 			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID, true, true, false),
 			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID, true, true, false),
 			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID, true, true, false),
@@ -367,12 +369,12 @@ public class EventsComposite extends Composite
 			onFoundsetChunk(StaticContentSpecLoader.PROPERTY_ONFOUNDSETNEXTCHUNKMETHODID, false, true, false),
 			onValidate(StaticContentSpecLoader.PROPERTY_ONVALIDATEMETHODID, true, true, true);
 
-			private final TypedProperty<Integer> property;
+			private final TypedProperty<String> property;
 			private final boolean forTable;
 			private final boolean forInmem;
 			private final boolean forViewfs;
 
-			EventNodeType(TypedProperty<Integer> property, boolean forTable, boolean forInmem, boolean forViewfs)
+			EventNodeType(TypedProperty<String> property, boolean forTable, boolean forInmem, boolean forViewfs)
 			{
 				this.property = property;
 				this.forTable = forTable;
@@ -395,7 +397,7 @@ public class EventsComposite extends Composite
 				return forViewfs;
 			}
 
-			public TypedProperty<Integer> getProperty()
+			public TypedProperty<String> getProperty()
 			{
 				return property;
 			}
@@ -471,13 +473,13 @@ public class EventsComposite extends Composite
 				MethodWithArguments mw = MethodWithArguments.METHOD_DEFAULT;
 				if (tableNode != null)
 				{
-					Integer property = (Integer)tableNode.getProperty(tp.getProperty().getPropertyName());
+					String property = (String)tableNode.getProperty(tp.getProperty().getPropertyName());
 					if (property == null)
 					{
 						continue;
 					}
 					mw = new MethodWithArguments(
-						property.intValue(), dsm.getDataSource(tableNode.getDataSource()));
+						property, dsm.getDataSource(tableNode.getDataSource()));
 				}
 				children.add(new EventNode(tp, mw, solution, table));
 			}

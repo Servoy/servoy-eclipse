@@ -1,21 +1,26 @@
-import { Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
-        TemplateRef,  ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject } from '@angular/core';
+import {
+  Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+  TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, AfterViewInit, AfterViewChecked,
+  DOCUMENT
+} from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, IFormComponent } from '../types';
 
 import { ServoyService } from '../servoy.service';
 
 import { SabloService } from '../../sablo/sablo.service';
-import { LoggerService, LoggerFactory, ServoyBaseComponent } from '@servoy/public';
+import { LoggerService, LoggerFactory, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
 import { ServoyApi } from '../servoy_api';
 import { FormService } from '../form.service';
-import { DOCUMENT } from '@angular/common';
+
 import { ConverterService } from '../../sablo/converter.service';
 import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_registry';
+import { fromEvent, debounceTime, Subscription } from 'rxjs';
 
 @Component({
-    template: ''
+    template: '',
+    standalone: false
 })
 /**
  * This is the definition of a angular component that represents servoy forms.
@@ -97,7 +102,7 @@ export abstract class AbstractFormComponent {
         }
     }
 
-    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: {propertyName: string; newPropertyValue: any}[]): void {
+    triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[]): void {
         const comp = this.componentCache[componentName];
         if (comp) {
             const changes = {};
@@ -105,7 +110,7 @@ export abstract class AbstractFormComponent {
                 changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
             });
             comp.ngOnChanges(changes);
-            // this is kind of like a push so we should trigger this.
+            // this is kind of like a push so we should trigger detection for this
             comp.detectChanges();
         }
     }
@@ -126,60 +131,92 @@ export abstract class AbstractFormComponent {
     changeDetection: ChangeDetectionStrategy.OnPush,
     /* eslint-disable max-len */
     template: `
-      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
-           <div *ngFor="let part of formCache.parts" [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
-               <div *ngFor="let item of part.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
+      @if (formCache.absolute) {
+        <div [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
+          @for (part of formCache.parts; track part.rId) {
+            <div [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
+              @for (item of part.items; track item.rId) {
+                <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+                  <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
                 </div>
-          </div>
-      </div>
-      <div *ngIf="!formCache.absolute&&formCache.mainStructure" class="svy-form svy-respform" [ngClass]="formClasses"> <!-- main container div -->
-            <ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>  <!-- component or responsive div  -->
-      </div>
-
-      <ng-template  #svyResponsiveDiv  let-state="state" >
-          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
-               <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
-          </div>
-      </ng-template>
-
-      <ng-template  #cssPositionContainer  let-state="state" >
-          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
-            <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
-                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+              }
             </div>
+          }
+        </div>
+      }
+      @if (!formCache.absolute&&formCache.mainStructure) {
+        <div class="svy-form svy-respform" [ngClass]="formClasses"> <!-- main container div -->
+          @for (item of formCache.mainStructure.items; track item.rId) {
+            <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+            }  <!-- component or responsive div  -->
           </div>
-      </ng-template>
-
-      <!-- structure template generate start -->
-      <!-- structure template generate end -->
-      <ng-template  #formComponentAbsoluteDiv  let-state="state" >
-          <div *ngIf="state.model.visible" [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
-               <div *ngFor="let item of state.items" [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
-                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
-               </div>
+        }
+      
+        <ng-template  #svyResponsiveDiv  let-state="state" >
+          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+            @for (item of state.items; track item.rId) {
+              <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+            }
           </div>
-      </ng-template>
-      <ng-template  #formComponentResponsiveDiv  let-state="state" >
-        <servoycore-formcomponent-responsive-container *ngIf="state.model.visible"  [items]="state.items" [class]="state.model.styleClass" [formComponent]="this"></servoycore-formcomponent-responsive-container>
-      </ng-template>
-      <!-- component template generate start -->
-<ng-template #servoycoreDefaultLoadingIndicator let-callback="callback" let-state="state"><servoycore-defaultLoadingIndicator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [size]="state.model.size" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-defaultLoadingIndicator></ng-template>
-<ng-template #servoycoreErrorbean let-callback="callback" let-state="state"><servoycore-errorbean  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [error]="state.model.error" [location]="state.model.location" [size]="state.model.size" [toolTipText]="state.model.toolTipText" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-errorbean></ng-template>
-<ng-template #servoycoreFormcomponent let-callback="callback" let-state="state"><servoycore-formcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [size]="state.model.size" [styleClass]="state.model.styleClass" *ngIf="state.model.visible" [width]="state.model.width" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-formcomponent></ng-template>
-<ng-template #servoycoreFormcontainer let-callback="callback" let-state="state"><servoycore-formcontainer  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [relationName]="state.model.relationName" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" *ngIf="state.model.visible" [waitForData]="state.model.waitForData" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'><svy-form *ngIf="isFormAvailable(name)" [name]="name"></svy-form></ng-template></servoycore-formcontainer></ng-template>
-<ng-template #servoycoreListformcomponent let-callback="callback" let-state="state"><servoycore-listformcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [foundset]="state.model.foundset" [location]="state.model.location" [pageLayout]="state.model.pageLayout" [paginationStyleClass]="state.model.paginationStyleClass" [readOnly]="state.model.readOnly" [responsivePageSize]="state.model.responsivePageSize" [rowStyleClass]="state.model.rowStyleClass" [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider" [selectionClass]="state.model.selectionClass" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" *ngIf="state.model.visible" [onSelectionChanged]="callback.getHandler(state,'onSelectionChanged')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-listformcomponent></ng-template>
-<ng-template #servoycoreNavigator let-callback="callback" let-state="state"><servoycore-navigator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [currentIndex]="state.model.currentIndex" [hasMore]="state.model.hasMore" [location]="state.model.location" [maxIndex]="state.model.maxIndex" [minIndex]="state.model.minIndex" [size]="state.model.size" [setSelectedIndex]="callback.getHandler(state,'setSelectedIndex')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-navigator></ng-template>
-<ng-template #servoycoreSlider let-callback="callback" let-state="state"><servoycore-slider  [animate]="state.model.animate" [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="callback.datachange(state,'dataProviderID',$event, true)" [enabled]="state.model.enabled" [location]="state.model.location" [max]="state.model.max" [min]="state.model.min" [orientation]="state.model.orientation" [range]="state.model.range" [size]="state.model.size" [step]="state.model.step" *ngIf="state.model.visible" [onChangeMethodID]="callback.getHandler(state,'onChangeMethodID')" [onCreateMethodID]="callback.getHandler(state,'onCreateMethodID')" [onSlideMethodID]="callback.getHandler(state,'onSlideMethodID')" [onStartMethodID]="callback.getHandler(state,'onStartMethodID')" [onStopMethodID]="callback.getHandler(state,'onStopMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-slider></ng-template>
-     <!-- component template generate end -->
-   `
-   /* eslint-enable max-len */
+        </ng-template>
+      
+        <ng-template  #cssPositionContainer  let-state="state" >
+          <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+            @for (item of state.items; track item.rId) {
+              <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+              </div>
+            }
+          </div>
+        </ng-template>
+      
+        <!-- structure template generate start -->
+        <!-- structure template generate end -->
+        <ng-template  #formComponentAbsoluteDiv  let-state="state" >
+          @if (state.model.visible) {
+            <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
+              @for (item of state.items; track item.rId) {
+                <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+                  <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
+                </div>
+              }
+            </div>
+          }
+        </ng-template>
+        <ng-template  #formComponentResponsiveDiv  let-state="state" >
+          @if (state.model.visible) {
+            <servoycore-formcomponent-responsive-container  [items]="state.items" [class]="state.model.styleClass" [formComponent]="this"></servoycore-formcomponent-responsive-container>
+          }
+        </ng-template>
+        <!-- component template generate start -->
+        <ng-template #servoycoreDefaultLoadingIndicator let-callback="callback" let-state="state"><servoycore-defaultLoadingIndicator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-defaultLoadingIndicator></ng-template>
+        <ng-template #servoycoreErrorbean let-callback="callback" let-state="state"><servoycore-errorbean  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [error]="state.model.error" [toolTipText]="state.model.toolTipText" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-errorbean></ng-template>
+        <ng-template #servoycoreFormcomponent let-callback="callback" let-state="state">@if (state.model.visible) {
+          <servoycore-formcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [styleClass]="state.model.styleClass" [width]="state.model.width" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-formcomponent>
+        }</ng-template>
+        <ng-template #servoycoreFormcontainer let-callback="callback" let-state="state">@if (state.model.visible) {
+          <servoycore-formcontainer  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [relationName]="state.model.relationName" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [waitForData]="state.model.waitForData" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'>@if (isFormAvailable(name)) {
+            <svy-form [name]="name"></svy-form>
+          }</ng-template></servoycore-formcontainer>
+        }</ng-template>
+        <ng-template #servoycoreListformcomponent let-callback="callback" let-state="state">@if (state.model.visible) {
+          <servoycore-listformcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [foundset]="state.model.foundset" [pageLayout]="state.model.pageLayout" [paginationStyleClass]="state.model.paginationStyleClass" [readOnly]="state.model.readOnly" [responsivePageSize]="state.model.responsivePageSize" [rowStyleClass]="state.model.rowStyleClass" [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider" [selectionClass]="state.model.selectionClass" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [onSelectionChanged]="callback.getHandler(state,'onSelectionChanged')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-listformcomponent>
+        }</ng-template>
+        <ng-template #servoycoreNavigator let-callback="callback" let-state="state"><servoycore-navigator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [currentIndex]="state.model.currentIndex" [hasMore]="state.model.hasMore" [maxIndex]="state.model.maxIndex" [minIndex]="state.model.minIndex" [setSelectedIndex]="callback.getHandler(state,'setSelectedIndex')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-navigator></ng-template>
+        <ng-template #servoycoreSlider let-callback="callback" let-state="state">@if (state.model.visible) {
+          <servoycore-slider  [animate]="state.model.animate" [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="callback.datachange(state,'dataProviderID',$event, true)" [enabled]="state.model.enabled" [max]="state.model.max" [min]="state.model.min" [orientation]="state.model.orientation" [range]="state.model.range" [step]="state.model.step" [onChangeMethodID]="callback.getHandler(state,'onChangeMethodID')" [onCreateMethodID]="callback.getHandler(state,'onCreateMethodID')" [onSlideMethodID]="callback.getHandler(state,'onSlideMethodID')" [onStartMethodID]="callback.getHandler(state,'onStartMethodID')" [onStopMethodID]="callback.getHandler(state,'onStopMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-slider>
+        }</ng-template>
+        <!-- component template generate end -->
+      `
+    /* eslint-enable max-len */
+    ,
+    standalone: false
 })
 
 /**
  * This is the definition of a angular component that represents servoy forms.
  */
-export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, IFormComponent {
+export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, AfterViewChecked, IFormComponent {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
     @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
     // structure viewchild template generate start
@@ -205,24 +242,30 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     formCache: FormCache;
 
     absolutFormPosition = {};
-    detectingChanges = false;    
+    detectingChanges = false;
 
-    private handlerCache: { [property: string]: { [property: string]: (event:Event) => void } } = {};
+    private handlerCache: { [property: string]: { [property: string]: (event: Event) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private log: LoggerService;
+    private resizeSubscription$: Subscription;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
-                private servoyService: ServoyService, logFactory: LoggerFactory,
-                private changeHandler: ChangeDetectorRef,
-                private el: ElementRef, protected renderer: Renderer2,
-                private converterService: ConverterService<unknown>,
-                @Inject(DOCUMENT) private document: Document) {
+        private servoyService: ServoyService, logFactory: LoggerFactory,
+        private changeHandler: ChangeDetectorRef,
+        private el: ElementRef<Element>, protected renderer: Renderer2,
+        private converterService: ConverterService<unknown>,
+        @Inject(DOCUMENT) private document: Document,
+        private windowRefService: WindowRefService) {
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
+        const resizeObservable$ = fromEvent(this.windowRefService.nativeWindow, 'resize')
+        this.resizeSubscription$ = resizeObservable$.pipe(debounceTime(500)).subscribe(evt => {
+            this.onResize()
+        });
     }
 
     public static doCallApiOnComponent(comp: ServoyBaseComponent<any>, componentSpec: IWebObjectSpecification, apiName: string, args: any[],
-                        converterService: ConverterService<unknown>, log: LoggerService): Promise<any> {
+        converterService: ConverterService<unknown>, log: LoggerService, compName: string): Promise<any> {
         const callSpec = componentSpec?.getApiFunction(apiName);
 
         // convert args
@@ -231,22 +274,29 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             args[i] = converterService.convertFromServerToClient(val, callSpec?.getArgumentType(i),
                 undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
 
-        const proto = Object.getPrototypeOf(comp);
-        if (proto[apiName]) {
-            // also convert the return value
-            return Promise.resolve(proto[apiName].apply(comp, args)).then((ret) =>
-                converterService.convertFromClientToServer(ret, callSpec?.returnType, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0]
-            ); // I think we don't need to define an error callback as well as there is nothing to convert then
-        } else {
-            log.error(log.buildMessage(() => ('Api ' + apiName + ' for component ' + comp.name + ' was not found, please check component implementation.')));
+        if (comp) {
+            const proto = Object.getPrototypeOf(comp);
+            if (proto[apiName]) {
+                // also convert the return value
+                return Promise.resolve(proto[apiName].apply(comp, args)).then((ret) =>
+                    converterService.convertFromClientToServer(ret, callSpec?.returnType, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0]
+                ); // I think we don't need to define an error callback as well as there is nothing to convert then
+            } else {
+                log.error(log.buildMessage(() => ('Api ' + apiName + ' for component ' + comp.name + ' was not found, please check component implementation.')));
+                return null;
+            }
+        }
+        else {
+            log.error(log.buildMessage(() => ('Trying to call api ' + apiName + ' while its component ' + compName + ' was not found,make sure component is present and visible.')));
             return null;
         }
+
     }
 
     public detectChanges() {
         const oldDetect = this.detectingChanges;
         try {
-            if (this.detectingChanges){
+            if (this.detectingChanges) {
                 this.log.warn("Nested detectChanges call in form: " + this.name);
             }
             this.detectingChanges = true;
@@ -284,28 +334,36 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             this.servoyApiCache = {};
             this.componentCache = {};
 
-            this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
-            this.renderer.setAttribute(this.el.nativeElement,'name', this.name);
-
+            this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
         }
-       this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
+        this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
+    }
+
+    ngAfterViewInit() {
+        this.formservice.resolveComponentCache(this);
+        this.onResize();
+    }
+    
+    ngAfterViewChecked() {
+        this.formservice.resolveComponentCache(this);
     }
 
     ngOnDestroy() {
         this.formservice.destroy(this.name);
+        this.resizeSubscription$.unsubscribe();
     }
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname] : ( item.cssPositionContainer ? this.cssPositionContainer : this.svyResponsiveDiv);
-        } else if (item instanceof FormComponentCache ) {
+            return item.tagname ? this[item.tagname] : (item.cssPositionContainer ? this.cssPositionContainer : this.svyResponsiveDiv);
+        } else if (item instanceof FormComponentCache) {
             if (item.hasFoundset) return this.servoycoreListformcomponent;
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         } else {
             let componentRef = this[item.type];
 
             // "injectedComponentRefs" is used only for being able to inject some TEST component templates inside Karma/Jasmine unit tests
-            if (!componentRef) componentRef = this.injectedComponentRefs[item.type];
+            if (!componentRef && this.injectedComponentRefs) componentRef = this.injectedComponentRefs[item.type];
 
             if (componentRef === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
@@ -314,7 +372,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
     }
 
-    getTemplateForLFC(state: ComponentCache ): TemplateRef<any> {
+    getTemplateForLFC(state: ComponentCache): TemplateRef<any> {
         if (state.type.includes('formcomponent')) {
             return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
         } else {
@@ -322,7 +380,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             // TODO - hmm type is already camel case here with dashes removed normally - so I don't think we need the indexOf, replace etc anymore
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
-            compDirectiveName =  compDirectiveName.replace('-','');
+            compDirectiveName = compDirectiveName.replace('-', '');
             return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)];
         }
     }
@@ -330,8 +388,8 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     public getAbsoluteFormStyle() {
         const formData = this.formCache.getComponent('');
 
-        for (const key in this.absolutFormPosition){
-            if (this.absolutFormPosition.hasOwnProperty(key)){
+        for (const key in this.absolutFormPosition) {
+            if (this.absolutFormPosition.hasOwnProperty(key)) {
                 delete this.absolutFormPosition[key];
             }
         }
@@ -351,12 +409,11 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             this.absolutFormPosition['backgroundColor'] = 'transparent';
         }
 
-        if (formData.model.addMinSize) {
-            if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null) {
-                // see svyFormstyle from ng1
-                this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
-                this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
-            }
+        // add a min size if needed and if this is not the main form to avoid scrollbars there.
+        if (this.el.nativeElement.parentElement?.closest('svy-form') != null) {
+            // see svyFormstyle from ng1
+            if (formData.model.useMinWidth) this.absolutFormPosition['minWidth'] = this.formCache.size.width + 'px';
+            if (formData.model.useMinHeight) this.absolutFormPosition['minHeight'] = this.formCache.size.height + 'px';
         }
         return this.absolutFormPosition;
     }
@@ -392,11 +449,11 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         return func;
     }
 
-    registerComponent(component: ServoyBaseComponent<any> ): void {
+    registerComponent(component: ServoyBaseComponent<any>): void {
         this.componentCache[component.name] = component;
     }
 
-    unRegisterComponent(component: ServoyBaseComponent<any> ): void {
+    unRegisterComponent(component: ServoyBaseComponent<any>): void {
         delete this.componentCache[component.name];
     }
 
@@ -417,17 +474,17 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
                 return comp.callApi(path[1], apiName, args, path.slice(2));
             } else {
                 this.log.error('trying to call api: ' + apiName + ' on component: ' + componentName + ' with path: ' + path +
-                 ', but comp: ' + (comp == null?' is not found':comp.name + ' doesnt implement IApiExecutor') );
+                    ', but comp: ' + (comp == null ? ' is not found' : comp.name + ' doesnt implement IApiExecutor'));
             }
             return null;
         } else {
             return FormComponent.doCallApiOnComponent(this.componentCache[componentName], this.formCache.getComponentSpecification(componentName),
-                                    apiName, args, this.converterService, this.log);
+                apiName, args, this.converterService, this.log, componentName);
         }
     }
 
     getContainerByName(containername: string): Element {
-       return this.document.querySelector('[name="'+this.name+'.'+containername+'"]');
+        return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
     }
 
     public updateFormStyleClasses(ngutilsstyleclasses: string): void {
@@ -441,23 +498,39 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         }
         this.detectChanges();
     }
+
+    private onResize(): void {
+        const formElement = this.el.nativeElement.querySelector('.svy-form');
+        if (formElement) {
+            const formSize = formElement.getBoundingClientRect();
+            const value = { width: formSize.width, height: formSize.height }
+            const oldValue = this.formCache.getComponent('').model['size'];
+            if (oldValue.width != value.width || oldValue.height != value.height) {
+				if (this.formservice.getFormCache(this)){
+					this.formservice.sendChanges(this.name, '', 'size', value, oldValue, false);
+				}else{
+					this.log.warn("onResize called on form visible in browser but missing from cache: " + this.name);
+				}
+            }
+        }
+    }
 }
 
 class FormComponentServoyApi extends ServoyApi {
     constructor(item: ComponentCache,
-                formname: string,
-                absolute: boolean,
-                formservice: FormService,
-                servoyService: ServoyService,
-                private fc: FormComponent) {
+        formname: string,
+        absolute: boolean,
+        formservice: FormService,
+        servoyService: ServoyService,
+        private fc: FormComponent) {
         super(item, formname, absolute, formservice, servoyService, false);
     }
 
-    registerComponent(comp: ServoyBaseComponent<any> ) {
+    registerComponent(comp: ServoyBaseComponent<any>) {
         this.fc.registerComponent(comp);
     }
 
-    unRegisterComponent(comp: ServoyBaseComponent<any> ) {
+    unRegisterComponent(comp: ServoyBaseComponent<any>) {
         this.fc.unRegisterComponent(comp);
     }
 }

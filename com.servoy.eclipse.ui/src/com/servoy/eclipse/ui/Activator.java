@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -39,8 +40,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dltk.ui.text.HTMLUtils;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -67,10 +70,19 @@ import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.websocket.CurrentWindow;
+import org.sablo.websocket.IWebsocketSession;
+import org.sablo.websocket.IWebsocketSessionFactory;
+import org.sablo.websocket.WebsocketSessionKey;
+import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.developersolution.DeveloperNGClient;
+import com.servoy.eclipse.developersolution.DeveloperNGClientEndpoint;
+import com.servoy.eclipse.developersolution.DeveloperWindow;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -87,6 +99,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
@@ -96,12 +109,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends AbstractUIPlugin
 {
-	/**
-	 *
-	 */
-	public static final String TUTORIALS_URL = System.getProperty("servoy.tutorial.url") == null
-		? "https://admin.servoy-cloud.eu/solution/developerWelcome?servoyVersion=" + ClientVersion.getPureVersion() + "&loginToken="
-		: System.getProperty("servoy.tutorial.url");
+	public static final String CLOUD_BASE_URL = System.getProperty("servoy.cloud_base.url", "https://admin.servoy-cloud.eu");
+	public static final String TUTORIALS_URL = CLOUD_BASE_URL + "/solution/developerWelcome?servoyVersion=" + ClientVersion.getPureVersion() + "&loginToken=";
 
 	/**
 	 * The PLUGIN_ID for com.servoy.eclipse.ui.
@@ -186,6 +195,10 @@ public class Activator extends AbstractUIPlugin
 											{
 												// see if package is there or not; the component is not present
 												String packageName = ((WebComponent)o).getTypeName().split("-")[0];
+												if ("svy-fullcalendar2".equals(((WebComponent)o).getTypeName()))
+												{
+													packageName = "fullcalendarcomponent2";
+												}
 												if (componentSpecProvider.getPackageReader(packageName) == null)
 												{
 													missingPackage = packageName;
@@ -273,7 +286,7 @@ public class Activator extends AbstractUIPlugin
 												"The packages listed below are missing from the active solution and it's modules.\nPlease select the ones you want to download using Servoy Package Manager:");
 											lsd.setInitialElementSelections(packagesNeeded);
 											lsd.setBlockOnOpen(true);
-											lsd.setTitle("Solution needs packages, install them from wpm/source");
+											lsd.setTitle("Solution needs packages, install them from SPM or from source");
 											int pressedButton = lsd.open();
 											if (pressedButton == 0)
 											{
@@ -324,6 +337,86 @@ public class Activator extends AbstractUIPlugin
 					};
 					findMissingSpecs.setRule(ServoyModel.getWorkspace().getRoot());
 					findMissingSpecs.schedule();
+
+					// active solution is loaded, now see if this solutionj has a developerSolution and start the DeveleperNGClient
+					Job startDevClientJon = new Job("Starting DeveloperNGClient")
+					{
+						@Override
+						protected IStatus run(IProgressMonitor monitor)
+						{
+							try
+							{
+								if (activeProject != null && activeProject.getSolution() != null)
+								{
+									try
+									{
+										String devSolutionName = null;
+										IProject[] referencedProjects = activeProject.getProject().getReferencedProjects();
+										for (IProject ref : referencedProjects)
+										{
+											IProjectNature nature = ref.isOpen() ? ref.getNature(ServoyDeveloperProject.NATURE_ID) : null;
+											if (nature instanceof ServoyDeveloperProject)
+											{
+												// for now just take the first one that has this nature
+												// the project should be the solution name
+												devSolutionName = ref.getName();
+												break;
+											}
+										}
+										if (devSolutionName != null)
+										{
+											NGClientWebsocketSession session = new NGClientWebsocketSession(new WebsocketSessionKey("1", 1), null)
+											{
+												private final org.sablo.websocket.IWindow window = createWindow(1, "1");
+
+												@Override
+												public org.sablo.websocket.IWindow getOrCreateWindow(int windowNr, String windowName)
+												{
+													return window;
+												};
+											};
+											// start the DeveloperNGClient
+											DeveloperNGClient developerNGClient = new DeveloperNGClient(session, null);
+											session.setClient(developerNGClient);
+											DeveloperWindow window = new DeveloperWindow(session, 1, "1");
+											CurrentWindow.set(window);
+											try
+											{
+												developerNGClient.loadSolution(devSolutionName);
+											}
+											finally
+											{
+												CurrentWindow.set(null);
+											}
+
+											com.servoy.eclipse.ngclient.startup.Activator.setDeveloperNGClient(developerNGClient);
+
+											WebsocketSessionManager.setWebsocketSessionFactory(DeveloperNGClientEndpoint.DEVELOPER_ENDPOINT,
+												new IWebsocketSessionFactory()
+												{
+													@Override
+													public IWebsocketSession createSession(WebsocketSessionKey sessionKey) throws Exception
+													{
+														return session;
+													}
+												});
+										}
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError("Error starting dev solution", e);
+									}
+								}
+							}
+							catch (Exception e)
+							{
+								ServoyLog.logError(e);
+							}
+							return Status.OK_STATUS;
+						}
+					};
+					startDevClientJon.schedule();
+
 				}
 
 			}
@@ -343,6 +436,8 @@ public class Activator extends AbstractUIPlugin
 					showLoginAndStart();
 				}
 			}));
+		// initialize the colors
+		HTMLUtils.getBgColor();
 	}
 
 
@@ -365,34 +460,32 @@ public class Activator extends AbstractUIPlugin
 			@Override
 			public void run()
 			{
-				Shell activeShell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-				if (activeShell == null)
+				Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+				if (shell == null)
 				{
 					Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
 					for (int i = shells.length; --i >= 0;)
 					{
 						if (shells[i].getParent() == null && shells[i].isVisible())
 						{
-							activeShell = shells[i];
+							shell = shells[i];
 							break;
 						}
 					}
-					if (activeShell == null)
+					if (shell == null)
 					{
 						Display.getDefault().asyncExec(this);
 						return;
 					}
 				}
-				while (activeShell.getParent() instanceof Shell && activeShell.getParent().isVisible())
+				while (shell.getParent() instanceof Shell && shell.getParent().isVisible())
 				{
-					activeShell = (Shell)activeShell.getParent();
+					shell = (Shell)shell.getParent();
 				}
-				boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
-				//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
-				String username = null;
+				String uname = null;
 				try
 				{
-					username = SecurePreferencesFactory.getDefault()
+					uname = SecurePreferencesFactory.getDefault()
 						.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY)
 						.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
 				}
@@ -400,28 +493,35 @@ public class Activator extends AbstractUIPlugin
 				{
 					ServoyLog.logError(e);
 				}
-				String loginToken = new ServoyLoginDialog(activeShell).doLogin();
-				if (loginToken != null)
-				{
-					ISecurePreferences node = SecurePreferencesFactory.getDefault().node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
-					try
+				Shell activeShell = shell;
+				String username = uname;
+				new ServoyLoginDialog(shell).doLogin(loginToken -> {
+					if (loginToken != null)
 					{
-						com.servoy.eclipse.cloud.Activator.getDefault().checkoutFromCloud(loginToken, node.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null),
-							node.get(ServoyLoginDialog.SERVOY_LOGIN_PASSWORD, null));
+						ISecurePreferences node = SecurePreferencesFactory.getDefault().node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
+						try
+						{
+							com.servoy.eclipse.cloud.Activator.getDefault().checkoutFromCloud(loginToken,
+								node.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null),
+								node.get(ServoyLoginDialog.SERVOY_LOGIN_PASSWORD, null));
+						}
+						catch (StorageException e)
+						{
+							ServoyLog.logError(e);
+						}
 					}
-					catch (StorageException e)
+					// only show if first login or is not disabled from preferences
+					if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
 					{
-						ServoyLog.logError(e);
+						boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
+						Display.getDefault().asyncExec(() -> {
+							BrowserDialog dialog = new BrowserDialog(activeShell,
+								TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, true);
+							dialog.open();
+						});
 					}
-				}
-				// only show if first login or is not disabled from preferences
-				if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
-				{
-					BrowserDialog dialog = new BrowserDialog(activeShell,
-						TUTORIALS_URL + loginToken + "&emptyWorkspace=" + emptyWorkspace, true, true);
-					dialog.open(true);
-				}
 
+				});
 			}
 		};
 		Display.getDefault().asyncExec(runnable);

@@ -25,7 +25,6 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.ui.css.swt.CSSSWTConstants;
 import org.eclipse.help.IContextProvider;
@@ -100,6 +99,8 @@ import com.servoy.j2db.util.Utils;
 public class TableEditor extends MultiPageEditorPart implements IActiveProjectListener
 {
 	public static final String ID = "com.servoy.eclipse.ui.editors.TableEditor";
+
+	public static final String PREFERENCE_KEY_EXTENDED_VIEW = "com.servoy.eclipse.ui.editors.TableEditor.extended_view";
 
 	private boolean isModified;
 
@@ -500,21 +501,14 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 				public void gotoMarker(IMarker marker)
 				{
-					try
+					String columnName = marker.getAttribute("columnName", null);
+					if (columnName != null)
 					{
-						String columnName = (String)marker.getAttribute("columnName");
-						if (columnName != null)
+						IColumn column = getTable().getColumn(columnName);
+						if (column != null && columnComposite != null)
 						{
-							IColumn column = getTable().getColumn(columnName);
-							if (column != null && columnComposite != null)
-							{
-								columnComposite.selectColumn(column);
-							}
+							columnComposite.selectColumn(column);
 						}
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
 					}
 				}
 			};
@@ -1047,17 +1041,20 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					}
 
 					disposeDynamicPages();
-					createDynamicPages();
-
-					if (activeOrder != null)
+					if (!getContainer().isDisposed())
 					{
-						int pages = getPageCount();
-						for (int i = 0; i < pages; i++)
+						createDynamicPages();
+
+						if (activeOrder != null)
 						{
-							if (activeOrder.equals(getControl(i).getData("order")))
+							int pages = getPageCount();
+							for (int i = 0; i < pages; i++)
 							{
-								setActivePage(i);
-								break;
+								if (activeOrder.equals(getControl(i).getData("order")))
+								{
+									setActivePage(i);
+									break;
+								}
 							}
 						}
 					}

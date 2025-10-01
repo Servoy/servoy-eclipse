@@ -2,7 +2,8 @@ import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, SimpleCh
 
 @Directive({
     // eslint-disable-next-line @angular-eslint/directive-selector
-    selector: '[sabloTabseq]'
+    selector: '[sabloTabseq]',
+    standalone: false
 })
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class SabloTabseq implements OnInit, OnChanges, OnDestroy {

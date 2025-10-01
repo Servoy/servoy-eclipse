@@ -21,8 +21,10 @@ import { FormcomponentType } from './converters/formcomponent_converter';
 import { ComponentType } from './converters/component_converter';
 import { LocaleService } from './locale.service';
 import { FormSettings } from './types';
+import { SvyUtilsService } from './utils.service';
 import { ClientFunctionType } from './converters/clientfunction_converter';
-import { ClientFunctionService } from './services/clientfunction.service';
+import { JSMenuType } from './converters/jsmenu_converter';
+import { ClientFunctionService } from '../sablo/clientfunction.service';
 import { UIBlockerService } from './services/ui_blocker.service';
 import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
 import { ServerFunctionType } from './converters/serverfunction_converter';
@@ -85,6 +87,7 @@ export class ServoyService {
     constructor(private websocketService: WebsocketService,
         private sabloService: SabloService,
         private windowRefService: WindowRefService,
+        private utils: SvyUtilsService,
         private sessionStorageService: SessionStorageService,
         private localeService: LocaleService,
         private clientFunctionService: ClientFunctionService,
@@ -115,8 +118,9 @@ export class ServoyService {
         typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, this.uiBlockerService));
 
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
-        typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this));
-        typesRegistry.registerGlobalType(ServerFunctionType.NATIVE_FUNCTION_TYPE_NAME, new ServerFunctionType(this));
+        typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this, this.utils));
+        typesRegistry.registerGlobalType(ServerFunctionType.NATIVE_FUNCTION_TYPE_NAME, new ServerFunctionType(this, this.utils));
+        typesRegistry.registerGlobalType(JSMenuType.TYPE_NAME, new JSMenuType(converterService));
     }
 
     public connect() {
@@ -125,18 +129,22 @@ export class ServoyService {
         if (!solName) this.solutionSettings.solutionName = /.*\/([\$\w]+)\/.*/.exec(this.websocketService.getPathname())[1];
         else this.solutionSettings.solutionName = solName;
         this.solutionSettings.windowName = this.sabloService.getWindownr();
-        let recordingPrefix: string;
-        if (this.windowRefService.nativeWindow.location.search.indexOf('svy_record=true') > -1) {
-            recordingPrefix = '/recording/websocket';
-
+        let socketPrefix: string;
+        const recording = this.windowRefService.nativeWindow.location.search.indexOf('svy_record=true') > -1;
+        if (recording) {
+            socketPrefix = '/recording/websocket';
         }
+        else if (this.windowRefService.nativeWindow.location.search.indexOf('svy_developer=true') > -1) {
+            socketPrefix = '/developer/websocket';
+        }
+        
         const wsSession = this.sabloService.connect('/solution/' + this.solutionSettings.solutionName,
-            { solution: this.solutionSettings.solutionName, clienttype: 2 }, recordingPrefix);
+            { solution: this.solutionSettings.solutionName, clienttype: 2 }, socketPrefix);
         // TODO find mode and anchors handling (anchors should be handles completely at the server side,
         // css positioning should go over the line)
         wsSession.onMessageObject((msg: {clientnr?: number; windownr?: string}) => {
 
-            if (msg.clientnr && recordingPrefix) {
+            if (msg.clientnr && recording) {
                 const btn = this.windowRefService.nativeWindow.document.createElement('A')  as HTMLAnchorElement;      // Create a <button> element
                 btn.href = 'solutions/' + msg.clientnr + '.recording';
                 btn.target = '_blank';
@@ -206,7 +214,7 @@ export class ServoyService {
             this.findModeShortCutCallback = (event: KeyboardEvent) => {
                 // perform find on ENTER
                 if (event.keyCode === 13) {
-                    this.sabloService.callService('formService', 'performFind', { formname: formName, clear: true, reduce: true, showDialogOnNoResults: true }, true);
+                    this.sabloService.callService('formService', 'performFind', { formname: formName, clear: true, reduce: true, showDialogOnNoResults: false }, true);
                 }
             };
             this.windowRefService.nativeWindow.addEventListener('keyup', this.findModeShortCutCallback);

@@ -43,7 +43,6 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
-import com.servoy.j2db.util.Debug;
 
 /**
  * @author gganea@servoy.com
@@ -97,7 +96,7 @@ public class RemovePackageProjectReferenceAction extends Action implements ISele
 		}
 		catch (CoreException e)
 		{
-			Debug.log(e);
+			ServoyLog.logError(e);
 		}
 	}
 
@@ -197,7 +196,7 @@ public class RemovePackageProjectReferenceAction extends Action implements ISele
 			}
 			catch (CoreException e)
 			{
-				Debug.log(e);
+				ServoyLog.logError(e);
 			}
 		}
 		setEnabled(state);

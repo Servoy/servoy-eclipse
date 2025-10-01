@@ -16,6 +16,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     private rectangles : DOMRect[];
 	private uuids: string[];
 	private types: Map<string, string> = new Map();
+	private parents: Map<string, string> = new Map();
     private element: Element;
     private uuid: string;
     
@@ -30,6 +31,9 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	equalSize: boolean = false;
 	initialPoint: { x: number; y: number; };
 	initialRectangle: DOMRect;
+	formBounds: DOMRect;
+	snapToEndEnabled: boolean = true;
+	parentContainer: Element;
 
     constructor(private editorContentService: EditorContentService, protected readonly editorSession: EditorSessionService) {
         this.editorSession.addDynamicGuidesChangedListener(this);
@@ -56,10 +60,23 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         if (this.leftPos.size == 0) {
             this.rectangles = [];
 			this.uuids = [];
-			this.element = this.editorSession.getSelection().length == 1 ? this.editorContentService.getContentElementById(this.editorSession.getSelection()[0]) : 
-				this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
+			const contentElements = this.editorContentService.getContentElementsFromPoint(point);
+			if (this.editorSession.getSelection().length == 1) {
+				this.element = this.editorContentService.getContentElementById(this.editorSession.getSelection()[0]);
+				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
+			}
+			let parent = contentElements.find(e => e.classList.contains('svy-formcomponent'));
             this.uuid = this.element?.getAttribute('svy-id');
+			if (this.uuid && parent && this.uuid.indexOf(parent.getAttribute('svy-id').replace(/-/g,'_')) >= 0 ){
+				this.parentContainer = parent;
+			}
+			this.formBounds = this.editorContentService.getContentForm().getBoundingClientRect();
             for (let comp of this.editorContentService.getAllContentElements()) {
+				const compParent = this.getParent(comp);
+				if (compParent?.classList.contains('svy-formcomponent')) {
+					//ignore components within FC
+					continue;
+				}
 				const componentType = comp.getAttribute('svy-formelement-type');
 				if (componentType == null) continue;
                 const id = comp.getAttribute('svy-id');
@@ -71,6 +88,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
                 this.middleV.set(id, (bounds.top + bounds.bottom) / 2);
                 this.middleH.set(id, (bounds.left + bounds.right) / 2);
 				this.types.set(id, componentType);
+				this.parents.set(id, compParent?.getAttribute('svy-id'));
                 if (id !== this.uuid){
 					this.rectangles.push(bounds);
 					this.uuids.push(id);
@@ -87,19 +105,45 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         }
     }
 
+	private getParent(element: HTMLElement) {
+		while (element.parentElement) {
+			element = element.parentElement;
+			if (element.classList.contains('svy-formcomponent') || element.classList.contains('svy-form')) {
+				return element;
+			}
+		}
+		return null;
+	}
+
     onMouseUp(): void {
        this.clear();
+	   this.editorSession.setStatusBarText('');
     }
 
     private onMouseMove(event: MouseEvent): void {
-      if (!this.guidesEnabled || this.editorSession.getSelection()?.length !==1 || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
-
+	  if (this.editorSession.getSelection()?.length > 1 || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
+	  let guidesEnabled = this.guidesEnabled;
+	  let statusText = '';
+	  if (event.altKey) {
+		guidesEnabled = !guidesEnabled;
+		statusText = 'Release the ALT key to ' + (guidesEnabled ? 'hide ':'show ') + ' dynamic guides';
+	  }
+	  else {
+		statusText = 'Press the ALT key to ' + (this.guidesEnabled ? 'disable ':'enable ') + ' snapping to guides';
+	  }
+	  
+this.snapToEndEnabled = !event.shiftKey;
+	  this.editorSession.setStatusBarText(statusText);
+	  if (!guidesEnabled) {
+		if (this.properties) this.snapDataListener.next(null);
+		return;
+	  } 
       let point = this.adjustPoint(event.pageX, event.pageY);
       if (this.leftPos.size == 0) this.init(point);
       this.computeGuides(event, point);
     }
 
-    private adjustPoint(x: number, y:number) :{x: number, y:number} {
+    private adjustPoint(x: number, y:number): {x: number, y:number} {
         let point = {x, y};
         if (!this.topAdjust) {
             const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null);
@@ -107,8 +151,8 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
             this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''));
         }
         const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-        point.x = point.x + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust;
-        point.y = point.y + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust;
+        point.x = Math.round(point.x + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust);
+        point.y = Math.round(point.y + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust);
         return point;
     }
 
@@ -127,11 +171,17 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     }
     
     private isSnapInterval(uuid, coordinate, posMap) {
+		const parent = this.parents.get(uuid);
         for (let [key, value] of posMap) {
             if (key === uuid) continue;
             if ((coordinate > value - this.snapThreshold) && (coordinate < value + this.snapThreshold)) {
+				if (parent != null && parent !== this.parents.get(key)) {
+					//if the parent of the dragged component is not the form,
+					//then it needs to be in the same container
+					continue;
+				}
                 //return the first component id that matches the coordinate
-                return {uuid: key};
+                return {uuid: key, container: this.parents.get(key)};
             }
         }
         return null;        
@@ -206,27 +256,41 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			pack.components.length > 0 && pack.components.some(component => component.name === componentType));
 	}
 
-	shouldSnapToSize(uuid: string, properties: SnapData, resizing?: string, value?: number, property?: string): boolean {
-		if (!uuid) return false; //no snap target
+	shouldSnapToSize(uuid: string, resizing?: string, value?: number, property?: string): boolean {
+		if (!uuid || !this.snapToEndEnabled) return false; //no snap target or snap to end disabled
 		if (resizing) return true;
+		const targetRect = this.rectangles[this.uuids.indexOf(uuid)];
+		if (value && (property === 'width' && value > targetRect.width || property === 'height' && value > targetRect.height)) {
+			//the dragged component should not be larger than the target
+			return false;
+		}
 		const targetType = this.types.get(uuid);
 		const componentType = this.getDraggedComponentType();
+		let result = false;
 		if (targetType === componentType || this.getDraggedElementCategorySet(componentType)?.indexOf(targetType) >= 0) {
 			//the dragged component should not become too small unless the target is also very small
-			return property === 'width' && (value >= 80 || this.rectangles[this.uuids.indexOf(uuid)].width < 80) ||
-			property === 'height' && (value >= 30 || this.rectangles[this.uuids.indexOf(uuid)].height < 30);
+			result = property === 'width' && (value >= 80 || targetRect.width < 80) ||
+			property === 'height' && (value >= 30 || targetRect.height < 30);
 		}
-		else if (targetType?.split('-')[0] !== componentType?.split('-')[0] && value && this.initialRectangle) {
+		else if (value && this.initialRectangle) {
 			//if the dragged component is not in the same category, 
-			//use the size hints but make sure is not smaller than than the initial size
-			return this.initialRectangle[property] < value;
+			//use the size hints but make sure is not smaller than the initial size
+			result = this.initialRectangle[property] < value;
 		}
-		return false;
+		if (result) {
+			this.editorSession.setStatusBarText('Press SHIFT to disable snap to end size.');
+		}
+		return result;
 	}
 
 	computeGuides(event: MouseEvent, point: { x: number, y: number }) {
+		if (this.parentContainer?.classList.contains('svy-formcomponent')) {
+			//disable for components within a form component
+			this.snapDataListener.next(null);
+			return;
+		}
 		const resizing = this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
-        let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id'));
+        let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
         const draggedItem = this.editorContentService.getContentElementById('svy_draggedelement');
 		if (!draggedItem && !resizing) {
             this.element = elem;
@@ -277,9 +341,14 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		const verticalSnap = this.handleVerticalSnap(resizing, !!resizing || !!draggedItem, point, uuid, rect, properties);
 		if (!resizing) { 
 			//equal distance guides
-			const overlapsX = this.rectangles.filter(r => this.isOverlap(rect, r, 'x'));
-			const overlapsY = this.rectangles.filter(r => this.isOverlap(rect, r, 'y'));
-			if (draggedItem) {
+			let rectangles = this.rectangles;
+			if (this.initialRectangle) {
+				const eq = (a: DOMRect, b: DOMRect) => ['top', 'left', 'width', 'height'].every(key => a[key] === b[key]);
+				rectangles = rectangles.filter(r => !eq(r, this.initialRectangle));
+			}
+			const overlapsX = rectangles.filter(r => this.isOverlap(rect, r, 'x'));
+			const overlapsY = rectangles.filter(r => this.isOverlap(rect, r, 'y'));
+			if (draggedItem && this.snapToEndEnabled) {
 				this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
 				rect = new DOMRect(properties.left, properties.top, properties.width? properties.width : rect.width, properties.height ? properties.height: rect.height);
 			}
@@ -301,7 +370,14 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			this.initialPoint = point;
 			this.initialRectangle = rect;
 		}
+		if (this.parentContainer) this.adjustPropertiesToContainer(properties);
 		this.snapDataListener.next(properties.guides.length == 0 ? null : properties);
+	}
+
+	private adjustPropertiesToContainer(properties: SnapData) {
+		const parentBounds = this.parentContainer.getBoundingClientRect();
+		properties.top -= parentBounds.top;
+		properties.left -= parentBounds.left;
 	}
 
 	private checkSnapToSize(properties: SnapData, rect: DOMRect, overlapsX: DOMRect[], overlapsY: DOMRect[]) {
@@ -316,9 +392,6 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					return closest;
 				}
 			}, null);
-			if (closestYRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestYRect)], properties, undefined, closestYRect.right - properties.left, 'width')) {
-				properties.width = closestYRect.right - properties.left;
-			}
 
 			const closestXRect = overlapsY.reduce((closest, r) => {
 				const distanceLeft = Math.abs(r.left - rect.left);
@@ -329,8 +402,21 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					return closest;
 				}
 			}, null);
-			if (closestXRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestXRect)], properties, undefined, closestXRect.bottom - properties.top, 'height')) {
+
+			if (closestYRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestYRect)], undefined, closestYRect.right - properties.left, 'width')) {
+				properties.width = closestYRect.right - properties.left;
+				properties.cssPosition['endWidth'] = {uuid : this.uuids[this.rectangles.indexOf(closestYRect)], prop: 'right'};
+				if (closestXRect && closestXRect.right < properties.left) {
+					properties.cssPosition['endWidth']['left'] = this.uuids[this.rectangles.indexOf(closestXRect)];
+				}
+			}
+
+			if (closestXRect && this.shouldSnapToSize(this.uuids[this.rectangles.indexOf(closestXRect)], undefined, closestXRect.bottom - properties.top, 'height')) {
 				properties.height = closestXRect.bottom - properties.top;
+				properties.cssPosition['endHeight'] = {uuid : this.uuids[this.rectangles.indexOf(closestXRect)], prop: 'bottom'};
+				if (closestYRect && closestYRect.right < properties.top) {
+					properties.cssPosition['endHeight']['top'] = this.uuids[this.rectangles.indexOf(closestYRect)];
+				}
 			}
 		}
 		if (properties.width && !properties.height) {
@@ -347,6 +433,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			Math.abs(r.width - rect.width) <= this.equalSizeThreshold
 		).sort((rectA, rectB) => rectA.width - rectB.width);
 		if (filteredRectangles.length > 0) {
+			const previousProperties = { ...properties };
 			let size = filteredRectangles[0].width;
 			if (this.pointCloserToTopOrLeftSide(point, rect, 'x')) {
 				properties.left = rect.right - size;
@@ -355,6 +442,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				properties.left = rect.left;
 			}
 			properties.width = size;
+			if (this.isOutOfBounds(previousProperties, properties, rect, 'x')) {
+				return null;
+			}
+			properties.cssPosition['sameWidth'] = { uuid: this.uuids[this.rectangles.indexOf(filteredRectangles[0])]};
 			let guides = [];
 			guides.push(new Guide(properties.left, rect.bottom + 5, 1, 15 , 'dist'));
 			guides.push(new Guide(properties.left + size, rect.bottom + 5, 1, 15, 'dist'));
@@ -377,6 +468,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			Math.abs(r.height - rect.height) <= this.equalSizeThreshold
 		).sort((rectA, rectB) => rectA.height - rectB.height);
 		if (filteredRectangles.length > 0) {
+			const previousProperties = { ...properties };
 			let size = filteredRectangles[0].height;
 			if (this.pointCloserToTopOrLeftSide(point, rect, 'y')) {
 				properties.top = rect.bottom - size;
@@ -385,6 +477,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				properties.top = rect.top;
 			}
 			properties.height = size;
+			if (this.isOutOfBounds(previousProperties, properties, rect, 'y')) {
+				return null;
+			}
+			properties.cssPosition['sameHeight'] = { uuid: this.uuids[this.rectangles.indexOf(filteredRectangles[0])]};
 			let guides = [];
 			guides.push(new Guide(rect.right + 5, properties.top, 15, 1 , 'dist'));
 			guides.push(new Guide(rect.right + 5, properties.top + size, 15, 1, 'dist'));
@@ -403,6 +499,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 
 	private handleHorizontalSnap(resizing: string, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
 		if (this.snapThreshold <= 0) return null;
+		const previousProperties = { ...properties };
 		if (!resizing || resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
 			let closerToTheLeft = this.pointCloserToTopOrLeftSide(point, rect, 'x');
 			let snapX, guideX;
@@ -411,7 +508,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				if (snapX?.uuid) {
 					properties.left = this.leftPos.get(snapX.uuid);
 					const width = this.rightPos.get(snapX.uuid) - properties.left;
-					if (adjustSize && this.shouldSnapToSize(snapX.uuid, properties, resizing, width, 'width'))
+					if (adjustSize && this.shouldSnapToSize(snapX.uuid, resizing, width, 'width'))
 					{
 						properties['width'] = width;
 					}
@@ -456,7 +553,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 					}
 					if (!properties.cssPosition['right']) properties.cssPosition['right'] = properties.left;
 				}
-				if (adjustSize && this.shouldSnapToSize(snapX?.uuid, properties, resizing, guideX - properties.left, 'width'))
+				if (adjustSize && this.shouldSnapToSize(snapX?.uuid, resizing, guideX - properties.left, 'width'))
 				{
 					properties['width'] = guideX - properties.left;
 				}
@@ -472,6 +569,9 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 
 			if (snapX) {
+				if (this.isOutOfBounds(previousProperties, properties, rect, 'x')) {
+					return null;
+				}
 				let guide : Guide;
 				if (this.topPos.get(snapX.uuid) < rect.top) {
 					guide = new Guide(guideX, this.topPos.get(snapX.uuid), 1, rect.bottom - this.topPos.get(snapX.uuid), 'snap');
@@ -488,6 +588,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 
 	private handleVerticalSnap(resizing: string, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
 		if (this.snapThreshold <= 0) return null;
+		const previousProperties = { ...properties };
 		if (!resizing || resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
 			let closerToTheTop = this.pointCloserToTopOrLeftSide(point, rect, 'y');
 			let snapY, guideY;
@@ -496,7 +597,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				if (snapY?.uuid) {
 					properties.top = this.topPos.get(snapY.uuid);
 					const height = this.bottomPos.get(snapY.uuid) - properties.top;
-					if (adjustSize && this.shouldSnapToSize(snapY.uuid, properties, resizing, height, 'height'))
+					if (adjustSize && this.shouldSnapToSize(snapY.uuid, resizing, height, 'height'))
 					{
 						properties['height'] = height;
 					}
@@ -540,7 +641,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						properties.top -= rect.height;
 					}
 				}
-				if (adjustSize && this.shouldSnapToSize(snapY?.uuid, properties, resizing, guideY - properties.top, 'height'))
+				if (adjustSize && this.shouldSnapToSize(snapY?.uuid, resizing, guideY - properties.top, 'height'))
 				{
 					properties['height'] = guideY - properties.top;
 				}
@@ -555,7 +656,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 
 			if (snapY) {
-				let guide;
+				if (this.isOutOfBounds(previousProperties, properties, rect, 'y')) {
+					return null;
+				}
+				let guide : Guide;
 				if (this.leftPos.get(snapY.uuid) < rect.left) {
 					guide = new Guide(this.leftPos.get(snapY.uuid), guideY, rect.right - this.leftPos.get(snapY.uuid), 1, 'snap');
 				}
@@ -568,6 +672,21 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		}
 		return null;
 	}
+
+	private isOutOfBounds(previousProperties: SnapData, properties: SnapData, rect: DOMRect, axis: 'x' | 'y'): boolean{
+		if (axis === 'y' && (properties.top < this.formBounds.top || properties.top + (properties.height ? properties.height : rect.height) > this.formBounds.bottom) || 
+		  axis === 'x' && (properties.left < this.formBounds.left || properties.left + (properties.width ? properties.width : rect.width) > this.formBounds.right)) {
+			for (const key in properties) {
+				if (previousProperties.hasOwnProperty(key)) {
+					properties[key] = previousProperties[key];
+				} else {
+					delete properties[key];
+				}
+			}
+			return true;
+		}
+		return false;
+	}
     
 	private pointCloserToTopOrLeftSide(point: {x: number, y: number}, rectangle: DOMRect, axis: 'x' | 'y'): boolean {
 		const calculateDistance = (a: number, b: number) => Math.abs(a - b);
@@ -579,11 +698,14 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	}
     
     private addEqualDistanceVerticalGuides(rect: DOMRect, properties: any, overlaps: DOMRect[], adjustSize: boolean): Guide[] {
-		const overlappingX = this.getOverlappingRectangles(rect, overlaps);
+		const overlappingX = this.getOverlappingRectangles(overlaps, 'top');
         for (let pair of overlappingX){
 			const e1 = pair[0];
             const e2 = pair[1];   
 			const left = properties.left ? properties.left : rect.x;
+			const uuids = [this.uuids[this.rectangles.indexOf(e1)], this.uuids[this.rectangles.indexOf(e2)]];
+			const containers = [this.parents.get(uuids[0]), this.parents.get(uuids[1])];
+			const previousProperties = { ...properties };
             if (e2.top > e1.bottom && rect.top > e2.bottom) {
 				const dist = e2.top - e1.bottom;
 				if (Math.abs(dist - rect.top + e2.bottom) < this.equalDistanceThreshold) {
@@ -592,6 +714,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.right - properties.left, 'width', properties);
 					}
 					const r = new DOMRect(left, properties.top, properties.width ? properties.width : rect.width, rect.height);
+					if (this.isOutOfBounds(previousProperties, properties, r, 'y')) {
+						continue;
+					}
+					properties.cssPosition['distY'] = {pos: 1, targets: uuids, containers: containers};
 					return this.addVerticalGuides(e1, e2, r, dist, properties);
 				}
 			}
@@ -603,6 +729,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.right - properties.left, 'width', properties);
 					}
 	    			const r = new DOMRect(left, properties.top, properties.width ? properties.width : rect.width, rect.height);
+					if (this.isOutOfBounds(previousProperties, properties, r, 'y')) {
+						continue;
+					}
+					properties.cssPosition['distY'] = {pos: -1, targets: uuids, containers: containers};
     				return this.addVerticalGuides(r, e1, e2, dist, properties);
 				}
 			}
@@ -614,6 +744,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.right - properties.left, 'width', properties);
 					}
 	    			const r = new DOMRect(properties.left ? properties.left : rect.x, properties.top, properties.width ? properties.width : rect.width, rect.height);
+					if (this.isOutOfBounds(previousProperties, properties, r, 'y')) {
+						continue;
+					}
+					properties.cssPosition['distY'] = {pos: 0, targets: uuids, containers: containers};
     				return this.addVerticalGuides(e1, r, e2, dist - rect.height/2, properties);
 				}
 			}
@@ -622,10 +756,13 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 	}
 	
 	private addEqualDistanceHorizontalGuides(rect: DOMRect, properties: any, overlaps: DOMRect[], adjustSize: boolean): Guide[] {
-		const overlappingY = this.getOverlappingRectangles(rect, overlaps);
+		const overlappingY = this.getOverlappingRectangles(overlaps, 'left');
         for (let pair of overlappingY){
 			const e1 = pair[0];
             const e2 = pair[1];
+			const uuids = [this.uuids[this.rectangles.indexOf(e1)], this.uuids[this.rectangles.indexOf(e2)]];
+			const containers = [this.parents.get(uuids[0]), this.parents.get(uuids[1])];
+			const previousProperties = { ...properties };
             if (e2.left > e1.right && rect.left > e2.right) {
 				const dist = e2.left - e1.right;
 				if (Math.abs(dist - rect.left + e2.right) < this.equalDistanceThreshold) {                  
@@ -634,6 +771,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.bottom - properties.top, 'height', properties);
 					}
                  	const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, properties.height ? properties.height : rect.height);
+					 if (this.isOutOfBounds(previousProperties, properties, r, 'x')) {
+						continue;
+					}
+					properties.cssPosition['distX'] = {pos: 1, targets: uuids, containers: containers};
     				return this.addHorizontalGuides(e1, e2, r, dist, properties);
                 }
 			}
@@ -645,6 +786,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.bottom - properties.top, 'height', properties);
 					}
                    	const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, properties.height ? properties.height : rect.height);
+					if (this.isOutOfBounds(previousProperties, properties, r, 'x')) {
+						continue;
+					}
+					properties.cssPosition['distX'] = {pos: -1, targets: uuids, containers: containers};
                    	return this.addHorizontalGuides(r, e1, e2, dist, properties);
                	}
 			}
@@ -656,6 +801,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 						this.setDimension(e1.bottom - properties.top, 'height', properties);
 					}
 	    			const r = new DOMRect(properties.left, properties.top ? properties.top : rect.y, rect.width, properties.height ? properties.height : rect.height);
+					if (this.isOutOfBounds(previousProperties, properties, r, 'x')) {
+						continue;
+					}
+					properties.cssPosition['distX'] = {pos: 0, targets: uuids, containers: containers};
     				return this.addHorizontalGuides(e1, r, e2, dist - rect.width/2, properties);
 				}
 			}
@@ -663,14 +812,17 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 		return null;
 	}
     
-    private getOverlappingRectangles(rect: DOMRect, overlaps: DOMRect[]): DOMRect[][] {
+    private getOverlappingRectangles(overlaps: DOMRect[], property: 'left' | 'top'): DOMRect[][] {
 		const pairs: DOMRect[][] = [];
     	for (let i = 0; i < overlaps.length - 1; i++) {
-        	for (let j = i + 1; j < overlaps.length; j++) {
-            	if (overlaps[i] !== rect && overlaps[j] !== rect) {
-                	pairs.push([overlaps[i], overlaps[j]]);
-            	}
-        	}
+			for (let j = i + 1; j < overlaps.length; j++) {
+				if (overlaps[i][property] <= overlaps[j][property]) {
+					pairs.push([overlaps[i], overlaps[j]]);
+				}
+				else {
+					pairs.push([overlaps[j], overlaps[i]]);
+				}
+			}
     	}
     	return pairs;
 	}
@@ -678,10 +830,12 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     private isOverlap(rect: DOMRect, eRect: DOMRect, axis: 'x' | 'y'): boolean {
 		if (axis === 'x') {
         	return (rect.left >= eRect.left && rect.left <= eRect.right) ||
-               	(rect.right >= eRect.left && rect.right <= eRect.right);
+               	(rect.right >= eRect.left && rect.right <= eRect.right) ||
+				(rect.left <= eRect.right && rect.right >= eRect.left);
     	} else if (axis === 'y') {
         	return (rect.top >= eRect.top && rect.top <= eRect.bottom) ||
-               (rect.bottom >= eRect.top && rect.bottom <= eRect.bottom);
+               (rect.bottom >= eRect.top && rect.bottom <= eRect.bottom) ||
+			   (rect.top <= eRect.bottom && rect.bottom >= eRect.top);
     	}
     	return false;
 	}

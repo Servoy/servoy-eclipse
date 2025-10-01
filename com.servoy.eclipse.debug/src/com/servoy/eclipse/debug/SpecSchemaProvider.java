@@ -35,7 +35,6 @@ public class SpecSchemaProvider implements ISchemaProvider
 		catch (IOException e)
 		{
 			ServoyLog.logError(e);
-			e.printStackTrace();
 		}
 		return sb.toString();
 	}

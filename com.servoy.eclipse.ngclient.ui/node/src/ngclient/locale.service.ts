@@ -1,8 +1,9 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, DOCUMENT } from '@angular/core';
 import { SabloService } from '../sablo/sablo.service';
 import { Deferred, SessionStorageService, LoggerFactory, LoggerService, Locale } from '@servoy/public';
 import { registerLocaleData } from '@angular/common';
-import { DOCUMENT } from '@angular/common';
+
+import { environment as env} from '../environments/environment';
 
 import numbro from 'numbro';
 import { Settings } from 'luxon';
@@ -17,6 +18,7 @@ export class LocaleService {
     private loadedLocale: Deferred<any>;
 
     private readonly localeMap = { en: 'en-US' };
+    private agGridLocale: { [key: string]: string; };
     private readonly log: LoggerService;
 
     constructor(private sabloService: SabloService,
@@ -39,6 +41,10 @@ export class LocaleService {
         return this.sabloService.getLocale();;
     }
 
+    public getAgGridLocale(): { [key: string]: string; } {
+        return this.agGridLocale;
+    }
+
     public setLocale(language: string, country: string, initializing?: boolean) {
         // TODO angular $translate and our i18n service
         //            $translate.refresh();
@@ -51,13 +57,26 @@ export class LocaleService {
                 // in the session storage we always have the value set via applicationService.setLocale
                 this.sessionStorageService.set('locale', language + '-' + country);
             }
+
+            const allPromises = [];
+
             // luxon default locale
             Settings.defaultLocale =  localeId;
             this.locale = localeId;
             // numbro wants with upper case counter but moment is all lower case
-            this.setNumbroLocale(full, true).then(() =>
+            allPromises.push(this.setNumbroLocale(full, true));
+
+            // load ag grid locale
+            const localeKey = country ? country.toUpperCase() : 'EN';
+    	    const localeConstName = `AG_GRID_LOCALE_${localeKey}`;
+            allPromises.push(import('@ag-grid-community/locale'));
+
+            Promise.all(allPromises).then(([numbroResp, localeModule]) => {
+                this.agGridLocale = localeModule[localeConstName];
+                if(!this.agGridLocale) this.agGridLocale = localeModule[`AG_GRID_LOCALE_EN`];
                 this.loadedLocale.resolve(localeId)
-            ).catch(() => this.loadedLocale.resolve(localeId));
+            }).catch(() => this.loadedLocale.resolve(localeId));
+
         }, () => {
             this.loadedLocale.reject('Could not set Locale because angular locale could not be loaded.');
         });
@@ -164,12 +183,19 @@ export class LocaleService {
         // angular locales are either <language lowercase> or <language lowercase> - <country uppercase>
         const localeId = country !== undefined && country.length > 0 ?
             language.toLowerCase() + '-' + country.toUpperCase() : language.toLowerCase();
-        const index = this.doc.baseURI.indexOf('/',8);
-        const context = index > 0 ? this.doc.baseURI.substring(index) : '/';
+        let context: string;
+        if (env.mobile) {
+            const index = this.doc.baseURI.indexOf('index.html');
+            context = index > 0 ? this.doc.baseURI.substring(0,index) : '/';
+            
+        } else {
+            const index = this.doc.baseURI.indexOf('/',8);
+            context = index > 0 ? this.doc.baseURI.substring(index) : '/';
+        }
         
         return new Promise<string>((resolve, reject) => {
             return import(
-                `${context}locales/angular/${localeId}.mjs?localeid=${localeId}`).then(
+                `${context}locales/angular/${localeId}.js?localeid=${localeId}`).then(
                 module => {
                     registerLocaleData(module.default, localeId);
                     resolve(localeId);

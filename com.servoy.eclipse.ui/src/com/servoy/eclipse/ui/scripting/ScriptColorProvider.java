@@ -81,16 +81,18 @@ public class ScriptColorProvider
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void createKeywords()
 	{
 		createKeyword(IExecutingEnviroment.TOPLEVEL_JSUNIT);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_UTILS);
+		createKeyword(IExecutingEnviroment.TOPLEVEL_CLIENTUTILS);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_SECURITY);
 		createKeyword("elements");
 		createKeyword("controller");
 		createKeyword("currentcontroller");
+		createKeyword("developerBridge");
 		createKeyword(IExecutingEnviroment.TOPLEVEL_APPLICATION);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_DATASOURCES);
@@ -99,6 +101,9 @@ public class ScriptColorProvider
 		createKeyword(IExecutingEnviroment.TOPLEVEL_SCOPES);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_FORMS);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_HISTORY);
+		createKeyword(IExecutingEnviroment.TOPLEVEL_MENUS);
+		createKeyword(IExecutingEnviroment.TOPLEVEL_EVENTTYPES);
+		createKeyword(IExecutingEnviroment.TOPLEVEL_JSPERMISSION);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_PLUGINS);
 
 		createKeyword("null");
@@ -123,7 +128,7 @@ public class ScriptColorProvider
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void createRules()
 	{

@@ -1,12 +1,13 @@
-import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, HostListener, Inject, ChangeDetectorRef, Renderer2, ViewChild } from '@angular/core';
+
+import { AfterViewInit, Component, ElementRef, HostListener, Inject, ChangeDetectorRef, Renderer2, ViewChild, DOCUMENT } from '@angular/core';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorSessionService } from '../services/editorsession.service';
 
 @Component({
     selector: 'designer-inline-edit',
     templateUrl: './inlineedit.component.html',
-     styleUrls: ['./inlineedit.component.css']
+    styleUrls: ['./inlineedit.component.css'],
+    standalone: false
 })
 export class InlineEditComponent implements AfterViewInit {
 
@@ -104,8 +105,10 @@ export class InlineEditComponent implements AfterViewInit {
         if (!this.keyupListener) {
             this.keyupListener = this.renderer.listen(this.elementRef.nativeElement, 'keyup', (event: KeyboardEvent) => {
                 if (event.key === 'Escape') {
+                    this.elementRef.nativeElement.textContent = this.propertyValue;
                     this.showDirectEdit = false;
                     this.editorSession.setInlineEditMode(false);
+                    
                 }
                 if ( event.key == 'Delete') {
                     event.stopPropagation();

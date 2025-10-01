@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * @author user
@@ -29,15 +30,17 @@ import com.servoy.eclipse.core.elements.IFieldPositioner;
 public class UpdateFieldPositioner implements IServerService
 {
 	private final IFieldPositioner fieldPositioner;
+	private final BaseVisualFormEditor editorPart;
 
 	/**
 	 * @param editorPart
 	 * @param selectionListener
 	 * @param selectionProvider
 	 */
-	public UpdateFieldPositioner(IFieldPositioner fieldPositioner)
+	public UpdateFieldPositioner(BaseVisualFormEditor editorPart, IFieldPositioner fieldPositioner)
 	{
 		this.fieldPositioner = fieldPositioner;
+		this.editorPart = editorPart;
 	}
 
 	/**
@@ -47,6 +50,11 @@ public class UpdateFieldPositioner implements IServerService
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
 		JSONObject location = args.optJSONObject("location");
+		if (location.optInt("x") >= editorPart.getForm().getWidth() || location.optInt("y") >= editorPart.getForm().getHeight())
+		{
+			fieldPositioner.setDefaultLocation(new org.eclipse.swt.graphics.Point(40, 50));
+			return null;
+		}
 		fieldPositioner.setDefaultLocation(new org.eclipse.swt.graphics.Point(location.optInt("x"), location.optInt("y")));
 		return null;
 	}

@@ -32,14 +32,14 @@ import org.eclipse.gef.Request;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.util.Utils;
 
 /**
  * Graphical edit part for element groups.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class GroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 {
@@ -49,9 +49,9 @@ public class GroupGraphicalEditPart extends BaseGroupGraphicalEditPart
 	}
 
 	@Override
-	protected List<IFormElement> getModelChildren()
+	protected List<ISupportFormElement> getModelChildren()
 	{
-		List<IFormElement> returnList = Utils.asList(getGroup().getElements());
+		List<ISupportFormElement> returnList = Utils.asList(getGroup().getElements());
 		Collections.sort(returnList, Form.FORM_INDEX_COMPARATOR);
 		return returnList;
 	}

@@ -1,25 +1,30 @@
-<select *ngIf="multiselectListbox; else notMultiselectListbox"  size='2'
-		class='svy-listbox form-control input-sm svy-padding-xs'
-		style="width:100%; height:100%;"
-		[id]="servoyApi.getMarkupId()"
-		(change)="multiUpdate()"
-		[svyTooltip]="toolTipText"
-		[sabloTabseq]="tabSeq"
-		[(ngModel)]="selectedValues"
-		multiple
-    	#element>
-		<option *ngFor="let item of valuelistID"  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format}}</option>		    
-</select>
-<ng-template #notMultiselectListbox>
-  	<select size='2'
-		class='svy-listbox form-control input-sm svy-padding-xs'
-		style="width:100%; height:100%;"
-		[id]="servoyApi.getMarkupId()"
-		[(ngModel)]="dataProviderID"
-		(change)="pushUpdate()"
-		[svyTooltip]="toolTipText"
-		[sabloTabseq]="tabSeq"
-    	#element>
-		<option *ngFor="let item of valuelistID"  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format}}</option>		    
-	</select>
-</ng-template>
+@if (multiselectListbox) {
+  <select  size='2'
+    class='svy-listbox form-control input-sm svy-padding-xs'
+    style="width:100%; height:100%;"
+    [id]="servoyApi.getMarkupId()"
+    (change)="multiUpdate()"
+    [svyTooltip]="toolTipText"
+    [sabloTabseq]="tabSeq"
+    [(ngModel)]="selectedValues"
+    multiple
+    #element>
+    @for (item of valuelistID; track item) {
+      <option  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format}}</option>
+    }
+  </select>
+} @else {
+  <select size='2'
+    class='svy-listbox form-control input-sm svy-padding-xs'
+    style="width:100%; height:100%;"
+    [id]="servoyApi.getMarkupId()"
+    [(ngModel)]="dataProviderID"
+    (change)="pushUpdate()"
+    [svyTooltip]="toolTipText"
+    [sabloTabseq]="tabSeq"
+    #element>
+    @for (item of valuelistID; track item) {
+      <option  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format}}</option>
+    }
+  </select>
+}

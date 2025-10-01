@@ -18,25 +18,29 @@
  	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.6.0.3980_rc</version>
+		<version>2025.12.0.4120_rc</version>
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.32.0.v20231107-0834</version>
+  <version>3.37.0.v20250522-1428</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
     <code.ignoredWarnings>-warn:-deprecation,raw,unchecked</code.ignoredWarnings>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
   </properties>
 	<build>
 		<plugins>
-
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-apitools-plugin</artifactId>
+                <version>${tycho.version}</version>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.8.0</version>
 				<executions>
 					<execution>
 						<id>adjust the p2 osgi area to overwrite the eclipse plugin</id>

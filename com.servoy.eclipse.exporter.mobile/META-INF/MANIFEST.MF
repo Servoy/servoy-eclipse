@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Mobile Exporter Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.exporter.mobile;singleton:=true
-Bundle-Version: 2024.6.0.3980_rc
+Bundle-Version: 2025.12.0.4120_rc
 Bundle-Activator: com.servoy.eclipse.exporter.mobile.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: com.servoy.eclipse.model,
@@ -22,21 +22,12 @@ Require-Bundle: com.servoy.eclipse.model,
  org.eclipse.ui.ide,
  org.maven.ide.eclipse.grouplayout,
  org.apache.commons.commons-collections4,
- com.servoy.eclipse.debug
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+ com.servoy.eclipse.debug,
+ com.servoy.eclipse.exporter.war
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Import-Package: org.apache.commons.io;version="2.8.0",
  org.apache.commons.io.file;version="2.8.0",
- org.apache.hc.client5.http.auth;version="5.2.1",
- org.apache.hc.client5.http.classic.methods;version="5.2.1",
- org.apache.hc.client5.http.entity.mime;version="5.2.1",
- org.apache.hc.client5.http.impl.auth;version="5.2.1",
- org.apache.hc.client5.http.impl.classic;version="5.2.1",
- org.apache.hc.client5.http.protocol;version="5.2.1",
- org.apache.hc.core5.http;version="5.2.3",
- org.apache.hc.core5.http.io.entity;version="5.2.4",
- org.apache.hc.core5.http.message;version="5.2.4",
- org.apache.hc.core5.http.protocol;version="5.2.4",
  org.eclipse.ui.internal.browser
 Automatic-Module-Name: com.servoy.eclipse.exporter.mobile

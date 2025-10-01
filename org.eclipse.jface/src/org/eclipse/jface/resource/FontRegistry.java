@@ -25,10 +25,12 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.util.Policy;
 import org.eclipse.jface.util.Util;
+import org.eclipse.pde.api.tools.annotations.NoExtend;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Font;
@@ -58,8 +60,8 @@ import org.eclipse.swt.widgets.Display;
  * </p>
  *
  * Since 3.0 this class extends ResourceRegistry.
- * @noextend This class is not intended to be subclassed by clients.
  */
+@NoExtend
 public class FontRegistry extends ResourceRegistry {
 
 	/**
@@ -206,7 +208,7 @@ public class FontRegistry extends ResourceRegistry {
 	 */
 	protected Runnable displayRunnable = this::clearCaches;
 
-	private boolean displayDisposeHooked;
+	private final Set<Display> displayDisposeHooked = ConcurrentHashMap.newKeySet();
 
 	private final boolean cleanOnDisplayDisposal;
 
@@ -491,7 +493,7 @@ public class FontRegistry extends ResourceRegistry {
 		if (display == null) {
 			return null;
 		}
-		if (cleanOnDisplayDisposal && !displayDisposeHooked) {
+		if (cleanOnDisplayDisposal && !displayDisposeHooked.contains(display)) {
 			hookDisplayDispose(display);
 		}
 
@@ -717,7 +719,7 @@ public class FontRegistry extends ResourceRegistry {
 		stringToFontRecord.clear();
 		staleFonts.clear();
 
-		displayDisposeHooked = false;
+		displayDisposeHooked.remove(Display.getCurrent());
 	}
 
 	/**
@@ -735,7 +737,7 @@ public class FontRegistry extends ResourceRegistry {
 	 * Hook a dispose listener on the SWT display.
 	 */
 	private void hookDisplayDispose(Display display) {
-		displayDisposeHooked = true;
+		displayDisposeHooked.add(display);
 		display.disposeExec(displayRunnable);
 	}
 

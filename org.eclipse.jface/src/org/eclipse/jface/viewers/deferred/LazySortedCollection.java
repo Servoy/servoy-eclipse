@@ -125,7 +125,6 @@ public class LazySortedCollection {
 
 		/**
 		 * Redirects this edge to a new node
-		 * @param newNode
 		 * @since 3.1
 		 */
 		private void setTarget(int newNode) {
@@ -361,12 +360,11 @@ public class LazySortedCollection {
 	 * lazy removal, this will force the node to be removed immediately. Returns
 	 * the new subTree.
 	 *
-	 * @param subTree
 	 * @return the replacement node (this may be different from subTree if the subtree
 	 * was replaced during the removal)
 	 * @since 3.1
 	 */
-	private final int partition(int subTree, FastProgressReporter mon) throws InterruptedException {
+	private final int partition(int subTree) {
 		if (subTree == -1) {
 			return -1;
 		}
@@ -383,10 +381,6 @@ public class LazySortedCollection {
 			nextUnsorted[subTree] = idx;
 			if (idx != -1) {
 				parentTree[idx] = subTree;
-			}
-
-			if (mon.isCanceled()) {
-				throw new InterruptedException();
 			}
 		}
 
@@ -419,8 +413,6 @@ public class LazySortedCollection {
 
 	/**
 	 * Adjusts the capacity of the array.
-	 *
-	 * @param newCapacity
 	 */
 	private final void setArraySize(int newCapacity) {
 		Object[] newContents = new Object[newCapacity];
@@ -452,7 +444,6 @@ public class LazySortedCollection {
 	 * Creates a new node with the given value. Returns the index of the newly
 	 * created node.
 	 *
-	 * @param value
 	 * @return the index of the newly created node
 	 * @since 3.1
 	 */
@@ -497,7 +488,6 @@ public class LazySortedCollection {
 	/**
 	 * Returns the current tree index for the given object.
 	 *
-	 * @param value
 	 * @return the current tree index
 	 * @since 3.1
 	 */
@@ -531,10 +521,8 @@ public class LazySortedCollection {
 	/**
 	 * Redirects any pointers from the original to the replacement. If the replacement
 	 * causes a change in the number of elements in the parent tree, the changes are
-	 * propogated toward the root.
+	 * propagated toward the root.
 	 *
-	 * @param nodeToReplace
-	 * @param replacementNode
 	 * @since 3.1
 	 */
 	private void replaceNode(int nodeToReplace, int replacementNode) {
@@ -575,7 +563,6 @@ public class LazySortedCollection {
 	/**
 	 * Recomputes the tree size for the given node.
 	 *
-	 * @param node
 	 * @since 3.1
 	 */
 	private void recomputeTreeSize(int node) {
@@ -590,8 +577,6 @@ public class LazySortedCollection {
 
 	/**
 	 *
-	 * @param toRecompute
-	 * @param whereToStop
 	 * @since 3.1
 	 */
 	private void forceRecomputeTreeSize(int toRecompute, int whereToStop) {
@@ -604,7 +589,6 @@ public class LazySortedCollection {
 
 	/**
 	 * Destroy the node at the given index in the tree
-	 * @param nodeToDestroy
 	 * @since 3.1
 	 */
 	private void destroyNode(int nodeToDestroy) {
@@ -846,31 +830,6 @@ public class LazySortedCollection {
 	}
 
 	/**
-	 * Retains the n smallest items in the collection, removing the rest. When
-	 * this method returns, the size of the collection will be n. Note that
-	 * this is a no-op if n &gt; the current size of the collection.
-	 * <p>
-	 * Temporarily package visibility until the implementation of FastProgressReporter
-	 * is finished.
-	 * </p>
-	 *
-	 * @param n number of items to retain
-	 * @param mon progress monitor
-	 * @throws InterruptedException if the progress monitor is cancelled in another thread
-	 */
-	/* package */ final void retainFirst(int n, FastProgressReporter mon) throws InterruptedException {
-		int sz = size();
-
-		if (n >= sz) {
-			return;
-		}
-
-		removeRange(n, sz - n, mon);
-
-		testInvariants();
-	}
-
-	/**
 	 * Retains the n smallest items in the collection, removing the rest. When this
 	 * method returns, the size of the collection will be n. Note that this is a
 	 * no-op if n &gt; the current size of the collection.
@@ -878,10 +837,13 @@ public class LazySortedCollection {
 	 * @param n number of items to retain
 	 */
 	public final void retainFirst(int n) {
-		try {
-			retainFirst(n, new FastProgressReporter());
-		} catch (InterruptedException e) {
+		int sz = size();
+
+		if (n >= sz) {
+			return;
 		}
+
+		removeRange(n, sz - n);
 
 		testInvariants();
 	}
@@ -895,36 +857,14 @@ public class LazySortedCollection {
 	 * @param length number of items to remove
 	 */
 	public final void removeRange(int first, int length) {
-		try {
-			removeRange(first, length, new FastProgressReporter());
-		} catch (InterruptedException e) {
-		}
-
-		testInvariants();
-	}
-
-	/**
-	 * Removes all elements in the given range from this collection.
-	 * For example, removeRange(10, 3) would remove the 11th through 13th
-	 * smallest items from the collection.
-	 *
-	 * Temporarily package visiblity until the implementation of FastProgressReporter is
-	 * finished.
-	 *
-	 * @param first 0-based index of the smallest item to remove
-	 * @param length number of items to remove
-	 * @param mon progress monitor
-	 * @throws InterruptedException if the progress monitor is cancelled in another thread
-	 */
-	/* package */ final void removeRange(int first, int length, FastProgressReporter mon) throws InterruptedException {
-		removeRange(root, first, length, mon);
+		removeRange(root, first, length);
 
 		pack();
 
 		testInvariants();
 	}
 
-	private final void removeRange(int node, int rangeStart, int rangeLength, FastProgressReporter mon) throws InterruptedException {
+	private final void removeRange(int node, int rangeStart, int rangeLength) {
 		if (rangeLength == 0) {
 			return;
 		}
@@ -942,7 +882,7 @@ public class LazySortedCollection {
 		}
 		try {
 			// Partition any unsorted nodes
-			node = partition(node, mon);
+			node = partition(node);
 
 			int left = leftSubTree[node];
 			int leftSize = getSubtreeSize(left);
@@ -951,14 +891,14 @@ public class LazySortedCollection {
 
 			// If we're removing anything from the left node
 			if (toRemoveFromLeft >= 0) {
-				removeRange(leftSubTree[node], rangeStart, toRemoveFromLeft, mon);
+				removeRange(leftSubTree[node], rangeStart, toRemoveFromLeft);
 
 				// Check if we're removing from both sides
 				int toRemoveFromRight = rangeStart + rangeLength - leftSize - 1;
 
 				if (toRemoveFromRight >= 0) {
 					// Remove from right subtree
-					removeRange(rightSubTree[node], 0, toRemoveFromRight, mon);
+					removeRange(rightSubTree[node], 0, toRemoveFromRight);
 
 					// ... removing from both sides means we need to remove the node itself too
 					removeNode(node);
@@ -966,7 +906,7 @@ public class LazySortedCollection {
 				}
 			} else {
 				// If removing from the right side only
-				removeRange(rightSubTree[node], rangeStart - leftSize - 1, rangeLength, mon);
+				removeRange(rightSubTree[node], rangeStart - leftSize - 1, rangeLength);
 			}
 		} finally {
 			recomputeTreeSize(node);
@@ -976,7 +916,6 @@ public class LazySortedCollection {
 	/**
 	 * Prunes the given subtree (and all child nodes, sorted or unsorted).
 	 *
-	 * @param subTree
 	 * @since 3.1
 	 */
 	private final void removeSubTree(int subTree) {
@@ -1008,7 +947,6 @@ public class LazySortedCollection {
 	 * Schedules the node for removal. If the node can be removed in constant time,
 	 * it is removed immediately.
 	 *
-	 * @param subTree
 	 * @return the replacement node
 	 * @since 3.1
 	 */
@@ -1039,7 +977,6 @@ public class LazySortedCollection {
 	 * Removes the given subtree, replacing it with one of its children.
 	 * Returns the new root of the subtree
 	 *
-	 * @param subTree
 	 * @return the index of the new root
 	 * @since 3.1
 	 */
@@ -1061,11 +998,7 @@ public class LazySortedCollection {
 					result = left;
 				}
 
-				try {
-					result = partition(result, new FastProgressReporter());
-				} catch (InterruptedException e) {
-
-				}
+				result = partition(result);
 				if (result == -1) {
 					result = nextUnsorted[subTree];
 				} else {
@@ -1202,29 +1135,6 @@ public class LazySortedCollection {
 	 * Fills in an array of size n with the n smallest elements from the collection.
 	 * Can compute the result in sorted or unsorted order.
 	 *
-	 * Currently package visible until the implementation of FastProgressReporter is finished.
-	 *
-	 * @param result array to be filled
-	 * @param sorted if true, the result array will be sorted. If false, the result array
-	 * may be unsorted. This does not affect which elements appear in the result, only their
-	 * order.
-	 * @param mon monitor used to report progress and check for cancellation
-	 * @return the number of items inserted into the result array. This will be equal to the minimum
-	 * of result.length and container.size()
-	 * @throws InterruptedException if the progress monitor is cancelled
-	 */
-	/* package */ final int getFirst(Object[] result, boolean sorted, FastProgressReporter mon) throws InterruptedException {
-		int returnValue = getRange(result, 0, sorted, mon);
-
-		testInvariants();
-
-		return returnValue;
-	}
-
-	/**
-	 * Fills in an array of size n with the n smallest elements from the collection.
-	 * Can compute the result in sorted or unsorted order.
-	 *
 	 * @param result array to be filled
 	 * @param sorted if true, the result array will be sorted. If false, the result array
 	 * may be unsorted. This does not affect which elements appear in the result. It only
@@ -1233,37 +1143,11 @@ public class LazySortedCollection {
 	 * of result.length and container.size()
 	 */
 	public final int getFirst(Object[] result, boolean sorted) {
-		int returnValue = 0;
-
-		try {
-			returnValue = getFirst(result, sorted, new FastProgressReporter());
-		} catch (InterruptedException e) {
-		}
+		int returnValue = getRange(result, 0, sorted);
 
 		testInvariants();
 
 		return returnValue;
-	}
-
-	/**
-	 * Given a position defined by k and an array of size n, this fills in the array with
-	 * the kth smallest element through to the (k+n)th smallest element. For example,
-	 * getRange(myArray, 10, false) would fill in myArray starting with the 10th smallest item
-	 * in the collection. The result can be computed in sorted or unsorted order. Computing the
-	 * result in unsorted order is more efficient.
-	 * <p>
-	 * Temporarily set to package visibility until the implementation of FastProgressReporter
-	 * is finished.
-	 * </p>
-	 *
-	 * @param result array to be filled in
-	 * @param rangeStart index of the smallest element to appear in the result
-	 * @param sorted true iff the result array should be sorted
-	 * @param mon progress monitor used to cancel the operation
-	 * @throws InterruptedException if the progress monitor was cancelled in another thread
-	 */
-	/* package */ final int getRange(Object[] result, int rangeStart, boolean sorted, FastProgressReporter mon) throws InterruptedException {
-		return getRange(result, 0, rangeStart, root, sorted, mon);
 	}
 
 	/**
@@ -1280,12 +1164,7 @@ public class LazySortedCollection {
 	 * of result.length and this.size())
 	 */
 	public final int getRange(Object[] result, int rangeStart, boolean sorted) {
-		int returnValue = 0;
-
-		try {
-			returnValue = getRange(result, rangeStart, sorted, new FastProgressReporter());
-		} catch (InterruptedException e) {
-		}
+		int returnValue = getRange(result, 0, rangeStart, root, sorted);
 
 		testInvariants();
 
@@ -1300,11 +1179,7 @@ public class LazySortedCollection {
 	 */
 	public final Object getItem(int index) {
 		Object[] result = new Object[1];
-		try {
-			getRange(result, index, false, new FastProgressReporter());
-		} catch (InterruptedException e) {
-			// shouldn't happen
-		}
+		getRange(result, index, false);
 		Object returnValue = result[0];
 
 		testInvariants();
@@ -1328,7 +1203,7 @@ public class LazySortedCollection {
 		return result;
 	}
 
-	private final int getRange(Object[] result, int resultIdx, int rangeStart, int node, boolean sorted, FastProgressReporter mon) throws InterruptedException {
+	private final int getRange(Object[] result, int resultIdx, int rangeStart, int node, boolean sorted) {
 		if (node == -1) {
 			return 0;
 		}
@@ -1338,11 +1213,11 @@ public class LazySortedCollection {
 		// If we're asking for all children of the current node, simply call getChildren
 		if (rangeStart == 0) {
 			if (treeSize[node] <= availableSpace) {
-				return getChildren(result, resultIdx, node, sorted, mon);
+				return getChildren(result, resultIdx, node, sorted);
 			}
 		}
 
-		node = partition(node, mon);
+		node = partition(node);
 		if (node == -1) {
 			return 0;
 		}
@@ -1353,7 +1228,7 @@ public class LazySortedCollection {
 
 		if (rangeStart < numberLessThanNode) {
 			if (inserted < availableSpace) {
-				inserted += getRange(result, resultIdx, rangeStart, leftSubTree[node], sorted, mon);
+				inserted += getRange(result, resultIdx, rangeStart, leftSubTree[node], sorted);
 			}
 		}
 
@@ -1366,7 +1241,7 @@ public class LazySortedCollection {
 
 		if (inserted < availableSpace) {
 			inserted += getRange(result, resultIdx + inserted,
-				Math.max(rangeStart - numberLessThanNode - 1, 0), rightSubTree[node], sorted, mon);
+					Math.max(rangeStart - numberLessThanNode - 1, 0), rightSubTree[node], sorted);
 		}
 
 		return inserted;
@@ -1375,13 +1250,11 @@ public class LazySortedCollection {
 	/**
 	 * Fills in the available space in the given array with all children of the given node.
 	 *
-	 * @param result
 	 * @param resultIdx index in the result array where we will begin filling in children
-	 * @param node
 	 * @return the number of children added to the array
 	 * @since 3.1
 	 */
-	private final int getChildren(Object[] result, int resultIdx, int node, boolean sorted, FastProgressReporter mon) throws InterruptedException {
+	private final int getChildren(Object[] result, int resultIdx, int node, boolean sorted) {
 		if (node == -1) {
 			return 0;
 		}
@@ -1389,7 +1262,7 @@ public class LazySortedCollection {
 		int tempIdx = resultIdx;
 
 		if (sorted) {
-			node = partition(node, mon);
+			node = partition(node);
 			if (node == -1) {
 				return 0;
 			}
@@ -1397,7 +1270,7 @@ public class LazySortedCollection {
 
 		// Add child nodes smaller than this one
 		if (tempIdx < result.length) {
-			tempIdx += getChildren(result, tempIdx, leftSubTree[node], sorted, mon);
+			tempIdx += getChildren(result, tempIdx, leftSubTree[node], sorted);
 		}
 
 		// Add the pivot
@@ -1410,7 +1283,7 @@ public class LazySortedCollection {
 
 		// Add child nodes larger than this one
 		if (tempIdx < result.length) {
-			tempIdx += getChildren(result, tempIdx, rightSubTree[node], sorted, mon);
+			tempIdx += getChildren(result, tempIdx, rightSubTree[node], sorted);
 		}
 
 		// Add unsorted children (should be empty if the sorted flag was true)

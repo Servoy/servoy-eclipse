@@ -34,16 +34,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.jar.Manifest;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -63,7 +53,10 @@ import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
+import com.servoy.eclipse.designer.rfb.palette.PaletteFavoritesHandler;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -78,6 +71,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
@@ -85,6 +79,16 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Filter for designer editor
@@ -122,8 +126,22 @@ public class DesignerFilter implements Filter
 
 				try
 				{
-					FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+					ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+
+					FlattenedSolution fl = activeProject.getEditingFlattenedSolution();
 					Form form = fl.getForm(formName);
+
+					if (form == null)
+					{
+						// try to find it in the developer project(s) from the active project
+						for (ServoyDeveloperProject developerProjectsList : activeProject.getDeveloperProjects())
+						{
+							FlattenedSolution devSol = developerProjectsList.getEditingFlattenedSolution();
+							form = devSol.getForm(formName);
+							if (form != null) break;
+						}
+					}
+
 					if (form == null)
 					{
 						ServoyLog.logInfo(
@@ -132,6 +150,7 @@ public class DesignerFilter implements Filter
 					}
 
 					boolean skipDefault = EditorUtil.hideDefaultComponents(form);
+					boolean hasMenuProperty = false;
 
 					TreeMap<String, Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>> componentCategories = new TreeMap<>();
 					for (Entry<String, PackageSpecification<WebObjectSpecification>> entry : specProvider.getWebObjectSpecifications().entrySet())
@@ -155,6 +174,10 @@ public class DesignerFilter implements Filter
 								componentCategories.put(categoryName, pair);
 							}
 							pair.getRight().add(spec);
+							if (spec.getProperties(MenuPropertyType.INSTANCE).size() > 0)
+							{
+								hasMenuProperty = true;
+							}
 						}
 					}
 
@@ -165,6 +188,10 @@ public class DesignerFilter implements Filter
 					// Step 1: create a list with all keys containing first the layout and then the component packages
 					List<String> orderedKeys = new ArrayList<String>();
 					orderedKeys.add("Templates");
+					if (hasMenuProperty && fl.getMenus(false).hasNext())
+					{
+						orderedKeys.add("Servoy Menu");
+					}
 					orderedKeys.addAll(specProvider.getLayoutSpecifications().keySet());
 
 					for (String category : componentCategories.keySet())
@@ -295,6 +322,30 @@ public class DesignerFilter implements Filter
 								jsonWriter.endArray();
 								jsonWriter.endObject();
 							}
+						}
+						else if (key.equals("Servoy Menu"))
+						{
+							jsonWriter.object();
+							jsonWriter.key("packageName").value("Servoy Menu");
+							jsonWriter.key("packageDisplayname").value("Servoy Menu");
+							jsonWriter.key("components");
+							jsonWriter.array();
+							fl.getMenus(true).forEachRemaining(menu -> {
+								jsonWriter.object();
+								jsonWriter.key("name").value("servoymenu-" + menu.getName());
+								jsonWriter.key("componentType").value("jsmenu");
+								jsonWriter.key("displayName").value(menu.getName());
+								jsonWriter.key("icon").value("rfb/angular/images/column.png");
+								Map<String, Object> model = new HashMap<String, Object>();
+								HashMap<String, Number> size = new HashMap<String, Number>();
+								size.put("height", Integer.valueOf(30));
+								size.put("width", Integer.valueOf(30));
+								model.put("size", size);
+								jsonWriter.key("model").value(new JSONObject(model));
+								jsonWriter.endObject();
+							});
+							jsonWriter.endArray();
+							jsonWriter.endObject();
 						}
 						if (startedArray && specProvider.getLayoutSpecifications().containsKey(key))
 						{
@@ -481,9 +532,8 @@ public class DesignerFilter implements Filter
 					}
 					jsonWriter.endArray();
 					JSONArray jsonArray = new JSONArray(sw.toString());
-					jsonArray = PaletteCommonsHandler.getInstance()
-						.insertcommonsCategory(jsonArray);
-					;
+					jsonArray = PaletteCommonsHandler.getInstance().insertcommonsCategory(jsonArray);
+					jsonArray = PaletteFavoritesHandler.getInstance().insertFavoritesCategory(jsonArray);
 					servletResponse.getWriter().write(jsonArray.toString());
 				}
 				catch (JSONException ex)

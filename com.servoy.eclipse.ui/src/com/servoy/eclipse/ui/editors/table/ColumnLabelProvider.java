@@ -68,13 +68,24 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 	public Image getColumnImage(Object element, int columnIndex)
 	{
 		int delta = columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? 1 : 0;
+		int deltaForDelete = columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? 5 : 0;
 		if (columnIndex == ColumnComposite.CI_ALLOW_NULL + delta)
 		{
 			return ((Column)element).getAllowNull() ? TRUE_IMAGE : FALSE_IMAGE;
 		}
-		if (columnIndex == ColumnComposite.CI_DELETE + delta)
+		if (columnIndex == ColumnComposite.CI_DELETE + deltaForDelete)
 		{
 			return Activator.getDefault().loadImageFromBundle("delete.png");
+		}
+		if (columnIndex == ColumnComposite.CI_EX_VALIDATION)
+		{
+			ColumnInfo columnInfo = ((Column)element).getColumnInfo();
+			return columnInfo != null && columnInfo.getValidatorName() != null ? TRUE_IMAGE : FALSE_IMAGE;
+		}
+		if (columnIndex == ColumnComposite.CI_EX_CONVERSION)
+		{
+			ColumnInfo columnInfo = ((Column)element).getColumnInfo();
+			return columnInfo != null && columnInfo.getConverterName() != null ? TRUE_IMAGE : FALSE_IMAGE;
 		}
 		return null;
 	}
@@ -88,31 +99,22 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 			return columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? info.getSQLName() : info.getName();
 		}
 		int delta = columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? 1 : 0;
-		if ((columnIndex == ColumnComposite.CI_DELETE + delta) || (columnIndex == ColumnComposite.CI_ALLOW_NULL + delta))
+		int deltaForDelete = columnComposite != null && columnComposite.isDataProviderIdDisplayed() ? 5 : 0;
+		if ((columnIndex == ColumnComposite.CI_DELETE + deltaForDelete) || (columnIndex == ColumnComposite.CI_ALLOW_NULL + delta) ||
+			columnIndex == ColumnComposite.CI_EX_VALIDATION || columnIndex == ColumnComposite.CI_EX_CONVERSION)
 		{
 			return "";
 		}
 		if (columnIndex == ColumnComposite.CI_TYPE + delta)
 		{
-			if (info.hasFlag(IBaseColumn.UUID_COLUMN))
+			if (columnType.isArray())
 			{
-				if (info.hasFlag(IBaseColumn.NATIVE_COLUMN))
-				{
-					return UUID_NATIVE;
-				}
-				int type = Column.mapToDefaultType(info.getConfiguredColumnType().getSqlType());
-				if (type == IColumnTypes.MEDIA)
-				{
-					return UUID_MEDIA_16;
-				}
-				return UUID_TEXT_36;
+				return "ARRAY<" + getColumnTypeText(info, ColumnType.getColumnType(columnType.getSubType())) + ">";
 			}
-			if ((columnType.getSqlType() == Types.OTHER || columnType.getSqlType() == Types.JAVA_OBJECT) &&
-				!Utils.stringIsEmpty(info.getNativeTypename()))
+			else
 			{
-				return info.getNativeTypename() + " (native type)";
+				return getColumnTypeText(info, columnType);
 			}
-			return Column.getDisplayTypeString(columnType.getSqlType());
 		}
 		if (columnIndex == ColumnComposite.CI_LENGTH + delta)
 		{
@@ -126,11 +128,44 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		{
 			return ColumnInfo.getSeqDisplayTypeString(info.getSequenceType());
 		}
+		if (columnIndex == ColumnComposite.CI_EX_FORMAT)
+		{
+			ColumnInfo columnInfo = info.getColumnInfo();
+			return columnInfo != null ? columnInfo.getDefaultFormat() : "";
+		}
+		if (columnIndex == ColumnComposite.CI_EX_AUTOENTER)
+		{
+			ColumnInfo columnInfo = info.getColumnInfo();
+			return columnInfo != null ? columnInfo.getAutoEnterSubTypeString(columnInfo.getAutoEnterType(), columnInfo.getAutoEnterSubType()) : "";
+		}
 		if (columnIndex == ColumnComposite.CI_DATAPROVIDER_ID)
 		{
 			return info.getDataProviderID();
 		}
 		return columnIndex + ": " + element;
+	}
+
+	private String getColumnTypeText(Column info, ColumnType columnType)
+	{
+		if (info.hasFlag(IBaseColumn.UUID_COLUMN))
+		{
+			if (info.hasFlag(IBaseColumn.NATIVE_COLUMN))
+			{
+				return UUID_NATIVE;
+			}
+			int type = Column.mapToDefaultType(info.getConfiguredColumnType().getSqlType());
+			if (type == IColumnTypes.MEDIA)
+			{
+				return UUID_MEDIA_16;
+			}
+			return UUID_TEXT_36;
+		}
+		if ((columnType.getSqlType() == Types.OTHER || columnType.getSqlType() == Types.JAVA_OBJECT) &&
+			!Utils.stringIsEmpty(info.getNativeTypename()))
+		{
+			return info.getNativeTypename() + " (native type)";
+		}
+		return Column.getDisplayTypeString(columnType);
 	}
 
 	public Color getBackground(Object element, int columnIndex)

@@ -6,6 +6,8 @@ module.exports = function (config) {
   karmaBaseConfig(config);
 
   config.set({
+    autoWatch: true,
+    singleRun: false,
     browsers: ['ChromeHeadless','Chrome', 'Edge', 'Firefox'],
     failOnEmptyTestSuite: true,
     browserDisconnectTimeout : 99999999,

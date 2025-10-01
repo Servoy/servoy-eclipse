@@ -103,6 +103,7 @@ public class ColumnDetailsComposite extends Composite
 	private final Combo sortIgnoringcaseCombo;
 	private final Combo sortNullprecedenceCombo;
 	private final Button excludedCheckBox;
+	private final Button noDataLogCheckBox;
 	private final Button uuidCheckBox;
 	private final Button tenantCheckBox;
 	private SuggestForeignTypesWizard suggestForeignTypesWizard;
@@ -221,6 +222,7 @@ public class ColumnDetailsComposite extends Composite
 		excludedCheckBox = checkbox(this, "Excluded");
 		uuidCheckBox = checkbox(this, "UUID");
 		tenantCheckBox = checkbox(this, "Tenant");
+		noDataLogCheckBox = checkbox(this, "No data log");
 
 		if (!isViewFoundsetTable)
 		{
@@ -247,6 +249,7 @@ public class ColumnDetailsComposite extends Composite
 		{
 			excludedCheckBox.setVisible(false);
 			tenantCheckBox.setVisible(false);
+			noDataLogCheckBox.setVisible(false);
 		}
 
 		uuidCheckBox.addListener(SWT.Selection, event -> {
@@ -318,7 +321,10 @@ public class ColumnDetailsComposite extends Composite
 			LayoutStyle.RELATED);
 		if (!isViewFoundsetTable)
 		{
-			flagsHorizontalGroup.add(tenantCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE);
+			flagsHorizontalGroup.add(tenantCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED);
+			flagsHorizontalGroup.add(noDataLogCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED);
 		}
 
 
@@ -385,7 +391,11 @@ public class ColumnDetailsComposite extends Composite
 		ParallelGroup flagsVerticalGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(flagsLabel);
 		if (!isViewFoundsetTable) flagsVerticalGroup.add(excludedCheckBox);
 		flagsVerticalGroup.add(uuidCheckBox);
-		if (!isViewFoundsetTable) flagsVerticalGroup.add(tenantCheckBox);
+		if (!isViewFoundsetTable)
+		{
+			flagsVerticalGroup.add(tenantCheckBox);
+			flagsVerticalGroup.add(noDataLogCheckBox);
+		}
 
 		ParallelGroup foreignTypeVerticalGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false);
 		if (!isViewFoundsetTable)
@@ -538,12 +548,14 @@ public class ColumnDetailsComposite extends Composite
 		IObservableValue getCIFlagsExcludedObserveValue = PojoProperties.value(ColumnInfoBean.class, "excludedFlag").observe(columnInfoBean);
 		IObservableValue getCIFlagsUuidObserveValue = PojoProperties.value("uuidFlag").observe(columnInfoBean);
 		IObservableValue getCIFlagsTenantObserveValue = PojoProperties.value("tenantFlag").observe(columnInfoBean);
+		IObservableValue getCIFlagsNoDataLogObserveValue = PojoProperties.value(ColumnInfoBean.class, "noDataLogFlag").observe(columnInfoBean);
 
 		IObservableValue sortIgnoringcaseComboObserveWidget = WidgetProperties.widgetSelection().observe(sortIgnoringcaseCombo);
 		IObservableValue sortingNullprecedenceComboObserveWidget = WidgetProperties.widgetSelection().observe(sortNullprecedenceCombo);
 		IObservableValue uuidOtherFlagsTextObserveWidget = WidgetProperties.widgetSelection().observe(uuidCheckBox);
 		IObservableValue excludedOtherFlagsTextObserveWidget = WidgetProperties.widgetSelection().observe(excludedCheckBox);
 		IObservableValue tenantOtherFlagsTextObserveWidget = WidgetProperties.widgetSelection().observe(tenantCheckBox);
+		IObservableValue noDataLogFlagsTextObserveWidget = WidgetProperties.widgetSelection().observe(noDataLogCheckBox);
 
 		if (listener != null)
 		{
@@ -575,6 +587,9 @@ public class ColumnDetailsComposite extends Composite
 
 		// bind the 'TENANT' checkbox
 		bindingContext.bindValue(tenantOtherFlagsTextObserveWidget, getCIFlagsTenantObserveValue, null, null);
+
+		// bind the 'noDataLog' checkbox;
+		bindingContext.bindValue(noDataLogFlagsTextObserveWidget, getCIFlagsNoDataLogObserveValue, null, null);
 
 		suggestForeignTypesWizard = new SuggestForeignTypesWizard(dataSource);
 		IObservableValue foreignTypeInWizard = suggestForeignTypesWizard.setColumnToTrace(column.getTable().getName(), column.getName(),

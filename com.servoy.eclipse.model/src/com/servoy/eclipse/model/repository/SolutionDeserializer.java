@@ -17,7 +17,6 @@
 package com.servoy.eclipse.model.repository;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +33,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectNature;
@@ -56,6 +57,7 @@ import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.ConstStatement;
 import org.eclipse.dltk.javascript.ast.DecimalLiteral;
+import org.eclipse.dltk.javascript.ast.DestructuringVariableDeclaration;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.IVariableStatement;
@@ -67,7 +69,7 @@ import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.UnaryOperation;
-import org.eclipse.dltk.javascript.ast.VariableDeclaration;
+import org.eclipse.dltk.javascript.ast.VariableBinding;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.ast.v4.Keywords;
 import org.eclipse.dltk.javascript.ast.v4.LetStatement;
@@ -138,6 +140,12 @@ public class SolutionDeserializer
 	static final String COMMENT_JSON_ATTRIBUTE = "comment";
 	static final String DECL_KEYWORD = "keyword";
 	private static final String CHANGED_JSON_ATTRIBUTE = "changed";
+	static final String DESTRUCTURING_KEYWORD = "destructuring";
+	private static final String INITIALIZERS_KEY = "initializers";
+	private static final String IDENTIFIERS_KEY = "identifiers";
+	private static final String DESTRUCTURING_VAlUE_KEY = "destructuringValue";
+	private static final String IS_DESTRUCTURING = "is_destructuring";
+
 
 	public static final RuntimeProperty<Boolean> POSSIBLE_DUPLICATE_UUID = new RuntimeProperty<Boolean>()
 	{
@@ -172,7 +180,7 @@ public class SolutionDeserializer
 	{
 		try
 		{
-			return new ServoyJSONObject(content, true);
+			return new ServoyJSONObject(content, false);
 		}
 		catch (JSONException e)
 		{
@@ -355,14 +363,15 @@ public class SolutionDeserializer
 	{
 		if (dir != null && dir.exists())
 		{
-			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
-			Map<JSONObject, File> fileMap = new HashMap<JSONObject, File>();
-			List<File> scriptFiles = new ArrayList<File>();
-			List<File> subdirs = new ArrayList<File>();
+			List<JSONObject> jsonObjects = new ArrayList<>();
+			Map<JSONObject, File> fileMap = new HashMap<>();
+			Map<File, String> formCssMap = new HashMap<>();
+			List<File> scriptFiles = new ArrayList<>();
+			List<File> subdirs = new ArrayList<>();
 			String[] files = dir.list();
 			Arrays.sort(files, new ObjBeforeJSExtensionComparator());
-			Map<File, List<JSONObject>> childrenJSObjectMap = new HashMap<File, List<JSONObject>>(); // js objects from Form & TableNode
-			Map<File, ISupportChilds> jsParentFileMap = new HashMap<File, ISupportChilds>(); // keep which js files belong to which parent
+			Map<File, List<JSONObject>> childrenJSObjectMap = new HashMap<>(); // js objects from Form & TableNode
+			Map<File, ISupportChilds> jsParentFileMap = new HashMap<>(); // keep which js files belong to which parent
 
 			for (final String file : files)
 			{
@@ -389,7 +398,7 @@ public class SolutionDeserializer
 							boolean recognized = false;
 							if (SolutionSerializer.isJSONFile(file))
 							{
-								JSONObject json_obj = new ServoyJSONObject(Utils.getTXTFileContent(f, Charset.forName("UTF8")), true);
+								JSONObject json_obj = new ServoyJSONObject(Utils.getTXTFileContent(f, Charset.forName("UTF8")), false);
 								if (json_obj.length() == 0)
 								{
 									// empty file just skip this one.
@@ -441,6 +450,12 @@ public class SolutionDeserializer
 								}
 								recognized = true;
 							}
+							else if (file.endsWith(".less") && f.getParentFile().getName().equals(SolutionSerializer.FORMS_DIR))
+							{
+								formCssMap.put(new File(f.getParentFile(), f.getName().replace(".less", SolutionSerializer.FORM_FILE_EXTENSION)),
+									Utils.getTXTFileContent(f, Charset.forName("UTF8")));
+								recognized = true;
+							}
 							if (changedFiles != null && recognized)
 							{
 								changedFiles.remove(f);
@@ -488,6 +503,17 @@ public class SolutionDeserializer
 					{
 						persistFileMap.put(file, persist);
 					}
+				}
+			}
+
+			for (Entry<File, String> entry : formCssMap.entrySet())
+			{
+				File file = entry.getKey();
+				IPersist persist = persistFileMap.get(file);
+				if (persist instanceof Form form)
+				{
+					String css = entry.getValue();
+					form.setFormCss(css);
 				}
 			}
 
@@ -655,7 +681,8 @@ public class SolutionDeserializer
 			{
 				// main solution directory
 				return SolutionSerializer.FORMS_DIR.equals(subdir.getName()) || SolutionSerializer.RELATIONS_DIR.equals(subdir.getName()) ||
-					SolutionSerializer.VALUELISTS_DIR.equals(subdir.getName()) || SolutionSerializer.DATASOURCES_DIR_NAME.equals(subdir.getName());
+					SolutionSerializer.VALUELISTS_DIR.equals(subdir.getName()) || SolutionSerializer.DATASOURCES_DIR_NAME.equals(subdir.getName()) ||
+					SolutionSerializer.MENUS_DIR.equals(subdir.getName());
 			}
 			if (parentDir.getParentFile().equals(solutionDir) && SolutionSerializer.DATASOURCES_DIR_NAME.equals(parentDir.getName()))
 			{
@@ -832,9 +859,9 @@ public class SolutionDeserializer
 	{
 		if (file.getName().endsWith(SolutionSerializer.FORM_FILE_EXTENSION))
 		{
-			return containsPath(
-				file.getPath().substring(0, file.getPath().length() - SolutionSerializer.FORM_FILE_EXTENSION.length()) + SolutionSerializer.JS_FILE_EXTENSION,
-				files);
+			String basePath = file.getPath().substring(0, file.getPath().length() - SolutionSerializer.FORM_FILE_EXTENSION.length());
+			return containsPath(basePath + SolutionSerializer.JS_FILE_EXTENSION, files) ||
+				containsPath(basePath + ".less", files);
 		}
 
 		if (file.getName().endsWith(SolutionSerializer.TABLENODE_FILE_EXTENSION))
@@ -1074,7 +1101,7 @@ public class SolutionDeserializer
 			}
 
 
-			List<VariableDeclaration> variables = new ArrayList<VariableDeclaration>();
+			List<VariableBinding> variables = new ArrayList<VariableBinding>();
 			List<FunctionStatement> functions = new ArrayList<FunctionStatement>();
 			List<Statement> statements = script.getStatements();
 			List<Comment> comments = script.getComments();
@@ -1096,8 +1123,8 @@ public class SolutionDeserializer
 					{
 						Comment doc = exp.getDocumentation();
 						if (doc != null) sortedComments.remove(doc);
-						List<VariableDeclaration> vars = ((IVariableStatement)exp).getVariables();
-						for (VariableDeclaration var : vars)
+						List<VariableBinding> vars = ((IVariableStatement)exp).getBindings();
+						for (VariableBinding var : vars)
 						{
 							doc = var.getDocumentation();
 							if (doc != null) sortedComments.remove(doc);
@@ -1144,7 +1171,7 @@ public class SolutionDeserializer
 			lines.add(new Line(currentLine.line + 1, counter + 1));
 
 
-			for (VariableDeclaration field : variables)
+			for (VariableBinding field : variables)
 			{
 				Comment comment = field.getDocumentation();
 				if (comment == null && field.getParent() instanceof IVariableStatement)
@@ -1174,258 +1201,43 @@ public class SolutionDeserializer
 						}
 					}
 				}
-				if (json == null)
-				{
-					json = new ServoyJSONObject();
-				}
 
-				Identifier ident = field.getIdentifier();
-				json.put(SolutionSerializer.PROP_NAME, ident.getName());
-				Expression code = field.getInitializer();
-				if (commentString.length() > 0)
+				boolean firstIdentifier = true;
+				for (Identifier ident : field.getIdentifiers())
 				{
-					int typeIndex = commentString.indexOf(SolutionSerializer.TYPEKEY);
-					if (typeIndex != -1)
+					JSONObject obj = getScriptVariableJSON(markAsChanged, doCleanup, fileContent, lines, field, newField,
+						json == null ? new ServoyJSONObject() : new ServoyJSONObject(json.toString(), false), firstIdentifier ? commentString : null, ident);
+					if (field instanceof DestructuringVariableDeclaration dv)
 					{
-						int newLine = commentString.indexOf('\n', typeIndex);
-						if (newLine > 0)
+						if (firstIdentifier)
 						{
-							String typeName = commentString.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).trim();
-							// don't touch the special object types that start with {{
-							if (!typeName.startsWith("{{"))
-							{
-								if (typeName.startsWith("{") && typeName.endsWith("}"))
-								{
-									typeName = typeName.substring(1, typeName.length() - 1);
-								}
-							}
-							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, typeName);
-							int servoyType = getServoyType(typeName);
-							if (servoyType == IColumnTypes.NUMBER)
-							{
-								int currentType = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
-								if (currentType != IColumnTypes.INTEGER) json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
-							}
-							else
-							{
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
-							}
-						}
-					}
-				}
-				if (field.getParent() instanceof ConstStatement || field.getParent() instanceof LetStatement)
-				{
-					json.put(DECL_KEYWORD, field.getParent() instanceof ConstStatement ? Keywords.CONST : Keywords.LET);
-				}
+							firstIdentifier = false;
+							// the first var in a destructuring declaration has all the info on how to create the rest
+							obj.put(DESTRUCTURING_KEYWORD, dv.getTarget().toString());
+							obj.put(DESTRUCTURING_VAlUE_KEY, dv.getInitializer().toString());
+							obj.put(IDENTIFIERS_KEY, new JSONArray(field.getVariableNames()));
 
-				if (code != null)
-				{
-					String value_part = fileContent.substring(code.sourceStart(), code.sourceEnd());
-					if (value_part.endsWith(";")) value_part = value_part.substring(0, value_part.length() - 1);
-					if (code instanceof UnaryOperation)
-					{
-						code = ((UnaryOperation)code).getExpression();
-					}
-					if (code instanceof DecimalLiteral)
-					{
-						int variableType = Column.mapToDefaultType(json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT));
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, variableType);
-						try
-						{
-							Integer.parseInt(value_part);
-							if (variableType != IColumnTypes.NUMBER) json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.INTEGER);
-						}
-						catch (NumberFormatException e)
-						{
-							try
-							{
-								Double.parseDouble(value_part);
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
-							}
-							catch (NumberFormatException e2)
-							{
-								// ignore shouldnt happen
-								if (json.has(VARIABLE_TYPE_JSON_ATTRIBUTE))
-								{
-									if (variableType == IColumnTypes.INTEGER || variableType == IColumnTypes.NUMBER)
-									{
-										json.remove(VARIABLE_TYPE_JSON_ATTRIBUTE);
-									}
-								}
-							}
-						}
-					}
-					else if (code instanceof StringLiteral)
-					{
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
-					}
-					else if (code instanceof NullExpression)
-					{
-						if (newField)
-						{
-							String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-							if (typeName != null)
-							{
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
-							}
-							else
-							{
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-							}
-						}
-					}
-					else if (code instanceof CallExpression || code instanceof NewExpression || code instanceof FunctionStatement)
-					{
-						ASTNode callExpression = code;
-						if (callExpression instanceof CallExpression)
-						{
-							callExpression = ((CallExpression)callExpression).getExpression();
-						}
-						String objectclass = null;
-						if (callExpression instanceof NewExpression)
-						{
-							Expression objectClassExpression = ((NewExpression)callExpression).getObjectClass();
-							if (objectClassExpression instanceof Identifier)
-							{
-								objectclass = ((Identifier)objectClassExpression).getName();
-							}
-							else if (objectClassExpression instanceof CallExpression &&
-								((CallExpression)objectClassExpression).getExpression() instanceof Identifier)
-							{
-								objectclass = ((Identifier)((CallExpression)objectClassExpression).getExpression()).getName();
-							}
-						}
-						if ("String".equals(objectclass))
-						{
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
-						}
-						else if ("Date".equals(objectclass))
-						{
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.DATETIME);
-						}
-						else if ("Array".equals(objectclass))
-						{
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-							String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-							if (doCleanup && (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))))
-								json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
+							List<String> initializers = field.getVariableNames().stream()
+								.map(id -> {
+									// this also returns the default value of the BindingIdentifier
+									// like const {x, y = 2} = obj, returns 2 for y
+									Expression expr = field.getInitializer(id);
+									return expr != null ? expr.toString() : null;
+								})
+								.collect(Collectors.toList());
+
+							obj.put(INITIALIZERS_KEY, new JSONArray(initializers));
 						}
 						else
 						{
-							String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-							if (typeName != null)
-							{
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
-							}
-							else
-							{
-								if (objectclass != null)
-								{
-									json.putOpt(JS_TYPE_JSON_ATTRIBUTE, objectclass);
-								}
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-							}
+							// this is a destructuring variable, which we skip when initializing vars in scope
+							obj.put(IS_DESTRUCTURING, Boolean.TRUE);
+							// remove the uuid from the json for this one else we generate duplicates
+							obj.remove(SolutionSerializer.PROP_UUID);
 						}
 					}
-					else if (code instanceof ObjectInitializer)
-					{
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-					}
-					else if (code instanceof ArrayInitializer)
-					{
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-						String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
-						if (doCleanup && (current == null || (!current.startsWith("{Array") && !current.startsWith("Array")) && !current.endsWith("[]")))
-						{
-							List<Expression> items = ((ArrayInitializer)code).getItems();
-							if (items != null && items.size() > 0)
-							{
-								boolean isString = true;
-								boolean isNumber = true;
-								for (Expression item : items)
-								{
-									if (!(item instanceof StringLiteral))
-									{
-										isString = false;
-									}
-									if (!(item instanceof DecimalLiteral))
-									{
-										isNumber = false;
-									}
-								}
-								if (isString)
-								{
-									json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<String>");
-								}
-								else if (isNumber)
-								{
-									json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<Number>");
-								}
-							}
-
-						}
-					}
-					else if (code instanceof BooleanLiteral)
-					{
-						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-						if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Boolean");
-					}
-					else if (code instanceof BinaryOperation && json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
-					{
-						Expression le = ((BinaryOperation)code).getLeftExpression();
-						Expression re = ((BinaryOperation)code).getRightExpression();
-						if (le instanceof StringLiteral || re instanceof StringLiteral)
-						{
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
-							if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "String");
-						}
-						else if (le instanceof DecimalLiteral || re instanceof DecimalLiteral)
-						{
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
-							if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Number");
-						}
-					}
-					else
-					{
-						// only fall back to media if the jstype is not set, else keep the jstype that is specified in the doc
-						if (json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
-						{
-							Debug.log("Unknow expression falling back to media: " + code.getClass());
-							json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
-						}
-						else
-						{
-							int current = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, -1);
-							int servoyType = getServoyType(json.optString(JS_TYPE_JSON_ATTRIBUTE));
-							if (current == -1 || !((servoyType == IColumnTypes.NUMBER || servoyType == IColumnTypes.INTEGER) &&
-								(current == IColumnTypes.NUMBER || current == IColumnTypes.INTEGER)))
-							{
-								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
-							}
-						}
-					}
-					json.put("defaultValue", value_part);
+					jsonObjects.add(obj);
 				}
-				else
-				{
-					json.put("defaultValue", "");
-				}
-
-				int linenr = 1;
-				int fieldLineIndex = field.sourceStart();
-				for (Line line : lines)
-				{
-					if (line.start > fieldLineIndex)
-					{
-						linenr = line.line;
-						break;
-					}
-				}
-
-				json.put(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE, linenr);
-				json.put(COMMENT_JSON_ATTRIBUTE, commentString);
-				json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
-				jsonObjects.add(json);
 			}
 
 			for (FunctionStatement function : functions)
@@ -1558,6 +1370,17 @@ public class SolutionDeserializer
 					object.put("start", comment.sourceStart());
 					object.put("end", comment.sourceEnd());
 					object.put("text", comment.getText());
+					int linenr = 1;
+					int commentLineIndex = comment.sourceStart();
+					for (Line line : lines)
+					{
+						if (line.start > commentLineIndex)
+						{
+							linenr = line.line;
+							break;
+						}
+					}
+					object.put("linenr", linenr);
 					array.put(object);
 				}
 				jsonObjects.get(0).put(EXTRA_DOC_COMMENTS, array.toString());
@@ -1571,6 +1394,271 @@ public class SolutionDeserializer
 			ServoyLog.logWarning("Javascript file '" + file + "' had a parsing error ", e);
 		}
 		return null;
+	}
+
+	private JSONObject getScriptVariableJSON(boolean markAsChanged, boolean doCleanup, String fileContent, List<Line> lines, VariableBinding field,
+		boolean newField,
+		JSONObject json, String commentString, Identifier ident)
+	{
+		String comment = commentString;
+		json.put(SolutionSerializer.PROP_NAME, ident.getName());
+		Expression code = field.getInitializer(ident.getName());
+		if (code == null)
+		{
+			if (field instanceof DestructuringVariableDeclaration)
+			{
+				// for a destruction if it doesn't have a assigned or default value check the comment for that identifier
+				comment = ident.getDocumentation().getText();
+			}
+			else code = field.getInitializer();
+		}
+		if (comment != null && comment.length() > 0)
+		{
+			int typeIndex = comment.indexOf(SolutionSerializer.TYPEKEY);
+			if (typeIndex != -1)
+			{
+				int newLine = comment.indexOf('\n', typeIndex);
+				if (newLine == -1) newLine = comment.indexOf("*/", typeIndex);
+				if (newLine > 0)
+				{
+					String typeName = comment.substring(typeIndex + SolutionSerializer.TYPEKEY.length(), newLine).trim();
+					// don't touch the special object types that start with {{
+					if (!typeName.startsWith("{{"))
+					{
+						if (typeName.startsWith("{") && typeName.endsWith("}"))
+						{
+							typeName = typeName.substring(1, typeName.length() - 1);
+						}
+					}
+					json.putOpt(JS_TYPE_JSON_ATTRIBUTE, typeName);
+					int servoyType = getServoyType(typeName);
+					if (servoyType == IColumnTypes.NUMBER)
+					{
+						int currentType = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
+						if (currentType != IColumnTypes.INTEGER) json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
+					}
+					else
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
+					}
+				}
+			}
+		}
+		if (field.getParent() instanceof ConstStatement || field.getParent() instanceof LetStatement)
+		{
+			json.put(DECL_KEYWORD, field.getParent() instanceof ConstStatement ? Keywords.CONST : Keywords.LET);
+
+		}
+
+		if (code != null)
+		{
+			String value_part = fileContent.substring(code.sourceStart(), code.sourceEnd());
+			if (value_part.endsWith(";")) value_part = value_part.substring(0, value_part.length() - 1);
+			if (code instanceof UnaryOperation)
+			{
+				code = ((UnaryOperation)code).getExpression();
+			}
+			if (code instanceof DecimalLiteral)
+			{
+				int variableType = Column.mapToDefaultType(json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT));
+				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, variableType);
+				try
+				{
+					Integer.parseInt(value_part);
+					if (variableType != IColumnTypes.NUMBER) json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.INTEGER);
+				}
+				catch (NumberFormatException e)
+				{
+					try
+					{
+						Double.parseDouble(value_part);
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
+					}
+					catch (NumberFormatException e2)
+					{
+						// ignore shouldnt happen
+						if (json.has(VARIABLE_TYPE_JSON_ATTRIBUTE))
+						{
+							if (variableType == IColumnTypes.INTEGER || variableType == IColumnTypes.NUMBER)
+							{
+								json.remove(VARIABLE_TYPE_JSON_ATTRIBUTE);
+							}
+						}
+					}
+				}
+			}
+			else if (code instanceof StringLiteral)
+			{
+				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
+			}
+			else if (code instanceof NullExpression)
+			{
+				if (newField)
+				{
+					String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
+					if (typeName != null)
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
+					}
+					else
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+					}
+				}
+			}
+			else if (code instanceof CallExpression || code instanceof NewExpression || code instanceof FunctionStatement)
+			{
+				ASTNode callExpression = code;
+				if (callExpression instanceof CallExpression)
+				{
+					callExpression = ((CallExpression)callExpression).getExpression();
+				}
+				String objectclass = null;
+				if (callExpression instanceof NewExpression)
+				{
+					Expression objectClassExpression = ((NewExpression)callExpression).getObjectClass();
+					if (objectClassExpression instanceof Identifier)
+					{
+						objectclass = ((Identifier)objectClassExpression).getName();
+					}
+					else if (objectClassExpression instanceof CallExpression &&
+						((CallExpression)objectClassExpression).getExpression() instanceof Identifier)
+					{
+						objectclass = ((Identifier)((CallExpression)objectClassExpression).getExpression()).getName();
+					}
+				}
+				if ("String".equals(objectclass))
+				{
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
+				}
+				else if ("Date".equals(objectclass))
+				{
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.DATETIME);
+				}
+				else if ("Array".equals(objectclass))
+				{
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+					String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
+					if (doCleanup && (current == null || (!current.startsWith("Array") && !current.endsWith("[]"))))
+						json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array");
+				}
+				else
+				{
+					String typeName = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
+					if (typeName != null)
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, getServoyType(typeName));
+					}
+					else
+					{
+						if (objectclass != null)
+						{
+							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, objectclass);
+						}
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+					}
+				}
+			}
+			else if (code instanceof ObjectInitializer)
+			{
+				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+			}
+			else if (code instanceof ArrayInitializer)
+			{
+				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+				String current = json.optString(JS_TYPE_JSON_ATTRIBUTE, null);
+				if (doCleanup && (current == null || (!current.startsWith("{Array") && !current.startsWith("Array")) && !current.endsWith("[]")))
+				{
+					List<Expression> items = ((ArrayInitializer)code).getItems();
+					if (items != null && items.size() > 0)
+					{
+						boolean isString = true;
+						boolean isNumber = true;
+						for (Expression item : items)
+						{
+							if (!(item instanceof StringLiteral))
+							{
+								isString = false;
+							}
+							if (!(item instanceof DecimalLiteral))
+							{
+								isNumber = false;
+							}
+						}
+						if (isString)
+						{
+							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<String>");
+						}
+						else if (isNumber)
+						{
+							json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Array<Number>");
+						}
+					}
+
+				}
+			}
+			else if (code instanceof BooleanLiteral)
+			{
+				json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+				if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Boolean");
+			}
+			else if (code instanceof BinaryOperation && json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
+			{
+				Expression le = ((BinaryOperation)code).getLeftExpression();
+				Expression re = ((BinaryOperation)code).getRightExpression();
+				if (le instanceof StringLiteral || re instanceof StringLiteral)
+				{
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.TEXT);
+					if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "String");
+				}
+				else if (le instanceof DecimalLiteral || re instanceof DecimalLiteral)
+				{
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.NUMBER);
+					if (doCleanup) json.putOpt(JS_TYPE_JSON_ATTRIBUTE, "Number");
+				}
+			}
+			else
+			{
+				// only fall back to media if the jstype is not set, else keep the jstype that is specified in the doc
+				if (json.opt(JS_TYPE_JSON_ATTRIBUTE) == null)
+				{
+					Debug.log("Unknow expression falling back to media: " + code.getClass());
+					json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, IColumnTypes.MEDIA);
+				}
+				else
+				{
+					int current = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, -1);
+					int servoyType = getServoyType(json.optString(JS_TYPE_JSON_ATTRIBUTE));
+					if (current == -1 || !((servoyType == IColumnTypes.NUMBER || servoyType == IColumnTypes.INTEGER) &&
+						(current == IColumnTypes.NUMBER || current == IColumnTypes.INTEGER)))
+					{
+						json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
+					}
+				}
+			}
+			json.put("defaultValue", value_part);
+		}
+		else
+		{
+			json.put("defaultValue", "");
+		}
+
+
+		int linenr = 1;
+		int fieldLineIndex = field.sourceStart();
+		for (Line line : lines)
+		{
+			if (line.start > fieldLineIndex)
+			{
+				linenr = line.line;
+				break;
+			}
+		}
+
+		json.put(LINE_NUMBER_OFFSET_JSON_ATTRIBUTE, linenr);
+		json.put(COMMENT_JSON_ATTRIBUTE, comment);
+		json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
+		return json;
 	}
 
 	/**
@@ -1861,6 +1949,10 @@ public class SolutionDeserializer
 		}
 
 		if (useFilesForDirtyMark) handleChanged(obj, retval);
+		if (retval instanceof ScriptVariable sv)
+		{
+			setDestructuringProperties(obj, sv);
+		}
 		return retval;
 	}
 
@@ -1889,8 +1981,7 @@ public class SolutionDeserializer
 		}
 		else
 		{
-			int element_id = repository.getElementIdForUUID(uuid);
-			retval = repository.createObject(parent, objectTypeId, element_id, uuid);
+			retval = repository.createObject(parent, objectTypeId, uuid);
 			parent.addChild(retval);
 		}
 		return retval;
@@ -1921,27 +2012,24 @@ public class SolutionDeserializer
 		{
 			IPersist retval = entry.getKey();
 			JSONObject obj = entry.getValue();
-			if (retval instanceof ScriptVariable)
+			if (retval instanceof ScriptVariable sv)
 			{
 				if (obj.has(COMMENT_JSON_ATTRIBUTE))
 				{
 					String comment = obj.getString(COMMENT_JSON_ATTRIBUTE);
-					((ScriptVariable)retval).setComment(comment);
+					sv.setComment(comment);
 				}
 				if (obj.has(JS_TYPE_JSON_ATTRIBUTE))
 				{
 					String type = obj.getString(JS_TYPE_JSON_ATTRIBUTE);
-					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, type);
+					sv.setSerializableRuntimeProperty(IScriptProvider.TYPE, type);
 				}
 				else
 				{
-					((ScriptVariable)retval).setSerializableRuntimeProperty(IScriptProvider.TYPE, null);
-				}
-				if (obj.has(DECL_KEYWORD))
-				{
-					((ScriptVariable)retval).setKeyword(obj.getString(DECL_KEYWORD));
+					sv.setSerializableRuntimeProperty(IScriptProvider.TYPE, null);
 				}
 
+				setDestructuringProperties(obj, sv);
 			}
 			else if (retval instanceof AbstractScriptProvider)
 			{
@@ -2055,8 +2143,40 @@ public class SolutionDeserializer
 			{
 				((AbstractBase)retval).putCustomProperty(new String[] { EXTRA_DOC_COMMENTS }, obj.get(EXTRA_DOC_COMMENTS));
 			}
+			if (retval instanceof ScriptVariable sv)
+			{
+				if (obj.has(DECL_KEYWORD)) sv.setKeyword(obj.getString(DECL_KEYWORD));
+				setDestructuringProperties(obj, sv);
+			}
 			if (useFilesForDirtyMark) handleChanged(obj, retval);
 		}
+	}
+
+	private static void setDestructuringProperties(JSONObject obj, ScriptVariable sv)
+	{
+		if (obj.has(DESTRUCTURING_KEYWORD))
+		{
+			//the first var in a destructuring declaration has all the info on how to create the rest
+			String destructuring = obj.getString(DESTRUCTURING_KEYWORD);
+			sv.setSerializableRuntimeProperty(IScriptProvider.DESTRUCTURING, destructuring);
+			sv.setSerializableRuntimeProperty(IScriptProvider.DESTRUCTURING_VALUE, obj.optString(DESTRUCTURING_VAlUE_KEY));
+			sv.setSerializableRuntimeProperty(IScriptProvider.DESTRUCTURING_VARS, toStringArray(obj.optJSONArray(IDENTIFIERS_KEY)));
+			sv.setSerializableRuntimeProperty(IScriptProvider.DESTRUCTURING_INITIALIZERS, toStringArray(obj.optJSONArray(INITIALIZERS_KEY)));
+		}
+		else if (obj.has(IS_DESTRUCTURING))
+		{
+			// this is a destructuring variable, which we skip when initializing vars in scope
+			sv.setSerializableRuntimeProperty(IScriptProvider.IS_DESTRUCTURING, Boolean.TRUE);
+		}
+	}
+
+	private static String[] toStringArray(JSONArray jsonArray)
+	{
+		if (jsonArray == null) return new String[0];
+
+		return IntStream.range(0, jsonArray.length())
+			.mapToObj(i -> jsonArray.optString(i, null))
+			.toArray(String[]::new);
 	}
 
 	private static MethodArgument[] NULL = new MethodArgument[0];
@@ -2097,36 +2217,7 @@ public class SolutionDeserializer
 					propertyObjectValue = propertyObjectValue.toString();
 				}
 
-				if (element.getTypeID() == IRepository.ELEMENTS)
-				{
-					String id = propertyObjectValue.toString();
-					UUID uuid = null;
-					if (id.indexOf('-') > 0)
-					{
-						uuid = UUID.fromString(id);
-						propertyObjectValue = new Integer(repository.getElementIdForUUID(uuid));
-					}
-					else
-					{
-						propertyObjectValue = new Integer(Utils.getAsInteger(id));
-					}
-
-					//filling this in case the obj is sent to team repository (with other ids)
-					HashMap<UUID, Integer> map = ((AbstractBase)persist).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
-					if (map == null)
-					{
-						map = new HashMap<UUID, Integer>();
-						((AbstractBase)persist).setSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty, map);
-					}
-					if (uuid != null)
-					{
-						map.put(uuid, (Integer)propertyObjectValue);
-					}
-				}
-				else
-				{
-					propertyObjectValue = repository.convertArgumentStringToObject(element.getTypeID(), (String)propertyObjectValue);
-				}
+				propertyObjectValue = repository.convertArgumentStringToObject(element.getTypeID(), (String)propertyObjectValue);
 				propertyValues.put(propertyName, propertyObjectValue);
 				obj.remove(propertyName);
 			}
@@ -2147,7 +2238,7 @@ public class SolutionDeserializer
 		UUID uuid = null;
 		try
 		{
-			JSONObject obj = new ServoyJSONObject(txtFileContent, true);
+			JSONObject obj = new ServoyJSONObject(txtFileContent, false);
 			if (obj.has(SolutionSerializer.PROP_UUID))
 			{
 				uuid = UUID.fromString(obj.getString(SolutionSerializer.PROP_UUID));
@@ -2291,14 +2382,14 @@ public class SolutionDeserializer
 							}
 							catch (Exception e)
 							{
-								ServoyLog.logError(e);
+								ServoyLog.logError("Error while reading working sets file: " + path, e);
 							}
 						}
 					}
 				}
-				catch (IOException ex)
+				catch (Exception ex)
 				{
-					ServoyLog.logError(ex);
+					ServoyLog.logError("Error while reading working sets file: " + path, ex);
 				}
 			}
 		}
@@ -2314,7 +2405,7 @@ public class SolutionDeserializer
 			if (solutionmetadata == null) return null;
 
 			int fileVersion;
-			JSONObject obj = new ServoyJSONObject(solutionmetadata, true);
+			JSONObject obj = new ServoyJSONObject(solutionmetadata, false);
 			if (!obj.has(SolutionSerializer.PROP_FILE_VERSION))
 			{
 				throw new RepositoryException("Cannot handle files with unknown version");
@@ -2333,8 +2424,7 @@ public class SolutionDeserializer
 			int solutionType = obj.getInt("solutionType");
 			boolean mustAuthenticate = obj.getBoolean("mustAuthenticate");
 			//int id = repository.getNewElementID(rootObjectUuid);
-			int id = repository.getElementIdForUUID(rootObjectUuid);
-			SolutionMetaData metadata = (SolutionMetaData)repository.createRootObjectMetaData(id, rootObjectUuid, name, objectTypeId, 1, 1);
+			SolutionMetaData metadata = (SolutionMetaData)repository.createRootObjectMetaData(rootObjectUuid, name, objectTypeId, 1, 1);
 			metadata.setMustAuthenticate(mustAuthenticate);
 			metadata.setSolutionType(solutionType);
 			metadata.setFileVersion(fileVersion);

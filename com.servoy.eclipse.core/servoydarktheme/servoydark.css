@@ -10,6 +10,12 @@ ExpandBar {
 	color: #330099;
 }
 
+ExpandableComposite {
+    swt-titlebar-color: #eee;
+    tb-toggle-hover-color: #eee;
+    tb-toggle-color: #eee;
+}
+
 * {
 	background-color: '#org-eclipse-ui-workbench-DARK_BACKGROUND';
 }

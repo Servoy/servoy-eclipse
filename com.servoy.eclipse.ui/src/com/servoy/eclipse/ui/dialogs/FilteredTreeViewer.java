@@ -351,7 +351,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 						recursiveExpand(null, items, monitor, lst);
 						for (TreePath treePath : lst)
 						{
-							treeViewer.expandToLevel(treePath, 1);
+							treeViewer.expandToLevel(treePath, 4);
 						}
 						// enabled toolbar - there is text to clear
 						// and the list is currently being filtered

@@ -35,7 +35,8 @@ public class IsContainerPropertyTester extends PropertyTester
 			PersistContext persistContext = (PersistContext)receiver;
 			if (persistContext.getPersist() instanceof WebComponent)
 			{
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((WebComponent)persistContext.getPersist()).getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+					.getWebObjectSpecification(((WebComponent)persistContext.getPersist()).getTypeName());
 				Map<String, PropertyDescription> properties = spec.getProperties();
 				for (PropertyDescription propertyDescription : properties.values())
 				{
@@ -43,6 +44,13 @@ public class IsContainerPropertyTester extends PropertyTester
 					{
 						return true;
 					}
+				}
+			}
+			else if (persistContext.getPersist() instanceof LayoutContainer)
+			{
+				if ("csspositioncontainer".equals(((LayoutContainer)persistContext.getPersist()).getSpecName()) && args.length == 1 && "add".equals(args[0]))
+				{
+					return false;
 				}
 			}
 			return persistContext.getPersist() instanceof LayoutContainer;

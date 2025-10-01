@@ -1,31 +1,31 @@
 
-import { Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, Inject } from '@angular/core';
+import { Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, Inject, DOCUMENT } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
-import { DOCUMENT } from '@angular/common';
+
 import { LoggerFactory, LoggerService } from '../logger.service';
 import { DateTime } from 'luxon';
 
 
 class NumberParser {
-  private _group: RegExp;
+    private _group: RegExp;
     private _decimal: RegExp;
     private _numeral: RegExp;
     private _index: (d: any) => string;
-  constructor() {
-    const locale = new Intl.NumberFormat().resolvedOptions().locale;
-    const parts = (new Intl.NumberFormat(locale) as any).formatToParts(12345.6);
-    const numerals = [...new Intl.NumberFormat(locale, {useGrouping: false}).format(9876543210)].reverse();
-    const index = new Map(numerals.map((d, i) => [d, i]));
-    this._group = new RegExp(`[${parts.find(d => d.type === 'group').value}]`, 'g');
-    this._decimal = new RegExp(`[${parts.find(d => d.type === 'decimal').value}]`);
-    this._numeral = new RegExp(`[${numerals.join('')}]`, 'g');
-    this._index = d => index.get(d).toString();
-  }
-  parse(str: string) {
-    return (str.trim().replace(this._group, '').replace(this._decimal, '.').replace(this._numeral, this._index)) ? +str : NaN;
-  }
+    constructor() {
+        const locale = new Intl.NumberFormat().resolvedOptions().locale;
+        const parts = (new Intl.NumberFormat(locale) as any).formatToParts(12345.6);
+        const numerals = [...new Intl.NumberFormat(locale, { useGrouping: false }).format(9876543210)].reverse();
+        const index = new Map(numerals.map((d, i) => [d, i]));
+        this._group = new RegExp(`[${parts.find(d => d.type === 'group').value}]`, 'g');
+        this._decimal = new RegExp(`[${parts.find(d => d.type === 'decimal').value}]`);
+        this._numeral = new RegExp(`[${numerals.join('')}]`, 'g');
+        this._index = d => index.get(d).toString();
+    }
+    parse(str: string) {
+        return (str.trim().replace(this._group, '').replace(this._decimal, '.').replace(this._numeral, this._index)) ? +str : NaN;
+    }
 }
 
 /**
@@ -36,21 +36,21 @@ class NumberParser {
   * it uses the {@link FormattingService} for this. 
   */
 @Directive({
-
     // eslint-disable-next-line @angular-eslint/directive-selector
     selector: '[svyFormat]',
     providers: [{
         provide: NG_VALUE_ACCESSOR,
         useExisting: forwardRef(() => FormatDirective),
         multi: true
-    }]
+    }],
+    standalone: false
 })
 export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnChanges {
-    private static DATETIMEFORMAT: Format = {display:'yyyy-MM-dd\'T\'HH:mm:ss', type:'DATETIME'} as Format;
-    private static DATEFORMAT: Format = {display:'yyyy-MM-dd', type:'DATETIME'} as Format;
-    private static MONTHFORMAT: Format = {display:'yyyy-MM', type:'DATETIME'} as Format;
-    private static WEEKFORMAT: Format = {display:'YYYY-[W]WW', type:'DATETIME'} as Format;
-    private static TIMEFORMAT: Format = {display:'HH:mm', type:'DATETIME'} as Format;
+    private static DATETIMEFORMAT: Format = { display: 'yyyy-MM-dd\'T\'HH:mm:ss', type: 'DATETIME' } as Format;
+    private static DATEFORMAT: Format = { display: 'yyyy-MM-dd', type: 'DATETIME' } as Format;
+    private static MONTHFORMAT: Format = { display: 'yyyy-MM', type: 'DATETIME' } as Format;
+    private static WEEKFORMAT: Format = { display: 'YYYY-\'W\'WW', type: 'DATETIME' } as Format;
+    private static TIMEFORMAT: Format = { display: 'HH:mm', type: 'DATETIME' } as Format;
     private static BROWSERNUMBERFORMAT = new NumberParser();
 
     @Input('svyFormat') format: Format;
@@ -62,27 +62,42 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private isKeyPressEventFired = false;
     private oldInputValue = null;
     private listeners = [];
-    private maskFormat : MaskFormat;
+    private maskFormat: MaskFormat;
     private readonly log: LoggerService;
+    private focusText: string;
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService,
         @Inject(DOCUMENT) private doc: Document, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('formatdirective');
     }
 
-    @HostListener('blur', []) touched() {
+    @HostListener('blur', ['$event.target.value']) touched(value: any) {
         this.onTouchedCallback();
         this.hasFocus = false;
+        this.dateInputChange(value);
         const inputType = this.getType();
         if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
             this.writeValue(this.realValue);
+        }
+        if (!this.format.isMask && (this.format.uppercase || this.format.lowercase) && this.focusText != this._elementRef.nativeElement.value && inputType === 'text') {
+            this._elementRef.nativeElement.dispatchEvent(new CustomEvent('change', { bubbles: true }));
         }
     }
 
     @HostListener('focus', []) focussed() {
         this.hasFocus = true;
+        // make sure all updates are processed
+        setTimeout(() => {
+            this.focusText = this._elementRef.nativeElement.value;
+        });
         if (this.format.display && this.format.edit && this.format.edit !== this.format.display) {
             this.writeValue(this.realValue);
+        }
+    }
+
+    @HostListener('keydown', ['$event']) keyDown(event: KeyboardEvent) {
+        if (event.key === 'Enter') {
+            this.dateInputChange((event.target as HTMLInputElement).value);
         }
     }
 
@@ -90,20 +105,18 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         let data = value;
         const inputType = this.getType();
         if (inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week') {
-             const luxonDate = DateTime.fromISO(data);
-             if (luxonDate.isValid)
-                data = luxonDate.toJSDate();
-            else data = null;
-        } else if (inputType === 'number') {
-             data = FormatDirective.BROWSERNUMBERFORMAT.parse(value);
+            return;
+        }
+        else if (inputType === 'number') {
+            data = FormatDirective.BROWSERNUMBERFORMAT.parse(value);
         } else if (inputType === 'email') {
-             data = value;
+            data = value;
         } else if (!this.findmode && this.format) {
             const type = this.format.type;
             let format = this.format.display ? this.format.display : this.format.edit;
             if (this.hasFocus && this.format.edit && !this.format.isMask) format = this.format.edit;
             try {
-                data = this.formatService.unformat(data, format, type, this.realValue);
+                data = this.formatService.unformat(data, format, type, this.realValue, true);
             } catch (e) {
                 this.log.error(e);
                 //TODO set error state
@@ -131,8 +144,25 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
                 }
             }
         }
-        this.realValue = data;
-        this.onChangeCallback(data);
+        this.setRealValue(data);
+    }
+
+    dateInputChange(value: any) {
+        let data = value;
+        const inputType = this.getType();
+        if (inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week') {
+            const luxonDate = DateTime.fromISO(data);
+            if (luxonDate.isValid)
+                data = luxonDate.toJSDate();
+            else data = null;
+
+            this.setRealValue(data);
+        }
+    }
+
+    setRealValue(value: any) {
+        this.realValue = value;
+        this.onChangeCallback(value);
     }
 
     onChangeCallback = (_: any) => { };
@@ -159,8 +189,8 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         this.realValue = value;
         const inputType = this.getType();
         if (inputType === 'datetime-local') {
-             const data = this.formatService.format(value, FormatDirective.DATETIMEFORMAT, false);
-             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+            const data = this.formatService.format(value, FormatDirective.DATETIMEFORMAT, false);
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
         } else if (inputType === 'date') {
             const data = this.formatService.format(value, FormatDirective.DATEFORMAT, false);
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
@@ -174,14 +204,13 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             const data = this.formatService.format(value, FormatDirective.WEEKFORMAT, false);
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
         } else if (inputType === 'number') {
-            const data = value?new Intl.NumberFormat().format(value):'';
-            this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
+            this._renderer.setProperty(this._elementRef.nativeElement, 'value', value);
         } else if (inputType === 'email') {
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', value);
         } else if ((value !== null && value !== undefined) && this.format) {
             let data = value;
             if (!this.findmode) {
-                data = inputType  === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength) : data;
+                data = inputType === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength) : data;
                 let useEdit = !this.format.display;
                 if (this.format.edit && !this.format.isMask && this.hasFocus) useEdit = true;
                 try {
@@ -202,16 +231,16 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
 
     private getType(): string {
         const type = this._elementRef.nativeElement.type as string;
-        return type?type.toLocaleLowerCase():'text';
+        return type ? type.toLocaleLowerCase() : 'text';
     }
 
     private setFormat() {
         this.listeners.forEach(lFn => lFn());
         this.listeners = [];
-        if (this.maskFormat){
-           this.maskFormat.destroy();
-           this.maskFormat = null; 
-        } 
+        if (this.maskFormat) {
+            this.maskFormat.destroy();
+            this.maskFormat = null;
+        }
         if (this.format) {
             if (!this.findmode && (this.format.uppercase || this.format.lowercase)) {
                 this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'input', () => this.upperOrLowerCase()));

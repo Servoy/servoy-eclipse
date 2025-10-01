@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.internal.InternalPolicy;
 import org.eclipse.jface.util.Policy;
@@ -51,7 +50,6 @@ import org.eclipse.swt.widgets.Widget;
  * </p>
  *
  * @since 3.3
- *
  */
 public abstract class ColumnViewer extends StructuredViewer {
 
@@ -227,9 +225,6 @@ public abstract class ColumnViewer extends StructuredViewer {
 	/**
 	 * Sets up editing support for the given column based on the "old" cell
 	 * editor API.
-	 *
-	 * @param columnIndex
-	 * @param viewer
 	 */
 	private void setupEditingSupport(final int columnIndex, ViewerColumn viewer) {
 		if (getCellModifier() != null) {
@@ -340,7 +335,6 @@ public abstract class ColumnViewer extends StructuredViewer {
 	 * may also implement {@link IColorProvider} and/or {@link IFontProvider} to
 	 * provide colors and/or fonts.
 	 * </p>
-	 *
 	 */
 	@Override
 	public void setLabelProvider(IBaseLabelProvider labelProvider) {
@@ -762,9 +756,7 @@ public abstract class ColumnViewer extends StructuredViewer {
 					message += " This is only logged once per viewer instance," + //$NON-NLS-1$
 							" but similar calls will still be ignored."; //$NON-NLS-1$
 				}
-				Policy.getLog().log(
-						new Status(IStatus.WARNING, Policy.JFACE, message,
-								new RuntimeException()));
+				Policy.getLog().log(Status.warning(message));
 			}
 			return true;
 		}
@@ -1092,5 +1084,11 @@ public abstract class ColumnViewer extends StructuredViewer {
 		}
 		// by default return given selection.
 		return selection;
+	}
+
+	@Override
+	protected void unmapAllElements() {
+		expandableNodes.clear();
+		super.unmapAllElements();
 	}
 }

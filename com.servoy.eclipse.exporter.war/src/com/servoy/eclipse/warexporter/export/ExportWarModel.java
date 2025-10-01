@@ -36,15 +36,19 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -62,6 +66,16 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 public class ExportWarModel extends AbstractWarExportModel
 {
 
+	public static IDialogSettings getDialogSettings()
+	{
+		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		IDialogSettings section = activeProject != null
+			? DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName())
+			: DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard");
+		return section;
+	}
+
 	private String fileName;
 	private final List<String> plugins = new ArrayList<String>();
 	private final List<String> beans = new ArrayList<String>();
@@ -75,7 +89,6 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean startRMI = false;
 	private boolean exportActiveSolution;
 	private String exportNG2 = "true";
-	private boolean exportNG1 = false;
 	private boolean overwriteSocketFactoryProperties;
 	private final List<String> pluginLocations;
 	private boolean exportAllTablesFromReferencedServers;
@@ -119,53 +132,46 @@ public class ExportWarModel extends AbstractWarExportModel
 	private WorkspaceJob searchForUsedAndUnderTheHoodWebObjectsJob;
 	private String generateExportCommandLinePropertiesFileSavePath;
 
-	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
+	public ExportWarModel(IDialogSettings settings)
 	{
-		super(isNGExport);
-		if (isNGExport)
+		super();
+		searchForUsedAndUnderTheHoodWebObjectsJob = new WorkspaceJob("Searching used components and services data")
 		{
-			searchForUsedAndUnderTheHoodWebObjectsJob = new WorkspaceJob("Searching used components and services data")
+
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				try
 				{
-					try
-					{
-						searchForComponentsAndServicesBothDefaultAndInSolution();
+					searchForComponentsAndServicesBothDefaultAndInSolution();
 
-						// at one point we were showing under-the-hood components that are always needed to the user in the pick services/components dialog;
-						// that is no longer the case, but old exports might have saved those in settings; update the model to not include setComponentsToExportWithoutUnderTheHoodOnes
-						// they were initially set in code below, outside of this runInWorkspace
-						if (componentsToExportWithoutUnderTheHoodOnes != null)
-						{
-							componentsToExportWithoutUnderTheHoodOnes.removeAll(ExportWarModel.super.getComponentsNeededUnderTheHood());
-						}
-						if (servicesToExportWithoutUnderTheHoodOnes != null)
-						{
-							servicesToExportWithoutUnderTheHoodOnes.removeAll(ExportWarModel.super.getServicesNeededUnderTheHoodWithoutSabloServices());
-						}
-					}
-					catch (final Exception e)
+					// at one point we were showing under-the-hood components that are always needed to the user in the pick services/components dialog;
+					// that is no longer the case, but old exports might have saved those in settings; update the model to not include setComponentsToExportWithoutUnderTheHoodOnes
+					// they were initially set in code below, outside of this runInWorkspace
+					if (componentsToExportWithoutUnderTheHoodOnes != null)
 					{
-						Debug.error(e);
-						searchProblem = true;
+						componentsToExportWithoutUnderTheHoodOnes.removeAll(ExportWarModel.super.getComponentsNeededUnderTheHood());
 					}
-					finally
+					if (servicesToExportWithoutUnderTheHoodOnes != null)
 					{
-						ready = true;
+						servicesToExportWithoutUnderTheHoodOnes.removeAll(ExportWarModel.super.getServicesNeededUnderTheHoodWithoutSabloServices());
 					}
-					return Status.OK_STATUS;
 				}
-			};
-			searchForUsedAndUnderTheHoodWebObjectsJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
-			searchForUsedAndUnderTheHoodWebObjectsJob.setUser(false);
-			searchForUsedAndUnderTheHoodWebObjectsJob.schedule();
-		}
-		else
-		{
-			ready = true;
-		}
+				catch (final Exception e)
+				{
+					Debug.error(e);
+					searchProblem = true;
+				}
+				finally
+				{
+					ready = true;
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		searchForUsedAndUnderTheHoodWebObjectsJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		searchForUsedAndUnderTheHoodWebObjectsJob.setUser(false);
+		searchForUsedAndUnderTheHoodWebObjectsJob.schedule();
 
 		Cipher desCipher = null;
 		try
@@ -186,7 +192,6 @@ public class ExportWarModel extends AbstractWarExportModel
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
 		exportNG2 = settings.get("export.ng2");
-		exportNG1 = Utils.getAsBoolean(settings.get("export.legacyng"));
 		exportNoneActiveSolutions = Utils.getAsBoolean(settings.get("export.exportNoneActiveSolutions"));
 		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
 		if (settings.get("export.startRMI") != null) startRMI = Utils.getAsBoolean(settings.get("export.startRMI"));
@@ -236,16 +241,13 @@ public class ExportWarModel extends AbstractWarExportModel
 			setOverwriteDeployedServoyProperties(false);
 		}
 
-		if (isNGExport())
+		if (settings.getArray("export.components") != null)
 		{
-			if (settings.getArray("export.components") != null)
-			{
-				setComponentsToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(settings.getArray("export.components"))));
-			}
-			if (settings.getArray("export.services") != null)
-			{
-				setServicesToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(settings.getArray("export.services"))));
-			}
+			setComponentsToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(settings.getArray("export.components"))));
+		}
+		if (settings.getArray("export.services") != null)
+		{
+			setServicesToExportWithoutUnderTheHoodOnes(new TreeSet<String>(Arrays.asList(settings.getArray("export.services"))));
 		}
 		pluginLocations = new ArrayList<String>();
 		String[] array = settings.getArray("plugin.locations");
@@ -401,7 +403,6 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		settings.put("export.warfilename", warFileName);
 		settings.put("export.ng2", exportNG2Mode());
-		settings.put("export.legacyng", exportNG1());
 		settings.put("export.userHome", getUserHome());
 		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
@@ -637,17 +638,6 @@ public class ExportWarModel extends AbstractWarExportModel
 	public void setExportNG2Mode(String exportNG2)
 	{
 		this.exportNG2 = exportNG2;
-	}
-
-	@Override
-	public boolean exportNG1()
-	{
-		return exportNG1;
-	}
-
-	public void setExportNG1(boolean exportNG1)
-	{
-		this.exportNG1 = exportNG1;
 	}
 
 	public List<String> getPlugins()

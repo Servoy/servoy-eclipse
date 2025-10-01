@@ -16,7 +16,6 @@
 package org.eclipse.jface.viewers;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.internal.InternalPolicy;
 import org.eclipse.jface.util.Policy;
@@ -78,7 +77,7 @@ public abstract class ContentViewer extends Viewer {
 			Control control = getControl();
 			if (control == null || control.isDisposed()) {
 				if (logWhenDisposed) {
-					String message = "Ignored labelProviderChanged notification because control is diposed." + //$NON-NLS-1$
+					String message = "Ignored labelProviderChanged notification because control is disposed." + //$NON-NLS-1$
 							" This indicates a potential memory leak."; //$NON-NLS-1$
 					if (!InternalPolicy.DEBUG_LOG_LABEL_PROVIDER_NOTIFICATIONS_WHEN_DISPOSED) {
 						// stop logging after the first
@@ -86,9 +85,7 @@ public abstract class ContentViewer extends Viewer {
 						message += " This is only logged once per viewer instance," + //$NON-NLS-1$
 								" but similar calls will still be ignored."; //$NON-NLS-1$
 					}
-					Policy.getLog().log(
-							new Status(IStatus.WARNING, Policy.JFACE, message,
-									new RuntimeException()));
+					Policy.getLog().log(Status.warning(message));
 				}
 				return;
 			}
@@ -173,7 +170,7 @@ public abstract class ContentViewer extends Viewer {
 				// ignore exception
 				String message = "Exception while calling ContentProvider.inputChanged from ContentViewer.handleDispose"; //$NON-NLS-1$
 				message += " (" + contentProvider.getClass().getName() + ")"; //$NON-NLS-1$//$NON-NLS-2$
-				Policy.getLog().log(new Status(IStatus.WARNING, Policy.JFACE, message, e));
+				Policy.getLog().log(Status.warning(message, e));
 			}
 			contentProvider.dispose();
 			contentProvider = null;

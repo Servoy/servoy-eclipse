@@ -24,11 +24,13 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.RfbSelectionListener;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -79,6 +81,14 @@ public class SetSelectionHandler implements IServerService
 				IStructuredSelection structuredSelection = new StructuredSelection(selection);
 				selectionListener.setLastSelection(structuredSelection);
 				selectionProvider.setSelection(selection.size() == 0 ? null : structuredSelection);
+
+				// if a set selection came from the browser, then this should have focus and should be the active part
+				if (selection.size() > 0 && editorPart != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
+				{
+					// if that is not the case make it active, can happen in certain conditions
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
+				}
+
 			}
 		});
 		return null;

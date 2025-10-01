@@ -2,20 +2,30 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Document Plug-in
 Bundle-SymbolicName: j2db_documentation;singleton:=true
-Bundle-Version: 2024.6.0.3980_rc
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-Version: 2025.12.0.4120_rc
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-Vendor: Servoy
-Require-Bundle: servoy_shared,
+Require-Bundle: com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.17.1",
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.17.1",
+ com.fasterxml.jackson.core.jackson-databind;bundle-version="2.17.1",
+ servoy_shared,
  org.eclipse.dltk.javascript.rhino,
  servoy_smart_client,
  com.servoy.eclipse.core,
  com.servoy.eclipse.debug,
  j2db_server,
- sablo
+ sablo,
+ org.eclipse.dltk.javascript.parser;bundle-version="5.2.0",
+ org.eclipse.dltk.core;bundle-version="5.1.1"
 Export-Package: com.servoy.build.documentation
 Import-Package: freemarker.cache,
  freemarker.core,
  freemarker.template,
+ freemarker.template.utility,
  org.apache.commons.io,
- org.apache.commons.io.filefilter
+ org.apache.commons.io.filefilter,
+ org.apache.commons.lang3,
+ org.apache.commons.text,
+ org.dom4j,
+ org.dom4j.io
 Automatic-Module-Name: j2db_documentation

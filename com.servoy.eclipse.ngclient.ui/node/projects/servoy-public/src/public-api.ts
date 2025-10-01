@@ -28,6 +28,7 @@ export * from './lib/utils/date_utils';
 export * from './lib/utils/popupform';
 export * from './lib/spectypes.service';
 export * from './lib/testing/publictesting.module';
+export * from './lib/testing/servoyapi_testing';
 export * from './lib/testing/utils';
 export * from './lib/directives/tabfix.directive';
-
+export * from './lib/services/popup-state.service';

@@ -75,9 +75,10 @@ import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.Expression;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
 import org.eclipse.dltk.javascript.ast.IVariableStatement;
+import org.eclipse.dltk.javascript.ast.JSNode;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.Statement;
-import org.eclipse.dltk.javascript.ast.VariableDeclaration;
+import org.eclipse.dltk.javascript.ast.VariableBinding;
 import org.eclipse.dltk.javascript.ast.VoidExpression;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -124,6 +125,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
+import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -192,6 +194,7 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.servlets.RootIndexPageFilter;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -707,7 +710,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 			private MobileExporter getMobileExporter(HttpRequest request)
 			{
-				MobileExporter exporter = new MobileExporter();
+				MobileExporter exporter = new MobileExporter(null);
 				exporter.setDebugMode(true);
 				exporter.setServerURL(request.queryParam("u"));
 				exporter.setSolutionName(request.queryParam("s"));
@@ -984,19 +987,19 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	 * @param rootObjectId the rootObjectId of the style.
 	 * @return the style with the given name.
 	 */
-	public IRootObject getActiveRootObject(int rootObjectId)
+	public IRootObject getActiveRootObject(UUID rootObjectUUID)
 	{
 		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
 			{
-				return repository.getActiveRootObject(rootObjectId);
+				return repository.getActiveRootObject(rootObjectUUID);
 				// TODO Problem markers for deserialize exception (in servoy builder)
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logWarning("Cannot get style object with id " + rootObjectId + " from " + activeResourcesProject, e);
+				ServoyLog.logWarning("Cannot get style object with uuid " + rootObjectUUID + " from " + activeResourcesProject, e);
 			}
 		}
 		else
@@ -1189,7 +1192,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						progress.worked(1);
 						if (activeProject != null)
 						{
-							// prefetch the editting solution to minimize ui lags
+							// prefetch the editing solution to minimize ui lags
 							progress.subTask("Preparing solution for editing...");
 							if (Display.getCurrent() != null)
 							{
@@ -1206,6 +1209,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								{
 								}
 							}
+
+							RootIndexPageFilter.ACTIVE_SOLUTION_NAME = activeProject.getEditingFlattenedSolution().getName();
 						}
 
 						Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
@@ -1337,6 +1342,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						progress.worked(1);
 
 						fireLoadingDone();
+
+
 					}
 				}
 				finally
@@ -1591,7 +1598,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						}
 						else
 						{
-							dataModelManager = null;
+							dataModelManager = new DataModelManager(null, serverManager);
 							sequenceProvider = null;
 						}
 						if (old != null)
@@ -1663,6 +1670,10 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						// so we must reload the form security access info
 						getUserManager().reloadAllFormInfo();
 						monitor.worked(4);
+					}
+					if (activeResourcesProject == null && dataModelManager == null)
+					{
+						dataModelManager = new DataModelManager(null, ApplicationServerRegistry.get().getServerManager());
 					}
 				}
 				finally
@@ -1931,13 +1942,13 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	public void firePersistChanged(boolean realSolution, Object obj, boolean recursive)
 	{
 		flushFlattenedFormCache(realSolution); // looking up elements in firePersistChangedInternal may use out-of-date flattened forms
-		firePersistChangedInternal(realSolution, obj, recursive, new HashSet<Integer>());
+		firePersistChangedInternal(realSolution, obj, recursive, new HashSet<String>());
 	}
 
-	private void firePersistChangedInternal(boolean realSolution, Object obj, boolean recursive, Set<Integer> visited)
+	private void firePersistChangedInternal(boolean realSolution, Object obj, boolean recursive, Set<String> visited)
 	{
 		// Protect against cycle in form extends relation.
-		if (obj instanceof IPersist && !visited.add(new Integer(((IPersist)obj).getID())))
+		if (obj instanceof IPersist && !visited.add(((IPersist)obj).getUUID().toString()))
 		{
 			return;
 		}
@@ -2281,7 +2292,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					EclipseRepository eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 
 					// DO STUFF RELATED TO SOLUTION PROJECTS
-					if (element.getKind() != IResourceDelta.REMOVED && project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
+					if (element.getKind() != IResourceDelta.REMOVED && project.isOpen() &&
+						(project.hasNature(ServoyProject.NATURE_ID) || project.hasNature(ServoyDeveloperProject.NATURE_ID)))
 					{
 						// so the project is a Servoy project, still exists and is open
 						// refresh cached project list if necessary
@@ -2366,7 +2378,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						if (isLoaded)
 						{
 							eclipseRepository.removeRootObject(
-								eclipseRepository.getRootObjectMetaData(resource.getName(), IRepository.SOLUTIONS).getRootObjectId());
+								eclipseRepository.getRootObjectMetaData(resource.getName(), IRepository.SOLUTIONS).getRootObjectUuid());
 							// it is unloaded; avoid loading it afterwards when checking for active solutions
 							if (activeProject != null && activeProject.getProject().getName().equals(resource.getName()))
 							{
@@ -2385,11 +2397,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 					// DO STUFF RELATED TO RESOURCES PROJECTS
 					checkForResourcesProjectRename(element, project);
-					if (activeResourcesProject != null && project == activeResourcesProject.getProject() && project.isOpen() &&
-						project.hasNature(ServoyResourcesProject.NATURE_ID))
-					{
-						modifyDBIFilesToAllClones(element);
-					}
 					if (element.getKind() != IResourceDelta.REMOVED && project.isOpen())
 					{
 						// something happened to this project, resulting in a valid open project; see if it is the currently active resources project
@@ -2502,7 +2509,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			}
 		}
 		// if the boolean is set to false then the module changed code was called and needs to be called once.
-		if (skipModuleChanged.booleanValue() == false)
+		if (skipModuleChanged != null && skipModuleChanged.booleanValue() == false)
 		{
 			// it is called
 			skipModuleChanged = null;
@@ -2518,7 +2525,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	private void refreshGlobalScopes(boolean fireChange)
 	{
 		boolean realSolutionScopnamesChanged = false;
-		for (ServoyProject project : getModulesOfActiveProject())
+		List<ServoyProject> servoyProjects = new ArrayList(Arrays.asList(getModulesOfActiveProject()));
+		if (activeProject != null)
+		{
+			servoyProjects.addAll(activeProject.getDeveloperProjects());
+		}
+		for (ServoyProject project : servoyProjects)
 		{
 			List<String> globalScopenames = project.getGlobalScopenames();
 			String[] scopeNames = globalScopenames.toArray(new String[globalScopenames.size()]);
@@ -2557,64 +2569,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				MessageDialog.openError(UIUtils.getActiveShell(), "Save error", ex.getMessage());
 			}
 		});
-	}
-
-	private void modifyDBIFilesToAllClones(final IResourceDelta element)
-	{
-		List<IResourceDelta> al = findChangedFiles(element, new ArrayList<IResourceDelta>());
-		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
-		if (serverManager != null && dataModelManager != null)
-		{
-			for (IResourceDelta fileRd : al)
-			{
-				final IFile file = (IFile)fileRd.getResource();
-				if (file.getName().endsWith(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT))
-				{
-					String serverName = file.getParent().getName();
-					final IServer[] servers = serverManager.getDataModelCloneServers(serverName);
-					if (servers != null && servers.length > 0)
-					{
-						final String tableName = file.getName().substring(0,
-							file.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-						final Job job = new WorkspaceJob("Writing dbi file changes to all clones - " + file.getName())
-						{
-							@Override
-							public IStatus runInWorkspace(IProgressMonitor monitor)
-							{
-								for (IServer server : servers)
-								{
-									try
-									{
-										IFile cloneFile = dataModelManager.getDBIFile(server.getName(), tableName);
-										if ((element.getKind() == IResourceDelta.REMOVED || !file.exists()) && cloneFile.exists())
-										{
-											cloneFile.delete(true, null);
-										}
-										if (file.exists() && (element.getKind() == IResourceDelta.ADDED || element.getKind() == IResourceDelta.CHANGED))
-										{
-											try (InputStream is = file.getContents())
-											{
-												ResourcesUtils.createOrWriteFile(cloneFile, is, true);
-											}
-										}
-									}
-									catch (Exception ex)
-									{
-										ServoyLog.logError(ex);
-									}
-								}
-								return Status.OK_STATUS;
-							}
-						};
-
-						job.setUser(false);
-						job.setSystem(true);
-						job.setRule(getWorkspace().getRoot());
-						job.schedule();
-					}
-				}
-			}
-		}
 	}
 
 	private void checkForResourcesProjectRename(IResourceDelta element, IProject project)
@@ -2978,16 +2932,16 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				{
 					// if there is a media in the modules with the same name, but no file on in the ws, then ignore it, because
 					// it is deleting
-					int skip_media_id = 0;
+					UUID skip_media_uuid = null;
 					Media moduleMedia = getFlattenedSolution().getMedia(name);
 					if (moduleMedia != null)
 					{
 						Pair<String, String> filePath = SolutionSerializer.getFilePath(moduleMedia, false);
 						if (!servoyProject.getProject().getWorkspace().getRoot().getFile(new Path(filePath.getLeft() + filePath.getRight())).exists())
-							skip_media_id = moduleMedia.getID();
+							skip_media_uuid = moduleMedia.getUUID();
 					}
 
-					media = editingSolution.createNewMedia(getNameValidator(), name, skip_media_id);
+					media = editingSolution.createNewMedia(getNameValidator(), name, skip_media_uuid);
 					media.setMimeType(eclipseRepository.getContentType(name));
 				}
 				if (media != null) eclipseRepository.updateNodesInWorkspace(new IPersist[] { media }, false, false);
@@ -3403,7 +3357,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						{
 							// the style is there, only needs to be loaded into the repository
 							repository.addRootObjectMetaData(md);
-							modifiedResourcesList.add(repository.getActiveRootObject(md.getRootObjectId()));
+							modifiedResourcesList.add(repository.getActiveRootObject(md.getRootObjectUuid()));
 						}
 					}
 					catch (RepositoryException e)
@@ -3421,7 +3375,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					try
 					{
 						modifiedResourcesList.add(resource);
-						repository.removeRootObject(resource.getID());
+						repository.removeRootObject(resource.getUUID());
 					}
 					catch (RepositoryException e)
 					{
@@ -3774,19 +3728,25 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		{
 			if (statement instanceof VoidExpression)
 			{
-				IPersist persist = null;
 				Expression expression = ((VoidExpression)statement).getExpression();
+				IPersist persist = null;
 				if (expression instanceof IVariableStatement)
 				{
-					VariableDeclaration decl = ((IVariableStatement)expression).getVariables().get(0);
-
+					VariableBinding decl = ((IVariableStatement)expression).getBindings().get(0);
+					List<String> variableNames = decl.getVariableNames();
+					//in case there are more variables (destructuring), only the first one has the comment
+					String variableName = variableNames.get(0);
 					if (parent instanceof Form)
 					{
-						persist = ((Form)parent).getScriptVariable(decl.getVariableName());
+						persist = ((Form)parent).getScriptVariable(variableName);
 					}
 					else if (parent instanceof Solution && scopeName != null)
 					{
-						persist = ((Solution)parent).getScriptVariable(scopeName, decl.getVariableName());
+						persist = ((Solution)parent).getScriptVariable(scopeName, variableName);
+					}
+					if (persist != null)
+					{
+						addChildToMultiTextEdit(textEdit, statement, persist, expression, scriptFile);
 					}
 				}
 				else if (expression instanceof FunctionStatement)
@@ -3808,42 +3768,47 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							persist = ((TableNode)parent).getFoundsetMethod(name);
 						}
 					}
-				}
-				if (persist != null)
-				{
-					Comment documentation = expression.getDocumentation();
-
-					JSDocScriptTemplates prefs = JSDocScriptTemplates.getTemplates(scriptFile.getProject(), true);
-					String userTemplate = (persist instanceof IVariable) ? prefs.getVariableTemplate() : prefs.getMethodTemplate();
-					String comment = null;
-					try
+					if (persist != null)
 					{
-						comment = SolutionSerializer.getComment(persist, userTemplate, ApplicationServerRegistry.get().getDeveloperRepository());
-					}
-					catch (RuntimeException e)
-					{
-					}
-					if (comment == null) continue;
-					if (documentation == null || !documentation.getText().equals(comment.trim()))
-					{
-						// if the jsdoc didn't match make sure that the persist is flagged as changed, because it needs to be regenerated.
-						persist.flagChanged();
-						if (documentation == null)
-						{
-							if (!comment.endsWith("\n")) comment += "\n";
-							textEdit.addChild(new InsertEdit(statement.sourceStart(), comment));
-						}
-						else
-						{
-							textEdit.addChild(
-								new ReplaceEdit(documentation.sourceStart(), documentation.sourceEnd() - documentation.sourceStart(), comment.trim()));
-						}
+						addChildToMultiTextEdit(textEdit, statement, persist, expression, scriptFile);
 					}
 				}
 
 			}
 		}
 		return textEdit;
+	}
+
+	private void addChildToMultiTextEdit(MultiTextEdit textEdit, Statement statement, IPersist persist, JSNode expression, IResource scriptFile)
+	{
+		Comment documentation = expression.getDocumentation();
+
+		JSDocScriptTemplates prefs = JSDocScriptTemplates.getTemplates(scriptFile.getProject(), true);
+		String userTemplate = (persist instanceof IVariable) ? prefs.getVariableTemplate() : prefs.getMethodTemplate();
+		String comment = null;
+		try
+		{
+			comment = SolutionSerializer.getComment(persist, userTemplate, ApplicationServerRegistry.get().getDeveloperRepository());
+		}
+		catch (RuntimeException e)
+		{
+		}
+		if (comment == null) return;
+		if (documentation == null || !documentation.getText().equals(comment.trim()))
+		{
+			// if the jsdoc didn't match make sure that the persist is flagged as changed, because it needs to be regenerated.
+			persist.flagChanged();
+			if (documentation == null)
+			{
+				if (!comment.endsWith("\n")) comment += "\n";
+				textEdit.addChild(new InsertEdit(statement.sourceStart(), comment));
+			}
+			else
+			{
+				textEdit.addChild(
+					new ReplaceEdit(documentation.sourceStart(), documentation.sourceEnd() - documentation.sourceStart(), comment.trim()));
+			}
+		}
 	}
 
 	private final List<File> ignoreOnceFiles = Collections.synchronizedList(new ArrayList<File>());
@@ -3941,11 +3906,25 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						while (it.hasNext())
 						{
 							String path = it.next();
-							IResource resource = getWorkspace().getRoot().getFile(new Path(path));
-							resources.add(resource);
-							if (!resource.exists())
+							try
 							{
-								it.remove();
+								IResource resource = getWorkspace().getRoot().findMember(new Path(path));
+								if (resource == null || !resource.exists())
+								{
+									it.remove();
+									ServoyLog.logWarning("The path " + path + " from the working set file " + workingSetName +
+										" is illegal, will remove it from the working set",
+										new RuntimeException("Illegal path in working set file " + workingSetName));
+								}
+								else
+								{
+									resources.add(resource);
+								}
+							}
+							catch (Exception e)
+							{
+								ServoyLog.logError("The path " + path + " from the working set file " + workingSetName + " is illegal, please adjust that file",
+									e);
 							}
 						}
 					}
@@ -3979,7 +3958,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			(event.getNewValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId())))
 		{
 
-			Job job = new Job("Seriale working set")
+			Job job = new Job("Serialize working set")
 			{
 				@Override
 				protected IStatus run(IProgressMonitor monitor)

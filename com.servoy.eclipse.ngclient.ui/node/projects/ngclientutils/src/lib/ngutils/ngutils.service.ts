@@ -1,6 +1,6 @@
-import { Injectable, Renderer2, Inject, RendererFactory2 } from '@angular/core';
+import { Injectable, Renderer2, Inject, RendererFactory2, DOCUMENT } from '@angular/core';
 
-import { DOCUMENT, PlatformLocation } from '@angular/common';
+import { PlatformLocation } from '@angular/common';
 import { WindowRefService, ServoyPublicService } from '@servoy/public';
 
 @Injectable()
@@ -330,11 +330,13 @@ export class NGUtilsService {
 	*/
     public printDocument(url: string) {
 		const objFra = document.createElement('iframe');   
-	    objFra.style.visibility = 'hidden';    
-	    objFra.src = url;                      
-	    document.body.appendChild(objFra);  
-	    objFra.contentWindow.focus();      
-	    objFra.contentWindow.print();
+        objFra.style.visibility = 'hidden';
+        document.body.appendChild(objFra);
+        objFra.onload = () => {
+                objFra.contentWindow.focus();
+                objFra.contentWindow.print();
+        };    
+        objFra.src = url;                      
 	}
 
     /**

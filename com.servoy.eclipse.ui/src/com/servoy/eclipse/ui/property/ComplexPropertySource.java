@@ -92,4 +92,10 @@ public abstract class ComplexPropertySource<T> implements IPropertySource
 		return false;
 	}
 
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + "[" + complexProperty + "]";
+	}
+
 }

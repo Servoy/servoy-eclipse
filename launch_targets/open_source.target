@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<target name="open_source">
+	<locations>
+		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<repository location="https://download.servoy.com/developer/latest/4001"/>
+			<unit id="com.servoy.css.core.feature.group" version="2024.9.0.4001_rc2"/>
+			<unit id="com.servoy.eclipse.feature.feature.group" version="2024.9.0.4001_rc2"/>
+			<unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202407231120"/>
+			<unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202407231204"/>
+			<unit id="org.eclipse.draw2d.feature.group" version="3.20.0.202405290843"/>
+			<unit id="org.eclipse.emf.common.feature.group" version="2.31.0.v20240314-0928"/>
+			<unit id="org.eclipse.emf.common.ui.feature.group" version="2.21.0.v20231002-1020"/>
+			<unit id="org.eclipse.emf.ecore.feature.group" version="2.37.0.v20240203-0859"/>
+			<unit id="org.eclipse.emf.edit.feature.group" version="2.22.0.v20231208-1346"/>
+			<unit id="org.eclipse.emf.edit.ui.feature.group" version="2.25.0.v20230211-1150"/>
+			<unit id="org.eclipse.gef.feature.group" version="3.20.0.202405290843"/>
+		</location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
+            <repository location="https://developer.servoy.com/sqlexplorer/"/>
+        </location>		
+	</locations>
+</target>

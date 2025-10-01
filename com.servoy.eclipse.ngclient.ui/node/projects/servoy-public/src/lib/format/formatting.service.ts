@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import numbro from 'numbro';
+import BigNumber from "bignumber.js";
 import { DateTime } from 'luxon';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
@@ -128,12 +129,15 @@ export class FormattingService {
             servoyFormat = this.convertFormat(servoyFormat);
             let d = DateTime.fromFormat(data, servoyFormat, { locale: this.servoyService.getLocale() }).toJSDate();
             if (isNaN(d.getTime()) && useHeuristics) {
-                for (var newFormat of this.getHeuristicFormats(servoyFormat)) {
+                
+				const possibleDates: Map<string,Date> = new Map();
+                for (const newFormat of this.getHeuristicFormats(servoyFormat, data)) {
                     d = DateTime.fromFormat(data, newFormat, { locale: this.servoyService.getLocale() }).toJSDate();
                     if (!isNaN(d.getTime())) {
-                        break;
+                        possibleDates.set(newFormat,d);
                     }
                 }
+				d = this.findClosestDate(possibleDates, servoyFormat);
             }
             // if format has not year/month/day use the one from the current model value
             // because luxon will just use current date
@@ -154,6 +158,24 @@ export class FormattingService {
         }
         return data;
     }
+	
+	private findClosestDate(dateMap: Map<string,Date>, servoyFormat: string): Date {
+        // if there is just one return that.
+		if (dateMap.size === 1) return dateMap.values().next().value
+        // else find the one closest to the current format (starts with the same letters)
+        const strippedFormat = servoyFormat.replace(/[^a-zA-Z]/g, '');
+        for (const key of dateMap.keys()) {
+            if (strippedFormat.startsWith(key) || servoyFormat.startsWith(key)) {
+                return dateMap.get(key);
+            }
+        }
+        // fallback to closest date
+		const currentDateTime = new Date().getTime();
+        const dateArray = Array.from(dateMap.values());
+		const dateArrayConverted = dateArray.map(date => date.getTime()).map(time => Math.abs(currentDateTime - time));
+		const index = dateArrayConverted.indexOf(Math.min(...dateArrayConverted));
+		return dateArray[index];
+	}
 
     private addToFormats(formats: Array<string>,formatLetters: Array<string>, newChar: string, isSeparator: boolean) {
         const size = formats.length;
@@ -185,8 +207,8 @@ export class FormattingService {
         }
     }
 
-    private containsAllLetters(newFormat: String, formatLetters: Array<string>): boolean{
-        for (let formatLetter of  formatLetters){
+    private containsAllLetters(newFormat: string, formatLetters: Array<string>): boolean{
+        for (const formatLetter of  formatLetters){
             if (newFormat.indexOf(formatLetter) < 0){
                 return false;
             }
@@ -194,28 +216,35 @@ export class FormattingService {
         return true;
     }
     
-    private getHeuristicFormats(servoyFormat: string): Array<string> {
+    private getHeuristicFormats(servoyFormat: string, input?: string): Array<string> {
         const formats = new Array<string>();
         const formatLetters = new Array<string>();
-        let separator;
         if (servoyFormat) {
             for (let index = 0; index < servoyFormat.length; index++) {
                 const currentChar = servoyFormat.charAt(index);
                 if (currentChar.match(/[a-zA-Z]/)) {
                     this.addToFormats(formats,formatLetters, currentChar, false);
-                }
-                else if (!separator || separator == currentChar) {
-                    separator = currentChar;
+                } else {
                     this.addToFormats(formats,formatLetters, currentChar, true);
-                }
-                else {
-                    // another separator?
-                    break;
                 }
             }
         }
+		if (input) {
+			return formats.filter(format => format.length === input.length && this.compareInputWithFormat(input, format));
+		} 
         return formats;
     }
+	
+	private compareInputWithFormat(input: string, format: string): boolean {
+		for (let i = 0; i < input.length; i ++) {
+			const inputChar = input[i];
+			const formatChar = format[i];
+			if ((!inputChar.match(/[0-9]/) || !formatChar.match(/[a-zA-Z]/)) && inputChar !== formatChar) {
+				return false;
+			}
+		}
+		return true;
+	}
 
     private unformatNumbers(data: any, format: string) { // todo throw error when not coresponding to format (reimplement with state machine)
         if (data === '') return data;
@@ -251,6 +280,14 @@ export class FormattingService {
                     data = adjustedData;
                 }
             }
+        }
+        // first try it with the BigNumber library
+        // and test if this number can be represented as a javascript number without loosing precision
+        // if not, return the string representation of the number
+        const stripped = data.replaceAll(numbro.languageData().delimiters.thousands, '').replace(numbro.languageData().delimiters.decimal, '.');
+        const bigNumber = new BigNumber(stripped);
+        if (!bigNumber.isNaN() && !bigNumber.isEqualTo(bigNumber.toNumber())) {
+            return bigNumber.toString();
         }
         let ret = numbro(data).value();
         ret *= multFactor;
@@ -343,8 +380,16 @@ export class FormattingService {
         if (data === '')
             return data;
 
-        data = Number(data); // just to make sure that if it was a string representing a number we turn it into a number
-        if (typeof data === 'number' && isNaN(data)) return ''; // cannot format something that is not a number
+        let nmbr = Number(data);
+        if (typeof data === 'string' && nmbr.toString() != data) {
+           // this is very likely a bignumber.
+           data = new BigNumber(data);
+           if (data.isNaN()) return '';
+        }
+        else {
+            data = Number(data); // just to make sure that if it was a string representing a number we turn it into a number
+            if (typeof data === 'number' && isNaN(data)) return ''; // cannot format something that is not a number
+        }
 
         const initialData = data;
         let patchedFormat = servoyFormat; // patched format for numbro format
@@ -427,7 +472,7 @@ export class FormattingService {
                     fractionalDigits++;
                 }
             }
-            ret = Number(data).toExponential(integerDigits + fractionalDigits);
+            ret = new BigNumber(data).toExponential(integerDigits + fractionalDigits);
         } else {
 
             let leftFormat = '';
@@ -486,14 +531,23 @@ export class FormattingService {
             } else {
                 mantissaLength = minLenMantissa + optionalDigitsMantissa;
             }
-            ret = numbro(data).format({
-                thousandSeparated: data > 999 && patchedFormat.includes(',') ? true : false,
-                mantissa: mantissaLength,
-                optionalMantissa: minLenMantissa === 0,
-                trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
-                characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
-                optionalCharacteristic: rightDataMantissaLength === 0 && minLenMantissa === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0
-            });
+            if (data instanceof BigNumber) {
+                ret = data.toFormat(mantissaLength, BigNumber.ROUND_HALF_UP, {
+                    decimalSeparator: numbro.languageData().delimiters.decimal,
+                    groupSeparator: numbro  .languageData().delimiters.thousands,
+                    groupSize: patchedFormat.includes(',') ? 3 : 0,
+                });
+            }
+            else {
+                ret = numbro(data).format({
+                    thousandSeparated: data > 999 && patchedFormat.includes(',') ? true : false,
+                    mantissa: mantissaLength,
+                    optionalMantissa: minLenMantissa === 0,
+                    trimMantissa: minLenMantissa === 0 && optionalDigitsMantissa >= 0 ? true : false,
+                    characteristic: minLenCharacteristic + minLenCharacteristicAfterZeroFound,
+                    optionalCharacteristic: rightDataMantissaLength === 0 && minLenMantissa === 0 && minLenCharacteristic === 0 && optionalDigitsCharacteristic > 0
+                });
+            }
         }
 
         return prefix + ret + sufix;

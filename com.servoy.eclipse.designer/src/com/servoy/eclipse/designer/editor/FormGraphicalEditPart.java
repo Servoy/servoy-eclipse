@@ -49,6 +49,7 @@ import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
@@ -87,9 +88,9 @@ public class FormGraphicalEditPart extends BaseFormGraphicalEditPart implements 
 		Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
 		if (flattenedForm != null)
 		{
-			for (IFormElement o : Utils.iterate(flattenedForm.getFormElementsSortedByFormIndex()))
+			for (ISupportFormElement o : Utils.iterate(flattenedForm.getFormElementsSortedByFormIndex()))
 			{
-				if (Boolean.TRUE.equals(getViewer().getProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)) && !getPersist().equals(o.getParent()))
+				if (Boolean.TRUE.equals(getViewer().getProperty(VisualFormEditor.PROPERTY_HIDE_INHERITED)) && !getPersist().equals(o.getParent()))
 				{
 					// Hide inherited elements
 					continue;

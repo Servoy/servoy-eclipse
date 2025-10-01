@@ -1,6 +1,6 @@
 import { WindowRefService } from '@servoy/public';
-import { Renderer2, RendererFactory2, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Renderer2, RendererFactory2, Inject, DOCUMENT } from '@angular/core';
+
 import { BSWindowManager } from './bswindow_manager.service';
 import { SvyUtilsService } from '../../utils.service';
 
@@ -35,6 +35,7 @@ export class BSWindow {
     offset: any;
     window_info: any;
 
+    onClose: () => void;
     mouseDownListenerElement: any;
     mouseDownListenerHandle: any;
 
@@ -146,8 +147,9 @@ export class BSWindow {
 
     setSize(size: { width: number; height: number }) {
         const winBody = this.element.querySelector(this.options.selectors.body);
-        this.renderer.setStyle(winBody, 'width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
-        this.renderer.setStyle(winBody, 'height', size.height + 'px');
+        this.renderer.setStyle(winBody, 'min-width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
+        this.renderer.setStyle(winBody, 'min-height', size.height + 'px');
+        this.renderer.setStyle(winBody, 'height', '1px');
     }
 
     centerWindow() {
@@ -182,6 +184,9 @@ export class BSWindow {
             }
         } else if (this.options.window_manager && this.options.window_manager.windows.length > 0) {
             this.options.window_manager.setNextFocused();
+        }
+        if (this.onClose){
+            this.onClose();
         }
         _this.element.remove();
         if (this.windowTab) {
@@ -219,6 +224,15 @@ export class BSWindow {
 
     getWindowTab() {
         return this.windowTab;
+    }
+
+    setTitle(title: string) {
+        if(this.options) {
+            this.options.title = title;
+            if(this.options.elements && this.options.elements.title) {
+                this.options.elements.title.innerHTML = title;
+            }
+        }
     }
 
     getTitle() {
@@ -313,8 +327,8 @@ export class BSWindow {
             this.renderer.removeClass(this.element, 'east');
             this.renderer.removeClass(this.element, 'north');
             this.renderer.removeClass(this.element, 'south');
-            const width = this.element.getBoundingClientRect().width;
-            const height = this.element.getBoundingClientRect().height;
+            const width = this.element.querySelector(this.options.selectors.body).getBoundingClientRect().width;
+            const height = this.element.querySelector(this.options.selectors.body).getBoundingClientRect().height;
 
             const size = { width, height };
             // before: this.element.trigger('bswin.resize',size);
@@ -521,7 +535,7 @@ export class BSWindow {
         for (const key of Object.keys(childNodesBody)) {
             if (childNodesBody[key] instanceof Element) {
                 const node = childNodesBody[key] as Element;
-                node.classList.add(cls);
+                node.classList.remove(cls);
             }
         }
     }

@@ -29,8 +29,8 @@ import com.servoy.eclipse.ui.property.IRestorer;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IDeveloperRepository;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -153,16 +153,16 @@ public class RestorerAdapterFactory implements IAdapterFactory
 			FormElementGroup group = (FormElementGroup)object;
 
 			Map<UUID, Object> elementStates = new HashMap<UUID, Object>();
-			Iterator<IFormElement> elements = group.getElements();
+			Iterator<ISupportFormElement> elements = group.getElements();
 			while (elements.hasNext())
 			{
-				IFormElement element = elements.next();
+				ISupportFormElement element = elements.next();
 				if (element instanceof IPersist)
 				{
 					IRestorer restorer = getRestorer(element);
 					if (restorer != null)
 					{
-						elementStates.put(((IPersist)element).getUUID(), restorer.getState(element));
+						elementStates.put(element.getUUID(), restorer.getState(element));
 					}
 				}
 			}
@@ -175,16 +175,16 @@ public class RestorerAdapterFactory implements IAdapterFactory
 			FormElementGroup group = (FormElementGroup)object;
 
 			Map<UUID, Object> elementStates = new HashMap<UUID, Object>();
-			Iterator<IFormElement> elements = group.getElements();
+			Iterator<ISupportFormElement> elements = group.getElements();
 			while (elements.hasNext())
 			{
-				IFormElement element = elements.next();
+				ISupportFormElement element = elements.next();
 				if (element instanceof IPersist)
 				{
 					IRestorer restorer = getRestorer(element);
 					if (restorer != null)
 					{
-						elementStates.put(((IPersist)element).getUUID(), restorer.getRemoveState(element));
+						elementStates.put(element.getUUID(), restorer.getRemoveState(element));
 					}
 				}
 			}
@@ -198,16 +198,16 @@ public class RestorerAdapterFactory implements IAdapterFactory
 			Pair<String, Map<UUID, Object>> saved = (Pair<String, Map<UUID, Object>>)state;
 
 			Map<UUID, Object> elementStates = saved.getRight();
-			Iterator<IFormElement> elements = group.getElements();
+			Iterator<ISupportFormElement> elements = group.getElements();
 			while (elements.hasNext())
 			{
-				IFormElement element = elements.next();
+				ISupportFormElement element = elements.next();
 				if (element instanceof IPersist)
 				{
 					IRestorer restorer = getRestorer(element);
 					if (restorer != null)
 					{
-						restorer.restoreState(element, elementStates.get(((IPersist)element).getUUID()));
+						restorer.restoreState(element, elementStates.get(element.getUUID()));
 					}
 				}
 			}

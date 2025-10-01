@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.awt.Point;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -60,7 +61,6 @@ import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.preferences.Ng2DesignerPreferences;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -82,6 +82,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.ChildrenJSONGenerator;
 import com.servoy.j2db.server.ngclient.FormElement;
@@ -135,15 +136,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (int i = 0; i < styleSheets.size(); i++)
 			{
 				String stylesheetName = styleSheets.get(i);
-				if (new Ng2DesignerPreferences().showNG2Designer())
+				int lastPoint = stylesheetName.lastIndexOf('.');
+				String ng2StylesheetName = stylesheetName.substring(0, lastPoint) + "_ng2" + stylesheetName.substring(lastPoint);
+				Media media = fs.getMedia(ng2StylesheetName);
+				if (media != null)
 				{
-					int lastPoint = stylesheetName.lastIndexOf('.');
-					String ng2StylesheetName = stylesheetName.substring(0, lastPoint) + "_ng2" + stylesheetName.substring(lastPoint);
-					Media media = fs.getMedia(ng2StylesheetName);
-					if (media != null)
-					{
-						stylesheetName = ng2StylesheetName;
-					}
+					stylesheetName = ng2StylesheetName;
 				}
 				styleSheets.set(i, "resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + fs.getSolution().getName() + "/" +
 					stylesheetName + "?t=" + Long.toHexString(System.currentTimeMillis()));
@@ -158,7 +156,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		if (EDITOR_CONTENT_SERVICE.equals(name))
 		{
-			return new ClientService(EDITOR_CONTENT_SERVICE, EDITOR_CONTENT_SERVICE_SPECIFICATION);
+			return new ClientService(EDITOR_CONTENT_SERVICE, EDITOR_CONTENT_SERVICE_SPECIFICATION, this);
 		}
 		return super.createClientService(name);
 	}
@@ -262,14 +260,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 				boolean componentFound = false;
 				boolean responsive = form.isResponsiveLayout();
-				int mainContainerID = -1;
+				String mainContainerID = null;
 				if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
 				{
 					AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
 					if (container instanceof LayoutContainer)
 					{
 						responsive = !CSSPositionUtils.isCSSPositionContainer((LayoutContainer)container);
-						mainContainerID = container.getID();
+						mainContainerID = container.getUUID().toString();
 					}
 				}
 				if (designIDOrName != null)
@@ -402,7 +400,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Set<IFormElement> components,
 		Set<IFormElement> compAttributes, Set<IFormElement> deletedComponents, boolean formComponentChild, Set<IFormElement> refreshTemplate,
 		Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, boolean renderGhosts, FlattenedSolution fs,
-		Map<String, String> childParentMap, boolean skipComponents)
+		Map<String, String> childLayoutContainerToParentFormComponentComponentDesignIdMap, boolean skipComponents)
 	{
 		boolean ghost = false;
 		List<LayoutContainer> containers = layoutContainersOfComponentPersist.get(persist);
@@ -418,7 +416,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					boolean auxGhost = checkLayoutHierarchyRecursively(element, layoutContainersOfComponentPersist, components, compAttributes,
 						deletedComponents,
 						formComponentChild,
-						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, childParentMap, skipComponents);
+						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs,
+						childLayoutContainerToParentFormComponentComponentDesignIdMap, skipComponents);
 					if (auxGhost) ghost = auxGhost;
 				}
 			}
@@ -427,7 +426,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		if (!skipComponents && persist instanceof IFormElement && !components.contains(persist) && !compAttributes.contains(persist))
 		{
 			ghost = parseIFormElement((IFormElement)persist, components, compAttributes, deletedComponents, formComponentChild, refreshTemplate,
-				updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, layoutContainersOfComponentPersist, childParentMap);
+				updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, layoutContainersOfComponentPersist,
+				childLayoutContainerToParentFormComponentComponentDesignIdMap);
 			return ghost;
 		}
 		return false;
@@ -435,50 +435,50 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 	/**
 	 * Function that parse an IPersist when instance is IFormElement
-	 * @return ghost
+	 *
+	 * @return true is it's a 'ghost' from the editor's point of view
 	 */
-	private boolean parseIFormElement(IFormElement persist, Set<IFormElement> baseComponents, Set<IFormElement> compAttributes,
+	private boolean parseIFormElement(final IFormElement formElementPersist, Set<IFormElement> baseComponents, Set<IFormElement> compAttributes,
 		Set<IFormElement> deletedComponents, boolean formComponentChild, Set<IFormElement> refreshTemplate, Set<String> updatedFormComponentsDesignId,
 		Set<IFormElement> formComponentsComponents, boolean renderGhosts, FlattenedSolution fs,
-		Map<IPersist, List<LayoutContainer>> layoutContainersOfComponentPersist, Map<String, String> childParentMap)
+		Map<IPersist, List<LayoutContainer>> layoutContainersOfComponentPersist,
+		Map<String, String> childLayoutContainerToParentFormComponentComponentDesignIdMap)
 	{
 		boolean ghost = renderGhosts;
-		IFormElement baseComponent = persist;
-		if (baseComponent.getGroupID() != null)
+		if (formElementPersist.getGroupID() != null)
 		{
-			compAttributes.add(baseComponent);
+			compAttributes.add(formElementPersist);
 		}
 
-		IPersist superPersist = PersistHelper.getSuperPersist(persist);
+		IPersist superPersist = PersistHelper.getSuperPersist(formElementPersist);
 		if (superPersist instanceof IFormElement)
 		{
 			deletedComponents.add((IFormElement)superPersist);
-			if (persist instanceof WebComponent)
+			if (formElementPersist instanceof WebComponent)
 			{
 				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-					.getWebObjectSpecification(((WebComponent)persist).getTypeName());
+					.getWebObjectSpecification(((WebComponent)formElementPersist).getTypeName());
 				ghost = !spec.getProperties(FormComponentPropertyType.INSTANCE).isEmpty();
 			}
 		}
 
-
-		if (formComponentChild || persist.getParent().getChild(persist.getUUID()) != null)
+		ISupportChilds parent = formElementPersist.getParent();
+		if (formComponentChild || parent.getChild(formElementPersist.getUUID()) != null)
 		{
-			ISupportChilds parent = persist.getParent();
 			if (parent instanceof AbstractContainer)
 			{
-				baseComponents.add(baseComponent);
+				baseComponents.add(formElementPersist);
 			}
 			else if (parent instanceof Form)
 			{
-				baseComponents.add(baseComponent);
+				baseComponents.add(formElementPersist);
 			}
 			else while (parent instanceof BaseComponent)
 			{
 				if (parent.getParent() instanceof Form)
 				{
 					baseComponents.add((IFormElement)parent);
-					IPersist oldPersist = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
+					IPersist oldPersist = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(formElementPersist.getUUID());
 					if (oldPersist == null) // a new child was added, force parent refresh
 					{
 						refreshTemplate.add((IFormElement)parent);
@@ -490,28 +490,36 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					parent = parent.getParent();
 				}
 			}
-			if (persist instanceof Field)
+			if (formElementPersist instanceof Field)
 			{
-				Field oldField = (Field)ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
-				if (oldField != null && ((Field)persist).getDisplayType() != oldField.getDisplayType())
+				Field oldField = (Field)ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(formElementPersist.getUUID());
+				if (oldField != null && ((Field)formElementPersist).getDisplayType() != oldField.getDisplayType())
 				{
-					refreshTemplate.add(baseComponent);
+					refreshTemplate.add(formElementPersist);
 				}
 			}
-			if (persist instanceof ChildWebComponent || persist.getParent() instanceof Portal)
+			if (formElementPersist instanceof ChildWebComponent || formElementPersist.getParent() instanceof Portal)
 			{
 				ghost = true;
 			}
+			if (!form.isResponsiveLayout())
+			{
+				int formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
+				Point location = CSSPositionUtils.getLocation(formElementPersist);
+				if (((location.x > form.getWidth()) || (location.y > formHeight)))
+				{
+					ghost = true;
+				}
+			}
 			boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
-				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs, new HashSet<String>(), layoutContainersOfComponentPersist,
-				childParentMap);
+				FormElementHelper.INSTANCE.getFormElement(formElementPersist, fs, null, true), fs, new HashSet<String>(), layoutContainersOfComponentPersist,
+				childLayoutContainerToParentFormComponentComponentDesignIdMap);
 			if (fcGhosts) ghost = fcGhosts;
 		}
 		else
 		{
-			deletedComponents.add(baseComponent);
+			deletedComponents.add(formElementPersist);
 			// if it has parent, make sure it refreshes
-			ISupportChilds parent = persist.getParent();
 			while (parent instanceof BaseComponent)
 			{
 				if (parent.getParent() instanceof Form)
@@ -526,14 +534,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 			}
 		}
-		if (persist instanceof ISupportsIndexedChildren)
+		if (formElementPersist instanceof ISupportsIndexedChildren)
 		{
-			ISupportsIndexedChildren supportChilds = (ISupportsIndexedChildren)persist;
+			ISupportsIndexedChildren supportChilds = (ISupportsIndexedChildren)formElementPersist;
 			ghost = ghost || supportChilds.getAllObjects().hasNext();
 		}
 		return ghost;
 	}
 
+	/**
+	 * @param persists from what I can see, "persists" will always be from this direct form,
+	 * so not persists from nested form component components (those result in a full refresh
+	 * of this editor; see code in BaseVisualFormEditor.persistChanges(Collection<IPersist>))
+	 */
 	public String getComponentsJSON(FlattenedSolution fs, Set<IPersist> persists)
 	{
 		Set<IFormElement> baseComponents = new HashSet<>();
@@ -542,9 +555,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Set<String> updatedFormComponentsDesignId = new HashSet<>();
 		Set<IFormElement> formComponentsComponents = new HashSet<>();
 		Set<LayoutContainer> deletedLayoutContainers = new HashSet<>();
-		Map<String, String> childParentMap = new HashMap<String, String>();
+		Map<String, String> childLayoutContainerToParentFormComponentComponentDesignIdMap = new HashMap<String, String>();
 		Set<Part> parts = new HashSet<>();
-		List<LayoutContainer> containers = new ArrayList<>();
+		List<LayoutContainer> containers = new ArrayList<>(); // so this is about LayoutContainer just from current form, not nested in form component components - see @param persists comment above
 		Map<IPersist, List<LayoutContainer>> layoutContainersOfComponentPersist = new HashMap<>();
 		Set<IFormElement> compAttributes = new HashSet<>();
 		boolean renderGhosts = editor.isRenderGhosts();
@@ -568,8 +581,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				boolean newRenderGhosts = parseIFormElement((IFormElement)persist, baseComponents, compAttributes, deletedComponents, formComponentChild,
 					refreshTemplate,
-					updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, layoutContainersOfComponentPersist, childParentMap);
-				renderGhosts = renderGhosts || newRenderGhosts;
+					updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, layoutContainersOfComponentPersist,
+					childLayoutContainerToParentFormComponentComponentDesignIdMap);
+				renderGhosts = renderGhosts || newRenderGhosts || formHasGhosts(persist);
 			}
 			else if (persist instanceof Part)
 			{
@@ -587,8 +601,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					boolean newRenderGhosts = checkLayoutHierarchyRecursively(persist, layoutContainersOfComponentPersist, baseComponents,
 						compAttributes, deletedComponents,
 						formComponentChild,
-						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, childParentMap, false);
-					renderGhosts = renderGhosts || newRenderGhosts;
+						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs,
+						childLayoutContainerToParentFormComponentComponentDesignIdMap, false);
+					renderGhosts = renderGhosts || newRenderGhosts || formHasGhosts(persist);
 				}
 				else
 				{
@@ -609,9 +624,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				// do add the child base component so that it gets this new update
 				while (parent != null && !(parent instanceof Form))
 				{
-					if (parent instanceof BaseComponent)
+					if (parent instanceof BaseComponent baseComponentParent)
 					{
-						baseComponents.add((BaseComponent)parent);
+						baseComponents.add(baseComponentParent);
+						IPersist superPersist = PersistHelper.getSuperPersist(baseComponentParent);
+						if (superPersist instanceof IFormElement superPersistFormElement)
+						{
+							deletedComponents.add(superPersistFormElement);
+						}
 						parent = null;
 					}
 					else parent = parent.getParent();
@@ -761,7 +781,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (LayoutContainer container : containersList)
 			{
 				writer.object();
-				ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, form, true);
+				ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, form, true, fs);
 				writer.endObject();
 			}
 			writer.endArray();
@@ -782,7 +802,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					for (LayoutContainer container : entry.getValue())
 					{
 						writer.object();
-						ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, form, true);
+						ChildrenJSONGenerator.writeLayoutContainer(writer, container, null, form, true, fs);
 						writer.endObject();
 						if (!containers.contains(container)) containers.add(container);
 					}
@@ -849,10 +869,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.key("uuid");
 				if (parent instanceof Form)
 				{
-					writer.value(childParentMap.containsKey(uuid) ? childParentMap.get(uuid) : null);
+					// in case the layout container is the root one from inside a form component component, it's parent is that form component component, not the main form
+					// if it is the main form, it will write null here
+					writer.value(childLayoutContainerToParentFormComponentComponentDesignIdMap.containsKey(uuid)
+						? childLayoutContainerToParentFormComponentComponentDesignIdMap.get(uuid) : null);
 				}
 				else
 				{
+					// parent is another layout container
 					writer.value(parent.getUUID().toString());
 				}
 				writer.key("location");
@@ -865,7 +889,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.value(-1);
 				}
 				writer.key("formIndex");
-				if (p instanceof IFormElement && !form.isResponsiveLayout())
+				if (p instanceof IFormElement)
 				{
 					writer.value(((IFormElement)p).getFormIndex());
 				}
@@ -882,6 +906,40 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		return writer.toString();
 	}
 
+	private boolean formHasGhosts(IPersist persist)
+	{
+		Form frm = null;
+		IPersist parent = persist.getParent();
+		while (parent != null && frm == null)
+		{
+			if (parent instanceof Form) frm = (Form)parent;
+			parent = parent.getParent();
+		}
+		if (frm == null) return false;
+
+		boolean hasGhost = false;
+		List<IFormElement> allElements = frm.getFlattenedFormElementsAndLayoutContainers()
+			.stream()
+			.filter(IFormElement.class::isInstance)
+			.map(IFormElement.class::cast)
+			.toList();
+		for (IFormElement element : allElements)
+		{
+			if (element instanceof WebComponent webComponent)
+			{
+				Iterator<IPersist> it = webComponent.getAllObjects();
+				while (it.hasNext() && !hasGhost)
+				{
+					IPersist child = it.next();
+					if (child instanceof WebCustomType) hasGhost = true;
+				}
+			}
+			if (hasGhost) break;
+		}
+
+		return hasGhost;
+	}
+
 	public static String getDesignIDOrFeName(FormElement formElement)
 	{
 		PersistIdentifier designId = formElement.getDesignId();
@@ -890,7 +948,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 	private boolean checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
 		FlattenedSolution fs, HashSet<String> forms, Map<IPersist, List<LayoutContainer>> layoutContainersOfComponentPersist,
-		Map<String, String> childParentMap)
+		Map<String, String> childLayoutContainerToParentFormComponentComponentDesignIdMap)
 	{
 		boolean ghost = false;
 		WebObjectSpecification spec = formElement.getWebComponentSpec();
@@ -924,7 +982,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						}
 						layoutContainersOfComponentPersist.put(element.getPersistIfAvailable(), value);
 						boolean fcGhosts = checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs, forms,
-							layoutContainersOfComponentPersist, childParentMap);
+							layoutContainersOfComponentPersist, childLayoutContainerToParentFormComponentComponentDesignIdMap);
 						if (fcGhosts) ghost = fcGhosts;
 					}
 					if (frm.isResponsiveLayout() || frm.containsResponsiveLayout())
@@ -934,17 +992,13 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						{
 							LayoutContainer container = it.next();
 							layoutContainersOfComponentPersist.put(container, value);
-
-							// I commented of the "childParentMap" code because it only puts a design id (that starts with an UUID) + possibly a whole
-							// path of form component typed properties & component names + the container UUID
-							// but when it uses the keys of this map it will NEVER use a key that ends with an UUID & has at least another UUID before it
-							// so it seems to not be used...
-							childParentMap.put(container.getUUID().toString(),
-								formElement.getPersistIfAvailable().getUUID().toString());
+							childLayoutContainerToParentFormComponentComponentDesignIdMap.put(container.getUUID().toString(),
+								getDesignIDOrFeName(formElement));
 							boolean fcGhosts = checkLayoutHierarchyRecursively(container, layoutContainersOfComponentPersist, formComponentsComponents,
 								formComponentsComponents,
 								formComponentsComponents,
-								isValid(), formComponentsComponents, updatedFormComponentsDesignId, formComponentsComponents, isValid(), fs, childParentMap,
+								isValid(), formComponentsComponents, updatedFormComponentsDesignId, formComponentsComponents, isValid(), fs,
+								childLayoutContainerToParentFormComponentComponentDesignIdMap,
 								true);
 							if (fcGhosts) ghost = fcGhosts;
 						}

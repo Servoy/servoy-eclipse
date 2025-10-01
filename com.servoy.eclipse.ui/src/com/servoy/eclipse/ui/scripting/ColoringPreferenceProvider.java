@@ -44,6 +44,7 @@ public class ColoringPreferenceProvider implements IColoringPreferenceProvider
 
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_JSUNIT, IExecutingEnviroment.TOPLEVEL_JSUNIT, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_UTILS, IExecutingEnviroment.TOPLEVEL_UTILS, new RGB(0, 200, 0));
+		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_CLIENTUTILS, IExecutingEnviroment.TOPLEVEL_CLIENTUTILS, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_SECURITY, IExecutingEnviroment.TOPLEVEL_SECURITY, new RGB(0, 200, 0));
 		requestor.addPreference("elements", "elements", new RGB(100, 200, 0));
 		requestor.addPreference("controller", "controller", new RGB(50, 200, 0));
@@ -56,7 +57,11 @@ public class ColoringPreferenceProvider implements IColoringPreferenceProvider
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_SCOPES, IExecutingEnviroment.TOPLEVEL_SCOPES, new RGB(0, 200, 50));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_FORMS, IExecutingEnviroment.TOPLEVEL_FORMS, new RGB(0, 200, 100));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_HISTORY, IExecutingEnviroment.TOPLEVEL_HISTORY, new RGB(0, 200, 0));
+		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_MENUS, IExecutingEnviroment.TOPLEVEL_MENUS, new RGB(0, 200, 0));
+		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_EVENTTYPES, IExecutingEnviroment.TOPLEVEL_EVENTTYPES, new RGB(0, 200, 0));
+		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_JSPERMISSION, IExecutingEnviroment.TOPLEVEL_JSPERMISSION, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_PLUGINS, IExecutingEnviroment.TOPLEVEL_PLUGINS, new RGB(255, 0, 0));
 		requestor.addPreference("_super", "_super", new RGB(0, 200, 50));
+		requestor.addPreference("developerBridge", "developerBridge", new RGB(0, 200, 0));
 	}
 }

@@ -42,22 +42,25 @@ describe('MainComponent', () => {
 });
 
 @Directive({
-    selector: 'svy-form'
-  })
+    selector: 'svy-form',
+    standalone: false
+})
   class MockFormComponent{
     @Input('name')
     public name: string;
   }
 
 @Directive({
-    selector: 'svy-default-navigator'
-  })
+    selector: 'svy-default-navigator',
+    standalone: false
+})
   class MockDefaultNavigator{
     @Input('name')
     public name: string;
   }
 @Directive({
-    selector: 'session-view'
-  })
+    selector: 'session-view',
+    standalone: false
+})
   class MockSessionView{
   }

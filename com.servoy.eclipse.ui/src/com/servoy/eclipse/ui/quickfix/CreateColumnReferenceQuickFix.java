@@ -36,6 +36,7 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -98,7 +99,7 @@ public class CreateColumnReferenceQuickFix implements IMarkerResolution
 								if (table.getColumn(columName) == null)
 								{
 									IValidateName nameValidator = servoyModel.getNameValidator();
-									Column column = table.createNewColumn(nameValidator, columName, IColumnTypes.TEXT, 50);
+									Column column = table.createNewColumn(nameValidator, columName, ColumnType.getInstance(IColumnTypes.TEXT, 50, 0));
 									IEditorPart editor = EditorUtil.openTableEditor(table);
 									if (editor instanceof TableEditor)
 									{

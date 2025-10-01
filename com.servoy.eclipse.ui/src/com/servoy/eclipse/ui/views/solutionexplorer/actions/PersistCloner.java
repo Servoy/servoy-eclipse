@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.Iterator;
 
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -110,20 +111,17 @@ public class PersistCloner
 						{
 							for (String handler : ((WebObjectSpecification)pd).getHandlers().keySet())
 							{
-								UUID uuid = Utils.getAsUUID(wc.getProperty(handler), false);
-								if (uuid != null)
+								ScriptMethod clonedMethod = this.getClonedMethod(wc.getProperty(handler));
+								if (clonedMethod != null)
 								{
-									IPersist originalMethod = original.findChild(uuid);
-									if (originalMethod instanceof ScriptMethod)
-									{
-										ScriptMethod clonedMethod = duplicate.getScriptMethod(((ScriptMethod)originalMethod).getName());
-										if (clonedMethod != null)
-										{
-											wc.setProperty(handler, clonedMethod.getUUID().toString());
-										}
-									}
+									wc.setProperty(handler, clonedMethod.getUUID().toString());
 								}
 							}
+						}
+						if (wc.getTypeName().equals("servoycore-listformcomponent") || wc.getTypeName().equals("servoycore-formcomponent"))
+						{
+							JSONObject jsonObject = (JSONObject)wc.getProperty("json");
+							this.updateEventsUUID(jsonObject);
 						}
 					}
 					else
@@ -143,21 +141,21 @@ public class PersistCloner
 							if (typeId == IRepository.ELEMENTS)
 							{
 								Object property_value = ((AbstractBase)o).getProperty(element.getName());
-								final int element_id = Utils.getAsInteger(property_value);
-								if (element_id > 0)
+								final UUID element_uuid = Utils.getAsUUID(property_value, false);
+								if (element_uuid != null)
 								{
 									boolean idFound = false;
 									Iterator<ScriptMethod> originalScriptMethods = original.getScriptMethods(false);
 									while (originalScriptMethods.hasNext())
 									{
 										ScriptMethod originalMethod = originalScriptMethods.next();
-										if (originalMethod.getID() == element_id)
+										if (originalMethod.getUUID().equals(element_uuid))
 										{
 											// reference to a method in the original form - change this to the duplicated form method
 											ScriptMethod duplicateMethod = duplicate.getScriptMethod(originalMethod.getName());
 											if (duplicateMethod != null)
 											{
-												((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateMethod.getID()));
+												((AbstractBase)o).setProperty(element.getName(), duplicateMethod.getUUID().toString());
 											}
 											idFound = true;
 										}
@@ -169,13 +167,13 @@ public class PersistCloner
 										while (originalScriptVariables.hasNext())
 										{
 											ScriptVariable originalVariable = originalScriptVariables.next();
-											if (originalVariable.getID() == element_id)
+											if (originalVariable.getUUID().equals(element_uuid))
 											{
 												// reference to a variable in the original form - change this to the duplicated form variable
 												ScriptVariable duplicateVariable = duplicate.getScriptVariable(originalVariable.getName());
 												if (duplicateVariable != null)
 												{
-													((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateVariable.getID()));
+													((AbstractBase)o).setProperty(element.getName(), duplicateVariable.getUUID().toString());
 												}
 											}
 										}
@@ -196,6 +194,41 @@ public class PersistCloner
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}
 
+			private ScriptMethod getClonedMethod(Object obj)
+			{
+				UUID uuid = Utils.getAsUUID(obj, false);
+				if (uuid != null)
+				{
+					IPersist originalMethod = original.findChild(uuid);
+					if (originalMethod instanceof ScriptMethod)
+					{
+						return duplicate.getScriptMethod(((ScriptMethod)originalMethod).getName());
+					}
+				}
+				return null;
+			}
+
+			private void updateEventsUUID(JSONObject jsonObject)
+			{
+				Iterator<String> keys = jsonObject.keys();
+				while (keys.hasNext())
+				{
+					String key = keys.next();
+					Object value = jsonObject.get(key);
+					if (value instanceof JSONObject)
+					{
+						updateEventsUUID((JSONObject)value);
+					}
+					else
+					{
+						ScriptMethod clonedMethod = this.getClonedMethod(jsonObject.get(key));
+						if (clonedMethod != null)
+						{
+							jsonObject.put(key, clonedMethod.getUUID().toString());
+						}
+					}
+				}
+			}
 		});
 	}
 
@@ -231,7 +264,7 @@ public class PersistCloner
 				else
 				{
 					clone = (AbstractBase)((AbstractBase)persist).cloneObj(destinationEditingSolution, true, nameValidator, true, false //
-					, false /* elements of original form should remain override, not a flattened element */);
+						, false /* elements of original form should remain override, not a flattened element */);
 				}
 				if (clone instanceof ISupportUpdateableName)
 				{
@@ -242,7 +275,7 @@ public class PersistCloner
 					for (Solution mod : fs.getModules())
 					{
 						FlattenedSolution editingFlattenedSolution = servoyModel.getServoyProject(mod.getName()).getEditingFlattenedSolution();
-						if (editingFlattenedSolution.getForm(clone.getID()) != null)
+						if (editingFlattenedSolution.getForm(clone.getUUID().toString()) != null)
 						{
 							editingFlattenedSolution.flushAllCachedData();
 						}

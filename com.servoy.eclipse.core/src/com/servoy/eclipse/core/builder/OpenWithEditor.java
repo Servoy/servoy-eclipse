@@ -25,6 +25,7 @@ import org.eclipse.ui.ide.IDE;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -77,11 +78,12 @@ public class OpenWithEditor implements IMarkerAttributeContributor
 			{
 				marker.setAttribute(
 					IDE.EDITOR_ID_ATTR,
-					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null, Platform.getContentTypeManager().getContentType(contentTypeIdentifier)).getId());
+					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null, Platform.getContentTypeManager().getContentType(contentTypeIdentifier))
+						.getId());
 
 				if (persist != null)
 				{
-					marker.setAttribute("elementUuid", persist.getUUID().toString());
+					marker.setAttribute("persistIdentifier", PersistFinder.INSTANCE.fromPersist(persist).toJSONString());
 				}
 			}
 			catch (CoreException e)

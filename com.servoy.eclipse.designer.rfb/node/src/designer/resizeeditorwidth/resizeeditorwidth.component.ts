@@ -6,7 +6,8 @@ import { Point } from './../mouseselection/mouseselection.component';
 @Component({
     selector: 'designer-resizeeditorwidth',
     templateUrl: './resizeeditorwidth.component.html',
-    styleUrls: ['./resizeeditorwidth.component.css']
+    styleUrls: ['./resizeeditorwidth.component.css'],
+    standalone: false
 })
 export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
     @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;

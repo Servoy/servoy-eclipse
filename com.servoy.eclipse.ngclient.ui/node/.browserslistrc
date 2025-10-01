@@ -2,16 +2,17 @@
 # For additional information regarding the format and rule options, please see:
 # https://github.com/browserslist/browserslist#queries
 
+# For Angular's browser support policy, please see:
+# https://angular.dev/reference/versions#browser-support
+
 # You can see what browsers were selected by your queries by running:
 #   npx browserslist
 
-> 0.5%
-last 2 versions
-Firefox ESR
-not dead
-not IE 11
-not op_mini all
-not op_mob <63
-not baidu 7.12
-not kaios 2.5
-not and_uc 12.12
+Chrome >= 107
+ChromeAndroid >= 107
+Edge >= 107
+Firefox >= 104
+FirefoxAndroid >= 104
+Safari >= 16
+iOS >= 16
+

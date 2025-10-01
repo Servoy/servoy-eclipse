@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -46,6 +48,8 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -109,7 +113,20 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 		//ExtendedInputDialog<String> dialog = createDialog(persist, nameValidator, solutionNames, initialSolutionName);
 		String newName = null;
 		String oldName = getName(persist);
-		if (persist instanceof Media) newName = "copy_" + oldName;
+		if (persist instanceof Media)
+		{
+			if (oldName.contains("/"))
+			{
+				// find the file name and add a prefix to it
+				String[] arr = oldName.split("/");
+				arr[arr.length - 1] = "copy_" + arr[arr.length - 1];
+				newName = String.join("/", arr);
+			}
+			else
+			{
+				newName = "copy_" + oldName;
+			}
+		}
 		else newName = oldName + "_copy";
 		final String[] workingSetName = new String[] { null };
 		// prepare dialog
@@ -120,13 +137,23 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				{
 					String message = null;
 					String checkText = newText;
-					if (persist instanceof Media) checkText = checkText.replace(".", "");
+					if (checkText.startsWith(".") || checkText.endsWith(".") || checkText.startsWith("/") || checkText.contains("/.") ||
+						checkText.contains("./") ||
+						checkText.contains("//"))
+					{
+						return "Invalid name";
+					}
+					if (persist instanceof Media)
+					{
+						checkText = checkText.replace(".", "");
+						checkText = checkText.replace("/", "");
+					}
 					message = IdentDocumentValidator.isJavaIdentifier(checkText) ? null : (newText.length() == 0 ? "" : "Invalid name");
 					if (message == null)
 					{
 						try
 						{
-							nameValidator.checkName(newText, -1, new ValidatorSearchContext(getPersistType()), false);
+							nameValidator.checkName(newText, null, new ValidatorSearchContext(getPersistType()), false);
 						}
 						catch (RepositoryException e)
 						{
@@ -202,15 +229,17 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				List<Object> workingSets = new ArrayList<Object>();
 				workingSets.add(SELECTION_NONE);
 				String listValue = null;
+				ServoyResourcesProject activeResourcesPropject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 				IStructuredSelection selection = (IStructuredSelection)listViewer.getSelection();
 				if (!selection.isEmpty())
 				{
 					listValue = (String)selection.getFirstElement();
 				}
-				if (listValue != null)
+				if (listValue != null && activeResourcesPropject != null)
 				{
-					List<String> existingWorkingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
-						new String[] { listValue });
+					List<String> existingWorkingSets = activeResourcesPropject
+						.getServoyWorkingSets(
+							new String[] { listValue });
 					if (existingWorkingSets != null)
 					{
 						workingSets.addAll(existingWorkingSets);
@@ -218,8 +247,8 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				}
 				workingSetNameCombo.setInput(workingSets.toArray());
 
-				String workingSetOfFormName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject()
-					.getWorkingSetOfPersist(((Form)persist).getName(), solutionNames);
+				String workingSetOfFormName = (activeResourcesPropject != null) ? activeResourcesPropject
+					.getWorkingSetOfPersist(((Form)persist).getName(), solutionNames) : null;
 				if (workingSetOfFormName != null)
 				{
 					workingSetNameCombo.setSelection(new StructuredSelection(workingSetOfFormName));
@@ -257,6 +286,28 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				{
 					IPersist duplicate = PersistCloner.intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator,
 						true);
+					IWorkspaceRoot root = ServoyModel.getWorkspace().getRoot();
+					Pair<String, String> duplicatePath = SolutionSerializer.getFilePath(duplicate, false);
+					if (persist instanceof Form frm)
+					{
+						Pair<String, String> persitPath = SolutionSerializer.getFilePath(frm, false);
+						IFile lessFile = root.getFile(new Path(persitPath.getLeft() + frm.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
+						if (lessFile.exists())
+						{
+							IFile duplicateLessFile = root
+								.getFile(new Path(duplicatePath.getLeft() + ((Form)duplicate).getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION));
+							duplicateLessFile.create(lessFile.getContents(), true, null);
+						}
+
+						IFile secFile = root.getFile(new Path(persitPath.getLeft() + frm.getName() + DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT));
+						if (secFile.exists())
+						{
+							IFile duplicateSecFile = root
+								.getFile(new Path(duplicatePath.getLeft() + ((Form)duplicate).getName() + DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT));
+							duplicateSecFile.create(secFile.getContents(), true, null);
+						}
+					}
+
 					String parentWorkingSet = location.getWorkingSetName();
 					if (parentWorkingSet != null)
 					{
@@ -264,15 +315,14 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 						if (ws != null)
 						{
 							List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
-							Pair<String, String> formFilePath = SolutionSerializer.getFilePath(duplicate, false);
-							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+							IFile file = root.getFile(new Path(duplicatePath.getLeft() + duplicatePath.getRight()));
 							files.add(file);
 							ws.setElements(files.toArray(new IAdaptable[0]));
 						}
 					}
 					EditorUtil.openPersistEditor(duplicate);
 				}
-				catch (RepositoryException e)
+				catch (RepositoryException | CoreException e)
 				{
 					ServoyLog.logError(e);
 					MessageDialog.openError(shell, "Cannot duplicate form",

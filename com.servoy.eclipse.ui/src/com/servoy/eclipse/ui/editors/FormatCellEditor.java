@@ -26,6 +26,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.IPropertyType;
+import org.sablo.specification.property.types.StringPropertyType;
 
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.Activator;
@@ -54,7 +55,6 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -207,10 +207,10 @@ public class FormatCellEditor extends TextDialogCellEditor
 						}
 						else
 						{
-							int valuelistID = Utils.getAsInteger(((AbstractBase)persist).getProperty(propertyName));
-							if (valuelistID > 0)
+							String valuelistUUID = (String)((AbstractBase)persist).getProperty(propertyName);
+							if (valuelistUUID != null)
 							{
-								vl = flattenedSolution.getValueList(valuelistID);
+								vl = flattenedSolution.getValueList(valuelistUUID);
 							}
 						}
 
@@ -280,6 +280,19 @@ public class FormatCellEditor extends TextDialogCellEditor
 								}
 							}
 						}
+					}
+					else if (propertyType instanceof StringPropertyType)
+					{
+						String formatType = (String)((AbstractBase)persist).getProperty(propertyName);
+						if (formatType == null)
+						{
+							Object defaultValue = pd.getDefaultValue();
+							if (defaultValue instanceof String)
+							{
+								formatType = (String)defaultValue;
+							}
+						}
+						type = ComponentFormat.getValueTypeForFormatType(formatType);
 					}
 				}
 			}

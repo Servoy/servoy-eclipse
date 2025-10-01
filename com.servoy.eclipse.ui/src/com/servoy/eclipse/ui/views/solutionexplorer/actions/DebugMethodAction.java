@@ -50,7 +50,7 @@ public class DebugMethodAction extends Action implements ISelectionChangedListen
 		this.viewPart = viewPart;
 
 		setText("Debug Method");
-		setToolTipText("Debug this method in the Smart/Webclient");
+		setToolTipText("Debug this method in the Debug Client");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
