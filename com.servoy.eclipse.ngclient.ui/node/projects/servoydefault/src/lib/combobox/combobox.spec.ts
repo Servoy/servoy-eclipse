@@ -40,7 +40,6 @@ describe('ComboboxComponent', () => {
         'startEdit',
         'apply',
         'callServerSideApi',
-        'getFormComponentElements',
         'isInDesigner',
         'trustAsHtml',
         'isInAbsoluteLayout',
