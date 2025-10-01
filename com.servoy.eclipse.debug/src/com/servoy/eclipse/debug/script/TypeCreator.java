@@ -223,6 +223,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.plugins.IPluginManager;
@@ -282,6 +283,7 @@ import com.servoy.j2db.scripting.info.EventType;
 import com.servoy.j2db.scripting.info.JSPermission;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.scripting.solutionmodel.JSValueList;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.Location;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
@@ -571,6 +573,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSMenuDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSMenuDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(EventType.class.getSimpleName(), new EventTypesCreator());
 		addScopeType(JSPermission.class.getSimpleName(), new JSPermissionCreator());
+		addScopeType(JSValueList.class.getSimpleName(), new JSValueListCreator());
 	}
 
 	private void addQueryBuilderScopeType(Class< ? > clazz)
@@ -840,6 +843,7 @@ public class TypeCreator extends TypeCache
 			classTypes.remove(JSPermission.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
+			//classTypes.remove(JSValueList.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
 			registerConstantsForScriptObject(new IReturnedTypesProvider()
 			{
@@ -1082,6 +1086,10 @@ public class TypeCreator extends TypeCache
 
 	protected final Class< ? > getTypeClass(String name)
 	{
+		if (scopeTypes.containsKey(name))
+		{
+			return null;
+		}
 		Class< ? > clz = classTypes.get(name);
 		if (clz == null)
 		{
@@ -5227,6 +5235,97 @@ public class TypeCreator extends TypeCache
 		public void flush()
 		{
 		}
+	}
+
+	private class JSValueListCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		JSValueListCreator()
+		{
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#createType(java.lang.String, java.lang.String)
+		 */
+		@Override
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setVisible(true);
+
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "JSValueList", JSValueList.class);
+			}
+
+			type.setSuperType(superType);
+
+			EList<Member> members = type.getMembers();
+
+			Property NAMES = TypeInfoModelFactory.eINSTANCE.createProperty();
+			NAMES.setName("NAMES");
+			NAMES.setVisible(true);
+			NAMES.setStatic(true);
+			NAMES.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("valuelist.gif")); // is this image correct
+			NAMES.setDescription("List of value list names");
+
+			members.add(NAMES);
+
+			Type namesType = TypeInfoModelFactory.eINSTANCE.createType();
+			namesType.setName("JSValueListNames");
+			namesType.setKind(TypeKind.JAVA);
+
+			NAMES.setDirectType(namesType);
+
+
+			EList<Member> namesMembers = namesType.getMembers();
+
+			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+			if (flattenedSolution != null)
+			{
+				Iterator<ValueList> valuelistIterator = flattenedSolution.getValueLists(false);
+				while (valuelistIterator.hasNext())
+				{
+					final ValueList valuelist = valuelistIterator.next();
+
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(valuelist.getName());
+					property.setVisible(true);
+					property.setStatic(true);
+					property.setType(getTypeRef(context, "String"));
+					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("valuelist.gif")); // is this image correct
+					property.setDescription("Value list name");
+
+					namesMembers.add(property);
+				}
+			}
+
+			addType(null, namesType);
+			return addType(null, type);
+
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#getClientSupport()
+		 */
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+
 	}
 
 	private class JSPermissionCreator implements IScopeTypeCreator
