@@ -130,6 +130,7 @@ import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.MenuFoundsetServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -843,7 +844,6 @@ public class TypeCreator extends TypeCache
 			classTypes.remove(JSPermission.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
-			//classTypes.remove(JSValueList.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
 			registerConstantsForScriptObject(new IReturnedTypesProvider()
 			{
@@ -1063,6 +1063,7 @@ public class TypeCreator extends TypeCache
 							List<IResourceDelta> changedFiles = new ArrayList<IResourceDelta>();
 							ServoyModel.findChangedFiles(event.getDelta(), changedFiles);
 							boolean permissionsChanged = false;
+							boolean valuesListChanged = false;
 							for (IResourceDelta changedDelta : changedFiles)
 							{
 								IResource res = changedDelta.getResource();
@@ -1071,8 +1072,13 @@ public class TypeCreator extends TypeCache
 									permissionsChanged = true;
 									break;
 								}
+								if (res instanceof IFile file && file.getName().endsWith(SolutionSerializer.VALUELIST_FILE_EXTENSION))
+								{
+									valuesListChanged = true;
+									break;
+								}
 							}
-							if (permissionsChanged)
+							if (permissionsChanged || valuesListChanged)
 							{
 								runClearCacheJob();
 							}
@@ -5296,7 +5302,7 @@ public class TypeCreator extends TypeCache
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(valuelist.getName());
 					property.setVisible(true);
-					property.setStatic(true);
+					property.setStatic(false);
 					property.setType(getTypeRef(context, "String"));
 					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("valuelist.gif")); // is this image correct
 					property.setDescription("Value list name");
@@ -5305,7 +5311,6 @@ public class TypeCreator extends TypeCache
 				}
 			}
 
-			addType(null, namesType);
 			return addType(null, type);
 
 		}
