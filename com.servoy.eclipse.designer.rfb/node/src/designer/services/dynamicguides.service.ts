@@ -501,9 +501,9 @@ this.snapToEndEnabled = !event.shiftKey;
 		if (this.snapThreshold <= 0) return null;
 		const previousProperties = { ...properties };
 		if (!resizing || resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
-			let closerToTheLeft = this.pointCloserToTopOrLeftSide(point, rect, 'x');
 			let snapX, guideX;
-			if (!resizing || closerToTheLeft) {
+            // left edge
+			if (!resizing || resizing.indexOf('w') >= 0) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.leftPos);
 				if (snapX?.uuid) {
 					properties.left = this.leftPos.get(snapX.uuid);
@@ -526,12 +526,12 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (!properties.cssPosition['left']) properties.cssPosition['left'] = properties.left;
 					guideX = properties.left;
 					if (resizing) {
-						properties['width'] = rect.width + rect.left - properties.left;
+						properties['width'] = this.rightPos.get(snapX.uuid) - properties.left;
 					}
 				}
 			}
 			//if not found, check the right edge as well
-			if(!snapX && (!resizing || !closerToTheLeft)) {
+			if(!snapX && (!resizing || resizing.indexOf('e') >= 0)) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.right, this.rightPos);
 				guideX = this.rightPos.get(snapX?.uuid);
 				properties.left = snapX ? this.rightPos.get(snapX.uuid) : properties.left;
@@ -590,9 +590,9 @@ this.snapToEndEnabled = !event.shiftKey;
 		if (this.snapThreshold <= 0) return null;
 		const previousProperties = { ...properties };
 		if (!resizing || resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
-			let closerToTheTop = this.pointCloserToTopOrLeftSide(point, rect, 'y');
 			let snapY, guideY;
-			if (!resizing || closerToTheTop) {
+            // top edge
+			if (!resizing || resizing.indexOf('n') >= 0) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.topPos);
 				if (snapY?.uuid) {
 					properties.top = this.topPos.get(snapY.uuid);
@@ -614,11 +614,12 @@ this.snapToEndEnabled = !event.shiftKey;
 					properties.cssPosition['top'] = snapY;
 					guideY = properties.top;
 					if (resizing) {
-						properties['height'] = rect.height + rect.top - properties.top;
+						properties['height'] = this.bottomPos.get(snapY.uuid) - properties.top;
 					}
 				}
 			}
-			if (!snapY && (!resizing || !closerToTheTop)) {
+            //if not found, check the bottom edge as well
+			if (!snapY && (!resizing || resizing.indexOf('s') >= 0)) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.bottom, this.bottomPos);
 				if (snapY?.uuid) {
 					guideY = this.bottomPos.get(snapY.uuid);

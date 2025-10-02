@@ -74,28 +74,44 @@
     margin-left: -4px;
 }
 
-.knob.l,
+.knob.l {
+    top: 50%;
+    margin-top: -4px;
+    cursor: w-resize
+}
+
 .knob.r {
     top: 50%;
     margin-top: -4px;
     cursor: e-resize
 }
 
-.knob.t,
+.knob.t {
+    left: 50%;
+    margin-left: -4px;
+    cursor: n-resize
+}
+
 .knob.b {
     left: 50%;
     margin-left: -4px;
     cursor: s-resize
 }
 
-.knob.t.l,
-.knob.b.r {
-    cursor: se-resize
+.knob.t.l {
+    cursor: nw-resize;
 }
 
-.knob.t.r,
+.knob.b.r {
+    cursor: se-resize;
+}
+
+.knob.t.r {
+    cursor: ne-resize;
+}
+
 .knob.b.l {
-    cursor: ne-resize
+    cursor: sw-resize;
 }
 
 .knob.hidden {display:none}
