@@ -32,7 +32,6 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -124,7 +123,7 @@ public class MarkdownGenerator
 		static Platform detectPlatform()
 		{
 			var osName = System.getProperty("os.name");
-			if ("win".equalsIgnoreCase(osName)) return Windows;
+			if (osName.startsWith("Windows")) return Windows;
 			if ("linux".equalsIgnoreCase(osName)) return Linux;
 			return MacOS;
 		}
@@ -263,6 +262,8 @@ public class MarkdownGenerator
 		doNotStoreAsReadMe.add("DataException");
 	}
 
+	private static String servoySourceRoot = "";
+
 	private final Map<String, Object> root;
 	private final Path path;
 	private final String rootPath;
@@ -363,6 +364,7 @@ public class MarkdownGenerator
 		gitLocation = args[4];
 		summaryMdFilePath = gitLocation + "/gitbook/SUMMARY.md";
 		boolean generateForAI = "forAI".equals(args[5]);
+		servoySourceRoot = args.length > 6 ? args[6] : "";
 
 		duplicateTracker.init(); // avoid init prior to analyze params; you may overwrite unintentionaly some usefull content for analyzing
 
@@ -956,7 +958,7 @@ public class MarkdownGenerator
 		{
 			case Windows :
 				System.out.println("Running on Windows");
-				urls = findJarURLsFromServoyInstall(new File(new URI(pluginDir).normalize()).getAbsolutePath());
+				urls = findJarURLsFromServoyInstall(new File(pluginDir).getAbsolutePath());
 
 				jsLibURLObject = new URL(jsLibURL);
 				servoyDocURLObject = new URL(servoyDocURL);
@@ -1022,19 +1024,7 @@ public class MarkdownGenerator
 			}
 
 			System.out.println("  - plugins (from " + pluginDir + "):");
-			File file2;
-			switch (platform)
-			{
-				case Windows :
-					file2 = new File(new URI(pluginDir).normalize());
-					break;
-
-				case MacOS :
-				case Linux :
-				default :
-					file2 = new File(new File(pluginDir).toURI().normalize());
-					break;
-			}
+			File file2 = new File(new File(pluginDir).toURI().normalize());
 
 
 			if (file2.isDirectory())
@@ -1359,7 +1349,8 @@ public class MarkdownGenerator
 		String classPath = pluginClassName.replace('.', File.separatorChar) + ".java";
 
 		// Check in servoy-extensions (with intermediary com.servoy.extensions directory)
-		String extensionsPath = gitLocation + File.separator + "servoy-extensions" + File.separator + "com.servoy.extensions" + File.separator + "src" +
+		String extensionsPath = gitLocation + File.separator + servoySourceRoot + "servoy-extensions" + File.separator + "com.servoy.extensions" +
+			File.separator + "src" +
 			File.separator + classPath;
 		File extensionsFile = new File(extensionsPath);
 		if (extensionsFile.exists())
@@ -2011,7 +2002,7 @@ public class MarkdownGenerator
 
 					if (ngOnly)
 					{
-						String relativePath = file.getPath().substring(file.getPath().indexOf("ng_generated/") + "ng_generated/".length());
+						String relativePath = file.getPath().substring(file.getPath().indexOf("ng_generated") + "ng_generated/".length());
 						relativePath = relativePath.replace('\\', '/');
 
 						// Check if the relative path is in the summary but not in generated files

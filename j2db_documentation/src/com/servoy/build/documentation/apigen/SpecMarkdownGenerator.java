@@ -483,15 +483,28 @@ public class SpecMarkdownGenerator
 		{
 			File parent = specFile.getParentFile();
 			File docFile = new File(parent, docFileName);
+			if (!docFile.exists())
+			{
+				docFile = new File(specFile.getParentFile(), docFile.getName());
+			}
+			if (!docFile.exists())
+			{
+				File packageRoot = specFile.getParentFile();
+				while (packageRoot != null)
+				{
+					if (new File(packageRoot, "META-INF").exists())
+					{
+						docFile = new File(packageRoot, docFileName.substring(packageName.length() + 1));
+						break;
+					}
+					packageRoot = packageRoot.getParentFile();
+				}
+			}
 			while (!docFile.exists())
 			{
 				parent = parent.getParentFile();
 				if (parent == null) break;
 				docFile = new File(parent, docFileName);
-			}
-			if (!docFile.exists())
-			{
-				docFile = new File(specFile.getParentFile(), docFile.getName());
 			}
 			if (docFile.exists())
 			{
@@ -1596,7 +1609,7 @@ public class SpecMarkdownGenerator
 						{
 							while (tagStart > 0 && (updatedJsDocEquivalent.charAt(tagStart - delta - 1) == '*'))
 								tagStart--;
-							while (tagEnd < (updatedJsDocEquivalent.length() + delta) &&
+							while ((tagEnd - delta + 1) < (updatedJsDocEquivalent.length()) &&
 								Character.isWhitespace(updatedJsDocEquivalent.charAt(tagEnd - delta + 1)))
 								tagEnd++;
 							if (tagEnd < updatedJsDocEquivalent.length() + delta) tagEnd++; // end of line
@@ -1856,6 +1869,7 @@ public class SpecMarkdownGenerator
 			while (keys.hasNext())
 			{
 				String type = keys.next();
+				System.out.println("Processing type: " + type);
 				JSONObject jsDocType = jsDocTypes.optJSONObject(type);
 				String _docValue = jsDocType != null ? jsDocType.optString("_doc", "") : "";
 				JSONObject typeObject = types.optJSONObject(type);
@@ -2132,6 +2146,7 @@ public class SpecMarkdownGenerator
 				case "format" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#format";
 				case "color" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#color";
 				case "map" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#map";
+				case "insets" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#insets";
 				case "scrollbars" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#scrollbars";
 				case "dataprovider" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#dataprovider";
 				case "${dataprovidertype}" -> "../../../servoy-developer/component\\_and\\_service\\_property\\_types.md#dataprovider";
@@ -2607,7 +2622,7 @@ public class SpecMarkdownGenerator
 				file.getParentFile().mkdirs();
 				FileWriter out = new FileWriter(file, Charset.forName("UTF-8"));
 
-				String relativePath = file.getPath().substring(file.getPath().indexOf("reference/"));
+				String relativePath = file.getPath().substring(file.getPath().indexOf("reference" + File.separator));
 				relativePath = relativePath.replace('\\', '/');
 
 				// Check if the relative path is in the summary but not in generated files
