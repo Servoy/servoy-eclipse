@@ -1054,7 +1054,20 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 				}
 				catch (Throwable e)
 				{
-					System.out.println("Failed to decode class from '" + returnedTypeCode + "' at return type of function " + name + ".");
+					int indexOf = returnedTypeCode.indexOf('<');
+					if (indexOf > 0)
+					{
+						returnedTypeCode = returnedTypeCode.substring(0, indexOf);
+						try
+						{
+							returnedType = DocumentationUtil.loadClass(loader, returnedTypeCode);
+						}
+						catch (Throwable e1)
+						{
+						}
+					}
+					if (returnedType == null)
+						System.out.println("Failed to decode class from '" + returnedTypeCode + "' at return type of function " + name + ".");
 				}
 				if (returnedType != null)
 				{
