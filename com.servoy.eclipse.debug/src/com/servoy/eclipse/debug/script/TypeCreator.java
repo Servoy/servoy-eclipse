@@ -5417,7 +5417,7 @@ public class TypeCreator extends TypeCache
 					property.setName(form);
 					property.setVisible(true);
 					property.setStatic(true);
-					property.setType(TypeUtil.ref(type));
+					property.setType(TypeUtil.ref("Form"));
 					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("form.png"));
 					property.setDescription("JSForm to be used in scripting.");
 					members.add(property);
