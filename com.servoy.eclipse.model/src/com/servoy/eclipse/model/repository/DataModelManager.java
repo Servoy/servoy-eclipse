@@ -246,7 +246,7 @@ public class DataModelManager implements IServerInfoManager
 			}
 		}
 		IFile file = getDBIFile(serverName, t.getName());
-		if (file.exists())
+		if (file != null && file.exists())
 		{
 			InputStream is = null;
 			try
@@ -1315,7 +1315,8 @@ public class DataModelManager implements IServerInfoManager
 			{
 				try
 				{
-					if (file.exists() && file.findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, false, IResource.DEPTH_ZERO).length > 0)
+					if (file != null && file.exists() &&
+						file.findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, false, IResource.DEPTH_ZERO).length > 0)
 					{
 						// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
 						// the project might have disappeared before this job was started... (delete)

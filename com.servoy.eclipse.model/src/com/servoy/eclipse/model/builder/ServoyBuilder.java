@@ -2653,6 +2653,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ITable table = server.getTable(tableName);
 							IResource res = project;
 							if (getServoyModel().getDataModelManager() != null &&
+								getServoyModel().getDataModelManager().getDBIFile(serverName, tableName) != null &&
 								getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
 							{
 								res = getServoyModel().getDataModelManager().getDBIFile(serverName, tableName);
