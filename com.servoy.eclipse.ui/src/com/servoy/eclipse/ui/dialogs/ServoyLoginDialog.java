@@ -57,6 +57,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.IServoyLoginListener;
@@ -311,11 +312,13 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 2;
 		layout.marginLeft = 20;
 		layout.marginRight = 20;
 		((Composite)control).setLayout(layout);
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText("Forgot password?");
+		lbl.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLUE));
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		lbl.addMouseListener(new MouseAdapter()
 		{
@@ -324,7 +327,8 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			{
 				try
 				{
-					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://admin.servoy-cloud.eu/"));
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser()
+						.openURL(new URL("https://admin.servoy-cloud.eu/solution/svyCloud/index.html?a=forgotpassword"));
 				}
 				catch (PartInitException | MalformedURLException e1)
 				{
@@ -332,15 +336,41 @@ public class ServoyLoginDialog extends TitleAreaDialog
 				}
 			}
 		});
-		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, true);
+		GridData gd = new GridData(SWT.BEGINNING, SWT.BEGINNING, true, false);
 		gd.horizontalIndent = 10;
 		lbl.setLayoutData(gd);
 		Cursor handCursor = parent.getDisplay().getSystemCursor(SWT.CURSOR_HAND);
 		lbl.setCursor(handCursor);
+
+		Label create = new Label(parent, SWT.NONE);
+		create.setText("Create an account");
+		create.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLUE));
+		create.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		create.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseUp(MouseEvent e)
+			{
+				try
+				{
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser()
+						.openURL(new URL("https://admin.servoy-cloud.eu/solution/svyCloud/index.html?a=registration"));
+				}
+				catch (PartInitException | MalformedURLException e1)
+				{
+					ServoyLog.logError(e1);
+				}
+			}
+		});
+		gd = new GridData(SWT.BEGINNING, SWT.BEGINNING, true, false);
+		gd.horizontalIndent = 10;
+		create.setLayoutData(gd);
+		create.setCursor(handCursor);
 		if (Util.isMac())
 		{
 			Label lbl2 = new Label(parent, SWT.NONE);
 			lbl2.setText("Having issues storing credentials?");
+			lbl2.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLUE));
 			lbl2.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 			lbl2.addMouseListener(new MouseAdapter()
 			{
@@ -351,7 +381,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 					infoDialog.open();
 				}
 			});
-			GridData gd2 = new GridData(SWT.FILL, SWT.BEGINNING, true, true);
+			GridData gd2 = new GridData(SWT.BEGINNING, SWT.END, true, false);
 			gd2.horizontalIndent = 10;
 			lbl2.setLayoutData(gd2);
 			lbl2.setCursor(handCursor);
@@ -359,6 +389,25 @@ public class ServoyLoginDialog extends TitleAreaDialog
 
 		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		return control;
+	}
+
+	@Override
+	protected void cancelPressed()
+	{
+	}
+
+	@Override
+	protected void handleShellCloseEvent()
+	{
+		if (ServoyMessageDialog.openQuestion(getShell(), "Login required", "Do you want to exit the Developer?"))
+		{
+			// clean any listeners because nothing should be called anymore
+			servoyLoginListener = null;
+			// close this dialog
+			super.handleShellCloseEvent();
+			// exit the application
+			PlatformUI.getWorkbench().close();
+		}
 	}
 
 	public static void clearSavedInfo()
