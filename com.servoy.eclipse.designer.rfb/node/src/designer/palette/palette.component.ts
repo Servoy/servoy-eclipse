@@ -247,9 +247,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             else {
                 component.x = event.pageX;
                 component.y = event.pageY;
-                // do we also need to set size here ?
-                component.x = component.x - this.editorContentService.getLeftPositionIframe();
-                component.y = component.y - this.editorContentService.getTopPositionIframe();
+                if (this.urlParser.isAbsoluteFormLayout()) {
+                    component.x = component.x - this.editorContentService.getLeftPositionIframe();
+                    component.y = component.y - this.editorContentService.getTopPositionIframe();
+                }
             }
 
             if (this.isDraggedVariant) {
@@ -340,6 +341,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.editorContentService.getTopPositionIframe() + 'px');
 
                 this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
+                
+                console.log(this.canDrop);
                 if (!this.canDrop.dropAllowed) {
                     this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
                 }
@@ -350,6 +353,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 if (this.dragItem.contentItemBeingDragged) {
                     if (this.canDrop.dropAllowed) {
                         //TODO do we need to optimize the calls to insert the dragged component?
+                        console.log("call insert");
                         this.editorContentService.sendMessageToIframe({
                             id: 'insertDraggedComponent',
                             dropTarget: this.canDrop.dropTarget && !this.canDrop.dropTarget.classList.contains('svy-csspositioncontainer') ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
