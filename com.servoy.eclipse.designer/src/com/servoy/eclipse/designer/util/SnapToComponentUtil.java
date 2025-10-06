@@ -74,8 +74,8 @@ public class SnapToComponentUtil
 		for (String property : obj.keySet())
 		{
 			JSONObject jsonObject = obj.getJSONObject(property);
-			ISupportCSSPosition target = getTarget(form, jsonObject.optString("uuid"));
-			ISupportCSSPosition targetContainer = getTarget(form, jsonObject.optString("container"));
+			ISupportCSSPosition target = getTarget(form, jsonObject.optString("uuid", null));
+			ISupportCSSPosition targetContainer = getTarget(form, jsonObject.optString("container", null));
 			CSSPosition targetContainerCssPos = targetContainer != null ? targetContainer.getCssPosition() : null;
 			AbstractContainer targetParent = target != null ? CSSPositionUtils.getParentContainer(target) : null;
 
