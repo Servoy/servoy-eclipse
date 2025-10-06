@@ -57,6 +57,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.util.ServoyMessageDialog;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.IServoyLoginListener;
@@ -83,13 +84,6 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	public ServoyLoginDialog(Shell parentShell)
 	{
 		super(parentShell);
-	}
-
-	@Override
-	protected void setShellStyle(int newShellStyle)
-	{
-		// Remove the SWT.CLOSE style bit to hide the close button
-		super.setShellStyle(newShellStyle & ~SWT.CLOSE | SWT.RESIZE);
 	}
 
 	public void doLogin(Consumer<String> onLogin)
@@ -405,6 +399,15 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	@Override
 	protected void handleShellCloseEvent()
 	{
+		if (ServoyMessageDialog.openQuestion(getShell(), "Login required", "Do you want to exit the Developer?"))
+		{
+			// clean any listeners because nothing should be called anymore
+			servoyLoginListener = null;
+			// close this dialog
+			super.handleShellCloseEvent();
+			// exit the application
+			PlatformUI.getWorkbench().close();
+		}
 	}
 
 	public static void clearSavedInfo()
