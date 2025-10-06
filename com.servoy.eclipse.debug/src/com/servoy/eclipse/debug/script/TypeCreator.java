@@ -575,6 +575,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(EventType.class.getSimpleName(), new EventTypesCreator());
 		addScopeType(JSPermission.class.getSimpleName(), new JSPermissionCreator());
 		addScopeType(JSValueList.class.getSimpleName(), new JSValueListCreator());
+		addScopeType(JSForm.class.getSimpleName(), new JSFormCreator());
 	}
 
 	private void addQueryBuilderScopeType(Class< ? > clazz)
@@ -5368,6 +5369,58 @@ public class TypeCreator extends TypeCache
 						property.setDescription("Permission to be used by security manager(JSSecurity) in scripting.");
 						members.add(property);
 					}
+				}
+			}
+			return addType(null, type);
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+	private class JSFormCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		JSFormCreator()
+		{
+		}
+
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "JSForm", JSForm.class);
+			}
+			type.setSuperType(superType);
+			type.setKind(TypeKind.JAVA);
+			EList<Member> members = type.getMembers();
+
+			List<String> forms = new ArrayList<>();
+			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForms(true)
+				.forEachRemaining(form -> forms.add(form.getName()));
+			if (forms != null)
+			{
+				for (String form : forms)
+				{
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(form);
+					property.setVisible(true);
+					property.setStatic(true);
+					property.setType(TypeUtil.ref(type));
+					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("form.png"));
+					property.setDescription("JSForm to be used in scripting.");
+					members.add(property);
 				}
 			}
 			return addType(null, type);
