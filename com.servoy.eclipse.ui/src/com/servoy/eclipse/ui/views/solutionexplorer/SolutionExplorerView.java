@@ -313,6 +313,8 @@ public class SolutionExplorerView extends ViewPart
 
 	public static final String INCLUDE_ENTRIES_FROM_MODULES = "SolutionExplorerView.includeEntriedFromModules";
 
+	public static final String INCLUDE_DEVELOPER_SOLUTION = "SolutionExplorerView.includeDeveloperSolution";
+
 	public static final String DIALOGSTORE_CONTEXT_MENU_NAVIGATION = "SolutionExplorerView.contextMenuNavigation";
 
 	public static final String DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING = "SolutionExplorerView.contextMenuTreeNavigation";

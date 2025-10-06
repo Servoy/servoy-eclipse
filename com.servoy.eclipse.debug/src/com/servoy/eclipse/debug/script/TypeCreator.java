@@ -279,6 +279,7 @@ import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
+import com.servoy.j2db.scripting.annotations.JSRealClass;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.info.EventType;
 import com.servoy.j2db.scripting.info.JSPermission;
@@ -2727,12 +2728,11 @@ public class TypeCreator extends TypeCache
 			return null;
 		}
 
-		ServoyDocumented sd = returnType.getAnnotation(ServoyDocumented.class);
-		if (sd != null && sd.realClass() != null && sd.realClass() != Object.class)
+		JSRealClass rc = returnType.getAnnotation(JSRealClass.class);
+		if (rc != null && rc.value() != null)
 		{
-			return sd.realClass();
+			return rc.value();
 		}
-
 
 		return returnType;
 	}
