@@ -551,7 +551,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 											List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
 											for (ServoyProject updateModule : modulesToUpdate)
 												modulesList.remove(updateModule.getSolution().getName());
-											String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+											String modulesTokenized = Utils.getTokenValue(modulesList.toArray(new String[] { }), ",");
 											editingSolution.setModulesNames(modulesTokenized);
 											try
 											{

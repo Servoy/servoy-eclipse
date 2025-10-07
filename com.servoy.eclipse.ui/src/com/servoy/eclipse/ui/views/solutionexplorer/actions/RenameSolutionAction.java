@@ -52,7 +52,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -179,7 +178,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 										if (oldName.equals(modulesNames[i]))
 										{
 											modulesNames[i] = newSolutionName;
-											String modulesTokenized = ModelUtils.getTokenValue(modulesNames, ",");
+											String modulesTokenized = Utils.getTokenValue(modulesNames, ",");
 											editingSol.setModulesNames(modulesTokenized);
 											toUpdate.add(editingSol);
 											break;

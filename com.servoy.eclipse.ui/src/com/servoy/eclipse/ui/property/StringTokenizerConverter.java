@@ -16,7 +16,6 @@
 */
 package com.servoy.eclipse.ui.property;
 
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.util.Utils;
 
 
@@ -44,6 +43,6 @@ public class StringTokenizerConverter implements IPropertyConverter<String, Obje
 
 	public String convertValue(Object id, Object[] value)
 	{
-		return ModelUtils.getTokenValue(value, delim);
+		return Utils.getTokenValue(value, delim);
 	}
 }

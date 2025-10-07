@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Shell;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
@@ -56,6 +55,7 @@ import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Class that allows the selection of modules to be added to the currently active solution.
@@ -147,7 +147,7 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 		Solution editingSolution = activeSolution.getEditingSolution();
 		if (editingSolution != null)
 		{
-			String modulesTokenized = ModelUtils.getTokenValue(selectedProjsArray, ",");
+			String modulesTokenized = Utils.getTokenValue(selectedProjsArray, ",");
 			editingSolution.setModulesNames(modulesTokenized);
 			try
 			{

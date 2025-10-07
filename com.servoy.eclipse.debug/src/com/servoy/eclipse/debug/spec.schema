@@ -382,6 +382,9 @@
                                 "resolveValuelist": {
                                     "type": "boolean"
                                 },
+                                "multiselect": {
+                                    "type": "string"
+                                },
                                 "oppositeOf": {
                                     "type": "string"
                                 },
