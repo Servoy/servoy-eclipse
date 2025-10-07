@@ -53,8 +53,8 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
     showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void {
 
     }
-    showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<string> {
-        return this.applicationService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, buttonsText);
+    showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], okButtonText?:string): Promise<string> {
+        return this.applicationService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, buttonsText,okButtonText);
     }
     generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
         return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName, tus);

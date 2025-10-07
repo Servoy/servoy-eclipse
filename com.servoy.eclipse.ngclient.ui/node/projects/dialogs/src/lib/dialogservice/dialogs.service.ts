@@ -51,8 +51,8 @@ export class DialogService {
     private async showDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[]): Promise<any> {
         let dialogButtonsText = buttonsText;
         if (!dialogButtonsText || dialogButtonsText.length === 0) {
-            dialogButtonsText = ['OK'];
+            dialogButtonsText = [this.i18nOK];
         }
-        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, dialogButtonsText);
+        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, dialogButtonsText,this.i18nOK);
     }
 }
