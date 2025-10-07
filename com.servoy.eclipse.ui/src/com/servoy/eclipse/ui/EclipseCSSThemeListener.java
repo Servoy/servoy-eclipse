@@ -267,7 +267,7 @@ public class EclipseCSSThemeListener
 
 	public void removeListener()
 	{
-		InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).removePreferenceChangeListener(themeChangedListener);
+		if (themeChangedListener != null) InstanceScope.INSTANCE.getNode(ECLIPSE_CSS_SWT_THEME).removePreferenceChangeListener(themeChangedListener);
 	}
 
 
