@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -130,75 +132,85 @@ public class ConvertToNewFormatAction extends Action implements ISelectionChange
 		try
 		{
 			dialog.run(true, false, monitor -> {
-				Solution[] modules = selectedSolutionProject.getModules();
-				monitor.beginTask("Converting " + selectedSolutionProject.getSolution().getName() + " and its modules...", modules.length + 2);
-				for (Solution solution : modules)
+				try
 				{
-					monitor.subTask("Converting " + solution.getName());
-					convertSolutionToNewFormat(solution);
-					monitor.worked(1);
-					if (monitor.isCanceled()) break;
-				}
-
-				final boolean[] resourceProjectConvert = new boolean[] { true };
-				Display.getDefault().syncExec(() -> {
-					resourceProjectConvert[0] = MessageDialog.openQuestion(UIUtils.getActiveShell(),
-						Messages.ConvertSolutionToNewFormatAction_convertToNewFormat,
-						"Convert the database and security information files from the resource project?");
-				});
-
-				if (resourceProjectConvert[0])
-				{
-					monitor.subTask("Converting the resource project database information");
-					IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
-					for (String serverName : serverManager.getServerNames(false, true, false, true))
-					{
-						ServerSettings serverSettings = serverManager.getServerSettings(serverName);
-						try
+					ResourcesPlugin.getWorkspace().run(workspaceMonitor -> {
+						Solution[] modules = selectedSolutionProject.getModules();
+						monitor.beginTask("Converting " + selectedSolutionProject.getSolution().getName() + " and its modules...", modules.length + 2);
+						for (Solution solution : modules)
 						{
-							IFile serverDbiFile = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager()
-								.getServerDBIFile(serverName);
-							if (serverDbiFile != null && serverDbiFile.exists())
+							monitor.subTask("Converting " + solution.getName());
+							convertSolutionToNewFormat(solution);
+							monitor.worked(1);
+							if (monitor.isCanceled()) break;
+						}
+
+						final boolean[] resourceProjectConvert = new boolean[] { true };
+						Display.getDefault().syncExec(() -> {
+							resourceProjectConvert[0] = MessageDialog.openQuestion(UIUtils.getActiveShell(),
+								Messages.ConvertSolutionToNewFormatAction_convertToNewFormat,
+								"Convert the database and security information files from the resource project?");
+						});
+
+						if (resourceProjectConvert[0])
+						{
+							monitor.subTask("Converting the resource project database information");
+							IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+							for (String serverName : serverManager.getServerNames(false, true, false, true))
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().updateServerSettings(serverName,
-									serverSettings);
-							}
-							IServer server = serverManager.getServer(serverName);
-							for (String tableName : server.getTableNames(true))
-							{
-								IFile tableDbiFile = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().getDBIFile(serverName,
-									tableName);
-								if (tableDbiFile != null && tableDbiFile.exists())
+								ServerSettings serverSettings = serverManager.getServerSettings(serverName);
+								try
 								{
-									ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager()
-										.updateAllColumnInfo(server.getTable(tableName));
+									IFile serverDbiFile = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager()
+										.getServerDBIFile(serverName);
+									if (serverDbiFile != null && serverDbiFile.exists())
+									{
+										ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().updateServerSettings(serverName,
+											serverSettings);
+									}
+									IServer server = serverManager.getServer(serverName);
+									for (String tableName : server.getTableNames(true))
+									{
+										IFile tableDbiFile = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().getDBIFile(
+											serverName,
+											tableName);
+										if (tableDbiFile != null && tableDbiFile.exists())
+										{
+											ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager()
+												.updateAllColumnInfo(server.getTable(tableName));
+										}
+									}
+								}
+								catch (Exception e)
+								{
+									Debug.error(e);
 								}
 							}
+							monitor.worked(1);
+
+							monitor.subTask("Converting the resource project security information");
+							try
+							{
+								ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().writeAllSecurityInformation(true);
+							}
+							catch (Exception e)
+							{
+								Debug.error(e);
+							}
+							monitor.worked(1);
 						}
-						catch (Exception e)
+						else
 						{
-							Debug.error(e);
+							monitor.worked(2);
 						}
-					}
-					monitor.worked(1);
 
-					monitor.subTask("Converting the resource project security information");
-					try
-					{
-						ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().writeAllSecurityInformation(true);
-					}
-					catch (Exception e)
-					{
-						Debug.error(e);
-					}
-					monitor.worked(1);
+						monitor.done();
+					}, null, IWorkspace.AVOID_UPDATE, monitor);
 				}
-				else
+				catch (CoreException e)
 				{
-					monitor.worked(2);
+					Debug.error(e);
 				}
-
-				monitor.done();
 			});
 		}
 		catch (Exception e)
