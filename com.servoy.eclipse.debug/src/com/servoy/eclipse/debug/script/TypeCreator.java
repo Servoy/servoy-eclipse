@@ -576,7 +576,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(EventType.class.getSimpleName(), new EventTypesCreator());
 		addScopeType(JSPermission.class.getSimpleName(), new JSPermissionCreator());
 		addScopeType(JSValueList.class.getSimpleName(), new JSValueListCreator());
-		addScopeType(JSForm.class.getSimpleName(), new JSFormCreator());
+		addScopeType(com.servoy.j2db.scripting.solutionmodel.JSForm.class.getSimpleName(), new JSFormCreator()); //here we refer to the one from the solution model, even though it's the same class name 
 	}
 
 	private void addQueryBuilderScopeType(Class< ? > clazz)
@@ -5397,14 +5397,45 @@ public class TypeCreator extends TypeCache
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
-
+			type.setVisible(true);
 			if (superType == null)
 			{
-				superType = TypeCreator.this.createType(null, "JSForm", JSForm.class);
+				superType = TypeCreator.this.createType(null, "JSForm", com.servoy.j2db.scripting.solutionmodel.JSForm.class);
 			}
 			type.setSuperType(superType);
 			type.setKind(TypeKind.JAVA);
 			EList<Member> members = type.getMembers();
+
+			Property INSTANCES = TypeInfoModelFactory.eINSTANCE.createProperty();
+			INSTANCES.setName("INSTANCES");
+			INSTANCES.setVisible(true);
+			INSTANCES.setStatic(true);
+			INSTANCES.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("forms.png"));
+			INSTANCES.setDescription("The list of design time forms.");
+			members.add(INSTANCES);
+			Type instancesType = TypeInfoModelFactory.eINSTANCE.createType();
+			instancesType.setName("JSFormInstances");
+			instancesType.setKind(TypeKind.JAVA);
+			INSTANCES.setDirectType(instancesType);
+
+			EList<Member> instancesMembers = instancesType.getMembers();
+			Property NAMES = TypeInfoModelFactory.eINSTANCE.createProperty();
+			NAMES.setName("NAMES");
+			NAMES.setVisible(true);
+			NAMES.setStatic(true);
+			NAMES.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("forms.png"));
+			NAMES.setDescription("The list of form names as strings.");
+			members.add(NAMES);
+			Type namesType = TypeInfoModelFactory.eINSTANCE.createType();
+			namesType.setName("JSFormNames");
+			namesType.setKind(TypeKind.JAVA);
+			NAMES.setDirectType(namesType);
+			EList<Member> namesMembers = namesType.getMembers();
+
+			Iterator<Form> formIterator = ServoyModelManager.getServoyModelManager()
+				.getServoyModel()
+				.getFlattenedSolution()
+				.getForms(true);
 
 			List<String> forms = new ArrayList<>();
 			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForms(true)
@@ -5413,14 +5444,24 @@ public class TypeCreator extends TypeCache
 			{
 				for (String form : forms)
 				{
-					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-					property.setName(form);
-					property.setVisible(true);
-					property.setStatic(true);
-					property.setType(TypeUtil.ref("Form"));
-					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("form.png"));
-					property.setDescription("JSForm to be used in scripting.");
-					members.add(property);
+					// JSForm property (in INSTANCES)
+					Property formInstance = TypeInfoModelFactory.eINSTANCE.createProperty();
+					formInstance.setName(form);
+					formInstance.setVisible(true);
+					formInstance.setStatic(false);
+					formInstance.setType(TypeUtil.ref(type));
+					formInstance.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("form.png"));
+					formInstance.setDescription("JSForm to be used in scripting.");
+					instancesMembers.add(formInstance);
+
+					// String property (in NAMES)
+					Property formNameProp = TypeInfoModelFactory.eINSTANCE.createProperty();
+					formNameProp.setName(form);
+					formNameProp.setVisible(true);
+					formNameProp.setStatic(false);
+					formNameProp.setType(getTypeRef(context, "String"));
+					formNameProp.setDescription("Form name as string.");
+					namesMembers.add(formNameProp);
 				}
 			}
 			return addType(null, type);
