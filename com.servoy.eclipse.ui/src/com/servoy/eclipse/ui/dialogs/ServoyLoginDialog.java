@@ -83,6 +83,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	private String dlgUsername = "";
 	private String dlgPassword = "";
 	private String errorMessage = null;
+	private LoginTokenResponse.Status lastStatus = LoginTokenResponse.Status.LOGIN_ERROR;
 
 	public ServoyLoginDialog(Shell parentShell)
 	{
@@ -139,6 +140,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			else if (firstLogin || loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
 			{
 				clearSavedInfo();
+				this.lastStatus = loginTokenResponse.status;
 				this.errorMessage = loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR ? "Login failed, invalid credentials" : "Login failed";
 				doLogin();
 			}
@@ -385,7 +387,13 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	@Override
 	protected void handleShellCloseEvent()
 	{
-		if (ServoyMessageDialog.openQuestion(getShell(), "Login required", "Do you want to exit the Developer?"))
+		if (lastStatus == LoginTokenResponse.Status.ERROR)
+		{
+			// if it is really an error then this is a network problem (offline or something else)
+			// the user should be able to just cancel this.
+			super.handleShellCloseEvent();
+		}
+		else if (ServoyMessageDialog.openQuestion(getShell(), "Login required", "Do you want to exit the Developer?"))
 		{
 			// clean any listeners because nothing should be called anymore
 			servoyLoginListener = null;
