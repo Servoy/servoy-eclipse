@@ -13,6 +13,7 @@ export class MessageDialogWindowComponent {
   @Input() values: string[];
   @Input() buttonsText: string[]
   @Input() inputType: string;
+  @Input() okButtonText:string = 'OK';
 
   @ViewChild("inputfield") inputfield: ElementRef;
   @ViewChild("buttons") buttons: ElementRef;
@@ -32,8 +33,9 @@ export class MessageDialogWindowComponent {
   }
 
   ngOnInit(): void {
+    if (!this.okButtonText) this.okButtonText  = 'OK';
     if(!this.buttonsText || !this.buttonsText.length) {
-      this.buttonsText = ['OK'];
+      this.buttonsText = [this.okButtonText];
     }
     if(this.values && this.values.length && (this.styleClass === 'type-input' || this.styleClass === 'type-select')) {
       this.retValue = this.values[0];
@@ -68,7 +70,7 @@ export class MessageDialogWindowComponent {
 
   dismiss(value: string): void {
     if (this.styleClass === 'type-input' || this.styleClass === 'type-select') {
-      if (value !== 'OK') {
+      if (value !==this.okButtonText) {
        this.retValue = null;
      }
     } else {

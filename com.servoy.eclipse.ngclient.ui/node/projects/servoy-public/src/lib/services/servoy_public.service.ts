@@ -20,7 +20,8 @@ export abstract class ServoyPublicService {
      */
     public abstract showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void;
 
-    public abstract showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string): Promise<string>;
+    public abstract showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string, okButtonText?: string): Promise<string>;
+
     /**
      * This created the correct {@link JSEvent} object that is used for handler calls to the server, tries to fill in as much as it can.
      */

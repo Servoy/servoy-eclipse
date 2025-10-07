@@ -344,7 +344,7 @@ export class ApplicationService {
         bsWindowInstance.setActive(true);
     }
 
-    public showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string): Promise<string> {
+    public showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string, okButtonText?:string): Promise<string> {
         return new Promise((resolve, reject) => {
             const messageDialogWindowComponent = this.mainViewRefService.mainContainer.createComponent(MessageDialogWindowComponent);
 
@@ -353,6 +353,7 @@ export class ApplicationService {
             messageDialogWindowComponent.instance.values = values;
             messageDialogWindowComponent.instance.buttonsText = buttonsText;
             messageDialogWindowComponent.instance.inputType = inputType;
+            messageDialogWindowComponent.instance.okButtonText = okButtonText
 
             const dialogWindowComponentEl = messageDialogWindowComponent.location.nativeElement.childNodes[0];
             const windowWidth = this.doc.documentElement.clientWidth;
