@@ -212,6 +212,13 @@ public class ServoyLoginDialog extends TitleAreaDialog
 				String loginToken = loginTokenJSON.getString("token");
 				return new LoginTokenResponse(LoginTokenResponse.Status.OK, loginToken);
 			}
+			else if (response.statusCode() >= 500)
+			{
+				// if this is a server error (so no 200 or 40x code) then it is not a login error
+				StringBuilder sb = new StringBuilder();
+				sb.append("HTTP ERROR : ").append(response.statusCode()).append(' ').append(responseString);
+				return new LoginTokenResponse(LoginTokenResponse.Status.ERROR, sb.toString());
+			}
 			else
 			{
 				StringBuilder sb = new StringBuilder();
