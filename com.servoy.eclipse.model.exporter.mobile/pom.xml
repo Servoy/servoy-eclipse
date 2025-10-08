@@ -8,10 +8,10 @@
   <parent>
     <groupId>com.servoy</groupId>
     <artifactId>servoy-eclipse</artifactId>
-    <version>2024.3.7.3950_LTS</version>
+    <version>2024.3.8.3951_LTS</version>
   </parent>
   <artifactId>com.servoy.eclipse.model.exporter.mobile</artifactId>
-  <version>2024.3.7.3950_LTS</version>
+  <version>2024.3.8.3951_LTS</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 		<plugins>
