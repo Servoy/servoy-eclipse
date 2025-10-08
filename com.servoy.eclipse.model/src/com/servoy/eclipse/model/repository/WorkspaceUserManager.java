@@ -615,7 +615,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		try
 		{
 			final String out = serializeSecurityInfo(serverName, tableName);
-			if (out != null)
+			if (out == null)
 			{
 				// no content to write
 				if (later)
