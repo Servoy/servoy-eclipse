@@ -615,7 +615,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		try
 		{
 			final String out = serializeSecurityInfo(serverName, tableName);
-			if (out.trim().length() == 0)
+			if (out != null)
 			{
 				// no content to write
 				if (later)
@@ -705,7 +705,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				tableAccess.put(groupSecurityInfo.getName(), info);
 			}
 		}
-		return serializeSecurityPermissionInfo(tableAccess);
+		return tableAccess.size() > 0 ? serializeSecurityPermissionInfo(tableAccess) : null;
 	}
 
 	/**
