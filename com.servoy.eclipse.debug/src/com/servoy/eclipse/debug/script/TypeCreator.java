@@ -576,7 +576,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(EventType.class.getSimpleName(), new EventTypesCreator());
 		addScopeType(JSPermission.class.getSimpleName(), new JSPermissionCreator());
 		addScopeType(JSValueList.class.getSimpleName(), new JSValueListCreator());
-		addScopeType(com.servoy.j2db.scripting.solutionmodel.JSForm.class.getSimpleName(), new JSFormCreator()); //here we refer to the one from the solution model, even though it's the same class name 
+		addScopeType(com.servoy.j2db.scripting.solutionmodel.JSForm.class.getSimpleName(), new JSFormCreator()); //here we refer to the one from the solution model, even though it's the same class name
 	}
 
 	private void addQueryBuilderScopeType(Class< ? > clazz)
@@ -5431,11 +5431,6 @@ public class TypeCreator extends TypeCache
 			namesType.setKind(TypeKind.JAVA);
 			NAMES.setDirectType(namesType);
 			EList<Member> namesMembers = namesType.getMembers();
-
-			Iterator<Form> formIterator = ServoyModelManager.getServoyModelManager()
-				.getServoyModel()
-				.getFlattenedSolution()
-				.getForms(true);
 
 			List<String> forms = new ArrayList<>();
 			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForms(true)
