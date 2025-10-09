@@ -1061,23 +1061,19 @@ public class TypeCreator extends TypeCache
 						{
 							List<IResourceDelta> changedFiles = new ArrayList<IResourceDelta>();
 							ServoyModel.findChangedFiles(event.getDelta(), changedFiles);
-							boolean permissionsChanged = false;
-							boolean valuesListChanged = false;
+							boolean clearCache = false;
 							for (IResourceDelta changedDelta : changedFiles)
 							{
 								IResource res = changedDelta.getResource();
-								if (res instanceof IFile file && file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT))
+								if (res instanceof IFile file && (file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT) ||
+									file.getName().endsWith(SolutionSerializer.VALUELIST_FILE_EXTENSION) ||
+									file.getName().endsWith(SolutionSerializer.FORM_FILE_EXTENSION)))
 								{
-									permissionsChanged = true;
-									break;
-								}
-								if (res instanceof IFile file && file.getName().endsWith(SolutionSerializer.VALUELIST_FILE_EXTENSION))
-								{
-									valuesListChanged = true;
+									clearCache = true;
 									break;
 								}
 							}
-							if (permissionsChanged || valuesListChanged)
+							if (clearCache)
 							{
 								runClearCacheJob();
 							}
