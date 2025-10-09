@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.IDragData;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
@@ -37,9 +38,9 @@ import com.servoy.j2db.persistence.ISupportText;
 
 /**
  * Copy an draggable objects and their name or text as string (if available) to the clipboard.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class FormElementCopyCommand extends Command
 {
@@ -91,7 +92,11 @@ public class FormElementCopyCommand extends Command
 		List<IDragData> dragDatas = new ArrayList<IDragData>(elements.length);
 		for (Object element : elements)
 		{
-			IDragData dragData = (IDragData)Platform.getAdapterManager().getAdapter(element, IDragData.class);
+			if (element instanceof WebFormComponentChildType formElementChild)
+			{
+				element = formElementChild.getElement();
+			}
+			IDragData dragData = Platform.getAdapterManager().getAdapter(element, IDragData.class);
 			if (dragData != null)
 			{
 				dragDatas.add(dragData);

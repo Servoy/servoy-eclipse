@@ -88,6 +88,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -414,6 +415,10 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			return null;
 		}
 		IPersist draggedPersist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), dragData.uuid);
+		if (draggedPersist == null)
+		{
+			draggedPersist = FormElementHelper.INSTANCE.findPersist(dragData.uuid);
+		}
 		if (draggedPersist == null)
 		{
 			// maybe it was deleted by a CutAction, possibly by another editor
