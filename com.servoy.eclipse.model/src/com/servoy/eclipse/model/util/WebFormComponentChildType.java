@@ -289,6 +289,8 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	{
 		getJson(true, false).remove(propertyName);
 		getParentComponent().flagChanged();
+		// force form component cache reload
+		getAncestor(Form.class).setLastModified(System.currentTimeMillis());
 		initializeElement();
 	}
 
@@ -304,6 +306,8 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 			((JSONObject)((JSONArray)customProperty).get(propertyIndex)).remove(propertyName);
 		}
 		getParentComponent().flagChanged();
+		// force form component cache reload
+		getAncestor(Form.class).setLastModified(System.currentTimeMillis());
 		initializeElement();
 	}
 
