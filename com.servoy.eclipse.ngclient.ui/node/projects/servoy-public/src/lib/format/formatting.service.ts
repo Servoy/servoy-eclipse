@@ -280,7 +280,10 @@ export class FormattingService {
                 }
             }
         }
-        let ret = numbro(data).value();
+        // get the first number from the string
+        const stripped = data.replaceAll(numbro.languageData().delimiters.thousands, '').replace(numbro.languageData().delimiters.decimal, '.');
+        const dataNumbers = stripped.match(/[-+]?\d*\.?\d+/);
+        let ret = numbro(dataNumbers ? dataNumbers[0].replace('.', numbro.languageData().delimiters.decimal) : data).value();
         ret *= multFactor;
         return ret;
     }
