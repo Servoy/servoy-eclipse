@@ -289,7 +289,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							}
 							if (!responsive || isInCSSPositionContainer)
 								FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
-							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm);
+							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, context);
 							if (!responsive || isInCSSPositionContainer) FormLayoutGenerator.generateEndDiv(w);
 							if (responsive)
 							{
@@ -314,7 +314,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							IPersist parent = ((ISupportExtendsID)child).getRealParent();
 							parentuuid = parent instanceof Form ? null : parent.getUUID();
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w,
-								new DesignProperties(mainContainerID), FormElementHelper.INSTANCE);
+								new DesignProperties(mainContainerID), FormElementHelper.INSTANCE, context);
 						}
 					}
 				}
