@@ -289,8 +289,8 @@ export class FormattingService {
         if (!bigNumber.isNaN() && !bigNumber.isEqualTo(bigNumber.toNumber())) {
             return bigNumber.toString();
         }
-        // get the first number from the string
-        const dataNumbers = stripped.match(/[-+]?\d*\.?\d+/);
+        // This regex matches optional sign, optional % or ‰ before, the number (with decimals and scientific notation), and optional % or ‰ after
+        const dataNumbers = stripped.match(/[-+]?[%‰]?\d*\.?\d+(?:[eE][-+]?\d+)?[%‰]?/);
         let ret = numbro(dataNumbers ? dataNumbers[0].replace('.', numbro.languageData().delimiters.decimal) : data).value();
         ret *= multFactor;
         return ret;
