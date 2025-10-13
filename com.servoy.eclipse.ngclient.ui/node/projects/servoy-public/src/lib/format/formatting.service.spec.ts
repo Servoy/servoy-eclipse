@@ -291,6 +291,7 @@ describe('FormattingService', () => {
         //expect(service.unformat(MILLSIGN + "+10490.00", MILLSIGN + '+00.00', 'NUMBER')).toEqual(10.49);
         expect(service.unformat('1.0490e+1', '00.00E00', 'NUMBER')).toEqual(10.49);
         expect(service.unformat('3', '0 \'μm\'', 'NUMBER')).toEqual(3);
+        expect(service.unformat('€ 12.15', '€ #,##0.00', 'NUMBER')).toEqual(12.15);
     });
 
     it('should corectly format numbers in dutch locale', () => {
