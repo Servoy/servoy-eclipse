@@ -2177,8 +2177,35 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	public static String getParsedComment(String comment, String elementName, boolean toHTML)
 	{
 		if (comment == null) return null;
-		String c = comment.replaceAll("/\\*\\*|\\*/", "");
-		c = c.replaceAll("\\n(\\s*)\\*", "\n").trim();
+		String c = TextUtils.stripCommentStartMiddleAndEndChars(comment);
+
+		if (elementName != null) c = c.replaceAll("%%elementName%%", "elements." + elementName);
+
+		String[] splitExample = c.split("@example", 2);
+		if (splitExample.length > 1)
+		{
+			String exampleBlock = splitExample[1].split("@")[0];
+			String[] exampleLines = exampleBlock.split("\\r?\\n");
+			StringBuilder cleanedExample = new StringBuilder();
+
+			for (String line : exampleLines)
+			{
+				String trimmed = line.trim();
+				if (!trimmed.isEmpty())
+				{
+					cleanedExample.append(trimmed).append("\n");
+				}
+			}
+
+			String finalExample = cleanedExample.toString().trim(); // remove leading/trailing newlines
+			finalExample = finalExample.replace("<br/>", ""); // remove <br/> from the example block to ensure no extra newlines are added
+			if (!finalExample.isEmpty())
+			{
+				c = c.replace(exampleBlock, finalExample + "\n");
+			}
+		}
+		c = c.replaceAll("@param\\s+(\\{[^}]+})\\s+(\\w+)", "@param $1 <b>$2</b>"); // bold param name
+
 		if (!toHTML)
 		{
 			String separator = System.getProperty("line.separator");
@@ -2191,17 +2218,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			c = stringBuilder.toString();
 			c = c.replaceAll(separator, "<br/>");
-		}
-		if (elementName != null) c = c.replaceAll("%%elementName%%", elementName);
-
-		String[] splitExample = c.split("@example");
-		if (splitExample.length > 1)
-		{
-			String example = splitExample[1].split("@")[0];
-			if (!example.isBlank())
-			{
-				c = c.replace(example, "\n<pre>" + example + "</pre><br/>\n");
-			}
 		}
 
 		if (!toHTML) return c;
@@ -3212,7 +3228,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>");
 			if ("".equals(tooltip))
 			{
-				tooltip = tmp.toString();
+				String methodDocu = getTooltipIfMethodActuallyHasDocumentation();
+				tooltip = tmp.toString() + "<br/><br/>" + methodDocu;
 			}
 			else
 			{
@@ -3221,7 +3238,143 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return tooltip;
 		}
 
-		private Class getMethodReturnType()
+		/**
+		 * Web components also have Legacy api methods found in interfaces like HasRuntimeStyleClass
+		 * HasRuntimeFormName, HasRuntimeName, HasRuntimeElementType, HasRuntimeDesignTimeProperty, HasRuntimeClientProperty
+		 *
+		 * TODO: investigate if we cad add scriptObject for those methods so that we do not need to hardcode the documentation here.
+		 *
+		 * @param methodDocu
+		 * @return
+		 */
+		private String getTooltipIfMethodActuallyHasDocumentation()
+		{
+			Class< ? > clazz = getMethodClass();
+			String methodDocu = null;
+			// check documentation for the legacy api methods
+			if (HasRuntimeStyleClass.class.isAssignableFrom(clazz))
+			{
+				if ("addStyleClass".equals(name))
+				{
+					methodDocu = "Adds a style to the styleClass property. This works only for NGClient where multiple styles are supported.<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"elements." + prefix + "addStyleClass();<br/>" +
+						"<br/>" +
+						"<b>@param</b> {String} styleName the name of the style class to add";
+				}
+				if ("removeStyleClass".equals(name))
+				{
+					methodDocu = "Removes a style from the styleClass property. This works only for NGClient where multiple styles are supported.<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"elements." + prefix + "removeStyleClass();<br/>" +
+						"<br/>" +
+						"<b>@param</b> {String} styleName the name of the style class to remove";
+				}
+				if ("hasStyleClass".equals(name))
+				{
+					methodDocu = "Check if an element already has a style from the styleClass property.<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"var name = elements." + prefix + "hasStyleClass();<br/>" +
+						"<br/>" +
+						"<b>@param</b> {String} styleName the name of the style class to be checked";
+				}
+				if ("getStyleClasses".equals(name))
+				{
+					methodDocu = "Return style classes of the element.<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"elements." + prefix + "getStyleClasses();<br/>" +
+						"<br/>" +
+						"<b>@return</b> an array of style class names";
+				}
+
+			}
+			else if (HasRuntimeFormName.class.isAssignableFrom(clazz))
+			{
+				methodDocu = "Returns the name of the form. (may be empty string as well)<br/>" +
+					"<br/>" +
+					"<b>@sample</b><br/>" +
+					"var name = elements." + prefix + "getFormName();<br/>" +
+					"<br/>" +
+					"<b>@return</b> The name of the form.";
+
+			}
+			else if (HasRuntimeName.class.isAssignableFrom(clazz))
+			{
+				methodDocu = "Returns the name of an element. (may be null as well)<br/>" +
+					"<br/>" +
+					"<b>@sample</b><br/>" +
+					"var name = elements." + prefix + "getName();<br/>" +
+					"<br/>" +
+					"<b>@return</b> The name of the element.";
+
+			}
+			else if (HasRuntimeElementType.class.isAssignableFrom(clazz))
+			{
+				methodDocu = "Returns the type of a specified element.<br/>" +
+					"<br/>" +
+					"<b>@sample</b><br/>" +
+					"var et = elements." + prefix + "getElementType();<br/>" +
+					"<br/>" +
+					"<b>@return</b> The display type of the element as String.";
+
+			}
+			else if (HasRuntimeDesignTimeProperty.class.isAssignableFrom(clazz))
+			{
+				if ("getDesignTimeProperty".equals(name))
+				{
+					methodDocu = "Get a design-time property of an element.<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"var prop = elements." + prefix + "getDesignTimeProperty();<br/>" +
+						"<br/>" +
+						"<b>@param</b> {String} key the name of the property<br/>" +
+						"<br/>" +
+						"<b>@return</b> The value of the specified design-time property.";
+				}
+				if ("getDesignProperties".equals(name))
+				{
+					methodDocu = "Returns the type of a specified element.<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"var propMap = elements." + prefix + "getDesignProperties();<br/>" +
+						"<br/>" +
+						"<b>@return</b> A map of all design-time properties for the element.";
+				}
+			}
+			else if (HasRuntimeClientProperty.class.isAssignableFrom(clazz))
+			{
+				if ("putClientProperty".equals(name))
+				{
+					methodDocu = "Sets the value for the specified element client property key.<br/>" +
+						"NOTE: Depending on the operating system, a user interface property name may be available.<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"elements." + prefix + "putClientProperty('ToolTipText','some text');<br/>" +
+						"<br/>" +
+						"<b>@param</b> {String} key user interface key (depends on operating system<br/>" +
+						"<b>@param</b> {String} value a predefined value for the key<br/>";
+				}
+				if ("getClientProperty".equals(name))
+				{
+					methodDocu = "Gets the specified client property for the element based on a key.<br/>" +
+						"NOTE: Depending on the operating system, a user interface property name may be available.<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"var property = elements." + prefix + "getClientProperty('ToolTipText');<br/>" +
+						"<br/>" +
+						"<b>@param</b> {String} key user interface key (depends on operating system)<br/>" +
+						"<br/>" +
+						"<b>@return</b> The value of the property for specified key.";
+				}
+			}
+			return methodDocu;
+		}
+
+		private Class< ? > getMethodReturnType()
 		{
 			if (njm != null)
 			{
@@ -3236,6 +3389,23 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				return method.getReturnType();
 			}
 			return null;
+		}
+
+		private Class< ? > getMethodClass()
+		{
+			Class< ? > clazz = null;
+			if (njm != null)
+			{
+				for (MemberBox mthd : njm.getMethods())
+				{
+					if (Utils.equalObjects(mthd.getParameterTypes(), parameterTypes))
+					{
+						clazz = mthd.getDeclaringClass();
+						break;
+					}
+				}
+			}
+			return clazz;
 		}
 
 		private String getPrettyParameterTypesString(String[] names, boolean namesOnly)
