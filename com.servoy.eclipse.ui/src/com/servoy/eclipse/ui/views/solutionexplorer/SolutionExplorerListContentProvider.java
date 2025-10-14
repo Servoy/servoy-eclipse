@@ -2204,7 +2204,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				c = c.replace(exampleBlock, finalExample + "\n");
 			}
 		}
-		c = c.replaceAll("@param\\s+(\\{[^}]+})\\s+(\\w+)", "@param $1 <b>$2</b>"); // bold param name
+		c = c.replaceAll("@param\\s+(\\{[^}]+})\\s+(\\[?\\w+\\]?)", "@param $1 <b>$2</b>"); // bold param name
 
 		if (!toHTML)
 		{
@@ -3261,7 +3261,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						"<b>@sample</b><br/>" +
 						"elements." + prefix + "addStyleClass();<br/>" +
 						"<br/>" +
-						"<b>@param</b> {String} styleName the name of the style class to add";
+						"<b>@param</b> {String} <b>styleName</b> the name of the style class to add";
 				}
 				if ("removeStyleClass".equals(name))
 				{
@@ -3270,7 +3270,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						"<b>@sample</b><br/>" +
 						"elements." + prefix + "removeStyleClass();<br/>" +
 						"<br/>" +
-						"<b>@param</b> {String} styleName the name of the style class to remove";
+						"<b>@param</b> {String} <b>styleName</b> the name of the style class to remove";
 				}
 				if ("hasStyleClass".equals(name))
 				{
@@ -3279,7 +3279,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						"<b>@sample</b><br/>" +
 						"var name = elements." + prefix + "hasStyleClass();<br/>" +
 						"<br/>" +
-						"<b>@param</b> {String} styleName the name of the style class to be checked";
+						"<b>@param</b> {String} <b>styleName</b> the name of the style class to be checked";
 				}
 				if ("getStyleClasses".equals(name))
 				{
@@ -3331,7 +3331,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						"<b>@sample</b><br/>" +
 						"var prop = elements." + prefix + "getDesignTimeProperty();<br/>" +
 						"<br/>" +
-						"<b>@param</b> {String} key the name of the property<br/>" +
+						"<b>@param</b> {String} <b>key</b> the name of the property<br/>" +
 						"<br/>" +
 						"<b>@return</b> The value of the specified design-time property.";
 				}
@@ -3355,8 +3355,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						"<b>@sample</b><br/>" +
 						"elements." + prefix + "putClientProperty('ToolTipText','some text');<br/>" +
 						"<br/>" +
-						"<b>@param</b> {String} key user interface key (depends on operating system<br/>" +
-						"<b>@param</b> {String} value a predefined value for the key<br/>";
+						"<b>@param</b> {String} <b>key</b> user interface key (depends on operating system<br/>" +
+						"<b>@param</b> {String} <b>value</b> a predefined value for the key<br/>";
 				}
 				if ("getClientProperty".equals(name))
 				{
@@ -3366,7 +3366,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						"<b>@sample</b><br/>" +
 						"var property = elements." + prefix + "getClientProperty('ToolTipText');<br/>" +
 						"<br/>" +
-						"<b>@param</b> {String} key user interface key (depends on operating system)<br/>" +
+						"<b>@param</b> {String} <b>key</b> user interface key (depends on operating system)<br/>" +
 						"<br/>" +
 						"<b>@return</b> The value of the property for specified key.";
 				}
