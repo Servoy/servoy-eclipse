@@ -3242,7 +3242,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		 * Web components also have Legacy api methods found in interfaces like HasRuntimeStyleClass
 		 * HasRuntimeFormName, HasRuntimeName, HasRuntimeElementType, HasRuntimeDesignTimeProperty, HasRuntimeClientProperty
 		 *
-		 * TODO: investigate if we cad add scriptObject for those methods so that we do not need to hardcode the documentation here.
+		 * TODO: investigate if we cad add scriptObject for these methods so that we do not need to hardcode the documentation here.
 		 *
 		 * @param methodDocu
 		 * @return
