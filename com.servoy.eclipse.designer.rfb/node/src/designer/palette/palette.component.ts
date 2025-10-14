@@ -26,6 +26,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     snapData: SnapData;
     subscription: Subscription;
 
+    searchHistory: string[] = [];
+    filteredSuggestions: string[] = [];
+    showSuggestions = false;
+    keepSuggestionsOpen = false;
+    showSearchDeleteBtn = false;
+
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService,
         private windowRef: WindowRefService, private guidesService: DynamicGuidesService) {
@@ -57,6 +63,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 this.editorSession.variantsTrigger.emit({ show: false });
             }
         });
+        
+        this.searchHistory = localStorage.getItem('searchHistory') ? JSON.parse(localStorage.getItem('searchHistory')) : [];
     }
 
     ngAfterViewInit(): void {
@@ -499,6 +507,80 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         else {
             this.snapData = null;
         }
+    }
+
+    debounceTimer: any;
+
+    clearSearch(): void {
+        this.searchText = '';
+        this.showSearchDeleteBtn = false;
+    }
+
+    onSearchInput(value: string): void {
+        this.searchText = value;
+        this.updateDeleteVisibility();
+        this.filteredSuggestions = this.filterSuggestions(this.searchText);
+    }
+
+    onSearchChange(): void {
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(() => {
+            const trimmedText = this.searchText.trim();
+            if (trimmedText && this.filteredSuggestions.length === 0) {
+                const index = this.searchHistory.indexOf(trimmedText);
+                if (index === -1) {
+                    this.searchHistory.push(trimmedText);
+                    localStorage.setItem('searchHistory', JSON.stringify(this.searchHistory));
+                }
+            }
+        }, 500);
+    }
+
+    openSuggestions(): void {
+        this.searchHistory = localStorage.getItem('searchHistory') ? JSON.parse(localStorage.getItem('searchHistory')) : [];
+        this.keepSuggestionsOpen = false;
+        this.showSuggestions = true;
+        this.updateDeleteVisibility();
+        this.filteredSuggestions = this.filterSuggestions(this.searchText);
+    }
+
+    applySuggestion(suggestion: string): void {
+        this.searchText = suggestion;
+        this.showSuggestions = false;
+        this.updateDeleteVisibility();
+    }
+
+    removeSuggestion(event: MouseEvent, suggestion: string): void {
+        event.stopPropagation();
+        const index = this.searchHistory.indexOf(suggestion);
+        if (index !== -1) {
+            this.searchHistory.splice(index, 1);
+            localStorage.setItem('searchHistory', JSON.stringify(this.searchHistory));
+        }
+        setTimeout(() => {
+            this.keepSuggestionsOpen = true;
+            (document.querySelector('#searchInput') as HTMLElement)?.focus();
+        });
+    }
+
+    closeSuggestions(): void {
+        if (!this.keepSuggestionsOpen) {
+            this.showSuggestions = false;
+        }
+    }
+
+    private updateDeleteVisibility(): void {
+        this.showSearchDeleteBtn = this.searchText?.trim().length > 0;
+    }
+
+    private filterSuggestions(value: string): string[] {
+        const numberOfSuggestions = 10;
+        const reversedHistory = [...this.searchHistory].reverse();
+        if (value && value.trim().length > 0) {
+            const lowerValue = value.toLowerCase();
+            return reversedHistory.filter(suggestion => suggestion.toLowerCase().includes(lowerValue) && suggestion.toLowerCase() !== lowerValue).slice(0, numberOfSuggestions);
+        }
+        return reversedHistory.slice(0, numberOfSuggestions);
     }
 }
 

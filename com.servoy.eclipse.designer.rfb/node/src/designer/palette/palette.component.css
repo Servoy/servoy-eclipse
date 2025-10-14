@@ -11,8 +11,10 @@
 
 .palette {
     overflow-y: auto;
+    height: 100%;
     max-height:100%;
     user-select:none;
+    position: relative;
 }
 
 .palette ul {
@@ -69,4 +71,54 @@
 
 .palette ul>li:hover>.favIcon {
     visibility: visible;
+}
+
+/* search history */
+ul.suggestions, span.delete-search {
+    position: absolute;
+}
+
+ul.suggestions {
+    padding: unset !important;
+    background-color: rgb(255, 255, 255);
+    z-index: 4;
+    width: 100%;
+}
+
+ul.suggestions li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 12px;
+}
+
+ul.suggestions li:hover, .title {
+    background-color: rgb(255, 187, 55);
+}
+
+ul.suggestions li:hover {
+    opacity: 0.7;
+}
+
+ul.suggestions li:last-child:hover, ul.suggestions {
+    border-bottom-left-radius: 0.375rem;
+}
+
+ul.suggestions li:last-child .delete-suggestion:hover, ul.suggestions li:last-child:hover, ul.suggestions {
+    border-bottom-right-radius: 0.375rem;
+}
+
+span.delete-search {
+    right: 0;
+    top: 0;
+}
+
+.text-suggestion:hover {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+.title {
+    padding: 3px 0px 3px 12px;
+    margin:unset;
 }
