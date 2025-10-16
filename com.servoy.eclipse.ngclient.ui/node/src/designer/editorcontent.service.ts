@@ -250,6 +250,7 @@ export class EditorContentService {
                                         else {
 			                                // parent is null or the form component component itself, so it is the child of the fcc directly.
                                             fcc.addChild(container);
+											if (fcc.items.length > 1) this.sortChildren(fcc.items);
                                         }
                                     });
                                 } else {
