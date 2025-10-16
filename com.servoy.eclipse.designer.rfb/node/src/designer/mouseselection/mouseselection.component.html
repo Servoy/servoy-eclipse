@@ -50,7 +50,7 @@
 </ul>
 </div>
 }
-@if (nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length == 1) {
+@if (nodes.length == 1 && node.autowizardProperties && node.autowizardProperties.length == 1 && notInsideFormComponent(node)) {
   <div class="menubar">
     <span class="containerAction" (mousedown)="openWizardAction($event, node.autowizardProperties[0])" style="margin-left:3px; margin-right: 10px;background-color: #E9720B;background-image: url('designer/assets/images/configure_in_menu.png')" title="Configure {{node.autowizardProperties[0]}}"></span>
   </div>

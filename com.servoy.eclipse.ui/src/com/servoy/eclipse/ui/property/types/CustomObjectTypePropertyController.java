@@ -22,6 +22,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertyChildId;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
@@ -52,6 +53,7 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		super(id, displayName);
 		this.persistContext = persistContext;
 		this.propertyDescription = propertyDescription;
+		this.canAddRemoveItems = persistContext.getPersist().getAncestor(WebFormComponentChildType.class) == null;
 	}
 
 	@Override

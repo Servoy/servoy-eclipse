@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.GraphicalViewer;
@@ -147,7 +145,6 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 		if (form != null)
 		{
-			final Map<String, Set<String>> allowedChildrenMap = DesignerUtil.getAllowedChildren();
 			getTreeViewer().addDragSupport(DND.DROP_MOVE, new Transfer[] { FormElementTransfer.getInstance() }, new DragSourceListener()
 			{
 				@Override
@@ -164,9 +161,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							IPersist real = ((PersistContext)element).getPersist();
 							if (real != null)
 							{
-								if (CSSPositionUtils.isInAbsoluteLayoutMode(real))
+								if (CSSPositionUtils.isInAbsoluteLayoutMode(real) || real.getAncestor(WebFormComponentChildType.class) != null)
 								{
-									// do not allow d&d from absolute layout div
+									// do not allow d&d from absolute layout div or inside form component
 									event.doit = false;
 									return;
 								}
