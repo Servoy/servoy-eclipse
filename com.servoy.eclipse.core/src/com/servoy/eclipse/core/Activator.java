@@ -145,6 +145,7 @@ import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.starter.IServerStarter;
 import com.servoy.j2db.util.CompositeIterable;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ExtendableURLClassLoader;
 import com.servoy.j2db.util.IDeveloperURLStreamHandler;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
@@ -217,7 +218,26 @@ public class Activator extends Plugin
 			{
 				IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0].createExecutableExtension(
 					"class");
-				ss.setBaseClassloader(provider.getClassLoader());
+				ClassLoader combineWithDriverClassLoader = new ClassLoader(provider.getClassLoader())
+				{
+					private ExtendableURLClassLoader driverClassLoader = null;
+
+					@Override
+					protected Class< ? > findClass(String name) throws ClassNotFoundException
+					{
+						if (driverClassLoader == null)
+						{
+							ClassLoader classLoader = ss.getApplicationServer().getServerManager().getClassLoader();
+							if (classLoader instanceof ExtendableURLClassLoader ecl)
+							{
+								this.driverClassLoader = ecl;
+							}
+							else driverClassLoader = ExtendableURLClassLoader.create(new URL[0], null);
+						}
+						return driverClassLoader.loadClass(name);
+					}
+				};
+				ss.setBaseClassloader(combineWithDriverClassLoader);
 				break; //we support only one
 			}
 		}
