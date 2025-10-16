@@ -509,31 +509,15 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
     }
 
-    debounceTimer: any;
-
     clearSearch(): void {
+        this.addToHistory(this.searchText);
         this.searchText = '';
         this.showSearchDeleteBtn = false;
     }
 
     onSearchInput(value: string): void {
-        this.searchText = value;
         this.updateDeleteVisibility();
         this.filteredSuggestions = this.filterSuggestions(this.searchText);
-    }
-
-    onSearchChange(): void {
-        clearTimeout(this.debounceTimer);
-        this.debounceTimer = setTimeout(() => {
-            const trimmedText = this.searchText.trim();
-            if (trimmedText && this.filteredSuggestions.length === 0) {
-                const index = this.searchHistory.indexOf(trimmedText);
-                if (index === -1) {
-                    this.searchHistory.push(trimmedText);
-                    localStorage.setItem('searchHistory', JSON.stringify(this.searchHistory));
-                }
-            }
-        }, 500);
     }
 
     openSuggestions(): void {
@@ -565,7 +549,19 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     closeSuggestions(): void {
         if (!this.keepSuggestionsOpen) {
+            this.searchText && this.addToHistory(this.searchText);
             this.showSuggestions = false;
+        }
+    }
+    
+    private addToHistory(value: string): void {
+        const trimmedText = value.trim();
+        if (trimmedText && this.filteredSuggestions.length === 0) {
+            const index = this.searchHistory.indexOf(trimmedText);
+            if (index === -1) {
+                this.searchHistory.push(trimmedText);
+                localStorage.setItem('searchHistory', JSON.stringify(this.searchHistory));
+            }
         }
     }
 
@@ -574,7 +570,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     private filterSuggestions(value: string): string[] {
-        const numberOfSuggestions = 10;
+        if (this.searchHistory.length === 0) return [];
+        const numberOfSuggestions = 5;
         const reversedHistory = [...this.searchHistory].reverse();
         if (value && value.trim().length > 0) {
             const lowerValue = value.toLowerCase();

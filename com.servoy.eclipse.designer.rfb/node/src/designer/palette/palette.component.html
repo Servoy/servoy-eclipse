@@ -1,5 +1,5 @@
 <div id="palette" class="palette" (scroll)="onPaletteScroll()">
-  <input type="text" id="searchInput" class="form-control input-xs" placeholder="Search" [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" (input)="onSearchInput(searchText)" (focus)="openSuggestions()" (blur)="closeSuggestions()"/>
+  <input type="text" id="searchInput" class="form-control input-xs" placeholder="Search" [(ngModel)]="searchText" (input)="onSearchInput(searchText)" (focus)="openSuggestions()" (blur)="closeSuggestions()"/>
   <span class="delete-search" *ngIf="showSearchDeleteBtn">
       <button class="btn btn-default btn-xs" (click)="clearSearch()">
           <i class="fa fa-times"></i>
