@@ -13,6 +13,7 @@ export class MessageDialogWindowComponent {
   @Input() values: string[];
   @Input() buttonsText: string[]
   @Input() inputType: string;
+  @Input() defaultButtonIndex: number;
   @Input() okButtonText:string = 'OK';
 
   @ViewChild("inputfield") inputfield: ElementRef;
@@ -46,7 +47,7 @@ export class MessageDialogWindowComponent {
     if (this.styleClass === 'type-input' || this.styleClass === 'type-select') {
       this.inputfield.nativeElement.focus();
     } else {
-      this.buttons.nativeElement.children[0].focus();
+      this.buttons.nativeElement.children[this.defaultButtonIndex].focus();
     }
     const headerHeight = this.svyMessageDialog.nativeElement.querySelector('.window-header').offsetHeight;
     const footerHeight = this.buttons.nativeElement.offsetHeight;
@@ -62,7 +63,7 @@ export class MessageDialogWindowComponent {
       }
       return '';
     }
-    if (btnIndex === 0) {
+    if (btnIndex === this.defaultButtonIndex) {
       return 'svy-btn-primary';
     }
     return '';
