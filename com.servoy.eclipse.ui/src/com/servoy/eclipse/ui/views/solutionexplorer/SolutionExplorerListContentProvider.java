@@ -103,6 +103,7 @@ import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.DocumentationUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -925,10 +926,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return new Object[] { new SimpleUserNode("Loading...", UserNodeType.LOADING) };
 	}
 
-	/**
-	 * @param un
-	 * @return
-	 */
 	private SimpleUserNode[] createComponentFileList(SimpleUserNode un)
 	{
 		WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
@@ -1025,11 +1022,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return new SimpleUserNode[0];
 	}
 
-	/**
-	 * @param folder
-	 * @param resources
-	 * @return
-	 */
 	private List<SimpleUserNode> createComponentList(String path, IContainer folder)
 	{
 		List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
@@ -1919,16 +1911,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					Script script = JavaScriptParserUtil.parse(source, null);
 
-					// see if it starts with an overall description of the component/service
-					List<Comment> comments = script.getComments();
-					if (comments.size() > 0)
-					{
-						Comment firstComment = comments.get(0);
-						// it has to be a stand-alone comment, not a comment of some method / variable
-						// and it has to be the first comment in the file (should we limit it to be the first thing in the file?)
-						if (!firstComment.isDocumentation())
-							spec.setDescription(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(firstComment.getText())));
-					}
+					DocumentationUtils.extractWebObjectLevelDoc(script,
+						webObjectDesc -> spec.setDescription(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(webObjectDesc))));
 
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
 					{
@@ -1953,13 +1937,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							return super.visitBinaryOperation(node);
 						}
 
-
-						/*
-						 * (non-Javadoc)
-						 *
-						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
-						 * ObjectInitializer)
-						 */
 						@Override
 						public ASTNode visitObjectInitializer(ObjectInitializer node)
 						{
@@ -2135,11 +2112,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							return super.visitLetStatement(node);
 						}
 
-						/*
-						 * (non-Javadoc)
-						 *
-						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitThisExpression(org.eclipse.dltk.javascript.ast.ThisExpression)
-						 */
 						@Override
 						public ASTNode visitThisExpression(ThisExpression node)
 						{
@@ -2164,6 +2136,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								}
 							}
 						}
+
 					});
 				}
 			}

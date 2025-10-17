@@ -11,6 +11,7 @@ export * from './lib/format/formatting.service';
 export * from './lib/format/maskformat';
 export * from './lib/format/pipes';
 export * from './lib/tooltip/tooltip.directive';
+export * from './lib/tooltip/tooltip-html.directive';
 export * from './lib/tooltip/tooltip.service';
 export * from './lib/services/servoy_public.service';
 export * from './lib/webstorage/localstorage.service';

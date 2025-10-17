@@ -1093,6 +1093,10 @@ public class SolutionExplorerTreeContentProvider
 								UserNodeType.LAYOUT_PROJECT_PACKAGE, IPackageReader.WEB_LAYOUT);
 							List<PlatformSimpleUserNode> servicesProjects = getWebProjects(un, serviceSpecProvider, "services_package.png",
 								UserNodeType.SERVICES_PROJECT_PACKAGE, IPackageReader.WEB_SERVICE);
+							// TODO SVY-20650 get here the package descriptions and show them as tooltips... but those are currently not inside the .zip file
+							// or the package project (usually) that we have available, but inside the webpackage.json file somewhere inside their git repo...
+							// Johan suggested that we may base this on the README.md file of those repos as well...
+
 							children.addAll(servicesProjects);
 							children.addAll(layoutProjects);
 							children.addAll(getBinaryPackages(un, componentSpecProvider, serviceSpecProvider));
@@ -1114,6 +1118,7 @@ public class SolutionExplorerTreeContentProvider
 								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
+								node.setDeveloperFeedback(new WebComponentFeedback(spec));
 								node.parent = un;
 								children.add(node);
 							}
@@ -1130,6 +1135,7 @@ public class SolutionExplorerTreeContentProvider
 								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 									img != null ? img : componentIcon);
+								node.setDeveloperFeedback(new LayoutContainerFeedback(spec));
 								node.parent = un;
 								children.add(node);
 							}
@@ -1166,6 +1172,7 @@ public class SolutionExplorerTreeContentProvider
 										Image img = getIconFromSpec(spec, false);
 										PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 											img != null ? img : componentIcon);
+										node.setDeveloperFeedback(new LayoutContainerFeedback(spec));
 										node.parent = un;
 										children.add(node);
 										folderNames.add(folderName);
@@ -1223,6 +1230,7 @@ public class SolutionExplorerTreeContentProvider
 									Image img = getIconFromSpec(spec, true);
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
 										img != null ? img : serviceDefaultIcon);
+									node.setDeveloperFeedback(new WebServiceFeedback(spec));
 									node.parent = un;
 									children.add(node);
 								}
@@ -1271,6 +1279,11 @@ public class SolutionExplorerTreeContentProvider
 									packageType = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject);
 								}
 								if (packageType == null) continue;
+
+								// TODO SVY-20650 get here the package descriptions and show them as tooltips... but those are currently not inside the .zip file
+								// or the package project (usually) that we have available, but inside the webpackage.json file somewhere inside their git repo...
+								// Johan suggested that we may base this on the README.md file of those repos as well...
+
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject),
 									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, packageType, packageIcon);
 
@@ -1322,6 +1335,7 @@ public class SolutionExplorerTreeContentProvider
 	private void createWebPackageProjectChildren(PlatformSimpleUserNode un, SpecProviderState provider, UserNodeType type, Set<String> folderNames,
 		List<PlatformSimpleUserNode> children, List<String> services, Image defaultIcon)
 	{
+		// for component packages and for service packages
 		for (String component : services)
 		{
 			WebObjectSpecification spec = provider.getWebObjectSpecification(component);
@@ -1335,6 +1349,8 @@ public class SolutionExplorerTreeContentProvider
 					{
 						Image img = getIconFromSpec(spec, false);
 						PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), type, spec, img != null ? img : defaultIcon);
+						if (type == UserNodeType.SERVICE) node.setDeveloperFeedback(new WebServiceFeedback(spec));
+						else node.setDeveloperFeedback(new WebComponentFeedback(spec));
 						node.parent = un;
 						children.add(node);
 						folderNames.add(folderName);
@@ -1453,6 +1469,9 @@ public class SolutionExplorerTreeContentProvider
 	private Collection< ? extends PlatformSimpleUserNode> getBinaryPackages(PlatformSimpleUserNode un, SpecProviderState componentsProvider,
 		SpecProviderState servicesProvider)
 	{
+		// TODO SVY-20650 get here the package descriptions and show them as tooltips... but those are currently not inside the .zip file
+		// or the package project (usually) that we have available, but inside the webpackage.json file somewhere inside their git repo...
+		// Johan suggested that we may base this on the README.md file of those repos as well...
 		List<PlatformSimpleUserNode> result = new ArrayList<PlatformSimpleUserNode>();
 		Object realObject = un.getRealObject();
 		if (realObject instanceof Solution)
@@ -2316,9 +2335,7 @@ public class SolutionExplorerTreeContentProvider
 				Image icon = getIconFromSpec(spec, true);
 				if (icon == null) icon = uiActivator.loadImageFromBundle("plugin.png");
 				PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
-					icon, WebServiceScriptable.class, new SimpleDeveloperFeedback(
-						SolutionExplorerListContentProvider.PLUGIN_PREFIX + "." + spec.getScriptingName(), null,
-						spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic)));
+					icon, WebServiceScriptable.class, new WebServiceFeedback(spec));
 				allPluginNodes.add(node);
 				node.parent = pluginNode;
 				this.addCustomTypesNodes(node, spec, null);
@@ -3166,9 +3183,20 @@ public class SolutionExplorerTreeContentProvider
 							this.addCustomTypesNodes(node, spec, originalForm);
 						}
 					}
-					node.setDeveloperFeedback(
-						new SimpleDeveloperFeedback("elements." + element.getName() + ".", null,
-							spec != null ? spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic) : null));
+					node.setDeveloperFeedback(new WebComponentFeedback(spec)
+					{
+						@Override
+						public String getSample()
+						{
+							return null;
+						}
+
+						@Override
+						public String getCode()
+						{
+							return "elements." + element.getName() + ".";
+						}
+					});
 				}
 				elements.add(node);
 				node.parent = parentNode;
@@ -4311,4 +4339,102 @@ public class SolutionExplorerTreeContentProvider
 	{
 		return allWebPackagesNode;
 	}
+
+
+	private static class LayoutContainerFeedback extends WebObjectFeedback
+	{
+
+		public LayoutContainerFeedback(WebObjectSpecification spec)
+		{
+			super(spec);
+		}
+
+		@Override
+		public String getSample()
+		{
+			return "let myLayoutContainer = jsLayoutContainerOrForm.newLayoutContainer(\"" + forSolutionModelUsageInScripting() +
+				"\");";
+		}
+
+		@Override
+		public String getCode()
+		{
+			return forSolutionModelUsageInScripting();
+		}
+
+		private String forSolutionModelUsageInScripting()
+		{
+			return spec.getPackageName() + "-" + spec.getName();
+		}
+
+	}
+
+	private static class WebServiceFeedback extends WebObjectFeedback
+	{
+
+		public WebServiceFeedback(WebObjectSpecification spec)
+		{
+			super(spec);
+		}
+
+		@Override
+		public String getSample()
+		{
+			return null;
+		}
+
+		@Override
+		public String getCode()
+		{
+			return SolutionExplorerListContentProvider.PLUGIN_PREFIX + "." + spec.getScriptingName();
+		}
+
+	}
+
+	private static class WebComponentFeedback extends WebObjectFeedback
+	{
+
+		public WebComponentFeedback(WebObjectSpecification spec)
+		{
+			super(spec);
+		}
+
+		@Override
+		public String getSample()
+		{
+			return "let myWebComponent = jsSolutionModelForm.newWebComponent(\"wc1\", \"" + spec.getName() + "\");";
+		}
+
+		@Override
+		public String getCode()
+		{
+			return spec.getName();
+		}
+
+	}
+
+	/**
+	 * Web object (component, service, layout) feedback for properties of NG web components and services.
+	 * The information is taken from their .spec & _doc.js files.
+	 *
+	 * @author acostescu
+	 */
+	private abstract static class WebObjectFeedback implements IDeveloperFeedback
+	{
+
+		protected WebObjectSpecification spec;
+
+		protected WebObjectFeedback(WebObjectSpecification spec)
+		{
+			this.spec = spec;
+		}
+
+		public String getToolTipText()
+		{
+			SolutionExplorerListContentProvider.extractApiDocs(spec);
+			String description = (spec != null ? spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic) : null);
+			return description != null ? (getCode() != null ? getCode() + "\n\n" : "") + description : null; // if the result is fully null then Solex/user node will use getCode() if available anyway
+		}
+	}
+
 }

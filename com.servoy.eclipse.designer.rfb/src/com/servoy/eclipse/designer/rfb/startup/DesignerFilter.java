@@ -59,6 +59,7 @@ import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
@@ -75,6 +76,7 @@ import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.SortedList;
@@ -244,7 +246,7 @@ public class DesignerFilter implements Filter
 					{
 						Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>> componentCategory = componentCategories.get(key);
 						boolean startedArray = false;
-						JSONObject categories = new JSONObject(); // categorised layout items, categories for components are already in the orderedKeys..
+						JSONObject categories = new JSONObject(); // categorized layout items, categories for components are already in the orderedKeys..
 						if (specProvider.getLayoutSpecifications().containsKey(key))
 						{
 							// TODO check why getWebComponentSpecifications call below also returns the layout specifications.
@@ -355,6 +357,8 @@ public class DesignerFilter implements Filter
 								if (spec.isDeprecated()) continue;
 								JSONObject layoutJson = new JSONObject();
 								layoutJson.put("name", spec.getName());
+								SolutionExplorerListContentProvider.extractApiDocs(spec);
+								layoutJson.put("description", spec.getDescriptionProcessed(false, HtmlUtils::applyDescriptionMagic));
 								if (spec.getConfig() != null)
 								{
 									String layoutName = new JSONObject((String)spec.getConfig()).optString("layoutName", null);
@@ -442,6 +446,9 @@ public class DesignerFilter implements Filter
 									componentJson.put("componentType", "component");
 									componentJson.put("displayName", spec.getDisplayName());
 									componentJson.put("keywords", spec.getKeywords());
+									SolutionExplorerListContentProvider.extractApiDocs(spec);
+									componentJson.put("description", spec.getDescriptionProcessed(false, HtmlUtils::applyDescriptionMagic));
+
 									if (spec.getStyleVariantCategory() != null)
 									{
 										FlattenedSolution efs = ServoyModelFinder.getServoyModel().getServoyProject(form.getSolution().getName())

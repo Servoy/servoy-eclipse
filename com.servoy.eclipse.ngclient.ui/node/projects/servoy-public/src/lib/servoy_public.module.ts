@@ -15,10 +15,12 @@ import { FormatDirective } from './format/formatcontrolvalueaccessor.directive';
 import { FormattingService } from './format/formatting.service';
 import { ComponentContributor } from './basecomponent';
 import { SabloTabseq } from './directives/sablotabseq.directive';
+import { HTMLTooltipDirective } from './tooltip/tooltip-html.directive';
 
 @NgModule({
     declarations: [ TabFixDirective,
                     TooltipDirective,
+                    HTMLTooltipDirective,
                     MnemonicletterFilterPipe,
                     NotNullOrEmptyPipe,
                     HtmlFilterPipe,
@@ -36,6 +38,7 @@ import { SabloTabseq } from './directives/sablotabseq.directive';
     imports: [],
     exports: [TabFixDirective,
               TooltipDirective,
+              HTMLTooltipDirective,
               MnemonicletterFilterPipe,
               NotNullOrEmptyPipe,
               HtmlFilterPipe,

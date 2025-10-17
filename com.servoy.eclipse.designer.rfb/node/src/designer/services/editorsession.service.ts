@@ -569,6 +569,7 @@ class State {
 
 export class PaletteComp {
     name: string;
+    description: string;
     displayName: string;
     packageName: string;
     x: number;

@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author jcompagner
- * 
+ *
  */
 public class SimpleDeveloperFeedback implements IDeveloperFeedback
 {
@@ -37,17 +37,11 @@ public class SimpleDeveloperFeedback implements IDeveloperFeedback
 
 	}
 
-	/**
-	 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#getCode()
-	 */
 	public String getCode()
 	{
 		return code;
 	}
 
-	/**
-	 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#getSample()
-	 */
 	public String getSample()
 	{
 		return sample;
@@ -108,9 +102,6 @@ public class SimpleDeveloperFeedback implements IDeveloperFeedback
 		return (result != null ? result : originalToolTipText);
 	}
 
-	/**
-	 * @see com.servoy.eclipse.ui.node.IDeveloperFeedback#getToolTipText()
-	 */
 	public String getToolTipText()
 	{
 		return prettyPrintToolTipText(tooltip);

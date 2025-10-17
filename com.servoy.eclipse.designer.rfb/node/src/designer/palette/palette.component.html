@@ -28,7 +28,7 @@
             <ng-template>
               <ul>
                 @for (component of package.components | searchTextFilter : searchText; track component) {
-                  <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" (click)="onClick(component)">
+                  <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" (click)="onClick(component)" [htmlTooltip]="component.description" [tooltipInitialDelay]="2000" [tooltipDismissDelay]="10000">
                     <span>
                       @if (component.properties) {
                         <img id="chevron" draggable="false" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">

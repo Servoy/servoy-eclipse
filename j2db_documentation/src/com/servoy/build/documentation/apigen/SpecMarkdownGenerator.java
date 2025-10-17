@@ -78,6 +78,7 @@ import org.sablo.specification.Package.IPackageReader;
 import org.sablo.util.ValueReference;
 import org.sablo.websocket.impl.ClientService;
 
+import com.servoy.eclipse.core.util.DocumentationUtils;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.TextUtils;
@@ -440,8 +441,6 @@ public class SpecMarkdownGenerator
 	private final boolean deprecatedContent;
 	private final JSONObject packageTypes;
 	private boolean emptyApi = false;
-	private Comment packageComment;
-	private boolean packageCommentProcessed;
 
 	public SpecMarkdownGenerator(String packageName, String packageDisplayName, String packageType,
 		JSONObject specJson, File specFile, boolean generateComponentExtendsAsWell,
@@ -458,8 +457,6 @@ public class SpecMarkdownGenerator
 		this.specJson = specJson;
 		this.docGenerator = docGenerator;
 		this.packageTypes = specJson.optJSONObject("types");
-		this.packageComment = null;
-		this.packageCommentProcessed = false;
 
 		deprecatedContent = specJson.optBoolean("deprecated", false) || specJson.optString("deprecated", null) != null;
 
@@ -519,17 +516,9 @@ public class SpecMarkdownGenerator
 					String docContents = FileUtils.readFileToString(docFile, Charset.forName("UTF8"));
 					JavaScriptParser parser = new JavaScriptParser();
 					Script script = parser.parse(docContents, null);
-					List<Comment> comments = script.getComments();
 
-					//Note about packageComment:
-					//If it exists will be the first comment in the script comments list.
-					//It is mandatory for the next item (property / handler / function ) to have a comment else the package comment will be used as that item comment.
-					//If that item is a handler / function with at least one parameter or a return, validation step of that item will detect the error,
-					//otherwise this will go undetected
-					if (comments != null && !comments.isEmpty())
-					{
-						packageComment = comments.get(0); // Save the first comment as package comment
-					}
+					DocumentationUtils.extractWebObjectLevelDoc(script,
+						webObjectDesc -> apiDoc.put(WEB_OBJECT_OVERVIEW_KEY, processJSDocDescription(webObjectDesc)));
 
 					script.visitAll(new AbstractNavigationVisitor<Void>()
 					{
@@ -541,7 +530,6 @@ public class SpecMarkdownGenerator
 							if (functionComment != null)
 							{
 								String docText = functionComment.getText();
-								validatePackageCommentIfNeeded(functionComment);
 								apiDoc.put(functionName, processJSDocDescription(docText));
 							}
 
@@ -565,7 +553,6 @@ public class SpecMarkdownGenerator
 											Comment docComment = propertyExpr.getDocumentation();
 											if (docComment != null)
 											{
-												validatePackageCommentIfNeeded(docComment);
 												apiDoc.put(fullMethodName, processJSDocDescription(docComment.getText()));
 											}
 										}
@@ -644,7 +631,6 @@ public class SpecMarkdownGenerator
 										Comment docContent = declaration.getDocumentation();
 										if (varName != null && docContent != null)
 										{
-											validatePackageCommentIfNeeded(docContent);
 											propertiesDoc.put(varName, processJSDocDescription(docContent.getText()));
 										}
 									}
@@ -679,20 +665,9 @@ public class SpecMarkdownGenerator
 							return null;
 						}
 
-						private void validatePackageCommentIfNeeded(Comment doc)
-						{
-							if (packageCommentProcessed || packageComment == null) return;
-							if (doc != null && packageComment.end() < doc.start())
-							{
-								apiDoc.put(WEB_OBJECT_OVERVIEW_KEY, processJSDocDescription(packageComment.getText()));
-							}
-							packageCommentProcessed = true;
-						}
 					});
 				}
-				catch (
-
-				IOException e)
+				catch (Exception e)
 				{
 					throw new RuntimeException("Cannot parse docfile: " + docFileName, e);
 				}
@@ -1620,7 +1595,7 @@ public class SpecMarkdownGenerator
 					}
 					catch (IndexOutOfBoundsException e)
 					{
-						System.err.println(e.getMessage());
+						e.printStackTrace();
 					}
 				}
 				else if (jsDocTag.name().equals(JSDocTag.EXAMPLE))
@@ -2540,47 +2515,47 @@ public class SpecMarkdownGenerator
 		return result;
 	}
 
-	public class FunctionInfo
-	{
-		private final List<Parameter> parameters;
-		private final String returnType;
-		private final String returnDoc; // Added for return description
-		private final boolean deprecated;
-
-		public FunctionInfo(List<Parameter> parameters, String returnType, String returnDoc, boolean deprecated)
-		{
-			this.parameters = parameters;
-			this.returnType = returnType;
-			this.returnDoc = returnDoc; // Set return description
-			this.deprecated = deprecated;
-		}
-
-		public List<Parameter> getParameters()
-		{
-			return parameters;
-		}
-
-		public String getReturnType()
-		{
-			return returnType;
-		}
-
-		public String getReturnDoc()
-		{ // Getter for return description
-			return returnDoc;
-		}
-
-		public boolean isDeprecated()
-		{
-			return deprecated;
-		}
-
-		@Override
-		public String toString()
-		{
-			return "Parameters: " + parameters + ", Return Type: " + returnType + ", Return Doc: " + returnDoc;
-		}
-	}
+//	public class FunctionInfo
+//	{
+//		private final List<Parameter> parameters;
+//		private final String returnType;
+//		private final String returnDoc; // Added for return description
+//		private final boolean deprecated;
+//
+//		public FunctionInfo(List<Parameter> parameters, String returnType, String returnDoc, boolean deprecated)
+//		{
+//			this.parameters = parameters;
+//			this.returnType = returnType;
+//			this.returnDoc = returnDoc; // Set return description
+//			this.deprecated = deprecated;
+//		}
+//
+//		public List<Parameter> getParameters()
+//		{
+//			return parameters;
+//		}
+//
+//		public String getReturnType()
+//		{
+//			return returnType;
+//		}
+//
+//		public String getReturnDoc()
+//		{ // Getter for return description
+//			return returnDoc;
+//		}
+//
+//		public boolean isDeprecated()
+//		{
+//			return deprecated;
+//		}
+//
+//		@Override
+//		public String toString()
+//		{
+//			return "Parameters: " + parameters + ", Return Type: " + returnType + ", Return Doc: " + returnDoc;
+//		}
+//	}
 
 	public class ConversionException extends Exception
 	{
