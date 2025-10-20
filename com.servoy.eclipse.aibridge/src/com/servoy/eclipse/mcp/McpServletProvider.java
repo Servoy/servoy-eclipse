@@ -52,67 +52,53 @@ public class McpServletProvider implements IServicesProvider
 				.build())
 			.build();
 
-//		Map<String, Object> outputSchema = Map.of(
-//			"type", "object",
-//			"properties", Map.of(
-//				"data", Map.of(
-//					"type", "array",
-//					"items", Map.of(
-//						"type", "object",
-//						"properties", Map.of(
-//							"name", Map.of("type", "string"),
-//							"datasource", Map.of("type", "string"))))));
-
-
 		Tool tool = McpSchema.Tool.builder().inputSchema(new JsonSchema("object", null, null, null, null, null)).name("getForms") //.outputSchema(outputSchema)
 			.description("Getting all the forms in the current solution").build();
 
 		SyncToolSpecification syncToolSpecification = SyncToolSpecification.builder().tool(tool).callHandler((exchange, request) -> {
-//			List<Map<String, String>> lst = List.of(Map.of("name", "forma", "datasource", "db:/servera/tablea"),
-//				Map.of("name", "formb", "datasource", "db:/servera/tableb"));
-//			return McpSchema.CallToolResult.builder().structuredContent(lst).build();
 			return McpSchema.CallToolResult.builder().content(List.of(new TextContent("FormA"))).build();
 		}).build();
 		server.addTool(syncToolSpecification);
 
-		// createValueList tool
-		Tool createValueListTool = McpSchema.Tool.builder()
+		// openValueList tool
+		Tool openValueListTool = McpSchema.Tool.builder()
 			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("createValueList")
-			.description("Creates a new value list with the specified name and optional array of values")
+			.name("openValueList")
+			.description("Opens an existing value list or creates a new value list. Required: name (string). Optional: values (array of strings) - only needed when creating a new value list.")
 			.build();
 
-		SyncToolSpecification createValueListSpec = SyncToolSpecification.builder()
-			.tool(createValueListTool)
-			.callHandler(this::handleCreateValueList)
+		SyncToolSpecification openValueListSpec = SyncToolSpecification.builder()
+			.tool(openValueListTool)
+			.callHandler(this::handleOpenValueList)
 			.build();
-		server.addTool(createValueListSpec);
+		server.addTool(openValueListSpec);
 
-		// createRelation tool
-		Tool createRelationTool = McpSchema.Tool.builder()
+		// openRelation tool
+		Tool openRelationTool = McpSchema.Tool.builder()
 			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("createRelation")
+			.name("openRelation")
 			.description(
-				"Creates a new database relation between two tables. Required: name (string), primaryDataSource (format: db:/server_name/table_name'), foreignDataSource (format: 'db:/server_name/table_name'). Optional: primaryColumn (string), foreignColumn (string) for column mapping.")
+				"Opens an existing database relation or creates a new relation between two tables. Required: name (string). Optional (for creation): primaryDataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'), foreignDataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'), primaryColumn (string), foreignColumn (string) for column mapping.")
 			.build();
 
-		SyncToolSpecification createRelationSpec = SyncToolSpecification.builder()
-			.tool(createRelationTool)
-			.callHandler(this::handleCreateRelation)
+		SyncToolSpecification openRelationSpec = SyncToolSpecification.builder()
+			.tool(openRelationTool)
+			.callHandler(this::handleOpenRelation)
 			.build();
-		server.addTool(createRelationSpec);
+		server.addTool(openRelationSpec);
 
 		return Set.of(new ServletInstance(transportProvider, "/mcp"));
 	}
 
 	/**
-	 * Handler for the createValueList tool
+	 * Unified handler for the valueList tool - opens existing value list or creates new one
 	 */
-	private McpSchema.CallToolResult handleCreateValueList(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleOpenValueList(Object exchange, McpSchema.CallToolRequest request)
 	{
 		String name = null;
 		List<String> valuesList = null;
 		String errorMessage = null;
+		boolean isCreate = false;
 
 		try
 		{
@@ -138,30 +124,46 @@ public class McpServletProvider implements IServicesProvider
 					}
 				}
 			}
+
+			// Validate name is required
 			if (name == null || name.trim().isEmpty())
 			{
-				throw new IllegalArgumentException("The 'name' argument is required.");
-			}
-			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			ValueList myVL = servoyModel.getActiveProject().getEditingSolution().createNewValueList(servoyModel.getNameValidator(), name);
-			Iterator<ValueList> it = servoyModel.getActiveProject().getSolution().getValueLists(false);
-			if (valuesList != null && !valuesList.isEmpty())
-			{
-				StringBuilder customValues = new StringBuilder();
-				for (String value : valuesList)
-				{
-					if (value != null && !value.trim().isEmpty())
-					{
-						if (customValues.length() > 0)
-						{
-							customValues.append("\n");
-						}
-						customValues.append(value.trim());
-					}
-				}
-				myVL.setCustomValues(customValues.toString());
+				errorMessage = "The 'name' argument is required.";
+				return McpSchema.CallToolResult.builder()
+					.content(List.of(new TextContent(errorMessage)))
+					.build();
 			}
 
+			// Check if value list already exists
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			ValueList myVL = servoyModel.getActiveProject().getEditingSolution().getValueList(name);
+
+			if (myVL == null)
+			{
+				// Value list doesn't exist - create it
+				isCreate = true;
+				myVL = servoyModel.getActiveProject().getEditingSolution().createNewValueList(servoyModel.getNameValidator(), name);
+
+				// Set custom values if provided
+				if (valuesList != null && !valuesList.isEmpty())
+				{
+					StringBuilder customValues = new StringBuilder();
+					for (String value : valuesList)
+					{
+						if (value != null && !value.trim().isEmpty())
+						{
+							if (customValues.length() > 0)
+							{
+								customValues.append("\n");
+							}
+							customValues.append(value.trim());
+						}
+					}
+					myVL.setCustomValues(customValues.toString());
+				}
+			}
+
+			// Open editor on UI thread
 			final ValueList valueListToOpen = myVL;
 			Display.getDefault().asyncExec(new Runnable()
 			{
@@ -178,18 +180,17 @@ public class McpServletProvider implements IServicesProvider
 			errorMessage = e.getMessage();
 		}
 
-
-		String resultMessage = errorMessage != null ? errorMessage : "Value list '" + name + "' created successfully";
-		McpSchema.CallToolResult result = McpSchema.CallToolResult.builder()
+		String resultMessage = errorMessage != null ? errorMessage
+			: (isCreate ? "Value list '" + name + "' created successfully" : "Value list '" + name + "' opened in editor.");
+		return McpSchema.CallToolResult.builder()
 			.content(List.of(new TextContent(resultMessage)))
 			.build();
-		return result;
 	}
 
 	/**
-	 * Handler for the createRelation tool
+	 * Unified handler for the relation tool - opens existing relation or creates new one
 	 */
-	private McpSchema.CallToolResult handleCreateRelation(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleOpenRelation(Object exchange, McpSchema.CallToolRequest request)
 	{
 		String name = null;
 		String primaryDataSource = null;
@@ -197,12 +198,14 @@ public class McpServletProvider implements IServicesProvider
 		String primaryColumn = null;
 		String foreignColumn = null;
 		String errorMessage = null;
+		boolean isCreate = false;
 
 		try
 		{
 			Map<String, Object> args = request.arguments();
 			if (args != null)
 			{
+				// Extract name parameter
 				if (args.containsKey("name"))
 				{
 					Object nameObj = args.get("name");
@@ -212,6 +215,7 @@ public class McpServletProvider implements IServicesProvider
 					}
 				}
 
+				// Extract optional datasource parameters
 				if (args.containsKey("primaryDataSource"))
 				{
 					Object primaryObj = args.get("primaryDataSource");
@@ -249,6 +253,7 @@ public class McpServletProvider implements IServicesProvider
 				}
 			}
 
+			// Validate name is required
 			if (name == null || name.trim().isEmpty())
 			{
 				errorMessage = "The 'name' argument is required.";
@@ -256,73 +261,96 @@ public class McpServletProvider implements IServicesProvider
 					.content(List.of(new TextContent(errorMessage)))
 					.build();
 			}
-			if (primaryDataSource == null || primaryDataSource.trim().isEmpty())
-			{
-				errorMessage = "The 'primaryDataSource' argument is required.";
-				return McpSchema.CallToolResult.builder()
-					.content(List.of(new TextContent(errorMessage)))
-					.build();
-			}
-			if (foreignDataSource == null || foreignDataSource.trim().isEmpty())
-			{
-				errorMessage = "The 'foreignDataSource' argument is required.";
-				return McpSchema.CallToolResult.builder()
-					.content(List.of(new TextContent(errorMessage)))
-					.build();
-			}
 
-			// Auto-correct datasource format if needed
-			// If format is just "table_name", assume it needs "db:/example_data/table_name"
-			// If format is "server/table", convert to "db:/server/table"
-			if (!primaryDataSource.startsWith("db:/"))
-			{
-				
-				primaryDataSource = "db:/" + primaryDataSource;
-			}
-			if (!foreignDataSource.startsWith("db:/"))
-			{
-				foreignDataSource = "db:/" + foreignDataSource;
-			}
-
+			// Check if relation already exists
 			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			Relation existingRelation = servoyModel.getActiveProject().getEditingSolution().getRelation(name);
-			if (existingRelation != null)
+			Relation relation = servoyModel.getActiveProject().getEditingSolution().getRelation(name);
+
+			if (relation == null)
 			{
-				errorMessage = "Relation '" + name + "' already exists. Please use a different name or delete the existing relation first.";
-				return McpSchema.CallToolResult.builder()
-					.content(List.of(new TextContent(errorMessage)))
-					.build();
+				// Relation doesn't exist - try to create it
+				isCreate = true;
+
+				// Validate datasources are provided for creation
+				if (primaryDataSource == null || primaryDataSource.trim().isEmpty())
+				{
+					errorMessage = "Relation '" + name + "' not found. To create it, provide 'primaryDataSource' and 'foreignDataSource'.";
+					return McpSchema.CallToolResult.builder()
+						.content(List.of(new TextContent(errorMessage)))
+						.build();
+				}
+				if (foreignDataSource == null || foreignDataSource.trim().isEmpty())
+				{
+					errorMessage = "Relation '" + name + "' not found. To create it, provide 'primaryDataSource' and 'foreignDataSource'.";
+					return McpSchema.CallToolResult.builder()
+						.content(List.of(new TextContent(errorMessage)))
+						.build();
+				}
+
+				// Auto-correct datasource format if needed
+				if (!primaryDataSource.startsWith("db:/"))
+				{
+					if (primaryDataSource.contains("/"))
+					{
+						primaryDataSource = "db:/" + primaryDataSource;
+					}
+					else
+					{
+						errorMessage = "Invalid primaryDataSource format: '" + primaryDataSource + "'. Please provide format 'db:/server_name/table_name' or 'server_name/table_name'";
+						return McpSchema.CallToolResult.builder()
+							.content(List.of(new TextContent(errorMessage)))
+							.build();
+					}
+				}
+				if (!foreignDataSource.startsWith("db:/"))
+				{
+					if (foreignDataSource.contains("/"))
+					{
+						foreignDataSource = "db:/" + foreignDataSource;
+					}
+					else
+					{
+						errorMessage = "Invalid foreignDataSource format: '" + foreignDataSource + "'. Please provide format 'db:/server_name/table_name' or 'server_name/table_name'";
+						return McpSchema.CallToolResult.builder()
+							.content(List.of(new TextContent(errorMessage)))
+							.build();
+					}
+				}
+
+				// Create the relation
+				relation = servoyModel.getActiveProject().getEditingSolution().createNewRelation(
+					servoyModel.getNameValidator(),
+					name,
+					primaryDataSource,
+					foreignDataSource,
+					IQueryConstants.LEFT_OUTER_JOIN);
+
+				relation.setAllowCreationRelatedRecords(true);
+
+				// Add relation item (column mapping) if both columns are provided
+				if (primaryColumn != null && !primaryColumn.trim().isEmpty() &&
+					foreignColumn != null && !foreignColumn.trim().isEmpty())
+				{
+					try
+					{
+						ITable primaryTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(primaryDataSource);
+						ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foreignDataSource);
+						Column primaryCol = primaryTable.getColumn(primaryColumn);
+						Column foreignCol = foreignTable.getColumn(foreignColumn);
+
+						relation.createNewRelationItems(
+							new IDataProvider[] { primaryCol },
+							new int[] { com.servoy.base.query.IBaseSQLCondition.EQUALS_OPERATOR },
+							new Column[] { foreignCol });
+					}
+					catch (Exception e)
+					{
+						// Silently ignore - editor will open and user can add columns manually
+					}
+				}
 			}
 
-			Relation relation = servoyModel.getActiveProject().getEditingSolution().createNewRelation(
-				servoyModel.getNameValidator(),
-				name,
-				primaryDataSource,
-				foreignDataSource,
-				IQueryConstants.LEFT_OUTER_JOIN);
-
-			relation.setAllowCreationRelatedRecords(true);
-			if (primaryColumn != null && !primaryColumn.trim().isEmpty() &&
-				foreignColumn != null && !foreignColumn.trim().isEmpty())
-			{
-				try
-				{
-					ITable primaryTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(primaryDataSource);
-					ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foreignDataSource);
-					Column primaryCol = primaryTable.getColumn(primaryColumn);
-					Column foreignCol = foreignTable.getColumn(foreignColumn);
-
-					relation.createNewRelationItems(
-						new IDataProvider[] { primaryCol },
-						new int[] { com.servoy.base.query.IBaseSQLCondition.EQUALS_OPERATOR },
-						new Column[] { foreignCol });
-				}
-				catch (Exception e)
-				{
-					// Silently ignore - editor will open and user can add columns manually
-				}
-			}
-
+			// Open editor on UI thread
 			final Relation relationToOpen = relation;
 			Display.getDefault().asyncExec(new Runnable()
 			{
@@ -344,7 +372,7 @@ public class McpServletProvider implements IServicesProvider
 		}
 
 		String resultMessage = errorMessage != null ? errorMessage
-			: "Relation '" + name + "' created successfully (from " + primaryDataSource + " to " + foreignDataSource + ")";
+			: (isCreate ? "Relation '" + name + "' created successfully (from " + primaryDataSource + " to " + foreignDataSource + ")" : "Relation '" + name + "' opened in editor.");
 		return McpSchema.CallToolResult.builder()
 			.content(List.of(new TextContent(resultMessage)))
 			.build();
