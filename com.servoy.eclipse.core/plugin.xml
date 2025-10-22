@@ -414,7 +414,7 @@
       </content-type>
       <content-type
             base-type="org.eclipse.core.runtime.text"
-            describer="com.servoy.eclipse.core.resource.ValidDescriber"
+            describer="com.servoy.eclipse.core.resource.TableDBIValidDescriber"
             file-extensions="dbi"
             id="com.servoy.eclipse.core.resource.table"
             name="Table"
@@ -430,6 +430,7 @@
       </content-type>
       <content-type
             base-type="org.eclipse.core.runtime.text"
+            describer="com.servoy.eclipse.core.resource.ServerDBIValidDescriber"
             default-charset="UTF-8"
             file-extensions="dbi"
             id="com.servoy.eclipse.core.resource.dbsecurity"
