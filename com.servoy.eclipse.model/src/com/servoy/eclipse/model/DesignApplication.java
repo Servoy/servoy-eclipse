@@ -871,6 +871,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().invokeLater(r);
 	}
 
+	@Override
+	public void invokeLater(Runnable r, boolean immediate)
+	{
+		getClient().invokeLater(r, immediate);
+	}
+
 	public boolean isEventDispatchThread()
 	{
 		return getClient().isEventDispatchThread();
