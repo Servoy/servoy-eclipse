@@ -40,7 +40,7 @@ public class ColumnTypeEditingSupport extends EditingSupport
 	static
 	{
 		int length = Column.allDefinedTypes.length;
-		types = new String[length + 3];
+		types = new String[length + 4];
 		for (int i = 0; i < length; i++)
 		{
 			types[i] = Column.getDisplayTypeString(Column.allDefinedTypes[i]);
@@ -48,6 +48,8 @@ public class ColumnTypeEditingSupport extends EditingSupport
 		types[length++] = ColumnLabelProvider.UUID_MEDIA_16;
 		types[length++] = ColumnLabelProvider.UUID_TEXT_36;
 		types[length++] = ColumnLabelProvider.UUID_NATIVE;
+		types[length++] = ColumnLabelProvider.VECTOR;
+
 	}
 
 	public class ColumnTypeEditingObservable extends ChangeSupportObservable
@@ -111,6 +113,12 @@ public class ColumnTypeEditingSupport extends EditingSupport
 				length = 36;
 				column.setFlag(IBaseColumn.UUID_COLUMN, true);
 			}
+			else if (types[selectedIndex] == ColumnLabelProvider.VECTOR)
+			{
+				type = IColumnTypes.MEDIA;
+				column.setFlag(IBaseColumn.VECTOR_COLUMN, true);
+				column.setFlag(IBaseColumn.NATIVE_COLUMN, true);
+			}
 			else
 			{
 				type = Column.allDefinedTypes[selectedIndex];
@@ -157,6 +165,10 @@ public class ColumnTypeEditingSupport extends EditingSupport
 			if (col.hasFlag(IBaseColumn.NATIVE_COLUMN))
 			{
 				return Integer.valueOf(Column.allDefinedTypes.length + 2);
+			}
+			if (col.hasFlag(IBaseColumn.VECTOR_COLUMN))
+			{
+				return Integer.valueOf(Column.allDefinedTypes.length + 3);
 			}
 			if (col.hasFlag(IBaseColumn.UUID_COLUMN))
 			{

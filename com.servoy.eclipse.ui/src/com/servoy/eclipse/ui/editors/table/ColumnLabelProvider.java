@@ -43,6 +43,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 	public static final String UUID_TEXT_36 = "UUID (Text(36))";
 	public static final String UUID_MEDIA_16 = "UUID (Media(16))";
 	public static final String UUID_NATIVE = "UUID (DB native)";
+	public static final String VECTOR = "VECTOR";
 	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("check_on.png");
 	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("check_off.png");
 	public static final Image TRUE_RADIO = Activator.getDefault().loadImageFromBundle("radio_on.png");
@@ -159,6 +160,10 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 				return UUID_MEDIA_16;
 			}
 			return UUID_TEXT_36;
+		}
+		if (info.hasFlag(IBaseColumn.VECTOR_COLUMN))
+		{
+			return VECTOR;
 		}
 		if ((columnType.getSqlType() == Types.OTHER || columnType.getSqlType() == Types.JAVA_OBJECT) &&
 			!Utils.stringIsEmpty(info.getNativeTypename()))

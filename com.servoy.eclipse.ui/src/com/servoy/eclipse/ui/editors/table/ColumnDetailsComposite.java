@@ -597,6 +597,9 @@ public class ColumnDetailsComposite extends Composite
 		bindingContext.bindValue(foreignTypeInWizard, getCIForeignTypeObserveValue, null, null);
 
 		BindingHelper.addGlobalChangeListener(bindingContext, event -> getShell().getDisplay().asyncExec(column::flagColumnInfoChanged));
+
+		uuidCheckBox.setEnabled(!column.isNativetype()); // all native types can't be changed to uuid (they are a uud or they are not compatible)
+		tenantCheckBox.setEnabled(!column.hasFlag(IBaseColumn.VECTOR_COLUMN)); // vector columns can't be tenant columns
 	}
 
 	private IValueChangeListener listener;
