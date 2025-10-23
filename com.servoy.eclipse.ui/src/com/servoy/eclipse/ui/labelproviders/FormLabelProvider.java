@@ -34,9 +34,11 @@ import com.servoy.j2db.util.Utils;
 
 public class FormLabelProvider extends LabelProvider implements IPersistLabelProvider, IDeprecationProvider
 {
+	public static final String FORM_DEFAULT_STRING = "-default-";
 	protected final FlattenedSolution flattenedSolution;
 	private final boolean defaultIsNone;
 	private final boolean defaultAsText;
+	private final boolean nullIsDefault;
 
 	public FormLabelProvider(FlattenedSolution flattenedSolution, boolean defaultIsNone)
 	{
@@ -45,21 +47,27 @@ public class FormLabelProvider extends LabelProvider implements IPersistLabelPro
 
 	public FormLabelProvider(FlattenedSolution flattenedSolution, boolean defaultIsNone, boolean defaultAsText)
 	{
+		this(flattenedSolution, defaultIsNone, defaultAsText, false);
+	}
+
+	public FormLabelProvider(FlattenedSolution flattenedSolution, boolean defaultIsNone, boolean defaultAsText, boolean nullIsDefault)
+	{
 		this.flattenedSolution = flattenedSolution;
 		this.defaultIsNone = defaultIsNone;
 		this.defaultAsText = defaultAsText;
+		this.nullIsDefault = nullIsDefault;
 	}
 
 	@Override
 	public String getText(Object value)
 	{
+		if (FORM_DEFAULT_STRING.equals(value) || (nullIsDefault && value == null))
+		{
+			return defaultIsNone ? Messages.LabelNone : defaultAsText ? Messages.LabelDefaultAsText : Messages.LabelDefault;
+		}
 		if (value == null)
 		{
 			return Messages.LabelNone;
-		}
-		if (value == Form.NAVIGATOR_DEFAULT)
-		{
-			return defaultIsNone ? Messages.LabelNone : defaultAsText ? Messages.LabelDefaultAsText : Messages.LabelDefault;
 		}
 		if (Form.NAVIGATOR_IGNORE.equals(value))
 		{

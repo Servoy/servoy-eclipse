@@ -39,6 +39,7 @@ import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.PersistEncapsulation;
@@ -168,7 +169,7 @@ public class FormContentProvider implements ITreeContentProvider
 
 					ArrayList<Object> list = new ArrayList<Object>();
 					if (options.includeNone) list.add(Form.NAVIGATOR_NONE);
-					if (options.includeDefault) list.add(Form.NAVIGATOR_DEFAULT);
+					if (options.includeDefault) list.add(FormLabelProvider.FORM_DEFAULT_STRING);
 					if (options.includeIgnore) list.add(Form.NAVIGATOR_IGNORE);
 					if (workingSets != null)
 					{
