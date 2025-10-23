@@ -33,6 +33,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -533,7 +534,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		}
 		else if (name.endsWith("navigatorID") && form != null)
 		{
-			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
+			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(
+				new FormLabelProvider(flattenedEditingSolution, false, true, true),
 				persistContext.getContext());
 			PropertyDescriptor pd = new PropertyDescriptor(name, displayName)
 			{
@@ -553,7 +555,30 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true, false,
 							null),
 						SWT.NONE, null, "navigatorFormDialog",
-						"Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
+						"Only forms that have navigator set to -none- and showInMenu deselected appear in this list.")
+					{
+
+						@Override
+						protected StructuredSelection getSelection(Object value)
+						{
+							if (value == Form.NAVIGATOR_DEFAULT)
+							{
+								return new StructuredSelection(FormLabelProvider.FORM_DEFAULT_STRING);
+							}
+							return super.getSelection(value);
+						}
+
+						@Override
+						protected Object doGetValue()
+						{
+							Object value = super.doGetValue();
+							if (FormLabelProvider.FORM_DEFAULT_STRING.equals(value))
+							{
+								return Form.NAVIGATOR_DEFAULT;
+							}
+							return value;
+						}
+					};
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
