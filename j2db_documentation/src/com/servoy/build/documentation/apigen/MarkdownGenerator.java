@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.SortedMap;
@@ -86,9 +87,6 @@ import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.plugins.IPlugin;
 import com.servoy.j2db.plugins.IServerPlugin;
-import com.servoy.j2db.querybuilder.IQueryBuilderColumn;
-import com.servoy.j2db.querybuilder.IQueryBuilderCondition;
-import com.servoy.j2db.querybuilder.IQueryBuilderLogicalCondition;
 import com.servoy.j2db.scripting.FormScope;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptObject;
@@ -146,8 +144,8 @@ public class MarkdownGenerator
 	private static Set<String> uniqueClasses = new HashSet<>();
 	private static Set<String> undocumentedTypes = new HashSet<>();
 	private static List<String> missingMdFiles = new ArrayList<>();
-	private static Map<String, String> referenceTypes = new HashMap<String, String>();
-	private static Set<String> summaryPaths = new HashSet<String>();
+	private static Map<String, String> referenceTypes = new HashMap<>();
+	private static Set<String> summaryPaths = new HashSet<>();
 	private static String summaryMdFilePath;
 	private static Map<String, String> classNameMap = null;
 
@@ -564,7 +562,7 @@ public class MarkdownGenerator
 		}
 		catch (Exception e)
 		{
-			System.err.println("Error loading imports from ConfigServlet: " + e.getMessage());
+			Debug.error("Error loading imports from ConfigServlet", e);
 
 			// Fallback to hardcoded mappings if an error occurs
 			map.put("Settings", "com.servoy.j2db.util.Settings");
@@ -637,7 +635,7 @@ public class MarkdownGenerator
 		}
 		catch (Exception e)
 		{
-			System.err.println("Error resolving static field reference: " + fieldReference + " - " + e.getMessage());
+			Debug.error("Error resolving static field reference: " + fieldReference, e);
 		}
 
 		return fieldReference;
@@ -692,26 +690,26 @@ public class MarkdownGenerator
 					// Determine the argument type and convert the string value
 					if (arg.equals("true") || arg.equals("false"))
 					{
-						args.add(Boolean.parseBoolean(arg));
+						args.add(Boolean.valueOf(arg));
 						argTypes.add(boolean.class);
 					}
 					else if (arg.matches("-?\\d+"))
 					{
 						try
 						{
-							args.add(Integer.parseInt(arg));
+							args.add(Integer.valueOf(arg));
 							argTypes.add(int.class);
 						}
 						catch (NumberFormatException e)
 						{
 							// If it's too large for an int, try long
-							args.add(Long.parseLong(arg));
+							args.add(Long.valueOf(arg));
 							argTypes.add(long.class);
 						}
 					}
 					else if (arg.matches("-?\\d+\\.\\d+"))
 					{
-						args.add(Double.parseDouble(arg));
+						args.add(Double.valueOf(arg));
 						argTypes.add(double.class);
 					}
 					else
@@ -1048,11 +1046,11 @@ public class MarkdownGenerator
 									}
 									catch (IOException e)
 									{
-										e.printStackTrace();
+										Debug.error("Error reading entry " + entry.getName(), e);
 									}
 									return null;
 								})
-								.filter(is -> is != null)
+								.filter(Objects::nonNull)
 								.map(is -> {
 									// As some types can be accessed between plugins, we need to separate this processDocObjectToPathMaps(...) out of the main
 									// generateDocsFromXML(...) so that we could identify all types from all plugins (by calling only this method for each plugin)
@@ -1091,24 +1089,22 @@ public class MarkdownGenerator
 									}
 									catch (ClassNotFoundException | InstantiationException | IllegalAccessException e)
 									{
-										e.printStackTrace();
+										Debug.error("Error reading plugin doc for " + pluginPath, e);
 										return null;
 									}
 								})
+								.filter(Objects::nonNull)
 								.forEach(pluginDocumentationPreparated -> {
-									if (pluginDocumentationPreparated != null)
+									try
 									{
-										try
-										{
-											System.out.println("    * " + jar.getName());
+										System.out.println("    * " + jar.getName());
 
-											docGenerator.generateDocsFromXML(pluginDocumentationPreparated.docManager, pluginDocumentationPreparated.pluginPath,
-												ng);
-										}
-										catch (ClassNotFoundException | IOException e)
-										{
-											e.printStackTrace();
-										}
+										docGenerator.generateDocsFromXML(pluginDocumentationPreparated.docManager, pluginDocumentationPreparated.pluginPath,
+											ng);
+									}
+									catch (ClassNotFoundException | IOException e)
+									{
+										Debug.error("Error generating docs from xml in " + jar.getName(), e);
 									}
 								});
 						}
@@ -1137,8 +1133,7 @@ public class MarkdownGenerator
 			}
 			catch (Exception e)
 			{
-				System.err.println("Error generating admin page documentation: " + e.getMessage());
-				e.printStackTrace();
+				Debug.error("Error generating admin page documentation ", e);
 			}
 		}
 
@@ -1181,7 +1176,7 @@ public class MarkdownGenerator
 					}
 					catch (MalformedURLException e)
 					{
-						System.err.println("Error creating URL for JAR: " + path + ": " + e.getMessage());
+						Debug.error("Error creating URL for JAR: " + path, e);
 					}
 				});
 
@@ -1232,8 +1227,7 @@ public class MarkdownGenerator
 				}
 				catch (Exception e)
 				{
-					System.err.println("Error processing plugin: " + e.getMessage());
-					e.printStackTrace();
+					Debug.error("Error processing plugin " + plugin, e);
 				}
 			}
 
@@ -1245,8 +1239,7 @@ public class MarkdownGenerator
 		}
 		catch (Exception e)
 		{
-			System.err.println("Error scanning for plugins: " + e.getMessage());
-			e.printStackTrace();
+			Debug.error("Error scanning for plugins", e);
 		}
 		finally
 		{
@@ -1404,8 +1397,7 @@ public class MarkdownGenerator
 		}
 		catch (IOException e)
 		{
-			System.err.println("\033[38;5;202mFailed to load summary file: " + summaryMdFilePath + "\033[0m");
-			e.printStackTrace();
+			Debug.error("Failed to load summary file: " + summaryMdFilePath, e);
 		}
 		return;
 	}
@@ -1478,7 +1470,7 @@ public class MarkdownGenerator
 				}
 				catch (MalformedURLException e)
 				{
-					e.printStackTrace();
+					Debug.error("Failed to normalize filePath " + filePath, e);
 				}
 			});
 		}
@@ -1577,7 +1569,6 @@ public class MarkdownGenerator
 
 	private String generate()
 	{
-		// TODO Auto-generated method stub
 		StringWriter out = new StringWriter();
 		try
 		{
@@ -1585,7 +1576,7 @@ public class MarkdownGenerator
 		}
 		catch (TemplateException | IOException e)
 		{
-			e.printStackTrace();
+			Debug.error("Failed process template", e);
 		}
 		return out.toString();
 	}
@@ -1617,7 +1608,7 @@ public class MarkdownGenerator
 			}
 			catch (Exception e)
 			{
-				System.err.println("\033[31mError calculating relative path: " + e.getMessage() + "\033[0m");
+				Debug.error("Error calculating relative path", e);
 				return "";
 			}
 		}
@@ -1765,22 +1756,6 @@ public class MarkdownGenerator
 			else if (Function.class.isAssignableFrom(type))
 			{
 				return "Function";
-			}
-			else if (IQueryBuilderLogicalCondition.class.isAssignableFrom(type))
-			{
-				return "QBLogicalCondition";
-			}
-			else if (IQueryBuilderCondition.class.isAssignableFrom(type))
-			{
-				return "QBCondition";
-			}
-			else if (IQueryBuilderCondition.class.isAssignableFrom(type))
-			{
-				return "QBCondition";
-			}
-			else if (IQueryBuilderColumn.class.isAssignableFrom(type))
-			{
-				return "QBColumn";
 			}
 			else if (ICSSPosition.class.isAssignableFrom(type) || CSSPosition.class == type)
 			{

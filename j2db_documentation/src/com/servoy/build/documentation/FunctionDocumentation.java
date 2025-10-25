@@ -850,8 +850,6 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 	{
 		Element functionElement = DocumentHelper.createElement(typesToTags.get(type));
 
-//		if (!pretty)
-//		{
 		if (argumentsTypes != null)
 		{
 			Element argsTypes = DocumentHelper.createElement(TAG_ARGUMENTSTYPES);
@@ -863,7 +861,6 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 				argType.addAttribute(ATTR_TYPECODE, cc.getName());
 			}
 		}
-//		}
 
 		if (isDeprecated()) functionElement.addAttribute(ATTR_DEPRECATED, Boolean.TRUE.toString());
 		if (getClientSupport() != null) functionElement.addAttribute(ATTR_CLIENT_SUPPORT, getClientSupport().toAttribute());
