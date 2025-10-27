@@ -1349,7 +1349,7 @@ public class TypeCreator extends TypeCache
 				if (name.endsWith("ID")) name = name.substring(0, name.length() - 2);
 				Property property = createProperty(name, false, memberType,
 					SolutionExplorerListContentProvider.getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic),
-						STANDARD_ELEMENT_NAME, true),
+						STANDARD_ELEMENT_NAME, true, false),
 					null);
 				property.setDeprecated(pd.isDeprecated());
 				members.add(property);
@@ -1435,11 +1435,6 @@ public class TypeCreator extends TypeCache
 		return Arrays.asList(method);
 	}
 
-	/**
-	 * @param context
-	 * @param api
-	 * @return
-	 */
 	private Method createMethod(String context, WebObjectApiFunctionDefinition api)
 	{
 		Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
@@ -1449,7 +1444,7 @@ public class TypeCreator extends TypeCache
 			StringBuilder description = new StringBuilder(api.getDocumentation());
 			if (!api.getDocumentation().contains("@deprecated")) description.append(api.getDeprecatedMessage());
 			method.setDescription(SolutionExplorerListContentProvider.getParsedComment(description.toString(),
-				STANDARD_ELEMENT_NAME, true));
+				STANDARD_ELEMENT_NAME, true, false));
 			method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
 		}
 		else
@@ -5794,7 +5789,7 @@ public class TypeCreator extends TypeCache
 						String comment = method.getRuntimeProperty(IScriptProvider.COMMENT);
 						if (comment != null)
 						{
-							m.setDescription(SolutionExplorerListContentProvider.getParsedComment(comment, STANDARD_ELEMENT_NAME, false));
+							m.setDescription(SolutionExplorerListContentProvider.getParsedComment(comment, STANDARD_ELEMENT_NAME, false, true));
 						}
 						MethodArgument returnTypeArgument = method.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
 						if (returnTypeArgument != null)

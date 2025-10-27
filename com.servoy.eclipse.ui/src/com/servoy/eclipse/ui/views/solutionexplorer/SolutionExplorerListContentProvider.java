@@ -1930,7 +1930,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 									Comment doc = node.getDocumentation();
 									if (api != null && doc != null && doc.isDocumentation())
 									{
-										api.setDocumentation(doc.getText());
+										api.setDocumentation(TextUtils.stripCommentStartMiddleAndEndChars(doc.getText()));
 									}
 								}
 							}
@@ -1963,7 +1963,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 									Comment doc = initializer.getName().getDocumentation();
 									if (api != null && initializer.getValue() instanceof FunctionStatement && doc != null && doc.isDocumentation())
 									{
-										api.setDocumentation(doc.getText());
+										api.setDocumentation(TextUtils.stripCommentStartMiddleAndEndChars(doc.getText()));
 									}
 								}
 							}
@@ -1981,7 +1981,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								WebObjectApiFunctionDefinition api = apis.get(baseName);
 								if (api != null)
 								{
-									String doc = parseDoc(node.getDocumentation().getText());
+									String doc = parseDoc(TextUtils.stripCommentStartMiddleAndEndChars(node.getDocumentation().getText()));
 
 									if (nameParts.length > 1)
 									{
@@ -2021,7 +2021,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								if (parent instanceof BinaryOperation bo && bo.getLeftExpression() instanceof PropertyExpression pe &&
 									pe.getDocumentation() != null)
 								{
-									String doc = parseDoc(pe.getDocumentation().getText());
+									String doc = parseDoc(TextUtils.stripCommentStartMiddleAndEndChars(pe.getDocumentation().getText()));
 									String fullName = pe.getProperty().toString();
 									WebObjectApiFunctionDefinition apiFunction = customType.getApiFunction(fullName);
 									if (apiFunction != null)
@@ -2132,7 +2132,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								PropertyDescription pd = properties.get(node.getVariables().get(0).getVariableName());
 								if (pd != null)
 								{
-									pd.setDescription(node.getDocumentation().getText());
+									pd.setDescription(TextUtils.stripCommentStartMiddleAndEndChars(node.getDocumentation().getText()));
 								}
 							}
 						}
@@ -2147,10 +2147,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
-	public static String getParsedComment(String comment, String elementName, boolean toHTML)
+	public static String getParsedComment(String comment, String elementName, boolean toHTML, boolean commentMayContainsStartMiddleAnDEndTags)
 	{
 		if (comment == null) return null;
-		String c = TextUtils.stripCommentStartMiddleAndEndChars(comment);
+		String c = (commentMayContainsStartMiddleAnDEndTags ? TextUtils.stripCommentStartMiddleAndEndChars(comment) : comment);
 
 		if (elementName != null) c = c.replaceAll("%%elementName%%", "elements." + elementName);
 
@@ -2209,7 +2209,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		if (documentation != null && documentation.contains("@example"))
 		{
-			String description = getParsedComment(documentation, name, false);
+			String description = getParsedComment(documentation, name, false, false);
 			String example = description.split("@example")[1].split("@")[0];
 			example = example.replaceAll("<br>|<br/>", "\n");
 			example = example.replaceAll("\\<.*?\\>", "");
@@ -2285,7 +2285,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							@Override
 							public String getToolTip(String methodName)
 							{
-								return getParsedComment(api.getDocumentation(), elementName, false);
+								return getParsedComment(api.getDocumentation(), elementName, false, false);
 							}
 
 							@Override
@@ -2700,7 +2700,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			@Override
 			public String getToolTip(String methodName)
 			{
-				return getParsedComment(api.getDocumentation(), elementName, false);
+				return getParsedComment(api.getDocumentation(), elementName, false, false);
 			}
 
 			@Override
@@ -3215,7 +3215,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		 * Web components also have Legacy api methods found in interfaces like HasRuntimeStyleClass
 		 * HasRuntimeFormName, HasRuntimeName, HasRuntimeElementType, HasRuntimeDesignTimeProperty, HasRuntimeClientProperty
 		 *
-		 * TODO: investigate if we cad add scriptObject for these methods so that we do not need to hardcode the documentation here.
+		 * TODO: investigate if we can add scriptObject for these methods so that we do not need to hardcode the documentation here.
 		 *
 		 * @param methodDocu
 		 * @return
@@ -3474,7 +3474,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				@Override
 				public String getSample(String methodName)
 				{
-					String comment = getParsedComment(sm.getRuntimeProperty(IScriptProvider.COMMENT), null, false);
+					String comment = getParsedComment(sm.getRuntimeProperty(IScriptProvider.COMMENT), null, false, true);
 					if (comment != null)
 					{
 						String[] commentSplitByExample = comment.split("@example");
@@ -3534,7 +3534,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							extendsForm = extendsForm.getExtendsForm();
 						}
 					}
-					return getParsedComment(comment, null, false);
+					return getParsedComment(comment, null, false, true);
 				}
 
 				@Override
@@ -3727,7 +3727,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getToolTipText()
 		{
-			return getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic), elementName, false);
+			return getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic), elementName, false, false);
 		}
 	}
 

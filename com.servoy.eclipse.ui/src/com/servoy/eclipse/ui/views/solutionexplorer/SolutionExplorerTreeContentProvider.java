@@ -4433,7 +4433,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			SolutionExplorerListContentProvider.extractApiDocs(spec);
 			String description = (spec != null ? spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic) : null);
-			return description != null ? (getCode() != null ? getCode() + "\n\n" : "") + description : null; // if the result is fully null then Solex/user node will use getCode() if available anyway
+			return description != null ? (getCode() != null ? getCode() + "<br/><br/>" : "") + description : null; // if the result is fully null then Solex/user node will use getCode() if available anyway
 		}
 	}
 
