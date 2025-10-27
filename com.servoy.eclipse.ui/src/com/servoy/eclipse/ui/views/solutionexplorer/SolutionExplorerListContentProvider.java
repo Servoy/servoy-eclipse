@@ -2177,10 +2177,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				c = c.replace(exampleBlock, finalExample + "\n");
 			}
 		}
-		c = c.replaceAll("@param\\s+(\\{[^}]+})\\s+(\\[?\\w+\\]?)", "@param $1 <b>$2</b>"); // bold param name
 
 		if (!toHTML)
 		{
+			c = c.replaceAll("@param\\s+(\\{[^}]+})\\s+(\\[?\\w+\\]?)", "@param $1 <b>$2</b>"); // bold param name
 			String separator = System.getProperty("line.separator");
 			String[] inputArray = c.split(separator);
 			StringBuilder stringBuilder = new StringBuilder();
