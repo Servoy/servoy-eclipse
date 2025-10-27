@@ -2171,7 +2171,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 
 			String finalExample = cleanedExample.toString().trim(); // remove leading/trailing newlines
-			finalExample = finalExample.replace("<br/>", ""); // remove <br/> from the example block to ensure no extra newlines are added
 			if (!finalExample.isEmpty())
 			{
 				c = c.replace(exampleBlock, finalExample + "\n");
