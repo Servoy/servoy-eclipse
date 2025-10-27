@@ -136,6 +136,7 @@ import com.servoy.j2db.persistence.MethodTemplatesFactory;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
+import com.servoy.j2db.server.extensions.ServoyServiceLoader;
 import com.servoy.j2db.server.ngclient.BodyPortal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -238,6 +239,7 @@ public class Activator extends Plugin
 					}
 				};
 				ss.setBaseClassloader(combineWithDriverClassLoader);
+				ServoyServiceLoader.setClassLoader(combineWithDriverClassLoader);
 				break; //we support only one
 			}
 		}
