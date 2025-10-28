@@ -969,13 +969,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			String.class, String.class, String.class, int.class, int.class, //
 			int.class, int.class, String.class, String.class, boolean.class, //
 			boolean.class, boolean.class, boolean.class, int.class, Integer.class, //
-			String.class, List.class, boolean.class, String.class //
+			String.class, List.class, boolean.class, String.class, SortingNullprecedence.class //
 		}, new String[] { //
 			"serverName", "userName", "password", "serverUrl", "connectionProperties", //
 			"driver", "catalog", "schema", "maxActive", "maxIdle", //
 			"maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", //
 			"skipSysTables", "prefixTables", "queryProceduresNOTUSED", "idleTimeout", "selectINValueCountLimit", //
-			"dialectClass", "quoteList", "clientOnlyConnectionsNOTUSED", "initializationString" },
+			"dialectClass", "quoteList", "clientOnlyConnectionsNOTUSED", "initializationString", "sortingNullprecedence" },
 			new String[] { "queryProceduresNOTUSED", "clientOnlyConnectionsNOTUSED" });
 
 		serverSettingsObservable = new ImmutableObjectObservable<ServerSettings>(serverSettings,
@@ -1327,13 +1327,15 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			@Override
 			protected Object doGetValue()
 			{
-				return serverSettingsObservable.getObject().getSortingNullprecedence().display();
+				return serverSettingsObservable.getObject().getSortingNullprecedence() != null
+					? serverSettingsObservable.getObject().getSortingNullprecedence().display() : SortingNullprecedence.databaseDefault.display();
 			}
 
 			@Override
 			protected void doSetValue(Object value)
 			{
-				SortingNullprecedence.fromDisplay(value.toString()).ifPresent(snp -> serverSettingsObservable.setPropertyValue("sortingNullprecedence", snp));
+				SortingNullprecedence.fromDisplay(value.toString()).ifPresent(snp -> serverSettingsObservable.setPropertyValue("sortingNullprecedence",
+					snp != SortingNullprecedence.databaseDefault ? snp : null));
 			}
 		};
 
