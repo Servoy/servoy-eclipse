@@ -2155,7 +2155,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (elementName != null) c = c.replaceAll("%%elementName%%", "elements." + elementName);
 
 		String[] splitExample = c.split("@example", 2);
-		if (splitExample.length > 1)
+		if (splitExample.length > 1 && elementName != null)
 		{
 			String exampleBlock = splitExample[1].split("@")[0];
 			String[] exampleLines = exampleBlock.split("\\r?\\n");
@@ -2173,7 +2173,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String finalExample = cleanedExample.toString().trim(); // remove leading/trailing newlines
 			if (!finalExample.isEmpty())
 			{
-				c = c.replace(exampleBlock, finalExample + "\n");
+				c = c.replace(exampleBlock, finalExample + "\n"); // \n is needed for formatting the tooltip correctly in script editor code completion
 			}
 		}
 
@@ -2189,6 +2189,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				stringBuilder.append(separator);
 			}
 			c = stringBuilder.toString();
+			if (elementName == null) // if the element name is null it means we are parsing the documentation of a method from a form or scope
+			{
+				c = c.replaceAll("\n\n", "<br/>");
+				c = c.replaceAll("\n", "<br/>");
+				c = c.replaceFirst("@example", "<br/>@example");
+				c = c.replaceFirst("@param", "<br/>@param");
+				c = c.replaceFirst("@return", "<br/>@return");
+				c = c.replaceFirst("@properties", "<br/><b>@properties</b>");
+			}
+
 			c = c.replaceAll(separator, "<br/>");
 		}
 
