@@ -632,21 +632,28 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         if (!cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate) { // declare it only once for all rows in ComponentValue - so it can be used by component_converter.ts
             cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[], relativeRowIndex: number) => {
-                const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: ({ [property: string]: ServoyBaseComponent<any> })) => {
+                const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: ({ [property: string]: ServoyBaseComponent<any> }), componentModel: any) => {
                     const ui = rowObject[cm.name];
                     if (ui) {
                         const changes = {};
                         propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
-                            changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
+                            const newValue = componentModel && (componentModel[propertyChangedButNotByRef.propertyName] !== undefined) ? componentModel[propertyChangedButNotByRef.propertyName] : propertyChangedButNotByRef.newPropertyValue;
+                            changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(newValue, newValue, false);
                         });
                         ui.ngOnChanges(changes);
                         // no use to call detect changes here because it will be called in root parent form - because this is a result of a incomming server change for a child 'component' property
                     }
                 };
 
-                if (relativeRowIndex === -1 /*this means all rows*/) this.componentCache.forEach((rowObject) => triggerNgOnChangeForThisComponentInGivenRow(rowObject));
-                else if (this.componentCache[this.foundset.viewPort.startIndex + relativeRowIndex] /* do we really need this check? we should not get a change event for a component at an inexistent position */) {
-                    triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this.foundset.viewPort.startIndex + relativeRowIndex]);
+                let relativeStartIndex = relativeRowIndex, relativeStopIndex = relativeRowIndex + 1;
+                if (relativeRowIndex === -1 /*this means all rows*/) {
+                    relativeStartIndex = this.foundset.viewPort.startIndex;
+                    relativeStopIndex = this.foundset.viewPort.startIndex + this.foundset.viewPort.rows.length;
+                }
+                for(let relativeIndex = relativeStartIndex; relativeIndex < relativeStopIndex; relativeIndex++) {
+                    if (this.componentCache[this.foundset.viewPort.startIndex + relativeIndex]) {
+                        triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this.foundset.viewPort.startIndex + relativeIndex], cm.modelViewport ? cm.modelViewport[relativeIndex] : cm.model);
+                    }
                 }
             };
         }
