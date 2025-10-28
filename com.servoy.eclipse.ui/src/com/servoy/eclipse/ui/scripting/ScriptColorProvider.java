@@ -105,6 +105,7 @@ public class ScriptColorProvider
 		createKeyword(IExecutingEnviroment.TOPLEVEL_EVENTTYPES);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_JSPERMISSION);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_JSFORM);
+		createKeyword(IExecutingEnviroment.TOPLEVEL_JSCOMPONENT);
 		createKeyword(IExecutingEnviroment.TOPLEVEL_PLUGINS);
 
 		createKeyword("null");

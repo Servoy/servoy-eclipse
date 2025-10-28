@@ -76,6 +76,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
+import org.eclipse.dltk.javascript.typeinfo.model.impl.TypeImpl;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.common.util.URI;
@@ -284,6 +285,7 @@ import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.info.EventType;
 import com.servoy.j2db.scripting.info.JSPermission;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
+import com.servoy.j2db.scripting.solutionmodel.JSComponent;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.scripting.solutionmodel.JSValueList;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
@@ -577,6 +579,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSPermission.class.getSimpleName(), new JSPermissionCreator());
 		addScopeType(JSValueList.class.getSimpleName(), new JSValueListCreator());
 		addScopeType(com.servoy.j2db.scripting.solutionmodel.JSForm.class.getSimpleName(), new JSFormCreator()); //here we refer to the one from the solution model, even though it's the same class name
+		addScopeType(JSComponent.class.getSimpleName(), new JSComponentCreator());
 	}
 
 	private void addQueryBuilderScopeType(Class< ? > clazz)
@@ -5496,6 +5499,112 @@ public class TypeCreator extends TypeCache
 		@Override
 		public void flush()
 		{
+		}
+	}
+	
+	private class JSComponentCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		JSComponentCreator()
+		{
+		}
+
+		@Override
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setVisible(true);
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "JSComponent", JSComponent.class);
+			}
+			type.setSuperType(superType);
+			type.setKind(TypeKind.JAVA);
+			EList<Member> members = type.getMembers();
+
+
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			componentsSpecProviderState.getWebObjectSpecifications().values().forEach(componentsPackage -> {
+				for (String componentName : componentsPackage.getSpecifications().keySet())
+				{
+					Property component = TypeInfoModelFactory.eINSTANCE.createProperty();
+					String name = componentName.replaceAll("-", "_");
+					component.setName(name);
+					component.setVisible(true);
+					component.setStatic(true);
+					component.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("ng_component.png"));
+					component.setDescription("JSComponent constants for scripting.");
+					members.add(component);
+
+					Type componentType = new LazyJSComponentType(context, componentName);
+					component.setDirectType(componentType);
+					addType(context, componentType);
+				}
+			});
+			return addType(null, type);
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+	private class LazyJSComponentType extends TypeImpl
+	{
+		private final String context;
+		private final String componentName;
+		private boolean membersLoaded = false;
+
+		LazyJSComponentType(String context, String componentName)
+		{
+			this.context = context;
+			this.componentName = componentName;
+			setName("JSComponent<" + componentName + ">");
+			setKind(TypeKind.JAVASCRIPT);
+			setVisible(true);
+		}
+
+		@Override
+		public EList<Member> getMembers()
+		{
+			if (!membersLoaded)
+			{
+				loadMembers();
+				membersLoaded = true;
+			}
+			return super.getMembers();
+		}
+
+		private void loadMembers()
+		{
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentName);
+			EList<Member> componentMembers = super.getMembers();
+			// properties
+			spec.getAllPropertiesNames().forEach(propertyName -> {
+				Property prop = TypeInfoModelFactory.eINSTANCE.createProperty();
+				prop.setName(propertyName);
+				prop.setVisible(true);
+				prop.setStatic(false);
+				prop.setType(getTypeRef(context, "Object"));
+				prop.setAttribute(IMAGE_DESCRIPTOR,
+					com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("element.png"));
+				componentMembers.add(prop);
+			});
+
+			// API functions
+			for (WebObjectApiFunctionDefinition apiFunction : spec.getApiFunctions().values())
+			{
+				componentMembers.addAll(createMethods(context, apiFunction));
+			}
 		}
 	}
 

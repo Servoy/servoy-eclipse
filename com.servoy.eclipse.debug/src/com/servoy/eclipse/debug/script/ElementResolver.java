@@ -142,6 +142,7 @@ public class ElementResolver implements IElementResolver
 		constantTypeNames.put("EventType", "EventType");
 		constantTypeNames.put("JSPermission", "JSPermission");
 		constantTypeNames.put("JSForm", "JSForm");
+		constantTypeNames.put("JSComponent", "JSComponent");
 	}
 
 
