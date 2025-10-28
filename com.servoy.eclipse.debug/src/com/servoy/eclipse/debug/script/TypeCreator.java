@@ -1369,22 +1369,57 @@ public class TypeCreator extends TypeCache
 			{
 				members.add(fillParameter(createMethod("addStyleClass",
 					"Add a style class to styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.addStyleClass('mycssclass');" +
-						"</br></br>@param {String} style class to add"),
+						"</br></br><b>@param</b> {String} <b>style</b> class to add"),
 					createParam("String", "styleclass")));
 
 				members.add(fillParameter(createMethod("removeStyleClass",
 					"Remove a style class (if already present) from styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.removeStyleClass('mycssclass');" +
-						"</br></br>@param {String} style class to remove"),
+						"</br></br><b>@param</b> {String} <b>style</b> class to remove"),
 					createParam("String", "styleclass")));
 
 				members.add(fillParameter(createMethod("hasStyleClass",
 					"Check if a style class is present on styleclass named property</br></br>elements.myelem.hasStyleClass('mycssclass');" +
-						"</br></br>@param {String} style class to search"),
+						"</br></br><b>@param</b> {String} <b>style</b> class to search"),
 					createParam("String", "styleclass")));
 				members.add(fillParameter(createMethod("getStyleClasses",
 					"Returns the style classes of the styleclass named property</br></br>elements.myelem.getStyleClasses();" +
-						"</br></br>@return {String[]} array of style classes")));
+						"</br></br><b>@return</b> {String[]} array of style classes")));
 			}
+
+			members.add(fillParameter(createMethod("getFormName",
+				"Returns the name of the form. (may be empty string as well)<br/></br>var name = elements.myelem.getFormName();" +
+					"</br></br><b>@return</b> The name of the form.")));
+
+			members.add(fillParameter(createMethod("getName",
+				"Returns the name of an element. (may be null as well)<br/></br>var name = elements.myelem.getName();" +
+					"</br></br><b>@return</b> The name of the element.")));
+
+			members.add(fillParameter(createMethod("getElementType",
+				"Returns the type of a specified element.<br/><br/></br>var name = elements.myelem.getElementType();" +
+					"</br></br><b>@return</b> The display type of the element as String.")));
+
+			members.add(fillParameter(createMethod("getDesignTimeProperty",
+				"Get a design-time property of an element.<br/><br/></br>var prop = elements.myelem.getDesignTimeProperty();" +
+					"</br>" + "<b>@param</b> {String} <b>key</b> the name of the property<br/>" +
+					"</br><b>@return</b> The value of the specified design-time property.")));
+
+			members.add(fillParameter(createMethod("getDesignProperties",
+				"Returns the type of a specified element.<br/><br/></br>var propMap = elements.myelem.getDesignProperties();" +
+					"</br></br><b>@return</b> A map of all design-time properties for the element.")));
+
+			members.add(fillParameter(createMethod("putClientProperty",
+				"Sets the value for the specified element client property key.<br/>" +
+					"NOTE: Depending on the operating system, a user interface property name may be available." +
+					"<br/></br>elements.myelem.putClientProperty('ToolTipText','some text');" +
+					"</br>" + "<b>@param</b> {String} <b>key</b> user interface key (depends on operating system<br/>" +
+					"<b>@param</b> {String} <b>value</b> a predefined value for the key<br/>")));
+
+			members.add(fillParameter(createMethod("getClientProperty",
+				"Gets the specified client property for the element based on a key.<br/>" +
+					"NOTE: Depending on the operating system, a user interface property name may be available." +
+					"<br/></br>var property = elements.\" + prefix + \"getClientProperty('ToolTipText');" +
+					"</br></br><b>@return</b> The value of the property for specified key.")));
+
 
 			if (fullTypeName.endsWith(_ABS_POSTFIX))
 			{
