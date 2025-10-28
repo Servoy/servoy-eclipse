@@ -248,15 +248,15 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.logging.log4j.api"
-         version="2.25.1"/>
+         version="2.25.2"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
-         version="2.25.1"/>
+         version="2.25.2"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j2.impl"
-         version="2.25.1"/>
+         version="2.25.2"/>
 
    <plugin
          id="javax.transaction"
@@ -291,21 +291,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          os="linux"
          ws="gtk"
          arch="x86_64"
-         version="22.15.1"/>
+         version="24.10.0"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
          os="macosx"
          ws="cocoa"
          arch="x86_64"
-         version="22.15.1"/>
+         version="24.10.0"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.win32.win32.x86_64"
          os="win32"
          ws="win32"
          arch="x86_64"
-         version="22.15.1"/>
+         version="24.10.0"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
@@ -348,7 +348,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          os="macosx"
          ws="cocoa"
          arch="aarch64"
-         version="22.15.1"/>
+         version="24.10.0"/>
 
    <plugin
          id="slf4j.api"
@@ -381,51 +381,51 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          os="win32"
          ws="win32"
          arch="aarch64"
-         version="22.15.1"/>
+         version="24.10.0"/>
 
    <plugin
          id="org.apache.logging.log4j.jakarta.web"
-         version="2.25.1"/>
+         version="2.25.2"/>
 
    <plugin
          id="com.equo.chromium"
-         version="128.0.18"/>
+         version="128.0.23"/>
 
    <plugin
          id="com.equo.chromium.cef.cocoa.macosx.aarch64"
          os="macosx"
          arch="aarch64"
-         version="128.0.18"/>
+         version="128.0.23"/>
 
    <plugin
          id="com.equo.chromium.cef.cocoa.macosx.x86_64"
          os="macosx"
          arch="x86_64"
-         version="128.0.18"/>
+         version="128.0.23"/>
 
    <plugin
          id="com.equo.chromium.cef.gtk.linux.aarch64"
          os="linux"
          arch="aarch64"
-         version="128.0.18"/>
+         version="128.0.23"/>
 
    <plugin
          id="com.equo.chromium.cef.gtk.linux.x86_64"
          os="linux"
          arch="x86_64"
-         version="128.0.18"/>
+         version="128.0.23"/>
 
    <plugin
          id="com.equo.chromium.cef.win32.win32.aarch64"
          os="win32"
          arch="aarch64"
-         version="128.0.18"/>
+         version="128.0.23"/>
 
    <plugin
          id="com.equo.chromium.cef.win32.win32.x86_64"
          os="win32"
          arch="x86_64"
-         version="128.0.18"/>
+         version="128.0.23"/>
 
    <plugin
          id="com.equo.chromium.eclipse"
