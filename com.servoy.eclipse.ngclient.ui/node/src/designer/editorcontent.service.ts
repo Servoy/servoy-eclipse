@@ -43,7 +43,8 @@ export class EditorContentService {
                         if (item instanceof ComponentCache)
                             formCache.removeComponent(item.name);
                         else if (item instanceof StructureCache) {
-                            formCache.removeLayoutContainer(item.id);
+                            const id = item.id || (item as DesignStructureCache).hiddenId || item.attributes['svy-id-hidden'];
+                            formCache.removeLayoutContainer(id);
                             this.removeChildrenRecursively(item, formCache);
                         }
                     });
@@ -257,11 +258,16 @@ export class EditorContentService {
                                     const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position?elem.position:elem.model.cssPosition, this.typesRegistry).initForDesigner(elem.model);
                                     formCache.add(comp);
                                     if (parentUUID) {
-                                        // parent will be non-null here because of the if (handled) above
-                                        parent.addChild(comp);
-                                        if (reorderLayoutContainers.indexOf(parent) < 0) {
-                                            // new component in layout container , make sure is inserted in correct position
-                                            reorderLayoutContainers.push(parent);
+                                        const { id: parentId, items = [] } = parent;
+                                        const isEmpty = items.length === 0;
+                                        const isCompatible = !parentId && items.length > 0 && this.isElementCompatibleWithParent(items[0], elem.name);
+                                        if (parentId || isEmpty || isCompatible) {
+                                            // parent will be non-null here because of the if (handled) above
+                                            parent.addChild(comp);
+                                            if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                                // new component in layout container , make sure is inserted in correct position
+                                                reorderLayoutContainers.push(parent);
+                                            }
                                         }
                                     } else if (!data.formComponentsComponents || data.formComponentsComponents.indexOf(elem.name) === -1) {
                                         formCache.partComponentsCache.push(comp);
@@ -292,8 +298,9 @@ export class EditorContentService {
                             refresh = true;
                             if (formComponentCache.responsive) {
                                 formComponentCache.items.slice().forEach((item) => {
-                                    if (item['id'] !== undefined && data.childParentMap[item['id']] === undefined) {
-                                        formCache.removeLayoutContainer(item['id']);
+                                    const id = item['id'] || item['hiddenId'] || item['attributes']?.['svy-id-hidden'];
+                                    if (id !== undefined && data.childParentMap[id] === undefined) {
+                                        formCache.removeLayoutContainer(id);
                                         this.removeChildFromParentRecursively(item, formComponentCache);
                                     }
                                 });
@@ -472,6 +479,12 @@ export class EditorContentService {
 
     }
     
+    private isElementCompatibleWithParent(parentFirstItem: StructureCache | ComponentCache | FormComponentCache, newItemName: string): boolean {
+      const [parentItemUUID] = JSON.parse(parentFirstItem.name);
+      const [newItemUUID] = JSON.parse(newItemName);
+      return parentItemUUID === newItemUUID;
+    }
+
     private findStructureCacheFromRoot(formCache: FormCache, id: string): StructureCache {
         return this.findStructureCache([...formCache.layoutContainersCache.values()], id);
     }
@@ -509,10 +522,12 @@ export class EditorContentService {
         if (parent.items) {
             parent.items.forEach((elem) => {
                 if (elem instanceof StructureCache) {
-                    formCache.removeLayoutContainer(elem.id);
+                    const id = elem.id || (elem as DesignStructureCache).hiddenId || elem.attributes['svy-id-hidden'];
+                    formCache.removeLayoutContainer(id);
                     this.removeChildrenRecursively(elem, formCache);
                 } else if (elem instanceof FormComponentCache) {
                     formCache.removeFormComponent(elem.name);
+                    this.removeChildrenRecursively(elem, formCache);
                 } else if (elem instanceof ComponentCache) {
                     formCache.removeComponent(elem.name);
                 }
@@ -571,7 +586,7 @@ export class EditorContentService {
 class DesignStructureCache extends StructureCache {
     
     /** in case it's a layout container nested inside a form component container, that one is not given an svy-id so that it can't be selected clientside; but we do need it's id for nesting */
-    public readonly hiddenId?: String;
+    public readonly hiddenId?: string;
     
     constructor(tagname: string, classes: Array<string>, attributes?: { [property: string]: string },
         items?: Array<StructureCache | ComponentCache | FormComponentCache>,

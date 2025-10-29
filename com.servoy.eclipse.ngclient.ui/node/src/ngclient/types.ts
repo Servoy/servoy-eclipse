@@ -61,8 +61,9 @@ export class FormCache implements IFormCache {
     }
 
     public addLayoutContainer(container: StructureCache) {
-        if (container.id){
-           this.layoutContainersCache.set(container.id, container);
+        const id = container.id || container['hiddenId'] || container.attributes['svy-id-hidden'];
+        if (id) {
+           this.layoutContainersCache.set(id, container);
         }
     }
 
