@@ -447,23 +447,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return null;
 	}
 
-	private List<String> getImportantProperties()
+	protected List<String> getImportantProperties()
 	{
-		List<String> importantProps = new ArrayList<String>();
-		if (this instanceof WebComponentPropertySource wps)
-		{
-			PropertyDescription desc = wps.getPropertyDescription();
-			Map<String, PropertyDescription> props = desc.getProperties();
-			for (String name : props.keySet())
-			{
-				Object tagValue = props.get(name).getTag("basic");
-				if (tagValue != null)
-				{
-					importantProps.add(name);
-				}
-			}
-		}
-		return importantProps;
+		return Collections.emptyList();
 	}
 
 

@@ -100,6 +100,23 @@ public class PDPropertySource extends PersistPropertySource
 		else super.clearAbstractBaseProperty(propertyDescriptor, id, persist);
 	}
 
+	@Override
+	protected List<String> getImportantProperties()
+	{
+		List<String> importantProps = new ArrayList<String>();
+		PropertyDescription desc = getPropertyDescription();
+		Map<String, PropertyDescription> props = desc.getProperties();
+		for (String name : props.keySet())
+		{
+			Object tagValue = props.get(name).getTag("basic");
+			if (tagValue != null)
+			{
+				importantProps.add(name);
+			}
+		}
+		return importantProps;
+	}
+
 	public static IPropertyHandler[] createPropertyHandlersFromSpec(PropertyDescription propertyDescription, PersistContext persistContext)
 	{
 		List<IPropertyHandler> props = new ArrayList<IPropertyHandler>();
@@ -231,6 +248,7 @@ public class PDPropertySource extends PersistPropertySource
 								((ISupportAttributes)p).putUnmergedAttributes((Map<String, String>)value);
 							}
 						}
+
 					}).build());
 			props.add(attributesPropertyHandler);
 		}
