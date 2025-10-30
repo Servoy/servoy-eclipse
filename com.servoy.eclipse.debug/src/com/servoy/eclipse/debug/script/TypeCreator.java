@@ -5501,7 +5501,7 @@ public class TypeCreator extends TypeCache
 		{
 		}
 	}
-	
+
 	private class JSComponentCreator implements IScopeTypeCreator
 	{
 		Type superType;
@@ -5568,6 +5568,7 @@ public class TypeCreator extends TypeCache
 		{
 			this.context = context;
 			this.componentName = componentName;
+			setSuperType(getType(context, "String"));
 			setName("JSComponent<" + componentName + ">");
 			setKind(TypeKind.JAVASCRIPT);
 			setVisible(true);
