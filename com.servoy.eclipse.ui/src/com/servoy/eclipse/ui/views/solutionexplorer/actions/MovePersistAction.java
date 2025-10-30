@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -45,6 +47,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractPersistFactory;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DummyValidator;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -266,6 +269,36 @@ public class MovePersistAction extends AbstractMovePersistAction
 										changed[0] = true;
 									}
 								}
+							}
+						}
+
+						JSONObject json = wc.getJson();
+						if (json != null && json.length() > 0)
+						{
+							boolean jsonChanged = false;
+							for (String key : json.keySet())
+							{
+								if (!(json.get(key) instanceof JSONArray items)) continue;
+								for (Object item : items)
+								{
+									if (!(item instanceof JSONObject obj)) continue;
+									for (String k : obj.keySet())
+									{
+										UUID uuid = Utils.getAsUUID(obj.get(k), false);
+										if (uuid == null) continue;
+										Object newUUID = uuidMap.get(uuid.toString());
+										if (newUUID != null)
+										{
+											obj.put(k, newUUID);
+											jsonChanged = true;
+										}
+									}
+								}
+							}
+							if (jsonChanged)
+							{
+								wc.setProperty(IContentSpecConstants.PROPERTY_JSON, json);
+								changed[0] = true;
 							}
 						}
 					}
