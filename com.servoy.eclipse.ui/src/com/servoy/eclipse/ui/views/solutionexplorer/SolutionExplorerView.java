@@ -773,6 +773,11 @@ public class SolutionExplorerView extends ViewPart
 						result = (result != null) ? result += ("\n" + comment) : comment;
 					}
 				}
+				if (result == "")
+				{
+					// avoid showing tooltips with no content
+					result = null;
+				}
 
 			}
 			return result;
