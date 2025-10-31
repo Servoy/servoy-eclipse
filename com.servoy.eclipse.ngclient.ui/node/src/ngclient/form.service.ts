@@ -214,11 +214,11 @@ export class FormService {
 
 			// update legacy location and size property to layout
 			// hack for legacy absolute form runtime changes
-			if (propertyName === 'location' && newPropertyValue && comp.layout) {
+			if (propertyName === 'location' && newPropertyValue && comp.layout && !newComponentProperties.hasOwnProperty('cssPosition')) {
 				comp.layout = { left : newPropertyValue.x + 'px', top : newPropertyValue.y + 'px', width : comp.layout.width, height : comp.layout.height };
 			}
 
-			if (propertyName === 'size' && newPropertyValue && comp.layout) {
+			if (propertyName === 'size' && newPropertyValue && comp.layout && !newComponentProperties.hasOwnProperty('cssPosition')) {
 				comp.layout = { left : comp.layout.left, top : comp.layout.top, width : newPropertyValue.width + 'px', height : newPropertyValue.height + 'px'};
 			}
 
