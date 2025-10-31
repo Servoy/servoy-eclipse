@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -28,8 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -47,7 +46,6 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractPersistFactory;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DummyValidator;
-import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -58,6 +56,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
@@ -272,33 +271,29 @@ public class MovePersistAction extends AbstractMovePersistAction
 							}
 						}
 
-						JSONObject json = wc.getJson();
-						if (json != null && json.length() > 0)
+						Iterator<IPersist> it = wc.getAllObjects();
+						while (it.hasNext())
 						{
-							boolean jsonChanged = false;
-							for (String key : json.keySet())
+							IPersist child = it.next();
+							if (child instanceof WebCustomType childWC)
 							{
-								if (!(json.get(key) instanceof JSONArray items)) continue;
-								for (Object item : items)
+								PropertyDescription childPD = childWC.getPropertyDescription();
+								if (childPD != null)
 								{
-									if (!(item instanceof JSONObject obj)) continue;
-									for (String k : obj.keySet())
+									for (String property : childPD.getProperties().keySet())
 									{
-										UUID uuid = Utils.getAsUUID(obj.get(k), false);
-										if (uuid == null) continue;
-										Object newUUID = uuidMap.get(uuid.toString());
-										if (newUUID != null)
+										UUID uuid = Utils.getAsUUID(childWC.getProperty(property), false);
+										if (uuid != null)
 										{
-											obj.put(k, newUUID);
-											jsonChanged = true;
+											Object newUUID = uuidMap.get(uuid.toString());
+											if (newUUID != null)
+											{
+												childWC.setProperty(property, newUUID);
+												changed[0] = true;
+											}
 										}
 									}
 								}
-							}
-							if (jsonChanged)
-							{
-								wc.setProperty(IContentSpecConstants.PROPERTY_JSON, json);
-								changed[0] = true;
 							}
 						}
 					}
