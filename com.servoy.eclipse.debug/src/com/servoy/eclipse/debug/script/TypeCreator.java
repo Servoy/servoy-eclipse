@@ -5527,21 +5527,18 @@ public class TypeCreator extends TypeCache
 
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			componentsSpecProviderState.getWebObjectSpecifications().values().forEach(componentsPackage -> {
-				for (String componentName : componentsPackage.getSpecifications().keySet())
-				{
-					Property component = TypeInfoModelFactory.eINSTANCE.createProperty();
-					String name = componentName.replaceAll("-", "_");
-					component.setName(name);
-					component.setVisible(true);
-					component.setStatic(true);
-					component.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("ng_component.png"));
-					component.setDescription("JSComponent constants for scripting.");
-					members.add(component);
 
-					Type componentType = new LazyJSComponentType(context, componentName);
-					component.setDirectType(componentType);
-					addType(context, componentType);
-				}
+				Property pkg = TypeInfoModelFactory.eINSTANCE.createProperty();
+				pkg.setName(componentsPackage.getPackageName());
+				pkg.setVisible(true);
+				pkg.setStatic(true);
+				pkg.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("ng_component.png"));
+				pkg.setDescription("JSComponent constants for scripting.");
+				members.add(pkg);
+
+				Type pckType = new LazyJSPackageType(context, componentsPackage.getPackageName());
+				pkg.setDirectType(pckType);
+				addType(context, pckType);
 			});
 			return addType(null, type);
 		}
@@ -5555,6 +5552,60 @@ public class TypeCreator extends TypeCache
 		@Override
 		public void flush()
 		{
+		}
+	}
+
+	private class LazyJSPackageType extends TypeImpl
+	{
+		private final String context;
+		private final String packageName;
+		private boolean membersLoaded = false;
+
+		LazyJSPackageType(String context, String packageName)
+		{
+			this.context = context;
+			this.packageName = packageName;
+			setName("JSPackage<" + packageName + ">");
+			setKind(TypeKind.JAVASCRIPT);
+			setVisible(true);
+		}
+
+		@Override
+		public EList<Member> getMembers()
+		{
+			if (!membersLoaded)
+			{
+				loadMembers();
+				membersLoaded = true;
+			}
+			return super.getMembers();
+		}
+
+		private void loadMembers()
+		{
+
+			EList<Member> componentMembers = super.getMembers();
+			for (String compName : WebComponentSpecProvider.getSpecProviderState().getWebObjectsInPackage(packageName))
+			{
+				if (compName.contains("-"))
+				{
+					Property prop = TypeInfoModelFactory.eINSTANCE.createProperty();
+					prop.setName(compName.split("-")[1]);
+					prop.setVisible(true);
+					prop.setStatic(false);
+					prop.setAttribute(IMAGE_DESCRIPTOR,
+						com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("element.png"));
+					componentMembers.add(prop);
+
+					Type pckType = new LazyJSComponentType(context, compName);
+					prop.setDirectType(pckType);
+					addType(context, pckType);
+				}
+				else
+				{
+					Debug.log("Invalid component name in package: " + compName);
+				}
+			}
 		}
 	}
 
