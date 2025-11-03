@@ -41,6 +41,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -355,11 +358,38 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		//Now try opening servoyNGDesktop app.
 		try
 		{
+			ExecutorService executor = Executors.newFixedThreadPool(2, new ThreadFactory()
+			{
+				@Override
+				public Thread newThread(Runnable r)
+				{
+					Thread t = new Thread(r, "NGDesktop output reader");
+					t.setDaemon(true);
+					return t;
+				}
+
+			});
+
 			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
 			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + File.separator + NGDESKTOP_APP_NAME + extension;
 			monitor.beginTask("Open NGDesktop", 3);
 			String[] cmdArgs = Utils.isAppleMacOS() ? new String[] { "/usr/bin/open", command } : new String[] { command };
-			Runtime.getRuntime().exec(cmdArgs);
+			ProcessBuilder pb = new ProcessBuilder(cmdArgs);
+			Process p = pb.start();
+			p.onExit().thenAccept(exit -> {
+				exit.destroy();
+				executor.shutdown();
+			});
+			executor.execute(new StreamGobbler(
+				p.getInputStream(),
+				ServoyLog::logInfo,
+				"[NGDesktop.LOG] "));
+
+			executor.execute(new StreamGobbler(
+				p.getErrorStream(),
+				ServoyLog::logError,
+				"[NGDesktop.ERR] "));
+
 		}
 		catch (IOException e)
 		{
