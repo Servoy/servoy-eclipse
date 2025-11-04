@@ -53,7 +53,7 @@ public class DatabaseImportPropertiesPage extends WizardPage implements IRestore
 	private Button overwriteGroupsButton;
 	private final String ALLOW_DMC_TEXT = "Allow data model changes";
 
-	protected DatabaseImportPropertiesPage(ExportWarModel exportModel)
+	public DatabaseImportPropertiesPage(ExportWarModel exportModel)
 	{
 		super("Database Import Properties");
 		this.exportModel = exportModel;

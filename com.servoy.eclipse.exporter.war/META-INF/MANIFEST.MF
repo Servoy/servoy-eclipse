@@ -26,7 +26,8 @@ Require-Bundle: org.eclipse.core.resources,
  sablo,
  org.apache.commons.lang3,
  com.servoy.eclipse.ngclient,
- com.servoy.eclipse.notification
+ com.servoy.eclipse.notification,
+ org.eclipse.jgit;bundle-version="7.4.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

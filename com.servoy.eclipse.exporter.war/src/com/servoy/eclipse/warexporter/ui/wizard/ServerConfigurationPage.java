@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
@@ -71,15 +72,15 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 	private Button procedures;
 	private Combo validationType;
 
-	private final ExportWarWizard wizard;
+	private final Wizard wizard;
 
 	/**
 	 * @param pageName
 	 * @param selectedServerNames
 	 * @param serverConfigurationPages
 	 */
-	protected ServerConfigurationPage(String pageName, ServerConfiguration serverConfig, SortedSet<String> selectedServerNames,
-		HashMap<String, IWizardPage> serverConfigurationPages, ExportWarWizard wizard)
+	public ServerConfigurationPage(String pageName, ServerConfiguration serverConfig, SortedSet<String> selectedServerNames,
+		HashMap<String, IWizardPage> serverConfigurationPages, Wizard wizard)
 	{
 		super(pageName);
 		this.selectedServerNames = selectedServerNames;

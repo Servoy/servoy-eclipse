@@ -26,4 +26,22 @@
           plugin="com.servoy.eclipse.exporter.war">
     </contexts>
  </extension>
+  <extension
+         point="org.eclipse.ui.exportWizards">
+      <wizard
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.exporter.setuppipeline.SetupPipelineWizard"
+            icon="icons/war_export.png"
+            id="com.servoy.eclipse.exporter.setuppipeline.SetupPipelineWizard"
+            name="Setup Pipeline">
+      </wizard>
+   </extension>
+     <extension
+         point="com.servoy.eclipse.ui.exportSolutionProvider">
+      <provider
+            class="com.servoy.eclipse.exporter.setuppipeline.SetupPipelineProvider"
+            id="com.servoy.eclipse.exporter.setuppipeline.SetupPipelineWizard"
+            name="Setup Pipeline Wizard">
+      </provider>
+   </extension>
 </plugin>
