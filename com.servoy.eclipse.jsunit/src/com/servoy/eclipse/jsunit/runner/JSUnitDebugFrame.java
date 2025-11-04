@@ -19,6 +19,7 @@ package com.servoy.eclipse.jsunit.runner;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
+import org.mozilla.javascript.NativeWith;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.debug.DebugFrame;
 
@@ -41,7 +42,7 @@ public class JSUnitDebugFrame implements DebugFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.mozilla.javascript.debug.DebugFrame#onEnter(org.mozilla.javascript.Context, org.mozilla.javascript.Scriptable,
 	 * org.mozilla.javascript.Scriptable, java.lang.Object[])
 	 */
@@ -53,7 +54,7 @@ public class JSUnitDebugFrame implements DebugFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.mozilla.javascript.debug.DebugFrame#onLineChange(org.mozilla.javascript.Context, int)
 	 */
 	public void onLineChange(Context cx, int lineNumber)
@@ -64,25 +65,25 @@ public class JSUnitDebugFrame implements DebugFrame
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.mozilla.javascript.debug.DebugFrame#onExceptionThrown(org.mozilla.javascript.Context, java.lang.Throwable)
 	 */
 	public void onExceptionThrown(Context cx, Throwable ex)
 	{
 		/**
 		* This code keeps track of the latest exception thrown in the user code.
-		*  Background for rules of the uncaught exception mechanism: 
-		* -Only one exception can reach the jsunit fail mechanism(and that one is stored in the debugger exception map with the test case name). 
+		*  Background for rules of the uncaught exception mechanism:
+		* -Only one exception can reach the jsunit fail mechanism(and that one is stored in the debugger exception map with the test case name).
 		* -The user can throw , catch and throw  again an exception triggering onExceptionThrown each time overriding the previews exception in the map (which means it was caught)
 		* -if you throw an exception in a test case and it is not treated in the user code ,
 		*   the exception is caught by the JsUnit code, calls tearDown() for the testcase and rethrows it causing  the stack trace dropped down to jsunit's "run_test" base method . we must ignore this case.
-		*   
+		*
 		*/
 		if (wrapper != null) wrapper.onExceptionThrown(cx, ex);
 		if (ex instanceof JavaScriptException)
 		{
 			String stack = ((org.mozilla.javascript.JavaScriptException)ex).getScriptStackTrace();
-			// this throw was from jsUnit code , skip  last call is "at JsUnit.js:789 (TestCase_runBare)"   
+			// this throw was from jsUnit code , skip  last call is "at JsUnit.js:789 (TestCase_runBare)"
 			if (!stack.matches("^\\sat JsUnit.js\\:\\d+ \\(TestCase_runBare\\)(?s).*"))
 			{
 				String testName = name;
@@ -96,25 +97,29 @@ public class JSUnitDebugFrame implements DebugFrame
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.mozilla.javascript.debug.DebugFrame#onExit(org.mozilla.javascript.Context, boolean, java.lang.Object)
-	 */
 	public void onExit(Context cx, boolean byThrow, Object resultOrException)
 	{
 		if (wrapper != null) wrapper.onExit(cx, byThrow, resultOrException);
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.mozilla.javascript.debug.DebugFrame#onDebuggerStatement(org.mozilla.javascript.Context)
-	 */
 	public void onDebuggerStatement(Context cx)
 	{
 		if (wrapper != null) wrapper.onDebuggerStatement(cx);
+
+	}
+
+	@Override
+	public void onNativeWithEnter(Context cx, NativeWith withScope)
+	{
+		if (wrapper != null) wrapper.onNativeWithEnter(cx, withScope);
+
+	}
+
+	@Override
+	public void onNativeWithExit(Context cx, NativeWith withScope)
+	{
+		if (wrapper != null) wrapper.onNativeWithExit(cx, withScope);
 
 	}
 
