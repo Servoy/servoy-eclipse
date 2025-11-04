@@ -255,6 +255,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             else {
                 component.x = event.pageX;
                 component.y = event.pageY;
+                if (!this.urlParser.isAbsoluteFormLayout() && this.editorContentService.getContentArea().scrollLeft > 0) {
+                    component.x = component.x + this.editorContentService.getContentArea().scrollLeft;
+                }
+                if (!this.urlParser.isAbsoluteFormLayout() && this.editorContentService.getContentArea().scrollTop > 0) {
+                    component.y = component.y + this.editorContentService.getContentArea().scrollTop;
+                }
                 if (this.urlParser.isAbsoluteFormLayout()) {
                     component.x = component.x - this.editorContentService.getLeftPositionIframe();
                     component.y = component.y - this.editorContentService.getTopPositionIframe();
