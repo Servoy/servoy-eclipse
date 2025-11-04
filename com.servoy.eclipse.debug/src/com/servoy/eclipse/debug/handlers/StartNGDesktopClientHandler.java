@@ -41,7 +41,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -363,8 +365,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			{
 				try
 				{
+					ngdesktopProcess.compareAndSet(existingProcess, null); // Process ended, reset it
 					existingProcess.destroy();
-					ngdesktopProcess.set(null); // Process ended, reset it
 				}
 				catch (IllegalThreadStateException ex)
 				{
@@ -374,6 +376,16 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				}
 			}
 
+			ExecutorService executor = Executors.newFixedThreadPool(2, new ThreadFactory()
+			{
+				@Override
+				public Thread newThread(Runnable r)
+				{
+					Thread t = new Thread(r, "NGDesktop output reader");
+					t.setDaemon(true);
+					return t;
+				}
+			});
 
 			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
 			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + File.separator + NGDESKTOP_APP_NAME + extension;
@@ -390,16 +402,25 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			}
 
 			builder.directory(new File(System.getProperty("user.dir")));
-			builder.redirectErrorStream(true); // redirect error stream to the output stream
-			Process process = builder.start();
-			ngdesktopProcess.set(process);
-			if (!process.waitFor(50, TimeUnit.MINUTES))
-			{
-				runNgDesktop(monitor);
-			}
+			Process p = builder.start();
+			p.onExit().thenAccept(exit -> {
+				exit.destroy();
+				executor.shutdown();
+				ngdesktopProcess.compareAndSet(p, null);
+			});
+			executor.execute(new StreamGobbler(
+				p.getInputStream(),
+				ServoyLog::logInfo,
+				"[NGDesktop.LOG] "));
+
+			executor.execute(new StreamGobbler(
+				p.getErrorStream(),
+				ServoyLog::logError,
+				"[NGDesktop.ERR] "));
+			ngdesktopProcess.set(p);
 
 		}
-		catch (IOException | InterruptedException e)
+		catch (IOException e)
 		{
 			ServoyLog.logError("Cannot find servoy NGDesktop executable", e);
 		}
