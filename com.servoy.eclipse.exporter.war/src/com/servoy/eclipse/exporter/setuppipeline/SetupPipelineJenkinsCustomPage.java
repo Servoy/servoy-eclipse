@@ -63,19 +63,18 @@ public class SetupPipelineJenkinsCustomPage extends WizardPage
 
 		faviconDirText.setText(applicationServerDir + "server" + File.separator + "webapps" + File.separator + "ROOT");
 
-		// Add validation
-		ModifyListener validationListener = e -> setPageComplete(isPageComplete());
-		servoyPropsText.addModifyListener(validationListener);
-
-		faviconDirText.addModifyListener(validationListener);
-
 		//TODO: add another validator that checks if the files exist// or just check them in the perform finish
 
 		//webXmlText.addModifyListener(validationListener);
 		//contextXmlText.addModifyListener(validationListener);
 		//log4jXmlText.addModifyListener(validationListener);
+		
+		setPageComplete(true);
 
-		setPageComplete(isPageComplete());
+		ModifyListener validationListener = e -> setPageComplete(isPageComplete());
+		servoyPropsText.addModifyListener(validationListener);
+		faviconDirText.addModifyListener(validationListener);
+
 		setControl(container);
 	}
 
@@ -149,25 +148,26 @@ public class SetupPipelineJenkinsCustomPage extends WizardPage
 		return textField;
 	}
 
+
 	@Override
 	public boolean isPageComplete()
 	{
-		if (faviconDirText.getText().trim().isEmpty())
+		String faviconPath = faviconDirText.getText().trim();
+		if (faviconPath.isEmpty())
 		{
-			setErrorMessage("Favicons directory are required.");
+			setErrorMessage("Favicons directory is required.");
 			return false;
 		}
 
-		File favDir = new File(faviconDirText.getText());
-
+		File favDir = new File(faviconPath);
 		if (!favDir.exists() || !favDir.isDirectory())
 		{
 			setErrorMessage("Favicons directory is invalid.");
 			return false;
 		}
 
-		// Check required favicon files
 		String[] requiredFavicons = { "favicon.ico", "favicon32x32.png", "favicon192x192.png" };
+
 		for (String f : requiredFavicons)
 		{
 			if (!new File(favDir, f).exists())
@@ -176,19 +176,18 @@ public class SetupPipelineJenkinsCustomPage extends WizardPage
 				return false;
 			}
 		}
-		if (!servoyPropsText.getText().trim().isEmpty())
-		{
-			{
 
-				File props = new File(servoyPropsText.getText());
-				if (props.exists())
-					return true;// if the props file exists we do not need to choose which db servers to add because the properties file is already there
-				else
-				{
-					setErrorMessage("servoy.properties file does not exist.");
-					return false;
-				}
+		String propsPath = servoyPropsText.getText().trim();
+		if (!propsPath.isEmpty())
+		{
+			File props = new File(propsPath);
+			if (!props.exists())
+			{
+				setErrorMessage("servoy.properties file does not exist.");
+				return false;
 			}
+			setErrorMessage(null);
+			return false; // Next disabled intentionally
 		}
 
 		setErrorMessage(null);

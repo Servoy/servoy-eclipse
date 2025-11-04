@@ -32,6 +32,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.exporter.setuppipeline.SetupPipelineDetailsPage.GitInfo;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -146,10 +147,10 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 
 		addPage(infoPage);
 		addPage(detailsPage);
-		addPage(jenkinsPage);
 		addPage(solutionsPage);
 		addPage(pluginSelectionPage);
 		addPage(driverSelectionPage);
+		addPage(jenkinsPage);
 		addPage(licenseConfigurationPage);
 		addPage(serversSelectionPage);
 
@@ -205,8 +206,10 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 
 			String servoyVersion = ClientVersion.getPureVersion();
 
+			GitInfo gitInfo = detailsPage.getGitInfo();
+
 			final JSONObject payload = PipelineJsonBuilder.build(
-				namespace, applicationJobName, "jobName", appUrl, gitUsername, gitPassword, gitUrl, "git", servoyVersion, solutionName,
+				namespace, applicationJobName, "jobName", appUrl, gitUsername, gitPassword, gitUrl, gitInfo.host, servoyVersion, solutionName,
 				includeNonActive, Arrays.asList(selectedNonActiveSolutions), exportModel.getPlugins(), exportModel.getDrivers());
 
 			org.eclipse.jface.dialogs.MessageDialog.openInformation(getShell(), "Pipeline Created", "Servoy Cloud pipeline has been successfully set up.");

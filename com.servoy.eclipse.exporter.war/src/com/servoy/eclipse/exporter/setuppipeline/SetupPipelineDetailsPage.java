@@ -31,6 +31,7 @@ public class SetupPipelineDetailsPage extends WizardPage
 
 	private Font boldFont;
 
+	GitInfo gitInfo;
 
 	protected SetupPipelineDetailsPage(String pageName)
 	{
@@ -89,7 +90,7 @@ public class SetupPipelineDetailsPage extends WizardPage
 		String solutionDir = solutionProject.getLocation().toString();
 		File repoRoot = new File(solutionDir).getParentFile(); // <repo_root>
 
-		GitInfo gitInfo = getRemoteInfo(repoRoot);
+		gitInfo = getRemoteInfo(repoRoot);
 
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
@@ -152,6 +153,11 @@ public class SetupPipelineDetailsPage extends WizardPage
 		return gitUrlText.getText();
 	}
 
+	public GitInfo getGitInfo()
+	{
+		return gitInfo;
+	}
+
 	@Override
 	public void dispose()
 	{
@@ -178,7 +184,8 @@ public class SetupPipelineDetailsPage extends WizardPage
 					String token = uri.getPass(); // Token if present
 					String repoName = extractRepoName(uri.getPath());
 					String userName = uri.getUser();
-					return new GitInfo(url, token, repoName, userName);
+					String host = uri.getHost();
+					return new GitInfo(url, token, repoName, userName, host);
 				}
 			}
 		}
@@ -186,7 +193,7 @@ public class SetupPipelineDetailsPage extends WizardPage
 		{
 			e.printStackTrace();
 		}
-		return new GitInfo("", "", "", "");
+		return new GitInfo("", "", "", "", "");
 	}
 
 	private String extractRepoName(String path)
@@ -206,13 +213,15 @@ public class SetupPipelineDetailsPage extends WizardPage
 		String token;
 		String repoName;
 		String userName;
+		String host;
 
-		GitInfo(String url, String token, String repoName, String userName)
+		GitInfo(String url, String token, String repoName, String userName, String host)
 		{
 			this.url = url;
 			this.token = token;
 			this.repoName = repoName;
 			this.userName = userName;
+			this.host = host;
 		}
 	}
 }
