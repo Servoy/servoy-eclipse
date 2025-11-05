@@ -80,7 +80,8 @@ public class SetupPipelineSolutionsPage extends WizardPage
 		{
 			IPath projectDir = project.getLocation();
 			Path projectDirParent = projectDir.toPath().getParent();
-			if (project.isOpen() && !project.getName().equals(activeSolutionName) && activeSolutionParentDir.equals(projectDirParent))
+			if (project.isOpen() && !project.getName().equals(activeSolutionName) && activeSolutionParentDir.equals(projectDirParent) &&
+				!project.getName().equals("resources"))
 			{
 				nonActiveSolutionsList.add(project.getName());
 			}

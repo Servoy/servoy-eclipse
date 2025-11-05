@@ -6,6 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,6 +76,9 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 	private DirectorySelectionPage driverSelectionPage;
 	private DirectorySelectionPage pluginSelectionPage;
 	//private DatabaseImportPropertiesPage databaseImportProperties;
+
+	public static final String SETUP_PIPELINE_URL = System.getProperty("Dservoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
+		"/servoy-service/rest_ws/api/developer/setupPipeline";
 
 	private ExportWarModel exportModel;
 
@@ -189,7 +196,6 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			final String gitPassword = detailsPage.getGitPassword();
 			final String gitUrl = detailsPage.getGitUrl();
 
-			// 2. Check if pipeline already exists
 			if (pipelineExists(namespace, applicationJobName))
 			{
 				org.eclipse.jface.dialogs.MessageDialog.openInformation(getShell(), "Pipeline Exists",
@@ -208,9 +214,32 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 
 			GitInfo gitInfo = detailsPage.getGitInfo();
 
-			final JSONObject payload = PipelineJsonBuilder.build(
+			final JSONObject setupPipelineJson = PipelineJsonBuilder.build(
 				namespace, applicationJobName, "jobName", appUrl, gitUsername, gitPassword, gitUrl, gitInfo.host, servoyVersion, solutionName,
 				includeNonActive, Arrays.asList(selectedNonActiveSolutions), exportModel.getPlugins(), exportModel.getDrivers());
+
+
+			// Create HTTP client and POST request
+			HttpClient client = HttpClient.newHttpClient();
+			HttpRequest request = HttpRequest.newBuilder()
+				.uri(URI.create(SETUP_PIPELINE_URL))
+				.header("Content-Type", "application/json")
+				.POST(HttpRequest.BodyPublishers.ofString(setupPipelineJson.toString()))
+				.build();
+
+			// Send the request
+			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+			// Optional: handle response
+			if (response.statusCode() == 200)
+			{
+				System.out.println("post response: " + response.body());
+			}
+			else
+			{
+				org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Pipeline Error", "Failed to set up pipeline:\n" + response.body());
+				return false;
+			}
 
 			org.eclipse.jface.dialogs.MessageDialog.openInformation(getShell(), "Pipeline Created", "Servoy Cloud pipeline has been successfully set up.");
 			return true;
@@ -223,6 +252,31 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 		}
 	}
 
+	@Override
+	public boolean canFinish()
+	{
+		String propsPath = jenkinsPage.getServoyPropsPath().trim();
+		if (!propsPath.isEmpty())
+		{
+			File props = new File(propsPath);
+			if (props.exists())
+			{
+				return true; // Allow Finish even if Next is disabled
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		if (detailsPage.isPageComplete() && jenkinsPage.isPageComplete() && solutionsPage.isPageComplete())
+		{
+			return true;
+		}
+
+		return false;
+	}
+
 	private void createJenkinsCustomDir() throws ExportException
 	{
 		Path solutionParentDir = solutionsPage.getActiveSolutionParentDir();
@@ -232,6 +286,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 		try
 		{
 			Path customJarsPath = jenkinsCustomPath.resolve("custom-jars");
+			Files.createDirectories(customJarsPath);
 
 			copyPlugins(customJarsPath);
 			copyDrivers(customJarsPath);

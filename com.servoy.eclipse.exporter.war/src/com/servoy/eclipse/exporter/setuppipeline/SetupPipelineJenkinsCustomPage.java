@@ -194,7 +194,6 @@ public class SetupPipelineJenkinsCustomPage extends WizardPage
 		return true;
 	}
 
-	// Getters
 	public String getServoyPropsPath()
 	{
 		return servoyPropsText.getText();
