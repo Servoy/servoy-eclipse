@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.Image;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.IParentOverridable;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IBasicWebObject;
@@ -130,6 +131,11 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 				}
 			}
 
+		}
+		else if (persist instanceof WebFormComponentChildType webFormComponentChildType && webFormComponentChildType.getJson().has(String.valueOf(propertyId)))
+		{
+			// special case for form components
+			isOverridden = true;
 		}
 
 		if (isOverridden)
