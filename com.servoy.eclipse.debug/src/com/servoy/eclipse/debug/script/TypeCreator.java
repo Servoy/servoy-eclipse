@@ -1160,7 +1160,7 @@ public class TypeCreator extends TypeCache
 
 	protected final Class< ? > getTypeClass(String name)
 	{
-		if (scopeTypes.containsKey(name))
+		if (scopeTypes.containsKey(name) && !name.equals(RUNTIME_WEB_COMPONENT))
 		{
 			return null;
 		}
@@ -1458,42 +1458,6 @@ public class TypeCreator extends TypeCache
 					"Returns the style classes of the styleclass named property</br></br>elements.myelem.getStyleClasses();" +
 						"</br></br><b>@return</b> {String[]} array of style classes")));
 			}
-
-			members.add(fillParameter(createMethod("getFormName",
-				"Returns the name of the form. (may be empty string as well)<br/></br>var name = elements.myelem.getFormName();" +
-					"</br></br><b>@return</b> The name of the form.")));
-
-			members.add(fillParameter(createMethod("getName",
-				"Returns the name of an element. (may be null as well)<br/></br>var name = elements.myelem.getName();" +
-					"</br></br><b>@return</b> The name of the element.")));
-
-			members.add(fillParameter(createMethod("getElementType",
-				"Returns the type of a specified element.<br/><br/></br>var name = elements.myelem.getElementType();" +
-					"</br></br><b>@return</b> The display type of the element as String.")));
-
-			members.add(fillParameter(createMethod("getDesignTimeProperty",
-				"Get a design-time property of an element.<br/><br/></br>var prop = elements.myelem.getDesignTimeProperty();" +
-					"</br>" + "<b>@param</b> {String} <b>key</b> the name of the property<br/>" +
-					"</br><b>@return</b> The value of the specified design-time property.")));
-
-			members.add(fillParameter(createMethod("getDesignProperties",
-				"Returns the type of a specified element.<br/><br/></br>var propMap = elements.myelem.getDesignProperties();" +
-					"</br></br><b>@return</b> A map of all design-time properties for the element.")));
-
-			members.add(fillParameter(createMethod("putClientProperty",
-				"Sets the value for the specified element client property key.<br/>" +
-					"NOTE: Depending on the operating system, a user interface property name may be available." +
-					"<br/></br>elements.myelem.putClientProperty('ToolTipText','some text');" +
-					"</br>" + "<b>@param</b> {String} <b>key</b> user interface key (depends on operating system<br/>" +
-					"<b>@param</b> {String} <b>value</b> a predefined value for the key<br/>")));
-
-			members.add(fillParameter(createMethod("getClientProperty",
-				"Gets the specified client property for the element based on a key.<br/>" +
-					"NOTE: Depending on the operating system, a user interface property name may be available." +
-					"<br/></br>var property = elements.\" + prefix + \"getClientProperty('ToolTipText');" +
-					"</br></br><b>@return</b> The value of the property for specified key.")));
-
-
 			if (fullTypeName.endsWith(_ABS_POSTFIX))
 			{
 				members.add(fillParameter(createMethod("setLocation",
