@@ -193,9 +193,11 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
@@ -1012,6 +1014,32 @@ public class TypeCreator extends TypeCache
 
 				});
 
+				IItemChangeListener<IColumn> columnListener = new IItemChangeListener<IColumn>()
+				{
+					public void itemChanged(IColumn column)
+					{
+						runClearCacheJob();
+					}
+
+					@Override
+					public void itemChanged(Collection<IColumn> columns)
+					{
+						runClearCacheJob();
+					}
+
+					@Override
+					public void itemRemoved(IColumn column)
+					{
+						runClearCacheJob();
+					}
+
+					@Override
+					public void itemCreated(IColumn column)
+					{
+						runClearCacheJob();
+					}
+				};
+
 				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				ITableListener tableListener = new ITableListener.TableListener()
 				{
@@ -1019,6 +1047,20 @@ public class TypeCreator extends TypeCache
 					public void tablesAdded(IServerInternal server, String[] tableNames)
 					{
 						runClearCacheJob();
+						try
+						{
+							for (String tableName : tableNames)
+							{
+								if (server.isTableLoaded(tableName))
+								{
+									(server.getTable(tableName)).addIColumnListener(columnListener);
+								}
+							}
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
 					}
 
 					@Override
@@ -1031,13 +1073,41 @@ public class TypeCreator extends TypeCache
 					public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
 					{
 						runClearCacheJob();
+						for (ITable table : tables)
+						{
+							table.removeIColumnListener(columnListener);
+						}
+					}
+
+					@Override
+					public void tableInitialized(Table t)
+					{
+						t.addIColumnListener(columnListener);
 					}
 				};
 				// add listeners to initial server list
 				String[] array = serverManager.getServerNames(false, false, true, true);
 				for (String server_name : array)
 				{
-					((IServerInternal)serverManager.getServer(server_name, false, false)).addTableListener(tableListener);
+					IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
+					server.addTableListener(tableListener);
+					if (server.getConfig().isEnabled() && server.isValid() && server.isTableListLoaded())
+					{
+						try
+						{
+							for (String tableName : server.getTableAndViewNames(false))
+							{
+								if (server.isTableLoaded(tableName))
+								{
+									(server.getTable(tableName)).addIColumnListener(columnListener);
+								}
+							}
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
 				}
 				serverManager.addServerListener(new IServerListener()
 				{
