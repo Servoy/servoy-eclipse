@@ -3835,7 +3835,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		else if (persistContainingFoundsetProperty instanceof WebFormComponentChildType)
 		{
-			persistContainingFoundsetProperty = persistContainingFoundsetProperty.getAncestor(IRepository.WEBCOMPONENTS);
+			persistContainingFoundsetProperty = persistContainingFoundsetProperty.getAncestor(WebComponent.class);
 		}
 		if (forFoundsetName == null)
 		{
