@@ -1160,7 +1160,7 @@ public class TypeCreator extends TypeCache
 
 	protected final Class< ? > getTypeClass(String name)
 	{
-		if (scopeTypes.containsKey(name) && !name.equals(RUNTIME_WEB_COMPONENT))
+		if (scopeTypes.containsKey(name))
 		{
 			return null;
 		}
@@ -5230,7 +5230,11 @@ public class TypeCreator extends TypeCache
 		public Type createType(String context, String fullTypeName)
 		{
 			int smallerThenIndex = fullTypeName.indexOf('<');
-			if (smallerThenIndex == -1) return null;
+			if (smallerThenIndex == -1)
+			{
+				Class< ? > clz = classTypes.get(fullTypeName);
+				return TypeCreator.this.createType(context, fullTypeName, clz);
+			}
 			String wcTypeName = fullTypeName.substring(smallerThenIndex + 1, fullTypeName.length() - 1);
 			// test for form component
 			if ((smallerThenIndex = wcTypeName.indexOf('<')) != -1) wcTypeName = wcTypeName.substring(0, smallerThenIndex);
