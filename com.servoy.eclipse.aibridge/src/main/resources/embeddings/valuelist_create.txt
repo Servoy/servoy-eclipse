@@ -1,0 +1,3 @@
+Create a value list with status values
+Make a value list for priorities
+Add a value list with Active, Inactive, Pending
