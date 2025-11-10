@@ -1,3 +1,0 @@
-Create a relation between orders and customers
-Make a relation from products to categories
-Add a relation linking invoices to customers
