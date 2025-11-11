@@ -157,7 +157,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                     id: 'insertDraggedComponent',
                     dropTarget: this.canDrop.dropTarget ? this.canDrop.dropTarget.getAttribute('svy-id') : null,
                     insertBefore: this.canDrop.beforeChild ? this.canDrop.beforeChild.getAttribute('svy-id') : null,
-                    uuids: this.editorSession.getSelection().length > 1 ? this.editorSession.getSelection().filter(uuid => uuid !== this.dragNode.getAttribute('svy-id')) : null
+                    uuids: this.editorSession.getSelection().length > 1 && !this.dragCopy ? this.editorSession.getSelection().filter(uuid => uuid !== this.dragNode.getAttribute('svy-id')) : null
                 });
             }
         }
@@ -195,7 +195,15 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                         obj[uuid].dropTargetUUID = this.canDrop.dropTarget.getAttribute('svy-id');
                     }
                     if (this.canDrop.beforeChild) {
-                        obj[uuid].rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
+                        if (this.dragNode.getAttribute('svy-id') === uuid) {
+                            obj[uuid].rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
+                        }
+                        else {
+                            this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop.beforeChild);
+                            if (this.canDrop.beforeChild) {
+                                obj[uuid].rightSibling = this.canDrop.beforeChild.getAttribute('svy-id');
+                            }
+                        }
                     }
                 }
                 components.push(obj);
@@ -204,6 +212,9 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
                 this.editorSession.createComponents({ 'components': components });
             } else {
+                if (components.length > 1) {
+                    components.reverse(); //reverse order for multiple selection to keep the order when inserting before
+                }
                 this.editorSession.getSession().callService('formeditor', 'moveComponent', { 'components': components }, true);
             }
         }

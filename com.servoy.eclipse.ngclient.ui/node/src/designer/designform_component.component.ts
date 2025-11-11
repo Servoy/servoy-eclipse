@@ -276,6 +276,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 } else {
                     //if it's not a layout it must be a component
                     this.insertedClone = this.formCache.getComponent(event.data.uuid);
+                    if (!this.insertedClone.layout) {
+                        const elWidth = this.insertedClone.model.size ? this.insertedClone.model.size.width : 200;
+                        const elHeight = this.insertedClone.model.size ? this.insertedClone.model.size.height : 100;
+                        this.insertedClone.layout = { width: elWidth + 'px', height: elHeight + 'px' };
+                    }
                     const oldModel = this.insertedClone.model;
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;

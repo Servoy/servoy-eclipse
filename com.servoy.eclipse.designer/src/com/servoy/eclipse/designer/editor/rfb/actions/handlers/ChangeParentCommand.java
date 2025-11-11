@@ -268,6 +268,11 @@ public class ChangeParentCommand extends Command
 
 						insertIndex = count - 1;
 					}
+
+					if (insertIndex == -1)
+					{
+						insertIndex = sortedChildren.size() > 0 ? sortedChildren.size() : 0;
+					}
 				}
 			}
 			if (insertIndex >= 0)
