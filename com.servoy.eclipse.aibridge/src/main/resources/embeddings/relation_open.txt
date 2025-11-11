@@ -1,2 +1,0 @@
-Open the customers relation
-Edit the orders_to_customers relation
