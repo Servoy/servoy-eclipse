@@ -3,21 +3,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Servoy AI Bridge
 Bundle-SymbolicName: com.servoy.eclipse.aibridge;singleton:=true
 Bundle-Version: 2025.12.0.4120_rc
-Bundle-ClassPath: .
-Export-Package: com.servoy.eclipse.aibridge,
- com.servoy.eclipse.mcp.ai
-Import-Package: ai.onnxruntime,
- ai.onnxruntime.extensions,
- com.fasterxml.jackson.annotation;version="2.15.3",
+Export-Package: com.servoy.eclipse.aibridge
+Import-Package: com.fasterxml.jackson.annotation;version="2.15.3",
  com.fasterxml.jackson.core.type;version="2.15.3",
  com.fasterxml.jackson.databind;version="2.15.3",
  com.knuddels.jtokkit;version="0.6.1",
  com.knuddels.jtokkit.api;version="0.6.1",
- dev.langchain4j.data.document,
- dev.langchain4j.data.embedding,
- dev.langchain4j.data.segment,
- dev.langchain4j.store.embedding,
- dev.langchain4j.store.embedding.inmemory,
  com.microsoft.copilot.eclipse.core,
  com.microsoft.copilot.eclipse.core.lsp.protocol,
  com.microsoft.copilot.eclipse.ui,
@@ -77,9 +68,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide;bundle-version="3.21.0",
  org.eclipse.ui.editors;bundle-version="3.16.0",
  com.servoy.eclipse.ui.tweaks;bundle-version="2023.12.0",
- org.apache.tomcat;bundle-version="11.0.8",
- wrapped.com.microsoft.onnxruntime.onnxruntime;bundle-version="1.19.2",
- onnx-models-bge-small-en;bundle-version="1.5.0"
+ org.apache.tomcat;bundle-version="11.0.8"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.aibridge
 Bundle-ActivationPolicy: lazy
