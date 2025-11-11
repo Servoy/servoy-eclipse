@@ -2,6 +2,8 @@ package com.servoy.eclipse.mcp.ai;
 
 import java.util.List;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+
 /**
  * Detects user intent from prompts using semantic similarity search.
  * Uses ServoyEmbeddingService with ONNX tokenizer to find the closest matching intent.
@@ -22,23 +24,15 @@ public class IntentDetector
 	 */
 	public String detectIntent(String prompt)
 	{
-		System.out.println("[IntentDetector] Prompt: \"" + prompt + "\"");
-
-		// Search for similar prompts in knowledge base
 		List<ServoyEmbeddingService.SearchResult> results = embeddingService.search(prompt, 1);
-
 		if (results.isEmpty())
 		{
-			System.out.println("[IntentDetector] No matches found, defaulting to PASS_THROUGH");
 			return "PASS_THROUGH";
 		}
 
-		// Get the best match
 		ServoyEmbeddingService.SearchResult bestMatch = results.get(0);
 		String intent = bestMatch.metadata.get("intent");
-
-		System.out.println("[IntentDetector] Best match: \"" + bestMatch.text + "\" (score: " + String.format("%.3f", bestMatch.score) + ")");
-		System.out.println("[IntentDetector] Detected intent: " + intent);
+		ServoyLog.logInfo("[IntentDetector] Detected intent: " + intent + " (score: " + bestMatch.score + ")");
 
 		return intent != null ? intent : "PASS_THROUGH";
 	}

@@ -10,6 +10,7 @@ import org.osgi.framework.BundleContext;
 
 import com.microsoft.copilot.eclipse.ui.CopilotUi;
 import com.servoy.eclipse.mcp.ai.ServoyEmbeddingService;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -17,10 +18,8 @@ import com.servoy.eclipse.mcp.ai.ServoyEmbeddingService;
 public class Activator extends AbstractUIPlugin
 {
 
-	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.aibridge"; //$NON-NLS-1$
 
-	// The shared instance
 	private static Activator plugin;
 
 	/**
@@ -87,17 +86,16 @@ public class Activator extends AbstractUIPlugin
 				try
 				{
 					monitor.beginTask("Initializing embedding service...", IProgressMonitor.UNKNOWN);
-					System.out.println("[Activator] Pre-loading Servoy AI knowledge base...");
+					ServoyLog.logInfo("[Activator] Pre-loading Servoy AI knowledge base...");
 
 					// This will trigger singleton initialization and load the knowledge base
 					ServoyEmbeddingService.getInstance();
 
-					System.out.println("[Activator] Servoy AI knowledge base loaded successfully");
 					return Status.OK_STATUS;
 				}
 				catch (Exception e)
 				{
-					System.err.println("[Activator] Failed to pre-load knowledge base: " + e.getMessage());
+					ServoyLog.logError("[Activator] Failed to pre-load knowledge base: " + e.getMessage());
 					e.printStackTrace();
 					// Don't fail plugin startup if embedding service fails
 					return Status.OK_STATUS;

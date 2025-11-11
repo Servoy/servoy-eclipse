@@ -53,10 +53,10 @@ This creates a directory with:
 
 ### Step 2: Convert to ONNX Format
 
-Use the conversion script located at `src/main/resources/models/bge-small-en-v1.5/convert_tokenizer.py`:
+Use the conversion script located at `src/main/resources/scripts/convert_tokenizer.py`:
 
 ```bash
-cd src/main/resources/models/bge-small-en-v1.5
+cd src/main/resources/scripts/
 python convert_tokenizer.py
 ```
 
@@ -93,69 +93,3 @@ After conversion, you'll have:
   - Separate from tokenizer
   - Used for generating embeddings
 
-## Integration with Java
-
-The converted tokenizer is loaded in `ServoyEmbeddingService.java`:
-
-```java
-// Load ONNX tokenizer
-InputStream tokenizerStream = getClass()
-    .getResourceAsStream("/models/bge-small-en-v1.5/tokenizer.onnx");
-
-// Register ONNX Runtime Extensions (required for BertTokenizer)
-OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
-sessionOptions.registerCustomOpLibrary(OrtxPackage.getLibraryPath());
-
-// Create tokenizer session
-tokenizerSession = env.createSession(tokenizerBytes, sessionOptions);
-```
-
-## Platform-Specific Extensions
-
-The ONNX Runtime Extensions library is required for the BertTokenizer operator. Platform-specific builds are provided:
-
-- `onnxruntime-extensions-darwin-arm64-0.15.0.jar` (macOS Apple Silicon)
-- `onnxruntime-extensions-darwin-x64-0.15.0.jar` (macOS Intel)
-- `onnxruntime-extensions-linux-arm64-0.15.0.jar` (Linux ARM64)
-- `onnxruntime-extensions-linux-x64-0.15.0.jar` (Linux x86_64)
-- `onnxruntime-extensions-win-arm64-0.15.0.jar` (Windows ARM64)
-- `onnxruntime-extensions-win-x64-0.15.0.jar` (Windows x86_64)
-
-See platform-specific build documentation in `src/main/resources/models/bge-small-en-v1.5/README_CONVERSION_*.md`
-
-## Troubleshooting
-
-### Issue: Import Error for onnxruntime_extensions
-
-**Solution**: Ensure you're in the conda environment:
-```bash
-conda activate onnx-tokenizer
-pip install onnxruntime-extensions
-```
-
-### Issue: Tokenizer output doesn't match
-
-**Solution**: Verify you're using the same model version:
-- Check `tokenizer_config.json` for model name
-- Ensure all tokenizer files are from the same download
-
-### Issue: ONNX Runtime Extensions not found at runtime
-
-**Solution**: Verify the platform-specific JAR is in the classpath:
-- Check `MANIFEST.MF` Bundle-ClassPath
-- Ensure correct platform JAR is loaded
-- Verify `OrtxPackage.getLibraryPath()` returns valid path
-
-## References
-
-- **ONNX Runtime Extensions**: https://github.com/microsoft/onnxruntime-extensions
-- **BGE Model**: https://huggingface.co/BAAI/bge-small-en-v1.5
-- **HuggingFace Transformers**: https://huggingface.co/docs/transformers
-- **ONNX Format**: https://onnx.ai/
-
-## Version History
-
-- **v1.0.0** (2024-11-06): Initial tokenizer conversion using ONNX Runtime Extensions 0.15.0
-- Model: BGE-small-en-v1.5
-- ONNX Runtime: 1.19.2
-- Python: 3.10

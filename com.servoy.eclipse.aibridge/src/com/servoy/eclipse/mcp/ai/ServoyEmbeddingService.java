@@ -13,6 +13,8 @@ import java.util.Map;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+
 import ai.onnxruntime.OnnxTensor;
 import ai.onnxruntime.OrtEnvironment;
 import ai.onnxruntime.OrtException;
@@ -51,16 +53,14 @@ public class ServoyEmbeddingService
 	 */
 	private void initialize()
 	{
-		System.out.println("[ServoyEmbeddings] Initializing ONNX embedding service with ONNX tokenizer...");
+		ServoyLog.logInfo("[ServoyEmbeddings] Initializing ONNX embedding service with ONNX tokenizer...");
 
 		try
 		{
-			// Initialize ONNX Runtime
 			env = OrtEnvironment.getEnvironment();
-			System.out.println("[ServoyEmbeddings] ONNX Runtime initialized");
 
 			// Load embedding model from OSGi bundle
-			System.out.println("[ServoyEmbeddings] Loading ONNX embedding model from bundle...");
+			ServoyLog.logInfo("[ServoyEmbeddings] Loading ONNX embedding model from bundle...");
 			Bundle modelsBundle = Platform.getBundle("onnx-models-bge-small-en");
 			if (modelsBundle == null)
 			{
@@ -75,12 +75,9 @@ public class ServoyEmbeddingService
 			InputStream modelStream = modelURL.openStream();
 			byte[] modelBytes = modelStream.readAllBytes();
 			modelStream.close();
-			System.out.println("[ServoyEmbeddings] Model loaded (" + (modelBytes.length / 1024 / 1024) + " MB), creating session...");
-			modelSession = env.createSession(modelBytes);
-			System.out.println("[ServoyEmbeddings] ONNX model session created");
 
-			// Load ONNX tokenizer from OSGi bundle
-			System.out.println("[ServoyEmbeddings] Loading ONNX tokenizer from bundle...");
+			modelSession = env.createSession(modelBytes);
+
 			URL tokenizerURL = modelsBundle.getEntry("models/bge-small-en-v1.5/tokenizer.onnx");
 			if (tokenizerURL == null)
 			{
@@ -89,28 +86,18 @@ public class ServoyEmbeddingService
 			InputStream tokenizerStream = tokenizerURL.openStream();
 			byte[] tokenizerBytes = tokenizerStream.readAllBytes();
 			tokenizerStream.close();
-			System.out.println("[ServoyEmbeddings] Tokenizer loaded (" + (tokenizerBytes.length / 1024) + " KB), creating session...");
 
-			// Register ONNX Runtime Extensions for custom operators (BertTokenizer)
 			OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
 			sessionOptions.registerCustomOpLibrary(OrtxPackage.getLibraryPath());
-			System.out.println("[ServoyEmbeddings] ONNX Runtime Extensions registered");
-
-			// Create tokenizer session with ONNX Runtime Extensions
 			tokenizerSession = env.createSession(tokenizerBytes, sessionOptions);
-			System.out.println("[ServoyEmbeddings] ONNX tokenizer session created");
+			ServoyLog.logInfo("[ServoyEmbeddings] ONNX model and tokenizer loaded successfully");
 
-			System.out.println("[ServoyEmbeddings] ONNX model and tokenizer loaded successfully");
-
-			// Pre-load Servoy knowledge base (happens at startup via Activator)
 			initializeKnowledgeBase();
-
-			System.out.println("[ServoyEmbeddings] Embedding service ready!");
+			ServoyLog.logInfo("[ServoyEmbeddings] Embedding service ready!");
 		}
 		catch (Exception e)
 		{
-			System.err.println("[ServoyEmbeddings] Failed to initialize: " + e.getMessage());
-			e.printStackTrace();
+			ServoyLog.logError("[ServoyEmbeddings] Failed to initialize: " + e.getMessage());
 			throw new RuntimeException("Failed to initialize embedding service", e);
 		}
 	}
@@ -136,7 +123,6 @@ public class ServoyEmbeddingService
 	 */
 	private void initializeKnowledgeBase()
 	{
-		System.out.println("[ServoyEmbeddings] Loading knowledge base from /embeddings/ directory...");
 
 		try (InputStream listStream = getClass().getResourceAsStream("/main/resources/embeddings/embeddings.list");
 			BufferedReader listReader = new BufferedReader(new InputStreamReader(listStream, StandardCharsets.UTF_8)))
@@ -154,14 +140,12 @@ public class ServoyEmbeddingService
 					loadEmbeddingsFromFile("/main/resources/embeddings/" + filename, intentKey);
 				}
 			}
+			ServoyLog.logInfo("[ServoyEmbeddings] Knowledge base loaded with " + getEmbeddingCount() + " examples");
 		}
 		catch (Exception e)
 		{
-			System.err.println("[ServoyEmbeddings] Failed to load embedding files: " + e.getMessage());
-			e.printStackTrace();
+			ServoyLog.logError("[ServoyEmbeddings] Failed to load embedding files: " + e.getMessage());
 		}
-
-		System.out.println("[ServoyEmbeddings] Knowledge base loaded with " + getEmbeddingCount() + " examples");
 	}
 
 	/**
@@ -183,11 +167,10 @@ public class ServoyEmbeddingService
 					count++;
 				}
 			}
-			System.out.println("[ServoyEmbeddings] Loaded " + count + " examples for intent: " + intentKey);
 		}
 		catch (Exception e)
 		{
-			System.err.println("[ServoyEmbeddings] Failed to load embeddings from " + resourcePath + ": " + e.getMessage());
+			ServoyLog.logError("[ServoyEmbeddings] Failed to load embeddings from " + resourcePath + ": " + e.getMessage());
 		}
 	}
 
@@ -208,7 +191,7 @@ public class ServoyEmbeddingService
 		}
 		catch (Exception e)
 		{
-			System.err.println("[ServoyEmbeddings] Failed to embed text: " + e.getMessage());
+			ServoyLog.logError("[ServoyEmbeddings] Failed to embed text: " + e.getMessage());
 		}
 	}
 
@@ -217,9 +200,6 @@ public class ServoyEmbeddingService
 	 */
 	private float[] generateEmbedding(String text) throws OrtException
 	{
-		System.out.println("[ServoyEmbeddings] Tokenizing with ONNX tokenizer: \"" + text + "\"");
-
-		// Step 1: Tokenize using ONNX tokenizer
 		Map<String, OnnxTensor> tokenizerInputs = new HashMap<>();
 		String[] textArray = new String[] { text };
 		OnnxTensor textTensor = OnnxTensor.createTensor(env, textArray);
@@ -227,12 +207,9 @@ public class ServoyEmbeddingService
 
 		OrtSession.Result tokenizerResults = tokenizerSession.run(tokenizerInputs);
 
-		// Extract tokenizer outputs (1D arrays)
 		long[] inputIds = (long[])tokenizerResults.get(0).getValue();
 		long[] attentionMask = (long[])tokenizerResults.get(2).getValue();
 		long[] tokenTypeIds = (long[])tokenizerResults.get(1).getValue();
-
-		System.out.println("[ServoyEmbeddings] Token count: " + inputIds.length);
 
 		// Cleanup tokenizer tensors
 		textTensor.close();
@@ -263,9 +240,6 @@ public class ServoyEmbeddingService
 
 		// Normalize
 		normalize(embedding);
-
-		System.out.println("[ServoyEmbeddings] Generated embedding vector (384 dimensions): [" + embedding[0] + ", " + embedding[1] + ", ... " +
-			embedding[embedding.length - 1] + "]");
 
 		// Cleanup
 		inputIdsTensor.close();
@@ -335,13 +309,8 @@ public class ServoyEmbeddingService
 	{
 		try
 		{
-			System.out.println("\n[ServoyEmbeddings] === SEMANTIC SEARCH ===");
-			System.out.println("[ServoyEmbeddings] Query: \"" + query + "\"");
-
 			float[] queryEmbeddingArray = generateEmbedding(query);
 			Embedding queryEmbedding = new Embedding(queryEmbeddingArray);
-
-			System.out.println("[ServoyEmbeddings] Comparing against stored examples...");
 
 			// Use LangChain4j's search with minimum score threshold
 			EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest.builder()
@@ -368,26 +337,13 @@ public class ServoyEmbeddingService
 
 				double score = match.score();
 				results.add(new SearchResult(score, matchText, metadata));
-				System.out.println("[ServoyEmbeddings]   ✓ Match: \"" + matchText + "\" (similarity: " + String.format("%.3f", score) + ")");
 			}
-
-			if (results.isEmpty())
-			{
-				System.out.println("[ServoyEmbeddings] No matches found above 0.7 threshold");
-			}
-			else
-			{
-				System.out
-					.println("[ServoyEmbeddings] Best match: \"" + results.get(0).text + "\" (score: " + String.format("%.3f", results.get(0).score) + ")");
-			}
-			System.out.println("[ServoyEmbeddings] === END SEARCH ===\n");
 
 			return results;
 		}
 		catch (Exception e)
 		{
 			System.err.println("[ServoyEmbeddings] Search failed: " + e.getMessage());
-			e.printStackTrace();
 			return new ArrayList<>();
 		}
 	}

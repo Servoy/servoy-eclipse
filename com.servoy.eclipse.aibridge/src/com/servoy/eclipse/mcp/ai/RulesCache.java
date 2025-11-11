@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+
 /**
  * Stores and manages prompt enrichment rules loaded from resource files.
  * Rules are loaded once at initialization and cached in memory for fast access.
@@ -17,12 +19,10 @@ public class RulesCache
 	// Cache: intent key -> rule content
 	private static final Map<String, String> rulesCache = new HashMap<>();
 
-	// Static initializer - loads all rules at class initialization
 	static
 	{
-		System.out.println("[RuleStore] Initializing rule store...");
 		autoDiscoverRules();
-		System.out.println("[RuleStore] Rule store initialized with " + rulesCache.size() + " rules");
+		ServoyLog.logInfo("[RuleStore] Rule store initialized with " + rulesCache.size() + " rules");
 	}
 
 	/**
@@ -40,13 +40,8 @@ public class RulesCache
 				filename = filename.trim();
 				if (!filename.isEmpty() && !filename.startsWith("#") && filename.endsWith(".md"))
 				{
-					// Extract filename without extension: valuelist_create.md -> valuelist_create
 					String baseName = filename.substring(0, filename.lastIndexOf('.'));
-					
-					// Convert to uppercase with underscores: valuelist_create -> VALUELIST_CREATE
 					String intentKey = baseName.toUpperCase();
-					
-					// Load the rule
 					loadRule(intentKey, "/main/resources/rules/" + filename);
 				}
 			}
@@ -61,6 +56,7 @@ public class RulesCache
 	/**
 	 * Load a rule from resources into the cache
 	 */
+	//TODO: initialize at developer startup
 	private static void loadRule(String intentKey, String resourcePath)
 	{
 		try (InputStream is = RulesCache.class.getResourceAsStream(resourcePath))
@@ -73,11 +69,10 @@ public class RulesCache
 
 			String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 			rulesCache.put(intentKey, content);
-			System.out.println("[RuleStore] Loaded rule: " + intentKey + " (" + content.length() + " chars)");
 		}
 		catch (Exception e)
 		{
-			System.err.println("[RuleStore] Failed to load rule from " + resourcePath + ": " + e.getMessage());
+			ServoyLog.logError("[RuleStore] Failed to load rule from " + resourcePath + ": " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -92,7 +87,6 @@ public class RulesCache
 		String rules = rulesCache.get(intent);
 		if (rules == null)
 		{
-			System.out.println("[RuleStore] No rules found for intent: " + intent);
 			return "";
 		}
 		return rules;
