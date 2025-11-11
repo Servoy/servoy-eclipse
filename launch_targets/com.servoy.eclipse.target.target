@@ -540,6 +540,24 @@
                     <version>0.15.0</version>
                     <type>jar</type>
                 </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j</artifactId>
+                    <version>1.7.1</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j-core</artifactId>
+                    <version>1.7.1</version>
+                    <type>jar</type>
+                </dependency>
+               <dependency>
+				    <groupId>com.microsoft.onnxruntime</groupId>
+				    <artifactId>onnxruntime</artifactId>
+				    <version>1.19.2</version>
+				    <type>jar</type>
+				</dependency>
             </dependencies>
             <repositories>
                 <repository>
