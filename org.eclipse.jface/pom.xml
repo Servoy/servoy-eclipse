@@ -18,7 +18,7 @@
  	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.9.0.4102</version>
+		<version>2025.9.1.4103</version>
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
