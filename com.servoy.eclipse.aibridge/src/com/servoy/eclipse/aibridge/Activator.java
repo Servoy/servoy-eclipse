@@ -11,6 +11,7 @@ import org.osgi.framework.BundleContext;
 import com.microsoft.copilot.eclipse.ui.CopilotUi;
 import com.servoy.eclipse.mcp.ai.ServoyEmbeddingService;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -62,7 +63,7 @@ public class Activator extends AbstractUIPlugin
 			else servers = json.getJSONObject("servers");
 
 			JSONObject servoy = new JSONObject();
-			servoy.put("url", "http://localhost:8183/mcp");
+			servoy.put("url", "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/mcp");
 
 			servers.put("servoy", servoy);
 
