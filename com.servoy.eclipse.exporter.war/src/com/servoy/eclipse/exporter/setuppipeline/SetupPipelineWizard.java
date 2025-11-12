@@ -77,7 +77,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 	private DirectorySelectionPage pluginSelectionPage;
 	//private DatabaseImportPropertiesPage databaseImportProperties;
 
-	public static final String SETUP_PIPELINE_URL = System.getProperty("Dservoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
+	public static final String SETUP_PIPELINE_URL = System.getProperty("servoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
 		"/servoy-service/rest_ws/api/developer/setupPipeline";
 
 	private ExportWarModel exportModel;
