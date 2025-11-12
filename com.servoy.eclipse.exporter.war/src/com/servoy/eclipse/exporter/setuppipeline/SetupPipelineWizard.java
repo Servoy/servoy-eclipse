@@ -248,6 +248,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 		catch (final Exception e)
 		{
 			org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Error", "Failed to set up pipeline: " + e.getMessage());
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -416,64 +417,68 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			}
 
 			Map<String, String> upgradedLicenses = exportModel.getUpgradedLicenses();
-			if (!exportModel.getLicenses().isEmpty() || !upgradedLicenses.isEmpty())
+			if (upgradedLicenses != null)
 			{
-				List<License> licenses = new ArrayList<>();
-				Cipher desCipher = null;
-				try
+				if (!exportModel.getLicenses().isEmpty() || !upgradedLicenses.isEmpty())
 				{
-					Cipher cipher = Cipher.getInstance("DESede"); //$NON-NLS-1$
-					cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey());
-					desCipher = cipher;
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError("Cannot load encrypted previous export passwords", e);
-				}
-
-				Set<String> codes = new HashSet<String>();
-				if (properties.get("licenseManager.numberOfLicenses") != null)
-				{
-					int totalLicenses = Integer.parseInt(properties.getProperty("licenseManager.numberOfLicenses"));
-					for (int i = 0; i < totalLicenses; i++)
+					List<License> licenses = new ArrayList<>();
+					Cipher desCipher = null;
+					try
 					{
-						String code = properties.getProperty("license." + i + ".code", "");
-						if (code.startsWith(IWarExportModel.enc_prefix)) code = exportModel.decryptPassword(desCipher, code);
-						codes.add(code);
-						licenses.add(
-							new License(properties.getProperty("license." + i + ".company_name"), code, properties.getProperty("license." + i + ".licenses")));
+						Cipher cipher = Cipher.getInstance("DESede"); //$NON-NLS-1$
+						cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey());
+						desCipher = cipher;
 					}
-				}
-
-				for (License license : exportModel.getLicenses())
-				{
-					if (ApplicationServerRegistry.get().checkClientLicense(license.getCompanyKey(), license.getCode(), license.getNumberOfLicenses()))
+					catch (Exception e)
 					{
-						if (codes.contains(license.getCode()))
+						ServoyLog.logError("Cannot load encrypted previous export passwords", e);
+					}
+
+					Set<String> codes = new HashSet<String>();
+					if (properties.get("licenseManager.numberOfLicenses") != null)
+					{
+						int totalLicenses = Integer.parseInt(properties.getProperty("licenseManager.numberOfLicenses"));
+						for (int i = 0; i < totalLicenses; i++)
 						{
-							ServoyLog.logInfo("Duplicate license for license key " + license.getCode().substring(0, 4) +
-								"**-******-******. Please check the servoy.properties file");
-							continue;
+							String code = properties.getProperty("license." + i + ".code", "");
+							if (code.startsWith(IWarExportModel.enc_prefix)) code = exportModel.decryptPassword(desCipher, code);
+							codes.add(code);
+							licenses.add(
+								new License(properties.getProperty("license." + i + ".company_name"), code,
+									properties.getProperty("license." + i + ".licenses")));
 						}
-						licenses.add(license);
 					}
-					else
+
+					for (License license : exportModel.getLicenses())
 					{
-						ServoyLog.logError(new Exception("The license \"" + license.getCompanyKey() + ", " + license.getCode().substring(0, 4) +
-							"**-******-******," + license.getNumberOfLicenses() + "\" is not valid"));
+						if (ApplicationServerRegistry.get().checkClientLicense(license.getCompanyKey(), license.getCode(), license.getNumberOfLicenses()))
+						{
+							if (codes.contains(license.getCode()))
+							{
+								ServoyLog.logInfo("Duplicate license for license key " + license.getCode().substring(0, 4) +
+									"**-******-******. Please check the servoy.properties file");
+								continue;
+							}
+							licenses.add(license);
+						}
+						else
+						{
+							ServoyLog.logError(new Exception("The license \"" + license.getCompanyKey() + ", " + license.getCode().substring(0, 4) +
+								"**-******-******," + license.getNumberOfLicenses() + "\" is not valid"));
+						}
 					}
-				}
 
-				for (License license : licenses)
-				{
-					if (upgradedLicenses.containsKey(license.getCode()))
+					for (License license : licenses)
 					{
-						license.setCode(upgradedLicenses.get(license.getCode()));
+						if (upgradedLicenses.containsKey(license.getCode()))
+						{
+							license.setCode(upgradedLicenses.get(license.getCode()));
+						}
 					}
+
+					AbstractWarExportModel.writeLicenses(properties, licenses);
+
 				}
-
-				AbstractWarExportModel.writeLicenses(properties, licenses);
-
 			}
 
 			properties.store(fos, "");
