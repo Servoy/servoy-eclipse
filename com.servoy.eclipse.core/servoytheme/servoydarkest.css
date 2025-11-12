@@ -155,6 +155,14 @@ Shell > Composite > Table {
     text-trim: false;
 }
 
+.MPart ScrolledComposite Composite StyledText.org-eclipse-egit-ui-CommitAndDiffComponent {
+	background-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
+}
+
+.MPartStack.active .MPart Form Composite Section Composite Tree.org-eclipse-egit-ui-StagingView {
+	background-color: '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR';
+}
+
 IEclipsePreferences#org-eclipse-ui-editors:com-servoy-eclipse-servoydarktheme{
   /* pseudo attribute added to allow contributions without replacing this node, see Bug 466075 */
   preferences: 'AbstractTextEditor.Color.SelectionForeground.SystemDefault=false'
