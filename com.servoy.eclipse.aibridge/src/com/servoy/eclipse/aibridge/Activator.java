@@ -44,9 +44,9 @@ public class Activator extends AbstractUIPlugin
 			try
 			{
 				json = new JSONObject(mcpServers);
-				if (json.has("servers") && json.getJSONObject("servers").has("servoy"))
+				if (!(json.has("servers") && json.getJSONObject("servers").has("servoy")))
 				{
-					addServoyServer = false;
+					addServoyServer = true;
 				}
 			}
 			catch (Exception ex)
@@ -67,7 +67,7 @@ public class Activator extends AbstractUIPlugin
 
 			servers.put("servoy", servoy);
 
-			CopilotUi.getPlugin().getPreferenceStore().putValue("mcp", json.toString());
+			CopilotUi.getPlugin().getPreferenceStore().putValue("mcp", json.toString(1));
 		}
 
 		// Pre-load embedding service and knowledge base in background
