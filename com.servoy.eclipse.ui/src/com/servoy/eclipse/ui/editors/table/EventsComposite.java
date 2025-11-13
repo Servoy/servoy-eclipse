@@ -474,12 +474,11 @@ public class EventsComposite extends Composite
 				if (tableNode != null)
 				{
 					String property = (String)tableNode.getProperty(tp.getProperty().getPropertyName());
-					if (property == null)
+					if (property != null)
 					{
-						continue;
+						mw = new MethodWithArguments(
+							property, dsm.getDataSource(tableNode.getDataSource()));
 					}
-					mw = new MethodWithArguments(
-						property, dsm.getDataSource(tableNode.getDataSource()));
 				}
 				children.add(new EventNode(tp, mw, solution, table));
 			}
