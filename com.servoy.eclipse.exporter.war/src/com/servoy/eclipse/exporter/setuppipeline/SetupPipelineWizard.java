@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -45,7 +44,6 @@ import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
-import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
 import com.servoy.eclipse.ui.wizards.IExportSolutionWizardProvider;
 import com.servoy.eclipse.warexporter.Activator;
@@ -307,9 +305,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			{
 				Path originalFile = Paths.get(jenkinsPage.getServoyPropsPath());
 
-				Path templateFile = jenkinsCustomPath.resolve("servoy.properties.template");
-				Files.copy(originalFile, templateFile, StandardCopyOption.REPLACE_EXISTING);
-				changeAndWritePropertiesFile(jenkinsCustomPath.toFile(), templateFile.toFile());
+				changeAndWritePropertiesFile(jenkinsCustomPath, originalFile.toFile());
 			}
 			else
 			{
@@ -374,8 +370,10 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 		}
 	}
 
-	private void changeAndWritePropertiesFile(File jenkinsCustomDir, File sourceFile) throws ExportException
+	private void changeAndWritePropertiesFile(Path jenkinsCustomPath, File sourceFile) throws ExportException
 	{
+		//Path templateFile = jenkinsCustomPath.resolve("servoy.properties.template");
+		File jenkinsCustomDir = jenkinsCustomPath.toFile();
 		try (FileInputStream fis = new FileInputStream(sourceFile);
 			FileOutputStream fos = new FileOutputStream(new File(jenkinsCustomDir, "servoy.properties.template")))
 		{
@@ -603,38 +601,17 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 		{
 			Files.copy(Paths.get(log4j), log4jTarget, StandardCopyOption.REPLACE_EXISTING);
 		}
-		else
-		{
-			try (InputStream is = WarExporter.class.getResourceAsStream("resources/log4j.xml"))
-			{
-				Files.copy(is, log4jTarget, StandardCopyOption.REPLACE_EXISTING);
-			}
-		}
-
 		// web.xml
 		Path webXmlTarget = jenkinsCustomPath.resolve("web.xml");
 		if (webxml != null && !webxml.isEmpty())
 		{
 			Files.copy(Paths.get(webxml), webXmlTarget, StandardCopyOption.REPLACE_EXISTING);
 		}
-		else
-		{
-			try (InputStream is = WarExporter.class.getResourceAsStream("resources/web.xml"))
-			{
-				Files.copy(is, webXmlTarget, StandardCopyOption.REPLACE_EXISTING);
-			}
-		}
-
 		// context.xml
 		Path contextXmlTarget = jenkinsCustomPath.resolve("context.xml");
 		if (contextxml != null && !contextxml.isEmpty())
 		{
 			Files.copy(Paths.get(contextxml), contextXmlTarget, StandardCopyOption.REPLACE_EXISTING);
-		}
-		else
-		{
-			String defaultContent = buildDefaultContextXml();
-			Files.writeString(contextXmlTarget, defaultContent);
 		}
 	}
 
