@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -39,7 +38,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -53,8 +51,6 @@ import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
-import com.servoy.j2db.persistence.IBasicWebObject;
-import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
@@ -284,24 +280,7 @@ public class FormElementDeleteCommand extends Command
 
 	private boolean isInherited(WebCustomType custom, IBasicWebComponent component)
 	{
-		if (custom.getExtendsID() != null) return true;
-		IPersist parentComponent = PersistHelper.getSuperPersist(component);
-		if (parentComponent instanceof IBasicWebObject indexed)
-		{
-			Object value = indexed.getProperty(custom.getJsonKey());
-			if (value instanceof IChildWebObject[] arrayValue && custom.getIndex() < arrayValue.length)
-			{
-				Display.getDefault().asyncExec(() -> {
-					String message = "Canot delete inherited " + custom.getJsonKey() + ", check the log for more details.";
-					MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-						"Cannot delete", message);
-				});
-				ServoyLog.logError(new Exception("Cannot delete custom type " + custom.getUUID() +
-					" because is inherited from the parent component " + parentComponent.getUUID()));
-				return true;
-			}
-		}
-		return false;
+		return custom.getExtendsID() != null;
 	}
 
 	@Override
