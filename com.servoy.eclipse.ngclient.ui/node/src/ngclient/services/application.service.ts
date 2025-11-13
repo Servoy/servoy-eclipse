@@ -423,11 +423,8 @@ export class ApplicationService {
         return this.windowRefService.nativeWindow.navigator.clipboard.readText();
     }
 
-	public replaceUrlState(): void {
-		const currentUrl = this.windowRefService.nativeWindow.location.href;
-		const baseUrl = currentUrl.split('?')[0];
-		const cleanedUrl = baseUrl.replace('/svylogin', '').replace('/svy_oauth', '');
-		history.replaceState({}, '', cleanedUrl);
+	public replaceUrlState() {
+       history.replaceState({}, '', this.windowRefService.nativeWindow.location.href.split('?')[0]);
 	}
 
     private showDefaultLoginWindow() {
