@@ -210,7 +210,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 				{
 					// delete duplicate Media
 					((EclipseRepository)rootObject.getRepository()).deleteObject(editingNode);
-					servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+					servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
 				}
 				else
 				{
