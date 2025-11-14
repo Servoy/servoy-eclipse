@@ -266,7 +266,11 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 			// TODO are default json/.spec/IPropertyType based values handled correctly or should we do that here as well?
 		}
 		else propVal = jsonAndPurePersistPropsFlattened.opt(propertyName);
-
+		if (propVal instanceof String && propertyName.equals(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()))
+		{
+			// legacy string value, convert to json object
+			propVal = new ServoyJSONObject((String)propVal, false, false, true);
+		}
 		return convertToJavaType(propertyName, propVal);
 	}
 
@@ -525,6 +529,13 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 			}
 			ServoyJSONObject.mergeAndDeepCloneJSON(propertyValue, full);
 			propertyValue = full;
+		}
+		if (propertyValue != null && forMutation &&
+			propertyValue.opt(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()) instanceof String legacyCustomPropertiesValue)
+		{
+			// save it in pure json format
+			propertyValue.put(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName(),
+				new ServoyJSONObject(legacyCustomPropertiesValue, false, false, true));
 		}
 		return propertyValue;
 	}

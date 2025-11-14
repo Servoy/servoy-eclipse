@@ -1175,8 +1175,7 @@ public class SolutionSerializer
 			Object propertyObjectValue = property_values.get(propertyName);
 			boolean isBoolean = (propertyObjectValue instanceof Boolean);
 			boolean isNumber = (propertyObjectValue instanceof Number && element.getTypeID() != IRepository.ELEMENTS);//element_id for elements type becomes uuid
-			boolean isJSON = propertyObjectValue instanceof JSONObject || element.getTypeID() == IRepository.JSON ||
-				StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName().equals(propertyName);
+			boolean isJSON = propertyObjectValue instanceof JSONObject || element.getTypeID() == IRepository.JSON;
 
 			String propertyValue = repository.convertObjectToArgumentString(element.getTypeID(), propertyObjectValue);//, persist.getID(), persist.getRevisionNumber(), element.contentID, resolver);
 
