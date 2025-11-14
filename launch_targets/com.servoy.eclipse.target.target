@@ -13,7 +13,7 @@
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://azuredownloads-g3ahgwb5b8bkbxhd.b01.azurefd.net/github-copilot/"/>
-            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.12.0.202510160637"/>
+            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.13.0.202511140445"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/eclipse/updates/4.37/"/>
@@ -69,37 +69,37 @@
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.aarch64</artifactId>
-                    <version>128.0.24</version>
+                    <version>128.0.25</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.x86_64</artifactId>
-                    <version>128.0.24</version>
+                    <version>128.0.25</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.aarch64</artifactId>
-                    <version>128.0.24</version>
+                    <version>128.0.25</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.x86_64</artifactId>
-                    <version>128.0.24</version>
+                    <version>128.0.25</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.aarch64</artifactId>
-                    <version>128.0.24</version>
+                    <version>128.0.25</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.x86_64</artifactId>
-                    <version>128.0.24</version>
+                    <version>128.0.25</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -117,7 +117,7 @@
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium</artifactId>
-                    <version>128.0.24</version>
+                    <version>128.0.25</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -187,6 +187,42 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.linux.x86_64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.macosx.aarch64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.macosx.x86_64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.win32.aarch64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.win32.x86_64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime</artifactId>
+                    <version>1.19.2</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
                     <groupId>com.networknt</groupId>
                     <artifactId>json-schema-validator</artifactId>
                     <version>1.5.9</version>
@@ -202,6 +238,12 @@
                     <groupId>com.servoy</groupId>
                     <artifactId>javax.transaction</artifactId>
                     <version>1.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.servoy</groupId>
+                    <artifactId>onnx-models-bge-small-en</artifactId>
+                    <version>1.5.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -250,6 +292,18 @@
                     <groupId>de.inetsoftware</groupId>
                     <artifactId>jlessc</artifactId>
                     <version>1.14.0.s2</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j-core</artifactId>
+                    <version>1.7.1</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j</artifactId>
+                    <version>1.7.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -504,60 +558,6 @@
                     <version>2.5</version>
                     <type>jar</type>
                 </dependency>
-                <dependency>
-                    <groupId>com.servoy</groupId>
-                    <artifactId>onnx-models-bge-small-en</artifactId>
-                    <version>1.5.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.linux.x86_64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.macosx.aarch64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.macosx.x86_64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.win32.aarch64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.win32.x86_64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>dev.langchain4j</groupId>
-                    <artifactId>langchain4j</artifactId>
-                    <version>1.7.1</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>dev.langchain4j</groupId>
-                    <artifactId>langchain4j-core</artifactId>
-                    <version>1.7.1</version>
-                    <type>jar</type>
-                </dependency>
-               <dependency>
-				    <groupId>com.microsoft.onnxruntime</groupId>
-				    <artifactId>onnxruntime</artifactId>
-				    <version>1.19.2</version>
-				    <type>jar</type>
-				</dependency>
             </dependencies>
             <repositories>
                 <repository>
