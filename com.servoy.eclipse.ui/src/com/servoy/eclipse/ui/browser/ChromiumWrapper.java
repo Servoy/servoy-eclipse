@@ -38,7 +38,7 @@ public class ChromiumWrapper implements IBrowser
 	public ChromiumWrapper(Composite parent)
 	{
 		this.browser = new Browser(parent, SWT.NONE);
-//		this.browser.setData("AUTOSCALE_DISABLED", Boolean.TRUE); // HACK because chromium does not handle DPI zoom well
+		this.browser.setData("AUTOSCALE_DISABLED", Boolean.TRUE); // HACK because chromium does not handle DPI zoom well
 	}
 
 	@Override
