@@ -132,14 +132,22 @@ public class SetupPipelineDetailsPage extends WizardPage
 
 			Composite appSection = createSection(container, "Application Info");
 			namespaceText = createLabeledText(appSection, "Namespace:");
+			namespaceText.setEditable(false);
+
 			if (response.statusCode() == 200)
 			{
 				JSONObject jsonObject = new JSONObject(response.body());
-
 				String namespace = (String)jsonObject.get("namespace");
-				if (namespace != null)
+
+				if (namespace != null && !namespace.trim().isEmpty())
 				{
 					namespaceText.setText(namespace);
+				}
+				else
+				{
+					// Show error message in the wizard page
+					setErrorMessage("Namespace is missing or invalid. Please verify your Servoy Cloud configuration.");
+					setPageComplete(false); // Prevent moving forward
 				}
 			}
 
@@ -170,15 +178,30 @@ public class SetupPipelineDetailsPage extends WizardPage
 
 	private void validatePage()
 	{
-		boolean hasAppName = applicationJobNameText != null && !applicationJobNameText.getText().trim().isEmpty();
+		boolean hasAppName = applicationJobNameText != null &&
+			!applicationJobNameText.getText().trim().isEmpty();
 
 		boolean hasGitInfo = gitUsernameText != null && gitPasswordText != null && gitUrlText != null &&
 			!gitUsernameText.getText().trim().isEmpty() &&
 			!gitUrlText.getText().trim().isEmpty();
 
-		boolean isComplete = hasAppName && hasGitInfo;
+		if (!hasAppName)
+		{
+			setErrorMessage("Application job name is required.");
+			setPageComplete(false);
+			return;
+		}
 
-		setPageComplete(isComplete);
+		if (!hasGitInfo)
+		{
+			setErrorMessage("Git information is incomplete. Please provide username, password/token, and repository URL.");
+			setPageComplete(false);
+			return;
+		}
+
+		// If everything is valid
+		setErrorMessage(null);
+		setPageComplete(true);
 	}
 
 	public String getLoginToken()

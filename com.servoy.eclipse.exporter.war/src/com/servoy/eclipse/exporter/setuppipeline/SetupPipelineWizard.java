@@ -214,8 +214,9 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			String loginToken = detailsPage.getLoginToken();
 
 			final JSONObject setupPipelineJson = PipelineJsonBuilder.build(loginToken,
-				namespace, applicationJobName, "jobName", appUrl, gitUsername, gitPassword, gitUrl, gitInfo.host, servoyVersion, solutionName,
-				includeNonActive, Arrays.asList(selectedNonActiveSolutions), exportModel.getPlugins(), exportModel.getDrivers());
+				namespace, applicationJobName, "jobName", appUrl, gitUsername, gitPassword,
+				gitUrl, gitInfo.host, servoyVersion, solutionName, includeNonActive,
+				Arrays.asList(selectedNonActiveSolutions), exportModel.getPlugins(), exportModel.getDrivers());
 
 			// Create HTTP client and POST request
 			HttpClient client = HttpClient.newHttpClient();
@@ -227,9 +228,10 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 
 			// Send the request
 			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+			int statusCode = response.statusCode();
 
 			// Optional: handle response
-			if (response.statusCode() == 200)
+			if (statusCode == 200)
 			{
 				System.out.println("post response: " + response.body());
 			}
@@ -244,9 +246,12 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			return true;
 
 		}
+
 		catch (final Exception e)
 		{
-			org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Error", "Failed to set up pipeline: " + e.getMessage());
+			org.eclipse.jface.dialogs.MessageDialog.openError(getShell(),
+				"Error",
+				"Failed to set up pipeline: " + e.getMessage());
 			e.printStackTrace();
 			return false;
 		}
@@ -614,18 +619,6 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 		{
 			Files.copy(Paths.get(contextxml), contextXmlTarget, StandardCopyOption.REPLACE_EXISTING);
 		}
-	}
-
-
-	private String buildDefaultContextXml()
-	{
-		StringBuilder sb = new StringBuilder("<Context ");
-		sb.append("antiResourceLocking=\"true\" ");
-		sb.append("clearReferencesStatic=\"true\" ");
-		sb.append("clearReferencesStopThreads=\"true\" ");
-		sb.append("clearReferencesStopTimerThreads=\"true\" ");
-		sb.append(">\n</Context>");
-		return sb.toString();
 	}
 
 	private void copyFaviconFiles(Path sourceDir, Path targetDir) throws IOException

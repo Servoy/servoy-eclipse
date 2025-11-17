@@ -17,10 +17,7 @@ public class SetupPipelineInfoPage extends WizardPage
 	protected SetupPipelineInfoPage(String pageName)
 	{
 		super(pageName);
-
 		setTitle("Wizard Page Title");
-		setDescription("Description of what this page does.");
-
 	}
 
 	@Override
@@ -39,15 +36,10 @@ public class SetupPipelineInfoPage extends WizardPage
 		infoLink.setText(
 			"Before you begin, please make sure you have the following ready:\n\n" +
 				"1. <a href=\"https://docs.servoy.com/reference/servoy-cloud/cloud-control-center/home/setup-namespace\">Namespace Setup Guide</a>\n" +
-				"   - Instructions for creating a namespace and application in Servoy Cloud.\n\n" +
+				"   - Ensure you have created a namespace in Servoy Cloud.\n\n" +
 				"2. Git Repository Access\n" +
 				"   - Git URL, username, and password or personal access token.\n\n" +
-				"3. Workspace Preparation\n" +
-				"   - Create a 'jenkins-custom' folder with:\n" +
-				"     • servoy.properties.template\n" +
-				"     • web.xml, context.xml, log4j.xml, rewrite.config\n" +
-				"     • custom-jars folder with non-default plugins, beans, drivers\n" +
-				"     • Optional: e2e-test-scripts folder for TiNG tests\n\n" +
+				"The wizard will automatically create the required 'jenkins-custom' folder and configuration files for your pipeline.\n\n" +
 				"Once you have these ready, click 'Next' to begin the setup wizard.");
 		infoLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		infoLink.addListener(SWT.Selection, event -> {
