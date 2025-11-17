@@ -1,6 +1,10 @@
 package com.servoy.eclipse.exporter.setuppipeline;
 
 import java.io.File;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Collection;
 
 import org.eclipse.core.resources.IProject;
@@ -16,8 +20,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 
 public class SetupPipelineDetailsPage extends WizardPage
 {
@@ -28,10 +34,17 @@ public class SetupPipelineDetailsPage extends WizardPage
 	private Text gitUsernameText;
 	private Text gitPasswordText;
 	private Text gitUrlText;
+	private Text currentBranch;
+
+	private final String[] loginTokenForJson = new String[1];
 
 	private Font boldFont;
 
 	GitInfo gitInfo;
+
+	private static final String CROWD = System.getProperty("servoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
+		"/servoy-service/rest_ws/api/developer/getApplications?loginToken=";
+
 
 	protected SetupPipelineDetailsPage(String pageName)
 	{
@@ -88,30 +101,71 @@ public class SetupPipelineDetailsPage extends WizardPage
 
 		IProject solutionProject = ServoyModelFinder.getServoyModel().getActiveProject().getProject();
 		String solutionDir = solutionProject.getLocation().toString();
-		File repoRoot = new File(solutionDir).getParentFile(); // <repo_root>
-
+		File repoRoot = new File(solutionDir).getParentFile();
 		gitInfo = getRemoteInfo(repoRoot);
 
-		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(1, false));
-		container.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		ServoyLoginDialog.getLoginToken(loginToken -> {
 
-		Composite appSection = createSection(container, "Application Info");
-		namespaceText = createLabeledText(appSection, "Namespace:");
-		applicationJobNameText = createLabeledText(appSection, "Application Name:");
+			if (loginToken != null)
+			{
 
-		Composite gitSection = createSection(container, "Git Information");
-		gitUsernameText = createLabeledText(gitSection, "Git Username:");
-		gitUsernameText.setText(gitInfo.userName != null ? gitInfo.userName : "");
+				loginTokenForJson[0] = loginToken;
+			}
 
-		gitPasswordText = createLabeledText(gitSection, "Git Password / Token:", true);
+		});
 
-		gitUrlText = createLabeledText(gitSection, "Git Repository URL:");
-		gitUrlText.setText(gitInfo.url != null ? gitInfo.url : "");
+		try
+		{
+			String url = CROWD + loginTokenForJson[0]; // Append token to the URL
+			HttpRequest request = HttpRequest.newBuilder()
+				.uri(URI.create(url))
+				.header("Accept", "application/json")
+				.GET()
+				.build();
 
-		setControl(container);
+			HttpClient client = HttpClient.newHttpClient();
+			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-		validatePage();
+			Composite container = new Composite(parent, SWT.NONE);
+			container.setLayout(new GridLayout(1, false));
+			container.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+
+			Composite appSection = createSection(container, "Application Info");
+			namespaceText = createLabeledText(appSection, "Namespace:");
+			if (response.statusCode() == 200)
+			{
+				JSONObject jsonObject = new JSONObject(response.body());
+
+				String namespace = (String)jsonObject.get("namespace");
+				if (namespace != null)
+				{
+					namespaceText.setText(namespace);
+				}
+			}
+
+			applicationJobNameText = createLabeledText(appSection, "Application Name:");
+
+			Composite gitSection = createSection(container, "Git Information");
+			gitUsernameText = createLabeledText(gitSection, "Git Username:");
+			gitUsernameText.setText(gitInfo.userName != null ? gitInfo.userName : "");
+
+			gitPasswordText = createLabeledText(gitSection, "Git Password / Token:", true);
+
+			gitUrlText = createLabeledText(gitSection, "Git Repository URL:");
+			gitUrlText.setText(gitInfo.url != null ? gitInfo.url : "");
+
+			currentBranch = createLabeledText(gitSection, "Current Branch:");
+			currentBranch.setText(gitInfo.gitBranch != null ? gitInfo.gitBranch : "");
+
+			setControl(container);
+
+			validatePage();
+
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	private void validatePage()
@@ -125,6 +179,11 @@ public class SetupPipelineDetailsPage extends WizardPage
 		boolean isComplete = hasAppName && hasGitInfo;
 
 		setPageComplete(isComplete);
+	}
+
+	public String getLoginToken()
+	{
+		return loginTokenForJson[0];
 	}
 
 	// Getters for retrieving user input
@@ -175,6 +234,8 @@ public class SetupPipelineDetailsPage extends WizardPage
 				.findGitDir()
 				.build();
 
+			String gitBranch = repository.getBranch();
+
 			Collection<RemoteConfig> remotes = RemoteConfig.getAllRemoteConfigs(repository.getConfig());
 			for (RemoteConfig remote : remotes)
 			{
@@ -185,7 +246,7 @@ public class SetupPipelineDetailsPage extends WizardPage
 					String repoName = extractRepoName(uri.getPath());
 					String userName = uri.getUser();
 					String host = uri.getHost();
-					return new GitInfo(url, token, repoName, userName, host);
+					return new GitInfo(url, token, repoName, userName, host, gitBranch);
 				}
 			}
 		}
@@ -193,7 +254,7 @@ public class SetupPipelineDetailsPage extends WizardPage
 		{
 			e.printStackTrace();
 		}
-		return new GitInfo("", "", "", "", "");
+		return new GitInfo("", "", "", "", "", "");
 	}
 
 	private String extractRepoName(String path)
@@ -214,14 +275,16 @@ public class SetupPipelineDetailsPage extends WizardPage
 		String repoName;
 		String userName;
 		String host;
+		String gitBranch;
 
-		GitInfo(String url, String token, String repoName, String userName, String host)
+		GitInfo(String url, String token, String repoName, String userName, String host, String gitBranch)
 		{
 			this.url = url;
 			this.token = token;
 			this.repoName = repoName;
 			this.userName = userName;
 			this.host = host;
+			this.gitBranch = gitBranch;
 		}
 	}
 }

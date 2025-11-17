@@ -211,11 +211,11 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			String servoyVersion = ClientVersion.getPureVersion();
 
 			GitInfo gitInfo = detailsPage.getGitInfo();
+			String loginToken = detailsPage.getLoginToken();
 
-			final JSONObject setupPipelineJson = PipelineJsonBuilder.build(
+			final JSONObject setupPipelineJson = PipelineJsonBuilder.build(loginToken,
 				namespace, applicationJobName, "jobName", appUrl, gitUsername, gitPassword, gitUrl, gitInfo.host, servoyVersion, solutionName,
 				includeNonActive, Arrays.asList(selectedNonActiveSolutions), exportModel.getPlugins(), exportModel.getDrivers());
-
 
 			// Create HTTP client and POST request
 			HttpClient client = HttpClient.newHttpClient();
@@ -235,7 +235,8 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			}
 			else
 			{
-				org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Pipeline Error", "Failed to set up pipeline:\n" + response.body());
+				org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Pipeline Error",
+					"Failed to set up pipeline: Status code" + response.statusCode());
 				return false;
 			}
 
@@ -685,6 +686,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 class PipelineJsonBuilder
 {
 	public static JSONObject build(
+		String loginToken,
 		String namespace,
 		String applicationName,
 		String jobName,
@@ -714,6 +716,7 @@ class PipelineJsonBuilder
 
 		// Main JSON
 		JSONObject setupPipelineJson = new JSONObject();
+		setupPipelineJson.put("loginToken", loginToken);
 		setupPipelineJson.put("namespace", namespace);
 		setupPipelineJson.put("applicationName", applicationName);
 		setupPipelineJson.put("jobName", jobName);
