@@ -99,7 +99,6 @@ import com.servoy.j2db.persistence.ISupportSize;
 import com.servoy.j2db.persistence.ISupportText;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.IValidateName;
-import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -275,8 +274,6 @@ public class ElementFactory
 	public static IPersist copyComponent(ISupportChilds parent, AbstractBase component, int x, int y, int type, Map<String, String> groupMap)
 		throws RepositoryException
 	{
-		String name = (component instanceof ISupportUpdateableName)
-			? createUniqueName(parent, type, ((ISupportUpdateableName)component).getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR) : null;
 		// place copied group
 		String groupId = (component instanceof IFormElement) ? ((IFormElement)component).getGroupID() : null;
 		String newGroupId = null;
@@ -301,7 +298,8 @@ public class ElementFactory
 			}
 		}
 		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-		AbstractBase copy = (AbstractBase)component.cloneObj(parent, true, validator, true, true,
+		boolean changeNames = (component.getAncestor(Form.class) == parent.getAncestor(Form.class));
+		AbstractBase copy = (AbstractBase)component.cloneObj(parent, true, validator, changeNames, changeNames,
 			true /* when component is an override we want a flattened one */);
 		if (copy instanceof BaseComponent && parent instanceof Form && ((Form)parent).getUseCssPosition())
 		{
@@ -326,48 +324,11 @@ public class ElementFactory
 		{
 			CSSPositionUtils.setLocation((ISupportBounds)copy, x, y);
 		}
-		if (name != null)
-		{
-			((ISupportUpdateableName)copy).updateName(validator, name);
-			copy.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
-		}
-		if (name == null && component instanceof LayoutContainer && copy instanceof LayoutContainer)
-		{
-			checkAllElements(component.getAllObjectsAsList(), copy.getAllObjectsAsList(), parent, validator);
-		}
 		if (copy instanceof IFormElement)
 		{
 			((IFormElement)copy).setGroupID(newGroupId);
 		}
 		return copy;
-	}
-
-	private static void checkAllElements(List<IPersist> originalItems, List<IPersist> copyItems, ISupportChilds parent, IValidateName validator)
-		throws RepositoryException
-	{
-		for (int i = 0; i < originalItems.size(); i++)
-		{
-			IPersist originalItem = originalItems.get(i);
-			IPersist copyItem = copyItems.get(i);
-			if (originalItem instanceof WebComponent oWC && copyItem instanceof WebComponent cWC)
-			{
-				updateName(parent, oWC, cWC, validator);
-			}
-			else if (originalItem instanceof LayoutContainer oLC && copyItem instanceof LayoutContainer cLC)
-			{
-				checkAllElements(oLC.getAllObjectsAsList(), cLC.getAllObjectsAsList(), parent, validator);
-			}
-		}
-	}
-
-	private static void updateName(ISupportChilds parent, WebComponent oWC, WebComponent cWC, IValidateName validator) throws RepositoryException
-	{
-		String name = createUniqueName(parent, IRepository.ELEMENTS, oWC.getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR);
-		if (name != null)
-		{
-			cWC.updateName(validator, name);
-			cWC.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
-		}
 	}
 
 	public static IPersist createImage(ISupportFormElements parent, Media media, Point location) throws RepositoryException
