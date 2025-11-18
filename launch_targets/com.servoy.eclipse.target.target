@@ -13,7 +13,7 @@
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://azuredownloads-g3ahgwb5b8bkbxhd.b01.azurefd.net/github-copilot/"/>
-            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.13.0.202511140445"/>
+            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.13.1.202511180215"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/eclipse/updates/4.37/"/>
