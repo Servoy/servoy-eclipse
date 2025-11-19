@@ -22,7 +22,6 @@ public class RulesCache
 	static
 	{
 		autoDiscoverRules();
-		ServoyLog.logInfo("[RuleStore] Rule store initialized with " + rulesCache.size() + " rules");
 	}
 
 	/**
@@ -48,8 +47,7 @@ public class RulesCache
 		}
 		catch (Exception e)
 		{
-			System.err.println("[RuleStore] Failed to load rules: " + e.getMessage());
-			e.printStackTrace();
+			ServoyLog.logError("[RuleStore] Failed to load rules: " + e.getMessage());
 		}
 	}
 
@@ -63,7 +61,7 @@ public class RulesCache
 		{
 			if (is == null)
 			{
-				System.err.println("[RuleStore] Rule file not found: " + resourcePath);
+				ServoyLog.logError("[RuleStore] Rule file not found: " + resourcePath);
 				return;
 			}
 

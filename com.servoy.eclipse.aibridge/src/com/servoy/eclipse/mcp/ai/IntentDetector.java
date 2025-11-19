@@ -24,17 +24,16 @@ public class IntentDetector
 	 */
 	public String detectIntent(String prompt)
 	{
+		String intent = "PASS_THROUGH";
+		ServoyEmbeddingService.SearchResult bestMatch = null;
 		List<ServoyEmbeddingService.SearchResult> results = embeddingService.search(prompt, 1);
-		if (results.isEmpty())
+		if (!results.isEmpty())
 		{
-			return "PASS_THROUGH";
+			bestMatch = results.get(0);
+			intent = bestMatch.metadata.get("intent");
 		}
-
-		ServoyEmbeddingService.SearchResult bestMatch = results.get(0);
-		String intent = bestMatch.metadata.get("intent");
-		ServoyLog.logInfo("[IntentDetector] Detected intent: " + intent + " (score: " + bestMatch.score + ")");
-
-		return intent != null ? intent : "PASS_THROUGH";
+		ServoyLog.logInfo("[IntentDetector] Detected intent: " + intent + " (score: " + (bestMatch != null ? bestMatch.score : 0) + ")");
+		return intent;
 	}
 
 	/**
