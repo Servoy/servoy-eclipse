@@ -783,7 +783,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 				if (model instanceof IBasicWebComponent && FormTemplateGenerator.isWebcomponentBean((IBasicWebComponent)model))
 				{
-					lm = getWebComponentMembers(prefix, (IBasicWebComponent)model);
+					lm = getWebComponentMembers(prefix, (IBasicWebComponent)model, un);
 					key = null; // for now don't cache this.
 				}
 				else if (specificClass == null)
@@ -2611,7 +2611,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray(nodes);
 	}
 
-	private SimpleUserNode[] getWebComponentMembers(String prefix, final IBasicWebComponent webcomponent)
+	private SimpleUserNode[] getWebComponentMembers(String prefix, final IBasicWebComponent webcomponent, SimpleUserNode un)
 	{
 		String prefixForWebComponentMembers = prefix + ".";
 		if (webcomponent == null)
@@ -2647,6 +2647,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				// and skip the dataprovider properties (those are not accesable through scripting)
 				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 				{
+					if (un.getForm().isResponsiveLayout() && name.equals("cssPosition")) continue;
+
 					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS,
 						new WebObjectFieldFeedback(pd, webcomponent.getName(), prefixForWebComponentMembers + name), webcomponent,
 						propertiesIcon));
