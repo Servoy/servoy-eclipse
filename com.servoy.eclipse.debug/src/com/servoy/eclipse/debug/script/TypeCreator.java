@@ -65,6 +65,7 @@ import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.AnyType;
 import org.eclipse.dltk.javascript.typeinfo.model.ArrayType;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
+import org.eclipse.dltk.javascript.typeinfo.model.FunctionType;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
@@ -3142,6 +3143,30 @@ public class TypeCreator extends TypeCache
 						overridden = TypeCreator.clone(member, null);
 						overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
 					}
+				}
+				else if (member.getName().equals("forEach"))
+				{
+					Method clone = (Method)TypeCreator.clone(member, member.getType());
+					Parameter functionParam = clone.getParameterFor(0);
+					FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
+					EList<Parameter> parameters = functionType.getParameters();
+					Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+					param.setName("record");
+					param.setType(getTypeRef(context, Record.JS_RECORD + '<' + config + '>'));
+					parameters.add(param);
+					param = TypeInfoModelFactory.eINSTANCE.createParameter();
+					param.setName("recordIndex");
+					param.setType(getTypeRef(context, "Number"));
+					param.setKind(ParameterKind.OPTIONAL);
+					parameters.add(param);
+					param = TypeInfoModelFactory.eINSTANCE.createParameter();
+					param.setName("foundset");
+					param.setType(getTypeRef(context, fullTypeName));
+					param.setKind(ParameterKind.OPTIONAL);
+					parameters.add(param);
+					functionParam.setType(functionType);
+
+					overridden = clone;
 				}
 				else
 				{
