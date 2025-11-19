@@ -37,38 +37,18 @@ public class Activator extends AbstractUIPlugin
 		super.start(context);
 		plugin = this;
 		String mcpServers = CopilotUi.getPlugin().getPreferenceStore().getString("mcp");
-		boolean addServoyServer = mcpServers == null || mcpServers.trim().length() == 0;
-		JSONObject json = null;
-		if (!addServoyServer)
-		{
-			try
-			{
-				json = new JSONObject(mcpServers);
-				if (!(json.has("servers") && json.getJSONObject("servers").has("servoy")))
-				{
-					addServoyServer = true;
-				}
-			}
-			catch (Exception ex)
-			{
-				// ignore and add servoy server
-				addServoyServer = true;
-			}
-		}
-		if (addServoyServer)
-		{
-			JSONObject servers = null;
-			if (json == null) json = new JSONObject();
-			if (!json.has("servers")) json.put("servers", servers = new JSONObject());
-			else servers = json.getJSONObject("servers");
+		JSONObject json = mcpServers == null || mcpServers.trim().length() == 0 ? null : new JSONObject(mcpServers);
+		JSONObject servers = null;
+		if (json == null) json = new JSONObject();
+		if (!json.has("servers")) json.put("servers", servers = new JSONObject());
+		else servers = json.getJSONObject("servers");
 
-			JSONObject servoy = new JSONObject();
-			servoy.put("url", "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/mcp");
+		JSONObject servoy = new JSONObject();
+		servoy.put("url", "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/mcp");
 
-			servers.put("servoy", servoy);
+		servers.put("servoy", servoy);
 
-			CopilotUi.getPlugin().getPreferenceStore().putValue("mcp", json.toString(1));
-		}
+		CopilotUi.getPlugin().getPreferenceStore().putValue("mcp", json.toString(1));
 
 		// Pre-load embedding service and knowledge base in background
 		initializeEmbeddingService();
