@@ -367,7 +367,7 @@ export class ContextMenuComponent implements OnInit {
 			}
 			let node = this.editorContentService.getContentElement(this.selection[0]);
 			if (!node){
-				node = this.editorContentService.querySelector('[svy-id="' + this.selection[0] + '"]');
+				node = this.editorContentService.querySelector("[svy-id='" + this.selection[0] + "']");
 			}
 			if (node) {
 				if (node.parentElement.closest('.svy-listformcomponent')) return 'disabled';

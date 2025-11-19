@@ -497,6 +497,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     }
 
     private findAncestor(el: HTMLElement, cls: string): Element {
+		if (!el) return null;
         var ancestor = el.closest('.' + cls);
         if (ancestor && ancestor.parentElement && ancestor.parentElement.classList.contains('svy-wrapper')) {
             ancestor = ancestor.parentElement;
