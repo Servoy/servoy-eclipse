@@ -7,11 +7,6 @@
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.09/"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202507231516"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202508121425"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://azuredownloads-g3ahgwb5b8bkbxhd.b01.azurefd.net/github-copilot/"/>
             <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.13.1.202511180215"/>
         </location>
@@ -51,6 +46,11 @@
             <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.25.0.202508011427"/>
             <unit id="org.eclipse.gef.feature.group" version="3.25.0.202508011427"/>
             <unit id="org.eclipse.gef.sdk.feature.group" version="3.25.0.202508011427"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.12/"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202511191606"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202511191608"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
