@@ -204,6 +204,11 @@ public class SetupPipelineDetailsPage extends WizardPage
 		setPageComplete(true);
 	}
 
+	public String getCurrentBranch()
+	{
+		return currentBranch.getText();
+	}
+	
 	public String getLoginToken()
 	{
 		return loginTokenForJson[0];

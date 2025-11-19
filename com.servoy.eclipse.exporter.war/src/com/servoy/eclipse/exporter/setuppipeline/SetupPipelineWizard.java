@@ -212,10 +212,11 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 
 			GitInfo gitInfo = detailsPage.getGitInfo();
 			String loginToken = detailsPage.getLoginToken();
+			String currentBranch = detailsPage.getCurrentBranch();
 
 			final JSONObject setupPipelineJson = PipelineJsonBuilder.build(
 				namespace, applicationJobName, "jobName", appUrl, gitUsername, gitPassword,
-				gitUrl, gitInfo.host, servoyVersion, solutionName, includeNonActive,
+				gitUrl, gitInfo.host, currentBranch, servoyVersion, solutionName, includeNonActive,
 				Arrays.asList(selectedNonActiveSolutions), exportModel.getPlugins(), exportModel.getDrivers());
 
 			// Create HTTP client and POST request
@@ -688,6 +689,7 @@ class PipelineJsonBuilder
 		String gitPassword,
 		String gitUrl,
 		String repositoryHost,
+		String currentBranch,
 		String servoyVersion,
 		String activeSolutionName,
 		boolean includeNonActive,
@@ -716,6 +718,7 @@ class PipelineJsonBuilder
 		setupPipelineJson.put("gitUsername", gitUsername);
 		setupPipelineJson.put("gitPassword", gitPassword);
 		setupPipelineJson.put("gitUrl", gitUrl);
+		setupPipelineJson.put("currentBranch", currentBranch);
 		setupPipelineJson.put("exporterSettings", exporterSettings);
 		setupPipelineJson.put("repositoryHost", repositoryHost); // Example additional setting
 
