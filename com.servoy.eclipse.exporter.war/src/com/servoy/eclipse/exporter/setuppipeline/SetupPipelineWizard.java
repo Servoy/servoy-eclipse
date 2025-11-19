@@ -213,7 +213,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			GitInfo gitInfo = detailsPage.getGitInfo();
 			String loginToken = detailsPage.getLoginToken();
 
-			final JSONObject setupPipelineJson = PipelineJsonBuilder.build(loginToken,
+			final JSONObject setupPipelineJson = PipelineJsonBuilder.build(
 				namespace, applicationJobName, "jobName", appUrl, gitUsername, gitPassword,
 				gitUrl, gitInfo.host, servoyVersion, solutionName, includeNonActive,
 				Arrays.asList(selectedNonActiveSolutions), exportModel.getPlugins(), exportModel.getDrivers());
@@ -223,6 +223,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			HttpRequest request = HttpRequest.newBuilder()
 				.uri(URI.create(SETUP_PIPELINE_URL))
 				.header("Content-Type", "application/json")
+				.header("Authorization", "Bearer " + loginToken)
 				.POST(HttpRequest.BodyPublishers.ofString(setupPipelineJson.toString()))
 				.build();
 
@@ -679,7 +680,6 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 class PipelineJsonBuilder
 {
 	public static JSONObject build(
-		String loginToken,
 		String namespace,
 		String applicationName,
 		String jobName,
@@ -709,7 +709,6 @@ class PipelineJsonBuilder
 
 		// Main JSON
 		JSONObject setupPipelineJson = new JSONObject();
-		setupPipelineJson.put("loginToken", loginToken);
 		setupPipelineJson.put("namespace", namespace);
 		setupPipelineJson.put("applicationName", applicationName);
 		setupPipelineJson.put("jobName", jobName);
