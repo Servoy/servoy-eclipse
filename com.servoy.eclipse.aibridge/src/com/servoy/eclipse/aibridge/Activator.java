@@ -37,7 +37,18 @@ public class Activator extends AbstractUIPlugin
 		super.start(context);
 		plugin = this;
 		String mcpServers = CopilotUi.getPlugin().getPreferenceStore().getString("mcp");
-		JSONObject json = mcpServers == null || mcpServers.trim().length() == 0 ? null : new JSONObject(mcpServers);
+		JSONObject json = null;
+		if (mcpServers != null && mcpServers.isBlank())
+		{
+			try
+			{
+				json = new JSONObject(mcpServers);
+			}
+			catch (Exception e)
+			{
+				// ignore invalid json
+			}
+		}
 		JSONObject servers = null;
 		if (json == null) json = new JSONObject();
 		if (!json.has("servers")) json.put("servers", servers = new JSONObject());
