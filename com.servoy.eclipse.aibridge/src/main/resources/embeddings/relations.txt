@@ -142,3 +142,137 @@ I need to see relation
 Can you show relation
 Display the relation for me
 Open up the relation
+delete the old_orders_relation
+remove the test_relation
+delete relation named temp_rel
+remove the unused_relation
+delete the prototype_relation
+I want to delete the sample_relation
+remove relation called deprecated_rel
+delete relation between old_table and other_table
+remove customer_orders relation
+delete the relation called legacy_link
+I need to remove the test_customer_relation
+get rid of the old_products_relation
+delete relation named obsolete_link
+remove the relation orders_old
+show me all relations
+list all relations
+what relations exist
+display all relations in the solution
+show relations
+I want to see all relations
+list relations in the project
+what relations are defined
+show me the relations
+display relations
+can you list the relations
+show all defined relations
+what relations do I have
+display all my relations
+list existing relations
+show relations in the solution
+what relations are there
+display all defined relations
+I need to see all relations
+can you show me the relations
+list out all relations
+what database relations exist
+show me database relations
+I want to see which relations are defined
+what tables are available in example_data
+show me tables in the production database
+list tables in the CRM server
+what tables exist in database server sales_db
+show database tables in inventory_db
+I want to see available tables in example_data
+what columns does the customers table have
+show me columns in the products table
+what fields are in the orders table
+display columns for the employees table
+what columns exist in the categories table
+I need to see the structure of the suppliers table
+show me the customers table structure
+what fields does the invoices table have
+display the schema for the products table
+list columns in the contacts table
+show me foreign keys in customers table
+what foreign keys does orders table have
+display FK relationships for products
+I need to see foreign key constraints
+show me which tables reference this one
+what tables have foreign keys to customers
+display incoming foreign keys
+show me outgoing foreign keys
+what are the FK relationships
+I want to see table relationships
+create relation between orders and customers
+create relation from products to categories
+create relation linking invoices to customers
+I need to create relation from employees to departments
+create relation between projects and tasks
+create relation connecting suppliers with products
+create relation from customers to addresses
+create relation between users and roles
+I want to create relation linking accounts to transactions
+create relation between inventory and warehouses
+create relation from shipments to carriers
+create relation between contracts and clients
+create relation connecting assets to locations
+I need relation from sales to salespersons
+create relation between payments and invoices
+create relation linking reservations to customers
+create relation from tickets to events
+create relation between courses and students
+I want to add relation from companies to contacts
+open relation orders_to_customers
+edit relation products_categories
+open relation called order_details
+view relation employee_department
+show relation product_supplier
+display relation user_roles
+open relation sales_customers
+I want to see relation between projects and tasks
+delete relation orders_to_customers_old
+remove relation test_products
+delete relation legacy_invoices
+I need to delete relation old_employees
+remove relation deprecated_orders
+list all my relations
+show all relations in the project
+what relations do we have
+display the relations
+create a relation orders_to_customers using customer_id
+make a relation products_to_categories with category_id field
+add a relation invoices_to_customers on customer_id column
+I need a relation from orders to products using product_id
+create relation employees_to_departments via department_id
+link orders to customers by customer_id
+relate products to suppliers using supplier_id
+connect invoices to items via item_id
+join customers and addresses on address_id
+associate projects with tasks using task_id
+create relation with order_id as foreign key
+make relation using customer_id for linking
+add relation based on product_id column
+I need relation on employee_id field
+create relation where department_id matches
+link using category_id as key
+relate via supplier_id field
+connect with invoice_id reference
+join on address_id column
+create a sorted relation from products
+I need relation with sorted results
+make relation with ascending sort
+add relation sorted alphabetically
+create relation with DESC sort order
+I want relation sorted by name
+create a relation from orders to customers in example_data server
+make relation using products table in production database
+add relation from employees in HR database
+I need relation in the CRM server
+create relation using main_db server
+link tables in inventory database
+create relation on test_server
+make relation from accounting database
+add relation in sales_db server

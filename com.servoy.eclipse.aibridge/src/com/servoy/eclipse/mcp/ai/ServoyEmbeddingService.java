@@ -133,7 +133,7 @@ public class ServoyEmbeddingService
 				filename = filename.trim();
 				if (!filename.isEmpty() && !filename.startsWith("#") && filename.endsWith(".txt"))
 				{
-					// Extract intent from filename: relation_create.txt -> RELATION_CREATE
+					// Extract intent from filename: relations.txt -> RELATIONS, valuelists.txt -> VALUELISTS
 					String intentKey = filename.substring(0, filename.lastIndexOf('.')).toUpperCase();
 
 					// Load examples from file
