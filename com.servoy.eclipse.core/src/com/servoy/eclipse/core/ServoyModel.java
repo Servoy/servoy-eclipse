@@ -3882,6 +3882,11 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	private void readWorkingSetsFromResourcesProject()
 	{
+		if (workingSetChangeListener == null)
+		{
+			ServoyLog.logError("Cannot read working sets from resources project, working set change listener is null");
+			return;
+		}
 		PlatformUI.getWorkbench().getWorkingSetManager().removePropertyChangeListener(workingSetChangeListener);
 		if (activeResourcesProject != null)
 		{
