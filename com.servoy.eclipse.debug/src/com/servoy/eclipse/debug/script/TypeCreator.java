@@ -252,11 +252,13 @@ import com.servoy.j2db.querybuilder.impl.QBParameter;
 import com.servoy.j2db.querybuilder.impl.QBParameters;
 import com.servoy.j2db.querybuilder.impl.QBPart;
 import com.servoy.j2db.querybuilder.impl.QBResult;
+import com.servoy.j2db.querybuilder.impl.QBScoreColumn;
 import com.servoy.j2db.querybuilder.impl.QBSelect;
 import com.servoy.j2db.querybuilder.impl.QBSort;
 import com.servoy.j2db.querybuilder.impl.QBSorts;
 import com.servoy.j2db.querybuilder.impl.QBTableClause;
 import com.servoy.j2db.querybuilder.impl.QBTextColumn;
+import com.servoy.j2db.querybuilder.impl.QBVectorColumn;
 import com.servoy.j2db.querybuilder.impl.QBWhereCondition;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
@@ -534,6 +536,8 @@ public class TypeCreator extends TypeCache
 		addQueryBuilderScopeType(QBMediaColumn.class);
 		addQueryBuilderScopeType(QBTextColumn.class);
 		addQueryBuilderScopeType(QBArrayColumn.class);
+		addQueryBuilderScopeType(QBVectorColumn.class);
+		addQueryBuilderScopeType(QBScoreColumn.class);
 		addQueryBuilderScopeType(QBCondition.class);
 		addQueryBuilderScopeType(QBFactory.class);
 		addQueryBuilderScopeType(QBGroupBy.class);
@@ -3955,6 +3959,10 @@ public class TypeCreator extends TypeCache
 
 		private static Class< ? > determineColumnClass(Column column)
 		{
+			if (column.hasFlag(IBaseColumn.VECTOR_COLUMN))
+			{
+				return QBVectorColumn.class;
+			}
 			switch (column.getDataProviderType())
 			{
 				case IColumnTypeConstants.DATETIME :
