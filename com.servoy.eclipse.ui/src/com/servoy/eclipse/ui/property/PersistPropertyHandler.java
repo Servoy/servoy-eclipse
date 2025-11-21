@@ -985,7 +985,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 	 * Looks in case of IFormElement persists for legacy java interface javadoc or a .spec file with "doc" tag on that property or doc key on the handler.<br/>
 	 * What it finds it provides either to the propertyControllerThatMightNeedTooltip if given or it sets it as string into setTooltipOnTagsJSONObjectHack.
 	 */
-	private void applyTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
+	public static void applyTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
 		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip)
 	{
 		// it's not always a trivial thing to compute it for all properties so if possible give a tooltip provider - not a string
@@ -1012,7 +1012,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 	}
 
 
-	private String getTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
+	private static String getTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
 		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip)
 	{
 		String toolTip = null;

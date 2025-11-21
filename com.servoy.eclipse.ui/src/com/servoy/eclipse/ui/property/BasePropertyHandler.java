@@ -131,6 +131,7 @@ public class BasePropertyHandler implements IPropertyHandler
 
 		String name = propertyDescriptor.getName();
 
+		PersistPropertyHandler.applyTooltipFromJavadocOrSpec(name, persistContext.getPersist(), true, null);
 		// name based
 		if (name.equals("anchors"))
 		{
