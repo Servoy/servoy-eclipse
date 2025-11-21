@@ -9,9 +9,6 @@ import org.apache.tomcat.starter.ServletInstance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servoy.eclipse.mcp.ai.PromptEnricher;
-import com.servoy.eclipse.mcp.handlers.CommonToolHandler;
-import com.servoy.eclipse.mcp.handlers.RelationToolHandler;
-import com.servoy.eclipse.mcp.handlers.ValueListToolHandler;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
@@ -60,14 +57,8 @@ public class McpServletProvider implements IServicesProvider
 			.build();
 		server.addTool(processPromptSpec);
 
-		// Register value list tools
-		ValueListToolHandler.registerTools(server);
+		registerHandlers(server);
 
-		// Register relation tools
-		RelationToolHandler.registerTools(server);
-
-		// Register common tools
-		CommonToolHandler.registerTools(server);
 
 		return Set.of(new ServletInstance(transportProvider, "/mcp"));
 	}
@@ -116,6 +107,27 @@ public class McpServletProvider implements IServicesProvider
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent("PASS_THROUGH")))
 				.build();
+		}
+	}
+
+	/**
+	 * Auto-register all handlers from the registry.
+	 */
+	private void registerHandlers(McpSyncServer server)
+	{
+		IToolHandler[] handlers = ToolHandlerRegistry.getHandlers();
+
+		for (IToolHandler handler : handlers)
+		{
+			try
+			{
+				handler.registerTools(server);
+				ServoyLog.logInfo("[MCP] Registered handler: " + handler.getHandlerName());
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("[MCP] Failed to register handler: " + handler.getHandlerName(), e);
+			}
 		}
 	}
 

@@ -50,9 +50,14 @@ Each **high-level intent** (e.g., RELATIONS, VALUE_LISTS) has:
 - **Multiple MCP tools** that execute specific operations
 
 **Example - RELATIONS Intent:**
-- Training file: `relations.txt` (144 sample prompts)
+- Training file: `relations.txt` (~280 sample prompts)
 - Rules file: `relations.md` (comprehensive workflow guide)
 - Tools: `openRelation`, `deleteRelation`, `listRelations`, `queryDatabaseSchema`
+
+**Example - VALUELISTS Intent:**
+- Training file: `valuelists.txt` (~270 sample prompts)
+- Rules file: `valuelists.md` (comprehensive workflow guide)
+- Tools: `openValueList`, `deleteValueList`, `listValueLists`, `queryDatabaseSchema`, `getTableColumns` (shared)
 
 ---
 
@@ -62,13 +67,13 @@ Each **high-level intent** (e.g., RELATIONS, VALUE_LISTS) has:
 
 **Location:** `src/com/servoy/eclipse/mcp/McpServletProvider.java`
 
-**Purpose:** Hosts the MCP server that exposes tools to the Copilot LLM.
+**Purpose:** Main orchestrator that hosts the MCP server and delegates tool registration to handler classes.
 
 **Key Responsibilities:**
-- Registers MCP tools (`processPrompt`, `openRelation`, `deleteRelation`, etc.)
-- Handles tool invocations from the LLM
-- Executes Eclipse operations (opens editors, creates relations, etc.)
-- Returns results to the LLM
+- Initializes MCP server with capabilities
+- Registers `processPrompt` tool for AI-powered intent detection
+- Delegates domain-specific tool registration to handler classes
+- Manages prompt enrichment through PromptEnricher
 
 **Important Implementation Details:**
 
@@ -76,82 +81,381 @@ Each **high-level intent** (e.g., RELATIONS, VALUE_LISTS) has:
 // Singleton pattern for PromptEnricher to avoid reloading models
 final PromptEnricher enricher = new PromptEnricher();
 
-// Tool registration
-Tool processPromptTool = McpSchema.Tool.builder()
-    .inputSchema(new JsonSchema("object", null, null, null, null, null))
-    .name("processPrompt")
-    .description("Process user prompts for Servoy operations...")
-    .build();
+@Override
+public Set<ServletInstance> getServletInstances(String context)
+{
+    // Initialize MCP server
+    McpSyncServer server = McpServer.sync(transportProvider)...build();
 
-server.addTool(SyncToolSpecification.builder()
-    .tool(processPromptTool)
-    .callHandler(this::handleProcessPrompt)
-    .build());
+    // Register processPrompt tool (AI-powered intent detection)
+    server.addTool(processPromptSpec);
+
+    // AUTO-REGISTRATION: Automatically discover and register all tool handlers
+    registerHandlers(server);
+
+    return Set.of(new ServletInstance(transportProvider, "/mcp"));
+}
+
+private void registerHandlers(McpSyncServer server)
+{
+    // Get all registered handlers from ToolHandlerRegistry
+    IToolHandler[] handlers = ToolHandlerRegistry.getHandlers();
+    
+    // Register each handler
+    for (IToolHandler handler : handlers)
+    {
+        try
+        {
+            handler.registerTools(server);
+            ServoyLog.logInfo("[MCP] Registered handler: " + handler.getHandlerName());
+        }
+        catch (Exception e)
+        {
+            ServoyLog.logError("[MCP] Failed to register handler: " + handler.getHandlerName(), e);
+        }
+    }
+}
 ```
 
 **Key Methods:**
-- `handleProcessPrompt()` - Routes to PromptEnricher for intent detection
-- `handleOpenRelation()` - Creates/opens relations
-- `handleDeleteRelation()` - Deletes relations
-- `handleListRelations()` - Lists all relations in solution
-- `handleQueryDatabaseSchema()` - Queries database servers for tables and FKs
-- `handleOpenValueList()` - Creates/opens value lists
+- `handleProcessPrompt()` - Routes to PromptEnricher for intent detection and prompt enrichment
+- `registerHandlers()` - Auto-discovers and registers all tool handlers from `ToolHandlerRegistry`
 
 ---
 
-### 2. Prompt Enricher (`PromptEnricher.java`)
+### 1a. Tool Handlers (Handler Classes)
 
-**Location:** `src/com/servoy/eclipse/mcp/ai/PromptEnricher.java`
+**Location:** `src/com/servoy/eclipse/mcp/handlers/`
 
-**Purpose:** AI-powered intent detection and prompt enrichment using ONNX embeddings.
+**Purpose:** Domain-specific tool registration and handling, organized by intent area.
+
+**Architecture Pattern:**
+- Each handler class implements `IToolHandler` interface
+- Each handler manages tools for a specific domain (Relations, ValueLists, Common)
+- **Map-based tool registration** eliminates boilerplate
+- Instance methods (not static) for clean object-oriented design
+- Clean separation of concerns
+
+**Handler Classes:**
+
+#### RelationToolHandler.java
+- `openRelation` - Creates/opens relations
+- `deleteRelation` - Deletes relations
+- `listRelations` - Lists all relations in solution
+
+#### ValueListToolHandler.java
+- `openValueList` - Creates/opens value lists (custom or database-based)
+- `deleteValueList` - Deletes value lists
+- `listValueLists` - Lists all value lists in solution
+
+#### CommonToolHandler.java
+- `queryDatabaseSchema` - Queries database servers for tables and FKs
+- `getTableColumns` - Retrieves detailed column information for specific table
+
+**New Handler Structure (Map-Based Registration):**
+
+```java
+public class RelationToolHandler implements IToolHandler
+{
+    @Override
+    public String getHandlerName()
+    {
+        return "RelationToolHandler";
+    }
+
+    // All tools defined in one place
+    private Map<String, ToolHandlerRegistry.ToolDefinition> getToolDefinitions()
+    {
+        Map<String, ToolHandlerRegistry.ToolDefinition> tools = new LinkedHashMap<>();
+        
+        tools.put("openRelation", new ToolHandlerRegistry.ToolDefinition(
+            "Opens an existing database relation or creates a new relation...",
+            this::handleOpenRelation));
+        
+        tools.put("deleteRelation", new ToolHandlerRegistry.ToolDefinition(
+            "Deletes an existing database relation...",
+            this::handleDeleteRelation));
+        
+        tools.put("listRelations", new ToolHandlerRegistry.ToolDefinition(
+            "Retrieves a list of all existing database relations...",
+            this::handleListRelations));
+        
+        return tools;
+    }
+
+    @Override
+    public void registerTools(McpSyncServer server)
+    {
+        // Generic iteration - same for all handlers
+        for (Map.Entry<String, ToolHandlerRegistry.ToolDefinition> entry : getToolDefinitions().entrySet())
+        {
+            ToolHandlerRegistry.registerTool(server, entry.getKey(), 
+                entry.getValue().description, entry.getValue().handler);
+        }
+    }
+
+    // Handler methods (implementation)
+    private McpSchema.CallToolResult handleOpenRelation(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+    {
+        // Implementation
+    }
+}
+```
+
+**Key Benefits:**
+- ✅ **No boilerplate** - `registerXxx()` methods eliminated
+- ✅ **All tool metadata in one place** - `getToolDefinitions()` method
+- ✅ **Uniform pattern** - All handlers use same registration logic
+- ✅ **Easy to add tools** - Just add one entry to the map
+- ✅ **Type-safe** - No reflection, compiler catches errors
+
+**Logging Standards:**
+- Use `ServoyLog.logInfo()` for essential operations (create, delete)
+- Use `ServoyLog.logError()` for exceptions with stack traces
+- Prefix: `[HandlerName]` (e.g., `[RelationToolHandler]`, `[ValueListToolHandler]`)
+- No verbose System.out/System.err output
+
+---
+
+### 1b. ToolHandlerRegistry (Central Registry & Utilities)
+
+**Location:** `src/com/servoy/eclipse/mcp/ToolHandlerRegistry.java`
+
+**Purpose:** Central registry for all tool handlers and shared utilities for tool registration.
+
+**Key Components:**
+
+#### Handler Registry
+
+```java
+public static IToolHandler[] getHandlers()
+{
+    return new IToolHandler[] {
+        new RelationToolHandler(),
+        new ValueListToolHandler(),
+        new CommonToolHandler()
+        // ADD NEW HANDLERS HERE - just add one line
+    };
+}
+```
+
+**To add a new handler:**
+1. Create handler class implementing `IToolHandler`
+2. Add one line to the array above
+3. Done! Zero changes to `McpServletProvider`
+
+#### ToolDefinition Helper Class
+
+```java
+public static class ToolDefinition
+{
+    public final String description;
+    public final BiFunction<McpSyncServerExchange, CallToolRequest, CallToolResult> handler;
+    
+    public ToolDefinition(String description, BiFunction<...> handler)
+    {
+        this.description = description;
+        this.handler = handler;
+    }
+}
+```
+
+**Purpose:** Pairs a tool description with its handler method reference for map-based registration.
+
+#### registerTool() Utility Method
+
+```java
+public static void registerTool(
+    McpSyncServer server,
+    String toolName,
+    String description,
+    BiFunction<McpSyncServerExchange, CallToolRequest, CallToolResult> handler)
+{
+    Tool tool = McpSchema.Tool.builder()
+        .inputSchema(new JsonSchema("object", null, null, null, null, null))
+        .name(toolName)
+        .description(description)
+        .build();
+
+    SyncToolSpecification spec = SyncToolSpecification.builder()
+        .tool(tool)
+        .callHandler(handler)
+        .build();
+
+    server.addTool(spec);
+}
+```
+
+**Purpose:** Eliminates boilerplate code in handler classes. All handlers use this utility to register tools.
+
+**Benefits:**
+- ✅ Single source of truth for all handlers
+- ✅ Shared utilities reduce code duplication
+- ✅ Easy to extend - add handler in one place
+
+---
+
+### 2. AI Components (Intent Detection & Prompt Enrichment)
+
+**Location:** `src/com/servoy/eclipse/mcp/ai/`
+
+The AI pipeline consists of three main components working together:
+
+---
+
+#### 2a. PromptEnricher.java
+
+**Purpose:** Orchestrator for intent detection and prompt enrichment.
 
 **Key Responsibilities:**
-- Loads ONNX embedding model (`onnx_model_mac.onnx`)
-- Generates embeddings for user prompts
-- Compares against pre-computed training embeddings
-- Finds best matching intent using cosine similarity
-- Enriches prompt with intent-specific rules
+- Coordinates between IntentDetector and RulesCache
+- Enriches prompts with context-specific rules
 - Performs template variable substitution
+- Gathers Servoy context (project name, active solution)
 
-**Important Implementation Details:**
+**Implementation:**
 
 ```java
 public class PromptEnricher
 {
-    private OrtEnvironment env;
-    private OrtSession session;
-    private Map<String, List<float[]>> intentEmbeddings;
-    private static final double SIMILARITY_THRESHOLD = 0.5;
+    private final IntentDetector intentDetector;
 
-    public String processPrompt(String userPrompt)
+    public String processPrompt(String prompt)
     {
-        // 1. Generate embedding for user prompt
-        float[] promptEmbedding = generateEmbedding(userPrompt);
+        // 1. Detect intent using embedding similarity
+        String intent = intentDetector.detectIntent(prompt);
 
-        // 2. Find best matching intent
-        String detectedIntent = detectIntent(promptEmbedding);
-
-        // 3. If no match, return PASS_THROUGH
-        if (detectedIntent == null) {
+        // 2. Check if Servoy-related
+        if (!intentDetector.isServoyIntent(intent)) {
             return "PASS_THROUGH";
         }
 
-        // 4. Load rules for detected intent
-        String rules = loadRulesForIntent(detectedIntent);
+        // 3. Enrich with rules
+        return enrichPrompt(intent, prompt);
+    }
 
-        // 5. Substitute template variables
-        String enrichedRules = substituteTemplateVariables(rules);
+    private String enrichPrompt(String intent, String prompt)
+    {
+        // Load rules for detected intent
+        String rules = RulesCache.getRules(intent);
 
-        // 6. Return enriched prompt
-        return "INTENT: " + detectedIntent + "\n\n" + enrichedRules;
+        // Gather context
+        String context = gatherServoyContext();
+        String projectName = getProjectName();
+
+        // Substitute template variables
+        String processedRules = rules.replace("{{PROJECT_NAME}}", projectName);
+
+        // Return enriched prompt
+        return context + "\n\nUSER REQUEST:\n" + prompt + "\n\n" + processedRules;
     }
 }
 ```
 
 **Template Variable Substitution:**
-
-Current template variables:
 - `{{PROJECT_NAME}}` → Active Servoy project name
+
+---
+
+#### 2b. IntentDetector.java
+
+**Purpose:** Semantic intent detection using ONNX embeddings.
+
+**Key Responsibilities:**
+- Uses ServoyEmbeddingService for embedding generation
+- Performs semantic similarity search
+- Returns best matching intent or PASS_THROUGH
+
+**Implementation:**
+
+```java
+public class IntentDetector
+{
+    private final ServoyEmbeddingService embeddingService;
+
+    public String detectIntent(String prompt)
+    {
+        // Search for best matching intent using embeddings
+        List<SearchResult> results = embeddingService.search(prompt, 1);
+
+        if (!results.isEmpty()) {
+            SearchResult bestMatch = results.get(0);
+            String intent = bestMatch.metadata.get("intent");
+            ServoyLog.logInfo("[IntentDetector] Detected intent: " + intent +
+                            " (score: " + bestMatch.score + ")");
+            return intent;
+        }
+
+        return "PASS_THROUGH";
+    }
+
+    public boolean isServoyIntent(String intent)
+    {
+        return !intent.equals("PASS_THROUGH");
+    }
+}
+```
+
+---
+
+#### 2c. ServoyEmbeddingService.java
+
+**Purpose:** ONNX-based embedding generation and semantic search engine.
+
+**Key Responsibilities:**
+- Loads ONNX model (bge-small-en-v1.5) and tokenizer from OSGi bundle
+- Generates embeddings for user prompts
+- Maintains in-memory knowledge base of training samples
+- Performs cosine similarity search
+- Singleton pattern for efficient resource usage
+
+**Implementation:**
+
+```java
+public class ServoyEmbeddingService
+{
+    private static ServoyEmbeddingService instance;
+    private OrtEnvironment env;
+    private OrtSession modelSession;
+    private OrtSession tokenizerSession;
+    private List<EmbeddingEntry> knowledgeBase;
+
+    private void initializeKnowledgeBase()
+    {
+        // Load training samples from embeddings.list
+        // For each .txt file (e.g., relations.txt):
+        String intentKey = filename.substring(0, filename.lastIndexOf('.')).toUpperCase();
+        // e.g., relations.txt -> RELATIONS
+
+        // Load examples and generate embeddings
+        loadEmbeddingsFromFile("/main/resources/embeddings/" + filename, intentKey);
+    }
+
+    public List<SearchResult> search(String query, int topK)
+    {
+        // 1. Generate embedding for query
+        float[] queryEmbedding = generateEmbedding(query);
+
+        // 2. Calculate cosine similarity with all training samples
+        List<SearchResult> results = new ArrayList<>();
+        for (EmbeddingEntry entry : knowledgeBase) {
+            double similarity = cosineSimilarity(queryEmbedding, entry.embedding);
+            results.add(new SearchResult(entry.text, similarity, entry.metadata));
+        }
+
+        // 3. Sort by similarity (descending) and return top K
+        results.sort((a, b) -> Double.compare(b.score, a.score));
+        return results.subList(0, Math.min(topK, results.size()));
+    }
+}
+```
+
+**Key Features:**
+- Uses ONNX Runtime for cross-platform inference
+- Loads model from `onnx-models-bge-small-en` OSGi bundle
+- Generates 384-dimensional embeddings
+- Singleton pattern ensures model loaded only once
+- In-memory knowledge base for fast search
 
 **Cosine Similarity Formula:**
 
@@ -162,54 +466,133 @@ Where:
 - A = user prompt embedding
 - B = training sample embedding
 - Result ranges from -1 (opposite) to 1 (identical)
-- Threshold = 0.5 for matching
+- Higher score = better match
 ```
+
+---
+
+#### 2d. RulesCache.java
+
+**Purpose:** Rules file loader and caching system.
+
+**Key Responsibilities:**
+- Auto-discovers `.md` files from `rules.list`
+- Loads rule content at startup
+- Caches rules in memory for fast access
+- Provides exact-match rule lookup by intent
+
+**Implementation:**
+
+```java
+public class RulesCache
+{
+    private static final Map<String, String> rulesCache = new HashMap<>();
+
+    static {
+        autoDiscoverRules();
+    }
+
+    private static void autoDiscoverRules()
+    {
+        // Read rules.list manifest
+        // For each .md file (e.g., relations.md):
+        String baseName = filename.substring(0, filename.lastIndexOf('.'));
+        String intentKey = baseName.toUpperCase();
+        // e.g., relations.md -> RELATIONS
+
+        loadRule(intentKey, "/main/resources/rules/" + filename);
+    }
+
+    public static String getRules(String intent)
+    {
+        // Exact match lookup
+        String rules = rulesCache.get(intent);
+        return rules != null ? rules : "";
+    }
+}
+```
+
+**Important:** Intent names must match exactly:
+- `relations.txt` → intent `RELATIONS` → rule key `RELATIONS` → from `relations.md`
+- `valuelists.txt` → intent `VALUELISTS` → rule key `VALUELISTS` → from `valuelists.md`
 
 ---
 
 ### 3. Intent Detection Files
 
-**Location:** `src/main/resources/intents/`
+**Location:** `src/main/resources/embeddings/`
 
 #### Training Files (`.txt`)
 
 **Format:** One prompt per line
 
 **Purpose:**
-- Pre-computed embeddings stored in `.npy` files
-- Used for cosine similarity matching at runtime
+- Training samples for intent classification
+- Loaded at startup by ServoyEmbeddingService
+- Embeddings generated on-the-fly using ONNX model
 
 **Example - `relations.txt`:**
 ```
-I need a relation in my database
 Create a relation between orders and customers
-Link the products table to categories
+Make a relation from products to categories
+Add a relation linking invoices to customers
+I need to create a relation from employees to departments
+Open the orders_to_customers relation
+Delete old_relation
 Show me all relations
-Delete the old_relation
-What foreign keys exist in the customers table?
+...
+```
+
+**Example - `valuelists.txt`:**
+```
+create a value list with Active, Inactive, Pending
+create value list called status with Active and Inactive
+I need a value list with Low, Medium, High
+make a value list from customers table
+value list from database table countries
 ...
 ```
 
 **Naming Convention:**
 - Intent name in lowercase
-- Snake_case for multi-word intents
-- Example: `relations.txt`, `value_lists.txt`
+- Plural form for domain intents (relations, valuelists)
+- Must match exactly with rule file name (without extension)
+- Example: `relations.txt` → intent `RELATIONS` → matches `relations.md`
+- Example: `valuelists.txt` → intent `VALUELISTS` → matches `valuelists.md`
 
-#### Embedding Files (`.npy`)
+**Registry File:** `embeddings.list`
+- Contains list of all `.txt` files to load
+- Read by ServoyEmbeddingService at startup
+- Format: one filename per line
 
-**Generated by:** External Python script (fine-tuning dataset generator)
-
-**Format:** NumPy array of float32 embeddings
-
-**Purpose:** Pre-computed embeddings for fast runtime lookup
-
-**Example:** `relations.npy` contains embeddings for all 144 prompts in `relations.txt`
+**Current Intent Files:**
+- `relations.txt` (~280 training samples)
+- `valuelists.txt` (~270 training samples)
+- `run_test_embeddings.txt` (test/development samples)
 
 ---
 
 ### 4. Rules Files (`.md`)
 
 **Location:** `src/main/resources/rules/`
+
+**Purpose:** Comprehensive workflow guide for the LLM after intent is detected
+
+**Registry File:** `rules.list`
+- Contains list of all `.md` files to load
+- Read by RulesCache at startup
+- Format: one filename per line
+
+**Current Rule Files:**
+- `relations.md` - Comprehensive guide for relation operations
+- `valuelists.md` - Comprehensive guide for value list operations
+- `run_test_embeddings.md` (test/development rules)
+
+**Intent Matching:**
+- Rule file basename (without `.md`) must match intent name from embeddings
+- Example: `RELATIONS` intent → loads `RELATIONS` rule key → from `relations.md`
+- Example: `VALUELISTS` intent → loads `VALUELISTS` rule key → from `valuelists.md`
+- Matching is case-insensitive and exact
 
 **Purpose:** Comprehensive workflow guide for the LLM after intent is detected
 
@@ -338,28 +721,32 @@ private McpSchema.CallToolResult handleProcessPrompt(Object exchange, McpSchema.
 #### 4. PromptEnricher Detects Intent
 
 ```java
-// Generate embedding for user prompt
-float[] promptEmbedding = generateEmbedding("I need a relation between orders and customers");
+// IntentDetector uses ServoyEmbeddingService
+List<SearchResult> results = embeddingService.search("I need a relation between orders and customers", 1);
 
-// Compare against all intent embeddings
-// relations.npy: similarity = 0.87 ✓ (above threshold)
-// value_lists.npy: similarity = 0.32 ✗ (below threshold)
+// Compare against all training samples in knowledge base
+// relations.txt samples: best match similarity = 0.87 ✓
+// valuelists.txt samples: best match similarity = 0.32 ✗
 
-String detectedIntent = "RELATIONS"; // Best match
+SearchResult bestMatch = results.get(0);
+String detectedIntent = bestMatch.metadata.get("intent"); // "RELATIONS"
 ```
 
 #### 5. Load and Enrich Rules
 
 ```java
-// Load relations.md
-String rules = loadRulesForIntent("RELATIONS");
+// Load rules from RulesCache (cached at startup)
+String rules = RulesCache.getRules("RELATIONS"); // Loads relations.md content
+
+// Gather Servoy context
+String context = gatherServoyContext();
+String projectName = getProjectName(); // e.g., "my_servoy_project"
 
 // Substitute template variables
-String projectName = getActiveProjectName(); // e.g., "my_servoy_project"
-String enrichedRules = rules.replace("{{PROJECT_NAME}}", projectName);
+String processedRules = rules.replace("{{PROJECT_NAME}}", projectName);
 
-// Return enriched prompt
-return "INTENT: RELATIONS\n\n" + enrichedRules;
+// Return enriched prompt with context
+return context + "\n\nUSER REQUEST:\n" + prompt + "\n\n" + processedRules;
 ```
 
 #### 6. Copilot Receives Enriched Context
@@ -391,38 +778,43 @@ Based on the rules in `relations.md`, the LLM:
 
 #### 8. Tool Executes in Eclipse
 
+**RelationToolHandler.handleOpenRelation()** is called with the arguments:
+
 ```java
-private McpSchema.CallToolResult handleOpenRelation(Object exchange, McpSchema.CallToolRequest request)
-{
-    // Extract parameters
-    String name = getArgument(request, "name");
-    String primaryDS = getArgument(request, "primaryDataSource");
-    String foreignDS = getArgument(request, "foreignDataSource");
+// Extract parameters from request
+String name = "orders_to_customers";
+String primaryDS = "example_data/orders";
+String foreignDS = "example_data/customers";
+String primaryColumn = "customer_id";
+String foreignColumn = "customer_id";
 
-    // Get Servoy model
-    IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+// Get Servoy model
+IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
-    // Create or open relation
-    Relation relation = servoyModel.getActiveProject().getEditingSolution().getRelation(name);
-    if (relation == null) {
-        relation = servoyModel.getActiveProject().getEditingSolution().createNewRelation(
-            servoyModel.getNameValidator(),
-            name,
-            primaryDS,
-            foreignDS,
-            IQueryConstants.LEFT_OUTER_JOIN
-        );
-    }
+// Check if relation exists
+Relation relation = servoyModel.getActiveProject().getEditingSolution().getRelation(name);
 
-    // Open editor on UI thread
-    Display.getDefault().asyncExec(() -> {
-        EditorUtil.openRelationEditor(relation, true);
-    });
-
-    return McpSchema.CallToolResult.builder()
-        .content(List.of(new TextContent("Relation 'orders_to_customers' created successfully")))
-        .build();
+if (relation == null) {
+    // Create new relation
+    ServoyLog.logInfo("[RelationToolHandler] Creating relation: " + name);
+    relation = servoyModel.getActiveProject().getEditingSolution().createNewRelation(
+        servoyModel.getNameValidator(),
+        name,
+        primaryDS,
+        foreignDS,
+        IQueryConstants.LEFT_OUTER_JOIN
+    );
+    
+    // Add column mapping if provided
+    relation.createNewRelationItems(...);
 }
+
+// Open editor on UI thread
+Display.getDefault().asyncExec(() -> {
+    EditorUtil.openRelationEditor(relation, true);
+});
+
+return "Relation 'orders_to_customers' created successfully (from example_data/orders to example_data/customers)";
 ```
 
 #### 9. User Sees Result
@@ -437,41 +829,63 @@ private McpSchema.CallToolResult handleOpenRelation(Object exchange, McpSchema.C
 
 ### ONNX Embedding Model
 
-**Model File:** `onnx_model_mac.onnx` (for macOS)
+**Model:** `bge-small-en-v1.5` (BAAI General Embedding)
+**Location:** OSGi bundle `onnx-models-bge-small-en`
+**Files:**
+- `models/bge-small-en-v1.5/model.onnx` - Embedding model
+- `models/bge-small-en-v1.5/tokenizer.onnx` - Tokenizer (uses ONNX Runtime Extensions)
 
 **Architecture:**
-- Sentence transformer model (e.g., `all-MiniLM-L6-v2`)
+- Sentence transformer model optimized for semantic search
 - Converts text → 384-dimensional float vector
 - Trained to create semantically similar embeddings for similar text
 
-**Model Loading:**
+**Model Loading (from OSGi bundle):**
 
 ```java
-env = OrtEnvironment.getEnvironment();
-session = env.createSession(
-    PromptEnricher.class.getResourceAsStream("/models/onnx_model_mac.nnx"),
-    new OrtSession.SessionOptions()
-);
+// Get bundle
+Bundle modelsBundle = Platform.getBundle("onnx-models-bge-small-en");
+
+// Load embedding model
+URL modelURL = modelsBundle.getEntry("models/bge-small-en-v1.5/model.onnx");
+InputStream modelStream = modelURL.openStream();
+byte[] modelBytes = modelStream.readAllBytes();
+modelSession = env.createSession(modelBytes);
+
+// Load tokenizer with ONNX Runtime Extensions
+URL tokenizerURL = modelsBundle.getEntry("models/bge-small-en-v1.5/tokenizer.onnx");
+InputStream tokenizerStream = tokenizerURL.openStream();
+byte[] tokenizerBytes = tokenizerStream.readAllBytes();
+
+OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
+sessionOptions.registerCustomOpLibrary(OrtxPackage.getLibraryPath());
+tokenizerSession = env.createSession(tokenizerBytes, sessionOptions);
 ```
 
 **Embedding Generation:**
 
 ```java
-private float[] generateEmbedding(String text)
+public float[] generateEmbedding(String text)
 {
-    // Tokenize text (simple whitespace split for demo)
-    String[] tokens = text.toLowerCase().split("\\s+");
-
-    // Create ONNX input tensor
-    long[] inputIds = convertTokensToIds(tokens);
-    OnnxTensor tensor = OnnxTensor.createTensor(env, inputIds);
-
-    // Run inference
-    OrtSession.Result result = session.run(Collections.singletonMap("input_ids", tensor));
-
-    // Extract embedding vector
-    float[][] output = (float[][])result.get(0).getValue();
-    return output[0]; // Return first (and only) embedding
+    // 1. Tokenize using ONNX tokenizer
+    OnnxTensor inputTensor = OnnxTensor.createTensor(env, new String[][] {{text}});
+    OrtSession.Result tokenizerResult = tokenizerSession.run(
+        Collections.singletonMap("inputs", inputTensor)
+    );
+    
+    long[][] inputIds = (long[][])tokenizerResult.get("input_ids").getValue();
+    long[][] attentionMask = (long[][])tokenizerResult.get("attention_mask").getValue();
+    
+    // 2. Generate embedding using model
+    Map<String, OnnxTensor> inputs = new HashMap<>();
+    inputs.put("input_ids", OnnxTensor.createTensor(env, inputIds));
+    inputs.put("attention_mask", OnnxTensor.createTensor(env, attentionMask));
+    
+    OrtSession.Result modelResult = modelSession.run(inputs);
+    
+    // 3. Extract embedding vector (384 dimensions)
+    float[][][] embeddings = (float[][][])modelResult.get(0).getValue();
+    return embeddings[0][0]; // [batch_size=1][sequence_pos=0][embedding_dim=384]
 }
 ```
 
@@ -479,54 +893,71 @@ private float[] generateEmbedding(String text)
 
 **Process:**
 
-1. **Load Pre-computed Embeddings:**
+1. **Initialize Knowledge Base (at startup):**
    ```java
-   Map<String, List<float[]>> intentEmbeddings = loadAllIntentEmbeddings();
-   // {
-   //   "RELATIONS": [embedding1, embedding2, ..., embedding144],
-   //   "VALUE_LISTS": [embedding1, embedding2, ..., embedding89],
-   //   ...
-   // }
-   ```
-
-2. **Generate User Prompt Embedding:**
-   ```java
-   float[] userEmbedding = generateEmbedding(userPrompt);
-   ```
-
-3. **Calculate Similarity with All Intents:**
-   ```java
-   Map<String, Double> intentScores = new HashMap<>();
-
-   for (Map.Entry<String, List<float[]>> entry : intentEmbeddings.entrySet()) {
-       String intent = entry.getKey();
-       List<float[]> trainingEmbeddings = entry.getValue();
-
-       // Find max similarity across all training samples for this intent
-       double maxSimilarity = 0.0;
-       for (float[] trainingEmbedding : trainingEmbeddings) {
-           double similarity = cosineSimilarity(userEmbedding, trainingEmbedding);
-           maxSimilarity = Math.max(maxSimilarity, similarity);
+   List<EmbeddingEntry> knowledgeBase = new ArrayList<>();
+   
+   // Load and embed all training samples from embeddings.list
+   for (String filename : embeddingFiles) {
+       String intentKey = filename.substring(0, filename.lastIndexOf('.')).toUpperCase();
+       // e.g., relations.txt -> RELATIONS
+       
+       List<String> samples = readLines(filename);
+       for (String sample : samples) {
+           float[] embedding = generateEmbedding(sample);
+           knowledgeBase.add(new EmbeddingEntry(
+               sample,
+               embedding,
+               Map.of("intent", intentKey)
+           ));
        }
+   }
+   ```
 
-       intentScores.put(intent, maxSimilarity);
+2. **Search for Best Match (at runtime):**
+   ```java
+   public List<SearchResult> search(String query, int topK)
+   {
+       // Generate embedding for user query
+       float[] queryEmbedding = generateEmbedding(query);
+       
+       // Calculate similarity with all training samples
+       List<SearchResult> results = new ArrayList<>();
+       for (EmbeddingEntry entry : knowledgeBase) {
+           double similarity = cosineSimilarity(queryEmbedding, entry.embedding);
+           results.add(new SearchResult(entry.text, similarity, entry.metadata));
+       }
+       
+       // Sort by similarity (descending) and return top K
+       results.sort((a, b) -> Double.compare(b.score, a.score));
+       return results.subList(0, Math.min(topK, results.size()));
    }
    ```
 
-4. **Select Best Intent:**
+3. **Extract Best Intent:**
    ```java
-   String bestIntent = null;
-   double bestScore = 0.0;
-
-   for (Map.Entry<String, Double> entry : intentScores.entrySet()) {
-       if (entry.getValue() > SIMILARITY_THRESHOLD && entry.getValue() > bestScore) {
-           bestIntent = entry.getKey();
-           bestScore = entry.getValue();
-       }
+   // IntentDetector calls search with topK=1
+   List<SearchResult> results = embeddingService.search(userPrompt, 1);
+   
+   if (!results.isEmpty()) {
+       SearchResult bestMatch = results.get(0);
+       String intent = bestMatch.metadata.get("intent");
+       double score = bestMatch.score;
+       
+       ServoyLog.logInfo("[IntentDetector] Detected intent: " + intent + 
+                       " (score: " + score + ")");
+       return intent;
    }
-
-   return bestIntent; // null if no match above threshold
+   
+   return "PASS_THROUGH"; // No match found
    ```
+
+**Key Differences from Traditional Approach:**
+- ✅ No pre-computed `.npy` files needed
+- ✅ Embeddings generated on-the-fly at startup
+- ✅ In-memory knowledge base for fast search
+- ✅ Single model loading for all operations
+- ✅ Cross-platform (no platform-specific `.npy` files)
 
 **Cosine Similarity Implementation:**
 
@@ -896,15 +1327,15 @@ com.servoy.eclipse.aibridge/
 │   │       └── PromptEnricher.java          # Intent detection & enrichment
 │   │
 │   └── main/resources/
-│       ├── intents/
-│       │   ├── relations.txt                # Training prompts for RELATIONS
+│       ├── embeddings/
+│       │   ├── relations.txt                # Training prompts for RELATIONS (~280)
 │       │   ├── relations.npy                # Pre-computed embeddings
-│       │   ├── value_lists.txt              # Training prompts for VALUE_LISTS
-│       │   └── value_lists.npy              # Pre-computed embeddings
+│       │   ├── valuelists.txt               # Training prompts for VALUE_LISTS (~270)
+│       │   └── valuelists.npy               # Pre-computed embeddings
 │       │
 │       ├── rules/
 │       │   ├── relations.md                 # Comprehensive RELATIONS rules
-│       │   └── value_lists.md               # Comprehensive VALUE_LISTS rules
+│       │   └── valuelist.md                 # Comprehensive VALUE_LISTS rules
 │       │
 │       ├── models/
 │       │   └── onnx_model_mac.onnx          # ONNX embedding model (macOS)
@@ -1007,6 +1438,208 @@ Ensure `PromptEnricher.java` loads your new intent:
 5. Verify correct tool calls
 6. Test context switching (out-of-context prompts)
 ```
+
+### Adding a New Tool to Existing Handler
+
+**Scenario:** You want to add a new tool to an existing handler (e.g., `renameRelation` to `RelationToolHandler`).
+
+**Steps:**
+
+**Step 1: Add tool to training file**
+
+Add examples to `src/main/resources/embeddings/relations.txt`:
+```
+Rename the orders_to_customers relation
+I need to rename a relation
+Change the relation name from old_name to new_name
+```
+
+**Step 2: Add tool documentation to rules file**
+
+Add tool section to `src/main/resources/rules/relations.md`:
+```markdown
+## TOOL: renameRelation
+
+**Purpose**: Rename an existing relation
+
+**Required Parameters**:
+- oldName (string): Current relation name
+- newName (string): New relation name
+
+**Examples**: [add examples]
+```
+
+**Step 3: Add tool to handler's getToolDefinitions() map**
+
+In `RelationToolHandler.java`:
+
+```java
+private Map<String, ToolHandlerRegistry.ToolDefinition> getToolDefinitions()
+{
+    Map<String, ToolHandlerRegistry.ToolDefinition> tools = new LinkedHashMap<>();
+    
+    tools.put("openRelation", new ToolHandlerRegistry.ToolDefinition(...));
+    tools.put("deleteRelation", new ToolHandlerRegistry.ToolDefinition(...));
+    tools.put("listRelations", new ToolHandlerRegistry.ToolDefinition(...));
+    
+    // ADD NEW TOOL HERE - just add one entry!
+    tools.put("renameRelation", new ToolHandlerRegistry.ToolDefinition(
+        "Renames an existing relation. Required: oldName (string), newName (string).",
+        this::handleRenameRelation));
+    
+    return tools;
+}
+```
+
+**Step 4: Implement handler method**
+
+```java
+private McpSchema.CallToolResult handleRenameRelation(
+    McpSyncServerExchange exchange, 
+    McpSchema.CallToolRequest request)
+{
+    String oldName = extractParameter(request, "oldName");
+    String newName = extractParameter(request, "newName");
+    
+    // Validation
+    if (oldName == null || newName == null) {
+        return buildErrorResult("Both oldName and newName are required");
+    }
+    
+    try {
+        // Implementation
+        IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+        Relation relation = servoyModel.getActiveProject().getEditingSolution().getRelation(oldName);
+        
+        if (relation == null) {
+            return buildErrorResult("Relation '" + oldName + "' not found");
+        }
+        
+        relation.setName(newName);
+        ServoyLog.logInfo("[RelationToolHandler] Renamed relation: " + oldName + " → " + newName);
+        
+        return McpSchema.CallToolResult.builder()
+            .content(List.of(new TextContent("Relation renamed successfully")))
+            .build();
+    }
+    catch (Exception e) {
+        ServoyLog.logError("[RelationToolHandler] Error in handleRenameRelation: " + e.getMessage(), e);
+        return buildErrorResult("Error: " + e.getMessage());
+    }
+}
+```
+
+**That's it!** No changes to:
+- ❌ `McpServletProvider` (auto-registration handles it)
+- ❌ `ToolHandlerRegistry` (handler already registered)
+- ❌ `registerTools()` method (generic iteration handles it)
+
+**Total effort:** Add 1 map entry + implement 1 handler method.
+
+---
+
+### Adding a New Handler
+
+**Scenario:** You want to add a completely new handler (e.g., `FormToolHandler` for form operations).
+
+**Steps:**
+
+**Step 1: Create training file**
+
+Create `src/main/resources/embeddings/forms.txt` with ~100+ examples
+
+**Step 2: Add to embeddings.list**
+
+Add to `src/main/resources/embeddings/embeddings.list`:
+```
+relations.txt
+valuelists.txt
+forms.txt
+```
+
+**Step 3: Create rules file**
+
+Create `src/main/resources/rules/forms.md` with comprehensive rules
+
+**Step 4: Add to rules.list**
+
+Add to `src/main/resources/rules/rules.list`:
+```
+relations.md
+valuelists.md
+forms.md
+```
+
+**Step 5: Create handler class**
+
+Create `src/com/servoy/eclipse/mcp/handlers/FormToolHandler.java`:
+
+```java
+public class FormToolHandler implements IToolHandler
+{
+    @Override
+    public String getHandlerName()
+    {
+        return "FormToolHandler";
+    }
+
+    private Map<String, ToolHandlerRegistry.ToolDefinition> getToolDefinitions()
+    {
+        Map<String, ToolHandlerRegistry.ToolDefinition> tools = new LinkedHashMap<>();
+        
+        tools.put("openForm", new ToolHandlerRegistry.ToolDefinition(
+            "Opens a form in the editor...",
+            this::handleOpenForm));
+        
+        return tools;
+    }
+
+    @Override
+    public void registerTools(McpSyncServer server)
+    {
+        for (Map.Entry<String, ToolHandlerRegistry.ToolDefinition> entry : getToolDefinitions().entrySet())
+        {
+            ToolHandlerRegistry.registerTool(server, entry.getKey(), 
+                entry.getValue().description, entry.getValue().handler);
+        }
+    }
+
+    private McpSchema.CallToolResult handleOpenForm(
+        McpSyncServerExchange exchange, 
+        McpSchema.CallToolRequest request)
+    {
+        // Implementation
+    }
+}
+```
+
+**Step 6: Register in ToolHandlerRegistry**
+
+In `ToolHandlerRegistry.getHandlers()`, add ONE line:
+
+```java
+public static IToolHandler[] getHandlers()
+{
+    return new IToolHandler[] {
+        new RelationToolHandler(),
+        new ValueListToolHandler(),
+        new CommonToolHandler(),
+        new FormToolHandler()  // <-- ADD THIS LINE
+    };
+}
+```
+
+**That's it!** The handler is now:
+- ✅ Auto-discovered by `McpServletProvider`
+- ✅ Auto-registered with MCP server
+- ✅ Ready to use
+
+**Total changes:**
+- ✅ 4 new files (training, rules, handler, list entries)
+- ✅ 1 line in `ToolHandlerRegistry.getHandlers()`
+- ✅ Zero changes to `McpServletProvider`
+
+---
 
 ### Best Practices
 
@@ -1309,6 +1942,13 @@ Iterator<Relation> allRelations = solution.getRelations(true);
 // Value Lists
 ValueList valueList = solution.getValueList("valuelist_name");
 ValueList newValueList = solution.createNewValueList(validator, name);
+valueList.setValueListType(IValueListConstants.CUSTOM_VALUES); // or DATABASE_VALUES
+valueList.setCustomValues("Value1\nValue2\nValue3"); // for custom type
+valueList.setDataSource("db:/server_name/table_name"); // for database type
+valueList.setDataProviderID1("column_name"); // display column
+valueList.setShowDataProviders(1); // bitmask for columns (1=col1, 2=col2, 4=col3)
+valueList.setReturnDataProviders(1); // return columns bitmask
+Iterator<ValueList> allValueLists = solution.getValueLists(true);
 
 // Database access via ApplicationServerRegistry
 IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
@@ -1330,6 +1970,7 @@ Display.getDefault().asyncExec(() -> {
 // Open editors
 EditorUtil.openRelationEditor(relation, true);
 EditorUtil.openValueListEditor(valueList, true);
+EditorUtil.openFormEditor(form, true);
 ```
 
 ### MCP APIs
@@ -1397,6 +2038,10 @@ For questions or contributions, refer to the main project documentation.
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2025-01-19
+**Document Version:** 1.1
+**Last Updated:** 2025-11-19
 **Author:** Generated from MCP workflow implementation analysis
+**Recent Updates:**
+- Added VALUE_LISTS intent implementation
+- Updated training prompt counts (relations: ~280, valuelists: ~270)
+- Added value list tool handlers and API examples

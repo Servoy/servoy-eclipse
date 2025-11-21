@@ -8,55 +8,73 @@ import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.mcp.IToolHandler;
+import com.servoy.eclipse.mcp.ToolHandlerRegistry;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.ValueList;
 
-import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
-import io.modelcontextprotocol.spec.McpSchema.TextContent;
-import io.modelcontextprotocol.spec.McpSchema.Tool;
 import io.modelcontextprotocol.server.McpSyncServer;
-import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
+import io.modelcontextprotocol.server.McpSyncServerExchange;
+import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
  * Value Lists handler - all VALUE_LISTS intent tools
  * Tools: openValueList, deleteValueList, listValueLists
  */
-public class ValueListToolHandler
+public class ValueListToolHandler implements IToolHandler
 {
+	@Override
+	public String getHandlerName()
+	{
+		return "ValueListToolHandler";
+	}
+
+	/**
+	 * Define all tools for this handler with their descriptions and handlers
+	 */
+	private Map<String, ToolHandlerRegistry.ToolDefinition> getToolDefinitions()
+	{
+		Map<String, ToolHandlerRegistry.ToolDefinition> tools = new java.util.LinkedHashMap<>();
+
+		tools.put("openValueList", new ToolHandlerRegistry.ToolDefinition(
+			"Opens an existing value list or creates a new value list. Required: name (string). Optional for CUSTOM type: customValues (array of strings). Optional for DATABASE type: dataSource (format: 'server_name/table_name'), displayColumn (string), returnColumn (string), separator (string), sortOptions (string like 'column asc').",
+			this::handleOpenValueList));
+
+		tools.put("deleteValueList", new ToolHandlerRegistry.ToolDefinition(
+			"Deletes an existing value list. Required: name (string) - the name of the value list to delete.",
+			this::handleDeleteValueList));
+
+		tools.put("listValueLists", new ToolHandlerRegistry.ToolDefinition(
+			"Retrieves a list of all existing value lists in the active solution. No parameters required.",
+			this::handleListValueLists));
+
+		return tools;
+	}
+
 	/**
 	 * Register all value list tools with MCP server
 	 */
-	public static void registerTools(McpSyncServer server)
+	@Override
+	public void registerTools(McpSyncServer server)
 	{
-		registerOpenValueList(server);
-		registerDeleteValueList(server);
-		registerListValueLists(server);
+		// Map-based registration with ToolDefinition
+		for (Map.Entry<String, ToolHandlerRegistry.ToolDefinition> entry : getToolDefinitions().entrySet())
+		{
+			ToolHandlerRegistry.registerTool(
+				server,
+				entry.getKey(),
+				entry.getValue().description,
+				entry.getValue().handler);
+		}
 	}
 
 	// =============================================
 	// TOOL: openValueList
 	// =============================================
 
-	private static void registerOpenValueList(McpSyncServer server)
-	{
-		Tool tool = McpSchema.Tool.builder()
-			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("openValueList")
-			.description(
-				"Opens an existing value list or creates a new value list. Required: name (string). Optional for CUSTOM type: customValues (array of strings). Optional for DATABASE type: dataSource (format: 'server_name/table_name'), displayColumn (string), returnColumn (string), separator (string), sortOptions (string like 'column asc').")
-			.build();
-
-		SyncToolSpecification spec = SyncToolSpecification.builder()
-			.tool(tool)
-			.callHandler(ValueListToolHandler::handleOpenValueList)
-			.build();
-
-		server.addTool(spec);
-	}
-
-	private static McpSchema.CallToolResult handleOpenValueList(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleOpenValueList(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		String name = null;
 		List<String> customValues = null;
@@ -258,24 +276,7 @@ public class ValueListToolHandler
 	// TOOL: deleteValueList
 	// =============================================
 
-	private static void registerDeleteValueList(McpSyncServer server)
-	{
-		Tool tool = McpSchema.Tool.builder()
-			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("deleteValueList")
-			.description(
-				"Deletes an existing value list. Required: name (string) - the name of the value list to delete.")
-			.build();
-
-		SyncToolSpecification spec = SyncToolSpecification.builder()
-			.tool(tool)
-			.callHandler(ValueListToolHandler::handleDeleteValueList)
-			.build();
-
-		server.addTool(spec);
-	}
-
-	private static McpSchema.CallToolResult handleDeleteValueList(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleDeleteValueList(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		String name = null;
 		String errorMessage = null;
@@ -329,24 +330,7 @@ public class ValueListToolHandler
 	// TOOL: listValueLists
 	// =============================================
 
-	private static void registerListValueLists(McpSyncServer server)
-	{
-		Tool tool = McpSchema.Tool.builder()
-			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("listValueLists")
-			.description(
-				"Retrieves a list of all existing value lists in the active solution. No parameters required.")
-			.build();
-
-		SyncToolSpecification spec = SyncToolSpecification.builder()
-			.tool(tool)
-			.callHandler(ValueListToolHandler::handleListValueLists)
-			.build();
-
-		server.addTool(spec);
-	}
-
-	private static McpSchema.CallToolResult handleListValueLists(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleListValueLists(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		String errorMessage = null;
 		StringBuilder resultBuilder = new StringBuilder();

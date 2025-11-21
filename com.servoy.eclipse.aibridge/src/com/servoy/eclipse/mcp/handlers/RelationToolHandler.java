@@ -9,6 +9,8 @@ import org.eclipse.swt.widgets.Display;
 import com.servoy.base.query.IQueryConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.mcp.IToolHandler;
+import com.servoy.eclipse.mcp.ToolHandlerRegistry;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -18,51 +20,67 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 
-import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
-import io.modelcontextprotocol.spec.McpSchema.TextContent;
-import io.modelcontextprotocol.spec.McpSchema.Tool;
 import io.modelcontextprotocol.server.McpSyncServer;
-import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
+import io.modelcontextprotocol.server.McpSyncServerExchange;
+import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
  * Relations handler - all RELATIONS intent tools
  * Tools: openRelation, deleteRelation, listRelations
  */
-public class RelationToolHandler
+public class RelationToolHandler implements IToolHandler
 {
-	/**
-	 * Register all relation tools with MCP server
-	 */
-	public static void registerTools(McpSyncServer server)
+	@Override
+	public String getHandlerName()
 	{
-		registerOpenRelation(server);
-		registerDeleteRelation(server);
-		registerListRelations(server);
+		return "RelationToolHandler";
+	}
+
+	/**
+	 * Define all tools for this handler with their descriptions and handlers
+	 */
+	private Map<String, ToolHandlerRegistry.ToolDefinition> getToolDefinitions()
+	{
+		Map<String, ToolHandlerRegistry.ToolDefinition> tools = new java.util.LinkedHashMap<>();
+
+		tools.put("openRelation", new ToolHandlerRegistry.ToolDefinition(
+			"Opens an existing database relation or creates a new relation between two tables. Required: name (string). Optional (for creation): primaryDataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'), foreignDataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'), primaryColumn (string), foreignColumn (string) for column mapping.",
+			this::handleOpenRelation));
+
+		tools.put("deleteRelation", new ToolHandlerRegistry.ToolDefinition(
+			"Deletes an existing database relation. Required: name (string) - the name of the relation to delete.",
+			this::handleDeleteRelation));
+
+		tools.put("listRelations", new ToolHandlerRegistry.ToolDefinition(
+			"Retrieves a list of all existing database relations in the active solution. No parameters required.",
+			this::handleListRelations));
+
+		return tools;
+	}
+
+	/**
+	 * Register all relations tools with MCP server
+	 */
+	@Override
+	public void registerTools(McpSyncServer server)
+	{
+		// Map-based approach: iterate through tool definitions and register each
+		for (Map.Entry<String, ToolHandlerRegistry.ToolDefinition> entry : getToolDefinitions().entrySet())
+		{
+			ToolHandlerRegistry.registerTool(
+				server,
+				entry.getKey(),
+				entry.getValue().description,
+				entry.getValue().handler);
+		}
 	}
 
 	// =============================================
 	// TOOL: openRelation
 	// =============================================
 
-	private static void registerOpenRelation(McpSyncServer server)
-	{
-		Tool tool = McpSchema.Tool.builder()
-			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("openRelation")
-			.description(
-				"Opens an existing database relation or creates a new relation between two tables. Required: name (string). Optional (for creation): primaryDataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'), foreignDataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'), primaryColumn (string), foreignColumn (string) for column mapping.")
-			.build();
-
-		SyncToolSpecification spec = SyncToolSpecification.builder()
-			.tool(tool)
-			.callHandler(RelationToolHandler::handleOpenRelation)
-			.build();
-
-		server.addTool(spec);
-	}
-
-	private static McpSchema.CallToolResult handleOpenRelation(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleOpenRelation(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		String name = null;
 		String primaryDataSource = null;
@@ -261,24 +279,7 @@ public class RelationToolHandler
 	// TOOL: deleteRelation
 	// =============================================
 
-	private static void registerDeleteRelation(McpSyncServer server)
-	{
-		Tool tool = McpSchema.Tool.builder()
-			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("deleteRelation")
-			.description(
-				"Deletes an existing database relation. Required: name (string) - the name of the relation to delete.")
-			.build();
-
-		SyncToolSpecification spec = SyncToolSpecification.builder()
-			.tool(tool)
-			.callHandler(RelationToolHandler::handleDeleteRelation)
-			.build();
-
-		server.addTool(spec);
-	}
-
-	private static McpSchema.CallToolResult handleDeleteRelation(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleDeleteRelation(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		String name = null;
 		String errorMessage = null;
@@ -335,24 +336,7 @@ public class RelationToolHandler
 	// TOOL: listRelations
 	// =============================================
 
-	private static void registerListRelations(McpSyncServer server)
-	{
-		Tool tool = McpSchema.Tool.builder()
-			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("listRelations")
-			.description(
-				"Retrieves a list of all existing database relations in the active solution. No parameters required.")
-			.build();
-
-		SyncToolSpecification spec = SyncToolSpecification.builder()
-			.tool(tool)
-			.callHandler(RelationToolHandler::handleListRelations)
-			.build();
-
-		server.addTool(spec);
-	}
-
-	private static McpSchema.CallToolResult handleListRelations(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleListRelations(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		String errorMessage = null;
 		StringBuilder resultBuilder = new StringBuilder();

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.servoy.eclipse.mcp.IToolHandler;
+import com.servoy.eclipse.mcp.ToolHandlerRegistry;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -15,50 +17,63 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
-import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
-import io.modelcontextprotocol.spec.McpSchema.TextContent;
-import io.modelcontextprotocol.spec.McpSchema.Tool;
 import io.modelcontextprotocol.server.McpSyncServer;
-import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
+import io.modelcontextprotocol.server.McpSyncServerExchange;
+import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
  * Common tools handler - shared tools used by multiple intent domains
  * Tools: queryDatabaseSchema, getTableColumns
  */
-public class CommonToolHandler
+public class CommonToolHandler implements IToolHandler
 {
+	@Override
+	public String getHandlerName()
+	{
+		return "CommonToolHandler";
+	}
+
+	/**
+	 * Define all tools for this handler with their descriptions and handlers
+	 */
+	private Map<String, ToolHandlerRegistry.ToolDefinition> getToolDefinitions()
+	{
+		Map<String, ToolHandlerRegistry.ToolDefinition> tools = new java.util.LinkedHashMap<>();
+
+		tools.put("queryDatabaseSchema", new ToolHandlerRegistry.ToolDefinition(
+			"Queries the database schema for available servers, tables, and columns. Optional: serverName (string) - filter by specific database server, tableName (string) - filter by specific table.",
+			this::handleQueryDatabaseSchema));
+
+		tools.put("getTableColumns", new ToolHandlerRegistry.ToolDefinition(
+			"Retrieves detailed column information for a specific database table. Required: serverName (string) - database server name, tableName (string) - table name.",
+			this::handleGetTableColumns));
+
+		return tools;
+	}
+
 	/**
 	 * Register all common tools with MCP server
 	 */
-	public static void registerTools(McpSyncServer server)
+	@Override
+	public void registerTools(McpSyncServer server)
 	{
-		registerQueryDatabaseSchema(server);
-		registerGetTableColumns(server);
+		// Map-based approach: iterate through tool definitions and register each
+		for (Map.Entry<String, ToolHandlerRegistry.ToolDefinition> entry : getToolDefinitions().entrySet())
+		{
+			ToolHandlerRegistry.registerTool(
+				server,
+				entry.getKey(),
+				entry.getValue().description,
+				entry.getValue().handler);
+		}
 	}
 
 	// =============================================
 	// TOOL: queryDatabaseSchema
 	// =============================================
 
-	private static void registerQueryDatabaseSchema(McpSyncServer server)
-	{
-		Tool tool = McpSchema.Tool.builder()
-			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("queryDatabaseSchema")
-			.description(
-				"Queries the database schema for available servers, tables, and columns. Optional: serverName (string) - filter by specific database server, tableName (string) - filter by specific table.")
-			.build();
-
-		SyncToolSpecification spec = SyncToolSpecification.builder()
-			.tool(tool)
-			.callHandler(CommonToolHandler::handleQueryDatabaseSchema)
-			.build();
-
-		server.addTool(spec);
-	}
-
-	private static McpSchema.CallToolResult handleQueryDatabaseSchema(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleQueryDatabaseSchema(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		String serverName = null;
 		String tableName = null;
@@ -310,24 +325,7 @@ public class CommonToolHandler
 	// TOOL: getTableColumns
 	// =============================================
 
-	private static void registerGetTableColumns(McpSyncServer server)
-	{
-		Tool tool = McpSchema.Tool.builder()
-			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("getTableColumns")
-			.description(
-				"Retrieves detailed column information for a specific table. Useful for creating database value lists. Required: serverName (string) - database server name, tableName (string) - table name. Returns: list of columns with their types, primary key status, and other metadata.")
-			.build();
-
-		SyncToolSpecification spec = SyncToolSpecification.builder()
-			.tool(tool)
-			.callHandler(CommonToolHandler::handleGetTableColumns)
-			.build();
-
-		server.addTool(spec);
-	}
-
-	private static McpSchema.CallToolResult handleGetTableColumns(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleGetTableColumns(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		String serverName = null;
 		String tableName = null;
