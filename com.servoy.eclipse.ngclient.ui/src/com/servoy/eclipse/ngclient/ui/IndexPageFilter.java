@@ -102,6 +102,11 @@ public class IndexPageFilter implements Filter
 				{
 					showLogin = OAuthHandler.handleOauth(request, response);
 					if (Boolean.FALSE.equals(showLogin.getLeft()) && showLogin.getRight() == null) return;
+
+					request.getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
+					String queryString = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
+					response.sendRedirect(request.getRequestURI().replace("/svy_oauth", "") + (queryString != null ? "?" + queryString : ""));
+					return;
 				}
 				else
 				{
@@ -118,9 +123,6 @@ public class IndexPageFilter implements Filter
 				if (showLogin.getRight() != null)
 				{
 					((HttpServletRequest)servletRequest).getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
-
-					//could be oauth + deeplink (need to wrap the request to add the parameters)
-					req = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
 				}
 
 				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
