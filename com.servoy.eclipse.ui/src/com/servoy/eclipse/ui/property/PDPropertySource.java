@@ -226,6 +226,12 @@ public class PDPropertySource extends PersistPropertySource
 							};
 						}
 
+						@Override
+						public String getTooltipText()
+						{
+							return "Array of attributes of a component that will be rendered in HTML.";
+						}
+
 					}, IContentSpecConstants.PROPERTY_ATTRIBUTES, IContentSpecConstants.PROPERTY_ATTRIBUTES)
 					{
 
