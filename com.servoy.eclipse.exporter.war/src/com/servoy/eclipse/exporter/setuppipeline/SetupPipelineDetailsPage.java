@@ -5,7 +5,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.WizardPage;
@@ -20,6 +22,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -40,7 +43,9 @@ public class SetupPipelineDetailsPage extends WizardPage
 
 	private Font boldFont;
 
-	GitInfo gitInfo;
+	private GitInfo gitInfo;
+
+	private final List<String> names = new ArrayList<>();
 
 	private static final String CROWD = System.getProperty("servoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
 		"/servoy-service/rest_ws/api/developer/getApplications?loginToken=";
@@ -105,13 +110,10 @@ public class SetupPipelineDetailsPage extends WizardPage
 		gitInfo = getRemoteInfo(repoRoot);
 
 		ServoyLoginDialog.getLoginToken(loginToken -> {
-
 			if (loginToken != null)
 			{
-
 				loginTokenForJson[0] = loginToken;
 			}
-
 		});
 
 		try
@@ -149,6 +151,18 @@ public class SetupPipelineDetailsPage extends WizardPage
 					setErrorMessage("Namespace is missing or invalid. Please verify your Servoy Cloud configuration.");
 					setPageComplete(false); // Prevent moving forward
 				}
+
+				Object applicationsObj = jsonObject.get("applications");
+				if (applicationsObj instanceof JSONArray applicationsArray)
+				{
+					for (int i = 0; i < applicationsArray.length(); i++)
+					{
+						JSONObject appObj = applicationsArray.getJSONObject(i);
+						String name = appObj.getString("name");
+						names.add(name);
+					}
+				}
+
 			}
 
 			applicationJobNameText = createLabeledText(appSection, "Application Name:");
@@ -192,6 +206,14 @@ public class SetupPipelineDetailsPage extends WizardPage
 			return;
 		}
 
+		String enteredName = applicationJobNameText.getText().trim();
+		if (names.stream().anyMatch(n -> n.equalsIgnoreCase(enteredName)))
+		{
+			setErrorMessage("Application name already exists: " + enteredName);
+			setPageComplete(false);
+			return;
+		}
+
 		if (!hasGitInfo)
 		{
 			setErrorMessage("Git information is incomplete. Please provide username, password/token, and repository URL.");
@@ -208,7 +230,7 @@ public class SetupPipelineDetailsPage extends WizardPage
 	{
 		return currentBranch.getText();
 	}
-	
+
 	public String getLoginToken()
 	{
 		return loginTokenForJson[0];
