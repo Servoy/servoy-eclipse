@@ -79,6 +79,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.server.ngclient.DefaultComponentPropertiesProvider;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -286,9 +287,21 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					{
 						hardcodedText = "Set value &lt;empty> for no title text";
 					}
-					else if (StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(item.getText(0)))
+					else if (DefaultComponentPropertiesProvider.ENABLED_DATAPROVIDER_NAME.equals(item.getText(0)))
 					{
-						hardcodedText = "Set z-index of the element.";
+						hardcodedText = "Setting a boolean data provider will determine whether the component is enabled or not; blocks onAction, onDoubleClick, onRightClick events.";
+					}
+					else if (DefaultComponentPropertiesProvider.VISIBLE_DATAPROVIDER_NAME.equals(item.getText(0)))
+					{
+						hardcodedText = "Setting a boolean data provider will determine whether the button is visible or not";
+					}
+					else if (StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(item.getText(0)))
+					{
+						hardcodedText = "The name of the component; must be unique within a form";
+					}
+					else if (StaticContentSpecLoader.PROPERTY_COMMENT.getPropertyName().equals(item.getText(0)))
+					{
+						hardcodedText = "Additional information, such as programmer notes about this model object's purpose.";
 					}
 					else if ("min-width".equals(item.getText(0)) || "min-height".equals(item.getText(0)))
 					{

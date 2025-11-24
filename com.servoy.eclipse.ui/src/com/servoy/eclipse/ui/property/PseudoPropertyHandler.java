@@ -101,6 +101,11 @@ public class PseudoPropertyHandler implements IPropertyHandler
 					};
 				}
 
+				@Override
+				public String getTooltipText()
+				{
+					return "Property to get and add design-time properties for a component.";
+				}
 			}, "designTimeProperties", IContentSpecConstants.PROPERTY_DESIGNTIME)
 		{
 
