@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 
 import { ServoyService,SessionProblem } from '../servoy.service';
+import { WindowService } from './window.service';
 
 @Injectable()
 export class SessionService {
 
-    constructor(public servoyService: ServoyService) {
+    constructor(public servoyService: ServoyService, private windowService: WindowService) {
         }
 
     public expireSession(sessionExpired: SessionProblem){
@@ -17,6 +18,7 @@ export class SessionService {
         if(sessionExpired.redirectUrl)  exp.redirectUrl= sessionExpired.redirectUrl;
 
         this.servoyService.getSolutionSettings().sessionProblem = exp;
+        this.windowService.switchToSessionProblemPage();
     }
 
     public setNoLicense(noLicense: SessionProblem){
@@ -30,6 +32,7 @@ export class SessionService {
         if(noLicense.redirectTimeout) noLic.redirectTimeout = noLicense.redirectTimeout;
 
         this.servoyService.getSolutionSettings().sessionProblem = noLic;
+        this.windowService.switchToSessionProblemPage();
     }
 
     public setMaintenanceMode(maintenanceMode: SessionProblem){
@@ -43,6 +46,7 @@ export class SessionService {
         if(maintenanceMode.redirectTimeout) ment.redirectTimeout = maintenanceMode.redirectTimeout;
 
         this.servoyService.getSolutionSettings().sessionProblem = ment;
+        this.windowService.switchToSessionProblemPage();
     }
 
     public setInternalServerError(internalServerError: SessionProblem){
@@ -51,5 +55,6 @@ export class SessionService {
         if(internalServerError.stack) error['stack'] = internalServerError.stack;
 
         this.servoyService.getSolutionSettings().sessionProblem = error;
+        this.windowService.switchToSessionProblemPage();
     }
 }

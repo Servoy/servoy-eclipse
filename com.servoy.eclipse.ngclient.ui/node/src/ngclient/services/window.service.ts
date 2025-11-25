@@ -455,6 +455,17 @@ export class WindowService {
             }
         });
     }
+    
+    public switchToSessionProblemPage() {
+        this.servoyService.loaded().then(() => {
+            const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem;
+            if (sessionProblem && sessionProblem.viewUrl) {
+                sessionProblem.nonce = this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes['ngCspNonce']?.value;
+                const name = sessionProblem.viewUrl.includes('/') ? sessionProblem.viewUrl.split('/')[1].split('.')[0] : sessionProblem.viewUrl.split('.')[0];
+                this.platformLocation.pushState(name, null, this.platformLocation.pathname + this.platformLocation.search + '#' + name);
+            }
+        });
+    }
 
     public reload() {
         window.location.reload();

@@ -230,6 +230,7 @@ export class SessionProblem {
     public redirectUrl?: string;
     public redirectTimeout?: number;
     public stack?: string;
+    public nonce?: string;
 }
 
 
