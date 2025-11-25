@@ -1430,6 +1430,13 @@ public class TypeCreator extends TypeCache
 						STANDARD_ELEMENT_NAME, true, false),
 					null);
 				property.setDeprecated(pd.isDeprecated());
+				if (!fullTypeName.startsWith(WEB_SERVICE) && StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(name) &&
+					!fullTypeName.contains(_ABS_POSTFIX))
+				{
+					property.setDeprecated(true);
+					property.setDescription(
+						"<b>Deprecated:</b> do not use cssPosition in responsive forms!<br/>" + property.getDescription());
+				}
 				members.add(property);
 			}
 		}
