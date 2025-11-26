@@ -95,6 +95,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectApiFunctionDefinition;
+import org.sablo.specification.WebObjectHandlerFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.CustomJSONArrayType;
@@ -5697,7 +5698,6 @@ public class TypeCreator extends TypeCache
 		{
 			this.context = context;
 			this.componentName = componentName;
-			setSuperType(getType(context, "String"));
 			setName("JSComponent<" + componentName + ">");
 			setKind(TypeKind.JAVASCRIPT);
 			setVisible(true);
@@ -5720,21 +5720,25 @@ public class TypeCreator extends TypeCache
 			EList<Member> componentMembers = super.getMembers();
 			// properties
 			spec.getAllPropertiesNames().forEach(propertyName -> {
+				PropertyDescription pd = spec.getProperty(propertyName);
+				if (pd == null)
+				{
+					WebObjectHandlerFunctionDefinition handler = spec.getHandler(propertyName);
+					if (handler == null || handler.isDeprecated() || handler.isPrivate())
+					{
+						return;
+					}
+				}
+				else if (pd.isDeprecated() || "private".equals(pd.getTag(WebFormComponent.TAG_SCOPE))) return;
 				Property prop = TypeInfoModelFactory.eINSTANCE.createProperty();
 				prop.setName(propertyName);
 				prop.setVisible(true);
 				prop.setStatic(false);
-				prop.setType(getTypeRef(context, "Object"));
+				prop.setType(getTypeRef(context, "String"));
 				prop.setAttribute(IMAGE_DESCRIPTOR,
 					com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("element.png"));
 				componentMembers.add(prop);
 			});
-
-			// API functions
-			for (WebObjectApiFunctionDefinition apiFunction : spec.getApiFunctions().values())
-			{
-				componentMembers.addAll(createMethods(context, apiFunction));
-			}
 		}
 	}
 
