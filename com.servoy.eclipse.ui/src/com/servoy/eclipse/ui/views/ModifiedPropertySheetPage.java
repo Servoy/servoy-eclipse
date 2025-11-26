@@ -290,6 +290,10 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					{
 						hardcodedText = "The name of the component; must be unique within a form";
 					}
+					else if (StaticContentSpecLoader.PROPERTY_COMMENT.getPropertyName().equals(item.getText(0)))
+					{
+						hardcodedText = "Additional design information, such as programmer notes about this model object's purpose.";
+					}
 					else if ("min-width".equals(item.getText(0)) || "min-height".equals(item.getText(0)))
 					{
 						ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite()
