@@ -1,0 +1,21 @@
+# FORMS category - AI perspective queries
+create form
+add form
+make form
+new form
+build form
+create screen
+add screen
+make screen
+create page
+add page
+create UI screen
+make UI page
+form creation
+screen creation
+page creation
+design form
+design screen
+build UI form
+create interface
+add interface

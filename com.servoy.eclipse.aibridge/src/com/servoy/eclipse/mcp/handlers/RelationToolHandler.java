@@ -11,11 +11,15 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.mcp.IToolHandler;
 import com.servoy.eclipse.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.mcp.services.DatabaseSchemaService;
+import com.servoy.eclipse.mcp.services.DatabaseSchemaService.ForeignKeyRelationship;
+import com.servoy.eclipse.mcp.services.DatabaseSchemaService.PotentialRelationship;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -27,7 +31,7 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
  * Relations handler - all RELATIONS intent tools
- * Tools: openRelation, deleteRelation, listRelations
+ * Tools: openRelation, deleteRelation, listRelations, discoverRelations
  */
 public class RelationToolHandler implements IToolHandler
 {
@@ -55,6 +59,10 @@ public class RelationToolHandler implements IToolHandler
 		tools.put("listRelations", new ToolHandlerRegistry.ToolDefinition(
 			"Retrieves a list of all existing database relations in the active solution. No parameters required.",
 			this::handleListRelations));
+
+		tools.put("discoverRelations", new ToolHandlerRegistry.ToolDefinition(
+			"Discovers potential database relations by analyzing foreign key relationships. Required: serverName (string) - database server name. Returns explicit FK constraints and potential relations based on PK name matching.",
+			this::handleDiscoverRelations));
 
 		return tools;
 	}
@@ -368,6 +376,113 @@ public class RelationToolHandler implements IToolHandler
 		{
 			errorMessage = e.getMessage();
 			ServoyLog.logError("[RelationToolHandler] Error in handleListRelations: " + errorMessage, e);
+		}
+
+		String resultMessage = errorMessage != null ? errorMessage : resultBuilder.toString();
+		return McpSchema.CallToolResult.builder()
+			.content(List.of(new TextContent(resultMessage)))
+			.build();
+	}
+
+	// =============================================
+	// TOOL: discoverRelations
+	// =============================================
+
+	private McpSchema.CallToolResult handleDiscoverRelations(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+	{
+		String serverName = null;
+		String errorMessage = null;
+		StringBuilder resultBuilder = new StringBuilder();
+
+		try
+		{
+			Map<String, Object> args = request.arguments();
+
+			if (args != null && args.containsKey("serverName"))
+			{
+				Object serverObj = args.get("serverName");
+				if (serverObj != null)
+				{
+					serverName = serverObj.toString();
+				}
+			}
+
+			// Validate serverName is required
+			if (serverName == null || serverName.trim().isEmpty())
+			{
+				errorMessage = "The 'serverName' argument is required.";
+				return McpSchema.CallToolResult.builder()
+					.content(List.of(new TextContent(errorMessage)))
+					.build();
+			}
+
+			// Use DatabaseSchemaService to get server
+			IServerInternal server = DatabaseSchemaService.getServer(serverName);
+
+			if (server == null)
+			{
+				errorMessage = "Database server '" + serverName + "' not found.";
+			}
+			else
+			{
+				// Get table names for context
+				List<String> tables = DatabaseSchemaService.getTableNames(server);
+
+				resultBuilder.append("Database Server: ").append(serverName).append("\n");
+				resultBuilder.append("Tables (").append(tables.size()).append("):\n");
+
+				for (String tName : tables)
+				{
+					resultBuilder.append("  - ").append(tName).append("\n");
+				}
+
+				// Analyze explicit foreign key relationships using service
+				resultBuilder.append("\n=== EXPLICIT FOREIGN KEY RELATIONSHIPS ===\n\n");
+				List<ForeignKeyRelationship> explicitFKs = DatabaseSchemaService.getExplicitForeignKeys(server);
+
+				if (explicitFKs.isEmpty())
+				{
+					resultBuilder.append("(No explicit FK metadata found)\n");
+				}
+				else
+				{
+					int fkNum = 1;
+					for (ForeignKeyRelationship fk : explicitFKs)
+					{
+						resultBuilder.append(fkNum).append(". ");
+						resultBuilder.append(fk.sourceTable).append(".").append(fk.sourceColumn);
+						resultBuilder.append(" → ").append(fk.targetTable);
+						resultBuilder.append("\n");
+						fkNum++;
+					}
+				}
+
+				// Find potential relations using service
+				resultBuilder.append("\n=== POTENTIAL RELATIONS (PK column name + type matching) ===\n\n");
+				List<PotentialRelationship> potentialRels = DatabaseSchemaService.getPotentialRelationships(server);
+
+				if (potentialRels.isEmpty())
+				{
+					resultBuilder.append("(No potential relations found)\n");
+				}
+				else
+				{
+					int relNum = 1;
+					for (PotentialRelationship rel : potentialRels)
+					{
+						resultBuilder.append(relNum).append(". ");
+						resultBuilder.append(rel.sourceTable).append(".").append(rel.sourceColumn);
+						resultBuilder.append(" → ").append(rel.targetTable).append(".").append(rel.targetColumn);
+						resultBuilder.append(" (PK match)\n");
+						relNum++;
+					}
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			errorMessage = e.getMessage();
+			ServoyLog.logError("[RelationToolHandler] Error in handleDiscoverRelations: " + errorMessage, e);
 		}
 
 		String resultMessage = errorMessage != null ? errorMessage : resultBuilder.toString();

@@ -27,19 +27,28 @@ public class PromptEnricher
 	 */
 	public String processPrompt(String prompt)
 	{
+		System.out.println("[PromptEnricher] processPrompt() called with: \"" + prompt + "\"");
 		try
 		{
+			System.out.println("[PromptEnricher] Detecting intent...");
 			String intent = intentDetector.detectIntent(prompt);
+			System.out.println("[PromptEnricher] Detected intent: " + intent);
 
 			if (!intentDetector.isServoyIntent(intent))
 			{
+				System.out.println("[PromptEnricher] Not a Servoy intent, returning PASS_THROUGH");
 				return "PASS_THROUGH";
 			}
 
-			return enrichPrompt(intent, prompt);
+			System.out.println("[PromptEnricher] Servoy intent detected, enriching prompt...");
+			String enriched = enrichPrompt(intent, prompt);
+			System.out.println("[PromptEnricher] Prompt enriched, length: " + enriched.length() + " chars");
+			return enriched;
 		}
 		catch (Exception e)
 		{
+			System.out.println("[PromptEnricher] ERROR: " + e.getMessage());
+			e.printStackTrace();
 			ServoyLog.logError("[PromptEnricher] Error: " + e.getMessage());
 			return "PASS_THROUGH";
 		}
@@ -52,16 +61,21 @@ public class PromptEnricher
 	{
 		try
 		{
+			System.out.println("[PromptEnricher.enrichPrompt] Getting rules for intent: " + intent);
 			String rules = RulesCache.getRules(intent);
 
 			if (rules.isEmpty())
 			{
+				System.out.println("[PromptEnricher.enrichPrompt] ERROR: No rules found for intent: " + intent);
 				ServoyLog.logError("[PromptEnricher] No rules found for intent: " + intent + ", returning PASS_THROUGH");
 				return "PASS_THROUGH";
 			}
 
+			System.out.println("[PromptEnricher.enrichPrompt] Rules loaded, length: " + rules.length() + " chars");
 			String context = gatherServoyContext();
+			System.out.println("[PromptEnricher.enrichPrompt] Context gathered");
 			String projectName = getProjectName();
+			System.out.println("[PromptEnricher.enrichPrompt] Project name: " + projectName);
 			String processedRules = rules.replace("{{PROJECT_NAME}}", projectName);
 
 			String enriched = context + "\n\n" +
@@ -70,11 +84,14 @@ public class PromptEnricher
 				"IMPORTANT: If you have all required parameters, call the appropriate tool immediately. " +
 				"If any required parameters are missing or unclear, ASK THE USER before calling the tool.\n";
 
+			System.out.println("[PromptEnricher.enrichPrompt] Final enriched prompt length: " + enriched.length() + " chars");
 			ServoyLog.logInfo("[PromptEnricher] Final enriched prompt length: " + enriched.length() + " chars");
 			return enriched;
 		}
 		catch (Exception e)
 		{
+			System.out.println("[PromptEnricher.enrichPrompt] ERROR: " + e.getMessage());
+			e.printStackTrace();
 			ServoyLog.logError("[PromptEnricher] Error: " + e.getMessage());
 			return "PASS_THROUGH";
 		}

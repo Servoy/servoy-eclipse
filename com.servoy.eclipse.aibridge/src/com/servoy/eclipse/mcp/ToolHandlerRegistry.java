@@ -2,7 +2,9 @@ package com.servoy.eclipse.mcp;
 
 import java.util.function.BiFunction;
 
-import com.servoy.eclipse.mcp.handlers.CommonToolHandler;
+import com.servoy.eclipse.mcp.handlers.ComponentToolHandler;
+import com.servoy.eclipse.mcp.handlers.DatabaseToolHandler;
+import com.servoy.eclipse.mcp.handlers.FormToolHandler;
 import com.servoy.eclipse.mcp.handlers.RelationToolHandler;
 import com.servoy.eclipse.mcp.handlers.ValueListToolHandler;
 
@@ -48,7 +50,9 @@ public class ToolHandlerRegistry
 		return new IToolHandler[] {
 			new RelationToolHandler(),
 			new ValueListToolHandler(),
-			new CommonToolHandler()
+			new DatabaseToolHandler(),
+			new FormToolHandler(),
+			new ComponentToolHandler()
 		};
 		// @formatter:on
 	}
@@ -68,6 +72,9 @@ public class ToolHandlerRegistry
 		String description,
 		BiFunction<McpSyncServerExchange, McpSchema.CallToolRequest, McpSchema.CallToolResult> handler)
 	{
+		System.out.println("[ToolHandlerRegistry] Registering tool: " + toolName);
+		System.out.println("[ToolHandlerRegistry] Description: " + description);
+		
 		Tool tool = McpSchema.Tool.builder()
 			.inputSchema(new JsonSchema("object", null, null, null, null, null))
 			.name(toolName)
@@ -80,5 +87,6 @@ public class ToolHandlerRegistry
 			.build();
 
 		server.addTool(spec);
+		System.out.println("[ToolHandlerRegistry] Tool '" + toolName + "' registered successfully");
 	}
 }
