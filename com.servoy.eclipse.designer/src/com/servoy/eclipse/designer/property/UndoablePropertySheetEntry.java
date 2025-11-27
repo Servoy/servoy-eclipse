@@ -146,8 +146,23 @@ public class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 	public void applyEditorValue()
 	{
 		Object[] values = getValues();
-		// Don't save if the editor is not dirty
-		if (values != null && values.length > 0 && editor != null && !editor.isDirty())
+		// bug?? ComboBoxCellEditor (like the one used in Variants property) is not marked as dirty when selection changes
+		boolean isComboEditor = editor instanceof org.eclipse.jface.viewers.ComboBoxCellEditor;
+		boolean valueChanged = false;
+		if (isComboEditor && editor != null && !editor.isDirty())
+		{
+			Object newValue = editor.getValue();
+			if (editValue == null)
+			{
+				valueChanged = (newValue != null);
+			}
+			else
+			{
+				valueChanged = !editValue.equals(newValue);
+			}
+		}
+
+		if (values != null && values.length > 0 && editor != null && !editor.isDirty() && !valueChanged)
 		{
 			return;
 		}
