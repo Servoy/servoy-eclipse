@@ -61,7 +61,7 @@ public class ColoringPreferenceProvider implements IColoringPreferenceProvider
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_EVENTTYPES, IExecutingEnviroment.TOPLEVEL_EVENTTYPES, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_JSPERMISSION, IExecutingEnviroment.TOPLEVEL_JSPERMISSION, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_JSFORM, IExecutingEnviroment.TOPLEVEL_JSFORM, new RGB(0, 200, 0));
-		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_JSCOMPONENT, IExecutingEnviroment.TOPLEVEL_JSCOMPONENT, new RGB(0, 200, 0));
+		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_JSWEBCOMPONENT, IExecutingEnviroment.TOPLEVEL_JSWEBCOMPONENT, new RGB(0, 200, 0));
 		requestor.addPreference(IExecutingEnviroment.TOPLEVEL_PLUGINS, IExecutingEnviroment.TOPLEVEL_PLUGINS, new RGB(255, 0, 0));
 		requestor.addPreference("_super", "_super", new RGB(0, 200, 50));
 		requestor.addPreference("developerBridge", "developerBridge", new RGB(0, 200, 0));

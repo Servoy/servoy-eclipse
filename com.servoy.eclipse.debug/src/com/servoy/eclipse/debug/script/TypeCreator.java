@@ -291,9 +291,9 @@ import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.info.EventType;
 import com.servoy.j2db.scripting.info.JSPermission;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
-import com.servoy.j2db.scripting.solutionmodel.JSComponent;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.scripting.solutionmodel.JSValueList;
+import com.servoy.j2db.scripting.solutionmodel.JSWebComponent;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.Location;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
@@ -587,7 +587,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSPermission.class.getSimpleName(), new JSPermissionCreator());
 		addScopeType(JSValueList.class.getSimpleName(), new JSValueListCreator());
 		addScopeType(com.servoy.j2db.scripting.solutionmodel.JSForm.class.getSimpleName(), new JSFormCreator()); //here we refer to the one from the solution model, even though it's the same class name
-		addScopeType(JSComponent.class.getSimpleName(), new JSComponentCreator());
+		addScopeType(JSWebComponent.class.getSimpleName(), new JSComponentCreator());
 	}
 
 	private void addQueryBuilderScopeType(Class< ? > clazz)
@@ -5597,7 +5597,7 @@ public class TypeCreator extends TypeCache
 			type.setVisible(true);
 			if (superType == null)
 			{
-				superType = TypeCreator.this.createType(null, "JSComponent", JSComponent.class);
+				superType = TypeCreator.this.createType(null, "JSWebComponent", JSWebComponent.class);
 			}
 			type.setSuperType(superType);
 			type.setKind(TypeKind.JAVA);
@@ -5612,7 +5612,7 @@ public class TypeCreator extends TypeCache
 				pkg.setVisible(true);
 				pkg.setStatic(true);
 				pkg.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("ng_component.png"));
-				pkg.setDescription("JSComponent constants for scripting.");
+				pkg.setDescription("JSWebComponent constants for scripting.");
 				members.add(pkg);
 
 				Type pckType = new LazyJSPackageType(context, componentsPackage.getPackageName());
