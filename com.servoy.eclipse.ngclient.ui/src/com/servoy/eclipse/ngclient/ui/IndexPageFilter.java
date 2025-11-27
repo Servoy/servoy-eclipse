@@ -69,6 +69,12 @@ public class IndexPageFilter implements Filter
 		HttpServletResponse response = (HttpServletResponse)servletResponse;
 		request.getSession();
 		String requestURI = request.getRequestURI();
+
+		if (AngularIndexPageWriter.handleShortSolutionRequest(request, response))
+		{
+			return;
+		}
+
 		if (requestURI.toLowerCase().endsWith("/index.html") &&
 			(requestURI.toLowerCase().contains("rfb/angular2") || requestURI.toLowerCase().contains("/solution/")) && WebPackagesListener.isBuildRunning())
 		{
