@@ -156,7 +156,15 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 								PropertyWizardDialogConfigurator dialogConfigurator = new PropertyWizardDialogConfigurator(UIUtils.getActiveShell(),
 									persistContext,
 									flattenedSolution, property).withTable(table).withProperties(wizardProperties).withInput(input);
-								if (dialogConfigurator.open() != Window.OK) return null;
+								if (dialogConfigurator.open() != Window.OK)
+								{
+									UIUtils.restoreFocusToChromium();
+									return null;
+								}
+
+								UIUtils.restoreFocusToChromium();
+
+
 								List<Map<String, Object>> newProperties = dialogConfigurator.getResult();
 
 								if (!newProperties.equals(originalInput))

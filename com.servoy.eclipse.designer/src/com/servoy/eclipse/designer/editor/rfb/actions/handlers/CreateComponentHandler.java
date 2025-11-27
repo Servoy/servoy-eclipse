@@ -223,6 +223,8 @@ public class CreateComponentHandler implements IServerService
 				webComponent.setProperty(propertyName, result.toString());
 			}
 		}
+
+		UIUtils.restoreFocusToChromium();
 	}
 
 	public static void autoshowWizard(ISupportFormElements parentSupportingElements, WebObjectSpecification spec,
@@ -275,6 +277,8 @@ public class CreateComponentHandler implements IServerService
 			ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
 				" that is not an custom array type " + propType, null);
 		}
+
+		UIUtils.restoreFocusToChromium();
 	}
 
 }
