@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.12.0.4120_rc</version>
+		<version>2026.3.0.4140_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.win32.win32.aarch64</artifactId>
 	<version>24.11.1</version>
