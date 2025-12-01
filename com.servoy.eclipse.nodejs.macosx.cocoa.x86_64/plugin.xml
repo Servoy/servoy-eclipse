@@ -6,8 +6,8 @@
       <nodejs
             id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
             name="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
-            nodePath="node-v24.10.0-darwin-x64/bin/node"
-            npmPath="node-v24.10.0-darwin-x64/bin/npm"
+            nodePath="node-v24.11.1-darwin-x64/bin/node"
+            npmPath="node-v24.11.1-darwin-x64/bin/npm"
             archive="node.tar.gz">
       </nodejs>
    </extension>
