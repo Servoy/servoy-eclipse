@@ -65,7 +65,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				this.element = this.editorContentService.getContentElementById(this.editorSession.getSelection()[0]);
 				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
 			}
-			let parent = contentElements.find(e => e.classList.contains('svy-formcomponent'));
+			let parent = contentElements.find(e => this.isParentContainer(e));
             this.uuid = this.element?.getAttribute('svy-id');
 			if (this.uuid && parent && this.uuid.indexOf(parent.getAttribute('svy-id').replace(/-/g,'_')) >= 0 ){
 				this.parentContainer = parent;
@@ -73,7 +73,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			this.formBounds = this.editorContentService.getContentForm().getBoundingClientRect();
             for (let comp of this.editorContentService.getAllContentElements()) {
 				const compParent = this.getParent(comp);
-				if (compParent?.classList.contains('svy-formcomponent')) {
+				if (this.isParentContainer(compParent)) {
 					//ignore components within FC
 					continue;
 				}
@@ -105,10 +105,17 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         }
     }
 
+	private isParentContainer(compParent: Element) {
+		if (!compParent) return false;
+		const parentClassList = compParent.classList;
+		return parentClassList.contains('svy-formcomponent') || parentClassList.contains('svy-listformcomponent')
+			|| parentClassList.contains('svy-container');
+	}
+
 	private getParent(element: HTMLElement) {
 		while (element.parentElement) {
 			element = element.parentElement;
-			if (element.classList.contains('svy-formcomponent') || element.classList.contains('svy-form')) {
+			if (element.classList.contains('svy-form') || this.isParentContainer(element)) {
 				return element;
 			}
 		}
@@ -284,8 +291,8 @@ this.snapToEndEnabled = !event.shiftKey;
 	}
 
 	computeGuides(event: MouseEvent, point: { x: number, y: number }) {
-		if (this.parentContainer?.classList.contains('svy-formcomponent')) {
-			//disable for components within a form component
+		if (this.isParentContainer(this.parentContainer) ) {
+			//disable for components within a form component or container
 			this.snapDataListener.next(null);
 			return;
 		}
@@ -370,14 +377,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			this.initialPoint = point;
 			this.initialRectangle = rect;
 		}
-		if (this.parentContainer) this.adjustPropertiesToContainer(properties);
 		this.snapDataListener.next(properties.guides.length == 0 ? null : properties);
-	}
-
-	private adjustPropertiesToContainer(properties: SnapData) {
-		const parentBounds = this.parentContainer.getBoundingClientRect();
-		properties.top -= parentBounds.top;
-		properties.left -= parentBounds.left;
 	}
 
 	private checkSnapToSize(properties: SnapData, rect: DOMRect, overlapsX: DOMRect[], overlapsY: DOMRect[]) {
