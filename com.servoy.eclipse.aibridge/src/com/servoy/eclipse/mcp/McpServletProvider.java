@@ -1,7 +1,6 @@
 package com.servoy.eclipse.mcp;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,8 +90,6 @@ public class McpServletProvider implements IServicesProvider
 	 */
 	private McpSchema.CallToolResult handleProcessPrompt(Object exchange, McpSchema.CallToolRequest request)
 	{
-		System.out.println("========================================");
-		System.out.println("[McpServletProvider] handleProcessPrompt CALLED");
 		String prompt = null;
 
 		// Extract prompt from request
@@ -108,19 +105,15 @@ public class McpServletProvider implements IServicesProvider
 
 		if (prompt == null || prompt.trim().isEmpty())
 		{
-			System.out.println("[McpServletProvider] ERROR: No prompt provided");
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent("Error: prompt parameter is required")))
 				.build();
 		}
 
-		System.out.println("[McpServletProvider] Received prompt: \"" + prompt + "\"");
 		ServoyLog.logInfo("[MCP] Prompt: \"" + prompt + "\"");
 		try
 		{
-			System.out.println("[McpServletProvider] Calling enricher.processPrompt()...");
 			String result = enricher.processPrompt(prompt);
-			System.out.println("[McpServletProvider] Enricher returned: " + (result.length() > 100 ? result.substring(0, 100) + "..." : result));
 
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent(result)))
@@ -128,8 +121,6 @@ public class McpServletProvider implements IServicesProvider
 		}
 		catch (Exception e)
 		{
-			System.out.println("[McpServletProvider] ERROR in AI processing: " + e.getMessage());
-			e.printStackTrace();
 			ServoyLog.logError("[MCP] Error in AI processing: " + e.getMessage());
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent("PASS_THROUGH")))
@@ -144,22 +135,16 @@ public class McpServletProvider implements IServicesProvider
 	 */
 	private McpSchema.CallToolResult handleGetContextFor(Object exchange, McpSchema.CallToolRequest request)
 	{
-		System.out.println("========================================");
-		System.out.println("[McpServletProvider] handleGetContextFor CALLED");
-
 		// Extract queries array from request
 		List<String> queries = new ArrayList<>();
 		Map<String, Object> args = request.arguments();
-		
+
 		if (args != null && args.containsKey("queries"))
 		{
 			Object queriesObj = args.get("queries");
-			System.out.println("[McpServletProvider] Queries object type: " + (queriesObj != null ? queriesObj.getClass().getName() : "null"));
-			System.out.println("[McpServletProvider] Queries object: " + queriesObj);
-			
-			if (queriesObj instanceof List<?>)
+			if (queriesObj instanceof List< ? >)
 			{
-				List<?> queriesList = (List<?>)queriesObj;
+				List< ? > queriesList = (List< ? >)queriesObj;
 				for (Object query : queriesList)
 				{
 					if (query != null)
@@ -177,44 +162,31 @@ public class McpServletProvider implements IServicesProvider
 
 		if (queries.isEmpty())
 		{
-			System.out.println("[McpServletProvider] ERROR: No queries provided");
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent("Error: queries parameter is required (array of strings)")))
 				.isError(true)
 				.build();
 		}
 
-		System.out.println("[McpServletProvider] Received " + queries.size() + " queries:");
-		for (int i = 0; i < queries.size(); i++)
-		{
-			System.out.println("[McpServletProvider]   Query " + (i + 1) + ": \"" + queries.get(i) + "\"");
-		}
-
 		try
 		{
 			// Get embedding service
 			ServoyEmbeddingService embeddingService = ServoyEmbeddingService.getInstance();
-			
+
 			// Track matched categories and their contexts
 			Map<String, CategoryMatch> categoryMatches = new LinkedHashMap<>();
-			
+
 			// For each query, do similarity search
 			for (String query : queries)
 			{
-				System.out.println("[McpServletProvider] Searching for: \"" + query + "\"");
-				
 				// Search with top 3 results to allow multiple category matches
 				List<ServoyEmbeddingService.SearchResult> results = embeddingService.search(query, 3);
-				
-				System.out.println("[McpServletProvider] Found " + results.size() + " matches for \"" + query + "\"");
-				
+
 				for (ServoyEmbeddingService.SearchResult result : results)
 				{
 					String intent = result.metadata.get("intent");
 					if (intent != null && !intent.equals("PASS_THROUGH"))
 					{
-						System.out.println("[McpServletProvider]   Matched: " + intent + " (score: " + result.score + ")");
-						
 						// Track this category
 						if (!categoryMatches.containsKey(intent))
 						{
@@ -276,16 +248,12 @@ public class McpServletProvider implements IServicesProvider
 				}
 			}
 
-			System.out.println("[McpServletProvider] Returning context for " + categoryMatches.size() + " categories");
-
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent(response.toString())))
 				.build();
 		}
 		catch (Exception e)
 		{
-			System.out.println("[McpServletProvider] ERROR in getContextFor: " + e.getMessage());
-			e.printStackTrace();
 			ServoyLog.logError("[MCP] Error in getContextFor: " + e.getMessage(), e);
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent("Error processing queries: " + e.getMessage())))
@@ -316,27 +284,18 @@ public class McpServletProvider implements IServicesProvider
 	 */
 	private void registerHandlers(McpSyncServer server)
 	{
-		System.out.println("[McpServletProvider] Starting handler registration...");
 		IToolHandler[] handlers = ToolHandlerRegistry.getHandlers();
-		System.out.println("[McpServletProvider] Found " + handlers.length + " handlers to register");
-
 		for (IToolHandler handler : handlers)
 		{
 			try
 			{
-				System.out.println("[McpServletProvider] Registering handler: " + handler.getHandlerName());
 				handler.registerTools(server);
 				ServoyLog.logInfo("[MCP] Registered handler: " + handler.getHandlerName());
-				System.out.println("[McpServletProvider] Successfully registered: " + handler.getHandlerName());
 			}
 			catch (Exception e)
 			{
-				System.out.println("[McpServletProvider] FAILED to register handler: " + handler.getHandlerName());
-				e.printStackTrace();
 				ServoyLog.logError("[MCP] Failed to register handler: " + handler.getHandlerName(), e);
 			}
 		}
-		System.out.println("[McpServletProvider] Handler registration complete");
 	}
-
 }

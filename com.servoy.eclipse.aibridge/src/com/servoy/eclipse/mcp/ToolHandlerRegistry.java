@@ -72,9 +72,6 @@ public class ToolHandlerRegistry
 		String description,
 		BiFunction<McpSyncServerExchange, McpSchema.CallToolRequest, McpSchema.CallToolResult> handler)
 	{
-		System.out.println("[ToolHandlerRegistry] Registering tool: " + toolName);
-		System.out.println("[ToolHandlerRegistry] Description: " + description);
-		
 		Tool tool = McpSchema.Tool.builder()
 			.inputSchema(new JsonSchema("object", null, null, null, null, null))
 			.name(toolName)
@@ -87,6 +84,5 @@ public class ToolHandlerRegistry
 			.build();
 
 		server.addTool(spec);
-		System.out.println("[ToolHandlerRegistry] Tool '" + toolName + "' registered successfully");
 	}
 }

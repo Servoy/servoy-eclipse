@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.mcp.IToolHandler;
@@ -41,13 +40,11 @@ public class FormToolHandler implements IToolHandler
 	@Override
 	public void registerTools(McpSyncServer server)
 	{
-		System.out.println("[FormToolHandler] registerTools() called");
 		ToolHandlerRegistry.registerTool(
 			server,
 			"createForm",
 			"Creates a new form in the active solution. Required: name (string). Optional: width (int, default 640), height (int, default 480), style (string: 'css' or 'responsive', default 'css'), dataSource (string, format: 'db:/server_name/table_name').",
 			this::handleCreateForm);
-		System.out.println("[FormToolHandler] createForm tool registered");
 	}
 
 	// =============================================
@@ -56,8 +53,6 @@ public class FormToolHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleCreateForm(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.out.println("========================================");
-		System.out.println("[FormToolHandler] handleCreateForm CALLED");
 		String name = null;
 		int width = 640; // default width
 		int height = 480; // default height
@@ -68,7 +63,6 @@ public class FormToolHandler implements IToolHandler
 		try
 		{
 			Map<String, Object> args = request.arguments();
-			System.out.println("[FormToolHandler] Request arguments: " + args);
 			if (args != null)
 			{
 				// Extract name parameter (required)
@@ -141,11 +135,9 @@ public class FormToolHandler implements IToolHandler
 			}
 
 			// Validate required parameters
-			System.out.println("[FormToolHandler] Extracted parameters - name: " + name + ", width: " + width + ", height: " + height + ", style: " + style + ", dataSource: " + dataSource);
-			
+
 			if (name == null || name.trim().isEmpty())
 			{
-				System.out.println("[FormToolHandler] ERROR: name parameter is required");
 				return McpSchema.CallToolResult.builder()
 					.content(List.of(new TextContent("Error: 'name' parameter is required")))
 					.isError(true)
@@ -154,7 +146,6 @@ public class FormToolHandler implements IToolHandler
 
 			if (errorMessage != null)
 			{
-				System.out.println("[FormToolHandler] ERROR: " + errorMessage);
 				return McpSchema.CallToolResult.builder()
 					.content(List.of(new TextContent("Error: " + errorMessage)))
 					.isError(true)
@@ -162,7 +153,6 @@ public class FormToolHandler implements IToolHandler
 			}
 
 			// Execute form creation on UI thread
-			System.out.println("[FormToolHandler] Preparing to create form on UI thread...");
 			final String finalName = name;
 			final int finalWidth = width;
 			final int finalHeight = height;
@@ -174,21 +164,16 @@ public class FormToolHandler implements IToolHandler
 			Display.getDefault().syncExec(() -> {
 				try
 				{
-					System.out.println("[FormToolHandler] Executing createForm() on UI thread...");
 					result[0] = createForm(finalName, finalWidth, finalHeight, finalStyle, finalDataSource);
-					System.out.println("[FormToolHandler] createForm() completed successfully");
 				}
 				catch (Exception e)
 				{
-					System.out.println("[FormToolHandler] createForm() threw exception: " + e.getMessage());
-					e.printStackTrace();
 					exception[0] = e;
 				}
 			});
 
 			if (exception[0] != null)
 			{
-				System.out.println("[FormToolHandler] Form creation failed");
 				ServoyLog.logError("Error creating form: " + finalName, exception[0]);
 				return McpSchema.CallToolResult.builder()
 					.content(List.of(new TextContent("Error creating form '" + finalName + "': " + exception[0].getMessage())))
@@ -196,7 +181,6 @@ public class FormToolHandler implements IToolHandler
 					.build();
 			}
 
-			System.out.println("[FormToolHandler] Form creation succeeded: " + result[0]);
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent(result[0])))
 				.build();
@@ -217,32 +201,25 @@ public class FormToolHandler implements IToolHandler
 	 */
 	private String createForm(String formName, int width, int height, String style, String dataSource) throws RepositoryException
 	{
-		System.out.println("[FormToolHandler.createForm] Starting form creation: " + formName);
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject servoyProject = servoyModel.getActiveProject();
 
 		if (servoyProject == null)
 		{
-			System.out.println("[FormToolHandler.createForm] ERROR: No active Servoy project");
 			throw new RepositoryException("No active Servoy solution project found");
 		}
 
 		if (servoyProject.getEditingSolution() == null)
 		{
-			System.out.println("[FormToolHandler.createForm] ERROR: Cannot get editing solution");
 			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
 		}
 
-		System.out.println("[FormToolHandler.createForm] Active project: " + servoyProject.getProject().getName());
-		
 		// Create validator
 		IValidateName validator = new ScriptNameValidator(servoyProject.getEditingFlattenedSolution());
 
 		// Create the form with dimensions
 		Dimension size = new Dimension(width, height);
-		System.out.println("[FormToolHandler.createForm] Creating form with size: " + width + "x" + height);
 		Form form = servoyProject.getEditingSolution().createNewForm(validator, null, formName, dataSource, true, size);
-		System.out.println("[FormToolHandler.createForm] Form created, configuring style: " + style);
 
 		boolean isResponsive = "responsive".equalsIgnoreCase(style);
 

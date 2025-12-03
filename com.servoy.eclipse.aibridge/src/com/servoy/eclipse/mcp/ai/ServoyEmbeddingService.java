@@ -53,62 +53,45 @@ public class ServoyEmbeddingService
 	 */
 	private void initialize()
 	{
-		System.out.println("========================================");
-		System.out.println("[ServoyEmbeddingService] Initializing ONNX embedding service with ONNX tokenizer...");
 		ServoyLog.logInfo("[ServoyEmbeddings] Initializing ONNX embedding service with ONNX tokenizer...");
 
 		try
 		{
-			System.out.println("[ServoyEmbeddingService] Getting ORT environment...");
 			env = OrtEnvironment.getEnvironment();
 
 			// Load embedding model from OSGi bundle
-			System.out.println("[ServoyEmbeddingService] Loading ONNX embedding model from bundle...");
 			ServoyLog.logInfo("[ServoyEmbeddings] Loading ONNX embedding model from bundle...");
 			Bundle modelsBundle = Platform.getBundle("onnx-models-bge-small-en");
 			if (modelsBundle == null)
 			{
-				System.out.println("[ServoyEmbeddingService] ERROR: Models bundle not found");
 				throw new RuntimeException("Models bundle not found: onnx-models-bge-small-en");
 			}
-			System.out.println("[ServoyEmbeddingService] Bundle found: " + modelsBundle.getSymbolicName());
 
 			URL modelURL = modelsBundle.getEntry("models/bge-small-en-v1.5/model.onnx");
 			if (modelURL == null)
 			{
-				System.out.println("[ServoyEmbeddingService] ERROR: Model file not found in bundle");
 				throw new RuntimeException("Model file not found in bundle");
 			}
-			System.out.println("[ServoyEmbeddingService] Loading model from: " + modelURL);
 			InputStream modelStream = modelURL.openStream();
 			byte[] modelBytes = modelStream.readAllBytes();
 			modelStream.close();
-			System.out.println("[ServoyEmbeddingService] Model loaded, " + modelBytes.length + " bytes");
 
 			modelSession = env.createSession(modelBytes);
-			System.out.println("[ServoyEmbeddingService] Model session created");
-
 			URL tokenizerURL = modelsBundle.getEntry("models/bge-small-en-v1.5/tokenizer.onnx");
 			if (tokenizerURL == null)
 			{
-				System.out.println("[ServoyEmbeddingService] ERROR: Tokenizer file not found in bundle");
 				throw new RuntimeException("Tokenizer file not found in bundle");
 			}
-			System.out.println("[ServoyEmbeddingService] Loading tokenizer from: " + tokenizerURL);
 			InputStream tokenizerStream = tokenizerURL.openStream();
 			byte[] tokenizerBytes = tokenizerStream.readAllBytes();
 			tokenizerStream.close();
-			System.out.println("[ServoyEmbeddingService] Tokenizer loaded, " + tokenizerBytes.length + " bytes");
 
 			OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
 			sessionOptions.registerCustomOpLibrary(OrtxPackage.getLibraryPath());
 			tokenizerSession = env.createSession(tokenizerBytes, sessionOptions);
-			System.out.println("[ServoyEmbeddingService] Tokenizer session created");
 			ServoyLog.logInfo("[ServoyEmbeddings] ONNX model and tokenizer loaded successfully");
 
-			System.out.println("[ServoyEmbeddingService] Initializing knowledge base...");
 			initializeKnowledgeBase();
-			System.out.println("[ServoyEmbeddingService] Embedding service ready!");
 			ServoyLog.logInfo("[ServoyEmbeddings] Embedding service ready!");
 		}
 		catch (Exception e)
@@ -139,8 +122,6 @@ public class ServoyEmbeddingService
 	 */
 	private void initializeKnowledgeBase()
 	{
-		System.out.println("[ServoyEmbeddingService.initializeKnowledgeBase] Loading knowledge base...");
-
 		try (InputStream listStream = getClass().getResourceAsStream("/main/resources/embeddings/embeddings.list");
 			BufferedReader listReader = new BufferedReader(new InputStreamReader(listStream, StandardCharsets.UTF_8)))
 		{
@@ -153,20 +134,16 @@ public class ServoyEmbeddingService
 				{
 					// Extract intent from filename: relations.txt -> RELATIONS, valuelists.txt -> VALUELISTS
 					String intentKey = filename.substring(0, filename.lastIndexOf('.')).toUpperCase();
-					System.out.println("[ServoyEmbeddingService.initializeKnowledgeBase] Loading file: " + filename + " (intent: " + intentKey + ")");
 
 					// Load examples from file
 					loadEmbeddingsFromFile("/main/resources/embeddings/" + filename, intentKey);
 					fileCount++;
 				}
 			}
-			System.out.println("[ServoyEmbeddingService.initializeKnowledgeBase] Loaded " + fileCount + " files with " + getEmbeddingCount() + " examples");
 			ServoyLog.logInfo("[ServoyEmbeddings] Knowledge base loaded with " + getEmbeddingCount() + " examples");
 		}
 		catch (Exception e)
 		{
-			System.out.println("[ServoyEmbeddingService.initializeKnowledgeBase] ERROR: " + e.getMessage());
-			e.printStackTrace();
 			ServoyLog.logError("[ServoyEmbeddings] Failed to load embedding files: " + e.getMessage());
 		}
 	}
@@ -330,10 +307,8 @@ public class ServoyEmbeddingService
 	 */
 	public List<SearchResult> search(String query, int maxResults)
 	{
-		System.out.println("[ServoyEmbeddingService.search] Searching for: \"" + query + "\" (maxResults: " + maxResults + ")");
 		try
 		{
-			System.out.println("[ServoyEmbeddingService.search] Generating embedding for query...");
 			float[] queryEmbeddingArray = generateEmbedding(query);
 			Embedding queryEmbedding = new Embedding(queryEmbeddingArray);
 
@@ -344,9 +319,7 @@ public class ServoyEmbeddingService
 				.minScore(0.7) // Only return >70% similarity
 				.build();
 
-			System.out.println("[ServoyEmbeddingService.search] Searching embedding store...");
 			List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(searchRequest).matches();
-			System.out.println("[ServoyEmbeddingService.search] Found " + matches.size() + " matches");
 
 			// Convert to our SearchResult format
 			List<SearchResult> results = new ArrayList<>();
@@ -363,7 +336,6 @@ public class ServoyEmbeddingService
 				}
 
 				double score = match.score();
-				System.out.println("[ServoyEmbeddingService.search] Match: score=" + score + ", intent=" + metadata.get("intent") + ", text=\"" + matchText + "\"");
 				results.add(new SearchResult(score, matchText, metadata));
 			}
 
@@ -371,8 +343,6 @@ public class ServoyEmbeddingService
 		}
 		catch (Exception e)
 		{
-			System.err.println("[ServoyEmbeddingService.search] Search failed: " + e.getMessage());
-			e.printStackTrace();
 			return new ArrayList<>();
 		}
 	}
