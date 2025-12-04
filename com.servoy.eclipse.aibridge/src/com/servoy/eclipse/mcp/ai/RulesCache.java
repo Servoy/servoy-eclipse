@@ -82,11 +82,29 @@ public class RulesCache
 	 */
 	public static String getRules(String intent)
 	{
+		return getRules(intent, null);
+	}
+	
+	/**
+	 * Get rules for a specific intent with variable substitution
+	 * @param intent The intent key (e.g., "RELATION_CREATE")
+	 * @param projectName The active project name for variable substitution (can be null)
+	 * @return The rule content with variables replaced, or empty string if not found
+	 */
+	public static String getRules(String intent, String projectName)
+	{
 		String rules = rulesCache.get(intent);
 		if (rules == null)
 		{
 			return "";
 		}
+		
+		// Replace variables if project name provided
+		if (projectName != null && !projectName.isEmpty())
+		{
+			rules = rules.replace("{{PROJECT_NAME}}", projectName);
+		}
+		
 		return rules;
 	}
 

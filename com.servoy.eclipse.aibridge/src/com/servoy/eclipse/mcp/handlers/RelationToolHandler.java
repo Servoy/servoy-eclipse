@@ -15,10 +15,12 @@ import com.servoy.eclipse.mcp.services.DatabaseSchemaService;
 import com.servoy.eclipse.mcp.services.DatabaseSchemaService.ForeignKeyRelationship;
 import com.servoy.eclipse.mcp.services.DatabaseSchemaService.PotentialRelationship;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
@@ -250,6 +252,14 @@ public class RelationToolHandler implements IToolHandler
 						// Silently ignore - editor will open and user can add columns manually
 					}
 				}
+			}
+
+			// Save the relation if it was created
+			if (isCreate)
+			{
+				ServoyLog.logInfo("[RelationToolHandler] Saving relation: " + name);
+				ServoyProject servoyProject = servoyModel.getActiveProject();
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { relation }, true);
 			}
 
 			// Open editor on UI thread

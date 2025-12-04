@@ -9,6 +9,20 @@
 
 ---
 
+## [CRITICAL] TOOL USAGE RESTRICTIONS
+
+**For value list operations, use ONLY the tools specified below and NO other tools (like file_search, grep_search, workspace search, etc.).**
+
+**See copilot-instructions.md RULE 6 for complete tool restrictions.**
+
+**Key points:**
+- [YES] ONLY use the 3 value list tools + 2 database tools listed below
+- [YES] Stay within {{PROJECT_NAME}} project
+- [NO] Do NOT use file system or search tools
+- [NO] Do NOT search in other projects
+
+---
+
 ## CRITICAL: DATABASE SERVER NAME
 
 **When ANY database tool requires serverName parameter:**
@@ -45,9 +59,14 @@
 
 **For DATABASE value lists** (from table):
 - `dataSource`: Table datasource (format: `server_name/table_name`)
-- `displayColumn`: Column to display
-- `returnColumn`: Column to return (defaults to displayColumn)
+- `displayColumn`: Column to display to the user
+- `returnColumn`: Column value to store in the database field (optional)
 - `sortOptions`: "NONE", "ASC", or "DESC" (default: "NONE")
+
+**Display vs Return Column Behavior**:
+- **Only `displayColumn` specified**: Same column used for BOTH display and return
+- **Only `returnColumn` specified**: Same column used for BOTH display and return
+- **Both `displayColumn` AND `returnColumn` specified**: Display shows one, return stores the other (most common for ID/Name pairs)
 
 **Examples**:
 ```
@@ -112,6 +131,12 @@ openValueList(
 4. **Missing info**: Use `listTables` to discover tables, then `getTableInfo` to discover columns, or ASK THE USER
 5. **Extract values carefully**: Preserve casing and order from user input
 6. **DataSource format**: `server_name/table_name` (tool adds `db:/` prefix automatically)
+7. **Display vs Return columns**:
+   - **Display column**: What the user SEES in the dropdown/combobox
+   - **Return column**: What gets STORED in the database field
+   - **Common use case**: Display human-readable names (e.g., "John Smith"), return IDs (e.g., 12345)
+   - **When to use both**: When table has separate ID and name columns (customer_id vs customer_name)
+   - **When to use one**: When same value should be displayed and stored (e.g., country codes, status values)
 
 ---
 
@@ -126,8 +151,12 @@ openValueList(
 2. If user doesn't know tables: `listTables(serverName="...")`
 3. Ask for table name if not provided
 4. If user doesn't know columns: `getTableInfo(serverName="...", tableName="...")`
-5. Collect parameters (dataSource, displayColumn, optional returnColumn)
-6. Call `openValueList` with database parameters
+5. Determine display and return columns:
+   - If user wants to show names but store IDs: Use BOTH displayColumn and returnColumn
+   - If same value for display and storage: Use only displayColumn (or only returnColumn)
+   - Ask user if unclear: "Should I display and store the same column, or display one column but store another?"
+6. Collect parameters (dataSource, displayColumn, optional returnColumn)
+7. Call `openValueList` with database parameters
 
 **Other Operations**:
 - Open existing: `openValueList(name="valuelist_name")`
@@ -141,31 +170,57 @@ openValueList(
 **Example 1: Custom value list**
 ```
 User: "Create value list called status with Active, Inactive, Pending"
-→ openValueList(name="status", customValues=["Active", "Inactive", "Pending"])
+--> openValueList(name="status", customValues=["Active", "Inactive", "Pending"])
 ```
 
-**Example 2: Database value list**
+**Example 2: Database value list (same column for display and return)**
 ```
 User: "Create value list from customers table showing company names"
-→ Ask: "What's your database server name?"
+--> Ask: "What's your database server name?"
 User: "example_data"
-→ openValueList(name="customers_list",
+--> openValueList(name="customers_list",
                 dataSource="example_data/customers",
                 displayColumn="company_name")
+Note: company_name will be both displayed AND stored
 ```
 
-**Example 3: List existing**
+**Example 3: Database value list (different display and return)**
+```
+User: "Create value list showing customer names but storing customer IDs"
+--> Ask: "What's your database server name?"
+User: "example_data"
+--> Ask: "What table contains the customers?"
+User: "customers"
+--> openValueList(name="customers_list",
+                dataSource="example_data/customers",
+                displayColumn="customer_name",
+                returnColumn="customer_id")
+Note: User sees customer_name, but customer_id is stored in the field
+```
+
+**Example 4: Database value list with country codes**
+```
+User: "Create value list from countries table with country codes"
+--> Ask: "What's your database server name?"
+User: "example_data"
+--> openValueList(name="countries_list",
+                dataSource="example_data/countries",
+                displayColumn="country_code")
+Note: Same value (country_code) for display and storage
+```
+
+**Example 5: List existing**
 ```
 User: "Show me all value lists"
-→ listValueLists()
+--> listValueLists()
 ```
 
-**Example 4: Database list with display and return columns**
+**Example 6: Database list with display and return columns**
 ```
 User: "Value list from countries, show name but return code, sorted"
-→ Ask: "What's your database server name?"
+--> Ask: "What's your database server name?"
 User: "example_data"
-→ openValueList(name="countries_list",
+--> openValueList(name="countries_list",
                 dataSource="example_data/countries",
                 displayColumn="country_name",
                 returnColumn="country_code",

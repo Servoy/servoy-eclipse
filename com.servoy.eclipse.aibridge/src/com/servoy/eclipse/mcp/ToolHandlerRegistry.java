@@ -2,10 +2,12 @@ package com.servoy.eclipse.mcp;
 
 import java.util.function.BiFunction;
 
-import com.servoy.eclipse.mcp.handlers.ComponentToolHandler;
+import com.servoy.eclipse.mcp.handlers.ButtonComponentHandler;
 import com.servoy.eclipse.mcp.handlers.DatabaseToolHandler;
 import com.servoy.eclipse.mcp.handlers.FormToolHandler;
+import com.servoy.eclipse.mcp.handlers.LabelComponentHandler;
 import com.servoy.eclipse.mcp.handlers.RelationToolHandler;
+import com.servoy.eclipse.mcp.handlers.StyleHandler;
 import com.servoy.eclipse.mcp.handlers.ValueListToolHandler;
 
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
@@ -52,7 +54,9 @@ public class ToolHandlerRegistry
 			new ValueListToolHandler(),
 			new DatabaseToolHandler(),
 			new FormToolHandler(),
-			new ComponentToolHandler()
+			new LabelComponentHandler(),
+			new ButtonComponentHandler(),
+			new StyleHandler()
 		};
 		// @formatter:on
 	}

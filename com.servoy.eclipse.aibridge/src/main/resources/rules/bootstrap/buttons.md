@@ -1,307 +1,542 @@
-=== SERVOY BOOTSTRAP BUTTON COMPONENT ===
+=== SERVOY BOOTSTRAP BUTTON COMPONENT - COMPLETE CRUD ===
 
-**Goal**: Add and configure bootstrap button components on Servoy forms.
+**Goal**: Manage bootstrap button components in Servoy forms (Create, Read, Update, Delete).
 
 **Current Project**: {{PROJECT_NAME}}  
 **Note**: Use only the tools specified below. See copilot-instructions.md for security and topic change handling.
 
 ---
 
-## CRITICAL: BUTTON REQUIREMENTS
+## [CRITICAL] TOOL USAGE RESTRICTIONS
 
-**Before adding ANY button:**
+**For button operations, use ONLY the 5 tools specified below and NO other tools.**
 
-[FORBIDDEN] NEVER manipulate .frm files directly  
-[FORBIDDEN] NEVER use Copilot's file editing tools on .frm files  
-[FORBIDDEN] DO NOT add buttons to non-existent forms  
+**See copilot-instructions.md RULE 6 for complete tool restrictions.**
 
-[REQUIRED] Form must exist first (use createForm if needed)  
-[REQUIRED] Form must use CSS positioning (useCssPosition: true)  
-[REQUIRED] Use addButton tool ONLY - never edit files manually  
-[REQUIRED] Provide unique button name (no duplicates on same form)  
-
----
-
-## AVAILABLE TOOL
-
-**addButton** - Add a bootstrap button component to a form (via FormFileService)
+**Key points:**
+- [YES] ONLY use the 5 button tools listed below (addButton, updateButton, deleteButton, listButtons, getButtonInfo)
+- [YES] Call tools directly - they handle validation and return clear errors
+- [YES] Stay within {{PROJECT_NAME}} project
+- [NO] Do NOT use file_search, grep_search, read_file, or other workspace tools
+- [NO] Do NOT manipulate .frm files directly
+- [NO] Do NOT search in other projects
 
 ---
 
-### addButton
+## AVAILABLE TOOLS (5)
 
-**Add a bootstrap button to a form**
+1. **addButton** - Add a new button to a form
+2. **updateButton** - Modify existing button properties
+3. **deleteButton** - Remove a button from a form
+4. **listButtons** - List all buttons in a form
+5. **getButtonInfo** - Get detailed info about a specific button
+
+---
+
+## TOOL 1: addButton
+
+**Create a new bootstrap button component on a form**
 
 **Parameters**:
-- `formName` (required): Name of the form (without .frm extension)
-- `buttonName` (required): Unique name for the button (e.g., "btnSave", "button_1")
-- `text` (required): Text to display on the button
-- `cssPosition` (optional): Position string "top,right,bottom,left,width,height" (default: auto-calculated)
+- `formName` (REQUIRED): Name of the form (without .frm extension)
+- `name` (REQUIRED): Unique component name (e.g., "btnSave", "button_1")
+- `cssPosition` (REQUIRED): Position string "top,right,bottom,left,width,height"
+  - **Format**: "distance_from_top,distance_from_right,distance_from_bottom,distance_from_left,width,height"
+  - **Values are DISTANCES from edges, not coordinates!**
+  - Use `-1` for edges you don't want to constrain
+  - Example: "20,-1,-1,25,80,30" = 20px from top, 25px from left, 80x30 size
+- `text` (REQUIRED, default="Button"): Text to display on the button
+- `styleClass` (optional): CSS classes to apply (space-separated, e.g., "btn btn-primary align-center")
+- `variant` (optional): Variant name from variants.json
+- `imageStyleClass` (optional): Icon to display to the left (e.g., "fas fa-save")
+- `trailingImageStyleClass` (optional): Icon to display to the right (e.g., "fas fa-chevron-right")
+- `showAs` (optional): Display mode - "text" (default), "html", or "trusted_html"
+- `tabSeq` (optional): Tab sequence order number
+- `enabled` (optional): Boolean - defaults to true if not specified
+- `visible` (optional): Boolean - defaults to true if not specified
+- `toolTipText` (optional): Tooltip text to display on hover
 
 **Examples**:
 ```
-addButton(formName="CustomerForm", buttonName="btnSave", text="Save")
-
+# Add button at top-left (20px from top, 25px from left)
 addButton(
   formName="CustomerForm",
-  buttonName="btnCancel",
+  name="btnSave",
+  text="Save",
+  cssPosition="20,-1,-1,25,80,30"
+)
+
+# Add button below previous one (60px from top = 20 + 30 + 10 spacing)
+addButton(
+  formName="CustomerForm",
+  name="btnCancel",
   text="Cancel",
-  cssPosition="39,-1,-1,150,80,30"
+  cssPosition="60,-1,-1,25,80,30"
+)
+
+# Add button with icon and styling
+addButton(
+  formName="CustomerForm",
+  name="btnDelete",
+  text="Delete",
+  cssPosition="20,-1,-1,115,80,30",
+  imageStyleClass="fas fa-trash",
+  styleClass="btn btn-danger"
+)
+
+# Add three buttons side by side (same top, different left positions)
+addButton(formName="OrderForm", name="btnNew", text="New", cssPosition="20,-1,-1,20,80,30")
+addButton(formName="OrderForm", name="btnSave", text="Save", cssPosition="20,-1,-1,110,80,30")
+addButton(formName="OrderForm", name="btnDelete", text="Delete", cssPosition="20,-1,-1,200,80,30")
+
+# Add right-aligned button (25px from right edge)
+addButton(
+  formName="HeaderForm",
+  name="btnLogout",
+  text="Logout",
+  cssPosition="15,25,-1,-1,100,30"
+)
+
+# Add button with HTML content
+addButton(
+  formName="InfoForm",
+  name="btnSubmit",
+  text="<strong>Submit</strong> Order",
+  cssPosition="50,-1,-1,25,120,35",
+  showAs="html"
+)
+
+# Add button with tooltip
+addButton(
+  formName="CustomerForm",
+  name="btnHelp",
+  text="Help",
+  cssPosition="20,-1,-1,300,60,30",
+  imageStyleClass="fas fa-question-circle",
+  toolTipText="Click for help documentation"
 )
 ```
 
 ---
 
-## BUTTON COMPONENT STRUCTURE
+## TOOL 2: updateButton
 
-**Technical Details** (for understanding, NOT for manual editing):
+**Update properties of an existing button component**
 
-```json
-{
-    "cssPosition": "top,right,bottom,left,width,height",
-    "json": {
-        "cssPosition": {
-            "top": "39",
-            "right": "-1",
-            "bottom": "-1",
-            "left": "60",
-            "width": "80",
-            "height": "30"
-        },
-        "text": "Button Text"
-    },
-    "name": "button_name",
-    "typeName": "bootstrapcomponents-button",
-    "typeid": 47,
-    "uuid": "[AUTO-GENERATED]"
-}
+**Parameters**:
+- `formName` (REQUIRED): Name of the form
+- `name` (REQUIRED): Name of the button to update
+- Any property to update (optional): text, cssPosition, styleClass, variant, imageStyleClass, trailingImageStyleClass, showAs, tabSeq, enabled, visible, toolTipText
+
+**Only specified properties will be updated - others remain unchanged.**
+
+**Examples**:
 ```
+# Update button text
+updateButton(
+  formName="CustomerForm",
+  name="btnSave",
+  text="Save Changes"
+)
 
-**Key Fields:**
-- `typeName`: Always "bootstrapcomponents-button" for bootstrap buttons
-- `typeid`: Always 47 for buttons
-- `uuid`: Auto-generated by FormFileService
-- `cssPosition`: String format for positioning
-- `json.text`: The button label
+# Move button to new position
+updateButton(
+  formName="CustomerForm",
+  name="btnSave",
+  cssPosition="30,-1,-1,20,100,30"
+)
+
+# Update multiple properties
+updateButton(
+  formName="CustomerForm",
+  name="btnSave",
+  text="Save Customer",
+  styleClass="btn btn-primary",
+  enabled=true
+)
+
+# Add icon to existing button
+updateButton(
+  formName="CustomerForm",
+  name="btnSave",
+  imageStyleClass="fas fa-save"
+)
+
+# Change to HTML display
+updateButton(
+  formName="CustomerForm",
+  name="btnInfo",
+  text="<i>Click</i> Here",
+  showAs="html"
+)
+```
 
 ---
 
-## CSS POSITIONING
+## TOOL 3: deleteButton
+
+**Remove a button component from a form**
+
+**Parameters**:
+- `formName` (REQUIRED): Name of the form
+- `name` (REQUIRED): Name of the button to delete
+
+**Examples**:
+```
+# Delete a button
+deleteButton(
+  formName="CustomerForm",
+  name="btnOldButton"
+)
+
+# Delete multiple buttons (call multiple times)
+deleteButton(formName="OrderForm", name="btnTemp1")
+deleteButton(formName="OrderForm", name="btnTemp2")
+```
+
+---
+
+## TOOL 4: listButtons
+
+**List all button components in a form**
+
+**Parameters**:
+- `formName` (REQUIRED): Name of the form
+
+**Returns**: JSON array with button details (name, typeName, cssPosition, text, styleClass)
+
+**Examples**:
+```
+# List all buttons in a form
+listButtons(formName="CustomerForm")
+
+# Use before adding to see existing buttons
+listButtons(formName="OrderForm")
+```
+
+---
+
+## TOOL 5: getButtonInfo
+
+**Get detailed information about a specific button**
+
+**Parameters**:
+- `formName` (REQUIRED): Name of the form
+- `name` (REQUIRED): Name of the button
+
+**Returns**: Full JSON object with all button properties
+
+**Examples**:
+```
+# Get details of a specific button
+getButtonInfo(
+  formName="CustomerForm",
+  name="btnSave"
+)
+
+# Check button properties before updating
+getButtonInfo(formName="OrderForm", name="btnSubmit")
+```
+
+---
+
+## CSS POSITIONING - CRITICAL UNDERSTANDING
 
 **Format**: "top,right,bottom,left,width,height"
 
-**Values:**
-- `-1` means "not set" (flexible)
-- Positive numbers are pixel values
+**First 4 values are DISTANCES from edges, NOT coordinates:**
+- `top`: Distance from top edge (or -1 if unconstrained)
+- `right`: Distance from right edge (or -1 if unconstrained)
+- `bottom`: Distance from bottom edge (or -1 if unconstrained)
+- `left`: Distance from left edge (or -1 if unconstrained)
+- `width`: Component width in pixels
+- `height`: Component height in pixels
 
-**Common Patterns:**
+**Examples:**
+```
+"20,-1,-1,25,80,30"
+→ 20px from top, 25px from left, 80px wide, 30px tall
 
-**Left-aligned button:**
-```
-"top,right,bottom,left,width,height"
-"39,-1,-1,60,80,30"
-→ 39px from top, 60px from left, 80px wide, 30px tall
-```
+"20,25,-1,-1,80,30"
+→ 20px from top, 25px from right, 80px wide, 30px tall
 
-**Right-aligned button:**
-```
-"39,60,-1,-1,80,30"
-→ 39px from top, 60px from right, 80px wide, 30px tall
+"-1,-1,10,25,80,30"
+→ 10px from bottom, 25px from left, 80px wide, 30px tall
 ```
 
-**Full-width button:**
+**Calculating Positions:**
+
+**Vertical stack:**
 ```
-"39,10,-1,10,-1,30"
-→ 39px from top, 10px margins left/right, auto width, 30px tall
+First button:  top=20
+Second button: top = 20 + 30 (height) + 10 (spacing) = 60
+Third button:  top = 60 + 30 + 10 = 100
+```
+
+**Horizontal row:**
+```
+First button:  left=20
+Second button: left = 20 + 80 (width) + 10 (spacing) = 110
+Third button:  left = 110 + 80 + 10 = 200
 ```
 
 ---
 
 ## KEY RULES
 
-1. **Unique Names**: Each button on a form must have a unique name
-2. **Form Hierarchy**: Form must exist before adding buttons
-3. **CSS Forms Only**: Only works with forms that have useCssPosition: true
-4. **No Manual Editing**: NEVER edit .frm files directly
-5. **Position Validation**: If providing cssPosition, must have exactly 6 comma-separated values
-6. **Text Required**: Every button must have text (can be empty string, but parameter required)
+1. **Form Must Exist**: Form must exist before adding buttons
+2. **Unique Names**: Each button must have a unique name within the form
+3. **Position Required**: You must calculate and provide cssPosition (use listButtons to see existing components)
+4. **No Manual Editing**: [FORBIDDEN] NEVER edit .frm files directly - use button tools only
+5. **Styling Options**: Can use styleClass OR variant (not both)
 
 ---
 
 ## WORKFLOW
 
-**Adding a Button to a Form**:
-1. Ensure form exists (check or create with createForm)
-2. Choose unique button name (e.g., btnSave, btnCancel, button_1)
-3. Decide button text
-4. Optionally calculate position (or let system auto-position)
-5. Call addButton with all required parameters
-6. Tool will:
-   - Validate form exists
-   - Check form uses CSS positioning
-   - Generate UUID
-   - Create button JSON structure
-   - Add to form's items array
-   - Create backup of .frm file
-   - Save updated .frm file
+**Adding Buttons to a Form**:
+1. Check current form (use getCurrentForm) or specify formName
+2. List existing buttons to see what's already there: listButtons(formName="MyForm")
+3. Calculate position based on existing components
+4. Call addButton with all REQUIRED parameters (formName, name, cssPosition)
+5. System will validate and add the button
 
----
+**Updating Buttons**:
+1. List buttons to find the one to update: listButtons(formName="MyForm")
+2. Call updateButton with the properties to change
+3. Only specified properties are updated
 
-## BUTTON PROPERTIES
-
-**Currently Supported:**
-- `text` - Button label text
-
-**Not Yet Supported** (inform user if requested):
-- Button styling (styleClass, variants)
-- Event handlers (onAction, onClick)
-- Tooltips (toolTipText)
-- Enabled/visible state
-- Icons
-- Button groups
-- Custom CSS classes
-
----
-
-## COMMON BUTTON TYPES
-
-**Save Button:**
-```
-addButton(formName="CustomerForm", buttonName="btnSave", text="Save")
-```
-
-**Cancel Button:**
-```
-addButton(formName="CustomerForm", buttonName="btnCancel", text="Cancel")
-```
-
-**Action Buttons:**
-```
-addButton(formName="OrderForm", buttonName="btnSubmit", text="Submit Order")
-addButton(formName="OrderForm", buttonName="btnDelete", text="Delete")
-addButton(formName="OrderForm", buttonName="btnRefresh", text="Refresh")
-```
-
----
-
-## POSITIONING STRATEGY
-
-**Auto-Positioning** (recommended for now):
-- Let system calculate positions
-- Buttons placed sequentially
-- Default spacing applied
-
-**Manual Positioning** (if user provides coordinates):
-- User must provide valid cssPosition string
-- Format: "top,right,bottom,left,width,height"
-- System validates format before applying
-
-**Example Manual Positions:**
-```
-First button:  "39,-1,-1,60,80,30"   (top-left area)
-Second button: "39,-1,-1,150,80,30"  (next to first, 150px from left)
-Third button:  "39,-1,-1,240,80,30"  (next to second, 240px from left)
-```
+**Deleting Buttons**:
+1. List buttons to confirm name: listButtons(formName="MyForm")
+2. Call deleteButton with formName and name
 
 ---
 
 ## EXAMPLES
 
-**Example 1: Simple Save/Cancel buttons**
+**Example 1: CRUD Form Buttons**
 ```
-User: "Add Save and Cancel buttons to CustomerForm"
+# First, list existing buttons to see positions
+listButtons(formName="CustomerForm")
 
-Step 1: Verify form exists
-Step 2: Add Save button
-→ addButton(formName="CustomerForm", buttonName="btnSave", text="Save")
+# Add New button at top-left
+addButton(
+  formName="CustomerForm",
+  name="btnNew",
+  text="New",
+  cssPosition="20,-1,-1,20,80,30",
+  styleClass="btn btn-primary"
+)
 
-Step 3: Add Cancel button  
-→ addButton(formName="CustomerForm", buttonName="btnCancel", text="Cancel")
+# Add Save button next to it (same top, different left)
+addButton(
+  formName="CustomerForm",
+  name="btnSave",
+  text="Save",
+  cssPosition="20,-1,-1,110,80,30",
+  styleClass="btn btn-success",
+  imageStyleClass="fas fa-save"
+)
+
+# Add Delete button
+addButton(
+  formName="CustomerForm",
+  name="btnDelete",
+  text="Delete",
+  cssPosition="20,-1,-1,200,80,30",
+  styleClass="btn btn-danger",
+  imageStyleClass="fas fa-trash"
+)
+
+# Add Cancel button
+addButton(
+  formName="CustomerForm",
+  name="btnCancel",
+  text="Cancel",
+  cssPosition="20,-1,-1,290,80,30"
+)
 ```
 
-**Example 2: Button with specific position**
+**Example 2: Styled Buttons with Custom CSS**
 ```
-User: "Add a Submit button to OrderForm at position top:50, left:100, size 100x35"
+# First create custom style (if using addStyle tool)
+addStyle(className="btn-custom", cssContent="background: #007bff; color: white; padding: 10px 20px;")
 
-→ addButton(
-    formName="OrderForm",
-    buttonName="btnSubmit",
-    text="Submit",
-    cssPosition="50,-1,-1,100,100,35"
-  )
+# Add button with custom style
+addButton(
+  formName="OrderForm",
+  name="btnSubmit",
+  text="Submit Order",
+  cssPosition="60,-1,-1,20,120,35",
+  styleClass="btn btn-custom"
+)
 ```
 
-**Example 3: Multiple action buttons**
+**Example 3: Update Button Properties**
 ```
-User: "Add New, Edit, Delete buttons to ProductForm"
+# Change button text
+updateButton(
+  formName="CustomerForm",
+  name="btnSave",
+  text="Save Changes"
+)
 
-→ addButton(formName="ProductForm", buttonName="btnNew", text="New")
-→ addButton(formName="ProductForm", buttonName="btnEdit", text="Edit")
-→ addButton(formName="ProductForm", buttonName="btnDelete", text="Delete")
+# Add icon to existing button
+updateButton(
+  formName="CustomerForm",
+  name="btnSave",
+  imageStyleClass="fas fa-save"
+)
+
+# Change button style
+updateButton(
+  formName="CustomerForm",
+  name="btnSave",
+  styleClass="btn btn-primary btn-lg"
+)
+
+# Move button to new position
+updateButton(
+  formName="CustomerForm",
+  name="btnSave",
+  cssPosition="30,-1,-1,25,100,35"
+)
+```
+
+**Example 4: Grid Layout (3x2 buttons)**
+```
+# Row 1
+addButton(formName="MenuForm", name="btn1", text="Option 1", cssPosition="20,-1,-1,20,100,40")
+addButton(formName="MenuForm", name="btn2", text="Option 2", cssPosition="20,-1,-1,130,100,40")
+addButton(formName="MenuForm", name="btn3", text="Option 3", cssPosition="20,-1,-1,240,100,40")
+
+# Row 2 (70 = 20 top + 40 height + 10 spacing)
+addButton(formName="MenuForm", name="btn4", text="Option 4", cssPosition="70,-1,-1,20,100,40")
+addButton(formName="MenuForm", name="btn5", text="Option 5", cssPosition="70,-1,-1,130,100,40")
+addButton(formName="MenuForm", name="btn6", text="Option 6", cssPosition="70,-1,-1,240,100,40")
+```
+
+**Example 5: Button with Icons**
+```
+# Button with left icon
+addButton(
+  formName="ToolbarForm",
+  name="btnSave",
+  text="Save",
+  cssPosition="10,-1,-1,10,80,30",
+  imageStyleClass="fas fa-save"
+)
+
+# Button with right icon
+addButton(
+  formName="ToolbarForm",
+  name="btnNext",
+  text="Next",
+  cssPosition="10,-1,-1,100,80,30",
+  trailingImageStyleClass="fas fa-chevron-right"
+)
+
+# Icon-only button (empty text)
+addButton(
+  formName="ToolbarForm",
+  name="btnSettings",
+  text="",
+  cssPosition="10,-1,-1,190,40,30",
+  imageStyleClass="fas fa-cog",
+  toolTipText="Settings"
+)
 ```
 
 ---
 
-## TROUBLESHOOTING
+## COMMON USE CASES
+
+**Dialog Buttons (OK/Cancel):**
+```
+addButton(formName="ConfirmDialog", name="btnOk", text="OK", cssPosition="200,20,-1,-1,80,30", styleClass="btn btn-primary")
+addButton(formName="ConfirmDialog", name="btnCancel", text="Cancel", cssPosition="200,110,-1,-1,80,30")
+```
+
+**Search Form:**
+```
+addButton(formName="SearchForm", name="btnSearch", text="Search", cssPosition="50,-1,-1,20,100,30", imageStyleClass="fas fa-search")
+addButton(formName="SearchForm", name="btnClear", text="Clear", cssPosition="50,-1,-1,130,100,30")
+```
+
+**Navigation Buttons:**
+```
+addButton(formName="RecordNav", name="btnFirst", text="First", cssPosition="10,-1,-1,10,60,25")
+addButton(formName="RecordNav", name="btnPrev", text="Prev", cssPosition="10,-1,-1,80,60,25")
+addButton(formName="RecordNav", name="btnNext", text="Next", cssPosition="10,-1,-1,150,60,25")
+addButton(formName="RecordNav", name="btnLast", text="Last", cssPosition="10,-1,-1,220,60,25")
+```
+
+---
+
+## ERROR HANDLING
 
 **Error: "Form file not found"**
-- Form doesn't exist yet
-- Solution: Create form first with createForm
+- Check form exists: `listForms()`
+- Create form if needed: `openForm(name="FormName", create=true)`
 
 **Error: "Form does not use CSS positioning"**
-- Form was created without CSS positioning
-- Solution: Create new form with style="css" or style="responsive"
+- Form must be created with style="css" or style="responsive"
 
-**Error: "Invalid CSS position format"**
-- cssPosition doesn't have exactly 6 comma-separated values
-- Solution: Use format "top,right,bottom,left,width,height"
+**Error: "Component with name X already exists"**
+- Use listButtons to see existing names
+- Choose a different unique name
 
-**Error: "Duplicate button name"**
-- Another button with same name already exists on form
-- Solution: Choose different unique name
+**Error: "'name' parameter is required"**
+- You must provide a unique component name
 
----
-
-## LIMITATIONS
-
-**Current Implementation:**
-- ✅ Can add buttons with text
-- ✅ Can position buttons manually
-- ✅ Validates form structure
-- ✅ Creates backups before changes
-
-**Not Yet Implemented:**
-- ❌ Event handlers (onAction)
-- ❌ Styling (styleClass, variants)
-- ❌ Icons
-- ❌ Tooltips
-- ❌ Enabled/visible states
-- ❌ Auto-layout optimization
-- ❌ Button removal
-- ❌ Button editing
-
-**When user requests unsupported features:**
-"The addButton tool currently supports basic button creation with text and positioning. [Feature X] is not yet implemented. Would you like to add buttons with the current capabilities?"
+**Error: "'cssPosition' parameter is required"**
+- You must calculate and provide the position
+- Use listButtons to see existing component positions
 
 ---
 
-## TECHNICAL NOTES
+## PARAMETER GUESSING PREVENTION
 
-**File Structure:**
-- Forms stored in: `PROJECT_ROOT/forms/`
-- Form file format: `FORM_NAME.frm` (JSON)
-- JavaScript file: `FORM_NAME.js` (optional, for functionality)
+[FORBIDDEN] Never guess parameter values  
+[REQUIRED] If formName not provided: ASK user or use getCurrentForm  
+[REQUIRED] If name not provided: ASK user for button name  
+[REQUIRED] If cssPosition not provided: ASK user or tell them to use listButtons to calculate position
 
-**UUID Generation:**
-- Uses `com.servoy.j2db.util.UUID.randomUUID()`
-- Ensures unique component identification
-- Required for Servoy runtime
+**All three parameters (formName, name, cssPosition) are REQUIRED for addButton.**
 
-**Backup Strategy:**
-- Before any .frm modification, backup created: `FORM_NAME.frm.backup`
-- Allows recovery if corruption occurs
+---
 
-**Bootstrap Components:**
-- typeName: "bootstrapcomponents-button"
-- typeid: 47
-- Part of Servoy's bootstrap components package
+## INTEGRATION WITH OTHER TOOLS
+
+**With getCurrentForm:**
+```
+# Get current form first
+getCurrentForm()
+→ Returns: "CustomerForm"
+
+# Then add button to that form
+addButton(formName="CustomerForm", name="btnSave", text="Save", cssPosition="20,-1,-1,25,80,30")
+```
+
+**With listButtons:**
+```
+# List existing buttons to calculate next position
+listButtons(formName="OrderForm")
+→ Returns: [button at position "20,-1,-1,20,80,30"]
+
+# Calculate next position (same top, next left = 20 + 80 + 10 = 110)
+addButton(formName="OrderForm", name="btnNew", text="New", cssPosition="20,-1,-1,110,80,30")
+```
+
+**With Styles:**
+```
+# Create style first
+addStyle(className="btn-primary-lg", cssContent="background: #007bff; color: white; font-size: 16px; padding: 12px 24px;")
+
+# Use style on button
+addButton(formName="MyForm", name="btnSubmit", text="Submit", cssPosition="50,-1,-1,20,120,40", styleClass="btn btn-primary-lg")
+```
+
+---
+
+**END OF BUTTON RULES**

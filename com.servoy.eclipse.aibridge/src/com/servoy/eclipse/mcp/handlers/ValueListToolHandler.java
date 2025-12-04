@@ -10,8 +10,10 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.mcp.IToolHandler;
 import com.servoy.eclipse.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ValueList;
 
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -197,20 +199,33 @@ public class ValueListToolHandler implements IToolHandler
 
 					myVL.setDataSource(dataSource);
 
-					// Determine which column to use
-					String columnToUse = displayColumn;
-					if (columnToUse == null || columnToUse.trim().isEmpty())
-					{
-						columnToUse = returnColumn;
-					}
+					// Determine display and return column configuration
+					boolean hasDisplayColumn = (displayColumn != null && !displayColumn.trim().isEmpty());
+					boolean hasReturnColumn = (returnColumn != null && !returnColumn.trim().isEmpty());
 
-					if (columnToUse != null && !columnToUse.trim().isEmpty())
+					if (hasDisplayColumn && hasReturnColumn && !displayColumn.equals(returnColumn))
 					{
-						// Set the column in dataProviderID1
-						myVL.setDataProviderID1(columnToUse);
-						// Set bitmask to 1 (show and return first column)
-						myVL.setShowDataProviders(1);
-						myVL.setReturnDataProviders(1);
+						// Different columns: display one, return another
+						// dataProviderID1 = display column (what user sees)
+						// dataProviderID2 = return column (what gets stored)
+						myVL.setDataProviderID1(displayColumn);
+						myVL.setDataProviderID2(returnColumn);
+						myVL.setShowDataProviders(1); // Show first column (display)
+						myVL.setReturnDataProviders(2); // Return second column (return)
+					}
+					else if (hasDisplayColumn)
+					{
+						// Only displayColumn: use it for both display and return
+						myVL.setDataProviderID1(displayColumn);
+						myVL.setShowDataProviders(1); // Show first column
+						myVL.setReturnDataProviders(1); // Return first column
+					}
+					else if (hasReturnColumn)
+					{
+						// Only returnColumn: use it for both display and return (backward compatibility)
+						myVL.setDataProviderID1(returnColumn);
+						myVL.setShowDataProviders(1); // Show first column
+						myVL.setReturnDataProviders(1); // Return first column
 					}
 
 					// Set separator if provided
@@ -245,6 +260,14 @@ public class ValueListToolHandler implements IToolHandler
 					}
 					myVL.setCustomValues(customValuesStr.toString());
 				}
+			}
+
+			// Save the value list if it was created
+			if (isCreate)
+			{
+				ServoyLog.logInfo("[ValueListToolHandler] Saving value list: " + name);
+				ServoyProject servoyProject = servoyModel.getActiveProject();
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { myVL }, true);
 			}
 
 			// Open editor on UI thread

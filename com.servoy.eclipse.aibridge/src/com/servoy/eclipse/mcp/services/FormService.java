@@ -1,7 +1,5 @@
 package com.servoy.eclipse.mcp.services;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,12 +13,12 @@ import com.servoy.j2db.util.UUID;
 
 /**
  * Service for safe manipulation of Servoy form (.frm) files.
- * Handles JSON parsing, component addition, validation, and file writing.
+ * Handles JSON parsing, component addition, validation, file writing, and form refresh.
  * 
  * CRITICAL: This service is the ONLY way to manipulate form files.
  * Direct file editing by AI models is FORBIDDEN due to corruption risks.
  */
-public class FormFileService
+public class FormService
 {
 	/**
 	 * Adds a button component to a form file.
@@ -36,15 +34,18 @@ public class FormFileService
 	{
 		try
 		{
+			System.out.println("[FormService] addButtonToForm called with: projectPath='" + projectPath + "', formName='" + formName + "', buttonName='" + buttonName + "', buttonText='" + buttonText + "', cssPosition='" + cssPosition + "'");
+			
 			// Build path to form file
 			Path formPath = Paths.get(projectPath, "forms", formName + ".frm");
 			
 			if (!Files.exists(formPath))
 			{
-				ServoyLog.logError("[FormFileService] Form file not found: " + formPath);
+				ServoyLog.logError("[FormService] Form file not found: " + formPath);
 				return false;
 			}
 			
+			System.out.println("[FormService] Loading and parsing form file: " + formPath);
 			// Read and parse existing form JSON
 			String formContent = new String(Files.readAllBytes(formPath));
 			JSONObject formJson = new JSONObject(formContent);
@@ -52,7 +53,7 @@ public class FormFileService
 			// Validate form structure
 			if (!formJson.has("items") || !formJson.has("uuid"))
 			{
-				ServoyLog.logError("[FormFileService] Invalid form structure in: " + formPath);
+				ServoyLog.logError("[FormService] Invalid form structure in: " + formPath);
 				return false;
 			}
 			
@@ -66,7 +67,7 @@ public class FormFileService
 			
 			if (!usesCssPosition)
 			{
-				ServoyLog.logError("[FormFileService] Form does not use CSS positioning: " + formName);
+				ServoyLog.logError("[FormService] Form does not use CSS positioning: " + formName);
 				return false;
 			}
 			
@@ -74,7 +75,7 @@ public class FormFileService
 			String[] positionParts = cssPosition.split(",");
 			if (positionParts.length != 6)
 			{
-				ServoyLog.logError("[FormFileService] Invalid CSS position format. Expected: top,right,bottom,left,width,height");
+				ServoyLog.logError("[FormService] Invalid CSS position format. Expected: top,right,bottom,left,width,height");
 				return false;
 			}
 			
@@ -117,12 +118,13 @@ public class FormFileService
 				writer.write(updatedContent);
 			}
 			
-			ServoyLog.logInfo("[FormFileService] Successfully added button '" + buttonName + "' to form '" + formName + "'");
+			ServoyLog.logInfo("[FormService] Successfully added button '" + buttonName + "' to form '" + formName + "'");
+			System.out.println("[FormService] Button '" + buttonName + "' added successfully to form '" + formName + "'");
 			return true;
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("[FormFileService] Error adding button to form: " + e.getMessage(), e);
+			ServoyLog.logError("[FormService] Error adding button to form: " + e.getMessage(), e);
 			return false;
 		}
 	}
@@ -169,7 +171,7 @@ public class FormFileService
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("[FormFileService] Error validating form: " + e.getMessage(), e);
+			ServoyLog.logError("[FormService] Error validating form: " + e.getMessage(), e);
 			return false;
 		}
 	}
@@ -227,8 +229,9 @@ public class FormFileService
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("[FormFileService] Error getting form info: " + e.getMessage(), e);
+			ServoyLog.logError("[FormService] Error getting form info: " + e.getMessage(), e);
 			return null;
 		}
 	}
+	
 }

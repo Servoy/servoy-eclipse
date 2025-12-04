@@ -7,6 +7,20 @@
 
 ---
 
+## [CRITICAL] TOOL USAGE RESTRICTIONS
+
+**For relation operations, use ONLY the tools specified below and NO other tools (like file_search, grep_search, workspace search, etc.).**
+
+**See copilot-instructions.md RULE 6 for complete tool restrictions.**
+
+**Key points:**
+- [YES] ONLY use the 4 relation tools + 2 database tools listed below
+- [YES] Stay within {{PROJECT_NAME}} project
+- [NO] Do NOT use file system or search tools
+- [NO] Do NOT search in other projects
+
+---
+
 ## CRITICAL: DATABASE SERVER NAME
 
 **When ANY database tool requires serverName parameter:**
@@ -122,7 +136,7 @@ openRelation(
 **Example 1: User knows everything**
 ```
 User: "Create relation from orders to customers using customer_id"
-→ openRelation(name="orders_to_customers",
+--> openRelation(name="orders_to_customers",
                primaryDataSource="example_data/orders",
                foreignDataSource="example_data/customers",
                primaryColumn="customer_id",
@@ -132,16 +146,16 @@ User: "Create relation from orders to customers using customer_id"
 **Example 2: User doesn't know what's available**
 ```
 User: "I need a relation"
-→ Ask: "What's your database server name?"
+--> Ask: "What's your database server name?"
 User: "example_data"
-→ discoverRelations(serverName="example_data")
-→ Show: EXPLICIT FKs + POTENTIAL relations
-→ User chooses tables
-→ openRelation(...with parameters...)
+--> discoverRelations(serverName="example_data")
+--> Show: EXPLICIT FKs + POTENTIAL relations
+--> User chooses tables
+--> openRelation(...with parameters...)
 ```
 
 **Example 3: List existing**
 ```
 User: "Show me all relations"
-→ listRelations()
+--> listRelations()
 ```

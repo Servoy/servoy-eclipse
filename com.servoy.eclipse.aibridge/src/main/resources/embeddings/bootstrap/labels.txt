@@ -1,0 +1,52 @@
+# BOOTSTRAP LABELS category - AI perspective queries (CRUD operations)
+
+# CREATE operations
+add label
+create label
+make label
+build label
+place label
+insert label
+new label
+label component
+add text label
+create text label
+label on form
+form label
+static text
+add title
+heading label
+
+# UPDATE operations
+update label
+modify label
+change label
+edit label
+change label text
+update label position
+move label
+reposition label
+change label style
+modify label properties
+
+# DELETE operations
+delete label
+remove label
+clear label
+drop label
+erase label
+
+# READ/LIST operations
+list labels
+show labels
+get labels
+find labels
+search labels
+view labels
+display labels
+label info
+label details
+get label info
+inspect label
+check label
+see labels

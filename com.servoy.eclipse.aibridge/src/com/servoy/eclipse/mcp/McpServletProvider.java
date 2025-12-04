@@ -1,7 +1,6 @@
 package com.servoy.eclipse.mcp;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,8 +10,10 @@ import org.apache.tomcat.starter.IServicesProvider;
 import org.apache.tomcat.starter.ServletInstance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.servoy.eclipse.mcp.ai.PromptEnricher;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.mcp.ai.RulesCache;
 import com.servoy.eclipse.mcp.ai.ServoyEmbeddingService;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
@@ -29,8 +30,6 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
 
 public class McpServletProvider implements IServicesProvider
 {
-	final PromptEnricher enricher = new PromptEnricher();
-
 	@Override
 	public Set<ServletInstance> getServletInstances(String context)
 	{
@@ -47,35 +46,21 @@ public class McpServletProvider implements IServicesProvider
 				.build())
 			.build();
 
-		// processPrompt tool - AI-powered intent detection and enrichment
-		Tool processPromptTool = McpSchema.Tool.builder()
+		// getContext tool - Action list based context retrieval
+		Tool getContextTool = McpSchema.Tool.builder()
 			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("processPrompt")
-			.description(
-				"Process user prompts for Servoy operations. This tool analyzes the user's request and either handles it or returns PASS_THROUGH for non-Servoy tasks. Required: prompt (string) - the complete user message.")
-			.build();
-
-		SyncToolSpecification processPromptSpec = SyncToolSpecification.builder()
-			.tool(processPromptTool)
-			.callHandler(this::handleProcessPrompt)
-			.build();
-		server.addTool(processPromptSpec);
-
-		// getContextFor tool - NEW: Action list based context retrieval
-		Tool getContextForTool = McpSchema.Tool.builder()
-			.inputSchema(new JsonSchema("object", null, null, null, null, null))
-			.name("getContextFor")
+			.name("getContext")
 			.description(
 				"Retrieves Servoy documentation and tools for specified action queries. " +
-				"Required: queries (array of strings) - action phrases like 'create form', 'add buttons', 'create relation'. " +
-				"Each query should be a simple 2-4 word phrase describing one action type.")
+					"Required: queries (array of strings) - action phrases like 'create form', 'add buttons', 'create relation'. " +
+					"Each query should be a simple 2-4 word phrase describing one action type.")
 			.build();
 
-		SyncToolSpecification getContextForSpec = SyncToolSpecification.builder()
-			.tool(getContextForTool)
-			.callHandler(this::handleGetContextFor)
+		SyncToolSpecification getContextSpec = SyncToolSpecification.builder()
+			.tool(getContextTool)
+			.callHandler(this::handleGetContext)
 			.build();
-		server.addTool(getContextForSpec);
+		server.addTool(getContextSpec);
 
 		registerHandlers(server);
 
@@ -84,82 +69,28 @@ public class McpServletProvider implements IServicesProvider
 	}
 
 	/**
-	 * Process the prompt using AI-powered intent detection and enrichment:
-	 * 1. Use embedding-based intent detection (ONNX local model)
-	 * 2. Enrich prompt with rules and examples based on detected intent
-	 * 3. Return enriched prompt to Copilot for processing
-	 */
-	private McpSchema.CallToolResult handleProcessPrompt(Object exchange, McpSchema.CallToolRequest request)
-	{
-		System.out.println("========================================");
-		System.out.println("[McpServletProvider] handleProcessPrompt CALLED");
-		String prompt = null;
-
-		// Extract prompt from request
-		Map<String, Object> args = request.arguments();
-		if (args != null && args.containsKey("prompt"))
-		{
-			Object promptObj = args.get("prompt");
-			if (promptObj != null)
-			{
-				prompt = promptObj.toString();
-			}
-		}
-
-		if (prompt == null || prompt.trim().isEmpty())
-		{
-			System.out.println("[McpServletProvider] ERROR: No prompt provided");
-			return McpSchema.CallToolResult.builder()
-				.content(List.of(new TextContent("Error: prompt parameter is required")))
-				.build();
-		}
-
-		System.out.println("[McpServletProvider] Received prompt: \"" + prompt + "\"");
-		ServoyLog.logInfo("[MCP] Prompt: \"" + prompt + "\"");
-		try
-		{
-			System.out.println("[McpServletProvider] Calling enricher.processPrompt()...");
-			String result = enricher.processPrompt(prompt);
-			System.out.println("[McpServletProvider] Enricher returned: " + (result.length() > 100 ? result.substring(0, 100) + "..." : result));
-
-			return McpSchema.CallToolResult.builder()
-				.content(List.of(new TextContent(result)))
-				.build();
-		}
-		catch (Exception e)
-		{
-			System.out.println("[McpServletProvider] ERROR in AI processing: " + e.getMessage());
-			e.printStackTrace();
-			ServoyLog.logError("[MCP] Error in AI processing: " + e.getMessage());
-			return McpSchema.CallToolResult.builder()
-				.content(List.of(new TextContent("PASS_THROUGH")))
-				.build();
-		}
-	}
-
-	/**
-	 * NEW: Get context for action list queries.
+	 * Get context for action list queries.
 	 * Receives array of action phrases, does similarity search for each,
 	 * returns aggregated Servoy context.
 	 */
-	private McpSchema.CallToolResult handleGetContextFor(Object exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleGetContext(Object exchange, McpSchema.CallToolRequest request)
 	{
 		System.out.println("========================================");
-		System.out.println("[McpServletProvider] handleGetContextFor CALLED");
+		System.out.println("[McpServletProvider] handleGetContext CALLED");
 
 		// Extract queries array from request
 		List<String> queries = new ArrayList<>();
 		Map<String, Object> args = request.arguments();
-		
+
 		if (args != null && args.containsKey("queries"))
 		{
 			Object queriesObj = args.get("queries");
 			System.out.println("[McpServletProvider] Queries object type: " + (queriesObj != null ? queriesObj.getClass().getName() : "null"));
 			System.out.println("[McpServletProvider] Queries object: " + queriesObj);
-			
-			if (queriesObj instanceof List<?>)
+
+			if (queriesObj instanceof List< ? >)
 			{
-				List<?> queriesList = (List<?>)queriesObj;
+				List< ? > queriesList = (List< ? >)queriesObj;
 				for (Object query : queriesList)
 				{
 					if (query != null)
@@ -194,27 +125,27 @@ public class McpServletProvider implements IServicesProvider
 		{
 			// Get embedding service
 			ServoyEmbeddingService embeddingService = ServoyEmbeddingService.getInstance();
-			
+
 			// Track matched categories and their contexts
 			Map<String, CategoryMatch> categoryMatches = new LinkedHashMap<>();
-			
+
 			// For each query, do similarity search
 			for (String query : queries)
 			{
 				System.out.println("[McpServletProvider] Searching for: \"" + query + "\"");
-				
+
 				// Search with top 3 results to allow multiple category matches
 				List<ServoyEmbeddingService.SearchResult> results = embeddingService.search(query, 3);
-				
+
 				System.out.println("[McpServletProvider] Found " + results.size() + " matches for \"" + query + "\"");
-				
+
 				for (ServoyEmbeddingService.SearchResult result : results)
 				{
 					String intent = result.metadata.get("intent");
 					if (intent != null && !intent.equals("PASS_THROUGH"))
 					{
 						System.out.println("[McpServletProvider]   Matched: " + intent + " (score: " + result.score + ")");
-						
+
 						// Track this category
 						if (!categoryMatches.containsKey(intent))
 						{
@@ -242,7 +173,7 @@ public class McpServletProvider implements IServicesProvider
 
 			if (categoryMatches.isEmpty())
 			{
-				response.append("⚠️ NO MATCHING SERVOY CATEGORIES FOUND\n\n");
+				response.append("[!!! NO MATCHING SERVOY CATEGORIES FOUND !!!]\n\n");
 				response.append("Your queries:\n");
 				for (String query : queries)
 				{
@@ -253,26 +184,49 @@ public class McpServletProvider implements IServicesProvider
 			}
 			else
 			{
-				response.append("📋 MATCHED CATEGORIES:\n");
+				response.append("=============================================================================\n");
+				response.append("=== AVAILABLE TOOLS & CONTEXT ===\n");
+				response.append("=============================================================================\n\n");
+
+				// Get active project name for variable substitution
+				String projectName = null;
+				try
+				{
+					ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+					if (activeProject != null)
+					{
+						projectName = activeProject.getProject().getName();
+					}
+				}
+				catch (Exception e)
+				{
+					// Ignore - will use null project name
+					System.out.println("[McpServletProvider] Could not get active project name: " + e.getMessage());
+				}
+
 				int categoryNum = 1;
 				for (CategoryMatch match : categoryMatches.values())
 				{
-					response.append("\n").append(categoryNum++).append(". Category: ").append(match.category).append("\n");
-					response.append("   Matched query: \"").append(match.matchedQuery).append("\"\n");
-					response.append("   Confidence: ").append(String.format("%.1f%%", match.bestScore * 100)).append("\n");
-				}
+					response.append("--- Category ").append(categoryNum++).append(": ").append(match.category).append(" ---\n");
+					response.append("Matched query: \"").append(match.matchedQuery).append("\"\n");
+					response.append("Confidence: ").append(String.format("%.1f%%", match.bestScore * 100)).append("\n\n");
 
-				response.append("\n\n🔧 AVAILABLE TOOLS & CONTEXT:\n\n");
-				response.append("(Note: Full tool definitions, rules, and examples will be added in Phase 3)\n");
-				response.append("For now, showing matched categories to verify action list approach works.\n\n");
+					// Load actual rules content from RulesCache with project name substitution
+					String rules = RulesCache.getRules(match.category, projectName);
+					if (rules != null && !rules.isEmpty())
+					{
+						response.append(rules).append("\n\n");
+					}
+					else
+					{
+						response.append("[NOT YET IMPLEMENTED]\n\n");
+						response.append("This category was matched by similarity search, but tools for ")
+							.append(match.category).append(" are not yet available.\n");
+						response.append("This feature is planned for future implementation.\n\n");
+						response.append("For now, inform the user that this functionality is coming soon.\n\n");
+					}
 
-				for (CategoryMatch match : categoryMatches.values())
-				{
-					response.append("Category: ").append(match.category).append("\n");
-					response.append("  - Tools will be defined here\n");
-					response.append("  - Rules and requirements\n");
-					response.append("  - Parameter specifications\n");
-					response.append("  - Usage examples\n\n");
+					response.append("=============================================================================\n\n");
 				}
 			}
 
@@ -284,9 +238,9 @@ public class McpServletProvider implements IServicesProvider
 		}
 		catch (Exception e)
 		{
-			System.out.println("[McpServletProvider] ERROR in getContextFor: " + e.getMessage());
+			System.out.println("[McpServletProvider] ERROR in getContext: " + e.getMessage());
 			e.printStackTrace();
-			ServoyLog.logError("[MCP] Error in getContextFor: " + e.getMessage(), e);
+			ServoyLog.logError("[MCP] Error in getContext: " + e.getMessage(), e);
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent("Error processing queries: " + e.getMessage())))
 				.isError(true)

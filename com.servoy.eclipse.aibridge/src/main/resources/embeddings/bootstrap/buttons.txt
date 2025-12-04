@@ -1,21 +1,54 @@
-# BOOTSTRAP BUTTONS category - AI perspective queries
+# BOOTSTRAP BUTTONS category - AI perspective queries (CRUD operations)
+
+# CREATE operations
 add button
 create button
 make button
 build button
 place button
 insert button
+new button
+button component
 add action button
 create UI button
-button creation
-button component
-button element
-add click button
-create button element
-place action button
-insert UI button
 button on form
 form button
-add form button
-create form button
-button to form
+click button
+action button
+submit button
+
+# UPDATE operations
+update button
+modify button
+change button
+edit button
+change button text
+update button position
+move button
+reposition button
+change button style
+modify button properties
+change button icon
+update button state
+
+# DELETE operations
+delete button
+remove button
+clear button
+drop button
+erase button
+
+# READ/LIST operations
+list buttons
+show buttons
+get buttons
+find buttons
+search buttons
+view buttons
+display buttons
+button info
+button details
+get button info
+inspect button
+check button
+see buttons
