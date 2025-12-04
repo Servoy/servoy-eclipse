@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { EditorContentService } from './editorcontent.service';
+import { EditorContentService} from './editorcontent.service';
 import { EditorSessionService, IShowDynamicGuidesChangedListener } from './editorsession.service';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-
+import { PersistIdentifier } from '@servoy/designer';
 
 @Injectable()
 export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
@@ -67,8 +67,10 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			}
 			let parent = contentElements.find(e => this.isParentContainer(e));
             this.uuid = this.element?.getAttribute('svy-id');
-			const svyName = this.element?.getAttribute('svy-name');
-			if (svyName && parent && svyName.indexOf(parent.getAttribute('svy-id').replace(/-/g,'_')) >= 0 ){
+			const persistId = this.uuid ? PersistIdentifier.fromJSONString(this.uuid) : null;
+			const parentSvyName = parent?.getAttribute('svy-id');
+			const parentPersistId = parentSvyName ? PersistIdentifier.fromJSONString(parentSvyName) : null;
+			if (persistId && parentPersistId && persistId.isDirectlyNestedInside(parentPersistId)) {
 				this.parentContainer = parent;
 			}
 			this.formBounds = this.editorContentService.getContentForm().getBoundingClientRect();
