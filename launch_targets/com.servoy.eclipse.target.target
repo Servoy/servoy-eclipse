@@ -379,6 +379,12 @@
                     <version>2.3</version>
                     <type>jar</type>
                 </dependency>
+                <dependency>
+                	<groupId>org.owasp.encoder</groupId>
+                	<artifactId>encoder</artifactId>
+                	<version>1.4.0</version>
+                	<type>jar</type>
+                </dependency>
             </dependencies>
             <repositories>
                 <repository>
