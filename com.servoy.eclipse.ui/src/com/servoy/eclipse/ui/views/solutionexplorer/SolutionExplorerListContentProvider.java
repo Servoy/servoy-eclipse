@@ -3235,124 +3235,127 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			Class< ? > clazz = getMethodClass();
 			String methodDocu = null;
-			// check documentation for the legacy api methods
-			if (HasRuntimeStyleClass.class.isAssignableFrom(clazz))
+			if (clazz != null)
 			{
-				if ("addStyleClass".equals(name))
+				// check documentation for the legacy api methods
+				if (HasRuntimeStyleClass.class.isAssignableFrom(clazz))
 				{
-					methodDocu = "Adds a style to the styleClass property. This works only for NGClient where multiple styles are supported.<br/>" +
-						"<br/>" +
-						"<b>@sample</b><br/>" +
-						"elements." + prefix + "addStyleClass();<br/>" +
-						"<br/>" +
-						"<b>@param</b> {String} <b>styleName</b> the name of the style class to add";
-				}
-				if ("removeStyleClass".equals(name))
-				{
-					methodDocu = "Removes a style from the styleClass property. This works only for NGClient where multiple styles are supported.<br/>" +
-						"<br/>" +
-						"<b>@sample</b><br/>" +
-						"elements." + prefix + "removeStyleClass();<br/>" +
-						"<br/>" +
-						"<b>@param</b> {String} <b>styleName</b> the name of the style class to remove";
-				}
-				if ("hasStyleClass".equals(name))
-				{
-					methodDocu = "Check if an element already has a style from the styleClass property.<br/>" +
-						"<br/>" +
-						"<b>@sample</b><br/>" +
-						"var name = elements." + prefix + "hasStyleClass();<br/>" +
-						"<br/>" +
-						"<b>@param</b> {String} <b>styleName</b> the name of the style class to be checked";
-				}
-				if ("getStyleClasses".equals(name))
-				{
-					methodDocu = "Return style classes of the element.<br/>" +
-						"<br/>" +
-						"<b>@sample</b><br/>" +
-						"elements." + prefix + "getStyleClasses();<br/>" +
-						"<br/>" +
-						"<b>@return</b> an array of style class names";
-				}
+					if ("addStyleClass".equals(name))
+					{
+						methodDocu = "Adds a style to the styleClass property. This works only for NGClient where multiple styles are supported.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"elements." + prefix + "addStyleClass();<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>styleName</b> the name of the style class to add";
+					}
+					if ("removeStyleClass".equals(name))
+					{
+						methodDocu = "Removes a style from the styleClass property. This works only for NGClient where multiple styles are supported.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"elements." + prefix + "removeStyleClass();<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>styleName</b> the name of the style class to remove";
+					}
+					if ("hasStyleClass".equals(name))
+					{
+						methodDocu = "Check if an element already has a style from the styleClass property.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"var name = elements." + prefix + "hasStyleClass();<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>styleName</b> the name of the style class to be checked";
+					}
+					if ("getStyleClasses".equals(name))
+					{
+						methodDocu = "Return style classes of the element.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"elements." + prefix + "getStyleClasses();<br/>" +
+							"<br/>" +
+							"<b>@return</b> an array of style class names";
+					}
 
-			}
-			else if (HasRuntimeFormName.class.isAssignableFrom(clazz))
-			{
-				methodDocu = "Returns the name of the form. (may be empty string as well)<br/>" +
-					"<br/>" +
-					"<b>@sample</b><br/>" +
-					"var name = elements." + prefix + "getFormName();<br/>" +
-					"<br/>" +
-					"<b>@return</b> The name of the form.";
-
-			}
-			else if (HasRuntimeName.class.isAssignableFrom(clazz))
-			{
-				methodDocu = "Returns the name of an element. (may be null as well)<br/>" +
-					"<br/>" +
-					"<b>@sample</b><br/>" +
-					"var name = elements." + prefix + "getName();<br/>" +
-					"<br/>" +
-					"<b>@return</b> The name of the element.";
-
-			}
-			else if (HasRuntimeElementType.class.isAssignableFrom(clazz))
-			{
-				methodDocu = "Returns the type of a specified element.<br/>" +
-					"<br/>" +
-					"<b>@sample</b><br/>" +
-					"var et = elements." + prefix + "getElementType();<br/>" +
-					"<br/>" +
-					"<b>@return</b> The display type of the element as String.";
-
-			}
-			else if (HasRuntimeDesignTimeProperty.class.isAssignableFrom(clazz))
-			{
-				if ("getDesignTimeProperty".equals(name))
+				}
+				else if (HasRuntimeFormName.class.isAssignableFrom(clazz))
 				{
-					methodDocu = "Get a design-time property of an element.<br/>" +
+					methodDocu = "Returns the name of the form. (may be empty string as well)<br/>" +
 						"<br/>" +
 						"<b>@sample</b><br/>" +
-						"var prop = elements." + prefix + "getDesignTimeProperty();<br/>" +
+						"var name = elements." + prefix + "getFormName();<br/>" +
 						"<br/>" +
-						"<b>@param</b> {String} <b>key</b> the name of the property<br/>" +
-						"<br/>" +
-						"<b>@return</b> The value of the specified design-time property.";
+						"<b>@return</b> The name of the form.";
+
 				}
-				if ("getDesignProperties".equals(name))
+				else if (HasRuntimeName.class.isAssignableFrom(clazz))
+				{
+					methodDocu = "Returns the name of an element. (may be null as well)<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"var name = elements." + prefix + "getName();<br/>" +
+						"<br/>" +
+						"<b>@return</b> The name of the element.";
+
+				}
+				else if (HasRuntimeElementType.class.isAssignableFrom(clazz))
 				{
 					methodDocu = "Returns the type of a specified element.<br/>" +
 						"<br/>" +
 						"<b>@sample</b><br/>" +
-						"var propMap = elements." + prefix + "getDesignProperties();<br/>" +
+						"var et = elements." + prefix + "getElementType();<br/>" +
 						"<br/>" +
-						"<b>@return</b> A map of all design-time properties for the element.";
+						"<b>@return</b> The display type of the element as String.";
+
 				}
-			}
-			else if (HasRuntimeClientProperty.class.isAssignableFrom(clazz))
-			{
-				if ("putClientProperty".equals(name))
+				else if (HasRuntimeDesignTimeProperty.class.isAssignableFrom(clazz))
 				{
-					methodDocu = "Sets the value for the specified element client property key.<br/>" +
-						"NOTE: Depending on the operating system, a user interface property name may be available.<br/>" +
-						"<br/>" +
-						"<b>@sample</b><br/>" +
-						"elements." + prefix + "putClientProperty('ToolTipText','some text');<br/>" +
-						"<br/>" +
-						"<b>@param</b> {String} <b>key</b> user interface key (depends on operating system<br/>" +
-						"<b>@param</b> {String} <b>value</b> a predefined value for the key<br/>";
+					if ("getDesignTimeProperty".equals(name))
+					{
+						methodDocu = "Get a design-time property of an element.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"var prop = elements." + prefix + "getDesignTimeProperty();<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>key</b> the name of the property<br/>" +
+							"<br/>" +
+							"<b>@return</b> The value of the specified design-time property.";
+					}
+					if ("getDesignProperties".equals(name))
+					{
+						methodDocu = "Returns the type of a specified element.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"var propMap = elements." + prefix + "getDesignProperties();<br/>" +
+							"<br/>" +
+							"<b>@return</b> A map of all design-time properties for the element.";
+					}
 				}
-				if ("getClientProperty".equals(name))
+				else if (HasRuntimeClientProperty.class.isAssignableFrom(clazz))
 				{
-					methodDocu = "Gets the specified client property for the element based on a key.<br/>" +
-						"NOTE: Depending on the operating system, a user interface property name may be available.<br/>" +
-						"<br/>" +
-						"<b>@sample</b><br/>" +
-						"var property = elements." + prefix + "getClientProperty('ToolTipText');<br/>" +
-						"<br/>" +
-						"<b>@param</b> {String} <b>key</b> user interface key (depends on operating system)<br/>" +
-						"<br/>" +
-						"<b>@return</b> The value of the property for specified key.";
+					if ("putClientProperty".equals(name))
+					{
+						methodDocu = "Sets the value for the specified element client property key.<br/>" +
+							"NOTE: Depending on the operating system, a user interface property name may be available.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"elements." + prefix + "putClientProperty('ToolTipText','some text');<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>key</b> user interface key (depends on operating system<br/>" +
+							"<b>@param</b> {String} <b>value</b> a predefined value for the key<br/>";
+					}
+					if ("getClientProperty".equals(name))
+					{
+						methodDocu = "Gets the specified client property for the element based on a key.<br/>" +
+							"NOTE: Depending on the operating system, a user interface property name may be available.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"var property = elements." + prefix + "getClientProperty('ToolTipText');<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>key</b> user interface key (depends on operating system)<br/>" +
+							"<br/>" +
+							"<b>@return</b> The value of the property for specified key.";
+					}
 				}
 			}
 			return methodDocu;
