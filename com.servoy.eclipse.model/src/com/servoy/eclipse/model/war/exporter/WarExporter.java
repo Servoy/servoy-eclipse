@@ -184,7 +184,7 @@ public class WarExporter
 		"wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
 		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar", //
 		"org.apache.httpcomponents.core5.httpcore5_*.jar", "org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
-		"org.apache.httpcomponents.client5.httpclient5_*.jar" };
+		"org.apache.httpcomponents.client5.httpclient5_*.jar", "org.owasp.encoder_*.jar" };
 
 	private static final Set<String> HTTP_PLUGIN_FILES = Set.of("httpclient5.jar", "httpcore5-h2.jar", "httpcore5.jar");
 
