@@ -20,6 +20,7 @@ package com.servoy.eclipse.model.builder;
 import java.awt.Point;
 import java.awt.print.PageFormat;
 import java.lang.reflect.Method;
+import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -2385,7 +2386,7 @@ public class ServoyFormBuilder
 	{
 		int realValueType = valuelist.getRealValueType();
 		int dataProviderType = dataProvider.getDataProviderType();
-		if (realValueType != 0 && realValueType != dataProviderType)
+		if (realValueType != 0 && realValueType != dataProviderType && dataProviderType != Types.ARRAY)
 		{
 
 			boolean isMatchingType = dataProvider instanceof ScriptVariable &&
