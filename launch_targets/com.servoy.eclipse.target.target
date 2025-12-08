@@ -51,18 +51,6 @@
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
-              <dependency>
-                  <groupId>org.eclipse.collections</groupId>
-                  <artifactId>eclipse-collections-api</artifactId>
-                  <version>13.0.0</version>
-                  <type>jar</type>
-              </dependency>
-              <dependency>
-                  <groupId>org.eclipse.collections</groupId>
-                  <artifactId>eclipse-collections</artifactId>
-                  <version>13.0.0</version>
-                  <type>jar</type>
-              </dependency>
                 <dependency>
                     <groupId>com.auth0</groupId>
                     <artifactId>java-jwt</artifactId>
@@ -334,11 +322,6 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
-                    <groupId>org.jspecify</groupId>
-                    <artifactId>jspecify</artifactId>
-                    <version>1.0.0</version>
-                </dependency>
-                <dependency>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex</artifactId>
                     <version>3.5.3</version>
@@ -525,6 +508,18 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>org.eclipse.collections</groupId>
+                    <artifactId>eclipse-collections-api</artifactId>
+                    <version>13.0.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.collections</groupId>
+                    <artifactId>eclipse-collections</artifactId>
+                    <version>13.0.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
                     <groupId>org.freemarker</groupId>
                     <artifactId>freemarker</artifactId>
                     <version>2.3.34</version>
@@ -552,6 +547,12 @@
                     <groupId>org.jsoup</groupId>
                     <artifactId>jsoup</artifactId>
                     <version>1.21.2</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.jspecify</groupId>
+                    <artifactId>jspecify</artifactId>
+                    <version>1.0.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -593,6 +594,10 @@
                     <url>https://repo.maven.apache.org/maven2</url>
                 </repository>
             </repositories>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/nebula/updates/release/3.2.0"/>
+            <unit id="org.eclipse.nebula.widgets.richtext.feature.feature.group" version="1.6.0.202509131601"/>
         </location>
     </locations>
     <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21"/>
