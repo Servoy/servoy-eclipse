@@ -53,7 +53,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ISourceRange;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
+import org.eclipse.dltk.javascript.typeinference.ReferenceLocation;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
@@ -62,6 +68,7 @@ import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.JSDocTypeParser;
 import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.RTypes;
+import org.eclipse.dltk.javascript.typeinfo.ReferenceSource;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
@@ -6073,6 +6080,28 @@ public class TypeCreator extends TypeCache
 						org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
 						m.setName(method.getName());
 						m.setAttribute(RESOURCE, method);
+
+						try
+						{
+							IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
+								Path.fromPortableString(method.getSerializableRuntimeProperty(IScriptProvider.FILENAME).replace('\\', '/')));
+							if (file != null)
+							{
+								ISourceModule sm = DLTKCore.createSourceModuleFrom(file);
+								ReferenceSource rs = ReferenceSource.create(sm);
+								ISourceRange range = sm.getMethod(method.getName()).getSourceRange();
+								ISourceRange nameRange = sm.getMethod(method.getName()).getNameRange();
+								ReferenceLocation location = ReferenceLocation.create(rs, range.getOffset(), range.getOffset() + range.getLength(),
+									nameRange.getOffset(),
+									nameRange.getOffset() + nameRange.getLength());
+								m.setAttribute(IReferenceAttributes.LOCATION, location);
+							}
+						}
+						catch (ModelException e)
+						{
+							ServoyLog.logError("Could not set the location for fs method " + method.getName(), e);
+						}
+
 						String comment = method.getRuntimeProperty(IScriptProvider.COMMENT);
 						if (comment != null)
 						{
