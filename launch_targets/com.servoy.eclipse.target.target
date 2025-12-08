@@ -322,6 +322,11 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>org.jspecify</groupId>
+                    <artifactId>jspecify</artifactId>
+                    <version>1.0.0</version>
+                </dependency>
+                <dependency>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex</artifactId>
                     <version>3.5.3</version>
