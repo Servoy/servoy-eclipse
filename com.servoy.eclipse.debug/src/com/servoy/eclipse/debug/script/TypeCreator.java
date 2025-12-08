@@ -3457,7 +3457,7 @@ public class TypeCreator extends TypeCache
 	{
 		public Type createType(String context, String fullTypeName)
 		{
-			Type type = getType(context, "JSDataSet");
+			Type type = TypeCreator.this.createType(context, fullTypeName, JSDataSet.class);
 			int index = fullTypeName.indexOf('<');
 			if (index != -1 && fullTypeName.endsWith(">"))
 			{
