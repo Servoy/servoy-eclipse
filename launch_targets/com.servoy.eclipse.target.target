@@ -51,6 +51,18 @@
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
+              <dependency>
+                  <groupId>org.eclipse.collections</groupId>
+                  <artifactId>eclipse-collections-api</artifactId>
+                  <version>13.0.0</version>
+                  <type>jar</type>
+              </dependency>
+              <dependency>
+                  <groupId>org.eclipse.collections</groupId>
+                  <artifactId>eclipse-collections</artifactId>
+                  <version>13.0.0</version>
+                  <type>jar</type>
+              </dependency>
                 <dependency>
                     <groupId>com.auth0</groupId>
                     <artifactId>java-jwt</artifactId>
