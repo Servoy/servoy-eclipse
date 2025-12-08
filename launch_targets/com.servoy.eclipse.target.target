@@ -216,7 +216,7 @@
                 <dependency>
                     <groupId>com.microsoft.onnxruntime</groupId>
                     <artifactId>onnxruntime</artifactId>
-                    <version>1.19.2</version>
+                    <version>1.23.2</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
