@@ -10,6 +10,15 @@
             <repository location="https://azuredownloads-g3ahgwb5b8bkbxhd.b01.azurefd.net/github-copilot/"/>
             <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.13.1.202511180215"/>
         </location>
+         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="http://download.eclipse.org/nattable/releases/2.5.0/repository/"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.5.0.202411280718"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.core.feature.source.feature.group" version="2.5.0.202411280718"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.feature.group" version="2.5.0.202411280718"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.source.feature.group" version="2.5.0.202411280718"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.feature.group" version="2.5.0.202411280718"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.source.feature.group" version="2.5.0.202411280718"/>
+        </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.12/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202511191606"/>
@@ -39,15 +48,6 @@
             <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.26.0.202512020742"/>
             <unit id="org.eclipse.gef.feature.group" version="3.26.0.202512020742"/>
             <unit id="org.eclipse.gef.sdk.feature.group" version="3.26.0.202512020742"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="http://download.eclipse.org/nattable/releases/2.6.0/repository/"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.6.0.202509190702"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.core.feature.source.feature.group" version="2.6.0.202509190702"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.feature.group" version="2.6.0.202509190702"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.source.feature.group" version="2.6.0.202509190702"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.feature.group" version="2.6.0.202509190702"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.source.feature.group" version="2.6.0.202509190702"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
