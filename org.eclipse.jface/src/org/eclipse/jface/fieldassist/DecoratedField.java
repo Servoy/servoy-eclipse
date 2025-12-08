@@ -128,17 +128,17 @@ public class DecoratedField {
 	/**
 	 * Decorations keyed by position.
 	 */
-	private FieldDecorationData[] decDatas = new FieldDecorationData[DECORATION_SLOTS];
+	private final FieldDecorationData[] decDatas = new FieldDecorationData[DECORATION_SLOTS];
 
 	/**
 	 * The associated control
 	 */
-	private Control control;
+	private final Control control;
 
 	/**
 	 * The composite with form layout used to manage decorations.
 	 */
-	private Composite form;
+	private final Composite form;
 
 	/**
 	 * The boolean that indicates whether the maximum decoration width is used
@@ -154,53 +154,59 @@ public class DecoratedField {
 	/**
 	 * The hover used to show a decoration image's description.
 	 */
+	@Deprecated
 	class Hover {
 		private static final String EMPTY = ""; //$NON-NLS-1$
 
 		/**
 		 * Offset of info hover arrow from the left or right side.
 		 */
-		private int hao = 10;
+		private final int hao = 10;
 
 		/**
 		 * Width of info hover arrow.
 		 */
-		private int haw = 8;
+		private final int haw = 8;
 
 		/**
 		 * Height of info hover arrow.
 		 */
-		private int hah = 10;
+		private final int hah = 10;
 
 		/**
 		 * Margin around info hover text.
 		 */
-		private int hm = 2;
+		private final int hm = 2;
 
 		/**
 		 * This info hover's shell.
 		 */
+		@Deprecated
 		Shell hoverShell;
 
 		/**
 		 * The info hover text.
 		 */
+		@Deprecated
 		String text = EMPTY;
 
 		/**
 		 * The region used to manage the shell shape
 		 */
+		@Deprecated
 		Region region;
 
 		/**
 		 * Boolean indicating whether the last computed polygon location had an
 		 * arrow on left. (true if left, false if right).
 		 */
+		@Deprecated
 		boolean arrowOnLeft = true;
 
 		/*
 		 * Create a hover parented by the specified shell.
 		 */
+		@Deprecated
 		Hover(Shell parent) {
 			final Display display = parent.getDisplay();
 			hoverShell = new Shell(parent, SWT.NO_TRIM | SWT.ON_TOP
@@ -228,6 +234,7 @@ public class DecoratedField {
 		 * border is true, compute the polygon inset by 1-pixel border. Consult
 		 * the arrowOnLeft flag to determine which side the arrow is on.
 		 */
+		@Deprecated
 		int[] getPolygon(boolean border) {
 			Point e = getExtent();
 			int b = border ? 1 : 0;
@@ -245,6 +252,7 @@ public class DecoratedField {
 		 * Dispose the hover, it is no longer needed. Dispose any resources
 		 * allocated by the hover.
 		 */
+		@Deprecated
 		void dispose() {
 			if (!hoverShell.isDisposed()) {
 				hoverShell.dispose();
@@ -257,6 +265,7 @@ public class DecoratedField {
 		/*
 		 * Set the visibility of the hover.
 		 */
+		@Deprecated
 		void setVisible(boolean visible) {
 			if (visible) {
 				if (!hoverShell.isVisible()) {
@@ -272,6 +281,7 @@ public class DecoratedField {
 		 * and location of the hover to hover near the specified control,
 		 * pointing the arrow toward the target control.
 		 */
+		@Deprecated
 		void setText(String t, Control hoverNear, Control targetControl) {
 			if (t == null) {
 				t = EMPTY;
@@ -303,6 +313,7 @@ public class DecoratedField {
 		/*
 		 * Return whether or not the hover (shell) is visible.
 		 */
+		@Deprecated
 		boolean isVisible() {
 			return hoverShell.isVisible();
 		}
@@ -310,6 +321,7 @@ public class DecoratedField {
 		/*
 		 * Compute the extent of the hover for the current text.
 		 */
+		@Deprecated
 		Point getExtent() {
 			GC gc = new GC(hoverShell);
 			Point e = gc.textExtent(text);
@@ -322,6 +334,7 @@ public class DecoratedField {
 		/*
 		 * Compute a new shape for the hover shell.
 		 */
+		@Deprecated
 		void setNewShape() {
 			Region oldRegion = region;
 			region = new Region();
@@ -349,6 +362,7 @@ public class DecoratedField {
 	 *
 	 * @see IControlCreator
 	 */
+	@Deprecated
 	public DecoratedField(Composite parent, int style,
 			IControlCreator controlCreator) {
 		this.form = createForm(parent);
@@ -394,6 +408,7 @@ public class DecoratedField {
 	 *            when the associated control has focus, <code>false</code> if
 	 *            it should always be shown.
 	 */
+	@Deprecated
 	public void addFieldDecoration(FieldDecoration decoration, int position,
 			boolean showOnFocus) {
 		final Label label;
@@ -534,6 +549,7 @@ public class DecoratedField {
 	 * @return the Control decorated by the receiver, or <code>null</code> if
 	 *         none has been created yet.
 	 */
+	@Deprecated
 	public Control getControl() {
 		return control;
 	}
@@ -546,6 +562,7 @@ public class DecoratedField {
 	 *         layout. This is typically not the control itself, since
 	 *         additional controls are used to represent the decorations.
 	 */
+	@Deprecated
 	public Control getLayoutControl() {
 		return form;
 	}
@@ -671,6 +688,7 @@ public class DecoratedField {
 	 *            the text to be shown in the info hover, or <code>null</code>
 	 *            if no text should be shown.
 	 */
+	@Deprecated
 	public void showHoverText(String text) {
 		showHoverText(text, control);
 	}
@@ -686,6 +704,7 @@ public class DecoratedField {
 	 * <p>
 	 * This message has no effect if there is no current hover.
 	 */
+	@Deprecated
 	public void hideHover() {
 		if (hover != null) {
 			hover.setVisible(false);
@@ -724,6 +743,7 @@ public class DecoratedField {
 	 * @param decoration
 	 *            the decoration to be shown.
 	 */
+	@Deprecated
 	public void showDecoration(FieldDecoration decoration) {
 		FieldDecorationData data = getDecorationData(decoration);
 		if (data == null) {
@@ -746,6 +766,7 @@ public class DecoratedField {
 	 * @param decoration
 	 *            the decoration to be hidden.
 	 */
+	@Deprecated
 	public void hideDecoration(FieldDecoration decoration) {
 		FieldDecorationData data = getDecorationData(decoration);
 		if (data == null) {
@@ -767,6 +788,7 @@ public class DecoratedField {
 	 * @param decoration
 	 *            the decoration to be hidden.
 	 */
+	@Deprecated
 	public void updateDecoration(FieldDecoration decoration) {
 		FieldDecorationData data = getDecorationData(decoration);
 		if (data == null) {
@@ -852,6 +874,7 @@ public class DecoratedField {
 	 *
 	 * @see FieldDecorationRegistry#getMaximumDecorationWidth()
 	 */
+	@Deprecated
 	public void setUseMaximumDecorationWidth(boolean useMaximumWidth) {
 		useMaxDecorationWidth = useMaximumWidth;
 	}
