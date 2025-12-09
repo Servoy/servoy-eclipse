@@ -368,7 +368,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.commons.commons-codec"
-         version="1.19.0"/>
+         version="1.20.0"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.aarch64"

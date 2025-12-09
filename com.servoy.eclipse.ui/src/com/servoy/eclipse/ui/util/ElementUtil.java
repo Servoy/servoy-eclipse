@@ -398,23 +398,7 @@ public class ElementUtil
 			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getUUID().toString());
 			if (persist instanceof WebComponent webComponent && newPersist instanceof WebComponent newWebComponent)
 			{
-				List<WebCustomType> customTypes = new ArrayList<>();
-				for (IPersist child : webComponent.getAllObjectsAsList())
-				{
-					if (child instanceof WebCustomType custom)
-					{
-						customTypes.add(custom);
-					}
-				}
-				Iterator<WebCustomType> customTypeIterator = customTypes.iterator();
-				for (IPersist child : newWebComponent.getAllObjectsAsList())
-				{
-					if (child instanceof WebCustomType custom && customTypeIterator.hasNext())
-					{
-						custom.resetUUID();
-						custom.setExtendsID(customTypeIterator.next().getUUID().toString());
-					}
-				}
+				setCustomTypesOverrides(webComponent, newWebComponent);
 			}
 			if (CSSPositionUtils.useCSSPosition(persist))
 			{
@@ -435,6 +419,30 @@ public class ElementUtil
 			newPersist = childOfParent.newOverwrittenParent(newPersist);
 		}
 		return newPersist;
+	}
+
+	private static void setCustomTypesOverrides(AbstractBase oldComponent, AbstractBase newComponent)
+	{
+		List<WebCustomType> customTypes = new ArrayList<>();
+		for (IPersist child : oldComponent.getAllObjectsAsList())
+		{
+			if (child instanceof WebCustomType custom)
+			{
+				customTypes.add(custom);
+			}
+		}
+		Iterator<WebCustomType> customTypeIterator = customTypes.iterator();
+		for (IPersist child : newComponent.getAllObjectsAsList())
+		{
+			if (child instanceof WebCustomType custom && customTypeIterator.hasNext())
+			{
+				WebCustomType oldCustom = customTypeIterator.next();
+				custom.resetUUID();
+				custom.setExtendsID(oldCustom.getUUID().toString());
+				setCustomTypesOverrides(oldCustom, custom);
+				custom.updateJSON();
+			}
+		}
 	}
 
 	private static IPersist getWebObjectChild(IPersist parent, IChildWebObject webObject)
