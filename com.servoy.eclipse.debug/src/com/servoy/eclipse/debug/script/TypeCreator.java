@@ -95,6 +95,7 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.mozilla.javascript.Function;
 import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
@@ -1969,6 +1970,33 @@ public class TypeCreator extends TypeCache
 												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(context, name, componentType, typeName)));
 											}
 										}
+										else if (paramType != null && Function.class.isAssignableFrom(paramType))
+										{
+											FunctionTypeParser.ParsedFunctionDeclaration parsed = FunctionTypeParser.parseFunctionType(param.getDescription());
+
+											FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
+
+											for (FunctionTypeParser.ParsedParameter p : parsed.parameters())
+											{
+												Parameter paramForFunctionType = TypeInfoModelFactory.eINSTANCE.createParameter();
+												paramForFunctionType.setName(p.name());
+												paramForFunctionType.setType(getTypeRef(context, p.type()));
+												if (p.optional())
+												{
+													paramForFunctionType.setKind(ParameterKind.OPTIONAL);
+												}
+												if (p.kind() == FunctionTypeParser.ParsedParameterKind.VARARGS)
+												{
+													paramForFunctionType.setKind(ParameterKind.VARARGS);
+												}
+												functionType.getParameters().add(paramForFunctionType);
+
+											}
+
+											functionType.setReturnType(getTypeRef(context, parsed.returnType()));
+											parameter.setType(functionType);
+
+										}
 										else if (paramType != null)
 										{
 											parameter.setType(getMemberTypeName(context, name, paramType, typeName));
@@ -2114,6 +2142,7 @@ public class TypeCreator extends TypeCache
 
 			membersList.addAll(newMembers);
 		}
+
 	}
 
 	protected final JSType getMemberTypeName(String context, String memberName, Class< ? > memberReturnType, String objectTypeName)
@@ -3166,30 +3195,30 @@ public class TypeCreator extends TypeCache
 						overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
 					}
 				}
-				else if (member.getName().equals("forEach"))
-				{
-					Method clone = (Method)TypeCreator.clone(member, member.getType());
-					Parameter functionParam = clone.getParameterFor(0);
-					FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
-					EList<Parameter> parameters = functionType.getParameters();
-					Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
-					param.setName("record");
-					param.setType(getTypeRef(context, Record.JS_RECORD + '<' + config + '>'));
-					parameters.add(param);
-					param = TypeInfoModelFactory.eINSTANCE.createParameter();
-					param.setName("recordIndex");
-					param.setType(getTypeRef(context, "Number"));
-					param.setKind(ParameterKind.OPTIONAL);
-					parameters.add(param);
-					param = TypeInfoModelFactory.eINSTANCE.createParameter();
-					param.setName("foundset");
-					param.setType(getTypeRef(context, fullTypeName));
-					param.setKind(ParameterKind.OPTIONAL);
-					parameters.add(param);
-					functionParam.setType(functionType);
-
-					overridden = clone;
-				}
+//				else if (member.getName().equals("forEach"))
+//				{
+//					Method clone = (Method)TypeCreator.clone(member, member.getType());
+//					Parameter functionParam = clone.getParameterFor(0);
+//					FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
+//					EList<Parameter> parameters = functionType.getParameters();
+//					Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+//					param.setName("record");
+//					param.setType(getTypeRef(context, Record.JS_RECORD + '<' + config + '>'));
+//					parameters.add(param);
+//					param = TypeInfoModelFactory.eINSTANCE.createParameter();
+//					param.setName("recordIndex");
+//					param.setType(getTypeRef(context, "Number"));
+//					param.setKind(ParameterKind.OPTIONAL);
+//					parameters.add(param);
+//					param = TypeInfoModelFactory.eINSTANCE.createParameter();
+//					param.setName("foundset");
+//					param.setType(getTypeRef(context, fullTypeName));
+//					param.setKind(ParameterKind.OPTIONAL);
+//					parameters.add(param);
+//					functionParam.setType(functionType);
+//
+//					overridden = clone;
+//				}
 				else
 				{
 					String memberConfig = config;
