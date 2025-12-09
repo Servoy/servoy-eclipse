@@ -3464,17 +3464,24 @@ public class TypeCreator extends TypeCache
 	{
 		public Type createType(String context, String fullTypeName)
 		{
-			Type type = TypeCreator.this.createType(context, fullTypeName, JSDataSet.class);
-			int index = fullTypeName.indexOf('<');
-			if (index != -1 && fullTypeName.endsWith(">"))
+			if (fullTypeName.equals(JSDataSet.class.getSimpleName()))
 			{
-				String recordType = fullTypeName.substring(index + 1, fullTypeName.length() - 1);
-				Type t = getRecordType(recordType);
-				t.setName(fullTypeName);
-				t.setSuperType(type);
-				type = t;
+				Type type = TypeCreator.this.createType(context, fullTypeName, JSDataSet.class);
+				return addType(null, type);
 			}
-			return type;
+			else
+			{
+				Type type = null;
+				int index = fullTypeName.indexOf('<');
+				if (index != -1 && fullTypeName.endsWith(">"))
+				{
+					String recordType = fullTypeName.substring(index + 1, fullTypeName.length() - 1);
+					type = getRecordType(recordType);
+					type.setName(fullTypeName);
+					type.setSuperType(findType(null, JSDataSet.class.getSimpleName()));
+				}
+				return type;
+			}
 		}
 
 		public ClientSupport getClientSupport()
@@ -5197,7 +5204,13 @@ public class TypeCreator extends TypeCache
 		public Type createType(String context, String fullTypeName)
 		{
 			//Custom component type can be defined only in WebComponents objects. So get WebComponentSpec
-			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1) return null;
+			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1)
+			{
+				Type type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setName(ElementUtil.CUSTOM_TYPE);
+				type.setKind(TypeKind.JAVA);
+				return addType(null, type);
+			}
 			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 			String[] typeNames = wcTypeName.split("\\.");
 			if (typeNames.length < 2) return null;
