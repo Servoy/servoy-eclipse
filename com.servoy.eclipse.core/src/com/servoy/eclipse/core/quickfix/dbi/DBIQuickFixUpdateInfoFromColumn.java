@@ -30,6 +30,7 @@ import org.json.JSONException;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.preferences.DbiPreferences;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -103,7 +104,7 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent, false);
 
 						// prepare to update column creation order to the one of current real table
 						ArrayList<String> colNames = new ArrayList<String>();
@@ -118,7 +119,8 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 							int creationOrderIndex = colNames.indexOf(cid.name);
 							if (creationOrderIndex >= 0)
 							{
-								cid.creationOrderIndex = creationOrderIndex;
+								cid.creationOrderIndex = DbiPreferences.DBI_SORT_BY_INDEX.equals(new DbiPreferences().getDbiSortingKey()) ? creationOrderIndex
+									: -1;
 							}
 							if (cid.name.equals(difference.getColumnName()))
 							{
