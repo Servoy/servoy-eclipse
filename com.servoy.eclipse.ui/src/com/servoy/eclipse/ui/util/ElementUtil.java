@@ -440,6 +440,7 @@ public class ElementUtil
 				custom.resetUUID();
 				custom.setExtendsID(oldCustom.getUUID().toString());
 				setCustomTypesOverrides(oldCustom, custom);
+				custom.updateJSON();
 			}
 		}
 	}
