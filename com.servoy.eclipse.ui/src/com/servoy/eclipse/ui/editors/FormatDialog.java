@@ -48,7 +48,7 @@ import com.servoy.j2db.util.FormatParser.ParsedFormat;
 
 /**
  * Dialog for format options, includes options to configure UI converters
- * 
+ *
  * @author jcompagner, rgansevles
  *
  */
@@ -167,6 +167,7 @@ public class FormatDialog extends Dialog
 				layoutForUIConverters();
 				recreateFormatTextContainer();
 				((Composite)getContents()).layout(true, true);
+				getShell().pack();
 			}
 		});
 
@@ -178,6 +179,7 @@ public class FormatDialog extends Dialog
 				setPropertiesForSelectedConverter();
 				recreateFormatTextContainer();
 				((Composite)getContents()).layout(true, true);
+				getShell().pack();
 			}
 		});
 
@@ -224,7 +226,6 @@ public class FormatDialog extends Dialog
 		boolean useConverters = useConvertersCheckbutton.getSelection();
 		uiConvertersComposite.setVisible(useConverters);
 		((GridData)uiConverterContainer.getLayoutData()).heightHint = useConverters ? -1 : 50;
-		getShell().pack();
 	}
 
 	protected void recreateFormatTextContainer()
@@ -275,7 +276,6 @@ public class FormatDialog extends Dialog
 		formatComposite.setParsedFormat(parsedFormat);
 
 		getShell().setText(title);
-		getShell().pack();
 	}
 
 	protected int calculateConvertedType()
@@ -297,7 +297,7 @@ public class FormatDialog extends Dialog
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	protected void setPropertiesForSelectedConverter()
 	{
