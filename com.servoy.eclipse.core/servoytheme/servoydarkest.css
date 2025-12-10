@@ -109,7 +109,7 @@ ExpandableComposite {
 }
 
 Shell > Composite > Table {
-  background-color: '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
+  background-color: '#com-servoy-themes-darktheme-EDITOR_SECONDARY_BACKGROUND_COLOR';
 }
 
 .svyNatTable {
@@ -219,7 +219,8 @@ ThemesExtension {
   color-definition: '#com-servoy-themes-darktheme-FOREGROUND_COLOR',
   '#com-servoy-themes-darktheme-HIGHLIGHT_COLOR',
   '#com-servoy-themes-darktheme-MAIN_BACKGROUND_COLOR',
-  '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR';
+  '#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR',
+  '#com-servoy-themes-darktheme-EDITOR_SECONDARY_BACKGROUND_COLOR';
 }
 
 ColorDefinition#com-servoy-themes-darktheme-FOREGROUND_COLOR {
@@ -248,6 +249,13 @@ ColorDefinition#com-servoy-themes-darktheme-EDITOR_BACKGROUND_COLOR {
   category: '#com-servoy-themes-darktheme-themeCategory';
   label: 'Editor Background Color';
   description: 'The editing zones background color.';
+}
+
+ColorDefinition#com-servoy-themes-darktheme-EDITOR_SECONDARY_BACKGROUND_COLOR {
+  color: #303030;
+  category: '#com-servoy-themes-darktheme-themeCategory';
+  label: 'Editor Secondary Background Color';
+  description: 'Background color used in secondary editor zones.';
 }
 
 Composite#org-eclipse-ui-main-toolbar, 
