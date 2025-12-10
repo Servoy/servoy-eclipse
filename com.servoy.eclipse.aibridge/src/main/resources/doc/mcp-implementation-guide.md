@@ -1,7 +1,142 @@
 # MCP Implementation Guide for Servoy Developer Copilot Plugin
 
-**Last Updated:** December 4, 2025  
-**Status:** PRODUCTION READY - Core Features Complete + Plugin Components Phase 1 & 2
+**Last Updated:** December 10, 2025  
+**Last Verified Against Code:** December 10, 2025  
+**Status:** PRODUCTION READY - Core Features Complete + Relations & ValueLists Enhanced
+
+---
+
+## [NEW] DECEMBER 10, 2025 UPDATES - RELATIONS & VALUELISTS COMPLETE CRUD
+
+### Relations Service & Handler - Complete Rewrite
+
+**RelationService Created (NEW):**
+- Complete service layer for all relation operations
+- Extracts business logic from handler for reusability
+- Methods: createRelation(), updateRelationProperties(), applyRelationProperties(), validateAndCorrectDataSource()
+- Supports all 8 relation properties with smart defaults
+- Property parsing for encapsulation, joinType, etc.
+
+**RelationToolHandler Enhanced:**
+- Refactored following FormToolHandler pattern (properties map approach)
+- Tool names improved for clarity
+- Complete CRUD operations with properties support
+
+**Tool Changes:**
+- `openRelation` - Now supports properties map for all 8 relation properties, dual purpose (create OR update)
+- `listRelations` --> `getRelations` - Renamed for clarity
+- `deleteRelation` --> `deleteRelations` - Enhanced to support array of names (bulk delete)
+- `discoverRelations` --> `discoverDbRelations` - Renamed to emphasize database FK discovery
+
+**All 8 Relation Properties Now Supported:**
+1. **joinType** - "left outer" | "inner" (default: "left outer")
+2. **allowCreationRelatedRecords** - boolean (default: true)
+3. **allowParentDeleteWhenHavingRelatedRecords** - boolean (default: false)
+4. **deleteRelatedRecords** - boolean (default: false)
+5. **initialSort** - string (e.g., "column1 asc, column2 desc")
+6. **encapsulation** - "public" | "hide" | "module" (default: "public")
+7. **deprecated** - string (deprecation message)
+8. **comment** - string (documentation)
+
+**Files Created:**
+- `RelationService.java` - Complete service layer (~280 lines)
+
+**Files Modified:**
+- `RelationToolHandler.java` - Complete refactor using service, renamed tools, properties support
+
+### ValueLists Service & Handler - Complete Rewrite
+
+**ValueListService Created (NEW):**
+- Complete service layer for all valuelist operations
+- Supports all 4 valuelist types: CUSTOM, DATABASE (table), DATABASE (related), GLOBAL_METHOD
+- Methods: createValueList(), updateValueListProperties(), applyValueListProperties()
+- Type-specific configuration methods for each valuelist type
+- Supports all valuelist properties from Servoy API
+
+**ValueListToolHandler Enhanced:**
+- Refactored following FormToolHandler pattern (properties map approach)
+- Tool names improved for clarity
+- Complete CRUD operations with properties support for all 4 types
+
+**Tool Changes:**
+- `openValueList` - Now supports all 4 types + properties map for 11+ properties, dual purpose (create OR update)
+- `listValueLists` --> `getValueLists` - Renamed for clarity
+- `deleteValueList` --> `deleteValueLists` - Enhanced to support array of names (bulk delete)
+
+**All 4 ValueList Types Supported:**
+1. **CUSTOM_VALUES** - Fixed list of values (array of strings)
+2. **DATABASE_VALUES (table)** - Values from database table via dataSource
+3. **DATABASE_VALUES (related)** - Values from related table via relationName
+4. **GLOBAL_METHOD_VALUES** - Dynamic values from global method
+
+**11+ ValueList Properties Supported:**
+1. **lazyLoading** - boolean (load on demand)
+2. **displayValueType** - int (data type of display values)
+3. **realValueType** - int (data type of stored values)
+4. **separator** - string (multi-column separator)
+5. **sortOptions** - string (e.g., "column asc")
+6. **useTableFilter** - boolean (filter by valuelist name column)
+7. **addEmptyValue** - boolean/"always"/"never" (allow null option)
+8. **fallbackValueListID** - string (fallback valuelist name)
+9. **deprecated** - string (deprecation message)
+10. **encapsulation** - "public" | "hide" | "module"
+11. **comment** - string (documentation)
+
+**Files Created:**
+- `ValueListService.java` - Complete service layer (~450 lines)
+
+**Files Modified:**
+- `ValueListToolHandler.java` - Complete refactor using service, renamed tools, properties support
+
+### Architecture Pattern Established
+
+**Service Layer Pattern:**
+- Relations, ValueLists, and Forms all follow same pattern
+- Handler extracts parameters, validates, delegates to Service
+- Service contains all business logic (create, update, property application)
+- Clean separation of concerns: Handler = MCP protocol, Service = Servoy API
+
+**Properties Map Approach:**
+- Flexible single-step create/update via optional properties parameter
+- Smart defaults for required properties
+- AI can start simple, add complexity as needed
+- Easy to extend without breaking changes
+
+**Naming Consistency:**
+- `openX` - Dual purpose create OR update (with properties)
+- `getXs` - List all (plural)
+- `deleteXs` - Delete multiple (array support)
+- `discoverDbX` - Database discovery operations
+
+**Benefits:**
+- Complete API parity with Servoy editors
+- Production-ready relations and valuelists
+- Support for complex scenarios (related valuelists, global methods, etc.)
+- Full property control (metadata, behavior, types)
+- Reusable service layer for future enhancements
+
+---
+
+## [NEW] DECEMBER 5, 2025 UPDATES - FIRST FORM AUTO-MAIN
+
+### Form Creation Enhancement
+
+**Automatic Main Form Setting:**
+- When creating the FIRST form in a solution (no other forms exist), it is automatically set as the main form
+- No need to explicitly set `setAsMainForm=true` for the first form
+- Improves user experience by ensuring solutions always have a valid startup form
+- The result message clearly indicates when this auto-setting occurs: "Automatically set as main form (first form in solution)"
+
+**Logic:**
+- Before creating a new form, check if any forms exist in the solution
+- If no forms exist (`isFirstForm = true`), automatically set the new form as main
+- This happens regardless of the `setAsMainForm` parameter value
+
+**Files Modified:**
+- `FormToolHandler.java` - Added `isFirstForm` detection and automatic main form setting
+- `rules/forms.md` - Added KEY RULE 11 documenting this behavior
+
+**Impact:** Solutions created via MCP now automatically have a valid main form when the first form is created, preventing "no main form" errors.
 
 ---
 
@@ -151,14 +286,25 @@
 - DatabaseSchemaService - Database operations
 
 **Handlers:**
-- LabelComponentHandler - 5 label tools
-- StyleHandler - 4 style tools
-- FormToolHandler - 3 form tools
-- RelationToolHandler - 4 relation tools
-- ValueListToolHandler - 3 valuelist tools
-- DatabaseToolHandler - 2 database tools
+- ButtonComponentHandler - 5 button tools (addButton, updateButton, deleteButton, listButtons, getButtonInfo)
+- LabelComponentHandler - 5 label tools (addLabel, updateLabel, deleteLabel, listLabels, getLabelInfo)
+- StyleHandler - 4 style tools (addStyle, getStyle, listStyles, deleteStyle)
+- FormToolHandler - 5 form tools (getCurrentForm, openForm, setMainForm, listForms, getFormProperties)
+- RelationToolHandler - 4 relation tools (openRelation, getRelations, deleteRelations, discoverDbRelations) [ENHANCED Dec 10]
+- ValueListToolHandler - 3 valuelist tools (openValueList, getValueLists, deleteValueLists) [ENHANCED Dec 10]
+- DatabaseToolHandler - 2 database tools (listTables, getTableInfo)
 
-**Total Tools:** 21 MCP tools
+**Total Tools:** 28 MCP tools
+
+**Services:**
+- RelationService - Complete relation business logic [NEW Dec 10]
+- ValueListService - Complete valuelist business logic (all 4 types) [NEW Dec 10]
+- BootstrapComponentService - Component CRUD in .frm files
+- FormService - Form utilities and validation
+- StyleService - CSS/LESS management
+- DatabaseSchemaService - Database operations
+
+**Status:** Button and Label components fully implemented with complete CRUD operations. Style management ready. Forms fully functional.
 
 **Status:** Label + Style management ready for demo. Clean, working implementation.
 
@@ -169,9 +315,11 @@
 ### Major Enhancements
 
 **1. Form Tool Handler Enhanced:**
+- Added `getCurrentForm` utility tool for getting active form in editor
 - Replaced `createForm` with unified `openForm` tool
 - Added `setMainForm` tool for solution startup form management
 - Added `listForms` tool for form discovery
+- Added `getFormProperties` tool for retrieving form details
 - Implemented property map support for batch property updates
 - Added form inheritance support via `extendsForm` parameter
 - Can now open existing forms, create new forms, and update form properties
@@ -238,46 +386,71 @@
 **Core MCP Infrastructure:**
 - McpServletProvider with getContext tool
 - Action list-based context retrieval (no direct intent detection)
-- ToolHandlerRegistry with 5 active handlers
+- ToolHandlerRegistry with 7 active handlers
 - RulesCache for loading rules from `/rules/*.md` files
 - ServoyEmbeddingService with BGE-small-en-v1.5 ONNX model
 - Similarity search on embedding knowledge base
 
-**20 Working MCP Tools:**
-1. **getContext** - Retrieves documentation for action list queries
-2. **listTables** - Lists all tables in a database server
-3. **getTableInfo** - Gets table structure with columns and PKs
-4. **openRelation** - Creates or opens database relation
-5. **deleteRelation** - Deletes a relation
-6. **listRelations** - Lists all relations
-7. **discoverRelations** - Discovers FKs for potential relations
-8. **openValueList** - Creates or opens valuelist (custom or database)
-9. **deleteValueList** - Deletes a valuelist
-10. **listValueLists** - Lists all valuelists
-11. **openForm** - Opens existing or creates new form with property management (ENHANCED Dec 2, 2025)
-12. **setMainForm** - Sets solution's main/first form (NEW Dec 2, 2025)
-13. **listForms** - Lists all forms in solution (NEW Dec 2, 2025)
-14. **addStyle** - Add/update CSS class in ai-generated.less (NEW Dec 3, 2025)
-15. **getStyle** - Retrieve CSS class content (NEW Dec 3, 2025)
-16. **listStyles** - List all CSS classes (NEW Dec 3, 2025)
-17. **deleteStyle** - Delete CSS class (NEW Dec 3, 2025)
-18. **addVariant** - Add/update variant in variants.json (NEW Dec 3, 2025)
-19. **listVariants** - List variants with optional category filter (NEW Dec 3, 2025)
-20. **deleteVariant** - Delete variant (NEW Dec 3, 2025)
+**28 Working MCP Tools:**
 
-**4 Service Layer Classes:**
+**Database Tools (2):**
+1. **listTables** - Lists all tables in a database server
+2. **getTableInfo** - Gets table structure with columns and PKs
+
+**Relation Tools (4):**
+3. **openRelation** - Creates or opens relation with properties map (all 8 properties supported)
+4. **getRelations** - Lists all relations (renamed from listRelations)
+5. **deleteRelations** - Deletes multiple relations (array support, renamed from deleteRelation)
+6. **discoverDbRelations** - Discovers FKs for potential relations (renamed from discoverRelations)
+
+**ValueList Tools (3):**
+7. **openValueList** - Creates or opens valuelist (all 4 types: CUSTOM, DATABASE table, DATABASE related, GLOBAL_METHOD) with properties map (11+ properties supported)
+8. **getValueLists** - Lists all valuelists (renamed from listValueLists)
+9. **deleteValueLists** - Deletes multiple valuelists (array support, renamed from deleteValueList)
+
+**Form Tools (5):**
+10. **getCurrentForm** - Gets currently opened form in active editor
+11. **openForm** - Opens existing or creates new form with property management
+12. **setMainForm** - Sets solution's main/first form
+13. **listForms** - Lists all forms in solution (renamed from getFormProperties)
+14. **getFormProperties** - Gets detailed form properties
+
+**Button Component Tools (5):**
+15. **addButton** - Add button to form [NEW Dec 3, 2025]
+16. **updateButton** - Update button properties [NEW Dec 3, 2025]
+17. **deleteButton** - Delete button from form [NEW Dec 3, 2025]
+18. **listButtons** - List all buttons in form [NEW Dec 3, 2025]
+19. **getButtonInfo** - Get detailed button info [NEW Dec 3, 2025]
+
+**Label Component Tools (5):**
+20. **addLabel** - Add label to form [NEW Dec 3, 2025]
+21. **updateLabel** - Update label properties [NEW Dec 3, 2025]
+22. **deleteLabel** - Delete label from form [NEW Dec 3, 2025]
+23. **listLabels** - List all labels in form [NEW Dec 3, 2025]
+24. **getLabelInfo** - Get detailed label info [NEW Dec 3, 2025]
+
+**Style Tools (4):**
+25. **addStyle** - Add/update CSS class in LESS files [NEW Dec 3, 2025]
+26. **getStyle** - Retrieve CSS class content [NEW Dec 3, 2025]
+27. **listStyles** - List all CSS classes [NEW Dec 3, 2025]
+28. **deleteStyle** - Delete CSS class [NEW Dec 3, 2025]
+
+**6 Service Layer Classes:**
+- **RelationService** - Complete relation business logic (all 8 properties) [NEW Dec 10, 2025]
+- **ValueListService** - Complete valuelist business logic (all 4 types, 11+ properties) [NEW Dec 10, 2025]
 - **DatabaseSchemaService** - Shared database metadata access (used by all handlers)
-- **FormFileService** - Safe .frm file JSON manipulation (UUID generation, backups)
-- **StyleManagementService** - CSS/LESS style management in ai-generated.less (NEW Dec 3, 2025)
-- **VariantManagementService** - Variant management in variants.json (NEW Dec 3, 2025)
+- **FormService** - Safe .frm file JSON manipulation (UUID generation, backups)
+- **StyleService** - CSS/LESS style management [NEW Dec 3, 2025]
+- **BootstrapComponentService** - Bootstrap component CRUD in .frm files [NEW Dec 3, 2025]
 
-**6 Tool Handlers:**
+**8 Tool Handlers:**
 - DatabaseToolHandler (2 tools)
-- RelationToolHandler (4 tools)
-- ValueListToolHandler (3 tools)
-- FormToolHandler (3 tools - openForm, setMainForm, listForms) [ENHANCED Dec 2, 2025]
-- BootstrapComponentHandler (4 tools - addButton, addLabel, addCheckbox, addTextbox) [NEW Dec 2, 2025]
-- StyleToolHandler (7 tools - style and variant management) [NEW Dec 3, 2025]
+- RelationToolHandler (4 tools - openRelation, getRelations, deleteRelations, discoverDbRelations) [ENHANCED Dec 10, 2025]
+- ValueListToolHandler (3 tools - openValueList, getValueLists, deleteValueLists) [ENHANCED Dec 10, 2025]
+- FormToolHandler (5 tools - getCurrentForm, openForm, setMainForm, listForms, getFormProperties) [ENHANCED Dec 5, 2025]
+- ButtonComponentHandler (5 tools - addButton, updateButton, deleteButton, listButtons, getButtonInfo) [NEW Dec 3, 2025]
+- LabelComponentHandler (5 tools - addLabel, updateLabel, deleteLabel, listLabels, getLabelInfo) [NEW Dec 3, 2025]
+- StyleHandler (4 tools - addStyle, getStyle, listStyles, deleteStyle) [NEW Dec 3, 2025]
 
 **Critical Protections:**
 - [YES] RULE 5: .FRM files STRICTLY FORBIDDEN to edit directly
@@ -306,16 +479,18 @@ src/com/servoy/eclipse/mcp/
 ├── IToolHandler.java                # Handler interface
 ├── ToolHandlerRegistry.java         # Central registry of all handlers
 ├── handlers/
-│   ├── DatabaseToolHandler.java    # Database queries (listTables, getTableInfo)
+│   ├── DatabaseToolHandler.java    # Database queries (2 tools)
 │   ├── RelationToolHandler.java    # Relation operations (4 tools)
 │   ├── ValueListToolHandler.java   # ValueList operations (3 tools)
-│   ├── FormToolHandler.java        # Form creation (3 tools)
-│   └── ComponentToolHandler.java   # Bootstrap components (1 tool - WIP)
+│   ├── FormToolHandler.java        # Form operations (4 tools)
+│   ├── ButtonComponentHandler.java # Button component CRUD (5 tools) [NEW Dec 3]
+│   ├── LabelComponentHandler.java  # Label component CRUD (5 tools) [NEW Dec 3]
+│   └── StyleHandler.java           # Style management (4 tools) [NEW Dec 3]
 ├── services/
-│   ├── DatabaseSchemaService.java  # Shared DB metadata service
-│   ├── FormFileService.java        # Safe .frm file manipulation
-│   ├── StyleManagementService.java # CSS/LESS style management [NEW Dec 3]
-│   └── VariantManagementService.java # Variant management [NEW Dec 3]
+│   ├── DatabaseSchemaService.java       # Shared DB metadata service
+│   ├── FormService.java                 # Safe .frm file manipulation
+│   ├── StyleService.java                # CSS/LESS style management [NEW Dec 3]
+│   └── BootstrapComponentService.java   # Bootstrap component CRUD [NEW Dec 3]
 └── ai/
     ├── ServoyEmbeddingService.java # ONNX embedding + similarity search
     └── RulesCache.java             # Rules file loader
@@ -447,18 +622,46 @@ public void registerTools(McpSyncServer server) {
 
 #### 4. Service Layer
 
+**RelationService:** [NEW Dec 10, 2025]
+- Complete relation business logic
+- Methods: `createRelation()`, `updateRelationProperties()`, `applyRelationProperties()`, `validateAndCorrectDataSource()`, `parseEncapsulation()`
+- Features: All 8 relation properties support, smart defaults, auto-save
+- Used by: RelationToolHandler
+- **Benefit:** Production-ready relations with full API parity, reusable logic
+
+**ValueListService:** [NEW Dec 10, 2025]
+- Complete valuelist business logic for all 4 types
+- Methods: `createValueList()`, `updateValueListProperties()`, `configureCustomValueList()`, `configureDatabaseValueList()`, `configureRelatedValueList()`, `configureGlobalMethodValueList()`, `applyValueListProperties()`
+- Features: All 4 types (CUSTOM, DATABASE table/related, GLOBAL_METHOD), 11+ properties support, smart defaults, auto-save
+- Used by: ValueListToolHandler
+- **Benefit:** Production-ready valuelists with full API parity including global methods and related values
+
 **DatabaseSchemaService:**
 - Shared service for database metadata access
 - Methods: `getServer()`, `getTable()`, `getColumns()`, `getPrimaryKeyColumns()`, `getExplicitForeignKeys()`, `getPotentialRelationships()`
 - Used by: DatabaseToolHandler, RelationToolHandler, ValueListToolHandler
 - **Benefit:** Zero code duplication across handlers
 
-**FormFileService:**
+**FormService:**
 - Safe .frm file JSON manipulation
 - Methods: `addButtonToForm()`, `validateFormFile()`, `getFormInfo()`
 - Features: JSON parsing, UUID generation (com.servoy.j2db.util.UUID), backup creation (.frm.backup)
 - Used by: ComponentToolHandler
 - **Benefit:** Prevents .frm file corruption
+
+**StyleService:**
+- CSS/LESS style management
+- Methods: `addOrUpdateStyle()`, `getStyle()`, `listStyles()`, `deleteStyle()`, `validateLessContent()`, `formatLessContent()`
+- Features: CSS validation, LESS syntax support, automatic import management
+- Used by: StyleHandler
+- **Benefit:** Prevents invalid CSS, supports advanced LESS features
+
+**BootstrapComponentService:**
+- Bootstrap component CRUD operations
+- Methods: `addComponentToForm()`, `updateComponent()`, `deleteComponent()`, `listComponentsByType()`, `getComponentInfo()`
+- Features: Dual cssPosition storage, styleClass handling, component validation
+- Used by: ButtonComponentHandler, LabelComponentHandler
+- **Benefit:** Clean, reusable component operations
 
 #### 5. AI Services
 
@@ -494,46 +697,87 @@ public void registerTools(McpSyncServer server) {
 - **Returns:** Table structure with columns, types, PK status
 - **Protection:** [FORBIDDEN] parameter guessing
 
-### Relation Tools (RelationToolHandler)
+### Relation Tools (RelationToolHandler) [ENHANCED Dec 10, 2025]
 
 #### openRelation
-- **Parameters:** name (required), primaryDataSource, foreignDataSource, primaryColumn, foreignColumn (optional for creation)
-- **Behavior:** Opens existing or creates new relation
-- **Auto-save:** YES - saves immediately after creation
+- **Parameters:** name (required), primaryDataSource, foreignDataSource, primaryColumn, foreignColumn (optional for creation), properties (optional map)
+- **Behavior:** Opens existing relation OR creates new relation. Supports updating properties on existing relations
+- **Properties Map Supports (all 8 relation properties):**
+  - joinType: "left outer" | "inner" (default: "left outer")
+  - allowCreationRelatedRecords: boolean (default: true)
+  - allowParentDeleteWhenHavingRelatedRecords: boolean (default: false)
+  - deleteRelatedRecords: boolean (default: false)
+  - initialSort: string (e.g., "column1 asc, column2 desc")
+  - encapsulation: "public" | "hide" | "module" (default: "public")
+  - deprecated: string (deprecation message)
+  - comment: string (documentation)
+- **Auto-save:** YES - saves after creation or property modifications
+- **Service:** Uses RelationService for all business logic
 
-#### deleteRelation
-- **Parameters:** name (required)
-- **Behavior:** Deletes the relation
-
-#### listRelations
+#### getRelations
 - **Parameters:** None
 - **Returns:** List of all relations in current project
+- **Renamed from:** listRelations (for consistency)
 
-#### discoverRelations
+#### deleteRelations
+- **Parameters:** names (required array of strings)
+- **Behavior:** Deletes multiple relations in one call
+- **Renamed from:** deleteRelation (now supports array)
+- **Returns:** Success/not found details for each relation
+
+#### discoverDbRelations
 - **Parameters:** serverName (required)
 - **Returns:** Explicit FK constraints + potential relations by PK name matching
 - **Protection:** [FORBIDDEN] parameter guessing
+- **Renamed from:** discoverRelations (emphasizes database discovery)
 
-### ValueList Tools (ValueListToolHandler)
+### ValueList Tools (ValueListToolHandler) [ENHANCED Dec 10, 2025]
 
 #### openValueList
-- **Parameters:** name (required), customValues OR (dataSource + displayColumn + returnColumn)
-- **Behavior:** Opens existing or creates new valuelist (custom or database-based)
+- **Parameters:** name (required), PLUS one of: customValues (array), dataSource (string), relationName (string), globalMethod (string), PLUS optional displayColumn, returnColumn, properties (map)
+- **Behavior:** Opens existing valuelist OR creates new valuelist. Supports all 4 types and updating properties on existing valuelists
+- **Supports 4 ValueList Types:**
+  1. **CUSTOM_VALUES:** customValues (array of strings) - Fixed list
+  2. **DATABASE_VALUES (table):** dataSource + displayColumn/returnColumn - From database table
+  3. **DATABASE_VALUES (related):** relationName + displayColumn/returnColumn - From related table via relation
+  4. **GLOBAL_METHOD_VALUES:** globalMethod (string like "scopes.globals.getCountries") - Dynamic from method
 - **Display vs Return:** 
   - Only displayColumn: Same for both display and return
   - Only returnColumn: Same for both display and return
   - Both provided AND different: displayColumn shown, returnColumn stored
-- **Auto-save:** YES - saves immediately after creation
+- **Properties Map Supports (11+ valuelist properties):**
+  - lazyLoading: boolean (load on demand)
+  - displayValueType: int (data type of display values)
+  - realValueType: int (data type of stored values)
+  - separator: string (multi-column separator)
+  - sortOptions: string (e.g., "column asc")
+  - useTableFilter: boolean (filter by valuelist name column)
+  - addEmptyValue: boolean/"always"/"never" (allow null option)
+  - fallbackValueListID: string (fallback valuelist name)
+  - deprecated: string (deprecation message)
+  - encapsulation: "public" | "hide" | "module"
+  - comment: string (documentation)
+- **Auto-save:** YES - saves after creation or property modifications
+- **Service:** Uses ValueListService for all business logic
 
-#### deleteValueList
-- **Parameters:** name (required)
-- **Behavior:** Deletes the valuelist
-
-#### listValueLists
+#### getValueLists
 - **Parameters:** None
-- **Returns:** List of all valuelists in current project
+- **Returns:** List of all valuelists in current project with type indicators
+- **Renamed from:** listValueLists (for consistency)
+
+#### deleteValueLists
+- **Parameters:** names (required array of strings)
+- **Behavior:** Deletes multiple valuelists in one call
+- **Renamed from:** deleteValueList (now supports array)
+- **Returns:** Success/not found details for each valuelist
 
 ### Form Tools (FormToolHandler) [ENHANCED Dec 2, 2025]
+
+#### getCurrentForm
+- **Parameters:** None
+- **Behavior:** Gets the name of the currently opened form in the active editor
+- **Returns:** Form name if a form is currently open, or error if no form is open
+- **Usage:** Use when user refers to "current form", "this form", "active form", or doesn't specify a form name
 
 #### openForm
 - **Parameters:** name (required), create (default false), width (default 640), height (default 480), style (default "css"), dataSource (optional), extendsForm (optional), setAsMainForm (default false), properties (optional map)
@@ -553,13 +797,62 @@ public void registerTools(McpSyncServer server) {
 - **Behavior:** Lists all forms in the solution with main form indicator
 - **Returns:** Formatted list of form names with [MAIN FORM] marker
 
-### Component Tools (ComponentToolHandler)
+#### getFormProperties
+- **Parameters:** name (required)
+- **Behavior:** Gets detailed properties of a specific form
+- **Returns:** Form properties including width, height, dataSource, style type, and other settings
+
+### Button Component Tools (ButtonComponentHandler) [NEW Dec 3, 2025]
+
+**Complete CRUD operations for bootstrap buttons:**
 
 #### addButton
-- **Parameters:** formName (required), buttonName (required), text (required), cssPosition (optional)
-- **Behavior:** Adds bootstrap button to form via FormFileService
-- **Status:** ⚠️ IMPLEMENTED but not fully working yet
-- **Protection:** Uses FormFileService to prevent .frm corruption
+- **Parameters:** formName (required), name (required), cssPosition (required), text (optional, default "Button"), styleClass (optional), imageStyleClass (optional), trailingImageStyleClass (optional), showAs (optional), tabSeq (optional), enabled (optional), visible (optional), toolTipText (optional)
+- **Behavior:** Adds bootstrap button to form
+- **Auto-save:** YES
+
+#### updateButton
+- **Parameters:** formName (required), name (required), plus any properties to update
+- **Behavior:** Updates existing button properties
+- **Auto-save:** YES
+
+#### deleteButton
+- **Parameters:** formName (required), name (required)
+- **Behavior:** Deletes button from form
+
+#### listButtons
+- **Parameters:** formName (required)
+- **Returns:** JSON array of all buttons in form
+
+#### getButtonInfo
+- **Parameters:** formName (required), name (required)
+- **Returns:** Complete button property details
+
+### Label Component Tools (LabelComponentHandler) [NEW Dec 3, 2025]
+
+**Complete CRUD operations for bootstrap labels:**
+
+#### addLabel
+- **Parameters:** formName (required), name (required), cssPosition (required), text (optional, default "Label"), styleClass (optional), labelFor (optional), showAs (optional), enabled (optional), visible (optional), toolTipText (optional)
+- **Behavior:** Adds bootstrap label to form
+- **Auto-save:** YES
+
+#### updateLabel
+- **Parameters:** formName (required), name (required), plus any properties to update
+- **Behavior:** Updates existing label properties
+- **Auto-save:** YES
+
+#### deleteLabel
+- **Parameters:** formName (required), name (required)
+- **Behavior:** Deletes label from form
+
+#### listLabels
+- **Parameters:** formName (required)
+- **Returns:** JSON array of all labels in form
+
+#### getLabelInfo
+- **Parameters:** formName (required), name (required)
+- **Returns:** Complete label property details
 
 ### Context Tool (McpServletProvider)
 
@@ -695,28 +988,12 @@ new form
 
 ### Issues
 
-1. **buttons.txt not in embeddings.list**
-   - File exists: `/embeddings/bootstrap/buttons.txt`
-   - Missing from: `/embeddings/embeddings.list`
-   - Impact: BUTTONS category not loaded into knowledge base
-   - Fix needed: Add `bootstrap/buttons.txt` to embeddings.list
-
-2. **bootstrap/buttons.md not in rules.list**
-   - File exists: `/rules/bootstrap/buttons.md`
-   - Missing from: `/rules/rules.list`
-   - Impact: BUTTONS rules not loaded into RulesCache
-   - Fix needed: Add `bootstrap/buttons.md` to rules.list
-
-3. **addButton tool not fully working**
-   - Tool is registered and callable
-   - FormFileService is implemented
-   - But actual button creation has issues
-   - Status: WIP - needs debugging
+None currently identified - all components are properly registered and documented.
 
 ### Limitations (By Design)
 
 **Not Yet Implemented:**
-- Other bootstrap components (labels, textfields, comboboxes, etc.)
+- Other bootstrap components (textfields, checkboxes, comboboxes, datepickers, calendars, etc.)
 - Form deletion
 - Multi-column value lists
 - Global method value lists
@@ -799,6 +1076,8 @@ private McpSchema.CallToolResult handleNewTool(
 - [ ] Verify auto-save after creation
 
 **Form Tools:**
+- [ ] Get current form via getCurrentForm tool when form editor is open
+- [ ] Test getCurrentForm error when no form is open
 - [ ] Open existing form
 - [ ] Create new CSS form (create=true)
 - [ ] Create new responsive form
@@ -808,6 +1087,7 @@ private McpSchema.CallToolResult handleNewTool(
 - [ ] Update existing form properties
 - [ ] Set main form via setMainForm tool
 - [ ] List all forms via listForms tool
+- [ ] Get form properties via getFormProperties tool
 - [ ] Verify auto-save after creation
 - [ ] Verify auto-save after property updates
 - [ ] Test property map with multiple properties
@@ -841,8 +1121,7 @@ private McpSchema.CallToolResult handleNewTool(
 ### Future Enhancements
 
 **Short-term (Forms & Components focus):**
-- Fix addButton tool completely
-- Add more bootstrap components (label, textfield, combobox)
+- Add more bootstrap components (textfield, checkbox, combobox, datepicker, calendar, textarea, etc.)
 - Add deleteForm tool
 - Add duplicateForm tool
 - Add renameForm tool
@@ -976,5 +1255,6 @@ private McpSchema.CallToolResult handleNewTool(
 
 **END OF IMPLEMENTATION GUIDE**
 
-*This document reflects the actual implementation as of November 28, 2025.*  
-*All code references, file paths, and workflows are verified against the current codebase.*
+*This document reflects the actual implementation as of December 10, 2025.*  
+*All code references, file paths, and workflows are verified against the current codebase.*  
+*Tool count: 28 tools across 7 handlers (Database: 2, Relations: 4, ValueLists: 3, Forms: 5, Buttons: 5, Labels: 5, Styles: 4)*

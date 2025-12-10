@@ -1,6 +1,6 @@
-=== SERVOY STYLE AND VARIANT MANAGEMENT ===
+=== SERVOY STYLE MANAGEMENT ===
 
-**Goal**: Manage CSS/LESS styles and component variants using the available MCP tools.
+**Goal**: Manage CSS/LESS styles using the available MCP tools.
 
 **Current Project**: {{PROJECT_NAME}}  
 **Note**: Use only the tools specified below. See copilot-instructions.md for security and topic change handling.
@@ -14,7 +14,7 @@
 **See copilot-instructions.md RULE 6 for complete tool restrictions.**
 
 **Key points:**
-- [YES] ONLY use the 7 style tools listed in "AVAILABLE TOOLS" section below
+- [YES] ONLY use the 4 style tools listed in "AVAILABLE TOOLS" section below
 - [YES] Stay within {{PROJECT_NAME}} project
 - [YES] If tool returns "not found", ACCEPT that result and STOP immediately
 - [NO] Do NOT use file system or search tools
@@ -131,61 +131,6 @@ Deletes a CSS class from ai-generated.less file.
 deleteStyle(className="btn-custom-blue")
 ```
 
-### Variant Management Tools
-
-#### addVariant
-Adds or updates a variant in variants.json.
-
-**Parameters:**
-- variantName (string, REQUIRED) - Unique variant name (e.g., "BtnCustomBlue")
-- category (string, REQUIRED) - Component category: "button", "label", "checkbox", "textbox", etc.
-- displayName (string, REQUIRED) - Human-readable display name shown in Designer
-- classes (array of strings, REQUIRED) - Array of CSS class names to apply
-
-**Behavior:**
-- If variantName exists: Replaces variant definition
-- If variantName does not exist: Creates new variant
-- Creates backup before modifications
-
-**File Location:** medias/variants.json
-
-**Example:**
-```
-addVariant(
-  variantName="BtnCustomBlue",
-  category="button",
-  displayName="Custom Blue Button",
-  classes=["btn", "btn-custom-blue"]
-)
-```
-
-#### listVariants
-Lists all variants from variants.json, optionally filtered by category.
-
-**Parameters:**
-- category (string, OPTIONAL) - Filter by category (e.g., "button", "label")
-
-**Returns:** Comma-separated list of variant names
-
-**Examples:**
-```
-listVariants()
-listVariants(category="button")
-```
-
-#### deleteVariant
-Deletes a variant from variants.json.
-
-**Parameters:**
-- variantName (string, REQUIRED) - Variant name to delete
-
-**Behavior:** Creates backup before deletion
-
-**Example:**
-```
-deleteVariant(variantName="BtnCustomBlue")
-```
-
 ## KEY RULES
 
 ### 1. Style Naming Convention
@@ -193,11 +138,6 @@ deleteVariant(variantName="BtnCustomBlue")
 - No dots in className parameter (e.g., "btn-custom-blue", not ".btn-custom-blue")
 - Avoid generic names that might conflict with existing styles
 - Consider prefixing: "btn-", "label-", "form-", etc.
-
-### 2. Variant Naming Convention
-- Variant names should be PascalCase (e.g., "BtnCustomBlue", "LabelHighlight")
-- Must be unique across all categories
-- DisplayName should be human-readable (e.g., "Custom Blue Button")
 
 ### 3. CSS/LESS Content Format
 Two formats supported:
@@ -261,23 +201,13 @@ Common categories:
 - calendar
 - (any component type)
 
-### 5. Style vs Variant
-Two ways to apply styles to components:
-
-**Option 1: Direct styleClass**
-- Create style with addStyle
-- Use styleClass parameter in component tool
-- Example: addButton(formName="myForm", styleClass="btn btn-custom-blue")
-
-**Option 2: Using Variants**
-- Create style with addStyle
-- Create variant with addVariant (references the style)
-- Use variant parameter in component tool
-- Example: addButton(formName="myForm", variant="BtnCustomBlue")
-- Designer users can drag-and-drop variants
+### 5. Applying Styles to Components
+Create styles with addStyle, then apply using styleClass parameter in component tools:
+- Example: addButton(formName="myForm", name="btnSubmit", text="Submit", styleClass="btn btn-custom-blue")
+- Multiple classes supported: styleClass="btn btn-primary btn-large"
 
 ### 6. Check Before Create
-Always check if style/variant exists before creating:
+Always check if style exists before creating:
 
 **For Styles:**
 ```
@@ -286,24 +216,14 @@ If not found --> addStyle(...)
 If found and needs update --> addStyle(...) [replaces content]
 ```
 
-**For Variants:**
-```
-listVariants() or listVariants(category="button")
-Check if variant name in list
-If not found --> addVariant(...)
-If found and needs update --> addVariant(...) [replaces definition]
-```
-
 ### 7. File Structure
-All style and variant files are in medias/ folder:
+Style files are in medias/ folder:
 - medias/ai-generated.less - AI-generated CSS classes
-- medias/variants.json - Variant definitions
 - medias/{solutionName}.less - Main solution styles (auto-import added)
 
 ### 8. Backup Safety
 All modifications create backup files:
 - .less.backup for style changes
-- .json.backup for variant changes
 - Backups allow recovery if needed
 
 ### 9. LESS Import
@@ -314,7 +234,7 @@ First time ai-generated.less is created, import is added to main solution .less 
 
 ### 10. Parameter Guessing Prevention
 [FORBIDDEN] Never guess parameter values
-[REQUIRED] If className, cssContent, variantName, category, displayName, or classes not provided: ASK user
+[REQUIRED] If className or cssContent not provided: ASK user
 
 ## WORKFLOW
 
@@ -334,20 +254,15 @@ First time ai-generated.less is created, import is added to main solution .less 
    )
    ```
 
-3. Optionally create variant:
+3. Add component with style:
    ```
-   addVariant(
-     variantName="BtnDemoPrimary",
-     category="button",
-     displayName="Demo Primary Button",
-     classes=["btn", "btn-demo-primary"]
+   addButton(
+     formName="myForm",
+     name="btnSubmit",
+     text="Submit",
+     cssPosition="20,-1,-1,25,100,40",
+     styleClass="btn btn-demo-primary"
    )
-   ```
-
-4. Add component with style:
-   ```
-   Option A: addButton(formName="myForm", text="Submit", styleClass="btn btn-demo-primary")
-   Option B: addButton(formName="myForm", text="Submit", variant="BtnDemoPrimary")
    ```
 
 **Scenario 2: User wants to update existing style**
@@ -383,19 +298,12 @@ First time ai-generated.less is created, import is added to main solution .less 
    listVariants(category="button")
    ```
 
-**Scenario 4: User wants to delete style/variant**
+**Scenario 4: User wants to delete style**
 
-1. Delete style:
-   ```
-   deleteStyle(className="btn-demo-primary")
-   ```
-
-2. Delete variant:
-   ```
-   deleteVariant(variantName="BtnDemoPrimary")
-   ```
-
-[Note: Deleting a style does NOT delete variants that reference it]
+Delete style:
+```
+deleteStyle(className="btn-demo-primary")
+```
 
 ## EXAMPLES
 
@@ -413,17 +321,8 @@ addStyle(
   cssContent="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 8px; border: none; font-weight: 600"
 )
 
-Creating variant 'BtnBlueGradient' for easy reuse:
-addVariant(
-  variantName="BtnBlueGradient",
-  category="button",
-  displayName="Blue Gradient Button",
-  classes=["btn", "btn-blue-gradient"]
-)
-
-Style and variant created successfully. You can now use:
-- styleClass: "btn btn-blue-gradient"
-- variant: "BtnBlueGradient"
+Style created successfully. You can now use it with:
+styleClass="btn btn-blue-gradient"
 ```
 
 ### Example 2: Highlight Label Style
@@ -440,17 +339,8 @@ addStyle(
   cssContent="background-color: #fff3cd; color: #856404; padding: 5px 10px; border: 1px solid #ffc107; border-radius: 4px; font-weight: bold"
 )
 
-Creating variant 'LabelHighlight':
-addVariant(
-  variantName="LabelHighlight",
-  category="label",
-  displayName="Highlight Label",
-  classes=["label-highlight"]
-)
-
-Style and variant created. You can use:
-- styleClass: "label-highlight"
-- variant: "LabelHighlight"
+Style created successfully. You can use it with:
+styleClass="label-highlight"
 ```
 
 ### Example 3: Update Existing Style
@@ -537,22 +427,6 @@ All styles created. You can now apply them to your form components.
 **Error: 'cssContent' parameter is required**
 - Cause: Missing cssContent parameter in addStyle
 - Solution: Provide CSS rules as cssContent parameter
-
-**Error: 'variantName' parameter is required**
-- Cause: Missing variantName parameter
-- Solution: Provide variantName when calling addVariant or deleteVariant
-
-**Error: 'category' parameter is required**
-- Cause: Missing category parameter in addVariant
-- Solution: Provide category (e.g., "button", "label")
-
-**Error: 'displayName' parameter is required**
-- Cause: Missing displayName parameter in addVariant
-- Solution: Provide human-readable display name
-
-**Error: 'classes' parameter is required and must be a non-empty array**
-- Cause: Missing or empty classes array in addVariant
-- Solution: Provide array of CSS class names
 
 ### CSS Syntax Validation Errors
 

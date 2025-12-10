@@ -47,7 +47,6 @@
   - Example: "20,-1,-1,25,80,30" = 20px from top, 25px from left, 80x30 size
 - `text` (REQUIRED, default="Button"): Text to display on the button
 - `styleClass` (optional): CSS classes to apply (space-separated, e.g., "btn btn-primary align-center")
-- `variant` (optional): Variant name from variants.json
 - `imageStyleClass` (optional): Icon to display to the left (e.g., "fas fa-save")
 - `trailingImageStyleClass` (optional): Icon to display to the right (e.g., "fas fa-chevron-right")
 - `showAs` (optional): Display mode - "text" (default), "html", or "trusted_html"
@@ -126,7 +125,7 @@ addButton(
 **Parameters**:
 - `formName` (REQUIRED): Name of the form
 - `name` (REQUIRED): Name of the button to update
-- Any property to update (optional): text, cssPosition, styleClass, variant, imageStyleClass, trailingImageStyleClass, showAs, tabSeq, enabled, visible, toolTipText
+- Any property to update (optional): text, cssPosition, styleClass, imageStyleClass, trailingImageStyleClass, showAs, tabSeq, enabled, visible, toolTipText
 
 **Only specified properties will be updated - others remain unchanged.**
 

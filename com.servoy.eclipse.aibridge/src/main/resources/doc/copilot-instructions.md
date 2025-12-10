@@ -290,23 +290,21 @@ Simple request: "Create a form called Orders"
 - create form
 ```
 
-Complex request: "Create form Orders with Save button and dropdown for customers"
+Complex request: "Create form Orders with Save button and label for title"
 --> Action list:
 ```
 - create form
 - add buttons
-- create value list
-- add combobox
+- add labels
 ```
 
-Very complex: "Form with 2 buttons and valuelist dropdown displaying book_nodes from book_text table"
+Very complex: "Form with 2 buttons, title label, and valuelist for customer dropdown"
 --> Action list:
 ```
 - create form
 - add buttons
+- add labels
 - create value list
-- add combobox
-- create relation
 ```
 
 **Note:** "add buttons" (one line) even if multiple buttons. Similarity search will find BUTTONS category.

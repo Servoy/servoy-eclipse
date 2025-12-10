@@ -10,10 +10,12 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.mcp.IToolHandler;
 import com.servoy.eclipse.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.mcp.services.ValueListService;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -23,7 +25,7 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
  * Value Lists handler - all VALUE_LISTS intent tools
- * Tools: openValueList, deleteValueList, listValueLists
+ * Tools: openValueList, getValueLists, deleteValueLists
  */
 public class ValueListToolHandler implements IToolHandler
 {
@@ -41,16 +43,24 @@ public class ValueListToolHandler implements IToolHandler
 		Map<String, ToolHandlerRegistry.ToolDefinition> tools = new java.util.LinkedHashMap<>();
 
 		tools.put("openValueList", new ToolHandlerRegistry.ToolDefinition(
-			"Opens an existing value list or creates a new value list. Required: name (string). Optional for CUSTOM type: customValues (array of strings). Optional for DATABASE type: dataSource (format: 'server_name/table_name'), displayColumn (string), returnColumn (string), separator (string), sortOptions (string like 'column asc').",
+			"Opens an existing valuelist or creates a new valuelist. Supports 4 types: CUSTOM, DATABASE (table), DATABASE (related), GLOBAL_METHOD. " +
+			"Required: name (string). " +
+			"For CUSTOM: customValues (array of strings). " +
+			"For DATABASE (table): dataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'), displayColumn (string), returnColumn (string). " +
+			"For DATABASE (related): relationName (string), displayColumn (string), returnColumn (string). " +
+			"For GLOBAL_METHOD: globalMethod (string - method prefixed name like 'scopes.globals.getCountries'). " +
+			"Optional properties (object): lazyLoading: boolean, displayValueType: int, realValueType: int, " +
+			"separator: string, sortOptions: string, useTableFilter: boolean, addEmptyValue: boolean|'always'|'never', " +
+			"fallbackValueListID: int, deprecated: string, encapsulation: 'public'|'hide'|'module', comment: string.",
 			this::handleOpenValueList));
 
-		tools.put("deleteValueList", new ToolHandlerRegistry.ToolDefinition(
-			"Deletes an existing value list. Required: name (string) - the name of the value list to delete.",
-			this::handleDeleteValueList));
+		tools.put("getValueLists", new ToolHandlerRegistry.ToolDefinition(
+			"Lists all existing valuelists in the active solution. No parameters required.",
+			this::handleGetValueLists));
 
-		tools.put("listValueLists", new ToolHandlerRegistry.ToolDefinition(
-			"Retrieves a list of all existing value lists in the active solution. No parameters required.",
-			this::handleListValueLists));
+		tools.put("deleteValueLists", new ToolHandlerRegistry.ToolDefinition(
+			"Deletes one or more existing valuelists. Required: names (array of strings) - the names of the valuelists to delete.",
+			this::handleDeleteValueLists));
 
 		return tools;
 	}
@@ -73,287 +83,363 @@ public class ValueListToolHandler implements IToolHandler
 	}
 
 	// =============================================
+	// HELPER METHODS - Parameter Extraction
+	// =============================================
+	
+	private String extractString(Map<String, Object> args, String key, String defaultValue)
+	{
+		if (args == null || !args.containsKey(key))
+		{
+			return defaultValue;
+		}
+		Object value = args.get(key);
+		return value != null ? value.toString() : defaultValue;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<String> extractStringList(Map<String, Object> args, String key)
+	{
+		if (args == null || !args.containsKey(key))
+		{
+			return null;
+		}
+		Object value = args.get(key);
+		if (value instanceof List)
+		{
+			List<String> result = new java.util.ArrayList<>();
+			for (Object item : (List<?>)value)
+			{
+				if (item != null)
+				{
+					result.add(item.toString());
+				}
+			}
+			return result;
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> extractMap(Map<String, Object> args, String key)
+	{
+		if (args == null || !args.containsKey(key))
+		{
+			return null;
+		}
+		Object value = args.get(key);
+		if (value instanceof Map)
+		{
+			return (Map<String, Object>)value;
+		}
+		return null;
+	}
+
+	// =============================================
 	// TOOL: openValueList
 	// =============================================
 
 	private McpSchema.CallToolResult handleOpenValueList(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		String name = null;
-		List<String> customValues = null;
-		String dataSource = null;
-		String displayColumn = null;
-		String returnColumn = null;
-		String separator = null;
-		String sortOptions = null;
-		String errorMessage = null;
-		boolean isCreate = false;
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
-			if (args != null)
-			{
-				// Extract name
-				if (args.containsKey("name"))
-				{
-					Object nameObj = args.get("name");
-					if (nameObj != null) name = nameObj.toString();
-				}
-
-				// Extract CUSTOM_VALUES parameters
-				if (args.containsKey("customValues"))
-				{
-					Object valuesObj = args.get("customValues");
-					if (valuesObj instanceof List< ? >)
-					{
-						customValues = ((List< ? >)valuesObj).stream()
-							.map(Object::toString)
-							.collect(java.util.stream.Collectors.toList());
-					}
-				}
-				// Legacy support for "values" parameter
-				else if (args.containsKey("values"))
-				{
-					Object valuesObj = args.get("values");
-					if (valuesObj instanceof List< ? >)
-					{
-						customValues = ((List< ? >)valuesObj).stream()
-							.map(Object::toString)
-							.collect(java.util.stream.Collectors.toList());
-					}
-				}
-
-				// Extract DATABASE_VALUES parameters
-				if (args.containsKey("dataSource"))
-				{
-					Object dsObj = args.get("dataSource");
-					if (dsObj != null) dataSource = dsObj.toString();
-				}
-				if (args.containsKey("displayColumn"))
-				{
-					Object dcObj = args.get("displayColumn");
-					if (dcObj != null) displayColumn = dcObj.toString();
-				}
-				if (args.containsKey("returnColumn"))
-				{
-					Object rcObj = args.get("returnColumn");
-					if (rcObj != null) returnColumn = rcObj.toString();
-				}
-				if (args.containsKey("separator"))
-				{
-					Object sepObj = args.get("separator");
-					if (sepObj != null) separator = sepObj.toString();
-				}
-				if (args.containsKey("sortOptions"))
-				{
-					Object sortObj = args.get("sortOptions");
-					if (sortObj != null) sortOptions = sortObj.toString();
-				}
-			}
-
+			
+			// Extract parameters
+			String name = extractString(args, "name", null);
+			List<String> tempCustomValues = extractStringList(args, "customValues");
+			final List<String> customValues = (tempCustomValues != null) ? tempCustomValues : extractStringList(args, "values"); // Legacy support
+			String dataSource = extractString(args, "dataSource", null);
+			String relationName = extractString(args, "relationName", null);
+			String globalMethod = extractString(args, "globalMethod", null);
+			String displayColumn = extractString(args, "displayColumn", null);
+			String returnColumn = extractString(args, "returnColumn", null);
+			Map<String, Object> properties = extractMap(args, "properties");
+			
 			// Validate name is required
 			if (name == null || name.trim().isEmpty())
 			{
-				errorMessage = "The 'name' argument is required.";
 				return McpSchema.CallToolResult.builder()
-					.content(List.of(new TextContent(errorMessage)))
+					.content(List.of(new TextContent("Error: 'name' parameter is required")))
+					.isError(true)
 					.build();
 			}
-
-			// Check if value list already exists
-			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			ValueList myVL = servoyModel.getActiveProject().getEditingSolution().getValueList(name);
-
-			if (myVL == null)
-			{
-				// Value list doesn't exist - create it
-				ServoyLog.logInfo("[ValueListToolHandler] Creating value list: " + name);
-				isCreate = true;
-				myVL = servoyModel.getActiveProject().getEditingSolution().createNewValueList(servoyModel.getNameValidator(), name);
-
-				// Determine type and configure
-				boolean isDatabase = (dataSource != null && !dataSource.trim().isEmpty());
-				boolean isCustom = (customValues != null && !customValues.isEmpty());
-
-				if (isDatabase)
+			
+			// Execute on UI thread
+			final String[] result = new String[1];
+			final Exception[] exception = new Exception[1];
+			
+			Display.getDefault().syncExec(() -> {
+				try
 				{
-					// DATABASE_VALUES type (value = 1)
-					myVL.setValueListType(1); // DATABASE_VALUES
-
-					// Auto-correct datasource format if needed
-					if (!dataSource.startsWith("db:/"))
-					{
-						if (dataSource.contains("/"))
-						{
-							dataSource = "db:/" + dataSource;
-						}
-						else
-						{
-							errorMessage = "Invalid dataSource format: '" + dataSource +
-								"'. Please provide format 'db:/server_name/table_name' or 'server_name/table_name'";
-							return McpSchema.CallToolResult.builder()
-								.content(List.of(new TextContent(errorMessage)))
-								.build();
-						}
-					}
-
-					myVL.setDataSource(dataSource);
-
-					// Determine display and return column configuration
-					boolean hasDisplayColumn = (displayColumn != null && !displayColumn.trim().isEmpty());
-					boolean hasReturnColumn = (returnColumn != null && !returnColumn.trim().isEmpty());
-
-					if (hasDisplayColumn && hasReturnColumn && !displayColumn.equals(returnColumn))
-					{
-						// Different columns: display one, return another
-						// dataProviderID1 = display column (what user sees)
-						// dataProviderID2 = return column (what gets stored)
-						myVL.setDataProviderID1(displayColumn);
-						myVL.setDataProviderID2(returnColumn);
-						myVL.setShowDataProviders(1); // Show first column (display)
-						myVL.setReturnDataProviders(2); // Return second column (return)
-					}
-					else if (hasDisplayColumn)
-					{
-						// Only displayColumn: use it for both display and return
-						myVL.setDataProviderID1(displayColumn);
-						myVL.setShowDataProviders(1); // Show first column
-						myVL.setReturnDataProviders(1); // Return first column
-					}
-					else if (hasReturnColumn)
-					{
-						// Only returnColumn: use it for both display and return (backward compatibility)
-						myVL.setDataProviderID1(returnColumn);
-						myVL.setShowDataProviders(1); // Show first column
-						myVL.setReturnDataProviders(1); // Return first column
-					}
-
-					// Set separator if provided
-					if (separator != null && !separator.trim().isEmpty())
-					{
-						myVL.setSeparator(separator);
-					}
-
-					// Set sort options if provided
-					if (sortOptions != null && !sortOptions.trim().isEmpty())
-					{
-						myVL.setSortOptions(sortOptions);
-					}
+					result[0] = openOrCreateValueList(name, customValues, dataSource, relationName, 
+						globalMethod, displayColumn, returnColumn, properties);
 				}
-				else if (isCustom)
+				catch (Exception e)
 				{
-					// CUSTOM_VALUES type (value = 0, which is default)
-					myVL.setValueListType(0); // CUSTOM_VALUES
-
-					// Convert list to newline-separated string
-					StringBuilder customValuesStr = new StringBuilder();
-					for (String value : customValues)
-					{
-						if (value != null && !value.trim().isEmpty())
-						{
-							if (customValuesStr.length() > 0)
-							{
-								customValuesStr.append("\n");
-							}
-							customValuesStr.append(value.trim());
-						}
-					}
-					myVL.setCustomValues(customValuesStr.toString());
-				}
-			}
-
-			// Save the value list if it was created
-			if (isCreate)
-			{
-				ServoyLog.logInfo("[ValueListToolHandler] Saving value list: " + name);
-				ServoyProject servoyProject = servoyModel.getActiveProject();
-				servoyProject.saveEditingSolutionNodes(new IPersist[] { myVL }, true);
-			}
-
-			// Open editor on UI thread
-			final ValueList valueListToOpen = myVL;
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					EditorUtil.openValueListEditor(valueListToOpen, true);
+					exception[0] = e;
 				}
 			});
-
+			
+			if (exception[0] != null)
+			{
+				ServoyLog.logError("Error opening/creating valuelist: " + name, exception[0]);
+				return McpSchema.CallToolResult.builder()
+					.content(List.of(new TextContent("Error: " + exception[0].getMessage())))
+					.isError(true)
+					.build();
+			}
+			
+			return McpSchema.CallToolResult.builder()
+				.content(List.of(new TextContent(result[0])))
+				.build();
 		}
 		catch (Exception e)
 		{
-			errorMessage = e.getMessage();
-			ServoyLog.logError("[ValueListToolHandler] Error in handleOpenValueList: " + errorMessage, e);
+			ServoyLog.logError("Unexpected error in handleOpenValueList", e);
+			return McpSchema.CallToolResult.builder()
+				.content(List.of(new TextContent("Unexpected error: " + e.getMessage())))
+				.isError(true)
+				.build();
 		}
-
-		String resultMessage = errorMessage != null ? errorMessage
-			: (isCreate ? "Value list '" + name + "' created successfully" : "Value list '" + name + "' opened in editor.");
-		return McpSchema.CallToolResult.builder()
-			.content(List.of(new TextContent(resultMessage)))
-			.build();
+	}
+	
+	/**
+	 * Opens an existing valuelist or creates a new one if it doesn't exist.
+	 * Supports updating properties on existing valuelists via properties map.
+	 */
+	private String openOrCreateValueList(String name, List<String> customValues, String dataSource,
+		String relationName, String globalMethod, String displayColumn, String returnColumn,
+		Map<String, Object> properties) throws RepositoryException
+	{
+		ServoyLog.logInfo("[ValueListToolHandler] Processing valuelist: " + name);
+		
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject servoyProject = servoyModel.getActiveProject();
+		
+		if (servoyProject == null)
+		{
+			throw new RepositoryException("No active Servoy solution project found");
+		}
+		
+		if (servoyProject.getEditingSolution() == null)
+		{
+			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
+		}
+		
+		// Check if valuelist already exists
+		ValueList valueList = servoyProject.getEditingSolution().getValueList(name);
+		boolean isNewValueList = false;
+		boolean propertiesModified = false;
+		
+		if (valueList != null)
+		{
+			ServoyLog.logInfo("[ValueListToolHandler] ValueList exists: " + name);
+			
+			// Apply properties if provided (update existing valuelist)
+			if (properties != null && !properties.isEmpty())
+			{
+				ServoyLog.logInfo("[ValueListToolHandler] Updating valuelist properties");
+				ValueListService.updateValueListProperties(valueList, properties);
+				propertiesModified = true;
+			}
+		}
+		else
+		{
+			// ValueList doesn't exist - create it
+			ServoyLog.logInfo("[ValueListToolHandler] ValueList doesn't exist, creating: " + name);
+			
+			// Validate that at least one type parameter is provided
+			boolean hasCustom = (customValues != null && !customValues.isEmpty());
+			boolean hasDatabase = (dataSource != null && !dataSource.trim().isEmpty());
+			boolean hasRelated = (relationName != null && !relationName.trim().isEmpty());
+			boolean hasGlobalMethod = (globalMethod != null && !globalMethod.trim().isEmpty());
+			
+			if (!hasCustom && !hasDatabase && !hasRelated && !hasGlobalMethod)
+			{
+				throw new RepositoryException("ValueList '" + name + "' not found. To create it, provide one of: " +
+					"customValues (array), dataSource (string), relationName (string), or globalMethod (string).");
+			}
+			
+			// Create the valuelist using service
+			valueList = ValueListService.createValueList(name, customValues, dataSource, relationName,
+				globalMethod, displayColumn, returnColumn, properties);
+			isNewValueList = true;
+		}
+		
+		// Open editor on UI thread
+		final ValueList valueListToOpen = valueList;
+		Display.getDefault().asyncExec(() -> {
+			EditorUtil.openValueListEditor(valueListToOpen, true);
+		});
+		
+		// Build result message
+		StringBuilder result = new StringBuilder();
+		if (isNewValueList)
+		{
+			result.append("ValueList '").append(name).append("' created successfully");
+			if (customValues != null && !customValues.isEmpty())
+			{
+				result.append(" (CUSTOM with ").append(customValues.size()).append(" values)");
+			}
+			else if (globalMethod != null)
+			{
+				result.append(" (GLOBAL_METHOD: ").append(globalMethod).append(")");
+			}
+			else if (relationName != null)
+			{
+				result.append(" (RELATED: ").append(relationName).append(")");
+			}
+			else if (dataSource != null)
+			{
+				result.append(" (DATABASE: ").append(dataSource).append(")");
+			}
+		}
+		else
+		{
+			result.append("ValueList '").append(name).append("' opened successfully");
+			if (propertiesModified)
+			{
+				result.append(". Properties updated");
+			}
+		}
+		
+		return result.toString();
 	}
 
 	// =============================================
-	// TOOL: deleteValueList
+	// TOOL: deleteValueLists
 	// =============================================
 
-	private McpSchema.CallToolResult handleDeleteValueList(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleDeleteValueLists(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		String name = null;
-		String errorMessage = null;
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
-
-			if (args != null && args.containsKey("name"))
+			
+			// Extract names array
+			List<String> names = extractStringList(args, "names");
+			
+			// Validate names is required
+			if (names == null || names.isEmpty())
 			{
-				Object nameObj = args.get("name");
-				if (nameObj != null) name = nameObj.toString();
-			}
-
-			// Validate name is required
-			if (name == null || name.trim().isEmpty())
-			{
-				errorMessage = "The 'name' argument is required.";
 				return McpSchema.CallToolResult.builder()
-					.content(List.of(new TextContent(errorMessage)))
+					.content(List.of(new TextContent("Error: 'names' parameter is required (array of valuelist names)")))
+					.isError(true)
 					.build();
 			}
-
-			// Find the value list
-			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			ValueList valueList = servoyModel.getActiveProject().getEditingSolution().getValueList(name);
-
+			
+			// Execute on UI thread
+			final String[] result = new String[1];
+			final Exception[] exception = new Exception[1];
+			
+			Display.getDefault().syncExec(() -> {
+				try
+				{
+					result[0] = deleteValueLists(names);
+				}
+				catch (Exception e)
+				{
+					exception[0] = e;
+				}
+			});
+			
+			if (exception[0] != null)
+			{
+				ServoyLog.logError("Error deleting valuelists", exception[0]);
+				return McpSchema.CallToolResult.builder()
+					.content(List.of(new TextContent("Error: " + exception[0].getMessage())))
+					.isError(true)
+					.build();
+			}
+			
+			return McpSchema.CallToolResult.builder()
+				.content(List.of(new TextContent(result[0])))
+				.build();
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Unexpected error in handleDeleteValueLists", e);
+			return McpSchema.CallToolResult.builder()
+				.content(List.of(new TextContent("Unexpected error: " + e.getMessage())))
+				.isError(true)
+				.build();
+		}
+	}
+	
+	/**
+	 * Deletes one or more valuelists.
+	 */
+	private String deleteValueLists(List<String> names) throws RepositoryException
+	{
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject servoyProject = servoyModel.getActiveProject();
+		
+		if (servoyProject == null)
+		{
+			throw new RepositoryException("No active Servoy solution project found");
+		}
+		
+		if (servoyProject.getEditingSolution() == null)
+		{
+			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
+		}
+		
+		java.util.List<String> deletedValueLists = new java.util.ArrayList<>();
+		java.util.List<String> notFoundValueLists = new java.util.ArrayList<>();
+		
+		for (String name : names)
+		{
+			if (name == null || name.trim().isEmpty())
+			{
+				continue;
+			}
+			
+			ValueList valueList = servoyProject.getEditingSolution().getValueList(name);
+			
 			if (valueList == null)
 			{
-				errorMessage = "Value list '" + name + "' not found.";
+				notFoundValueLists.add(name);
 			}
 			else
 			{
-				servoyModel.getActiveProject().getEditingSolution().removeChild(valueList);
-				ServoyLog.logInfo("[ValueListToolHandler] Deleted value list: " + name);
+				servoyProject.getEditingSolution().removeChild(valueList);
+				deletedValueLists.add(name);
+				ServoyLog.logInfo("[ValueListToolHandler] Deleted valuelist: " + name);
 			}
 		}
-		catch (Exception e)
+		
+		// Build result message
+		StringBuilder result = new StringBuilder();
+		
+		if (!deletedValueLists.isEmpty())
 		{
-			errorMessage = e.getMessage();
-			ServoyLog.logError("[ValueListToolHandler] Error in handleDeleteValueList: " + errorMessage, e);
+			result.append("Successfully deleted ").append(deletedValueLists.size()).append(" valuelist(s): ");
+			result.append(String.join(", ", deletedValueLists));
 		}
-
-		String resultMessage = errorMessage != null ? errorMessage : "Value list '" + name + "' deleted successfully.";
-		return McpSchema.CallToolResult.builder()
-			.content(List.of(new TextContent(resultMessage)))
-			.build();
+		
+		if (!notFoundValueLists.isEmpty())
+		{
+			if (result.length() > 0)
+			{
+				result.append("\n\n");
+			}
+			result.append("ValueLists not found (").append(notFoundValueLists.size()).append("): ");
+			result.append(String.join(", ", notFoundValueLists));
+		}
+		
+		if (deletedValueLists.isEmpty() && notFoundValueLists.isEmpty())
+		{
+			result.append("No valuelists specified for deletion");
+		}
+		
+		return result.toString();
 	}
 
 	// =============================================
-	// TOOL: listValueLists
+	// TOOL: getValueLists
 	// =============================================
 
-	private McpSchema.CallToolResult handleListValueLists(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleGetValueLists(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		String errorMessage = null;
 		StringBuilder resultBuilder = new StringBuilder();
@@ -429,7 +515,7 @@ public class ValueListToolHandler implements IToolHandler
 		catch (Exception e)
 		{
 			errorMessage = e.getMessage();
-			ServoyLog.logError("[ValueListToolHandler] Error in handleListValueLists: " + errorMessage, e);
+			ServoyLog.logError("[ValueListToolHandler] Error in handleGetValueLists: " + errorMessage, e);
 		}
 
 		String resultMessage = errorMessage != null ? errorMessage : resultBuilder.toString();

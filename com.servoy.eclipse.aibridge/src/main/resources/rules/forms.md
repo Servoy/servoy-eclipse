@@ -27,6 +27,7 @@
 1. **openForm** - Open existing form or create new form
 2. **setMainForm** - Set solution's main/first form
 3. **listForms** - List all forms in solution
+4. **getFormProperties** - Get properties of a form
 
 ---
 
@@ -73,6 +74,9 @@ openForm(
   extendsForm="BaseForm"
 )
 
+# Update existing form size (simple syntax)
+openForm(name="ExistingForm", width=1024, height=768)
+
 # Update existing form properties
 openForm(
   name="ExistingForm",
@@ -80,6 +84,15 @@ openForm(
     "showInMenu": true,
     "useMinWidth": true,
     "initialSort": "customer_name asc"
+  }
+)
+
+# Update size via properties (alternative syntax)
+openForm(
+  name="ExistingForm",
+  properties={
+    "width": 1024,
+    "height": 768
   }
 )
 ```
@@ -113,12 +126,34 @@ Returns list of all forms with indicator for main form
 
 ---
 
+### getFormProperties
+**Get the properties of a form**
+
+**Parameters**:
+- `name` (required): Form name
+
+**Examples**:
+```
+getFormProperties(name="CustomerForm")
+```
+
+**Returns**: Detailed form properties including:
+- Dimensions (width, height, useMinWidth, useMinHeight)
+- Form type (css-positioned, responsive, or absolute-positioned)
+- Data source
+- Settings (showInMenu, styleName, navigatorID, initialSort)
+- Inheritance (parent form if applicable)
+- Main form status
+
+---
+
 ## [REMINDER] THESE ARE THE ONLY VALID TOOLS
 
-**For ALL form-related operations, you may ONLY use these 3 tools:**
+**For ALL form-related operations, you may ONLY use these 4 tools:**
 1. `openForm` - Open/create/edit forms
 2. `setMainForm` - Set main form
 3. `listForms` - List all forms
+4. `getFormProperties` - Get form properties
 
 **[CRITICAL] Use only these specified tools for form operations and no other tools (like file_search, grep_search, workspace search, semantic search, etc.). See copilot-instructions.md RULE 6.**
 
@@ -169,6 +204,8 @@ properties={
 8. **Form inheritance**: Use `extendsForm` to specify parent form for inheritance
 9. **Main form**: Solution's first form loads automatically on startup
 10. **Property updates**: Can update properties on existing forms without `create=true`
+11. **First form auto-main**: When creating the FIRST form in a solution (no other forms exist), it is AUTOMATICALLY set as the main form - no need to specify `setAsMainForm=true`
+12. **Width/Height for updates**: The `width` and `height` parameters work for BOTH creating AND updating forms - use them directly: `openForm(name="MyForm", width=800, height=600)` to resize an existing form
 
 ---
 

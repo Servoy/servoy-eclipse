@@ -32,33 +32,59 @@
 [REQUIRED] If user doesn't provide serverName: STOP and ASK THE USER explicitly  
 [REQUIRED] Example: "I need the database server name. What server should I query?"
 
-**This applies to:** discoverRelations, listTables, getTableInfo
+**This applies to:** discoverDbRelations, listTables, getTableInfo
 
 ---
 
 ## AVAILABLE TOOLS
 
-1. **openRelation** - Create or open relation
-2. **deleteRelation** - Delete relation  
-3. **listRelations** - List all relations
-4. **discoverRelations** - Discover potential relations by analyzing foreign keys
+1. **openRelation** - Create or open relation with full property support (all 8 properties)
+2. **getRelations** - List all relations (renamed from listRelations)
+3. **deleteRelations** - Delete multiple relations (array support, renamed from deleteRelation)
+4. **discoverDbRelations** - Discover potential relations by analyzing foreign keys (renamed from discoverRelations)
 
 ---
 
 ### openRelation
-**Create new or open existing relation**
+**Create new or open existing relation - Dual purpose tool with properties map**
 
-**Parameters**:
-- `name` (required): Relation name
-- `primaryDataSource`: Primary table (format: `server_name/table_name`)
-- `foreignDataSource`: Foreign table (format: `server_name/table_name`)
-- `primaryColumn`: Column in primary table
-- `foreignColumn`: Column in foreign table
+**Behavior:**
+- If relation exists: Opens it (and updates properties if provided)
+- If relation doesn't exist: Creates it with provided parameters
+
+**Required for creation:**
+- `name` (string): Relation name
+- `primaryDataSource` (string): Primary table (format: `server_name/table_name`)
+- `foreignDataSource` (string): Foreign table (format: `server_name/table_name`)
+
+**Optional for creation:**
+- `primaryColumn` (string): Column in primary table
+- `foreignColumn` (string): Column in foreign table
+- `properties` (object): Map of relation properties (see below)
+
+**Properties Map - All 8 Relation Properties:**
+```
+properties: {
+  "joinType": "left outer" | "inner",  // Default: "left outer"
+  "allowCreationRelatedRecords": boolean,  // Default: true
+  "allowParentDeleteWhenHavingRelatedRecords": boolean,  // Default: false
+  "deleteRelatedRecords": boolean,  // Default: false (cascade delete)
+  "initialSort": "column1 asc, column2 desc",  // Optional sorting
+  "encapsulation": "public" | "hide" | "module",  // Default: "public"
+  "deprecated": "Use new_relation instead",  // Optional deprecation message
+  "comment": "Documentation for this relation"  // Optional comment
+}
+```
 
 **Examples**:
+
+Simple - open existing:
 ```
 openRelation(name="orders_to_customers")
+```
 
+Create with defaults:
+```
 openRelation(
   name="orders_to_customers",
   primaryDataSource="example_data/orders",
@@ -68,27 +94,64 @@ openRelation(
 )
 ```
 
-### deleteRelation
-**Delete a relation**
+Create with properties:
+```
+openRelation(
+  name="orders_to_customers",
+  primaryDataSource="example_data/orders",
+  foreignDataSource="example_data/customers",
+  primaryColumn="customer_id",
+  foreignColumn="customer_id",
+  properties={
+    "joinType": "inner",
+    "deleteRelatedRecords": true,
+    "initialSort": "order_date desc",
+    "comment": "Links orders to their customers"
+  }
+)
+```
 
-**Parameters**: `name` (required)
+Update existing relation properties:
+```
+openRelation(
+  name="orders_to_customers",
+  properties={
+    "encapsulation": "module",
+    "deprecated": "Use orders_to_customers_v2 instead"
+  }
+)
+```
 
-**Example**: `deleteRelation(name="old_relation")`
-
-### listRelations
+### getRelations
 **List all relations in current project**
 
 **Parameters**: None
 
-**Example**: `listRelations()`
+**Example**: `getRelations()`
 
-### discoverRelations
+**Returns**: List of all relations with their primary/foreign datasources
+
+### deleteRelations
+**Delete one or more relations**
+
+**Parameters**: 
+- `names` (required array): Array of relation names to delete
+
+**Examples**: 
+```
+deleteRelations(names=["old_relation"])
+deleteRelations(names=["temp_rel1", "temp_rel2", "deprecated_relation"])
+```
+
+**Returns**: Success/not found details for each relation
+
+### discoverDbRelations
 **Discover potential relations by analyzing foreign keys**
 
 **Parameters**:
 - `serverName` (required): Database server name - [FORBIDDEN] NEVER guess this, [REQUIRED] always ASK THE USER if not provided
 
-**Example**: `discoverRelations(serverName="example_data")`
+**Example**: `discoverDbRelations(serverName="example_data")`
 
 **Returns**:
 - List of tables in the database
@@ -104,9 +167,12 @@ openRelation(
 1. **Database server name is REQUIRED** - Always ask first if not provided
 2. **Project ({{PROJECT_NAME}}) vs Database server**: If user mentions a name that's NOT "{{PROJECT_NAME}}", it's likely a database server  
 3. **Two tables mentioned**: First = primary, second = foreign (don't ask unless ambiguous)
-4. **Distinguish FKs**: Always show EXPLICIT FKs separately from POTENTIAL relations when using discoverRelations
-5. **Missing info**: Use `discoverRelations` to discover available relationships, or ASK THE USER
+4. **Distinguish FKs**: Always show EXPLICIT FKs separately from POTENTIAL relations when using discoverDbRelations
+5. **Missing info**: Use `discoverDbRelations` to discover available relationships, or ASK THE USER
 6. **DataSource format**: `server_name/table_name` (tool adds `db:/` prefix automatically)
+7. **Properties are optional**: Start simple (just create), add properties when needed for specific behavior
+8. **Update via properties**: To modify existing relation, call openRelation with just name + properties map
+9. **Bulk delete**: Use deleteRelations with array for multiple relations at once
 
 ---
 
@@ -114,20 +180,26 @@ openRelation(
 
 **Creating a Relation**:
 1. Ask for database server name if not provided
-2. If user doesn't know what relations to create: `discoverRelations(serverName="...")`
+2. If user doesn't know what relations to create: `discoverDbRelations(serverName="...")`
 3. Show EXPLICIT FKs first, then POTENTIAL relations
 4. When user mentions two tables: first = primary, second = foreign
 5. Collect all parameters, then call `openRelation`
+6. Add properties map if user specifies behavior (join type, cascade delete, etc.)
 
 **Discovering Relations**:
-- Call `discoverRelations(serverName="...")` to analyze FK relationships
+- Call `discoverDbRelations(serverName="...")` to analyze FK relationships
 - Present both EXPLICIT and POTENTIAL relations to user
 - Help user choose which relation to create
 
+**Updating Relations**:
+- To update properties: `openRelation(name="...", properties={...})`
+- Can update any of the 8 properties independently
+
 **Other Operations**:
 - Open existing: `openRelation(name="relation_name")`
-- Delete: `deleteRelation(name="relation_name")`
-- List all: `listRelations()`
+- Delete one: `deleteRelations(names=["relation_name"])`
+- Delete multiple: `deleteRelations(names=["rel1", "rel2"])`
+- List all: `getRelations()`
 
 ---
 
@@ -148,7 +220,7 @@ User: "Create relation from orders to customers using customer_id"
 User: "I need a relation"
 --> Ask: "What's your database server name?"
 User: "example_data"
---> discoverRelations(serverName="example_data")
+--> discoverDbRelations(serverName="example_data")
 --> Show: EXPLICIT FKs + POTENTIAL relations
 --> User chooses tables
 --> openRelation(...with parameters...)
@@ -157,5 +229,5 @@ User: "example_data"
 **Example 3: List existing**
 ```
 User: "Show me all relations"
---> listRelations()
+--> getRelations()
 ```

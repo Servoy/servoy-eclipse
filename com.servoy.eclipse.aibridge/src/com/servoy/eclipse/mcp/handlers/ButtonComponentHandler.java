@@ -46,7 +46,7 @@ public class ButtonComponentHandler implements IToolHandler
 				"Required: formName (string), name (string), cssPosition (string). " +
 				"cssPosition format: 'top,right,bottom,left,width,height' where first 4 values are DISTANCES from edges (not coordinates). " +
 				"Use -1 for unconstrained edges. Example: '20,-1,-1,25,80,30' means 20px from top, 25px from left, 80x30 size. " +
-				"Optional: text (string, default 'Button'), styleClass (string), variant (string), " +
+				"Optional: text (string, default 'Button'), styleClass (string), " +
 				"imageStyleClass (string - icon to the left), trailingImageStyleClass (string - icon to the right), " +
 				"showAs (string: 'text', 'html', 'trusted_html'), tabSeq (number), " +
 				"enabled (boolean), visible (boolean), toolTipText (string).",
@@ -55,7 +55,7 @@ public class ButtonComponentHandler implements IToolHandler
 		tools.put("updateButton", new ToolHandlerRegistry.ToolDefinition(
 			"Updates an existing button component on a form. " +
 				"Required: formName (string), name (string). " +
-				"Optional: Any property to update - text, cssPosition, styleClass, variant, imageStyleClass, " +
+				"Optional: Any property to update - text, cssPosition, styleClass, imageStyleClass, " +
 				"trailingImageStyleClass, showAs, tabSeq, enabled, visible, toolTipText. Only specified properties will be updated.",
 			this::handleUpdateButton));
 
@@ -116,7 +116,6 @@ public class ButtonComponentHandler implements IToolHandler
 			// Extract optional parameters
 			String text = extractString(args, "text", "Button");
 			String styleClass = extractString(args, "styleClass", null);
-			String variant = extractString(args, "variant", null);
 			String imageStyleClass = extractString(args, "imageStyleClass", null);
 			String trailingImageStyleClass = extractString(args, "trailingImageStyleClass", null);
 			String showAs = extractString(args, "showAs", null);
@@ -145,7 +144,6 @@ public class ButtonComponentHandler implements IToolHandler
 			Map<String, Object> properties = new HashMap<>();
 			properties.put("text", text);
 			if (styleClass != null) properties.put("styleClass", styleClass);
-			if (variant != null) properties.put("variant", variant);
 			if (imageStyleClass != null) properties.put("imageStyleClass", imageStyleClass);
 			if (trailingImageStyleClass != null) properties.put("trailingImageStyleClass", trailingImageStyleClass);
 			if (showAs != null) properties.put("showAs", showAs);
@@ -215,7 +213,6 @@ public class ButtonComponentHandler implements IToolHandler
 			String text = extractString(args, "text", null);
 			String cssPosition = extractString(args, "cssPosition", null);
 			String styleClass = extractString(args, "styleClass", null);
-			String variant = extractString(args, "variant", null);
 			String imageStyleClass = extractString(args, "imageStyleClass", null);
 			String trailingImageStyleClass = extractString(args, "trailingImageStyleClass", null);
 			String showAs = extractString(args, "showAs", null);
@@ -227,7 +224,6 @@ public class ButtonComponentHandler implements IToolHandler
 			if (text != null) updates.put("text", text);
 			if (cssPosition != null) updates.put("cssPosition", cssPosition);
 			if (styleClass != null) updates.put("styleClass", styleClass);
-			if (variant != null) updates.put("variant", variant);
 			if (imageStyleClass != null) updates.put("imageStyleClass", imageStyleClass);
 			if (trailingImageStyleClass != null) updates.put("trailingImageStyleClass", trailingImageStyleClass);
 			if (showAs != null) updates.put("showAs", showAs);

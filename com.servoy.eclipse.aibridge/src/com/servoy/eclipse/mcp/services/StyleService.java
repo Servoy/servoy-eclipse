@@ -395,6 +395,10 @@ public class StyleService
 	 * Preprocesses CSS content to strip class selector if model incorrectly included it.
 	 * Model should send only content, but sometimes sends full class definition.
 	 * 
+	 * IMPORTANT: Distinguishes between:
+	 * 1. Single wrapper: .className { properties } - needs unwrapping
+	 * 2. Complete LESS: .className { } .className:hover { } @keyframes { } - use as-is
+	 * 
 	 * @param cssContent The CSS content from the model
 	 * @param className The class name to detect and strip
 	 * @return Clean CSS content (wrapper stripped if present)
@@ -426,29 +430,75 @@ public class StyleService
 		
 		if (matchesPattern1 || matchesPattern2)
 		{
-			System.out.println("[StyleService] WRAPPER DETECTED - stripping it...");
+			System.out.println("[StyleService] Class name detected at start - checking if wrapper or complete LESS...");
 			
-			// Model sent full class definition - extract inner content
+			// Check if this is a COMPLETE LESS definition (multiple rules/at-rules) or a SINGLE wrapper
+			// Count top-level closing braces after the first opening brace
 			int firstBrace = trimmed.indexOf('{');
-			int lastBrace = trimmed.lastIndexOf('}');
-			
-			System.out.println("[StyleService] First brace at position: " + firstBrace);
-			System.out.println("[StyleService] Last brace at position: " + lastBrace);
-			System.out.println("[StyleService] Total length: " + trimmed.length());
-			
-			if (firstBrace != -1 && lastBrace > firstBrace)
+			if (firstBrace == -1)
 			{
-				String innerContent = trimmed.substring(firstBrace + 1, lastBrace).trim();
-				System.out.println("[StyleService] Extracted inner content length: " + innerContent.length());
-				System.out.println("[StyleService] Extracted content (first 200 chars): " + 
-					(innerContent.length() > 200 ? innerContent.substring(0, 200) + "..." : innerContent));
-				System.out.println("[StyleService] SUCCESS - wrapper stripped");
-				return innerContent;
+				System.out.println("[StyleService] ERROR - no opening brace found");
+				return cssContent;
 			}
-			else
+			
+			// Find the matching closing brace for the first opening brace
+			int braceDepth = 1;
+			int matchingCloseBrace = -1;
+			
+			for (int i = firstBrace + 1; i < trimmed.length(); i++)
 			{
-				System.out.println("[StyleService] ERROR - invalid brace positions, returning original");
+				char c = trimmed.charAt(i);
+				if (c == '{') braceDepth++;
+				else if (c == '}')
+				{
+					braceDepth--;
+					if (braceDepth == 0)
+					{
+						matchingCloseBrace = i;
+						break;
+					}
+				}
 			}
+			
+			System.out.println("[StyleService] First brace at: " + firstBrace + ", matching close at: " + matchingCloseBrace);
+			
+			if (matchingCloseBrace == -1)
+			{
+				System.out.println("[StyleService] ERROR - no matching closing brace");
+				return cssContent;
+			}
+			
+			// Check if there's significant content after the matching closing brace
+			String afterFirstRule = trimmed.substring(matchingCloseBrace + 1).trim();
+			System.out.println("[StyleService] Content after first rule (length=" + afterFirstRule.length() + "): " + 
+				(afterFirstRule.length() > 100 ? afterFirstRule.substring(0, 100) + "..." : afterFirstRule));
+			
+			// If there's significant content after (other rules, keyframes, etc.), this is a COMPLETE LESS definition
+			// Check for: other class definitions (.className:hover, .className::before), @keyframes, @media, etc.
+			boolean hasAdditionalRules = afterFirstRule.length() > 0 && 
+				(afterFirstRule.contains("{") || 
+				 afterFirstRule.matches(".*\\." + Pattern.quote(className) + ".*\\{.*") ||
+				 afterFirstRule.matches(".*@(keyframes|media|supports).*\\{.*"));
+			
+			System.out.println("[StyleService] Has additional rules after first block: " + hasAdditionalRules);
+			
+			if (hasAdditionalRules)
+			{
+				System.out.println("[StyleService] COMPLETE LESS DEFINITION detected - using as-is (no unwrapping)");
+				System.out.println("[StyleService] This appears to be multiple rules/keyframes, not a single wrapper");
+				System.out.println("[StyleService] ===== END PREPROCESSING =====");
+				return cssContent;
+			}
+			
+			// Single wrapper case - extract inner content
+			System.out.println("[StyleService] SINGLE WRAPPER detected - unwrapping it...");
+			String innerContent = trimmed.substring(firstBrace + 1, matchingCloseBrace).trim();
+			System.out.println("[StyleService] Extracted inner content length: " + innerContent.length());
+			System.out.println("[StyleService] Extracted content (first 200 chars): " + 
+				(innerContent.length() > 200 ? innerContent.substring(0, 200) + "..." : innerContent));
+			System.out.println("[StyleService] SUCCESS - wrapper stripped");
+			System.out.println("[StyleService] ===== END PREPROCESSING =====");
+			return innerContent;
 		}
 		else
 		{

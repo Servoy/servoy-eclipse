@@ -46,7 +46,7 @@ public class LabelComponentHandler implements IToolHandler
 				"Required: formName (string), name (string), cssPosition (string). " +
 				"cssPosition format: 'top,right,bottom,left,width,height' where first 4 values are DISTANCES from edges (not coordinates). " +
 				"Use -1 for unconstrained edges. Example: '20,-1,-1,25,80,30' means 20px from top, 25px from left, 80x30 size. " +
-				"Optional: text (string, default 'Label'), styleClass (string), variant (string), " +
+				"Optional: text (string, default 'Label'), styleClass (string), " +
 				"labelFor (string), showAs (string: 'text', 'html', 'trusted_html'), " +
 				"enabled (boolean), visible (boolean), toolTipText (string).",
 			this::handleAddLabel));
@@ -54,7 +54,7 @@ public class LabelComponentHandler implements IToolHandler
 		tools.put("updateLabel", new ToolHandlerRegistry.ToolDefinition(
 			"Updates an existing label component on a form. " +
 				"Required: formName (string), name (string). " +
-				"Optional: Any property to update - text, cssPosition, styleClass, variant, labelFor, showAs, " +
+				"Optional: Any property to update - text, cssPosition, styleClass, labelFor, showAs, " +
 				"enabled, visible, toolTipText. Only specified properties will be updated.",
 			this::handleUpdateLabel));
 
@@ -115,7 +115,6 @@ public class LabelComponentHandler implements IToolHandler
 			// Extract optional parameters
 			String text = extractString(args, "text", "Label");
 			String styleClass = extractString(args, "styleClass", null);
-			String variant = extractString(args, "variant", null);
 			String labelFor = extractString(args, "labelFor", null);
 			String showAs = extractString(args, "showAs", null);
 			Boolean enabled = extractBoolean(args, "enabled", null);
@@ -142,7 +141,6 @@ public class LabelComponentHandler implements IToolHandler
 			Map<String, Object> properties = new HashMap<>();
 			properties.put("text", text);
 			if (styleClass != null) properties.put("styleClass", styleClass);
-			if (variant != null) properties.put("variant", variant);
 			if (labelFor != null) properties.put("labelFor", labelFor);
 			if (showAs != null) properties.put("showAs", showAs);
 			if (enabled != null) properties.put("enabled", enabled);
@@ -210,7 +208,6 @@ public class LabelComponentHandler implements IToolHandler
 			String text = extractString(args, "text", null);
 			String cssPosition = extractString(args, "cssPosition", null);
 			String styleClass = extractString(args, "styleClass", null);
-			String variant = extractString(args, "variant", null);
 			String labelFor = extractString(args, "labelFor", null);
 			String showAs = extractString(args, "showAs", null);
 			Boolean enabled = extractBoolean(args, "enabled", null);
@@ -220,7 +217,6 @@ public class LabelComponentHandler implements IToolHandler
 			if (text != null) updates.put("text", text);
 			if (cssPosition != null) updates.put("cssPosition", cssPosition);
 			if (styleClass != null) updates.put("styleClass", styleClass);
-			if (variant != null) updates.put("variant", variant);
 			if (labelFor != null) updates.put("labelFor", labelFor);
 			if (showAs != null) updates.put("showAs", showAs);
 			if (enabled != null) updates.put("enabled", enabled);

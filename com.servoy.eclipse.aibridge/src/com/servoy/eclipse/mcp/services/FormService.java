@@ -234,4 +234,76 @@ public class FormService
 		}
 	}
 	
+	/**
+	 * Refreshes an open form in the designer by touching the .less file resource.
+	 * This triggers Eclipse's resource change notification, causing the form editor
+	 * to refresh its styling without closing/reopening (no flickering).
+	 * 
+	 * NOTE: This method must be called from the Display (UI) thread.
+	 * Use Display.getDefault().syncExec() or asyncExec() when calling from background threads.
+	 * 
+	 * @param projectPath Path to the Servoy project
+	 * @param lessFileName Name of the LESS file that was modified (e.g., "mysolution.less")
+	 * @return true if refresh was triggered, false otherwise
+	 */
+	public static boolean refreshFormAfterStyleChange(String projectPath, String lessFileName)
+	{
+		try
+		{
+			System.out.println("[FormService] refreshFormAfterStyleChange called for LESS file: " + lessFileName);
+			
+			// Get the Eclipse workspace and project
+			org.eclipse.core.resources.IWorkspaceRoot workspaceRoot = 
+				org.eclipse.core.resources.ResourcesPlugin.getWorkspace().getRoot();
+			
+			// Find the project by matching path
+			org.eclipse.core.resources.IProject[] projects = workspaceRoot.getProjects();
+			org.eclipse.core.resources.IProject targetProject = null;
+			
+			for (org.eclipse.core.resources.IProject project : projects)
+			{
+				if (project.getLocation() != null && 
+					project.getLocation().toOSString().equals(projectPath))
+				{
+					targetProject = project;
+					break;
+				}
+			}
+			
+			if (targetProject == null)
+			{
+				System.out.println("[FormService] Could not find Eclipse project for path: " + projectPath);
+				return false;
+			}
+			
+			// Get the LESS file resource
+			org.eclipse.core.resources.IFile lessFile = 
+				targetProject.getFile("medias/" + lessFileName);
+			
+			if (!lessFile.exists())
+			{
+				System.out.println("[FormService] LESS file not found: " + lessFile.getFullPath());
+				return false;
+			}
+			
+			System.out.println("[FormService] Touching LESS file to trigger refresh: " + lessFile.getFullPath());
+			
+			// Touch the file - this updates the modification timestamp and triggers
+			// Eclipse's resource change listeners, causing editors to refresh
+			lessFile.touch(null);
+			
+			// Additionally, refresh the file from the file system to ensure Eclipse
+			// picks up any external changes
+			lessFile.refreshLocal(org.eclipse.core.resources.IResource.DEPTH_ZERO, null);
+			
+			ServoyLog.logInfo("[FormService] Successfully triggered refresh for LESS file: " + lessFileName);
+			return true;
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("[FormService] Error refreshing after style change: " + e.getMessage(), e);
+			return false;
+		}
+	}
+	
 }

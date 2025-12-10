@@ -42,3 +42,12 @@ design screen
 build UI form
 create interface
 add interface
+get form properties
+show form properties
+display form properties
+form details
+view form properties
+check form size
+what is form size
+form information
+inspect form

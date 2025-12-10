@@ -85,7 +85,16 @@ public class FormToolHandler implements IToolHandler
 			"Lists all forms in the active solution. No parameters required.",
 			this::handleListForms);
 		
-		System.out.println("[FormToolHandler] Tools registered: getCurrentForm, openForm, setMainForm, listForms");
+		// Helper tool: getFormProperties
+		ToolHandlerRegistry.registerTool(
+			server,
+			"getFormProperties",
+			"Gets the properties of a form. " +
+			"Required: name (string) - the form name. " +
+			"Returns: Form properties including width, height, dataSource, style type, and other settings.",
+			this::handleGetFormProperties);
+		
+		System.out.println("[FormToolHandler] Tools registered: getCurrentForm, openForm, setMainForm, listForms, getFormProperties");
 	}
 
 	// =============================================
@@ -144,7 +153,7 @@ public class FormToolHandler implements IToolHandler
 				try
 				{
 					System.out.println("[FormToolHandler] Executing openForm() on UI thread...");
-					result[0] = openOrCreateForm(name, create, width, height, style, dataSource, extendsForm, setAsMainForm, properties);
+					result[0] = openOrCreateForm(name, create, width, height, style, dataSource, extendsForm, setAsMainForm, properties, args);
 					System.out.println("[FormToolHandler] openForm() completed successfully");
 				}
 				catch (Exception e)
@@ -288,6 +297,65 @@ public class FormToolHandler implements IToolHandler
 	}
 
 	// =============================================
+	// TOOL: getFormProperties
+	// =============================================
+	
+	private McpSchema.CallToolResult handleGetFormProperties(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+	{
+		System.out.println("========================================");
+		System.out.println("[FormToolHandler] handleGetFormProperties CALLED");
+		
+		try
+		{
+			Map<String, Object> args = request.arguments();
+			String name = extractString(args, "name", null);
+			
+			if (name == null || name.trim().isEmpty())
+			{
+				return McpSchema.CallToolResult.builder()
+					.content(List.of(new TextContent("Error: 'name' parameter is required")))
+					.isError(true)
+					.build();
+			}
+			
+			final String[] result = new String[1];
+			final Exception[] exception = new Exception[1];
+			
+			Display.getDefault().syncExec(() -> {
+				try
+				{
+					result[0] = getFormProperties(name);
+				}
+				catch (Exception e)
+				{
+					exception[0] = e;
+				}
+			});
+			
+			if (exception[0] != null)
+			{
+				ServoyLog.logError("Error getting form properties: " + name, exception[0]);
+				return McpSchema.CallToolResult.builder()
+					.content(List.of(new TextContent("Error: " + exception[0].getMessage())))
+					.isError(true)
+					.build();
+			}
+			
+			return McpSchema.CallToolResult.builder()
+				.content(List.of(new TextContent(result[0])))
+				.build();
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Unexpected error in handleGetFormProperties", e);
+			return McpSchema.CallToolResult.builder()
+				.content(List.of(new TextContent("Unexpected error: " + e.getMessage())))
+				.isError(true)
+				.build();
+		}
+	}
+
+	// =============================================
 	// CORE LOGIC METHODS
 	// =============================================
 	
@@ -295,7 +363,7 @@ public class FormToolHandler implements IToolHandler
 	 * Opens an existing form or creates a new one if it doesn't exist (and create=true).
 	 */
 	private String openOrCreateForm(String name, boolean create, int width, int height, String style, 
-		String dataSource, String extendsForm, boolean setAsMainForm, Map<String, Object> properties) throws RepositoryException
+		String dataSource, String extendsForm, boolean setAsMainForm, Map<String, Object> properties, Map<String, Object> args) throws RepositoryException
 	{
 		System.out.println("[FormToolHandler.openOrCreateForm] Processing form: " + name);
 		
@@ -315,6 +383,7 @@ public class FormToolHandler implements IToolHandler
 		// Check if form already exists
 		Form form = servoyProject.getEditingSolution().getForm(name);
 		boolean isNewForm = false;
+		boolean isFirstForm = false;
 		
 		if (form != null)
 		{
@@ -324,6 +393,16 @@ public class FormToolHandler implements IToolHandler
 		else if (create)
 		{
 			System.out.println("[FormToolHandler.openOrCreateForm] Form doesn't exist, creating: " + name);
+			
+			// Check if this will be the first form in the solution
+			java.util.Iterator<Form> existingForms = servoyProject.getEditingSolution().getForms(null, true);
+			isFirstForm = !existingForms.hasNext();
+			
+			if (isFirstForm)
+			{
+				System.out.println("[FormToolHandler.openOrCreateForm] This is the first form in the solution - will set as main form");
+			}
+			
 			// Form doesn't exist and create=true - create it
 			form = createNewForm(servoyProject, name, width, height, style, dataSource);
 			isNewForm = true;
@@ -332,6 +411,31 @@ public class FormToolHandler implements IToolHandler
 		{
 			// Form doesn't exist and create=false - error
 			throw new RepositoryException("Form '" + name + "' does not exist. Use create=true to create it.");
+		}
+		
+		// Merge width/height into properties if explicitly provided for existing forms
+		// This allows: openForm(name="MyForm", width=800, height=600) to work for updates
+		if (!isNewForm && args != null)
+		{
+			// Initialize properties map if null
+			if (properties == null)
+			{
+				properties = new java.util.HashMap<>();
+			}
+			
+			// Check if width was explicitly provided in the original arguments
+			if (args.containsKey("width") && !properties.containsKey("width"))
+			{
+				System.out.println("[FormToolHandler.openOrCreateForm] Adding explicitly provided width=" + width + " to properties for existing form");
+				properties.put("width", width);
+			}
+			
+			// Check if height was explicitly provided in the original arguments
+			if (args.containsKey("height") && !properties.containsKey("height"))
+			{
+				System.out.println("[FormToolHandler.openOrCreateForm] Adding explicitly provided height=" + height + " to properties for existing form");
+				properties.put("height", height);
+			}
 		}
 		
 		// Apply additional properties if provided
@@ -351,10 +455,11 @@ public class FormToolHandler implements IToolHandler
 			propertiesModified = true;
 		}
 		
-		// Set as main form if requested
-		if (setAsMainForm)
+		// Set as main form if requested OR if this is the first form in the solution
+		if (setAsMainForm || isFirstForm)
 		{
-			System.out.println("[FormToolHandler.openOrCreateForm] Setting as main form");
+			System.out.println("[FormToolHandler.openOrCreateForm] Setting as main form" + 
+				(isFirstForm ? " (first form in solution)" : ""));
 			servoyProject.getEditingSolution().setFirstFormID(form.getUUID().toString());
 			propertiesModified = true;
 		}
@@ -397,6 +502,10 @@ public class FormToolHandler implements IToolHandler
 		if (setAsMainForm)
 		{
 			result.append(". Set as solution's main form");
+		}
+		else if (isFirstForm)
+		{
+			result.append(". Automatically set as main form (first form in solution)");
 		}
 		
 		return result.toString();
@@ -633,6 +742,96 @@ public class FormToolHandler implements IToolHandler
 				result.append(" [MAIN FORM]");
 			}
 			result.append("\n");
+		}
+		
+		return result.toString();
+	}
+	
+	/**
+	 * Gets properties of a form.
+	 */
+	private String getFormProperties(String formName) throws RepositoryException
+	{
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject servoyProject = servoyModel.getActiveProject();
+
+		if (servoyProject == null)
+		{
+			throw new RepositoryException("No active Servoy solution project found");
+		}
+
+		if (servoyProject.getEditingSolution() == null)
+		{
+			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
+		}
+		
+		Form form = servoyProject.getEditingSolution().getForm(formName);
+		
+		if (form == null)
+		{
+			throw new RepositoryException("Form '" + formName + "' not found");
+		}
+		
+		StringBuilder result = new StringBuilder();
+		result.append("Form Properties for '").append(formName).append("':\n\n");
+		
+		// Basic properties
+		result.append("Dimensions:\n");
+		result.append("  width: ").append(form.getWidth()).append(" px\n");
+		result.append("  height: ").append(form.getHeight()).append(" px\n");
+		result.append("  useMinWidth: ").append(form.getUseMinWidth()).append("\n");
+		result.append("  useMinHeight: ").append(form.getUseMinHeight()).append("\n\n");
+		
+		// Form type
+		result.append("Form Type:\n");
+		if (form.isResponsiveLayout())
+		{
+			result.append("  type: responsive\n");
+		}
+		else if (form.getUseCssPosition() != null && form.getUseCssPosition())
+		{
+			result.append("  type: css-positioned\n");
+		}
+		else
+		{
+			result.append("  type: absolute-positioned\n");
+		}
+		result.append("\n");
+		
+		// Data source
+		result.append("Data:\n");
+		String dataSource = form.getDataSource();
+		result.append("  dataSource: ").append(dataSource != null ? dataSource : "none").append("\n\n");
+		
+		// Form settings
+		result.append("Settings:\n");
+		result.append("  showInMenu: ").append(form.getShowInMenu()).append("\n");
+		
+		String styleName = form.getStyleName();
+		result.append("  styleName: ").append(styleName != null && !styleName.isEmpty() ? styleName : "default").append("\n");
+		
+		String navigatorID = form.getNavigatorID();
+		result.append("  navigatorID: ").append(navigatorID != null && !navigatorID.isEmpty() ? navigatorID : "default").append("\n");
+		
+		String initialSort = form.getInitialSort();
+		result.append("  initialSort: ").append(initialSort != null && !initialSort.isEmpty() ? initialSort : "none").append("\n\n");
+		
+		// Inheritance
+		String extendsID = form.getExtendsID();
+		if (extendsID != null && !extendsID.isEmpty())
+		{
+			Form parentForm = servoyProject.getEditingSolution().getForm(extendsID);
+			result.append("Inheritance:\n");
+			result.append("  extendsForm: ").append(parentForm != null ? parentForm.getName() : extendsID).append("\n\n");
+		}
+		
+		// Check if main form
+		String mainFormUUID = servoyProject.getEditingSolution().getFirstFormID();
+		boolean isMainForm = form.getUUID().toString().equals(mainFormUUID);
+		if (isMainForm)
+		{
+			result.append("Special Status:\n");
+			result.append("  [MAIN FORM] - This form is set as the solution's startup form\n");
 		}
 		
 		return result.toString();

@@ -3,10 +3,13 @@ package com.servoy.eclipse.mcp.handlers;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Display;
+
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.mcp.IToolHandler;
 import com.servoy.eclipse.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.mcp.services.FormService;
 import com.servoy.eclipse.mcp.services.StyleService;
 import com.servoy.eclipse.model.util.ServoyLog;
 
@@ -121,6 +124,14 @@ public class StyleHandler implements IToolHandler
 				String targetFile = (lessFileName != null && !lessFileName.trim().isEmpty()) 
 					? lessFileName 
 					: solutionName + ".less";
+				
+				if (!targetFile.endsWith(".less"))
+				{
+					targetFile += ".less";
+				}
+				
+				// Refresh any open form to reflect style changes
+				refreshCurrentForm(targetFile);
 				
 				return successResult("Successfully added/updated style '." + className + "' in " + targetFile);
 			}
@@ -266,6 +277,14 @@ public class StyleHandler implements IToolHandler
 					? lessFileName 
 					: solutionName + ".less";
 				
+				if (!targetFile.endsWith(".less"))
+				{
+					targetFile += ".less";
+				}
+				
+				// Refresh any open form to reflect style changes
+				refreshCurrentForm(targetFile);
+				
 				return successResult("Successfully deleted style '." + className + "' from " + targetFile);
 			}
 			catch (Exception e)
@@ -329,5 +348,45 @@ public class StyleHandler implements IToolHandler
 			.content(List.of(new TextContent("Error: " + message)))
 			.isError(true)
 			.build();
+	}
+	
+	/**
+	 * Refreshes the currently open form (if any) to reflect style changes.
+	 * This triggers a resource change notification without closing/reopening the editor.
+	 * 
+	 * @param lessFileName Name of the LESS file that was modified
+	 */
+	private void refreshCurrentForm(String lessFileName)
+	{
+		try
+		{
+			System.out.println("[StyleHandler] Triggering refresh after style change in: " + lessFileName);
+			
+			String projectPath = getProjectPath();
+			
+			// Refresh on UI thread
+			Display.getDefault().asyncExec(() -> {
+				try
+				{
+					boolean refreshed = FormService.refreshFormAfterStyleChange(projectPath, lessFileName);
+					if (refreshed)
+					{
+						System.out.println("[StyleHandler] Style refresh triggered successfully");
+					}
+					else
+					{
+						System.out.println("[StyleHandler] Style refresh could not be triggered");
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("[StyleHandler] Error triggering style refresh: " + e.getMessage(), e);
+				}
+			});
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("[StyleHandler] Error in refreshCurrentForm: " + e.getMessage(), e);
+		}
 	}
 }
