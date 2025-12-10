@@ -69,8 +69,9 @@ public class FunctionTypeParser
 	 * Parses a function type declaration string into a structured FunctionDeclaration record.
 	 * Examples:
 	 *   "{(param1:String,param2:Number)=>String}"
-	 *   "(record:JSRecord,recordIndex:Number,foundset:JSFoundset)=>Object"
+	 *   "{(record:JSRecord,recordIndex:Number,foundset:JSFoundset)=>Object}"
 	 *   "{(a:Number)=>void}"
+	 *   "{(event:JSEvent,customArguments:...Object)=>Object}"
 	 *
 	 * Accepts both arrow forms: "=>" and "=&gt;" and optional outer braces.
 	 */
@@ -79,7 +80,6 @@ public class FunctionTypeParser
 	{
 		if (declaration == null)
 		{
-			System.err.println("Error: null declaration");
 			return new ParsedFunctionDeclaration("void", Collections.emptyList());
 		}
 
@@ -96,8 +96,6 @@ public class FunctionTypeParser
 			parsed = parsed.substring(open + 1, close).trim();
 		}
 
-		System.out.println("Parsing declaration: " + parsed);
-
 		// Now parse the inner "(...)=>(...)" only
 		String regex = "^\\s*\\{?\\s*\\((.*?)\\)\\s*(?:=>|=&gt;)\\s*(.*?)\\s*\\}?\\s*$";
 
@@ -106,7 +104,6 @@ public class FunctionTypeParser
 
 		if (!matcher.find())
 		{
-			System.err.println("Error: Function declaration format not recognized: " + parsed);
 			return new ParsedFunctionDeclaration("void", Collections.emptyList());
 		}
 
@@ -157,7 +154,7 @@ public class FunctionTypeParser
 	public static void main(String[] args)
 	{
 		String declaration = "{(event:JSEvent,customArguments:...Object)=>Object}";
-		String declaration1 = " @param callback {(record:JSRecord,recordIndex?:Number,foundset?:JSFoundSet)=>Object} The callback function to be called for each loaded record in the foundset. Can receive three parameters: the record to be processed, the index of the record in the foundset, and the foundset that is traversed.";
+		String declaration1 = "@param callback {(record:JSRecord,recordIndex?:Number,foundset?:JSFoundSet)=>Object} The callback function to be called for each loaded record in the foundset. Can receive three parameters: the record to be processed, the index of the record in the foundset, and the foundset that is traversed.";
 
 		ParsedFunctionDeclaration parsedFunction = parseFunctionType(declaration);
 
