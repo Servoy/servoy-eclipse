@@ -194,10 +194,15 @@ public class Activator extends Plugin
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
+
 		ModelUtils.assertUINotDisabled(PLUGIN_ID);
 
 		super.start(context);
 		plugin = this;
+
+		File cacerts = new File(getStateLocation().toFile(), "cacerts");
+
+		TrustStoreManager.initializeTrustStore(cacerts, "servoy_2025.cer");
 
 		String propertiesFile = InstanceScope.INSTANCE.getNode(PLUGIN_ID).get(PROPERTIES_FILE_PATH_SETTING, null);
 		if (!Utils.stringIsEmpty(propertiesFile) && System.getProperty("property-file", null) == null)
