@@ -411,7 +411,6 @@ public class ElementUtil
 				{
 					if (child instanceof WebCustomType custom && customTypeIterator.hasNext())
 					{
-						custom.resetUUID();
 						custom.setExtendsID(customTypeIterator.next().getUUID().toString());
 					}
 				}
