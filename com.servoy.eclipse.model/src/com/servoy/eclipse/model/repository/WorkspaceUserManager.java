@@ -726,6 +726,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		try
 		{
 			final String out = serializeSecurityInfo(f);
+			if (out == null) return;
 			if (out.trim().length() == 0)
 			{
 				// no content to write
@@ -830,7 +831,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				formAccess.put(groupSecurityInfo.getName(), infos);
 			}
 		}
-		return serializeSecurityPermissionInfo(formAccess);
+		return formAccess.size() > 0 ? serializeSecurityPermissionInfo(formAccess) : null;
 	}
 
 	private void runLaterInUserJob(IResource resource, final Runnable runnable)

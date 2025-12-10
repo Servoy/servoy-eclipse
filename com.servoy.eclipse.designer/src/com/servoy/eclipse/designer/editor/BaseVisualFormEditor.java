@@ -87,7 +87,6 @@ import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.FlattenedTabPanel;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
@@ -103,7 +102,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
@@ -623,31 +621,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 
 					if (formParent != form && changed instanceof ISupportExtendsID)
 					{
-						final WebComponent[] changedWebComponent = new WebComponent[1];
-						if (changed instanceof WebComponent)
-						{
-							changedWebComponent[0] = (WebComponent)changed;
-						}
-						else if (changed instanceof WebCustomType)
-						{
-							IBasicWebComponent customTypeParent = ((WebCustomType)changed).getParentComponent();
-							if (customTypeParent instanceof WebComponent)
-							{
-								changedWebComponent[0] = (WebComponent)customTypeParent;
-							}
-						}
-
 						IPersist override = (IPersist)form.acceptVisitor(new IPersistVisitor()
 						{
 							public Object visit(IPersist o)
 							{
-								// make sure the custom types are reloaded for the webcomponents in the hierarchy of the changed
-								if (changedWebComponent[0] != null && o instanceof WebComponent && !changedWebComponent[0].equals(changed) &&
-									PersistHelper.getOverrideHierarchy((WebComponent)o).indexOf(changedWebComponent[0]) != -1)
-								{
-									((WebComponent)o).getImplementation().reload(false);
-								}
-
 								if (o instanceof ISupportExtendsID && (changed.getUUID().toString().equals(((ISupportExtendsID)o).getExtendsID()) ||
 									(((ISupportExtendsID)changed).getExtendsID() != null &&
 										Utils.equalObjects(((ISupportExtendsID)changed).getExtendsID(), ((ISupportExtendsID)o).getExtendsID()))))

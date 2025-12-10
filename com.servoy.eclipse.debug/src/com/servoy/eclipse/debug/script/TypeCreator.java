@@ -831,9 +831,16 @@ public class TypeCreator extends TypeCache
 		return null;
 	}
 
+	private volatile Job clearJob = null;
+
 
 	private void clearCache()
 	{
+		if (clearJob != null)
+		{
+			return;
+		}
+
 		Job job = new Job("clearing cache")
 		{
 			@Override
@@ -848,9 +855,11 @@ public class TypeCreator extends TypeCache
 				clear(null);
 				flushCache();
 				docCache.clear();
+				clearJob = null;
 				return Status.OK_STATUS;
 			}
 		};
+		clearJob = job;
 		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 		job.schedule();
 	}
@@ -973,7 +982,7 @@ public class TypeCreator extends TypeCache
 								if (changed instanceof Solution)
 								{
 									fullChange = true;
-									runClearCacheJob();
+									clearCache();
 									break;
 								}
 							}
@@ -1026,7 +1035,7 @@ public class TypeCreator extends TypeCache
 					@Override
 					public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 					{
-						runClearCacheJob();
+						clearCache();
 					}
 
 				});
@@ -1035,25 +1044,25 @@ public class TypeCreator extends TypeCache
 				{
 					public void itemChanged(IColumn column)
 					{
-						runClearCacheJob();
+						clearCache();
 					}
 
 					@Override
 					public void itemChanged(Collection<IColumn> columns)
 					{
-						runClearCacheJob();
+						clearCache();
 					}
 
 					@Override
 					public void itemRemoved(IColumn column)
 					{
-						runClearCacheJob();
+						clearCache();
 					}
 
 					@Override
 					public void itemCreated(IColumn column)
 					{
-						runClearCacheJob();
+						clearCache();
 					}
 				};
 
@@ -1063,7 +1072,7 @@ public class TypeCreator extends TypeCache
 					@Override
 					public void tablesAdded(IServerInternal server, String[] tableNames)
 					{
-						runClearCacheJob();
+						clearCache();
 						try
 						{
 							for (String tableName : tableNames)
@@ -1083,13 +1092,13 @@ public class TypeCreator extends TypeCache
 					@Override
 					public void hiddenTableChanged(IServerInternal server, ITable table)
 					{
-						runClearCacheJob();
+						clearCache();
 					}
 
 					@Override
 					public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
 					{
-						runClearCacheJob();
+						clearCache();
 						for (ITable table : tables)
 						{
 							table.removeIColumnListener(columnListener);
@@ -1165,7 +1174,7 @@ public class TypeCreator extends TypeCache
 							}
 							if (clearCache)
 							{
-								runClearCacheJob();
+								clearCache();
 							}
 						}
 					}
@@ -6210,24 +6219,6 @@ public class TypeCreator extends TypeCache
 		superType.getMembers().add(arrayType);
 		return superType;
 	}
-
-
-	private void runClearCacheJob()
-	{
-		Job job = new Job("clearing cache")
-		{
-
-			@Override
-			public IStatus run(IProgressMonitor monitor)
-			{
-				clearCache();
-				return Status.OK_STATUS;
-			}
-		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		job.schedule();
-	}
-
 
 	public static class TypeConfig
 	{
