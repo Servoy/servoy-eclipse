@@ -27,6 +27,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
+import org.eclipse.dltk.javascript.typeinfo.IRProperty;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.ui.IOpenDelegate;
@@ -55,22 +56,26 @@ public class OpenAdapter implements IOpenDelegate
 
 	public boolean supports(Object object)
 	{
-		return object instanceof Element &&
-			(((Element)object).getAttribute(TypeCreator.RESOURCE) != null || ((Element)object).getAttribute(TypeCreator.LAZY_VALUECOLLECTION) != null);
+		return object instanceof Element element &&
+			(element.getAttribute(TypeCreator.RESOURCE) != null || element.getAttribute(TypeCreator.LAZY_VALUECOLLECTION) != null) ||
+			object instanceof IRProperty prop && prop.getSource() != null &&
+				(prop.getSource().getAttribute(TypeCreator.RESOURCE) != null || prop.getSource().getAttribute(TypeCreator.LAZY_VALUECOLLECTION) != null);
 	}
 
 	public String getName(Object object)
 	{
-		if (object instanceof Element) return ((Element)object).getName();
+		if (object instanceof Element element) return element.getName();
+		if (object instanceof IRProperty property) return property.getName();
 		return null;
 	}
 
 	public IEditorPart openInEditor(Object object, boolean activate) throws PartInitException, CoreException
 	{
-		Object resource = ((Element)object).getAttribute(TypeCreator.RESOURCE);
+		Element element = object instanceof IRProperty prop ? prop.getSource() : (Element)object;
+		Object resource = element.getAttribute(TypeCreator.RESOURCE);
 		if (resource == null)
 		{
-			resource = ((Element)object).getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
+			resource = element.getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
 		}
 		if (resource instanceof IPersist)
 		{
