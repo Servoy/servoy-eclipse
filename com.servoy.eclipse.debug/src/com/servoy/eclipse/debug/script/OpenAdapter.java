@@ -27,7 +27,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
-import org.eclipse.dltk.javascript.typeinfo.IRProperty;
+import org.eclipse.dltk.javascript.typeinfo.IRElement;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.ui.IOpenDelegate;
@@ -58,20 +58,20 @@ public class OpenAdapter implements IOpenDelegate
 	{
 		return object instanceof Element element &&
 			(element.getAttribute(TypeCreator.RESOURCE) != null || element.getAttribute(TypeCreator.LAZY_VALUECOLLECTION) != null) ||
-			object instanceof IRProperty prop && prop.getSource() != null &&
-				(prop.getSource().getAttribute(TypeCreator.RESOURCE) != null || prop.getSource().getAttribute(TypeCreator.LAZY_VALUECOLLECTION) != null);
+			object instanceof IRElement prop && prop.getSource() instanceof Element elem &&
+				(elem.getAttribute(TypeCreator.RESOURCE) != null || elem.getAttribute(TypeCreator.LAZY_VALUECOLLECTION) != null);
 	}
 
 	public String getName(Object object)
 	{
 		if (object instanceof Element element) return element.getName();
-		if (object instanceof IRProperty property) return property.getName();
+		if (object instanceof IRElement property) return property.getName();
 		return null;
 	}
 
 	public IEditorPart openInEditor(Object object, boolean activate) throws PartInitException, CoreException
 	{
-		Element element = object instanceof IRProperty prop ? prop.getSource() : (Element)object;
+		Element element = (Element)(object instanceof IRElement prop ? prop.getSource() : object);
 		Object resource = element.getAttribute(TypeCreator.RESOURCE);
 		if (resource == null)
 		{
