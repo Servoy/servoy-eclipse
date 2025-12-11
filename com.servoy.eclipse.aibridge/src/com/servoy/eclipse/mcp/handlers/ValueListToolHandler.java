@@ -260,16 +260,25 @@ public class ValueListToolHandler implements IToolHandler
 					"customValues (array), dataSource (string), relationName (string), or globalMethod (string).");
 			}
 			
-			// Create the valuelist using service
+			// Create the valuelist using service (this saves it)
 			valueList = ValueListService.createValueList(name, customValues, dataSource, relationName,
 				globalMethod, displayColumn, returnColumn, properties);
 			isNewValueList = true;
+			
+			// Re-fetch from solution after save to ensure we have the saved version
+			ValueList savedValueList = servoyProject.getEditingSolution().getValueList(name);
+			if (savedValueList != null)
+			{
+				valueList = savedValueList;
+				ServoyLog.logInfo("[ValueListToolHandler] Re-fetched saved valuelist from solution");
+			}
 		}
 		
 		// Open editor on UI thread
 		final ValueList valueListToOpen = valueList;
+		final boolean finalIsNewValueList = isNewValueList;
 		Display.getDefault().asyncExec(() -> {
-			EditorUtil.openValueListEditor(valueListToOpen, true);
+			EditorUtil.openValueListEditor(valueListToOpen, !finalIsNewValueList);
 		});
 		
 		// Build result message
@@ -368,11 +377,17 @@ public class ValueListToolHandler implements IToolHandler
 	
 	/**
 	 * Deletes one or more valuelists.
+	 * Ensures memory state always reflects disk reality - only removes from memory after successful disk save.
 	 */
 	private String deleteValueLists(List<String> names) throws RepositoryException
 	{
+		System.out.println("[DEBUG deleteValueLists] ========== START DELETE VALUELISTS ==========");
+		System.out.println("[DEBUG deleteValueLists] Requested to delete: " + names);
+		
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject servoyProject = servoyModel.getActiveProject();
+		
+		System.out.println("[DEBUG deleteValueLists] Active project: " + (servoyProject != null ? servoyProject.getProject().getName() : "NULL"));
 		
 		if (servoyProject == null)
 		{
@@ -384,37 +399,114 @@ public class ValueListToolHandler implements IToolHandler
 			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
 		}
 		
+		System.out.println("[DEBUG deleteValueLists] Editing solution: " + servoyProject.getEditingSolution().getName());
+		
 		java.util.List<String> deletedValueLists = new java.util.ArrayList<>();
 		java.util.List<String> notFoundValueLists = new java.util.ArrayList<>();
+		java.util.List<ValueList> valueListsToDelete = new java.util.ArrayList<>();
 		
+		// Step 1: Find valuelists to delete (don't remove from memory yet)
+		System.out.println("[DEBUG deleteValueLists] PHASE 1: Finding valuelists...");
 		for (String name : names)
 		{
 			if (name == null || name.trim().isEmpty())
 			{
+				System.out.println("[DEBUG deleteValueLists] Skipping empty name");
 				continue;
 			}
 			
+			System.out.println("[DEBUG deleteValueLists] Looking for valuelist: " + name);
 			ValueList valueList = servoyProject.getEditingSolution().getValueList(name);
 			
 			if (valueList == null)
 			{
+				System.out.println("[DEBUG deleteValueLists] NOT FOUND: " + name);
 				notFoundValueLists.add(name);
 			}
 			else
 			{
-				servoyProject.getEditingSolution().removeChild(valueList);
-				deletedValueLists.add(name);
-				ServoyLog.logInfo("[ValueListToolHandler] Deleted valuelist: " + name);
+				System.out.println("[DEBUG deleteValueLists] FOUND: " + name + " (will be deleted)");
+				valueListsToDelete.add(valueList);
 			}
 		}
 		
+		System.out.println("[DEBUG deleteValueLists] Found " + valueListsToDelete.size() + " valuelists to delete");
+		System.out.println("[DEBUG deleteValueLists] Not found: " + notFoundValueLists.size() + " valuelists");
+		
+		// Step 2: Delete using proper Servoy API (repository.deleteObject + saveEditingSolutionNodes)
+		if (!valueListsToDelete.isEmpty())
+		{
+			System.out.println("[DEBUG deleteValueLists] PHASE 2: Deleting via repository.deleteObject()...");
+			
+			// Get the repository
+			com.servoy.eclipse.model.repository.EclipseRepository repository = 
+				(com.servoy.eclipse.model.repository.EclipseRepository)servoyProject.getEditingSolution().getRepository();
+			
+			System.out.println("[DEBUG deleteValueLists] Got repository: " + repository);
+			
+			try
+			{
+				// Delete each valuelist using Servoy API
+				for (ValueList valueList : valueListsToDelete)
+				{
+					System.out.println("[DEBUG deleteValueLists] Getting editing persist for: " + valueList.getName());
+					IPersist editingNode = servoyProject.getEditingPersist(valueList.getUUID());
+					
+					if (editingNode == null)
+					{
+						System.out.println("[DEBUG deleteValueLists] WARNING: editingNode is null for: " + valueList.getName());
+						editingNode = valueList; // fallback to the valuelist itself
+					}
+					
+					System.out.println("[DEBUG deleteValueLists] Calling repository.deleteObject() for: " + valueList.getName());
+					repository.deleteObject(editingNode);
+					System.out.println("[DEBUG deleteValueLists] deleteObject succeeded for: " + valueList.getName());
+					ServoyLog.logInfo("[ValueListToolHandler] Called deleteObject for valuelist: " + valueList.getName());
+				}
+				
+				// Now save to persist the deletions to disk
+				System.out.println("[DEBUG deleteValueLists] PHASE 3: Calling saveEditingSolutionNodes to persist deletions...");
+				for (ValueList valueList : valueListsToDelete)
+				{
+					IPersist editingNode = servoyProject.getEditingPersist(valueList.getUUID());
+					if (editingNode == null) editingNode = valueList;
+					
+					System.out.println("[DEBUG deleteValueLists] Saving deletion for: " + valueList.getName());
+					servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+					System.out.println("[DEBUG deleteValueLists] Save succeeded for: " + valueList.getName());
+					
+					deletedValueLists.add(valueList.getName());
+					ServoyLog.logInfo("[ValueListToolHandler] Successfully deleted valuelist: " + valueList.getName());
+				}
+				
+				System.out.println("[DEBUG deleteValueLists] All deletions completed successfully");
+			}
+			catch (Exception e)
+			{
+				// Deletion failed
+				System.out.println("[DEBUG deleteValueLists] Deletion FAILED: " + e.getMessage());
+				System.out.println("[DEBUG deleteValueLists] Exception type: " + e.getClass().getName());
+				e.printStackTrace(System.out);
+				ServoyLog.logError("[ValueListToolHandler] FAILED to delete valuelists", e);
+				
+				// Throw exception with clear message
+				throw new RepositoryException("Failed to delete valuelists. Error: " + e.getMessage(), e);
+			}
+		}
+		else
+		{
+			System.out.println("[DEBUG deleteValueLists] No valuelists to delete (all were not found or empty)");
+		}
+		
 		// Build result message
+		System.out.println("[DEBUG deleteValueLists] Building result message...");
 		StringBuilder result = new StringBuilder();
 		
 		if (!deletedValueLists.isEmpty())
 		{
 			result.append("Successfully deleted ").append(deletedValueLists.size()).append(" valuelist(s): ");
 			result.append(String.join(", ", deletedValueLists));
+			System.out.println("[DEBUG deleteValueLists] Result includes " + deletedValueLists.size() + " deleted valuelists");
 		}
 		
 		if (!notFoundValueLists.isEmpty())
@@ -425,13 +517,17 @@ public class ValueListToolHandler implements IToolHandler
 			}
 			result.append("ValueLists not found (").append(notFoundValueLists.size()).append("): ");
 			result.append(String.join(", ", notFoundValueLists));
+			System.out.println("[DEBUG deleteValueLists] Result includes " + notFoundValueLists.size() + " not found valuelists");
 		}
 		
 		if (deletedValueLists.isEmpty() && notFoundValueLists.isEmpty())
 		{
 			result.append("No valuelists specified for deletion");
+			System.out.println("[DEBUG deleteValueLists] No valuelists were specified");
 		}
 		
+		System.out.println("[DEBUG deleteValueLists] Final result: " + result.toString());
+		System.out.println("[DEBUG deleteValueLists] ========== END DELETE VALUELISTS ==========");
 		return result.toString();
 	}
 

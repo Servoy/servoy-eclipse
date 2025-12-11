@@ -365,11 +365,17 @@ public class RelationToolHandler implements IToolHandler
 	
 	/**
 	 * Deletes one or more relations.
+	 * Ensures memory state always reflects disk reality - only removes from memory after successful disk save.
 	 */
 	private String deleteRelations(List<String> names) throws RepositoryException
 	{
+		System.out.println("[DEBUG deleteRelations] ========== START DELETE RELATIONS ==========");
+		System.out.println("[DEBUG deleteRelations] Requested to delete: " + names);
+		
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject servoyProject = servoyModel.getActiveProject();
+		
+		System.out.println("[DEBUG deleteRelations] Active project: " + (servoyProject != null ? servoyProject.getProject().getName() : "NULL"));
 		
 		if (servoyProject == null)
 		{
@@ -381,37 +387,114 @@ public class RelationToolHandler implements IToolHandler
 			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
 		}
 		
+		System.out.println("[DEBUG deleteRelations] Editing solution: " + servoyProject.getEditingSolution().getName());
+		
 		java.util.List<String> deletedRelations = new java.util.ArrayList<>();
 		java.util.List<String> notFoundRelations = new java.util.ArrayList<>();
+		java.util.List<Relation> relationsToDelete = new java.util.ArrayList<>();
 		
+		// Step 1: Find relations to delete (don't remove from memory yet)
+		System.out.println("[DEBUG deleteRelations] PHASE 1: Finding relations...");
 		for (String name : names)
 		{
 			if (name == null || name.trim().isEmpty())
 			{
+				System.out.println("[DEBUG deleteRelations] Skipping empty name");
 				continue;
 			}
 			
+			System.out.println("[DEBUG deleteRelations] Looking for relation: " + name);
 			Relation relation = servoyProject.getEditingSolution().getRelation(name);
 			
 			if (relation == null)
 			{
+				System.out.println("[DEBUG deleteRelations] NOT FOUND: " + name);
 				notFoundRelations.add(name);
 			}
 			else
 			{
-				servoyProject.getEditingSolution().removeChild(relation);
-				deletedRelations.add(name);
-				ServoyLog.logInfo("[RelationToolHandler] Deleted relation: " + name);
+				System.out.println("[DEBUG deleteRelations] FOUND: " + name + " (will be deleted)");
+				relationsToDelete.add(relation);
 			}
 		}
 		
+		System.out.println("[DEBUG deleteRelations] Found " + relationsToDelete.size() + " relations to delete");
+		System.out.println("[DEBUG deleteRelations] Not found: " + notFoundRelations.size() + " relations");
+		
+		// Step 2: Delete using proper Servoy API (repository.deleteObject + saveEditingSolutionNodes)
+		if (!relationsToDelete.isEmpty())
+		{
+			System.out.println("[DEBUG deleteRelations] PHASE 2: Deleting via repository.deleteObject()...");
+			
+			// Get the repository
+			com.servoy.eclipse.model.repository.EclipseRepository repository = 
+				(com.servoy.eclipse.model.repository.EclipseRepository)servoyProject.getEditingSolution().getRepository();
+			
+			System.out.println("[DEBUG deleteRelations] Got repository: " + repository);
+			
+			try
+			{
+				// Delete each relation using Servoy API
+				for (Relation relation : relationsToDelete)
+				{
+					System.out.println("[DEBUG deleteRelations] Getting editing persist for: " + relation.getName());
+					IPersist editingNode = servoyProject.getEditingPersist(relation.getUUID());
+					
+					if (editingNode == null)
+					{
+						System.out.println("[DEBUG deleteRelations] WARNING: editingNode is null for: " + relation.getName());
+						editingNode = relation; // fallback to the relation itself
+					}
+					
+					System.out.println("[DEBUG deleteRelations] Calling repository.deleteObject() for: " + relation.getName());
+					repository.deleteObject(editingNode);
+					System.out.println("[DEBUG deleteRelations] deleteObject succeeded for: " + relation.getName());
+					ServoyLog.logInfo("[RelationToolHandler] Called deleteObject for relation: " + relation.getName());
+				}
+				
+				// Now save to persist the deletions to disk
+				System.out.println("[DEBUG deleteRelations] PHASE 3: Calling saveEditingSolutionNodes to persist deletions...");
+				for (Relation relation : relationsToDelete)
+				{
+					IPersist editingNode = servoyProject.getEditingPersist(relation.getUUID());
+					if (editingNode == null) editingNode = relation;
+					
+					System.out.println("[DEBUG deleteRelations] Saving deletion for: " + relation.getName());
+					servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+					System.out.println("[DEBUG deleteRelations] Save succeeded for: " + relation.getName());
+					
+					deletedRelations.add(relation.getName());
+					ServoyLog.logInfo("[RelationToolHandler] Successfully deleted relation: " + relation.getName());
+				}
+				
+				System.out.println("[DEBUG deleteRelations] All deletions completed successfully");
+			}
+			catch (Exception e)
+			{
+				// Deletion failed
+				System.out.println("[DEBUG deleteRelations] Deletion FAILED: " + e.getMessage());
+				System.out.println("[DEBUG deleteRelations] Exception type: " + e.getClass().getName());
+				e.printStackTrace(System.out);
+				ServoyLog.logError("[RelationToolHandler] FAILED to delete relations", e);
+				
+				// Throw exception with clear message
+				throw new RepositoryException("Failed to delete relations. Error: " + e.getMessage(), e);
+			}
+		}
+		else
+		{
+			System.out.println("[DEBUG deleteRelations] No relations to delete (all were not found or empty)");
+		}
+		
 		// Build result message
+		System.out.println("[DEBUG deleteRelations] Building result message...");
 		StringBuilder result = new StringBuilder();
 		
 		if (!deletedRelations.isEmpty())
 		{
 			result.append("Successfully deleted ").append(deletedRelations.size()).append(" relation(s): ");
 			result.append(String.join(", ", deletedRelations));
+			System.out.println("[DEBUG deleteRelations] Result includes " + deletedRelations.size() + " deleted relations");
 		}
 		
 		if (!notFoundRelations.isEmpty())
@@ -422,13 +505,17 @@ public class RelationToolHandler implements IToolHandler
 			}
 			result.append("Relations not found (").append(notFoundRelations.size()).append("): ");
 			result.append(String.join(", ", notFoundRelations));
+			System.out.println("[DEBUG deleteRelations] Result includes " + notFoundRelations.size() + " not found relations");
 		}
 		
 		if (deletedRelations.isEmpty() && notFoundRelations.isEmpty())
 		{
 			result.append("No relations specified for deletion");
+			System.out.println("[DEBUG deleteRelations] No relations were specified");
 		}
 		
+		System.out.println("[DEBUG deleteRelations] Final result: " + result.toString());
+		System.out.println("[DEBUG deleteRelations] ========== END DELETE RELATIONS ==========");
 		return result.toString();
 	}
 
@@ -438,39 +525,62 @@ public class RelationToolHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleGetRelations(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
+		System.out.println("[DEBUG getRelations] ========== START GET RELATIONS ==========");
 		String errorMessage = null;
 		StringBuilder resultBuilder = new StringBuilder();
 
 		try
 		{
 			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			ServoyProject activeProject = servoyModel.getActiveProject();
+			System.out.println("[DEBUG getRelations] Active project: " + (activeProject != null ? activeProject.getProject().getName() : "NULL"));
+			
+			if (activeProject != null && activeProject.getEditingSolution() != null)
+			{
+				System.out.println("[DEBUG getRelations] Editing solution: " + activeProject.getEditingSolution().getName());
+			}
+			
 			Iterator<Relation> relations = servoyModel.getActiveProject().getEditingSolution().getRelations(true);
+			System.out.println("[DEBUG getRelations] Got relations iterator");
 
 			int count = 0;
 			resultBuilder.append("Relations in solution '").append(servoyModel.getActiveProject().getEditingSolution().getName()).append("':\n\n");
 
+			System.out.println("[DEBUG getRelations] Iterating through relations...");
 			while (relations.hasNext())
 			{
 				Relation relation = relations.next();
 				count++;
+				System.out.println("[DEBUG getRelations] Relation #" + count + ": " + relation.getName());
+				System.out.println("[DEBUG getRelations]   Primary DS: " + relation.getPrimaryDataSource());
+				System.out.println("[DEBUG getRelations]   Foreign DS: " + relation.getForeignDataSource());
+				
 				resultBuilder.append(count).append(". ").append(relation.getName());
 				resultBuilder.append("\n   Primary: ").append(relation.getPrimaryDataSource());
 				resultBuilder.append("\n   Foreign: ").append(relation.getForeignDataSource());
 				resultBuilder.append("\n");
 			}
 
+			System.out.println("[DEBUG getRelations] Total relations found: " + count);
+			
 			if (count == 0)
 			{
 				resultBuilder.append("No relations found.");
+				System.out.println("[DEBUG getRelations] No relations in solution");
 			}
 		}
 		catch (Exception e)
 		{
 			errorMessage = e.getMessage();
+			System.out.println("[DEBUG getRelations] ERROR: " + errorMessage);
+			System.out.println("[DEBUG getRelations] Exception type: " + e.getClass().getName());
+			e.printStackTrace(System.out);
 			ServoyLog.logError("[RelationToolHandler] Error in handleGetRelations: " + errorMessage, e);
 		}
 
 		String resultMessage = errorMessage != null ? errorMessage : resultBuilder.toString();
+		System.out.println("[DEBUG getRelations] Result message length: " + resultMessage.length() + " chars");
+		System.out.println("[DEBUG getRelations] ========== END GET RELATIONS ==========");
 		return McpSchema.CallToolResult.builder()
 			.content(List.of(new TextContent(resultMessage)))
 			.build();
