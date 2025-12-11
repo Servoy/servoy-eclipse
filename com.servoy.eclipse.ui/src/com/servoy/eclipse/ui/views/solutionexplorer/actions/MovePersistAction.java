@@ -217,6 +217,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 				else
 				{
 					editingNode.getParent().removeChild(editingNode);
+					destination.getServoyProject().getEditingSolution().addChild(editingNode);
 				}
 			}
 			catch (final RepositoryException e)

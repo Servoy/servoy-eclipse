@@ -141,14 +141,28 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		}
 	}
 
+	private void removeAll(Set<Form> set, Form form)
+	{
+		set.removeIf(f -> f.equals(form));
+	}
+
+	private void addIfNotExists(Set<Form> set, Form form)
+	{
+		removeAll(set, form);
+		set.add(form);
+	}
+
 	private void updateDataSourceCache(Form form)
 	{
 		String oldDataSource = formToDataSource.get(form);
 		String newDataSource = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
 		if (oldDataSource != null && !oldDataSource.equals(newDataSource) || oldDataSource == null && newDataSource != null)
 		{
-			getFormsByDatasource(oldDataSource, false).remove(form);
-			getFormsByDatasource(newDataSource, false).add(form);
+			removeAll(getFormsByDatasource(oldDataSource, false), form);
+			if (oldDataSource != null) removeAll(getFormsByDatasource(null, false), form);
+			if (!oldDataSource.equals(Form.DATASOURCE_NONE)) removeAll(getFormsByDatasource(Form.DATASOURCE_NONE, false), form);
+			addIfNotExists(getFormsByDatasource(newDataSource, false), form);
+			if (newDataSource != null) addIfNotExists(getFormsByDatasource(null, false), form);
 			formToDataSource.put(form, newDataSource);
 
 			if (form.isFormComponent().booleanValue())
@@ -178,7 +192,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			datasourceSet = fillSet(datasource);
 			formCacheByDataSource.put(ds, datasourceSet);
 		}
-		if (includeNone)
+		if (includeNone && !ds.equals(ALL_FORMS))
 		{
 			Set<Form> datasourceNoneSet = formCacheByDataSource.get(Form.DATASOURCE_NONE);
 			if (datasourceNoneSet == null)
@@ -242,10 +256,10 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		if (persist instanceof Form)
 		{
 			Form form = (Form)persist;
-			getFormsByDatasource(null, false).add(form);
+			addIfNotExists(getFormsByDatasource(null, false), form);
 			String ds = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
 			formToDataSource.put(form, ds);
-			getFormsByDatasource(ds, false).add(form);
+			addIfNotExists(getFormsByDatasource(ds, false), form);
 			if (form.getNamedFoundSet() != null)
 			{
 				getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), true).add(form);
@@ -260,9 +274,11 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		if (persist instanceof Form)
 		{
 			Form form = (Form)persist;
-			getFormsByDatasource(null, false).remove(form);
+			removeAll(getFormsByDatasource(null, false), form);
 			formToDataSource.remove(form);
-			getFormsByDatasource(form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE, false).remove(form);
+			String ds = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
+			removeAll(getFormsByDatasource(ds, false), form);
+			if (!ds.equals(Form.DATASOURCE_NONE)) removeAll(getFormsByDatasource(Form.DATASOURCE_NONE, false), form);
 			if (form.getNamedFoundSet() != null)
 			{
 				List<Form> lst = getFormsByNamedFoundsetImpl(form.getNamedFoundSet(), false);
