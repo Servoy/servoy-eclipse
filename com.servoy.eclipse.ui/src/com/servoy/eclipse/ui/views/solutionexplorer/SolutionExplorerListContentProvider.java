@@ -3213,6 +3213,24 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			if ("".equals(tooltip))
 			{
 				String methodDocu = getTooltipIfMethodActuallyHasDocumentation();
+				if (methodDocu == null)
+				{
+					StringBuilder generatedJSDocCommentFromSpec = new StringBuilder();
+					if (paramNames != null)
+					{
+						for (int i = 0; i < paramNames.length; i++)
+						{
+							String paramName = paramNames[i];
+							generatedJSDocCommentFromSpec.append("\n @param {")
+								.append(parameterTypes != null && i < parameterTypes.length ? parameterTypes[i] : "Object").append("} ").append(paramName);
+						}
+					}
+					if (returnTypeString != null && !"void".equals(returnTypeString))
+					{
+						generatedJSDocCommentFromSpec.append("\n @return {").append(returnTypeString).append("}");
+					}
+					methodDocu = generatedJSDocCommentFromSpec.toString();
+				}
 				tooltip = tmp.toString() + "<br/><br/>" + methodDocu;
 			}
 			else

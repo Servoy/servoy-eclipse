@@ -102,6 +102,7 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.Scriptable;
+import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -1555,6 +1556,26 @@ public class TypeCreator extends TypeCache
 		else
 		{
 			if (!"".equals(api.getDeprecatedMessage())) method.setDescription(api.getDeprecatedMessage());
+			else
+			{
+				StringBuilder generatedJSDocCommentFromSpec = new StringBuilder();
+				if (api.getParameters() != null)
+				{
+					IFunctionParameters parameters = api.getParameters();
+					for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
+					{
+						generatedJSDocCommentFromSpec.append("<br/>@param {")
+							.append(ElementUtil.getDecoratedCustomTypeName(parameters.getParameterDefinition(i).getType())).append("} <b>")
+							.append(parameters.getParameterDefinition(i).getName()).append("</b>");
+					}
+				}
+				if (api.getReturnType() != null)
+				{
+					generatedJSDocCommentFromSpec.append("<br/><br/> @return {").append(ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()))
+						.append("}");
+				}
+				method.setDescription(generatedJSDocCommentFromSpec.toString());
+			}
 			method.setDeprecated(api.isDeprecated());
 		}
 
