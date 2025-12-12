@@ -8,12 +8,12 @@
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://azuredownloads-g3ahgwb5b8bkbxhd.b01.azurefd.net/github-copilot/"/>
-            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.13.1.202511180215"/>
+            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.14.0.202512112209"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.12/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202511191606"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202512041652"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202512120937"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/releases/2025-12"/>
