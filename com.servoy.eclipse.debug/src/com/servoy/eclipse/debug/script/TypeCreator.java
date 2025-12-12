@@ -2006,12 +2006,22 @@ public class TypeCreator extends TypeCache
 
 											FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
 											EList<Parameter> functionTypeParameters = functionType.getParameters();
+											JSDocTypeParser parse = new JSDocTypeParser();
 
 											for (FunctionTypeParser.ParsedParameter p : parsed.parameters())
 											{
 												Parameter paramForFunctionType = TypeInfoModelFactory.eINSTANCE.createParameter();
 												paramForFunctionType.setName(p.name());
-												paramForFunctionType.setType(getTypeRef(context, p.type()));
+												try
+												{
+													JSType jsType = parse.parse(p.type());
+													paramForFunctionType.setType(jsType);
+												}
+												catch (ParseException e)
+												{
+													ServoyLog.logInfo("Couldn't parse the type: " + p.type() + " form param: " + p + " of " +
+														param.getDescription() + " - " + e.getMessage());
+												}
 												if (p.optional())
 												{
 													paramForFunctionType.setKind(ParameterKind.OPTIONAL);
