@@ -2005,6 +2005,7 @@ public class TypeCreator extends TypeCache
 											FunctionTypeParser.ParsedFunctionDeclaration parsed = FunctionTypeParser.parseFunctionType(param.getDescription());
 
 											FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
+											EList<Parameter> functionTypeParameters = functionType.getParameters();
 
 											for (FunctionTypeParser.ParsedParameter p : parsed.parameters())
 											{
@@ -2019,11 +2020,9 @@ public class TypeCreator extends TypeCache
 												{
 													paramForFunctionType.setKind(ParameterKind.VARARGS);
 												}
-												functionType.getParameters().add(paramForFunctionType);
-
+												functionTypeParameters.add(paramForFunctionType);
 											}
-
-											functionType.setReturnType(getTypeRef(context, parsed.returnType()));
+											functionType.getParameters().addAll(functionTypeParameters);
 											parameter.setType(functionType);
 
 										}
@@ -3225,8 +3224,8 @@ public class TypeCreator extends TypeCache
 						overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
 					}
 				}
-//				else if (member.getName().equals("forEach"))
-//				{
+				else if (member.getName().equals("forEach"))
+				{
 //					Method clone = (Method)TypeCreator.clone(member, member.getType());
 //					Parameter functionParam = clone.getParameterFor(0);
 //					FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
@@ -3248,7 +3247,7 @@ public class TypeCreator extends TypeCache
 //					functionParam.setType(functionType);
 //
 //					overridden = clone;
-//				}
+				}
 				else
 				{
 					String memberConfig = config;

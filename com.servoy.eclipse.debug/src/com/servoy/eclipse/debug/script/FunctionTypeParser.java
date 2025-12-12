@@ -143,7 +143,7 @@ public class FunctionTypeParser
 					type = type.substring(0, type.length() - 1).trim();
 				}
 
-				parameters.add(new ParsedParameter(name, type, optional, ParsedParameterKind.NORMAL));
+				parameters.add(new ParsedParameter(name, type, optional, null));
 			}
 		}
 
