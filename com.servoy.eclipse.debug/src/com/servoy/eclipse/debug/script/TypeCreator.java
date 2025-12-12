@@ -3226,27 +3226,27 @@ public class TypeCreator extends TypeCache
 				}
 				else if (member.getName().equals("forEach"))
 				{
-//					Method clone = (Method)TypeCreator.clone(member, member.getType());
-//					Parameter functionParam = clone.getParameterFor(0);
-//					FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
-//					EList<Parameter> parameters = functionType.getParameters();
-//					Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
-//					param.setName("record");
-//					param.setType(getTypeRef(context, Record.JS_RECORD + '<' + config + '>'));
-//					parameters.add(param);
-//					param = TypeInfoModelFactory.eINSTANCE.createParameter();
-//					param.setName("recordIndex");
-//					param.setType(getTypeRef(context, "Number"));
-//					param.setKind(ParameterKind.OPTIONAL);
-//					parameters.add(param);
-//					param = TypeInfoModelFactory.eINSTANCE.createParameter();
-//					param.setName("foundset");
-//					param.setType(getTypeRef(context, fullTypeName));
-//					param.setKind(ParameterKind.OPTIONAL);
-//					parameters.add(param);
-//					functionParam.setType(functionType);
-//
-//					overridden = clone;
+					Method clone = (Method)TypeCreator.clone(member, member.getType());
+					Parameter functionParam = clone.getParameterFor(0);
+					FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
+					EList<Parameter> parameters = functionType.getParameters();
+					Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+					param.setName("record");
+					param.setType(getTypeRef(context, Record.JS_RECORD + '<' + config + '>'));
+					parameters.add(param);
+					param = TypeInfoModelFactory.eINSTANCE.createParameter();
+					param.setName("recordIndex");
+					param.setType(getTypeRef(context, "Number"));
+					param.setKind(ParameterKind.OPTIONAL);
+					parameters.add(param);
+					param = TypeInfoModelFactory.eINSTANCE.createParameter();
+					param.setName("foundset");
+					param.setType(getTypeRef(context, fullTypeName));
+					param.setKind(ParameterKind.OPTIONAL);
+					parameters.add(param);
+					functionParam.setType(functionType);
+
+					overridden = clone;
 				}
 				else
 				{
