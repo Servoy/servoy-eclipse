@@ -20,9 +20,14 @@ public class TrustStoreManager
 
 	public static void initializeTrustStore(File customTrustStore, String certificateName) throws Exception
 	{
+		File defaultCacerts = new File(DEFAULT_CACERTS_PATH);
+		if (defaultCacerts.lastModified() > customTrustStore.lastModified())
+		{
+			// if the default cacerts file is updated (e.g. after a JRE update), we need to recreate our custom trust store
+			customTrustStore.delete();
+		}
 		if (!customTrustStore.exists())
 		{
-			File defaultCacerts = new File(DEFAULT_CACERTS_PATH);
 
 			// 1. Copy the default cacerts file
 			Files.copy(defaultCacerts.toPath(), customTrustStore.toPath());
