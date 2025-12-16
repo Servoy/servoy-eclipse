@@ -107,12 +107,14 @@ public class IndexPageFilter implements Filter
 				if (OAuthHandler.isOAuthRequest(request))
 				{
 					showLogin = OAuthHandler.handleOauth(request, response);
-					if (Boolean.FALSE.equals(showLogin.getLeft()) && showLogin.getRight() == null) return;
-
-					request.getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
-					String queryString = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
-					response.sendRedirect(request.getRequestURI().replace("/svy_oauth", "") + (queryString != null ? "?" + queryString : ""));
-					return;
+					if (Boolean.FALSE.equals(showLogin.getLeft()))
+					{
+						if (showLogin.getRight() == null) return; // oauth was successful but the cloud returned html
+						request.getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
+						String queryString = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
+						response.sendRedirect(request.getRequestURI().replace("/svy_oauth", "") + (queryString != null ? "?" + queryString : ""));
+						return;
+					}
 				}
 				else
 				{
@@ -138,7 +140,7 @@ public class IndexPageFilter implements Filter
 					contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
 				return;
 			}
-			else if (solutionName != null && CloudStatelessAccessManager.handlePossibleCloudRequest(request, response, solutionName, indexFile))
+			else if (solutionName != null && CloudStatelessAccessManager.handlePossibleCloudRequest(request, response, solutionName))
 			{
 				return;
 			}
