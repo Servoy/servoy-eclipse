@@ -45,6 +45,7 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -112,6 +113,7 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 				try
 				{
 					wsfa.setContents(scriptPath, new byte[0]);
+					EditorUtil.openScriptEditor(((ServoyProject)project.getRealObject()).getSolution(), scopeName, true);
 				}
 				catch (IOException e)
 				{
