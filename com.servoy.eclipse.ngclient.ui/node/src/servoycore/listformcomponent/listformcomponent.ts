@@ -36,7 +36,8 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
         <ag-grid-angular #aggrid
           [gridOptions]="agGridOptions"
           [ngStyle]="getAGGridStyle()"
-          [sabloTabseq]="tabSeq">
+          [sabloTabseq]="tabSeq"
+          [sabloTabseqConfig]="{container: true, reservedGap: 1000}">
         </ag-grid-angular>
       }
     
@@ -280,7 +281,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 },
                 headerHeight: 0,
                 defaultColDef: {
-                    flex: 1
+                    flex: 1,
+                    suppressKeyboardEvent: (params: any) => {
+                        if(params.event.keyCode === 9) {
+                            return true;
+                        }
+                        return false;
+                    }
                 },
                 columnDefs: [
                     { cellRenderer: 'row-renderer', autoHeight: true }
