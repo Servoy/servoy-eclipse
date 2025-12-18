@@ -670,7 +670,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         const rowId = row[ViewportService.ROW_ID_COL_KEY];
         const handlers = {};
-        const rowItem = new Cell(cm, handlers, rowId, this.foundset.viewPort.startIndex + rowIndex, rowIndex);
+
+		//rowIndex is always 0. use rId instead of rowIndex for unique identification. Hack to have unique index for each makeupId. 
+		const rIdNum = item?.rId as number;
+        const rowItem = new Cell(cm, handlers, rowId, rIdNum, rowIndex);
 
         if (cm.mappedHandlers) {
             cm.mappedHandlers.forEach((value, key) => {
