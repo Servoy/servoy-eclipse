@@ -159,8 +159,11 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		if (oldDataSource != null && !oldDataSource.equals(newDataSource) || oldDataSource == null && newDataSource != null)
 		{
 			removeAll(getFormsByDatasource(oldDataSource, false), form);
-			if (oldDataSource != null) removeAll(getFormsByDatasource(null, false), form);
-			if (!oldDataSource.equals(Form.DATASOURCE_NONE)) removeAll(getFormsByDatasource(Form.DATASOURCE_NONE, false), form);
+			if (oldDataSource != null)
+			{
+				removeAll(getFormsByDatasource(null, false), form);
+				if (!oldDataSource.equals(Form.DATASOURCE_NONE)) removeAll(getFormsByDatasource(Form.DATASOURCE_NONE, false), form);
+			}
 			addIfNotExists(getFormsByDatasource(newDataSource, false), form);
 			if (newDataSource != null) addIfNotExists(getFormsByDatasource(null, false), form);
 			formToDataSource.put(form, newDataSource);
