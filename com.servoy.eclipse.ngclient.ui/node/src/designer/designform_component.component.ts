@@ -625,6 +625,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 }
 
 class FormComponentDesignServoyApi extends ServoyApi {
+	private markupId: string;
     constructor(item: ComponentCache,
         formname: string,
         absolute: boolean,
@@ -632,6 +633,7 @@ class FormComponentDesignServoyApi extends ServoyApi {
         servoyService: ServoyService,
         private fc: DesignFormComponent) {
         super(item, formname, absolute, formservice, servoyService, true);
+		this.markupId = super.getMarkupId() + '_' + item.rId;
     }
 
     registerComponent(comp: ServoyBaseComponent<any>) {
@@ -641,6 +643,10 @@ class FormComponentDesignServoyApi extends ServoyApi {
     unRegisterComponent(comp: ServoyBaseComponent<any>) {
         this.fc.unRegisterComponent(comp);
     }
+
+	getMarkupId(): string {
+		return this.markupId;
+	}
 
     public formWillShow(_formname: string, _relationname?: string, _formIndex?: number): Promise<boolean> {
         return new Promise<any>(resolve => {

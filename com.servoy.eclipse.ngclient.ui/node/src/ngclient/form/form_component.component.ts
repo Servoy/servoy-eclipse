@@ -517,20 +517,26 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 }
 
 class FormComponentServoyApi extends ServoyApi {
-    constructor(item: ComponentCache,
-        formname: string,
-        absolute: boolean,
-        formservice: FormService,
-        servoyService: ServoyService,
-        private fc: FormComponent) {
-        super(item, formname, absolute, formservice, servoyService, false);
-    }
+	private markupId: string;
+	constructor(item: ComponentCache,
+		formname: string,
+		absolute: boolean,
+		formservice: FormService,
+		servoyService: ServoyService,
+		private fc: FormComponent) {
+		super(item, formname, absolute, formservice, servoyService, false);
+		this.markupId = super.getMarkupId() + '_' + item.rId;
+	}
 
-    registerComponent(comp: ServoyBaseComponent<any>) {
-        this.fc.registerComponent(comp);
-    }
+	registerComponent(comp: ServoyBaseComponent<any>) {
+		this.fc.registerComponent(comp);
+	}
 
-    unRegisterComponent(comp: ServoyBaseComponent<any>) {
-        this.fc.unRegisterComponent(comp);
-    }
+	getMarkupId(): string {
+		return this.markupId;
+	}
+
+	unRegisterComponent(comp: ServoyBaseComponent<any>) {
+		this.fc.unRegisterComponent(comp);
+	}
 }
