@@ -78,13 +78,8 @@ return RulesCache.class;
 	 */
 	public static void loadKnowledgeBasesForSolution(Object solution)
 	{
-		System.out.println("========================================");
-		System.out.println("[KnowledgeBaseManager] loadKnowledgeBasesForSolution() CALLED");
-		
 		if (!(solution instanceof ServoyProject))
 		{
-			System.err.println("[KnowledgeBaseManager] ERROR: Invalid solution type: " + 
-				(solution != null ? solution.getClass().getName() : "null"));
 			ServoyLog.logError("[KnowledgeBaseManager] Invalid solution type: " + 
 				(solution != null ? solution.getClass().getName() : "null"));
 			return;
@@ -92,31 +87,17 @@ return RulesCache.class;
 		
 		ServoyProject servoyProject = (ServoyProject)solution;
 		String solutionName = servoyProject.getProject().getName();
-		System.out.println("[KnowledgeBaseManager] Solution: " + solutionName);
 		ServoyLog.logInfo("[KnowledgeBaseManager] Loading knowledge bases for solution: " + solutionName);
 		
 		// Discover knowledge base packages
-		System.out.println("[KnowledgeBaseManager] Discovering knowledge base packages...");
 		IPackageReader[] packageReaders = discoverKnowledgeBasePackagesInSolution(servoyProject);
 		
-		System.out.println("[KnowledgeBaseManager] Discovered " + packageReaders.length + 
-			" knowledge base package(s)");
 		ServoyLog.logInfo("[KnowledgeBaseManager] Discovered " + packageReaders.length + 
 			" knowledge base package(s)");
 		
 		// ALWAYS reload (clears existing knowledge base even if no packages found)
 		try
 		{
-			if (packageReaders.length > 0)
-			{
-				System.out.println("[KnowledgeBaseManager] Loading knowledge bases from " + 
-					packageReaders.length + " package(s)...");
-			}
-			else
-			{
-				System.out.println("[KnowledgeBaseManager] No knowledge base packages found - clearing existing knowledge base");
-			}
-			
 			ServoyEmbeddingService embeddingService = ServoyEmbeddingService.getInstance();
 			embeddingService.reloadAllKnowledgeBasesFromReaders(packageReaders);
 			
@@ -125,30 +106,19 @@ return RulesCache.class;
 			
 			if (packageReaders.length > 0)
 			{
-				System.out.println("[KnowledgeBaseManager] Knowledge bases loaded successfully:");
-				System.out.println("  - Embeddings: " + embeddingCount);
-				System.out.println("  - Rules: " + ruleCount);
 				ServoyLog.logInfo("[KnowledgeBaseManager] Knowledge bases loaded successfully - " + 
 					embeddingCount + " embeddings, " + ruleCount + " rules");
 			}
 			else
 			{
-				System.out.println("[KnowledgeBaseManager] Knowledge base cleared (no packages in solution)");
-				System.out.println("  - Embeddings: " + embeddingCount + " (should be 0)");
-				System.out.println("  - Rules: " + ruleCount + " (should be 0)");
 				ServoyLog.logInfo("[KnowledgeBaseManager] Knowledge base cleared - no packages in solution");
 			}
 		}
 		catch (Exception e)
 		{
-			System.err.println("[KnowledgeBaseManager] ERROR loading/clearing knowledge bases: " + e.getMessage());
-			e.printStackTrace();
 			ServoyLog.logError("[KnowledgeBaseManager] Error loading/clearing knowledge bases: " + 
 				e.getMessage(), e);
 		}
-		
-		System.out.println("[KnowledgeBaseManager] loadKnowledgeBasesForSolution() COMPLETED");
-		System.out.println("========================================");
 	}
 
 	/**
@@ -160,130 +130,66 @@ return RulesCache.class;
 	 */
 	public static void loadKnowledgeBase(String packageName)
 	{
-		System.out.println("========================================");
-		System.out.println("[KnowledgeBaseManager] loadKnowledgeBase() CALLED");
-		System.out.println("[KnowledgeBaseManager] Package name: " + packageName);
 		ServoyLog.logInfo("[KnowledgeBaseManager] loadKnowledgeBase called for: " + packageName);
 		
 		if (packageName == null || packageName.trim().isEmpty())
 		{
-			System.err.println("[KnowledgeBaseManager] ERROR: Invalid package name");
 			ServoyLog.logError("[KnowledgeBaseManager] Invalid package name: " + packageName);
 			return;
 		}
 		
 		try
 		{
-			// Find the package in the active solution
-			System.out.println("[KnowledgeBaseManager] Searching for package in active solution...");
-			ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
-			if (activeProject == null)
+			// Get NGPackageManager
+			com.servoy.eclipse.model.ngpackages.BaseNGPackageManager ngPackageManager = 
+				ServoyModelFinder.getServoyModel().getNGPackageManager();
+			
+			if (ngPackageManager == null)
 			{
-				System.err.println("[KnowledgeBaseManager] ERROR: No active solution");
-				ServoyLog.logError("[KnowledgeBaseManager] No active solution - cannot load package");
+				ServoyLog.logError("[KnowledgeBaseManager] NGPackageManager is null");
 				return;
 			}
 			
-			System.out.println("[KnowledgeBaseManager] Active solution: " + activeProject.getProject().getName());
+			// Get ALL loaded package readers (includes workspace projects AND installed zips)
+			List<IPackageReader> allReaders = ngPackageManager.getAllPackageReaders();
 			
-			// Search in solution packages
-			ServoyNGPackageProject[] packages = activeProject.getNGPackageProjects();
-			System.out.println("[KnowledgeBaseManager] Searching " + packages.length + " packages in solution...");
-			
-			ServoyNGPackageProject targetPackage = null;
-			for (ServoyNGPackageProject pkg : packages)
+			// Find the target package by name
+			IPackageReader targetReader = null;
+			for (IPackageReader reader : allReaders)
 			{
-				if (pkg.getProject().getName().equals(packageName))
+				if (reader.getPackageName().equals(packageName))
 				{
-					targetPackage = pkg;
-					System.out.println("[KnowledgeBaseManager] Found package in solution!");
+					targetReader = reader;
 					break;
 				}
 			}
 			
-			// If not found, search in modules
-			if (targetPackage == null)
+			if (targetReader == null)
 			{
-				System.out.println("[KnowledgeBaseManager] Not found in solution, searching modules...");
-				ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-				for (ServoyProject module : modules)
-				{
-					ServoyNGPackageProject[] modulePackages = module.getNGPackageProjects();
-					for (ServoyNGPackageProject pkg : modulePackages)
-					{
-						if (pkg.getProject().getName().equals(packageName))
-						{
-							targetPackage = pkg;
-							System.out.println("[KnowledgeBaseManager] Found package in module: " + 
-								module.getProject().getName());
-							break;
-						}
-					}
-					if (targetPackage != null) break;
-				}
-			}
-			
-			if (targetPackage == null)
-			{
-				System.err.println("[KnowledgeBaseManager] ERROR: Package not found: " + packageName);
-				ServoyLog.logError("[KnowledgeBaseManager] Package not found in solution or modules: " + packageName);
+				ServoyLog.logError("[KnowledgeBaseManager] Package not found in loaded packages: " + packageName);
 				return;
 			}
 			
 			// Verify it's a knowledge base package
-			System.out.println("[KnowledgeBaseManager] Verifying package is a knowledge base package...");
-			if (!isKnowledgeBasePackage(targetPackage))
+			if (!isKnowledgeBasePackage(targetReader))
 			{
-				System.err.println("[KnowledgeBaseManager] ERROR: Package is not a knowledge base package");
 				ServoyLog.logError("[KnowledgeBaseManager] Package is not a knowledge base package: " + packageName);
 				return;
 			}
 			
-			System.out.println("[KnowledgeBaseManager] Package verified as knowledge base package");
-			
-			// Create package reader
-			System.out.println("[KnowledgeBaseManager] Creating package reader...");
-			IProject project = targetPackage.getProject();
-			File projectLocation = project.getLocation().toFile();
-			DirPackageReader reader = new DirPackageReader(projectLocation);
-			
-			System.out.println("[KnowledgeBaseManager] Loading knowledge base (ADDITIVE - does not clear existing)...");
-			
-			// Load embeddings
-			ServoyEmbeddingService embeddingService = ServoyEmbeddingService.getInstance();
-			int oldEmbeddingCount = embeddingService.getEmbeddingCount();
-			int oldRuleCount = RulesCache.getRuleCount();
-			
-			System.out.println("[KnowledgeBaseManager] Current state before load:");
-			System.out.println("  - Embeddings: " + oldEmbeddingCount);
-			System.out.println("  - Rules: " + oldRuleCount);
-			
 			// Load from this package reader (additive)
-			int newEmbeddings = embeddingService.loadKnowledgeBaseFromReader(reader);
-			int newRules = RulesCache.loadFromPackageReader(reader);
-			
-			int totalEmbeddings = embeddingService.getEmbeddingCount();
-			int totalRules = RulesCache.getRuleCount();
-			
-			System.out.println("[KnowledgeBaseManager] Knowledge base loaded successfully!");
-			System.out.println("  - New embeddings from package: " + newEmbeddings);
-			System.out.println("  - New rules from package: " + newRules);
-			System.out.println("  - Total embeddings now: " + totalEmbeddings);
-			System.out.println("  - Total rules now: " + totalRules);
+			ServoyEmbeddingService embeddingService = ServoyEmbeddingService.getInstance();
+			int newEmbeddings = embeddingService.loadKnowledgeBaseFromReader(targetReader);
+			int newRules = RulesCache.loadFromPackageReader(targetReader);
 			
 			ServoyLog.logInfo("[KnowledgeBaseManager] Knowledge base loaded: " + packageName + 
 				" (added " + newEmbeddings + " embeddings, " + newRules + " rules)");
 		}
 		catch (Exception e)
 		{
-			System.err.println("[KnowledgeBaseManager] ERROR loading knowledge base: " + e.getMessage());
-			e.printStackTrace();
 			ServoyLog.logError("[KnowledgeBaseManager] Error loading knowledge base '" + packageName + "': " + 
 				e.getMessage(), e);
 		}
-		
-		System.out.println("[KnowledgeBaseManager] loadKnowledgeBase() COMPLETED");
-		System.out.println("========================================");
 	}
 
 	/**
@@ -339,179 +245,116 @@ return RulesCache.class;
 	 * Discover knowledge base packages in a solution.
 	 * 
 	 * Strategy:
-	 * 1. Get all NG packages from solution via ServoyProject.getNGPackageProjects()
-	 * 2. Get all NG packages from modules (excluding the main solution to avoid duplicates)
-	 * 3. Filter for knowledge base packages (Knowledge-Base: true in MANIFEST.MF)
-	 * 4. Create IPackageReader for each package (workspace projects, not OSGi bundles)
+	 * 1. Get ALL loaded package readers from NGPackageManager (includes workspace projects AND installed zips)
+	 * 2. For each package reader, check MANIFEST.MF for Knowledge-Base: true
+	 * 3. Check for embeddings/embeddings.list OR rules/rules.list
+	 * 4. Return filtered list of knowledge base package readers
+	 * 
+	 * This approach works for BOTH:
+	 * - Workspace projects with NG package nature (source)
+	 * - Installed zip packages from Servoy Package Manager
 	 * 
 	 * @param solution The Servoy solution to scan
 	 * @return Array of package readers for knowledge base packages (no duplicates)
 	 */
 	private static IPackageReader[] discoverKnowledgeBasePackagesInSolution(ServoyProject solution)
 	{
-		System.out.println("[KnowledgeBaseManager] discoverKnowledgeBaseBundlesInSolution() starting...");
-		Set<String> processedProjects = new HashSet<>();
-		List<ServoyNGPackageProject> knowledgeBasePackages = new ArrayList<>();
 		String solutionName = solution.getProject().getName();
+		List<IPackageReader> knowledgeBaseReaders = new ArrayList<>();
+		Set<String> processedPackageNames = new HashSet<>();
 		
 		try
 		{
-			// Get NG packages from solution
-			System.out.println("[KnowledgeBaseManager] Getting NG packages from solution...");
-			ServoyNGPackageProject[] ngPackages = solution.getNGPackageProjects();
-			System.out.println("[KnowledgeBaseManager] Found " + ngPackages.length + 
-				" NG package(s) in solution: " + solutionName);
-			ServoyLog.logInfo("[KnowledgeBaseManager] Found " + ngPackages.length + 
-				" NG package(s) in solution: " + solutionName);
+			// Get NGPackageManager from ServoyModel
+			com.servoy.eclipse.model.ngpackages.BaseNGPackageManager ngPackageManager = 
+				ServoyModelFinder.getServoyModel().getNGPackageManager();
 			
-			for (ServoyNGPackageProject ngPackage : ngPackages)
+			if (ngPackageManager == null)
+			{
+				ServoyLog.logError("[KnowledgeBaseManager] NGPackageManager is null");
+				return new IPackageReader[0];
+			}
+			
+			// Get ALL loaded package readers (includes workspace projects AND installed zips)
+			List<IPackageReader> allReaders = ngPackageManager.getAllPackageReaders();
+			ServoyLog.logInfo("[KnowledgeBaseManager] Checking " + allReaders.size() + " loaded package(s) for knowledge bases");
+			
+			// Check each package reader for knowledge base markers
+			for (IPackageReader reader : allReaders)
 			{
 				try
 				{
-					String packageName = ngPackage.getProject().getName();
-					System.out.println("[KnowledgeBaseManager] Checking package: " + packageName);
+					String packageName = reader.getPackageName();
 					
-					if (processedProjects.contains(packageName))
+					// Skip duplicates
+					if (processedPackageNames.contains(packageName))
 					{
-						System.out.println("[KnowledgeBaseManager]   -> Already processed (skipped)");
 						continue;
 					}
 					
-					if (isKnowledgeBasePackage(ngPackage))
+					// Check if this is a knowledge base package
+					if (isKnowledgeBasePackage(reader))
 					{
-						System.out.println("[KnowledgeBaseManager]   -> IS a knowledge base package");
-						knowledgeBasePackages.add(ngPackage);
-						processedProjects.add(packageName);
-						System.out.println("[KnowledgeBaseManager]   -> Added to knowledge base list");
+						knowledgeBaseReaders.add(reader);
+						processedPackageNames.add(packageName);
 						ServoyLog.logInfo("[KnowledgeBaseManager] Found knowledge base package: " + packageName);
-					}
-					else
-					{
-						System.out.println("[KnowledgeBaseManager]   -> Not a knowledge base package (skipped)");
 					}
 				}
 				catch (Exception e)
 				{
-					System.err.println("[KnowledgeBaseManager] ERROR checking package: " + 
-						ngPackage.getProject().getName() + " - " + e.getMessage());
-					ServoyLog.logError("[KnowledgeBaseManager] Error checking package: " + 
-						ngPackage.getProject().getName() + " - " + e.getMessage(), e);
-				}
-			}
-			
-			// Get NG packages from modules (excluding main solution to avoid duplicates)
-			System.out.println("[KnowledgeBaseManager] Checking modules...");
-			ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-			if (modules != null && modules.length > 0)
-			{
-				System.out.println("[KnowledgeBaseManager] Found " + modules.length + " module(s)");
-				ServoyLog.logInfo("[KnowledgeBaseManager] Checking " + modules.length + " module(s)");
-				
-				for (ServoyProject module : modules)
-				{
-					try
-					{
-						String moduleName = module.getProject().getName();
-						
-						// Skip if this is the main solution (to avoid duplicates)
-						if (moduleName.equals(solutionName))
-						{
-							System.out.println("[KnowledgeBaseManager] Skipping module: " + moduleName + " (is main solution)");
-							continue;
-						}
-						
-						System.out.println("[KnowledgeBaseManager] Checking module: " + moduleName);
-						ServoyNGPackageProject[] modulePackages = module.getNGPackageProjects();
-						System.out.println("[KnowledgeBaseManager]   -> Found " + modulePackages.length + " NG package(s)");
-						ServoyLog.logInfo("[KnowledgeBaseManager] Found " + modulePackages.length + 
-							" NG package(s) in module: " + moduleName);
-						
-						for (ServoyNGPackageProject ngPackage : modulePackages)
-						{
-							try
-							{
-								String packageName = ngPackage.getProject().getName();
-								System.out.println("[KnowledgeBaseManager] Checking package: " + packageName);
-								
-								if (processedProjects.contains(packageName))
-								{
-									System.out.println("[KnowledgeBaseManager]   -> Already processed (skipped)");
-									continue;
-								}
-								
-								if (isKnowledgeBasePackage(ngPackage))
-								{
-									System.out.println("[KnowledgeBaseManager]   -> IS a knowledge base package");
-									knowledgeBasePackages.add(ngPackage);
-									processedProjects.add(packageName);
-									System.out.println("[KnowledgeBaseManager]   -> Added to knowledge base list");
-									ServoyLog.logInfo("[KnowledgeBaseManager] Found knowledge base package in module: " + packageName);
-								}
-								else
-								{
-									System.out.println("[KnowledgeBaseManager]   -> Not a knowledge base package (skipped)");
-								}
-							}
-							catch (Exception e)
-							{
-								System.err.println("[KnowledgeBaseManager] ERROR checking module package: " + 
-									ngPackage.getProject().getName() + " - " + e.getMessage());
-								ServoyLog.logError("[KnowledgeBaseManager] Error checking module package: " + 
-									ngPackage.getProject().getName() + " - " + e.getMessage(), e);
-							}
-						}
-					}
-					catch (Exception e)
-					{
-						System.err.println("[KnowledgeBaseManager] ERROR processing module: " + 
-							module.getProject().getName() + " - " + e.getMessage());
-						ServoyLog.logError("[KnowledgeBaseManager] Error processing module: " + 
-							module.getProject().getName() + " - " + e.getMessage(), e);
-					}
+					ServoyLog.logError("[KnowledgeBaseManager] Error checking package reader: " + e.getMessage(), e);
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			System.err.println("[KnowledgeBaseManager] ERROR discovering knowledge base bundles: " + e.getMessage());
-			e.printStackTrace();
-			ServoyLog.logError("[KnowledgeBaseManager] Error discovering knowledge base bundles: " + 
+			ServoyLog.logError("[KnowledgeBaseManager] Error discovering knowledge base packages: " + 
 				e.getMessage(), e);
 		}
 		
-		System.out.println("[KnowledgeBaseManager] discoverKnowledgeBasePackagesInSolution() completed:");
-		System.out.println("  -> Total knowledge base packages found: " + knowledgeBasePackages.size());
-		
-		// Create IPackageReader for each knowledge base package
-		List<IPackageReader> packageReaders = new ArrayList<>();
-		for (ServoyNGPackageProject pkg : knowledgeBasePackages)
+		return knowledgeBaseReaders.toArray(new IPackageReader[0]);
+	}
+	
+	/**
+	 * Check if a package reader is a knowledge base package.
+	 * Works with ANY IPackageReader (workspace projects, zips, etc.)
+	 * 
+	 * Requirements:
+	 * 1. MANIFEST.MF must contain Knowledge-Base: true
+	 * 2. Must have embeddings/embeddings.list OR rules/rules.list
+	 * 
+	 * @param reader The package reader to check
+	 * @return true if this is a knowledge base package
+	 */
+	private static boolean isKnowledgeBasePackage(IPackageReader reader)
+	{
+		try
 		{
-			try
+			// Check MANIFEST.MF for Knowledge-Base: true
+			Manifest manifest = reader.getManifest();
+			if (manifest == null)
 			{
-				String packageName = pkg.getProject().getName();
-				System.out.println("[KnowledgeBaseManager] Creating package reader for: " + packageName);
-				
-				IProject project = pkg.getProject();
-				File projectLocation = project.getLocation().toFile();
-				
-				// Create DirPackageReader for workspace project
-				DirPackageReader reader = new DirPackageReader(projectLocation);
-				packageReaders.add(reader);
-				
-				System.out.println("     - " + packageName + " (reader created)");
+				return false;
 			}
-			catch (Exception e)
+			
+			String knowledgeBase = manifest.getMainAttributes().getValue("Knowledge-Base");
+			if (!"true".equalsIgnoreCase(knowledgeBase))
 			{
-				System.err.println("[KnowledgeBaseManager] ERROR creating reader for " + 
-					pkg.getProject().getName() + ": " + e.getMessage());
-				e.printStackTrace();
-				ServoyLog.logError("[KnowledgeBaseManager] Error creating package reader: " + e.getMessage(), e);
+				return false;
 			}
+			
+			// Check for embeddings/embeddings.list OR rules/rules.list
+			boolean hasEmbeddings = reader.getUrlForPath("embeddings/embeddings.list") != null;
+			boolean hasRules = reader.getUrlForPath("rules/rules.list") != null;
+			
+			return hasEmbeddings || hasRules;
 		}
-		
-		IPackageReader[] result = packageReaders.toArray(new IPackageReader[0]);
-		System.out.println("[KnowledgeBaseManager] Created " + result.length + " package reader(s)");
-		return result;
+		catch (Exception e)
+		{
+			ServoyLog.logError("[KnowledgeBaseManager] Error checking if package reader is knowledge base: " + 
+				reader.getPackageName() + " - " + e.getMessage(), e);
+			return false;
+		}
 	}
 	
 	/**
@@ -541,6 +384,7 @@ return RulesCache.class;
 			{
 				Manifest manifest = new Manifest(is);
 				String knowledgeBase = manifest.getMainAttributes().getValue("Knowledge-Base");
+				
 				if (!"true".equalsIgnoreCase(knowledgeBase))
 				{
 					return false;
