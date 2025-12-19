@@ -499,6 +499,9 @@ public class SolutionExplorerView extends ViewPart
 
 	private Action includeModulesAction;
 
+	private LoadKnowledgeBaseAction loadKnowledgeBaseAction;
+	private ReloadAllKnowledgeBasesAction reloadAllKnowledgeBasesAction;
+
 	private Menu listDropDownMenu;
 
 	private StatusBarUpdater statusBarUpdater;
@@ -2851,6 +2854,8 @@ public class SolutionExplorerView extends ViewPart
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
 		if (editWebPackageDetailsAction.isEnabled()) manager.add(editWebPackageDetailsAction);
 		if (upgradeComponentPackageAction.isEnabled()) manager.add(upgradeComponentPackageAction);
+		if (loadKnowledgeBaseAction.isEnabled()) manager.add(loadKnowledgeBaseAction);
+		if (reloadAllKnowledgeBasesAction.isEnabled()) manager.add(reloadAllKnowledgeBasesAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 		if (moveActionInTree.isEnabled()) manager.add(moveActionInTree);
@@ -3512,10 +3517,9 @@ public class SolutionExplorerView extends ViewPart
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 		upgradeComponentPackageAction = new WebPackageUpgradeAction(this, shell, "Upgrade to Titanum NGClient package", Package.IPackageReader.WEB_COMPONENT);
+		loadKnowledgeBaseAction = new LoadKnowledgeBaseAction(this, "Load plugin knowledge");
+		reloadAllKnowledgeBasesAction = new ReloadAllKnowledgeBasesAction(this, "Refresh knowledge db");
 
-//		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT, this);
-//		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT, this);
-//		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE, this);
 		IAction deleteI18N = new DeleteI18NAction(shell);
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 
@@ -3685,6 +3689,8 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(exportComponentPackage);
 		addTreeSelectionChangedListener(editWebPackageDetailsAction);
 		addTreeSelectionChangedListener(upgradeComponentPackageAction);
+		addTreeSelectionChangedListener(loadKnowledgeBaseAction);
+		addTreeSelectionChangedListener(reloadAllKnowledgeBasesAction);
 		addTreeSelectionChangedListener(moveFormAction);
 		addTreeSelectionChangedListener(changeResourcesProjectAction);
 		addTreeSelectionChangedListener(convertToNewFormatAction);

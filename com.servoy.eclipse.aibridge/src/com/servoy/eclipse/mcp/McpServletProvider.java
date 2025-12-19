@@ -11,8 +11,9 @@ import org.apache.tomcat.starter.ServletInstance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.mcp.ai.RulesCache;
-import com.servoy.eclipse.mcp.ai.ServoyEmbeddingService;
+import com.servoy.eclipse.knowledgebase.KnowledgeBaseManager;
+import com.servoy.eclipse.knowledgebase.ai.RulesCache;
+import com.servoy.eclipse.knowledgebase.ai.ServoyEmbeddingService;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 
@@ -75,9 +76,6 @@ public class McpServletProvider implements IServicesProvider
 	 */
 	private McpSchema.CallToolResult handleGetContext(Object exchange, McpSchema.CallToolRequest request)
 	{
-		System.out.println("========================================");
-		System.out.println("[McpServletProvider] handleGetContext CALLED");
-
 		// Extract queries array from request
 		List<String> queries = new ArrayList<>();
 		Map<String, Object> args = request.arguments();
@@ -85,8 +83,6 @@ public class McpServletProvider implements IServicesProvider
 		if (args != null && args.containsKey("queries"))
 		{
 			Object queriesObj = args.get("queries");
-			System.out.println("[McpServletProvider] Queries object type: " + (queriesObj != null ? queriesObj.getClass().getName() : "null"));
-			System.out.println("[McpServletProvider] Queries object: " + queriesObj);
 
 			if (queriesObj instanceof List< ? >)
 			{
@@ -108,17 +104,10 @@ public class McpServletProvider implements IServicesProvider
 
 		if (queries.isEmpty())
 		{
-			System.out.println("[McpServletProvider] ERROR: No queries provided");
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent("Error: queries parameter is required (array of strings)")))
 				.isError(true)
 				.build();
-		}
-
-		System.out.println("[McpServletProvider] Received " + queries.size() + " queries:");
-		for (int i = 0; i < queries.size(); i++)
-		{
-			System.out.println("[McpServletProvider]   Query " + (i + 1) + ": \"" + queries.get(i) + "\"");
 		}
 
 		try
@@ -129,25 +118,19 @@ public class McpServletProvider implements IServicesProvider
 			// Track matched categories and their contexts
 			Map<String, CategoryMatch> categoryMatches = new LinkedHashMap<>();
 
-			// For each query, do similarity search
-			for (String query : queries)
+		// For each query, do similarity search
+		for (String query : queries)
+		{
+			// Search with top 3 results to allow multiple category matches
+			List<ServoyEmbeddingService.SearchResult> results = embeddingService.search(query, 3);
+
+			for (ServoyEmbeddingService.SearchResult result : results)
 			{
-				System.out.println("[McpServletProvider] Searching for: \"" + query + "\"");
-
-				// Search with top 3 results to allow multiple category matches
-				List<ServoyEmbeddingService.SearchResult> results = embeddingService.search(query, 3);
-
-				System.out.println("[McpServletProvider] Found " + results.size() + " matches for \"" + query + "\"");
-
-				for (ServoyEmbeddingService.SearchResult result : results)
+				String intent = result.metadata.get("intent");
+				if (intent != null && !intent.equals("PASS_THROUGH"))
 				{
-					String intent = result.metadata.get("intent");
-					if (intent != null && !intent.equals("PASS_THROUGH"))
-					{
-						System.out.println("[McpServletProvider]   Matched: " + intent + " (score: " + result.score + ")");
-
-						// Track this category
-						if (!categoryMatches.containsKey(intent))
+					// Track this category
+					if (!categoryMatches.containsKey(intent))
 						{
 							categoryMatches.put(intent, new CategoryMatch(intent, query, result.score));
 						}
@@ -198,11 +181,10 @@ public class McpServletProvider implements IServicesProvider
 						projectName = activeProject.getProject().getName();
 					}
 				}
-				catch (Exception e)
-				{
-					// Ignore - will use null project name
-					System.out.println("[McpServletProvider] Could not get active project name: " + e.getMessage());
-				}
+			catch (Exception e)
+			{
+				// Ignore - will use null project name
+			}
 
 				int categoryNum = 1;
 				for (CategoryMatch match : categoryMatches.values())
@@ -230,16 +212,12 @@ public class McpServletProvider implements IServicesProvider
 				}
 			}
 
-			System.out.println("[McpServletProvider] Returning context for " + categoryMatches.size() + " categories");
-
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent(response.toString())))
 				.build();
 		}
 		catch (Exception e)
 		{
-			System.out.println("[McpServletProvider] ERROR in getContext: " + e.getMessage());
-			e.printStackTrace();
 			ServoyLog.logError("[MCP] Error in getContext: " + e.getMessage(), e);
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent("Error processing queries: " + e.getMessage())))
@@ -270,27 +248,20 @@ public class McpServletProvider implements IServicesProvider
 	 */
 	private void registerHandlers(McpSyncServer server)
 	{
-		System.out.println("[McpServletProvider] Starting handler registration...");
-		IToolHandler[] handlers = ToolHandlerRegistry.getHandlers();
-		System.out.println("[McpServletProvider] Found " + handlers.length + " handlers to register");
+		com.servoy.eclipse.knowledgebase.IToolHandler[] handlers = KnowledgeBaseManager.getHandlers();
 
-		for (IToolHandler handler : handlers)
+		for (com.servoy.eclipse.knowledgebase.IToolHandler handler : handlers)
 		{
 			try
 			{
-				System.out.println("[McpServletProvider] Registering handler: " + handler.getHandlerName());
 				handler.registerTools(server);
 				ServoyLog.logInfo("[MCP] Registered handler: " + handler.getHandlerName());
-				System.out.println("[McpServletProvider] Successfully registered: " + handler.getHandlerName());
 			}
 			catch (Exception e)
 			{
-				System.out.println("[McpServletProvider] FAILED to register handler: " + handler.getHandlerName());
-				e.printStackTrace();
 				ServoyLog.logError("[MCP] Failed to register handler: " + handler.getHandlerName(), e);
 			}
 		}
-		System.out.println("[McpServletProvider] Handler registration complete");
 	}
 
 }
