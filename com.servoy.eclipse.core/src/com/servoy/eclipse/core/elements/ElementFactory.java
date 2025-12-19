@@ -302,7 +302,8 @@ public class ElementFactory
 		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 		AbstractBase copy = (AbstractBase)component.cloneObj(parent, true, validator, true, true,
 			true /* when component is an override we want a flattened one */);
-		boolean changeNames = (component.getAncestor(Form.class) != parent.getAncestor(Form.class));
+		boolean changeNames = component.getAncestor(Form.class) != parent.getAncestor(Form.class) &&
+			!(parent instanceof Form frm && frm.getExtendsForm() != null);
 		if (changeNames)
 		{
 			if (component instanceof LayoutContainer)
