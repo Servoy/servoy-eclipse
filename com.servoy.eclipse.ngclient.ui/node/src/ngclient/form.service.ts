@@ -43,25 +43,25 @@ export class FormService {
 			}) => {
 				if (msg.forms) {
 					for (const formname in msg.forms) {
-						// if form is loaded
-						if (this.formsCache.has(formname)) {
-							this.clientFunctionService.waitForLoading().finally(() => {
+						this.clientFunctionService.waitForLoading().finally(() => {
+							// if form is loaded
+							if (this.formsCache.has(formname)) {
 								this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService);
-							});
-						} else {
-							this.log.warn('Updates to a form state/cache/model came before it was initialized; this is no longer expected; form: ' + formname);
-							// do treat this situation anyway, even if it's no loner expected
-							let pendingRunnablesForThisForm = this.formsCachePendingRunnables.get(formname);
-							if (!pendingRunnablesForThisForm) {
-								pendingRunnablesForThisForm = [];
-								this.formsCachePendingRunnables.set(formname, pendingRunnablesForThisForm);
-							}
+							} else {
+								this.log.warn('Updates to a form state/cache/model came before it was initialized; this is no longer expected; form: ' + formname);
+								// do treat this situation anyway, even if it's no loner expected
+								let pendingRunnablesForThisForm = this.formsCachePendingRunnables.get(formname);
+								if (!pendingRunnablesForThisForm) {
+									pendingRunnablesForThisForm = [];
+									this.formsCachePendingRunnables.set(formname, pendingRunnablesForThisForm);
+								}
 
-							pendingRunnablesForThisForm.push((formCache) => {
-								// it is not needed here to do this.clientFunctionService.waitForLoading().finally, as pendingRunnables will always run inside that anyway
-								this.formMessageHandler(formCache, formname, msg, servoyService);
-							});
-						}
+								pendingRunnablesForThisForm.push((formCache) => {
+									// it is not needed here to do this.clientFunctionService.waitForLoading().finally, as pendingRunnables will always run inside that anyway
+									this.formMessageHandler(formCache, formname, msg, servoyService);
+								});
+							}
+						});
 					}
 				}
 				if (msg.call) {
