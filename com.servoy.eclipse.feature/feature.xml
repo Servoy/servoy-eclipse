@@ -264,19 +264,19 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.logging.log4j.api"
-         version="2.24.3"/>
+         version="2.25.3"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
-         version="2.24.3"/>
+         version="2.25.3"/>
 
    <plugin
          id="org.apache.logging.log4j.web"
-         version="2.24.3"/>
+         version="2.25.3"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j2.impl"
-         version="2.24.3"/>
+         version="2.25.3"/>
 
    <plugin
          id="javax.transaction"
@@ -406,7 +406,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.jre.win32.aarch64"
          os="win32"
          arch="aarch64"
-         version="0.0.0"/>
+         version="21.0.6"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.win32.win32.aarch64"
