@@ -18,11 +18,10 @@
 package com.servoy.eclipse.ui.browser;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-
-import com.equo.chromium.swt.Browser;
 
 /**
  * @author jcompagner
@@ -38,7 +37,7 @@ public class ChromiumWrapper implements IBrowser
 	public ChromiumWrapper(Composite parent)
 	{
 		this.browser = new Browser(parent, SWT.NONE);
-		this.browser.setData("AUTOSCALE_DISABLED", Boolean.TRUE); // HACK because chromium does not handle DPI zoom well
+//		this.browser.setData("AUTOSCALE_DISABLED", Boolean.TRUE); // HACK because chromium does not handle DPI zoom well
 	}
 
 	@Override
