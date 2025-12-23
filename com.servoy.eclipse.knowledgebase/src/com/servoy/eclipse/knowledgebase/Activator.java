@@ -23,7 +23,7 @@ import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.knowledgebase.ai.ServoyEmbeddingService;
+import com.servoy.eclipse.knowledgebase.service.ServoyEmbeddingService;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;

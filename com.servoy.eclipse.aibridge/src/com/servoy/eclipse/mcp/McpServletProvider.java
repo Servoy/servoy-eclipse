@@ -11,10 +11,10 @@ import org.apache.tomcat.starter.ServletInstance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.knowledgebase.ai.RulesCache;
-import com.servoy.eclipse.knowledgebase.ai.ServoyEmbeddingService;
 import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolManager;
+import com.servoy.eclipse.knowledgebase.service.RulesCache;
+import com.servoy.eclipse.knowledgebase.service.ServoyEmbeddingService;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 

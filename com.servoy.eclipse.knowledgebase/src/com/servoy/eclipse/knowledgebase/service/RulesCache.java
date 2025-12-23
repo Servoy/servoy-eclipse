@@ -1,4 +1,4 @@
-package com.servoy.eclipse.knowledgebase.ai;
+package com.servoy.eclipse.knowledgebase.service;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

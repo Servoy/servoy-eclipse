@@ -30,8 +30,8 @@ import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
 import org.sablo.specification.Package.IPackageReader;
 
-import com.servoy.eclipse.knowledgebase.ai.RulesCache;
-import com.servoy.eclipse.knowledgebase.ai.ServoyEmbeddingService;
+import com.servoy.eclipse.knowledgebase.service.RulesCache;
+import com.servoy.eclipse.knowledgebase.service.ServoyEmbeddingService;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
