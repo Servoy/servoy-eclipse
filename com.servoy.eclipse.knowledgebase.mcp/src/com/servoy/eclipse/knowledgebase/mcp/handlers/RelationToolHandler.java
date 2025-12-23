@@ -1,4 +1,4 @@
-package com.servoy.eclipse.knowledgebase.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers;
 
 import java.util.Iterator;
 import java.util.List;
@@ -8,12 +8,12 @@ import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.knowledgebase.IToolHandler;
-import com.servoy.eclipse.knowledgebase.ToolHandlerRegistry;
-import com.servoy.eclipse.knowledgebase.services.DatabaseSchemaService;
-import com.servoy.eclipse.knowledgebase.services.DatabaseSchemaService.ForeignKeyRelationship;
-import com.servoy.eclipse.knowledgebase.services.DatabaseSchemaService.PotentialRelationship;
-import com.servoy.eclipse.knowledgebase.services.RelationService;
+import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.knowledgebase.mcp.services.DatabaseSchemaService;
+import com.servoy.eclipse.knowledgebase.mcp.services.DatabaseSchemaService.ForeignKeyRelationship;
+import com.servoy.eclipse.knowledgebase.mcp.services.DatabaseSchemaService.PotentialRelationship;
+import com.servoy.eclipse.knowledgebase.mcp.services.RelationService;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;

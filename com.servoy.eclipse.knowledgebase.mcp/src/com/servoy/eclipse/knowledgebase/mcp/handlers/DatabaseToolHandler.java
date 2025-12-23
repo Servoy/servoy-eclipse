@@ -1,13 +1,13 @@
-package com.servoy.eclipse.knowledgebase.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.servoy.eclipse.knowledgebase.IToolHandler;
-import com.servoy.eclipse.knowledgebase.ToolHandlerRegistry;
-import com.servoy.eclipse.knowledgebase.services.DatabaseSchemaService;
+import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.knowledgebase.mcp.services.DatabaseSchemaService;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IServerInternal;

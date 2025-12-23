@@ -11,9 +11,10 @@ import org.apache.tomcat.starter.ServletInstance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.knowledgebase.KnowledgeBaseManager;
 import com.servoy.eclipse.knowledgebase.ai.RulesCache;
 import com.servoy.eclipse.knowledgebase.ai.ServoyEmbeddingService;
+import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.ToolManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 
@@ -109,7 +110,6 @@ public class McpServletProvider implements IServicesProvider
 				.isError(true)
 				.build();
 		}
-
 		try
 		{
 			// Get embedding service
@@ -244,13 +244,13 @@ public class McpServletProvider implements IServicesProvider
 	}
 
 	/**
-	 * Auto-register all handlers from the registry.
+	 * Auto-register all handlers from the MCP plugin.
 	 */
 	private void registerHandlers(McpSyncServer server)
 	{
-		com.servoy.eclipse.knowledgebase.IToolHandler[] handlers = KnowledgeBaseManager.getHandlers();
+		IToolHandler[] handlers = ToolManager.getHandlers();
 
-		for (com.servoy.eclipse.knowledgebase.IToolHandler handler : handlers)
+		for (IToolHandler handler : handlers)
 		{
 			try
 			{

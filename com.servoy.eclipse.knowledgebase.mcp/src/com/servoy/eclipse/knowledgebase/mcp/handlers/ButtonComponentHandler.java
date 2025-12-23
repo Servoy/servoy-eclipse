@@ -1,4 +1,4 @@
-package com.servoy.eclipse.knowledgebase.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +10,9 @@ import org.eclipse.ui.IWorkbenchPage;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.knowledgebase.IToolHandler;
-import com.servoy.eclipse.knowledgebase.ToolHandlerRegistry;
-import com.servoy.eclipse.knowledgebase.services.BootstrapComponentService;
+import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.knowledgebase.mcp.services.BootstrapComponentService;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
@@ -23,63 +23,64 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
- * Label component handler - Complete CRUD operations for bootstrap labels
- * Tools: addLabel, updateLabel, deleteLabel, listLabels, getLabelInfo
+ * Button component handler - Complete CRUD operations for bootstrap buttons
+ * Tools: addButton, updateButton, deleteButton, listButtons, getButtonInfo
  */
-public class LabelComponentHandler implements IToolHandler
+public class ButtonComponentHandler implements IToolHandler
 {
 	@Override
 	public String getHandlerName()
 	{
-		return "LabelComponentHandler";
+		return "ButtonComponentHandler";
 	}
 
 	/**
-	 * Define all tools for label operations
+	 * Define all tools for button operations
 	 */
 	private Map<String, ToolHandlerRegistry.ToolDefinition> getToolDefinitions()
 	{
 		Map<String, ToolHandlerRegistry.ToolDefinition> tools = new java.util.LinkedHashMap<>();
 
-		tools.put("addLabel", new ToolHandlerRegistry.ToolDefinition(
-			"Adds a bootstrap label component to a form. " +
+		tools.put("addButton", new ToolHandlerRegistry.ToolDefinition(
+			"Adds a bootstrap button component to a form. " +
 				"Required: formName (string), name (string), cssPosition (string). " +
 				"cssPosition format: 'top,right,bottom,left,width,height' where first 4 values are DISTANCES from edges (not coordinates). " +
 				"Use -1 for unconstrained edges. Example: '20,-1,-1,25,80,30' means 20px from top, 25px from left, 80x30 size. " +
-				"Optional: text (string, default 'Label'), styleClass (string), " +
-				"labelFor (string), showAs (string: 'text', 'html', 'trusted_html'), " +
+				"Optional: text (string, default 'Button'), styleClass (string), " +
+				"imageStyleClass (string - icon to the left), trailingImageStyleClass (string - icon to the right), " +
+				"showAs (string: 'text', 'html', 'trusted_html'), tabSeq (number), " +
 				"enabled (boolean), visible (boolean), toolTipText (string).",
-			this::handleAddLabel));
+			this::handleAddButton));
 
-		tools.put("updateLabel", new ToolHandlerRegistry.ToolDefinition(
-			"Updates an existing label component on a form. " +
+		tools.put("updateButton", new ToolHandlerRegistry.ToolDefinition(
+			"Updates an existing button component on a form. " +
 				"Required: formName (string), name (string). " +
-				"Optional: Any property to update - text, cssPosition, styleClass, labelFor, showAs, " +
-				"enabled, visible, toolTipText. Only specified properties will be updated.",
-			this::handleUpdateLabel));
+				"Optional: Any property to update - text, cssPosition, styleClass, imageStyleClass, " +
+				"trailingImageStyleClass, showAs, tabSeq, enabled, visible, toolTipText. Only specified properties will be updated.",
+			this::handleUpdateButton));
 
-		tools.put("deleteLabel", new ToolHandlerRegistry.ToolDefinition(
-			"Deletes a label component from a form. " +
+		tools.put("deleteButton", new ToolHandlerRegistry.ToolDefinition(
+			"Deletes a button component from a form. " +
 				"Required: formName (string), name (string).",
-			this::handleDeleteLabel));
+			this::handleDeleteButton));
 
-		tools.put("listLabels", new ToolHandlerRegistry.ToolDefinition(
-			"Lists all label components in a form with their details. " +
+		tools.put("listButtons", new ToolHandlerRegistry.ToolDefinition(
+			"Lists all button components in a form with their details. " +
 				"Required: formName (string). " +
-				"Returns: JSON array of label information (name, cssPosition, text, styleClass).",
-			this::handleListLabels));
+				"Returns: JSON array of button information (name, cssPosition, text, styleClass).",
+			this::handleListButtons));
 
-		tools.put("getLabelInfo", new ToolHandlerRegistry.ToolDefinition(
-			"Gets detailed information about a specific label component. " +
+		tools.put("getButtonInfo", new ToolHandlerRegistry.ToolDefinition(
+			"Gets detailed information about a specific button component. " +
 				"Required: formName (string), name (string). " +
-				"Returns: Full JSON object with all label properties.",
-			this::handleGetLabelInfo));
+				"Returns: Full JSON object with all button properties.",
+			this::handleGetButtonInfo));
 
 		return tools;
 	}
 
 	/**
-	 * Register all label tools with MCP server
+	 * Register all button tools with MCP server
 	 */
 	@Override
 	public void registerTools(McpSyncServer server)
@@ -95,13 +96,13 @@ public class LabelComponentHandler implements IToolHandler
 	}
 
 	// =============================================
-	// TOOL: addLabel
+	// TOOL: addButton
 	// =============================================
 
-	private McpSchema.CallToolResult handleAddLabel(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleAddButton(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		System.err.println("========================================");
-		System.err.println("[LabelComponentHandler] handleAddLabel CALLED");
+		System.err.println("[ButtonComponentHandler] handleAddButton CALLED");
 
 		try
 		{
@@ -113,10 +114,12 @@ public class LabelComponentHandler implements IToolHandler
 			String cssPosition = extractString(args, "cssPosition", null);
 
 			// Extract optional parameters
-			String text = extractString(args, "text", "Label");
+			String text = extractString(args, "text", "Button");
 			String styleClass = extractString(args, "styleClass", null);
-			String labelFor = extractString(args, "labelFor", null);
+			String imageStyleClass = extractString(args, "imageStyleClass", null);
+			String trailingImageStyleClass = extractString(args, "trailingImageStyleClass", null);
 			String showAs = extractString(args, "showAs", null);
+			Integer tabSeq = extractInteger(args, "tabSeq", null);
 			Boolean enabled = extractBoolean(args, "enabled", null);
 			Boolean visible = extractBoolean(args, "visible", null);
 			String toolTipText = extractString(args, "toolTipText", null);
@@ -141,8 +144,10 @@ public class LabelComponentHandler implements IToolHandler
 			Map<String, Object> properties = new HashMap<>();
 			properties.put("text", text);
 			if (styleClass != null) properties.put("styleClass", styleClass);
-			if (labelFor != null) properties.put("labelFor", labelFor);
+			if (imageStyleClass != null) properties.put("imageStyleClass", imageStyleClass);
+			if (trailingImageStyleClass != null) properties.put("trailingImageStyleClass", trailingImageStyleClass);
 			if (showAs != null) properties.put("showAs", showAs);
+			if (tabSeq != null) properties.put("tabSeq", tabSeq);
 			if (enabled != null) properties.put("enabled", enabled);
 			if (visible != null) properties.put("visible", visible);
 			if (toolTipText != null) properties.put("toolTipText", toolTipText);
@@ -152,36 +157,36 @@ public class LabelComponentHandler implements IToolHandler
 			{
 				String projectPath = getProjectPath();
 				String error = BootstrapComponentService.addComponentToForm(
-					projectPath, formName, name, "bootstrapcomponents-label", cssPosition, properties);
+					projectPath, formName, name, "bootstrapcomponents-button", cssPosition, properties);
 
 				if (error != null)
 				{
 					return errorResult(error);
 				}
 
-				return successResult("Successfully added label '" + name + "' to form '" + formName + "'");
+				return successResult("Successfully added button '" + name + "' to form '" + formName + "'");
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError("Error adding label", e);
+				ServoyLog.logError("Error adding button", e);
 				return errorResult(e.getMessage());
 			}
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Unexpected error in handleAddLabel", e);
+			ServoyLog.logError("Unexpected error in handleAddButton", e);
 			return errorResult("Unexpected error: " + e.getMessage());
 		}
 	}
 
 	// =============================================
-	// TOOL: updateLabel
+	// TOOL: updateButton
 	// =============================================
 
-	private McpSchema.CallToolResult handleUpdateLabel(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleUpdateButton(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		System.err.println("========================================");
-		System.err.println("[LabelComponentHandler] handleUpdateLabel CALLED");
+		System.err.println("[ButtonComponentHandler] handleUpdateButton CALLED");
 
 		try
 		{
@@ -208,8 +213,10 @@ public class LabelComponentHandler implements IToolHandler
 			String text = extractString(args, "text", null);
 			String cssPosition = extractString(args, "cssPosition", null);
 			String styleClass = extractString(args, "styleClass", null);
-			String labelFor = extractString(args, "labelFor", null);
+			String imageStyleClass = extractString(args, "imageStyleClass", null);
+			String trailingImageStyleClass = extractString(args, "trailingImageStyleClass", null);
 			String showAs = extractString(args, "showAs", null);
+			Integer tabSeq = extractInteger(args, "tabSeq", null);
 			Boolean enabled = extractBoolean(args, "enabled", null);
 			Boolean visible = extractBoolean(args, "visible", null);
 			String toolTipText = extractString(args, "toolTipText", null);
@@ -217,8 +224,10 @@ public class LabelComponentHandler implements IToolHandler
 			if (text != null) updates.put("text", text);
 			if (cssPosition != null) updates.put("cssPosition", cssPosition);
 			if (styleClass != null) updates.put("styleClass", styleClass);
-			if (labelFor != null) updates.put("labelFor", labelFor);
+			if (imageStyleClass != null) updates.put("imageStyleClass", imageStyleClass);
+			if (trailingImageStyleClass != null) updates.put("trailingImageStyleClass", trailingImageStyleClass);
 			if (showAs != null) updates.put("showAs", showAs);
+			if (tabSeq != null) updates.put("tabSeq", tabSeq);
 			if (enabled != null) updates.put("enabled", enabled);
 			if (visible != null) updates.put("visible", visible);
 			if (toolTipText != null) updates.put("toolTipText", toolTipText);
@@ -239,29 +248,29 @@ public class LabelComponentHandler implements IToolHandler
 					return errorResult(error);
 				}
 
-				return successResult("Successfully updated label '" + name + "' on form '" + formName + "'");
+				return successResult("Successfully updated button '" + name + "' on form '" + formName + "'");
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError("Error updating label", e);
+				ServoyLog.logError("Error updating button", e);
 				return errorResult(e.getMessage());
 			}
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Unexpected error in handleUpdateLabel", e);
+			ServoyLog.logError("Unexpected error in handleUpdateButton", e);
 			return errorResult("Unexpected error: " + e.getMessage());
 		}
 	}
 
 	// =============================================
-	// TOOL: deleteLabel
+	// TOOL: deleteButton
 	// =============================================
 
-	private McpSchema.CallToolResult handleDeleteLabel(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleDeleteButton(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		System.err.println("========================================");
-		System.err.println("[LabelComponentHandler] handleDeleteLabel CALLED");
+		System.err.println("[ButtonComponentHandler] handleDeleteButton CALLED");
 
 		try
 		{
@@ -293,29 +302,29 @@ public class LabelComponentHandler implements IToolHandler
 					return errorResult(error);
 				}
 
-				return successResult("Successfully deleted label '" + name + "' from form '" + formName + "'");
+				return successResult("Successfully deleted button '" + name + "' from form '" + formName + "'");
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError("Error deleting label", e);
+				ServoyLog.logError("Error deleting button", e);
 				return errorResult(e.getMessage());
 			}
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Unexpected error in handleDeleteLabel", e);
+			ServoyLog.logError("Unexpected error in handleDeleteButton", e);
 			return errorResult("Unexpected error: " + e.getMessage());
 		}
 	}
 
 	// =============================================
-	// TOOL: listLabels
+	// TOOL: listButtons
 	// =============================================
 
-	private McpSchema.CallToolResult handleListLabels(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleListButtons(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		System.err.println("========================================");
-		System.err.println("[LabelComponentHandler] handleListLabels CALLED");
+		System.err.println("[ButtonComponentHandler] handleListButtons CALLED");
 
 		try
 		{
@@ -333,31 +342,31 @@ public class LabelComponentHandler implements IToolHandler
 			try
 			{
 				String projectPath = getProjectPath();
-				String result = BootstrapComponentService.listComponentsByType(projectPath, formName, "bootstrapcomponents-label");
+				String result = BootstrapComponentService.listComponentsByType(projectPath, formName, "bootstrapcomponents-button");
 
 				return successResult(result);
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError("Error listing labels", e);
+				ServoyLog.logError("Error listing buttons", e);
 				return errorResult(e.getMessage());
 			}
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Unexpected error in handleListLabels", e);
+			ServoyLog.logError("Unexpected error in handleListButtons", e);
 			return errorResult("Unexpected error: " + e.getMessage());
 		}
 	}
 
 	// =============================================
-	// TOOL: getLabelInfo
+	// TOOL: getButtonInfo
 	// =============================================
 
-	private McpSchema.CallToolResult handleGetLabelInfo(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
+	private McpSchema.CallToolResult handleGetButtonInfo(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
 		System.err.println("========================================");
-		System.err.println("[LabelComponentHandler] handleGetLabelInfo CALLED");
+		System.err.println("[ButtonComponentHandler] handleGetButtonInfo CALLED");
 
 		try
 		{
@@ -387,13 +396,13 @@ public class LabelComponentHandler implements IToolHandler
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logError("Error getting label info", e);
+				ServoyLog.logError("Error getting button info", e);
 				return errorResult(e.getMessage());
 			}
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Unexpected error in handleGetLabelInfo", e);
+			ServoyLog.logError("Unexpected error in handleGetButtonInfo", e);
 			return errorResult("Unexpected error: " + e.getMessage());
 		}
 	}
@@ -434,21 +443,21 @@ public class LabelComponentHandler implements IToolHandler
 						if (form != null)
 						{
 							result[0] = form.getName();
-							System.err.println("[LabelComponentHandler] Current form detected: " + result[0]);
+							System.err.println("[ButtonComponentHandler] Current form detected: " + result[0]);
 						}
 						else
 						{
-							System.err.println("[LabelComponentHandler] Active editor does not contain a form");
+							System.err.println("[ButtonComponentHandler] Active editor does not contain a form");
 						}
 					}
 					else
 					{
-						System.err.println("[LabelComponentHandler] No active editor found");
+						System.err.println("[ButtonComponentHandler] No active editor found");
 					}
 				}
 				else
 				{
-					System.err.println("[LabelComponentHandler] No active workbench page found");
+					System.err.println("[ButtonComponentHandler] No active workbench page found");
 				}
 			}
 			catch (Exception e)
@@ -473,6 +482,25 @@ public class LabelComponentHandler implements IToolHandler
 		Object value = args.get(key);
 		if (value instanceof Boolean) return (Boolean)value;
 		if (value != null) return Boolean.parseBoolean(value.toString());
+		return defaultValue;
+	}
+
+	private Integer extractInteger(Map<String, Object> args, String key, Integer defaultValue)
+	{
+		if (args == null || !args.containsKey(key)) return defaultValue;
+		Object value = args.get(key);
+		if (value instanceof Number) return ((Number)value).intValue();
+		if (value != null)
+		{
+			try
+			{
+				return Integer.parseInt(value.toString());
+			}
+			catch (NumberFormatException e)
+			{
+				return defaultValue;
+			}
+		}
 		return defaultValue;
 	}
 

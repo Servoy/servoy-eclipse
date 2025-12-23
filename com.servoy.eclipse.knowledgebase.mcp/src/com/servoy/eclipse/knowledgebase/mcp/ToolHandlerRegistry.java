@@ -1,14 +1,14 @@
-package com.servoy.eclipse.knowledgebase;
+package com.servoy.eclipse.knowledgebase.mcp;
 
 import java.util.function.BiFunction;
 
-import com.servoy.eclipse.knowledgebase.handlers.ButtonComponentHandler;
-import com.servoy.eclipse.knowledgebase.handlers.DatabaseToolHandler;
-import com.servoy.eclipse.knowledgebase.handlers.FormToolHandler;
-import com.servoy.eclipse.knowledgebase.handlers.LabelComponentHandler;
-import com.servoy.eclipse.knowledgebase.handlers.RelationToolHandler;
-import com.servoy.eclipse.knowledgebase.handlers.StyleHandler;
-import com.servoy.eclipse.knowledgebase.handlers.ValueListToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.handlers.ButtonComponentHandler;
+import com.servoy.eclipse.knowledgebase.mcp.handlers.DatabaseToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.handlers.FormToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.handlers.LabelComponentHandler;
+import com.servoy.eclipse.knowledgebase.mcp.handlers.RelationToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.handlers.StyleHandler;
+import com.servoy.eclipse.knowledgebase.mcp.handlers.ValueListToolHandler;
 
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.McpSyncServer;

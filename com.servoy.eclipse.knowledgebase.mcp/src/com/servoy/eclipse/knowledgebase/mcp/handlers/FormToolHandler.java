@@ -1,4 +1,4 @@
-package com.servoy.eclipse.knowledgebase.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers;
 
 import java.awt.Dimension;
 import java.util.List;
@@ -11,8 +11,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.knowledgebase.IToolHandler;
-import com.servoy.eclipse.knowledgebase.ToolHandlerRegistry;
+import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;

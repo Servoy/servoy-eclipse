@@ -1,4 +1,4 @@
-package com.servoy.eclipse.knowledgebase;
+package com.servoy.eclipse.knowledgebase.mcp;
 
 import io.modelcontextprotocol.server.McpSyncServer;
 

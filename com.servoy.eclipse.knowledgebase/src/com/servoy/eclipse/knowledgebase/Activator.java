@@ -1,8 +1,25 @@
+/*
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2025 Servoy BV
+
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Affero General Public License as published by the Free
+ Software Foundation; either version 3 of the License, or (at your option) any
+ later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License along
+ with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+*/
+
 package com.servoy.eclipse.knowledgebase;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
@@ -23,6 +40,9 @@ import com.servoy.eclipse.model.util.ServoyLog;
  * - Registers IActiveProjectListener to track solution changes
  * - When solution activates: clears existing knowledge base, discovers and loads knowledge base packages
  * - Knowledge base packages are NOT auto-reloaded on updates - user must use context menu actions
+ * 
+ * @author mvid
+ * @since 2026.3
  */
 public class Activator implements BundleActivator
 {
@@ -50,7 +70,6 @@ public class Activator implements BundleActivator
 		
 		ServoyLog.logInfo("[KnowledgeBase] Plugin starting...");
 		
-		// Initialize embedding service with ONNX models (without knowledge base initially)
 		try
 		{
 			ServoyLog.logInfo("[KnowledgeBase] Initializing embedding service...");
@@ -62,10 +81,7 @@ public class Activator implements BundleActivator
 			ServoyLog.logError("[KnowledgeBase] Failed to initialize embedding service: " + e.getMessage(), e);
 		}
 		
-		// Register solution activation listener
 		registerSolutionActivationListener();
-		
-		// Load knowledge bases for currently active solution (if any)
 		loadKnowledgeBasesForCurrentSolution();
 
 		ServoyLog.logInfo("[KnowledgeBase] Plugin started - service accessible via Activator.getDefault()");
@@ -81,39 +97,33 @@ public class Activator implements BundleActivator
 		{
 			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 			
-			// Cast to IDeveloperServoyModel which has addActiveProjectListener
-			if (!(servoyModel instanceof IDeveloperServoyModel))
+			if (servoyModel instanceof IDeveloperServoyModel developerModel)
 			{
-				ServoyLog.logError("[KnowledgeBase] ServoyModel is not IDeveloperServoyModel - cannot register listener");
-				return;
+				solutionActivationListener = new IActiveProjectListener()
+				{
+					@Override
+					public void activeProjectChanged(ServoyProject activeProject)
+					{
+						handleSolutionActivation(activeProject);
+					}
+					
+					@Override
+					public boolean activeProjectWillChange(ServoyProject from, ServoyProject to)
+					{
+						// Allow all solution changes
+						return true;
+					}
+					
+					@Override
+					public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+					{
+						// Do NOT react to updates - user must manually reload via context menu
+					}
+				};
+			
+				developerModel.addActiveProjectListener(solutionActivationListener);
+				ServoyLog.logInfo("[KnowledgeBase] Solution activation listener registered");
 			}
-			
-			IDeveloperServoyModel developerModel = (IDeveloperServoyModel)servoyModel;
-			
-			solutionActivationListener = new IActiveProjectListener()
-			{
-				@Override
-				public void activeProjectChanged(ServoyProject activeProject)
-				{
-					handleSolutionActivation(activeProject);
-				}
-				
-				@Override
-				public boolean activeProjectWillChange(ServoyProject from, ServoyProject to)
-				{
-					// Allow all solution changes
-					return true;
-				}
-				
-				@Override
-				public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-				{
-					// Do NOT react to updates - user must manually reload via context menu
-				}
-			};
-			
-			developerModel.addActiveProjectListener(solutionActivationListener);
-			ServoyLog.logInfo("[KnowledgeBase] Solution activation listener registered");
 		}
 		catch (Exception e)
 		{
@@ -129,39 +139,19 @@ public class Activator implements BundleActivator
 	 */
 	private void handleSolutionActivation(ServoyProject activeProject)
 	{
-		System.out.println("========================================");
-		System.out.println("[KnowledgeBase] SOLUTION ACTIVATION EVENT");
-		System.out.println("========================================");
-		
 		if (activeProject != null)
 		{
 			String solutionName = activeProject.getProject().getName();
 			ServoyLog.logInfo("[KnowledgeBase] Solution activated: " + solutionName);
 			
-			// Load knowledge bases for new solution
-			// This will automatically clear existing knowledge base first
 			try
 			{
+				ServoyEmbeddingService.getInstance().reloadAllKnowledgeBasesFromReaders(new IPackageReader[0]);
 				KnowledgeBaseManager.loadKnowledgeBasesForSolution(activeProject);
 			}
 			catch (Exception e)
 			{
 				ServoyLog.logError("[KnowledgeBase] Error loading knowledge bases for solution: " + e.getMessage(), e);
-			}
-		}
-		else
-		{
-			// No active solution - clear knowledge base by reloading with empty array
-			ServoyLog.logInfo("[KnowledgeBase] No active solution - clearing knowledge base");
-			try
-			{
-				org.sablo.specification.Package.IPackageReader[] emptyReaders = 
-					new org.sablo.specification.Package.IPackageReader[0];
-				ServoyEmbeddingService.getInstance().reloadAllKnowledgeBasesFromReaders(emptyReaders);
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError("[KnowledgeBase] Error clearing knowledge base: " + e.getMessage(), e);
 			}
 		}
 	}
@@ -180,10 +170,6 @@ public class Activator implements BundleActivator
 				ServoyLog.logInfo("[KnowledgeBase] Loading knowledge bases for current solution: " + solutionName);
 				KnowledgeBaseManager.loadKnowledgeBasesForSolution(activeProject);
 			}
-			else
-			{
-				ServoyLog.logInfo("[KnowledgeBase] No active solution at startup");
-			}
 		}
 		catch (Exception e)
 		{
@@ -196,11 +182,11 @@ public class Activator implements BundleActivator
 	{
 		ServoyLog.logInfo("[KnowledgeBase] Plugin stopping...");
 		
-		// Unregister listener
 		if (solutionActivationListener != null)
 		{
 			try
 			{
+				ServoyEmbeddingService.getInstance().reloadAllKnowledgeBasesFromReaders(new IPackageReader[0]);
 				IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 				if (servoyModel instanceof IDeveloperServoyModel)
 				{
@@ -215,19 +201,6 @@ public class Activator implements BundleActivator
 			}
 		}
 		
-		// Clear knowledge base (reload with empty package reader array)
-		try
-		{
-			org.sablo.specification.Package.IPackageReader[] emptyReaders = 
-				new org.sablo.specification.Package.IPackageReader[0];
-			ServoyEmbeddingService.getInstance().reloadAllKnowledgeBasesFromReaders(emptyReaders);
-			ServoyLog.logInfo("[KnowledgeBase] Knowledge base cleared");
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError("[KnowledgeBase] Error clearing knowledge base: " + e.getMessage(), e);
-		}
-
 		Activator.context = null;
 		Activator.plugin = null;
 

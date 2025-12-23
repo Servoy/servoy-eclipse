@@ -1,4 +1,4 @@
-package com.servoy.eclipse.knowledgebase.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers;
 
 import java.util.List;
 import java.util.Map;
@@ -7,10 +7,10 @@ import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.knowledgebase.IToolHandler;
-import com.servoy.eclipse.knowledgebase.ToolHandlerRegistry;
-import com.servoy.eclipse.knowledgebase.services.FormService;
-import com.servoy.eclipse.knowledgebase.services.StyleService;
+import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.knowledgebase.mcp.services.FormService;
+import com.servoy.eclipse.knowledgebase.mcp.services.StyleService;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 import io.modelcontextprotocol.server.McpSyncServer;

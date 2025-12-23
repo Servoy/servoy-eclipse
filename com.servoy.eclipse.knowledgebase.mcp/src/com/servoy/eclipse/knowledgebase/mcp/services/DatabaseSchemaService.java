@@ -1,4 +1,4 @@
-package com.servoy.eclipse.knowledgebase.services;
+package com.servoy.eclipse.knowledgebase.mcp.services;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -22,14 +22,19 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.jar.Manifest;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.osgi.framework.Bundle;
 import org.sablo.specification.Package.IPackageReader;
 
+import com.servoy.eclipse.knowledgebase.IKnowledgeBaseOperations;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -127,24 +132,58 @@ public class LoadKnowledgeBaseAction extends Action implements ISelectionChanged
 	public void run()
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
-		try
+		if (node != null && (node.getRealObject() instanceof IPackageReader packageReader))
 		{
-			if (node != null && (node.getRealObject() instanceof IPackageReader packageReader))
+			String packageName = packageReader.getPackageName();
+			Object ops = getKnowledgeBaseOperations();
+			if (ops != null)
 			{
-				String packageName = packageReader.getPackageName();
-				Bundle knowledgeBaseBundle = Platform.getBundle("com.servoy.eclipse.knowledgebase");
-
-				if (knowledgeBaseBundle != null)
+				try
 				{
-					Class< ? > managerClass = knowledgeBaseBundle.loadClass("com.servoy.eclipse.knowledgebase.KnowledgeBaseManager");
-					managerClass.getMethod("loadKnowledgeBase", String.class).invoke(null, packageName);
+					ops.getClass().getMethod("loadKnowledgeBase", String.class).invoke(ops, packageName);
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Failed to load knowledge base from package: " + packageName, e);
+				}
+			}
+			else
+			{
+				ServoyLog.logError("Knowledge base operations provider not found. Ensure com.servoy.eclipse.knowledgebase plugin is installed.");
+			}
+		}
+	}
+
+	/**
+	 * Gets the knowledge base operations provider via extension point.
+	 * @return the operations provider instance or null if not available
+	 */
+	private Object getKnowledgeBaseOperations()
+	{
+		IExtensionRegistry reg = Platform.getExtensionRegistry();
+		IExtensionPoint ep = reg.getExtensionPoint(IKnowledgeBaseOperations.EXTENSION_ID);
+		if (ep == null)
+		{
+			return null;
+		}
+
+		IExtension[] extensions = ep.getExtensions();
+		if (extensions != null && extensions.length > 0)
+		{
+			IConfigurationElement[] ce = extensions[0].getConfigurationElements();
+			if (ce != null && ce.length > 0)
+			{
+				try
+				{
+					return ce[0].createExecutableExtension("class");
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError("Failed to create knowledge base operations provider", e);
 				}
 			}
 		}
-		catch (Exception e)
-		{
-			ServoyLog.logError("Failed to load knowledge base from package: " + e.getMessage());
-		}
+		return null;
 	}
 }
 

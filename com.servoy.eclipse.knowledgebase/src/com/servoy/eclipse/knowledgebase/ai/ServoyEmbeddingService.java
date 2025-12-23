@@ -49,12 +49,11 @@ public class ServoyEmbeddingService
 	}
 
 	/**
-	 * Initialize the service with ONNX models and knowledge base bundles.
+	 * Initialize the service with ONNX models.
 	 * Called once at plugin startup by Activator.
-	 * 
-	 * @param knowledgeBaseBundles array of knowledge base bundles to load (can be empty)
+	 * Knowledge bases are loaded separately via loadKnowledgeBaseFromReader().
 	 */
-	private void initialize(Bundle[] knowledgeBaseBundles)
+	private void initialize()
 	{
 		ServoyLog.logInfo("[ServoyEmbeddings] Initializing ONNX embedding service with ONNX tokenizer...");
 
@@ -62,7 +61,6 @@ public class ServoyEmbeddingService
 		{
 			env = OrtEnvironment.getEnvironment();
 
-			// Load embedding model from OSGi bundle
 			ServoyLog.logInfo("[ServoyEmbeddings] Loading ONNX embedding model from bundle...");
 			Bundle modelsBundle = Platform.getBundle("onnx-models-bge-small-en");
 			if (modelsBundle == null)
@@ -93,18 +91,8 @@ public class ServoyEmbeddingService
 			sessionOptions.registerCustomOpLibrary(OrtxPackage.getLibraryPath());
 			tokenizerSession = env.createSession(tokenizerBytes, sessionOptions);
 			ServoyLog.logInfo("[ServoyEmbeddings] ONNX model and tokenizer loaded successfully");
-
-			// Load knowledge base from bundles
-			if (knowledgeBaseBundles != null && knowledgeBaseBundles.length > 0)
-			{
-				initializeKnowledgeBase(knowledgeBaseBundles);
-			}
-			else
-			{
-				ServoyLog.logInfo("[ServoyEmbeddings] No knowledge base bundles provided - service ready but empty");
-			}
 			
-			ServoyLog.logInfo("[ServoyEmbeddings] Embedding service ready!");
+			ServoyLog.logInfo("[ServoyEmbeddings] Embedding service ready! Knowledge bases will be loaded from workspace packages.");
 		}
 		catch (Exception e)
 		{
@@ -114,202 +102,20 @@ public class ServoyEmbeddingService
 	}
 
 	/**
-	 * Get singleton instance without knowledge base.
-	 * Use getInstance(Bundle[]) to initialize with knowledge base bundles.
+	 * Get singleton instance (lazy initialization).
+	 * Models are initialized on first call.
+	 * Knowledge bases loaded separately via loadKnowledgeBaseFromReader().
 	 * 
-	 * @return the singleton instance (initialized with models only)
-	 */
-	public static synchronized ServoyEmbeddingService getInstance()
-	{
-		return getInstance(new Bundle[0]);
-	}
-
-	/**
-	 * Get singleton instance and initialize with knowledge base bundles.
-	 * Can be called multiple times - subsequent calls will be ignored (singleton).
-	 * 
-	 * @param knowledgeBaseBundles array of knowledge base bundles to load
 	 * @return the singleton instance
 	 */
-	public static synchronized ServoyEmbeddingService getInstance(Bundle[] knowledgeBaseBundles)
+	public static synchronized ServoyEmbeddingService getInstance()
 	{
 		if (instance == null)
 		{
 			instance = new ServoyEmbeddingService();
-			instance.initialize(knowledgeBaseBundles);
+			instance.initialize();
 		}
 		return instance;
-	}
-
-	/**
-	 * Load knowledge base from a single bundle.
-	 * Loads embeddings (additive - may create duplicates) and rules (overwrites by intent key).
-	 * 
-	 * @param bundle the knowledge base bundle to load
-	 */
-	public void loadKnowledgeBase(Bundle bundle)
-	{
-		String bundleName = bundle.getSymbolicName();
-		ServoyLog.logInfo("[ServoyEmbeddings] Loading knowledge base from bundle: " + bundleName);
-		
-		// Load embeddings (additive)
-		int embeddingCount = loadKnowledgeBaseFromBundle(bundle);
-		
-		// Load rules (overwrites by intent key)
-		int ruleCount = RulesCache.loadFromBundle(bundle);
-		
-		ServoyLog.logInfo("[ServoyEmbeddings] Loaded " + embeddingCount + " embeddings and " + 
-			ruleCount + " rules from " + bundleName);
-	}
-
-	/**
-	 * Reload all knowledge bases from all installed bundles.
-	 * Clears all embeddings and rules, then reloads from scratch.
-	 * This prevents duplicates and ensures clean state.
-	 * 
-	 * @param knowledgeBaseBundles array of knowledge base bundles to load
-	 */
-	public void reloadAllKnowledgeBases(Bundle[] knowledgeBaseBundles)
-	{
-		ServoyLog.logInfo("[ServoyEmbeddings] Reloading all knowledge bases...");
-		
-		// Clear all embeddings
-		this.embeddingStore.removeAll();
-		this.embeddingCount = 0;
-		
-		// Clear all rules
-		RulesCache.clear();
-		
-		// Reload embeddings and rules from all bundles
-		initializeKnowledgeBase(knowledgeBaseBundles);
-		
-		ServoyLog.logInfo("[ServoyEmbeddings] Reload complete");
-	}
-
-	/**
-	 * Load knowledge base from multiple bundles.
-	 * Each bundle's embeddings are loaded and merged into the embedding store.
-	 * Rules with same intent key will be overwritten.
-	 * 
-	 * @param knowledgeBaseBundles array of knowledge base bundles
-	 */
-	private void initializeKnowledgeBase(Bundle[] knowledgeBaseBundles)
-	{
-		int totalEmbeddings = 0;
-		int totalRules = 0;
-		
-		for (Bundle bundle : knowledgeBaseBundles)
-		{
-			String bundleName = bundle.getSymbolicName();
-			ServoyLog.logInfo("[ServoyEmbeddings] Loading knowledge base from bundle: " + bundleName);
-			
-			// Load embeddings
-			int embeddingCount = loadKnowledgeBaseFromBundle(bundle);
-			totalEmbeddings += embeddingCount;
-			
-			// Load rules (overwrites if intent key exists)
-			int ruleCount = RulesCache.loadFromBundle(bundle);
-			totalRules += ruleCount;
-			
-			ServoyLog.logInfo("[ServoyEmbeddings] Loaded " + embeddingCount + " embeddings and " + 
-				ruleCount + " rules from " + bundleName);
-		}
-		
-		ServoyLog.logInfo("[ServoyEmbeddings] Total knowledge base loaded: " + totalEmbeddings + " embeddings and " + 
-			totalRules + " rules from " + knowledgeBaseBundles.length + " bundle(s)");
-	}
-
-	/**
-	 * Load knowledge base from a single bundle.
-	 * Reads embeddings/embeddings.list to find all .txt files to load.
-	 * 
-	 * @param bundle the knowledge base bundle
-	 * @return number of embeddings loaded from this bundle
-	 */
-	private int loadKnowledgeBaseFromBundle(Bundle bundle)
-	{
-		int loadedCount = 0;
-		
-		try
-		{
-			URL embeddingsListURL = bundle.getEntry("embeddings/embeddings.list");
-			if (embeddingsListURL == null)
-			{
-				ServoyLog.logError("[ServoyEmbeddings] No embeddings.list found in bundle: " + bundle.getSymbolicName());
-				return 0;
-			}
-
-			try (InputStream listStream = embeddingsListURL.openStream();
-				BufferedReader listReader = new BufferedReader(new InputStreamReader(listStream, StandardCharsets.UTF_8)))
-			{
-				String filename;
-				while ((filename = listReader.readLine()) != null)
-				{
-					filename = filename.trim();
-					if (!filename.isEmpty() && !filename.startsWith("#") && filename.endsWith(".txt"))
-					{
-						// Extract intent from filename: relations.txt -> RELATIONS, valuelists.txt -> VALUELISTS
-						String intentKey = filename.substring(0, filename.lastIndexOf('.')).toUpperCase();
-
-						// Load examples from bundle
-						int count = loadEmbeddingsFromBundle(bundle, "embeddings/" + filename, intentKey);
-						loadedCount += count;
-					}
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError("[ServoyEmbeddings] Failed to load knowledge base from bundle " + 
-				bundle.getSymbolicName() + ": " + e.getMessage());
-		}
-		
-		return loadedCount;
-	}
-
-	/**
-	 * Load embedding examples from a bundle file (one example per line).
-	 * 
-	 * @param bundle the bundle containing the embeddings
-	 * @param path path within the bundle (e.g., "embeddings/forms.txt")
-	 * @param intentKey the intent/category key (e.g., "FORMS")
-	 * @return number of embeddings loaded from this file
-	 */
-	private int loadEmbeddingsFromBundle(Bundle bundle, String path, String intentKey)
-	{
-		int count = 0;
-		
-		try
-		{
-			URL fileURL = bundle.getEntry(path);
-			if (fileURL == null)
-			{
-				ServoyLog.logError("[ServoyEmbeddings] File not found in bundle " + bundle.getSymbolicName() + ": " + path);
-				return 0;
-			}
-
-			try (InputStream is = fileURL.openStream();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)))
-			{
-				String line;
-				while ((line = reader.readLine()) != null)
-				{
-					line = line.trim();
-					if (!line.isEmpty() && !line.startsWith("#")) // Skip empty lines and comments
-					{
-						embed(line, "intent", intentKey);
-						count++;
-					}
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError("[ServoyEmbeddings] Failed to load embeddings from " + path + 
-				" in bundle " + bundle.getSymbolicName() + ": " + e.getMessage());
-		}
-		
-		return count;
 	}
 
 	/**
@@ -362,12 +168,9 @@ public class ServoyEmbeddingService
 		long[] inputIds = (long[])tokenizerResults.get(0).getValue();
 		long[] attentionMask = (long[])tokenizerResults.get(2).getValue();
 		long[] tokenTypeIds = (long[])tokenizerResults.get(1).getValue();
-
-		// Cleanup tokenizer tensors
 		textTensor.close();
 		tokenizerResults.close();
 
-		// Step 2: Wrap in 2D arrays for embedding model (add batch dimension)
 		long[][] inputIdsArray = new long[][] { inputIds };
 		long[][] attentionMaskArray = new long[][] { attentionMask };
 		long[][] tokenTypeIdsArray = new long[][] { tokenTypeIds };
@@ -376,7 +179,6 @@ public class ServoyEmbeddingService
 		OnnxTensor attentionMaskTensor = OnnxTensor.createTensor(env, attentionMaskArray);
 		OnnxTensor tokenTypeIdsTensor = OnnxTensor.createTensor(env, tokenTypeIdsArray);
 
-		// Step 3: Run embedding model inference
 		Map<String, OnnxTensor> modelInputs = new HashMap<>();
 		modelInputs.put("input_ids", inputIdsTensor);
 		modelInputs.put("attention_mask", attentionMaskTensor);
@@ -384,16 +186,12 @@ public class ServoyEmbeddingService
 
 		OrtSession.Result modelResults = modelSession.run(modelInputs);
 
-		// Extract embeddings (last_hidden_state output)
 		float[][][] output = (float[][][])modelResults.get(0).getValue();
 
-		// Mean pooling over sequence length (first and only item in batch)
 		float[] embedding = meanPooling(output[0], attentionMask);
 
-		// Normalize
 		normalize(embedding);
 
-		// Cleanup
 		inputIdsTensor.close();
 		attentionMaskTensor.close();
 		tokenTypeIdsTensor.close();
@@ -464,7 +262,6 @@ public class ServoyEmbeddingService
 			float[] queryEmbeddingArray = generateEmbedding(query);
 			Embedding queryEmbedding = new Embedding(queryEmbeddingArray);
 
-			// Use LangChain4j's search with minimum score threshold
 			EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest.builder()
 				.queryEmbedding(queryEmbedding)
 				.maxResults(maxResults)
@@ -473,14 +270,13 @@ public class ServoyEmbeddingService
 
 			List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(searchRequest).matches();
 
-			// Convert to our SearchResult format
+			// Convert to SearchResult format
 			List<SearchResult> results = new ArrayList<>();
 			for (EmbeddingMatch<TextSegment> match : matches)
 			{
 				TextSegment segment = match.embedded();
 				String matchText = segment.text();
 
-				// Convert Metadata to Map<String, String>
 				Map<String, String> metadata = new HashMap<>();
 				for (Map.Entry<String, Object> entry : segment.metadata().toMap().entrySet())
 				{
@@ -532,10 +328,6 @@ public class ServoyEmbeddingService
 		embed(text, metadataKey, metadataValue);
 	}
 	
-	// ========================================
-	// NEW: IPackageReader-based methods for workspace packages
-	// ========================================
-	
 	/**
 	 * Reload all knowledge bases from package readers (workspace projects).
 	 * Clears all embeddings and rules, then reloads from scratch.
@@ -546,32 +338,23 @@ public class ServoyEmbeddingService
 	{
 		ServoyLog.logInfo("[ServoyEmbeddings] Reloading all knowledge bases from package readers...");
 		
-		// Clear all embeddings
 		this.embeddingStore.removeAll();
 		this.embeddingCount = 0;
 		
-		// Clear all rules
 		RulesCache.clear();
 		
-		// Reload embeddings and rules from all package readers
 		int totalEmbeddings = 0;
 		int totalRules = 0;
 		
 		for (IPackageReader reader : packageReaders)
 		{
 			String packageName = reader.getPackageName();
-			ServoyLog.logInfo("[ServoyEmbeddings] Loading knowledge base from package: " + packageName);
 			
-			// Load embeddings
 			int embeddingCount = loadKnowledgeBaseFromReader(reader);
 			totalEmbeddings += embeddingCount;
 			
-			// Load rules
 			int ruleCount = RulesCache.loadFromPackageReader(reader);
 			totalRules += ruleCount;
-			
-			ServoyLog.logInfo("[ServoyEmbeddings] Loaded " + embeddingCount + " embeddings and " + 
-				ruleCount + " rules from " + packageName);
 		}
 		
 		ServoyLog.logInfo("[ServoyEmbeddings] Reload complete - Total: " + totalEmbeddings + " embeddings, " + 
@@ -662,7 +445,6 @@ public class ServoyEmbeddingService
 					line = line.trim();
 					if (!line.isEmpty() && !line.startsWith("#"))
 					{
-						// CRITICAL: Use "intent" not "category" to match McpServletProvider expectations
 						embed(line, "intent", category);
 						count++;
 					}
