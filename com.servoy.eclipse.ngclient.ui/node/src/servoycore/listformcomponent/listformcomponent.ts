@@ -18,6 +18,7 @@ import { isEmpty } from 'lodash-es';
 import { ServoyApi } from '../../ngclient/servoy_api';
 import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { RowRenderer } from './row-renderer.component';
+import { SabloTabseq } from '@servoy/public';
 import { AgGridAngular } from 'ag-grid-angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
@@ -134,6 +135,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     // used for scrolling with AGGGrid
     @ViewChild('aggrid', { static: false }) agGrid: AgGridAngular;
+
+    // Reference to the sabloTabseq directive
+    @ViewChild('aggrid', { read: SabloTabseq, static: false }) sabloTabseqDirective: SabloTabseq;
 
     // TODO: remove this when switching completely to scrollable LFC
     useScrolling = false;
@@ -284,6 +288,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     flex: 1,
                     suppressKeyboardEvent: (params: any) => {
                         if(params.event.keyCode === 9) {
+                            if(params.event.altKey) {
+                                const nextIndex = this.sabloTabseqDirective.runtimeIndex.nextAvailableIndex;
+                                const nextElement = this.doc.querySelector('[tabindex="' + nextIndex + '"]');
+                                if (nextElement) {
+                                    (nextElement as HTMLElement).focus();
+                                }
+                            }
                             return true;
                         }
                         return false;
