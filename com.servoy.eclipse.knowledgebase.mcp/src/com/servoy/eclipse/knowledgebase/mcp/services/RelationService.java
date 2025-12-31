@@ -22,8 +22,9 @@ import com.servoy.j2db.persistence.RepositoryException;
 public class RelationService
 {
 	/**
-	 * Creates a new relation with specified parameters and properties.
+	 * Creates a new relation in a specific project (active solution or module).
 	 * 
+	 * @param targetProject The project where relation will be created
 	 * @param name Relation name
 	 * @param primaryDataSource Primary datasource (format: db:/server/table)
 	 * @param foreignDataSource Foreign datasource (format: db:/server/table)
@@ -33,24 +34,23 @@ public class RelationService
 	 * @return The created relation
 	 * @throws RepositoryException If creation fails
 	 */
-	public static Relation createRelation(String name, String primaryDataSource, String foreignDataSource,
+	public static Relation createRelationInProject(ServoyProject targetProject, String name, String primaryDataSource, String foreignDataSource,
 		String primaryColumn, String foreignColumn, Map<String, Object> properties) throws RepositoryException
 	{
-		ServoyLog.logInfo("[RelationService] Creating relation: " + name);
-		
+		ServoyLog.logInfo("[RelationService] Creating relation in " + targetProject.getProject().getName() + ": " + name);
+
+		if (targetProject == null)
+		{
+			throw new RepositoryException("Target project is null");
+		}
+
+		if (targetProject.getEditingSolution() == null)
+		{
+			throw new RepositoryException("Cannot get editing solution from target project");
+		}
+
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject servoyProject = servoyModel.getActiveProject();
-		
-		if (servoyProject == null)
-		{
-			throw new RepositoryException("No active Servoy solution project found");
-		}
-		
-		if (servoyProject.getEditingSolution() == null)
-		{
-			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
-		}
-		
+
 		// Extract joinType from properties or use default
 		int joinType = IQueryConstants.LEFT_OUTER_JOIN; // default
 		if (properties != null && properties.containsKey("joinType"))
@@ -61,21 +61,16 @@ public class RelationService
 				joinType = IQueryConstants.INNER_JOIN;
 			}
 		}
-		
-		// Create the relation
-		Relation relation = servoyProject.getEditingSolution().createNewRelation(
-			servoyModel.getNameValidator(),
-			name,
-			primaryDataSource,
-			foreignDataSource,
+
+		// Create the relation in target solution
+		Relation relation = targetProject.getEditingSolution().createNewRelation(servoyModel.getNameValidator(), name, primaryDataSource, foreignDataSource,
 			joinType);
-		
+
 		// Apply properties
 		applyRelationProperties(relation, properties);
-		
+
 		// Add relation item (column mapping) if both columns are provided
-		if (primaryColumn != null && !primaryColumn.trim().isEmpty() &&
-			foreignColumn != null && !foreignColumn.trim().isEmpty())
+		if (primaryColumn != null && !primaryColumn.trim().isEmpty() && foreignColumn != null && !foreignColumn.trim().isEmpty())
 		{
 			try
 			{
@@ -83,10 +78,8 @@ public class RelationService
 				ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foreignDataSource);
 				Column primaryCol = primaryTable.getColumn(primaryColumn);
 				Column foreignCol = foreignTable.getColumn(foreignColumn);
-				
-				relation.createNewRelationItems(
-					new IDataProvider[] { primaryCol },
-					new int[] { com.servoy.base.query.IBaseSQLCondition.EQUALS_OPERATOR },
+
+				relation.createNewRelationItems(new IDataProvider[] { primaryCol }, new int[] { com.servoy.base.query.IBaseSQLCondition.EQUALS_OPERATOR },
 					new Column[] { foreignCol });
 			}
 			catch (Exception e)
@@ -95,14 +88,14 @@ public class RelationService
 				// Continue - relation is created, columns can be added manually in editor
 			}
 		}
-		
+
 		// Save the relation
-		servoyProject.saveEditingSolutionNodes(new IPersist[] { relation }, true);
-		ServoyLog.logInfo("[RelationService] Relation created and saved: " + name);
-		
+		targetProject.saveEditingSolutionNodes(new IPersist[] { relation }, true);
+		ServoyLog.logInfo("[RelationService] Relation created and saved in " + targetProject.getProject().getName() + ": " + name);
+
 		return relation;
 	}
-	
+
 	/**
 	 * Updates properties of an existing relation.
 	 * 

@@ -3,8 +3,10 @@ package com.servoy.eclipse.knowledgebase.mcp;
 import java.util.function.BiFunction;
 
 import com.servoy.eclipse.knowledgebase.mcp.handlers.ButtonComponentHandler;
+import com.servoy.eclipse.knowledgebase.mcp.handlers.ContextToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.handlers.DatabaseToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.handlers.FormToolHandler;
+import com.servoy.eclipse.knowledgebase.mcp.handlers.KnowledgeToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.handlers.LabelComponentHandler;
 import com.servoy.eclipse.knowledgebase.mcp.handlers.RelationToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.handlers.StyleHandler;
@@ -50,6 +52,8 @@ public class ToolHandlerRegistry
 	{
 		// @formatter:off
 		return new IToolHandler[] {
+			new KnowledgeToolHandler(),
+			new ContextToolHandler(),
 			new RelationToolHandler(),
 			new ValueListToolHandler(),
 			new DatabaseToolHandler(),

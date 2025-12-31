@@ -24,12 +24,13 @@ import com.servoy.j2db.persistence.ValueList;
 public class ValueListService
 {
 	/**
-	 * Creates a new valuelist with specified parameters and properties.
+	 * Creates a new valuelist in a specific project (active solution or module).
 	 * 
+	 * @param targetProject The project where valuelist will be created
 	 * @param name ValueList name
-	 * @param customValues Custom values list (for CUSTOM type)
-	 * @param dataSource Database datasource (for DATABASE type with table)
-	 * @param relationName Relation name (for DATABASE type with relation)
+	 * @param customValues Custom values (for CUSTOM type)
+	 * @param dataSource Database datasource (for DATABASE type)
+	 * @param relationName Relation name (for RELATED type)
 	 * @param globalMethod Global method name (for GLOBAL_METHOD type)
 	 * @param displayColumn Display column name
 	 * @param returnColumn Return column name
@@ -37,29 +38,26 @@ public class ValueListService
 	 * @return The created valuelist
 	 * @throws RepositoryException If creation fails
 	 */
-	public static ValueList createValueList(String name, List<String> customValues, String dataSource,
-		String relationName, String globalMethod, String displayColumn, String returnColumn,
-		Map<String, Object> properties) throws RepositoryException
+	public static ValueList createValueListInProject(ServoyProject targetProject, String name, List<String> customValues, String dataSource,
+		String relationName, String globalMethod, String displayColumn, String returnColumn, Map<String, Object> properties) throws RepositoryException
 	{
-		ServoyLog.logInfo("[ValueListService] Creating valuelist: " + name);
-		
+		ServoyLog.logInfo("[ValueListService] Creating valuelist in " + targetProject.getProject().getName() + ": " + name);
+
+		if (targetProject == null)
+		{
+			throw new RepositoryException("Target project is null");
+		}
+
+		if (targetProject.getEditingSolution() == null)
+		{
+			throw new RepositoryException("Cannot get editing solution from target project");
+		}
+
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject servoyProject = servoyModel.getActiveProject();
-		
-		if (servoyProject == null)
-		{
-			throw new RepositoryException("No active Servoy solution project found");
-		}
-		
-		if (servoyProject.getEditingSolution() == null)
-		{
-			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
-		}
-		
-		// Create the valuelist
-		ValueList valueList = servoyProject.getEditingSolution().createNewValueList(
-			servoyModel.getNameValidator(), name);
-		
+
+		// Create the valuelist in target solution
+		ValueList valueList = targetProject.getEditingSolution().createNewValueList(servoyModel.getNameValidator(), name);
+
 		// Determine type and configure
 		if (globalMethod != null && !globalMethod.trim().isEmpty())
 		{
@@ -81,17 +79,17 @@ public class ValueListService
 			// CUSTOM_VALUES type
 			configureCustomValueList(valueList, customValues);
 		}
-		
+
 		// Apply additional properties
 		applyValueListProperties(valueList, properties);
-		
+
 		// Save the valuelist
-		servoyProject.saveEditingSolutionNodes(new IPersist[] { valueList }, true);
-		ServoyLog.logInfo("[ValueListService] ValueList created and saved: " + name);
-		
+		targetProject.saveEditingSolutionNodes(new IPersist[] { valueList }, true);
+		ServoyLog.logInfo("[ValueListService] ValueList created and saved in " + targetProject.getProject().getName() + ": " + name);
+
 		return valueList;
 	}
-	
+
 	/**
 	 * Updates properties of an existing valuelist.
 	 * 

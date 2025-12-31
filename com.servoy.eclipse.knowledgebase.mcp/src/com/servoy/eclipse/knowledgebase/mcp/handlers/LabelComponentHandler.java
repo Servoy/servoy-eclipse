@@ -13,9 +13,12 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
 import com.servoy.eclipse.knowledgebase.mcp.services.BootstrapComponentService;
+import com.servoy.eclipse.knowledgebase.mcp.services.ContextService;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.RepositoryException;
 
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
@@ -43,6 +46,10 @@ public class LabelComponentHandler implements IToolHandler
 
 		tools.put("addLabel", new ToolHandlerRegistry.ToolDefinition(
 			"Adds a bootstrap label component to a form. " +
+				"[CONTEXT-AWARE] Looks for the form in current context first. " +
+				"If form not found in current context, searches all solutions/modules: " +
+				"if found in exactly one location, auto-switches context there; " +
+				"if found in multiple locations, returns error listing all locations (use setContext to specify). " +
 				"Required: formName (string), name (string), cssPosition (string). " +
 				"cssPosition format: 'top,right,bottom,left,width,height' where first 4 values are DISTANCES from edges (not coordinates). " +
 				"Use -1 for unconstrained edges. Example: '20,-1,-1,25,80,30' means 20px from top, 25px from left, 80x30 size. " +
@@ -53,6 +60,7 @@ public class LabelComponentHandler implements IToolHandler
 
 		tools.put("updateLabel", new ToolHandlerRegistry.ToolDefinition(
 			"Updates an existing label component on a form. " +
+				"[CONTEXT-AWARE] Searches for form using same smart fallback as addLabel. " +
 				"Required: formName (string), name (string). " +
 				"Optional: Any property to update - text, cssPosition, styleClass, labelFor, showAs, " +
 				"enabled, visible, toolTipText. Only specified properties will be updated.",
@@ -60,17 +68,20 @@ public class LabelComponentHandler implements IToolHandler
 
 		tools.put("deleteLabel", new ToolHandlerRegistry.ToolDefinition(
 			"Deletes a label component from a form. " +
+				"[CONTEXT-AWARE] Searches for form using same smart fallback as addLabel. " +
 				"Required: formName (string), name (string).",
 			this::handleDeleteLabel));
 
 		tools.put("listLabels", new ToolHandlerRegistry.ToolDefinition(
 			"Lists all label components in a form with their details. " +
+				"[CONTEXT-AWARE] Searches for form using same smart fallback as addLabel. " +
 				"Required: formName (string). " +
 				"Returns: JSON array of label information (name, cssPosition, text, styleClass).",
 			this::handleListLabels));
 
 		tools.put("getLabelInfo", new ToolHandlerRegistry.ToolDefinition(
 			"Gets detailed information about a specific label component. " +
+				"[CONTEXT-AWARE] Searches for form using same smart fallback as addLabel. " +
 				"Required: formName (string), name (string). " +
 				"Returns: Full JSON object with all label properties.",
 			this::handleGetLabelInfo));
@@ -405,11 +416,41 @@ public class LabelComponentHandler implements IToolHandler
 	private String getProjectPath() throws Exception
 	{
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		if (servoyModel == null || servoyModel.getActiveProject() == null)
+		
+		// Resolve target project based on current context
+		ServoyProject targetProject = resolveTargetProject(servoyModel);
+		
+		if (targetProject == null)
 		{
-			throw new Exception("No active Servoy project found");
+			throw new Exception("No target solution/module found for current context");
 		}
-		return servoyModel.getActiveProject().getProject().getLocation().toOSString();
+		return targetProject.getProject().getLocation().toOSString();
+	}
+
+	/**
+	 * Resolve current context to a ServoyProject.
+	 * Uses ContextService to determine which solution/module to target.
+	 */
+	private ServoyProject resolveTargetProject(IDeveloperServoyModel servoyModel) throws RepositoryException
+	{
+		String context = ContextService.getInstance().getCurrentContext();
+
+		if ("active".equals(context))
+		{
+			return servoyModel.getActiveProject();
+		}
+
+		// Find module by name
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		for (ServoyProject module : modules)
+		{
+			if (module.getProject().getName().equals(context))
+			{
+				return module;
+			}
+		}
+
+		throw new RepositoryException("Context '" + context + "' not found or not a module of active solution");
 	}
 
 	/**

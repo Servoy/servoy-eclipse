@@ -36,6 +36,7 @@ public class ServoyEmbeddingService
 {
 
 	private static ServoyEmbeddingService instance;
+	private static final double SCORE_THRESHOLD = 0.8; // Minimum similarity score percentage
 
 	private OrtEnvironment env;
 	private OrtSession modelSession;
@@ -265,7 +266,7 @@ public class ServoyEmbeddingService
 			EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest.builder()
 				.queryEmbedding(queryEmbedding)
 				.maxResults(maxResults)
-				.minScore(0.7) // Only return >70% similarity
+				.minScore(SCORE_THRESHOLD) // Only return >70% similarity
 				.build();
 
 			List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(searchRequest).matches();

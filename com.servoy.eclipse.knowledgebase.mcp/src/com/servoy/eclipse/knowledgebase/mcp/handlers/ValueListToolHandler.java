@@ -10,12 +10,15 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.knowledgebase.mcp.services.ContextService;
 import com.servoy.eclipse.knowledgebase.mcp.services.ValueListService;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValueList;
 
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -44,6 +47,8 @@ public class ValueListToolHandler implements IToolHandler
 
 		tools.put("openValueList", new ToolHandlerRegistry.ToolDefinition(
 			"Opens an existing valuelist or creates a new valuelist. Supports 4 types: CUSTOM, DATABASE (table), DATABASE (related), GLOBAL_METHOD. " +
+			"[CONTEXT-AWARE for CREATE] When creating a new valuelist, it will be created in the current context (active solution or module). " +
+			"Use getContext to check where it will be created, setContext to change target location. " +
 			"Required: name (string). " +
 			"For CUSTOM: customValues (array of strings). " +
 			"For DATABASE (table): dataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'), displayColumn (string), returnColumn (string). " +
@@ -55,7 +60,11 @@ public class ValueListToolHandler implements IToolHandler
 			this::handleOpenValueList));
 
 		tools.put("getValueLists", new ToolHandlerRegistry.ToolDefinition(
-			"Lists all existing valuelists in the active solution. No parameters required.",
+			"Lists valuelists in the active solution and its modules. " +
+			"Optional: scope (string: 'current' or 'all', default 'all'). " +
+			"  - 'current': Returns valuelists from current context only (active solution or specific module based on current context). " +
+			"  - 'all': Returns valuelists from active solution and all modules. " +
+			"Returns: List of valuelist names with their types and configuration, including origin information (which solution/module each valuelist belongs to).",
 			this::handleGetValueLists));
 
 		tools.put("deleteValueLists", new ToolHandlerRegistry.ToolDefinition(
@@ -205,6 +214,8 @@ public class ValueListToolHandler implements IToolHandler
 	
 	/**
 	 * Opens an existing valuelist or creates a new one if it doesn't exist.
+	 * For opening (when creation params not provided): searches current context first, then falls back to active solution and modules.
+	 * For creating: creates ONLY in current context.
 	 * Supports updating properties on existing valuelists via properties map.
 	 */
 	private String openOrCreateValueList(String name, List<String> customValues, String dataSource,
@@ -212,29 +223,68 @@ public class ValueListToolHandler implements IToolHandler
 		Map<String, Object> properties) throws RepositoryException
 	{
 		ServoyLog.logInfo("[ValueListToolHandler] Processing valuelist: " + name);
-		
+
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject servoyProject = servoyModel.getActiveProject();
-		
+
 		if (servoyProject == null)
 		{
 			throw new RepositoryException("No active Servoy solution project found");
 		}
-		
+
 		if (servoyProject.getEditingSolution() == null)
 		{
-			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
+			throw new RepositoryException("Cannot get editing solution from active project");
+		}
+
+		// Resolve target project based on current context
+		ServoyProject targetProject = resolveTargetProject(servoyModel);
+		String targetContext = ContextService.getInstance().getCurrentContext();
+
+		if (targetProject == null)
+		{
+			throw new RepositoryException("No target solution/module found for context: " + targetContext);
+		}
+
+		if (targetProject.getEditingSolution() == null)
+		{
+			throw new RepositoryException("Cannot get editing solution from target: " + targetContext);
+		}
+
+		// Search for existing valuelist: current context first, then fall back to all modules
+		ValueList valueList = targetProject.getEditingSolution().getValueList(name);
+		
+		// If not found in current context, search in active solution (if different from target)
+		if (valueList == null && !targetProject.equals(servoyProject))
+		{
+			valueList = servoyProject.getEditingSolution().getValueList(name);
 		}
 		
-		// Check if valuelist already exists
-		ValueList valueList = servoyProject.getEditingSolution().getValueList(name);
+		// If still not found, search in all modules
+		if (valueList == null)
+		{
+			ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+			for (ServoyProject module : modules)
+			{
+				if (module != null && module.getEditingSolution() != null && !module.equals(targetProject))
+				{
+					valueList = module.getEditingSolution().getValueList(name);
+					if (valueList != null)
+					{
+						ServoyLog.logInfo("[ValueListToolHandler] ValueList found in module: " + getSolutionName(valueList));
+						break;
+					}
+				}
+			}
+		}
+		
 		boolean isNewValueList = false;
 		boolean propertiesModified = false;
-		
+
 		if (valueList != null)
 		{
 			ServoyLog.logInfo("[ValueListToolHandler] ValueList exists: " + name);
-			
+
 			// Apply properties if provided (update existing valuelist)
 			if (properties != null && !properties.isEmpty())
 			{
@@ -245,28 +295,28 @@ public class ValueListToolHandler implements IToolHandler
 		}
 		else
 		{
-			// ValueList doesn't exist - create it
-			ServoyLog.logInfo("[ValueListToolHandler] ValueList doesn't exist, creating: " + name);
-			
+			// ValueList doesn't exist - create it in current context
+			ServoyLog.logInfo("[ValueListToolHandler] ValueList doesn't exist, creating in " + targetContext + ": " + name);
+
 			// Validate that at least one type parameter is provided
 			boolean hasCustom = (customValues != null && !customValues.isEmpty());
 			boolean hasDatabase = (dataSource != null && !dataSource.trim().isEmpty());
 			boolean hasRelated = (relationName != null && !relationName.trim().isEmpty());
 			boolean hasGlobalMethod = (globalMethod != null && !globalMethod.trim().isEmpty());
-			
+
 			if (!hasCustom && !hasDatabase && !hasRelated && !hasGlobalMethod)
 			{
 				throw new RepositoryException("ValueList '" + name + "' not found. To create it, provide one of: " +
 					"customValues (array), dataSource (string), relationName (string), or globalMethod (string).");
 			}
-			
-			// Create the valuelist using service (this saves it)
-			valueList = ValueListService.createValueList(name, customValues, dataSource, relationName,
-				globalMethod, displayColumn, returnColumn, properties);
+
+			// Create the valuelist in target project using service
+			valueList = ValueListService.createValueListInProject(targetProject, name, customValues, dataSource, relationName, globalMethod, displayColumn,
+				returnColumn, properties);
 			isNewValueList = true;
-			
-			// Re-fetch from solution after save to ensure we have the saved version
-			ValueList savedValueList = servoyProject.getEditingSolution().getValueList(name);
+
+			// Re-fetch from target solution after save to ensure we have the saved version
+			ValueList savedValueList = targetProject.getEditingSolution().getValueList(name);
 			if (savedValueList != null)
 			{
 				valueList = savedValueList;
@@ -280,12 +330,14 @@ public class ValueListToolHandler implements IToolHandler
 		Display.getDefault().asyncExec(() -> {
 			EditorUtil.openValueListEditor(valueListToOpen, !finalIsNewValueList);
 		});
-		
-		// Build result message
+
+		// Build result message with context information
 		StringBuilder result = new StringBuilder();
+		String contextDisplay = "active".equals(targetContext) ? targetProject.getProject().getName() + " (active solution)" : targetContext;
+
 		if (isNewValueList)
 		{
-			result.append("ValueList '").append(name).append("' created successfully");
+			result.append("ValueList '").append(name).append("' created successfully in ").append(contextDisplay);
 			if (customValues != null && !customValues.isEmpty())
 			{
 				result.append(" (CUSTOM with ").append(customValues.size()).append(" values)");
@@ -306,12 +358,22 @@ public class ValueListToolHandler implements IToolHandler
 		else
 		{
 			result.append("ValueList '").append(name).append("' opened successfully");
+			
+			// Add location info if valuelist is from a different module
+			String valueListSolution = getSolutionName(valueList);
+			String activeSolutionName = servoyProject.getEditingSolution().getName();
+			
+			if (!valueListSolution.equals(activeSolutionName))
+			{
+				result.append(" (from module: ").append(valueListSolution).append(")");
+			}
+			
 			if (propertiesModified)
 			{
 				result.append(". Properties updated");
 			}
 		}
-		
+
 		return result.toString();
 	}
 
@@ -416,7 +478,27 @@ public class ValueListToolHandler implements IToolHandler
 			}
 			
 			System.err.println("[DEBUG deleteValueLists] Looking for valuelist: " + name);
+			
+			// Search in active solution first
 			ValueList valueList = servoyProject.getEditingSolution().getValueList(name);
+			
+			// If not found in active solution, search in all modules
+			if (valueList == null)
+			{
+				ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+				for (ServoyProject module : modules)
+				{
+					if (module != null && module.getEditingSolution() != null)
+					{
+						valueList = module.getEditingSolution().getValueList(name);
+						if (valueList != null)
+						{
+							System.err.println("[DEBUG deleteValueLists] Found in module: " + getSolutionName(valueList));
+							break;
+						}
+					}
+				}
+			}
 			
 			if (valueList == null)
 			{
@@ -542,17 +624,91 @@ public class ValueListToolHandler implements IToolHandler
 
 		try
 		{
+			Map<String, Object> args = request.arguments();
+			
+			// Extract scope parameter (default: "all")
+			String scope = extractString(args, "scope", "all");
+			
+			// Validate scope parameter
+			if (!scope.equals("current") && !scope.equals("all"))
+			{
+				return McpSchema.CallToolResult.builder()
+					.content(List.of(new TextContent("Error: Invalid scope value '" + scope + "'. Must be 'current' or 'all'.")))
+					.isError(true)
+					.build();
+			}
+			
 			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			Iterator<ValueList> valueLists = servoyModel.getActiveProject().getEditingSolution().getValueLists(true);
+			ServoyProject activeProject = servoyModel.getActiveProject();
+			String activeSolutionName = activeProject.getEditingSolution().getName();
+			String contextName = null;
+			
+			// Collect all valuelists based on scope
+			java.util.List<ValueList> allValueLists = new java.util.ArrayList<>();
+			
+			if ("current".equals(scope))
+			{
+				// Get valuelists from current context only
+				ServoyProject targetProject = resolveTargetProject(servoyModel);
+				String context = ContextService.getInstance().getCurrentContext();
+				contextName = "active".equals(context) ? activeSolutionName : context;
+				
+				Iterator<ValueList> valueLists = targetProject.getEditingSolution().getValueLists(false); // false = no modules
+				while (valueLists.hasNext())
+				{
+					allValueLists.add(valueLists.next());
+				}
+			}
+			else
+			{
+				// Get valuelists from active solution and all modules
+				// First, add active solution valuelists
+				Iterator<ValueList> activeValueLists = activeProject.getEditingSolution().getValueLists(false); // false = only active
+				while (activeValueLists.hasNext())
+				{
+					allValueLists.add(activeValueLists.next());
+				}
+				
+				// Then, add valuelists from each module (excluding active project to avoid duplication)
+				ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+				for (ServoyProject module : modules)
+				{
+					if (module != null && module.getEditingSolution() != null)
+					{
+						// Skip if this module is actually the active project itself (prevent duplication)
+						if (module.equals(activeProject))
+						{
+							continue;
+						}
+						
+						Iterator<ValueList> moduleValueLists = module.getEditingSolution().getValueLists(false); // false = only this module
+						while (moduleValueLists.hasNext())
+						{
+							allValueLists.add(moduleValueLists.next());
+						}
+					}
+				}
+			}
 
 			int count = 0;
-			resultBuilder.append("Value lists in solution '").append(servoyModel.getActiveProject().getEditingSolution().getName()).append("':\n\n");
-
-			while (valueLists.hasNext())
+			
+			// Build appropriate header based on scope
+			if ("current".equals(scope))
 			{
-				ValueList vl = valueLists.next();
+				resultBuilder.append("Value lists in '").append(contextName).append("':\n\n");
+			}
+			else
+			{
+				resultBuilder.append("Value lists in solution '").append(activeSolutionName).append("' and modules:\n\n");
+			}
+
+			for (ValueList vl : allValueLists)
+			{
 				count++;
-				resultBuilder.append(count).append(". ").append(vl.getName());
+				String solutionName = getSolutionName(vl);
+				String originInfo = formatOrigin(solutionName, activeSolutionName);
+				
+				resultBuilder.append(count).append(". ").append(vl.getName()).append(originInfo);
 
 				// Show type
 				int type = vl.getValueListType();
@@ -618,5 +774,76 @@ public class ValueListToolHandler implements IToolHandler
 		return McpSchema.CallToolResult.builder()
 			.content(List.of(new TextContent(resultMessage)))
 			.build();
+	}
+
+	// =============================================
+	// UTILITY METHODS
+	// =============================================
+
+	/**
+	 * Get the solution name that owns a persist object.
+	 * Returns the solution name or "unknown" if cannot determine.
+	 */
+	private String getSolutionName(IPersist persist)
+	{
+		try
+		{
+			IRootObject rootObject = persist.getRootObject();
+			if (rootObject instanceof Solution)
+			{
+				return ((Solution)rootObject).getName();
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("[ValueListToolHandler] Error getting solution name", e);
+		}
+		return "unknown";
+	}
+
+	/**
+	 * Format origin information for display.
+	 * Returns " (in: solutionName)" or " (in: active solution)" based on context.
+	 */
+	private String formatOrigin(String solutionName, String activeSolutionName)
+	{
+		if (solutionName.equals(activeSolutionName))
+		{
+			return " (in: active solution)";
+		}
+		else
+		{
+			return " (in: " + solutionName + ")";
+		}
+	}
+
+	/**
+	 * Resolve current context to a ServoyProject.
+	 * Uses ContextService to determine which solution/module to target.
+	 * 
+	 * @param servoyModel The Servoy model
+	 * @return The target ServoyProject (active solution or module)
+	 * @throws RepositoryException If context is invalid or project not found
+	 */
+	private ServoyProject resolveTargetProject(IDeveloperServoyModel servoyModel) throws RepositoryException
+	{
+		String context = ContextService.getInstance().getCurrentContext();
+
+		if ("active".equals(context))
+		{
+			return servoyModel.getActiveProject();
+		}
+
+		// Find module by name
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		for (ServoyProject module : modules)
+		{
+			if (module.getProject().getName().equals(context))
+			{
+				return module;
+			}
+		}
+
+		throw new RepositoryException("Context '" + context + "' not found or not a module of active solution");
 	}
 }

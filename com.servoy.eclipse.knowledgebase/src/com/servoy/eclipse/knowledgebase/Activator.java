@@ -134,6 +134,7 @@ public class Activator implements BundleActivator
 	/**
 	 * Handles solution activation event.
 	 * Clears existing knowledge base and loads packages for new solution.
+	 * Resets context to active solution.
 	 * 
 	 * @param activeProject The newly activated solution (or null if no solution active)
 	 */
@@ -143,9 +144,13 @@ public class Activator implements BundleActivator
 		{
 			String solutionName = activeProject.getProject().getName();
 			ServoyLog.logInfo("[KnowledgeBase] Solution activated: " + solutionName);
-			
+
 			try
 			{
+				// Reset context to active solution
+				resetContextToActiveSolution();
+
+				// Reload knowledge bases
 				ServoyEmbeddingService.getInstance().reloadAllKnowledgeBasesFromReaders(new IPackageReader[0]);
 				KnowledgeBaseManager.loadKnowledgeBasesForSolution(activeProject);
 			}
@@ -203,7 +208,33 @@ public class Activator implements BundleActivator
 		
 		Activator.context = null;
 		Activator.plugin = null;
-
+		
 		ServoyLog.logInfo("[KnowledgeBase] Plugin stopped");
+	}
+
+	/**
+	 * Resets the module context to active solution.
+	 * Called when solution changes to ensure context starts fresh.
+	 */
+	private void resetContextToActiveSolution()
+	{
+		try
+		{
+			// Use reflection to access ContextService from the mcp plugin
+			// This avoids compile-time dependency on the mcp plugin
+			org.osgi.framework.Bundle mcpBundle = org.eclipse.core.runtime.Platform.getBundle("com.servoy.eclipse.knowledgebase.mcp");
+			if (mcpBundle != null && mcpBundle.getState() == org.osgi.framework.Bundle.ACTIVE)
+			{
+				Class< ? > contextServiceClass = mcpBundle.loadClass("com.servoy.eclipse.knowledgebase.mcp.services.ContextService");
+				Object contextServiceInstance = contextServiceClass.getMethod("getInstance").invoke(null);
+				contextServiceClass.getMethod("resetToActiveSolution").invoke(contextServiceInstance);
+				ServoyLog.logInfo("[KnowledgeBase] Context reset to active solution");
+			}
+		}
+		catch (Exception e)
+		{
+			// Silently ignore - mcp plugin may not be loaded yet
+			ServoyLog.logInfo("[KnowledgeBase] Could not reset context (mcp plugin not active): " + e.getMessage());
+		}
 	}
 }

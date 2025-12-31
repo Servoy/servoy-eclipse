@@ -13,15 +13,18 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.knowledgebase.mcp.services.ContextService;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptNameValidator;
+import com.servoy.j2db.persistence.Solution;
 
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
@@ -59,7 +62,9 @@ public class FormToolHandler implements IToolHandler
 		ToolHandlerRegistry.registerTool(
 			server,
 			"openForm",
-			"Opens an existing form or creates a new form in the active solution. " +
+			"Opens an existing form or creates a new form. " +
+			"[CONTEXT-AWARE for CREATE] When create=true, new form will be created in current context (active solution or module). " +
+			"Use getContext to check where it will be created, setContext to change target location. " +
 			"Required: name (string). " +
 			"Optional: create (boolean, default false - if true, creates form if it doesn't exist), " +
 			"width (int, default 640), height (int, default 480), " +
@@ -82,7 +87,11 @@ public class FormToolHandler implements IToolHandler
 		ToolHandlerRegistry.registerTool(
 			server,
 			"listForms",
-			"Lists all forms in the active solution. No parameters required.",
+			"Lists forms in the active solution and its modules. " +
+			"Optional: scope (string: 'current' or 'all', default 'all'). " +
+			"  - 'current': Returns forms from current context only (active solution or specific module based on current context). " +
+			"  - 'all': Returns forms from active solution and all modules. " +
+			"Returns: List of form names including origin information (which solution/module each form belongs to).",
 			this::handleListForms);
 		
 		// Helper tool: getFormProperties
@@ -259,13 +268,29 @@ public class FormToolHandler implements IToolHandler
 		
 		try
 		{
+			Map<String, Object> args = request.arguments();
+			
+			// Extract scope parameter (default: "all")
+			String scope = extractString(args, "scope", "all");
+			System.err.println("[FormToolHandler] Scope parameter: " + scope);
+			
+			// Validate scope parameter
+			if (!scope.equals("current") && !scope.equals("all"))
+			{
+				return McpSchema.CallToolResult.builder()
+					.content(List.of(new TextContent("Error: Invalid scope value '" + scope + "'. Must be 'current' or 'all'.")))
+					.isError(true)
+					.build();
+			}
+			
 			final String[] result = new String[1];
 			final Exception[] exception = new Exception[1];
+			final String finalScope = scope;
 			
 			Display.getDefault().syncExec(() -> {
 				try
 				{
-					result[0] = listForms();
+					result[0] = listForms(finalScope);
 				}
 				catch (Exception e)
 				{
@@ -361,12 +386,14 @@ public class FormToolHandler implements IToolHandler
 	
 	/**
 	 * Opens an existing form or creates a new one if it doesn't exist (and create=true).
+	 * For opening (create=false): searches current context first, then falls back to active solution and modules.
+	 * For creating (create=true): creates ONLY in current context.
 	 */
-	private String openOrCreateForm(String name, boolean create, int width, int height, String style, 
+	private String openOrCreateForm(String name, boolean create, int width, int height, String style,
 		String dataSource, String extendsForm, boolean setAsMainForm, Map<String, Object> properties, Map<String, Object> args) throws RepositoryException
 	{
 		System.err.println("[FormToolHandler.openOrCreateForm] Processing form: " + name);
-		
+
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject servoyProject = servoyModel.getActiveProject();
 
@@ -377,40 +404,79 @@ public class FormToolHandler implements IToolHandler
 
 		if (servoyProject.getEditingSolution() == null)
 		{
-			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
+			throw new RepositoryException("Cannot get editing solution from active project");
+		}
+
+		// Resolve target project based on current context
+		ServoyProject targetProject = resolveTargetProject(servoyModel);
+		String targetContext = ContextService.getInstance().getCurrentContext();
+
+		if (targetProject == null)
+		{
+			throw new RepositoryException("No target solution/module found for context: " + targetContext);
+		}
+
+		if (targetProject.getEditingSolution() == null)
+		{
+			throw new RepositoryException("Cannot get editing solution from target: " + targetContext);
+		}
+
+		// Search for existing form: current context first, then fall back to all modules
+		Form form = targetProject.getEditingSolution().getForm(name);
+		
+		// If not found in current context, search in active solution (if different from target)
+		if (form == null && !targetProject.equals(servoyProject))
+		{
+			form = servoyProject.getEditingSolution().getForm(name);
 		}
 		
-		// Check if form already exists
-		Form form = servoyProject.getEditingSolution().getForm(name);
+		// If still not found, search in all modules
+		if (form == null)
+		{
+			ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+			for (ServoyProject module : modules)
+			{
+				if (module != null && module.getEditingSolution() != null && !module.equals(targetProject))
+				{
+					form = module.getEditingSolution().getForm(name);
+					if (form != null)
+					{
+						System.err.println("[FormToolHandler.openOrCreateForm] Form found in module: " + getSolutionName(form));
+						break;
+					}
+				}
+			}
+		}
+		
 		boolean isNewForm = false;
 		boolean isFirstForm = false;
-		
+
 		if (form != null)
 		{
 			System.err.println("[FormToolHandler.openOrCreateForm] Form exists, opening: " + name);
-			// Form exists - open it
+			// Form exists - open it (may be from current context or another module)
 		}
 		else if (create)
 		{
-			System.err.println("[FormToolHandler.openOrCreateForm] Form doesn't exist, creating: " + name);
-			
-			// Check if this will be the first form in the solution
-			java.util.Iterator<Form> existingForms = servoyProject.getEditingSolution().getForms(null, true);
+			System.err.println("[FormToolHandler.openOrCreateForm] Form doesn't exist, creating in " + targetContext + ": " + name);
+
+			// Check if this will be the first form in the target solution
+			java.util.Iterator<Form> existingForms = targetProject.getEditingSolution().getForms(null, true);
 			isFirstForm = !existingForms.hasNext();
-			
+
 			if (isFirstForm)
 			{
-				System.err.println("[FormToolHandler.openOrCreateForm] This is the first form in the solution - will set as main form");
+				System.err.println("[FormToolHandler.openOrCreateForm] This is the first form in " + targetContext + " - will set as main form");
 			}
-			
-			// Form doesn't exist and create=true - create it
-			form = createNewForm(servoyProject, name, width, height, style, dataSource);
+
+			// Form doesn't exist and create=true - create it in target project (current context)
+			form = createNewForm(targetProject, name, width, height, style, dataSource);
 			isNewForm = true;
 		}
 		else
 		{
 			// Form doesn't exist and create=false - error
-			throw new RepositoryException("Form '" + name + "' does not exist. Use create=true to create it.");
+			throw new RepositoryException("Form '" + name + "' does not exist in current context, active solution, or any modules. Use create=true to create it.");
 		}
 		
 		// Merge width/height into properties if explicitly provided for existing forms
@@ -443,47 +509,48 @@ public class FormToolHandler implements IToolHandler
 		if (properties != null && !properties.isEmpty())
 		{
 			System.err.println("[FormToolHandler.openOrCreateForm] Applying properties: " + properties);
-			applyFormProperties(form, properties, servoyProject);
+			applyFormProperties(form, properties, targetProject);
 			propertiesModified = true;
 		}
-		
+
 		// Set form parent (inheritance) if specified
 		if (extendsForm != null && !extendsForm.trim().isEmpty())
 		{
 			System.err.println("[FormToolHandler.openOrCreateForm] Setting parent form: " + extendsForm);
-			setFormParent(form, extendsForm, servoyProject);
+			setFormParent(form, extendsForm, targetProject);
 			propertiesModified = true;
 		}
-		
+
 		// Set as main form if requested OR if this is the first form in the solution
 		if (setAsMainForm || isFirstForm)
 		{
-			System.err.println("[FormToolHandler.openOrCreateForm] Setting as main form" + 
-				(isFirstForm ? " (first form in solution)" : ""));
-			servoyProject.getEditingSolution().setFirstFormID(form.getUUID().toString());
+			System.err.println("[FormToolHandler.openOrCreateForm] Setting as main form" + (isFirstForm ? " (first form in solution)" : ""));
+			targetProject.getEditingSolution().setFirstFormID(form.getUUID().toString());
 			propertiesModified = true;
 		}
-		
+
 		// Save if modifications were made
 		if (propertiesModified || isNewForm)
 		{
-			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
+			targetProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
 		}
-		
+
 		// Open the form in designer
 		final Form finalForm = form;
 		final boolean finalIsNewForm = isNewForm;
 		Display.getDefault().asyncExec(() -> {
 			EditorUtil.openFormDesignEditor(finalForm, finalIsNewForm, true);
 		});
-		
-		// Build result message
+
+		// Build result message with context information
 		StringBuilder result = new StringBuilder();
+		String contextDisplay = "active".equals(targetContext) ? targetProject.getProject().getName() + " (active solution)" : targetContext;
+
 		if (isNewForm)
 		{
 			String formType = "responsive".equals(style) ? "responsive" : "CSS-positioned";
-			result.append("Form '").append(name).append("' created successfully as ").append(formType)
-				.append(" form (").append(width).append("x").append(height).append(" pixels)");
+			result.append("Form '").append(name).append("' created successfully in ").append(contextDisplay).append(" as ").append(formType).append(" form (")
+				.append(width).append("x").append(height).append(" pixels)");
 			if (dataSource != null)
 			{
 				result.append(" with datasource: ").append(dataSource);
@@ -492,13 +559,22 @@ public class FormToolHandler implements IToolHandler
 		else
 		{
 			result.append("Form '").append(name).append("' opened successfully");
+			
+			// Add location info if form is from a different module
+			String formSolution = getSolutionName(form);
+			String activeSolutionName = servoyProject.getEditingSolution().getName();
+			
+			if (!formSolution.equals(activeSolutionName))
+			{
+				result.append(" (from module: ").append(formSolution).append(")");
+			}
 		}
-		
+
 		if (propertiesModified && !isNewForm)
 		{
 			result.append(". Properties updated");
 		}
-		
+
 		if (setAsMainForm)
 		{
 			result.append(". Set as solution's main form");
@@ -507,7 +583,7 @@ public class FormToolHandler implements IToolHandler
 		{
 			result.append(". Automatically set as main form (first form in solution)");
 		}
-		
+
 		return result.toString();
 	}
 	
@@ -690,7 +766,7 @@ public class FormToolHandler implements IToolHandler
 	/**
 	 * Lists all forms in the active solution.
 	 */
-	private String listForms() throws RepositoryException
+	private String listForms(String scope) throws RepositoryException
 	{
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject servoyProject = servoyModel.getActiveProject();
@@ -705,18 +781,59 @@ public class FormToolHandler implements IToolHandler
 			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
 		}
 		
-		java.util.Iterator<Form> formsIterator = servoyProject.getEditingSolution().getForms(null, true);
-		java.util.List<String> formNames = new java.util.ArrayList<>();
+		String activeSolutionName = servoyProject.getEditingSolution().getName();
+		String contextName = null;
 		
-		while (formsIterator.hasNext())
+		// Collect all forms based on scope
+		java.util.List<Form> forms = new java.util.ArrayList<>();
+		
+		if ("current".equals(scope))
 		{
-			Form form = formsIterator.next();
-			formNames.add(form.getName());
+			// Get forms from current context only
+			ServoyProject targetProject = resolveTargetProject(servoyModel);
+			String context = ContextService.getInstance().getCurrentContext();
+			contextName = "active".equals(context) ? activeSolutionName : context;
+			
+			java.util.Iterator<Form> formsIterator = targetProject.getEditingSolution().getForms(null, false); // false = no modules
+			while (formsIterator.hasNext())
+			{
+				forms.add(formsIterator.next());
+			}
+		}
+		else
+		{
+			// Get forms from active solution and all modules
+			// First, add active solution forms
+			java.util.Iterator<Form> activeForms = servoyProject.getEditingSolution().getForms(null, false); // false = only active
+			while (activeForms.hasNext())
+			{
+				forms.add(activeForms.next());
+			}
+			
+			// Then, add forms from each module (excluding active project to avoid duplication)
+			ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+			for (ServoyProject module : modules)
+			{
+				if (module != null && module.getEditingSolution() != null)
+				{
+					// Skip if this module is actually the active project itself (prevent duplication)
+					if (module.equals(servoyProject))
+					{
+						continue;
+					}
+					
+					java.util.Iterator<Form> moduleForms = module.getEditingSolution().getForms(null, false); // false = only this module
+					while (moduleForms.hasNext())
+					{
+						forms.add(moduleForms.next());
+					}
+				}
+			}
 		}
 		
-		if (formNames.isEmpty())
+		if (forms.isEmpty())
 		{
-			return "No forms found in the active solution";
+			return "No forms found" + ("current".equals(scope) ? " in '" + contextName + "'" : " in the active solution");
 		}
 		
 		// Get main form if set
@@ -732,11 +849,24 @@ public class FormToolHandler implements IToolHandler
 		}
 		
 		StringBuilder result = new StringBuilder();
-		result.append("Forms in solution (").append(formNames.size()).append(" total):\n");
 		
-		for (String formName : formNames)
+		// Build appropriate header based on scope
+		if ("current".equals(scope))
 		{
-			result.append("- ").append(formName);
+			result.append("Forms in '").append(contextName).append("' (").append(forms.size()).append(" total):\n");
+		}
+		else
+		{
+			result.append("Forms in solution '").append(activeSolutionName).append("' and modules (").append(forms.size()).append(" total):\n");
+		}
+		
+		for (Form form : forms)
+		{
+			String formName = form.getName();
+			String solutionName = getSolutionName(form);
+			String originInfo = formatOrigin(solutionName, activeSolutionName);
+			
+			result.append("- ").append(formName).append(originInfo);
 			if (formName.equals(mainFormName))
 			{
 				result.append(" [MAIN FORM]");
@@ -749,6 +879,7 @@ public class FormToolHandler implements IToolHandler
 	
 	/**
 	 * Gets properties of a form.
+	 * Searches in current context first, then falls back to active solution and all modules.
 	 */
 	private String getFormProperties(String formName) throws RepositoryException
 	{
@@ -765,15 +896,60 @@ public class FormToolHandler implements IToolHandler
 			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
 		}
 		
-		Form form = servoyProject.getEditingSolution().getForm(formName);
+		// First, search in current context
+		ServoyProject targetProject = resolveTargetProject(servoyModel);
+		Form form = null;
+		
+		if (targetProject != null && targetProject.getEditingSolution() != null)
+		{
+			form = targetProject.getEditingSolution().getForm(formName);
+		}
+		
+		// If not found in current context, search in active solution
+		if (form == null)
+		{
+			form = servoyProject.getEditingSolution().getForm(formName);
+		}
+		
+		// If still not found, search in all modules
+		if (form == null)
+		{
+			ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+			for (ServoyProject module : modules)
+			{
+				if (module != null && module.getEditingSolution() != null)
+				{
+					form = module.getEditingSolution().getForm(formName);
+					if (form != null)
+					{
+						break;
+					}
+				}
+			}
+		}
 		
 		if (form == null)
 		{
-			throw new RepositoryException("Form '" + formName + "' not found");
+			throw new RepositoryException("Form '" + formName + "' not found in current context, active solution, or any modules");
 		}
 		
+		// Get origin information
+		String solutionName = getSolutionName(form);
+		String activeSolutionName = servoyProject.getEditingSolution().getName();
+		
 		StringBuilder result = new StringBuilder();
-		result.append("Form Properties for '").append(formName).append("':\n\n");
+		result.append("Form Properties for '").append(formName).append("':\n");
+		
+		// Show location/origin
+		result.append("Location: ");
+		if (solutionName.equals(activeSolutionName))
+		{
+			result.append("active solution (").append(activeSolutionName).append(")\n\n");
+		}
+		else
+		{
+			result.append("module '").append(solutionName).append("'\n\n");
+		}
 		
 		// Basic properties
 		result.append("Dimensions:\n");
@@ -1024,5 +1200,76 @@ public class FormToolHandler implements IToolHandler
 			return (Map<String, Object>)value;
 		}
 		return null;
+	}
+
+	// =============================================
+	// UTILITY METHODS
+	// =============================================
+
+	/**
+	 * Get the solution name that owns a persist object.
+	 * Returns the solution name or "unknown" if cannot determine.
+	 */
+	private String getSolutionName(IPersist persist)
+	{
+		try
+		{
+			IRootObject rootObject = persist.getRootObject();
+			if (rootObject instanceof Solution)
+			{
+				return ((Solution)rootObject).getName();
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("[FormToolHandler] Error getting solution name", e);
+		}
+		return "unknown";
+	}
+
+	/**
+	 * Format origin information for display.
+	 * Returns " (in: solutionName)" or " (in: active solution)" based on context.
+	 */
+	private String formatOrigin(String solutionName, String activeSolutionName)
+	{
+		if (solutionName.equals(activeSolutionName))
+		{
+			return " (in: active solution)";
+		}
+		else
+		{
+			return " (in: " + solutionName + ")";
+		}
+	}
+
+	/**
+	 * Resolve current context to a ServoyProject.
+	 * Uses ContextService to determine which solution/module to target.
+	 * 
+	 * @param servoyModel The Servoy model
+	 * @return The target ServoyProject (active solution or module)
+	 * @throws RepositoryException If context is invalid or project not found
+	 */
+	private ServoyProject resolveTargetProject(IDeveloperServoyModel servoyModel) throws RepositoryException
+	{
+		String context = ContextService.getInstance().getCurrentContext();
+
+		if ("active".equals(context))
+		{
+			return servoyModel.getActiveProject();
+		}
+
+		// Find module by name
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		for (ServoyProject module : modules)
+		{
+			if (module.getProject().getName().equals(context))
+			{
+				return module;
+			}
+		}
+
+		throw new RepositoryException("Context '" + context + "' not found or not a module of active solution");
 	}
 }

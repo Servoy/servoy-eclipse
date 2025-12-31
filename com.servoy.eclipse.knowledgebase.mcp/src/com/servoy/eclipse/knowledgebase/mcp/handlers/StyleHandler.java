@@ -9,9 +9,12 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.knowledgebase.mcp.services.ContextService;
 import com.servoy.eclipse.knowledgebase.mcp.services.FormService;
 import com.servoy.eclipse.knowledgebase.mcp.services.StyleService;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.RepositoryException;
 
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
@@ -36,6 +39,8 @@ public class StyleHandler implements IToolHandler
 
 		tools.put("addStyle", new ToolHandlerRegistry.ToolDefinition(
 			"Adds or updates a CSS class in a LESS file. " +
+				"[CONTEXT-AWARE] Style will be added to the LESS file in the current context (active solution or module). " +
+				"Use getContext to check where it will be created, setContext to change target location. " +
 				"Required: className (string - without dot), cssContent (string - CSS rules). " +
 				"Optional: lessFileName (string - file to add style to, defaults to <solution-name>.less). " +
 				"If lessFileName is provided and different from main solution file, import is automatically added.",
@@ -50,11 +55,15 @@ public class StyleHandler implements IToolHandler
 		tools.put("listStyles", new ToolHandlerRegistry.ToolDefinition(
 			"Lists all CSS class names in a LESS file. " +
 				"Optional: lessFileName (string - file to list from, defaults to <solution-name>.less). " +
-				"Returns: Comma-separated list of class names.",
+				"Optional: scope (string: 'current' or 'all', default 'current'). " +
+				"  - 'current': Lists styles from current context only. " +
+				"  - 'all': Lists styles from active solution and all modules with origin information. " +
+				"Returns: Comma-separated list of class names (or detailed list with origins if scope='all').",
 			this::handleListStyles));
 
 		tools.put("deleteStyle", new ToolHandlerRegistry.ToolDefinition(
-			"Deletes a CSS class from a LESS file. " +
+			"Deletes a CSS class from a LESS file in the CURRENT CONTEXT only. " +
+				"To delete from a different module, use setContext first to switch to that module. " +
 				"Required: className (string - without dot). " +
 				"Optional: lessFileName (string - file to delete from, defaults to <solution-name>.less).",
 			this::handleDeleteStyle));
@@ -177,10 +186,50 @@ public class StyleHandler implements IToolHandler
 
 			try
 			{
-				String projectPath = getProjectPath();
-				String solutionName = getSolutionName();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				ServoyProject servoyProject = servoyModel.getActiveProject();
+				
+				if (servoyProject == null)
+				{
+					return errorResult("No active Servoy solution project found");
+				}
+				
+				// First, try current context
+				ServoyProject targetProject = resolveTargetProject(servoyModel);
+				String projectPath = targetProject.getProject().getLocation().toOSString();
+				String solutionName = targetProject.getSolution().getName();
 				
 				String result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+				
+				// If not found (error message returned), try active solution
+				if (result.startsWith("Class '") && result.contains("not found") && !targetProject.equals(servoyProject))
+				{
+					projectPath = servoyProject.getProject().getLocation().toOSString();
+					solutionName = servoyProject.getSolution().getName();
+					result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+				}
+				
+				// If still not found, search in all modules
+				if (result.startsWith("Class '") && result.contains("not found"))
+				{
+					ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+					for (ServoyProject module : modules)
+					{
+						if (module != null && module.getSolution() != null && !module.equals(targetProject))
+						{
+							projectPath = module.getProject().getLocation().toOSString();
+							solutionName = module.getSolution().getName();
+							String moduleResult = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+							
+							if (!moduleResult.startsWith("Class '") || !moduleResult.contains("not found"))
+							{
+								// Found it! Add location info
+								result = "Style found in module '" + module.getProject().getName() + "':\n" + moduleResult;
+								break;
+							}
+						}
+					}
+				}
 
 				return successResult(result);
 			}
@@ -211,15 +260,91 @@ public class StyleHandler implements IToolHandler
 			Map<String, Object> args = request.arguments();
 
 			String lessFileName = extractString(args, "lessFileName", null);
+			String scope = extractString(args, "scope", "current");
+
+			// Validate scope parameter
+			if (!scope.equals("current") && !scope.equals("all"))
+			{
+				return errorResult("Invalid scope value '" + scope + "'. Must be 'current' or 'all'.");
+			}
 
 			try
 			{
-				String projectPath = getProjectPath();
-				String solutionName = getSolutionName();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				ServoyProject servoyProject = servoyModel.getActiveProject();
 				
-				String result = StyleService.listStyles(projectPath, solutionName, lessFileName);
-
-				return successResult(result);
+				if (servoyProject == null)
+				{
+					return errorResult("No active Servoy solution project found");
+				}
+				
+				if ("current".equals(scope))
+				{
+					// List from current context only
+					String projectPath = getProjectPath();
+					String solutionName = getSolutionName();
+					String result = StyleService.listStyles(projectPath, solutionName, lessFileName);
+					return successResult(result);
+				}
+				else
+				{
+					// List from all modules with origin information
+					StringBuilder allStyles = new StringBuilder();
+					ServoyProject targetProject = resolveTargetProject(servoyModel);
+					String activeSolutionName = servoyProject.getSolution().getName();
+					
+					// Add current context styles
+					String contextName = targetProject.getProject().getName();
+					String projectPath = targetProject.getProject().getLocation().toOSString();
+					String solutionName = targetProject.getSolution().getName();
+					String result = StyleService.listStyles(projectPath, solutionName, lessFileName);
+					
+					if (!result.startsWith("No CSS classes") && !result.startsWith("LESS file not found"))
+					{
+						String origin = solutionName.equals(activeSolutionName) ? " (in: active solution)" : " (in: " + contextName + ")";
+						allStyles.append("Styles from ").append(solutionName).append(".less").append(origin).append(":\n");
+						allStyles.append("  ").append(result).append("\n\n");
+					}
+					
+					// Add active solution styles (if different from current context)
+					if (!targetProject.equals(servoyProject))
+					{
+						projectPath = servoyProject.getProject().getLocation().toOSString();
+						solutionName = servoyProject.getSolution().getName();
+						result = StyleService.listStyles(projectPath, solutionName, lessFileName);
+						
+						if (!result.startsWith("No CSS classes") && !result.startsWith("LESS file not found"))
+						{
+							allStyles.append("Styles from ").append(solutionName).append(".less (in: active solution):\n");
+							allStyles.append("  ").append(result).append("\n\n");
+						}
+					}
+					
+					// Add module styles
+					ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+					for (ServoyProject module : modules)
+					{
+						if (module != null && module.getSolution() != null && !module.equals(targetProject) && !module.equals(servoyProject))
+						{
+							projectPath = module.getProject().getLocation().toOSString();
+							solutionName = module.getSolution().getName();
+							result = StyleService.listStyles(projectPath, solutionName, lessFileName);
+							
+							if (!result.startsWith("No CSS classes") && !result.startsWith("LESS file not found"))
+							{
+								allStyles.append("Styles from ").append(solutionName).append(".less (in: ").append(module.getProject().getName()).append("):\n");
+								allStyles.append("  ").append(result).append("\n\n");
+							}
+						}
+					}
+					
+					if (allStyles.length() == 0)
+					{
+						return successResult("No CSS classes found in any module");
+					}
+					
+					return successResult(allStyles.toString().trim());
+				}
 			}
 			catch (Exception e)
 			{
@@ -307,25 +432,59 @@ public class StyleHandler implements IToolHandler
 	private String getProjectPath() throws Exception
 	{
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		if (servoyModel == null || servoyModel.getActiveProject() == null)
+		
+		// Resolve target project based on current context
+		ServoyProject targetProject = resolveTargetProject(servoyModel);
+		
+		if (targetProject == null)
 		{
-			throw new Exception("No active Servoy project found");
+			throw new Exception("No target solution/module found for current context");
 		}
-		return servoyModel.getActiveProject().getProject().getLocation().toOSString();
+		return targetProject.getProject().getLocation().toOSString();
 	}
 
 	private String getSolutionName() throws Exception
 	{
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		if (servoyModel == null || servoyModel.getActiveProject() == null)
+		
+		// Resolve target project based on current context
+		ServoyProject targetProject = resolveTargetProject(servoyModel);
+		
+		if (targetProject == null)
 		{
-			throw new Exception("No active Servoy project found");
+			throw new Exception("No target solution/module found for current context");
 		}
-		if (servoyModel.getActiveProject().getSolution() == null)
+		if (targetProject.getSolution() == null)
 		{
-			throw new Exception("No active solution found");
+			throw new Exception("No solution found in target project");
 		}
-		return servoyModel.getActiveProject().getSolution().getName();
+		return targetProject.getSolution().getName();
+	}
+
+	/**
+	 * Resolve current context to a ServoyProject.
+	 * Uses ContextService to determine which solution/module to target.
+	 */
+	private ServoyProject resolveTargetProject(IDeveloperServoyModel servoyModel) throws RepositoryException
+	{
+		String context = ContextService.getInstance().getCurrentContext();
+
+		if ("active".equals(context))
+		{
+			return servoyModel.getActiveProject();
+		}
+
+		// Find module by name
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		for (ServoyProject module : modules)
+		{
+			if (module.getProject().getName().equals(context))
+			{
+				return module;
+			}
+		}
+
+		throw new RepositoryException("Context '" + context + "' not found or not a module of active solution");
 	}
 
 	private String extractString(Map<String, Object> args, String key, String defaultValue)

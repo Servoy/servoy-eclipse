@@ -13,9 +13,12 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
 import com.servoy.eclipse.knowledgebase.mcp.services.BootstrapComponentService;
+import com.servoy.eclipse.knowledgebase.mcp.services.ContextService;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.RepositoryException;
 
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
@@ -43,6 +46,10 @@ public class ButtonComponentHandler implements IToolHandler
 
 		tools.put("addButton", new ToolHandlerRegistry.ToolDefinition(
 			"Adds a bootstrap button component to a form. " +
+				"[CONTEXT-AWARE] Looks for the form in current context first. " +
+				"If form not found in current context, searches all solutions/modules: " +
+				"if found in exactly one location, auto-switches context there; " +
+				"if found in multiple locations, returns error listing all locations (use setContext to specify). " +
 				"Required: formName (string), name (string), cssPosition (string). " +
 				"cssPosition format: 'top,right,bottom,left,width,height' where first 4 values are DISTANCES from edges (not coordinates). " +
 				"Use -1 for unconstrained edges. Example: '20,-1,-1,25,80,30' means 20px from top, 25px from left, 80x30 size. " +
@@ -54,6 +61,7 @@ public class ButtonComponentHandler implements IToolHandler
 
 		tools.put("updateButton", new ToolHandlerRegistry.ToolDefinition(
 			"Updates an existing button component on a form. " +
+				"[CONTEXT-AWARE] Searches for form using same smart fallback as addButton. " +
 				"Required: formName (string), name (string). " +
 				"Optional: Any property to update - text, cssPosition, styleClass, imageStyleClass, " +
 				"trailingImageStyleClass, showAs, tabSeq, enabled, visible, toolTipText. Only specified properties will be updated.",
@@ -61,17 +69,20 @@ public class ButtonComponentHandler implements IToolHandler
 
 		tools.put("deleteButton", new ToolHandlerRegistry.ToolDefinition(
 			"Deletes a button component from a form. " +
+				"[CONTEXT-AWARE] Searches for form using same smart fallback as addButton. " +
 				"Required: formName (string), name (string).",
 			this::handleDeleteButton));
 
 		tools.put("listButtons", new ToolHandlerRegistry.ToolDefinition(
 			"Lists all button components in a form with their details. " +
+				"[CONTEXT-AWARE] Searches for form using same smart fallback as addButton. " +
 				"Required: formName (string). " +
 				"Returns: JSON array of button information (name, cssPosition, text, styleClass).",
 			this::handleListButtons));
 
 		tools.put("getButtonInfo", new ToolHandlerRegistry.ToolDefinition(
 			"Gets detailed information about a specific button component. " +
+				"[CONTEXT-AWARE] Searches for form using same smart fallback as addButton. " +
 				"Required: formName (string), name (string). " +
 				"Returns: Full JSON object with all button properties.",
 			this::handleGetButtonInfo));
@@ -414,11 +425,41 @@ public class ButtonComponentHandler implements IToolHandler
 	private String getProjectPath() throws Exception
 	{
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		if (servoyModel == null || servoyModel.getActiveProject() == null)
+		
+		// Resolve target project based on current context
+		ServoyProject targetProject = resolveTargetProject(servoyModel);
+		
+		if (targetProject == null)
 		{
-			throw new Exception("No active Servoy project found");
+			throw new Exception("No target solution/module found for current context");
 		}
-		return servoyModel.getActiveProject().getProject().getLocation().toOSString();
+		return targetProject.getProject().getLocation().toOSString();
+	}
+
+	/**
+	 * Resolve current context to a ServoyProject.
+	 * Uses ContextService to determine which solution/module to target.
+	 */
+	private ServoyProject resolveTargetProject(IDeveloperServoyModel servoyModel) throws RepositoryException
+	{
+		String context = ContextService.getInstance().getCurrentContext();
+
+		if ("active".equals(context))
+		{
+			return servoyModel.getActiveProject();
+		}
+
+		// Find module by name
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		for (ServoyProject module : modules)
+		{
+			if (module.getProject().getName().equals(context))
+			{
+				return module;
+			}
+		}
+
+		throw new RepositoryException("Context '" + context + "' not found or not a module of active solution");
 	}
 
 	/**

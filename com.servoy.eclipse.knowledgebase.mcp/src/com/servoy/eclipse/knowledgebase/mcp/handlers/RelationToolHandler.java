@@ -10,6 +10,7 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
+import com.servoy.eclipse.knowledgebase.mcp.services.ContextService;
 import com.servoy.eclipse.knowledgebase.mcp.services.DatabaseSchemaService;
 import com.servoy.eclipse.knowledgebase.mcp.services.DatabaseSchemaService.ForeignKeyRelationship;
 import com.servoy.eclipse.knowledgebase.mcp.services.DatabaseSchemaService.PotentialRelationship;
@@ -18,9 +19,11 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
@@ -48,6 +51,8 @@ public class RelationToolHandler implements IToolHandler
 
 		tools.put("openRelation", new ToolHandlerRegistry.ToolDefinition(
 			"Opens an existing database relation or creates a new relation between two tables. " +
+			"[CONTEXT-AWARE for CREATE] When creating a new relation, it will be created in the current context (active solution or module). " +
+			"Use getContext to check where it will be created, setContext to change target location. " +
 			"Required: name (string). " +
 			"Required for creation: primaryDataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'), " +
 			"foreignDataSource (format: 'server_name/table_name' or 'db:/server_name/table_name'). " +
@@ -59,7 +64,11 @@ public class RelationToolHandler implements IToolHandler
 			this::handleOpenRelation));
 
 		tools.put("getRelations", new ToolHandlerRegistry.ToolDefinition(
-			"Lists all existing database relations in the active solution. No parameters required.",
+			"Lists relations in the active solution and its modules. " +
+			"Optional: scope (string: 'current' or 'all', default 'all'). " +
+			"  - 'current': Returns relations from current context only (active solution or specific module based on current context). " +
+			"  - 'all': Returns relations from active solution and all modules. " +
+			"Returns: List of relation names with their primary and foreign datasources, including origin information (which solution/module each relation belongs to).",
 			this::handleGetRelations));
 
 		tools.put("deleteRelations", new ToolHandlerRegistry.ToolDefinition(
@@ -212,35 +221,76 @@ public class RelationToolHandler implements IToolHandler
 	
 	/**
 	 * Opens an existing relation or creates a new one if it doesn't exist (with datasources provided).
+	 * For opening (when datasources not provided): searches current context first, then falls back to active solution and modules.
+	 * For creating: creates ONLY in current context.
 	 * Supports updating properties on existing relations via properties map.
 	 */
 	private String openOrCreateRelation(String name, String primaryDataSource, String foreignDataSource,
 		String primaryColumn, String foreignColumn, Map<String, Object> properties) throws RepositoryException
 	{
 		ServoyLog.logInfo("[RelationToolHandler] Processing relation: " + name);
-		
+
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject servoyProject = servoyModel.getActiveProject();
-		
+
 		if (servoyProject == null)
 		{
 			throw new RepositoryException("No active Servoy solution project found");
 		}
-		
+
 		if (servoyProject.getEditingSolution() == null)
 		{
-			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
+			throw new RepositoryException("Cannot get editing solution from active project");
+		}
+
+		// Resolve target project based on current context
+		ServoyProject targetProject = resolveTargetProject(servoyModel);
+		String targetContext = ContextService.getInstance().getCurrentContext();
+
+		if (targetProject == null)
+		{
+			throw new RepositoryException("No target solution/module found for context: " + targetContext);
+		}
+
+		if (targetProject.getEditingSolution() == null)
+		{
+			throw new RepositoryException("Cannot get editing solution from target: " + targetContext);
+		}
+
+		// Search for existing relation: current context first, then fall back to all modules
+		Relation relation = targetProject.getEditingSolution().getRelation(name);
+		
+		// If not found in current context, search in active solution (if different from target)
+		if (relation == null && !targetProject.equals(servoyProject))
+		{
+			relation = servoyProject.getEditingSolution().getRelation(name);
 		}
 		
-		// Check if relation already exists
-		Relation relation = servoyProject.getEditingSolution().getRelation(name);
+		// If still not found, search in all modules
+		if (relation == null)
+		{
+			ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+			for (ServoyProject module : modules)
+			{
+				if (module != null && module.getEditingSolution() != null && !module.equals(targetProject))
+				{
+					relation = module.getEditingSolution().getRelation(name);
+					if (relation != null)
+					{
+						ServoyLog.logInfo("[RelationToolHandler] Relation found in module: " + getSolutionName(relation));
+						break;
+					}
+				}
+			}
+		}
+		
 		boolean isNewRelation = false;
 		boolean propertiesModified = false;
-		
+
 		if (relation != null)
 		{
 			ServoyLog.logInfo("[RelationToolHandler] Relation exists: " + name);
-			
+
 			// Apply properties if provided (update existing relation)
 			if (properties != null && !properties.isEmpty())
 			{
@@ -251,9 +301,9 @@ public class RelationToolHandler implements IToolHandler
 		}
 		else
 		{
-			// Relation doesn't exist - create it
-			ServoyLog.logInfo("[RelationToolHandler] Relation doesn't exist, creating: " + name);
-			
+			// Relation doesn't exist - create it in current context
+			ServoyLog.logInfo("[RelationToolHandler] Relation doesn't exist, creating in " + targetContext + ": " + name);
+
 			// Validate datasources are provided for creation
 			if (primaryDataSource == null || primaryDataSource.trim().isEmpty())
 			{
@@ -263,14 +313,14 @@ public class RelationToolHandler implements IToolHandler
 			{
 				throw new RepositoryException("Relation '" + name + "' not found. To create it, provide 'primaryDataSource' and 'foreignDataSource'.");
 			}
-			
+
 			// Validate and correct datasource format
 			primaryDataSource = RelationService.validateAndCorrectDataSource(primaryDataSource);
 			foreignDataSource = RelationService.validateAndCorrectDataSource(foreignDataSource);
-			
-			// Create the relation using service
-			relation = RelationService.createRelation(name, primaryDataSource, foreignDataSource, 
-				primaryColumn, foreignColumn, properties);
+
+			// Create the relation in target project using service
+			relation = RelationService.createRelationInProject(targetProject, name, primaryDataSource, foreignDataSource, primaryColumn, foreignColumn,
+				properties);
 			isNewRelation = true;
 		}
 		
@@ -280,11 +330,13 @@ public class RelationToolHandler implements IToolHandler
 			EditorUtil.openRelationEditor(relationToOpen, true);
 		});
 		
-		// Build result message
+		// Build result message with context information
 		StringBuilder result = new StringBuilder();
+		String contextDisplay = "active".equals(targetContext) ? targetProject.getProject().getName() + " (active solution)" : targetContext;
+
 		if (isNewRelation)
 		{
-			result.append("Relation '").append(name).append("' created successfully");
+			result.append("Relation '").append(name).append("' created successfully in ").append(contextDisplay);
 			result.append(" (from ").append(primaryDataSource).append(" to ").append(foreignDataSource).append(")");
 			if (properties != null && properties.containsKey("joinType"))
 			{
@@ -294,12 +346,22 @@ public class RelationToolHandler implements IToolHandler
 		else
 		{
 			result.append("Relation '").append(name).append("' opened successfully");
+			
+			// Add location info if relation is from a different module
+			String relationSolution = getSolutionName(relation);
+			String activeSolutionName = servoyProject.getEditingSolution().getName();
+			
+			if (!relationSolution.equals(activeSolutionName))
+			{
+				result.append(" (from module: ").append(relationSolution).append(")");
+			}
+			
 			if (propertiesModified)
 			{
 				result.append(". Properties updated");
 			}
 		}
-		
+
 		return result.toString();
 	}
 
@@ -404,7 +466,27 @@ public class RelationToolHandler implements IToolHandler
 			}
 			
 			System.err.println("[DEBUG deleteRelations] Looking for relation: " + name);
+			
+			// Search in active solution first
 			Relation relation = servoyProject.getEditingSolution().getRelation(name);
+			
+			// If not found in active solution, search in all modules
+			if (relation == null)
+			{
+				ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+				for (ServoyProject module : modules)
+				{
+					if (module != null && module.getEditingSolution() != null)
+					{
+						relation = module.getEditingSolution().getRelation(name);
+						if (relation != null)
+						{
+							System.err.println("[DEBUG deleteRelations] Found in module: " + getSolutionName(relation));
+							break;
+						}
+					}
+				}
+			}
 			
 			if (relation == null)
 			{
@@ -531,6 +613,21 @@ public class RelationToolHandler implements IToolHandler
 
 		try
 		{
+			Map<String, Object> args = request.arguments();
+			
+			// Extract scope parameter (default: "all")
+			String scope = extractString(args, "scope", "all");
+			System.err.println("[DEBUG getRelations] Scope parameter: " + scope);
+			
+			// Validate scope parameter
+			if (!scope.equals("current") && !scope.equals("all"))
+			{
+				return McpSchema.CallToolResult.builder()
+					.content(List.of(new TextContent("Error: Invalid scope value '" + scope + "'. Must be 'current' or 'all'.")))
+					.isError(true)
+					.build();
+			}
+			
 			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ServoyProject activeProject = servoyModel.getActiveProject();
 			System.err.println("[DEBUG getRelations] Active project: " + (activeProject != null ? activeProject.getProject().getName() : "NULL"));
@@ -540,28 +637,95 @@ public class RelationToolHandler implements IToolHandler
 				System.err.println("[DEBUG getRelations] Editing solution: " + activeProject.getEditingSolution().getName());
 			}
 			
-			Iterator<Relation> relations = servoyModel.getActiveProject().getEditingSolution().getRelations(true);
-			System.err.println("[DEBUG getRelations] Got relations iterator");
+			String activeSolutionName = activeProject.getEditingSolution().getName();
+			String contextName = null;
+			
+			// Collect all relations based on scope
+			java.util.List<Relation> allRelations = new java.util.ArrayList<>();
+			
+			if ("current".equals(scope))
+			{
+				// Get relations from current context only
+				ServoyProject targetProject = resolveTargetProject(servoyModel);
+				String context = ContextService.getInstance().getCurrentContext();
+				contextName = "active".equals(context) ? activeSolutionName : context;
+				
+				Iterator<Relation> relations = targetProject.getEditingSolution().getRelations(false); // false = no modules
+				while (relations.hasNext())
+				{
+					allRelations.add(relations.next());
+				}
+				System.err.println("[DEBUG getRelations] Scope=current, context=" + contextName + ", found " + allRelations.size() + " relations");
+			}
+			else
+			{
+				// Get relations from active solution and all modules
+				// First, add active solution relations
+				Iterator<Relation> activeRelations = activeProject.getEditingSolution().getRelations(false); // false = only active
+				while (activeRelations.hasNext())
+				{
+					allRelations.add(activeRelations.next());
+				}
+				System.err.println("[DEBUG getRelations] Found " + allRelations.size() + " relations in active solution");
+				
+				// Then, add relations from each module (excluding active project to avoid duplication)
+				ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+				System.err.println("[DEBUG getRelations] Checking " + modules.length + " modules");
+				for (ServoyProject module : modules)
+				{
+					if (module != null && module.getEditingSolution() != null)
+					{
+						// Skip if this module is actually the active project itself (prevent duplication)
+						if (module.equals(activeProject))
+						{
+							System.err.println("[DEBUG getRelations] Skipping active project in modules list: " + module.getProject().getName());
+							continue;
+						}
+						
+						System.err.println("[DEBUG getRelations] Checking module: " + module.getProject().getName());
+						Iterator<Relation> moduleRelations = module.getEditingSolution().getRelations(false); // false = only this module
+						int moduleCount = 0;
+						while (moduleRelations.hasNext())
+						{
+							allRelations.add(moduleRelations.next());
+							moduleCount++;
+						}
+						System.err.println("[DEBUG getRelations] Found " + moduleCount + " relations in module " + module.getProject().getName());
+					}
+				}
+				System.err.println("[DEBUG getRelations] Scope=all, total relations found: " + allRelations.size());
+			}
 
 			int count = 0;
-			resultBuilder.append("Relations in solution '").append(servoyModel.getActiveProject().getEditingSolution().getName()).append("':\n\n");
-
-			System.err.println("[DEBUG getRelations] Iterating through relations...");
-			while (relations.hasNext())
+			
+			// Build appropriate header based on scope
+			if ("current".equals(scope))
 			{
-				Relation relation = relations.next();
+				resultBuilder.append("Relations in '").append(contextName).append("':\n\n");
+			}
+			else
+			{
+				resultBuilder.append("Relations in solution '").append(activeSolutionName).append("' and modules:\n\n");
+			}
+
+			System.err.println("[DEBUG getRelations] Building output...");
+			for (Relation relation : allRelations)
+			{
 				count++;
-				System.err.println("[DEBUG getRelations] Relation #" + count + ": " + relation.getName());
+				String solutionName = getSolutionName(relation);
+				String originInfo = formatOrigin(solutionName, activeSolutionName);
+				
+				System.err.println("[DEBUG getRelations] Relation #" + count + ": " + relation.getName() + " " + originInfo);
 				System.err.println("[DEBUG getRelations]   Primary DS: " + relation.getPrimaryDataSource());
 				System.err.println("[DEBUG getRelations]   Foreign DS: " + relation.getForeignDataSource());
 				
-				resultBuilder.append(count).append(". ").append(relation.getName());
+				resultBuilder.append(count).append(". ").append(relation.getName()).append(originInfo);
 				resultBuilder.append("\n   Primary: ").append(relation.getPrimaryDataSource());
 				resultBuilder.append("\n   Foreign: ").append(relation.getForeignDataSource());
 				resultBuilder.append("\n");
 			}
 
-			System.err.println("[DEBUG getRelations] Total relations found: " + count);
+			System.err.println("[DEBUG getRelations] Total relations output: " + count);
 			
 			if (count == 0)
 			{
@@ -692,4 +856,76 @@ public class RelationToolHandler implements IToolHandler
 			.content(List.of(new TextContent(resultMessage)))
 			.build();
 	}
+
+	// =============================================
+	// UTILITY METHODS
+	// =============================================
+
+	/**
+	 * Get the solution name that owns a persist object.
+	 * Returns the solution name or "unknown" if cannot determine.
+	 */
+	private String getSolutionName(IPersist persist)
+	{
+		try
+		{
+			IRootObject rootObject = persist.getRootObject();
+			if (rootObject instanceof Solution)
+			{
+				return ((Solution)rootObject).getName();
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("[RelationToolHandler] Error getting solution name", e);
+		}
+		return "unknown";
+	}
+
+	/**
+	 * Format origin information for display.
+	 * Returns " (in: solutionName)" or " (in: active solution)" based on context.
+	 */
+	private String formatOrigin(String solutionName, String activeSolutionName)
+	{
+		if (solutionName.equals(activeSolutionName))
+		{
+			return " (in: active solution)";
+		}
+		else
+		{
+			return " (in: " + solutionName + ")";
+		}
+	}
+
+	/**
+	 * Resolve current context to a ServoyProject.
+	 * Uses ContextService to determine which solution/module to target.
+	 * 
+	 * @param servoyModel The Servoy model
+	 * @return The target ServoyProject (active solution or module)
+	 * @throws RepositoryException If context is invalid or project not found
+	 */
+	private ServoyProject resolveTargetProject(IDeveloperServoyModel servoyModel) throws RepositoryException
+	{
+		String context = ContextService.getInstance().getCurrentContext();
+
+		if ("active".equals(context))
+		{
+			return servoyModel.getActiveProject();
+		}
+
+		// Find module by name
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		for (ServoyProject module : modules)
+		{
+			if (module.getProject().getName().equals(context))
+			{
+				return module;
+			}
+		}
+
+		throw new RepositoryException("Context '" + context + "' not found or not a module of active solution");
+	}
 }
+
