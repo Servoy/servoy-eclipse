@@ -2714,7 +2714,7 @@ public class TypeCreator extends TypeCache
 						{
 							sb.append("<b>@param</b> ");
 							String type = parameter.getType();
-							if (type != null && !(("Function").equals(type) && parameter.getDescription().contains("{(")))
+							if (type != null && !(("Function").equals(type) && parameter.getDescription() != null && parameter.getDescription().contains("{(")))
 							{
 								type = type.replace("<", "&lt;").replace(">", "&gt;");
 								type = parameter.isVarArgs() ? type.replace("[]", "...") : type;
