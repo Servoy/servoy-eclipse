@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy AI Bridge
 Bundle-SymbolicName: com.servoy.eclipse.aibridge;singleton:=true
-Bundle-Version: 2025.12.0.4121_rc2
+Bundle-Version: 2025.12.0.4122
 Bundle-ClassPath: .
 Export-Package: com.servoy.eclipse.aibridge,
  com.servoy.eclipse.mcp.ai

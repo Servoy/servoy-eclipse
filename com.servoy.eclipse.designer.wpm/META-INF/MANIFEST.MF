@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Web Package Manager
 Bundle-SymbolicName: com.servoy.eclipse.designer.wpm;singleton:=true
-Bundle-Version: 2025.12.0.4121_rc2
+Bundle-Version: 2025.12.0.4122
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: jakarta.servlet;version="[6.1.0,8.0.0)",
