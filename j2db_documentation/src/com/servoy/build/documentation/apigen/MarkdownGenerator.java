@@ -92,6 +92,7 @@ import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.JSMap;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.scripting.annotations.JSRealClass;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.server.servlets.ConfigServlet;
 import com.servoy.j2db.solutionmodel.ISMPart;
@@ -1777,8 +1778,16 @@ public class MarkdownGenerator
 			String name = qualifiedToName.get(type.getCanonicalName());
 			if (name == null)
 			{
-//				System.err.println("public name not found for " + type);
-				name = "Object";
+				JSRealClass annotation = type.getAnnotation(JSRealClass.class);
+				if (annotation != null)
+				{
+					Class< ? > value = annotation.value();
+					name = qualifiedToName.get(value.getCanonicalName());
+				}
+				if (name == null)
+				{
+					name = "Object";
+				}
 			}
 			return name;
 		}
