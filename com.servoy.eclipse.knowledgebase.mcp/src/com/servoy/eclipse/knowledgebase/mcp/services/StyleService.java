@@ -38,25 +38,13 @@ public class StyleService
 	{
 		try
 		{
-			System.err.println("[StyleService] ========================================");
-			System.err.println("[StyleService] addOrUpdateStyle CALLED");
-			System.err.println("[StyleService] className='" + className + "'");
-			System.err.println("[StyleService] lessFile='" + (lessFileName != null ? lessFileName : solutionName + ".less") + "'");
-			System.err.println("[StyleService] cssContent RECEIVED (length=" + cssContent.length() + "):");
-			System.err.println("[StyleService] --- START RECEIVED CONTENT ---");
-			System.err.println(cssContent.length() > 500 ? cssContent.substring(0, 500) + "\n... (truncated)" : cssContent);
-			System.err.println("[StyleService] --- END RECEIVED CONTENT ---");
-			
 			// STEP 1: Validate the content AS-IS before any modifications
-			System.err.println("[StyleService] Starting validation of received content...");
 			String validationError = validateLessContent(cssContent);
 			if (validationError != null)
 			{
-				System.err.println("[StyleService] VALIDATION FAILED: " + validationError);
 				ServoyLog.logError("[StyleService] CSS validation failed: " + validationError);
 				return validationError; // Return immediately - no file operations
 			}
-			System.err.println("[StyleService] Validation PASSED");
 			
 			// Determine target LESS file
 			String targetFile = (lessFileName != null && !lessFileName.trim().isEmpty()) 
@@ -84,13 +72,10 @@ public class StyleService
 			String trimmed = cssContent.trim();
 			boolean hasClassWrapper = trimmed.matches("^\\." + Pattern.quote(className) + "\\s*\\{.*");
 			
-			System.err.println("[StyleService] Has class wrapper (.className {...}): " + hasClassWrapper);
-			
 			String newClassDef;
 			if (hasClassWrapper)
 			{
 				// Model already provided the complete class definition - use as-is
-				System.err.println("[StyleService] Using content as-is (already has class wrapper)");
 				newClassDef = trimmed;
 				// Ensure it ends with proper formatting
 				if (!newClassDef.endsWith("\n"))
@@ -101,7 +86,6 @@ public class StyleService
 			else
 			{
 				// Model provided only inner content - add class wrapper
-				System.err.println("[StyleService] Adding class wrapper to content");
 				String formattedCss = formatLessContent(cssContent);
 				newClassDef = "." + className + " {\n" + formattedCss + "\n}\n";
 			}
@@ -109,11 +93,6 @@ public class StyleService
 			// Create backup ONLY after validation passed
 			Path backupPath = Paths.get(lessPath.toString() + ".backup");
 			Files.copy(lessPath, backupPath, StandardCopyOption.REPLACE_EXISTING);
-			
-			System.err.println("[StyleService] FINAL CLASS DEFINITION to write:");
-			System.err.println("[StyleService] --- START FINAL CSS ---");
-			System.err.println(newClassDef.length() > 500 ? newClassDef.substring(0, 500) + "\n... (truncated)" : newClassDef);
-			System.err.println("[StyleService] --- END FINAL CSS ---");
 			
 			// Check if class already exists
 			Pattern pattern = Pattern.compile("\\." + Pattern.quote(className) + "\\s*\\{[^}]*\\}", Pattern.DOTALL);
@@ -123,13 +102,11 @@ public class StyleService
 			{
 				// Replace existing
 				content = matcher.replaceFirst(Matcher.quoteReplacement(newClassDef));
-				System.err.println("[StyleService] Updated existing class: " + className);
 			}
 			else
 			{
 				// Append new
 				content += "\n" + newClassDef;
-				System.err.println("[StyleService] Added new class: " + className);
 			}
 			
 			// Write updated content
@@ -405,39 +382,22 @@ public class StyleService
 	 */
 	private static String preprocessCssContent(String cssContent, String className)
 	{
-		System.err.println("[StyleService] ===== PREPROCESSING =====");
-		System.err.println("[StyleService] className: '" + className + "'");
-		System.err.println("[StyleService] cssContent length: " + cssContent.length());
-		System.err.println("[StyleService] cssContent (first 300 chars): " + 
-			(cssContent.length() > 300 ? cssContent.substring(0, 300) + "..." : cssContent));
-		
 		String trimmed = cssContent.trim();
-		System.err.println("[StyleService] After trim, first line: " + 
-			(trimmed.contains("\n") ? trimmed.substring(0, Math.min(100, trimmed.indexOf('\n'))) : trimmed.substring(0, Math.min(100, trimmed.length()))));
 		
 		// Check if content starts with ".className {" or "className {"
 		String pattern1 = "^\\." + Pattern.quote(className) + "\\s*\\{";
 		String pattern2 = "^" + Pattern.quote(className) + "\\s*\\{";
 		
-		System.err.println("[StyleService] Testing pattern1: " + pattern1);
-		System.err.println("[StyleService] Testing pattern2: " + pattern2);
-		
 		boolean matchesPattern1 = trimmed.matches(pattern1 + ".*");
 		boolean matchesPattern2 = trimmed.matches(pattern2 + ".*");
 		
-		System.err.println("[StyleService] Matches pattern1 (." + className + " {): " + matchesPattern1);
-		System.err.println("[StyleService] Matches pattern2 (" + className + " {): " + matchesPattern2);
-		
 		if (matchesPattern1 || matchesPattern2)
 		{
-			System.err.println("[StyleService] Class name detected at start - checking if wrapper or complete LESS...");
-			
 			// Check if this is a COMPLETE LESS definition (multiple rules/at-rules) or a SINGLE wrapper
 			// Count top-level closing braces after the first opening brace
 			int firstBrace = trimmed.indexOf('{');
 			if (firstBrace == -1)
 			{
-				System.err.println("[StyleService] ERROR - no opening brace found");
 				return cssContent;
 			}
 			
@@ -460,18 +420,13 @@ public class StyleService
 				}
 			}
 			
-			System.err.println("[StyleService] First brace at: " + firstBrace + ", matching close at: " + matchingCloseBrace);
-			
 			if (matchingCloseBrace == -1)
 			{
-				System.err.println("[StyleService] ERROR - no matching closing brace");
 				return cssContent;
 			}
 			
 			// Check if there's significant content after the matching closing brace
 			String afterFirstRule = trimmed.substring(matchingCloseBrace + 1).trim();
-			System.err.println("[StyleService] Content after first rule (length=" + afterFirstRule.length() + "): " + 
-				(afterFirstRule.length() > 100 ? afterFirstRule.substring(0, 100) + "..." : afterFirstRule));
 			
 			// If there's significant content after (other rules, keyframes, etc.), this is a COMPLETE LESS definition
 			// Check for: other class definitions (.className:hover, .className::before), @keyframes, @media, etc.
@@ -480,32 +435,15 @@ public class StyleService
 				 afterFirstRule.matches(".*\\." + Pattern.quote(className) + ".*\\{.*") ||
 				 afterFirstRule.matches(".*@(keyframes|media|supports).*\\{.*"));
 			
-			System.err.println("[StyleService] Has additional rules after first block: " + hasAdditionalRules);
-			
 			if (hasAdditionalRules)
 			{
-				System.err.println("[StyleService] COMPLETE LESS DEFINITION detected - using as-is (no unwrapping)");
-				System.err.println("[StyleService] This appears to be multiple rules/keyframes, not a single wrapper");
-				System.err.println("[StyleService] ===== END PREPROCESSING =====");
 				return cssContent;
 			}
 			
 			// Single wrapper case - extract inner content
-			System.err.println("[StyleService] SINGLE WRAPPER detected - unwrapping it...");
 			String innerContent = trimmed.substring(firstBrace + 1, matchingCloseBrace).trim();
-			System.err.println("[StyleService] Extracted inner content length: " + innerContent.length());
-			System.err.println("[StyleService] Extracted content (first 200 chars): " + 
-				(innerContent.length() > 200 ? innerContent.substring(0, 200) + "..." : innerContent));
-			System.err.println("[StyleService] SUCCESS - wrapper stripped");
-			System.err.println("[StyleService] ===== END PREPROCESSING =====");
 			return innerContent;
 		}
-		else
-		{
-			System.err.println("[StyleService] NO WRAPPER DETECTED - using content as-is");
-		}
-		
-		System.err.println("[StyleService] ===== END PREPROCESSING =====");
 		return cssContent;
 	}
 	

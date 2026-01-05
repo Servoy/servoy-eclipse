@@ -1,4 +1,6 @@
-package com.servoy.eclipse.knowledgebase.mcp.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers.utility;
+
+import com.servoy.eclipse.knowledgebase.mcp.handlers.AbstractToolHandler;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -6,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
 import com.servoy.eclipse.knowledgebase.service.RulesCache;
 import com.servoy.eclipse.knowledgebase.service.ServoyEmbeddingService;
@@ -22,7 +23,7 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
  * Knowledge handler - retrieves Servoy documentation and tool instructions.
  * Tools: getKnowledge
  */
-public class KnowledgeToolHandler implements IToolHandler
+public class KnowledgeToolHandler extends AbstractToolHandler
 {
 	@Override
 	public String getHandlerName()

@@ -141,8 +141,6 @@ public class FormService
 	{
 		try
 		{
-			System.err.println("[FormService] refreshFormAfterStyleChange called for LESS file: " + lessFileName);
-			
 			// Get the Eclipse workspace and project
 			org.eclipse.core.resources.IWorkspaceRoot workspaceRoot = 
 				org.eclipse.core.resources.ResourcesPlugin.getWorkspace().getRoot();
@@ -163,7 +161,6 @@ public class FormService
 			
 			if (targetProject == null)
 			{
-				System.err.println("[FormService] Could not find Eclipse project for path: " + projectPath);
 				return false;
 			}
 			
@@ -173,11 +170,8 @@ public class FormService
 			
 			if (!lessFile.exists())
 			{
-				System.err.println("[FormService] LESS file not found: " + lessFile.getFullPath());
 				return false;
 			}
-			
-			System.err.println("[FormService] Touching LESS file to trigger refresh: " + lessFile.getFullPath());
 			
 			// Touch the file - this updates the modification timestamp and triggers
 			// Eclipse's resource change listeners, causing editors to refresh

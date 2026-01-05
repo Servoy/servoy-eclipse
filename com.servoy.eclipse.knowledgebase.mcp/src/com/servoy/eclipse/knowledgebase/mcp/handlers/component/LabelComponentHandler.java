@@ -1,4 +1,4 @@
-package com.servoy.eclipse.knowledgebase.mcp.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers.component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -111,9 +111,6 @@ public class LabelComponentHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleAddLabel(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[LabelComponentHandler] handleAddLabel CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -191,9 +188,6 @@ public class LabelComponentHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleUpdateLabel(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[LabelComponentHandler] handleUpdateLabel CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -271,9 +265,6 @@ public class LabelComponentHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleDeleteLabel(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[LabelComponentHandler] handleDeleteLabel CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();

@@ -1,4 +1,4 @@
-package com.servoy.eclipse.knowledgebase.mcp.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers.component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -112,9 +112,6 @@ public class ButtonComponentHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleAddButton(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[ButtonComponentHandler] handleAddButton CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -196,9 +193,6 @@ public class ButtonComponentHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleUpdateButton(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[ButtonComponentHandler] handleUpdateButton CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -376,9 +370,6 @@ public class ButtonComponentHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleGetButtonInfo(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[ButtonComponentHandler] handleGetButtonInfo CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -484,21 +475,8 @@ public class ButtonComponentHandler implements IToolHandler
 						if (form != null)
 						{
 							result[0] = form.getName();
-							System.err.println("[ButtonComponentHandler] Current form detected: " + result[0]);
-						}
-						else
-						{
-							System.err.println("[ButtonComponentHandler] Active editor does not contain a form");
 						}
 					}
-					else
-					{
-						System.err.println("[ButtonComponentHandler] No active editor found");
-					}
-				}
-				else
-				{
-					System.err.println("[ButtonComponentHandler] No active workbench page found");
 				}
 			}
 			catch (Exception e)

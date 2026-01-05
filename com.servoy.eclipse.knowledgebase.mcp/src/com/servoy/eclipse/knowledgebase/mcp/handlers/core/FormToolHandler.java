@@ -1,4 +1,6 @@
-package com.servoy.eclipse.knowledgebase.mcp.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers.core;
+
+import com.servoy.eclipse.knowledgebase.mcp.handlers.AbstractPersistenceHandler;
 
 import java.awt.Dimension;
 import java.util.List;
@@ -11,7 +13,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
 import com.servoy.eclipse.knowledgebase.mcp.services.ContextService;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -35,7 +36,7 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
  * Forms handler - all FORMS intent tools
  * Tools: openForm, setMainForm, listForms
  */
-public class FormToolHandler implements IToolHandler
+public class FormToolHandler extends AbstractPersistenceHandler
 {
 	@Override
 	public String getHandlerName()
@@ -46,8 +47,6 @@ public class FormToolHandler implements IToolHandler
 	@Override
 	public void registerTools(McpSyncServer server)
 	{
-		System.err.println("[FormToolHandler] registerTools() called");
-		
 		// Utility tool: getCurrentForm
 		ToolHandlerRegistry.registerTool(
 			server,
@@ -102,8 +101,6 @@ public class FormToolHandler implements IToolHandler
 			"Required: name (string) - the form name. " +
 			"Returns: Form properties including width, height, dataSource, style type, and other settings.",
 			this::handleGetFormProperties);
-		
-		System.err.println("[FormToolHandler] Tools registered: getCurrentForm, openForm, setMainForm, listForms, getFormProperties");
 	}
 
 	// =============================================
@@ -112,13 +109,9 @@ public class FormToolHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleOpenForm(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[FormToolHandler] handleOpenForm CALLED");
-		
 		try
 		{
 			Map<String, Object> args = request.arguments();
-			System.err.println("[FormToolHandler] Request arguments: " + args);
 			
 			// Extract parameters
 			String name = extractString(args, "name", null);
@@ -134,7 +127,6 @@ public class FormToolHandler implements IToolHandler
 			// Validate required parameters
 			if (name == null || name.trim().isEmpty())
 			{
-				System.err.println("[FormToolHandler] ERROR: name parameter is required");
 				return McpSchema.CallToolResult.builder()
 					.content(List.of(new TextContent("Error: 'name' parameter is required")))
 					.isError(true)
@@ -150,10 +142,6 @@ public class FormToolHandler implements IToolHandler
 					.build();
 			}
 			
-			System.err.println("[FormToolHandler] Extracted parameters - name: " + name + ", create: " + create + 
-				", width: " + width + ", height: " + height + ", style: " + style + 
-				", dataSource: " + dataSource + ", extendsForm: " + extendsForm + ", setAsMainForm: " + setAsMainForm);
-			
 			// Execute on UI thread
 			final String[] result = new String[1];
 			final Exception[] exception = new Exception[1];
@@ -161,21 +149,16 @@ public class FormToolHandler implements IToolHandler
 			Display.getDefault().syncExec(() -> {
 				try
 				{
-					System.err.println("[FormToolHandler] Executing openForm() on UI thread...");
 					result[0] = openOrCreateForm(name, create, width, height, style, dataSource, extendsForm, setAsMainForm, properties, args);
-					System.err.println("[FormToolHandler] openForm() completed successfully");
 				}
 				catch (Exception e)
 				{
-					System.err.println("[FormToolHandler] openForm() threw exception: " + e.getMessage());
-					e.printStackTrace();
 					exception[0] = e;
 				}
 			});
 			
 			if (exception[0] != null)
 			{
-				System.err.println("[FormToolHandler] Form operation failed");
 				ServoyLog.logError("Error opening/creating form: " + name, exception[0]);
 				return McpSchema.CallToolResult.builder()
 					.content(List.of(new TextContent("Error: " + exception[0].getMessage())))
@@ -183,7 +166,6 @@ public class FormToolHandler implements IToolHandler
 					.build();
 			}
 			
-			System.err.println("[FormToolHandler] Form operation succeeded: " + result[0]);
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent(result[0])))
 				.build();
@@ -204,9 +186,6 @@ public class FormToolHandler implements IToolHandler
 	
 	private McpSchema.CallToolResult handleSetMainForm(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[FormToolHandler] handleSetMainForm CALLED");
-		
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -263,16 +242,12 @@ public class FormToolHandler implements IToolHandler
 	
 	private McpSchema.CallToolResult handleListForms(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[FormToolHandler] handleListForms CALLED");
-		
 		try
 		{
 			Map<String, Object> args = request.arguments();
 			
 			// Extract scope parameter (default: "all")
 			String scope = extractString(args, "scope", "all");
-			System.err.println("[FormToolHandler] Scope parameter: " + scope);
 			
 			// Validate scope parameter
 			if (!scope.equals("current") && !scope.equals("all"))
@@ -327,9 +302,6 @@ public class FormToolHandler implements IToolHandler
 	
 	private McpSchema.CallToolResult handleGetFormProperties(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[FormToolHandler] handleGetFormProperties CALLED");
-		
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -392,8 +364,6 @@ public class FormToolHandler implements IToolHandler
 	private String openOrCreateForm(String name, boolean create, int width, int height, String style,
 		String dataSource, String extendsForm, boolean setAsMainForm, Map<String, Object> properties, Map<String, Object> args) throws RepositoryException
 	{
-		System.err.println("[FormToolHandler.openOrCreateForm] Processing form: " + name);
-
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject servoyProject = servoyModel.getActiveProject();
 
@@ -421,52 +391,63 @@ public class FormToolHandler implements IToolHandler
 			throw new RepositoryException("Cannot get editing solution from target: " + targetContext);
 		}
 
-		// Search for existing form: current context first, then fall back to all modules
-		Form form = targetProject.getEditingSolution().getForm(name);
+		// For READ operations (opening existing form): Search ALL contexts and collect ALL matches
+		// Context NEVER changes for READ operations
+		java.util.List<Form> allMatchingForms = new java.util.ArrayList<>();
+		java.util.List<String> formLocations = new java.util.ArrayList<>();
 		
-		// If not found in current context, search in active solution (if different from target)
-		if (form == null && !targetProject.equals(servoyProject))
+		// Search in target context first
+		Form formInTarget = targetProject.getEditingSolution().getForm(name);
+		if (formInTarget != null)
 		{
-			form = servoyProject.getEditingSolution().getForm(name);
+			allMatchingForms.add(formInTarget);
+			formLocations.add(targetContext.equals("active") ? targetProject.getProject().getName() + " (active solution)" : targetContext);
 		}
 		
-		// If still not found, search in all modules
-		if (form == null)
+		// Search in active solution (if different from target)
+		if (!targetProject.equals(servoyProject))
 		{
-			ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
-			for (ServoyProject module : modules)
+			Form formInActive = servoyProject.getEditingSolution().getForm(name);
+			if (formInActive != null && !allMatchingForms.contains(formInActive))
 			{
-				if (module != null && module.getEditingSolution() != null && !module.equals(targetProject))
+				allMatchingForms.add(formInActive);
+				formLocations.add(servoyProject.getProject().getName() + " (active solution)");
+			}
+		}
+		
+		// Search in ALL modules
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		for (ServoyProject module : modules)
+		{
+			if (module != null && module.getEditingSolution() != null && 
+			    !module.equals(targetProject) && !module.equals(servoyProject))
+			{
+				Form formInModule = module.getEditingSolution().getForm(name);
+				if (formInModule != null && !allMatchingForms.contains(formInModule))
 				{
-					form = module.getEditingSolution().getForm(name);
-					if (form != null)
-					{
-						System.err.println("[FormToolHandler.openOrCreateForm] Form found in module: " + getSolutionName(form));
-						break;
-					}
+					allMatchingForms.add(formInModule);
+					formLocations.add(module.getProject().getName());
 				}
 			}
 		}
 		
 		boolean isNewForm = false;
 		boolean isFirstForm = false;
+		Form form = null; // Primary form reference for backward compatibility
 
-		if (form != null)
+		if (!allMatchingForms.isEmpty())
 		{
-			System.err.println("[FormToolHandler.openOrCreateForm] Form exists, opening: " + name);
-			// Form exists - open it (may be from current context or another module)
+			form = allMatchingForms.get(0); // Use first match as primary for compatibility
+			// Will open ALL matches below
 		}
 		else if (create)
 		{
-			System.err.println("[FormToolHandler.openOrCreateForm] Form doesn't exist, creating in " + targetContext + ": " + name);
-
 			// Check if this will be the first form in the target solution
 			java.util.Iterator<Form> existingForms = targetProject.getEditingSolution().getForms(null, true);
 			isFirstForm = !existingForms.hasNext();
 
 			if (isFirstForm)
 			{
-				System.err.println("[FormToolHandler.openOrCreateForm] This is the first form in " + targetContext + " - will set as main form");
 			}
 
 			// Form doesn't exist and create=true - create it in target project (current context)
@@ -492,23 +473,74 @@ public class FormToolHandler implements IToolHandler
 			// Check if width was explicitly provided in the original arguments
 			if (args.containsKey("width") && !properties.containsKey("width"))
 			{
-				System.err.println("[FormToolHandler.openOrCreateForm] Adding explicitly provided width=" + width + " to properties for existing form");
 				properties.put("width", width);
 			}
 			
 			// Check if height was explicitly provided in the original arguments
 			if (args.containsKey("height") && !properties.containsKey("height"))
 			{
-				System.err.println("[FormToolHandler.openOrCreateForm] Adding explicitly provided height=" + height + " to properties for existing form");
 				properties.put("height", height);
 			}
 		}
 		
-		// Apply additional properties if provided
+		// Check if UPDATE operation is requested (properties, extendsForm, or setAsMainForm)
+		boolean isUpdateOperation = (properties != null && !properties.isEmpty()) || 
+		                            (extendsForm != null && !extendsForm.trim().isEmpty()) ||
+		                            setAsMainForm;
+		
+		// If UPDATE operation and form not in current context, request approval
+		if (!isNewForm && isUpdateOperation)
+		{
+			// Check if form is in current context
+			Form formInCurrentContext = targetProject.getEditingSolution().getForm(name);
+			
+			if (formInCurrentContext == null)
+			{
+				// UPDATE operation but form not in current context - need approval
+				String foundLocation = null;
+				
+				// Find where it is
+				if (!targetProject.equals(servoyProject) && servoyProject.getEditingSolution().getForm(name) != null)
+				{
+					foundLocation = "active";
+				}
+				else
+				{
+					ServoyProject[] projectModules = servoyModel.getModulesOfActiveProject();
+					for (ServoyProject module : projectModules)
+					{
+						if (module != null && module.getEditingSolution() != null && !module.equals(targetProject))
+						{
+							if (module.getEditingSolution().getForm(name) != null)
+							{
+								foundLocation = module.getProject().getName();
+								break;
+							}
+						}
+					}
+				}
+				
+				if (foundLocation != null)
+				{
+					String locationDisplay = "active".equals(foundLocation) ? servoyProject.getProject().getName() + " (active solution)" : foundLocation;
+					String contextDisplay = "active".equals(targetContext) ? targetProject.getProject().getName() + " (active solution)" : targetContext;
+					StringBuilder approvalMsg = new StringBuilder();
+					approvalMsg.append("Current context: ").append(contextDisplay).append("\n\n");
+					approvalMsg.append("Form '").append(name).append("' found in ").append(locationDisplay).append(".\n");
+					approvalMsg.append("Current context is ").append(contextDisplay).append(".\n\n");
+					approvalMsg.append("To update this form's properties, I need to switch to ").append(locationDisplay).append(".\n");
+					approvalMsg.append("Do you want to proceed?\n\n");
+					approvalMsg.append("[If yes, I will: setContext({context: \"").append(foundLocation).append("\"}) then update properties]");
+					
+					return approvalMsg.toString();
+				}
+			}
+		}
+		
+		// Apply additional properties if provided (only if in current context or no approval needed)
 		boolean propertiesModified = false;
 		if (properties != null && !properties.isEmpty())
 		{
-			System.err.println("[FormToolHandler.openOrCreateForm] Applying properties: " + properties);
 			applyFormProperties(form, properties, targetProject);
 			propertiesModified = true;
 		}
@@ -516,7 +548,6 @@ public class FormToolHandler implements IToolHandler
 		// Set form parent (inheritance) if specified
 		if (extendsForm != null && !extendsForm.trim().isEmpty())
 		{
-			System.err.println("[FormToolHandler.openOrCreateForm] Setting parent form: " + extendsForm);
 			setFormParent(form, extendsForm, targetProject);
 			propertiesModified = true;
 		}
@@ -524,7 +555,6 @@ public class FormToolHandler implements IToolHandler
 		// Set as main form if requested OR if this is the first form in the solution
 		if (setAsMainForm || isFirstForm)
 		{
-			System.err.println("[FormToolHandler.openOrCreateForm] Setting as main form" + (isFirstForm ? " (first form in solution)" : ""));
 			targetProject.getEditingSolution().setFirstFormID(form.getUUID().toString());
 			propertiesModified = true;
 		}
@@ -535,12 +565,28 @@ public class FormToolHandler implements IToolHandler
 			targetProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
 		}
 
-		// Open the form in designer
-		final Form finalForm = form;
-		final boolean finalIsNewForm = isNewForm;
-		Display.getDefault().asyncExec(() -> {
-			EditorUtil.openFormDesignEditor(finalForm, finalIsNewForm, true);
-		});
+		// Open form(s) in designer
+		// For READ operations (existing forms): Open ALL matching forms
+		// For CREATE operations: Open the newly created form
+		if (isNewForm)
+		{
+			final Form finalForm = form;
+			Display.getDefault().asyncExec(() -> {
+				EditorUtil.openFormDesignEditor(finalForm, true, true);
+			});
+		}
+		else if (!allMatchingForms.isEmpty())
+		{
+			// READ operation: Open ALL matching forms in separate editors
+			// Context NEVER changes
+			final java.util.List<Form> formsToOpen = new java.util.ArrayList<>(allMatchingForms);
+			Display.getDefault().asyncExec(() -> {
+				for (Form formToOpen : formsToOpen)
+				{
+					EditorUtil.openFormDesignEditor(formToOpen, false, true);
+				}
+			});
+		}
 
 		// Build result message with context information
 		StringBuilder result = new StringBuilder();
@@ -558,16 +604,21 @@ public class FormToolHandler implements IToolHandler
 		}
 		else
 		{
-			result.append("Form '").append(name).append("' opened successfully");
-			
-			// Add location info if form is from a different module
-			String formSolution = getSolutionName(form);
-			String activeSolutionName = servoyProject.getEditingSolution().getName();
-			
-			if (!formSolution.equals(activeSolutionName))
+			// READ operation result: Show ALL matches
+			if (allMatchingForms.size() == 1)
 			{
-				result.append(" (from module: ").append(formSolution).append(")");
+				result.append("Form '").append(name).append("' opened successfully");
+				result.append(" (from ").append(formLocations.get(0)).append(")");
 			}
+			else
+			{
+				result.append("Form '").append(name).append("' found in ").append(allMatchingForms.size()).append(" locations. Opened all:\n");
+				for (int i = 0; i < allMatchingForms.size(); i++)
+				{
+					result.append("  - ").append(formLocations.get(i)).append("\n");
+				}
+			}
+			result.append("\n[Context remains: ").append(contextDisplay).append("]");
 		}
 
 		if (propertiesModified && !isNewForm)
@@ -593,8 +644,6 @@ public class FormToolHandler implements IToolHandler
 	private Form createNewForm(ServoyProject servoyProject, String formName, int width, int height, 
 		String style, String dataSource) throws RepositoryException
 	{
-		System.err.println("[FormToolHandler.createNewForm] Creating form: " + formName);
-		
 		// Create validator
 		IValidateName validator = new ScriptNameValidator(servoyProject.getEditingFlattenedSolution());
 
@@ -624,15 +673,15 @@ public class FormToolHandler implements IToolHandler
 	 */
 	private void applyFormProperties(Form form, Map<String, Object> properties, ServoyProject servoyProject) throws RepositoryException
 	{
-		for (Map.Entry<String, Object> entry : properties.entrySet())
+		Object propValue = null;
+		String propName = null;
+		try
 		{
-			String propName = entry.getKey();
-			Object propValue = entry.getValue();
-			
-			System.err.println("[FormToolHandler.applyFormProperties] Setting property: " + propName + " = " + propValue);
-			
-			try
+			for (Map.Entry<String, Object> entry : properties.entrySet())
 			{
+				propName = entry.getKey();
+				propValue = entry.getValue();
+			
 				switch (propName)
 				{
 					case "width":
@@ -704,15 +753,13 @@ public class FormToolHandler implements IToolHandler
 						break;
 						
 					default:
-						System.err.println("[FormToolHandler.applyFormProperties] WARNING: Unknown property: " + propName);
 						break;
 				}
 			}
-			catch (Exception e)
-			{
-				System.err.println("[FormToolHandler.applyFormProperties] ERROR setting property " + propName + ": " + e.getMessage());
-				throw new RepositoryException("Error setting property '" + propName + "': " + e.getMessage());
-			}
+		}
+		catch (Exception e)
+		{
+			throw new RepositoryException("Error setting property '" + propName + "': " + e.getMessage());
 		}
 	}
 	
@@ -729,7 +776,6 @@ public class FormToolHandler implements IToolHandler
 		}
 		
 		form.setExtendsID(parentForm.getUUID().toString());
-		System.err.println("[FormToolHandler.setFormParent] Set parent form to: " + parentFormName);
 	}
 	
 	/**
@@ -878,7 +924,7 @@ public class FormToolHandler implements IToolHandler
 	}
 	
 	/**
-	 * Gets properties of a form.
+	 * Gets properties of form(s). READ operation - displays ALL matches if found in multiple locations.
 	 * Searches in current context first, then falls back to active solution and all modules.
 	 */
 	private String getFormProperties(String formName) throws RepositoryException
@@ -896,60 +942,94 @@ public class FormToolHandler implements IToolHandler
 			throw new RepositoryException("Cannot get the Servoy Solution from the selected Servoy Project");
 		}
 		
-		// First, search in current context
+		// Resolve current context
 		ServoyProject targetProject = resolveTargetProject(servoyModel);
-		Form form = null;
+		String targetContext = ContextService.getInstance().getCurrentContext();
 		
+		// READ operation: Search ALL contexts and collect ALL matches
+		java.util.List<Form> allMatchingForms = new java.util.ArrayList<>();
+		java.util.List<String> formLocations = new java.util.ArrayList<>();
+		
+		// Search in target context
 		if (targetProject != null && targetProject.getEditingSolution() != null)
 		{
-			form = targetProject.getEditingSolution().getForm(formName);
-		}
-		
-		// If not found in current context, search in active solution
-		if (form == null)
-		{
-			form = servoyProject.getEditingSolution().getForm(formName);
-		}
-		
-		// If still not found, search in all modules
-		if (form == null)
-		{
-			ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
-			for (ServoyProject module : modules)
+			Form formInTarget = targetProject.getEditingSolution().getForm(formName);
+			if (formInTarget != null)
 			{
-				if (module != null && module.getEditingSolution() != null)
+				allMatchingForms.add(formInTarget);
+				formLocations.add(targetContext.equals("active") ? targetProject.getProject().getName() + " (active solution)" : targetContext);
+			}
+		}
+		
+		// Search in active solution (if different from target)
+		if (!targetProject.equals(servoyProject))
+		{
+			Form formInActive = servoyProject.getEditingSolution().getForm(formName);
+			if (formInActive != null && !allMatchingForms.contains(formInActive))
+			{
+				allMatchingForms.add(formInActive);
+				formLocations.add(servoyProject.getProject().getName() + " (active solution)");
+			}
+		}
+		
+		// Search in all modules
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		for (ServoyProject module : modules)
+		{
+			if (module != null && module.getEditingSolution() != null && 
+			    !module.equals(targetProject) && !module.equals(servoyProject))
+			{
+				Form formInModule = module.getEditingSolution().getForm(formName);
+				if (formInModule != null && !allMatchingForms.contains(formInModule))
 				{
-					form = module.getEditingSolution().getForm(formName);
-					if (form != null)
-					{
-						break;
-					}
+					allMatchingForms.add(formInModule);
+					formLocations.add(module.getProject().getName());
 				}
 			}
 		}
 		
-		if (form == null)
+		if (allMatchingForms.isEmpty())
 		{
 			throw new RepositoryException("Form '" + formName + "' not found in current context, active solution, or any modules");
 		}
 		
-		// Get origin information
-		String solutionName = getSolutionName(form);
-		String activeSolutionName = servoyProject.getEditingSolution().getName();
-		
+		// Build result showing ALL matching forms
 		StringBuilder result = new StringBuilder();
-		result.append("Form Properties for '").append(formName).append("':\n");
+		String contextDisplay = "active".equals(targetContext) ? targetProject.getProject().getName() + " (active solution)" : targetContext;
 		
-		// Show location/origin
-		result.append("Location: ");
-		if (solutionName.equals(activeSolutionName))
+		if (allMatchingForms.size() == 1)
 		{
-			result.append("active solution (").append(activeSolutionName).append(")\n\n");
+			// Single match - standard output
+			Form form = allMatchingForms.get(0);
+			result.append("Form Properties for '").append(formName).append("':\n");
+			result.append("Location: ").append(formLocations.get(0)).append("\n\n");
+			result.append(getFormPropertiesDetails(form, servoyProject));
 		}
 		else
 		{
-			result.append("module '").append(solutionName).append("'\n\n");
+			// Multiple matches - show all
+			result.append("Form '").append(formName).append("' found in ").append(allMatchingForms.size()).append(" locations:\n\n");
+			for (int i = 0; i < allMatchingForms.size(); i++)
+			{
+				result.append("=== Form from: ").append(formLocations.get(i)).append(" ===\n");
+				result.append(getFormPropertiesDetails(allMatchingForms.get(i), servoyProject));
+				if (i < allMatchingForms.size() - 1)
+				{
+					result.append("\n");
+				}
+			}
 		}
+		
+		result.append("\n[Context remains: ").append(contextDisplay).append("]");
+		return result.toString();
+	}
+	
+	/**
+	 * Helper to extract detailed form properties.
+	 */
+	private String getFormPropertiesDetails(Form form, ServoyProject servoyProject)
+	{
+		StringBuilder result = new StringBuilder();
 		
 		// Basic properties
 		result.append("Dimensions:\n");
@@ -1019,9 +1099,6 @@ public class FormToolHandler implements IToolHandler
 	
 	private McpSchema.CallToolResult handleGetCurrentForm(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[FormToolHandler] handleGetCurrentForm CALLED");
-		
 		try
 		{
 			final String[] result = new String[1];
@@ -1049,7 +1126,6 @@ public class FormToolHandler implements IToolHandler
 						{
 							String editorTitle = activeEditor.getTitle();
 							String editorClass = activeEditor.getClass().getSimpleName();
-							System.err.println("[FormToolHandler] Active editor: '" + editorTitle + "' (type: " + editorClass + ")");
 							
 							// Detect form via ServoyModel lookup by editor title
 							// This works because form editors have the form name as their title
@@ -1068,14 +1144,12 @@ public class FormToolHandler implements IToolHandler
 							}
 							catch (Exception e)
 							{
-								System.err.println("[FormToolHandler] Exception during form lookup: " + e.getMessage());
 								ServoyLog.logError("Error looking up form by editor title", e);
 							}
 							
 							if (form != null)
 							{
 								result[0] = form.getName();
-								System.err.println("[FormToolHandler] SUCCESS - Form detected: " + result[0]);
 							}
 							else
 							{
@@ -1088,26 +1162,21 @@ public class FormToolHandler implements IToolHandler
 								{
 									errorDetail[0] = "The active editor '" + editorTitle + "' is not a form editor (type: " + editorClass + "). Please open a form in the editor.";
 								}
-								System.err.println("[FormToolHandler] FAIL - " + errorDetail[0]);
 							}
 						}
 						else
 						{
 							errorDetail[0] = "No active editor found - no file is currently open or focused";
-							System.err.println("[FormToolHandler] FAIL - " + errorDetail[0]);
 						}
 					}
 					else
 					{
 						errorDetail[0] = "No active workbench page found";
-						System.err.println("[FormToolHandler] FAIL - " + errorDetail[0]);
 					}
 				}
 				catch (Exception e)
 				{
 					errorDetail[0] = "Exception: " + e.getClass().getSimpleName() + " - " + e.getMessage();
-					System.err.println("[FormToolHandler] EXCEPTION - " + errorDetail[0]);
-					e.printStackTrace();
 					ServoyLog.logError("Error detecting current form", e);
 				}
 			});
@@ -1128,8 +1197,6 @@ public class FormToolHandler implements IToolHandler
 		}
 		catch (Exception e)
 		{
-			System.err.println("[FormToolHandler] EXCEPTION: " + e.getMessage());
-			e.printStackTrace();
 			ServoyLog.logError("Unexpected error in handleGetCurrentForm", e);
 			return McpSchema.CallToolResult.builder()
 				.content(List.of(new TextContent("Error: Unexpected error: " + e.getMessage())))
@@ -1142,66 +1209,6 @@ public class FormToolHandler implements IToolHandler
 	// HELPER METHODS - Parameter Extraction
 	// =============================================
 	
-	private String extractString(Map<String, Object> args, String key, String defaultValue)
-	{
-		if (args == null || !args.containsKey(key))
-		{
-			return defaultValue;
-		}
-		Object value = args.get(key);
-		return value != null ? value.toString() : defaultValue;
-	}
-	
-	private int extractInt(Map<String, Object> args, String key, int defaultValue)
-	{
-		if (args == null || !args.containsKey(key))
-		{
-			return defaultValue;
-		}
-		Object value = args.get(key);
-		if (value instanceof Number)
-		{
-			return ((Number)value).intValue();
-		}
-		try
-		{
-			return Integer.parseInt(value.toString());
-		}
-		catch (NumberFormatException e)
-		{
-			return defaultValue;
-		}
-	}
-	
-	private boolean extractBoolean(Map<String, Object> args, String key, boolean defaultValue)
-	{
-		if (args == null || !args.containsKey(key))
-		{
-			return defaultValue;
-		}
-		Object value = args.get(key);
-		if (value instanceof Boolean)
-		{
-			return (Boolean)value;
-		}
-		return Boolean.parseBoolean(value.toString());
-	}
-	
-	@SuppressWarnings("unchecked")
-	private Map<String, Object> extractMap(Map<String, Object> args, String key)
-	{
-		if (args == null || !args.containsKey(key))
-		{
-			return null;
-		}
-		Object value = args.get(key);
-		if (value instanceof Map)
-		{
-			return (Map<String, Object>)value;
-		}
-		return null;
-	}
-
 	// =============================================
 	// UTILITY METHODS
 	// =============================================
@@ -1215,9 +1222,9 @@ public class FormToolHandler implements IToolHandler
 		try
 		{
 			IRootObject rootObject = persist.getRootObject();
-			if (rootObject instanceof Solution)
+			if (rootObject instanceof Solution solution)
 			{
-				return ((Solution)rootObject).getName();
+				return solution.getName();
 			}
 		}
 		catch (Exception e)
@@ -1241,35 +1248,5 @@ public class FormToolHandler implements IToolHandler
 		{
 			return " (in: " + solutionName + ")";
 		}
-	}
-
-	/**
-	 * Resolve current context to a ServoyProject.
-	 * Uses ContextService to determine which solution/module to target.
-	 * 
-	 * @param servoyModel The Servoy model
-	 * @return The target ServoyProject (active solution or module)
-	 * @throws RepositoryException If context is invalid or project not found
-	 */
-	private ServoyProject resolveTargetProject(IDeveloperServoyModel servoyModel) throws RepositoryException
-	{
-		String context = ContextService.getInstance().getCurrentContext();
-
-		if ("active".equals(context))
-		{
-			return servoyModel.getActiveProject();
-		}
-
-		// Find module by name
-		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
-		for (ServoyProject module : modules)
-		{
-			if (module.getProject().getName().equals(context))
-			{
-				return module;
-			}
-		}
-
-		throw new RepositoryException("Context '" + context + "' not found or not a module of active solution");
 	}
 }

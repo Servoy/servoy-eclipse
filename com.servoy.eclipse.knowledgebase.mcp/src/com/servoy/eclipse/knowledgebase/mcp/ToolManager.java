@@ -12,11 +12,11 @@ public class ToolManager
 	/**
 	 * Get all tool handlers for MCP registration.
 	 * Called by aibridge's McpServletProvider to register tools.
- * 
- * @return Array of all tool handler instances
- */
-public static IToolHandler[] getHandlers()
-{
-return ToolHandlerRegistry.getHandlers();
-}
+	 * 
+	 * @return Array of all tool handler instances
+	 */
+	public static IToolHandler[] getHandlers()
+	{
+		return ToolHandlerRegistry.getHandlers();
+	}
 }

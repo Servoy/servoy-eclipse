@@ -37,9 +37,6 @@ public class BootstrapComponentService
 	{
 		try
 		{
-			System.err.println("[BootstrapComponentService] addComponentToForm called: form='" + formName + 
-				"', component='" + componentName + "', type='" + typeName + "'");
-			
 			// Build path to form file
 			Path formPath = Paths.get(projectPath, "forms", formName + ".frm");
 			
@@ -50,8 +47,6 @@ public class BootstrapComponentService
 				String availableForms = listAvailableForms(projectPath);
 				return "Form '" + formName + "' not found. Available forms: " + availableForms;
 			}
-			
-			System.err.println("[BootstrapComponentService] Loading form file: " + formPath);
 			
 			// Read and parse existing form JSON (will throw JSONException if corrupted)
 			String formContent = new String(Files.readAllBytes(formPath));
@@ -132,7 +127,6 @@ public class BootstrapComponentService
 			
 			ServoyLog.logInfo("[BootstrapComponentService] Successfully added component '" + componentName + 
 				"' (type: " + typeName + ") to form '" + formName + "'");
-			System.err.println("[BootstrapComponentService] Component '" + componentName + "' added successfully");
 			
 			return null;  // Success
 		}
@@ -299,9 +293,6 @@ public class BootstrapComponentService
 	{
 		try
 		{
-			System.err.println("[BootstrapComponentService] updateComponent called: form='" + formName + 
-				"', component='" + componentName + "'");
-			
 			Path formPath = Paths.get(projectPath, "forms", formName + ".frm");
 			
 			if (!Files.exists(formPath))
@@ -414,9 +405,6 @@ public class BootstrapComponentService
 	{
 		try
 		{
-			System.err.println("[BootstrapComponentService] deleteComponent called: form='" + formName + 
-				"', component='" + componentName + "'");
-			
 			Path formPath = Paths.get(projectPath, "forms", formName + ".frm");
 			
 			if (!Files.exists(formPath))

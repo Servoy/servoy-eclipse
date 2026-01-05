@@ -1,4 +1,6 @@
-package com.servoy.eclipse.knowledgebase.mcp.handlers;
+package com.servoy.eclipse.knowledgebase.mcp.handlers.core;
+
+import com.servoy.eclipse.knowledgebase.mcp.handlers.AbstractPersistenceHandler;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +9,6 @@ import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
 import com.servoy.eclipse.knowledgebase.mcp.ToolHandlerRegistry;
 import com.servoy.eclipse.knowledgebase.mcp.services.ContextService;
 import com.servoy.eclipse.knowledgebase.mcp.services.FormService;
@@ -16,7 +17,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.RepositoryException;
 
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
@@ -25,7 +25,7 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
  * Style handler - CRUD operations for CSS/LESS styles
  * Tools: addStyle, getStyle, listStyles, deleteStyle
  */
-public class StyleHandler implements IToolHandler
+public class StyleHandler extends AbstractPersistenceHandler
 {
 	@Override
 	public String getHandlerName()
@@ -33,7 +33,8 @@ public class StyleHandler implements IToolHandler
 		return "StyleHandler";
 	}
 
-	private Map<String, ToolHandlerRegistry.ToolDefinition> getToolDefinitions()
+	@Override
+	protected Map<String, ToolHandlerRegistry.ToolDefinition> getToolDefinitions()
 	{
 		Map<String, ToolHandlerRegistry.ToolDefinition> tools = new java.util.LinkedHashMap<>();
 
@@ -71,28 +72,12 @@ public class StyleHandler implements IToolHandler
 		return tools;
 	}
 
-	@Override
-	public void registerTools(McpSyncServer server)
-	{
-		for (Map.Entry<String, ToolHandlerRegistry.ToolDefinition> entry : getToolDefinitions().entrySet())
-		{
-			ToolHandlerRegistry.registerTool(
-				server,
-				entry.getKey(),
-				entry.getValue().description,
-				entry.getValue().handler);
-		}
-	}
-
 	// =============================================
 	// TOOL: addStyle
 	// =============================================
 
 	private McpSchema.CallToolResult handleAddStyle(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[StyleHandler] handleAddStyle CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -120,8 +105,96 @@ public class StyleHandler implements IToolHandler
 
 			try
 			{
-				String projectPath = getProjectPath();
-				String solutionName = getSolutionName();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				ServoyProject servoyProject = servoyModel.getActiveProject();
+				
+				if (servoyProject == null)
+				{
+					return errorResult("No active Servoy solution project found");
+				}
+				
+				// Resolve current context
+				ServoyProject targetProject = resolveTargetProject(servoyModel);
+				String targetContext = ContextService.getInstance().getCurrentContext();
+				String contextDisplay = "active".equals(targetContext) ? targetProject.getProject().getName() + " (active solution)" : targetContext;
+				
+				// Search for existing style across all contexts (UPDATE vs CREATE detection)
+				String foundInContext = null;
+				String foundProjectPath = null;
+				String foundSolutionName = null;
+				
+				// Check current context first
+				String projectPath = targetProject.getProject().getLocation().toOSString();
+				String solutionName = targetProject.getSolution().getName();
+				String result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+				
+				if (!result.startsWith("Class '") || !result.contains("not found"))
+				{
+					foundInContext = targetContext;
+					foundProjectPath = projectPath;
+					foundSolutionName = solutionName;
+				}
+				
+				// If not found in current context, search active solution
+				if (foundInContext == null && !targetProject.equals(servoyProject))
+				{
+					projectPath = servoyProject.getProject().getLocation().toOSString();
+					solutionName = servoyProject.getSolution().getName();
+					result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+					
+					if (!result.startsWith("Class '") || !result.contains("not found"))
+					{
+						foundInContext = "active";
+						foundProjectPath = projectPath;
+						foundSolutionName = solutionName;
+					}
+				}
+				
+				// If still not found, search all modules
+				if (foundInContext == null)
+				{
+					ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+					for (ServoyProject module : modules)
+					{
+						if (module != null && module.getSolution() != null && 
+						    !module.equals(targetProject) && !module.equals(servoyProject))
+						{
+							projectPath = module.getProject().getLocation().toOSString();
+							solutionName = module.getSolution().getName();
+							result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+							
+							if (!result.startsWith("Class '") || !result.contains("not found"))
+							{
+								foundInContext = module.getProject().getName();
+								foundProjectPath = projectPath;
+								foundSolutionName = solutionName;
+								break;
+							}
+						}
+					}
+				}
+				
+				// If style exists in different context, request approval (UPDATE operation)
+				if (foundInContext != null && !foundInContext.equals(targetContext))
+				{
+					String locationDisplay = "active".equals(foundInContext) ? 
+						servoyProject.getProject().getName() + " (active solution)" : foundInContext;
+					
+					StringBuilder approvalMsg = new StringBuilder();
+					approvalMsg.append("Current context: ").append(contextDisplay).append("\n\n");
+					approvalMsg.append("Style '.").append(className).append("' found in ").append(locationDisplay).append(".\n");
+					approvalMsg.append("Current context is ").append(contextDisplay).append(".\n\n");
+					approvalMsg.append("To update this style, I need to switch to ").append(locationDisplay).append(".\n");
+					approvalMsg.append("Do you want to proceed?\n\n");
+					approvalMsg.append("[If yes, I will: setContext({context: \"").append(foundInContext).append("\"}) then update]");
+					
+					return successResult(approvalMsg.toString());
+				}
+				
+				// Style is in current context OR doesn't exist - proceed with add/update
+				// Use current context project path and solution name
+				projectPath = targetProject.getProject().getLocation().toOSString();
+				solutionName = targetProject.getSolution().getName();
 				
 				String error = StyleService.addOrUpdateStyle(projectPath, solutionName, lessFileName, className, cssContent);
 
@@ -163,9 +236,6 @@ public class StyleHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleGetStyle(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[StyleHandler] handleGetStyle CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -194,44 +264,86 @@ public class StyleHandler implements IToolHandler
 					return errorResult("No active Servoy solution project found");
 				}
 				
-				// First, try current context
+				// READ operation: Search ALL contexts and collect ALL matches
+				java.util.List<String> allMatchingStyles = new java.util.ArrayList<>();
+				java.util.List<String> styleLocations = new java.util.ArrayList<>();
+				
+				// Resolve current context
 				ServoyProject targetProject = resolveTargetProject(servoyModel);
+				String targetContext = ContextService.getInstance().getCurrentContext();
+				String contextDisplay = "active".equals(targetContext) ? targetProject.getProject().getName() + " (active solution)" : targetContext;
+				
+				// Search in target context
 				String projectPath = targetProject.getProject().getLocation().toOSString();
 				String solutionName = targetProject.getSolution().getName();
-				
 				String result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
 				
-				// If not found (error message returned), try active solution
-				if (result.startsWith("Class '") && result.contains("not found") && !targetProject.equals(servoyProject))
+				if (!result.startsWith("Class '") || !result.contains("not found"))
+				{
+					allMatchingStyles.add(result);
+					styleLocations.add(targetContext.equals("active") ? targetProject.getProject().getName() + " (active solution)" : targetContext);
+				}
+				
+				// Search in active solution (if different from target)
+				if (!targetProject.equals(servoyProject))
 				{
 					projectPath = servoyProject.getProject().getLocation().toOSString();
 					solutionName = servoyProject.getSolution().getName();
 					result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+					
+					if (!result.startsWith("Class '") || !result.contains("not found"))
+					{
+						allMatchingStyles.add(result);
+						styleLocations.add(servoyProject.getProject().getName() + " (active solution)");
+					}
 				}
 				
-				// If still not found, search in all modules
-				if (result.startsWith("Class '") && result.contains("not found"))
+				// Search in all modules
+				ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+				for (ServoyProject module : modules)
 				{
-					ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
-					for (ServoyProject module : modules)
+					if (module != null && module.getSolution() != null && 
+					    !module.equals(targetProject) && !module.equals(servoyProject))
 					{
-						if (module != null && module.getSolution() != null && !module.equals(targetProject))
+						projectPath = module.getProject().getLocation().toOSString();
+						solutionName = module.getSolution().getName();
+						String moduleResult = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+						
+						if (!moduleResult.startsWith("Class '") || !moduleResult.contains("not found"))
 						{
-							projectPath = module.getProject().getLocation().toOSString();
-							solutionName = module.getSolution().getName();
-							String moduleResult = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
-							
-							if (!moduleResult.startsWith("Class '") || !moduleResult.contains("not found"))
-							{
-								// Found it! Add location info
-								result = "Style found in module '" + module.getProject().getName() + "':\n" + moduleResult;
-								break;
-							}
+							allMatchingStyles.add(moduleResult);
+							styleLocations.add(module.getProject().getName());
 						}
 					}
 				}
-
-				return successResult(result);
+				
+				// Build result showing ALL matching styles
+				if (allMatchingStyles.isEmpty())
+				{
+					return successResult("Class '." + className + "' not found in any context");
+				}
+				else if (allMatchingStyles.size() == 1)
+				{
+					String finalResult = "Style from " + styleLocations.get(0) + ":\n" + allMatchingStyles.get(0) +
+					                     "\n\n[Context remains: " + contextDisplay + "]";
+					return successResult(finalResult);
+				}
+				else
+				{
+					StringBuilder sb = new StringBuilder();
+					sb.append("Style '.").append(className).append("' found in ").append(allMatchingStyles.size()).append(" locations:\n\n");
+					for (int i = 0; i < allMatchingStyles.size(); i++)
+					{
+						sb.append("=== From ").append(styleLocations.get(i)).append(" ===\n");
+						sb.append(allMatchingStyles.get(i));
+						if (i < allMatchingStyles.size() - 1)
+						{
+							sb.append("\n\n");
+						}
+					}
+					sb.append("\n\n[Context remains: ").append(contextDisplay).append("]");
+					return successResult(sb.toString());
+				}
 			}
 			catch (Exception e)
 			{
@@ -252,9 +364,6 @@ public class StyleHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleListStyles(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[StyleHandler] handleListStyles CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -365,9 +474,6 @@ public class StyleHandler implements IToolHandler
 
 	private McpSchema.CallToolResult handleDeleteStyle(McpSyncServerExchange exchange, McpSchema.CallToolRequest request)
 	{
-		System.err.println("========================================");
-		System.err.println("[StyleHandler] handleDeleteStyle CALLED");
-
 		try
 		{
 			Map<String, Object> args = request.arguments();
@@ -388,10 +494,100 @@ public class StyleHandler implements IToolHandler
 
 			try
 			{
-				String projectPath = getProjectPath();
-				String solutionName = getSolutionName();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				ServoyProject servoyProject = servoyModel.getActiveProject();
 				
-				String error = StyleService.deleteStyle(projectPath, solutionName, lessFileName, className);
+				if (servoyProject == null)
+				{
+					return errorResult("No active Servoy solution project found");
+				}
+				
+				// Resolve current context
+				ServoyProject targetProject = resolveTargetProject(servoyModel);
+				String targetContext = ContextService.getInstance().getCurrentContext();
+				String contextDisplay = "active".equals(targetContext) ? targetProject.getProject().getName() + " (active solution)" : targetContext;
+				
+				// Search for style across all contexts
+				String foundInContext = null;
+				String foundProjectPath = null;
+				String foundSolutionName = null;
+				
+				// Check current context first
+				String projectPath = targetProject.getProject().getLocation().toOSString();
+				String solutionName = targetProject.getSolution().getName();
+				String result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+				
+				if (!result.startsWith("Class '") || !result.contains("not found"))
+				{
+					foundInContext = targetContext;
+					foundProjectPath = projectPath;
+					foundSolutionName = solutionName;
+				}
+				
+				// If not found in current context, search active solution
+				if (foundInContext == null && !targetProject.equals(servoyProject))
+				{
+					projectPath = servoyProject.getProject().getLocation().toOSString();
+					solutionName = servoyProject.getSolution().getName();
+					result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+					
+					if (!result.startsWith("Class '") || !result.contains("not found"))
+					{
+						foundInContext = "active";
+						foundProjectPath = projectPath;
+						foundSolutionName = solutionName;
+					}
+				}
+				
+				// If still not found, search all modules
+				if (foundInContext == null)
+				{
+					ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+					for (ServoyProject module : modules)
+					{
+						if (module != null && module.getSolution() != null && 
+						    !module.equals(targetProject) && !module.equals(servoyProject))
+						{
+							projectPath = module.getProject().getLocation().toOSString();
+							solutionName = module.getSolution().getName();
+							result = StyleService.getStyle(projectPath, solutionName, lessFileName, className);
+							
+							if (!result.startsWith("Class '") || !result.contains("not found"))
+							{
+								foundInContext = module.getProject().getName();
+								foundProjectPath = projectPath;
+								foundSolutionName = solutionName;
+								break;
+							}
+						}
+					}
+				}
+				
+				// If not found anywhere, return error
+				if (foundInContext == null)
+				{
+					return errorResult("Style '." + className + "' not found in any context");
+				}
+				
+				// If found in different context, request approval
+				if (!foundInContext.equals(targetContext))
+				{
+					String locationDisplay = "active".equals(foundInContext) ? 
+						servoyProject.getProject().getName() + " (active solution)" : foundInContext;
+					
+					StringBuilder approvalMsg = new StringBuilder();
+					approvalMsg.append("Current context: ").append(contextDisplay).append("\n\n");
+					approvalMsg.append("Style '.").append(className).append("' found in ").append(locationDisplay).append(".\n");
+					approvalMsg.append("Current context is ").append(contextDisplay).append(".\n\n");
+					approvalMsg.append("To delete this style, I need to switch to ").append(locationDisplay).append(".\n");
+					approvalMsg.append("Do you want to proceed?\n\n");
+					approvalMsg.append("[If yes, I will: setContext({context: \"").append(foundInContext).append("\"}) then delete]");
+					
+					return successResult(approvalMsg.toString());
+				}
+				
+				// Style is in current context - proceed with delete
+				String error = StyleService.deleteStyle(foundProjectPath, foundSolutionName, lessFileName, className);
 
 				if (error != null)
 				{
@@ -400,7 +596,7 @@ public class StyleHandler implements IToolHandler
 
 				String targetFile = (lessFileName != null && !lessFileName.trim().isEmpty()) 
 					? lessFileName 
-					: solutionName + ".less";
+					: foundSolutionName + ".less";
 				
 				if (!targetFile.endsWith(".less"))
 				{
@@ -462,54 +658,6 @@ public class StyleHandler implements IToolHandler
 	}
 
 	/**
-	 * Resolve current context to a ServoyProject.
-	 * Uses ContextService to determine which solution/module to target.
-	 */
-	private ServoyProject resolveTargetProject(IDeveloperServoyModel servoyModel) throws RepositoryException
-	{
-		String context = ContextService.getInstance().getCurrentContext();
-
-		if ("active".equals(context))
-		{
-			return servoyModel.getActiveProject();
-		}
-
-		// Find module by name
-		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
-		for (ServoyProject module : modules)
-		{
-			if (module.getProject().getName().equals(context))
-			{
-				return module;
-			}
-		}
-
-		throw new RepositoryException("Context '" + context + "' not found or not a module of active solution");
-	}
-
-	private String extractString(Map<String, Object> args, String key, String defaultValue)
-	{
-		if (args == null || !args.containsKey(key)) return defaultValue;
-		Object value = args.get(key);
-		return value != null ? value.toString() : defaultValue;
-	}
-
-	private McpSchema.CallToolResult successResult(String message)
-	{
-		return McpSchema.CallToolResult.builder()
-			.content(List.of(new TextContent(message)))
-			.build();
-	}
-
-	private McpSchema.CallToolResult errorResult(String message)
-	{
-		return McpSchema.CallToolResult.builder()
-			.content(List.of(new TextContent("Error: " + message)))
-			.isError(true)
-			.build();
-	}
-	
-	/**
 	 * Refreshes the currently open form (if any) to reflect style changes.
 	 * This triggers a resource change notification without closing/reopening the editor.
 	 * 
@@ -519,23 +667,13 @@ public class StyleHandler implements IToolHandler
 	{
 		try
 		{
-			System.err.println("[StyleHandler] Triggering refresh after style change in: " + lessFileName);
-			
 			String projectPath = getProjectPath();
 			
 			// Refresh on UI thread
 			Display.getDefault().asyncExec(() -> {
 				try
 				{
-					boolean refreshed = FormService.refreshFormAfterStyleChange(projectPath, lessFileName);
-					if (refreshed)
-					{
-						System.err.println("[StyleHandler] Style refresh triggered successfully");
-					}
-					else
-					{
-						System.err.println("[StyleHandler] Style refresh could not be triggered");
-					}
+					FormService.refreshFormAfterStyleChange(projectPath, lessFileName);
 				}
 				catch (Exception e)
 				{
