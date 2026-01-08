@@ -329,15 +329,6 @@ public class ValueListToolHandler extends AbstractPersistenceHandler
 			allMatchingValueLists.add(valueList);
 			valueListLocations.add(targetContext.equals("active") ? targetProject.getProject().getName() + " (active solution)" : targetContext);
 			isNewValueList = true;
-
-			// Re-fetch from target solution after save to ensure we have the saved version
-			ValueList savedValueList = targetProject.getEditingSolution().getValueList(name);
-			if (savedValueList != null)
-			{
-				valueList = savedValueList;
-				allMatchingValueLists.set(0, savedValueList);
-				ServoyLog.logInfo("[ValueListToolHandler] Re-fetched saved valuelist from solution");
-			}
 		}
 		else
 		{
@@ -353,7 +344,7 @@ public class ValueListToolHandler extends AbstractPersistenceHandler
 		{
 			final ValueList valueListToOpen = valueList;
 			Display.getDefault().asyncExec(() -> {
-				EditorUtil.openValueListEditor(valueListToOpen, false);
+				EditorUtil.openValueListEditor(valueListToOpen, true);
 			});
 		}
 		else if (!allMatchingValueLists.isEmpty())

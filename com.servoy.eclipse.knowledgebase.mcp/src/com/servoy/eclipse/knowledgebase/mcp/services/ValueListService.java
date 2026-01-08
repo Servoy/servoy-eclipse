@@ -3,6 +3,8 @@ package com.servoy.eclipse.knowledgebase.mcp.services;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Display;
+
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -83,8 +85,17 @@ public class ValueListService
 		// Apply additional properties
 		applyValueListProperties(valueList, properties);
 
-		// Save the valuelist
-		targetProject.saveEditingSolutionNodes(new IPersist[] { valueList }, true);
+		// Save the valuelist synchronously (runAsJob = false) to ensure it completes before editor opens
+		targetProject.saveEditingSolutionNodes(new IPersist[] { valueList }, true, false); // false = synchronous
+		
+		// WORKAROUND: ValueListEditor data binding bug (line 928-932) marks new valuelists as dirty during initialization.
+		// Clear the flag after a short delay to ensure editor has finished initializing.
+		final ValueList valueListRef = valueList;
+		Display.getDefault().timerExec(100, () -> {
+			valueListRef.clearChanged();
+			ServoyLog.logInfo("[ValueListService] Cleared changed flag after editor initialization for: " + valueListRef.getName());
+		});
+		
 		ServoyLog.logInfo("[ValueListService] ValueList created and saved in " + targetProject.getProject().getName() + ": " + name);
 
 		return valueList;
