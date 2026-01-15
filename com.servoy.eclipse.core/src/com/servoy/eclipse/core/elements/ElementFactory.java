@@ -316,7 +316,8 @@ public class ElementFactory
 				updateName(parent, component, copy, validator, IRepository.ELEMENTS);
 			}
 		}
-		if (copy instanceof BaseComponent && parent instanceof Form && ((Form)parent).getUseCssPosition())
+		if (copy instanceof BaseComponent && ((parent instanceof Form && ((Form)parent).getUseCssPosition()) ||
+			(parent instanceof LayoutContainer container && CSSPositionUtils.isCSSPositionContainer(container))))
 		{
 			CSSPosition cssPosition = ((BaseComponent)copy).getCssPosition();
 
@@ -332,6 +333,10 @@ public class ElementFactory
 				{
 					cssPosition.top = String.valueOf(y);
 				}
+			}
+			if (cssPosition == null)
+			{
+				cssPosition = new CSSPosition("10", "-1", "-1", "10", "" + ((BaseComponent)copy).getSize().width, "" + ((BaseComponent)copy).getSize().height);
 			}
 			((BaseComponent)copy).setCssPosition(cssPosition);
 		}
