@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.border.Border;
@@ -2047,10 +2048,15 @@ public class ElementFactory
 		{
 			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 				((WebComponent)formElement).getTypeName());
-			Collection<PropertyDescription> labelForProperties = spec.getProperties(TagStringPropertyType.INSTANCE);
-			for (PropertyDescription pd : labelForProperties)
+			Collection<PropertyDescription> textProperties = spec.getProperties(TagStringPropertyType.INSTANCE);
+			if (textProperties.size() > 0)
 			{
-				String i18nPName = labelForProperties.size() > 1 ? name + "_" + pd.getName() : name;
+				textProperties = textProperties.stream().filter(pd -> pd.getTag("isText") != null)
+					.collect(Collectors.toList());
+			}
+			for (PropertyDescription pd : textProperties)
+			{
+				String i18nPName = textProperties.size() > 1 ? name + "_" + pd.getName() : name;
 				if (isLabelFor) i18nPName += "_label";
 				if (configuration.isAutomaticI18N())
 				{
