@@ -170,7 +170,9 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				{
 					Display.getDefault().asyncExec(new Runnable()
 					{
-						LayoutContainer container = (LayoutContainer)newPersist[newPersist.length - 1].getAncestor(IRepository.LAYOUTCONTAINERS);
+						LayoutContainer container = CSSPositionUtils
+							.isCSSPositionContainer((LayoutContainer)newPersist[newPersist.length - 1].getAncestor(IRepository.LAYOUTCONTAINERS))
+								? (LayoutContainer)newPersist[newPersist.length - 1].getAncestor(IRepository.LAYOUTCONTAINERS) : null;
 
 						@Override
 						public void run()
@@ -943,7 +945,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
 			if (activePage instanceof RfbVisualFormEditorDesignPage)
 			{
-				if (container != null && ((RfbVisualFormEditorDesignPage)activePage).getShowedContainer() != null)
+				if (container != null)
 				{
 					((RfbVisualFormEditorDesignPage)activePage).zoomOut();
 					((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
